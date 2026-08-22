@@ -9,6 +9,7 @@ from zoneinfo import ZoneInfo
 from django.utils import timezone
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from django.db.models import Q
 
 from devices.models import Device
 
