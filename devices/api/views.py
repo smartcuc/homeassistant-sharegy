@@ -7,8 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from django.shortcuts import get_object_or_404
-from django.db.models import OuterRef, Subquery
-from datetime import timedelta
+from django.db.models import OuterRef, Subquery, Q
 from django.utils import timezone
 
 from devices.models import (
@@ -22,9 +21,8 @@ from devices.models import (
     MetricDefinition,
 )
 
-from devices.models import DeviceMetric, DeviceLatestMetric, DeviceMetric1m, DeviceMetric5m
-
-from producer.models import GeneratorSystem, GeneratorType
+from devices.models import (
+    DeviceMetric,
 from energy.models import EMSSignalType
 
 from devices.services.metrics import get_latest_values
@@ -446,43 +444,36 @@ def device_dashboard_values(request):
 def get_range_config(range_str):
     if range_str == "1h":
         return {
-            "model": DeviceMetric,
-            "delta": timedelta(hours=1),
-            "field": "timestamp",
-            "value_field": "value",
-        }
-
-    if range_str == "6h":
-        return {
             "model": DeviceMetric1m,
+            "fallback_model": DeviceMetric,
+            "delta": timedelta(hours=1),
+            "value_field": "avg",
+            "fallback_value_field": "value",
+        }
+            "fallback_model": DeviceMetric1m,
             "delta": timedelta(hours=6),
             "field": "bucket",
+            "fallback_field": "bucket",
             "value_field": "avg",
-        }
 
     if range_str == "24h":
-        return {
-            "model": DeviceMetric1m,
+            "model": DeviceMetric15m,
             "delta": timedelta(hours=24),
             "field": "bucket",
+            "fallback_field": "bucket",
             "value_field": "avg",
-        }
-
+            "fallback_value_field": "avg",
     if range_str == "5d":
         return {
-            "model": DeviceMetric5m,
-            "delta": timedelta(days=5),
+            "fallback_model": DeviceMetric15m,
             "field": "bucket",
+            "fallback_field": "bucket",
             "value_field": "avg",
+            "fallback_value_field": "avg",
         }
 
-    raise ValueError("invalid_range")
 
-
-@api_view(["GET"])
 def device_timeseries(request, device_id):
-
-    range_str = request.GET.get("range", "24h")
 
     try:
         config = get_range_config(range_str)
@@ -497,76 +488,50 @@ def device_timeseries(request, device_id):
         id=device_id,
     )
 
-    metric_key = None
-
-    if range_str == "1h":
-
-        # Rohdaten werden seit dem Umbau immer als "value"
-        # gespeichert.
-        metric_key = "value"
-
-    else:
-
-        if hasattr(device, "config") and device.config and device.config.metric_definition:
-            metric_key = device.config.metric_definition.key
-
-    if not metric_key:
-        return Response(
-            {
-                "device": device_id,
-                "range": range_str,
-                "points": [],
-            }
-        )
+    possible_keys = ["power", "value"]
+    if hasattr(device, "config") and device.config and device.config.metric_definition:
+        possible_keys.append(device.config.metric_definition.key)
 
     now = timezone.now()
-
     field = config["field"]
 
     if field == "bucket":
         now = now.replace(
             second=0,
-            microsecond=0,
-        )
-
     start = now - config["delta"]
 
-    qs = (
+    qs = list(
         config["model"]
-        .objects.filter(
-            device_id=device_id,
-            metric_key=metric_key,
-        )
-        .filter(
-            **{
-                f"{field}__gte": start,
-                f"{field}__lte": now,
-            }
-        )
+        .objects.filter(device_id=device_id)
+        .filter(Q(metric_key__in=possible_keys) | Q(metric_key__isnull=True))
+        .filter(**{f"{field}__gte": start, f"{field}__lte": now})
         .order_by(field)
     )
 
-    points = []
-    
-    for row in qs:
+    value_field = config["value_field"]
 
-        t = getattr(
-            row,
-            field,
-        ).timestamp()
-
-        v = getattr(
-            row,
-            config["value_field"],
+    if not qs and config.get("fallback_model"):
+        fb_model = config["fallback_model"]
+        fb_field = config["fallback_field"]
+        qs = list(
+            fb_model.objects.filter(device_id=device_id)
+            .filter(Q(metric_key__in=possible_keys) | Q(metric_key__isnull=True))
+            .filter(**{f"{fb_field}__gte": start, f"{fb_field}__lte": now})
+            .order_by(fb_field)
         )
+        field = fb_field
+        value_field = config.get("fallback_value_field", "avg")
 
+    points = []
+    for row in qs:
+        t = getattr(row, field).timestamp()
+        v = getattr(row, value_field)
         points.append(
             {
                 "t": int(t),
-                "v": v,
+                "v": round(float(v), 2) if v is not None else 0.0,
                 "min": getattr(row, "min", None),
                 "max": getattr(row, "max", None),
-            }
         )
 
     return Response(
@@ -578,16 +543,12 @@ def device_timeseries(request, device_id):
     )
 
 
-# ============================================================
-# ✅ HOME-LIST
-# ============================================================
 
 @api_view(["GET"])
 def list_homes(request):
     homes = Home.objects.filter(user=request.user)
     serializer = HomeSerializer(homes, many=True)
     return Response(serializer.data)
-
 
 # ============================================================
 # ✅ REMOVE DEVICES
@@ -597,27 +558,12 @@ def list_homes(request):
 @permission_classes([IsAuthenticated])
 def remove_devices(request):
 
-    device_ids = request.data.get("device_ids", [])
-
-    if not device_ids:
-
-        return Response(
-            {"detail": "No devices selected"},
-            status=400,
-        )
-
-    delete_after = timezone.now() + timedelta(days=7)
 
     updated = Device.objects.filter(
-        id__in=device_ids,
-        home__user=request.user,
-        active=True,
-    ).update(
         active=False,
         pending_delete=True,
         delete_after=delete_after,
     )
-
     return Response({
         "updated": updated,
         "delete_after": delete_after,

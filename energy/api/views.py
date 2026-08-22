@@ -56,59 +56,47 @@ def dashboard_me(request):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def chart_data(request):
-
     metric = request.GET.get("metric")
-    period = request.GET.get(
-        "period",
-        "24h",
-    )
+    period = request.GET.get("period", "24h")
 
-    if period not in [
-        "1h",
-        "6h",
-        "24h",
-        "5d",
-    ]:
-        return Response(
-            {"detail": "invalid period"},
-            status=400,
-        )
+    if period not in ["1h", "6h", "24h", "5d"]:
+        return Response({"detail": "invalid period"}, status=400)
 
-    if metric not in [
-        "load",
-        "pv",
-        "grid",
-        "today",
-    ]:
-        return Response(
-            {"detail": "invalid metric"},
-            status=400,
-        )
+    if metric not in ["load", "pv", "grid", "battery", "today"]:
+        return Response({"detail": "invalid metric"}, status=400)
 
-    if metric == "pv":
-        signal_type = "pv"
+    signal_type = "grid" if metric == "today" else metric
 
-    elif metric == "grid":
-        signal_type = "grid"
-
-    elif metric == "load":
-        signal_type = "load"
-
-    elif metric == "today":
-        signal_type = "grid"
+    home = request.user.homes.first()
+    timezone_name = home.timezone if home else "UTC"
 
     device_ids = list(
         EMSSignalSource.objects.filter(
             home__user=request.user,
             signal_type__key=signal_type,
-        ).values_list(
-            "device_id",
-            flat=True,
-        )
+        ).values_list("device_id", flat=True)
     )
 
-    home = request.user.homes.first()
-    timezone_name = home.timezone if home else "UTC"
+    if not device_ids and home:
+        role_map = {
+            "pv": ["producer", "pv", "solar"],
+            "grid": ["grid"],
+            "battery": ["battery"],
+            "load": ["consumer", "load"],
+        }
+        target_roles = role_map.get(signal_type, [signal_type])
+        device_ids = list(
+            Device.objects.filter(
+                home=home,
+                active=True,
+                pending_delete=False,
+            )
+            .filter(
+                Q(config__role__key__in=target_roles)
+                | Q(config__energy_signal_type__key__in=target_roles)
+            )
+            .values_list("id", flat=True)
+        )
 
     data = get_chart_data(
         device_ids,

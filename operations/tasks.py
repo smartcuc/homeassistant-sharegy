@@ -217,20 +217,18 @@ def check_aggregation_5m():
 
 
 def check_aggregation_15m():
-
     update_aggregation_health(
         key="aggregation_15m",
         model=DeviceMetric15m,
-        max_age_seconds=3600,
+        max_age_seconds=5400,
     )
 
 
 def check_aggregation_1h():
-
     update_aggregation_health(
         key="aggregation_1h",
         model=DeviceMetric1h,
-        max_age_seconds=7200,
+        max_age_seconds=10800,
     )
 
 
