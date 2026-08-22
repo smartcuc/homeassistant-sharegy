@@ -19,10 +19,15 @@ from devices.models import (
     Home,
     MQTTProfile,
     MetricDefinition,
+    DeviceMetric,
+    DeviceLatestMetric,
+    DeviceMetric1m,
+    DeviceMetric5m,
+    DeviceMetric15m,
+    DeviceMetric1h,
 )
 
-from devices.models import (
-    DeviceMetric,
+from producer.models import GeneratorSystem, GeneratorType
 from energy.models import EMSSignalType
 
 from devices.services.metrics import get_latest_values
@@ -447,33 +452,51 @@ def get_range_config(range_str):
             "model": DeviceMetric1m,
             "fallback_model": DeviceMetric,
             "delta": timedelta(hours=1),
+            "field": "bucket",
+            "fallback_field": "timestamp",
             "value_field": "avg",
             "fallback_value_field": "value",
         }
+
+    if range_str == "6h":
+        return {
+            "model": DeviceMetric5m,
             "fallback_model": DeviceMetric1m,
             "delta": timedelta(hours=6),
             "field": "bucket",
             "fallback_field": "bucket",
             "value_field": "avg",
+            "fallback_value_field": "avg",
+        }
 
     if range_str == "24h":
-            "model": DeviceMetric15m,
-            "delta": timedelta(hours=24),
-            "field": "bucket",
-            "fallback_field": "bucket",
-            "value_field": "avg",
-            "fallback_value_field": "avg",
-    if range_str == "5d":
         return {
-            "fallback_model": DeviceMetric15m,
+            "model": DeviceMetric15m,
+            "fallback_model": DeviceMetric5m,
+            "delta": timedelta(hours=24),
             "field": "bucket",
             "fallback_field": "bucket",
             "value_field": "avg",
             "fallback_value_field": "avg",
         }
 
+    if range_str == "5d":
+        return {
+            "model": DeviceMetric1h,
+            "fallback_model": DeviceMetric15m,
+            "delta": timedelta(days=5),
+            "field": "bucket",
+            "fallback_field": "bucket",
+            "value_field": "avg",
+            "fallback_value_field": "avg",
+        }
 
+    raise ValueError("invalid_range")
+
+
+@api_view(["GET"])
 def device_timeseries(request, device_id):
+    range_str = request.GET.get("range", "24h")
 
     try:
         config = get_range_config(range_str)
@@ -498,6 +521,9 @@ def device_timeseries(request, device_id):
     if field == "bucket":
         now = now.replace(
             second=0,
+            microsecond=0,
+        )
+
     start = now - config["delta"]
 
     qs = list(
@@ -532,6 +558,7 @@ def device_timeseries(request, device_id):
                 "v": round(float(v), 2) if v is not None else 0.0,
                 "min": getattr(row, "min", None),
                 "max": getattr(row, "max", None),
+            }
         )
 
     return Response(
