@@ -90,16 +90,14 @@ def group_homes_by_location(homes):
 # =========================
 
 
-def get_weather_forecast(lat, lon, hours=48):
-    url = "https://api.open-meteo.com/v1/forecast"
+def get_weather_forecast(lat, lon, hours=96):
 
     params = {
         "latitude": lat,
         "longitude": lon,
         "hourly": "shortwave_radiation,cloud_cover,temperature_2m",
-        "forecast_days": 3,
+        "forecast_days": 5,
         "timezone": "UTC",
-    }
 
     response = requests.get(url, params=params, timeout=15)
     response.raise_for_status()
@@ -242,10 +240,9 @@ def store_weather_payload_for_home(
 # =========================
 
 
-def fetch_and_store_weather_for_group(homes, hours=48):
+def fetch_and_store_weather_for_group(homes, hours=96):
 
     homes = list(homes)
-
     if not homes:
         return {
             "status": "ok",

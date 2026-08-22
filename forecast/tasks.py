@@ -46,7 +46,7 @@ def update_all_forecasts():
         try:
             weather_result = fetch_and_store_weather_for_group(
                 home_group,
-                hours=48,
+                hours=96,
             )
 
         except Exception as e:
