@@ -91,6 +91,7 @@ def group_homes_by_location(homes):
 
 
 def get_weather_forecast(lat, lon, hours=96):
+    url = "https://api.open-meteo.com/v1/forecast"
 
     params = {
         "latitude": lat,
@@ -98,6 +99,7 @@ def get_weather_forecast(lat, lon, hours=96):
         "hourly": "shortwave_radiation,cloud_cover,temperature_2m",
         "forecast_days": 5,
         "timezone": "UTC",
+    }
 
     response = requests.get(url, params=params, timeout=15)
     response.raise_for_status()
