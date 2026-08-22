@@ -12,7 +12,7 @@ from django.utils.dateparse import parse_datetime
 
 from forecast.models import WeatherForecast
 from forecast.services_bias import calculate_bias, apply_bias
-from datetime import date, timedelta
+from datetime import date, timedelta, timezone as dt_timezone
 
 DEFAULT_LAT = getattr(settings, "DEFAULT_WEATHER_LAT", 50.9)
 DEFAULT_LON = getattr(settings, "DEFAULT_WEATHER_LON", 6.97)
@@ -135,7 +135,7 @@ def validate_weather_payload(payload):
         dt = parse_datetime(ts)
 
         if dt is not None and timezone.is_naive(dt):
-            dt = timezone.make_aware(dt, timezone.UTC)
+            dt = timezone.make_aware(dt, dt_timezone.utc)
 
         if dt is None:
             continue
@@ -186,7 +186,7 @@ def store_weather_payload_for_home(
             continue
 
         if timezone.is_naive(dt):
-            dt = timezone.make_aware(dt, timezone.utc)
+            dt = timezone.make_aware(dt, dt_timezone.utc)
 
         rad = (
             float(radiation[i])

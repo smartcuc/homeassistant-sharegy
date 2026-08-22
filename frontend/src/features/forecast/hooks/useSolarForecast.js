@@ -5,13 +5,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "../../../api/client";
 
-export function useSolarForecast(stringId) {
+export function useSolarForecast(stringId = "all") {
     return useQuery({
         queryKey: ["solar-forecast", stringId],
-        enabled: !!stringId,
-        queryFn: () =>
-            apiFetch(
-                `/api/forecast/string/${stringId}/`
-            ),
+        queryFn: () => {
+            const queryParam = stringId && stringId !== "all" ? `?string_id=${stringId}` : "";
+            return apiFetch(`/api/forecast/home/${queryParam}`);
+        },
     });
 }

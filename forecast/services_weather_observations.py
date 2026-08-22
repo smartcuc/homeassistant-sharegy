@@ -3,7 +3,7 @@
 ###########################################
 
 from forecast.models import WeatherObservation
-from datetime import timezone
+from datetime import timezone as dt_timezone
 from django.utils.dateparse import parse_datetime
 import logging
 
@@ -95,7 +95,7 @@ def store_sensor_community_observations(
             continue
 
         if timestamp.tzinfo is None:
-            timestamp = timestamp.replace(tzinfo=timezone.utc)
+            timestamp = timestamp.replace(tzinfo=dt_timezone.utc)
 
         sensor = row.get("sensor") or {}
 

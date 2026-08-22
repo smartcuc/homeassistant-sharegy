@@ -3,6 +3,7 @@
 ###################
 
 from datetime import timedelta
+from collections import defaultdict
 
 from django.utils import timezone
 from rest_framework.decorators import api_view, permission_classes
@@ -10,6 +11,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from core.models import Tenant
+from devices.models import Home
+from producer.models import GeneratorString
 from forecast.models import SolarForecast
 
 VALID_SOURCES = {"ml", "physics", "hybrid"}
@@ -393,3 +396,102 @@ def generator_string_forecast(request, string_id):
             ],
         }
     )
+
+
+# =========================================================
+# 🏠 HOME SOLAR FORECAST (Gesamtanlage / Strings)
+# GET /api/forecast/home/?home_id=<uuid>&string_id=<uuid>&source=hybrid&hours=24
+# =========================================================
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def home_solar_forecast(request):
+    home_id = request.GET.get("home_id")
+    string_id = request.GET.get("string_id")
+    source = request.GET.get("source", "hybrid")
+    hours = int(request.GET.get("hours", 24))
+
+    user_homes = request.user.homes.all()
+    if not user_homes.exists():
+        if request.user.is_staff:
+            home = Home.objects.first()
+        else:
+            return Response({"error": "No home configured"}, status=404)
+    else:
+        if home_id:
+            home = user_homes.filter(id=home_id).first() or user_homes.first()
+        else:
+            home = user_homes.first()
+
+    if not home:
+        return Response({"error": "Home not found"}, status=404)
+
+    strings = list(
+        GeneratorString.objects.filter(generator__home=home)
+        .select_related("generator", "orientation")
+    )
+
+    if not strings:
+        strings = list(GeneratorString.objects.all().select_related("generator", "orientation"))
+
+    if string_id and string_id != "all":
+        target_strings = [s for s in strings if str(s.id) == str(string_id)]
+    else:
+        target_strings = strings
+
+    now = timezone.now().replace(minute=0, second=0, microsecond=0)
+    if timezone.now().minute > 0:
+        now += timedelta(hours=1)
+
+    target_string_ids = [s.id for s in target_strings]
+
+    qs = SolarForecast.objects.filter(
+        generator_string_id__in=target_string_ids,
+        source=source,
+        timestamp__gte=now,
+    ).order_by("timestamp")
+
+    if not qs.exists() and source == "hybrid":
+        qs = SolarForecast.objects.filter(
+            generator_string_id__in=target_string_ids,
+            source="physics",
+            timestamp__gte=now,
+        ).order_by("timestamp")
+        source = "physics"
+
+    points_by_ts = defaultdict(float)
+    for row in qs:
+        points_by_ts[row.timestamp] += float(row.forecast_kwh or 0)
+
+    sorted_ts = sorted(points_by_ts.keys())[:hours]
+    points = [
+        {
+            "t": int(ts.timestamp()),
+            "v": round(points_by_ts[ts], 3),
+        }
+        for ts in sorted_ts
+    ]
+
+    total_kwh = sum(p["v"] for p in points)
+    peak_point = max(points, key=lambda p: p["v"]) if points else None
+
+    return Response({
+        "home_id": str(home.id),
+        "home_name": home.name,
+        "source": source,
+        "hours": hours,
+        "strings": [
+            {
+                "id": str(s.id),
+                "name": s.name,
+                "peak_power_kwp": float(s.peak_power_kwp or 0),
+                "orientation": s.orientation.name if s.orientation else "Süd",
+            }
+            for s in strings
+        ],
+        "selected_string_id": string_id or "all",
+        "total_kwh": round(total_kwh, 2),
+        "peak_kwh": peak_point["v"] if peak_point else 0.0,
+        "peak_time": peak_point["t"] if peak_point else None,
+        "points": points,
+    })
