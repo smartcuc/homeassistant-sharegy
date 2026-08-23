@@ -128,14 +128,14 @@ class UserLanguageView(APIView):
     def post(self, request):
         lang = request.data.get("language")
 
-        if lang not in ["de", "en"]:
+        if lang not in ["de", "en", "pl"]:
             return Response({"error": "invalid language"}, status=400)
 
-        settings_obj = request.user.settings
+        settings_obj, _ = UserSettings.objects.get_or_create(user=request.user)
         settings_obj.language = lang
         settings_obj.save()
 
-        return Response({"status": "saved"})
+        return Response({"status": "saved", "language": lang})
 
 
 class UserTimezoneView(APIView):

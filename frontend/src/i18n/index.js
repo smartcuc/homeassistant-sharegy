@@ -23,14 +23,17 @@ i18n
         resources,
         fallbackLng: "de",
         supportedLngs: ["de", "en", "pl"],
+        nonExplicitSupportedLngs: true,
+        load: "languageOnly",
+        debug: false,
         interpolation: {
-            escapeValue: false, // React handles XSS
+            escapeValue: false,
         },
         detection: {
             order: ["localStorage", "navigator"],
+            lookupLocalStorage: "i18nextLng",
             caches: ["localStorage"],
         },
     });
 
 export default i18n;
-

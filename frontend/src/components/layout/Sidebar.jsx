@@ -72,7 +72,7 @@ export default function Sidebar() {
                 },
                 {
                     name: t("nav.mqtt_interfaces", "MQTT & Schnittstellen"),
-                    path: "/app/settings#mqtt",
+                    path: "/app/interfaces",
                     icon: "📡",
                 },
                 {

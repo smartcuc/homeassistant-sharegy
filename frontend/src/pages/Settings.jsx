@@ -1,406 +1,112 @@
-import { useState } from "react";
+/*
+# src/pages/Settings.jsx
+*/
+
 import Card from "../components/ui/Card";
-import Button from "../components/ui/Button";
 import { useUser } from "../hooks/useUser";
-import { useHomes } from "../hooks/useHomes";
-import { apiFetch } from "../api/client";
-import { useQueryClient } from "@tanstack/react-query";
-import { QRCodeSVG } from "qrcode.react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 
 export default function Settings() {
     const { user } = useUser();
-    const queryClient = useQueryClient();
-    const { primaryHome, isLoading: homeLoading, regenerateMqttPassword, isRegenerating } = useHomes();
-    const { t, i18n } = useTranslation();
-
-    const [showPassword, setShowPassword] = useState(false);
-    const [copiedKey, setCopiedKey] = useState(null);
-    const [showQR, setShowQR] = useState(false);
-    const [guideTab, setGuideTab] = useState("iobroker");
-
-    function safeCopy(text, key) {
-        if (navigator.clipboard) {
-            navigator.clipboard.writeText(text);
-            setCopiedKey(key);
-            setTimeout(() => setCopiedKey(null), 1500);
-        } else {
-            alert("Kopieren nicht unterstützt");
-        }
-    }
-
-    async function changeLanguage(lang) {
-        i18n.changeLanguage(lang);
-        try {
-            await apiFetch("/api/language/", {
-                method: "POST",
-                body: JSON.stringify({ language: lang }),
-            });
-        } catch {
-            // fallback falls noch alte route
-            try {
-                await apiFetch("/api/user-language/", {
-                    method: "POST",
-                    body: JSON.stringify({ language: lang }),
-                });
-            } catch {
-                // Ignore silent API fallback
-            }
-        }
-
-        queryClient.setQueryData(["user"], (old) => {
-            if (!old) return old;
-            return {
-                ...old,
-                language: lang,
-            };
-        });
-    }
-
-    async function handleRegeneratePassword() {
-        if (window.confirm("Möchtest du wirklich ein neues MQTT-Passwort generieren? Bestehende Geräte müssen anschließend mit dem neuen Passwort aktualisiert werden.")) {
-            try {
-                await regenerateMqttPassword();
-                alert("Neues MQTT-Passwort erfolgreich generiert!");
-            } catch {
-                alert("Fehler beim Generieren des neuen Passworts.");
-            }
-        }
-    }
-
-    const mqttHost = primaryHome?.mqtt_host || "mqtt.sharegy.de";
-    const mqttPort = primaryHome?.mqtt_port || 1883;
-    const mqttUser = primaryHome?.mqtt_username || primaryHome?.mqtt_token || "-";
-    const mqttPass = primaryHome?.mqtt_password || "-";
-    const baseTopic = primaryHome?.mqtt_token ? `h/${primaryHome.mqtt_token}/#` : "h/<token>/#";
+    const { t } = useTranslation();
 
     return (
-        <div className="p-6 max-w-4xl space-y-8">
+        <div className="p-6 max-w-3xl space-y-6">
 
             {/* HEADER */}
             <div>
                 <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                    <span>⚙️</span> App-Einstellungen & Schnittstellen
+                    <span>⚙️</span> {t("nav.app_settings", "App-Einstellungen")}
                 </h1>
                 <p className="text-sm text-gray-500 mt-1">
-                    Verwalte dein Benutzerkonto, deine Sprache und die globale Smart Home MQTT-Schnittstelle.
+                    Allgemeine Einstellungen, Benachrichtigungen und System-Informationen.
                 </p>
             </div>
 
-            {/* 📡 MQTT & SMART HOME INTERFACE */}
-            <div id="mqtt" className="scroll-mt-6">
-                <div className="bg-white border border-indigo-100 rounded-2xl shadow-sm overflow-hidden ring-1 ring-indigo-50">
-                    <div className="p-5 bg-gradient-to-r from-indigo-50/80 via-blue-50/40 to-white border-b border-indigo-100 flex flex-wrap items-center justify-between gap-3">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xl shadow-sm">
-                                📡
-                            </div>
-                            <div>
-                                <h2 className="text-base font-bold text-gray-900">
-                                    MQTT & Smart Home Schnittstelle
-                                </h2>
-                                <p className="text-xs text-gray-500">
-                                    Globale Zugangsdaten für ioBroker, Home Assistant, Node-RED & Shelly
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => setShowQR(true)}
-                                className="px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-gray-700 text-xs font-semibold rounded-lg shadow-xs transition flex items-center gap-1.5"
-                            >
-                                <span>📱</span> QR-Code
-                            </button>
-                            <button
-                                onClick={() => {
-                                    const text = `Host: ${mqttHost}\nPort: ${mqttPort}\nUser: ${mqttUser}\nPass: ${mqttPass}\nBase Topic: ${baseTopic}`;
-                                    safeCopy(text, "all_mqtt");
-                                }}
-                                className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-xs transition flex items-center gap-1.5"
-                            >
-                                {copiedKey === "all_mqtt" ? "✅ Kopiert!" : "📋 Alle Daten kopieren"}
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="p-6 space-y-6">
-                        {homeLoading ? (
-                            <div className="text-sm text-gray-400 py-6 text-center animate-pulse">
-                                Lade MQTT-Zugangsdaten...
-                            </div>
-                        ) : (
-                            <>
-                                {/* CREDENTIALS GRID */}
-                                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                    <div className="bg-slate-50 border border-slate-200/80 p-3.5 rounded-xl">
-                                        <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">
-                                            Broker Host
-                                        </div>
-                                        <div className="font-mono text-xs font-semibold text-gray-900 flex items-center justify-between">
-                                            <span>{mqttHost}</span>
-                                            <button
-                                                onClick={() => safeCopy(mqttHost, "host")}
-                                                className="text-gray-400 hover:text-indigo-600 text-xs ml-1"
-                                                title="Kopieren"
-                                            >
-                                                {copiedKey === "host" ? "✓" : "📋"}
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div className="bg-slate-50 border border-slate-200/80 p-3.5 rounded-xl">
-                                        <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">
-                                            Port (TCP)
-                                        </div>
-                                        <div className="font-mono text-xs font-semibold text-gray-900 flex items-center justify-between">
-                                            <span>{mqttPort}</span>
-                                            <span className="text-[10px] px-1.5 py-0.5 bg-emerald-100 text-emerald-700 font-semibold rounded">
-                                                Aktiv
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div className="bg-slate-50 border border-slate-200/80 p-3.5 rounded-xl">
-                                        <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">
-                                            Benutzername
-                                        </div>
-                                        <div className="font-mono text-xs font-semibold text-gray-900 flex items-center justify-between">
-                                            <span className="truncate">{mqttUser}</span>
-                                            <button
-                                                onClick={() => safeCopy(mqttUser, "user")}
-                                                className="text-gray-400 hover:text-indigo-600 text-xs ml-1"
-                                                title="Kopieren"
-                                            >
-                                                {copiedKey === "user" ? "✓" : "📋"}
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div className="bg-slate-50 border border-slate-200/80 p-3.5 rounded-xl">
-                                        <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">
-                                            Passwort
-                                        </div>
-                                        <div className="font-mono text-xs font-semibold text-gray-900 flex items-center justify-between">
-                                            <span className="truncate">
-                                                {showPassword ? mqttPass : "••••••••••••••••"}
-                                            </span>
-                                            <div className="flex items-center gap-1.5 ml-1">
-                                                <button
-                                                    onClick={() => setShowPassword((v) => !v)}
-                                                    className="text-gray-400 hover:text-indigo-600 text-xs"
-                                                    title={showPassword ? "Verstecken" : "Anzeigen"}
-                                                >
-                                                    {showPassword ? "🙈" : "👁️"}
-                                                </button>
-                                                <button
-                                                    onClick={() => safeCopy(mqttPass, "pass")}
-                                                    className="text-gray-400 hover:text-indigo-600 text-xs"
-                                                    title="Kopieren"
-                                                >
-                                                    {copiedKey === "pass" ? "✓" : "📋"}
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* BASE TOPIC BANNER */}
-                                <div className="p-3.5 bg-indigo-50/60 border border-indigo-100 rounded-xl flex flex-wrap items-center justify-between gap-3 text-xs">
-                                    <div>
-                                        <span className="text-gray-500 font-medium">Dein persönliches Basis-Topic: </span>
-                                        <code className="font-mono font-bold text-indigo-700 bg-white px-2 py-0.5 rounded border border-indigo-200">
-                                            {baseTopic}
-                                        </code>
-                                    </div>
-                                    <button
-                                        onClick={handleRegeneratePassword}
-                                        disabled={isRegenerating}
-                                        className="text-xs text-red-600 hover:text-red-700 font-semibold hover:underline flex items-center gap-1"
-                                    >
-                                        <span>🔄</span> {isRegenerating ? "Generiere..." : "Passwort neu generieren"}
-                                    </button>
-                                </div>
-
-                                {/* QUICK INTEGRATION GUIDES */}
-                                <div className="border border-slate-200 rounded-xl overflow-hidden">
-                                    <div className="flex bg-slate-50 border-b border-slate-200 text-xs font-semibold overflow-x-auto">
-                                        {[
-                                            { id: "iobroker", label: "🔧 ioBroker Anleitung" },
-                                            { id: "homeassistant", label: "🏠 Home Assistant" },
-                                            { id: "otel", label: "🔭 OpenTelemetry (OTel)" },
-                                            { id: "shelly", label: "⚡ Shelly Web-UI" },
-                                        ].map((tab) => (
-                                            <button
-                                                key={tab.id}
-                                                onClick={() => setGuideTab(tab.id)}
-                                                className={`px-4 py-2.5 transition whitespace-nowrap ${guideTab === tab.id
-                                                        ? "bg-white text-indigo-600 border-b-2 border-indigo-600 font-bold"
-                                                        : "text-gray-500 hover:text-gray-900"
-                                                    }`}
-                                            >
-                                                {tab.label}
-                                            </button>
-                                        ))}
-                                    </div>
-
-                                    <div className="p-4 text-xs text-gray-700 leading-relaxed bg-white">
-                                        {guideTab === "iobroker" && (
-                                            <div className="space-y-2">
-                                                <p className="text-gray-600">
-                                                    1. Installiere den <strong>MQTT Client Adapter</strong> (<code className="bg-slate-100 px-1 rounded">mqtt-client</code>).<br />
-                                                    2. Wähle Typ <strong>Client / Abonnent</strong>, trage URL <code className="bg-slate-100 px-1 rounded">{mqttHost}</code>, Port <code className="bg-slate-100 px-1 rounded">{mqttPort}</code> sowie Benutzer & Kennwort ein.<br />
-                                                    3. Sende Messwerte an <code className="font-mono bg-slate-100 px-1 text-indigo-600">h/{primaryHome?.mqtt_token || "<TOKEN>"}/&lt;geraet_id&gt;</code>:
-                                                </p>
-                                                <pre className="bg-slate-900 text-green-400 p-2.5 rounded-lg font-mono text-[11px] overflow-x-auto">
-                                                    {`sendTo('mqtt-client.0', 'sendMessage', {
-    topic: 'h/${primaryHome?.mqtt_token || "<TOKEN>"}/balkonkraftwerk',
-    message: JSON.stringify({ power: 450.0 })
-});`}
-                                                </pre>
-                                            </div>
-                                        )}
-
-                                        {guideTab === "homeassistant" && (
-                                            <div className="space-y-2">
-                                                <p className="text-gray-600">
-                                                    Veröffentliche Sensor-Zustände automatisiert per Home Assistant MQTT-Aktion:
-                                                </p>
-                                                <pre className="bg-slate-900 text-slate-100 p-2.5 rounded-lg font-mono text-[11px] overflow-x-auto">
-                                                    {`action: mqtt.publish
-data:
-  topic: "h/${primaryHome?.mqtt_token || "<TOKEN>"}/meingeraet"
-  payload: '{"power": {{ states("sensor.stromverbrauch") }}}'`}
-                                                </pre>
-                                            </div>
-                                        )}
-
-                                        {guideTab === "otel" && (
-                                            <div className="space-y-2">
-                                                <div className="font-bold text-gray-900 text-sm flex items-center justify-between">
-                                                    <span>🔭 OpenTelemetry (OTLP/HTTP) Ingestion</span>
-                                                    <span className="text-[10px] text-indigo-600 font-mono">Endpoint: /api/v1/metrics</span>
-                                                </div>
-                                                <p className="text-gray-600">
-                                                    Sende Telemetrie direkt via OpenTelemetry Collector oder Python SDK mit dem Resource Attribute:
-                                                </p>
-                                                <div className="bg-slate-100 p-2 rounded-lg font-mono text-[11px]">
-                                                    home.token: <strong>{primaryHome?.mqtt_token || "<TOKEN>"}</strong>
-                                                </div>
-                                                <pre className="bg-slate-900 text-green-400 p-2.5 rounded-lg font-mono text-[11px] overflow-x-auto">
-                                                    {`processors:
-  resource:
-    attributes:
-      - key: home.token
-        value: "${primaryHome?.mqtt_token || "<TOKEN>"}"
-        action: insert
-
-exporters:
-  otlphttp:
-    endpoint: "${window.location.origin}/api"`}
-                                                </pre>
-                                            </div>
-                                        )}
-
-                                        {guideTab === "shelly" && (
-                                            <div className="space-y-1.5 text-gray-600">
-                                                <p>1. Öffne die Weboberfläche deines Shelly im Browser $\rightarrow$ <strong>Settings</strong> $\rightarrow$ <strong>MQTT</strong>.</p>
-                                                <p>2. Aktiviere <strong>Enable MQTT</strong> und trage Server <code className="bg-slate-100 px-1 rounded font-mono">{mqttHost}:{mqttPort}</code> ein.</p>
-                                                <p>3. Setze das <strong>Topic Prefix</strong> auf <code className="bg-slate-100 px-1 rounded font-mono text-indigo-600">h/{primaryHome?.mqtt_token || "<TOKEN>"}/&lt;geraet_name&gt;</code>.</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </>
-                        )}
-                    </div>
-                </div>
-            </div>
-
-            {/* USER INFO */}
+            {/* ACCOUNT SHORTCUT */}
             <Card>
-                <h2 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                    <span>👤</span> Benutzerkonto
-                </h2>
-                <div className="text-sm text-gray-600 flex items-center justify-between">
-                    <span>E-Mail-Adresse:</span>
-                    <span className="font-medium text-gray-900">{user?.email}</span>
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+                            <span>👤</span> {t("settings.account", "Benutzerkonto & Sprache")}
+                        </h2>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                            {user?.email} • Sprache & Zeitzone werden im Profil verwaltet.
+                        </p>
+                    </div>
+                    <Link
+                        to="/app/profile"
+                        className="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold rounded-xl transition"
+                    >
+                        Zum Profil →
+                    </Link>
                 </div>
             </Card>
 
-            {/* LANGUAGE */}
+            {/* INTERFACES SHORTCUT */}
+            <Card>
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+                            <span>📡</span> {t("nav.mqtt_interfaces", "MQTT & Schnittstellen")}
+                        </h2>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                            Zugangsdaten für ioBroker, Home Assistant, OpenTelemetry und Shelly.
+                        </p>
+                    </div>
+                    <Link
+                        to="/app/interfaces"
+                        className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-gray-800 text-xs font-semibold rounded-xl transition"
+                    >
+                        Schnittstellen verwalten →
+                    </Link>
+                </div>
+            </Card>
+
+            {/* DISPLAY & THEME */}
             <Card>
                 <h2 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                    <span>🌐</span> {t("settings.language", "Sprache")}
+                    <span>🎨</span> Anzeige & Theme
                 </h2>
                 <p className="text-xs text-gray-500 mb-4">
-                    Wähle deine bevorzugte Sprache für die gesamte Benutzeroberfläche.
+                    Passe das Erscheinungsbild und Farbschema deiner Sharegy-Oberfläche an.
                 </p>
-                <div className="flex flex-wrap gap-3">
-                    <button
-                        onClick={() => changeLanguage("de")}
-                        className={`px-4 py-2 text-sm font-semibold rounded-xl border transition flex items-center gap-2 ${i18n.language === "de"
-                            ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
-                            : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
-                            }`}
-                    >
-                        <span>🇩🇪</span> Deutsch
+                <div className="flex gap-3">
+                    <button className="px-4 py-2 text-xs font-semibold rounded-xl border border-indigo-600 bg-indigo-50 text-indigo-700 shadow-xs">
+                        ☀️ Hell (Standard)
                     </button>
                     <button
-                        onClick={() => changeLanguage("en")}
-                        className={`px-4 py-2 text-sm font-semibold rounded-xl border transition flex items-center gap-2 ${i18n.language === "en"
-                            ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
-                            : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
-                            }`}
+                        disabled
+                        className="px-4 py-2 text-xs font-semibold rounded-xl border border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed"
+                        title="In Kürze verfügbar"
                     >
-                        <span>🇬🇧</span> English
-                    </button>
-                    <button
-                        onClick={() => changeLanguage("pl")}
-                        className={`px-4 py-2 text-sm font-semibold rounded-xl border transition flex items-center gap-2 ${i18n.language === "pl"
-                            ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
-                            : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
-                            }`}
-                    >
-                        <span>🇵🇱</span> Polski
+                        🌙 Dunkel (In Kürze)
                     </button>
                 </div>
             </Card>
 
-            {/* QR FULLSCREEN MODAL */}
-            {showQR && primaryHome && (
-                <div
-                    className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
-                    onClick={() => setShowQR(false)}
-                >
-                    <div className="bg-white p-6 rounded-2xl text-center shadow-2xl max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
-                        <h3 className="font-bold text-gray-900 text-base mb-1">
-                            MQTT Zugangsdaten Scan
-                        </h3>
-                        <p className="text-xs text-gray-500 mb-4">
-                            Für automatisierte Konfiguration & Companion Apps
-                        </p>
-                        <div className="flex justify-center mb-4">
-                            <QRCodeSVG
-                                value={JSON.stringify({
-                                    host: mqttHost,
-                                    port: mqttPort,
-                                    username: mqttUser,
-                                    password: mqttPass,
-                                    topic_prefix: `h/${primaryHome.mqtt_token}/`,
-                                })}
-                                size={220}
-                            />
-                        </div>
-                        <button
-                            onClick={() => setShowQR(false)}
-                            className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 rounded-xl text-xs transition"
-                        >
-                            Schließen
-                        </button>
+            {/* SYSTEM INFO */}
+            <Card>
+                <h2 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                    <span>ℹ️</span> System-Informationen
+                </h2>
+                <div className="text-xs text-gray-600 space-y-1.5 font-mono">
+                    <div className="flex justify-between">
+                        <span className="text-gray-400">Version:</span>
+                        <span className="font-semibold text-gray-800">Sharegy EMS 2.4.0 (Free Edition)</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span className="text-gray-400">Backend Engine:</span>
+                        <span className="text-gray-800">Django 5.x / TimescaleDB</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span className="text-gray-400">Telemetrie Broker:</span>
+                        <span className="text-emerald-600 font-semibold">Online (MQTT & OTel)</span>
                     </div>
                 </div>
-            )}
+            </Card>
+
         </div>
     );
 }

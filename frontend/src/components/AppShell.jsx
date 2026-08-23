@@ -10,6 +10,7 @@ import Sidebar from "../components/layout/Sidebar";
 import Dashboard from "../pages/dashboard/Dashboard";
 import OverviewPage from "../pages/dashboard/overview/OverviewPage";
 import Settings from "../pages/Settings";
+import InterfacesPage from "../pages/InterfacesPage";
 import EnergyDashboard from "../features/energy/EnergyDashboard";
 import ProducerPage from "../features/producer/pages/ProducerPage";
 import TariffPage from "../features/market/pages/TariffPage";
@@ -59,6 +60,7 @@ export default function AppShell() {
                         <Route path="devices" element={<DevicesPage />} />
                         <Route path="producers" element={<ProducerPage />} />
                         <Route path="tariff" element={<TariffPage />} />
+                        <Route path="interfaces" element={<InterfacesPage />} />
                         <Route path="settings" element={<Settings />} />
 
                         <Route path="solarforecast" element={<ForecastPage />} />
