@@ -3,7 +3,7 @@
 */
 
 import ReactECharts from "echarts-for-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useMemo } from "react";
 
 function getNodeColor(node) {
     switch (node.id) {
@@ -47,6 +47,92 @@ export default function LiveEnergySankeyECharts({ data }) {
         };
     }, []);
 
+    const option = useMemo(() => {
+        if (!data || !Array.isArray(data.nodes) || !Array.isArray(data.links)) {
+            return null;
+        }
+
+        // Links filtern (Verhindert Geister-Linien mit dem Wert 0)
+        const links = data.links
+            .filter((link) => (link.value || 0) > 0)
+            .map((link) => ({
+                source: link.source,
+                target: link.target,
+                value: link.value,
+            }));
+
+        if (links.length === 0) {
+            return null;
+        }
+
+        const connectedNodeIds = new Set();
+        links.forEach((l) => {
+            connectedNodeIds.add(l.source);
+            connectedNodeIds.add(l.target);
+        });
+
+        // Nur Knoten übergeben, die an einem aktiven Fluss teilnehmen
+        const nodes = data.nodes
+            .filter((node) => connectedNodeIds.has(node.id))
+            .map((node) => ({
+                name: node.id,
+                itemStyle: {
+                    color: getNodeColor(node),
+                },
+                rawLabel: node.label,
+                nodeType: node.type,
+            }));
+
+        return {
+            animation: false,
+            tooltip: {
+                trigger: "item",
+                formatter: (params) => {
+                    if (params.dataType === "edge") {
+                        return `${params.data.source} → ${params.data.target}: <b>${params.data.value.toFixed(0)} W</b>`;
+                    }
+                    return `${params.name}: <b>${params.value.toFixed(0)} W</b>`;
+                },
+            },
+            series: [
+                {
+                    type: "sankey",
+                    left: 120,
+                    right: 60,
+                    top: 20,
+                    bottom: 20,
+                    data: nodes,
+                    links,
+                    nodeWidth: 18,
+                    nodeGap: 24,
+                    draggable: false,
+                    layoutIterations: 0,
+                    emphasis: {
+                        focus: "adjacency",
+                    },
+                    lineStyle: {
+                        color: "gradient",
+                        opacity: 0.35,
+                        curveness: 0.5,
+                    },
+                    label: {
+                        color: "#374151",
+                        fontSize: 12,
+                        formatter: (params) => {
+                            const node = data.nodes.find((n) => n.id === params.name);
+                            const label = node ? node.label : params.name;
+                            const value = params.value || 0;
+
+                            return value >= 1000
+                                ? `${label}\n${(value / 1000).toFixed(1)} kW`
+                                : `${label}\n${value.toFixed(0)} W`;
+                        },
+                    },
+                },
+            ],
+        };
+    }, [data]);
+
     if (!data || !Array.isArray(data.nodes) || !Array.isArray(data.links)) {
         return <div className="text-gray-400">Keine Energiedaten</div>;
     }
@@ -55,84 +141,9 @@ export default function LiveEnergySankeyECharts({ data }) {
         return <div className="text-gray-400">Warten auf Live-Daten…</div>;
     }
 
-    // Links filtern (Verhindert Geister-Linien mit dem Wert 0)
-    const links = data.links
-        .filter((link) => (link.value || 0) > 0)
-        .map((link) => ({
-            source: link.source,
-            target: link.target,
-            value: link.value,
-        }));
-
-    if (links.length === 0) {
+    if (!option) {
         return <div className="text-gray-400 p-8 text-center">Keine aktiven Energieflüsse im Moment</div>;
     }
-
-    const connectedNodeIds = new Set();
-    links.forEach((l) => {
-        connectedNodeIds.add(l.source);
-        connectedNodeIds.add(l.target);
-    });
-
-    // Nur Knoten übergeben, die an einem aktiven Fluss teilnehmen
-    const nodes = data.nodes
-        .filter((node) => connectedNodeIds.has(node.id))
-        .map((node) => ({
-            name: node.id,
-            itemStyle: {
-                color: getNodeColor(node),
-            },
-            rawLabel: node.label,
-            nodeType: node.type,
-        }));
-
-    const option = {
-        tooltip: {
-            trigger: "item",
-            formatter: (params) => {
-                if (params.dataType === "edge") {
-                    return `${params.data.source} → ${params.data.target}: <b>${params.data.value.toFixed(0)} W</b>`;
-                }
-                return `${params.name}: <b>${params.value.toFixed(0)} W</b>`;
-            },
-        },
-        series: [
-            {
-                type: "sankey",
-                left: 120,
-                right: 60,
-                top: 20,
-                bottom: 20,
-                data: nodes,
-                links,
-                nodeWidth: 18,
-                nodeGap: 24,
-                draggable: false,
-                layoutIterations: 0,
-                emphasis: {
-                    focus: "adjacency",
-                },
-                lineStyle: {
-                    color: "gradient",
-                    opacity: 0.35,
-                    curveness: 0.5,
-                },
-                label: {
-                    color: "#374151",
-                    fontSize: 12,
-                    formatter: (params) => {
-                        const node = data.nodes.find((n) => n.id === params.name);
-                        const label = node ? node.label : params.name;
-                        const value = params.value || 0;
-
-                        return value >= 1000
-                            ? `${label}\n${(value / 1000).toFixed(1)} kW`
-                            : `${label}\n${value.toFixed(0)} W`;
-                    },
-                },
-            },
-        ],
-    };
 
     return (
         <div style={{ height: 550 }}>
@@ -140,7 +151,7 @@ export default function LiveEnergySankeyECharts({ data }) {
                 ref={chartRef}
                 option={option}
                 style={{ height: "100%", width: "100%" }}
-                notMerge={false}
+                notMerge={true}
                 lazyUpdate={true}
             />
         </div>

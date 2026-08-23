@@ -46,16 +46,9 @@ export default function DashboardUser() {
     const [activeSystemChart, setActiveSystemChart] = useState(null);
 
     const energyQuery = useQuery({
-        queryKey: [
-            "energy-dashboard",
-            showFloors,
-            showRooms,
-        ],
+        queryKey: ["energy-dashboard"],
         queryFn: () => apiFetch("/api/energy/dashboard/me/"),
-        //refetchInterval: 3000, // ✅ VERY IMPORTANT
-        refetchInterval: activeSystemChart
-            ? false
-            : 3000,
+        refetchInterval: activeSystemChart ? false : 3000,
         refetchIntervalInBackground: true,
     });
 

@@ -310,7 +310,7 @@ CELERY_BEAT_SCHEDULE = {
     },
     "allocate-user-balance": {
         "task": "billing.tasks.allocate_user_balance_last_24h",
-        "schedule": 60.0,
+        "schedule": crontab(minute="*/15"),
     },
     # ✅ DB Aggregation triggern
     "rollup-15min": {
@@ -327,15 +327,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "integrations.tasks.sync_tibber",
         "schedule": 1800.0,
     },
-    # ✅ Strompreise (separat ok)
-    # "fetch-spot-prices-daily": {
-    #    "task": "market.tasks.fetch_spot_prices_retry",
-    #    "schedule": crontab(hour=13, minute=1),
-    # },
-    # ✅ Strompreise UTC <-> CEST
+    # ✅ Strompreise Day-Ahead Fenster (13:00 - 18:59 alle 15m + 00:05 Safety)
     "fetch-spot-prices-daily": {
         "task": "market.tasks.fetch_spot_prices_retry",
-        "schedule": crontab(minute=5),
+        "schedule": crontab(hour="0,13,14,15,16,17,18", minute="5,20,35,50"),
     },
     # ✅ MagicLogin CleanUp
     "cleanup_tokens": {

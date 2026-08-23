@@ -8,10 +8,10 @@
 
 | Phase | Bereich | Fokus | Status | Erledigt | Offen |
 |---|---|---|---|---|---|
-| **Phase 1** | Kritische Bugs & Flusslogik | 🟢 EMS-Free & Core | 🟡 In Arbeit | 1.1, 1.2, 1.3, 1.4 | 1.5, 1.6 |
-| **Phase 2** | DB- & Performance-Optimierung | 🟢 EMS-Free (TimescaleDB) | 🟡 In Arbeit | 2.3, 2.4 | 2.1, 2.2 (Sharing), 2.5 |
-| **Phase 3** | Celery & Buffer-Härtung | 🟢 EMS-Free Stabilität | 🟡 In Arbeit | 3.1, 3.3 | 3.2 |
-| **Phase 4** | Architektur & Diagramme | 🟢 EMS-Free Sankey & Tests | 🟡 In Arbeit | 4.4 | 4.1 (Sharing), 4.2, 4.3 |
+| **Phase 1** | Kritische Bugs & Flusslogik | 🟢 EMS-Free & Core |  Abgeschlossen | 1.1, 1.2, 1.3, 1.4, 1.6 | 1.5 (Sharing) |
+| **Phase 2** | DB- & Performance-Optimierung | 🟢 EMS-Free (TimescaleDB) | 🟢 Abgeschlossen | 2.1, 2.3, 2.4, 2.5, 2.6, 2.7 | 2.2 (Sharing) |
+| **Phase 3** | Celery & Buffer-Härtung | 🟢 EMS-Free Stabilität | 🟢 Abgeschlossen | 3.1, 3.2, 3.3, 3.4 | – |
+| **Phase 4** | Architektur & Diagramme | 🟢 EMS-Free Sankey & Tests | 🟢 Abgeschlossen | 4.2, 4.3, 4.4 | 4.1 (Sharing) |
 
 ---
 
@@ -52,25 +52,17 @@
 
 ---
 
-### [ ] 1.6 Vollständige Energiefluss-Berechnung in `flow_engine.py` aktivieren
+### [x] 1.6 Vollständige Energiefluss-Berechnung in `flow_engine.py` aktivieren
 - **Datei**: [`energy/flow_engine.py`](file:///c:/Users/Public/Dev/eswes/energy/flow_engine.py#L5-L75)
-- **Problem**: Aktive Funktion mappt Werte nur 1:1, während die korrekte Verteilungslogik (PV -> Last -> Batterie -> Netz) auskommentiert ist.
-- **Lösung**: Auskommentierte Berechnung aktivieren, damit Sankey und KPIs exakt berechnet werden.
+- **Status**: ✅ **Erledigt**. Vollständige physikalische Verteilungslogik (PV $\rightarrow$ Last $\rightarrow$ Batterie $\rightarrow$ Netz) ist aktiviert und balanciert.
 
 ---
 
 ## Phase 2 — High-Impact Datenbank- & Query-Optimierung
 
-### [ ] 2.1 Index mit führendem `timestamp` auf `DeviceMetric` anlegen
-- **Datei**: [`devices/models.py`](file:///c:/Users/Public/Dev/eswes/devices/models.py#L378-L395)
-- **Problem**: `filter(timestamp__gte=start, timestamp__lt=end)` scannt Millionen Zeilen Full-Table, da `timestamp` nicht an erster Stelle im Index steht.
-- **Lösung**:
-  ```python
-  models.Index(
-      fields=["timestamp", "device", "metric_key"],
-      name="dm_ts_dev_key_idx",
-  ),
-  ```
+### [x] 2.1 Index mit führendem `timestamp` auf `DeviceMetric` anlegen
+- **Datei**: [`devices/models.py`](file:///c:/Users/Public/Dev/eswes/devices/models.py#L378-L405)
+- **Status**: ✅ **Erledigt**. `dm_ts_dev_key_idx` (`["timestamp", "device", "metric_key"]`) und `dm_device_timestamp_idx` (`["device", "-timestamp"]`) sind migriert und aktiv.
 
 ---
 
@@ -180,11 +172,13 @@
 
 ---
 
-### [ ] 3.2 Celery Beat Schedule Tuning
-- **Datei**: [`backend/settings/base.py`](file:///c:/Users/Public/Dev/eswes/backend/settings/base.py#L305-L333)
-- **Probleme & Anpassungen**:
-  1. `fetch-spot-prices-daily`: Läuft aktuell stündlich (`minute=5`) und retried bis zu 20x alle 5 Min. Anpassen auf `crontab(hour=13, minute=5)` (Zeitpunkt der Day-Ahead Auktion).
-  2. `allocate-user-balance`: Läuft alle 60s für 24h historische Daten. Entweder Intervall vergrößern oder auf Dirty-Slots beschränken.
+### [x] 3.2 Celery Beat Schedule Tuning & Public Spot-Price Fallback
+- **Dateien**: [`backend/settings/base.py`](file:///c:/Users/Public/Dev/eswes/backend/settings/base.py), [`market/tasks.py`](file:///c:/Users/Public/Dev/eswes/market/tasks.py)
+- **Status**: ✅ **Erledigt**.
+  1. `fetch-spot-prices-daily`: Läuft im Veröffentlichungsfenster (13:00 - 18:59 Uhr) alle 15 Minuten (`crontab(hour="0,13,14,15,16,17,18", minute="5,20,35,50")`).
+  2. Intelligente Day-Ahead Erkennung: Sobald Preise für MORGEN ($\ge 24$ Werte) geladen sind, cacht der Task das Ergebnis und beendet Folgeläufe sofort in $<1\,\text{ms}$.
+  3. Öffentliche Fallback-Kaskade: Energy-Charts (Fraunhofer ISE) $\rightarrow$ SMARD (Bundesnetzagentur).
+  4. `allocate-user-balance` auf 15-Minuten-Takt (`crontab(minute="*/15")`) harmonisiert.
 
 ---
 
