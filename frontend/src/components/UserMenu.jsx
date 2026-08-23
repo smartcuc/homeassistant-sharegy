@@ -8,6 +8,7 @@ import { useTheme } from "../theme/ThemeContext";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useTranslation } from "react-i18next";
+import i18n from "../i18n";
 import { apiFetch } from "../api/client";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -18,7 +19,7 @@ export default function UserMenu() {
     const { logout } = useAuth();
     const navigate = useNavigate();
     const queryClient = useQueryClient();
-    const { i18n } = useTranslation();
+    const { t } = useTranslation();
 
     const [open, setOpen] = useState(false);
     const dropdownRef = useRef(null);
@@ -129,7 +130,7 @@ export default function UserMenu() {
                         onClick={() => setOpen(false)}
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center justify-between"
                     >
-                        <span>👤 Profil</span>
+                        <span>👤 {t("settings.account", "Profil")}</span>
                         <span className="text-xs text-gray-400">→</span>
                     </Link>
 
@@ -138,7 +139,7 @@ export default function UserMenu() {
                     {/* 🌐 Schnell-Sprachumschalter */}
                     <div className="px-4 py-2 bg-slate-50/50">
                         <div className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-2">
-                            Sprache / Language
+                            {t("settings.language", "Sprache")}
                         </div>
                         <div className="grid grid-cols-3 gap-1.5">
                             {[

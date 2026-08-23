@@ -9,12 +9,13 @@ import { useSettings } from "../hooks/useSettings";
 import { useUser } from "../hooks/useUser";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import i18n from "../i18n";
 
 export default function Profile() {
     const { user } = useUser();
     const queryClient = useQueryClient();
     const { settings } = useSettings();
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
 
     const [timezone, setTimezone] = useState("");
     const [saved, setSaved] = useState(false);
@@ -147,8 +148,8 @@ export default function Profile() {
                                     type="button"
                                     onClick={() => handleLanguageChange(lang.id)}
                                     className={`p-3 rounded-xl border text-left transition flex items-center justify-between ${isActive
-                                            ? "border-indigo-600 bg-indigo-50/80 ring-2 ring-indigo-500/20 shadow-xs"
-                                            : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
+                                        ? "border-indigo-600 bg-indigo-50/80 ring-2 ring-indigo-500/20 shadow-xs"
+                                        : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
                                         }`}
                                 >
                                     <div>

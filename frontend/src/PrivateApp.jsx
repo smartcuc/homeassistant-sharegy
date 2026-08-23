@@ -4,21 +4,21 @@ import Onboarding from "./pages/Onboarding";
 import AppShell from "./components/AppShell";
 import { Navigate } from "react-router-dom";
 import { useEffect } from "react";
-import { useTranslation } from "react-i18next";
+import i18n from "./i18n";
 
 export default function PrivateApp() {
 
     const { user, loading: userLoading } = useUser();
     const { settings, loading: settingsLoading } = useSettings();
-    const { i18n } = useTranslation();
 
     useEffect(() => {
         if (settings?.language && ["de", "en", "pl"].includes(settings.language)) {
-            if (i18n.language !== settings.language) {
+            const currentLang = (i18n.resolvedLanguage || i18n.language || "de").substring(0, 2);
+            if (currentLang !== settings.language) {
                 i18n.changeLanguage(settings.language);
             }
         }
-    }, [settings?.language, i18n]);
+    }, [settings?.language]);
 
     if (userLoading || settingsLoading) {
         return (
