@@ -16,6 +16,7 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from devices.models import Home, Device, DeviceMetric, DeviceLatestMetric
+from devices.services.ingest import ingest_metric_payload
 from integrations.mqtt_profiles import get_parser
 
 import paho.mqtt.client as mqtt
@@ -255,12 +256,9 @@ def ingest(topic: str, payload: bytes, auto_prov: bool):
     )
 
     # ========================================================
-    # ✅ DEVICE ACTIVITY UPDATE
+    # ✅ DEVICE ACTIVITY & PROFILE NORMALIZATION
     # ========================================================
 
-    device.last_seen = ts or timezone.now()
-    device.save(update_fields=["last_seen"])
-    
     profile_slug = (
         device.mqtt_profile.slug
         if device.mqtt_profile
@@ -271,75 +269,17 @@ def ingest(topic: str, payload: bytes, auto_prov: bool):
     metrics = parser.normalize(metrics)
 
     # ========================================================
-    # ✅ METRICS INGEST
+    # ✅ UNIFIED METRIC INGESTION PIPELINE
     # ========================================================
 
-    for key, value in metrics.items():
-        float_val = _to_float(value)
-        metric_key = str(key)
-
-        # 1. 💡 Sofort in den Redis Live-Cache spiegeln (UI immer 100% Echtzeit!)
-        if metric_key in ["value", "power"] and float_val is not None:
-            cache_key = f"device:{device.id}:latest_power"
-            cache.set(cache_key, float_val, timeout=3600)  # 1 Stunde TTL
-
-        # 2. ⚡ DeviceLatestMetric Snapshot aktualisieren (O(1) Statusabfragen)
-        DeviceLatestMetric.objects.update_or_create(
-            device=device,
-            metric_key=metric_key,
-            defaults={
-                "value": float_val,
-                "unit": "",
-                "data": {"source": source, "raw": meta},
-                "timestamp": ts,
-            },
-        )
-
-        # 3. 🛡️ Deduplizierung: Nur bei Änderung oder nach Heartbeat in DB-Zeitreihe schreiben
-        if should_record_metric(device.id, metric_key, float_val, ts):
-            DeviceMetric.objects.create(
-                device=device,
-                timestamp=ts,
-                metric_key=metric_key,
-                value=float_val,
-                unit="",
-                data={
-                    "source": source,
-                    "raw": meta,
-                },
-            )
-
-    # ========================================================
-    # ✅ STATE INGEST (separat gespeichert & dedupliziert)
-    # ========================================================
-
-    for key, value in state.items():
-        state_key = f"state.{key}"
-        float_val = _to_float(value)
-
-        DeviceLatestMetric.objects.update_or_create(
-            device=device,
-            metric_key=state_key,
-            defaults={
-                "value": float_val,
-                "unit": "",
-                "data": {"source": source, "raw": meta},
-                "timestamp": ts,
-            },
-        )
-
-        if should_record_state(device.id, key, value, ts):
-            DeviceMetric.objects.create(
-                device=device,
-                timestamp=ts,
-                metric_key=state_key,
-                value=float_val,
-                unit="",
-                data={
-                    "source": source,
-                    "raw": meta,
-                },
-            )
+    ingest_metric_payload(
+        device=device,
+        metrics=metrics,
+        timestamp=ts,
+        source=source,
+        meta=meta,
+        state=state,
+    )
 
 
 # ============================================================

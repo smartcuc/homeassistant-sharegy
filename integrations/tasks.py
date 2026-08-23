@@ -21,6 +21,7 @@ from integrations.services_tibber import (
 
 from core.models import IntervalReading, MeterRegister
 from devices.models import Device, DeviceMetric
+from devices.services.ingest import ingest_metric_payload
 
 from core.models import Meter
 from core.constants.obis import OBIS_MAP
@@ -308,7 +309,7 @@ def flush_mqtt_buffer():
         for d in Device.objects.filter(identifier__in=device_identifiers)
     }
 
-    metrics = []
+    total_created = 0
 
     for entry in batch:
         dev_id = entry.get("device_id")
@@ -323,39 +324,35 @@ def flush_mqtt_buffer():
         elif timezone.is_naive(ts):
             ts = timezone.make_aware(ts, timezone.utc)
 
-        power = entry.get("power") if entry.get("power") is not None else entry.get("value")
-        if power is not None:
-            try:
-                val = float(power)
-            except (ValueError, TypeError):
-                val = None
+        # Extract metric payload (exclude routing keys)
+        payload_metrics = {
+            k: v for k, v in entry.items()
+            if k not in ["device_id", "timestamp", "topic"]
+        }
+        if not payload_metrics and (entry.get("power") is not None or entry.get("value") is not None):
+            val = entry.get("power") if entry.get("power") is not None else entry.get("value")
+            payload_metrics = {"power": val}
 
-            if val is not None:
-                metrics.append(
-                    DeviceMetric(
-                        device=device,
-                        timestamp=ts,
-                        metric_key="power",
-                        value=val,
-                        unit="W",
-                        data=entry,
-                    )
-                )
-
-    if metrics:
-        DeviceMetric.objects.bulk_create(metrics)
+        res = ingest_metric_payload(
+            device=device,
+            metrics=payload_metrics,
+            timestamp=ts,
+            source="mqtt_buffer",
+            meta=entry,
+        )
+        total_created += res.get("created_metrics", 0)
 
     logger.info(
         "mqtt.buffer.flushed",
         extra={
             "batch_size": len(batch),
-            "written": len(metrics),
+            "created_metrics": total_created,
         },
     )
 
     return {
         "status": "ok",
         "batch_size": len(batch),
-        "written": len(metrics),
+        "created_metrics": total_created,
     }
     

@@ -14,6 +14,8 @@ from devices.models import (
     DeviceLatestMetric,
     DeviceMetric1m,
     DeviceMetric5m,
+    DeviceMetric15m,
+    DeviceMetric1h,
 )
 from devices.services.aggregation import floor_bucket, aggregate_1m, aggregate_5m
 from devices.services.metrics import get_latest_values
@@ -109,3 +111,58 @@ class DeviceAggregationTest(TestCase):
         self.assertEqual(agg.avg, 150.0)
         self.assertEqual(agg.min, 100.0)
         self.assertEqual(agg.max, 200.0)
+
+    def test_multi_metric_endpoints(self):
+        # 1. Mehrere Metriken für ein Gerät anlegen
+        now = timezone.now()
+        DeviceLatestMetric.objects.create(
+            device=self.device,
+            metric_key="power",
+            value=1250.0,
+            unit="W",
+            timestamp=now,
+        )
+        DeviceLatestMetric.objects.create(
+            device=self.device,
+            metric_key="voltage_l1",
+            value=231.5,
+            unit="V",
+            timestamp=now,
+        )
+        DeviceLatestMetric.objects.create(
+            device=self.device,
+            metric_key="battery_soc",
+            value=85.0,
+            unit="%",
+            timestamp=now,
+        )
+
+        # 2. Endpoint /api/devices/<id>/metrics/ testen
+        response = self.client.get(f"/api/devices/{self.device.id}/metrics/")
+        self.assertEqual(response.status_code, 200)
+        metrics = response.json().get("metrics", [])
+        self.assertEqual(len(metrics), 3)
+        keys = [m["key"] for m in metrics]
+        self.assertIn("power", keys)
+        self.assertIn("voltage_l1", keys)
+        self.assertIn("battery_soc", keys)
+
+        # 3. Timeseries mit metric-Filter testen
+        bucket_time = floor_bucket(now, 900) - timedelta(minutes=15)
+        DeviceMetric15m.objects.create(
+            device=self.device,
+            metric_key="voltage_l1",
+            bucket=bucket_time,
+            avg=230.8,
+            min=230.0,
+            max=231.5,
+            count=15,
+        )
+
+        ts_response = self.client.get(f"/api/devices/{self.device.id}/timeseries/?range=24h&metric=voltage_l1")
+        self.assertEqual(ts_response.status_code, 200)
+        ts_data = ts_response.json()
+        self.assertEqual(ts_data.get("metric"), "voltage_l1")
+        self.assertEqual(ts_data.get("unit"), "V")
+        self.assertTrue(len(ts_data.get("points", [])) >= 1)
+        self.assertEqual(ts_data["points"][0]["v"], 230.8)

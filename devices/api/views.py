@@ -487,8 +487,92 @@ def get_range_config(range_str):
 
 
 @api_view(["GET"])
+def device_available_metrics(request, device_id):
+    """
+    Liefert alle aktiven Messwert-Kanäle eines Geräts (für Multi-Metric Devices).
+    """
+    device = get_object_or_404(
+        Device.objects.select_related("config__metric_definition"),
+        id=device_id,
+    )
+
+    primary_key = (
+        device.config.metric_definition.key
+        if hasattr(device, "config") and device.config and device.config.metric_definition
+        else "power"
+    )
+
+    latest_metrics = DeviceLatestMetric.objects.filter(device_id=device_id).order_by("metric_key")
+
+    KEY_METADATA = {
+        "power": {"name": "Wirkleistung", "unit": "W", "icon": "⚡"},
+        "active_power": {"name": "Wirkleistung", "unit": "W", "icon": "⚡"},
+        "p_total": {"name": "Gesamtleistung", "unit": "W", "icon": "⚡"},
+        "value": {"name": "Leistung", "unit": "W", "icon": "⚡"},
+        "voltage": {"name": "Spannung", "unit": "V", "icon": "🔌"},
+        "voltage_l1": {"name": "Spannung L1", "unit": "V", "icon": "🔌"},
+        "voltage_l2": {"name": "Spannung L2", "unit": "V", "icon": "🔌"},
+        "voltage_l3": {"name": "Spannung L3", "unit": "V", "icon": "🔌"},
+        "current": {"name": "Strom", "unit": "A", "icon": "⚡"},
+        "current_l1": {"name": "Strom L1", "unit": "A", "icon": "⚡"},
+        "current_l2": {"name": "Strom L2", "unit": "A", "icon": "⚡"},
+        "current_l3": {"name": "Strom L3", "unit": "A", "icon": "⚡"},
+        "soc": {"name": "Batterieladestand", "unit": "%", "icon": "🔋"},
+        "battery_soc": {"name": "Batterieladestand", "unit": "%", "icon": "🔋"},
+        "energy": {"name": "Energie", "unit": "kWh", "icon": "📊"},
+        "energy_import": {"name": "Netzbezug", "unit": "kWh", "icon": "📥"},
+        "energy_export": {"name": "Einspeisung", "unit": "kWh", "icon": "📤"},
+        "frequency": {"name": "Frequenz", "unit": "Hz", "icon": "〰️"},
+        "temperature": {"name": "Temperatur", "unit": "°C", "icon": "🌡️"},
+    }
+
+    def_map = {d.key: d for d in MetricDefinition.objects.all()}
+
+    results = []
+    seen_keys = set()
+
+    for lm in latest_metrics:
+        k = lm.metric_key
+        if k.startswith("state."):
+            continue
+        seen_keys.add(k)
+        meta = KEY_METADATA.get(k, {})
+        d_obj = def_map.get(k)
+
+        name = d_obj.name if d_obj else meta.get("name", k.replace("_", " ").title())
+        unit = lm.unit or (d_obj.unit if d_obj else meta.get("unit", ""))
+        icon = meta.get("icon", "📈")
+
+        is_primary = (k == primary_key) or (primary_key not in seen_keys and k in ["power", "value", "active_power"])
+
+        results.append({
+            "key": k,
+            "name": name,
+            "unit": unit,
+            "icon": icon,
+            "latest_value": lm.value,
+            "timestamp": lm.timestamp.isoformat() if lm.timestamp else None,
+            "is_primary": is_primary,
+        })
+
+    if not results:
+        results.append({
+            "key": primary_key,
+            "name": "Leistung",
+            "unit": "W",
+            "icon": "⚡",
+            "latest_value": None,
+            "timestamp": None,
+            "is_primary": True,
+        })
+
+    return Response({"metrics": results, "primary_metric": primary_key})
+
+
+@api_view(["GET"])
 def device_timeseries(request, device_id):
     range_str = request.GET.get("range", "24h")
+    requested_metric = request.GET.get("metric")
 
     try:
         config = get_range_config(range_str)
@@ -503,9 +587,12 @@ def device_timeseries(request, device_id):
         id=device_id,
     )
 
-    possible_keys = ["power", "value"]
-    if hasattr(device, "config") and device.config and device.config.metric_definition:
-        possible_keys.append(device.config.metric_definition.key)
+    if requested_metric:
+        possible_keys = [requested_metric]
+    else:
+        possible_keys = ["power", "value"]
+        if hasattr(device, "config") and device.config and device.config.metric_definition:
+            possible_keys.append(device.config.metric_definition.key)
 
     now = timezone.now()
     field = config["field"]
@@ -518,10 +605,14 @@ def device_timeseries(request, device_id):
 
     start = now - config["delta"]
 
+    metric_filter = Q(metric_key__in=possible_keys)
+    if not requested_metric:
+        metric_filter |= Q(metric_key__isnull=True)
+
     qs = list(
         config["model"]
         .objects.filter(device_id=device_id)
-        .filter(Q(metric_key__in=possible_keys) | Q(metric_key__isnull=True))
+        .filter(metric_filter)
         .filter(**{f"{field}__gte": start, f"{field}__lte": now})
         .order_by(field)
     )
@@ -533,7 +624,7 @@ def device_timeseries(request, device_id):
         fb_field = config["fallback_field"]
         qs = list(
             fb_model.objects.filter(device_id=device_id)
-            .filter(Q(metric_key__in=possible_keys) | Q(metric_key__isnull=True))
+            .filter(metric_filter)
             .filter(**{f"{fb_field}__gte": start, f"{fb_field}__lte": now})
             .order_by(fb_field)
         )
@@ -553,10 +644,22 @@ def device_timeseries(request, device_id):
             }
         )
 
+    unit = "W"
+    effective_metric = requested_metric or possible_keys[0]
+    latest_m = DeviceLatestMetric.objects.filter(device_id=device_id, metric_key=effective_metric).first()
+    if latest_m and latest_m.unit:
+        unit = latest_m.unit
+    else:
+        def_obj = MetricDefinition.objects.filter(key=effective_metric).first()
+        if def_obj and def_obj.unit:
+            unit = def_obj.unit
+
     return Response(
         {
             "device": device_id,
             "range": range_str,
+            "metric": effective_metric,
+            "unit": unit,
             "points": points,
         }
     )

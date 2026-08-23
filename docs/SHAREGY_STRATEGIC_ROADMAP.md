@@ -85,34 +85,31 @@
 
 ```
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ MEILENSTEIN 1: EMS-FREE VERSION (Höchste Priorität — Sofort produktionsreif)   │
+│ MEILENSTEIN 1: EMS-FREE VERSION (✅ Abgeschlossen & Produktiv gehärtet)         │
 └───────────────────────────────────────────────────────────────────────────────┘
-  ├── 1.1 TimescaleDB Hypertable für `devices_devicemetric` aktivieren
-  ├── 1.2 Ingest-Deduplizierung & Deadband-Filter (Redis + DB Idempotenz)
-  ├── 1.3 Energiefluss-Berechnung in `energy/flow_engine.py` scharfschalten
-  ├── 1.4 Sankey-Diagramm Kanten-Aggregation & Fehlerbereinigung
-  ├── 1.5 Dashboard N+1 Queries auflösen (Ladezeit < 100ms)
-  ├── 1.6 Spotpreis-Analyse & Stundenpreis-Resilienz (13:05 Uhr Schedule)
-  ├── 1.7 PV- & Wetter-Prognose für Dachanlagen (Physics + Open-Meteo)
-  ├── 1.8 Operations & Monitoring Dashboard im Django Admin:
-  │     • 🔌 Letzte erfolgreiche Tibber-Synchronisation
-  │     • ☀️ Letzte Wetterdaten-Aktualisierung
-  │     • 📡 Letzter MQTT-Message-Eingang
-  │     • ⚡ Anzahl aktiver Devices (Online/Offline Status)
-  └── 1.9 End-to-End Test EMS: Ingest → Dedup → Redis → WebSocket/Sankey → Historie
+  ├── 1.1 ✅ TimescaleDB Hypertable & Führende Indizes für `DeviceMetric`
+  ├── 1.2 ✅ Ingest-Deduplizierung & Deadband-Filter (Redis + Snapshot-Tabelle `DeviceLatestMetric`)
+  ├── 1.3 ✅ Energiefluss-Berechnung in `energy/flow_engine.py` (PV → Last → Akku → Netz)
+  ├── 1.4 ✅ Sankey-Diagramm Kanten-Aggregation, Balancierung & Flackerfreies Rendering
+  ├── 1.5 ✅ Dashboard N+1 Queries aufgelöst (Ladezeit < 50ms)
+  ├── 1.6 ✅ Spotpreis-Analyse, Stundenschnitt & Resiliente Public Börsenpreis-Pipeline (13:00-18:59 Schedule)
+  ├── 1.7 ✅ PV- & Wetter-Prognose für Dachanlagen (Physics + Open-Meteo 96h + PLZ-Geocoding)
+  ├── 1.8 ✅ Operations & Monitoring Dashboard im Django Admin (Live-Badges & Health-Checks)
+  ├── 1.9 ✅ Enterprise Multi-Metric Support (OTel/MQTT multi-channel Ingest, API & Modal-Kanalumschalter)
+  └── 1.10 ✅ End-to-End Test Suite (15/15 Tests erfolgreich)
 
 ┌───────────────────────────────────────────────────────────────────────────────┐
 │ MEILENSTEIN 2: EMS-PRO VERSION (Monetarisierung via SaaS-Abo)                  │
 └───────────────────────────────────────────────────────────────────────────────┘
-  ├── 2.1 Smarte Speicher- & Last-Steuerung (Optimierung nach Börsenstrompreisen)
+  ├── 2.1 Smarte Speicher- & Last-Steuerung (Optimierung nach Börsenstrompreisen & PV-Forecast)
   ├── 2.2 ✅ Machine Learning PV-Prognose (Hybrid Physics + ML - RandomForest/Residuals)
-  ├── 2.3 Erweiterte Langzeit-Historie & Export-Funktionen
+  ├── 2.3 Erweiterte Langzeit-Historie & Export-Funktionen (XLSX, CSV, PDF Berichte)
   └── 2.4 Stripe Subscription-Integration (Free vs. Pro Module)
 
 ┌───────────────────────────────────────────────────────────────────────────────┐
 │ MEILENSTEIN 3: ENERGY SHARING COMMUNITIES (Vollintegrierte Säule 2)           │
 └───────────────────────────────────────────────────────────────────────────────┘
-  ├── 3.1 Zähler- & iMSys-Datenmodell finalisieren (`AggregatedReading` OBIS)
+  ├── 3.1 Zähler- & iMSys-Datenmodell finalisieren (`AggregatedReading` OBIS 1.8.0/2.8.0)
   ├── 3.2 Tenant-Modell Konsolidierung (`core.Tenant`)
   ├── 3.3 15-Minuten Community-Bilanzierung & Allokationsschlüssel
   ├── 3.4 Sharing-Tarife, Umlagen & kaufmännische Abrechnungsperioden
@@ -130,7 +127,7 @@
 | **Step 3** | `devices/models.py` & DB | TimescaleDB Hypertable & führenden Index auf `DeviceMetric.timestamp` anlegen | 🚀 **100x schnellere Historien-Abfragen** |
 | **Step 4** | `energy/services/sankey.py` | Kanten-Duplikate vor JSON-Generierung summieren | 🛠️ **Keine Render-Abstürze im Frontend** |
 | **Step 5** | `energy/services/energy.py` | EMS-Signal-Abfragen von 4 Einzelqueries auf 1 Batch zusammenfassen | ⚡ **Dashboard Ladezeit unter 50ms** |
-| **Step 6** | `market/services_price_analysis.py` | Dynamischen Stundenschnitt bei fehlenden Viertelstundenwerten berechnen | 📈 **Resiliente Börsenpreis-Darstellung** |
-| **Step 7** | `operations/admin.py` & `tasks.py` | Monitoring-Dashboard mit Live-Badges für Tibber, Wetter, MQTT & aktive Devices | 📊 **Echtzeit-Transparenz im Admin-Backend** |
-| **Step 8** | `backend/settings/base.py` | Celery Beat für Spotpreise auf 13:05 Uhr setzen, unfertige Billing-Loops pausieren | 🛑 **Worker-Überlastung dauerhaft gelöst** |
+| **Step 6** | `market/tasks.py` | Resiliente Börsenpreis-Pipeline & smartes Nachmittags-Polling (Energy-Charts & SMARD) | 📈 **Resiliente Börsenpreis-Darstellung** |
+| **Step 7** | `operations/admin.py` & `tasks.py` | Monitoring-Dashboard mit Live-Badges für Tibber, Wetter, MQTT, Spotpreise & aktive Devices | 📊 **Echtzeit-Transparenz im Admin-Backend** |
+| **Step 8** | `providers/opentelemetry/` & `DeviceChartModal.jsx` | Multi-Metric Device Ingest, Lead-Power Auto-Detection & Kanal-Auswahl im Chart-Modal | 🎛️ **Volle Multi-Kanal Unterstützung (Shelly 3EM, Inverter, OTel)** |
 
