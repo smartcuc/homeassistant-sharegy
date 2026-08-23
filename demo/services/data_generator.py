@@ -76,6 +76,11 @@ def setup_demo_household():
     sig_load, _ = EMSSignalType.objects.get_or_create(key="load", defaults={"label": "Verbrauch"})
     sig_bat, _ = EMSSignalType.objects.get_or_create(key="battery", defaults={"label": "Batterie"})
     sig_grid, _ = EMSSignalType.objects.get_or_create(key="grid", defaults={"label": "Netz"})
+
+    # Generator-Typen & Orientierungen
+    gen_solar, _ = GeneratorType.objects.get_or_create(key="solar", defaults={"name": "Photovoltaik", "icon": "☀️"})
+    GeneratorType.objects.get_or_create(key="pv", defaults={"name": "Photovoltaik", "icon": "☀️"})
+
     ori_south, _ = Orientation.objects.get_or_create(key="s", defaults={"name": "Süd", "azimuth_deg": 180, "sort_order": 1})
     Orientation.objects.get_or_create(key="sw", defaults={"name": "Süd-West", "azimuth_deg": 225, "sort_order": 2})
     Orientation.objects.get_or_create(key="so", defaults={"name": "Süd-Ost", "azimuth_deg": 135, "sort_order": 3})
