@@ -4,23 +4,29 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 import { apiFetch } from "../../api/client";
 import { useUser } from "../../hooks/useUser";
+import { useDeviceStatus } from "../../hooks/useDevices";
 import UserMenu from "../UserMenu";
 import SpotPriceModal from "../../features/market/components/SpotPriceModal";
 
 export default function AppTopbar() {
-
+    const { t } = useTranslation();
     const { user } = useUser();
-    // Später aus API beziehen
-    const online = 12;
-    const total = 14;
+
+    // 📶 Live Geräte-Status aus dem Backend
+    const { data: devices = [], isLoading: isDeviceLoading } = useDeviceStatus();
+    const total = Array.isArray(devices) ? devices.length : 0;
+    const online = Array.isArray(devices)
+        ? devices.filter((d) => d.status === "online" || d.status === "stale").length
+        : 0;
 
     const spotPriceQuery = useQuery({
         queryKey: ["spot-price"],
-        queryFn: () =>
-            apiFetch("/api/market/current/"),
+        queryFn: () => apiFetch("/api/market/current/"),
         refetchInterval: 60000,
     });
 
@@ -33,15 +39,23 @@ export default function AppTopbar() {
                 ? "text-amber-600"
                 : "text-red-600";
 
-    const [spotModalOpen, setSpotModalOpen] =
-        useState(false);
+    const [spotModalOpen, setSpotModalOpen] = useState(false);
+
+    // Status-Punkt Farbe
+    const statusDotClass = isDeviceLoading
+        ? "bg-slate-400 animate-pulse"
+        : total === 0
+            ? "bg-slate-300"
+            : online === total
+                ? "bg-emerald-500 shadow-xs shadow-emerald-500/50"
+                : online > 0
+                    ? "bg-amber-500 shadow-xs shadow-amber-500/50"
+                    : "bg-rose-500 shadow-xs shadow-rose-500/50";
 
     return (
         <div className="h-14 bg-white border-b flex items-center justify-between px-4">
-
             {/* LEFT */}
             <div className="flex items-center gap-4">
-
                 {/* 🏠 Home Switcher */}
                 {user?.homes?.length > 1 && (
                     <select
@@ -56,10 +70,7 @@ export default function AppTopbar() {
                         "
                     >
                         {user.homes.map((h) => (
-                            <option
-                                key={h.id}
-                                value={h.id}
-                            >
+                            <option key={h.id} value={h.id}>
                                 {h.name}
                             </option>
                         ))}
@@ -70,31 +81,44 @@ export default function AppTopbar() {
                 <div className="text-sm text-gray-400">
                     Dashboard
                 </div>
-
             </div>
 
             {/* RIGHT */}
             <div className="flex items-center gap-4">
-
-                {/* 📶 Geräte Status */}
-                <div
+                {/* 📶 Live Geräte Status */}
+                <Link
+                    to="/app/devices"
+                    title={t("devices.title", "Geräteübersicht öffnen")}
                     className="
                         flex
                         items-center
                         gap-2
                         text-sm
                         text-gray-600
+                        hover:text-indigo-600
+                        px-2.5
+                        py-1
+                        rounded-lg
+                        hover:bg-gray-50
+                        transition
                     "
                 >
-                    <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                    <span className={`w-2 h-2 rounded-full ${statusDotClass}`}></span>
 
-                    <span>
-                        {online}/{total} Geräte online
+                    <span className="font-medium text-xs sm:text-sm">
+                        {isDeviceLoading
+                            ? t("common.loading", "Lädt...")
+                            : total === 0
+                                ? t("devices.no_devices", "Keine Geräte")
+                                : t("devices.online_summary", {
+                                    online,
+                                    total,
+                                    defaultValue: `${online}/${total} Geräte online`,
+                                })}
                     </span>
-                </div>
+                </Link>
 
-                {/* 👤 User */}
-
+                {/* 👤 Spot-Preis & User */}
                 {spotPrice && (
                     <button
                         onClick={() => setSpotModalOpen(true)}
@@ -106,14 +130,12 @@ export default function AppTopbar() {
                             text-sm
                             font-semibold
                             ${spotColor}
-
                             hover:opacity-80
                             transition-opacity
                             cursor-pointer
                         `}
                     >
                         <span>💰</span>
-
                         <span>
                             {spotPrice.price_ct.toFixed(2)} ct/kWh
                         </span>
@@ -123,12 +145,9 @@ export default function AppTopbar() {
                 <UserMenu user={user} />
                 <SpotPriceModal
                     open={spotModalOpen}
-                    onClose={() =>
-                        setSpotModalOpen(false)
-                    }
+                    onClose={() => setSpotModalOpen(false)}
                 />
             </div>
-
         </div>
     );
 }

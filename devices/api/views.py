@@ -31,7 +31,9 @@ from devices.models import (
 from producer.models import GeneratorSystem, GeneratorType
 from energy.models import EMSSignalType
 
+import os
 from devices.services.metrics import get_latest_values
+from devices.serializers import DeviceCreateSerializer
 from .serializers import (
     DeviceSerializer,
     DeviceConfigSerializer,
@@ -99,9 +101,29 @@ def device_setup_options(request):
 # ✅ ALL DEVICES
 # ============================================================
 
-@api_view(["GET"])
+@api_view(["GET", "POST"])
 @permission_classes([IsAuthenticated])
 def device_list(request):
+    if request.method == "POST":
+        serializer = DeviceCreateSerializer(
+            data=request.data,
+            context={"request": request}
+        )
+
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=400)
+
+        device = serializer.save()
+
+        return Response({
+            "id": device.id,
+            "identifier": device.identifier,
+            "mqtt_token": device.home.mqtt_token,
+            "mqtt_username": device.home.mqtt_username,
+            "mqtt_password": device.home.mqtt_password,
+            "mqtt_host": os.getenv("MQTT_HOST"),
+            "mqtt_port": int(os.getenv("MQTT_PORT", 1883)),
+        }, status=201)
 
     devices = Device.objects.filter(
         home__user=request.user,

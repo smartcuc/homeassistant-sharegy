@@ -100,7 +100,9 @@
     "role_consumer": "Consumer",
     "role_battery": "Battery",
     "role_grid": "Grid",
-    "incomplete_badge": "⚠ Incompletely configured"
+    "incomplete_badge": "⚠ Incompletely configured",
+    "online_summary": "{{online}}/{{total}} devices online",
+    "no_devices": "No devices"
   },
   "device_add": {
     "modal_title": "Connect New Device",

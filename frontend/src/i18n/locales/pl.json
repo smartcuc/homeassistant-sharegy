@@ -100,7 +100,9 @@
     "role_consumer": "Odbiornik",
     "role_battery": "Magazyn",
     "role_grid": "Sieć",
-    "incomplete_badge": "⚠ Niekompletna konfiguracja"
+    "incomplete_badge": "⚠ Niekompletna konfiguracja",
+    "online_summary": "{{online}}/{{total}} urządzeń online",
+    "no_devices": "Brak urządzeń"
   },
   "device_add": {
     "modal_title": "Połącz nowe urządzenie",

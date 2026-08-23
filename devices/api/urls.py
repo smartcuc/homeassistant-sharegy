@@ -24,8 +24,19 @@ from .views import (
     regenerate_mqtt_password,
 )
 
+from devices.views import (
+    device_status_list,
+    mqtt_status,
+    send_device_config,
+    device_metrics,
+)
+
 urlpatterns = [
     path("", device_list),
+    path("status/", device_status_list),
+    path("mqtt-status/", mqtt_status),
+    path("send-config/", send_device_config),
+    path("by-id/<int:device_id>/metrics/", device_metrics),
     path("setup-options/", device_setup_options),
     path("unconfigured/", unconfigured_devices),
     path("latest/", latest_device_values),

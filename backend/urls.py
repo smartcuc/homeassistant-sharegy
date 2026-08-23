@@ -71,7 +71,6 @@ urlpatterns = [
                 path("energy/", include("energy.api.urls")),
                 path("forecast/", include("forecast.urls")),
                 path("devices/", include("devices.api.urls")),
-                path("devices/", include("devices.urls")),
                 path("market/", include("market.api.urls")),
                 path("producer/", include("producer.api.urls")),
                 path("user-settings/", include("user_settings.api.urls")),
