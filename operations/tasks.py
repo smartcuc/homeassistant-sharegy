@@ -154,13 +154,13 @@ def check_celery_queues():
 def update_aggregation_health(
     key,
     model,
-    max_age_seconds,
+    warn_seconds=None,
+    error_seconds=None,
+    max_age_seconds=None,
 ):
-
     latest = model.objects.order_by("-bucket").first()
 
     if not latest:
-
         HealthState.objects.update_or_create(
             key=key,
             defaults={
@@ -169,22 +169,26 @@ def update_aggregation_health(
                 "details": {},
             },
         )
-
         return
 
     age = timezone.now() - latest.bucket
+    age_sec = int(age.total_seconds())
 
-    if age.total_seconds() > max_age_seconds:
-
-        status = "error"
-
-    elif age.total_seconds() > (max_age_seconds / 2):
-
-        status = "warn"
-
+    if error_seconds is not None and warn_seconds is not None:
+        if age_sec > error_seconds:
+            status = "error"
+        elif age_sec > warn_seconds:
+            status = "warn"
+        else:
+            status = "ok"
     else:
-
-        status = "ok"
+        max_age = max_age_seconds or 10800
+        if age_sec > max_age:
+            status = "error"
+        elif age_sec > (max_age / 2):
+            status = "warn"
+        else:
+            status = "ok"
 
     HealthState.objects.update_or_create(
         key=key,
@@ -192,27 +196,27 @@ def update_aggregation_health(
             "status": status,
             "value": latest.bucket.isoformat(),
             "details": {
-                "age_seconds": int(age.total_seconds()),
+                "age_seconds": age_sec,
             },
         },
     )
 
 
 def check_aggregation_1m():
-
     update_aggregation_health(
         key="aggregation_1m",
         model=DeviceMetric1m,
-        max_age_seconds=600,
+        warn_seconds=300,    # 5 min
+        error_seconds=600,   # 10 min
     )
 
 
 def check_aggregation_5m():
-
     update_aggregation_health(
         key="aggregation_5m",
         model=DeviceMetric5m,
-        max_age_seconds=1800,
+        warn_seconds=1200,   # 20 min
+        error_seconds=2400,  # 40 min
     )
 
 
@@ -220,7 +224,8 @@ def check_aggregation_15m():
     update_aggregation_health(
         key="aggregation_15m",
         model=DeviceMetric15m,
-        max_age_seconds=5400,
+        warn_seconds=4500,   # 75 min
+        error_seconds=7200,  # 120 min
     )
 
 
@@ -228,7 +233,8 @@ def check_aggregation_1h():
     update_aggregation_health(
         key="aggregation_1h",
         model=DeviceMetric1h,
-        max_age_seconds=10800,
+        warn_seconds=10800,  # 3 Stunden (Normal bis zu 2.5h)
+        error_seconds=18000, # 5 Stunden
     )
 
 

@@ -587,12 +587,29 @@ def device_timeseries(request, device_id):
         id=device_id,
     )
 
-    if requested_metric:
-        possible_keys = [requested_metric]
+    lead_key = (
+        device.config.metric_definition.key
+        if hasattr(device, "config") and device.config and device.config.metric_definition
+        else "power"
+    )
+
+    POWER_KEYS = {"power", "value", "active_power", "p_total", "val", "w", "watt"}
+
+    is_power_query = (
+        (not requested_metric)
+        or (requested_metric.lower() in POWER_KEYS)
+        or (requested_metric == lead_key)
+    )
+
+    if is_power_query:
+        possible_keys = list(POWER_KEYS)
+        if lead_key and lead_key not in possible_keys:
+            possible_keys.append(lead_key)
+        metric_filter = Q(metric_key__in=possible_keys) | Q(metric_key__isnull=True)
+        effective_metric = lead_key or "power"
     else:
-        possible_keys = ["power", "value"]
-        if hasattr(device, "config") and device.config and device.config.metric_definition:
-            possible_keys.append(device.config.metric_definition.key)
+        metric_filter = Q(metric_key=requested_metric)
+        effective_metric = requested_metric
 
     now = timezone.now()
     field = config["field"]
@@ -605,10 +622,7 @@ def device_timeseries(request, device_id):
 
     start = now - config["delta"]
 
-    metric_filter = Q(metric_key__in=possible_keys)
-    if not requested_metric:
-        metric_filter |= Q(metric_key__isnull=True)
-
+    # 1. Primäre Abfrage auf das Ziel-Aggregationsmodell
     qs = list(
         config["model"]
         .objects.filter(device_id=device_id)
@@ -616,20 +630,26 @@ def device_timeseries(request, device_id):
         .filter(**{f"{field}__gte": start, f"{field}__lte": now})
         .order_by(field)
     )
-
     value_field = config["value_field"]
 
-    if not qs and config.get("fallback_model"):
-        fb_model = config["fallback_model"]
-        fb_field = config["fallback_field"]
-        qs = list(
-            fb_model.objects.filter(device_id=device_id)
-            .filter(metric_filter)
-            .filter(**{f"{fb_field}__gte": start, f"{fb_field}__lte": now})
-            .order_by(fb_field)
-        )
-        field = fb_field
-        value_field = config.get("fallback_value_field", "avg")
+    # 2. Multi-Tier Fallback Kaskade (5m -> 1m -> raw DeviceMetric)
+    if not qs:
+        fallback_chain = [
+            (DeviceMetric5m, "bucket", "avg"),
+            (DeviceMetric1m, "bucket", "avg"),
+            (DeviceMetric, "timestamp", "value"),
+        ]
+        for fb_model, fb_field, fb_val in fallback_chain:
+            qs = list(
+                fb_model.objects.filter(device_id=device_id)
+                .filter(metric_filter)
+                .filter(**{f"{fb_field}__gte": start, f"{fb_field}__lte": now})
+                .order_by(fb_field)
+            )
+            if qs:
+                field = fb_field
+                value_field = fb_val
+                break
 
     points = []
     for row in qs:
@@ -645,7 +665,6 @@ def device_timeseries(request, device_id):
         )
 
     unit = "W"
-    effective_metric = requested_metric or possible_keys[0]
     latest_m = DeviceLatestMetric.objects.filter(device_id=device_id, metric_key=effective_metric).first()
     if latest_m and latest_m.unit:
         unit = latest_m.unit
@@ -665,12 +684,12 @@ def device_timeseries(request, device_id):
     )
 
 
-
 @api_view(["GET"])
 def list_homes(request):
     homes = Home.objects.filter(user=request.user)
     serializer = HomeSerializer(homes, many=True)
     return Response(serializer.data)
+
 
 # ============================================================
 # ✅ REMOVE DEVICES
@@ -679,9 +698,13 @@ def list_homes(request):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def remove_devices(request):
-
+    device_ids = request.data.get("device_ids", [])
+    delete_after = timezone.now() + timedelta(days=30)
 
     updated = Device.objects.filter(
+        id__in=device_ids,
+        home__user=request.user,
+    ).update(
         active=False,
         pending_delete=True,
         delete_after=delete_after,

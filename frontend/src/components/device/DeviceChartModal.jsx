@@ -112,7 +112,17 @@ function DeviceChartModal({ device, onClose }) {
 
     /* ✅ DATA FORMATTING FOR ECHARTS */
     const chartData = useMemo(() => {
-        const points = data?.points || [];
+        let points = data?.points || [];
+
+        // Single-point Duplizierung für glatte Linie auch bei nur 1 Messwert
+        if (points.length === 1) {
+            const single = points[0];
+            points = [
+                { t: single.t - 300, v: single.v },
+                single,
+            ];
+        }
+
         const xAxisData = [];
         const seriesData = [];
 
@@ -152,7 +162,7 @@ function DeviceChartModal({ device, onClose }) {
 
 
     /* ✅ ABSOLUT SICHERES ECHARTS ZOOM-EVENT */
-    const handleDataZoom = useCallback((event) => {
+    const handleDataZoom = useCallback(() => {
         if (!chartRef.current) return;
 
         // Hole die echten, aktuellen Zoom-Prozentwerte direkt aus der Chart-Instanz
@@ -353,7 +363,7 @@ function DeviceChartModal({ device, onClose }) {
                 }
             ]
         };
-    }, [chartData, unit, device.display_name]);
+    }, [chartData, unit, device.display_name, mainColor]);
 
     return (
         <div
@@ -602,17 +612,29 @@ function DeviceChartModal({ device, onClose }) {
                 )}
 
                 {/* CHART CONTAINER */}
-                <div className="flex-1 p-4 relative min-h-0">
-                    <ReactECharts
-                        ref={chartRef}
-                        option={option} // Hier steht dein bestehendes Option-Objekt
-                        onEvents={onEvents}
-                        notMerge={true}          // 🔥 Zwingt ECharts, die neuen Live-Punkte sofort zu zeichnen!
-                        style={{ height: "400px", width: "100%" }}
-                    />
+                <div className="flex-1 p-4 relative min-h-0 flex flex-col justify-center">
+                    {query.isLoading ? (
+                        <div className="flex flex-col items-center justify-center py-24 text-slate-400 gap-2">
+                            <span className="text-xl animate-pulse">⏳</span>
+                            <span className="text-sm">Lade Zeitreihe...</span>
+                        </div>
+                    ) : chartData.seriesData.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-24 text-slate-400 gap-2">
+                            <span className="text-2xl">📉</span>
+                            <span className="text-sm font-medium">Keine Messwerte für diesen Zeitraum vorhanden</span>
+                        </div>
+                    ) : (
+                        <ReactECharts
+                            ref={chartRef}
+                            option={option}
+                            onEvents={onEvents}
+                            notMerge={true}
+                            style={{ height: "400px", width: "100%" }}
+                        />
+                    )}
                 </div>
             </div>
-        </div >
+        </div>
     );
 }
 
