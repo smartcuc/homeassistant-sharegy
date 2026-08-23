@@ -101,6 +101,7 @@ function getRoleColor(config) {
 ========================================================= */
 function DeviceCard({ device, onSelect, onEdit }) {
 
+    const { t } = useTranslation();
     const config = device.config || {};
     const isOnline = device.status === "online";
     const missing = isIncomplete(config);

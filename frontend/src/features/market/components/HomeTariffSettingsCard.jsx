@@ -7,8 +7,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Card from "../../../components/ui/Card";
 import Button from "../../../components/ui/Button";
 import { fetchHomeTariff, saveHomeTariff } from "../api";
+import { useTranslation } from "react-i18next";
 
 export default function HomeTariffSettingsCard() {
+    const { t } = useTranslation();
     const queryClient = useQueryClient();
 
     const { data: tariffData, isLoading, isError } = useQuery({
@@ -31,13 +33,13 @@ export default function HomeTariffSettingsCard() {
             queryClient.invalidateQueries({ queryKey: ["home-tariff"] });
             queryClient.invalidateQueries({ queryKey: ["spot-price-chart"] });
             queryClient.invalidateQueries({ queryKey: ["energy-data"] });
-            setStatusMsg({ type: "success", text: "Stromtarif erfolgreich gespeichert!" });
+            setStatusMsg({ type: "success", text: t("tariffs.save_success", "Stromtarif erfolgreich gespeichert!") });
             setTimeout(() => setStatusMsg(null), 4000);
         },
         onError: (err) => {
             setStatusMsg({
                 type: "error",
-                text: err?.detail || err?.message || "Fehler beim Speichern des Tarifs.",
+                text: err?.detail || err?.message || t("tariffs.save_error", "Fehler beim Speichern des Tarifs."),
             });
             setTimeout(() => setStatusMsg(null), 5000);
         },
@@ -46,7 +48,7 @@ export default function HomeTariffSettingsCard() {
     function handleSave(e) {
         e.preventDefault();
         if (tariffType === "static" && (!staticPriceCt || isNaN(Number(staticPriceCt)))) {
-            setStatusMsg({ type: "error", text: "Bitte einen gültigen Arbeitspreis in ct/kWh eingeben." });
+            setStatusMsg({ type: "error", text: t("tariffs.invalid_price", "Bitte einen gültigen Arbeitspreis in ct/kWh eingeben.") });
             return;
         }
 
@@ -60,7 +62,7 @@ export default function HomeTariffSettingsCard() {
         return (
             <Card>
                 <div className="p-4 text-sm text-gray-400 animate-pulse">
-                    Lade Stromtarif-Einstellungen…
+                    {t("tariffs.loading", "Lade Stromtarif-Einstellungen…")}
                 </div>
             </Card>
         );
@@ -77,10 +79,10 @@ export default function HomeTariffSettingsCard() {
             <div className="flex items-center justify-between mb-4">
                 <div>
                     <h2 className="font-semibold text-gray-900 text-base">
-                        ⚡ Stromtarif & Abrechnungsmodell
+                        ⚡ {t("tariffs.model_title", "Stromtarif & Abrechnungsmodell")}
                     </h2>
                     <p className="text-xs text-gray-500 mt-0.5">
-                        Definiere dein Tarifmodell für {tariffData?.home_name || "dein Zuhause"}, um Stromkosten und Einsparungen exakt zu berechnen.
+                        {t("tariffs.model_desc", { home: tariffData?.home_name || t("profile.home_single", "dein Zuhause"), defaultValue: `Definiere dein Tarifmodell für ${tariffData?.home_name || "dein Zuhause"}, um Stromkosten und Einsparungen exakt zu berechnen.` })}
                     </p>
                 </div>
             </div>
@@ -109,14 +111,14 @@ export default function HomeTariffSettingsCard() {
                         <div className="flex-1">
                             <div className="flex items-center gap-2">
                                 <label htmlFor="tariff_dynamic" className="font-medium text-sm text-gray-900 cursor-pointer">
-                                    Dynamischer Börsenstrompreis (z. B. Tibber, Rabot, Ostrom)
+                                    {t("tariffs.dynamic_title", "Dynamischer Börsenstrompreis (z. B. Tibber, Rabot, Ostrom)")}
                                 </label>
                                 <span className="text-[10px] px-2 py-0.5 font-medium rounded-full bg-emerald-100 text-emerald-800">
                                     EPEX Spot
                                 </span>
                             </div>
                             <p className="text-xs text-gray-500 mt-1">
-                                Abrechnung viertelstündlich / stündlich nach dem aktuellen Börsenstrompreis zzgl. gesetzlicher Abgaben, Netzentgelte und Steuern.
+                                {t("tariffs.dynamic_desc", "Abrechnung viertelstündlich / stündlich nach dem aktuellen Börsenstrompreis zzgl. gesetzlicher Abgaben, Netzentgelte und Steuern.")}
                             </p>
 
                             {/* Preisbestandteile Detail-Toggle */}
@@ -130,31 +132,31 @@ export default function HomeTariffSettingsCard() {
                                         }}
                                         className="text-xs font-medium text-emerald-700 hover:text-emerald-800 underline inline-flex items-center gap-1"
                                     >
-                                        {showBreakdown ? "▲ Feste Preisbestandteile ausblenden" : "▼ Feste Preisbestandteile anzeigen (~" + priceConfig.additional_costs_ct.toFixed(2) + " ct/kWh netto)"}
+                                        {showBreakdown ? t("tariffs.hide_breakdown", "▲ Feste Preisbestandteile ausblenden") : `${t("tariffs.show_breakdown", "▼ Feste Preisbestandteile anzeigen")} (~${priceConfig.additional_costs_ct.toFixed(2)} ct/kWh netto)`}
                                     </button>
 
                                     {showBreakdown && (
                                         <div className="mt-2 p-3 bg-white/80 rounded-lg border border-emerald-200 text-xs space-y-1 text-gray-600">
                                             <div className="flex justify-between">
-                                                <span>Netzentgelte:</span>
+                                                <span>{t("tariffs.grid_fees", "Netzentgelte:")}</span>
                                                 <span className="font-medium text-gray-900">{priceConfig.grid_fee_ct.toFixed(2)} ct/kWh</span>
                                             </div>
                                             <div className="flex justify-between">
-                                                <span>Stromsteuer:</span>
+                                                <span>{t("tariffs.electricity_tax", "Stromsteuer:")}</span>
                                                 <span className="font-medium text-gray-900">{priceConfig.electricity_tax_ct.toFixed(2)} ct/kWh</span>
                                             </div>
                                             <div className="flex justify-between">
-                                                <span>Konzessionsabgabe:</span>
+                                                <span>{t("tariffs.concession_fee", "Konzessionsabgabe:")}</span>
                                                 <span className="font-medium text-gray-900">{priceConfig.concession_fee_ct.toFixed(2)} ct/kWh</span>
                                             </div>
                                             <div className="flex justify-between">
-                                                <span>Umlagen (KWK, §19, Offshore):</span>
+                                                <span>{t("tariffs.levies", "Umlagen (KWK, §19, Offshore):")}</span>
                                                 <span className="font-medium text-gray-900">
                                                     {(priceConfig.kwk_levy_ct + priceConfig.special_grid_levy_ct + priceConfig.offshore_levy_ct).toFixed(2)} ct/kWh
                                                 </span>
                                             </div>
                                             <div className="flex justify-between pt-1 border-t border-gray-200 font-semibold text-gray-900">
-                                                <span>Nebenkosten gesamt (brutto inkl. {priceConfig.vat_percent}% MwSt.):</span>
+                                                <span>{t("tariffs.total_additional_costs", "Nebenkosten gesamt")} (brutto inkl. {priceConfig.vat_percent}% MwSt.):</span>
                                                 <span className="text-emerald-700">
                                                     {(priceConfig.additional_costs_ct * (1 + priceConfig.vat_percent / 100)).toFixed(2)} ct/kWh
                                                 </span>
@@ -190,20 +192,20 @@ export default function HomeTariffSettingsCard() {
                         <div className="flex-1">
                             <div className="flex items-center gap-2">
                                 <label htmlFor="tariff_static" className="font-medium text-sm text-gray-900 cursor-pointer">
-                                    Klassischer Festpreis-Tarif
+                                    {t("tariffs.static_title", "Klassischer Festpreis-Tarif")}
                                 </label>
                                 <span className="text-[10px] px-2 py-0.5 font-medium rounded-full bg-blue-100 text-blue-800">
                                     Fixpreis
                                 </span>
                             </div>
                             <p className="text-xs text-gray-500 mt-1">
-                                Konstanter Stromarbeitspreis rund um die Uhr (z. B. Stadtwerke oder Grundversorgung).
+                                {t("tariffs.static_desc", "Konstanter Stromarbeitspreis rund um die Uhr (z. B. Stadtwerke oder Grundversorgung).")}
                             </p>
 
                             {tariffType === "static" && (
                                 <div className="mt-3 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                                     <label htmlFor="static_price" className="text-xs font-medium text-gray-700 whitespace-nowrap">
-                                        Arbeitspreis (brutto):
+                                        {t("tariffs.work_price", "Arbeitspreis (brutto):")}
                                     </label>
                                     <div className="relative w-36">
                                         <input
@@ -246,7 +248,7 @@ export default function HomeTariffSettingsCard() {
                         variant="primary"
                         onClick={handleSave}
                     >
-                        {mutation.isPending ? "Speichern…" : "Tarif speichern"}
+                        {mutation.isPending ? t("common.saving", "Speichern…") : t("tariffs.save_tariff", "Tarif speichern")}
                     </Button>
                 </div>
             </form>

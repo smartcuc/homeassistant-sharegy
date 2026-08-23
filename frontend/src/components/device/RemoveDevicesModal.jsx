@@ -4,14 +4,14 @@
 
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-
 import { apiFetch } from "../../api/client";
+import { useTranslation } from "react-i18next";
 
 export default function RemoveDevicesModal({
     open,
     onClose,
 }) {
-
+    const { t } = useTranslation();
     const queryClient = useQueryClient();
 
     const [selectedIds, setSelectedIds] = useState([]);
@@ -208,47 +208,25 @@ export default function RemoveDevicesModal({
                 {/* Header */}
 
                 <div className="p-4 border-b bg-gradient-to-r from-red-50 to-orange-50">
-
                     <div className="flex justify-between items-center">
-
                         <div className="flex items-center gap-3">
-
                             <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center text-xl shadow-sm">
                                 🗑️
                             </div>
-
                             <div>
-
                                 <h2 className="font-semibold text-lg text-gray-900">
-                                    Geräte entfernen
+                                    {t("device_remove.title", "Geräte entfernen")}
                                 </h2>
-
                                 <div className="text-xs text-gray-500">
-                                    Geräte in den Papierkorb verschieben
+                                    {t("device_remove.subtitle", "Geräte in den Papierkorb verschieben")}
                                 </div>
-
-                                <div className="text-xs text-gray-500">
-                                    {devices.length} Geräte
-                                </div>
-
                             </div>
-
                         </div>
 
                         <div className="flex items-center gap-3">
-
                             <div
-                                title="Geräte werden nicht sofort gelöscht. Sie bleiben 7 Tage im Papierkorb. Wenn Home Assistant, ioBroker oder MQTT weiterhin Daten sendet, kann das Gerät automatisch erneut erkannt werden. Entfernen Sie daher zuerst die Datenquelle."
-                                className="
-                                w-8 h-8
-                                rounded-full
-                                bg-red-100
-                                text-red-700
-                                flex items-center justify-center
-                                cursor-help
-                                text-sm
-                                font-medium
-                            "
+                                title={t("device_remove.info_tooltip", "Geräte werden nicht sofort gelöscht. Sie bleiben 7 Tage im Papierkorb. Wenn Home Assistant, ioBroker oder MQTT weiterhin Daten sendet, kann das Gerät automatisch erneut erkannt werden. Entfernen Sie daher zuerst die Datenquelle.")}
+                                className="w-8 h-8 rounded-full bg-red-100 text-red-700 flex items-center justify-center cursor-help text-sm font-medium"
                             >
                                 ℹ
                             </div>
@@ -259,65 +237,40 @@ export default function RemoveDevicesModal({
                             >
                                 ✕
                             </button>
-
                         </div>
-
                     </div>
-
                 </div>
 
                 {/* Content */}
-
                 <div className="flex-1 overflow-y-auto p-4">
-
                     {devicesQuery.isLoading ? (
-
-                        <div>Lade Geräte...</div>
-
+                        <div>{t("common.loading", "Lade Geräte...")}</div>
                     ) : (
-
                         <>
-
-                            <label className="flex items-center gap-2 mb-4">
-
+                            <label className="flex items-center gap-2 mb-4 text-sm font-medium text-gray-700 cursor-pointer">
                                 <input
                                     type="checkbox"
                                     checked={allSelected}
                                     onChange={toggleAll}
                                 />
-
-                                Alle auswählen
-
+                                {t("common.select_all", "Alle auswählen")}
                             </label>
 
                             <div className="space-y-2">
-
                                 {devices.length === 0 && (
                                     <div className="p-6 text-center text-gray-500 border rounded-xl">
-                                        Keine Geräte vorhanden
+                                        {t("device_remove.empty", "Keine Geräte vorhanden")}
                                     </div>
                                 )}
 
                                 {pagedDevices.map(device => {
-
                                     const status = statusMap[device.id];
-
                                     return (
-
                                         <div
                                             key={device.id}
-                                            className="
-                                border rounded-xl
-                                p-3
-                                bg-white
-                                shadow-sm
-                                hover:shadow-md
-                                transition-all
-                            "
+                                            className="border rounded-xl p-3 bg-white shadow-xs hover:shadow-md transition-all"
                                         >
-
                                             <div className="flex items-start gap-3">
-
                                                 <input
                                                     type="checkbox"
                                                     checked={selectedIds.includes(device.id)}
@@ -326,153 +279,96 @@ export default function RemoveDevicesModal({
                                                 />
 
                                                 <div className="flex-1">
-
                                                     <div className="flex items-start justify-between">
-
                                                         <div>
-
                                                             <div className="font-medium text-gray-900">
                                                                 {device.display_name}
                                                             </div>
-
-                                                            <div className="text-xs text-gray-500">
+                                                            <div className="text-xs text-gray-500 font-mono">
                                                                 {device.identifier}
                                                             </div>
-
                                                         </div>
 
-                                                        <div className="px-2 py-1 text-xs rounded-full bg-red-100 text-red-700">
-                                                            🗑 Papierkorb
+                                                        <div className="px-2 py-0.5 text-xs rounded-full bg-red-100 text-red-700 font-medium">
+                                                            🗑 {t("nav.trash_bin", "Papierkorb")}
                                                         </div>
-
                                                     </div>
 
                                                     <div className="mt-2 space-y-1">
-
                                                         {status?.status === "online" && (
-                                                            <div className="text-sm text-emerald-600 font-medium">
-                                                                🟢 Online
+                                                            <div className="text-xs text-emerald-600 font-medium">
+                                                                🟢 {t("common.online", "Online")}
                                                             </div>
                                                         )}
 
                                                         {status?.status === "offline" && (
-                                                            <div className="text-sm text-red-600 font-medium">
-                                                                🔴 Offline
+                                                            <div className="text-xs text-red-600 font-medium">
+                                                                🔴 {t("common.offline", "Offline")}
                                                             </div>
                                                         )}
 
                                                         {status?.status === "never_seen" && (
-                                                            <div className="text-sm text-gray-500 font-medium">
-                                                                ⚪ Nie aktiv
+                                                            <div className="text-xs text-gray-500 font-medium">
+                                                                ⚪ {t("common.no_data", "Nie aktiv")}
                                                             </div>
                                                         )}
-
                                                     </div>
-
                                                 </div>
-
                                             </div>
-
                                         </div>
-
                                     );
-
                                 })}
 
                                 {pageCount > 1 && (
-
                                     <div className="flex justify-center items-center gap-3 pt-2">
-
                                         <button
-                                            onClick={() =>
-                                                setPage(
-                                                    Math.max(
-                                                        1,
-                                                        safePage - 1
-                                                    )
-                                                )
-                                            }
+                                            onClick={() => setPage(Math.max(1, safePage - 1))}
                                             disabled={safePage === 1}
-                                            className="
-                                px-3 py-1
-                                border
-                                rounded-lg
-                                bg-white
-                                disabled:opacity-40
-                            "
+                                            className="px-3 py-1 border rounded-lg bg-white disabled:opacity-40"
                                         >
                                             ←
                                         </button>
 
-                                        <span className="text-sm text-gray-600">
-                                            Seite {safePage} von {pageCount}
+                                        <span className="text-xs text-gray-600">
+                                            {t("common.page_of", { current: safePage, total: pageCount, defaultValue: `Seite ${safePage} von ${pageCount}` })}
                                         </span>
 
                                         <button
-                                            onClick={() =>
-                                                setPage(
-                                                    Math.min(
-                                                        pageCount,
-                                                        safePage + 1
-                                                    )
-                                                )
-                                            }
+                                            onClick={() => setPage(Math.min(pageCount, safePage + 1))}
                                             disabled={safePage === pageCount}
-                                            className="
-                                px-3 py-1
-                                border
-                                rounded-lg
-                                bg-white
-                                disabled:opacity-40
-                            "
+                                            className="px-3 py-1 border rounded-lg bg-white disabled:opacity-40"
                                         >
                                             →
                                         </button>
-
                                     </div>
-
                                 )}
-
                             </div>
-
                         </>
-
                     )}
-
                 </div>
 
                 {/* Footer */}
-
                 <div className="border-t p-4 flex justify-between items-center bg-gray-50">
-
-                    <div className="text-sm text-gray-500">
-                        {selectedIds.length} ausgewählt
+                    <div className="text-xs text-gray-500">
+                        {t("common.items_selected", { count: selectedIds.length, defaultValue: `${selectedIds.length} ausgewählt` })}
                     </div>
 
                     <div className="flex gap-2">
-
                         <button
                             onClick={closeModal}
-                            className="px-4 py-2 border rounded-lg"
+                            className="px-4 py-2 border rounded-xl text-sm hover:bg-gray-100 transition"
                         >
-                            Abbrechen
+                            {t("common.cancel", "Abbrechen")}
                         </button>
 
                         <button
                             onClick={handleDelete}
                             disabled={!selectedIds.length}
-                            className="
-                            px-4 py-2 rounded-lg
-                            bg-red-600 hover:bg-red-700
-                            text-white
-                            disabled:bg-gray-300
-                        "
+                            className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-semibold shadow-xs disabled:bg-gray-300 transition"
                         >
-                            In Papierkorb verschieben
+                            {t("device_remove.move_to_trash", { count: selectedIds.length, defaultValue: `In den Papierkorb verschieben (${selectedIds.length})` })}
                         </button>
-
                     </div>
-
                 </div>
 
             </div>

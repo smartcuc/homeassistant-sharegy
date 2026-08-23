@@ -10,6 +10,7 @@ import { useTrashCount } from "../../hooks/useTrashDevices";
 
 export default function Sidebar() {
     const { t, i18n } = useTranslation();
+    const query = useUnconfiguredDevices();
 
     const isLoaded = query?.isSuccess;
     const count = query?.data?.count ?? 0;

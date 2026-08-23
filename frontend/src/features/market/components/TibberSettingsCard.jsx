@@ -7,8 +7,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Card from "../../../components/ui/Card";
 import Button from "../../../components/ui/Button";
 import { fetchHomeTariff, saveHomeTariff, fetchTibberHomes } from "../api";
+import { useTranslation } from "react-i18next";
 
 export default function TibberSettingsCard() {
+    const { t } = useTranslation();
     const queryClient = useQueryClient();
 
     const { data: tariffData, isLoading } = useQuery({
@@ -31,18 +33,18 @@ export default function TibberSettingsCard() {
         mutationFn: saveHomeTariff,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["home-tariff"] });
-            setStatusMsg({ type: "success", text: "Tibber-Zugangsdaten erfolgreich gespeichert!" });
+            setStatusMsg({ type: "success", text: t("tariffs.save_tibber_success", "Tibber-Zugangsdaten erfolgreich gespeichert!") });
             setTimeout(() => setStatusMsg(null), 4000);
         },
         onError: (err) => {
-            setStatusMsg({ type: "error", text: err?.detail || err?.message || "Fehler beim Speichern." });
+            setStatusMsg({ type: "error", text: err?.detail || err?.message || t("tariffs.save_tibber_error", "Fehler beim Speichern.") });
             setTimeout(() => setStatusMsg(null), 5000);
         },
     });
 
     async function handleFetchHomes() {
         if (!currentToken) {
-            setStatusMsg({ type: "error", text: "Bitte zuerst ein Tibber-API-Token eingeben." });
+            setStatusMsg({ type: "error", text: t("tariffs.enter_token", "Bitte zuerst ein Tibber-API-Token eingeben.") });
             return;
         }
         setFetchingHomes(true);
@@ -54,12 +56,12 @@ export default function TibberSettingsCard() {
                 if (!currentHomeId) {
                     setHomeId(res.homes[0].id);
                 }
-                setStatusMsg({ type: "success", text: `${res.homes.length} Tibber-Zuhause erfolgreich gefunden!` });
+                setStatusMsg({ type: "success", text: `${res.homes.length} ${t("tariffs.homes_found", "Tibber-Zuhause erfolgreich gefunden!")}` });
             } else {
-                setStatusMsg({ type: "error", text: "Keine Tibber-Zuhause mit diesem Token gefunden." });
+                setStatusMsg({ type: "error", text: t("tariffs.no_homes_found", "Keine Tibber-Zuhause mit diesem Token gefunden.") });
             }
         } catch (err) {
-            setStatusMsg({ type: "error", text: err?.detail || err?.message || "Fehler bei der Tibber-Verbindung." });
+            setStatusMsg({ type: "error", text: err?.detail || err?.message || t("tariffs.connect_error", "Fehler bei der Tibber-Verbindung.") });
         } finally {
             setFetchingHomes(false);
         }
@@ -78,7 +80,7 @@ export default function TibberSettingsCard() {
         return (
             <Card>
                 <div className="p-4 text-sm text-gray-400 animate-pulse">
-                    Lade Tibber-Integration…
+                    {t("tariffs.loading_tibber", "Lade Tibber-Integration…")}
                 </div>
             </Card>
         );
@@ -91,10 +93,10 @@ export default function TibberSettingsCard() {
                     <span className="text-2xl">🔌</span>
                     <div>
                         <h2 className="font-semibold text-gray-900 text-base">
-                            Tibber API & Smart Meter Integration
+                            {t("tariffs.tibber_title", "Tibber API & Smart Meter Integration")}
                         </h2>
                         <p className="text-xs text-gray-500 mt-0.5">
-                            Verbinde deinen Tibber-Account für automatische Zählerdaten und stundengenaue Tarifsynchronisation.
+                            {t("tariffs.tibber_desc", "Verbinde deinen Tibber-Account für automatische Zählerdaten und stundengenaue Tarifsynchronisation.")}
                         </p>
                     </div>
                 </div>
@@ -106,7 +108,7 @@ export default function TibberSettingsCard() {
                             : "bg-gray-100 text-gray-600"
                     }`}
                 >
-                    {isConnected ? "🟢 Verbunden" : "⚪ Nicht konfiguriert"}
+                    {isConnected ? `🟢 ${t("common.connected", "Verbunden")}` : `⚪ ${t("common.not_configured", "Nicht konfiguriert")}`}
                 </span>
             </div>
 
@@ -123,7 +125,7 @@ export default function TibberSettingsCard() {
                             rel="noreferrer"
                             className="text-xs text-emerald-600 hover:text-emerald-700 underline"
                         >
-                            Token erstellen auf developer.tibber.com ↗
+                            {t("tariffs.create_token_link", "Token erstellen auf developer.tibber.com ↗")}
                         </a>
                     </div>
                     <div className="flex gap-2">
@@ -141,7 +143,7 @@ export default function TibberSettingsCard() {
                             disabled={fetchingHomes || !currentToken}
                             className="px-3 py-2 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg border border-gray-300 disabled:opacity-50 transition-colors whitespace-nowrap"
                         >
-                            {fetchingHomes ? "Prüfe…" : "🔍 Homes laden"}
+                            {fetchingHomes ? `⏳ ${t("common.loading", "Prüfe…")}` : `🔍 ${t("tariffs.load_homes", "Homes laden")}`}
                         </button>
                     </div>
                 </div>
@@ -150,7 +152,7 @@ export default function TibberSettingsCard() {
                 {tibberHomes.length > 0 && (
                     <div className="p-3 bg-emerald-50/60 rounded-lg border border-emerald-200">
                         <label htmlFor="tibber_home_select" className="block text-xs font-medium text-gray-700 mb-1">
-                            Gefundenes Tibber-Zuhause auswählen:
+                            {t("tariffs.select_home", "Gefundenes Tibber-Zuhause auswählen:")}
                         </label>
                         <select
                             id="tibber_home_select"
@@ -198,7 +200,7 @@ export default function TibberSettingsCard() {
                 {/* SUBMIT */}
                 <div className="pt-2 flex justify-end">
                     <Button type="submit" variant="primary" onClick={handleSave}>
-                        {saveMutation.isPending ? "Speichern…" : "Tibber-Daten speichern"}
+                        {saveMutation.isPending ? t("common.saving", "Speichern…") : t("tariffs.save_tibber", "Tibber-Daten speichern")}
                     </Button>
                 </div>
             </form>

@@ -5,8 +5,8 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import ReactECharts from "echarts-for-react";
-
 import { apiFetch } from "../../api/client";
+import { useTranslation } from "react-i18next";
 
 /* =========================================
    HELPERS
@@ -65,6 +65,7 @@ function getDeviceStyle(device) {
 ========================================= */
 
 function DeviceChartModal({ device, onClose }) {
+    const { t } = useTranslation();
     const [range, setRange] = useState("24h");
     const [live, setLive] = useState(false);
     const [isZoomed, setIsZoomed] = useState(false);
@@ -523,14 +524,11 @@ function DeviceChartModal({ device, onClose }) {
 
                     {liveStats && (
                         <div className="mt-4 flex justify-center">
-                            {/* Schaltet dynamisch zwischen grid-cols-3 und grid-cols-4 um */}
                             <div className={`grid gap-3 w-1/2 min-w-[500px] ${live ? "grid-cols-4" : "grid-cols-3"}`}>
-
-                                {/* 🔥 AKTUELL: Wird NUR gerendert, wenn live aktiviert ist */}
                                 {live && (
                                     <div className="bg-white/70 rounded-lg p-2">
                                         <div className="text-xs text-gray-500">
-                                            Aktuell
+                                            {t("device_chart.stat_current", "Aktuell")}
                                         </div>
                                         <div
                                             className="font-semibold"
@@ -544,7 +542,7 @@ function DeviceChartModal({ device, onClose }) {
                                 {/* MINIMUM */}
                                 <div className="bg-white/70 rounded-lg p-2">
                                     <div className="text-xs text-gray-500">
-                                        Minimum
+                                        {t("device_chart.stat_min", "Minimum")}
                                     </div>
                                     <div className="font-semibold text-slate-600">
                                         {liveStats.min.toFixed(2)} {unit}
@@ -554,7 +552,7 @@ function DeviceChartModal({ device, onClose }) {
                                 {/* MAXIMUM */}
                                 <div className="bg-white/70 rounded-lg p-2">
                                     <div className="text-xs text-gray-500">
-                                        Maximum
+                                        {t("device_chart.stat_max", "Maximum")}
                                     </div>
                                     <div className="font-semibold text-orange-600">
                                         {liveStats.max.toFixed(2)} {unit}
@@ -564,25 +562,23 @@ function DeviceChartModal({ device, onClose }) {
                                 {/* DURCHSCHNITT */}
                                 <div className="bg-white/70 rounded-lg p-2">
                                     <div className="text-xs text-gray-500">
-                                        Durchschnitt
+                                        {t("device_chart.stat_avg", "Durchschnitt")}
                                     </div>
                                     <div className="font-semibold text-gray-700">
                                         {liveStats.avg.toFixed(2)} {unit}
                                     </div>
                                 </div>
-
                             </div>
                         </div>
                     )}
 
                 </div>
-                {/* </div> */}
 
                 {/* MULTI-METRIC CHANNELS TAB BAR */}
                 {availableMetrics.length > 1 && (
                     <div className="flex items-center gap-2 px-6 py-2.5 bg-slate-50 border-b border-slate-200 overflow-x-auto shrink-0">
                         <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mr-1 flex items-center gap-1">
-                            <span>📊</span> Messkanal:
+                            <span>📊</span> {t("device_chart.channel_label", "Messkanal:")}
                         </span>
                         {availableMetrics.map((m) => {
                             const isActive = (m.key === activeMetricKey);
@@ -616,12 +612,12 @@ function DeviceChartModal({ device, onClose }) {
                     {query.isLoading ? (
                         <div className="flex flex-col items-center justify-center py-24 text-slate-400 gap-2">
                             <span className="text-xl animate-pulse">⏳</span>
-                            <span className="text-sm">Lade Zeitreihe...</span>
+                            <span className="text-sm">{t("common.loading", "Lade Zeitreihe...")}</span>
                         </div>
                     ) : chartData.seriesData.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-24 text-slate-400 gap-2">
                             <span className="text-2xl">📉</span>
-                            <span className="text-sm font-medium">Keine Messwerte für diesen Zeitraum vorhanden</span>
+                            <span className="text-sm font-medium">{t("device_chart.no_data", "Keine Messwerte für diesen Zeitraum vorhanden")}</span>
                         </div>
                     ) : (
                         <ReactECharts

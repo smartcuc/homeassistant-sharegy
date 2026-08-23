@@ -45,8 +45,9 @@ def generator_list(request):
                     "name": string.name,
                     "module_count": string.module_count,
                     "peak_power_kwp": float(string.peak_power_kwp),
-                    "orientation": string.orientation.name,
-                    "orientation_id": string.orientation.id,
+                    "orientation": string.orientation.name if string.orientation else "-",
+                    "orientation_key": string.orientation.key if string.orientation else None,
+                    "orientation_id": string.orientation.id if string.orientation else None,
                     "tilt_deg": string.tilt_deg,
                     "shading_percent": float(string.shading_percent),
                 }
