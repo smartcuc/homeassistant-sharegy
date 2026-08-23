@@ -367,25 +367,15 @@ CELERY_BEAT_SCHEDULE = {
         "task": "devices.tasks.purge_pending_devices",
         "schedule": crontab(hour="*/6"),
     },
-    # ✅ Sync Demo Live Metrics
+    # ✅ Autonome Demo Live-Simulation (alle 15 Sekunden)
     "sync-demo-metrics": {
         "task": "demo.tasks.sync_demo_metrics",
         "schedule": 15.0,
     },
-    # ✅ Sync Demo Device Metric cleanup
+    # ✅ Tägliche Demo-Metriken Bereinigung (Retention)
     "demo-cleanup": {
         "task": "demo.tasks.cleanup_demo",
-        "schedule": 86400.0,
-    },
-    # ✅ Sync Demo Device delete
-    "demo-device-sync": {
-        "task": "demo.tasks.sync_demo_devices",
-        "schedule": 86400.0,
-    },
-    # ✅ Sync Demo Device Config
-    "demo-config-sync": {
-        "task": "demo.tasks.sync_demo_configs",
-        "schedule": 3600.0,
+        "schedule": crontab(hour=3, minute=0),
     },
     # ✅ Forecast Weather Update
     "update-forecasts-every-30-minutes": {
