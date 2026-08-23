@@ -146,11 +146,10 @@ export default function Profile() {
                                     key={lang.id}
                                     type="button"
                                     onClick={() => handleLanguageChange(lang.id)}
-                                    className={`p-3 rounded-xl border text-left transition flex items-center justify-between ${
-                                        isActive
+                                    className={`p-3 rounded-xl border text-left transition flex items-center justify-between ${isActive
                                             ? "border-indigo-600 bg-indigo-50/80 ring-2 ring-indigo-500/20 shadow-xs"
                                             : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
-                                    }`}
+                                        }`}
                                 >
                                     <div>
                                         <div className="font-semibold text-sm text-gray-900">
