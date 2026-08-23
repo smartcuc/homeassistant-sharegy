@@ -1,15 +1,47 @@
-# ESWES Energy Platform – Developer Handbook
+# ⚡ Sharegy Platform — Entwickler- & System-Dokumentation
 
-## Überblick
+Willkommen in der offiziellen Dokumentation der **Sharegy**-Plattform (Smart Home Energy Management & Community Energy Sharing).
 
-Dieses Dokument beschreibt Architektur, Setup, Datenmodell und Betrieb des Systems.
+---
 
-## Kapitel
+## 📚 Dokumentations-Übersicht
 
-1. Architektur → ./01_architektur/
-2. Setup → ./02_setup/
-3. Datenbank → ./03_datenbank/
-4. Pipeline → ./04_pipeline/
-5. API → ./05_api/
-6. Tests → ./06_tests/
-7. Operations → ./07_operations/
+| Dokument | Beschreibung |
+|---|---|
+| 🏛️ **[`ARCHITECTURE.md`](./ARCHITECTURE.md)** | Gesamtsystem-Architektur, Dual-Core Konzept, Tech-Stack & Datenflüsse |
+| 🗄️ **[`DATA_MODEL.md`](./DATA_MODEL.md)** | Vollständige Datenmodell-Referenz (EMS, Forecast, Market, Metering, Core) |
+| ⚡ **[`EMS_SYSTEM_GUIDE.md`](./EMS_SYSTEM_GUIDE.md)** | Home Energy Management System: Telemetrie, Deadband-Filter, Flow-Engine & Sankey |
+| 💶 **[`TARIFF_AND_MARKET.md`](./TARIFF_AND_MARKET.md)** | Stromtarife (Statisch / Dynamisch), EPEX Spot Börsenpreise & Tibber API-Integration |
+| ☀️ **[`SOLAR_FORECAST.md`](./SOLAR_FORECAST.md)** | 96h Hybrid-Prognose (Open-Meteo Wetter, Physik-Modell & Random Forest ML) |
+| 🚀 **[`OPERATIONS_AND_DEPLOYMENT.md`](./OPERATIONS_AND_DEPLOYMENT.md)** | Deployment Guide (Ubuntu/Pi), Systemd Services, Redis, Celery & Health-Checks |
+| 🛠️ **[`OPTIMIZATION_PLAN.md`](./OPTIMIZATION_PLAN.md)** | Audit-Ergebnisse, Stabilitäts-Härtung und abgeschlossene Meilensteine |
+| 🗺️ **[`SHAREGY_STRATEGIC_ROADMAP.md`](./SHAREGY_STRATEGIC_ROADMAP.md)** | Strategische Produkt-Roadmap (EMS Pro, Smarte Laststeuerung, Energy Sharing) |
+| 📋 **[`walkthroughs/`](./walkthroughs/README.md)** | Detaillierte Meilenstein- und Änderungsprotokolle der Entwicklung |
+| 📱 **[`marketing/APP_TEASER.md`](./marketing/APP_TEASER.md)** | App Store Beschreibungen, Teaser-Texte und Marken-Farbkonzepte |
+
+---
+
+## ⚡ Schnellstart (Entwicklungsumgebung)
+
+```bash
+# 1. Repository klonen & Virtual Environment
+cd eswes
+python -m venv venv
+.\venv\Scripts\activate  # Linux: source venv/bin/activate
+pip install -r requirements.txt
+
+# 2. Datenbank & Migrationen
+python manage.py migrate
+
+# 3. Demo-Haushalt initialisieren (Optional)
+python manage.py rebuild_demo
+
+# 4. Entwicklungsserver starten
+# Terminal 1: Backend
+python manage.py runserver 0.0.0.0:8000
+
+# Terminal 2: Frontend
+cd frontend
+npm install
+npm run dev
+```

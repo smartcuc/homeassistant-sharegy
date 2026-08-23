@@ -21,17 +21,14 @@ export default function App() {
 
         <Routes>
 
-          {/* 🔓 PUBLIC */}
-          <Route path="/*" element={<AppRoutes />} />
-
           {/* 🔒 PRIVATE */}
           <Route path="/app/*" element={<PrivateApp />} />
 
           {/* 🔐 ADMIN */}
           <Route path="/admin/*" element={<AdminApp />} />
 
-          {/* 🔓 DEMO
-          <Route path="/demo/*" element={<PrivateApp />} /> */}
+          {/* 🔓 PUBLIC */}
+          <Route path="/*" element={<AppRoutes />} />
 
         </Routes>
 

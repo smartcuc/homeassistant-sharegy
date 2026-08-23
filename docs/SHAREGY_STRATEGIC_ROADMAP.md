@@ -96,7 +96,9 @@
   ├── 1.7 ✅ PV- & Wetter-Prognose für Dachanlagen (Physics + Open-Meteo 96h + PLZ-Geocoding)
   ├── 1.8 ✅ Operations & Monitoring Dashboard im Django Admin (Live-Badges & Health-Checks)
   ├── 1.9 ✅ Enterprise Multi-Metric Support (OTel/MQTT multi-channel Ingest, API & Modal-Kanalumschalter)
-  └── 1.10 ✅ End-to-End Test Suite (15/15 Tests erfolgreich)
+  ├── 1.10 ✅ Smart Device Onboarding & Presets (3-Schritte-Assistent, ioBroker/Shelly/HA Anleitungen & Simulator)
+  ├── 1.11 ✅ Zentraler MQTT-Hub & Multi-Language i18n (DE, EN, PL in UI & Navigation)
+  └── 1.12 ✅ End-to-End Test Suite (15/15 Tests erfolgreich)
 
 ┌───────────────────────────────────────────────────────────────────────────────┐
 │ MEILENSTEIN 2: EMS-PRO VERSION (Monetarisierung via SaaS-Abo)                  │

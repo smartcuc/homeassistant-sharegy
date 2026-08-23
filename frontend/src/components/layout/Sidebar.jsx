@@ -1,79 +1,15 @@
-/*
-# src/components/layout/Sidebar.jsx
-*/
-
 import { NavLink } from "react-router-dom";
 import { useUnconfiguredDevices } from "../../hooks/useUnconfiguredDevices";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import DeviceSetupModal from "../device/DeviceSetupModal";
 import AddDeviceModal from "../device/AddDeviceModal";
 import RemoveDevicesModal from "../device/RemoveDevicesModal";
 import TrashBinModal from "../device/TrashBinModal";
 import { useTrashCount } from "../../hooks/useTrashDevices";
 
-
-const sections = [
-    {
-        title: null,
-        items: [
-            { name: "Dashboard", path: "/app/dashboard", icon: "🏠" },
-        ],
-    },
-    {
-        title: "Energy",
-        items: [
-            { name: "Overview", path: "/app/energy", icon: "⚡" },
-        ],
-    },
-    {
-        title: "Devices",
-        items: [
-            { name: "All Devices", path: "/app/devices", icon: "📟" },
-            { name: "Add Device", action: "add_device", icon: "➕" },
-            { name: "Remove Device", action: "remove_device", icon: "🗑️" },
-            { name: "Trash Bin", action: "trash_bin", icon: "♻️" },
-        ],
-
-    },
-    {
-        title: "📡 Monitoring",
-        items: [
-            { name: "Floors", path: "/app/structure", icon: "🏡" },
-        ],
-    },
-    {
-        title: "📊 Analytics",
-        items: [
-            { name: "Solar Forecast", path: "/app/solarforecast", icon: "☀️" },
-            { name: "Metrics", path: "/app/metrics", icon: "📊" },
-        ],
-    },
-    {
-        title: "⚙️ Einstellungen",
-        items: [
-            {
-                name: "Erzeuger",
-                path: "/app/producers",
-                icon: "☀️",
-            },
-            {
-                name: "Strompreise & Tarife",
-                path: "/app/tariff",
-                icon: "💶",
-            },
-            {
-                name: "App-Einstellungen",
-                path: "/app/settings",
-                icon: "⚙️",
-            },
-        ],
-    },
-
-
-];
-
 export default function Sidebar() {
-
+    const { t } = useTranslation();
     const query = useUnconfiguredDevices();
 
     const isLoaded = query?.isSuccess;
@@ -84,8 +20,69 @@ export default function Sidebar() {
     const [openTrashBin, setOpenTrashBin] = useState(false);
 
     const trashQuery = useTrashCount();
-    const trashCount =
-        trashQuery?.data?.count ?? 0;
+    const trashCount = trashQuery?.data?.count ?? 0;
+
+    const sections = useMemo(() => [
+        {
+            title: null,
+            items: [
+                { name: t("nav.dashboard", "Dashboard"), path: "/app/dashboard", icon: "🏠" },
+            ],
+        },
+        {
+            title: t("nav.energy", "Energy"),
+            items: [
+                { name: t("nav.overview", "Overview"), path: "/app/energy", icon: "⚡" },
+            ],
+        },
+        {
+            title: t("nav.devices", "Devices"),
+            items: [
+                { name: t("nav.all_devices", "All Devices"), path: "/app/devices", icon: "📟" },
+                { name: t("nav.add_device", "Add Device"), action: "add_device", icon: "➕" },
+                { name: t("nav.remove_device", "Remove Device"), action: "remove_device", icon: "🗑️" },
+                { name: t("nav.trash_bin", "Trash Bin"), action: "trash_bin", icon: "♻️" },
+            ],
+        },
+        {
+            title: `📡 ${t("nav.monitoring", "Monitoring")}`,
+            items: [
+                { name: t("nav.floors", "Floors"), path: "/app/structure", icon: "🏡" },
+            ],
+        },
+        {
+            title: `📊 ${t("nav.analytics", "Analytics")}`,
+            items: [
+                { name: t("nav.solar_forecast", "Solar Forecast"), path: "/app/solarforecast", icon: "☀️" },
+                { name: t("nav.metrics", "Metrics"), path: "/app/metrics", icon: "📊" },
+            ],
+        },
+        {
+            title: `⚙️ ${t("nav.settings_group", "Einstellungen")}`,
+            items: [
+                {
+                    name: t("nav.producers", "Erzeuger"),
+                    path: "/app/producers",
+                    icon: "☀️",
+                },
+                {
+                    name: t("nav.tariffs", "Strompreise & Tarife"),
+                    path: "/app/tariff",
+                    icon: "💶",
+                },
+                {
+                    name: t("nav.mqtt_interfaces", "MQTT & Schnittstellen"),
+                    path: "/app/settings#mqtt",
+                    icon: "📡",
+                },
+                {
+                    name: t("nav.app_settings", "App-Einstellungen"),
+                    path: "/app/settings",
+                    icon: "⚙️",
+                },
+            ],
+        },
+    ], [t]);
 
 
     return (

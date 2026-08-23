@@ -280,9 +280,32 @@ class DeviceSerializer(serializers.ModelSerializer):
 # ============================================================
 
 class HomeSerializer(serializers.ModelSerializer):
+    mqtt_host = serializers.SerializerMethodField()
+    mqtt_port = serializers.SerializerMethodField()
+
     class Meta:
         model = Home
-        fields = ("id", "name")
+        fields = (
+            "id",
+            "name",
+            "timezone",
+            "postal_code",
+            "city",
+            "mqtt_token",
+            "mqtt_username",
+            "mqtt_password",
+            "mqtt_host",
+            "mqtt_port",
+            "created_at",
+        )
+
+    def get_mqtt_host(self, obj):
+        import os
+        return os.getenv("MQTT_HOST", "mqtt.sharegy.de")
+
+    def get_mqtt_port(self, obj):
+        import os
+        return int(os.getenv("MQTT_PORT", 1883))
 
 
 class MQTTProfileSerializer(serializers.ModelSerializer):

@@ -49,7 +49,19 @@ class DeviceCreateSerializer(serializers.ModelSerializer):
     mqtt_profile = serializers.PrimaryKeyRelatedField(
         queryset=MQTTProfile.objects.filter(active=True),
         required=False,
+        allow_null=True,
     )
+
+    role_id = serializers.IntegerField(required=False, allow_null=True)
+    role_key = serializers.CharField(required=False, allow_null=True, allow_blank=True)
+    generator_type_id = serializers.IntegerField(required=False, allow_null=True)
+    generator_type_key = serializers.CharField(required=False, allow_null=True, allow_blank=True)
+    metric_definition_id = serializers.IntegerField(required=False, allow_null=True)
+    metric_key = serializers.CharField(required=False, allow_null=True, allow_blank=True)
+    energy_signal_type_id = serializers.IntegerField(required=False, allow_null=True)
+    energy_signal_type_key = serializers.CharField(required=False, allow_null=True, allow_blank=True)
+    room_id = serializers.IntegerField(required=False, allow_null=True)
+    floor_id = serializers.IntegerField(required=False, allow_null=True)
 
     class Meta:
         model = Device
@@ -57,6 +69,16 @@ class DeviceCreateSerializer(serializers.ModelSerializer):
             "identifier",
             "name",
             "mqtt_profile",
+            "role_id",
+            "role_key",
+            "generator_type_id",
+            "generator_type_key",
+            "metric_definition_id",
+            "metric_key",
+            "energy_signal_type_id",
+            "energy_signal_type_key",
+            "room_id",
+            "floor_id",
         ]
 
     def create(self, validated_data):
@@ -75,7 +97,6 @@ class DeviceCreateSerializer(serializers.ModelSerializer):
 
         identifier = validated_data["identifier"]
         name = validated_data.get("name")
-
         mqtt_profile = validated_data.get("mqtt_profile")
 
         device, created = Device.objects.get_or_create(
@@ -92,7 +113,8 @@ class DeviceCreateSerializer(serializers.ModelSerializer):
             device.active = True
             device.pending_delete = False
             device.delete_after = None
-            device.mqtt_profile = mqtt_profile
+            if mqtt_profile:
+                device.mqtt_profile = mqtt_profile
 
             device.save(
                 update_fields=[
@@ -103,17 +125,86 @@ class DeviceCreateSerializer(serializers.ModelSerializer):
                 ]
             )
 
-        # ✅ Name gehört in DeviceConfig
-        if name:
-            from devices.models import DeviceConfig
+        # ✅ DeviceConfig anlegen / aktualisieren
+        from devices.models import DeviceConfig, DeviceRole, MetricDefinition, Room, Floor
+        from producer.models import GeneratorSystem, GeneratorType
+        from energy.models import EMSSignalType
 
-            config, _ = DeviceConfig.objects.get_or_create(
+        config, _ = DeviceConfig.objects.get_or_create(
+            device=device,
+            defaults={"home": home}
+        )
+
+        if name:
+            config.name = name
+
+        # Rolle
+        role_id = validated_data.get("role_id")
+        role_key = validated_data.get("role_key")
+        if role_id:
+            config.role_id = role_id
+        elif role_key:
+            role_obj = DeviceRole.objects.filter(key=role_key).first()
+            if role_obj:
+                config.role = role_obj
+
+        # Generator Type
+        gen_id = validated_data.get("generator_type_id")
+        gen_key = validated_data.get("generator_type_key")
+        if gen_id:
+            config.generator_type_id = gen_id
+        elif gen_key:
+            gen_obj = GeneratorType.objects.filter(key=gen_key, active=True).first()
+            if gen_obj:
+                config.generator_type = gen_obj
+
+        # Metric Definition
+        metric_id = validated_data.get("metric_definition_id")
+        metric_key = validated_data.get("metric_key")
+        if metric_id:
+            config.metric_definition_id = metric_id
+        elif metric_key:
+            m_obj = MetricDefinition.objects.filter(key=metric_key).first()
+            if m_obj:
+                config.metric_definition = m_obj
+
+        # Energy Signal Type
+        sig_id = validated_data.get("energy_signal_type_id")
+        sig_key = validated_data.get("energy_signal_type_key")
+        if sig_id:
+            config.energy_signal_type_id = sig_id
+        elif sig_key:
+            sig_obj = EMSSignalType.objects.filter(key=sig_key, active=True).first()
+            if sig_obj:
+                config.energy_signal_type = sig_obj
+
+        # Room & Floor
+        room_id = validated_data.get("room_id")
+        floor_id = validated_data.get("floor_id")
+        if room_id:
+            config.room_id = room_id
+        if floor_id:
+            config.floor_id = floor_id
+
+        config.save()
+
+        # Producer System synchronisieren
+        if (
+            config.role
+            and config.role.key == "producer"
+            and config.generator_type
+        ):
+            GeneratorSystem.objects.get_or_create(
                 device=device,
-                defaults={"home": home}
+                defaults={
+                    "home": home,
+                    "name": config.display_name(),
+                    "generator_type": config.generator_type,
+                },
             )
 
-            config.name = name
-            config.save()
+        device.configured = config.is_classified()
+        device.save(update_fields=["configured"])
 
         if created:
             provision_home.delay(home.id)

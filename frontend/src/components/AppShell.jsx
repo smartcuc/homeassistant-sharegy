@@ -12,6 +12,7 @@ import OverviewPage from "../pages/dashboard/overview/OverviewPage";
 import Settings from "../pages/Settings";
 import EnergyDashboard from "../features/energy/EnergyDashboard";
 import ProducerPage from "../features/producer/pages/ProducerPage";
+import TariffPage from "../features/market/pages/TariffPage";
 
 import DevicesPage from "../pages/DevicesPage";
 import ForecastPage from "../features/forecast/ForecastPage";
@@ -57,6 +58,7 @@ export default function AppShell() {
                         <Route path="energy" element={<EnergyDashboard />} />
                         <Route path="devices" element={<DevicesPage />} />
                         <Route path="producers" element={<ProducerPage />} />
+                        <Route path="tariff" element={<TariffPage />} />
                         <Route path="settings" element={<Settings />} />
 
                         <Route path="solarforecast" element={<ForecastPage />} />
@@ -64,7 +66,7 @@ export default function AppShell() {
                         <Route path="structure" element={<StructurePage />} />
 
                         {/* ✅ FALLBACK IMMER UNTEN */}
-                        <Route path="*" element={<Navigate to="dashboard" />} />
+                        <Route path="*" element={<Navigate to="/app/dashboard" replace />} />
 
                     </Routes>
                 </div>

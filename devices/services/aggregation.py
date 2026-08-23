@@ -37,9 +37,9 @@ def floor_bucket(dt, seconds):
     )
 
 
-def aggregate_1m():
+def aggregate_1m(target_time=None):
 
-    now = timezone.now()
+    now = target_time or timezone.now()
 
     current_bucket = floor_bucket(
         now,

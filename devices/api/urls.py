@@ -20,6 +20,8 @@ from .views import (
     list_homes,
     mqtt_profile_list,
     device_dashboard_values,
+    simulate_telemetry,
+    regenerate_mqtt_password,
 )
 
 urlpatterns = [
@@ -30,8 +32,10 @@ urlpatterns = [
     path("<int:device_id>/", configure_device),
     path("<int:device_id>/metrics/", device_available_metrics),
     path("<int:device_id>/timeseries/", device_timeseries),
+    path("<int:device_id>/simulate/", simulate_telemetry),
     path("sankey/", sankey_data),
     path("homes/", list_homes),
+    path("homes/regenerate-mqtt/", regenerate_mqtt_password),
     path("mqtt-profiles/", mqtt_profile_list),
     path("remove/", remove_devices),
     path("restore/", restore_devices),

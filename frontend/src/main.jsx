@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./index.css";   // ✅ DAS MUSS DA SEIN
+import "./i18n";        // ✅ Multilanguage i18next
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 // ✅ globaler Cache

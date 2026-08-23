@@ -507,6 +507,8 @@ def device_available_metrics(request, device_id):
     KEY_METADATA = {
         "power": {"name": "Wirkleistung", "unit": "W", "icon": "⚡"},
         "active_power": {"name": "Wirkleistung", "unit": "W", "icon": "⚡"},
+        "apparent_power": {"name": "Scheinleistung", "unit": "VA", "icon": "⚡"},
+        "reactive_power": {"name": "Blindleistung", "unit": "var", "icon": "⚡"},
         "p_total": {"name": "Gesamtleistung", "unit": "W", "icon": "⚡"},
         "value": {"name": "Leistung", "unit": "W", "icon": "⚡"},
         "voltage": {"name": "Spannung", "unit": "V", "icon": "🔌"},
@@ -519,11 +521,25 @@ def device_available_metrics(request, device_id):
         "current_l3": {"name": "Strom L3", "unit": "A", "icon": "⚡"},
         "soc": {"name": "Batterieladestand", "unit": "%", "icon": "🔋"},
         "battery_soc": {"name": "Batterieladestand", "unit": "%", "icon": "🔋"},
+        "soh": {"name": "Batteriegesundheit", "unit": "%", "icon": "🩺"},
         "energy": {"name": "Energie", "unit": "kWh", "icon": "📊"},
         "energy_import": {"name": "Netzbezug", "unit": "kWh", "icon": "📥"},
         "energy_export": {"name": "Einspeisung", "unit": "kWh", "icon": "📤"},
         "frequency": {"name": "Frequenz", "unit": "Hz", "icon": "〰️"},
+        "power_factor": {"name": "Leistungsfaktor", "unit": "", "icon": "📐"},
         "temperature": {"name": "Temperatur", "unit": "°C", "icon": "🌡️"},
+        "humidity": {"name": "Luftfeuchtigkeit", "unit": "%", "icon": "💧"},
+        "pressure": {"name": "Luftdruck", "unit": "hPa", "icon": "⏲️"},
+        "co2": {"name": "CO2-Gehalt", "unit": "ppm", "icon": "🫧"},
+        "voc": {"name": "Luftgüte (VOC)", "unit": "ppb", "icon": "🍃"},
+        "illuminance": {"name": "Helligkeit", "unit": "lx", "icon": "💡"},
+        "solar_radiation": {"name": "Sonneneinstrahlung", "unit": "W/m²", "icon": "☀️"},
+        "wind_speed": {"name": "Windgeschwindigkeit", "unit": "m/s", "icon": "💨"},
+        "flow_temperature": {"name": "Vorlauftemperatur", "unit": "°C", "icon": "🔥"},
+        "return_temperature": {"name": "Rücklauftemperatur", "unit": "°C", "icon": "❄️"},
+        "flow_rate": {"name": "Durchfluss", "unit": "l/h", "icon": "🌊"},
+        "heat_power": {"name": "Wärmeleistung", "unit": "kW", "icon": "♨️"},
+        "percentage": {"name": "Prozentwert", "unit": "%", "icon": "📈"},
     }
 
     def_map = {d.key: d for d in MetricDefinition.objects.all()}
@@ -810,3 +826,64 @@ def mqtt_profile_list(request):
             many=True,
         ).data
     )
+
+
+# ============================================================
+# ✅ SIMULATE DEVICE TELEMETRY (für Onboarding & Live-Test)
+# ============================================================
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def simulate_telemetry(request, device_id):
+    device = get_object_or_404(
+        Device.objects.select_related("config__metric_definition"),
+        id=device_id,
+        home__user=request.user,
+    )
+
+    value = float(request.data.get("value", 450.0))
+    metric_key = request.data.get("metric_key")
+    if not metric_key:
+        if hasattr(device, "config") and device.config and device.config.metric_definition:
+            metric_key = device.config.metric_definition.key
+        else:
+            metric_key = "power"
+
+    from devices.services.ingest import ingest_metric_payload
+
+    result = ingest_metric_payload(
+        device=device,
+        metrics={metric_key: value},
+        source="simulator",
+    )
+
+    return Response({
+        "status": "ok",
+        "device_id": device.id,
+        "metric": metric_key,
+        "value": value,
+        "result": result,
+    })
+
+
+# ============================================================
+# ✅ REGENERATE MQTT PASSWORD
+# ============================================================
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def regenerate_mqtt_password(request):
+    home = request.user.homes.first()
+    if not home:
+        return Response({"error": "No home found"}, status=404)
+
+    import secrets
+    home.mqtt_password = secrets.token_hex(16)
+    home.save(update_fields=["mqtt_password"])
+
+    from devices.tasks import provision_home
+    provision_home.delay(home.id)
+
+    return Response(HomeSerializer(home).data)
+
+

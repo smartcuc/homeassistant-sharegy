@@ -1,0 +1,19 @@
+# 📋 Walkthroughs & Meilenstein-Protokolle
+
+Dieses Verzeichnis enthält detaillierte Protokolle und Änderungsberichte zu den abgeschlossenen Entwicklungs-Meilensteinen der Sharegy-Plattform.
+
+---
+
+## 📑 Chronologische Übersicht
+
+| Datum | Titel | Bereich | Dokument |
+|---|---|---|---|
+| **23.08.2026** | **MQTT-Zugangsdaten-Hub, SI-Einheiten & Multi-Language (i18n)** | Settings, i18n & Core | [📄 `2026-08-23_mqtt_hub_and_i18n.md`](./2026-08-23_mqtt_hub_and_i18n.md) |
+| **23.08.2026** | **Smarte Geräte-Anbindung & Onboarding-Assistent (AddDeviceModal)** | Frontend UX & Ingest | [📄 `2026-08-23_device_onboarding_concept.md`](./2026-08-23_device_onboarding_concept.md) |
+| **23.08.2026** | **Überarbeitung & Bereinigung des `docs/`-Verzeichnisses** | System-Dokumentation | [📄 `2026-08-23_docs_restructuring.md`](./2026-08-23_docs_restructuring.md) |
+| **23.08.2026** | **Stromtarife & Tibber API-Integration** | Frontend & Market API | [📄 `2026-08-23_tariff_and_tibber_integration.md`](./2026-08-23_tariff_and_tibber_integration.md) |
+| **23.08.2026** | **Sankey-Flussberechnung & Demo-Haushalt mit 96h PV-Forecast** | EMS & Flow-Engine | [📄 `2026-08-23_sankey_and_demo_forecast.md`](./2026-08-23_sankey_and_demo_forecast.md) |
+
+---
+
+> 💡 *Neue Meilensteine und Refaktorisierungen werden fortlaufend in diesem Verzeichnis als eigenständige Markdown-Dateien protokolliert.*

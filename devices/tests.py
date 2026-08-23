@@ -99,7 +99,7 @@ class DeviceAggregationTest(TestCase):
             timestamp=target + timedelta(seconds=30),
         )
 
-        aggregate_1m()
+        aggregate_1m(now)
 
         agg = DeviceMetric1m.objects.filter(
             device=self.device,
