@@ -19,10 +19,17 @@ from devices.models import (
     MetricDefinition,
     DeviceLatestMetric,
 )
-from producer.models import GeneratorType
+from producer.models import (
+    GeneratorType,
+    Orientation,
+    GeneratorSystem,
+    GeneratorString,
+)
 from energy.models import EMSSignalType
 from energy.ems.models import EMSSignalSource
 from devices.services.ingest import ingest_metric_payload
+from forecast.services_weather import fetch_and_store_weather_for_group
+from forecast.services_store import save_all_forecasts_for_generator_string
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -34,7 +41,7 @@ DEMO_USERNAME = "demo"
 def setup_demo_household():
     """
     Erstellt ein eigenständiges, realistisches Prosumer-Demo-Zuhause
-    völlig unabhängig von privaten Nutzerkonten.
+    inklusive Erzeuger-Konfiguration (GeneratorSystem/Strings) und 96h-Wetter/PV-Forecast.
     """
     demo_user, _ = User.objects.get_or_create(
         email=DEMO_EMAIL,
@@ -70,8 +77,15 @@ def setup_demo_household():
     sig_bat, _ = EMSSignalType.objects.get_or_create(key="battery_power", defaults={"label": "Batterieleistung"})
     sig_grid, _ = EMSSignalType.objects.get_or_create(key="grid_feed", defaults={"label": "Netzeinspeisung / Bezug"})
 
-    # Generator-Typ
-    gen_solar, _ = GeneratorType.objects.get_or_create(key="solar", defaults={"name": "Photovoltaik"})
+    # Generator-Typen & Orientierungen
+    gen_solar, _ = GeneratorType.objects.get_or_create(key="solar", defaults={"name": "Photovoltaik", "icon": "☀️"})
+    GeneratorType.objects.get_or_create(key="pv", defaults={"name": "Photovoltaik", "icon": "☀️"})
+
+    ori_south, _ = Orientation.objects.get_or_create(key="s", defaults={"name": "Süd", "azimuth_deg": 180, "sort_order": 1})
+    Orientation.objects.get_or_create(key="sw", defaults={"name": "Süd-West", "azimuth_deg": 225, "sort_order": 2})
+    Orientation.objects.get_or_create(key="so", defaults={"name": "Süd-Ost", "azimuth_deg": 135, "sort_order": 3})
+    Orientation.objects.get_or_create(key="w", defaults={"name": "West", "azimuth_deg": 270, "sort_order": 4})
+    Orientation.objects.get_or_create(key="o", defaults={"name": "Ost", "azimuth_deg": 90, "sort_order": 5})
 
     # Räume & Etagen
     floor_eg, _ = Floor.objects.get_or_create(name="Erdgeschoss")
@@ -105,6 +119,35 @@ def setup_demo_household():
     )
     EMSSignalSource.objects.create(home=demo_home, device=d_pv, signal_type=sig_pv)
     devices["pv"] = d_pv
+
+    # Erzeuger-System & Generator-String für Erzeuger-Verwaltung und Forecast-Engine!
+    gen_system = GeneratorSystem.objects.create(
+        home=demo_home,
+        device=d_pv,
+        name="PV-Dachanlage 10 kWp",
+        generator_type=gen_solar,
+        peak_power_kw=10.0,
+        inverter_power_kw=10.0,
+        battery_capacity_kwh=10.0,
+        active=True,
+    )
+    gen_string = GeneratorString.objects.create(
+        generator=gen_system,
+        name="Dach Süd (Hauptstring 10 kWp)",
+        module_count=24,
+        peak_power_kwp=10.0,
+        orientation=ori_south,
+        tilt_deg=35,
+        shading_percent=0.0,
+    )
+
+    # Initialen Wetter- und PV-Forecast für das Demo-Haus berechnen
+    try:
+        fetch_and_store_weather_for_group([demo_home], hours=96)
+        save_all_forecasts_for_generator_string(gen_string)
+        logger.info("Wetter- und PV-Prognose für Demo-Haus initialisiert.")
+    except Exception as e:
+        logger.warning("Forecast-Initialisierung für Demo-Haus übersprungen: %s", e)
 
     # B. Batteriespeicher (10 kWh)
     d_bat = Device.objects.create(home=demo_home, identifier="demo_battery_storage", configured=True, active=True)
