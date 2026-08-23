@@ -1,12 +1,9 @@
-/*
-# src/pages/Settings.jsx
-*/
-
 import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
 import { useUser } from "../hooks/useUser";
 import { apiFetch } from "../api/client";
 import { useQueryClient } from "@tanstack/react-query";
+import HomeTariffSettingsCard from "../features/market/components/HomeTariffSettingsCard";
 
 export default function Settings() {
 
@@ -37,8 +34,13 @@ export default function Settings() {
                     👤 Konto & Einstellungen
                 </h1>
                 <p className="text-gray-500">
-                    Deine persönlichen Einstellungen
+                    Deine persönlichen Einstellungen & Stromtarife
                 </p>
+            </div>
+
+            {/* TARIFF SETTINGS */}
+            <div className="mb-8">
+                <HomeTariffSettingsCard />
             </div>
 
             {/* USER INFO */}

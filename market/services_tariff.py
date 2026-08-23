@@ -28,14 +28,27 @@ def get_home_tariff(
 def get_price_config(
     date,
 ):
-
-    return (
+    config = (
         ElectricityPriceConfig.objects.filter(
             valid_from__lte=date,
         )
         .order_by("-valid_from")
         .first()
     )
+    if not config:
+        config, _ = ElectricityPriceConfig.objects.get_or_create(
+            valid_from=date.replace(month=1, day=1),
+            defaults={
+                "grid_fee_ct": Decimal("9.5000"),
+                "electricity_tax_ct": Decimal("2.0500"),
+                "concession_fee_ct": Decimal("1.6600"),
+                "kwk_levy_ct": Decimal("0.2750"),
+                "special_grid_levy_ct": Decimal("0.6430"),
+                "offshore_levy_ct": Decimal("0.6560"),
+                "vat_percent": Decimal("19.00"),
+            },
+        )
+    return config
 
 
 def calculate_effective_price(

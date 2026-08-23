@@ -3,7 +3,7 @@
 ####################
 
 from django.urls import path
-from .views import current_spot_price, spot_price_chart
+from .views import current_spot_price, spot_price_chart, home_tariff_detail
 
 urlpatterns = [
     path(
@@ -15,5 +15,10 @@ urlpatterns = [
         "chart/",
         spot_price_chart,
         name="spot-price-chart",
+    ),
+    path(
+        "tariff/",
+        home_tariff_detail,
+        name="home-tariff-detail",
     ),
 ]
