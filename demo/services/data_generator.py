@@ -188,6 +188,7 @@ def setup_demo_household():
         floor=floor_ug,
         room=room_tech,
     )
+    EMSSignalSource.objects.create(home=demo_home, device=d_hp, signal_type=sig_load)
     devices["heatpump"] = d_hp
 
     # E. Wallbox (EV Charger)
@@ -201,6 +202,7 @@ def setup_demo_household():
         floor=floor_eg,
         room=room_garage,
     )
+    EMSSignalSource.objects.create(home=demo_home, device=d_wb, signal_type=sig_load)
     devices["wallbox"] = d_wb
 
     # F. Haushalt Grundlast / Wohnbereich
@@ -214,6 +216,7 @@ def setup_demo_household():
         floor=floor_eg,
         room=room_living,
     )
+    EMSSignalSource.objects.create(home=demo_home, device=d_house, signal_type=sig_load)
     devices["household"] = d_house
 
     logger.info("Demo Smart Home erfolgreich mit %d Geräten initialisiert", len(devices))
@@ -272,9 +275,12 @@ def generate_demo_telemetry(now: datetime = None) -> dict:
     elif (18.5 <= hour_float <= 21.0):
         wb_power = 3700.0
 
-    total_load = household_power + hp_power + wb_power
+    total_load = round(household_power + hp_power + wb_power, 1)
 
     # 5. 🔋 Batterie-Berechnung (Laden bei Überschuss, Entladen bei Last)
+    # EMS-Standard:
+    # Entladen (Strom fließt ins Haus): positiv (> 0)
+    # Laden (Strom fließt in den Speicher): negativ (< 0)
     net_pv_surplus = pv_power - total_load
 
     # Letzten SoC laden oder Standard 65%
@@ -286,25 +292,26 @@ def generate_demo_telemetry(now: datetime = None) -> dict:
 
     battery_power = 0.0
     if net_pv_surplus > 100.0:
-        # PV-Überschuss: Akku lädt (positiver Wert)
+        # PV-Überschuss: Akku lädt (Ladung = negatives Signal im EMS)
         charge_rate = min(net_pv_surplus, 3000.0)
         if current_soc < 98.0:
-            battery_power = round(charge_rate, 1)
-            current_soc = min(100.0, current_soc + (battery_power / 10000.0) * 0.25)
+            battery_power = round(-charge_rate, 1)
+            current_soc = min(100.0, current_soc + (charge_rate / 10000.0) * 0.25)
     elif net_pv_surplus < -100.0:
-        # Defizit: Akku entlädt (negativer Wert)
+        # Defizit: Akku entlädt (Entladung = positives Signal im EMS)
         discharge_rate = min(abs(net_pv_surplus), 3000.0)
         if current_soc > 10.0:
-            battery_power = round(-discharge_rate, 1)
-            current_soc = max(5.0, current_soc - (abs(battery_power) / 10000.0) * 0.25)
+            battery_power = round(discharge_rate, 1)
+            current_soc = max(5.0, current_soc - (discharge_rate / 10000.0) * 0.25)
 
     current_soc = round(current_soc, 1)
 
     # 6. 🔌 Netz-Saldo
-    # Netzbezug / Einspeisung = Last - (PV + Batterieentladung)
-    effective_generation = pv_power + (-battery_power if battery_power < 0 else 0.0)
-    effective_load = total_load + (battery_power if battery_power > 0 else 0.0)
-    grid_power = round(effective_load - pv_power, 1)
+    # EMS-Standard:
+    # Netzbezug (Import): positiv (> 0)
+    # Netzeinspeisung (Export): negativ (< 0)
+    # Formel: Netzbezug = Last - PV - Batterieentladung (battery_power)
+    grid_power = round(total_load - pv_power - battery_power, 1)
 
     # 7. Ingestion über die zentrale Ingestion-Pipeline ausführen!
     results = {}
