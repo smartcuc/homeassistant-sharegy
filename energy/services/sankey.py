@@ -213,7 +213,7 @@ def build_live_sankey(
         })
 
     if flow.get("pv_to_battery", 0) > 0:
-        add_node("battery_charge", "Batterieladung", "consumer")
+        add_node("battery_charge", "Batterieladung", "battery_charge")
         links.append({
             "source": "pv",
             "target": "battery_charge",
@@ -221,7 +221,7 @@ def build_live_sankey(
         })
 
     if flow.get("pv_to_grid", 0) > 0:
-        add_node("grid_export", "Netzeinspeisung", "consumer")
+        add_node("grid_export", "Netzeinspeisung", "grid_export")
         links.append({
             "source": "pv",
             "target": "grid_export",
@@ -236,7 +236,7 @@ def build_live_sankey(
         })
 
     if flow.get("grid_to_battery", 0) > 0:
-        add_node("battery_charge", "Batterieladung", "consumer")
+        add_node("battery_charge", "Batterieladung", "battery_charge")
         links.append({
             "source": "grid",
             "target": "battery_charge",
