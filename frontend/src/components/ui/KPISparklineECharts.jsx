@@ -10,6 +10,12 @@ export default function KPISparklineECharts({
     chartType = "line",
     unit = "N/A",
 }) {
+    const chartValues =
+        Array.isArray(values) && values.length === 1
+            ? [values[0], values[0]]
+            : Array.isArray(values)
+                ? values
+                : [];
 
     const option = {
         animation: false,
@@ -24,7 +30,7 @@ export default function KPISparklineECharts({
         xAxis: {
             type: "category",
             show: false,
-            data: values.map((_, i) => i),
+            data: chartValues.map((_, i) => i),
         },
 
         yAxis: {
@@ -35,7 +41,7 @@ export default function KPISparklineECharts({
 
         series: [
             {
-                data: values,
+                data: chartValues,
                 type: chartType,
 
                 smooth: chartType === "line",

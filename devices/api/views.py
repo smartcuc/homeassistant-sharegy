@@ -367,76 +367,67 @@ def device_dashboard_values(request):
 
     since = timezone.now() - timedelta(hours=1)
 
-    metric_map = {}
-
-    for d in devices:
-        config = getattr(d, "config", None)
-
-        if config and config.metric_definition:
-            metric_map[d.id] = config.metric_definition.key
-
-    sparkline_rows = (
+    # 1. Sammle 1m Aggregationen der letzten Stunde
+    sparkline_rows = list(
         DeviceMetric1m.objects.filter(
             device_id__in=device_ids,
             bucket__gte=since,
         )
-        .values(
-            "device_id",
-            "metric_key",
-            "avg",
-        )
-        .order_by(
-            "device_id",
-            "bucket",
-        )
+        .filter(Q(metric_key__in=["power", "value"]) | Q(metric_key__isnull=True))
+        .values("device_id", "avg")
+        .order_by("device_id", "bucket")
     )
 
     sparkline_map = defaultdict(list)
-
     for row in sparkline_rows:
-        expected_key = metric_map.get(row["device_id"])
-        if expected_key and row["metric_key"] != expected_key:
-            continue
-
         sparkline_map[row["device_id"]].append(
-            round(
-                float(row["avg"] or 0),
-                2,
-            )
+            round(float(row["avg"] or 0), 2)
         )
 
-    # Fallback auf DeviceMetric, falls DeviceMetric1m für ein Gerät noch leer ist
-    missing_sparkline_devs = [d.id for d in devices if not sparkline_map.get(d.id)]
-    if missing_sparkline_devs:
-        raw_rows = (
-            DeviceMetric.objects.filter(
-                device_id__in=missing_sparkline_devs,
-                timestamp__gte=since,
-                metric_key__in=["power", "value"],
+    # 2. Resilienter Fallback für Geräte mit wenigen / keinen Punkten in der letzten Stunde
+    for d in devices:
+        pts = sparkline_map.get(d.id, [])
+        if len(pts) < 3:
+            # Versuche jüngste 30 Punkte aus DeviceMetric1m
+            recent_1m = list(
+                DeviceMetric1m.objects.filter(device_id=d.id)
+                .filter(Q(metric_key__in=["power", "value"]) | Q(metric_key__isnull=True))
+                .order_by("-bucket")
+                .values_list("avg", flat=True)[:30]
             )
-            .values("device_id", "value")
-            .order_by("device_id", "timestamp")[:300]
-        )
-        for r in raw_rows:
-            if r["value"] is not None:
-                sparkline_map[r["device_id"]].append(round(float(r["value"]), 2))
+            if len(recent_1m) >= 2:
+                sparkline_map[d.id] = [round(float(v or 0), 2) for v in reversed(recent_1m)]
+            else:
+                # Versuche jüngste 30 Punkte aus Rohdaten (DeviceMetric)
+                recent_raw = list(
+                    DeviceMetric.objects.filter(device_id=d.id)
+                    .filter(Q(metric_key__in=["power", "value"]) | Q(metric_key__isnull=True))
+                    .order_by("-timestamp")
+                    .values_list("value", flat=True)[:30]
+                )
+                if recent_raw:
+                    sparkline_map[d.id] = [
+                        round(float(v), 2) for v in reversed(recent_raw) if v is not None
+                    ]
 
     result = []
 
     for d in devices:
-
         config = getattr(d, "config", None)
-
         metric = (
             config.metric_definition if config and config.metric_definition else None
         )
+
+        sparkline_pts = sparkline_map.get(d.id, [])
+        if len(sparkline_pts) == 1:
+            sparkline_pts = [sparkline_pts[0], sparkline_pts[0]]
 
         result.append(
             {
                 "device": d.id,
                 "value": values.get(d.id),
                 "unit": metric.unit if metric else "",
-                "sparkline": sparkline_map.get(d.id, []),
+                "sparkline": sparkline_pts,
             }
         )
 
