@@ -71,16 +71,11 @@ def setup_demo_household():
     role_battery, _ = DeviceRole.objects.get_or_create(key="battery", defaults={"label": "Speicher"})
     role_grid, _ = DeviceRole.objects.get_or_create(key="grid", defaults={"label": "Netzzähler"})
 
-    # Signal-Typen laden / erstellen
-    sig_pv, _ = EMSSignalType.objects.get_or_create(key="pv_production", defaults={"label": "PV-Erzeugung"})
-    sig_load, _ = EMSSignalType.objects.get_or_create(key="home_load", defaults={"label": "Hausverbrauch"})
-    sig_bat, _ = EMSSignalType.objects.get_or_create(key="battery_power", defaults={"label": "Batterieleistung"})
-    sig_grid, _ = EMSSignalType.objects.get_or_create(key="grid_feed", defaults={"label": "Netzeinspeisung / Bezug"})
-
-    # Generator-Typen & Orientierungen
-    gen_solar, _ = GeneratorType.objects.get_or_create(key="solar", defaults={"name": "Photovoltaik", "icon": "☀️"})
-    GeneratorType.objects.get_or_create(key="pv", defaults={"name": "Photovoltaik", "icon": "☀️"})
-
+    # Signal-Typen laden / erstellen (Standard-Keys: pv, grid, load, battery)
+    sig_pv, _ = EMSSignalType.objects.get_or_create(key="pv", defaults={"label": "PV"})
+    sig_load, _ = EMSSignalType.objects.get_or_create(key="load", defaults={"label": "Verbrauch"})
+    sig_bat, _ = EMSSignalType.objects.get_or_create(key="battery", defaults={"label": "Batterie"})
+    sig_grid, _ = EMSSignalType.objects.get_or_create(key="grid", defaults={"label": "Netz"})
     ori_south, _ = Orientation.objects.get_or_create(key="s", defaults={"name": "Süd", "azimuth_deg": 180, "sort_order": 1})
     Orientation.objects.get_or_create(key="sw", defaults={"name": "Süd-West", "azimuth_deg": 225, "sort_order": 2})
     Orientation.objects.get_or_create(key="so", defaults={"name": "Süd-Ost", "azimuth_deg": 135, "sort_order": 3})
@@ -113,11 +108,11 @@ def setup_demo_household():
         name="PV Dachanlage 10 kWp",
         role=role_producer,
         generator_type=gen_solar,
+        energy_signal_type=sig_pv,
         metric_definition=m_power,
         floor=floor_og,
         room=room_roof,
     )
-    EMSSignalSource.objects.create(home=demo_home, device=d_pv, signal_type=sig_pv)
     devices["pv"] = d_pv
 
     # Erzeuger-System & Generator-String für Erzeuger-Verwaltung und Forecast-Engine!
@@ -156,11 +151,11 @@ def setup_demo_household():
         home=demo_home,
         name="Heimspeicher 10 kWh",
         role=role_battery,
+        energy_signal_type=sig_bat,
         metric_definition=m_power,
         floor=floor_ug,
         room=room_tech,
     )
-    EMSSignalSource.objects.create(home=demo_home, device=d_bat, signal_type=sig_bat)
     devices["battery"] = d_bat
 
     # C. Smart Meter / Netzzähler
@@ -170,11 +165,11 @@ def setup_demo_household():
         home=demo_home,
         name="Hauptzähler (iMSys)",
         role=role_grid,
+        energy_signal_type=sig_grid,
         metric_definition=m_power,
         floor=floor_ug,
         room=room_tech,
     )
-    EMSSignalSource.objects.create(home=demo_home, device=d_grid, signal_type=sig_grid)
     devices["grid"] = d_grid
 
     # D. Wärmepumpe
@@ -184,11 +179,11 @@ def setup_demo_household():
         home=demo_home,
         name="Wärmepumpe Luft-Wasser",
         role=role_consumer,
+        energy_signal_type=sig_load,
         metric_definition=m_power,
         floor=floor_ug,
         room=room_tech,
     )
-    EMSSignalSource.objects.create(home=demo_home, device=d_hp, signal_type=sig_load)
     devices["heatpump"] = d_hp
 
     # E. Wallbox (EV Charger)
@@ -198,11 +193,11 @@ def setup_demo_household():
         home=demo_home,
         name="Wallbox 11 kW (Garage)",
         role=role_consumer,
+        energy_signal_type=sig_load,
         metric_definition=m_power,
         floor=floor_eg,
         room=room_garage,
     )
-    EMSSignalSource.objects.create(home=demo_home, device=d_wb, signal_type=sig_load)
     devices["wallbox"] = d_wb
 
     # F. Haushalt Grundlast / Wohnbereich
@@ -212,11 +207,11 @@ def setup_demo_household():
         home=demo_home,
         name="Haushalt & Küche",
         role=role_consumer,
+        energy_signal_type=sig_load,
         metric_definition=m_power,
         floor=floor_eg,
         room=room_living,
     )
-    EMSSignalSource.objects.create(home=demo_home, device=d_house, signal_type=sig_load)
     devices["household"] = d_house
 
     logger.info("Demo Smart Home erfolgreich mit %d Geräten initialisiert", len(devices))
