@@ -57,6 +57,11 @@ const sections = [
                 icon: "☀️",
             },
             {
+                name: "Strompreise & Tarife",
+                path: "/app/tariff",
+                icon: "💶",
+            },
+            {
                 name: "App-Einstellungen",
                 path: "/app/settings",
                 icon: "⚙️",

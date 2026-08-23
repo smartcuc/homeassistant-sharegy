@@ -14,3 +14,10 @@ export async function saveHomeTariff(payload) {
         body: JSON.stringify(payload),
     });
 }
+
+export async function fetchTibberHomes(token) {
+    return await apiFetch("/api/market/tariff/tibber-homes/", {
+        method: "POST",
+        body: JSON.stringify({ tibber_token: token }),
+    });
+}

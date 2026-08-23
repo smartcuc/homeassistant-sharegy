@@ -282,6 +282,18 @@ def home_tariff_detail(request):
             },
         )
 
+        # Tibber Zugangsdaten auf dem User speichern (falls mitgesendet)
+        user = request.user
+        user_updated = False
+        if "tibber_token" in request.data:
+            user.tibber_token = (request.data.get("tibber_token") or "").strip() or None
+            user_updated = True
+        if "tibber_home_id" in request.data:
+            user.tibber_home_id = (request.data.get("tibber_home_id") or "").strip() or None
+            user_updated = True
+        if user_updated:
+            user.save(update_fields=["tibber_token", "tibber_home_id"])
+
     # GET oder Rückgabe nach POST
     active_tariff = get_home_tariff(home, today)
     price_config = get_price_config(today)
@@ -307,6 +319,38 @@ def home_tariff_detail(request):
             "static_price_ct": round(float(active_tariff.static_price_eur_per_kwh) * 100, 2) if active_tariff and active_tariff.static_price_eur_per_kwh is not None else None,
             "valid_from": active_tariff.valid_from.isoformat() if active_tariff else today.isoformat(),
             "price_config": config_data,
+            "tibber_token": request.user.tibber_token or "",
+            "tibber_home_id": request.user.tibber_home_id or "",
+            "tibber_connected": bool(request.user.tibber_token and request.user.tibber_home_id),
+        }
+    )
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def fetch_tibber_homes_view(request):
+    """
+    Testet das Tibber-API-Token und ruft die verfügbaren Tibber-Homes ab.
+    """
+    token = request.data.get("tibber_token") or getattr(request.user, "tibber_token", None)
+    if not token:
+        return Response(
+            {"detail": "Bitte ein gültiges Tibber-API-Token angeben."},
+            status=400,
+        )
+
+    from integrations.services_tibber import get_tibber_homes
+    result = get_tibber_homes(token.strip())
+    if result.get("status") == "error":
+        return Response(
+            {"detail": result.get("error", "Fehler beim Abrufen der Tibber-Daten. Bitte Token prüfen.")},
+            status=400,
+        )
+
+    return Response(
+        {
+            "status": "ok",
+            "homes": result.get("homes", []),
         }
     )
 

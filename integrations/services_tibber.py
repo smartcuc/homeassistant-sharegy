@@ -13,30 +13,52 @@ from core.models import IntervalReading
 TIBBER_API_URL = "https://api.tibber.com/v1-beta/gql"
 
 
-##----temp-------
-def get_tibber_home(token):
+def get_tibber_homes(token):
     query = """
     {
       viewer {
         homes {
           id
           appNickname
+          address {
+            address1
+            postalCode
+            city
+          }
         }
       }
     }
     """
+    try:
+        resp = requests.post(
+            TIBBER_API_URL,
+            json={"query": query},
+            headers=tibber_headers(token),
+            timeout=10,
+        )
+        data = resp.json()
+        if "errors" in data and data["errors"]:
+            return {
+                "status": "error",
+                "error": data["errors"][0].get("message", "Tibber API-Fehler"),
+            }
+        homes = data.get("data", {}).get("viewer", {}).get("homes", [])
+        formatted = []
+        for h in homes:
+            addr = h.get("address") or {}
+            addr_str = f"{addr.get('address1', '')}, {addr.get('postalCode', '')} {addr.get('city', '')}".strip(" ,")
+            formatted.append({
+                "id": h.get("id"),
+                "name": h.get("appNickname") or addr_str or "Tibber Home",
+                "address": addr_str,
+            })
+        return {"status": "ok", "homes": formatted}
+    except Exception as e:
+        return {"status": "error", "error": str(e)}
 
-    resp = requests.post(
-        TIBBER_API_URL,
-        json={"query": query},
-        headers=tibber_headers(token),
-    )
 
-    data = resp.json()
-    return data
-
-
-###################################
+def get_tibber_home(token):
+    return get_tibber_homes(token)
 
 
 def tibber_headers(token):
