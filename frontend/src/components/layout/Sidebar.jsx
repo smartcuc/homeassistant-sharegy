@@ -9,8 +9,7 @@ import TrashBinModal from "../device/TrashBinModal";
 import { useTrashCount } from "../../hooks/useTrashDevices";
 
 export default function Sidebar() {
-    const { t } = useTranslation();
-    const query = useUnconfiguredDevices();
+    const { t, i18n } = useTranslation();
 
     const isLoaded = query?.isSuccess;
     const count = query?.data?.count ?? 0;
@@ -82,8 +81,7 @@ export default function Sidebar() {
                 },
             ],
         },
-    ], [t]);
-
+    ], [t, i18n.language]);
 
     return (
         <div className="w-64 bg-white border-r flex flex-col">

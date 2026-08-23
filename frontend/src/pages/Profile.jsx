@@ -86,10 +86,10 @@ export default function Profile() {
             {/* HEADER */}
             <div>
                 <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
-                    <span>👤</span> {t("settings.account", "Benutzerprofil")}
+                    <span>👤</span> {t("profile.title", "Benutzerprofil")}
                 </h1>
                 <p className="text-gray-500 mt-1">
-                    Persönliche Daten, Sprache und regionale Einstellungen.
+                    {t("profile.subtitle", "Persönliche Daten, Sprache und regionale Einstellungen.")}
                 </p>
             </div>
 
@@ -104,23 +104,23 @@ export default function Profile() {
                 {/* USER DATA */}
                 <Card>
                     <h2 className="text-base font-bold text-gray-900 mb-3 flex items-center gap-2">
-                        <span>📧</span> Kontoinformationen
+                        <span>📧</span> {t("profile.account_info", "Kontoinformationen")}
                     </h2>
                     <div className="space-y-3 text-sm">
                         <div>
-                            <span className="text-xs text-gray-400 block uppercase font-bold">E-Mail-Adresse</span>
+                            <span className="text-xs text-gray-400 block uppercase font-bold">{t("profile.email", "E-Mail-Adresse")}</span>
                             <span className="font-medium text-gray-800">{user?.email}</span>
                         </div>
                         <div>
-                            <span className="text-xs text-gray-400 block uppercase font-bold">Name</span>
+                            <span className="text-xs text-gray-400 block uppercase font-bold">{t("profile.name", "Name")}</span>
                             <span className="font-medium text-gray-800">
-                                {user?.first_name ? `${user.first_name} ${user.last_name || ""}` : "Nicht angegeben"}
+                                {user?.first_name ? `${user.first_name} ${user.last_name || ""}` : t("profile.not_specified", "Nicht angegeben")}
                             </span>
                         </div>
                         <div>
-                            <span className="text-xs text-gray-400 block uppercase font-bold">Haushalte</span>
+                            <span className="text-xs text-gray-400 block uppercase font-bold">{t("profile.homes", "Haushalte")}</span>
                             <span className="font-medium text-gray-800">
-                                {user?.homes?.length || 1} {user?.homes?.length === 1 ? "Haushalt" : "Haushalte"}
+                                {user?.homes?.length || 1} {user?.homes?.length === 1 ? t("profile.home_single", "Haushalt") : t("profile.home_multi", "Haushalte")}
                             </span>
                         </div>
                     </div>
@@ -129,10 +129,10 @@ export default function Profile() {
                 {/* LANGUAGE SELECTION */}
                 <Card>
                     <h2 className="text-base font-bold text-gray-900 mb-1 flex items-center gap-2">
-                        <span>🌐</span> {t("settings.language", "Sprache der Benutzeroberfläche")}
+                        <span>🌐</span> {t("profile.ui_language", "Sprache der Benutzeroberfläche")}
                     </h2>
                     <p className="text-xs text-gray-500 mb-4">
-                        Wähle deine bevorzugte Sprache. Die Änderung wird sofort aktiv.
+                        {t("profile.ui_language_desc", "Wähle deine bevorzugte Sprache. Die Änderung wird sofort aktiv.")}
                     </p>
 
                     <div className="flex flex-col gap-2.5">
@@ -162,7 +162,7 @@ export default function Profile() {
                                     </div>
                                     {isActive && (
                                         <span className="text-xs font-bold text-indigo-700 bg-white px-2 py-0.5 rounded-full border border-indigo-200">
-                                            Aktiv
+                                            {t("common.active", "Aktiv")}
                                         </span>
                                     )}
                                 </button>
@@ -176,10 +176,10 @@ export default function Profile() {
             {/* TIMEZONE SETTINGS */}
             <Card>
                 <h2 className="text-base font-bold text-gray-900 mb-1 flex items-center gap-2">
-                    <span>🕒</span> Zeitzone & Region
+                    <span>🕒</span> {t("profile.timezone_title", "Zeitzone & Region")}
                 </h2>
                 <p className="text-xs text-gray-500 mb-4">
-                    Wichtig für korrekte Zeitachsen in Diagrammen und stundengenaue Strompreis-Analysen.
+                    {t("profile.timezone_desc", "Wichtig für korrekte Zeitachsen in Diagrammen und stundengenaue Strompreis-Analysen.")}
                 </p>
 
                 <div className="max-w-md space-y-3">
@@ -188,7 +188,7 @@ export default function Profile() {
                         onChange={(e) => setTimezone(e.target.value)}
                         className="w-full border rounded-xl px-3.5 py-2.5 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     >
-                        <option value="">Bitte auswählen</option>
+                        <option value="">{t("profile.select_prompt", "Bitte auswählen")}</option>
                         {commonTimezones.map((tz) => (
                             <option key={tz} value={tz}>{tz}</option>
                         ))}
@@ -200,7 +200,7 @@ export default function Profile() {
                             onClick={() => setTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone)}
                             className="px-3.5 py-2 border rounded-xl text-xs font-semibold text-gray-700 hover:bg-gray-50 transition"
                         >
-                            Automatisch erkennen
+                            {t("common.auto_detect", "Automatisch erkennen")}
                         </button>
 
                         <button
@@ -209,7 +209,7 @@ export default function Profile() {
                             disabled={savingTimezone}
                             className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-xs transition"
                         >
-                            {savingTimezone ? "Speichere..." : "Zeitzone speichern"}
+                            {savingTimezone ? t("common.saving", "Speichere...") : t("profile.save_timezone", "Zeitzone speichern")}
                         </button>
                     </div>
                 </div>

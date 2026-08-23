@@ -28,13 +28,13 @@ export default function InterfacesPage() {
 
     async function handleRegeneratePassword() {
         const msg = t(
-            "settings.regenerate_confirm",
+            "interfaces.regenerate_confirm",
             "Möchtest du wirklich ein neues MQTT-Passwort generieren? Bestehende Geräte müssen anschließend mit dem neuen Passwort aktualisiert werden."
         );
         if (window.confirm(msg)) {
             try {
                 await regenerateMqttPassword();
-                alert(t("settings.regenerate_success", "Neues MQTT-Passwort erfolgreich generiert!"));
+                alert(t("interfaces.regenerate_success", "Neues MQTT-Passwort erfolgreich generiert!"));
             } catch {
                 alert("Fehler beim Generieren des neuen Passworts.");
             }
@@ -53,10 +53,10 @@ export default function InterfacesPage() {
             {/* HEADER */}
             <div>
                 <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                    <span>📡</span> {t("nav.mqtt_interfaces", "MQTT & Schnittstellen")}
+                    <span>📡</span> {t("interfaces.title", "MQTT & Schnittstellen")}
                 </h1>
                 <p className="text-sm text-gray-500 mt-1">
-                    Verwalte deine globalen IoT-Telemetrie-Zugangsdaten für MQTT und OpenTelemetry.
+                    {t("interfaces.subtitle", "Verwalte deine globalen IoT-Telemetrie-Zugangsdaten für MQTT und OpenTelemetry.")}
                 </p>
             </div>
 
@@ -69,10 +69,10 @@ export default function InterfacesPage() {
                         </div>
                         <div>
                             <h2 className="text-base font-bold text-gray-900">
-                                {t("settings.mqtt_title", "MQTT & Smart Home Schnittstelle")}
+                                {t("interfaces.title", "MQTT & Smart Home Schnittstelle")}
                             </h2>
                             <p className="text-xs text-gray-500">
-                                {t("settings.mqtt_desc", "Globale Zugangsdaten für ioBroker, Home Assistant, Node-RED, OTel & Shelly")}
+                                {t("interfaces.subtitle", "Globale Zugangsdaten für ioBroker, Home Assistant, Node-RED, OTel & Shelly")}
                             </p>
                         </div>
                     </div>
@@ -82,7 +82,7 @@ export default function InterfacesPage() {
                             onClick={() => setShowQR(true)}
                             className="px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-gray-700 text-xs font-semibold rounded-lg shadow-xs transition flex items-center gap-1.5"
                         >
-                            <span>📱</span> {t("settings.qr_button", "QR-Code")}
+                            <span>📱</span> {t("interfaces.qr_code", "QR-Code")}
                         </button>
                         <button
                             onClick={() => {
@@ -91,7 +91,7 @@ export default function InterfacesPage() {
                             }}
                             className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-xs transition flex items-center gap-1.5"
                         >
-                            {copiedKey === "all_mqtt" ? "✅ Kopiert!" : `📋 ${t("settings.copy_all", "Alle Daten kopieren")}`}
+                            {copiedKey === "all_mqtt" ? `✅ ${t("common.copied", "Kopiert!")}` : t("interfaces.copy_all", "📋 Alle Daten kopieren")}
                         </button>
                     </div>
                 </div>
@@ -99,7 +99,7 @@ export default function InterfacesPage() {
                 <div className="p-6 space-y-6">
                     {homeLoading ? (
                         <div className="text-sm text-gray-400 py-6 text-center animate-pulse">
-                            Lade Schnittstellendaten...
+                            {t("interfaces.loading", "Lade Schnittstellendaten...")}
                         </div>
                     ) : (
                         <>
@@ -107,14 +107,14 @@ export default function InterfacesPage() {
                             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                 <div className="bg-slate-50 border border-slate-200/80 p-3.5 rounded-xl">
                                     <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">
-                                        {t("settings.broker_host", "Broker Host")}
+                                        {t("interfaces.broker_host", "Broker Host")}
                                     </div>
                                     <div className="font-mono text-xs font-semibold text-gray-900 flex items-center justify-between">
                                         <span>{mqttHost}</span>
                                         <button
                                             onClick={() => safeCopy(mqttHost, "host")}
                                             className="text-gray-400 hover:text-indigo-600 text-xs ml-1"
-                                            title="Kopieren"
+                                            title={t("common.copy", "Kopieren")}
                                         >
                                             {copiedKey === "host" ? "✓" : "📋"}
                                         </button>
@@ -123,7 +123,7 @@ export default function InterfacesPage() {
 
                                 <div className="bg-slate-50 border border-slate-200/80 p-3.5 rounded-xl">
                                     <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">
-                                        {t("settings.port", "Port (TCP)")}
+                                        {t("interfaces.port", "Port (TCP)")}
                                     </div>
                                     <div className="font-mono text-xs font-semibold text-gray-900 flex items-center justify-between">
                                         <span>{mqttPort}</span>
@@ -135,14 +135,14 @@ export default function InterfacesPage() {
 
                                 <div className="bg-slate-50 border border-slate-200/80 p-3.5 rounded-xl">
                                     <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">
-                                        {t("settings.username", "Benutzername")}
+                                        {t("interfaces.username", "Benutzername")}
                                     </div>
                                     <div className="font-mono text-xs font-semibold text-gray-900 flex items-center justify-between">
                                         <span className="truncate">{mqttUser}</span>
                                         <button
                                             onClick={() => safeCopy(mqttUser, "user")}
                                             className="text-gray-400 hover:text-indigo-600 text-xs ml-1"
-                                            title="Kopieren"
+                                            title={t("common.copy", "Kopieren")}
                                         >
                                             {copiedKey === "user" ? "✓" : "📋"}
                                         </button>
@@ -151,7 +151,7 @@ export default function InterfacesPage() {
 
                                 <div className="bg-slate-50 border border-slate-200/80 p-3.5 rounded-xl">
                                     <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">
-                                        {t("settings.password", "Passwort")}
+                                        {t("interfaces.password", "Passwort")}
                                     </div>
                                     <div className="font-mono text-xs font-semibold text-gray-900 flex items-center justify-between">
                                         <span className="truncate">
@@ -168,7 +168,7 @@ export default function InterfacesPage() {
                                             <button
                                                 onClick={() => safeCopy(mqttPass, "pass")}
                                                 className="text-gray-400 hover:text-indigo-600 text-xs"
-                                                title="Kopieren"
+                                                title={t("common.copy", "Kopieren")}
                                             >
                                                 {copiedKey === "pass" ? "✓" : "📋"}
                                             </button>
@@ -180,7 +180,7 @@ export default function InterfacesPage() {
                             {/* BASE TOPIC BANNER */}
                             <div className="p-3.5 bg-indigo-50/60 border border-indigo-100 rounded-xl flex flex-wrap items-center justify-between gap-3 text-xs">
                                 <div>
-                                    <span className="text-gray-500 font-medium">{t("settings.base_topic", "Dein persönliches Basis-Topic:")} </span>
+                                    <span className="text-gray-500 font-medium">{t("interfaces.base_topic", "Dein persönliches Basis-Topic:")} </span>
                                     <code className="font-mono font-bold text-indigo-700 bg-white px-2 py-0.5 rounded border border-indigo-200">
                                         {baseTopic}
                                     </code>
@@ -190,7 +190,7 @@ export default function InterfacesPage() {
                                     disabled={isRegenerating}
                                     className="text-xs text-red-600 hover:text-red-700 font-semibold hover:underline flex items-center gap-1"
                                 >
-                                    <span>🔄</span> {isRegenerating ? "Generiere..." : t("settings.regenerate_btn", "Passwort neu generieren")}
+                                    <span>🔄</span> {isRegenerating ? t("common.loading", "Generiere...") : t("interfaces.regenerate_btn", "Passwort neu generieren")}
                                 </button>
                             </div>
 
@@ -198,17 +198,17 @@ export default function InterfacesPage() {
                             <div className="border border-slate-200 rounded-xl overflow-hidden">
                                 <div className="flex bg-slate-50 border-b border-slate-200 text-xs font-semibold overflow-x-auto">
                                     {[
-                                        { id: "iobroker", label: `🔧 ${t("settings.iobroker_guide", "ioBroker Anleitung")}` },
-                                        { id: "homeassistant", label: `🏠 ${t("settings.ha_guide", "Home Assistant")}` },
-                                        { id: "otel", label: "🔭 OpenTelemetry (OTel)" },
-                                        { id: "shelly", label: `⚡ ${t("settings.shelly_guide", "Shelly Web-UI")}` },
+                                        { id: "iobroker", label: t("interfaces.tab_iobroker", "🔧 ioBroker Anleitung") },
+                                        { id: "homeassistant", label: t("interfaces.tab_ha", "🏠 Home Assistant") },
+                                        { id: "otel", label: t("interfaces.tab_otel", "🔭 OpenTelemetry (OTel)") },
+                                        { id: "shelly", label: t("interfaces.tab_shelly", "⚡ Shelly Web-UI") },
                                     ].map((tab) => (
                                         <button
                                             key={tab.id}
                                             onClick={() => setGuideTab(tab.id)}
                                             className={`px-4 py-2.5 transition whitespace-nowrap ${guideTab === tab.id
-                                                    ? "bg-white text-indigo-600 border-b-2 border-indigo-600 font-bold"
-                                                    : "text-gray-500 hover:text-gray-900"
+                                                ? "bg-white text-indigo-600 border-b-2 border-indigo-600 font-bold"
+                                                : "text-gray-500 hover:text-gray-900"
                                                 }`}
                                         >
                                             {tab.label}

@@ -1,7 +1,3 @@
-/*
-# src/pages/dashboard/DashboardUser.jsx
-*/
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSettings } from "../../hooks/useSettings";
@@ -13,19 +9,15 @@ import EnergyChartModal from "../../features/energy/components/EnergyChartModal"
 import KPI from "../../components/ui/KPI";
 import KPISparklineECharts from "../../components/ui/KPISparklineECharts";
 import Card from "../../components/ui/Card";
-
-//import Button from "../../components/ui/Button";
-
 import useUserPreference from "../../hooks/useUserPreference";
-
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "../../api/client";
-
 import LiveEnergySankeyECharts from "../../features/energy/components/LiveEnergySankeyECharts";
-
+import { useTranslation } from "react-i18next";
 
 export default function DashboardUser() {
 
+    const { t } = useTranslation();
     const queryClient = useQueryClient();
     const [openSetup, setOpenSetup] = useState(false);
 
@@ -96,15 +88,15 @@ export default function DashboardUser() {
             </div>
             <div className="mb-6">
                 <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-                    Deine Energiezentrale ⚡
+                    {t("dashboard.title", "Deine Energiezentrale ⚡")}
                 </h1>
                 <p className="mt-1 text-sm text-gray-500">
-                    Alle wichtigen Energiedaten auf einen Blick.
+                    {t("dashboard.subtitle", "Alle wichtigen Energiedaten auf einen Blick.")}
                 </p>
             </div>
             <div className="mb-3">
-                <h2 className="text-sm font-semibold tracking-wide text-gray-500"> {/* uppercase */}
-                    Echtzeit-Status
+                <h2 className="text-sm font-semibold tracking-wide text-gray-500">
+                    {t("dashboard.realtime_status", "Echtzeit-Status")}
                 </h2>
             </div>
 
@@ -114,7 +106,7 @@ export default function DashboardUser() {
                     onClick={() =>
                         setActiveSystemChart({
                             metricKey: "load",
-                            displayName: "Hausbedarf",
+                            displayName: t("dashboard.load", "Hausbedarf"),
                             unit: "W",
                             color: "#2563eb",
                             currentValue: kpis.load,
@@ -124,10 +116,10 @@ export default function DashboardUser() {
                 >
 
                     <KPI
-                        label="Bedarf"
+                        label={t("dashboard.load_short", "Bedarf")}
                         value={
                             kpis.load != null
-                                ? kpis.load.toLocaleString("de-DE", {
+                                ? kpis.load.toLocaleString(undefined, {
                                     minimumFractionDigits: 2,
                                     maximumFractionDigits: 2,
                                 })
@@ -149,7 +141,7 @@ export default function DashboardUser() {
                     onClick={() =>
                         setActiveSystemChart({
                             metricKey: "pv",
-                            displayName: "PV-Erzeugung",
+                            displayName: t("dashboard.pv", "PV-Erzeugung"),
                             unit: "W",
                             color: "#f59e0b",
                             currentValue: kpis.pv,
@@ -159,10 +151,10 @@ export default function DashboardUser() {
                 >
 
                     <KPI
-                        label="Erzeugung"
+                        label={t("dashboard.pv_short", "Erzeugung")}
                         value={
                             kpis.pv != null
-                                ? kpis.pv.toLocaleString("de-DE", {
+                                ? kpis.pv.toLocaleString(undefined, {
                                     minimumFractionDigits: 2,
                                     maximumFractionDigits: 2,
                                 })
@@ -184,7 +176,7 @@ export default function DashboardUser() {
                     onClick={() =>
                         setActiveSystemChart({
                             metricKey: "grid",
-                            displayName: "Netzanschluss",
+                            displayName: t("dashboard.grid", "Netzanschluss"),
                             unit: "W",
                             color: "#10b981",
                             currentValue: kpis.grid,
@@ -197,12 +189,12 @@ export default function DashboardUser() {
                     <KPI
                         label={
                             (kpis.grid ?? 0) >= 0
-                                ? "Bezug"
-                                : "Einspeisung"
+                                ? t("dashboard.grid_import", "Bezug")
+                                : t("dashboard.grid_export", "Einspeisung")
                         }
                         value={
                             kpis.grid != null
-                                ? kpis.grid.toLocaleString("de-DE", {
+                                ? kpis.grid.toLocaleString(undefined, {
                                     minimumFractionDigits: 2,
                                     maximumFractionDigits: 2,
                                 })
@@ -227,7 +219,7 @@ export default function DashboardUser() {
                         onClick={() =>
                             setActiveSystemChart({
                                 metricKey: "battery",
-                                displayName: "Batteriespeicher",
+                                displayName: t("dashboard.battery", "Batteriespeicher"),
                                 unit: "W",
                                 color: "#34d399",
                                 currentValue: kpis.battery,
@@ -238,12 +230,12 @@ export default function DashboardUser() {
                         <KPI
                             label={
                                 (kpis.battery ?? 0) >= 0
-                                    ? "Entladung"
-                                    : "Ladung"
+                                    ? t("dashboard.battery_discharge", "Entladung")
+                                    : t("dashboard.battery_charge", "Ladung")
                             }
                             value={
                                 kpis.battery != null
-                                    ? Math.abs(kpis.battery).toLocaleString("de-DE", {
+                                    ? Math.abs(kpis.battery).toLocaleString(undefined, {
                                         minimumFractionDigits: 2,
                                         maximumFractionDigits: 2,
                                     })
@@ -266,7 +258,7 @@ export default function DashboardUser() {
                     onClick={() =>
                         setActiveSystemChart({
                             metricKey: "today",
-                            displayName: "Tagesverbrauch",
+                            displayName: t("energy.household_load", "Tagesverbrauch"),
                             unit: "kWh",
                             color: "#8b5cf6",
                             currentValue: kpis.today,
@@ -276,9 +268,9 @@ export default function DashboardUser() {
                 >
 
                     <KPI
-                        label="Tagesverbrauch"
+                        label={t("dashboard.today", "Heute")}
                         value={
-                            kpis.today?.toLocaleString("de-DE", {
+                            kpis.today?.toLocaleString(undefined, {
                                 minimumFractionDigits: 2,
                                 maximumFractionDigits: 2,
                             })
@@ -307,11 +299,11 @@ export default function DashboardUser() {
 
                         <div>
                             <h2 className="text-xl font-semibold text-gray-900">
-                                Energiefluss
+                                {t("dashboard.live_energy_flow", "Energiefluss (Live)")}
                             </h2>
 
                             <p className="text-sm text-gray-500">
-                                Aktuelle Verteilung von Erzeugung und Verbrauch.
+                                {t("energy.subtitle", "Aktuelle Verteilung von Erzeugung und Verbrauch.")}
                             </p>
                         </div>
 
@@ -340,7 +332,7 @@ export default function DashboardUser() {
                                         : "bg-white hover:bg-gray-50 border-gray-200"}
                                 `}
                             >
-                                🏢 Etagen
+                                🏢 {t("nav.floors", "Etagen")}
                             </button>
 
                             <button
@@ -369,7 +361,7 @@ export default function DashboardUser() {
                                         : "bg-white hover:bg-gray-50 border-gray-200"}
                                 `}
                             >
-                                🚪 Räume
+                                🚪 {t("structure.title", "Räume")}
                             </button>
 
                         </div>

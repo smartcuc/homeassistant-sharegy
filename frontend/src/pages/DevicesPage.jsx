@@ -9,6 +9,7 @@ import KPISparklineECharts from "../components/ui/KPISparklineECharts";
 import DeviceChartModal from "../components/device/DeviceChartModal";
 import DeviceSetupModal from "../components/device/DeviceSetupModal";
 import useUserPreference from "../hooks/useUserPreference";
+import { useTranslation } from "react-i18next";
 
 
 function ensureOrder(items, storedOrder) {
@@ -179,7 +180,7 @@ function DeviceCard({ device, onSelect, onEdit }) {
             <div className={`text-sm mb-2 ${roleStyle.text}`}>
                 {
                     config.is_grid_source
-                        ? "Netz"
+                        ? t("devices.role_grid", "Netz")
                         : (config.role?.label || "–")
                 }
             </div>
@@ -189,15 +190,15 @@ function DeviceCard({ device, onSelect, onEdit }) {
                     `${device.value} ${device.unit || ""}`
                 ) : device.status === "stale" ? (
                     <span className="text-gray-400">
-                        Keine aktuellen Daten
+                        {t("common.no_recent_data", "Keine aktuellen Daten")}
                     </span>
                 ) : device.status === "offline" ? (
                     <span className="text-gray-400">
-                        offline
+                        {t("common.offline", "Offline")}
                     </span>
                 ) : (
                     <span className="text-gray-400">
-                        Keine Daten
+                        {t("common.no_data", "Keine Daten")}
                     </span>
                 )}
             </div>
@@ -214,7 +215,7 @@ function DeviceCard({ device, onSelect, onEdit }) {
 
             {missing && (
                 <div className="text-xs text-yellow-700 mt-2">
-                    ⚠ Unvollständig konfiguriert
+                    {t("devices.incomplete_badge", "⚠ Unvollständig konfiguriert")}
                 </div>
             )}
         </div>
@@ -225,53 +226,54 @@ function DeviceCard({ device, onSelect, onEdit }) {
    PAGE
 ========================================================= */
 
-const statusOptions = [
-    {
-        key: "online",
-        icon: "🟢",
-        label: "Online",
-        title: "Nur Geräte mit aktuellen Daten",
-    },
-    {
-        key: "offline",
-        icon: "⚫",
-        label: "Offline",
-        title: "Geräte ohne aktuelle Daten",
-    },
-    {
-        key: "missing",
-        icon: "⚠️",
-        label: "Offen",
-        title: "Unvollständig konfigurierte Geräte",
-    },
-];
-
-const roleOptions = {
-    producer: {
-        icon: "☀️",
-        label: "Erzeuger",
-        title: "Energieerzeuger anzeigen",
-    },
-    consumer: {
-        icon: "⚡",
-        label: "Verbraucher",
-        title: "Energieverbraucher anzeigen",
-    },
-    battery: {
-        icon: "🔋",
-        label: "Speicher",
-        title: "Batteriespeicher anzeigen",
-    },
-    grid: {
-        icon: "🔌",
-        label: "Netz",
-        title: "Netzanschlüsse anzeigen",
-    },
-};
-
 export default function DevicesPage() {
 
+    const { t, i18n } = useTranslation();
     const queryClient = useQueryClient();
+
+    const statusOptions = useMemo(() => [
+        {
+            key: "online",
+            icon: "🟢",
+            label: t("devices.filter_online", "Online"),
+            title: t("devices.online_desc", "Nur Geräte mit aktuellen Daten"),
+        },
+        {
+            key: "offline",
+            icon: "⚫",
+            label: t("devices.filter_offline", "Offline"),
+            title: t("devices.offline_desc", "Geräte ohne aktuelle Daten"),
+        },
+        {
+            key: "missing",
+            icon: "⚠️",
+            label: t("devices.filter_missing", "Offen"),
+            title: t("devices.missing_desc", "Unvollständig konfigurierte Geräte"),
+        },
+    ], [t, i18n.language]);
+
+    const roleOptions = useMemo(() => ({
+        producer: {
+            icon: "☀️",
+            label: t("devices.role_producer", "Erzeuger"),
+            title: "Energieerzeuger anzeigen",
+        },
+        consumer: {
+            icon: "⚡",
+            label: t("devices.role_consumer", "Verbraucher"),
+            title: "Energieverbraucher anzeigen",
+        },
+        battery: {
+            icon: "🔋",
+            label: t("devices.role_battery", "Speicher"),
+            title: "Batteriespeicher anzeigen",
+        },
+        grid: {
+            icon: "🔌",
+            label: t("devices.role_grid", "Netz"),
+            title: "Netzanschlüsse anzeigen",
+        },
+    }), [t, i18n.language]);
 
     const [chartDevice, setChartDevice] = useState(null);
     const [modalMode, setModalMode] = useState(null);
@@ -487,11 +489,11 @@ export default function DevicesPage() {
         return filtered.reduce((acc, d) => {
 
             const floor = showFloors
-                ? (d.config?.floor?.name || "Ohne Etage")
-                : "Alle Geräte";
+                ? (d.config?.floor?.name || t("devices.no_floor", "Ohne Etage"))
+                : t("devices.filter_all", "Alle Geräte");
 
             const room = showRooms
-                ? (d.config?.room?.name || "Ohne Raum")
+                ? (d.config?.room?.name || t("devices.no_room", "Ohne Raum"))
                 : "__ALL__";
 
             acc[floor] = acc[floor] || {};
@@ -506,6 +508,8 @@ export default function DevicesPage() {
         filtered,
         showFloors,
         showRooms,
+        t,
+        i18n.language,
     ]);
 
     const allFloorIds = useMemo(() => {
@@ -619,7 +623,7 @@ export default function DevicesPage() {
         valuesQuery.isLoading ||
         settingsLoading
     ) {
-        return <div className="p-6">Lade Geräte…</div>;
+        return <div className="p-6">{t("common.loading", "Lade Geräte…")}</div>;
     }
 
     return (
@@ -629,7 +633,7 @@ export default function DevicesPage() {
             <div className="mb-3">
 
                 <input
-                    placeholder="🔍 Gerät suchen..."
+                    placeholder={t("devices.search_placeholder", "🔍 Gerät suchen...")}
                     value={filterText}
                     onChange={(e) => setFilterText(e.target.value)}
                     className="border px-3 py-2 rounded w-64"
@@ -744,7 +748,7 @@ export default function DevicesPage() {
                             : "bg-white hover:bg-gray-50 border-gray-200"}
                     `}
                 >
-                    🏢 Etagen
+                    🏢 {t("nav.floors", "Etagen")}
                 </button>
 
                 <button
@@ -767,7 +771,7 @@ export default function DevicesPage() {
                             : "bg-white hover:bg-gray-50 border-gray-200"}
                     `}
                 >
-                    🚪 Räume
+                    🚪 {t("structure.title", "Räume")}
                 </button>
 
             </div>
@@ -782,11 +786,11 @@ export default function DevicesPage() {
                     className="mb-6 p-4 rounded-lg border border-yellow-300 bg-yellow-50 flex items-center justify-between cursor-pointer hover:bg-yellow-100"
                 >
                     <div className="text-yellow-800 text-sm">
-                        ⚠ {unconfiguredDevices.length} Gerät(e) nicht vollständig konfiguriert
+                        ⚠ {t("devices.unconfigured_banner", { count: unconfiguredDevices.length, defaultValue: `${unconfiguredDevices.length} Gerät(e) nicht vollständig konfiguriert` })}
                     </div>
 
                     <span className="text-sm text-white bg-yellow-500 px-3 py-1 rounded">
-                        Jetzt konfigurieren
+                        {t("devices.configure_now", "Jetzt konfigurieren")}
                     </span>
                 </div>
             )}
