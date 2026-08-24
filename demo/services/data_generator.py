@@ -40,26 +40,28 @@ DEMO_EMAIL = "demo@sharegy.de"
 DEMO_USERNAME = "demo"
 
 
-def setup_demo_household():
+def setup_demo_household(target_user=None):
     """
     Erstellt ein eigenständiges, realistisches Prosumer-Demo-Zuhause
     inklusive Erzeuger-Konfiguration (GeneratorSystem/Strings) und 96h-Wetter/PV-Forecast.
+    Kann für einen beliebigen Benutzer (oder standardmäßig den Demo-User) aufgerufen werden.
     """
-    demo_user, _ = User.objects.get_or_create(
-        email=DEMO_EMAIL,
-        defaults={
-            "username": DEMO_USERNAME,
-            "is_active": True,
-        },
-    )
+    if target_user is None:
+        target_user, _ = User.objects.get_or_create(
+            email=DEMO_EMAIL,
+            defaults={
+                "username": DEMO_USERNAME,
+                "is_active": True,
+            },
+        )
 
-    # 1. Altes Demo-Home sauber bereinigen
-    demo_user.homes.all().delete()
+    # 1. Altes Home sauber bereinigen
+    target_user.homes.all().delete()
 
     # 2. Neues Prosumer-Demo-Haus erstellen
     demo_home = Home.objects.create(
-        user=demo_user,
-        name="Sharegy Demo Smart Home",
+        user=target_user,
+        name=f"Sharegy Smart Home ({target_user.username})",
         city="Köln",
         postal_code="50667",
         latitude=50.9375,
@@ -329,7 +331,7 @@ def generate_demo_historical_metrics(demo_home=None, days: int = 30):
     return len(records_to_create)
 
 
-def generate_demo_telemetry(now: datetime = None) -> dict:
+def generate_demo_telemetry(now: datetime = None, target_user=None) -> dict:
     """
     Erzeugt physikalisch realistische, dynamische Messwerte für das Demo-Haus:
     - Sonnengang & PV-Erzeugung (0 W nachts, Sinus-Glockenkurve tagsüber)
@@ -341,13 +343,18 @@ def generate_demo_telemetry(now: datetime = None) -> dict:
     if now is None:
         now = timezone.now()
 
-    demo_home = Home.objects.filter(user__email=DEMO_EMAIL).first()
-    if not demo_home:
-        demo_home = setup_demo_household()
+    if target_user is not None:
+        demo_home = Home.objects.filter(user=target_user).first()
+        if not demo_home:
+            demo_home = setup_demo_household(target_user=target_user)
+    else:
+        demo_home = Home.objects.filter(user__email=DEMO_EMAIL).first()
+        if not demo_home:
+            demo_home = setup_demo_household()
 
     devices = {d.identifier: d for d in demo_home.devices.all()}
     if not devices:
-        demo_home = setup_demo_household()
+        demo_home = setup_demo_household(target_user=target_user)
         devices = {d.identifier: d for d in demo_home.devices.all()}
 
     # Lokale Stunde (0.00 bis 23.99)

@@ -63,6 +63,20 @@ def energy_balance(request):
     return Response(data)
 
 
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def seed_demo_data(request):
+    from demo.services.data_generator import setup_demo_household, generate_demo_telemetry
+    home = setup_demo_household(target_user=request.user)
+    telemetry = generate_demo_telemetry(target_user=request.user)
+    return Response({
+        "status": "ok",
+        "message": f"Demodaten & 30-Tage Historie erfolgreich für '{request.user.username}' eingerichtet.",
+        "devices": home.devices.count(),
+        "telemetry": telemetry,
+    })
+
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def chart_data(request):
