@@ -1,5 +1,7 @@
 {
   "python.defaultInterpreterPath": "venv\\Scripts\\python.exe",
   "python.terminal.activateEnvironment": true,
-  "editor.formatOnSave": true
+  "editor.formatOnSave": true,
+  "terminal.integrated.enableMultiLinePasteWarning": "always",
+  "gitlens.ai.defaultAgent": ""
 }

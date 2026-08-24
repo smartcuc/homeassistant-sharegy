@@ -432,6 +432,19 @@ def device_dashboard_values(request):
                         round(float(v), 2) for v in reversed(recent_raw) if v is not None
                     ]
 
+    all_latest = list(
+        DeviceLatestMetric.objects.filter(device_id__in=device_ids).values(
+            "device_id", "metric_key", "value", "unit", "timestamp"
+        )
+    )
+    device_metrics_map = defaultdict(dict)
+    for row in all_latest:
+        device_metrics_map[row["device_id"]][row["metric_key"]] = {
+            "value": round(float(row["value"]), 2) if row["value"] is not None else None,
+            "unit": row["unit"] or "",
+            "timestamp": row["timestamp"].isoformat() if row["timestamp"] else None,
+        }
+
     result = []
 
     for d in devices:
@@ -450,6 +463,7 @@ def device_dashboard_values(request):
                 "value": values.get(d.id),
                 "unit": metric.unit if metric else "",
                 "sparkline": sparkline_pts,
+                "metrics": device_metrics_map.get(d.id, {}),
             }
         )
 

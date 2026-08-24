@@ -8,6 +8,10 @@ import { apiFetch } from "../api/client";
 import KPISparklineECharts from "../components/ui/KPISparklineECharts";
 import DeviceChartModal from "../components/device/DeviceChartModal";
 import DeviceSetupModal from "../components/device/DeviceSetupModal";
+import AddDeviceModal from "../components/device/AddDeviceModal";
+import RemoveDevicesModal from "../components/device/RemoveDevicesModal";
+import TrashBinModal from "../components/device/TrashBinModal";
+import { useTrashCount } from "../hooks/useTrashDevices";
 import useUserPreference from "../hooks/useUserPreference";
 import { useTranslation } from "react-i18next";
 
@@ -99,7 +103,7 @@ function getRoleColor(config) {
 /* =========================================================
    DEVICE CARD
 ========================================================= */
-function DeviceCard({ device, onSelect, onEdit }) {
+function DeviceCard({ device, onSelect, onEdit, onDelete }) {
 
     const { t } = useTranslation();
     const config = device.config || {};
@@ -163,18 +167,30 @@ function DeviceCard({ device, onSelect, onEdit }) {
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                     <button
                         onClick={(e) => {
                             e.stopPropagation();
                             onEdit(device);
                         }}
-                        className="text-gray-400 hover:text-gray-600"
+                        className="text-gray-400 hover:text-gray-600 p-1 rounded hover:bg-gray-100"
+                        title={t("devices.setup_title", "Konfigurieren")}
                     >
                         ⚙️
                     </button>
 
-                    <div className={`w-3 h-3 rounded-full ${isOnline ? "bg-green-500" : "bg-gray-300"}`} />
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onDelete(device);
+                        }}
+                        className="text-gray-400 hover:text-rose-600 p-1 rounded hover:bg-gray-100"
+                        title={t("nav.remove_device", "In den Papierkorb verschieben")}
+                    >
+                        🗑️
+                    </button>
+
+                    <div className={`w-2.5 h-2.5 rounded-full ml-1 ${isOnline ? "bg-green-500" : "bg-gray-300"}`} />
                 </div>
             </div>
 
@@ -229,7 +245,7 @@ function DeviceCard({ device, onSelect, onEdit }) {
 
 export default function DevicesPage() {
 
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
     const queryClient = useQueryClient();
 
     const statusOptions = useMemo(() => [
@@ -251,7 +267,7 @@ export default function DevicesPage() {
             label: t("devices.filter_missing", "Offen"),
             title: t("devices.missing_desc", "Unvollständig konfigurierte Geräte"),
         },
-    ], [t, i18n.language]);
+    ], [t]);
 
     const roleOptions = useMemo(() => ({
         producer: {
@@ -274,11 +290,16 @@ export default function DevicesPage() {
             label: t("devices.role_grid", "Netz"),
             title: "Netzanschlüsse anzeigen",
         },
-    }), [t, i18n.language]);
+    }), [t]);
 
     const [chartDevice, setChartDevice] = useState(null);
     const [modalMode, setModalMode] = useState(null);
     const [editingDevice, setEditingDevice] = useState(null);
+    const [openAddDevice, setOpenAddDevice] = useState(false);
+    const [openRemoveDevice, setOpenRemoveDevice] = useState(false);
+    const [openTrashBin, setOpenTrashBin] = useState(false);
+    const trashQuery = useTrashCount();
+    const trashCount = trashQuery?.data?.count ?? 0;
 
     function handleDeviceUpdated(device) {
 
@@ -288,6 +309,33 @@ export default function DevicesPage() {
                 d.id === device.id ? device : d
             ) || []
         );
+    }
+
+    async function handleQuickDelete(device) {
+        const confirmed = window.confirm(
+            t("devices.confirm_trash_single", {
+                name: device.display_name || device.identifier,
+                defaultValue: `Gerät "${device.display_name || device.identifier}" in den Papierkorb verschieben?`
+            })
+        );
+        if (!confirmed) return;
+
+        try {
+            await apiFetch("/api/devices/remove/", {
+                method: "POST",
+                body: JSON.stringify({
+                    device_ids: [device.id],
+                }),
+            });
+            await Promise.all([
+                queryClient.invalidateQueries({ queryKey: ["devices"] }),
+                queryClient.invalidateQueries({ queryKey: ["device-trash"] }),
+                queryClient.invalidateQueries({ queryKey: ["trash-count"] }),
+                queryClient.invalidateQueries({ queryKey: ["unconfigured-devices"] }),
+            ]);
+        } catch (err) {
+            console.error("Failed to trash device", err);
+        }
     }
 
     const [filterText, setFilterText] = useState("");
@@ -510,7 +558,6 @@ export default function DevicesPage() {
         showFloors,
         showRooms,
         t,
-        i18n.language,
     ]);
 
     const allFloorIds = useMemo(() => {
@@ -628,7 +675,52 @@ export default function DevicesPage() {
     }
 
     return (
-        <div className="p-6 max-w-6xl">
+        <div className="p-6 max-w-6xl space-y-4">
+
+            {/* TOP ACTION HEADER */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                        <span>📟</span> {t("devices.title", "Geräteübersicht")}
+                    </h1>
+                    <p className="text-sm text-gray-500 mt-1">
+                        {t("devices.subtitle", "Verwalte und überwache alle angeschlossenen Sensoren und Aktoren.")}
+                    </p>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                    <button
+                        onClick={() => setOpenTrashBin(true)}
+                        className="px-3.5 py-2 rounded-xl border border-gray-200 hover:bg-gray-50 text-sm font-medium text-gray-700 flex items-center gap-1.5 transition"
+                        title={t("nav.trash_bin", "Papierkorb")}
+                    >
+                        <span>♻️</span>
+                        <span>{t("nav.trash_bin", "Papierkorb")}</span>
+                        {trashCount > 0 && (
+                            <span className="px-1.5 py-0.5 rounded-full bg-rose-100 text-rose-700 text-xs font-bold">
+                                {trashCount}
+                            </span>
+                        )}
+                    </button>
+
+                    <button
+                        onClick={() => setOpenRemoveDevice(true)}
+                        className="px-3.5 py-2 rounded-xl border border-gray-200 hover:bg-rose-50 hover:border-rose-200 text-sm font-medium text-gray-700 hover:text-rose-600 flex items-center gap-1.5 transition"
+                        title={t("nav.remove_device", "Geräte entfernen")}
+                    >
+                        <span>🗑️</span>
+                        <span>{t("nav.remove_device", "Gerät entfernen")}</span>
+                    </button>
+
+                    <button
+                        onClick={() => setOpenAddDevice(true)}
+                        className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold shadow-xs flex items-center gap-1.5 transition"
+                    >
+                        <span>➕</span>
+                        <span>{t("nav.add_device", "Neues Gerät")}</span>
+                    </button>
+                </div>
+            </div>
 
             {/* FILTER BAR */}
             <div className="mb-3">
@@ -833,6 +925,7 @@ export default function DevicesPage() {
                                                         setEditingDevice(dev);
                                                         setModalMode("single");
                                                     }}
+                                                    onDelete={handleQuickDelete}
                                                 />
                                             ))}
                                     </div>
@@ -860,6 +953,30 @@ export default function DevicesPage() {
                     onClose={() => setChartDevice(null)}
                 />
             )}
+
+            <AddDeviceModal
+                open={openAddDevice}
+                onClose={() => setOpenAddDevice(false)}
+                onCreated={() => {
+                    devicesQuery.refetch();
+                    valuesQuery.refetch();
+                }}
+            />
+
+            <RemoveDevicesModal
+                open={openRemoveDevice}
+                onClose={() => setOpenRemoveDevice(false)}
+            />
+
+            <TrashBinModal
+                open={openTrashBin}
+                onClose={() => setOpenTrashBin(false)}
+                onChanged={() => {
+                    devicesQuery.refetch();
+                    valuesQuery.refetch();
+                    trashQuery.refetch();
+                }}
+            />
 
         </div>
     );

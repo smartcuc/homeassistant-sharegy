@@ -8,6 +8,8 @@ Dieses Verzeichnis enthält detaillierte Protokolle und Änderungsberichte zu de
 
 | Datum | Titel | Bereich | Dokument |
 |---|---|---|---|
+| **24.08.2026** | **Sharegy Enterprise SaaS Blueprint & Architecture Guide** | Enterprise, VPP & B2B | [📄 `2026-08-24_enterprise_saas_blueprint.md`](./2026-08-24_enterprise_saas_blueprint.md) |
+| **23.08.2026** | **Backend-Stammdaten, CMS & Mehrsprachigkeits-Konzept** | i18n, CMS & Master Data | [📄 `2026-08-23_backend_data_i18n_concept.md`](./2026-08-23_backend_data_i18n_concept.md) |
 | **23.08.2026** | **MQTT-Zugangsdaten-Hub, SI-Einheiten & Multi-Language (i18n)** | Settings, i18n & Core | [📄 `2026-08-23_mqtt_hub_and_i18n.md`](./2026-08-23_mqtt_hub_and_i18n.md) |
 | **23.08.2026** | **Smarte Geräte-Anbindung & Onboarding-Assistent (AddDeviceModal)** | Frontend UX & Ingest | [📄 `2026-08-23_device_onboarding_concept.md`](./2026-08-23_device_onboarding_concept.md) |
 | **23.08.2026** | **Überarbeitung & Bereinigung des `docs/`-Verzeichnisses** | System-Dokumentation | [📄 `2026-08-23_docs_restructuring.md`](./2026-08-23_docs_restructuring.md) |

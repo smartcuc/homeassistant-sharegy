@@ -1,26 +1,20 @@
+/*
+# src/components/layout/Sidebar.jsx
+*/
+
 import { NavLink } from "react-router-dom";
 import { useUnconfiguredDevices } from "../../hooks/useUnconfiguredDevices";
 import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import DeviceSetupModal from "../device/DeviceSetupModal";
-import AddDeviceModal from "../device/AddDeviceModal";
-import RemoveDevicesModal from "../device/RemoveDevicesModal";
-import TrashBinModal from "../device/TrashBinModal";
-import { useTrashCount } from "../../hooks/useTrashDevices";
 
 export default function Sidebar() {
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
     const query = useUnconfiguredDevices();
 
     const isLoaded = query?.isSuccess;
     const count = query?.data?.count ?? 0;
     const [openSetup, setOpenSetup] = useState(false);
-    const [openAddDevice, setOpenAddDevice] = useState(false);
-    const [openRemoveDevice, setOpenRemoveDevice] = useState(false);
-    const [openTrashBin, setOpenTrashBin] = useState(false);
-
-    const trashQuery = useTrashCount();
-    const trashCount = trashQuery?.data?.count ?? 0;
 
     const sections = useMemo(() => [
         {
@@ -30,80 +24,52 @@ export default function Sidebar() {
             ],
         },
         {
-            title: t("nav.energy", "Energy"),
+            title: `📊 ${t("nav.analytics", "Analysen & Historie")}`,
             items: [
-                { name: t("nav.overview", "Overview"), path: "/app/energy", icon: "⚡" },
+                { name: t("energy.energy_balance", "Energiebilanz"), path: "/app/energy", icon: "⚡" },
+                { name: t("nav.solar_forecast", "Solar-Prognose"), path: "/app/solarforecast", icon: "☀️" },
+                { name: t("nav.metrics", "Messwert-Explorer"), path: "/app/metrics", icon: "📈" },
             ],
         },
         {
-            title: t("nav.devices", "Devices"),
+            title: `🏡 ${t("nav.assets_group", "Anlagen & Gebäude")}`,
             items: [
-                { name: t("nav.all_devices", "All Devices"), path: "/app/devices", icon: "📟" },
-                { name: t("nav.add_device", "Add Device"), action: "add_device", icon: "➕" },
-                { name: t("nav.remove_device", "Remove Device"), action: "remove_device", icon: "🗑️" },
-                { name: t("nav.trash_bin", "Trash Bin"), action: "trash_bin", icon: "♻️" },
+                {
+                    name: t("nav.all_devices", "Geräte"),
+                    path: "/app/devices",
+                    icon: "📟",
+                    badge: count > 0 ? count : null,
+                },
+                { name: t("nav.producers", "Erzeugeranlagen"), path: "/app/producers", icon: "☀️" },
+                { name: t("nav.floors", "Etagen & Räume"), path: "/app/structure", icon: "🏢" },
             ],
         },
         {
-            title: `📡 ${t("nav.monitoring", "Monitoring")}`,
+            title: `⚙️ ${t("nav.settings_group", "System & Tarife")}`,
             items: [
-                { name: t("nav.floors", "Floors"), path: "/app/structure", icon: "🏡" },
+                { name: t("nav.tariffs", "Strompreise & Tarife"), path: "/app/tariff", icon: "💶" },
+                { name: t("nav.mqtt_interfaces", "Schnittstellen & MQTT"), path: "/app/interfaces", icon: "📡" },
+                { name: t("nav.app_settings", "Einstellungen"), path: "/app/settings", icon: "⚙️" },
             ],
         },
-        {
-            title: `📊 ${t("nav.analytics", "Analytics")}`,
-            items: [
-                { name: t("nav.solar_forecast", "Solar Forecast"), path: "/app/solarforecast", icon: "☀️" },
-                { name: t("nav.metrics", "Metrics"), path: "/app/metrics", icon: "📊" },
-            ],
-        },
-        {
-            title: `⚙️ ${t("nav.settings_group", "Einstellungen")}`,
-            items: [
-                {
-                    name: t("nav.producers", "Erzeuger"),
-                    path: "/app/producers",
-                    icon: "☀️",
-                },
-                {
-                    name: t("nav.tariffs", "Strompreise & Tarife"),
-                    path: "/app/tariff",
-                    icon: "💶",
-                },
-                {
-                    name: t("nav.mqtt_interfaces", "MQTT & Schnittstellen"),
-                    path: "/app/interfaces",
-                    icon: "📡",
-                },
-                {
-                    name: t("nav.app_settings", "App-Einstellungen"),
-                    path: "/app/settings",
-                    icon: "⚙️",
-                },
-            ],
-        },
-    ], [t, i18n.language]);
+    ], [t, count]);
 
     return (
-        <div className="w-64 bg-white border-r flex flex-col">
-
+        <div className="w-64 bg-white border-r flex flex-col shrink-0">
             {/* ✅ Logo */}
             <div className="h-14 flex items-center px-4 border-b">
-                <span className="font-bold text-lg bg-gradient-to-r from-indigo-500 to-purple-600 text-transparent bg-clip-text">
-                    ⚡ Sharegy
+                <span className="font-bold text-lg bg-gradient-to-r from-indigo-500 to-purple-600 text-transparent bg-clip-text flex items-center gap-1.5">
+                    <span>⚡</span> <span>Sharegy</span>
                 </span>
             </div>
 
             {/* ✅ Navigation */}
-            <div className="flex-1 overflow-auto p-3 space-y-4">
-
-
+            <div className="flex-1 overflow-y-auto p-3 space-y-5">
                 {sections.map((section, idx) => (
                     <div key={idx}>
-
                         {/* Section Title */}
                         {section.title && (
-                            <div className="text-xs text-gray-400 uppercase px-2 mb-1">
+                            <div className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider px-2.5 mb-1.5">
                                 {section.title}
                             </div>
                         )}
@@ -111,108 +77,47 @@ export default function Sidebar() {
                         {/* Items */}
                         <div className="space-y-1">
                             {section.items.map((item) => (
+                                <NavLink
+                                    key={item.path}
+                                    to={item.path}
+                                    className={({ isActive }) =>
+                                        `flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium transition ${isActive
+                                            ? "bg-indigo-50 text-indigo-700 font-semibold shadow-2xs"
+                                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                                        }`
+                                    }
+                                >
+                                    <div className="flex items-center gap-2.5 truncate">
+                                        <span className="text-base">{item.icon}</span>
+                                        <span className="truncate">{item.name}</span>
+                                    </div>
 
-                                item.action === "add_device" ? (
-
-                                    <button
-                                        onClick={() => setOpenAddDevice(true)}  // ✅ HIER    key="add"
-                                        className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded w-full text-left"
-                                    >
-                                        <span>{item.icon}</span>
-                                        {item.name}
-                                    </button>
-
-                                ) : item.action === "remove_device" ? (
-
-                                    <button
-                                        key="remove"
-                                        onClick={() => setOpenRemoveDevice(true)}
-                                        className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded w-full text-left"
-                                    >
-                                        <span>{item.icon}</span>
-                                        {item.name}
-                                    </button>
-
-                                ) : item.action === "trash_bin" ? (
-                                    <button
-                                        key="trash"
-                                        onClick={() => setOpenTrashBin(true)}
-                                        className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded w-full text-left"
-                                    >
-
-                                        <span>{item.icon}</span>
-
-                                        <span>{item.name}</span>
-
-                                        {trashCount > 0 && (
-                                            <span className="ml-auto text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full">
-                                                {trashCount}
-                                            </span>
-                                        )}
-                                    </button>
-                                ) : (
-                                    <NavLink
-                                        key={item.path}
-                                        to={item.path}
-                                        className={({ isActive }) =>
-                                            `flex items-center gap-2 px-3 py-2 rounded text-sm transition ${isActive
-                                                ? "bg-indigo-100 text-indigo-700"
-                                                : "text-gray-600 hover:bg-gray-100"
-                                            }`
-                                        }
-                                    >
-                                        <span>{item.icon}</span>
-                                        <span>{item.name}</span>
-
-                                        {/* ✅ Badge */}
-                                        {item.path === "/app/devices" && isLoaded && count > 0 && (
-
-                                            <button
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    e.stopPropagation();
-                                                    setOpenSetup(true);
-                                                }}
-                                                className="ml-auto text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full hover:bg-yellow-200"
-                                            >
-                                                {count}
-                                            </button>
-
-                                        )}
-
-                                    </NavLink>
-
-                                )
+                                    {/* Unconfigured Count Badge */}
+                                    {item.badge && isLoaded && (
+                                        <button
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                setOpenSetup(true);
+                                            }}
+                                            title="Unkonfigurierte Geräte einrichten"
+                                            className="text-[11px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full hover:bg-amber-200 transition"
+                                        >
+                                            {item.badge}
+                                        </button>
+                                    )}
+                                </NavLink>
                             ))}
                         </div>
-
                     </div>
                 ))}
-
             </div>
 
-            {/* ✅ MODAL */}
+            {/* ✅ MODAL FOR UNCONFIGURED DEVICES */}
             <DeviceSetupModal
                 open={openSetup}
                 onClose={() => setOpenSetup(false)}
             />
-
-            <AddDeviceModal
-                open={openAddDevice}
-                onClose={() => setOpenAddDevice(false)}
-            />
-
-            <RemoveDevicesModal
-                open={openRemoveDevice}
-                onClose={() => setOpenRemoveDevice(false)}
-            />
-
-            <TrashBinModal
-                key={openTrashBin ? "open" : "closed"}
-                open={openTrashBin}
-                onClose={() => setOpenTrashBin(false)}
-            />
-
         </div>
     );
 }
