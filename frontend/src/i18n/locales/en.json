@@ -216,8 +216,8 @@
     "tilt_placeholder": "Tilt Angle (°)"
   },
   "energy": {
-    "title": "Energy Dashboard",
-    "subtitle": "Detailed analysis of power flows, generation, and consumption.",
+    "title": "Energy Balance & Analysis",
+    "subtitle": "Detailed consumption, volume, and cost analysis across time periods.",
     "solar_production": "Solar Generation",
     "household_load": "Household Load",
     "grid_import": "Grid Import",
@@ -227,7 +227,23 @@
     "autarky": "Self-Sufficiency",
     "self_consumption": "Self-Consumption Rate",
     "energy_balance": "Energy Balance",
-    "distribution": "Distribution"
+    "distribution": "Distribution",
+    "submeters_title": "Virtual Meters & Sub-Metering",
+    "submeters_subtitle": "Breakdown of total household consumption by individual appliance and solar coverage.",
+    "period_today": "Today",
+    "period_7d": "Last 7 Days",
+    "period_30d": "Last 30 Days",
+    "period_year": "This Year",
+    "solar_share": "Solar Power",
+    "grid_share": "Grid Power",
+    "net_benefit": "Financial Benefit",
+    "co2_saved": "CO₂ Saved",
+    "breakdown_title": "Consumption Breakdown",
+    "generation_vs_load": "Generation vs. Consumption",
+    "residual_meter": "Residual Household Demand",
+    "direct_use": "Direct Consumption",
+    "cost_remaining": "Grid Cost",
+    "savings_solar": "Solar Savings"
   },
   "interfaces": {
     "title": "MQTT & Interfaces",

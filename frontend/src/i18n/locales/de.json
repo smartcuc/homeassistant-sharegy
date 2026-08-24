@@ -216,8 +216,8 @@
     "tilt_placeholder": "Neigung (°)"
   },
   "energy": {
-    "title": "Energie-Dashboard",
-    "subtitle": "Detaillierte Analyse von Energieflüssen, Erzeugung und Verbrauch.",
+    "title": "Energiebilanz & Analyse",
+    "subtitle": "Detaillierte Mengen-, Verbrauchs- und Kostenanalyse nach Zeiträumen.",
     "solar_production": "Solarerzeugung",
     "household_load": "Hausverbrauch",
     "grid_import": "Netzbezug",
@@ -225,9 +225,25 @@
     "battery_charge": "Batterieladung",
     "battery_discharge": "Batterieentladung",
     "autarky": "Autarkiegrad",
-    "self_consumption": "Eigenverbrauch",
+    "self_consumption": "Eigenverbrauchsquote",
     "energy_balance": "Energiebilanz",
-    "distribution": "Verteilung"
+    "distribution": "Verteilung",
+    "submeters_title": "Virtuelle Zähler & Sub-Metering",
+    "submeters_subtitle": "Aufschlüsselung des gesamten Hausverbrauchs nach Verbrauchern und solarem Deckungsgrad.",
+    "period_today": "Heute",
+    "period_7d": "Letzte 7 Tage",
+    "period_30d": "Letzte 30 Tage",
+    "period_year": "Dieses Jahr",
+    "solar_share": "Solarstrom",
+    "grid_share": "Netzstrom",
+    "net_benefit": "Finanzieller Vorteil",
+    "co2_saved": "CO₂ eingespart",
+    "breakdown_title": "Verbrauchsaufteilung",
+    "generation_vs_load": "Erzeugung vs. Verbrauch",
+    "residual_meter": "Restlicher Hausverbrauch",
+    "direct_use": "Direktverbrauch",
+    "cost_remaining": "Netzkosten",
+    "savings_solar": "Solar-Ersparnis"
   },
   "interfaces": {
     "title": "MQTT & Schnittstellen",

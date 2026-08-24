@@ -4,8 +4,15 @@
 
 from django.urls import path
 from .views_fake import fake_dashboard
-from .views import dashboard_me, configure_device, chart_data
-from .views import export_chart_xlsx, export_chart_csv, export_chart_pdf
+from .views import (
+    dashboard_me,
+    configure_device,
+    chart_data,
+    energy_balance,
+    export_chart_xlsx,
+    export_chart_csv,
+    export_chart_pdf,
+)
 
 urlpatterns = [
     path("fake-dashboard/", fake_dashboard),
@@ -14,6 +21,7 @@ urlpatterns = [
 
 urlpatterns += [
     path("dashboard/me/", dashboard_me),
+    path("balance/", energy_balance),
     path("chart/", chart_data),
     path("chart/export/xlsx/", export_chart_xlsx),
     path("chart/export/csv/", export_chart_csv),

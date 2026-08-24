@@ -14,6 +14,7 @@ from django.db.models import Q
 from devices.models import Device
 
 from energy.services.energy import get_energy_data
+from energy.services.balance import get_energy_balance
 from energy.services.charts import (get_chart_data,)
 from energy.ems.models import EMSSignalSource
 
@@ -51,6 +52,14 @@ SHAREGY_TEXT = colors.HexColor("#374151")
 @permission_classes([IsAuthenticated])
 def dashboard_me(request):
     data = get_energy_data(request.user)
+    return Response(data)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def energy_balance(request):
+    period = request.GET.get("period", "today")
+    data = get_energy_balance(request.user, period=period)
     return Response(data)
 
 
