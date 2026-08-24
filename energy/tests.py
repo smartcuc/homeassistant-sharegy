@@ -85,3 +85,37 @@ class EMSSignalServiceTest(TestCase):
         self.assertEqual(signals["pv"]["production"], 0)
         self.assertEqual(signals["grid"]["import"], 0)
         self.assertEqual(signals["grid"]["export"], 0)
+
+
+class EnergyBalanceAPITest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="testbalanceuser",
+            email="balance@example.com",
+            password="testpassword123",
+        )
+        self.client.force_login(self.user)
+
+    def test_energy_balance_empty_user(self):
+        response = self.client.get("/api/energy/balance/?period=today")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIn("kpis", data)
+        self.assertIn("submeters", data)
+        self.assertIn("charts", data)
+
+    def test_energy_balance_seed_and_calculate(self):
+        seed_resp = self.client.post("/api/energy/seed-demo/")
+        self.assertEqual(seed_resp.status_code, 200)
+        self.assertEqual(seed_resp.json()["status"], "ok")
+
+        for p in ["today", "7d", "30d", "year"]:
+            resp = self.client.get(f"/api/energy/balance/?period={p}")
+            self.assertEqual(resp.status_code, 200)
+            data = resp.json()
+            self.assertIn("kpis", data)
+            self.assertGreater(data["kpis"]["pv_generation_kwh"], 0)
+            self.assertGreater(data["kpis"]["house_consumption_kwh"], 0)
+            self.assertGreater(len(data["submeters"]), 0)
+            for sm in data["submeters"]:
+                self.assertTrue(bool(sm["name"]))

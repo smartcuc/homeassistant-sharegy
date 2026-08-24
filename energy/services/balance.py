@@ -12,6 +12,13 @@ from devices.models import Device, DeviceMetric1h, DeviceMetric5m, DeviceLatestM
 from energy.ems.models import EMSSignalSource
 
 
+def get_device_name(dev):
+    cfg = getattr(dev, "config", None)
+    if cfg and cfg.name:
+        return cfg.name
+    return getattr(dev, "display_name", None) or dev.identifier
+
+
 def get_consumer_icon_and_category(device_name, role_key):
     name_lower = (device_name or "").lower()
     if any(k in name_lower for k in ["wallbox", "easee", "ev", "auto", "ladestation", "charger"]):
@@ -193,11 +200,12 @@ def get_energy_balance(user, period="today"):
 
         running_measured_kwh += dev_kwh
         share_pct = round((dev_kwh / total_house_consumption_kwh * 100.0), 1) if total_house_consumption_kwh > 0 else 0.0
-        icon, category = get_consumer_icon_and_category(dev.display_name or dev.identifier, "consumer")
+        dev_name = get_device_name(dev)
+        icon, category = get_consumer_icon_and_category(dev_name, "consumer")
 
         submeters.append({
             "id": dev.id,
-            "name": dev.display_name or dev.identifier,
+            "name": dev_name,
             "icon": icon,
             "category": category,
             "consumption_kwh": dev_kwh,
