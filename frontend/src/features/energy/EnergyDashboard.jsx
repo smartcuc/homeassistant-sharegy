@@ -2,7 +2,7 @@
 # src/features/energy/EnergyDashboard.jsx
 */
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../api/client";
@@ -33,6 +33,32 @@ export default function EnergyDashboard() {
         { key: "year", label: t("energy.period_year", "Dieses Jahr") },
     ];
 
+    // Pre-calculate SVG donut slices purely and immutably via reduce
+    const donutSlices = useMemo(() => {
+        const list = balanceQuery.data?.charts?.breakdown || [];
+        const total = list.reduce((acc, item) => acc + item.value, 0) || 1;
+
+        return list.reduce(
+            (acc, item) => {
+                const percentage = item.value / total;
+                const strokeDasharray = `${percentage * 251.2} 251.2`;
+                const strokeDashoffset = -acc.accumulated * 251.2;
+                return {
+                    accumulated: acc.accumulated + percentage,
+                    items: [
+                        ...acc.items,
+                        {
+                            ...item,
+                            strokeDasharray,
+                            strokeDashoffset,
+                        },
+                    ],
+                };
+            },
+            { accumulated: 0, items: [] }
+        ).items;
+    }, [balanceQuery.data?.charts?.breakdown]);
+
     // Calculate max value for timeseries scaling
     const maxBarValue = Math.max(
         ...timeseries.map((pt) => Math.max(pt.pv || 0, pt.load || 0)),
@@ -60,11 +86,10 @@ export default function EnergyDashboard() {
                         <button
                             key={p.key}
                             onClick={() => setPeriod(p.key)}
-                            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
-                                period === p.key
+                            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${period === p.key
                                     ? "bg-white text-indigo-600 shadow-xs"
                                     : "text-gray-600 hover:text-gray-900"
-                            }`}
+                                }`}
                         >
                             {p.label}
                         </button>
@@ -160,6 +185,59 @@ export default function EnergyDashboard() {
             </div>
 
             {/* =========================================================
+                ANALYTICS & IMPACT BENCHMARKS
+            ========================================================= */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 bg-slate-50/80 border border-slate-200/80 rounded-2xl p-3.5 shadow-2xs">
+                <div className="flex items-center gap-2.5">
+                    <span className="text-xl p-2 bg-white rounded-xl shadow-2xs">⚡</span>
+                    <div>
+                        <div className="text-[10px] uppercase font-bold text-gray-500">PV Spitzenleistung</div>
+                        <div className="text-sm font-black text-gray-900 font-mono">{kpis.peak_pv_kw || 0} kW</div>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-2.5">
+                    <span className="text-xl p-2 bg-white rounded-xl shadow-2xs">📈</span>
+                    <div>
+                        <div className="text-[10px] uppercase font-bold text-gray-500">Max. Lastspitze</div>
+                        <div className="text-sm font-black text-gray-900 font-mono">{kpis.peak_load_kw || 0} kW</div>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-2.5">
+                    <span className="text-xl p-2 bg-white rounded-xl shadow-2xs">☀️</span>
+                    <div>
+                        <div className="text-[10px] uppercase font-bold text-gray-500">Ø Erzeugung / Tag</div>
+                        <div className="text-sm font-black text-gray-900 font-mono">{kpis.daily_avg_generation_kwh || 0} kWh</div>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-2.5">
+                    <span className="text-xl p-2 bg-white rounded-xl shadow-2xs">🏠</span>
+                    <div>
+                        <div className="text-[10px] uppercase font-bold text-gray-500">Ø Bedarf / Tag</div>
+                        <div className="text-sm font-black text-gray-900 font-mono">{kpis.daily_avg_consumption_kwh || 0} kWh</div>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-2.5">
+                    <span className="text-xl p-2 bg-white rounded-xl shadow-2xs">🚗</span>
+                    <div>
+                        <div className="text-[10px] uppercase font-bold text-gray-500">Solar-Fahrleistung</div>
+                        <div className="text-sm font-black text-emerald-700 font-mono">+{kpis.ev_km_equivalent || 0} km</div>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-2.5">
+                    <span className="text-xl p-2 bg-white rounded-xl shadow-2xs">🌳</span>
+                    <div>
+                        <div className="text-[10px] uppercase font-bold text-gray-500">Baum-Kompensation</div>
+                        <div className="text-sm font-black text-teal-700 font-mono">{kpis.trees_equivalent || 0} Bäume</div>
+                    </div>
+                </div>
+            </div>
+
+            {/* =========================================================
                 INSIGHTS NOTIFICATION
             ========================================================= */}
             {insights.length > 0 && (
@@ -196,11 +274,10 @@ export default function EnergyDashboard() {
                     {submeters.map((meter) => (
                         <div
                             key={meter.id}
-                            className={`p-5 rounded-2xl border transition shadow-2xs ${
-                                meter.is_residual
+                            className={`p-5 rounded-2xl border transition shadow-2xs ${meter.is_residual
                                     ? "bg-slate-50/70 border-dashed border-slate-300"
                                     : "bg-white border-gray-200 hover:shadow-xs"
-                            }`}
+                                }`}
                         >
                             {/* Meter Header */}
                             <div className="flex items-center justify-between gap-2">
@@ -283,32 +360,20 @@ export default function EnergyDashboard() {
                         {/* Custom SVG Donut */}
                         <div className="relative w-44 h-44 shrink-0 flex items-center justify-center">
                             <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
-                                {(() => {
-                                    let accumulatedAngle = 0;
-                                    const total = breakdown.reduce((acc, item) => acc + item.value, 0) || 1;
-
-                                    return breakdown.map((item, idx) => {
-                                        const percentage = item.value / total;
-                                        const strokeDasharray = `${percentage * 251.2} 251.2`;
-                                        const strokeDashoffset = -accumulatedAngle * 251.2;
-                                        accumulatedAngle += percentage;
-
-                                        return (
-                                            <circle
-                                                key={idx}
-                                                cx="50"
-                                                cy="50"
-                                                r="40"
-                                                fill="transparent"
-                                                stroke={item.color}
-                                                strokeWidth="16"
-                                                strokeDasharray={strokeDasharray}
-                                                strokeDashoffset={strokeDashoffset}
-                                                className="transition-all duration-500 hover:opacity-80"
-                                            />
-                                        );
-                                    });
-                                })()}
+                                {donutSlices.map((item, idx) => (
+                                    <circle
+                                        key={idx}
+                                        cx="50"
+                                        cy="50"
+                                        r="40"
+                                        fill="transparent"
+                                        stroke={item.color}
+                                        strokeWidth="16"
+                                        strokeDasharray={item.strokeDasharray}
+                                        strokeDashoffset={item.strokeDashoffset}
+                                        className="transition-all duration-500 hover:opacity-80"
+                                    />
+                                ))}
                             </svg>
                             <div className="absolute text-center">
                                 <div className="text-xs text-gray-400 font-semibold uppercase">Gesamt</div>

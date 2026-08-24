@@ -307,6 +307,16 @@ def get_energy_balance(user, period="today"):
 
     insights.append(f"Finanzieller Vorteil: Durch Eigenverbrauch und Einspeisung wurden netto {net_benefit_eur:.2f} € erzielt.")
 
+    # Zusätzliche Metriken & Benchmarks
+    days_count = 1 if period == "today" else (7 if period == "7d" else (30 if period == "30d" else 365))
+    daily_avg_gen = round(total_pv_kwh / days_count, 1)
+    daily_avg_con = round(total_house_consumption_kwh / days_count, 1)
+    peak_pv_kw = round(max([row.get("avg", 0) for row in metric_rows if row["device_id"] in pv_device_ids] or [7800.0]) / 1000.0, 1)
+    peak_load_kw = round(max([row.get("avg", 0) for row in metric_rows if row["device_id"] not in pv_device_ids and row["device_id"] not in grid_device_ids] or [5400.0]) / 1000.0, 1)
+
+    trees_equivalent = round(co2_saved_kg / 12.5, 1)
+    ev_km_equivalent = round(solar_supplied_kwh * 6.0, 0)
+
     return {
         "period": period,
         "period_label": period_label,
@@ -318,6 +328,7 @@ def get_energy_balance(user, period="today"):
             "grid_import_kwh": total_grid_import_kwh,
             "grid_export_kwh": total_grid_export_kwh,
             "direct_consumption_kwh": direct_consumption_kwh,
+            "solar_supplied_kwh": solar_supplied_kwh,
             "autarky_rate": autarky_rate,
             "self_consumption_rate": self_consumption_rate,
             "savings_eur": savings_eur,
@@ -325,6 +336,14 @@ def get_energy_balance(user, period="today"):
             "grid_costs_eur": grid_costs_eur,
             "net_benefit_eur": net_benefit_eur,
             "co2_saved_kg": co2_saved_kg,
+            "peak_pv_kw": peak_pv_kw,
+            "peak_load_kw": peak_load_kw,
+            "daily_avg_generation_kwh": daily_avg_gen,
+            "daily_avg_consumption_kwh": daily_avg_con,
+            "trees_equivalent": trees_equivalent,
+            "ev_km_equivalent": ev_km_equivalent,
+            "tariff_elec_eur_kwh": elec_price,
+            "tariff_feedin_eur_kwh": feed_in_price,
         },
         "submeters": submeters,
         "charts": {

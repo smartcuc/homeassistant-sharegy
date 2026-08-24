@@ -5,7 +5,7 @@
 import math
 import random
 import logging
-from datetime import datetime, timezone as dt_timezone
+from datetime import datetime, timedelta, timezone as dt_timezone
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 
@@ -18,6 +18,8 @@ from devices.models import (
     Floor,
     MetricDefinition,
     DeviceLatestMetric,
+    DeviceMetric1h,
+    DeviceMetric5m,
 )
 from producer.models import (
     GeneratorType,
@@ -219,8 +221,112 @@ def setup_demo_household():
     )
     devices["household"] = d_house
 
+    # 30 Tage konsistente Stunden-Historie für Energiebilanz & Sub-Metering generieren
+    try:
+        generate_demo_historical_metrics(demo_home=demo_home, days=30)
+    except Exception as e:
+        logger.warning("Historische Demodaten-Generierung übersprungen: %s", e)
+
     logger.info("Demo Smart Home erfolgreich mit %d Geräten initialisiert", len(devices))
     return demo_home
+
+
+def generate_demo_historical_metrics(demo_home=None, days: int = 30):
+    """
+    Generiert vollständige stündliche DeviceMetric1h-Aggregate für alle Demo-Geräte
+    über die vergangenen X Tage, damit alle Zeiträume (Heute, 7T, 30T, Jahr)
+    mit physikalisch stimmigen, hochqualitativen Daten gefüllt sind.
+    """
+    if demo_home is None:
+        demo_home = Home.objects.filter(user__email=DEMO_EMAIL).first()
+        if not demo_home:
+            return 0
+
+    devices = {d.identifier: d for d in demo_home.devices.all()}
+    if not devices:
+        return 0
+
+    now = timezone.now().replace(minute=0, second=0, microsecond=0)
+    total_hours = days * 24
+
+    records_to_create = []
+
+    for h_offset in range(total_hours, -1, -1):
+        bucket_time = now - timedelta(hours=h_offset)
+        hour_float = bucket_time.hour + 0.5
+
+        # 1. ☀️ PV Erzeugung
+        pv_power = 0.0
+        if 5.5 <= hour_float <= 21.0:
+            sun_factor = math.sin((hour_float - 5.5) / (21.0 - 5.5) * math.pi)
+            if sun_factor > 0:
+                day_weather_factor = 0.85 + 0.25 * math.sin(bucket_time.day * 1.5)
+                pv_power = round(7500.0 * (sun_factor ** 1.3) * max(0.2, day_weather_factor), 1)
+
+        # 2. 🏠 Haushalt & Küche
+        base_load = 230.0 + 15.0 * math.sin(hour_float * 0.5)
+        morning_peak = 1100.0 * math.exp(-0.5 * ((hour_float - 7.5) / 0.8) ** 2) if 6.0 <= hour_float <= 9.5 else 0.0
+        noon_peak = 1600.0 * math.exp(-0.5 * ((hour_float - 12.5) / 0.7) ** 2) if 11.5 <= hour_float <= 14.0 else 0.0
+        evening_peak = 2100.0 * math.exp(-0.5 * ((hour_float - 19.5) / 1.5) ** 2) if 17.5 <= hour_float <= 23.0 else 0.0
+        household_power = round(base_load + morning_peak + noon_peak + evening_peak, 1)
+
+        # 3. ♨️ Wärmepumpe
+        hp_active = (6.0 <= hour_float <= 8.5) or (17.5 <= hour_float <= 21.5)
+        hp_power = 1600.0 if hp_active else 40.0
+
+        # 4. 🚗 Wallbox (alle 2-3 Tage aktiv)
+        wb_power = 0.0
+        is_charging_day = (bucket_time.weekday() in [1, 3, 5, 6])
+        if is_charging_day and (11.5 <= hour_float <= 15.0 and pv_power > 3500.0):
+            wb_power = min(pv_power - 1500.0, 7200.0)
+        elif is_charging_day and (18.5 <= hour_float <= 21.0):
+            wb_power = 3700.0
+
+        total_load = household_power + hp_power + wb_power
+
+        # 5. 🔋 Speicher
+        surplus = pv_power - total_load
+        if surplus > 100.0:
+            bat_power = -min(surplus, 3000.0)
+        elif surplus < -100.0:
+            bat_power = min(abs(surplus), 2800.0)
+        else:
+            bat_power = 0.0
+
+        # 6. 🔌 Netz Saldo
+        grid_power = round(total_load - pv_power - bat_power, 1)
+
+        dev_values = {
+            "demo_pv_inverter": (pv_power, pv_power),
+            "demo_household_load": (household_power, household_power),
+            "demo_heatpump": (hp_power, hp_power),
+            "demo_wallbox_ev": (wb_power, wb_power),
+            "demo_battery_storage": (bat_power, abs(bat_power)),
+            "demo_smart_meter": (grid_power, abs(grid_power)),
+        }
+
+        for dev_key, (avg_val, wh_val) in dev_values.items():
+            if dev_key in devices:
+                records_to_create.append(
+                    DeviceMetric1h(
+                        device=devices[dev_key],
+                        metric_key="power",
+                        bucket=bucket_time,
+                        avg=avg_val,
+                        min=avg_val * 0.9,
+                        max=avg_val * 1.1,
+                        count=60,
+                        energy_wh=wh_val,
+                    )
+                )
+
+    DeviceMetric1h.objects.filter(
+        device__in=devices.values(),
+        bucket__gte=now - timedelta(days=days),
+    ).delete()
+    DeviceMetric1h.objects.bulk_create(records_to_create, batch_size=1000)
+    logger.info("Demo-Historie für %d Tage mit %d Stunden-Einträgen erstellt.", days, len(records_to_create))
+    return len(records_to_create)
 
 
 def generate_demo_telemetry(now: datetime = None) -> dict:
