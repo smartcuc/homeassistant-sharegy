@@ -77,7 +77,10 @@ class SharegySolarPowerSensor(SharegyBaseSensor):
 
     @property
     def native_value(self) -> float:
-        val = self.coordinator.data.get("dashboard", {}).get("pv_power_w")
+        dash = self.coordinator.data.get("dashboard", {})
+        val = dash.get("pv_power_w")
+        if val is None:
+            val = dash.get("kpis", {}).get("pv")
         if val is None:
             val = self.coordinator.data.get("balance", {}).get("kpis", {}).get("pv_generation_kwh", 0) * 1000.0 / 24.0
         return round(float(val or 0.0), 1)
@@ -96,7 +99,10 @@ class SharegyHouseholdLoadSensor(SharegyBaseSensor):
 
     @property
     def native_value(self) -> float:
-        val = self.coordinator.data.get("dashboard", {}).get("load_power_w")
+        dash = self.coordinator.data.get("dashboard", {})
+        val = dash.get("load_power_w")
+        if val is None:
+            val = dash.get("kpis", {}).get("load")
         if val is None:
             val = self.coordinator.data.get("balance", {}).get("kpis", {}).get("house_consumption_kwh", 0) * 1000.0 / 24.0
         return round(float(val or 0.0), 1)
@@ -115,7 +121,10 @@ class SharegyGridPowerSensor(SharegyBaseSensor):
 
     @property
     def native_value(self) -> float:
-        val = self.coordinator.data.get("dashboard", {}).get("grid_power_w", 0.0)
+        dash = self.coordinator.data.get("dashboard", {})
+        val = dash.get("grid_power_w")
+        if val is None:
+            val = dash.get("kpis", {}).get("grid", 0.0)
         return round(float(val or 0.0), 1)
 
 
@@ -132,7 +141,10 @@ class SharegyBatteryPowerSensor(SharegyBaseSensor):
 
     @property
     def native_value(self) -> float:
-        val = self.coordinator.data.get("dashboard", {}).get("battery_power_w", 0.0)
+        dash = self.coordinator.data.get("dashboard", {})
+        val = dash.get("battery_power_w")
+        if val is None:
+            val = dash.get("kpis", {}).get("battery", 0.0)
         return round(float(val or 0.0), 1)
 
 
@@ -149,10 +161,13 @@ class SharegyBatterySoCSensor(SharegyBaseSensor):
 
     @property
     def native_value(self) -> float:
-        val = self.coordinator.data.get("dashboard", {}).get("battery_soc_pct")
+        dash = self.coordinator.data.get("dashboard", {})
+        val = dash.get("battery_soc_pct")
         if val is None:
-            val = self.coordinator.data.get("dashboard", {}).get("battery_soc", 65.0)
-        return round(float(val or 0.0), 1)
+            val = dash.get("battery_soc")
+        if val is None:
+            val = dash.get("kpis", {}).get("battery_soc_pct", 65.0)
+        return round(float(val or 65.0), 1)
 
 
 class SharegyAutarkySensor(SharegyBaseSensor):
@@ -167,7 +182,9 @@ class SharegyAutarkySensor(SharegyBaseSensor):
 
     @property
     def native_value(self) -> float:
-        val = self.coordinator.data.get("balance", {}).get("kpis", {}).get("autarky_rate", 0.0)
+        val = self.coordinator.data.get("balance", {}).get("kpis", {}).get("autarky_rate")
+        if val is None:
+            val = self.coordinator.data.get("dashboard", {}).get("autarky_rate_pct", 0.0)
         return round(float(val or 0.0), 1)
 
 
@@ -183,7 +200,9 @@ class SharegySelfConsumptionSensor(SharegyBaseSensor):
 
     @property
     def native_value(self) -> float:
-        val = self.coordinator.data.get("balance", {}).get("kpis", {}).get("self_consumption_rate", 0.0)
+        val = self.coordinator.data.get("balance", {}).get("kpis", {}).get("self_consumption_rate")
+        if val is None:
+            val = self.coordinator.data.get("dashboard", {}).get("self_consumption_rate_pct", 0.0)
         return round(float(val or 0.0), 1)
 
 
@@ -199,7 +218,15 @@ class SharegySpotPriceSensor(SharegyBaseSensor):
 
     @property
     def native_value(self) -> float:
-        val = self.coordinator.data.get("dashboard", {}).get("spot_price_eur_per_kwh")
+        opt = self.coordinator.data.get("optimizer", {})
+        timeline = opt.get("timeline", [])
+        if timeline and len(timeline) > 0:
+            price = timeline[0].get("effective_price_ct")
+            if price is not None:
+                return round(float(price), 2)
+        if opt.get("avg_day_cost_ct") is not None:
+            return round(float(opt["avg_day_cost_ct"]), 2)
+        val = self.coordinator.data.get("balance", {}).get("kpis", {}).get("tariff_elec_eur_kwh")
         if val is not None:
             return round(float(val) * 100.0, 2)
         return 12.50
@@ -216,17 +243,22 @@ class SharegyOptimizerWindowSensor(SharegyBaseSensor):
     @property
     def native_value(self) -> str:
         opt = self.coordinator.data.get("optimizer", {})
+        windows = opt.get("windows", {})
+        best_2h = windows.get("2h", {}).get("best_overall", {})
+        if best_2h and best_2h.get("start_label") and best_2h.get("end_label"):
+            return f"{best_2h.get('start_label')} - {best_2h.get('end_label')}"
         recs = opt.get("recommendations", [])
         if recs and isinstance(recs, list) and len(recs) > 0:
-            best_2h = next((r for r in recs if r.get("duration_hours") == 2), recs[0])
-            return f"{best_2h.get('start_time', '13:00')} - {best_2h.get('end_time', '15:00')}"
+            r2 = next((r for r in recs if r.get("duration_hours") == 2), recs[0])
+            return f"{r2.get('start_time', '13:00')} - {r2.get('end_time', '15:00')}"
         return "13:00 - 15:00"
 
     @property
     def extra_state_attributes(self) -> dict:
         opt = self.coordinator.data.get("optimizer", {})
         return {
-            "summary": opt.get("summary", ""),
-            "recommendations": opt.get("recommendations", []),
+            "avg_day_cost_ct": opt.get("avg_day_cost_ct"),
+            "windows": opt.get("windows", {}),
+            "timeline": opt.get("timeline", [])[:6],
         }
 

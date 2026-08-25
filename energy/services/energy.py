@@ -132,11 +132,31 @@ def get_energy_data(user):
     has_load = load.get("consumption") is not None
     ready = has_grid or len(all_user_devices) > 0
 
+    pv_power_w = float(pv.get("production") or 0.0)
+    load_power_w = float(house_demand or 0.0)
+    grid_power_w = float((grid.get("import") or 0.0) - (grid.get("export") or 0.0))
+    battery_power_w = float(battery_net or 0.0)
+
+    # State of charge ermitteln
+    home_obj = user.homes.first() if hasattr(user, "homes") else None
+    from energy.services.battery_forecast import find_home_battery_storage
+    _, has_batt, batt_params = find_home_battery_storage(home_obj)
+    battery_soc_pct = float(batt_params.get("current_soc_pct", 65.0)) if has_batt else 65.0
+
+    kpis["pv_power_w"] = pv_power_w
+    kpis["load_power_w"] = load_power_w
+    kpis["grid_power_w"] = grid_power_w
+    kpis["battery_power_w"] = battery_power_w
+    kpis["battery_soc_pct"] = battery_soc_pct
+
     return {
-        # Wenn dein Frontend hier strikt nach Rollen verlangt, 
-        # schalte es testweise fest auf True, um zu sehen, ob das Sankey-Diagramm rendert:
-        "ready": ready, # oder: has_producer and has_consumer
+        "ready": ready,
         "sankey": sankey,
         "kpis": kpis,
         "charts": charts,
+        "pv_power_w": pv_power_w,
+        "load_power_w": load_power_w,
+        "grid_power_w": grid_power_w,
+        "battery_power_w": battery_power_w,
+        "battery_soc_pct": battery_soc_pct,
     }
