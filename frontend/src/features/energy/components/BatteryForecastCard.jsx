@@ -48,7 +48,9 @@ export default function BatteryForecastCard() {
                             {t("energy.battery_forecast_title", "Batterie- & SoC-Prognose")}
                         </h2>
                         <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                            {params.battery_name || "Hausspeicher"} · {params.capacity_kwh} kWh
+                            {(params.battery_name || "Hausspeicher").toLowerCase().includes("kwh")
+                                ? (params.battery_name || "Hausspeicher")
+                                : `${params.battery_name || "Hausspeicher"} · ${params.capacity_kwh} kWh`}
                         </span>
                     </div>
                     <p className="text-xs text-emerald-200/70 mt-1">

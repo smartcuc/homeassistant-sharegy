@@ -19,6 +19,65 @@ def find_home_battery_storage(home):
     if not home:
         return None, False, {}
 
+    # 0. Primär: Konfigurierte Speichersysteme (StorageSystem) aus Erzeuger- & Speicheranlagen
+    from producer.models import StorageSystem
+    storage_systems = list(StorageSystem.objects.filter(home=home, active=True).order_by("-updated_at"))
+    if storage_systems:
+        if len(storage_systems) == 1:
+            storage_sys = storage_systems[0]
+            live_soc = storage_sys.get_live_soc()
+            current_soc_pct = live_soc if (live_soc is not None) else float(storage_sys.min_soc_reserve_pct)
+            c_eff = float(storage_sys.charge_efficiency_pct) / 100.0
+            d_eff = float(storage_sys.discharge_efficiency_pct) / 100.0
+            params = {
+                "battery_name": storage_sys.name,
+                "capacity_kwh": float(storage_sys.capacity_kwh),
+                "current_soc_pct": current_soc_pct,
+                "min_soc_reserve_pct": float(storage_sys.min_soc_reserve_pct),
+                "max_soc_pct": float(storage_sys.max_soc_pct),
+                "max_charge_kw": float(storage_sys.max_charge_power_kw),
+                "max_discharge_kw": float(storage_sys.max_discharge_power_kw),
+                "charge_efficiency": c_eff,
+                "discharge_efficiency": d_eff,
+                "roundtrip_efficiency_pct": round(c_eff * d_eff * 100, 1),
+            }
+            return (storage_sys.primary_device or storage_sys.soc_device or storage_sys.power_device), True, params
+        else:
+            # Mehrere Batteriespeicher im Haushalt: Aggregation über Gesamtkapazität
+            total_cap = sum(float(s.capacity_kwh) for s in storage_systems)
+            total_charge_kw = sum(float(s.max_charge_power_kw) for s in storage_systems)
+            total_discharge_kw = sum(float(s.max_discharge_power_kw) for s in storage_systems)
+
+            weighted_soc_sum = 0.0
+            for s in storage_systems:
+                s_soc = s.get_live_soc()
+                if s_soc is None:
+                    s_soc = float(s.min_soc_reserve_pct)
+                weighted_soc_sum += (float(s.capacity_kwh) * s_soc)
+
+            current_soc_pct = round(weighted_soc_sum / max(0.001, total_cap), 1)
+            min_soc = min(float(s.min_soc_reserve_pct) for s in storage_systems)
+            max_soc = max(float(s.max_soc_pct) for s in storage_systems)
+
+            c_eff = sum(float(s.charge_efficiency_pct) * float(s.capacity_kwh) for s in storage_systems) / (max(0.001, total_cap) * 100.0)
+            d_eff = sum(float(s.discharge_efficiency_pct) * float(s.capacity_kwh) for s in storage_systems) / (max(0.001, total_cap) * 100.0)
+
+            names = " + ".join([s.name for s in storage_systems])
+            params = {
+                "battery_name": names,
+                "capacity_kwh": round(total_cap, 2),
+                "current_soc_pct": current_soc_pct,
+                "min_soc_reserve_pct": min_soc,
+                "max_soc_pct": max_soc,
+                "max_charge_kw": round(total_charge_kw, 2),
+                "max_discharge_kw": round(total_discharge_kw, 2),
+                "charge_efficiency": c_eff,
+                "discharge_efficiency": d_eff,
+                "roundtrip_efficiency_pct": round(c_eff * d_eff * 100, 1),
+            }
+            primary_dev = next((s.primary_device or s.soc_device for s in storage_systems if (s.primary_device or s.soc_device)), None)
+            return primary_dev, True, params
+
     # 1. Direkt als Battery/Storage/Akku konfiguriertes Gerät
     bat_device = Device.objects.filter(
         home=home,
