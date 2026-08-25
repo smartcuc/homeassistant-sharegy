@@ -16,7 +16,6 @@ export default function HomeTariffSettingsCard() {
     const { data: tariffData, isLoading, isError } = useQuery({
         queryKey: ["home-tariff"],
         queryFn: fetchHomeTariff,
-        staleTime: 1000 * 60 * 5,
     });
 
     const [selectedType, setSelectedType] = useState(null);
@@ -33,18 +32,23 @@ export default function HomeTariffSettingsCard() {
 
     const mutation = useMutation({
         mutationFn: saveHomeTariff,
-        onSuccess: () => {
+        onSuccess: (updatedData) => {
+            queryClient.setQueryData(["home-tariff"], updatedData);
             queryClient.invalidateQueries({ queryKey: ["home-tariff"] });
             queryClient.invalidateQueries({ queryKey: ["spot-price-chart"] });
             queryClient.invalidateQueries({ queryKey: ["energy-data"] });
             queryClient.invalidateQueries({ queryKey: ["energy-balance"] });
+            setSelectedType(null);
+            setCustomPriceCt(null);
+            setSelectedFeedInType(null);
+            setCustomFeedInPriceCt(null);
             setStatusMsg({ type: "success", text: t("tariffs.save_success", "Strom- & Einspeisetarif erfolgreich gespeichert!") });
             setTimeout(() => setStatusMsg(null), 4000);
         },
         onError: (err) => {
             setStatusMsg({
                 type: "error",
-                text: err?.detail || err?.message || t("tariffs.save_error", "Fehler beim Speichern des Tarifs."),
+                text: err?.data?.detail || err?.data?.error || err?.detail || err?.message || t("tariffs.save_error", "Fehler beim Speichern des Tarifs."),
             });
             setTimeout(() => setStatusMsg(null), 5000);
         },
@@ -400,8 +404,8 @@ export default function HomeTariffSettingsCard() {
                 {statusMsg && (
                     <div
                         className={`p-3 rounded-lg text-xs font-medium ${statusMsg.type === "success"
-                                ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
-                                : "bg-red-50 text-red-800 border border-red-200"
+                            ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                            : "bg-red-50 text-red-800 border border-red-200"
                             }`}
                     >
                         {statusMsg.text}
@@ -413,7 +417,6 @@ export default function HomeTariffSettingsCard() {
                     <Button
                         type="submit"
                         variant="primary"
-                        onClick={handleSave}
                     >
                         {mutation.isPending ? t("common.saving", "Speichern…") : t("tariffs.save_tariff", "Tarif-Einstellungen speichern")}
                     </Button>

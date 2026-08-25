@@ -245,59 +245,85 @@ def home_tariff_detail(request):
         )
 
     today = timezone.now().date()
+    active_tariff = get_home_tariff(home, today) or HomeTariff.objects.filter(home=home).order_by("-valid_from").first()
 
     if request.method == "POST":
-        tariff_type = request.data.get("tariff_type", HomeTariff.TARIFF_DYNAMIC)
-        raw_static_price = request.data.get("static_price_ct")
-        raw_valid_from = request.data.get("valid_from")
-
-        valid_from = today
-        if raw_valid_from:
-            try:
-                valid_from = datetime.date.fromisoformat(str(raw_valid_from))
-            except ValueError:
-                valid_from = today
+        # 1. Strombezugstarif ermitteln
+        if "tariff_type" in request.data:
+            tariff_type = request.data.get("tariff_type") or HomeTariff.TARIFF_DYNAMIC
+        elif active_tariff:
+            tariff_type = active_tariff.tariff_type
+        else:
+            tariff_type = HomeTariff.TARIFF_DYNAMIC
 
         static_price_eur = None
         if tariff_type == HomeTariff.TARIFF_STATIC:
-            if raw_static_price is None or raw_static_price == "":
-                return Response(
-                    {"detail": "Für statische Tarife muss ein Arbeitspreis in ct/kWh angegeben werden."},
-                    status=400,
-                )
-            try:
-                static_price_eur = Decimal(str(raw_static_price)) / Decimal("100")
-            except Exception:
-                return Response(
-                    {"detail": "Ungültiger Preiswert."},
-                    status=400,
-                )
+            if "static_price_ct" in request.data:
+                raw_static_price = request.data.get("static_price_ct")
+                if raw_static_price is None or raw_static_price == "":
+                    return Response(
+                        {"detail": "Für statische Tarife muss ein Arbeitspreis in ct/kWh angegeben werden."},
+                        status=400,
+                    )
+                try:
+                    static_price_eur = Decimal(str(raw_static_price)) / Decimal("100")
+                except Exception:
+                    return Response(
+                        {"detail": "Ungültiger Arbeitspreis."},
+                        status=400,
+                    )
+            elif active_tariff and active_tariff.static_price_eur_per_kwh is not None:
+                static_price_eur = active_tariff.static_price_eur_per_kwh
+            else:
+                static_price_eur = Decimal("0.3200")
 
-        feed_in_tariff_type = request.data.get("feed_in_tariff_type", HomeTariff.FEED_IN_STATIC)
-        raw_feed_in_price = request.data.get("feed_in_tariff_ct")
+        # 2. Einspeisetarif ermitteln
+        if "feed_in_tariff_type" in request.data:
+            feed_in_tariff_type = request.data.get("feed_in_tariff_type") or HomeTariff.FEED_IN_STATIC
+        elif active_tariff:
+            feed_in_tariff_type = active_tariff.feed_in_tariff_type
+        else:
+            feed_in_tariff_type = HomeTariff.FEED_IN_STATIC
 
         feed_in_price_eur = Decimal("0.0820")
         if feed_in_tariff_type == HomeTariff.FEED_IN_STATIC:
-            if raw_feed_in_price is not None and raw_feed_in_price != "":
-                try:
-                    feed_in_price_eur = Decimal(str(raw_feed_in_price)) / Decimal("100")
-                except Exception:
+            if "feed_in_tariff_ct" in request.data:
+                raw_feed_in_price = request.data.get("feed_in_tariff_ct")
+                if raw_feed_in_price is not None and raw_feed_in_price != "":
+                    try:
+                        feed_in_price_eur = Decimal(str(raw_feed_in_price)) / Decimal("100")
+                    except Exception:
+                        feed_in_price_eur = Decimal("0.0820")
+                else:
                     feed_in_price_eur = Decimal("0.0820")
+            elif active_tariff and active_tariff.feed_in_tariff_eur_per_kwh is not None:
+                feed_in_price_eur = active_tariff.feed_in_tariff_eur_per_kwh
         elif feed_in_tariff_type == HomeTariff.FEED_IN_NONE:
             feed_in_price_eur = Decimal("0.0000")
         elif feed_in_tariff_type == HomeTariff.FEED_IN_DYNAMIC:
             feed_in_price_eur = None
 
-        tariff, _ = HomeTariff.objects.update_or_create(
-            home=home,
-            valid_from=valid_from,
-            defaults={
-                "tariff_type": tariff_type,
-                "static_price_eur_per_kwh": static_price_eur,
-                "feed_in_tariff_type": feed_in_tariff_type,
-                "feed_in_tariff_eur_per_kwh": feed_in_price_eur,
-            },
-        )
+        # 3. In Datenbank speichern / aktualisieren
+        existing_tariffs = list(HomeTariff.objects.filter(home=home))
+        if existing_tariffs:
+            for t in existing_tariffs:
+                t.tariff_type = tariff_type
+                t.static_price_eur_per_kwh = static_price_eur
+                t.feed_in_tariff_type = feed_in_tariff_type
+                t.feed_in_tariff_eur_per_kwh = feed_in_price_eur
+                if t.valid_from > today:
+                    t.valid_from = today
+                t.save()
+            active_tariff = existing_tariffs[0]
+        else:
+            active_tariff = HomeTariff.objects.create(
+                home=home,
+                valid_from=today,
+                tariff_type=tariff_type,
+                static_price_eur_per_kwh=static_price_eur,
+                feed_in_tariff_type=feed_in_tariff_type,
+                feed_in_tariff_eur_per_kwh=feed_in_price_eur,
+            )
 
         # Tibber Zugangsdaten auf dem User speichern (falls mitgesendet)
         user = request.user
@@ -312,7 +338,8 @@ def home_tariff_detail(request):
             user.save(update_fields=["tibber_token", "tibber_home_id"])
 
     # GET oder Rückgabe nach POST
-    active_tariff = get_home_tariff(home, today)
+    if not active_tariff:
+        active_tariff = get_home_tariff(home, today)
     price_config = get_price_config(today)
 
     config_data = None

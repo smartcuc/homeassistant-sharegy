@@ -6,6 +6,8 @@ import { NavLink } from "react-router-dom";
 import { useUnconfiguredDevices } from "../../hooks/useUnconfiguredDevices";
 import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
+import { apiFetch } from "../../api/client";
 import DeviceSetupModal from "../device/DeviceSetupModal";
 
 export default function Sidebar() {
@@ -15,6 +17,20 @@ export default function Sidebar() {
     const isLoaded = query?.isSuccess;
     const count = query?.data?.count ?? 0;
     const [openSetup, setOpenSetup] = useState(false);
+
+    const alertsQuery = useQuery({
+        queryKey: ["alerts-list"],
+        queryFn: () => apiFetch("/api/alerts/"),
+        refetchInterval: 30000,
+    });
+
+    const alertSummary = alertsQuery?.data?.summary || { critical: 0, warning: 0, info: 0, active_total: 0 };
+    const alertCount = alertSummary.active_total;
+    const alertBadgeClass = alertSummary.critical > 0
+        ? "bg-rose-100 text-rose-700 border-rose-200 animate-pulse"
+        : alertSummary.warning > 0
+            ? "bg-amber-100 text-amber-800 border-amber-200"
+            : "bg-emerald-100 text-emerald-800 border-emerald-200";
 
     const sections = useMemo(() => [
         {
@@ -29,6 +45,13 @@ export default function Sidebar() {
                 { name: t("energy.energy_balance", "Energiebilanz"), path: "/app/energy", icon: "⚡" },
                 { name: t("nav.solar_forecast", "Solar-Prognose"), path: "/app/solarforecast", icon: "☀️" },
                 { name: t("nav.metrics", "Messwert-Explorer"), path: "/app/metrics", icon: "📈" },
+                {
+                    name: t("nav.alerts", "Alarmzentrale"),
+                    path: "/app/alerts",
+                    icon: "🚨",
+                    badge: alertCount > 0 ? alertCount : null,
+                    badgeClass: alertBadgeClass,
+                },
             ],
         },
         {
@@ -39,6 +62,7 @@ export default function Sidebar() {
                     path: "/app/devices",
                     icon: "📟",
                     badge: count > 0 ? count : null,
+                    isDeviceSetupBadge: true,
                 },
                 { name: t("nav.producers", "Erzeugeranlagen"), path: "/app/producers", icon: "☀️" },
                 { name: t("nav.floors", "Etagen & Räume"), path: "/app/structure", icon: "🏢" },
@@ -52,7 +76,7 @@ export default function Sidebar() {
                 { name: t("nav.app_settings", "Einstellungen"), path: "/app/settings", icon: "⚙️" },
             ],
         },
-    ], [t, count]);
+    ], [t, count, alertCount, alertBadgeClass]);
 
     return (
         <div className="w-64 bg-white border-r flex flex-col shrink-0">
@@ -92,19 +116,27 @@ export default function Sidebar() {
                                         <span className="truncate">{item.name}</span>
                                     </div>
 
-                                    {/* Unconfigured Count Badge */}
-                                    {item.badge && isLoaded && (
-                                        <button
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                e.stopPropagation();
-                                                setOpenSetup(true);
-                                            }}
-                                            title="Unkonfigurierte Geräte einrichten"
-                                            className="text-[11px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full hover:bg-amber-200 transition"
-                                        >
-                                            {item.badge}
-                                        </button>
+                                    {/* Unconfigured Count Badge vs Alert Badge */}
+                                    {item.badge && (
+                                        item.isDeviceSetupBadge && isLoaded ? (
+                                            <button
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    setOpenSetup(true);
+                                                }}
+                                                title="Unkonfigurierte Geräte einrichten"
+                                                className="text-[11px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full hover:bg-amber-200 transition"
+                                            >
+                                                {item.badge}
+                                            </button>
+                                        ) : (
+                                            <span
+                                                className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${item.badgeClass || "bg-indigo-100 text-indigo-800 border-indigo-200"}`}
+                                            >
+                                                {item.badge}
+                                            </span>
+                                        )
                                     )}
                                 </NavLink>
                             ))}

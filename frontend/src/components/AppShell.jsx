@@ -19,6 +19,7 @@ import DevicesPage from "../pages/DevicesPage";
 import ForecastPage from "../features/forecast/ForecastPage";
 import MetricsPage from "../pages/MetricsPage";
 import StructurePage from "../pages/StructurePage";
+import AlertsPage from "../features/alerts/pages/AlertsPage";
 
 import { Routes, Route, Navigate } from "react-router-dom";
 
@@ -66,6 +67,7 @@ export default function AppShell() {
                         <Route path="solarforecast" element={<ForecastPage />} />
                         <Route path="metrics" element={<MetricsPage />} />
                         <Route path="structure" element={<StructurePage />} />
+                        <Route path="alerts" element={<AlertsPage />} />
 
                         {/* ✅ FALLBACK IMMER UNTEN */}
                         <Route path="*" element={<Navigate to="/app/dashboard" replace />} />
