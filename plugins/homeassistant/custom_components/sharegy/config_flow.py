@@ -24,8 +24,16 @@ _LOGGER = logging.getLogger(__name__)
 
 async def validate_input(hass: HomeAssistant, data: dict) -> dict:
     """Validate the user input allows us to connect."""
-    host = data[CONF_HOST].rstrip("/")
-    api_key = data[CONF_API_KEY]
+    host = str(data.get(CONF_HOST, "")).strip().rstrip("/")
+    if not host.startswith(("http://", "https://")):
+        if host.startswith("192.168.") or host.startswith("10.") or host.startswith("172.") or host.startswith("localhost") or host.startswith("127.0.0.1"):
+            host = f"http://{host}"
+        else:
+            host = f"https://{host}"
+
+    data[CONF_HOST] = host
+    api_key = str(data.get(CONF_API_KEY, "")).strip()
+    data[CONF_API_KEY] = api_key
 
     headers = {
         "Authorization": f"Bearer {api_key}",
@@ -36,16 +44,18 @@ async def validate_input(hass: HomeAssistant, data: dict) -> dict:
     url = f"{host}{ENDPOINT_DASHBOARD}"
 
     try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url, headers=headers, timeout=8) as resp:
+        connector = aiohttp.TCPConnector(ssl=False)
+        async with aiohttp.ClientSession(connector=connector) as session:
+            async with session.get(url, headers=headers, timeout=10) as resp:
                 if resp.status in (401, 403):
                     return {"error": "invalid_auth"}
                 if resp.status != 200:
+                    _LOGGER.warning("Sharegy validation returned HTTP %s on %s", resp.status, url)
                     return {"error": "cannot_connect"}
                 json_data = await resp.json()
                 return {"title": json_data.get("home_name", "Sharegy HEMS")}
     except Exception as err:
-        _LOGGER.error("Validation error: %s", err)
+        _LOGGER.error("Validation error connecting to %s: %s", url, err)
         return {"error": "cannot_connect"}
 
 

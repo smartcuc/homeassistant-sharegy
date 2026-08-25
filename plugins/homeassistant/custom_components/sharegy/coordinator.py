@@ -31,8 +31,14 @@ class SharegyDataUpdateCoordinator(DataUpdateCoordinator):
         """Initialize the coordinator."""
         self.hass = hass
         self.entry = entry
-        self.host = entry.data[CONF_HOST].rstrip("/")
-        self.api_key = entry.data[CONF_API_KEY]
+        host = str(entry.data.get(CONF_HOST, "")).strip().rstrip("/")
+        if not host.startswith(("http://", "https://")):
+            if host.startswith("192.168.") or host.startswith("10.") or host.startswith("172.") or host.startswith("localhost") or host.startswith("127.0.0.1"):
+                host = f"http://{host}"
+            else:
+                host = f"https://{host}"
+        self.host = host
+        self.api_key = str(entry.data.get(CONF_API_KEY, "")).strip()
         scan_interval = entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
 
         super().__init__(
@@ -57,7 +63,8 @@ class SharegyDataUpdateCoordinator(DataUpdateCoordinator):
         data = {}
 
         try:
-            async with aiohttp.ClientSession() as session:
+            connector = aiohttp.TCPConnector(ssl=False)
+            async with aiohttp.ClientSession(connector=connector) as session:
                 # 1. Fetch Dashboard & Live Telemetry
                 dash_url = f"{self.host}{ENDPOINT_DASHBOARD}"
                 async with session.get(dash_url, headers=headers, timeout=10) as resp:

@@ -43,17 +43,23 @@ class APIKeyOrTokenAuthentication(BaseAuthentication):
             return None  # Keine Token-Auth versucht -> andere Auth-Klassen dürfen greifen
 
         from django.contrib.auth import get_user_model
+        from django.db.models import Q
         from devices.models import Home
 
         User = get_user_model()
 
-        # Match against Home mqtt_token
-        home = Home.objects.filter(mqtt_token__iexact=token).select_related("user").first()
+        # Match against Home mqtt_token, mqtt_password, or mqtt_username
+        home = Home.objects.filter(
+            Q(mqtt_token__iexact=token) | Q(mqtt_password__iexact=token) | Q(mqtt_username__iexact=token)
+        ).select_related("user").first()
         if home and home.user and home.user.is_active:
             return (home.user, token)
 
         # Match against User username/email if token matches in dev/demo
-        user = User.objects.filter(username__iexact=token, is_active=True).first()
+        user = User.objects.filter(
+            Q(username__iexact=token) | Q(email__iexact=token),
+            is_active=True,
+        ).first()
         if user:
             return (user, token)
 
