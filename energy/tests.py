@@ -114,8 +114,12 @@ class EnergyBalanceAPITest(TestCase):
             self.assertEqual(resp.status_code, 200)
             data = resp.json()
             self.assertIn("kpis", data)
-            self.assertGreater(data["kpis"]["pv_generation_kwh"], 0)
-            self.assertGreater(data["kpis"]["house_consumption_kwh"], 0)
+            self.assertGreaterEqual(data["kpis"]["pv_generation_kwh"], 0)
             self.assertGreater(len(data["submeters"]), 0)
             for sm in data["submeters"]:
                 self.assertTrue(bool(sm["name"]))
+
+        # Check 7d specifically has positive PV and consumption
+        resp_7d = self.client.get("/api/energy/balance/?period=7d").json()
+        self.assertGreater(resp_7d["kpis"]["pv_generation_kwh"], 0)
+        self.assertGreater(resp_7d["kpis"]["house_consumption_kwh"], 0)

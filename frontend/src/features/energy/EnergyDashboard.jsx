@@ -202,8 +202,8 @@ export default function EnergyDashboard() {
                         {Number(kpis.net_benefit_eur || 0) >= 0 ? "+" : ""}
                         {Number(kpis.net_benefit_eur || 0).toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
                     </div>
-                    <div className="text-[11px] text-indigo-800/80 mt-1 font-medium">
-                        Ersparnis: {Number(kpis.savings_eur || 0).toFixed(2)} €
+                    <div className="text-[11px] text-indigo-800/80 mt-1 font-medium truncate" title={kpis.tariff_label}>
+                        Ersparnis: {Number(kpis.savings_eur || 0).toFixed(2)} € · <span className="font-semibold">{kpis.tariff_label || "Standard"}</span>
                     </div>
                 </div>
 

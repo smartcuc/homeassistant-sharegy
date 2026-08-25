@@ -20,6 +20,16 @@ class HomeTariff(models.Model):
         (TARIFF_STATIC, "Static"),
     ]
 
+    FEED_IN_STATIC = "static"
+    FEED_IN_DYNAMIC = "dynamic"
+    FEED_IN_NONE = "none"
+
+    FEED_IN_CHOICES = [
+        (FEED_IN_STATIC, "Feste EEG-Vergütung"),
+        (FEED_IN_DYNAMIC, "Börsen-Marktwert Solar"),
+        (FEED_IN_NONE, "Keine Vergütung (Nulleinspeisung)"),
+    ]
+
     id = models.UUIDField(
         primary_key=True,
         default=uuid.uuid4,
@@ -43,6 +53,20 @@ class HomeTariff(models.Model):
     static_price_eur_per_kwh = models.DecimalField(
         max_digits=10,
         decimal_places=4,
+        null=True,
+        blank=True,
+    )
+
+    feed_in_tariff_type = models.CharField(
+        max_length=20,
+        choices=FEED_IN_CHOICES,
+        default=FEED_IN_STATIC,
+    )
+
+    feed_in_tariff_eur_per_kwh = models.DecimalField(
+        max_digits=10,
+        decimal_places=4,
+        default=0.0820,
         null=True,
         blank=True,
     )
