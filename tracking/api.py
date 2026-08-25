@@ -16,7 +16,19 @@ from .analytics import get_kpis, get_funnel
 
 class TrackEventView(APIView):
     def post(self, request):
-        name = request.data.get("name")
+        events = request.data.get("events")
+        if isinstance(events, list):
+            for e in events:
+                name = e.get("name") or e.get("event")
+                if name:
+                    track_event(
+                        name=name,
+                        metadata=e.get("metadata", {}),
+                        request=request,
+                    )
+            return Response({"ok": True})
+
+        name = request.data.get("name") or request.data.get("event")
         metadata = request.data.get("metadata", {})
 
         if not name:
@@ -25,7 +37,7 @@ class TrackEventView(APIView):
         track_event(
             name=name,
             metadata=metadata,
-            request=request
+            request=request,
         )
 
         return Response({"ok": True})
@@ -36,8 +48,6 @@ class TrackEventView(APIView):
 # ============================================================
 
 class TrackEventBatchView(APIView):
-    permission_classes = [IsAuthenticated]
-
     def post(self, request):
         events = request.data.get("events", [])
 
@@ -45,7 +55,7 @@ class TrackEventBatchView(APIView):
             return Response({"error": "events must be a list"}, status=400)
 
         for e in events:
-            name = e.get("name")
+            name = e.get("name") or e.get("event")
 
             if not name:
                 continue  # skip invalid
