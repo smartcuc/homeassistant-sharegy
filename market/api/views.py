@@ -266,7 +266,7 @@ def home_tariff_detail(request):
                         status=400,
                     )
                 try:
-                    static_price_eur = Decimal(str(raw_static_price)) / Decimal("100")
+                    static_price_eur = Decimal(str(raw_static_price).strip().replace(",", ".")) / Decimal("100")
                 except Exception:
                     return Response(
                         {"detail": "Ungültiger Arbeitspreis."},
@@ -291,7 +291,7 @@ def home_tariff_detail(request):
                 raw_feed_in_price = request.data.get("feed_in_tariff_ct")
                 if raw_feed_in_price is not None and raw_feed_in_price != "":
                     try:
-                        feed_in_price_eur = Decimal(str(raw_feed_in_price)) / Decimal("100")
+                        feed_in_price_eur = Decimal(str(raw_feed_in_price).strip().replace(",", ".")) / Decimal("100")
                     except Exception:
                         feed_in_price_eur = Decimal("0.0820")
                 else:

@@ -9,6 +9,13 @@ import Button from "../../../components/ui/Button";
 import { fetchHomeTariff, saveHomeTariff } from "../api";
 import { useTranslation } from "react-i18next";
 
+function parseCt(val) {
+    if (val === null || val === undefined || val === "") return null;
+    const normalized = String(val).replace(",", ".").trim();
+    const num = Number(normalized);
+    return isNaN(num) ? null : num;
+}
+
 export default function HomeTariffSettingsCard() {
     const { t } = useTranslation();
     const queryClient = useQueryClient();
@@ -56,21 +63,24 @@ export default function HomeTariffSettingsCard() {
 
     function handleSave(e) {
         e.preventDefault();
-        if (tariffType === "static" && (!staticPriceCt || isNaN(Number(staticPriceCt)))) {
+
+        const parsedStaticPrice = parseCt(staticPriceCt);
+        if (tariffType === "static" && (parsedStaticPrice === null || parsedStaticPrice <= 0)) {
             setStatusMsg({ type: "error", text: t("tariffs.invalid_price", "Bitte einen gültigen Arbeitspreis in ct/kWh eingeben.") });
             return;
         }
 
-        if (feedInTariffType === "static" && (!feedInPriceCt || isNaN(Number(feedInPriceCt)))) {
+        const parsedFeedInPrice = parseCt(feedInPriceCt);
+        if (feedInTariffType === "static" && (parsedFeedInPrice === null || parsedFeedInPrice < 0)) {
             setStatusMsg({ type: "error", text: t("tariffs.invalid_feedin_price", "Bitte eine gültige Einspeisevergütung in ct/kWh eingeben.") });
             return;
         }
 
         mutation.mutate({
             tariff_type: tariffType,
-            static_price_ct: tariffType === "static" ? Number(staticPriceCt) : null,
+            static_price_ct: tariffType === "static" ? parsedStaticPrice : null,
             feed_in_tariff_type: feedInTariffType,
-            feed_in_tariff_ct: feedInTariffType === "static" ? Number(feedInPriceCt) : null,
+            feed_in_tariff_ct: feedInTariffType === "static" ? parsedFeedInPrice : 0,
         });
     }
 
@@ -233,11 +243,9 @@ export default function HomeTariffSettingsCard() {
                                         </label>
                                         <div className="relative w-36">
                                             <input
-                                                type="number"
+                                                type="text"
+                                                inputMode="decimal"
                                                 id="static_price"
-                                                step="0.01"
-                                                min="0"
-                                                max="100"
                                                 value={staticPriceCt}
                                                 onChange={(e) => setCustomPriceCt(e.target.value)}
                                                 placeholder="32.00"
@@ -307,11 +315,9 @@ export default function HomeTariffSettingsCard() {
                                         </label>
                                         <div className="relative w-36">
                                             <input
-                                                type="number"
+                                                type="text"
+                                                inputMode="decimal"
                                                 id="feedin_price"
-                                                step="0.01"
-                                                min="0"
-                                                max="60"
                                                 value={feedInPriceCt}
                                                 onChange={(e) => setCustomFeedInPriceCt(e.target.value)}
                                                 placeholder="8.20"

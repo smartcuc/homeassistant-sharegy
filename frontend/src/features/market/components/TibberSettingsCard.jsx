@@ -16,7 +16,6 @@ export default function TibberSettingsCard() {
     const { data: tariffData, isLoading } = useQuery({
         queryKey: ["home-tariff"],
         queryFn: fetchHomeTariff,
-        staleTime: 1000 * 60 * 5,
     });
 
     const [token, setToken] = useState(null);
@@ -31,13 +30,16 @@ export default function TibberSettingsCard() {
 
     const saveMutation = useMutation({
         mutationFn: saveHomeTariff,
-        onSuccess: () => {
+        onSuccess: (updatedData) => {
+            queryClient.setQueryData(["home-tariff"], updatedData);
             queryClient.invalidateQueries({ queryKey: ["home-tariff"] });
+            setToken(null);
+            setHomeId(null);
             setStatusMsg({ type: "success", text: t("tariffs.save_tibber_success", "Tibber-Zugangsdaten erfolgreich gespeichert!") });
             setTimeout(() => setStatusMsg(null), 4000);
         },
         onError: (err) => {
-            setStatusMsg({ type: "error", text: err?.detail || err?.message || t("tariffs.save_tibber_error", "Fehler beim Speichern.") });
+            setStatusMsg({ type: "error", text: err?.data?.detail || err?.detail || err?.message || t("tariffs.save_tibber_error", "Fehler beim Speichern.") });
             setTimeout(() => setStatusMsg(null), 5000);
         },
     });
@@ -70,7 +72,6 @@ export default function TibberSettingsCard() {
     function handleSave(e) {
         e.preventDefault();
         saveMutation.mutate({
-            tariff_type: tariffData?.tariff_type || "dynamic",
             tibber_token: currentToken,
             tibber_home_id: currentHomeId,
         });
@@ -102,11 +103,10 @@ export default function TibberSettingsCard() {
                 </div>
 
                 <span
-                    className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                        isConnected
+                    className={`text-xs px-2.5 py-1 rounded-full font-medium ${isConnected
                             ? "bg-emerald-100 text-emerald-800"
                             : "bg-gray-100 text-gray-600"
-                    }`}
+                        }`}
                 >
                     {isConnected ? `🟢 ${t("common.connected", "Verbunden")}` : `⚪ ${t("common.not_configured", "Nicht konfiguriert")}`}
                 </span>
@@ -187,11 +187,10 @@ export default function TibberSettingsCard() {
                 {/* STATUS MESSAGE */}
                 {statusMsg && (
                     <div
-                        className={`p-3 rounded-lg text-xs font-medium ${
-                            statusMsg.type === "success"
+                        className={`p-3 rounded-lg text-xs font-medium ${statusMsg.type === "success"
                                 ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
                                 : "bg-red-50 text-red-800 border border-red-200"
-                        }`}
+                            }`}
                     >
                         {statusMsg.text}
                     </div>
