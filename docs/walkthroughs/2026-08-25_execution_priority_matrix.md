@@ -2,13 +2,13 @@
 
 **Datum**: 25. August 2026  
 **Bereich**: Sprint-Planung, Meilenstein-Steuerung, Execution Backlog  
-**Ziel**: Systematische Abarbeitung der strategischen Meilensteine vom Datenfundament bis zu den nativen Apps.
+**Ziel**: Systematische Abarbeitung der strategischen Meilensteine vom Datenfundament über Integrationen bis hin zu Subscription, Monetarisierung und EMS-Userabrechnung.
 
 ---
 
-## 🏛️ Das 4-Stufen-Phasenmodell (Tiers)
+## 🏛️ Das 5-Stufen-Phasenmodell (Tiers)
 
-Wir arbeiten die offenen Arbeitspakete in 4 sequenziellen Stufen ab, um technische Abhängigkeiten optimal zu nutzen:
+Wir arbeiten die offenen Arbeitspakete in 5 sequenziellen Stufen ab, um technische Abhängigkeiten optimal zu nutzen:
 
 ```mermaid
 graph TD
@@ -33,6 +33,11 @@ graph TD
         T4_2["9. Kontextuelles Help-System & FAQ/Handbuch DE/EN (Task 5.4 & 5.5)"]
     end
 
+    subgraph TIER 5: Monetarisierung & EMS-Abrechnung
+        T5_1["10. Subscription & SaaS-Lizenzmodell / Stripe (Task 5.11)"]
+        T5_2["11. EMS-Userabrechnung & Mieterstrom / Sub-Metering Billing (Task 5.12)"]
+    end
+
     T1_1 --> T1_2
     T1_2 --> T1_3
     T1_3 --> T2_1
@@ -41,6 +46,8 @@ graph TD
     T3_1 --> T3_2
     T3_2 --> T4_1
     T4_1 --> T4_2
+    T4_2 --> T5_1
+    T5_1 --> T5_2
 ```
 
 ---
@@ -49,10 +56,10 @@ graph TD
 
 ---
 
-### 🟢 TIER 1: DATENFUNDAMENT & PROGNOSE-POWER (Sofort starten)
+### 🟢 TIER 1: DATENFUNDAMENT & PROGNOSE-POWER (Abgeschlossen / In Betrieb)
 
 #### 1. 🗄️ Task 5.1: TimescaleDB Migration & Continuous Aggregates
-* **Warum jetzt?**: `DeviceMetric` sammelt mit jeder Sekunde Telemetrie Millionen Zeilen. Hypertables verhindern Datenbank-Verlangsamung.
+* **Zweck**: Skalierbare Speicherung von Millionen Telemetrie-Zeilen ohne Performance-Verlust.
 * **Maßnahmen**:
   1. `devices_devicemetric` als TimescaleDB-Hypertable (`timestamp`-Partitionierung) konfigurieren.
   2. SQL Continuous Aggregates (1m, 5m, 1h) direkt in PostgreSQL für Sub-10ms Chartabfragen.
@@ -60,7 +67,7 @@ graph TD
 * **Ergebnis**: 100x schnellere Historien-Abfragen, 90 % weniger Speicherverbrauch.
 
 #### 2. 📈 Task 5.2: Verbrauchs-Prognose (Household Load Forecast Engine)
-* **Warum jetzt?**: Erst mit dem vorhergesagten Grundverbrauch kann der Optimizer echte Netto-PV-Überschüsse berechnen.
+* **Zweck**: Berechnung der voraussichtlichen Haushaltslast für präzise Netto-Überschussplanung.
 * **Maßnahmen**:
   1. Berechnung von Wochentags- und Tageszeit-Lastprofilen aus historischen Zählerdaten.
   2. Heizgradtage-/Temperatur-Kompensation für Wärmepumpen und Klimageräte.
@@ -68,32 +75,33 @@ graph TD
 * **Ergebnis**: Realistische Residuallast-Kurve für die nächsten 2 Tage.
 
 #### 3. 🔋 Task 5.3: Batterie- & SoC-Prognose (24h/48h Simulation)
-* **Warum jetzt?**: Der Anwender will im Dashboard sehen: *„Reicht mein Akku heute Nacht oder muss ich nachladen?“*
+* **Zweck**: Vorausschauende Transparenz über Batterieladung und Autarkie.
 * **Maßnahmen**:
-  1. Vorausschauende 48h SoC-Simulation: $SoC(t+1) = SoC(t) + \eta \cdot (P_{\text{PV}} - P_{\text{Last}})$.
+  1. 48h SoC-Simulation: $SoC(t+1) = SoC(t) + \eta \cdot (P_{\text{PV}} - P_{\text{Last}})$.
   2. Berücksichtigung von Batterie-Kapazität, Ladebegrenzungen, Mindest-Notstromreserve und Verlusten.
   3. Visualisierung der prognostizierten Ladekurve im Energie-Dashboard.
-* **Ergebnis**: Vollständige Transparenz über den Batteriezustand der nächsten 48 Stunden.
+* **Ergebnis**: Exakte Prognose über Akkulaufzeit und Nachladebedarf.
 
 ---
 
 ### 🟡 TIER 2: ALERTING & PUSH-BENACHRICHTIGUNGEN
 
-#### 4. 🚨 Task 5.6: Intelligentes Alert- & Anomalie-Erkennungssystem
+#### 4. 🚨 Task 5.6: Intelligentes Alert- & Anomalie-Erkennungssystem (Umgesetzt)
 * **Maßnahmen**:
-  1. Celery-Hintergrundprüfung alle 5 Minuten auf 3 Kern-Anomalien:
-     * 🔥 **„Keine PV erkannt“**: Wetterdienst meldet Globalstrahlung $> 400\,\text{W/m}^2$, aber Wechselrichter meldet $0\,\text{W}$.
-     * 🔥 **„Batterie leer / Ungewöhnliche Entladung“**: SoC fällt unerwartet unter $10\,\%$ oder entlädt sich bei Sonnenschein ins Netz.
-     * 🔥 **„Unerwarteter Verbrauch“**: Dauerlast $> 1.500\,\text{W}$ nachts zwischen 01:00 und 05:00 Uhr.
-  2. Speicherung der Alarme im Django-Modell `AlertEvent` und Anzeige im Frontend-Dashboard.
-* **Ergebnis**: Proaktiver Schutz vor Hardware-Defekten, PV-Ertragsverlust und Stromverschwendung.
+  1. Hintergrundprüfung auf Kern-Anomalien:
+     * 🔥 **„Keine PV erkannt“**: Globalstrahlung vorhanden, aber PV-Leistung $= 0\,\text{W}$.
+     * 🔥 **„Batterie leer / Tiefstand“**: SoC fällt unter Schwellwert (z. B. $< 10\,\%$).
+     * 🔥 **„Unerwarteter Nachtverbrauch“**: Dauerlast $> 1.500\,\text{W}$ nachts.
+     * 🟢 **„Börsenstrom-Preischance / Negativer Strompreis“**: Günstige Ladefenster erkennen.
+  2. Dedizierte Alarmzentrale-Seite (`/app/alerts`), Modal & Live-Badge in der Sidebar.
+* **Ergebnis**: Proaktiver Schutz vor Ertragsverlust, Tiefentladung und Stromverschwendung.
 
 #### 5. 📲 Task 5.9: Mobile Push & Notification Engine (Backend)
 * **Maßnahmen**:
-  1. Django `notifications`-App mit `DeviceToken`-Verwaltung (iOS/Android/Web).
+  1. Django `notifications`-App mit `DeviceToken`-Verwaltung (iOS/Android/Web-Push).
   2. Integration von Firebase Cloud Messaging (`FCM`) und Apple Push Notification Service (`APNs`).
-  3. Konfigurierbare Ruhezeiten (Quiet Hours) und Dringlichkeitsstufen (Kritisch vs. Info).
-* **Ergebnis**: Sofortige Zustellung von Alarmen auf den Smartphone-Sperrbildschirm.
+  3. Konfigurierbare Benachrichtigungs-Präferenzen, Ruhezeiten (Quiet Hours) und Dringlichkeitsstufen.
+* **Ergebnis**: Sofortige Zustellung kritischer Alarme auf das Smartphone.
 
 ---
 
@@ -132,3 +140,33 @@ graph TD
   3. Zweisprachig gepflegt (Deutsch / Englisch).
 * **Ergebnis**: Nahtloses Onboarding und minimale Support-Aufwände.
 
+---
+
+### 🟠 TIER 5: MONETARISIERUNG & EMS-ABRECHNUNG (Neu aufgenommen)
+
+#### 10. 💳 Task 5.11: Subscription- & SaaS-Lizenzmodell (Stripe / Feature-Gating)
+* **Zweck**: Kommerzielle Monetarisierung für Endkunden (B2C) und Prosumer/Installateure (B2B).
+* **Maßnahmen**:
+  1. **Tarifstufen-Definition**:
+     * 🆓 **Free / Community**: 1 Haushalt, 7 Tage Historie, Basis-Monitoring, Standard-Alarmierung.
+     * ⚡ **Pro HEMS (€ 4,99 / Monat)**: Unbegrenzte Historie, 48h KI-Last- & Solar-Prognose, Intelligenter Dynamic-Tariff-Optimizer, Push-Notifications, Wallbox-/Wärmepumpen-Aktorik.
+     * 🏢 **Multi-Home / Vermieter (€ 14,99 / Monat)**: Mehrere Zähler/Haushalte, Mieterstrom-Allokation, PDF-Abrechnungs-Generator.
+  2. **Payment & Stripe Integration**:
+     * Stripe Checkout, Customer Portal (Kreditkarte, SEPA-Lastschrift, PayPal, Apple/Google Pay).
+     * Webhook-Handler für automatische Verlängerung, Kündigung, Upgrade und Downgrade.
+  3. **Feature-Gating & Entitlements**:
+     * Deklarative Berechtigungsprüfung im Backend (`user.has_feature("optimizer_pro")`) und Frontend (`<FeatureGate feature="pro_forecast">`).
+* **Ergebnis**: Automatisierte Zahlungsabwicklung, wiederkehrender MRR (Monthly Recurring Revenue) und klarer Kundennutzen.
+
+#### 11. 🧾 Task 5.12: EMS-Userabrechnung & Sub-Metering Billing Engine (Mieterstrom & WEG)
+* **Zweck**: Rechtssichere, stichtagsgenaue Kosten- und Verbrauchsabrechnung für Mehrparteienhäuser, Mieterstrom-Gemeinschaften, Einliegerwohnungen und geteilte Ladeinfrastruktur.
+* **Maßnahmen**:
+  1. **Sub-Meter & Zähler-Allokation (`billing/services_allocation.py`)**:
+     * Automatische Aufteilung von Netzbezug, PV-Direktverbrauch, Batteriespeicher und Einspeisung auf einzelne Wohneinheiten oder Verbraucher (z. B. Partei A, Partei B, Allgemeinstrom, Wallbox).
+  2. **Stichtags- & Tarif-Integration**:
+     * Verrechnung mit den stichtagsgenau hinterlegten Tarifen (`HomeTariff.valid_from`), dynamischen Börsenpreisen und Grundgebühren.
+  3. **PDF-Abrechnungs-Generator**:
+     * Automatische Erstellung prüffähiger PDF-Jahres- und Monatsabrechnungen für Mieter und Hausverwaltungen inkl. kWh-Nachweis, Eigenverbrauchsquote und MwSt.-Ausweis.
+  4. **Export & Schnittstellen**:
+     * CSV-, Excel- und DATEV-kompatibler Export für Steuerberater und Hausverwaltungssoftware.
+* **Ergebnis**: Vollständige Mieterstrom- und Nebenkostenabrechnung auf Knopfdruck ohne manuelle Tabellenkalkulation.

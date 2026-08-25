@@ -29,11 +29,6 @@ export default function AlertCenterModal({ isOpen, onClose }) {
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ["alerts-list"] }),
     });
 
-    const seedDemoMutation = useMutation({
-        mutationFn: () => apiFetch("/api/alerts/seed-demo/", { method: "POST" }),
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["alerts-list"] }),
-    });
-
     if (!isOpen) return null;
 
     const data = query.data || {};
@@ -118,22 +113,14 @@ export default function AlertCenterModal({ isOpen, onClose }) {
                                     key={tab.key}
                                     onClick={() => setFilterSeverity(tab.key)}
                                     className={`px-3 py-1 rounded-lg transition cursor-pointer ${filterSeverity === tab.key
-                                            ? "bg-white text-gray-900 shadow-xs"
-                                            : "text-gray-500 hover:text-gray-900"
+                                        ? "bg-white text-gray-900 shadow-xs"
+                                        : "text-gray-500 hover:text-gray-900"
                                         }`}
                                 >
                                     {tab.label}
                                 </button>
                             ))}
                         </div>
-
-                        <button
-                            onClick={() => seedDemoMutation.mutate()}
-                            disabled={seedDemoMutation.isPending}
-                            className="text-xs px-2.5 py-1 text-slate-500 hover:text-indigo-600 bg-slate-100 hover:bg-indigo-50 border border-slate-200 rounded-lg transition font-medium cursor-pointer"
-                        >
-                            ⚡ Demo-Alarme testen
-                        </button>
                     </div>
                 </div>
 
@@ -150,12 +137,12 @@ export default function AlertCenterModal({ isOpen, onClose }) {
                             <div
                                 key={alert.id}
                                 className={`p-4 rounded-2xl border transition-all ${alert.status === "resolved"
-                                        ? "bg-gray-50/60 border-gray-200 opacity-60"
-                                        : alert.severity === "critical"
-                                            ? "bg-rose-50/50 border-rose-200 shadow-xs"
-                                            : alert.severity === "warning"
-                                                ? "bg-amber-50/50 border-amber-200 shadow-xs"
-                                                : "bg-emerald-50/50 border-emerald-200 shadow-xs"
+                                    ? "bg-gray-50/60 border-gray-200 opacity-60"
+                                    : alert.severity === "critical"
+                                        ? "bg-rose-50/50 border-rose-200 shadow-xs"
+                                        : alert.severity === "warning"
+                                            ? "bg-amber-50/50 border-amber-200 shadow-xs"
+                                            : "bg-emerald-50/50 border-emerald-200 shadow-xs"
                                     }`}
                             >
                                 <div className="flex items-start justify-between gap-3">

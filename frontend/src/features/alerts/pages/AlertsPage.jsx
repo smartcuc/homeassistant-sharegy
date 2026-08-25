@@ -28,11 +28,6 @@ export default function AlertsPage() {
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ["alerts-list"] }),
     });
 
-    const seedDemoMutation = useMutation({
-        mutationFn: () => apiFetch("/api/alerts/seed-demo/", { method: "POST" }),
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["alerts-list"] }),
-    });
-
     const data = query.data || {};
     const summary = data.summary || { critical: 0, warning: 0, info: 0, active_total: 0 };
     const allAlerts = data.alerts || [];
@@ -67,16 +62,6 @@ export default function AlertsPage() {
                     <p className="text-sm text-gray-500 mt-1">
                         {t("alerts.page_subtitle", "Echtzeit-Überwachung von Ertragsausfällen, Akkuzustand, Dauerlasten und Börsenstrom-Chancen.")}
                     </p>
-                </div>
-
-                <div className="flex items-center gap-2">
-                    <button
-                        onClick={() => seedDemoMutation.mutate()}
-                        disabled={seedDemoMutation.isPending}
-                        className="text-xs px-3.5 py-2 text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl transition font-semibold flex items-center gap-1.5 cursor-pointer shadow-2xs"
-                    >
-                        <span>⚡</span> {t("alerts.seed_demo", "Demo-Alarme erzeugen")}
-                    </button>
                 </div>
             </div>
 
@@ -114,8 +99,8 @@ export default function AlertsPage() {
                             key={tab.key}
                             onClick={() => setFilterSeverity(tab.key)}
                             className={`px-3.5 py-1.5 rounded-lg transition cursor-pointer ${filterSeverity === tab.key
-                                    ? "bg-white text-gray-900 shadow-xs font-bold"
-                                    : "text-gray-500 hover:text-gray-900"
+                                ? "bg-white text-gray-900 shadow-xs font-bold"
+                                : "text-gray-500 hover:text-gray-900"
                                 }`}
                         >
                             {tab.label}
@@ -147,12 +132,12 @@ export default function AlertsPage() {
                         <div
                             key={alert.id}
                             className={`p-5 rounded-2xl border transition-all ${alert.status === "resolved"
-                                    ? "bg-gray-50/60 border-gray-200 opacity-60"
-                                    : alert.severity === "critical"
-                                        ? "bg-rose-50/40 border-rose-200/80 shadow-xs"
-                                        : alert.severity === "warning"
-                                            ? "bg-amber-50/40 border-amber-200/80 shadow-xs"
-                                            : "bg-emerald-50/40 border-emerald-200/80 shadow-xs"
+                                ? "bg-gray-50/60 border-gray-200 opacity-60"
+                                : alert.severity === "critical"
+                                    ? "bg-rose-50/40 border-rose-200/80 shadow-xs"
+                                    : alert.severity === "warning"
+                                        ? "bg-amber-50/40 border-amber-200/80 shadow-xs"
+                                        : "bg-emerald-50/40 border-emerald-200/80 shadow-xs"
                                 }`}
                         >
                             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">

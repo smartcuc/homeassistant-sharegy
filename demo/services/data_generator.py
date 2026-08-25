@@ -229,8 +229,72 @@ def setup_demo_household(target_user=None):
     except Exception as e:
         logger.warning("Historische Demodaten-Generierung übersprungen: %s", e)
 
+    # Realistische Demo-Alarme für den Demo-User erzeugen
+    try:
+        seed_demo_home_alerts(demo_home=demo_home)
+    except Exception as e:
+        logger.warning("Demo-Alarm-Generierung übersprungen: %s", e)
+
     logger.info("Demo Smart Home erfolgreich mit %d Geräten initialisiert", len(devices))
     return demo_home
+
+
+def seed_demo_home_alerts(demo_home):
+    """
+    Erzeugt vorab erstellte, realistische Alarme für das Demo-Zuhause,
+    damit Besucher in der Alarmzentrale sofort ein lebendiges Bild sehen.
+    """
+    from alerts.models import AlertEvent
+    from alerts.services import evaluate_home_alerts
+
+    # 1. Aktuelle Live-Regeln ausführen
+    evaluate_home_alerts(demo_home)
+
+    now = timezone.now()
+    d_wb = demo_home.devices.filter(identifier="demo_wallbox_ev").first()
+    d_bat = demo_home.devices.filter(identifier="demo_battery_storage").first()
+
+    AlertEvent.objects.get_or_create(
+        home=demo_home,
+        alert_type="low_price_window",
+        defaults={
+            "severity": AlertEvent.SEVERITY_INFO,
+            "title": "Günstiges Börsenstrom-Fenster erkannt",
+            "message": "Heute zwischen 13:00 und 16:00 Uhr sinkt der Börsenstrompreis auf unter 12 ct/kWh. Perfekter Zeitpunkt zum Laden deines E-Autos oder für die Waschmaschine.",
+            "action_hint": "Wallbox / Großverbraucher jetzt einplanen",
+            "action_type": "optimize_consumption",
+            "status": AlertEvent.STATUS_ACTIVE,
+            "device": d_wb,
+        },
+    )
+
+    AlertEvent.objects.get_or_create(
+        home=demo_home,
+        alert_type="battery_empty",
+        defaults={
+            "severity": AlertEvent.SEVERITY_WARNING,
+            "title": "Hausspeicher unter 20 % Restkapazität",
+            "message": "Der Batteriespeicher nähert sich der Reservegrenze (18 % SoC). Für die Abendstunden wird Netzbezug prognostiziert.",
+            "action_hint": "Verbraucher auf PV-Überschuss ausrichten",
+            "action_type": "charge_battery",
+            "status": AlertEvent.STATUS_ACTIVE,
+            "device": d_bat,
+        },
+    )
+
+    AlertEvent.objects.get_or_create(
+        home=demo_home,
+        alert_type="negative_price",
+        defaults={
+            "severity": AlertEvent.SEVERITY_INFO,
+            "title": "Negativer Strompreis am Wochenende",
+            "message": "Am Sonntag traten zwischen 12:00 und 14:00 Uhr negative Strompreise (-3,4 ct/kWh) auf. Der Speicher wurde automatisch voll geladen.",
+            "action_hint": "Historischen Zyklus ansehen",
+            "action_type": "view_history",
+            "status": AlertEvent.STATUS_RESOLVED,
+            "resolved_at": now - timedelta(days=2),
+        },
+    )
 
 
 def generate_demo_historical_metrics(demo_home=None, days: int = 30):

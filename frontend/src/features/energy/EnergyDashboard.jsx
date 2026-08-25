@@ -68,23 +68,6 @@ export default function EnergyDashboard() {
         1
     );
 
-    const [isSeeding, setIsSeeding] = useState(false);
-    const [seedSuccessMsg, setSeedSuccessMsg] = useState("");
-
-    const handleSeedDemo = async () => {
-        try {
-            setIsSeeding(true);
-            const res = await apiFetch("/api/energy/seed-demo/", { method: "POST" });
-            setSeedSuccessMsg(res.message || "Demodaten erfolgreich geladen!");
-            balanceQuery.refetch();
-            setTimeout(() => setSeedSuccessMsg(""), 4000);
-        } catch (err) {
-            console.error("Failed to seed demo data", err);
-        } finally {
-            setIsSeeding(false);
-        }
-    };
-
     return (
         <div className="p-6 space-y-6 max-w-7xl">
             {/* =========================================================
@@ -106,25 +89,14 @@ export default function EnergyDashboard() {
                 </div>
 
                 <div className="flex items-center gap-2.5 self-start sm:self-auto">
-                    {/* Demo Seed Action */}
-                    <button
-                        onClick={handleSeedDemo}
-                        disabled={isSeeding}
-                        className="px-3.5 py-1.5 rounded-xl border border-dashed border-indigo-300 bg-indigo-50/70 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer disabled:opacity-50"
-                        title="Vollständige 30-Tage Demodaten und virtuelle Zähler für dieses Konto generieren"
-                    >
-                        <span>🎲</span>
-                        <span>{isSeeding ? "Generiere..." : "Demodaten laden"}</span>
-                    </button>
-
                     {/* Period Selector Tabs */}
                     <div className="inline-flex bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-2xs">
                         {periods.map((p) => (
                             <button
                                 key={p.key}
                                 onClick={() => setPeriod(p.key)}
-                                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${period === p.key
-                                    ? "bg-white text-indigo-600 shadow-xs"
+                                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${period === p.key
+                                    ? "bg-white text-indigo-600 shadow-xs font-bold"
                                     : "text-gray-600 hover:text-gray-900"
                                     }`}
                             >
@@ -134,14 +106,6 @@ export default function EnergyDashboard() {
                     </div>
                 </div>
             </div>
-
-            {/* Seed Success Toast */}
-            {seedSuccessMsg && (
-                <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold rounded-xl flex items-center gap-2 shadow-xs">
-                    <span>✅</span>
-                    <span>{seedSuccessMsg}</span>
-                </div>
-            )}
 
             {/* =========================================================
                 KPI HIGHLIGHTS
