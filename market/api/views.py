@@ -273,12 +273,29 @@ def home_tariff_detail(request):
                     status=400,
                 )
 
+        feed_in_tariff_type = request.data.get("feed_in_tariff_type", HomeTariff.FEED_IN_STATIC)
+        raw_feed_in_price = request.data.get("feed_in_tariff_ct")
+
+        feed_in_price_eur = Decimal("0.0820")
+        if feed_in_tariff_type == HomeTariff.FEED_IN_STATIC:
+            if raw_feed_in_price is not None and raw_feed_in_price != "":
+                try:
+                    feed_in_price_eur = Decimal(str(raw_feed_in_price)) / Decimal("100")
+                except Exception:
+                    feed_in_price_eur = Decimal("0.0820")
+        elif feed_in_tariff_type == HomeTariff.FEED_IN_NONE:
+            feed_in_price_eur = Decimal("0.0000")
+        elif feed_in_tariff_type == HomeTariff.FEED_IN_DYNAMIC:
+            feed_in_price_eur = None
+
         tariff, _ = HomeTariff.objects.update_or_create(
             home=home,
             valid_from=valid_from,
             defaults={
                 "tariff_type": tariff_type,
                 "static_price_eur_per_kwh": static_price_eur,
+                "feed_in_tariff_type": feed_in_tariff_type,
+                "feed_in_tariff_eur_per_kwh": feed_in_price_eur,
             },
         )
 
@@ -317,6 +334,8 @@ def home_tariff_detail(request):
             "home_name": home.name,
             "tariff_type": active_tariff.tariff_type if active_tariff else HomeTariff.TARIFF_DYNAMIC,
             "static_price_ct": round(float(active_tariff.static_price_eur_per_kwh) * 100, 2) if active_tariff and active_tariff.static_price_eur_per_kwh is not None else None,
+            "feed_in_tariff_type": active_tariff.feed_in_tariff_type if active_tariff else HomeTariff.FEED_IN_STATIC,
+            "feed_in_tariff_ct": round(float(active_tariff.feed_in_tariff_eur_per_kwh) * 100, 2) if active_tariff and active_tariff.feed_in_tariff_eur_per_kwh is not None else 8.20,
             "valid_from": active_tariff.valid_from.isoformat() if active_tariff else today.isoformat(),
             "price_config": config_data,
             "tibber_token": request.user.tibber_token or "",

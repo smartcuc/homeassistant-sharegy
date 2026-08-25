@@ -3,6 +3,7 @@
 #########################
 
 import uuid
+from decimal import Decimal
 
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -110,6 +111,12 @@ class HomeTariff(models.Model):
                     "static_price_eur_per_kwh": "Bei dynamischen Tarifen darf kein statischer Preis eingetragen werden."
                 }
             )
+
+        if (
+            self.feed_in_tariff_type == self.FEED_IN_STATIC
+            and self.feed_in_tariff_eur_per_kwh is None
+        ):
+            self.feed_in_tariff_eur_per_kwh = Decimal("0.0820")
 
     def save(self, *args, **kwargs):
 

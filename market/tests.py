@@ -69,3 +69,51 @@ class MarketAnalysisTest(TestCase):
         self.assertIn("best_2h", insights)
         self.assertIn("best_3h", insights)
         self.assertIn("best_5h", insights)
+
+
+from django.contrib.auth import get_user_model
+from devices.models import Home
+from market.models_tariff import HomeTariff
+
+User = get_user_model()
+
+
+class HomeTariffAPITest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="tarifftestuser", password="password123")
+        self.home = Home.objects.create(user=self.user, name="Tariff Test Home")
+        self.client.force_login(self.user)
+
+    def test_save_and_retrieve_feed_in_tariff(self):
+        # 1. Save static feed-in tariff with custom value (e.g. 11.50 ct/kWh)
+        post_data = {
+            "tariff_type": "dynamic",
+            "feed_in_tariff_type": "static",
+            "feed_in_tariff_ct": 11.50,
+        }
+        res = self.client.post("/api/market/tariff/", post_data, content_type="application/json")
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertEqual(data["feed_in_tariff_type"], "static")
+        self.assertEqual(data["feed_in_tariff_ct"], 11.50)
+
+        # 2. Retrieve via GET
+        get_res = self.client.get("/api/market/tariff/")
+        self.assertEqual(get_res.status_code, 200)
+        get_data = get_res.json()
+        self.assertEqual(get_data["feed_in_tariff_type"], "static")
+        self.assertEqual(get_data["feed_in_tariff_ct"], 11.50)
+
+        # 3. Change to "none" (Nulleinspeisung)
+        post_data_none = {
+            "tariff_type": "static",
+            "static_price_ct": 29.50,
+            "feed_in_tariff_type": "none",
+        }
+        res_none = self.client.post("/api/market/tariff/", post_data_none, content_type="application/json")
+        self.assertEqual(res_none.status_code, 200)
+        data_none = res_none.json()
+        self.assertEqual(data_none["tariff_type"], "static")
+        self.assertEqual(data_none["static_price_ct"], 29.50)
+        self.assertEqual(data_none["feed_in_tariff_type"], "none")
+        self.assertEqual(data_none["feed_in_tariff_ct"], 0.0)
