@@ -25,6 +25,7 @@ class MatterFabric(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        app_label = "matter"
         verbose_name = "Matter Fabric"
         verbose_name_plural = "Matter Fabrics"
 
@@ -98,6 +99,7 @@ class MatterNode(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        app_label = "matter"
         unique_together = ("fabric", "node_id")
         verbose_name = "Matter Node"
         verbose_name_plural = "Matter Nodes"
@@ -121,6 +123,7 @@ class MatterEndpoint(models.Model):
     device_type_id = models.IntegerField(default=0x010A)
 
     class Meta:
+        app_label = "matter"
         unique_together = ("node", "endpoint_id")
         verbose_name = "Matter Endpoint"
         verbose_name_plural = "Matter Endpoints"
@@ -163,6 +166,7 @@ class MatterCluster(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        app_label = "matter"
         unique_together = ("endpoint", "cluster_id")
         verbose_name = "Matter Cluster"
         verbose_name_plural = "Matter Clusters"

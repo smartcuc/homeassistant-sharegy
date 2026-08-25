@@ -156,6 +156,7 @@ INSTALLED_APPS = [
     "tracking",
     "helpcenter",
     "providers.opentelemetry",
+    "providers.matter",
 ]
 
 

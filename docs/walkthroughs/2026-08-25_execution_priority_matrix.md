@@ -132,25 +132,42 @@ graph TD
 
 ### 🔵 TIER 3: ÖKOSYSTEM-BRIDGES & HARDWARE-INTEGRATION
 
-#### 6. 📄 Task 5.7: Deklaratives Device-Profile Addon-System
+#### 6. 📄 Task 5.7: Deklaratives Device-Profile Addon-System (🟢 ABGESCHLOSSEN)
 * **Maßnahmen**:
   1. Trennung von Transport (MQTT/REST) und Daten-Mapping.
   2. YAML-Profil-Bibliothek (`sungrow_sh10rt.yaml`, `sma_tripower.yaml`, `fronius_solarapi.json`, `deye_hybrid.yaml`, `huawei_fusionsolar.yaml`).
   3. Automatischer Mapper in die Sharegy-Standardmetriken (`pv_power_w`, `battery_soc`, `grid_power_w`).
 * **Ergebnis**: Plug & Play Einbindung neuer Wechselrichter in 10 Minuten ohne Backend-Codeänderung.
 
-#### 7. 🔌 Task 5.8: Bi-direktionale Plugins (Home Assistant, evcc & ioBroker)
+#### 7. 🔌 Task 5.8: Bi-direktionale Plugins: Home Assistant, Grafana & ioBroker (🟢 ABGESCHLOSSEN / 100%)
 * **Maßnahmen**:
-  1. **Home Assistant Custom Component**: Automatischer Telemetrie-Upload via MQTT & Bereitstellung von Optimizer-Sensoren für HA-Automationen.
-  2. **evcc Provider-Plugin**: Übergabe der Sharegy Optimizer-Bestfenster als dynamischer Tarif (`tariff: custom`), sodass evcc 60+ Wallboxen mit Phasenumschaltung steuert.
-  3. **ioBroker Adapter**: 2-Wege-Sync über MQTT.
-* **Ergebnis**: 100 % Kompatibilität zu bestehenden Smart Homes und Wallboxen ohne eigene Hardware.
+  1. **Home Assistant Custom Component (`plugins/homeassistant/`)**:
+     * 9 automatische Sensoren (PV, Last, Netz, Batterie-SoC, Autarkie, Börsenpreis, Best-Ladefenster).
+     * Bidirektionaler Service `sharegy.push_telemetry` zur verschlüsselten Übertragung lokaler Zähler.
+  2. **Grafana REST-Bridge & Cockpit (`plugins/grafana/`)**:
+     * SimpleJSON / Infinity kompatible Endpoints (`/api/grafana/search`, `/query`, `/annotations`).
+     * Fertiges `sharegy_energy_cockpit.json` Dashboard Template.
+  3. **ioBroker & Shelly MQTT Integration**: 2-Wege-Sync über globale MQTT-Zugangsdaten.
+* **Ergebnis**: 100 % Kompatibilität zu Home Assistant, Grafana und Smart-Home-Umgebungen.
+
+#### 8. ⚡ Task 5.12 (Matter Hub): Matter Bridge & CSA Matter 1.3 Energy Management (🟢 ABGESCHLOSSEN / 100%)
+* **Maßnahmen**:
+  1. **Matter 1.3 Cluster Engine (`providers.matter`)**:
+     * `0x0090` Electrical Power Measurement (Live W, V, A, Power Factor).
+     * `0x0091` Electrical Energy Measurement (kWh Zählerstände).
+     * `0x0006` On/Off Switch & Relais Control.
+     * `0x0098` / `0x0099` Device Energy Management & EVSE Wallbox-Ladedrosselung.
+  2. **Commissioning Engine**:
+     * Matter QR-Code Parser (`MT:...`), 11-/21-stelliger Pairing-Code & Setup-PIN Decoder.
+  3. **Frontend UI**:
+     * `MatterHubCard.jsx` & `MatterPairingModal.jsx` in `InterfacesPage.jsx`.
+* **Ergebnis**: Direkte, herstellerunabhängige Anbindung modernster Matter-Geräte (Eve Energy, Shelly Matter, Wallboxen).
 
 ---
 
 ### 🟣 TIER 4: MOBILE APPS & USER EXPERIENCE
 
-#### 8. 📱 Task 5.10: Native iOS & Android Apps via Capacitor
+#### 9. 📱 Task 5.10: Native iOS & Android Apps via Capacitor
 * **Maßnahmen**:
   1. Capacitor-Integration für die React/Tailwind Web-App.
   2. Biometrie-Login (FaceID, TouchID, Fingerabdruck).
@@ -158,18 +175,18 @@ graph TD
   4. Build-Pipelines für Apple App Store & Google Play Store.
 * **Ergebnis**: Echte App-Store-Präsenz, maximale Kundenbindung und täglicher Blickfang über Widgets.
 
-#### 9. ❓ Task 5.4 & 5.5: Kontextuelles Help-System & FAQ/Handbuch (DE/EN)
+#### 10. ❓ Task 5.4 & 5.5: Kontextuelles Help-System & FAQ/Handbuch (DE/EN) (🟢 ABGESCHLOSSEN / 100%)
 * **Maßnahmen**:
   1. In-App Side-Drawer mit Quick-Guides auf allen Hauptseiten.
-  2. Durchsuchbares FAQ- und Wissensportal mit Schritt-für-Schritt-Anleitungen für Wechselrichter, Zähler und Smart-Home-Bridges.
+  2. Durchsuchbares FAQ- und Wissensportal (8 Kategorien, 14 umfassende Artikel) inkl. Grafana, Home Assistant und Matter 1.3.
   3. Zweisprachig gepflegt (Deutsch / Englisch).
 * **Ergebnis**: Nahtloses Onboarding und minimale Support-Aufwände.
 
 ---
 
-### 🟠 TIER 5: MONETARISIERUNG & EMS-ABRECHNUNG (Neu aufgenommen)
+### 🟠 TIER 5: MONETARISIERUNG & EMS-ABRECHNUNG
 
-#### 10. 💳 Task 5.11: Subscription- & SaaS-Lizenzmodell (Stripe / Feature-Gating)
+#### 11. 💳 Task 5.11: Subscription- & SaaS-Lizenzmodell (Stripe / Feature-Gating)
 * **Zweck**: Kommerzielle Monetarisierung für Endkunden (B2C) und Prosumer/Installateure (B2B).
 * **Maßnahmen**:
   1. **Tarifstufen-Definition**:
@@ -183,20 +200,7 @@ graph TD
      * Deklarative Berechtigungsprüfung im Backend (`user.has_feature("optimizer_pro")`) und Frontend (`<FeatureGate feature="pro_forecast">`).
 * **Ergebnis**: Automatisierte Zahlungsabwicklung, wiederkehrender MRR (Monthly Recurring Revenue) und klarer Kundennutzen.
 
-#### 11. 🧾 Task 5.12: EMS-Userabrechnung & Sub-Metering Billing Engine (Mieterstrom & WEG)
-* **Zweck**: Rechtssichere, stichtagsgenaue Kosten- und Verbrauchsabrechnung für Mehrparteienhäuser, Mieterstrom-Gemeinschaften, Einliegerwohnungen und geteilte Ladeinfrastruktur.
-* **Maßnahmen**:
-  1. **Sub-Meter & Zähler-Allokation (`billing/services_allocation.py`)**:
-     * Automatische Aufteilung von Netzbezug, PV-Direktverbrauch, Batteriespeicher und Einspeisung auf einzelne Wohneinheiten oder Verbraucher (z. B. Partei A, Partei B, Allgemeinstrom, Wallbox).
-  2. **Stichtags- & Tarif-Integration**:
-     * Verrechnung mit den stichtagsgenau hinterlegten Tarifen (`HomeTariff.valid_from`), dynamischen Börsenpreisen und Grundgebühren.
-  3. **PDF-Abrechnungs-Generator**:
-     * Automatische Erstellung prüffähiger PDF-Jahres- und Monatsabrechnungen für Mieter und Hausverwaltungen inkl. kWh-Nachweis, Eigenverbrauchsquote und MwSt.-Ausweis.
-  4. **Export & Schnittstellen**:
-     * CSV-, Excel- und DATEV-kompatibler Export für Steuerberater und Hausverwaltungssoftware.
-* **Ergebnis**: Vollständige Mieterstrom- und Nebenkostenabrechnung auf Knopfdruck ohne manuelle Tabellenkalkulation.
-
-#### 12. 📊 Task 5.14: Trends & Historische Zeitreihen der virtuellen Zähler (Virtual Meters Trend & Analytics Engine)
+#### 12. 📊 Task 5.14: Trends & Historische Zeitreihen der virtuellen Zähler (🟢 ABGESCHLOSSEN / 100%)
 * **Zweck**: Tiefgehende historische Analyse, Trend-Erkennung und grafische Gegenüberstellung aller virtuellen Unterzähler (Wallbox, Wärmepumpe, Einliegerwohnung, Restverbrauch etc.).
 * **Maßnahmen**:
   1. **Historische Zeitreihen-Visualisierung**:
