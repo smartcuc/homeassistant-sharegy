@@ -78,6 +78,7 @@ urlpatterns = [
                 path("public/", include("forecast.urls_public")),
                 path("track/", include("tracking.api_urls")),
                 path("tracking/", include("tracking.api_urls")),
+                path("help/", include("helpcenter.urls")),
             ]
         ),
     ),

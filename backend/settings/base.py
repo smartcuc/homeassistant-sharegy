@@ -153,6 +153,7 @@ INSTALLED_APPS = [
     "alerts",
     "operations",
     "tracking",
+    "helpcenter",
     "providers.opentelemetry",
 ]
 

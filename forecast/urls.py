@@ -12,6 +12,7 @@ from forecast.views import (
     generator_string_forecast,
     home_solar_forecast,
     household_load_forecast,
+    solar_forecast_accuracy_view,
 )
 
 from forecast.api_accuracy import forecast_accuracy
@@ -21,6 +22,7 @@ urlpatterns = [
     path("", forecast_list, name="forecast-list"),
     path("home/", home_solar_forecast, name="forecast-home"),
     path("load/", household_load_forecast, name="forecast-load"),
+    path("accuracy/", solar_forecast_accuracy_view, name="solar-forecast-accuracy"),
     path("sources/", forecast_sources, name="forecast-sources"),
     path("summary/", forecast_summary, name="forecast-summary"),
     path("recommendation/", forecast_recommendation, name="forecast-recommendation"),

@@ -504,3 +504,14 @@ def household_load_forecast(request):
     horizon = _parse_int(request.GET.get("horizon"), 48)
     data = get_household_load_forecast(request.user, horizon_hours=horizon)
     return Response(data)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def solar_forecast_accuracy_view(request):
+    from forecast.services_accuracy import get_solar_forecast_accuracy
+    period = request.GET.get("period", "today")
+    string_id = request.GET.get("string_id", "all")
+    data = get_solar_forecast_accuracy(request.user, period=period, string_id=string_id)
+    return Response(data)
+

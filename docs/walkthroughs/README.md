@@ -8,7 +8,8 @@ Dieses Verzeichnis enthält detaillierte Protokolle und Änderungsberichte zu de
 
 | Datum | Titel | Bereich | Dokument |
 |---|---|---|---|
-| **25.08.2026** | **Ausführungs- & Prioritätenliste (Execution Backlog Tiers 1–4)** | Sprint-Planung & Implementation | [📄 `2026-08-25_execution_priority_matrix.md`](./2026-08-25_execution_priority_matrix.md) |
+| **25.08.2026** | **Kontextuelles Help-System & Wissensportal (Task 5.4 & 5.5)** | In-App Support, Help Drawer & Knowledge Base | [📄 `2026-08-25_help_system_and_faq_portal_concept.md`](./2026-08-25_help_system_and_faq_portal_concept.md) |
+| **25.08.2026** | **Ausführungs- & Prioritätenliste (Execution Backlog Tiers 1–5: Core bis Subscription & Billing)** | Sprint-Planung & Implementation | [📄 `2026-08-25_execution_priority_matrix.md`](./2026-08-25_execution_priority_matrix.md) |
 | **25.08.2026** | **Markt- & Wettbewerbsanalyse v2 (Future-State & Target Architecture)** | Strategie, Category Leader & Roadmap | [📄 `2026-08-25_competitive_analysis_hems_ems_v2_future_state.md`](./2026-08-25_competitive_analysis_hems_ems_v2_future_state.md) |
 | **25.08.2026** | **Device-Profile Addon-System & Bi-direktionale Plugins (HA, evcc, ioB)** | Aktorik, Plugins & Integration | [📄 `2026-08-25_ecosystem_addons_and_bidirectional_plugins_strategy.md`](./2026-08-25_ecosystem_addons_and_bidirectional_plugins_strategy.md) |
 | **25.08.2026** | **Markt- & Wettbewerbsanalyse (Sharegy vs. HEMS & EMS)** | Strategie, Benchmark & USPs | [📄 `2026-08-25_competitive_analysis_hems_ems.md`](./2026-08-25_competitive_analysis_hems_ems.md) |

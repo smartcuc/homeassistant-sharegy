@@ -76,6 +76,12 @@ export default function Sidebar() {
                 { name: t("nav.app_settings", "Einstellungen"), path: "/app/settings", icon: "⚙️" },
             ],
         },
+        {
+            title: `📚 ${t("nav.help_group", "Support & Hilfe")}`,
+            items: [
+                { name: t("nav.knowledge_base", "Wissensportal & FAQ"), path: "/app/help", icon: "📖" },
+            ],
+        },
     ], [t, count, alertCount, alertBadgeClass]);
 
     return (

@@ -16,31 +16,33 @@ graph TD
         T1_1["1. TimescaleDB Migration & Continuous Aggregates (Task 5.1)"]
         T1_2["2. Verbrauchs-Prognose Engine (Task 5.2)"]
         T1_3["3. Batterie- & SoC-Prognose Simulation (Task 5.3)"]
+        T1_4["4. Solar-Prognosegüte & Ist-vs-Soll Abgleich (Task 5.13)"]
     end
 
     subgraph TIER 2: Alerting & Push-Engine
-        T2_1["4. Alert & Anomalie-Erkennungssystem (Task 5.6)"]
-        T2_2["5. Mobile Push & Notification Engine FCM/APNs (Task 5.9)"]
+        T2_1["5. Alert & Anomalie-Erkennungssystem (Task 5.6)"]
+        T2_2["6. Mobile Push & Notification Engine FCM/APNs (Task 5.9)"]
     end
 
     subgraph TIER 3: Ökosystem-Bridges & Aktorik
-        T3_1["6. Deklaratives Device-Profile Addon-System (Task 5.7)"]
-        T3_2["7. Bi-direktionale Plugins: Home Assistant, evcc, ioBroker (Task 5.8)"]
+        T3_1["7. Deklaratives Device-Profile Addon-System (Task 5.7)"]
+        T3_2["8. Bi-direktionale Plugins: Home Assistant, evcc, ioBroker (Task 5.8)"]
     end
 
     subgraph TIER 4: Mobile Apps & User Experience
-        T4_1["8. Native iOS & Android Apps via Capacitor (Task 5.10)"]
-        T4_2["9. Kontextuelles Help-System & FAQ/Handbuch DE/EN (Task 5.4 & 5.5)"]
+        T4_1["9. Native iOS & Android Apps via Capacitor (Task 5.10)"]
+        T4_2["10. Kontextuelles Help-System & FAQ/Handbuch DE/EN (Task 5.4 & 5.5)"]
     end
 
     subgraph TIER 5: Monetarisierung & EMS-Abrechnung
-        T5_1["10. Subscription & SaaS-Lizenzmodell / Stripe (Task 5.11)"]
-        T5_2["11. EMS-Userabrechnung & Mieterstrom / Sub-Metering Billing (Task 5.12)"]
+        T5_1["11. Subscription & SaaS-Lizenzmodell / Stripe (Task 5.11)"]
+        T5_2["12. EMS-Userabrechnung & Mieterstrom / Sub-Metering Billing (Task 5.12)"]
     end
 
     T1_1 --> T1_2
     T1_2 --> T1_3
-    T1_3 --> T2_1
+    T1_3 --> T1_4
+    T1_4 --> T2_1
     T2_1 --> T2_2
     T2_2 --> T3_1
     T3_1 --> T3_2
@@ -81,6 +83,15 @@ graph TD
   2. Berücksichtigung von Batterie-Kapazität, Ladebegrenzungen, Mindest-Notstromreserve und Verlusten.
   3. Visualisierung der prognostizierten Ladekurve im Energie-Dashboard.
 * **Ergebnis**: Exakte Prognose über Akkulaufzeit und Nachladebedarf.
+
+#### 4. ☀️ Task 5.13: Solar-Prognosegüte & Ist-vs-Soll-Vergleich (%-Genauigkeit & Kalibrierung)
+* **Zweck**: Transparenter Abgleich zwischen vorhergesagtem und real erzeugtem Solarstrom zur Qualitätskontrolle und Selbstkalibrierung.
+* **Maßnahmen**:
+  1. **Mathematischer Genauigkeitsabgleich**: Berechnung der prozentualen Übereinstimmung (Accuracy Score basierend auf WAPE: $\text{Accuracy} = 1 - \frac{\sum |P_{\text{Real}} - P_{\text{Forecast}}|}{\sum P_{\text{Real}}}$).
+  2. **Visuelle Soll-Ist-Überlagerung**: Darstellung der prognostizierten Kurve (gestrichelt) und der tatsächlichen Messwerte (Fläche/Balken) im Zeitverlauf.
+  3. **Scorecard & Güte-Badge**: Prozentuale Trefferquote (z. B. *„95,2 % Prognosegenauigkeit heute“*) mit Qualitäts-Indikator (Hervorragend / Gut / Abweichend) im Forecast- und Energie-Dashboard.
+  4. **Adaptive Selbstkalibrierung**: Nutzung systematischer Abweichungen (z. B. Nachmittags-Verschattung durch Nachbargebäude oder Bäume) zur automatischen Nachjustierung des standortspezifischen String-Korrekturfaktors.
+* **Ergebnis**: Höchste Transparenz, Benutzervertrauen und kontinuierlich selbstoptimierende PV-Ertragsprognosen.
 
 ---
 

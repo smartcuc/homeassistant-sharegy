@@ -170,4 +170,56 @@ class ForecastServiceTest(TestCase):
         self.assertIn("net_surplus_kw", first_slot)
         self.assertIn("net_grid_import_kw", first_slot)
 
+    def test_solar_forecast_accuracy_api(self):
+        from devices.models import Device, DeviceRole, DeviceConfig, DeviceMetric1h
+        from energy.models import EMSSignalType
+
+        # Create PV Device and test metrics
+        role_prod, _ = DeviceRole.objects.get_or_create(key="producer", defaults={"label": "Erzeuger"})
+        sig_pv, _ = EMSSignalType.objects.get_or_create(key="pv", defaults={"label": "PV"})
+        dev = Device.objects.create(home=self.home, identifier="test_pv_dev", configured=True, active=True)
+        DeviceConfig.objects.create(
+            device=dev,
+            home=self.home,
+            name="Test Wechselrichter",
+            role=role_prod,
+            energy_signal_type=sig_pv,
+        )
+
+        now = timezone.now().replace(minute=0, second=0, microsecond=0)
+        # Create SolarForecast & DeviceMetric1h
+        for i in range(12):
+            t = now - timedelta(hours=i)
+            SolarForecast.objects.create(
+                generator_string=self.string,
+                timestamp=t,
+                forecast_kwh=Decimal("3.500"),
+                source="hybrid",
+            )
+            DeviceMetric1h.objects.create(
+                device=dev,
+                metric_key="power",
+                bucket=t,
+                energy_wh=3400.0,  # 3.4 kWh
+                avg=3400.0,
+                min=3000.0,
+                max=3500.0,
+                count=60,
+            )
+
+        self.client.force_login(self.user)
+        response = self.client.get("/api/forecast/accuracy/?period=today")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+
+        self.assertIn("accuracy_percent", data)
+        self.assertIn("rating", data)
+        self.assertIn("total_actual_kwh", data)
+        self.assertIn("total_forecast_kwh", data)
+        self.assertIn("points", data)
+        self.assertGreater(len(data["points"]), 0)
+        self.assertGreater(data["accuracy_percent"], 85.0)
+        self.assertEqual(data["rating"], "excellent")
+
+
 

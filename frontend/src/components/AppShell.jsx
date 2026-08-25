@@ -20,6 +20,10 @@ import ForecastPage from "../features/forecast/ForecastPage";
 import MetricsPage from "../pages/MetricsPage";
 import StructurePage from "../pages/StructurePage";
 import AlertsPage from "../features/alerts/pages/AlertsPage";
+import HelpCenterPage from "../features/help/pages/HelpCenterPage";
+import HelpArticleDetailPage from "../features/help/pages/HelpArticleDetailPage";
+import HelpDrawer from "../features/help/components/HelpDrawer";
+import { HelpDrawerProvider } from "../features/help/context/HelpDrawerContext";
 
 import { Routes, Route, Navigate } from "react-router-dom";
 
@@ -36,47 +40,56 @@ export default function AppShell() {
     }
 
     return (
-        <div className="flex h-screen">
+        <HelpDrawerProvider>
+            <div className="flex h-screen">
 
-            {/* ✅ SIDEBAR */}
-            <Sidebar />
+                {/* ✅ SIDEBAR */}
+                <Sidebar />
 
-            <div className="flex-1 flex flex-col">
+                <div className="flex-1 flex flex-col">
 
-                {/* ✅ TOPBAR */}
-                <AppTopbar />
+                    {/* ✅ TOPBAR */}
+                    <AppTopbar />
 
-                {/* ✅ CONTENT */}
-                <div className="flex-1 overflow-auto">
-                    <Routes>
+                    {/* ✅ CONTENT */}
+                    <div className="flex-1 overflow-auto">
+                        <Routes>
 
-                        {/* ✅ DEFAULT */}
-                        <Route index element={<Navigate to="/app/dashboard" replace />} />
+                            {/* ✅ DEFAULT */}
+                            <Route index element={<Navigate to="/app/dashboard" replace />} />
 
-                        <Route path="dashboard" element={<Dashboard user={user} />} />
-                        <Route path="profile" element={<Profile />} />
+                            <Route path="dashboard" element={<Dashboard user={user} />} />
+                            <Route path="profile" element={<Profile />} />
 
-                        <Route path="overview" element={<OverviewPage />} />
-                        <Route path="energy" element={<EnergyDashboard />} />
-                        <Route path="devices" element={<DevicesPage />} />
-                        <Route path="producers" element={<ProducerPage />} />
-                        <Route path="tariff" element={<TariffPage />} />
-                        <Route path="interfaces" element={<InterfacesPage />} />
-                        <Route path="settings" element={<Settings />} />
+                            <Route path="overview" element={<OverviewPage />} />
+                            <Route path="energy" element={<EnergyDashboard />} />
+                            <Route path="devices" element={<DevicesPage />} />
+                            <Route path="producers" element={<ProducerPage />} />
+                            <Route path="tariff" element={<TariffPage />} />
+                            <Route path="interfaces" element={<InterfacesPage />} />
+                            <Route path="settings" element={<Settings />} />
 
-                        <Route path="solarforecast" element={<ForecastPage />} />
-                        <Route path="metrics" element={<MetricsPage />} />
-                        <Route path="structure" element={<StructurePage />} />
-                        <Route path="alerts" element={<AlertsPage />} />
+                            <Route path="solarforecast" element={<ForecastPage />} />
+                            <Route path="metrics" element={<MetricsPage />} />
+                            <Route path="structure" element={<StructurePage />} />
+                            <Route path="alerts" element={<AlertsPage />} />
 
-                        {/* ✅ FALLBACK IMMER UNTEN */}
-                        <Route path="*" element={<Navigate to="/app/dashboard" replace />} />
+                            {/* 📚 HELP CENTER & KNOWLEDGE BASE */}
+                            <Route path="help" element={<HelpCenterPage />} />
+                            <Route path="help/:slug" element={<HelpArticleDetailPage />} />
 
-                    </Routes>
+                            {/* ✅ FALLBACK IMMER UNTEN */}
+                            <Route path="*" element={<Navigate to="/app/dashboard" replace />} />
+
+                        </Routes>
+                    </div>
+
                 </div>
 
+                {/* 💡 SLIDE-OVER HELP DRAWER */}
+                <HelpDrawer />
             </div>
-        </div>
+        </HelpDrawerProvider>
     );
 }
 

@@ -9,6 +9,7 @@ import { useTimezone } from "../../hooks/useTimezone";
 import { formatHour, formatNumber } from "../../utils/format";
 import { useTranslation } from "react-i18next";
 import HouseholdLoadForecastCard from "./components/HouseholdLoadForecastCard";
+import SolarForecastAccuracyCard from "./components/SolarForecastAccuracyCard";
 
 export default function ForecastPage() {
     const { t } = useTranslation();
@@ -143,6 +144,11 @@ export default function ForecastPage() {
 
                                 <ForecastChart points={points} />
                             </div>
+
+                            {/* =========================================================
+                                SOLAR FORECAST ACCURACY & IST-VS-SOLL (TASK 5.13)
+                            ========================================================= */}
+                            <SolarForecastAccuracyCard stringId={selectedString} />
                         </>
                     )}
                 </>

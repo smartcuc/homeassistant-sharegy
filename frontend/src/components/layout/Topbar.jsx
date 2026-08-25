@@ -12,10 +12,12 @@ import { useUser } from "../../hooks/useUser";
 import { useDeviceStatus } from "../../hooks/useDevices";
 import UserMenu from "../UserMenu";
 import SpotPriceModal from "../../features/market/components/SpotPriceModal";
+import { useHelpDrawer } from "../../features/help/context/useHelpDrawer";
 
 export default function AppTopbar() {
     const { t } = useTranslation();
     const { user } = useUser();
+    const { toggleHelp } = useHelpDrawer();
 
     // 📶 Live Geräte-Status aus dem Backend
     const { data: devices = [], isLoading: isDeviceLoading } = useDeviceStatus();
@@ -141,6 +143,16 @@ export default function AppTopbar() {
                         </span>
                     </button>
                 )}
+
+                {/* 💡 Help Drawer Trigger */}
+                <button
+                    onClick={toggleHelp}
+                    title={t("help.open_drawer_title", "Hilfe & Schnellanleitungen (Drawer öffnen)")}
+                    className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition cursor-pointer shadow-2xs"
+                >
+                    <span>💡</span>
+                    <span className="hidden sm:inline">{t("help.btn_label", "Hilfe")}</span>
+                </button>
 
                 <UserMenu user={user} />
                 <SpotPriceModal
