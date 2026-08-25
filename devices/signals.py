@@ -64,14 +64,59 @@ def send_metric_update(sender, instance, created, **kwargs):
 
 
 @receiver(post_save, sender=DeviceConfig)
-def send_device_update(sender, instance, created, **kwargs):
+def handle_device_config_saved(sender, instance, created, **kwargs):
+    # 1. Batteriespeicher (StorageSystem) automatisch anlegen, wenn Rolle = Speicher
+    if instance.home and instance.device:
+        has_battery_role = (
+            (instance.role and instance.role.key in ["battery", "storage", "akku"])
+            or (instance.energy_signal_type and instance.energy_signal_type.key in ["battery", "battery_storage"])
+        )
 
-    # optional: nur wenn echte Felder gesetzt sind
+        if has_battery_role:
+            try:
+                from producer.models import StorageSystem
+                from django.db.models import Q
+
+                existing = StorageSystem.objects.filter(
+                    home=instance.home
+                ).filter(
+                    Q(primary_device=instance.device) | Q(soc_device=instance.device) | Q(power_device=instance.device)
+                ).first()
+
+                if not existing:
+                    dev_name = instance.name or instance.device.identifier or "Hausspeicher"
+                    storage_name = dev_name if any(w in dev_name.lower() for w in ["speicher", "battery", "akku", "storage"]) else f"{dev_name} (Speicher)"
+
+                    capacity_kwh = 10.0
+                    if hasattr(instance.device, "resource") and instance.device.resource and instance.device.resource.attributes:
+                        attrs = instance.device.resource.attributes
+                        cap = attrs.get("capacity_kwh") or attrs.get("battery_capacity_kwh") or attrs.get("capacity")
+                        if cap:
+                            try:
+                                capacity_kwh = float(cap)
+                            except (ValueError, TypeError):
+                                pass
+
+                    StorageSystem.objects.create(
+                        home=instance.home,
+                        name=storage_name,
+                        capacity_kwh=capacity_kwh,
+                        primary_device=instance.device,
+                        soc_device=instance.device,
+                        soc_metric_key="soc",
+                        power_device=instance.device,
+                        power_metric_key="power",
+                        is_auto_detected=True,
+                        active=True,
+                    )
+            except Exception as e:
+                logger.error(f"[SIGNAL_STORAGE_AUTO_CREATE_ERROR] Konnte StorageSystem nicht anlegen: {e}")
+
+    # 2. WebSocket Update
     if not instance.role and not instance.room and not instance.floor:
         return
 
     channel_layer = get_channel_layer()
-
     device = instance.device
 
     data = {
@@ -79,12 +124,15 @@ def send_device_update(sender, instance, created, **kwargs):
         "device": DeviceSerializer(device).data
     }
 
-    async_to_sync(channel_layer.group_send)(
-        "devices",
-        {
-            "type": "send_device_update",
-            "data": data
-        }
-    )
+    try:
+        async_to_sync(channel_layer.group_send)(
+            "devices",
+            {
+                "type": "send_device_update",
+                "data": data
+            }
+        )
+    except Exception as e:
+        logger.error(f"[SIGNAL_CHANNELS_ERROR] {e}")
 
     

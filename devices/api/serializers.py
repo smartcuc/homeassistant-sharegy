@@ -48,17 +48,18 @@ class FloorSerializer(serializers.ModelSerializer):
         fields = ("id", "name")
 
 
-# ============================================================
-# ✅ CONFIG
-# ============================================================
-
 class DeviceConfigSerializer(serializers.ModelSerializer):
 
+    name = serializers.CharField(
+        required=False,
+        allow_blank=True,
+    )
+
     display_name = serializers.CharField(
-            source="name",
-            required=False,
-            allow_blank=True,
-        )
+        source="name",
+        required=False,
+        allow_blank=True,
+    )
 
     # READ
     role = DeviceRoleSerializer(read_only=True)
@@ -127,6 +128,7 @@ class DeviceConfigSerializer(serializers.ModelSerializer):
         model = DeviceConfig
 
         fields = (
+            "name",
             "display_name",
             "role",
             "role_id",

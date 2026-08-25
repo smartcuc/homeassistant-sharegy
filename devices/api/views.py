@@ -217,6 +217,51 @@ def configure_device(request, device_id):
             },
         )
 
+    #
+    # Batteriespeicher (StorageSystem) automatisch anlegen
+    #
+    if (
+        config.role
+        and config.role.key in ["battery", "storage", "akku"]
+    ) or (
+        config.energy_signal_type
+        and config.energy_signal_type.key in ["battery", "battery_storage"]
+    ):
+        from producer.models import StorageSystem
+        from django.db.models import Q
+
+        existing_storage = StorageSystem.objects.filter(
+            home=device.home
+        ).filter(
+            Q(primary_device=device) | Q(soc_device=device) | Q(power_device=device)
+        ).first()
+
+        if not existing_storage:
+            dev_name = config.display_name() if config.display_name() else device.identifier
+            storage_name = dev_name if any(w in dev_name.lower() for w in ["speicher", "battery", "akku", "storage"]) else f"{dev_name} (Speicher)"
+
+            capacity_kwh = 10.0
+            if hasattr(device, "resource") and device.resource and device.resource.attributes:
+                cap = device.resource.attributes.get("capacity_kwh") or device.resource.attributes.get("battery_capacity_kwh")
+                if cap:
+                    try:
+                        capacity_kwh = float(cap)
+                    except (ValueError, TypeError):
+                        pass
+
+            StorageSystem.objects.create(
+                home=device.home,
+                name=storage_name,
+                capacity_kwh=capacity_kwh,
+                primary_device=device,
+                soc_device=device,
+                soc_metric_key="soc",
+                power_device=device,
+                power_metric_key="power",
+                is_auto_detected=True,
+                active=True,
+            )
+
     device.configured = config.is_classified()
     device.save(update_fields=["configured"])
 

@@ -166,3 +166,30 @@ class DeviceAggregationTest(TestCase):
         self.assertEqual(ts_data.get("unit"), "V")
         self.assertTrue(len(ts_data.get("points", [])) >= 1)
         self.assertEqual(ts_data["points"][0]["v"], 230.8)
+
+    def test_device_configured_as_battery_auto_creates_storage_system(self):
+        from producer.models import StorageSystem
+        role_bat = DeviceRole.objects.create(key="battery", label="Hausspeicher")
+
+        new_bat_dev = Device.objects.create(
+            home=self.home,
+            identifier="test_victron_multiplus_01",
+        )
+
+        self.client.force_login(self.user)
+        resp = self.client.patch(
+            f"/api/devices/{new_bat_dev.id}/",
+            data={
+                "name": "Victron MultiPlus Speicher",
+                "role_id": role_bat.id,
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 200)
+
+        # Prüfe ob StorageSystem automatisch unter Erzeuger- & Speicheranlagen existiert
+        storage = StorageSystem.objects.filter(home=self.home, primary_device=new_bat_dev).first()
+        self.assertIsNotNone(storage, "StorageSystem muss automatisch bei Rolle 'battery' angelegt werden")
+        self.assertEqual(storage.name, "Victron MultiPlus Speicher")
+        self.assertEqual(storage.capacity_kwh, 10.0)
+        self.assertTrue(storage.is_auto_detected)
