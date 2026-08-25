@@ -495,3 +495,12 @@ def home_solar_forecast(request):
         "peak_time": peak_point["t"] if peak_point else None,
         "points": points,
     })
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def household_load_forecast(request):
+    from forecast.services_load_forecast import get_household_load_forecast
+    horizon = _parse_int(request.GET.get("horizon"), 48)
+    data = get_household_load_forecast(request.user, horizon_hours=horizon)
+    return Response(data)

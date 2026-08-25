@@ -148,4 +148,26 @@ class ForecastServiceTest(TestCase):
         hybrid_forecasts = SolarForecast.objects.filter(generator_string=self.string, source="hybrid")
         self.assertGreaterEqual(hybrid_forecasts.count(), 1)
 
+    def test_household_load_forecast_api(self):
+        self.client.force_login(self.user)
+        response = self.client.get("/api/forecast/load/?horizon=24")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+
+        self.assertIn("kpis", data)
+        self.assertIn("timeline", data)
+        self.assertEqual(len(data["timeline"]), 24)
+
+        kpis = data["kpis"]
+        self.assertIn("total_load_kwh", kpis)
+        self.assertIn("total_pv_kwh", kpis)
+        self.assertIn("total_surplus_kwh", kpis)
+        self.assertIn("autarky_pct", kpis)
+
+        first_slot = data["timeline"][0]
+        self.assertIn("total_load_kw", first_slot)
+        self.assertIn("pv_forecast_kw", first_slot)
+        self.assertIn("net_surplus_kw", first_slot)
+        self.assertIn("net_grid_import_kw", first_slot)
+
 

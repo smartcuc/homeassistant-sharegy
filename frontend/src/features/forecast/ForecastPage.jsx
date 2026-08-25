@@ -8,6 +8,7 @@ import { useSolarForecast } from "./hooks/useSolarForecast";
 import { useTimezone } from "../../hooks/useTimezone";
 import { formatHour, formatNumber } from "../../utils/format";
 import { useTranslation } from "react-i18next";
+import HouseholdLoadForecastCard from "./components/HouseholdLoadForecastCard";
 
 export default function ForecastPage() {
     const { t } = useTranslation();
@@ -88,35 +89,31 @@ export default function ForecastPage() {
                     {points.length > 0 && (
                         <>
                             {/* KPIs */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-4">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-5">
                                     <div className="text-sm font-medium text-gray-500">
-                                        ☀️ {t("forecast.daily_yield", "Tagesertrag (24h)")}
+                                        📊 {t("forecast.total_today", "Erwartete Erzeugung")}
                                     </div>
-                                    <div className="text-3xl font-bold text-amber-600 mt-1">
+                                    <div className="text-3xl font-bold text-gray-900 mt-1">
                                         {formatNumber(totalForecast, 2)} <span className="text-sm font-normal text-gray-500">kWh</span>
                                     </div>
                                 </div>
 
-                                <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-4">
+                                <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-5">
                                     <div className="text-sm font-medium text-gray-500">
-                                        📈 {t("forecast.peak_power", "Peak-Leistung")}
+                                        🚀 {t("forecast.peak_today", "Maximaler Peak")}
                                     </div>
-                                    <div className="text-3xl font-bold text-orange-500 mt-1">
+                                    <div className="text-3xl font-bold text-amber-600 mt-1">
                                         {peak ? formatNumber(peak.v, 2) : "0,00"} <span className="text-sm font-normal text-gray-500">kW</span>
                                     </div>
+                                    {peak && (
+                                        <div className="text-xs text-gray-500 mt-0.5">
+                                            {formatHour(peak.t * 1000, timezone)}
+                                        </div>
+                                    )}
                                 </div>
 
-                                <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-4">
-                                    <div className="text-sm font-medium text-gray-500">
-                                        🕒 {t("forecast.peak_time", "Peak-Uhrzeit")}
-                                    </div>
-                                    <div className="text-3xl font-bold text-slate-700 mt-1">
-                                        {peak ? formatHour(peak.t * 1000, timezone) : "--:--"}
-                                    </div>
-                                </div>
-
-                                <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-4">
+                                <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-5">
                                     <div className="text-sm font-medium text-gray-500">
                                         ⚡ {t("forecast.next_hour", "Nächste Stunde")}
                                     </div>
@@ -150,6 +147,11 @@ export default function ForecastPage() {
                     )}
                 </>
             )}
+
+            {/* =========================================================
+                HOUSEHOLD LOAD FORECAST (TASK 5.2)
+            ========================================================= */}
+            <HouseholdLoadForecastCard />
         </div>
     );
 }

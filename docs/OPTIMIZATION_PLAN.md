@@ -241,23 +241,22 @@
 
 ---
 
-### [ ] 5.2 Verbrauchs-Prognose (Household Load Forecast Engine)
-- **Bereich**: Prognose & Modellierung (`forecast/services_load_forecast.py`)
-- **Ziel**: 
-  - Wochentags- und tageszeitabhängiges Lastprofil-Modell für den Haushaltsgrundbedarf.
-  - Temperatur-abhängige Lastmodellierung für Wärmepumpen / Klimatisierung (Heizgradtage).
-  - Berechnung der erwarteten Residuallast für die nächsten 24–48 Stunden.
-- **Impact**: Ermöglicht dem Optimizer exakte Vorhersagen über den tatsächlichen Netto-PV-Überschuss.
+### [x] 5.2 Verbrauchs-Prognose (Household Load Forecast Engine)
+- **Dateien**: [`forecast/services_load_forecast.py`](file:///c:/Users/Public/Dev/eswes/forecast/services_load_forecast.py), [`forecast/views.py`](file:///c:/Users/Public/Dev/eswes/forecast/views.py), [`HouseholdLoadForecastCard.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/forecast/components/HouseholdLoadForecastCard.jsx)
+- **Status**: ✅ **Erledigt**.
+  - Wochentags- und stundenbasierte Lastprofilberechnung aus historischen `DeviceMetric1h`-Daten mit H0-Standard-Fallback.
+  - Temperatur- & Heizgradtage-Kompensation für Wärmepumpen und Klimatisierung aus `WeatherForecast`.
+  - Netto-Solarüberschuss- & Netzbezugs-Timeline für 24h/48h.
+  - API `GET /api/forecast/load/` & interaktive Frontend-Karte mit Dual-Balken-Chart (PV vs. Last) und Autarkieprognose.
 
 ---
 
-### [ ] 5.3 Batterie- & SoC-Prognose (State-of-Charge Simulation)
-- **Bereich**: Speicher-Optimierung & Simulation (`energy/services/battery_forecast.py`)
-- **Ziel**: 
-  - Vorausschauende 24h/48h SoC-Kurvensimulation basierend auf PV-Ertrag, prognostiziertem Verbrauch und Lade-/Entladeverlusten.
-  - Berücksichtigung von Mindest-Notstromreserven und Ladebegrenzungen.
-  - Visualisierung des prognostizierten Speicherverlaufs im Dashboard.
-- **Impact**: Transparenz darüber, ob der Speicher über die Nacht reicht oder günstiger Netzstrom geladen werden sollte.
+### [x] 5.3 Batterie- & SoC-Prognose (State-of-Charge Simulation)
+- **Dateien**: [`energy/services/battery_forecast.py`](file:///c:/Users/Public/Dev/eswes/energy/services/battery_forecast.py), [`energy/api/views.py`](file:///c:/Users/Public/Dev/eswes/energy/api/views.py), [`BatteryForecastCard.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/energy/components/BatteryForecastCard.jsx)
+- **Status**: ✅ **Erledigt**.
+  - 24h/48h SoC-Verlaufssimulation unter Berücksichtigung von PV-Ertrag, Haushaltslast, Wirkungsgrad (95%) und Notstromreserve (10%).
+  - Automatische Berechnung von Voll-Ladezeitpunkt, Entladestand und Nacht-Autarkiegrad.
+  - API `GET /api/energy/battery-forecast/` & interaktive Timeline-Karte mit Farbzonen (grün/gelb/rot) und Fluss-Indikatoren im Dashboard.
 
 ---
 

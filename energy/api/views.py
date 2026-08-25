@@ -88,6 +88,15 @@ def energy_optimizer(request):
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
+def battery_forecast_view(request):
+    from energy.services.battery_forecast import get_battery_soc_forecast
+    horizon = int(request.GET.get("horizon", 48))
+    data = get_battery_soc_forecast(request.user, horizon_hours=horizon)
+    return Response(data)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def chart_data(request):
     metric = request.GET.get("metric")
     period = request.GET.get("period", "24h")

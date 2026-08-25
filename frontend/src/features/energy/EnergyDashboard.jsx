@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../api/client";
 import EnergyOptimizerCard from "./components/EnergyOptimizerCard";
+import BatteryForecastCard from "./components/BatteryForecastCard";
 
 export default function EnergyDashboard() {
     const { t } = useTranslation();
@@ -294,6 +295,11 @@ export default function EnergyDashboard() {
                 SMART ENERGY OPTIMIZER (1H, 2H, 4H BESTE LADEZEITEN)
             ========================================================= */}
             <EnergyOptimizerCard />
+
+            {/* =========================================================
+                BATTERIE- & SOC-PROGNOSE (TASK 5.3)
+            ========================================================= */}
+            <BatteryForecastCard />
 
             {/* =========================================================
                 VIRTUELLE ZÄHLER & SUB-METERING

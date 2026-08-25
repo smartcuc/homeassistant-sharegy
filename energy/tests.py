@@ -147,3 +147,28 @@ class EnergyBalanceAPITest(TestCase):
             self.assertIn("start_label", best)
             self.assertIn("end_label", best)
             self.assertIn("avg_cost_ct", best)
+
+    def test_battery_soc_forecast_api(self):
+        self.client.post("/api/energy/seed-demo/")
+
+        response = self.client.get("/api/energy/battery-forecast/?horizon=24")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+
+        self.assertIn("parameters", data)
+        self.assertIn("kpis", data)
+        self.assertIn("timeline", data)
+        self.assertEqual(len(data["timeline"]), 24)
+
+        kpis = data["kpis"]
+        self.assertIn("start_soc_pct", kpis)
+        self.assertIn("end_soc_pct", kpis)
+        self.assertIn("total_charged_kwh", kpis)
+        self.assertIn("total_discharged_kwh", kpis)
+        self.assertIn("night_autarky_pct", kpis)
+
+        slot0 = data["timeline"][0]
+        self.assertIn("soc_pct", slot0)
+        self.assertIn("stored_kwh", slot0)
+        self.assertIn("bat_flow_kw", slot0)
+        self.assertIn("status", slot0)

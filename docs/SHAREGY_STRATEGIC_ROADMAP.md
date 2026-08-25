@@ -107,8 +107,8 @@
   ├── 2.2 ✅ Verbrauchsbilanz, Virtuelle Zähler & Residual-Last Disaggregation
   ├── 2.3 ✅ Machine Learning PV-Prognose (Hybrid Physics + ML - RandomForest/Residuals)
   ├── 2.4 ✅ TimescaleDB Migration & Continuous Aggregates (`setup_timescaledb`)
-  ├── 2.5 ⏳ Verbrauchs-Prognose (Household Load Forecast Engine nach Wochentagen & Temp)
-  ├── 2.6 ⏳ Batterie- & SoC-Prognose (24h/48h State-of-Charge Simulation)
+  ├── 2.5 ✅ Verbrauchs-Prognose (Household Load Forecast Engine & Netto-Überschuss)
+  ├── 2.6 ✅ Batterie- & SoC-Prognose (24h/48h Simulation & Nachtautarkie)
   ├── 2.7 ⏳ Kontextuelles Help-System & In-App Drawer (DE / EN)
   ├── 2.8 ⏳ FAQ-Portal & Digitales Benutzerhandbuch (DE / EN)
   ├── 2.9 ⏳ Intelligentes Alert- & Anomalie-Erkennungssystem (Keine PV, Akku leer, Nachtlast)
