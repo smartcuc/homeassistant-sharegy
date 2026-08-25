@@ -69,6 +69,7 @@ urlpatterns = [
                 path("", include("content.urls_public")),
                 path("", include("providers.opentelemetry.urls")),
                 path("energy/", include("energy.api.urls")),
+                path("alerts/", include("alerts.urls")),
                 path("forecast/", include("forecast.urls")),
                 path("devices/", include("devices.api.urls")),
                 path("market/", include("market.api.urls")),

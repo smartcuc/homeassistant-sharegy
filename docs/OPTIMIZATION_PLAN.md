@@ -282,13 +282,12 @@
 
 ---
 
-### [ ] 5.6 Intelligentes Alert- & Anomalie-Erkennungssystem
-- **Bereich**: Operations, Monitoring & Benachrichtigungen (`alerts/`, `tasks_alerts.py`)
-- **Ziel**: Echtzeit-Überwachung des Haushalts mit proaktiven Warnmeldungen im Dashboard und via Webhook/E-Mail:
-  - 🔥 **„Keine PV erkannt“**: Hohe Globalstrahlung laut Wetterdienst (> 400 W/m²), aber Wechselrichter meldet 0 W Erzeugung $\rightarrow$ *Sicherung ausgelöst, Wechselrichter auf Störung oder Schattenschaden*.
-  - 🔥 **„Batterie leer / Ungewöhnliche Entladung“**: Speicher-SoC fällt unter kritische Schwelle (< 10 %) trotz erwarteter Mindestreserve oder entlädt sich bei Sonnenschein ins Netz.
-  - 🔥 **„Unerwarteter Verbrauch / Dauerlast-Alarm“**: Ungewöhnlich hohe Dauerlast (> 1.500 W) nachts zwischen 01:00 und 05:00 Uhr $\rightarrow$ *Vergessener Großverbraucher, Durchlauferhitzer-Dauerlauf oder defektes Gerät*.
-- **Impact**: Schutz vor teuren Stromkosten und sofortige Erkennung von Hardware-Defekten.
+### [x] 5.6 Intelligentes Alert- & Anomalie-Erkennungssystem
+- **Dateien**: [`alerts/models.py`](file:///c:/Users/Public/Dev/eswes/alerts/models.py), [`alerts/services.py`](file:///c:/Users/Public/Dev/eswes/alerts/services.py), [`alerts/views.py`](file:///c:/Users/Public/Dev/eswes/alerts/views.py), [`AlertCenterModal.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/alerts/components/AlertCenterModal.jsx), [`AlertNotificationBanner.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/alerts/components/AlertNotificationBanner.jsx)
+- **Status**: ✅ **Erledigt**.
+  - 8 Erkennungsregeln implementiert: „Keine PV erkannt (Ertragsausfall)“, „Batterie leer / Notreserve“, „Unerwarteter Nachtverbrauch / Dauerlast“, „Gerät offline / Signalverlust“, „Börsenstrom-Tiefstpreis (Spar-Tipp)“, „Preis-Peak (Dunkelflaute)“, „Netzbezug trotz PV“, „Frostschutz & Wärmepumpen-Vorlauf“.
+  - API `GET /api/alerts/`, `POST /api/alerts/<id>/acknowledge/`, `POST /api/alerts/<id>/resolve/` und `POST /api/alerts/seed-demo/`.
+  - Animierter Benachrichtigungs-Banner & vollständige Alarm- und Notifikationszentrale mit Schweregrad-Filtern im Dashboard.
 
 ---
 

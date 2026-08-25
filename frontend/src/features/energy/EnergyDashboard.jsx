@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../api/client";
 import EnergyOptimizerCard from "./components/EnergyOptimizerCard";
 import BatteryForecastCard from "./components/BatteryForecastCard";
+import AlertNotificationBanner from "../alerts/components/AlertNotificationBanner";
 
 export default function EnergyDashboard() {
     const { t } = useTranslation();
@@ -86,6 +87,11 @@ export default function EnergyDashboard() {
 
     return (
         <div className="p-6 space-y-6 max-w-7xl">
+            {/* =========================================================
+                SYSTEM ALERTS & NOTIFICATIONS (TASK 5.6)
+            ========================================================= */}
+            <AlertNotificationBanner />
+
             {/* =========================================================
                 HEADER & TIMEFRAME SELECTOR
             ========================================================= */}

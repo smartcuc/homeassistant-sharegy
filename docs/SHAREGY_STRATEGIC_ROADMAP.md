@@ -111,7 +111,7 @@
   ├── 2.6 ✅ Batterie- & SoC-Prognose (24h/48h Simulation & Nachtautarkie)
   ├── 2.7 ⏳ Kontextuelles Help-System & In-App Drawer (DE / EN)
   ├── 2.8 ⏳ FAQ-Portal & Digitales Benutzerhandbuch (DE / EN)
-  ├── 2.9 ⏳ Intelligentes Alert- & Anomalie-Erkennungssystem (Keine PV, Akku leer, Nachtlast)
+  ├── 2.9 ✅ Intelligentes Alert- & Anomalie-Erkennungssystem (Alarmzentrale & 8 Regeln)
   ├── 2.10 ⏳ Deklaratives Device-Profile Addon-System (Sungrow, SMA, Fronius, Deye, Huawei)
   ├── 2.11 ⏳ Bi-direktionale Ökosystem-Plugins (Home Assistant Custom Component, evcc Provider, ioBroker)
   ├── 2.12 ⏳ Mobile Push & Notification Engine (FCM Android & APNs iOS Dispatcher)

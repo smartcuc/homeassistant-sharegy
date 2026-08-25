@@ -150,6 +150,7 @@ INSTALLED_APPS = [
     "producer",
     "user_settings",
     "energy",
+    "alerts",
     "operations",
     "tracking",
     "providers.opentelemetry",
