@@ -79,8 +79,17 @@ def find_home_battery_storage(home):
         device=bat_device,
         metric_key__in=["soc", "battery_soc", "state_of_charge", "battery_percent", "soc_pct", "battery_level", "value"],
     ).first()
+
     # Falls nicht direkt auf bat_device, suche auf allen Geräten des Hauses
     if not latest_soc or latest_soc.value is None:
+        latest_soc = DeviceLatestMetric.objects.filter(
+            device__home=home,
+            device__active=True,
+            metric_key__in=["soc", "battery_soc", "state_of_charge", "battery_percent", "soc_pct", "battery_level"],
+        ).first()
+
+    if latest_soc and latest_soc.value is not None:
+        try:
             current_soc_pct = max(0.0, min(100.0, float(latest_soc.value)))
         except (ValueError, TypeError):
             pass
