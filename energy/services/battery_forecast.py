@@ -26,13 +26,15 @@ def find_home_battery_storage(home):
         if len(storage_systems) == 1:
             storage_sys = storage_systems[0]
             live_soc = storage_sys.get_live_soc()
-            current_soc_pct = live_soc if (live_soc is not None) else float(storage_sys.min_soc_reserve_pct)
+            has_live_soc = (live_soc is not None)
+            current_soc_pct = live_soc if has_live_soc else float(storage_sys.min_soc_reserve_pct)
             c_eff = float(storage_sys.charge_efficiency_pct) / 100.0
             d_eff = float(storage_sys.discharge_efficiency_pct) / 100.0
             params = {
                 "battery_name": storage_sys.name,
                 "capacity_kwh": float(storage_sys.capacity_kwh),
                 "current_soc_pct": current_soc_pct,
+                "has_live_soc": has_live_soc,
                 "min_soc_reserve_pct": float(storage_sys.min_soc_reserve_pct),
                 "max_soc_pct": float(storage_sys.max_soc_pct),
                 "max_charge_kw": float(storage_sys.max_charge_power_kw),
@@ -49,9 +51,12 @@ def find_home_battery_storage(home):
             total_discharge_kw = sum(float(s.max_discharge_power_kw) for s in storage_systems)
 
             weighted_soc_sum = 0.0
+            has_any_live = False
             for s in storage_systems:
                 s_soc = s.get_live_soc()
-                if s_soc is None:
+                if s_soc is not None:
+                    has_any_live = True
+                else:
                     s_soc = float(s.min_soc_reserve_pct)
                 weighted_soc_sum += (float(s.capacity_kwh) * s_soc)
 
@@ -67,6 +72,7 @@ def find_home_battery_storage(home):
                 "battery_name": names,
                 "capacity_kwh": round(total_cap, 2),
                 "current_soc_pct": current_soc_pct,
+                "has_live_soc": has_any_live,
                 "min_soc_reserve_pct": min_soc,
                 "max_soc_pct": max_soc,
                 "max_charge_kw": round(total_charge_kw, 2),
@@ -147,11 +153,15 @@ def find_home_battery_storage(home):
             metric_key__in=["soc", "battery_soc", "state_of_charge", "battery_percent", "soc_pct", "battery_level"],
         ).first()
 
-    if latest_soc and latest_soc.value is not None:
+    has_live_soc = (latest_soc is not None and latest_soc.value is not None)
+    if has_live_soc:
         try:
             current_soc_pct = max(0.0, min(100.0, float(latest_soc.value)))
         except (ValueError, TypeError):
-            pass
+            has_live_soc = False
+            current_soc_pct = min_soc_pct
+    else:
+        current_soc_pct = min_soc_pct
 
     battery_name = (
         bat_device.config.name
@@ -163,6 +173,7 @@ def find_home_battery_storage(home):
         "battery_name": battery_name,
         "capacity_kwh": capacity_kwh,
         "current_soc_pct": current_soc_pct,
+        "has_live_soc": has_live_soc,
         "min_soc_reserve_pct": min_soc_pct,
         "max_soc_pct": max_soc_pct,
         "max_charge_kw": max_charge_kw,
@@ -332,6 +343,7 @@ def get_battery_soc_forecast(user, horizon_hours: int = 48) -> dict:
         "has_battery": True,
         "parameters": params,
         "kpis": {
+            "has_live_soc": params.get("has_live_soc", False),
             "start_soc_pct": round(current_soc_pct, 1),
             "end_soc_pct": round(sim_soc_pct, 1),
             "total_charged_kwh": round(total_charged_kwh, 2),

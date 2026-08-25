@@ -84,14 +84,25 @@ export default function BatteryForecastCard() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
                 {/* 1. Aktueller Ladestand */}
                 <div className="p-4 rounded-2xl bg-emerald-950/50 border border-emerald-500/30 space-y-1">
-                    <div className="text-[11px] font-bold text-emerald-300 uppercase tracking-wider flex items-center gap-1">
-                        <span>⚡</span> Start-Ladestand
+                    <div className="text-[11px] font-bold text-emerald-300 uppercase tracking-wider flex items-center justify-between gap-1">
+                        <span className="flex items-center gap-1">
+                            <span>⚡</span> Start-Ladestand
+                        </span>
+                        {params.has_live_soc === false && (
+                            <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 normal-case font-semibold">
+                                geschätzt
+                            </span>
+                        )}
                     </div>
                     <div className="text-2xl font-black text-white font-mono">
                         {kpis.start_soc_pct} <span className="text-xs font-semibold text-emerald-400/80">%</span>
                     </div>
                     <div className="text-[10px] text-emerald-200/70">
-                        {((kpis.start_soc_pct / 100) * params.capacity_kwh).toFixed(1)} / {params.capacity_kwh} kWh
+                        {params.has_live_soc === false ? (
+                            <span className="text-amber-300/80">Kein Sensor · Notstromreserve ({params.min_soc_reserve_pct}%)</span>
+                        ) : (
+                            `${((kpis.start_soc_pct / 100) * params.capacity_kwh).toFixed(1)} / ${params.capacity_kwh} kWh`
+                        )}
                     </div>
                 </div>
 
@@ -224,11 +235,14 @@ export default function BatteryForecastCard() {
                     <span className="text-lg">⚙️</span>
                     <span>Speicherparameter:</span>
                 </div>
-                <div className="flex flex-wrap gap-4 text-xs font-mono">
+                <div className="flex flex-wrap gap-4 text-xs font-mono items-center">
                     <span>Kapazität: <strong>{params.capacity_kwh} kWh</strong></span>
                     <span>Max. Ladeleistung: <strong>{params.max_charge_kw} kW</strong></span>
                     <span>Wirkungsgrad: <strong>{params.roundtrip_efficiency_pct}%</strong></span>
                     <span>Notstromreserve: <strong>{params.min_soc_reserve_pct}%</strong></span>
+                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${params.has_live_soc === false ? "bg-amber-500/20 text-amber-300 border border-amber-500/30" : "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"}`}>
+                        {params.has_live_soc === false ? "⚠️ Kein Live-SoC Sensor" : "✓ SoC Live-Sensor aktiv"}
+                    </span>
                 </div>
             </div>
         </div>
