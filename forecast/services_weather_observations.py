@@ -143,9 +143,24 @@ def store_sensor_community_observations(
             )
         )
 
-    if objs_to_save:
+    # In-Memory Deduplizierung nach (provider, station_id, timestamp) gegen PostgreSQL CardinalityViolation
+    unique_map = {}
+    for obj in objs_to_save:
+        key = (obj.provider, str(obj.station_id), obj.timestamp)
+        if key in unique_map:
+            existing = unique_map[key]
+            if existing.temperature_c is None and obj.temperature_c is not None:
+                existing.temperature_c = obj.temperature_c
+            if existing.humidity_pct is None and obj.humidity_pct is not None:
+                existing.humidity_pct = obj.humidity_pct
+        else:
+            unique_map[key] = obj
+
+    deduped_objs = list(unique_map.values())
+
+    if deduped_objs:
         WeatherObservation.objects.bulk_create(
-            objs_to_save,
+            deduped_objs,
             update_conflicts=True,
             unique_fields=["provider", "station_id", "timestamp"],
             update_fields=[
@@ -158,5 +173,5 @@ def store_sensor_community_observations(
         )
 
     return {
-        "saved": len(objs_to_save),
+        "saved": len(deduped_objs),
     }

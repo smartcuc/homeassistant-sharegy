@@ -218,8 +218,14 @@ def store_weather_payload_for_home(
         )
 
     if objs_to_create:
+        unique_weather = {}
+        for obj in objs_to_create:
+            key = (obj.home_id or getattr(obj.home, "id", None), obj.ts)
+            unique_weather[key] = obj
+        deduped_weather = list(unique_weather.values())
+
         WeatherForecast.objects.bulk_create(
-            objs_to_create,
+            deduped_weather,
             update_conflicts=True,
             unique_fields=["home", "ts"],
             update_fields=[

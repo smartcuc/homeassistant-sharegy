@@ -25,54 +25,62 @@ def fetch_spot_prices_smard():
     """
     Holt 15-Minuten Spotpreise direkt von der SMARD-Schnittstelle der Bundesnetzagentur.
     """
-    index_url = "https://www.smard.de/app/chart_data/4169/DE-LU/index_quarterhour.json"
-    index_response = requests.get(index_url, timeout=15)
-    index_response.raise_for_status()
+    try:
+        index_url = "https://www.smard.de/app/chart_data/4169/DE-LU/index_quarterhour.json"
+        index_response = requests.get(index_url, timeout=15)
+        index_response.raise_for_status()
 
-    timestamps = index_response.json().get("timestamps", [])
-    if not timestamps:
-        return {"status": "error", "count": 0}
+        timestamps = index_response.json().get("timestamps", [])
+        if not timestamps:
+            return {"status": "error", "count": 0}
 
-    latest_timestamp = timestamps[-1]
-    data_url = (
-        f"https://www.smard.de/app/chart_data/4169/DE-LU/"
-        f"4169_DE-LU_quarterhour_{latest_timestamp}.json"
-    )
+        latest_timestamp = timestamps[-1]
+        data_url = (
+            f"https://www.smard.de/app/chart_data/4169/DE-LU/"
+            f"4169_DE-LU_quarterhour_{latest_timestamp}.json"
+        )
 
-    response = requests.get(data_url, timeout=15)
-    response.raise_for_status()
-    data = response.json()
+        response = requests.get(data_url, timeout=15)
+        response.raise_for_status()
+        data = response.json()
 
-    objs = []
-    for ts_ms, price_mwh in data.get("series", []):
-        if price_mwh is None:
-            continue
+        objs = []
+        for ts_ms, price_mwh in data.get("series", []):
+            if price_mwh is None:
+                continue
 
-        dt = timezone.datetime.fromtimestamp(ts_ms / 1000, tz=dt_timezone.utc)
-        price_kwh = Decimal(str(price_mwh)) / Decimal("1000")
+            dt = timezone.datetime.fromtimestamp(ts_ms / 1000, tz=dt_timezone.utc)
+            price_kwh = Decimal(str(price_mwh)) / Decimal("1000")
 
-        objs.append(
-            SpotPrice(
-                timestamp=dt,
-                price_eur_per_kwh=price_kwh,
-                source="smard",
+            objs.append(
+                SpotPrice(
+                    timestamp=dt,
+                    price_eur_per_kwh=price_kwh,
+                    source="smard",
+                )
             )
-        )
 
-    if objs:
-        SpotPrice.objects.bulk_create(
-            objs,
-            update_conflicts=True,
-            unique_fields=["timestamp", "source"],
-            update_fields=["price_eur_per_kwh"],
-        )
+        unique_smard = {obj.timestamp: obj for obj in objs}
+        deduped_smard = list(unique_smard.values())
 
-    count = len(objs)
-    cache.set("spot:last_update", timezone.now().isoformat(), timeout=None)
-    cache.set("spot:last_count", count, timeout=None)
-    cache.set("spot:last_success", True, timeout=None)
+        if deduped_smard:
+            SpotPrice.objects.bulk_create(
+                deduped_smard,
+                update_conflicts=True,
+                unique_fields=["timestamp", "source"],
+                update_fields=["price_eur_per_kwh"],
+            )
 
-    return {"status": "ok", "source": "smard", "count": count}
+        count = len(deduped_smard)
+        cache.set("spot:last_update", timezone.now().isoformat(), timeout=None)
+        cache.set("spot:last_count", count, timeout=None)
+        cache.set("spot:last_success", True, timeout=None)
+
+        return {"status": "ok", "source": "smard", "count": count}
+
+    except Exception as e:
+        logger.error("Fehler beim Abruf von SMARD: %s", e)
+        return {"status": "error", "error": str(e)}
 
 
 @shared_task
@@ -115,15 +123,18 @@ def fetch_spot_prices():
                 )
             )
 
-        if objs:
+        unique_ec = {obj.timestamp: obj for obj in objs}
+        deduped_ec = list(unique_ec.values())
+
+        if deduped_ec:
             SpotPrice.objects.bulk_create(
-                objs,
+                deduped_ec,
                 update_conflicts=True,
                 unique_fields=["timestamp", "source"],
                 update_fields=["price_eur_per_kwh"],
             )
 
-        count = len(objs)
+        count = len(deduped_ec)
         cache.set("spot:last_update", timezone.now().isoformat(), timeout=None)
         cache.set("spot:last_count", count, timeout=None)
         cache.set("spot:last_success", True, timeout=None)

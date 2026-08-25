@@ -36,7 +36,7 @@ export default function AlertCenterModal({ isOpen, onClose }) {
     const allAlerts = data.alerts || [];
 
     const filteredAlerts = allAlerts.filter((a) => {
-        if (filterSeverity === "all") return true;
+        if (filterSeverity === "all") return a.status !== "resolved";
         if (filterSeverity === "resolved") return a.status === "resolved";
         if (filterSeverity === "active") return a.status !== "resolved";
         return a.severity === filterSeverity && a.status !== "resolved";
@@ -103,11 +103,11 @@ export default function AlertCenterModal({ isOpen, onClose }) {
                     <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
                         <div className="flex flex-wrap gap-1 bg-gray-100 p-1 rounded-xl text-xs font-semibold">
                             {[
-                                { key: "all", label: "Alle" },
+                                { key: "all", label: "Alle aktiven" },
                                 { key: "critical", label: "Kritisch" },
                                 { key: "warning", label: "Warnungen" },
                                 { key: "info", label: "Spar-Tipps" },
-                                { key: "resolved", label: "Gelöst / Historie" },
+                                { key: "resolved", label: "Historie" },
                             ].map((tab) => (
                                 <button
                                     key={tab.key}
@@ -129,8 +129,14 @@ export default function AlertCenterModal({ isOpen, onClose }) {
                     {filteredAlerts.length === 0 ? (
                         <div className="py-12 text-center space-y-2">
                             <div className="text-4xl">✨</div>
-                            <div className="text-base font-bold text-gray-800">Keine aktiven Alarme</div>
-                            <p className="text-xs text-gray-500">Alle überwachten Systeme, Speicher und Erzeugungsanlagen laufen optimal.</p>
+                            <div className="text-base font-bold text-gray-800">
+                                {filterSeverity === "resolved" ? "Keine gelösten Alarme in der Historie" : "Keine aktiven Alarme"}
+                            </div>
+                            <p className="text-xs text-gray-500">
+                                {filterSeverity === "resolved"
+                                    ? "Es wurden bisher keine Alarme gelöst."
+                                    : "Alle überwachten Systeme, Speicher und Erzeugungsanlagen laufen optimal."}
+                            </p>
                         </div>
                     ) : (
                         filteredAlerts.map((alert) => (
