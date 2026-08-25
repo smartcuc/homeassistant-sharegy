@@ -71,3 +71,20 @@ class AlertsEngineTest(TestCase):
         self.assertEqual(res_resp.status_code, 200)
         self.assertEqual(res_resp.json()["status"], "resolved")
 
+    def test_negative_pv_generation_does_not_trigger_no_pv_alert(self):
+        role_pv = DeviceRole.objects.create(key="producer", label="PV Wechselrichter")
+        pv_dev = Device.objects.create(home=self.home, identifier="pv_inverter_01", configured=True)
+        DeviceConfig.objects.create(device=pv_dev, home=self.home, role=role_pv)
+
+        # Wechselrichter meldet Einspeisung als negativen Wert (-1074 W)
+        DeviceLatestMetric.objects.create(
+            device=pv_dev,
+            metric_key="power",
+            value=-1074.0,
+            timestamp="2026-08-25T15:00:00Z",
+        )
+
+        active_alerts = evaluate_home_alerts(self.home)
+        no_pv_alert = next((a for a in active_alerts if a.alert_type == "no_pv"), None)
+        self.assertIsNone(no_pv_alert, "Negative PV-Leistung (-1074 W Einspeisung) darf keinen Ertragsausfall-Alarm auslösen")
+

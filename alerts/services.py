@@ -39,8 +39,10 @@ def evaluate_home_alerts(home) -> list[AlertEvent]:
         latest_pv_w = 0.0
         for pvd in pv_devices:
             lm = DeviceLatestMetric.objects.filter(device=pvd, metric_key__in=["power", "pv_power", "value"]).first()
-            if lm and lm.value:
-                latest_pv_w += float(lm.value)
+            if lm and lm.value is not None:
+                # Wechselrichter oder Einspeisezähler übergeben Erzeugung/Einspeisung
+                # je nach Zählpfeil positiv (+1074 W) oder negativ (-1074 W).
+                latest_pv_w += abs(float(lm.value))
 
         # Sonnenzeit: Zwischen 10:00 und 17:00 Uhr
         is_daylight_peak = (10 <= hour <= 17)
