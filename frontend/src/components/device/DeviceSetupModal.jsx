@@ -230,6 +230,7 @@ export default function DeviceSetupModal({
             queryClient.invalidateQueries({ queryKey: ["dashboard-devices"] });
             queryClient.invalidateQueries({ queryKey: ["producers"] });
             queryClient.invalidateQueries({ queryKey: ["storages"] });
+            queryClient.invalidateQueries({ queryKey: ["battery-soc-forecast"] });
 
             if (query?.refetch) query.refetch();
         } catch (err) {

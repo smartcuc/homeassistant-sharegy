@@ -40,7 +40,7 @@ def find_home_battery_storage(home):
             active=True,
             pending_delete=False,
         ).filter(
-            latest_metrics__metric_key__in=["soc", "battery_soc", "state_of_charge", "battery_power", "battery_w"]
+            latest_metrics__metric_key__in=["soc", "battery_soc", "state_of_charge", "battery_percent", "soc_pct", "battery_power", "battery_w"]
         ).distinct().first()
 
     # Wenn kein Batteriespeicher konfiguriert oder über Plugins erkannt wurde:
@@ -77,11 +77,10 @@ def find_home_battery_storage(home):
     # SoC aus Live-Metriken abfragen
     latest_soc = DeviceLatestMetric.objects.filter(
         device=bat_device,
-        metric_key__in=["soc", "battery_soc", "state_of_charge", "value"],
+        metric_key__in=["soc", "battery_soc", "state_of_charge", "battery_percent", "soc_pct", "battery_level", "value"],
     ).first()
-
-    if latest_soc and latest_soc.value is not None:
-        try:
+    # Falls nicht direkt auf bat_device, suche auf allen Geräten des Hauses
+    if not latest_soc or latest_soc.value is None:
             current_soc_pct = max(0.0, min(100.0, float(latest_soc.value)))
         except (ValueError, TypeError):
             pass

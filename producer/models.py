@@ -399,30 +399,54 @@ class StorageSystem(models.Model):
         """Ermittelt den aktuellen Live-Ladestand in %."""
         from devices.models import DeviceLatestMetric
         target_device = self.soc_device or self.primary_device
-        if not target_device:
-            return None
-        keys = [self.soc_metric_key] if self.soc_metric_key else []
-        keys += ["soc", "battery_soc", "state_of_charge", "value"]
+        keys = []
+        if self.soc_metric_key:
+            keys.append(self.soc_metric_key)
+        keys += ["soc", "battery_soc", "state_of_charge", "battery_percent", "soc_pct", "battery_level", "value"]
+
+        if target_device:
+            metric = DeviceLatestMetric.objects.filter(
+                device=target_device,
+                metric_key__in=keys,
+            ).first()
+            if metric and metric.value is not None:
+                return round(float(metric.value), 1)
+
+        # Fallback: Suche in allen aktiven Geräten des Haushalts
         metric = DeviceLatestMetric.objects.filter(
-            device=target_device,
-            metric_key__in=keys,
+            device__home=self.home,
+            device__active=True,
+            metric_key__in=["soc", "battery_soc", "state_of_charge", "battery_percent", "soc_pct", "battery_level"],
         ).first()
         if metric and metric.value is not None:
             return round(float(metric.value), 1)
+
         return None
 
     def get_live_power(self):
         """Ermittelt die aktuelle Lade-/Entladeleistung in Watt."""
         from devices.models import DeviceLatestMetric
         target_device = self.power_device or self.primary_device
-        if not target_device:
-            return None
-        keys = [self.power_metric_key] if self.power_metric_key else []
+        keys = []
+        if self.power_metric_key:
+            keys.append(self.power_metric_key)
         keys += ["power", "battery_power", "battery_w", "value"]
+
+        if target_device:
+            metric = DeviceLatestMetric.objects.filter(
+                device=target_device,
+                metric_key__in=keys,
+            ).first()
+            if metric and metric.value is not None:
+                return round(float(metric.value), 1)
+
+        # Fallback: Suche in allen aktiven Geräten des Haushalts
         metric = DeviceLatestMetric.objects.filter(
-            device=target_device,
-            metric_key__in=keys,
+            device__home=self.home,
+            device__active=True,
+            metric_key__in=["battery_power", "battery_w"],
         ).first()
         if metric and metric.value is not None:
             return round(float(metric.value), 1)
+
         return None

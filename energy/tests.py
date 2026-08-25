@@ -172,3 +172,39 @@ class EnergyBalanceAPITest(TestCase):
         self.assertIn("stored_kwh", slot0)
         self.assertIn("bat_flow_kw", slot0)
         self.assertIn("status", slot0)
+
+    def test_battery_soc_forecast_with_custom_storage_system(self):
+        from producer.models import StorageSystem
+        from devices.models import DeviceLatestMetric
+
+        home = Home.objects.create(user=self.user, name="Custom Storage Home")
+        bat_dev = Device.objects.create(home=home, identifier="custom_byd_hvs", active=True)
+        DeviceLatestMetric.objects.create(
+            device=bat_dev,
+            metric_key="soc",
+            value=82.5,
+            timestamp=timezone.now(),
+        )
+
+        StorageSystem.objects.create(
+            home=home,
+            name="BYD Premium Speicher",
+            capacity_kwh=15.0,
+            max_charge_power_kw=7.5,
+            max_discharge_power_kw=7.5,
+            min_soc_reserve_pct=12.0,
+            soc_device=bat_dev,
+            soc_metric_key="soc",
+            primary_device=bat_dev,
+            active=True,
+        )
+
+        response = self.client.get("/api/energy/battery-forecast/?horizon=24")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data.get("has_battery"))
+        params = data.get("parameters", {})
+        self.assertEqual(params.get("battery_name"), "BYD Premium Speicher")
+        self.assertEqual(params.get("capacity_kwh"), 15.0)
+        self.assertEqual(params.get("current_soc_pct"), 82.5)
+        self.assertEqual(params.get("min_soc_reserve_pct"), 12.0)
