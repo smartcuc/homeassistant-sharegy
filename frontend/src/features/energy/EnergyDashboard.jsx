@@ -8,11 +8,14 @@ import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../api/client";
 import EnergyOptimizerCard from "./components/EnergyOptimizerCard";
 import BatteryForecastCard from "./components/BatteryForecastCard";
+import SubmeterTrendModal from "./components/SubmeterTrendModal";
+import SubmeterStackedTrendChart from "./components/SubmeterStackedTrendChart";
 import AlertNotificationBanner from "../alerts/components/AlertNotificationBanner";
 
 export default function EnergyDashboard() {
     const { t } = useTranslation();
     const [period, setPeriod] = useState("today");
+    const [selectedTrendMeter, setSelectedTrendMeter] = useState(null);
 
     // Fetch energy balance & submeters
     const balanceQuery = useQuery({
@@ -274,19 +277,21 @@ export default function EnergyDashboard() {
             {/* =========================================================
                 VIRTUELLE ZÄHLER & SUB-METERING
             ========================================================= */}
-            <div className="space-y-3">
-                <div className="flex items-center justify-between">
+            <div className="space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div>
                         <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                             <span>🧮</span> {t("energy.submeters_title", "Virtuelle Zähler & Sub-Metering")}
                         </h2>
                         <p className="text-xs text-gray-500 mt-0.5">
-                            {t("energy.submeters_subtitle", "Aufschlüsselung des gesamten Hausverbrauchs nach Verbrauchern und solarem Deckungsgrad.")}
+                            {t("energy.submeters_subtitle", "Aufschlüsselung des gesamten Hausverbrauchs nach Verbrauchern. Klicke auf eine Kachel für Zeitreihen- & Trend-Analysen.")}
                         </p>
                     </div>
-                    <span className="text-xs font-semibold px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg">
-                        {submeters.length} {submeters.length === 1 ? "Verbraucher" : "Verbraucher"}
-                    </span>
+                    <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg">
+                            {submeters.length} {submeters.length === 1 ? "Verbraucher" : "Verbraucher"}
+                        </span>
+                    </div>
                 </div>
 
                 {/* Submeters Grid */}
@@ -294,22 +299,28 @@ export default function EnergyDashboard() {
                     {submeters.map((meter) => (
                         <div
                             key={meter.id}
-                            className={`p-5 rounded-2xl border transition shadow-2xs ${meter.is_residual
-                                ? "bg-slate-50/70 border-dashed border-slate-300"
-                                : "bg-white border-gray-200 hover:shadow-xs"
+                            onClick={() => setSelectedTrendMeter(meter)}
+                            className={`p-5 rounded-2xl border transition shadow-2xs cursor-pointer group hover:scale-[1.01] ${meter.is_residual
+                                ? "bg-slate-50/70 border-dashed border-slate-300 hover:border-slate-400 hover:shadow-xs"
+                                : "bg-white border-gray-200 hover:border-indigo-300 hover:shadow-md"
                                 }`}
+                            title="Klick: Historische Zeitreihen & Trends öffnen"
                         >
                             {/* Meter Header */}
                             <div className="flex items-center justify-between gap-2">
                                 <div className="flex items-center gap-2.5 min-w-0">
-                                    <span className="text-2xl shrink-0 p-2 bg-slate-100 rounded-xl">{meter.icon}</span>
+                                    <span className="text-2xl shrink-0 p-2 bg-slate-100 group-hover:bg-indigo-50 rounded-xl transition">
+                                        {meter.icon}
+                                    </span>
                                     <div className="min-w-0">
-                                        <div className="font-bold text-sm text-gray-900 truncate">{meter.name}</div>
+                                        <div className="font-bold text-sm text-gray-900 group-hover:text-indigo-600 transition truncate">
+                                            {meter.name}
+                                        </div>
                                         <div className="text-[11px] text-gray-400 capitalize">{meter.category}</div>
                                     </div>
                                 </div>
                                 <span
-                                    className="px-2.5 py-1 rounded-full text-xs font-bold text-white shrink-0"
+                                    className="px-2.5 py-1 rounded-full text-xs font-bold text-white shrink-0 shadow-2xs"
                                     style={{ backgroundColor: meter.color }}
                                 >
                                     {meter.share_pct} %
@@ -317,7 +328,7 @@ export default function EnergyDashboard() {
                             </div>
 
                             {/* Consumption & Costs */}
-                            <div className="mt-4 flex items-baseline justify-between border-b pb-3">
+                            <div className="mt-4 flex items-baseline justify-between border-b border-gray-100 pb-3">
                                 <div>
                                     <div className="text-2xl font-black text-gray-900 font-mono">
                                         {Number(meter.consumption_kwh).toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}{" "}
@@ -361,9 +372,21 @@ export default function EnergyDashboard() {
                                     />
                                 </div>
                             </div>
+
+                            {/* Footer Link / Action Prompt */}
+                            <div className="mt-3 pt-2 border-t border-gray-100 flex items-center justify-between text-[11px] text-indigo-600 font-semibold opacity-0 group-hover:opacity-100 transition">
+                                <span>📈 Trends & Historie anzeigen</span>
+                                <span className="group-hover:translate-x-1 transition">→</span>
+                            </div>
                         </div>
                     ))}
                 </div>
+
+                {/* Gestapelte historische Trendanalyse aller Zähler */}
+                <SubmeterStackedTrendChart
+                    period={period}
+                    onSelectMeter={(m) => setSelectedTrendMeter(m)}
+                />
             </div>
 
             {/* =========================================================
@@ -534,6 +557,16 @@ export default function EnergyDashboard() {
                     </div>
                 </div>
             </div>
+
+            {/* =========================================================
+                SUBMETER TREND & HISTORY MODAL (TASK 5.14)
+            ========================================================= */}
+            <SubmeterTrendModal
+                meter={selectedTrendMeter}
+                isOpen={Boolean(selectedTrendMeter)}
+                onClose={() => setSelectedTrendMeter(null)}
+                defaultPeriod={period}
+            />
         </div>
     );
 }

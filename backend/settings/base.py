@@ -75,6 +75,7 @@ CSRF_TRUSTED_ORIGINS = [
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "accounts.auth.CsrfExemptSessionAuthentication",
+        "accounts.auth_api_key.APIKeyOrTokenAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.AllowAny",

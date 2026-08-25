@@ -79,6 +79,7 @@ urlpatterns = [
                 path("track/", include("tracking.api_urls")),
                 path("tracking/", include("tracking.api_urls")),
                 path("help/", include("helpcenter.urls")),
+                path("grafana/", include("energy.api.urls_grafana")),
             ]
         ),
     ),

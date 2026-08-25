@@ -17,32 +17,35 @@ graph TD
         T1_2["2. Verbrauchs-Prognose Engine (Task 5.2)"]
         T1_3["3. Batterie- & SoC-Prognose Simulation (Task 5.3)"]
         T1_4["4. Solar-Prognosegüte & Ist-vs-Soll Abgleich (Task 5.13)"]
+        T1_5["5. Frei wählbarer Zeitraum & Multi-Format Export (Task 5.15)"]
     end
 
     subgraph TIER 2: Alerting & Push-Engine
-        T2_1["5. Alert & Anomalie-Erkennungssystem (Task 5.6)"]
-        T2_2["6. Mobile Push & Notification Engine FCM/APNs (Task 5.9)"]
+        T2_1["6. Alert & Anomalie-Erkennungssystem (Task 5.6)"]
+        T2_2["7. Mobile Push & Notification Engine FCM/APNs (Task 5.9)"]
     end
 
     subgraph TIER 3: Ökosystem-Bridges & Aktorik
-        T3_1["7. Deklaratives Device-Profile Addon-System (Task 5.7)"]
-        T3_2["8. Bi-direktionale Plugins: Home Assistant, evcc, ioBroker (Task 5.8)"]
+        T3_1["8. Deklaratives Device-Profile Addon-System (Task 5.7)"]
+        T3_2["9. Bi-direktionale Plugins: Home Assistant, evcc, ioBroker (Task 5.8)"]
     end
 
     subgraph TIER 4: Mobile Apps & User Experience
-        T4_1["9. Native iOS & Android Apps via Capacitor (Task 5.10)"]
-        T4_2["10. Kontextuelles Help-System & FAQ/Handbuch DE/EN (Task 5.4 & 5.5)"]
+        T4_1["10. Native iOS & Android Apps via Capacitor (Task 5.10)"]
+        T4_2["11. Kontextuelles Help-System & FAQ/Handbuch DE/EN (Task 5.4 & 5.5)"]
     end
 
-    subgraph TIER 5: Monetarisierung & EMS-Abrechnung
-        T5_1["11. Subscription & SaaS-Lizenzmodell / Stripe (Task 5.11)"]
-        T5_2["12. EMS-Userabrechnung & Mieterstrom / Sub-Metering Billing (Task 5.12)"]
+    subgraph TIER 5: Monetarisierung, Sub-Metering & Analytics
+        T5_1["12. Subscription & SaaS-Lizenzmodell / Stripe (Task 5.11)"]
+        T5_2["13. EMS-Userabrechnung & Mieterstrom / Sub-Metering Billing (Task 5.12)"]
+        T5_3["14. Trends & Historische Zeitreihen der virtuellen Zähler (Task 5.14)"]
     end
 
     T1_1 --> T1_2
     T1_2 --> T1_3
     T1_3 --> T1_4
-    T1_4 --> T2_1
+    T1_4 --> T1_5
+    T1_5 --> T2_1
     T2_1 --> T2_2
     T2_2 --> T3_1
     T3_1 --> T3_2
@@ -50,6 +53,7 @@ graph TD
     T4_1 --> T4_2
     T4_2 --> T5_1
     T5_1 --> T5_2
+    T5_2 --> T5_3
 ```
 
 ---
@@ -91,7 +95,17 @@ graph TD
   2. **Visuelle Soll-Ist-Überlagerung**: Darstellung der prognostizierten Kurve (gestrichelt) und der tatsächlichen Messwerte (Fläche/Balken) im Zeitverlauf.
   3. **Scorecard & Güte-Badge**: Prozentuale Trefferquote (z. B. *„95,2 % Prognosegenauigkeit heute“*) mit Qualitäts-Indikator (Hervorragend / Gut / Abweichend) im Forecast- und Energie-Dashboard.
   4. **Adaptive Selbstkalibrierung**: Nutzung systematischer Abweichungen (z. B. Nachmittags-Verschattung durch Nachbargebäude oder Bäume) zur automatischen Nachjustierung des standortspezifischen String-Korrekturfaktors.
-* **Ergebnis**: Höchste Transparenz, Benutzervertrauen und kontinuierlich selbstoptimierende PV-Ertragsprognosen.
+#### 5. 📅 Task 5.15: Frei wählbarer Zeitraum (Date-Range-Picker) & Multi-Format Daten-Export (CSV / Excel / JSON / PDF)
+* **Zweck**: Volle Flexibilität zur historischen Auswertung beliebiger Zeitintervalle sowie Download und Weitergabe aller Mess-, Kosten- und Verbrauchsdaten.
+* **Maßnahmen**:
+  1. **Flexibler Zeitraum-Filter**:
+     * Schnellauswahl: *Heute, Gestern, Letzte 7 Tage, Letzte 30 Tage, Dieser Monat, Letzter Monat, Dieses Jahr, Gesamte Historie*.
+     * **Freier Datums- & Uhrzeitbereich (Custom Date Range Picker)** für minutengenaue historische Analysen.
+  2. **Multi-Format Export-Engine**:
+     * **CSV / Excel (.xlsx)**: Tabellarische Zeitreihen (15m-, 1h- und Tagesscheiben) für PV-Erzeugung, Hauslast, Batteriestände, Netzbezug, Einspeisung, Kosten und Zählerstände.
+     * **JSON**: Vollständiger strukturierter Rohdaten-Export für eigene Auswertungen, Grafana oder Home Assistant.
+     * **PDF-Energiebericht**: Formatierter Monats- oder Zeitraum-Report mit Diagrammen, Autarkiegrad, Eigenverbrauchsquote, CO₂-Einsparung und Kostenübersicht.
+* **Ergebnis**: Revisionssichere Datenarchivierung, maximale Transparenz und einfache Weitergabe an Steuerberater oder Hausverwaltungen.
 
 ---
 
@@ -181,3 +195,17 @@ graph TD
   4. **Export & Schnittstellen**:
      * CSV-, Excel- und DATEV-kompatibler Export für Steuerberater und Hausverwaltungssoftware.
 * **Ergebnis**: Vollständige Mieterstrom- und Nebenkostenabrechnung auf Knopfdruck ohne manuelle Tabellenkalkulation.
+
+#### 12. 📊 Task 5.14: Trends & Historische Zeitreihen der virtuellen Zähler (Virtual Meters Trend & Analytics Engine)
+* **Zweck**: Tiefgehende historische Analyse, Trend-Erkennung und grafische Gegenüberstellung aller virtuellen Unterzähler (Wallbox, Wärmepumpe, Einliegerwohnung, Restverbrauch etc.).
+* **Maßnahmen**:
+  1. **Historische Zeitreihen-Visualisierung**:
+     * Interaktive Verbrauchs- und Kostenkurven (Tag, Woche, Monat, Jahr & gleitender Durchschnitt) für jeden einzelnen virtuellen Zähler.
+  2. **Quellen-Aufschlüsselung je virtuellem Verbraucher**:
+     * Transparente Darstellung: Zu wie viel Prozent wurde der Verbrauch eines Zählers durch *PV-Direktverbrauch*, *Batterie-Entladung* oder *Netzbezug* gedeckt?
+  3. **Multi-Zähler-Vergleich & Anteils-Analyse**:
+     * Gestapelte Balken- und Sankey-Diagramme zur Visualisierung der prozentualen Verbrauchsanteile (z. B. Wärmepumpe vs. Wallbox vs. Grundlast).
+  4. **Kosten- & Einsparungs-Trends**:
+     * Ermittlung vermiedener Stromkosten durch Eigenverbrauchsnutzung je Verbraucher im historischen Zeitverlauf.
+* **Ergebnis**: Lückenlose Verbrauchstransparenz für alle Sub-Stromkreise und verlässliche Datengrundlage zur Dimensionierung künftiger Speicher- und PV-Erweiterungen.
+

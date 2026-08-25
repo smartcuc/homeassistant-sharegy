@@ -63,6 +63,16 @@ def energy_balance(request):
     return Response(data)
 
 
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def submeter_trends_view(request):
+    from energy.services.submeter_trends import get_submeter_trends
+    period = request.GET.get("period", "30d")
+    meter_id = request.GET.get("meter_id", None)
+    data = get_submeter_trends(request.user, period=period, meter_id=meter_id)
+    return Response(data)
+
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def seed_demo_data(request):

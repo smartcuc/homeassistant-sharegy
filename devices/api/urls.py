@@ -30,6 +30,7 @@ from devices.views import (
     send_device_config,
     device_metrics,
 )
+from .views_telemetry_push import telemetry_push
 
 urlpatterns = [
     path("", device_list),
@@ -56,4 +57,5 @@ urlpatterns = [
     path("trash/count/", trash_count),
     path("purge/", purge_devices),
     path("dashboard/", device_dashboard_values),
+    path("telemetry/push/", telemetry_push),
 ]

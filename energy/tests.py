@@ -208,3 +208,123 @@ class EnergyBalanceAPITest(TestCase):
         self.assertEqual(params.get("capacity_kwh"), 15.0)
         self.assertEqual(params.get("current_soc_pct"), 82.5)
         self.assertEqual(params.get("min_soc_reserve_pct"), 12.0)
+
+
+class SubmeterTrendsTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="trendtestuser",
+            email="trends@example.com",
+            password="testpassword123",
+        )
+        self.home = Home.objects.create(user=self.user, name="Trend Test Home")
+
+    def test_submeter_trends_api_and_service(self):
+        from energy.services.submeter_trends import get_submeter_trends
+
+        # 1. Service Test
+        data_30d = get_submeter_trends(self.user, period="30d")
+        self.assertIn("meters", data_30d)
+        self.assertIn("timeseries", data_30d)
+        self.assertGreaterEqual(len(data_30d["meters"]), 2)
+        self.assertIn("selected_meter", data_30d)
+        self.assertIn("selected_timeseries", data_30d)
+
+        # 2. API Endpoint Test
+        self.client.force_login(self.user)
+        response = self.client.get("/api/energy/submeters/trends/?period=7d")
+        self.assertEqual(response.status_code, 200)
+        json_data = response.json()
+        self.assertEqual(json_data.get("period"), "7d")
+        self.assertIsInstance(json_data.get("meters"), list)
+        self.assertIsInstance(json_data.get("timeseries"), list)
+        self.assertGreater(len(json_data.get("timeseries")), 0)
+
+
+class GrafanaAndHomeAssistantPluginTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="pluginuser",
+            email="plugin@example.com",
+            password="testpassword123",
+        )
+        self.home = Home.objects.create(
+            user=self.user,
+            name="Plugin Test Home",
+        )
+        self.token = self.home.mqtt_token
+
+    def test_grafana_endpoints_with_auth(self):
+        # 1. Test unauthenticated request fails
+        res_unauth = self.client.get("/api/grafana/")
+        self.assertIn(res_unauth.status_code, [401, 403])
+
+        # 2. Test Bearer Token Auth on Root
+        res_root = self.client.get(
+            "/api/grafana/",
+            HTTP_AUTHORIZATION=f"Bearer {self.token}",
+        )
+        self.assertEqual(res_root.status_code, 200)
+        self.assertEqual(res_root.json().get("status"), "success")
+
+        # 3. Test X-API-Key Auth on Search
+        res_search = self.client.post(
+            "/api/grafana/search",
+            HTTP_X_API_KEY=self.token,
+        )
+        self.assertEqual(res_search.status_code, 200)
+        self.assertIn("pv_power_w", res_search.json())
+        self.assertIn("load_power_w", res_search.json())
+        self.assertIn("battery_soc_pct", res_search.json())
+
+        # 4. Test Query Endpoint
+        res_query = self.client.post(
+            "/api/grafana/query",
+            data={
+                "range": {"from": "2026-08-25T00:00:00Z", "to": "2026-08-25T23:59:59Z"},
+                "targets": [{"target": "pv_power_w"}, {"target": "load_power_w"}],
+            },
+            content_type="application/json",
+            HTTP_AUTHORIZATION=f"Bearer {self.token}",
+        )
+        self.assertEqual(res_query.status_code, 200)
+        datapoints_list = res_query.json()
+        self.assertEqual(len(datapoints_list), 2)
+        self.assertEqual(datapoints_list[0]["target"], "pv_power_w")
+        self.assertGreater(len(datapoints_list[0]["datapoints"]), 0)
+
+    def test_home_assistant_telemetry_push(self):
+        # Test pushing local HA device telemetry to Sharegy
+        payload = {
+            "devices": [
+                {
+                    "identifier": "shelly_3em_ha",
+                    "name": "Shelly 3EM HA",
+                    "power_w": 2840.5,
+                    "energy_kwh": 1500.2,
+                    "role": "grid",
+                },
+                {
+                    "identifier": "heatpump_ha",
+                    "name": "Wärmepumpe HA",
+                    "power_w": 1800.0,
+                    "energy_kwh": 320.0,
+                    "role": "consumer",
+                },
+            ]
+        }
+
+        res_push = self.client.post(
+            "/api/devices/telemetry/push/",
+            data=payload,
+            content_type="application/json",
+            HTTP_X_API_KEY=self.token,
+        )
+        self.assertEqual(res_push.status_code, 200)
+        data = res_push.json()
+        self.assertEqual(data.get("status"), "success")
+        self.assertEqual(data.get("saved_metrics"), 2)
+        self.assertIn("shelly_3em_ha", data.get("devices_updated"))
+
+
+
