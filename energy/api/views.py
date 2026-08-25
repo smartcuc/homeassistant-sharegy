@@ -79,6 +79,15 @@ def seed_demo_data(request):
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
+def energy_optimizer(request):
+    from energy.services.optimizer import get_optimizer_schedule
+    horizon = int(request.GET.get("horizon", 36))
+    data = get_optimizer_schedule(request.user, horizon_hours=horizon)
+    return Response(data)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def chart_data(request):
     metric = request.GET.get("metric")
     period = request.GET.get("period", "24h")

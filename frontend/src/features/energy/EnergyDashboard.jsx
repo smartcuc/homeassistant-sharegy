@@ -6,6 +6,7 @@ import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../api/client";
+import EnergyOptimizerCard from "./components/EnergyOptimizerCard";
 
 export default function EnergyDashboard() {
     const { t } = useTranslation();
@@ -288,6 +289,11 @@ export default function EnergyDashboard() {
                     ))}
                 </div>
             )}
+
+            {/* =========================================================
+                SMART ENERGY OPTIMIZER (1H, 2H, 4H BESTE LADEZEITEN)
+            ========================================================= */}
+            <EnergyOptimizerCard />
 
             {/* =========================================================
                 VIRTUELLE ZÄHLER & SUB-METERING

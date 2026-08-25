@@ -123,3 +123,27 @@ class EnergyBalanceAPITest(TestCase):
         resp_7d = self.client.get("/api/energy/balance/?period=7d").json()
         self.assertGreater(resp_7d["kpis"]["pv_generation_kwh"], 0)
         self.assertGreater(resp_7d["kpis"]["house_consumption_kwh"], 0)
+
+    def test_energy_optimizer_api(self):
+        # Seed demo user
+        self.client.post("/api/energy/seed-demo/")
+
+        response = self.client.get("/api/energy/optimizer/?horizon=24")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+
+        self.assertIn("timeline", data)
+        self.assertIn("windows", data)
+        self.assertIn("1h", data["windows"])
+        self.assertIn("2h", data["windows"])
+        self.assertIn("4h", data["windows"])
+
+        # Check 1h, 2h, 4h windows structure
+        for dur in ["1h", "2h", "4h"]:
+            win_info = data["windows"][dur]
+            self.assertIn("best_overall", win_info)
+            self.assertIn("savings_eur", win_info)
+            best = win_info["best_overall"]
+            self.assertIn("start_label", best)
+            self.assertIn("end_label", best)
+            self.assertIn("avg_cost_ct", best)
