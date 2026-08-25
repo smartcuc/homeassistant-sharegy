@@ -179,11 +179,11 @@ def get_energy_balance(user, period="today") -> dict:
     self_consumption_rate = min(100.0, max(0.0, self_consumption_rate))
 
     # =========================================================================
-    # 2.5 Tarif-, Börsenpreis- und Einspeisevergütungs-Berechnung
+    # 2.5 Tarif-, Börsenpreis- und Einspeisevergütungs-Berechnung (Zeitgenau nach Datum)
     # =========================================================================
-    tariff = get_home_tariff(home, end_dt.date()) if home else None
-    tariff_type = tariff.tariff_type if tariff else "static"
-    feed_in_type = tariff.feed_in_tariff_type if tariff else HomeTariff.FEED_IN_STATIC
+    current_active_tariff = get_home_tariff(home, end_dt.date()) if home else None
+    tariff_type = current_active_tariff.tariff_type if current_active_tariff else "static"
+    feed_in_type = current_active_tariff.feed_in_tariff_type if current_active_tariff else HomeTariff.FEED_IN_STATIC
 
     spot_prices_map = {}
     if tariff_type == HomeTariff.TARIFF_DYNAMIC or feed_in_type == HomeTariff.FEED_IN_DYNAMIC:
@@ -195,9 +195,9 @@ def get_energy_balance(user, period="today") -> dict:
             ts_key = sp["timestamp"].astimezone(tz).replace(minute=0, second=0, microsecond=0)
             spot_prices_map[ts_key] = float(sp["price_eur_per_kwh"] or 0.10) * 100.0
 
-    # Bezugsstrompreis-Label
-    if tariff and tariff.tariff_type == HomeTariff.TARIFF_STATIC and tariff.static_price_eur_per_kwh:
-        base_elec_price = float(tariff.static_price_eur_per_kwh)
+    # Bezugsstrompreis-Label für aktuellen Tarif
+    if current_active_tariff and current_active_tariff.tariff_type == HomeTariff.TARIFF_STATIC and current_active_tariff.static_price_eur_per_kwh:
+        base_elec_price = float(current_active_tariff.static_price_eur_per_kwh)
         tariff_label = f"Festpreis ({base_elec_price * 100:.1f} ct/kWh)"
     elif tariff_type == HomeTariff.TARIFF_DYNAMIC:
         base_elec_price = 0.28
@@ -206,29 +206,24 @@ def get_energy_balance(user, period="today") -> dict:
         base_elec_price = 0.32
         tariff_label = "Standard-Tarif (32,0 ct/kWh)"
 
-    # Einspeisevergütung ermitteln
-    if feed_in_type == HomeTariff.FEED_IN_NONE:
-        feed_in_price = 0.0
-        feed_in_revenue_eur = 0.0
-    elif feed_in_type == HomeTariff.FEED_IN_DYNAMIC:
-        # Dynamischer Marktwert Solar
-        feed_in_price = 0.075
-        dynamic_feed_in_rev = 0.0
-        for b_time_dt, vals in [(row["bucket"].astimezone(tz).replace(minute=0, second=0, microsecond=0), row) for row in metric_rows]:
-            spot_ct = spot_prices_map.get(b_time_dt, 7.5)
-            spot_eur = max(0.0, spot_ct / 100.0)
-            if vals["device_id"] in grid_device_ids and float(vals.get("avg", 0)) < 0:
-                kwh_exp = float(vals["energy_wh"] or 0) / 1000.0
-                dynamic_feed_in_rev += kwh_exp * spot_eur
-        feed_in_revenue_eur = round(max(dynamic_feed_in_rev, total_grid_export_kwh * 0.07), 2)
-    else:  # FEED_IN_STATIC
-        feed_in_price = float(tariff.feed_in_tariff_eur_per_kwh) if tariff and tariff.feed_in_tariff_eur_per_kwh is not None else 0.082
-        feed_in_revenue_eur = round(total_grid_export_kwh * feed_in_price, 2)
+    feed_in_price = (
+        float(current_active_tariff.feed_in_tariff_eur_per_kwh)
+        if (current_active_tariff and current_active_tariff.feed_in_tariff_eur_per_kwh is not None)
+        else 0.082
+    )
 
-    # Finanzen & Ersparnis berechnen (Zeitintervall-basiert oder Festpreis)
-    if tariff_type == HomeTariff.TARIFF_DYNAMIC and metric_rows:
+    # Cache für tagesgenaue Tarife
+    tariff_cache = {}
+    def get_tariff_for_date(d):
+        if d not in tariff_cache:
+            tariff_cache[d] = get_home_tariff(home, d) if home else None
+        return tariff_cache[d]
+
+    # Finanzen & Ersparnis berechnen (Intervall- und tagesgenau)
+    if metric_rows:
         calculated_savings = 0.0
         calculated_grid_costs = 0.0
+        calculated_feed_in_revenue = 0.0
 
         for b_time_dt, vals in sorted(
             [
@@ -237,9 +232,29 @@ def get_energy_balance(user, period="today") -> dict:
             ],
             key=lambda x: x[0],
         ):
+            b_date = b_time_dt.date()
+            t_obj = get_tariff_for_date(b_date)
+            t_type = t_obj.tariff_type if t_obj else tariff_type
+            f_type = t_obj.feed_in_tariff_type if t_obj else feed_in_type
+
             spot_ct = spot_prices_map.get(b_time_dt, 10.5)
-            effective_ct = calculate_effective_price(home, b_time_dt, spot_ct) if home else (spot_ct + 17.59)
-            unit_price_eur = effective_ct / 100.0
+
+            # 1. Strombezugspreis für dieses Intervall
+            if t_type == HomeTariff.TARIFF_DYNAMIC:
+                effective_ct = calculate_effective_price(home, b_time_dt, spot_ct) if home else (spot_ct + 17.59)
+                unit_price_eur = effective_ct / 100.0
+            elif t_obj and t_obj.static_price_eur_per_kwh is not None:
+                unit_price_eur = float(t_obj.static_price_eur_per_kwh)
+            else:
+                unit_price_eur = base_elec_price
+
+            # 2. Einspeisepreis für dieses Intervall
+            if f_type == HomeTariff.FEED_IN_NONE:
+                feed_in_unit_eur = 0.0
+            elif f_type == HomeTariff.FEED_IN_DYNAMIC:
+                feed_in_unit_eur = max(0.0, spot_ct / 100.0)
+            else:
+                feed_in_unit_eur = float(t_obj.feed_in_tariff_eur_per_kwh) if (t_obj and t_obj.feed_in_tariff_eur_per_kwh is not None) else 0.082
 
             dev_id = vals["device_id"]
             wh = float(vals["energy_wh"] or 0)
@@ -247,16 +262,23 @@ def get_energy_balance(user, period="today") -> dict:
 
             if dev_id in pv_device_ids:
                 calculated_savings += kwh * 0.7 * unit_price_eur
-            elif dev_id in grid_device_ids and float(vals.get("avg", 0)) > 0:
-                calculated_grid_costs += kwh * unit_price_eur
+            elif dev_id in grid_device_ids:
+                avg_val = float(vals.get("avg", 0))
+                if avg_val > 0:
+                    calculated_grid_costs += kwh * unit_price_eur
+                elif avg_val < 0:
+                    calculated_feed_in_revenue += kwh * feed_in_unit_eur
 
-        savings_eur = round(max(calculated_savings, solar_supplied_kwh * 0.25), 2)
-        grid_costs_eur = round(max(calculated_grid_costs, total_grid_import_kwh * 0.25), 2)
+        savings_eur = round(max(calculated_savings, solar_supplied_kwh * 0.20), 2)
+        grid_costs_eur = round(max(calculated_grid_costs, total_grid_import_kwh * 0.20), 2)
+        feed_in_revenue_eur = round(calculated_feed_in_revenue if calculated_feed_in_revenue > 0 else (total_grid_export_kwh * (float(current_active_tariff.feed_in_tariff_eur_per_kwh) if current_active_tariff and current_active_tariff.feed_in_tariff_eur_per_kwh else 0.082) if feed_in_type == HomeTariff.FEED_IN_STATIC else 0.0), 2)
         elec_price = round(savings_eur / solar_supplied_kwh, 4) if solar_supplied_kwh > 0 else base_elec_price
     else:
         elec_price = base_elec_price
         savings_eur = round(solar_supplied_kwh * elec_price, 2)
         grid_costs_eur = round(total_grid_import_kwh * elec_price, 2)
+        feed_in_rate = float(current_active_tariff.feed_in_tariff_eur_per_kwh) if (current_active_tariff and current_active_tariff.feed_in_tariff_eur_per_kwh is not None) else 0.082
+        feed_in_revenue_eur = round(total_grid_export_kwh * feed_in_rate, 2) if feed_in_type == HomeTariff.FEED_IN_STATIC else 0.0
 
     net_benefit_eur = round(savings_eur + feed_in_revenue_eur - grid_costs_eur, 2)
     co2_saved_kg = round(solar_supplied_kwh * 0.40, 1)

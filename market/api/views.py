@@ -248,6 +248,15 @@ def home_tariff_detail(request):
     active_tariff = get_home_tariff(home, today) or HomeTariff.objects.filter(home=home).order_by("-valid_from").first()
 
     if request.method == "POST":
+        # 0. Gültigkeitsdatum (valid_from) ermitteln
+        raw_valid_from = request.data.get("valid_from")
+        valid_from = today
+        if raw_valid_from:
+            try:
+                valid_from = datetime.date.fromisoformat(str(raw_valid_from).strip())
+            except Exception:
+                valid_from = today
+
         # 1. Strombezugstarif ermitteln
         if "tariff_type" in request.data:
             tariff_type = request.data.get("tariff_type") or HomeTariff.TARIFF_DYNAMIC
@@ -303,27 +312,17 @@ def home_tariff_detail(request):
         elif feed_in_tariff_type == HomeTariff.FEED_IN_DYNAMIC:
             feed_in_price_eur = None
 
-        # 3. In Datenbank speichern / aktualisieren
-        existing_tariffs = list(HomeTariff.objects.filter(home=home))
-        if existing_tariffs:
-            for t in existing_tariffs:
-                t.tariff_type = tariff_type
-                t.static_price_eur_per_kwh = static_price_eur
-                t.feed_in_tariff_type = feed_in_tariff_type
-                t.feed_in_tariff_eur_per_kwh = feed_in_price_eur
-                if t.valid_from > today:
-                    t.valid_from = today
-                t.save()
-            active_tariff = existing_tariffs[0]
-        else:
-            active_tariff = HomeTariff.objects.create(
-                home=home,
-                valid_from=today,
-                tariff_type=tariff_type,
-                static_price_eur_per_kwh=static_price_eur,
-                feed_in_tariff_type=feed_in_tariff_type,
-                feed_in_tariff_eur_per_kwh=feed_in_price_eur,
-            )
+        # 3. Exakten Tarif für dieses Gültigkeitsdatum speichern / aktualisieren
+        tariff, _ = HomeTariff.objects.update_or_create(
+            home=home,
+            valid_from=valid_from,
+            defaults={
+                "tariff_type": tariff_type,
+                "static_price_eur_per_kwh": static_price_eur,
+                "feed_in_tariff_type": feed_in_tariff_type,
+                "feed_in_tariff_eur_per_kwh": feed_in_price_eur,
+            },
+        )
 
         # Tibber Zugangsdaten auf dem User speichern (falls mitgesendet)
         user = request.user
@@ -338,8 +337,8 @@ def home_tariff_detail(request):
             user.save(update_fields=["tibber_token", "tibber_home_id"])
 
     # GET oder Rückgabe nach POST
-    if not active_tariff:
-        active_tariff = get_home_tariff(home, today)
+    all_tariffs = list(HomeTariff.objects.filter(home=home).order_by("-valid_from"))
+    active_tariff = get_home_tariff(home, today) or (all_tariffs[0] if all_tariffs else None)
     price_config = get_price_config(today)
 
     config_data = None
@@ -355,6 +354,22 @@ def home_tariff_detail(request):
             "additional_costs_ct": float(price_config.additional_costs_ct()),
         }
 
+    history_list = []
+    for t in all_tariffs:
+        is_active = bool(active_tariff and t.id == active_tariff.id)
+        history_list.append(
+            {
+                "id": str(t.id),
+                "valid_from": t.valid_from.isoformat(),
+                "tariff_type": t.tariff_type,
+                "static_price_ct": round(float(t.static_price_eur_per_kwh) * 100, 2) if t.static_price_eur_per_kwh is not None else None,
+                "feed_in_tariff_type": t.feed_in_tariff_type,
+                "feed_in_tariff_ct": round(float(t.feed_in_tariff_eur_per_kwh) * 100, 2) if t.feed_in_tariff_eur_per_kwh is not None else 8.20,
+                "is_active": is_active,
+                "is_future": t.valid_from > today,
+            }
+        )
+
     return Response(
         {
             "home_id": str(home.id),
@@ -365,11 +380,34 @@ def home_tariff_detail(request):
             "feed_in_tariff_ct": round(float(active_tariff.feed_in_tariff_eur_per_kwh) * 100, 2) if active_tariff and active_tariff.feed_in_tariff_eur_per_kwh is not None else 8.20,
             "valid_from": active_tariff.valid_from.isoformat() if active_tariff else today.isoformat(),
             "price_config": config_data,
+            "history": history_list,
             "tibber_token": request.user.tibber_token or "",
             "tibber_home_id": request.user.tibber_home_id or "",
             "tibber_connected": bool(request.user.tibber_token and request.user.tibber_home_id),
         }
     )
+
+
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
+def delete_home_tariff_view(request, tariff_id):
+    """
+    Löscht eine hinterlegte Tarifperiode (sofern noch mindestens ein Tarif existiert).
+    """
+    home = request.user.homes.first()
+    if not home:
+        return Response({"detail": "Kein Zuhause für diesen Benutzer gefunden."}, status=404)
+
+    tariff = HomeTariff.objects.filter(id=tariff_id, home=home).first()
+    if not tariff:
+        return Response({"detail": "Tarifeintrag nicht gefunden."}, status=404)
+
+    total_count = HomeTariff.objects.filter(home=home).count()
+    if total_count <= 1:
+        return Response({"detail": "Der einzige hinterlegte Tarif kann nicht gelöscht werden."}, status=400)
+
+    tariff.delete()
+    return Response({"ok": True})
 
 
 @api_view(["POST"])

@@ -21,3 +21,9 @@ export async function fetchTibberHomes(token) {
         body: JSON.stringify({ tibber_token: token }),
     });
 }
+
+export async function deleteHomeTariff(tariffId) {
+    return await apiFetch(`/api/market/tariff/${tariffId}/`, {
+        method: "DELETE",
+    });
+}
