@@ -97,6 +97,8 @@ class DeviceConfigSerializer(serializers.ModelSerializer):
     energy_signal_type_id = serializers.PrimaryKeyRelatedField(
         queryset=EMSSignalType.objects.all(),
         source="energy_signal_type",
+        write_only=True,
+        allow_null=True,
         required=False,
     )
 
@@ -105,7 +107,7 @@ class DeviceConfigSerializer(serializers.ModelSerializer):
         source="room",
         write_only=True,
         allow_null=True,
-        required=False
+        required=False,
     )
 
     floor_id = serializers.PrimaryKeyRelatedField(
@@ -113,7 +115,7 @@ class DeviceConfigSerializer(serializers.ModelSerializer):
         source="floor",
         write_only=True,
         allow_null=True,
-        required=False
+        required=False,
     )
 
     home_id = serializers.PrimaryKeyRelatedField(
@@ -121,8 +123,24 @@ class DeviceConfigSerializer(serializers.ModelSerializer):
         source="home",
         write_only=True,
         allow_null=True,
-        required=False
+        required=False,
     )
+
+    def to_internal_value(self, data):
+        # Leere Strings aus HTML Form/Select zu None konvertieren
+        cleaned_data = data.copy() if hasattr(data, "copy") else dict(data)
+        for fk_field in [
+            "role_id",
+            "generator_type_id",
+            "metric_definition_id",
+            "energy_signal_type_id",
+            "room_id",
+            "floor_id",
+            "home_id",
+        ]:
+            if fk_field in cleaned_data and cleaned_data[fk_field] == "":
+                cleaned_data[fk_field] = None
+        return super().to_internal_value(cleaned_data)
 
     class Meta:
         model = DeviceConfig

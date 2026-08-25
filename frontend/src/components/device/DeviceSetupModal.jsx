@@ -1,8 +1,5 @@
-/*
-# src/components/device/DeviceSetupModal.jsx
-*/
-
 import { useState, useEffect, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useUnconfiguredDevices } from "../../hooks/useUnconfiguredDevices";
 import { useSettings } from "../../hooks/useSettings";
 import { useStructure } from "../../hooks/useStructure";
@@ -17,6 +14,7 @@ export default function DeviceSetupModal({
     singleDevice = null
 }) {
     const { t } = useTranslation();
+    const queryClient = useQueryClient();
     const isBulk = mode === "bulk";
 
     const query = useUnconfiguredDevices();
@@ -162,12 +160,14 @@ export default function DeviceSetupModal({
     const key = device.id;
 
     function handleChange(deviceId, field, value) {
+        const nextDeviceValues = {
+            ...(localValues[deviceId] || {}),
+            [field]: value,
+        };
+
         setLocalValues(prev => ({
             ...prev,
-            [deviceId]: {
-                ...prev[deviceId],
-                [field]: value,
-            },
+            [deviceId]: nextDeviceValues,
         }));
 
         setSaved(prev => ({
@@ -180,13 +180,13 @@ export default function DeviceSetupModal({
         }
 
         debounceTimers.current[deviceId] = setTimeout(() => {
-            saveToServer(deviceId);
+            saveToServer(deviceId, nextDeviceValues);
         }, 300);
     }
 
-    async function saveToServer(deviceId) {
-        const values = localValues[deviceId];
-        if (!values) return;
+    async function saveToServer(deviceId, explicitValues) {
+        const values = explicitValues || localValues[deviceId];
+        if (!values || Object.keys(values).length === 0) return;
 
         setSaving(prev => ({
             ...prev,
@@ -199,7 +199,7 @@ export default function DeviceSetupModal({
         }));
 
         try {
-            const updated = await apiFetch(
+            const res = await apiFetch(
                 `/api/devices/${deviceId}/config/`,
                 {
                     method: "PATCH",
@@ -207,9 +207,12 @@ export default function DeviceSetupModal({
                 }
             );
 
+            // ✅ Entpacke response: backend liefert { status: "ok", device: { ... } }
+            const updatedDevice = res?.device || res;
+
             setServerDevices(prev => ({
                 ...prev,
-                [deviceId]: updated,
+                [deviceId]: updatedDevice,
             }));
 
             setSaved(prev => ({
@@ -218,8 +221,15 @@ export default function DeviceSetupModal({
             }));
 
             if (onDeviceUpdated) {
-                onDeviceUpdated(updated);
+                onDeviceUpdated(updatedDevice);
             }
+
+            queryClient.invalidateQueries({ queryKey: ["devices"] });
+            queryClient.invalidateQueries({ queryKey: ["devices-status"] });
+            queryClient.invalidateQueries({ queryKey: ["unconfigured-devices"] });
+            queryClient.invalidateQueries({ queryKey: ["dashboard-devices"] });
+            queryClient.invalidateQueries({ queryKey: ["producers"] });
+            queryClient.invalidateQueries({ queryKey: ["storages"] });
 
             if (query?.refetch) query.refetch();
         } catch (err) {

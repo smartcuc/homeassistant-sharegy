@@ -302,13 +302,19 @@ export default function DevicesPage() {
     const trashCount = trashQuery?.data?.count ?? 0;
 
     function handleDeviceUpdated(device) {
+        const updatedDev = device?.device || device;
+        if (!updatedDev?.id) return;
 
         queryClient.setQueryData(
             ["devices"],
             old => old?.map(d =>
-                d.id === device.id ? device : d
+                d.id === updatedDev.id ? { ...d, ...updatedDev } : d
             ) || []
         );
+
+        queryClient.invalidateQueries({ queryKey: ["devices"] });
+        queryClient.invalidateQueries({ queryKey: ["devices-status"] });
+        queryClient.invalidateQueries({ queryKey: ["dashboard-devices"] });
     }
 
     async function handleQuickDelete(device) {
