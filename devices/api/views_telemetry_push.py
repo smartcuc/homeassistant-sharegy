@@ -97,9 +97,13 @@ def telemetry_push(request):
 
             DeviceMetric1h.objects.update_or_create(
                 device=dev,
+                metric_key="power",
                 bucket=bucket_dt,
                 defaults={
                     "avg": avg_w,
+                    "min": avg_w,
+                    "max": avg_w,
+                    "count": 1,
                     "energy_wh": energy_wh,
                 },
             )
