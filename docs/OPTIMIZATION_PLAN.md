@@ -8,10 +8,11 @@
 
 | Phase | Bereich | Fokus | Status | Erledigt | Offen |
 |---|---|---|---|---|---|
-| **Phase 1** | Kritische Bugs & Flusslogik | 🟢 EMS-Free & Core |  Abgeschlossen | 1.1, 1.2, 1.3, 1.4, 1.6 | 1.5 (Sharing) |
+| **Phase 1** | Kritische Bugs & Flusslogik | 🟢 EMS-Free & Core | 🟢 Abgeschlossen | 1.1, 1.2, 1.3, 1.4, 1.6 | 1.5 (Sharing) |
 | **Phase 2** | DB- & Performance-Optimierung | 🟢 EMS-Free (TimescaleDB) | 🟢 Abgeschlossen | 2.1, 2.3, 2.4, 2.5, 2.6, 2.7 | 2.2 (Sharing) |
 | **Phase 3** | Celery & Buffer-Härtung | 🟢 EMS-Free Stabilität | 🟢 Abgeschlossen | 3.1, 3.2, 3.3, 3.4 | – |
 | **Phase 4** | Architektur & Diagramme | 🟢 EMS-Free Sankey & Tests | 🟢 Abgeschlossen | 4.2, 4.3, 4.4 | 4.1 (Sharing) |
+| **Phase 5** | EMS-Pro, KI, Apps & Alerting | 🚀 Next Milestones | 🟡 In Planung | – | 5.1 – 5.10 |
 
 ---
 
@@ -226,3 +227,149 @@
 ### [x] 4.4 Automatisierte Tests ergänzen
 - **Dateien**: [`energy/tests.py`](file:///c:/Users/Public/Dev/eswes/energy/tests.py), [`devices/tests.py`](file:///c:/Users/Public/Dev/eswes/devices/tests.py), [`market/tests.py`](file:///c:/Users/Public/Dev/eswes/market/tests.py), [`forecast/tests.py`](file:///c:/Users/Public/Dev/eswes/forecast/tests.py)
 - **Status**: ✅ **Erledigt**. Umfassende Unit-Tests für Energy Flow Engine, Spot-Preis-Analyse, Metrik-Aggregationen und Forecast Physics & Storage wurden erstellt.
+
+---
+
+## Phase 5 — Erweiterte EMS-Pro Features, KI-Prognosen & Alerting
+
+### [x] 5.1 Umstellung auf TimescaleDB Hypertables & Continuous Aggregates
+- **Dateien**: [`devices/management/commands/setup_timescaledb.py`](file:///c:/Users/Public/Dev/eswes/devices/management/commands/setup_timescaledb.py), [`db/sql/timescaledb_setup.sql`](file:///c:/Users/Public/Dev/eswes/db/sql/timescaledb_setup.sql)
+- **Status**: ✅ **Erledigt**.
+  - `devices_devicemetric` (7d Chunks), `devices_devicemetric1m/5m/15m/1h`, `market_spotprice` und `core_intervalreading` als TimescaleDB Hypertables eingerichtet.
+  - Automatische Kompressions-Policy (nach 7 Tagen) und Retention-Policy (30 Tage Rohdaten / 60 Tage 1m) aktiviert.
+  - Management-Befehl `python manage.py setup_timescaledb` für idempotente Ausführung implementiert.
+
+---
+
+### [ ] 5.2 Verbrauchs-Prognose (Household Load Forecast Engine)
+- **Bereich**: Prognose & Modellierung (`forecast/services_load_forecast.py`)
+- **Ziel**: 
+  - Wochentags- und tageszeitabhängiges Lastprofil-Modell für den Haushaltsgrundbedarf.
+  - Temperatur-abhängige Lastmodellierung für Wärmepumpen / Klimatisierung (Heizgradtage).
+  - Berechnung der erwarteten Residuallast für die nächsten 24–48 Stunden.
+- **Impact**: Ermöglicht dem Optimizer exakte Vorhersagen über den tatsächlichen Netto-PV-Überschuss.
+
+---
+
+### [ ] 5.3 Batterie- & SoC-Prognose (State-of-Charge Simulation)
+- **Bereich**: Speicher-Optimierung & Simulation (`energy/services/battery_forecast.py`)
+- **Ziel**: 
+  - Vorausschauende 24h/48h SoC-Kurvensimulation basierend auf PV-Ertrag, prognostiziertem Verbrauch und Lade-/Entladeverlusten.
+  - Berücksichtigung von Mindest-Notstromreserven und Ladebegrenzungen.
+  - Visualisierung des prognostizierten Speicherverlaufs im Dashboard.
+- **Impact**: Transparenz darüber, ob der Speicher über die Nacht reicht oder günstiger Netzstrom geladen werden sollte.
+
+---
+
+### [ ] 5.4 Kontextuelles Help-System (DE / EN)
+- **Bereich**: Frontend UX & Dokumentation
+- **Ziel**: 
+  - In-App Side-Drawer & Quick-Help-Overlays auf allen Hauptseiten (Dashboard, Energiebilanz, Optimizer, Tarife, Geräte).
+  - Verständliche Tooltips und Infoboxen zu Fachbegriffen (Autarkie, Eigenverbrauch, Sub-Metering, Börsenpreise, Opportunitätskosten).
+  - Zweisprachig (Deutsch / Englisch).
+- **Impact**: Deutlich reduzierte Supportaufwände und intuitive Bedienung auch für technisch weniger versierte Endanwender.
+
+---
+
+### [ ] 5.5 FAQ-Portal & Digitales Benutzerhandbuch (DE / EN)
+- **Bereich**: Frontend Portal & Wissensdatenbank (`/app/help`, `/app/faq`)
+- **Ziel**: 
+  - Durchsuchbares FAQ- und Wissensportal mit Schritt-für-Schritt-Anleitungen:
+    - Anbindung von Wechselrichtern, Wallboxen, Smart Metern (Shelly, ioBroker, Home Assistant, Tasmota, Modbus).
+    - Erklärung der Tarifmodelle (Festpreis vs. EPEX Spot vs. EEG-Einspeisung).
+    - Troubleshooting-Leitfaden bei Offline-Geräten oder Signalfehlern.
+  - Zweisprachige Pflege (DE / EN).
+- **Impact**: Professionelles Onboarding und Vertrauensaufbau bei Enterprise- und Prosumer-Kunden.
+
+---
+
+### [ ] 5.6 Intelligentes Alert- & Anomalie-Erkennungssystem
+- **Bereich**: Operations, Monitoring & Benachrichtigungen (`alerts/`, `tasks_alerts.py`)
+- **Ziel**: Echtzeit-Überwachung des Haushalts mit proaktiven Warnmeldungen im Dashboard und via Webhook/E-Mail:
+  - 🔥 **„Keine PV erkannt“**: Hohe Globalstrahlung laut Wetterdienst (> 400 W/m²), aber Wechselrichter meldet 0 W Erzeugung $\rightarrow$ *Sicherung ausgelöst, Wechselrichter auf Störung oder Schattenschaden*.
+  - 🔥 **„Batterie leer / Ungewöhnliche Entladung“**: Speicher-SoC fällt unter kritische Schwelle (< 10 %) trotz erwarteter Mindestreserve oder entlädt sich bei Sonnenschein ins Netz.
+  - 🔥 **„Unerwarteter Verbrauch / Dauerlast-Alarm“**: Ungewöhnlich hohe Dauerlast (> 1.500 W) nachts zwischen 01:00 und 05:00 Uhr $\rightarrow$ *Vergessener Großverbraucher, Durchlauferhitzer-Dauerlauf oder defektes Gerät*.
+- **Impact**: Schutz vor teuren Stromkosten und sofortige Erkennung von Hardware-Defekten.
+
+---
+
+### [ ] 5.7 Deklaratives Device-Profile Addon-System (3rd-Party Wechelrichter)
+- **Bereich**: Ingest & Hardware-Abstraktion (`devices/adapters/`, `profiles/`)
+- **Ziel**: 
+  - Standardisiertes YAML/JSON-Profilsystem zur Anbindung von 3rd-Party Wechselrichtern und Speichern (Sungrow, SMA, Fronius, Deye, Huawei, Kostal, SolarEdge).
+  - Deklaratives Mapping von herstellerspezifischen Modbus-/API-Feldern auf standardisierte Sharegy-Metriken (`pv_power_w`, `battery_soc`, etc.).
+- **Impact**: Neue Wechselrichter können in 10 Minuten ohne Backend-Codeänderungen per YAML-Profil eingebunden werden.
+
+---
+
+### [ ] 5.8 Bi-direktionale Ökosystem-Plugins (Home Assistant, evcc, ioBroker)
+- **Bereich**: Aktorik, Smart-Home-Bridges & Vor-Ort-Steuerung
+- **Ziel**: 
+  - **Home Assistant Custom Component**: Automatischer Telemetrie-Upload via MQTT & Bereitstellung von Optimizer-Sensoren/Schaltern für HA-Automationen.
+  - **evcc Provider**: Integration von Sharegy als dynamischer Tarif- & Forecast-Provider (`tariff: custom`), sodass evcc Wallboxen (1p/3p) exakt nach dem Sharegy-KI-Fahrplan regelt.
+  - **ioBroker Adapter**: 2-Wege-Synchronisation von Datenpunkten für KNX- und SPS-Installationen.
+- **Impact**: Sofortige Kompatibilität zu 99 % aller am Markt existierenden Wallboxen und Smart Homes ohne eigene Hardware-Entwicklung.
+
+---
+
+### [ ] 5.9 Mobile Push & Notification Engine
+- **Bereich**: Backend Benachrichtigungen (`notifications/`, `tasks_push.py`)
+- **Ziel**: 
+  - Anbindung von Firebase Cloud Messaging (FCM für Android) und Apple Push Notification Service (APNs für iOS).
+  - Verwaltung von Geräte-Tokens (`DeviceToken`-Modell mit Platform, Last-Active, Token).
+  - Intelligente Ruhezeiten (Quiet Hours) und Filter für unkritische Hinweise vs. Notfall-Alarme.
+  - Actionable Notifications (Direktaktionen wie *„Wallbox jetzt starten“*, *„Stummschalten“*).
+- **Impact**: Sofortige Zustellung kritischer Alarme auf den Smartphone-Sperrbildschirm.
+
+---
+
+### [ ] 5.10 Native Mobile Apps (iOS & Android via Capacitor)
+- **Bereich**: Mobile Frontend & App Store Deployment (`mobile/`, `@capacitor/core`)
+- **Ziel**: 
+  - Cross-Platform Wrapper der React/Tailwind Web-App via Capacitor.
+  - Biometrie-Login (FaceID / TouchID / Fingerabdruck).
+  - Native Lockscreen- & Homescreen-Widgets (Live-PV-Leistung, Batterie-SoC & Optimizer-Bestzeit).
+  - Bereitstellung im Apple App Store & Google Play Store.
+- **Impact**: Massives Kundenvertrauen, tägliche Kundenbindung über Widgets und nativer Push-Kanal.
+
+---
+
+## 🎯 6. Verbindliche Prioritätenliste für die schrittweise Umsetzung
+
+Wir arbeiten diese Pipeline in 4 logischen Stufen (Tiers) ab:
+
+```
+┌───────────────────────────────────────────────────────────────────────────────┐
+│ TIER 1: DATEN-FUNDAMENT & PROGNOSEN (Sofort starten)                          │
+├───────────────────────────────────────────────────────────────────────────────┤
+│ 1. 🗄️ Task 5.1: TimescaleDB Migration & Continuous Aggregates (Speed & Scale) │
+│ 2. 📈 Task 5.2: Verbrauchs-Prognose (Household Load Forecast Engine)         │
+│ 3. 🔋 Task 5.3: Batterie- & SoC-Prognose (24h/48h Simulation)                │
+└───────────────────────────────────────────────────────────────────────────────┘
+                                       │
+                                       ▼
+┌───────────────────────────────────────────────────────────────────────────────┐
+│ TIER 2: ALERTING & PUSH-BENACHRICHTIGUNGEN                                    │
+├───────────────────────────────────────────────────────────────────────────────┤
+│ 4. 🚨 Task 5.6: Intelligentes Alert- & Anomalie-Erkennungssystem (Backend)    │
+│ 5. 📲 Task 5.9: Mobile Push & Notification Engine (FCM & APNs Dispatcher)    │
+└───────────────────────────────────────────────────────────────────────────────┘
+                                       │
+                                       ▼
+┌───────────────────────────────────────────────────────────────────────────────┐
+│ TIER 3: ÖKOSYSTEM-BRIDGES & HARDWARE-INTEGRATION                              │
+├───────────────────────────────────────────────────────────────────────────────┤
+│ 6. 📄 Task 5.7: Deklaratives Device-Profile Addon-System (YAML-Templates)     │
+│ 7. 🔌 Task 5.8: Bi-direktionale Plugins (Home Assistant, evcc & ioBroker)     │
+└───────────────────────────────────────────────────────────────────────────────┘
+                                       │
+                                       ▼
+┌───────────────────────────────────────────────────────────────────────────────┐
+│ TIER 4: MOBILE APPS & USER-EXPERIENCE                                         │
+├───────────────────────────────────────────────────────────────────────────────┤
+│ 8. 📱 Task 5.10: Native iOS & Android Apps via Capacitor (Widgets, Stores)    │
+│ 9. ❓ Task 5.4 & 5.5: Kontextuelles Help-System & FAQ/Handbuch (DE/EN)        │
+└───────────────────────────────────────────────────────────────────────────────┘
+```
+
+

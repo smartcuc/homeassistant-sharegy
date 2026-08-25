@@ -101,12 +101,23 @@
   └── 1.12 ✅ End-to-End Test Suite (15/15 Tests erfolgreich)
 
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ MEILENSTEIN 2: EMS-PRO VERSION (Monetarisierung via SaaS-Abo)                  │
+│ MEILENSTEIN 2: EMS-PRO & KI-OPTIMIERUNG (Monetarisierung via SaaS-Abo)        │
 └───────────────────────────────────────────────────────────────────────────────┘
-  ├── 2.1 Smarte Speicher- & Last-Steuerung (Optimierung nach Börsenstrompreisen & PV-Forecast)
-  ├── 2.2 ✅ Machine Learning PV-Prognose (Hybrid Physics + ML - RandomForest/Residuals)
-  ├── 2.3 Erweiterte Langzeit-Historie & Export-Funktionen (XLSX, CSV, PDF Berichte)
-  └── 2.4 Stripe Subscription-Integration (Free vs. Pro Module)
+  ├── 2.1 ✅ Smart Energy Optimizer (1h, 2h, 4h Zeitfenster nach PV-Forecast & Börsenstrom)
+  ├── 2.2 ✅ Verbrauchsbilanz, Virtuelle Zähler & Residual-Last Disaggregation
+  ├── 2.3 ✅ Machine Learning PV-Prognose (Hybrid Physics + ML - RandomForest/Residuals)
+  ├── 2.4 ✅ TimescaleDB Migration & Continuous Aggregates (`setup_timescaledb`)
+  ├── 2.5 ⏳ Verbrauchs-Prognose (Household Load Forecast Engine nach Wochentagen & Temp)
+  ├── 2.6 ⏳ Batterie- & SoC-Prognose (24h/48h State-of-Charge Simulation)
+  ├── 2.7 ⏳ Kontextuelles Help-System & In-App Drawer (DE / EN)
+  ├── 2.8 ⏳ FAQ-Portal & Digitales Benutzerhandbuch (DE / EN)
+  ├── 2.9 ⏳ Intelligentes Alert- & Anomalie-Erkennungssystem (Keine PV, Akku leer, Nachtlast)
+  ├── 2.10 ⏳ Deklaratives Device-Profile Addon-System (Sungrow, SMA, Fronius, Deye, Huawei)
+  ├── 2.11 ⏳ Bi-direktionale Ökosystem-Plugins (Home Assistant Custom Component, evcc Provider, ioBroker)
+  ├── 2.12 ⏳ Mobile Push & Notification Engine (FCM Android & APNs iOS Dispatcher)
+  ├── 2.13 ⏳ Native Mobile Apps (iOS & Android via Capacitor mit Widgets & Biometrie)
+  ├── 2.14 Erweiterte Langzeit-Historie & Export-Funktionen (XLSX, CSV, PDF Berichte)
+  └── 2.15 Stripe Subscription-Integration (Free vs. Pro Module)
 
 ┌───────────────────────────────────────────────────────────────────────────────┐
 │ MEILENSTEIN 3: ENERGY SHARING COMMUNITIES (Vollintegrierte Säule 2)           │
