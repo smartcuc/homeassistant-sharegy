@@ -41,6 +41,8 @@ urlpatterns = [
     path("unconfigured/", unconfigured_devices),
     path("latest/", latest_device_values),
     path("<int:device_id>/", configure_device),
+    path("<int:device_id>/config/", configure_device),
+    path("by-id/<int:device_id>/configure/", configure_device),
     path("<int:device_id>/metrics/", device_available_metrics),
     path("<int:device_id>/timeseries/", device_timeseries),
     path("<int:device_id>/simulate/", simulate_telemetry),

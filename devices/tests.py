@@ -193,3 +193,27 @@ class DeviceAggregationTest(TestCase):
         self.assertEqual(storage.name, "Victron MultiPlus Speicher")
         self.assertEqual(storage.capacity_kwh, 10.0)
         self.assertTrue(storage.is_auto_detected)
+
+    def test_device_setup_modal_patch_config_endpoint(self):
+        # Testet den exakten Aufruf aus DeviceSetupModal.jsx:
+        # PATCH /api/devices/{id}/config/ mit display_name und optionalen leeren Strings
+        self.client.force_login(self.user)
+        resp = self.client.patch(
+            f"/api/devices/{self.device.id}/config/",
+            data={
+                "display_name": "Hauptzähler Wohnzimmer",
+                "role_id": self.role_consumer.id,
+                "metric_definition_id": self.metric_def.id,
+                "generator_type_id": "",
+                "energy_signal_type_id": "",
+                "floor_id": "",
+                "room_id": "",
+                "home_id": str(self.home.id),
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertEqual(data["status"], "ok")
+        self.assertEqual(data["device"]["display_name"], "Hauptzähler Wohnzimmer")
+        self.assertEqual(data["device"]["config"]["role"]["id"], self.role_consumer.id)
