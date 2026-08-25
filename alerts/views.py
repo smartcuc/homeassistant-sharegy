@@ -24,27 +24,49 @@ def alerts_list(request):
     # Führe Live-Regelauswertung aus
     evaluate_home_alerts(home)
 
-    # Lade alle aktiven und zuletzt gelösten Alarme (letzte 20)
-    qs = AlertEvent.objects.filter(home=home).order_by("-created_at")[:20]
+    # 1. Aktive Alarme (active / acknowledged, NICHT resolved)
+    active_qs = AlertEvent.objects.filter(
+        home=home,
+        status__in=[AlertEvent.STATUS_ACTIVE, AlertEvent.STATUS_ACKNOWLEDGED]
+    ).order_by("-created_at")
 
-    alerts_data = []
+    # 2. Historische Alarme (bereits behoben / gelöst)
+    history_qs = AlertEvent.objects.filter(
+        home=home,
+        status=AlertEvent.STATUS_RESOLVED
+    ).order_by("-resolved_at", "-created_at")[:20]
+
     critical_count = 0
     warning_count = 0
     info_count = 0
-    active_total = 0
 
-    for a in qs:
-        is_active = (a.status in [AlertEvent.STATUS_ACTIVE, AlertEvent.STATUS_ACKNOWLEDGED])
-        if is_active:
-            active_total += 1
-            if a.severity == AlertEvent.SEVERITY_CRITICAL:
-                critical_count += 1
-            elif a.severity == AlertEvent.SEVERITY_WARNING:
-                warning_count += 1
-            elif a.severity == AlertEvent.SEVERITY_INFO:
-                info_count += 1
+    alerts_data = []
+    for a in active_qs:
+        if a.severity == AlertEvent.SEVERITY_CRITICAL:
+            critical_count += 1
+        elif a.severity == AlertEvent.SEVERITY_WARNING:
+            warning_count += 1
+        elif a.severity == AlertEvent.SEVERITY_INFO:
+            info_count += 1
 
         alerts_data.append({
+            "id": str(a.id),
+            "alert_type": a.alert_type,
+            "severity": a.severity,
+            "title": a.title,
+            "message": a.message,
+            "action_hint": a.action_hint,
+            "action_type": a.action_type,
+            "details": a.details,
+            "status": a.status,
+            "created_at": a.created_at.isoformat(),
+            "acknowledged_at": a.acknowledged_at.isoformat() if a.acknowledged_at else None,
+            "resolved_at": a.resolved_at.isoformat() if a.resolved_at else None,
+        })
+
+    history_data = []
+    for a in history_qs:
+        history_data.append({
             "id": str(a.id),
             "alert_type": a.alert_type,
             "severity": a.severity,
@@ -64,9 +86,10 @@ def alerts_list(request):
             "critical": critical_count,
             "warning": warning_count,
             "info": info_count,
-            "active_total": active_total,
+            "active_total": len(alerts_data),
         },
         "alerts": alerts_data,
+        "history": history_data,
     })
 
 

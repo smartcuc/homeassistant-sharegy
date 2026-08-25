@@ -33,14 +33,15 @@ export default function AlertCenterModal({ isOpen, onClose }) {
 
     const data = query.data || {};
     const summary = data.summary || { critical: 0, warning: 0, info: 0, active_total: 0 };
-    const allAlerts = data.alerts || [];
+    const activeAlerts = (data.alerts || []).filter(a => a.status !== "resolved");
+    const historyAlerts = data.history || (data.alerts || []).filter(a => a.status === "resolved");
 
-    const filteredAlerts = allAlerts.filter((a) => {
-        if (filterSeverity === "all") return a.status !== "resolved";
-        if (filterSeverity === "resolved") return a.status === "resolved";
-        if (filterSeverity === "active") return a.status !== "resolved";
-        return a.severity === filterSeverity && a.status !== "resolved";
-    });
+    const filteredAlerts = filterSeverity === "resolved"
+        ? historyAlerts
+        : activeAlerts.filter((a) => {
+            if (filterSeverity === "all" || filterSeverity === "active") return true;
+            return a.severity === filterSeverity;
+        });
 
     const getSeverityBadge = (sev) => {
         switch (sev) {
