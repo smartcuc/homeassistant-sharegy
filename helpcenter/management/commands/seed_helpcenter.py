@@ -598,18 +598,18 @@ The sub-metering engine enables precise breakdown of total household consumption
                 "category": cats["devices-protocols"],
                 "slug": "mqtt-und-smart-home-integration",
                 "context_key": "devices",
-                "title_de": "MQTT, Home Assistant, ioBroker & Shelly Zähler anbinden",
-                "title_en": "Connecting MQTT, Home Assistant, ioBroker & Shelly Meters",
+                "title_de": "MQTT, ioBroker & Shelly Zähler anbinden",
+                "title_en": "Connecting MQTT, ioBroker & Shelly Meters",
                 "summary_de": "Integration von Smart-Home-Zählern und Relais über den integrierten MQTT-Broker und REST-APIs.",
                 "summary_en": "Integrating smart home meters and relays via MQTT broker and REST APIs.",
                 "content_de": """# MQTT & Smart Home Integration
 
-Sharegy lässt sich nahtlos mit bestehenden Smart-Home-Systemen wie **Home Assistant**, **ioBroker**, **OpenHAB** oder **Shelly** verbinden.
+Sharegy lässt sich nahtlos mit bestehenden Smart-Home-Systemen wie **ioBroker**, **OpenHAB** oder **Shelly** verbinden.
 
 ## Anbindung via MQTT
 * **Broker-Host**: IP deines Sharegy-Servers (oder externer Mosquitto Broker).
 * **Port**: `1883` (bzw. `8883` für TLS).
-* **Topic-Struktur**: `sharegy/devices/<device_id>/telemetry`
+* **Topic-Struktur**: `h/<token>/<device_id>/telemetry`
 * **JSON-Payload**:
 ```json
 {
@@ -624,12 +624,12 @@ Trage im Webinterface des Shelly unter **Advanced - Developer Settings → MQTT*
 """,
                 "content_en": """# MQTT & Smart Home Integration
 
-Connect Sharegy to your smart home environment including **Home Assistant**, **ioBroker**, **OpenHAB**, or **Shelly** meters.
+Connect Sharegy to your smart home environment including **ioBroker**, **OpenHAB**, or **Shelly** meters.
 
 ## MQTT Configuration
 * **Broker Host**: IP address of your server.
 * **Port**: `1883` (or `8883` for TLS).
-* **Topic**: `sharegy/devices/<device_id>/telemetry`
+* **Topic**: `h/<token>/<device_id>/telemetry`
 * **Sample Payload**:
 ```json
 {
@@ -638,9 +638,179 @@ Connect Sharegy to your smart home environment including **Home Assistant**, **i
 }
 ```
 """,
-                "tags": ["mqtt", "homeassistant", "iobroker", "shelly", "smart home", "protokolle"],
+                "tags": ["mqtt", "iobroker", "shelly", "smart home", "protokolle"],
                 "is_featured": False,
                 "sort_order": 11,
+            },
+
+            # ---------------------------------------------------------------------
+            # 12. GRAFANA INTEGRATION & COCKPIT DASHBOARDS
+            # ---------------------------------------------------------------------
+            {
+                "category": cats["devices-protocols"],
+                "slug": "grafana-integration-und-cockpit-dashboards",
+                "context_key": "interfaces",
+                "title_de": "Grafana Integration & Energy Cockpit Dashboards",
+                "title_en": "Grafana Integration & Energy Cockpit Dashboards",
+                "summary_de": "Einrichtung der Grafana JSON/Infinity Datasource, Token-Authentifizierung und Nutzung des fertigen Sharegy Cockpit Dashboards.",
+                "summary_en": "Setting up Grafana JSON/Infinity datasource, token authentication, and importing the Sharegy Energy Cockpit dashboard.",
+                "content_de": """# Grafana Integration & Energy Cockpit
+
+Mit der integrierten Grafana-Schnittstelle kannst du hochentwickelte Dashboards und Zeitreihenanalysen in Grafana erstellen.
+
+## 1. REST-Bridge Endpoints
+Sharegy stellt standardisierte Endpunkte für Grafana (JSON / Infinity Datasource) bereit:
+* `GET /api/grafana/`: Healthcheck & Ping.
+* `POST /api/grafana/search`: Dynamische Metrikenliste (`pv_power_w`, `load_power_w`, `battery_soc_pct`, `autarky_rate_pct`, `spot_price_ct_per_kwh`, `submeter_*`).
+* `POST /api/grafana/query`: Zeitreihen-Stream im Grafana Datapoint-Format `[[value, timestamp_ms], ...]`.
+* `POST /api/grafana/annotations`: Überträgt Live-System-Warnungen und Optimizer-Ereignisse als Markierungen in den Zeitstrahl.
+
+## 2. Authentifizierung in Grafana
+Trage in den Grafana Datasource-Einstellungen unter **Custom HTTP Headers** einen der folgenden Header ein:
+* `X-API-Key: <DEIN_MQTT_PASSWORT_ODER_TOKEN>`
+* oder `Authorization: Bearer <DEIN_MQTT_PASSWORT_ODER_TOKEN>`
+
+## 3. Fertiges Cockpit-Dashboard
+Im Verzeichnis `plugins/grafana/dashboards/sharegy_energy_cockpit.json` findest du ein sofort importierbares Dashboard mit Gauges für PV/Last/SoC/Autarkie, 24h-Verläufen, dynamischen Strompreisen und gestapelten Sub-Metering-Kacheln.
+""",
+                "content_en": """# Grafana Integration & Energy Cockpit
+
+Build professional dashboards and time-series analytics in Grafana powered by live Sharegy telemetry.
+
+## 1. REST-Bridge Endpoints
+Sharegy offers dedicated endpoints compatible with Grafana JSON / Infinity Datasources:
+* `GET /api/grafana/`: Healthcheck & Ping.
+* `POST /api/grafana/search`: Metrics list (`pv_power_w`, `load_power_w`, `battery_soc_pct`, `autarky_rate_pct`, `spot_price_ct_per_kwh`, `submeter_*`).
+* `POST /api/grafana/query`: Time series data stream in `[[value, timestamp_ms], ...]` format.
+* `POST /api/grafana/annotations`: System alerts and optimizer events.
+
+## 2. Authentication
+In Grafana Datasource settings, configure **Custom HTTP Headers**:
+* `X-API-Key: <YOUR_MQTT_PASSWORD_OR_TOKEN>`
+* or `Authorization: Bearer <YOUR_MQTT_PASSWORD_OR_TOKEN>`
+""",
+                "tags": ["grafana", "visualisierung", "dashboards", "json datasource", "infinity", "api"],
+                "is_featured": True,
+                "sort_order": 12,
+            },
+
+            # ---------------------------------------------------------------------
+            # 13. HOME ASSISTANT CUSTOM INTEGRATION & TELEMETRY PUSH
+            # ---------------------------------------------------------------------
+            {
+                "category": cats["devices-protocols"],
+                "slug": "home-assistant-integration-und-telemetrie-push",
+                "context_key": "interfaces",
+                "title_de": "Home Assistant Custom Integration & Telemetrie-Push",
+                "title_en": "Home Assistant Custom Integration & Telemetry Push",
+                "summary_de": "Einrichtung der nativen Home Assistant Integration (9 Sensoren, Ladefenster) und verschlüsselter Messwerte-Push (sharegy.push_telemetry).",
+                "summary_en": "Setting up the native Home Assistant integration (9 sensors, charging windows) and secure telemetry push (sharegy.push_telemetry).",
+                "content_de": """# Home Assistant Integration & Telemetrie-Push
+
+Die Sharegy Custom Component verbindet dein Smart Home bidirektional mit Sharegy HEMS.
+
+## 1. Die 9 Home Assistant Live-Sensoren
+Nach der Einrichtung im HA Config Flow stehen folgende Sensoren für Dashboards und Automationen bereit:
+1. `sensor.sharegy_solar_erzeugung` (W)
+2. `sensor.sharegy_hausverbrauch` (W)
+3. `sensor.sharegy_netzleistung` (W)
+4. `sensor.sharegy_batterieleistung` (W)
+5. `sensor.sharegy_batterie_ladestand_soc` (%)
+6. `sensor.sharegy_autarkiegrad` (%)
+7. `sensor.sharegy_eigenverbrauchsquote` (%)
+8. `sensor.sharegy_borsenstrompreis` (ct/kWh)
+9. `sensor.sharegy_optimizer_best_zeitfenster` (z. B. `13:00 - 15:00` für smarte Aktorik)
+
+## 2. Lokale Messwerte an Sharegy senden (`sharegy.push_telemetry`)
+Mit dem Service `sharegy.push_telemetry` kann Home Assistant Messwerte lokaler Zähler (Shelly 3EM, Zigbee-Steckdosen, Wallbox, Wärmepumpe) gebündelt an Sharegy senden:
+
+```yaml
+alias: "Sharegy: Zählerdaten übertragen"
+trigger:
+  - platform: time_pattern
+    seconds: "/10"
+action:
+  - service: sharegy.push_telemetry
+    data:
+      devices:
+        - identifier: "ha_grid_meter"
+          name: "Hausanschluss"
+          power_w: "{{ states('sensor.shelly_3em_total_power') | float(0) }}"
+          energy_kwh: "{{ states('sensor.shelly_3em_total_energy') | float(0) }}"
+          role: "grid"
+        - identifier: "ha_wallbox"
+          name: "Wallbox"
+          power_w: "{{ states('sensor.wallbox_power') | float(0) }}"
+          role: "consumer"
+```
+""",
+                "content_en": """# Home Assistant Integration & Telemetry Push
+
+The Sharegy custom component bridges Home Assistant bidirectionally with Sharegy HEMS.
+
+## 1. Live Sensors
+1. `sensor.sharegy_solar_erzeugung` (W)
+2. `sensor.sharegy_hausverbrauch` (W)
+3. `sensor.sharegy_netzleistung` (W)
+4. `sensor.sharegy_batterie_ladestand_soc` (%)
+5. `sensor.sharegy_autarkiegrad` (%)
+6. `sensor.sharegy_borsenstrompreis` (ct/kWh)
+7. `sensor.sharegy_optimizer_best_zeitfenster` (e.g. `13:00 - 15:00`)
+
+## 2. Sending Local Telemetry (`sharegy.push_telemetry`)
+Push local energy meters (Shelly 3EM, Smart Plugs, Wallbox) automatically via Home Assistant automations.
+""",
+                "tags": ["homeassistant", "custom component", "push_telemetry", "aktoren", "wallbox", "shelly"],
+                "is_featured": True,
+                "sort_order": 13,
+            },
+
+            # ---------------------------------------------------------------------
+            # 14. MATTER 1.3 ENERGY MANAGEMENT & HUB
+            # ---------------------------------------------------------------------
+            {
+                "category": cats["devices-protocols"],
+                "slug": "matter-1-3-energy-management-und-hub",
+                "context_key": "interfaces",
+                "title_de": "Matter 1.3 Energy Hub (Smart Plugs, EVSE & Inverter)",
+                "title_en": "Matter 1.3 Energy Hub (Smart Plugs, EVSE & Inverters)",
+                "summary_de": "Kopplung und Steuerung moderner Matter-Geräte via Thread/Wi-Fi/IP unter Nutzung des CSA Matter 1.3 Energy Management Standards.",
+                "summary_en": "Commissioning and controlling Matter devices via Thread/Wi-Fi/IP utilizing the CSA Matter 1.3 Energy Management standard.",
+                "content_de": """# Matter 1.3 Energy Management Hub
+
+Sharegy verfügt über einen nativen **Matter Hub** mit voller Unterstützung des **CSA Matter 1.3 Energy Management Standards**.
+
+## 1. Unterstützte Matter-Cluster
+* **`0x0090` (Electrical Power Measurement)**: Misst Live-Leistung (`ActivePower` in W/mW), Spannung (`RMSVoltage` in mV), Stromstärke (`ActiveCurrent` in mA) und Power Factor.
+* **`0x0091` (Electrical Energy Measurement)**: Erfasst kumulierte Zählerstände (`CumulativeEnergyImported`) in kWh.
+* **`0x0006` (On/Off Cluster)**: Schaltet Relais und Zwischenstecker ein, aus oder toggelt ihren Zustand.
+* **`0x0098` / `0x0099` (Device Energy Management & EVSE)**: Dynamische Leistungsbegrenzung (`power_adjustment_limit_w`) und Ladestromsteuerung (`max_charge_current_a`) für Wallboxen und Wärmepumpen.
+
+## 2. Gerät per QR-Code oder Pairing-Code koppeln
+1. Gehe in Sharegy auf **Schnittstellen & MQTT → Matter 1.3 Energy Hub**.
+2. Klicke auf **+ Neues Matter-Gerät koppeln**.
+3. Wähle die Kopplungsmethode:
+   * **📷 QR-Code Payload**: z. B. `MT:Y.K9042C00KA0648G00`
+   * **🔢 Manueller Code**: 11-stellig (z. B. `34970112332`) oder 21-stellig
+   * **🔑 Setup-PIN**: 8-stelliger Geräte-PIN (z. B. `20202021`)
+4. Nach dem Klick auf **Gerät verbinden** wird das Gerät automatisch in der Matter Fabric registriert und in die Sharegy-Zählerhierarchie eingebunden.
+""",
+                "content_en": """# Matter 1.3 Energy Management Hub
+
+Sharegy provides a native **Matter Hub** fully compliant with the **CSA Matter 1.3 Energy Management standard**.
+
+## 1. Supported Matter Clusters
+* **`0x0090` (Electrical Power Measurement)**: Real-time active power (W), RMS voltage, active current, and power factor.
+* **`0x0091` (Electrical Energy Measurement)**: Cumulative imported energy (kWh).
+* **`0x0006` (On/Off Cluster)**: Smart plug relay toggling and switching.
+* **`0x0098` / `0x0099` (Device Energy Management & EVSE)**: Dynamic EV charging limits and heat pump modulation.
+
+## 2. Commissioning Devices
+Pair devices in seconds via QR-Code (`MT:...`), 11-/21-digit manual pairing codes, or setup PINs directly from the **Matter 1.3 Energy Hub** card.
+""",
+                "tags": ["matter", "matter 1.3", "csa", "thread", "smart plug", "evse", "energy management"],
+                "is_featured": True,
+                "sort_order": 14,
             },
         ]
 
@@ -651,3 +821,4 @@ Connect Sharegy to your smart home environment including **Home Assistant**, **i
             )
 
         self.stdout.write(self.style.SUCCESS(f"Erfolgreich {len(categories_data)} Kategorien und {len(articles_data)} Handbuch-Artikel in DE & EN initialisiert!"))
+

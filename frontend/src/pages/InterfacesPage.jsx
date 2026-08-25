@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useHomes } from "../hooks/useHomes";
 import { QRCodeSVG } from "qrcode.react";
 import { useTranslation } from "react-i18next";
+import MatterHubCard from "../features/matter/components/MatterHubCard";
 
 export default function InterfacesPage() {
     const { primaryHome, isLoading: homeLoading, regenerateMqttPassword, isRegenerating } = useHomes();
@@ -287,6 +288,9 @@ exporters:
                     )}
                 </div>
             </div>
+
+            {/* MATTER 1.3 ENERGY HUB */}
+            <MatterHubCard />
 
             {/* QR FULLSCREEN MODAL */}
             {showQR && primaryHome && (
