@@ -11,7 +11,7 @@
     "description_en": "Virtual meters, sub-metering, multi-tenant cost allocation, and monthly PDF exports.",
     "sort_order": 7,
     "created_at": "2026-08-25T11:23:37.142Z",
-    "updated_at": "2026-08-25T16:38:13.518Z"
+    "updated_at": "2026-08-25T16:52:32.071Z"
   }
 },
 {
@@ -26,7 +26,7 @@
     "description_en": "Integration with Home Assistant, ioBroker, Shelly, Tasmota, Modbus, and REST APIs.",
     "sort_order": 8,
     "created_at": "2026-08-25T16:38:13.525Z",
-    "updated_at": "2026-08-25T16:38:13.525Z"
+    "updated_at": "2026-08-25T16:52:32.074Z"
   }
 },
 {
@@ -41,7 +41,7 @@
     "description_en": "Hybrid forecasting, weather models, accuracy score (%), and actual vs. forecast tracking.",
     "sort_order": 3,
     "created_at": "2026-08-25T11:23:36.980Z",
-    "updated_at": "2026-08-25T16:38:13.502Z"
+    "updated_at": "2026-08-25T16:52:32.058Z"
   }
 },
 {
@@ -56,7 +56,7 @@
     "description_en": "Real-time health rules for yield losses, battery protection, baseload alerts, and savings tips.",
     "sort_order": 6,
     "created_at": "2026-08-25T11:23:37.108Z",
-    "updated_at": "2026-08-25T16:38:13.512Z"
+    "updated_at": "2026-08-25T16:52:32.068Z"
   }
 },
 {
@@ -71,7 +71,7 @@
     "description_en": "Quickstart guides, onboarding, dashboard navigation, and core energy KPIs.",
     "sort_order": 1,
     "created_at": "2026-08-25T11:23:36.940Z",
-    "updated_at": "2026-08-25T16:38:13.493Z"
+    "updated_at": "2026-08-25T16:52:32.044Z"
   }
 },
 {
@@ -86,7 +86,7 @@
     "description_en": "Dynamic tariffs, Tibber API, spot market prices, pricing formulas, and historical rates.",
     "sort_order": 5,
     "created_at": "2026-08-25T11:23:37.074Z",
-    "updated_at": "2026-08-25T16:38:13.509Z"
+    "updated_at": "2026-08-25T16:52:32.065Z"
   }
 },
 {
@@ -101,7 +101,7 @@
     "description_en": "Setup guides for SMA, Sungrow, Fronius, Deye, Huawei, home batteries, and meters.",
     "sort_order": 2,
     "created_at": "2026-08-25T11:23:36.961Z",
-    "updated_at": "2026-08-25T16:38:13.498Z"
+    "updated_at": "2026-08-25T16:52:32.054Z"
   }
 },
 {
@@ -116,7 +116,7 @@
     "description_en": "Automated schedules for EV wallboxes, home batteries, heat pumps, and appliances.",
     "sort_order": 4,
     "created_at": "2026-08-25T11:23:37.024Z",
-    "updated_at": "2026-08-25T16:38:13.506Z"
+    "updated_at": "2026-08-25T16:52:32.061Z"
   }
 },
 {
@@ -147,7 +147,7 @@
     "helpful_yes": 0,
     "helpful_no": 0,
     "created_at": "2026-08-25T11:23:37.264Z",
-    "updated_at": "2026-08-25T16:38:13.563Z"
+    "updated_at": "2026-08-25T16:52:32.108Z"
   }
 },
 {
@@ -177,7 +177,7 @@
     "helpful_yes": 0,
     "helpful_no": 0,
     "created_at": "2026-08-25T16:38:13.554Z",
-    "updated_at": "2026-08-25T16:38:13.554Z"
+    "updated_at": "2026-08-25T16:52:32.101Z"
   }
 },
 {
@@ -191,8 +191,8 @@
     "title_en": "Enabling Modbus TCP for SMA, Sungrow, Fronius & Deye",
     "summary_de": "Schritt-für-Schritt-Anleitung zur Aktivierung der lokalen Modbus-TCP-Schnittstelle im Wechselrichter-Webinterface.",
     "summary_en": "Step-by-step instructions to enable local Modbus TCP in your inverter's web portal.",
-    "content_de": "# Modbus TCP für Wechselrichter aktivieren\n\nModbus TCP ermöglicht die verzögerungsfreie Direktabfrage aller Leistungswerte im lokalen Netzwerk ohne Umweg über Hersteller-Clouds.\n\n## 1. SMA Sunny Tripower / Hybrid\n1. Im Browser die IP-Adresse des SMA-Wechselrichters aufrufen.\n2. Als **Installateur** einloggen.\n3. Zu **Gerätekonfiguration** $\\rightarrow$ **Externe Kommunikation** $\\rightarrow$ **Modbus** navigieren.\n4. **TCP-Server aktivieren** (Port: `502`, Unit-ID: `126` oder `3`).\n5. Speichern.\n\n## 2. Sungrow SH5.0 / SH10RT\n1. In der **iSolarCloud**-App oder im lokalen Webportal einloggen.\n2. In den **Erweiterten Einstellungen** $\\rightarrow$ **Modbus TCP** auf **Aktiviert** setzen.\n3. Standard-Port: `502`.\n\n## 3. Fronius Symo / Primo GEN24\n1. Webinterface des Fronius Datamanager aufrufen.\n2. Unter **Einstellungen** $\\rightarrow$ **Modbus** das Protokoll **Modbus TCP** auswählen.\n3. Datenausgabeformat auf **Float** einstellen.\n\n> [!TIP]\n> Reserviere im WLAN-Router (z. B. FRITZ!Box) eine feste IP-Adresse für den Wechselrichter (*„Diesem Netzwerkgerät immer die gleiche IPv4-Adresse zuweisen“*).\n",
-    "content_en": "# Enabling Modbus TCP on Inverters\n\nModbus TCP provides low-latency local telemetry without reliance on external cloud APIs.\n\n## 1. SMA Sunny Tripower\n1. Open the inverter's IP address in your browser and sign in as **Installer**.\n2. Navigate to **Device Configuration** $\\rightarrow$ **External Communication** $\\rightarrow$ **Modbus**.\n3. Enable the **TCP Server** (Port: `502`, Unit ID: `126` or `3`).\n\n## 2. Sungrow SH Series\n1. Sign in to the local web interface or iSolarCloud.\n2. In **Advanced Settings** $\\rightarrow$ **Modbus TCP**, toggle to **Enabled** (Port: `502`).\n\n## 3. Fronius GEN24 / Symo\n1. Open the Fronius Datamanager interface.\n2. Under **Settings** $\\rightarrow$ **Modbus**, select **Modbus TCP** and choose **Float** as data format.\n",
+    "content_de": "# Modbus TCP für Wechselrichter aktivieren\n\nModbus TCP ermöglicht die verzögerungsfreie Direktabfrage aller Leistungswerte im lokalen Netzwerk ohne Umweg über Hersteller-Clouds.\n\n## 1. SMA Sunny Tripower / Hybrid\n1. Im Browser die IP-Adresse des SMA-Wechselrichters aufrufen.\n2. Als **Installateur** einloggen.\n3. Zu **Gerätekonfiguration → Externe Kommunikation → Modbus** navigieren.\n4. **TCP-Server aktivieren** (Port: `502`, Unit-ID: `126` oder `3`).\n5. Speichern.\n\n## 2. Sungrow SH5.0 / SH10RT\n1. In der **iSolarCloud**-App oder im lokalen Webportal einloggen.\n2. In den **Erweiterten Einstellungen → Modbus TCP** auf **Aktiviert** setzen.\n3. Standard-Port: `502`.\n\n## 3. Fronius Symo / Primo GEN24\n1. Webinterface des Fronius Datamanager aufrufen.\n2. Unter **Einstellungen → Modbus** das Protokoll **Modbus TCP** auswählen.\n3. Datenausgabeformat auf **Float** einstellen.\n\n> [!TIP]\n> Reserviere im WLAN-Router (z. B. FRITZ!Box) eine feste IP-Adresse für den Wechselrichter (*„Diesem Netzwerkgerät immer die gleiche IPv4-Adresse zuweisen“*).\n",
+    "content_en": "# Enabling Modbus TCP on Inverters\n\nModbus TCP provides low-latency local telemetry without reliance on external cloud APIs.\n\n## 1. SMA Sunny Tripower\n1. Open the inverter's IP address in your browser and sign in as **Installer**.\n2. Navigate to **Device Configuration → External Communication → Modbus**.\n3. Enable the **TCP Server** (Port: `502`, Unit ID: `126` or `3`).\n\n## 2. Sungrow SH Series\n1. Sign in to the local web interface or iSolarCloud.\n2. In **Advanced Settings → Modbus TCP**, toggle to **Enabled** (Port: `502`).\n\n## 3. Fronius GEN24 / Symo\n1. Open the Fronius Datamanager interface.\n2. Under **Settings → Modbus**, select **Modbus TCP** and choose **Float** as data format.\n",
     "tags": [
       "modbus",
       "inverter",
@@ -209,7 +209,7 @@
     "helpful_yes": 0,
     "helpful_no": 0,
     "created_at": "2026-08-25T11:23:37.250Z",
-    "updated_at": "2026-08-25T16:38:13.540Z"
+    "updated_at": "2026-08-25T16:52:32.093Z"
   }
 },
 {
@@ -240,7 +240,7 @@
     "helpful_yes": 0,
     "helpful_no": 0,
     "created_at": "2026-08-25T16:38:13.568Z",
-    "updated_at": "2026-08-25T16:38:13.568Z"
+    "updated_at": "2026-08-25T16:52:32.115Z"
   }
 },
 {
@@ -254,8 +254,8 @@
     "title_en": "Virtual Meters, Sub-Metering & Multi-Tenant Billing",
     "summary_de": "Aufteilung des Gesamtstroms auf einzelne Verbraucher (Wallbox, Wärmepumpe, Einliegerwohnung) und PDF-Abrechnung.",
     "summary_en": "Allocating total electricity across submeters (EV charger, heat pump, rental unit) with PDF reports.",
-    "content_de": "# Virtuelle Zähler & Sub-Metering\n\nMit dem Sub-Metering-Modul kannst du deinen Gesamtverbrauch mathematisch auf einzelne Stromkreise oder Mieter aufteilen.\n\n## Funktionsweise der Zählerhierarchie\n1. **Hauptzähler (Grid Meter)**: Misst den gesamten Netzbezug und die Einspeisung am Hausanschluss.\n2. **Sub-Zähler (Unterzähler)**: Messen dedizierte Verbraucher wie Wallbox, Wärmepumpe oder Einliegerwohnung.\n3. **Restverbrauch (Virtueller Zähler)**:\n   $$\\text{Restverbrauch} = \\text{Gesamtverbrauch} - \\sum \\text{Sub-Zähler}$$\n\n## Solare Deckungsquote je Verbraucher\nSharegy berechnet für jeden Unterzähler sekundengenau, zu wie viel Prozent der Verbrauch durch die Solaranlage gedeckt wurde und welcher Anteil Netzstrom war.\n",
-    "content_en": "# Virtual Meters & Sub-Metering\n\nThe sub-metering engine enables precise breakdown of total household consumption into individual consumer circuits or multi-tenant parties.\n\n## Meter Hierarchy\n1. **Main Grid Meter**: Measures total import and export at the grid connection point.\n2. **Sub-Meters**: Dedicated meters for EV chargers, heat pumps, or rental units.\n3. **Residual Load (Virtual Meter)**:\n   $$\\text{Residual} = \\text{Total Consumption} - \\sum \\text{Submeters}$$\n",
+    "content_de": "# Virtuelle Zähler & Sub-Metering\n\nMit dem Sub-Metering-Modul kannst du deinen Gesamtverbrauch mathematisch auf einzelne Stromkreise oder Mieter aufteilen.\n\n## Funktionsweise der Zählerhierarchie\n1. **Hauptzähler (Grid Meter)**: Misst den gesamten Netzbezug und die Einspeisung am Hausanschluss.\n2. **Sub-Zähler (Unterzähler)**: Messen dedizierte Verbraucher wie Wallbox, Wärmepumpe oder Einliegerwohnung.\n3. **Restverbrauch (Virtueller Zähler)**:\n   > 📐 **Formel:**  \n   > `Restverbrauch = Gesamtverbrauch - Summe aller Unterzähler`\n\n## Solare Deckungsquote je Verbraucher\nSharegy berechnet für jeden Unterzähler sekundengenau, zu wie viel Prozent der Verbrauch durch die Solaranlage gedeckt wurde und welcher Anteil Netzstrom war.\n",
+    "content_en": "# Virtual Meters & Sub-Metering\n\nThe sub-metering engine enables precise breakdown of total household consumption into individual consumer circuits or multi-tenant parties.\n\n## Meter Hierarchy\n1. **Main Grid Meter**: Measures total import and export at the grid connection point.\n2. **Sub-Meters**: Dedicated meters for EV chargers, heat pumps, or rental units.\n3. **Residual Load (Virtual Meter)**:\n   > 📐 **Formula:**  \n   > `Residual Load = Total Consumption - Sum of all Submeters`\n",
     "tags": [
       "billing",
       "submetering",
@@ -271,7 +271,7 @@
     "helpful_yes": 0,
     "helpful_no": 0,
     "created_at": "2026-08-25T16:38:13.577Z",
-    "updated_at": "2026-08-25T16:38:13.577Z"
+    "updated_at": "2026-08-25T16:52:32.124Z"
   }
 },
 {
@@ -285,8 +285,8 @@
     "title_en": "Energy Balance, Autarky Rate & Self-Consumption",
     "summary_de": "Erklärung aller zentralen Kennzahlen im Energie-Dashboard (Autarkie, Eigenverbrauch, Solardeckung).",
     "summary_en": "Explanation of core metrics on the Energy Dashboard (autarky rate, self-consumption ratio, solar share).",
-    "content_de": "# Energiebilanz & Kennzahlen verstehen\n\nDas **Energie-Dashboard** bietet einen ganzheitlichen Überblick über deine Erzeugung, Batteriespeicher, Verbräuche und Netzflüsse.\n\n## Die wichtigsten Kennzahlen\n\n### 1. Autarkiegrad (%)\nGibt an, zu welchem prozentualen Anteil der gesamte Haushaltsstrombedarf durch deine eigene Solaranlage und den Batteriespeicher gedeckt werden konnte:\n\n$$\\text{Autarkiegrad} = \\left(1 - \\frac{\\text{Netzbezug (kWh)}}{\\text{Gesamtverbrauch (kWh)}}\\right) \\times 100$$\n\n* 🟢 **$\\ge 75\\,\\%$**: Sehr hohe Unabhängigkeit vom öffentlichen Stromnetz.\n* 🟡 **$40 - 74\\,\\%$**: Solide Grunddeckung, typisch für Übergangsmonate.\n* 🔵 **$< 40\\,\\%$**: Typischer Winterwert oder Ausbaupotenzial bei Speicher/PV.\n\n### 2. Eigenverbrauchsquote (%)\nZeigt, wie viel Prozent des von deiner Photovoltaikanlage erzeugten Stroms direkt im Haus verbraucht oder in den Akku geladen wurde:\n\n$$\\text{Eigenverbrauchsquote} = \\frac{\\text{Direktverbrauch} + \\text{Batterieladung}}{\\text{Gesamte PV-Erzeugung}} \\times 100$$\n\n> [!TIP]\n> Um die Eigenverbrauchsquote zu maximieren, nutze den **Smart Energy Optimizer**, um Großverbraucher (z. B. Wallbox, Wärmepumpe, Spülmaschine) automatisch in Phasen mit hohem Solarüberschuss zu starten.\n",
-    "content_en": "# Energy Balance & Key Performance Indicators\n\nThe **Energy Dashboard** provides a unified view of your solar generation, battery storage, household load, and grid interactions.\n\n## Core Metrics Overview\n\n### 1. Autarky / Self-Sufficiency Rate (%)\nRepresents the percentage of your total energy consumption covered directly by solar generation and your home battery:\n\n$$\\text{Autarky Rate} = \\left(1 - \\frac{\\text{Grid Import (kWh)}}{\\text{Total Load (kWh)}}\\right) \\times 100$$\n\n* 🟢 **$\\ge 75\\,\\%$**: High grid independence.\n* 🟡 **$40 - 74\\,\\%$**: Solid baseline coverage typical for spring and autumn.\n* 🔵 **$< 40\\,\\%$**: Typical winter performance or room for battery/solar expansion.\n\n### 2. Self-Consumption Ratio (%)\nShows the percentage of generated solar energy consumed directly or stored in your home battery rather than being fed into the grid:\n\n$$\\text{Self-Consumption} = \\frac{\\text{Direct Consumption} + \\text{Battery Charging}}{\\text{Total PV Generation}} \\times 100$$\n\n> [!TIP]\n> Use the **Smart Energy Optimizer** to align heavy loads (EV charging, heat pump heating cycles) with peak solar production hours.\n",
+    "content_de": "# Energiebilanz & Kennzahlen verstehen\n\nDas **Energie-Dashboard** bietet einen ganzheitlichen Überblick über deine Erzeugung, Batteriespeicher, Verbräuche und Netzflüsse.\n\n## Die wichtigsten Kennzahlen\n\n### 1. Autarkiegrad (%)\nGibt an, zu welchem prozentualen Anteil der gesamte Haushaltsstrombedarf durch deine eigene Solaranlage und den Batteriespeicher gedeckt werden konnte:\n\n> 📐 **Formel:**  \n> **Autarkiegrad (%)** = `(1 - Netzbezug / Gesamtverbrauch) × 100`  \n> *(Vereinfacht: Anteil des Eigenstroms am gesamten Hausverbrauch)*\n\n* 🟢 **≥ 75 %**: Sehr hohe Unabhängigkeit vom öffentlichen Stromnetz.\n* 🟡 **40 bis 74 %**: Solide Grunddeckung, typisch für Übergangsmonate (Frühjahr/Herbst).\n* 🔵 **Unter 40 %**: Typischer Winterwert oder Ausbaupotenzial bei Speicher/PV.\n\n---\n\n### 2. Eigenverbrauchsquote (%)\nZeigt, wie viel Prozent des von deiner Photovoltaikanlage erzeugten Stroms direkt im Haus verbraucht oder in den Akku geladen wurde (statt ins Netz eingespeist zu werden):\n\n> 📐 **Formel:**  \n> **Eigenverbrauchsquote (%)** = `(Direktverbrauch + Batterieladung) / Gesamte PV-Erzeugung × 100`\n\n> [!TIP]\n> Um die Eigenverbrauchsquote zu maximieren, nutze den **Smart Energy Optimizer**, um Großverbraucher (z. B. Wallbox, Wärmepumpe, Spülmaschine) automatisch in Phasen mit hohem Solarüberschuss zu starten.\n",
+    "content_en": "# Energy Balance & Key Performance Indicators\n\nThe **Energy Dashboard** provides a unified view of your solar generation, battery storage, household load, and grid interactions.\n\n## Core Metrics Overview\n\n### 1. Autarky / Self-Sufficiency Rate (%)\nRepresents the percentage of your total energy consumption covered directly by solar generation and your home battery:\n\n> 📐 **Formula:**  \n> **Autarky Rate (%)** = `(1 - Grid Import / Total Load) × 100`  \n> *(Simplified: Share of self-generated clean power over total consumption)*\n\n* 🟢 **≥ 75 %**: High grid independence.\n* 🟡 **40 to 74 %**: Solid baseline coverage typical for spring and autumn.\n* 🔵 **Under 40 %**: Typical winter performance or room for battery/solar expansion.\n\n---\n\n### 2. Self-Consumption Ratio (%)\nShows the percentage of generated solar energy consumed directly or stored in your home battery rather than being fed into the grid:\n\n> 📐 **Formula:**  \n> **Self-Consumption (%)** = `(Direct Consumption + Battery Charging) / Total PV Generation × 100`\n\n> [!TIP]\n> Use the **Smart Energy Optimizer** to align heavy loads (EV charging, heat pump heating cycles) with peak solar production hours.\n",
     "tags": [
       "energy",
       "autarkie",
@@ -302,7 +302,7 @@
     "helpful_yes": 0,
     "helpful_no": 0,
     "created_at": "2026-08-25T11:23:37.281Z",
-    "updated_at": "2026-08-25T16:38:13.530Z"
+    "updated_at": "2026-08-25T16:52:32.080Z"
   }
 },
 {
@@ -316,7 +316,7 @@
     "title_en": "Connecting MQTT, Home Assistant, ioBroker & Shelly Meters",
     "summary_de": "Integration von Smart-Home-Zählern und Relais über den integrierten MQTT-Broker und REST-APIs.",
     "summary_en": "Integrating smart home meters and relays via MQTT broker and REST APIs.",
-    "content_de": "# MQTT & Smart Home Integration\n\nSharegy lässt sich nahtlos mit bestehenden Smart-Home-Systemen wie **Home Assistant**, **ioBroker**, **OpenHAB** oder **Shelly** verbinden.\n\n## Anbindung via MQTT\n* **Broker-Host**: IP deines Sharegy-Servers (oder externer Mosquitto Broker).\n* **Port**: `1883` (bzw. `8883` für TLS).\n* **Topic-Struktur**: `sharegy/devices/<device_id>/telemetry`\n* **JSON-Payload**:\n```json\n{\n  \"power_w\": 2450.5,\n  \"voltage_v\": 230.2,\n  \"energy_kwh\": 1420.8\n}\n```\n\n## Shelly 3EM & Pro 3EM Direkt-Integration\nTrage im Webinterface des Shelly unter **Advanced - Developer Settings** $\\rightarrow$ **MQTT** einfach die Broker-Zugangsdaten ein. Die Messdaten werden automatisch erkannt.\n",
+    "content_de": "# MQTT & Smart Home Integration\n\nSharegy lässt sich nahtlos mit bestehenden Smart-Home-Systemen wie **Home Assistant**, **ioBroker**, **OpenHAB** oder **Shelly** verbinden.\n\n## Anbindung via MQTT\n* **Broker-Host**: IP deines Sharegy-Servers (oder externer Mosquitto Broker).\n* **Port**: `1883` (bzw. `8883` für TLS).\n* **Topic-Struktur**: `sharegy/devices/<device_id>/telemetry`\n* **JSON-Payload**:\n```json\n{\n  \"power_w\": 2450.5,\n  \"voltage_v\": 230.2,\n  \"energy_kwh\": 1420.8\n}\n```\n\n## Shelly 3EM & Pro 3EM Direkt-Integration\nTrage im Webinterface des Shelly unter **Advanced - Developer Settings → MQTT** einfach die Broker-Zugangsdaten ein. Die Messdaten werden automatisch erkannt.\n",
     "content_en": "# MQTT & Smart Home Integration\n\nConnect Sharegy to your smart home environment including **Home Assistant**, **ioBroker**, **OpenHAB**, or **Shelly** meters.\n\n## MQTT Configuration\n* **Broker Host**: IP address of your server.\n* **Port**: `1883` (or `8883` for TLS).\n* **Topic**: `sharegy/devices/<device_id>/telemetry`\n* **Sample Payload**:\n```json\n{\n  \"power_w\": 2450.5,\n  \"energy_kwh\": 1420.8\n}\n```\n",
     "tags": [
       "mqtt",
@@ -333,7 +333,7 @@
     "helpful_yes": 0,
     "helpful_no": 0,
     "created_at": "2026-08-25T16:38:13.585Z",
-    "updated_at": "2026-08-25T16:38:13.585Z"
+    "updated_at": "2026-08-25T16:52:32.127Z"
   }
 },
 {
@@ -347,8 +347,8 @@
     "title_en": "Producers & Storage: Setup & Metric Mapping",
     "summary_de": "So führst du PV-Strings, Hybrid-Wechselrichter und Batteriespeicher mit ihren Live-Messpunkten zusammen.",
     "summary_en": "How to configure PV strings, hybrid inverters, and battery systems with their live telemetry metrics.",
-    "content_de": "# Erzeuger- & Speicheranlagen verwalten\n\nUnter **Erzeuger- & Speicheranlagen** konfigurierst du deine PV-Module, Generator-Strings und Batteriesysteme, damit Sharegy Erträge und Speicherzustände exakt abbilden kann.\n\n## 1. Photovoltaik-Erzeugungsanlagen & Strings\n* **Leistung ($kW_p$)**: Installierte Nennleistung deiner PV-Module (z. B. `10.5 kWp`).\n* **Ausrichtung (Azimut)**: `0°` = Süden, `-90°` = Osten, `+90°` = Westen.\n* **Neigungswinkel**: z. B. `35°` für klassische Schrägdächer oder `10°` für Flachdach-Ost-West-Systeme.\n* **Messstellen-Zuweisung**: Wähle das Gerät (z. B. Wechselrichter) und den passenden Datenpunkt (z. B. `pv_power` oder `power`).\n\n## 2. Batteriespeicher anlegen\nWenn ein Gerät die Rolle *Batteriespeicher* erhält, wird automatisch ein Eintrag angelegt. Hier kannst du einstellen:\n* **Nennkapazität (kWh)**: z. B. `10.0 kWh` oder `20.0 kWh`.\n* **Max. Lade-/Entladeleistung (kW)**: z. B. `5.0 kW`.\n* **Notstromreserve / Mindest-SoC (%)**: z. B. `10 %` zur Schonung der Batteriezellen und für Netzausfälle.\n* **Messpunkte**: Verknüpfe den Datenpunkt für den Ladestand (`soc` in %) sowie die Lade-/Entladeleistung (`battery_power` in W).\n\n> [!NOTE]\n> Werden mehrere Batteriespeicher aktiv geschaltet, aggregiert Sharegy diese automatisch zu einer Gesamtkapazität und berechnet einen kapazitätsgewichteten Gesamt-SoC.\n",
-    "content_en": "# Managing Producers & Battery Storage Systems\n\nUnder **Producers & Storage**, configure your solar panel arrays, generator strings, and battery systems.\n\n## 1. PV Arrays & Strings Configuration\n* **Peak Power ($kW_p$)**: Total nominal PV capacity (e.g., `10.5 kWp`).\n* **Azimuth Orientation**: `0°` = South, `-90°` = East, `+90°` = West.\n* **Tilt Angle**: e.g., `35°` for pitched roofs or `10°` for east-west flat roofs.\n* **Metric Mapping**: Select the telemetry device and metric key (e.g., `pv_power` or `power`).\n\n## 2. Battery Storage Setup\n* **Usable Capacity (kWh)**: e.g., `10.0 kWh` or `20.0 kWh`.\n* **Max. Charge / Discharge Power (kW)**: e.g., `5.0 kW`.\n* **Backup Reserve / Min. SoC (%)**: e.g., `10 %` for cell protection and emergency backup.\n* **Metric Binding**: Map the State of Charge (`soc` in %) and active power (`battery_power` in W).\n",
+    "content_de": "# Erzeuger- & Speicheranlagen verwalten\n\nUnter **Erzeuger- & Speicheranlagen** konfigurierst du deine PV-Module, Generator-Strings und Batteriesysteme, damit Sharegy Erträge und Speicherzustände exakt abbilden kann.\n\n## 1. Photovoltaik-Erzeugungsanlagen & Strings\n* **Leistung (kWp)**: Installierte Nennleistung deiner PV-Module (z. B. `10.5 kWp`).\n* **Ausrichtung (Azimut)**: `0°` = Süden, `-90°` = Osten, `+90°` = Westen.\n* **Neigungswinkel**: z. B. `35°` für klassische Schrägdächer oder `10°` für Flachdach-Ost-West-Systeme.\n* **Messstellen-Zuweisung**: Wähle das Gerät (z. B. Wechselrichter) und den passenden Datenpunkt (z. B. `pv_power` oder `power`).\n\n## 2. Batteriespeicher anlegen\nWenn ein Gerät die Rolle *Batteriespeicher* erhält, wird automatisch ein Eintrag angelegt. Hier kannst du einstellen:\n* **Nennkapazität (kWh)**: z. B. `10.0 kWh` oder `20.0 kWh`.\n* **Max. Lade-/Entladeleistung (kW)**: z. B. `5.0 kW`.\n* **Notstromreserve / Mindest-SoC (%)**: z. B. `10 %` zur Schonung der Batteriezellen und für Netzausfälle.\n* **Messpunkte**: Verknüpfe den Datenpunkt für den Ladestand (`soc` in %) sowie die Lade-/Entladeleistung (`battery_power` in W).\n\n> [!NOTE]\n> Werden mehrere Batteriespeicher aktiv geschaltet, aggregiert Sharegy diese automatisch zu einer Gesamtkapazität und berechnet einen kapazitätsgewichteten Gesamt-SoC.\n",
+    "content_en": "# Managing Producers & Battery Storage Systems\n\nUnder **Producers & Storage**, configure your solar panel arrays, generator strings, and battery systems.\n\n## 1. PV Arrays & Strings Configuration\n* **Peak Power (kWp)**: Total nominal PV capacity (e.g., `10.5 kWp`).\n* **Azimuth Orientation**: `0°` = South, `-90°` = East, `+90°` = West.\n* **Tilt Angle**: e.g., `35°` for pitched roofs or `10°` for east-west flat roofs.\n* **Metric Mapping**: Select the telemetry device and metric key (e.g., `pv_power` or `power`).\n\n## 2. Battery Storage Setup\n* **Usable Capacity (kWh)**: e.g., `10.0 kWh` or `20.0 kWh`.\n* **Max. Charge / Discharge Power (kW)**: e.g., `5.0 kW`.\n* **Backup Reserve / Min. SoC (%)**: e.g., `10 %` for cell protection and emergency backup.\n* **Metric Binding**: Map the State of Charge (`soc` in %) and active power (`battery_power` in W).\n",
     "tags": [
       "producers",
       "storage",
@@ -364,7 +364,7 @@
     "helpful_yes": 0,
     "helpful_no": 0,
     "created_at": "2026-08-25T16:38:13.536Z",
-    "updated_at": "2026-08-25T16:38:13.536Z"
+    "updated_at": "2026-08-25T16:52:32.089Z"
   }
 },
 {
@@ -396,7 +396,7 @@
     "helpful_yes": 0,
     "helpful_no": 0,
     "created_at": "2026-08-25T11:23:37.203Z",
-    "updated_at": "2026-08-25T16:38:13.559Z"
+    "updated_at": "2026-08-25T16:52:32.105Z"
   }
 },
 {
@@ -410,8 +410,8 @@
     "title_en": "Alert & Notification Center: Live Rules & Anomaly Detection",
     "summary_de": "Übersicht aller 8 automatisierten Überwachungsregeln für Ertragsausfälle, Tiefentladeschutz und Dauerlasten.",
     "summary_en": "Overview of the 8 automated health checks for solar yield drops, battery protection, and baseload alarms.",
-    "content_de": "# Alarm- & Notifikationszentrale\n\nDie Alarmzentrale überwacht rund um die Uhr deine Erzeugung, Speicher und Verbräuche auf Unregelmäßigkeiten.\n\n## Die 8 Live-Überwachungsregeln\n\n1. 🔴 **Keine PV-Erzeugung (Ertragsausfall)**:\n   * Löst aus, wenn die Globalstrahlung $> 400\\,\\text{W/m}^2$ beträgt, der Wechselrichter aber $0\\,\\text{W}$ meldet (z. B. DC-Freischalter aus oder Sicherung gefallen).\n2. 🟡 **Batterie leer / Ungewöhnliche Entladung**:\n   * Warnung bei Absinken des SoC unter die Notstromreserve ($< 10\\,\\%$).\n3. 🟡 **Unerwarteter Nachtverbrauch (Dauerlast-Alarm)**:\n   * Benachrichtigung bei konstantem Verbrauch $> 1.500\\,\\text{W}$ zwischen 01:00 und 05:00 Uhr.\n4. 🔴 **Gerät offline / Signal-Verlust**:\n   * Alarm bei Ausbleiben von Zähler- oder Wechselrichter-Telemetrie seit mehr als 15 Minuten.\n5. 🟢 **Börsentief- & Negativpreis-Chance**:\n   * Spar-Tipp bei anstehenden Negativpreisen an der Strombörse.\n6. 🔴 **Netzbezug trotz Solarüberschuss**:\n   * Erkennt Phasenasymmetrien oder fehlerhafte Zählerkonfigurationen.\n7. 🟡 **Extremer Preis-Peak**:\n   * Warnung vor teuren Verbrauchsspitzen bei Dunkelflauten.\n8. 🔵 **Frostschutz & Wärmepumpen-Vorlauf**:\n   * Hinweis bei extremen Außentemperaturen.\n\n## Alarme quittieren & Historie\n* **✓ Erledigt**: Schließt den Alarm ab und verschiebt ihn in die Historie.\n* **Gesehen**: Bestätigt die Kenntnisnahme, lässt den Alarm aber aktiv.\n",
-    "content_en": "# Alert & Notification Center\n\nThe Alert Center continuously scans energy flows and device telemetry to proactively flag equipment faults and cost-saving opportunities.\n\n## The 8 Core Health Checks\n1. 🔴 **PV Yield Loss**: Solar radiation $> 400\\,\\text{W/m}^2$ but inverter power is $0\\,\\text{W}$.\n2. 🟡 **Battery Depleted**: SoC falls below configured emergency reserve.\n3. 🟡 **Unexpected Night Baseload**: Sustained load $> 1500\\,\\text{W}$ between 01:00 and 05:00.\n4. 🔴 **Device Offline**: Missing telemetry for $> 15$ minutes.\n5. 🟢 **Negative Spot Price Opportunity**: Alerts to scheduled negative electricity price hours.\n6. 🔴 **Grid Import During Solar Surplus**: Detects phase imbalance or meter misconfiguration.\n7. 🟡 **Extreme Price Peak**: Warns before expensive peak hours.\n8. 🔵 **Freeze Protection & Heat Pump Guard**: Temperature monitoring for heating systems.\n",
+    "content_de": "# Alarm- & Notifikationszentrale\n\nDie Alarmzentrale überwacht rund um die Uhr deine Erzeugung, Speicher und Verbräuche auf Unregelmäßigkeiten.\n\n## Die 8 Live-Überwachungsregeln\n\n1. 🔴 **Keine PV-Erzeugung (Ertragsausfall)**:\n   * Löst aus, wenn die Globalstrahlung > 400 W/m² beträgt, der Wechselrichter aber 0 W meldet (z. B. DC-Freischalter aus oder Sicherung gefallen).\n2. 🟡 **Batterie leer / Ungewöhnliche Entladung**:\n   * Warnung bei Absinken des SoC unter die Notstromreserve (< 10 %).\n3. 🟡 **Unerwarteter Nachtverbrauch (Dauerlast-Alarm)**:\n   * Benachrichtigung bei konstantem Verbrauch > 1.500 W zwischen 01:00 und 05:00 Uhr.\n4. 🔴 **Gerät offline / Signal-Verlust**:\n   * Alarm bei Ausbleiben von Zähler- oder Wechselrichter-Telemetrie seit mehr als 15 Minuten.\n5. 🟢 **Börsentief- & Negativpreis-Chance**:\n   * Spar-Tipp bei anstehenden Negativpreisen an der Strombörse.\n6. 🔴 **Netzbezug trotz Solarüberschuss**:\n   * Erkennt Phasenasymmetrien oder fehlerhafte Zählerkonfigurationen.\n7. 🟡 **Extremer Preis-Peak**:\n   * Warnung vor teuren Verbrauchsspitzen bei Dunkelflauten.\n8. 🔵 **Frostschutz & Wärmepumpen-Vorlauf**:\n   * Hinweis bei extremen Außentemperaturen.\n\n## Alarme quittieren & Historie\n* **✓ Erledigt**: Schließt den Alarm ab und verschiebt ihn in die Historie.\n* **Gesehen**: Bestätigt die Kenntnisnahme, lässt den Alarm aber aktiv.\n",
+    "content_en": "# Alert & Notification Center\n\nThe Alert Center continuously scans energy flows and device telemetry to proactively flag equipment faults and cost-saving opportunities.\n\n## The 8 Core Health Checks\n1. 🔴 **PV Yield Loss**: Solar radiation > 400 W/m² but inverter power is 0 W.\n2. 🟡 **Battery Depleted**: SoC falls below configured emergency reserve (< 10%).\n3. 🟡 **Unexpected Night Baseload**: Sustained load > 1500 W between 01:00 and 05:00.\n4. 🔴 **Device Offline**: Missing telemetry for > 15 minutes.\n5. 🟢 **Negative Spot Price Opportunity**: Alerts to scheduled negative electricity price hours.\n6. 🔴 **Grid Import During Solar Surplus**: Detects phase imbalance or meter misconfiguration.\n7. 🟡 **Extreme Price Peak**: Warns before expensive peak hours.\n8. 🔵 **Freeze Protection & Heat Pump Guard**: Temperature monitoring for heating systems.\n",
     "tags": [
       "alerts",
       "alarm",
@@ -427,7 +427,7 @@
     "helpful_yes": 0,
     "helpful_no": 0,
     "created_at": "2026-08-25T11:23:37.231Z",
-    "updated_at": "2026-08-25T16:38:13.572Z"
+    "updated_at": "2026-08-25T16:52:32.120Z"
   }
 },
 {
@@ -441,8 +441,8 @@
     "title_en": "Solar Forecasting, Weather Models & Accuracy Score",
     "summary_de": "Wie die Hybrid-Prognose aus Wetterdaten, Sensor.Community und ML berechnet wird und wie der Güte-Score funktioniert.",
     "summary_en": "How the hybrid solar forecast combines numerical weather predictions with local observations and ML.",
-    "content_de": "# Solar-Prognose & Genauigkeitsabgleich\n\nDie Solar-Prognose berechnet auf Basis hochauflösender Wetterdaten (Globalstrahlung in $W/m^2$, Bewölkung, Temperatur) und deiner Anlagenausrichtung die stündliche PV-Erzeugung für die nächsten 24 bis 48 Stunden.\n\n## Wie wird der Genauigkeits-Score berechnet?\n\nDer stündliche Abgleich vergleicht die tatsächliche Wechselrichter-Leistung ($P_{\\text{Real}}$) mit der Modellvorhersage ($P_{\\text{Forecast}}$):\n\n$$\\text{Prognosegüte} = \\max\\left(0, 1 - \\frac{\\sum |P_{\\text{Real}} - P_{\\text{Forecast}}|}{\\max(\\sum P_{\\text{Real}}, \\sum P_{\\text{Forecast}}, 0.1)}\\right) \\times 100$$\n\n* 🟢 **Hervorragend ($\\ge 90\\,\\%$)**: Optimale Übereinstimmung mit realen Messwerten.\n* 🟡 **Gut ($75 - 89\\,\\%$)**: Normale wetterbedingte Schwankungen (z. B. wechselnde Wolkenfelder).\n* 🔵 **In Kalibrierung ($< 75\\,\\%$)**: Das System lernt standortspezifische Abschattungen oder Horizontverläufe ein.\n\n## Selbstlernende Korrekturfaktoren\nStellt das System über mehrere Tage systematische Abweichungen fest (z. B. Nachmittagsschatten durch Bäume), passt ein adaptiver Korrekturfaktor zukünftige Vorhersagen automatisch an.\n",
-    "content_en": "# Solar Forecasting & Accuracy Scoring\n\nThe solar forecast combines physical irradiation models (Global Horizontal Irradiance in $W/m^2$, cloud cover, ambient temperature) with machine learning adjustments.\n\n## Accuracy Score Formula\n\n$$\\text{Accuracy} = \\max\\left(0, 1 - \\frac{\\sum |P_{\\text{Real}} - P_{\\text{Forecast}}|}{\\max(\\sum P_{\\text{Real}}, \\sum P_{\\text{Forecast}}, 0.1)}\\right) \\times 100$$\n\n* 🟢 **Excellent ($\\ge 90\\,\\%$)**: High model fidelity.\n* 🟡 **Good ($75 - 89\\,\\%$)**: Typical cloud drift.\n* 🔵 **Calibrating ($< 75\\,\\%$)**: Continuous horizon and shading adaptation.\n",
+    "content_de": "# Solar-Prognose & Genauigkeitsabgleich\n\nDie Solar-Prognose berechnet auf Basis hochauflösender Wetterdaten (Globalstrahlung in W/m², Bewölkung, Temperatur) und deiner Anlagenausrichtung die stündliche PV-Erzeugung für die nächsten 24 bis 48 Stunden.\n\n## Wie wird der Genauigkeits-Score berechnet?\n\nDer stündliche Abgleich vergleicht die tatsächliche Wechselrichter-Leistung mit der Modellvorhersage:\n\n> 📐 **Formel:**  \n> **Prognosegüte (%)** = `100 % - prozentuale Abweichung zwischen Ist-Ertrag und Modellvorhersage`\n\n* 🟢 **Hervorragend (≥ 90 %)**: Optimale Übereinstimmung mit realen Messwerten.\n* 🟡 **Gut (75 bis 89 %)**: Normale wetterbedingte Schwankungen (z. B. wechselnde Wolkenfelder).\n* 🔵 **In Kalibrierung (unter 75 %)**: Das System lernt standortspezifische Abschattungen oder Horizontverläufe ein.\n\n## Selbstlernende Korrekturfaktoren\nStellt das System über mehrere Tage systematische Abweichungen fest (z. B. Nachmittagsschatten durch Bäume), passt ein adaptiver Korrekturfaktor zukünftige Vorhersagen automatisch an.\n",
+    "content_en": "# Solar Forecasting & Accuracy Scoring\n\nThe solar forecast combines physical irradiation models (Global Horizontal Irradiance in W/m², cloud cover, ambient temperature) with machine learning adjustments.\n\n## Accuracy Score Calculation\n\n> 📐 **Formula:**  \n> **Accuracy Score (%)** = `100% - percentage deviation between actual yield and forecast model`\n\n* 🟢 **Excellent (≥ 90%)**: High model fidelity and clear sky tracking.\n* 🟡 **Good (75 to 89%)**: Typical cloud drift and transient weather.\n* 🔵 **Calibrating (under 75%)**: Continuous horizon and local shading adaptation.\n",
     "tags": [
       "forecast",
       "solar",
@@ -458,7 +458,7 @@
     "helpful_yes": 0,
     "helpful_no": 0,
     "created_at": "2026-08-25T11:23:37.186Z",
-    "updated_at": "2026-08-25T16:38:13.544Z"
+    "updated_at": "2026-08-25T16:52:32.097Z"
   }
 }
 ]

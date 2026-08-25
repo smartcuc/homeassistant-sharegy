@@ -8,6 +8,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { fetchHelpArticle, sendArticleFeedback } from "../api";
 import HelpArticleEditorModal from "../components/HelpArticleEditorModal";
+import MarkdownViewer from "../components/MarkdownViewer";
 
 export default function HelpArticleDetailPage() {
     const { slug } = useParams();
@@ -124,11 +125,8 @@ export default function HelpArticleDetailPage() {
                 </div>
 
                 {/* Markdown Content Body */}
-                <div className="p-6 sm:p-8 prose prose-slate max-w-none text-sm sm:text-base leading-relaxed space-y-4">
-                    {/* Formatted Markdown Content Output */}
-                    <div className="whitespace-pre-wrap font-sans text-gray-800 space-y-4 leading-relaxed">
-                        {content}
-                    </div>
+                <div className="p-6 sm:p-8">
+                    <MarkdownViewer content={content} />
                 </div>
 
                 {/* Helpful Feedback Section */}
