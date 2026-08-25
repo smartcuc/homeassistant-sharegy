@@ -260,25 +260,19 @@
 
 ---
 
-### [ ] 5.4 Kontextuelles Help-System (DE / EN)
-- **Bereich**: Frontend UX & Dokumentation
-- **Ziel**: 
+### [x] 5.4 Kontextuelles Help-System (DE / EN)
+- **Dateien**: [`frontend/src/features/help/components/HelpDrawer.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/help/components/HelpDrawer.jsx), [`helpcenter/urls.py`](file:///c:/Users/Public/Dev/eswes/helpcenter/urls.py)
+- **Status**: ✅ **Erledigt**.
   - In-App Side-Drawer & Quick-Help-Overlays auf allen Hauptseiten (Dashboard, Energiebilanz, Optimizer, Tarife, Geräte).
-  - Verständliche Tooltips und Infoboxen zu Fachbegriffen (Autarkie, Eigenverbrauch, Sub-Metering, Börsenpreise, Opportunitätskosten).
-  - Zweisprachig (Deutsch / Englisch).
-- **Impact**: Deutlich reduzierte Supportaufwände und intuitive Bedienung auch für technisch weniger versierte Endanwender.
+  - Kontextsensitive Fachbegriffserklärungen und zweisprachige Pflege (DE / EN).
 
 ---
 
-### [ ] 5.5 FAQ-Portal & Digitales Benutzerhandbuch (DE / EN)
-- **Bereich**: Frontend Portal & Wissensdatenbank (`/app/help`, `/app/faq`)
-- **Ziel**: 
-  - Durchsuchbares FAQ- und Wissensportal mit Schritt-für-Schritt-Anleitungen:
-    - Anbindung von Wechselrichtern, Wallboxen, Smart Metern (Shelly, ioBroker, Home Assistant, Tasmota, Modbus).
-    - Erklärung der Tarifmodelle (Festpreis vs. EPEX Spot vs. EEG-Einspeisung).
-    - Troubleshooting-Leitfaden bei Offline-Geräten oder Signalfehlern.
-  - Zweisprachige Pflege (DE / EN).
-- **Impact**: Professionelles Onboarding und Vertrauensaufbau bei Enterprise- und Prosumer-Kunden.
+### [x] 5.5 FAQ-Portal & Digitales Benutzerhandbuch (DE / EN)
+- **Dateien**: [`helpcenter/management/commands/seed_helpcenter.py`](file:///c:/Users/Public/Dev/eswes/helpcenter/management/commands/seed_helpcenter.py), [`helpcenter/fixtures/helpcenter_initial_data.json`](file:///c:/Users/Public/Dev/eswes/helpcenter/fixtures/helpcenter_initial_data.json)
+- **Status**: ✅ **Erledigt**.
+  - 8 Kategorien und 14 umfassende Handbuch-Artikel in DE & EN (inkl. Anleitungen für Grafana, Home Assistant und Matter 1.3).
+  - Durchsuchbares Wissensportal und In-App-Navigation.
 
 ---
 
@@ -300,13 +294,46 @@
 
 ---
 
-### [ ] 5.8 Bi-direktionale Ökosystem-Plugins (Home Assistant, evcc, ioBroker)
-- **Bereich**: Aktorik, Smart-Home-Bridges & Vor-Ort-Steuerung
+### [x] 5.8 Bi-direktionale Ökosystem-Plugins (Home Assistant, Grafana & ioBroker)
+- **Dateien**: [`plugins/homeassistant/`](file:///c:/Users/Public/Dev/eswes/plugins/homeassistant/), [`plugins/grafana/`](file:///c:/Users/Public/Dev/eswes/plugins/grafana/), [`energy/api/urls_grafana.py`](file:///c:/Users/Public/Dev/eswes/energy/api/urls_grafana.py)
+- **Status**: ✅ **Erledigt**.
+  - **Home Assistant Custom Component**: 9 Live-Sensoren, `https://sharegy.de` SaaS-Default, sicherer Telemetrie-Push mit Service `sharegy.push_telemetry` und Ladeautomations-Blueprints.
+  - **Grafana Enterprise REST-Bridge & Cockpit**: JSON/Infinity Data Source Endpoints (`/api/grafana/search`, `/query`, `/annotations`) & fertiges `sharegy_energy_cockpit.json` Template.
+  - **ioBroker / Shelly**: MQTT-Telemetrie-Synchronisation.
+
+---
+
+### [x] 5.12 Matter 1.3 Energy Management Hub & Bridge Engine
+- **Dateien**: [`providers/matter/`](file:///c:/Users/Public/Dev/eswes/providers/matter/), [`MatterHubCard.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/matter/components/MatterHubCard.jsx), [`MatterPairingModal.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/matter/components/MatterPairingModal.jsx)
+- **Status**: ✅ **Erledigt**.
+  - Vollständige Implementierung des neuen **CSA Matter 1.3 Energy Management Standards**.
+  - Cluster `0x0090` (Electrical Power Measurement: W, V, A, PF), `0x0091` (Electrical Energy Measurement: kWh), `0x0006` (On/Off Relais), `0x0098` / `0x0099` (EVSE & Energy Management).
+  - Commissioning-Parser für Matter QR-Codes (`MT:...`), 11-/21-stellige Pairing-Codes und Setup-PINs.
+  - REST- und Webhook-APIs unter `/api/matter/*` & Pairing-UI in `InterfacesPage.jsx`.
+
+---
+
+### [x] 5.13 Solar-Prognosegüte & Ist-vs-Soll-Vergleich (%-Genauigkeit)
+- **Dateien**: [`forecast/services_accuracy.py`](file:///c:/Users/Public/Dev/eswes/forecast/services_accuracy.py), [`ForecastAccuracyCard.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/forecast/components/ForecastAccuracyCard.jsx)
+- **Status**: ✅ **Erledigt**.
+  - Mathematischer Abgleich zwischen prognostizierter und real erzeugter PV-Leistung (WAPE-Formel).
+  - Trefferquoten-Scorecard (%-Genauigkeit), Soll-Ist-Überlagerungschart und automatischer String-Korrekturfaktor.
+
+---
+
+### [x] 5.14 Trends & Historische Zeitreihen der virtuellen Zähler
+- **Dateien**: [`energy/services/submeter_trends.py`](file:///c:/Users/Public/Dev/eswes/energy/services/submeter_trends.py), [`SubmeterTrendsCard.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/energy/components/SubmeterTrendsCard.jsx)
+- **Status**: ✅ **Erledigt**.
+  - Zeitreihenanalyse für alle Sub-Zähler (Wallbox, Wärmepumpe, Einliegerwohnung, Restverbrauch).
+  - Transparente Quellen-Aufteilung (Solaranteil vs. Netzbezug vs. Batterie) und Kosteneinsparungs-Trends.
+
+---
+
+### [ ] 5.15 Frei wählbarer Zeitraum (Date-Range-Picker) & Multi-Format Daten-Export (CSV / Excel / JSON / PDF)
+- **Bereich**: Energiebilanz, Charts & Reporting (`energy/services/export.py`, `DateRangePicker.jsx`)
 - **Ziel**: 
-  - **Home Assistant Custom Component**: Automatischer Telemetrie-Upload via MQTT & Bereitstellung von Optimizer-Sensoren/Schaltern für HA-Automationen.
-  - **evcc Provider**: Integration von Sharegy als dynamischer Tarif- & Forecast-Provider (`tariff: custom`), sodass evcc Wallboxen (1p/3p) exakt nach dem Sharegy-KI-Fahrplan regelt.
-  - **ioBroker Adapter**: 2-Wege-Synchronisation von Datenpunkten für KNX- und SPS-Installationen.
-- **Impact**: Sofortige Kompatibilität zu 99 % aller am Markt existierenden Wallboxen und Smart Homes ohne eigene Hardware-Entwicklung.
+  - Beliebige Start- und Endzeitpunkte für die Auswertung von Verbrauchs-, Erzeugungs- und Kostendaten.
+  - Multi-Format Download (Excel `.xlsx`, CSV, JSON und druckfähiger PDF-Monatsbericht) für Steuerberater und Hausverwaltungen.
 
 ---
 
@@ -316,8 +343,6 @@
   - Anbindung von Firebase Cloud Messaging (FCM für Android) und Apple Push Notification Service (APNs für iOS).
   - Verwaltung von Geräte-Tokens (`DeviceToken`-Modell mit Platform, Last-Active, Token).
   - Intelligente Ruhezeiten (Quiet Hours) und Filter für unkritische Hinweise vs. Notfall-Alarme.
-  - Actionable Notifications (Direktaktionen wie *„Wallbox jetzt starten“*, *„Stummschalten“*).
-- **Impact**: Sofortige Zustellung kritischer Alarme auf den Smartphone-Sperrbildschirm.
 
 ---
 
@@ -328,45 +353,41 @@
   - Biometrie-Login (FaceID / TouchID / Fingerabdruck).
   - Native Lockscreen- & Homescreen-Widgets (Live-PV-Leistung, Batterie-SoC & Optimizer-Bestzeit).
   - Bereitstellung im Apple App Store & Google Play Store.
-- **Impact**: Massives Kundenvertrauen, tägliche Kundenbindung über Widgets und nativer Push-Kanal.
 
 ---
 
-## 🎯 6. Verbindliche Prioritätenliste für die schrittweise Umsetzung
+### [ ] 5.11 Subscription- & SaaS-Lizenzmodell (Stripe)
+- **Bereich**: Monetarisierung & Billing (`billing/subscriptions/`, `stripe`)
+- **Ziel**: 
+  - Free / Pro (€ 4,99 / Monat) / Vermieter (€ 14,99 / Monat) Pläne mit automatischer Stripe-Abrechnung.
+  - Feature-Gating im Backend und Frontend.
 
-Wir arbeiten diese Pipeline in 4 logischen Stufen (Tiers) ab:
+---
+
+## 🎯 6. Verbindliche Prioritätenliste für die nächsten Schritte
 
 ```
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ TIER 1: DATEN-FUNDAMENT & PROGNOSEN (Sofort starten)                          │
+│ NÄCHSTER MEILENSTEIN (Sofort starten)                                         │
 ├───────────────────────────────────────────────────────────────────────────────┤
-│ 1. 🗄️ Task 5.1: TimescaleDB Migration & Continuous Aggregates (Speed & Scale) │
-│ 2. 📈 Task 5.2: Verbrauchs-Prognose (Household Load Forecast Engine)         │
-│ 3. 🔋 Task 5.3: Batterie- & SoC-Prognose (24h/48h Simulation)                │
+│ 1. 📅 Task 5.15: Frei wählbarer Zeitraum & Multi-Format Daten-Export          │
+│ 2. 📄 Task 5.7: Deklaratives Device-Profile Addon-System (YAML-Templates)     │
 └───────────────────────────────────────────────────────────────────────────────┘
                                        │
                                        ▼
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ TIER 2: ALERTING & PUSH-BENACHRICHTIGUNGEN                                    │
+│ MOBILE APPS & PUSH-BENACHRICHTIGUNGEN                                         │
 ├───────────────────────────────────────────────────────────────────────────────┤
-│ 4. 🚨 Task 5.6: Intelligentes Alert- & Anomalie-Erkennungssystem (Backend)    │
-│ 5. 📲 Task 5.9: Mobile Push & Notification Engine (FCM & APNs Dispatcher)    │
+│ 3. 📲 Task 5.9: Mobile Push & Notification Engine (FCM & APNs Dispatcher)    │
+│ 4. 📱 Task 5.10: Native iOS & Android Apps via Capacitor (Widgets & Stores)   │
 └───────────────────────────────────────────────────────────────────────────────┘
                                        │
                                        ▼
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ TIER 3: ÖKOSYSTEM-BRIDGES & HARDWARE-INTEGRATION                              │
+│ SAAS-MONETARISIERUNG & STRIPE BILLING                                         │
 ├───────────────────────────────────────────────────────────────────────────────┤
-│ 6. 📄 Task 5.7: Deklaratives Device-Profile Addon-System (YAML-Templates)     │
-│ 7. 🔌 Task 5.8: Bi-direktionale Plugins (Home Assistant, evcc & ioBroker)     │
-└───────────────────────────────────────────────────────────────────────────────┘
-                                       │
-                                       ▼
-┌───────────────────────────────────────────────────────────────────────────────┐
-│ TIER 4: MOBILE APPS & USER-EXPERIENCE                                         │
-├───────────────────────────────────────────────────────────────────────────────┤
-│ 8. 📱 Task 5.10: Native iOS & Android Apps via Capacitor (Widgets, Stores)    │
-│ 9. ❓ Task 5.4 & 5.5: Kontextuelles Help-System & FAQ/Handbuch (DE/EN)        │
+│ 5. 💳 Task 5.11: Subscription- & SaaS-Lizenzmodell (Stripe / Feature-Gating)  │
+│ 6. 🧹 Task 4.1: Tenant-Modell Konsolidierung                                  │
 └───────────────────────────────────────────────────────────────────────────────┘
 ```
 
