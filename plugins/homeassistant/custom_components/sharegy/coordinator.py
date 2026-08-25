@@ -15,6 +15,7 @@ from .const import (
     CONF_API_KEY,
     CONF_SCAN_INTERVAL,
     DEFAULT_SCAN_INTERVAL,
+    DEFAULT_HOST,
     ENDPOINT_DASHBOARD,
     ENDPOINT_BALANCE,
     ENDPOINT_OPTIMIZER,
@@ -32,11 +33,10 @@ class SharegyDataUpdateCoordinator(DataUpdateCoordinator):
         self.hass = hass
         self.entry = entry
         host = str(entry.data.get(CONF_HOST, "")).strip().rstrip("/")
-        if not host.startswith(("http://", "https://")):
-            if host.startswith("192.168.") or host.startswith("10.") or host.startswith("172.") or host.startswith("localhost") or host.startswith("127.0.0.1"):
-                host = f"http://{host}"
-            else:
-                host = f"https://{host}"
+        if not host:
+            host = DEFAULT_HOST
+        elif not host.startswith(("http://", "https://")):
+            host = f"https://{host}"
         self.host = host
         self.api_key = str(entry.data.get(CONF_API_KEY, "")).strip()
         scan_interval = entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)

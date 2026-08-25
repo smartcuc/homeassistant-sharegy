@@ -26,11 +26,11 @@ Die offizielle Home Assistant Integration verbindet dein **Sharegy HEMS** mit Ho
 
 1. Gehe in Home Assistant zu **Einstellungen → Geräte & Dienste → Integration hinzufügen**.
 2. Suche nach **Sharegy HEMS**.
-3. Trage die Verbindungsdaten ein:
-   * **Host**: `http://<sharegy-ip>:8000` (oder `https://app.sharegy.de`)
-   * **API-Key**: Dein Token aus Sharegy (**Einstellungen → Smart Home / MQTT**)
+3. Trage deine Zugangsdaten ein:
+   * **Host**: `https://sharegy.de` (Standard vorausgefüllt)
+   * **API-Key / MQTT-Token**: Dein Token aus Sharegy (**Schnittstellen & MQTT**)
    * **Abfrage-Intervall**: Standard 10 Sekunden (einstellbar 5 bis 300 Sekunden).
-4. Fertig! Alle Sensoren werden automatisch erstellt.
+4. Fertig! Alle 9 Sensoren werden automatisch erstellt.
 
 ---
 

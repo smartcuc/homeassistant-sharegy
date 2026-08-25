@@ -7,6 +7,7 @@ CONF_API_KEY = "api_key"
 CONF_SCAN_INTERVAL = "scan_interval"
 
 DEFAULT_NAME = "Sharegy HEMS"
+DEFAULT_HOST = "https://sharegy.de"
 DEFAULT_SCAN_INTERVAL = 10  # seconds
 
 ENDPOINT_DASHBOARD = "/api/energy/dashboard/me/"

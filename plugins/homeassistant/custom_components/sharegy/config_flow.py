@@ -16,6 +16,7 @@ from .const import (
     CONF_API_KEY,
     CONF_SCAN_INTERVAL,
     DEFAULT_SCAN_INTERVAL,
+    DEFAULT_HOST,
     ENDPOINT_DASHBOARD,
 )
 
@@ -25,11 +26,10 @@ _LOGGER = logging.getLogger(__name__)
 async def validate_input(hass: HomeAssistant, data: dict) -> dict:
     """Validate the user input allows us to connect."""
     host = str(data.get(CONF_HOST, "")).strip().rstrip("/")
-    if not host.startswith(("http://", "https://")):
-        if host.startswith("192.168.") or host.startswith("10.") or host.startswith("172.") or host.startswith("localhost") or host.startswith("127.0.0.1"):
-            host = f"http://{host}"
-        else:
-            host = f"https://{host}"
+    if not host:
+        host = DEFAULT_HOST
+    elif not host.startswith(("http://", "https://")):
+        host = f"https://{host}"
 
     data[CONF_HOST] = host
     api_key = str(data.get(CONF_API_KEY, "")).strip()
@@ -79,7 +79,7 @@ class SharegyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         data_schema = vol.Schema(
             {
-                vol.Required(CONF_HOST, default="http://192.168.1.100:8000"): str,
+                vol.Required(CONF_HOST, default=DEFAULT_HOST): str,
                 vol.Required(CONF_API_KEY): str,
                 vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): vol.All(
                     vol.Coerce(int), vol.Range(min=5, max=300)

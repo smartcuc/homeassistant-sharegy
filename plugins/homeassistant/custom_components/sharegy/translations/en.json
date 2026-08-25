@@ -2,18 +2,18 @@
   "config": {
     "step": {
       "user": {
-        "title": "Connect Sharegy HEMS",
-        "description": "Enter your server URL and Sharegy API Key / Token (found in Sharegy under Settings → Smart Home / MQTT).",
+        "title": "Connect Sharegy Cloud",
+        "description": "Enter your Sharegy API Key / MQTT Token (found in Sharegy under Interfaces & MQTT).",
         "data": {
-          "host": "Sharegy Server URL (e.g. http://192.168.1.100:8000)",
-          "api_key": "API Key / Token",
+          "host": "Sharegy Cloud URL (Default: https://sharegy.de)",
+          "api_key": "API Key / MQTT Password / Token",
           "scan_interval": "Update Interval (Seconds)"
         }
       }
     },
     "error": {
-      "cannot_connect": "Failed to connect to Sharegy. Please check server IP and port.",
-      "invalid_auth": "Invalid API Key / Token.",
+      "cannot_connect": "Failed to connect to https://sharegy.de. Please check internet connection.",
+      "invalid_auth": "Invalid API Key or Token.",
       "unknown": "Unexpected error occurred."
     },
     "abort": {
