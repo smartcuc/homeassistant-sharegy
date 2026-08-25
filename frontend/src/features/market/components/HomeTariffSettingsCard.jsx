@@ -2,10 +2,9 @@
 # src/features/market/components/HomeTariffSettingsCard.jsx
 */
 
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Card from "../../../components/ui/Card";
-import Button from "../../../components/ui/Button";
 import { fetchHomeTariff, saveHomeTariff } from "../api";
 import { useTranslation } from "react-i18next";
 
@@ -25,44 +24,32 @@ export default function HomeTariffSettingsCard() {
         queryFn: fetchHomeTariff,
     });
 
-    const [selectedType, setSelectedType] = useState(null);
-    const [customPriceCt, setCustomPriceCt] = useState(null);
-    const [selectedFeedInType, setSelectedFeedInType] = useState(null);
-    const [customFeedInPriceCt, setCustomFeedInPriceCt] = useState(null);
+    const [tariffType, setTariffType] = useState("dynamic");
+    const [staticPriceCt, setStaticPriceCt] = useState("32.00");
+    const [feedInTariffType, setFeedInTariffType] = useState("static");
+    const [feedInPriceCt, setFeedInPriceCt] = useState("8.20");
     const [showBreakdown, setShowBreakdown] = useState(false);
     const [statusMsg, setStatusMsg] = useState(null);
+    const [isSaving, setIsSaving] = useState(false);
 
-    const tariffType = selectedType ?? tariffData?.tariff_type ?? "dynamic";
-    const staticPriceCt = customPriceCt ?? (tariffData?.static_price_ct != null ? String(tariffData.static_price_ct) : "");
-    const feedInTariffType = selectedFeedInType ?? tariffData?.feed_in_tariff_type ?? "static";
-    const feedInPriceCt = customFeedInPriceCt ?? (tariffData?.feed_in_tariff_ct != null ? String(tariffData.feed_in_tariff_ct) : "8.20");
+    // Synchronize local form state with fetched tariff data
+    useEffect(() => {
+        if (tariffData) {
+            setTariffType(tariffData.tariff_type || "dynamic");
+            if (tariffData.static_price_ct != null) {
+                setStaticPriceCt(String(tariffData.static_price_ct));
+            }
+            setFeedInTariffType(tariffData.feed_in_tariff_type || "static");
+            if (tariffData.feed_in_tariff_ct != null) {
+                setFeedInPriceCt(String(tariffData.feed_in_tariff_ct));
+            }
+        }
+    }, [tariffData]);
 
-    const mutation = useMutation({
-        mutationFn: saveHomeTariff,
-        onSuccess: (updatedData) => {
-            queryClient.setQueryData(["home-tariff"], updatedData);
-            queryClient.invalidateQueries({ queryKey: ["home-tariff"] });
-            queryClient.invalidateQueries({ queryKey: ["spot-price-chart"] });
-            queryClient.invalidateQueries({ queryKey: ["energy-data"] });
-            queryClient.invalidateQueries({ queryKey: ["energy-balance"] });
-            setSelectedType(null);
-            setCustomPriceCt(null);
-            setSelectedFeedInType(null);
-            setCustomFeedInPriceCt(null);
-            setStatusMsg({ type: "success", text: t("tariffs.save_success", "Strom- & Einspeisetarif erfolgreich gespeichert!") });
-            setTimeout(() => setStatusMsg(null), 4000);
-        },
-        onError: (err) => {
-            setStatusMsg({
-                type: "error",
-                text: err?.data?.detail || err?.data?.error || err?.detail || err?.message || t("tariffs.save_error", "Fehler beim Speichern des Tarifs."),
-            });
-            setTimeout(() => setStatusMsg(null), 5000);
-        },
-    });
-
-    function handleSave(e) {
-        e.preventDefault();
+    async function handleSave(e) {
+        if (e && typeof e.preventDefault === "function") {
+            e.preventDefault();
+        }
 
         const parsedStaticPrice = parseCt(staticPriceCt);
         if (tariffType === "static" && (parsedStaticPrice === null || parsedStaticPrice <= 0)) {
@@ -76,12 +63,46 @@ export default function HomeTariffSettingsCard() {
             return;
         }
 
-        mutation.mutate({
+        const payload = {
             tariff_type: tariffType,
             static_price_ct: tariffType === "static" ? parsedStaticPrice : null,
             feed_in_tariff_type: feedInTariffType,
             feed_in_tariff_ct: feedInTariffType === "static" ? parsedFeedInPrice : 0,
-        });
+        };
+
+        setIsSaving(true);
+        setStatusMsg(null);
+
+        try {
+            const updated = await saveHomeTariff(payload);
+            queryClient.setQueryData(["home-tariff"], updated);
+            queryClient.invalidateQueries({ queryKey: ["home-tariff"] });
+            queryClient.invalidateQueries({ queryKey: ["spot-price-chart"] });
+            queryClient.invalidateQueries({ queryKey: ["energy-data"] });
+            queryClient.invalidateQueries({ queryKey: ["energy-balance"] });
+
+            if (updated) {
+                setTariffType(updated.tariff_type || "dynamic");
+                if (updated.static_price_ct != null) {
+                    setStaticPriceCt(String(updated.static_price_ct));
+                }
+                setFeedInTariffType(updated.feed_in_tariff_type || "static");
+                if (updated.feed_in_tariff_ct != null) {
+                    setFeedInPriceCt(String(updated.feed_in_tariff_ct));
+                }
+            }
+
+            setStatusMsg({ type: "success", text: t("tariffs.save_success", "Strom- & Einspeisetarif erfolgreich gespeichert!") });
+            setTimeout(() => setStatusMsg(null), 4000);
+        } catch (err) {
+            setStatusMsg({
+                type: "error",
+                text: err?.data?.detail || err?.data?.error || err?.detail || err?.message || t("tariffs.save_error", "Fehler beim Speichern des Tarifs."),
+            });
+            setTimeout(() => setStatusMsg(null), 5000);
+        } finally {
+            setIsSaving(false);
+        }
     }
 
     if (isLoading) {
@@ -124,7 +145,7 @@ export default function HomeTariffSettingsCard() {
 
                     {/* 1.1 OPTION: DYNAMISCH */}
                     <div
-                        onClick={() => setSelectedType("dynamic")}
+                        onClick={() => setTariffType("dynamic")}
                         className={`
                             p-4 rounded-xl border-2 cursor-pointer transition-all duration-150
                             ${tariffType === "dynamic"
@@ -139,7 +160,7 @@ export default function HomeTariffSettingsCard() {
                                 name="tariff_type"
                                 value="dynamic"
                                 checked={tariffType === "dynamic"}
-                                onChange={() => setSelectedType("dynamic")}
+                                onChange={() => setTariffType("dynamic")}
                                 className="mt-1 h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300"
                             />
                             <div className="flex-1">
@@ -164,7 +185,7 @@ export default function HomeTariffSettingsCard() {
                                                 e.stopPropagation();
                                                 setShowBreakdown(!showBreakdown);
                                             }}
-                                            className="text-xs font-medium text-emerald-700 hover:text-emerald-800 underline inline-flex items-center gap-1"
+                                            className="text-xs font-medium text-emerald-700 hover:text-emerald-800 underline inline-flex items-center gap-1 cursor-pointer"
                                         >
                                             {showBreakdown ? t("tariffs.hide_breakdown", "▲ Feste Preisbestandteile ausblenden") : `${t("tariffs.show_breakdown", "▼ Feste Preisbestandteile anzeigen")} (~${priceConfig.additional_costs_ct.toFixed(2)} ct/kWh netto)`}
                                         </button>
@@ -205,7 +226,7 @@ export default function HomeTariffSettingsCard() {
 
                     {/* 1.2 OPTION: STATISCH */}
                     <div
-                        onClick={() => setSelectedType("static")}
+                        onClick={() => setTariffType("static")}
                         className={`
                             p-4 rounded-xl border-2 cursor-pointer transition-all duration-150
                             ${tariffType === "static"
@@ -220,7 +241,7 @@ export default function HomeTariffSettingsCard() {
                                 name="tariff_type"
                                 value="static"
                                 checked={tariffType === "static"}
-                                onChange={() => setSelectedType("static")}
+                                onChange={() => setTariffType("static")}
                                 className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                             />
                             <div className="flex-1">
@@ -247,7 +268,7 @@ export default function HomeTariffSettingsCard() {
                                                 inputMode="decimal"
                                                 id="static_price"
                                                 value={staticPriceCt}
-                                                onChange={(e) => setCustomPriceCt(e.target.value)}
+                                                onChange={(e) => setStaticPriceCt(e.target.value)}
                                                 placeholder="32.00"
                                                 className="w-full px-3 py-1.5 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-12 font-medium"
                                             />
@@ -277,7 +298,7 @@ export default function HomeTariffSettingsCard() {
 
                     {/* 2.1 Feste EEG-Vergütung */}
                     <div
-                        onClick={() => setSelectedFeedInType("static")}
+                        onClick={() => setFeedInTariffType("static")}
                         className={`
                             p-4 rounded-xl border-2 cursor-pointer transition-all duration-150
                             ${feedInTariffType === "static"
@@ -292,7 +313,7 @@ export default function HomeTariffSettingsCard() {
                                 name="feed_in_tariff_type"
                                 value="static"
                                 checked={feedInTariffType === "static"}
-                                onChange={() => setSelectedFeedInType("static")}
+                                onChange={() => setFeedInTariffType("static")}
                                 className="mt-1 h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300"
                             />
                             <div className="flex-1">
@@ -319,7 +340,7 @@ export default function HomeTariffSettingsCard() {
                                                 inputMode="decimal"
                                                 id="feedin_price"
                                                 value={feedInPriceCt}
-                                                onChange={(e) => setCustomFeedInPriceCt(e.target.value)}
+                                                onChange={(e) => setFeedInPriceCt(e.target.value)}
                                                 placeholder="8.20"
                                                 className="w-full px-3 py-1.5 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 pr-12 font-medium"
                                             />
@@ -335,7 +356,7 @@ export default function HomeTariffSettingsCard() {
 
                     {/* 2.2 Dynamischer Börsen-Marktwert Solar */}
                     <div
-                        onClick={() => setSelectedFeedInType("dynamic")}
+                        onClick={() => setFeedInTariffType("dynamic")}
                         className={`
                             p-4 rounded-xl border-2 cursor-pointer transition-all duration-150
                             ${feedInTariffType === "dynamic"
@@ -350,7 +371,7 @@ export default function HomeTariffSettingsCard() {
                                 name="feed_in_tariff_type"
                                 value="dynamic"
                                 checked={feedInTariffType === "dynamic"}
-                                onChange={() => setSelectedFeedInType("dynamic")}
+                                onChange={() => setFeedInTariffType("dynamic")}
                                 className="mt-1 h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300"
                             />
                             <div className="flex-1">
@@ -371,7 +392,7 @@ export default function HomeTariffSettingsCard() {
 
                     {/* 2.3 Keine Vergütung / Nulleinspeisung */}
                     <div
-                        onClick={() => setSelectedFeedInType("none")}
+                        onClick={() => setFeedInTariffType("none")}
                         className={`
                             p-4 rounded-xl border-2 cursor-pointer transition-all duration-150
                             ${feedInTariffType === "none"
@@ -386,7 +407,7 @@ export default function HomeTariffSettingsCard() {
                                 name="feed_in_tariff_type"
                                 value="none"
                                 checked={feedInTariffType === "none"}
-                                onChange={() => setSelectedFeedInType("none")}
+                                onChange={() => setFeedInTariffType("none")}
                                 className="mt-1 h-4 w-4 text-slate-600 focus:ring-slate-500 border-gray-300"
                             />
                             <div className="flex-1">
@@ -420,12 +441,13 @@ export default function HomeTariffSettingsCard() {
 
                 {/* ACTION BUTTON */}
                 <div className="pt-2 flex justify-end">
-                    <Button
+                    <button
                         type="submit"
-                        variant="primary"
+                        disabled={isSaving}
+                        className="px-5 py-2.5 rounded-xl font-semibold text-sm bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition active:scale-[0.98] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {mutation.isPending ? t("common.saving", "Speichern…") : t("tariffs.save_tariff", "Tarif-Einstellungen speichern")}
-                    </Button>
+                        {isSaving ? t("common.saving", "Speichern…") : t("tariffs.save_tariff", "Tarif-Einstellungen speichern")}
+                    </button>
                 </div>
             </form>
         </Card>

@@ -27,15 +27,16 @@ class SpotPriceAdmin(admin.ModelAdmin):
 
     @admin.display(ordering="price_eur_per_kwh", description="Preis (ct/kWh)")
     def price_formatted(self, obj):
-        ct = obj.price_eur_per_kwh * 100
+        ct = float(obj.price_eur_per_kwh * 100)
+        formatted_ct = f"{ct:,.2f} ct/kWh"
         if ct < 0:
-            return format_html('<span style="background: #FEE2E2; color: #DC2626; font-weight: 700; padding: 2px 8px; border-radius: 6px;">🚨 {:,.2f} ct/kWh</span>', ct)
+            return format_html('<span style="background: #FEE2E2; color: #DC2626; font-weight: 700; padding: 2px 8px; border-radius: 6px;">🚨 {}</span>', formatted_ct)
         elif ct < 15:
-            return format_html('<span style="color: #059669; font-weight: 600;">{:,.2f} ct/kWh</span>', ct)
+            return format_html('<span style="color: #059669; font-weight: 600;">{}</span>', formatted_ct)
         elif ct < 30:
-            return format_html('<span style="color: #374151;">{:,.2f} ct/kWh</span>', ct)
+            return format_html('<span style="color: #374151;">{}</span>', formatted_ct)
         else:
-            return format_html('<span style="color: #D97706; font-weight: 700;">{:,.2f} ct/kWh</span>', ct)
+            return format_html('<span style="color: #D97706; font-weight: 700;">{}</span>', formatted_ct)
 
     @admin.display(description="Börsenpreis (EUR/MWh)")
     def price_eur_per_mwh(self, obj):

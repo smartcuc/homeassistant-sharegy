@@ -79,7 +79,8 @@ class DeviceAdmin(admin.ModelAdmin):
         cfg = getattr(obj, "config", None)
         role = cfg.role.key if (cfg and cfg.role) else ""
         color = "#10B981" if role == "battery" else "#D97706" if role == "producer" else "#2563EB" if role == "grid" else "#374151"
-        return format_html('<span style="font-weight: 700; color: {};">{:,.1f} W</span>', color, val)
+        formatted_val = f"{float(val):,.1f} W"
+        return format_html('<span style="font-weight: 700; color: {};">{}</span>', color, formatted_val)
 
     @admin.display(description="Status")
     def online_status(self, obj):
