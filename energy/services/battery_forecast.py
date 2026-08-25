@@ -4,72 +4,141 @@
 
 from zoneinfo import ZoneInfo
 from django.utils import timezone
+from django.db.models import Q
 
 from devices.models import Device, DeviceLatestMetric
 from forecast.services_load_forecast import get_household_load_forecast
 
 
-def get_battery_soc_forecast(user, horizon_hours: int = 48) -> dict:
+def find_home_battery_storage(home):
     """
-    Simuliert die vorausschauende 24h/48h Batterie- und SoC-Kurve basierend auf
-    PV-Ertrag, Haushaltslast, Wirkungsgraden und Mindest-Notstromreserven.
+    Ermittelt, ob für den Haushalt ein Batteriespeicher konfiguriert ist oder
+    über ein Wechselrichter- (SMA/Sungrow/Fronius/Deye), Home Assistant-
+    oder ioBroker-Plugin erkannt wurde, und liefert das Gerät sowie Parameter zurück.
     """
-    home = user.homes.first() if hasattr(user, "homes") else None
-    tz_name = home.timezone if home and home.timezone else "Europe/Berlin"
-    tz = ZoneInfo(tz_name)
+    if not home:
+        return None, False, {}
 
-    now = timezone.now().astimezone(tz)
+    # 1. Direkt als Battery/Storage/Akku konfiguriertes Gerät
+    bat_device = Device.objects.filter(
+        home=home,
+        active=True,
+        pending_delete=False,
+    ).filter(
+        Q(config__role__key__in=["battery", "storage", "akku"])
+        | Q(config__energy_signal_type__key__in=["battery", "battery_storage"])
+        | Q(identifier__icontains="battery")
+        | Q(identifier__icontains="storage")
+        | Q(identifier__icontains="akku")
+    ).first()
 
-    # 1. Batteriespeicher-Gerät und Parameter ermitteln
-    bat_device = None
-    has_battery = False
-    battery_capacity_kwh = 10.0
+    # 2. Falls kein explizites Batterie-Gerät: Suche nach Hybrid-Wechselrichter mit Batterie-/SoC-Telemetrie
+    # (z. B. SMA / Sungrow / Fronius / Deye Plugin oder Home Assistant / ioBroker Sync)
+    if not bat_device:
+        bat_device = Device.objects.filter(
+            home=home,
+            active=True,
+            pending_delete=False,
+        ).filter(
+            latest_metrics__metric_key__in=["soc", "battery_soc", "state_of_charge", "battery_power", "battery_w"]
+        ).distinct().first()
+
+    # Wenn kein Batteriespeicher konfiguriert oder über Plugins erkannt wurde:
+    if not bat_device:
+        return None, False, {}
+
+    # Standard-Parameter
+    capacity_kwh = 10.0
     max_charge_kw = 5.0
     max_discharge_kw = 5.0
     min_soc_pct = 10.0  # Tiefentladeschutz & Notstromreserve
     max_soc_pct = 100.0
     charge_efficiency = 0.95
     discharge_efficiency = 0.95
-
     current_soc_pct = 50.0
 
-    if home:
-        bat_device = Device.objects.filter(
-            home=home,
-            active=True,
-            config__role__key__in=["battery", "storage", "akku"],
-        ).first()
+    # Kapazität aus DeviceResource / DeviceConfig auslesen
+    if hasattr(bat_device, "resource") and bat_device.resource and bat_device.resource.attributes:
+        attrs = bat_device.resource.attributes
+        cap = attrs.get("capacity_kwh") or attrs.get("battery_capacity_kwh") or attrs.get("capacity")
+        if cap:
+            try:
+                capacity_kwh = float(cap)
+            except (ValueError, TypeError):
+                pass
+        max_c = attrs.get("max_charge_kw") or attrs.get("max_power_kw")
+        if max_c:
+            try:
+                max_charge_kw = float(max_c)
+                max_discharge_kw = float(max_c)
+            except (ValueError, TypeError):
+                pass
 
-        if bat_device:
-            has_battery = True
-            # Kapazität aus DeviceResource oder Standard
-            if hasattr(bat_device, "resource") and bat_device.resource and bat_device.resource.attributes:
-                cap = bat_device.resource.attributes.get("capacity_kwh")
-                if cap:
-                    try:
-                        battery_capacity_kwh = float(cap)
-                    except (ValueError, TypeError):
-                        pass
+    # SoC aus Live-Metriken abfragen
+    latest_soc = DeviceLatestMetric.objects.filter(
+        device=bat_device,
+        metric_key__in=["soc", "battery_soc", "state_of_charge", "value"],
+    ).first()
 
-            # Aktuellen SoC abfragen
-            latest_soc_metric = DeviceLatestMetric.objects.filter(
-                device=bat_device,
-                metric_key__in=["soc", "battery_soc", "state_of_charge", "value"],
-            ).first()
+    if latest_soc and latest_soc.value is not None:
+        try:
+            current_soc_pct = max(0.0, min(100.0, float(latest_soc.value)))
+        except (ValueError, TypeError):
+            pass
 
-            if latest_soc_metric and latest_soc_metric.value is not None:
-                current_soc_pct = max(0.0, min(100.0, float(latest_soc_metric.value)))
-        else:
-            # Virtueller Speicher für Simulation / Haushalte mit PV
-            has_pv = Device.objects.filter(
-                home=home,
-                active=True,
-                config__role__key__in=["producer", "pv", "solar"],
-            ).exists()
-            if has_pv:
-                has_battery = True
-                current_soc_pct = 65.0
-                battery_capacity_kwh = 10.0
+    battery_name = (
+        bat_device.config.name
+        if (hasattr(bat_device, "config") and bat_device.config and bat_device.config.name)
+        else bat_device.identifier
+    )
+
+    params = {
+        "battery_name": battery_name,
+        "capacity_kwh": capacity_kwh,
+        "current_soc_pct": current_soc_pct,
+        "min_soc_reserve_pct": min_soc_pct,
+        "max_soc_pct": max_soc_pct,
+        "max_charge_kw": max_charge_kw,
+        "max_discharge_kw": max_discharge_kw,
+        "charge_efficiency": charge_efficiency,
+        "discharge_efficiency": discharge_efficiency,
+        "roundtrip_efficiency_pct": round(charge_efficiency * discharge_efficiency * 100, 1),
+    }
+
+    return bat_device, True, params
+
+
+def get_battery_soc_forecast(user, horizon_hours: int = 48) -> dict:
+    """
+    Simuliert die vorausschauende 24h/48h Batterie- und SoC-Kurve basierend auf
+    PV-Ertrag, Haushaltslast, Wirkungsgraden und Mindest-Notstromreserven.
+    Wird nur ausgeführt, wenn ein realer oder über Plugins erkannter Speicher existiert.
+    """
+    home = user.homes.first() if hasattr(user, "homes") else None
+    tz_name = home.timezone if home and home.timezone else "Europe/Berlin"
+    tz = ZoneInfo(tz_name)
+
+    # 1. Batteriespeicher-Gerät und Parameter prüfen
+    bat_device, has_battery, params = find_home_battery_storage(home)
+
+    if not has_battery:
+        return {
+            "horizon_hours": horizon_hours,
+            "has_battery": False,
+            "reason": "no_battery_configured",
+            "parameters": {},
+            "kpis": {},
+            "timeline": [],
+        }
+
+    battery_capacity_kwh = params["capacity_kwh"]
+    current_soc_pct = params["current_soc_pct"]
+    min_soc_pct = params["min_soc_reserve_pct"]
+    max_soc_pct = params["max_soc_pct"]
+    max_charge_kw = params["max_charge_kw"]
+    max_discharge_kw = params["max_discharge_kw"]
+    charge_efficiency = params["charge_efficiency"]
+    discharge_efficiency = params["discharge_efficiency"]
 
     # 2. Last- und Solarprognose laden
     load_forecast = get_household_load_forecast(user, horizon_hours=horizon_hours)
@@ -193,16 +262,8 @@ def get_battery_soc_forecast(user, horizon_hours: int = 48) -> dict:
 
     return {
         "horizon_hours": horizon_hours,
-        "has_battery": has_battery,
-        "parameters": {
-            "battery_name": bat_device.config.display_name() if (bat_device and hasattr(bat_device, "config")) else "Hausspeicher",
-            "capacity_kwh": battery_capacity_kwh,
-            "current_soc_pct": round(current_soc_pct, 1),
-            "min_soc_reserve_pct": min_soc_pct,
-            "max_charge_kw": max_charge_kw,
-            "max_discharge_kw": max_discharge_kw,
-            "roundtrip_efficiency_pct": round(charge_efficiency * discharge_efficiency * 100, 1),
-        },
+        "has_battery": True,
+        "parameters": params,
         "kpis": {
             "start_soc_pct": round(current_soc_pct, 1),
             "end_soc_pct": round(sim_soc_pct, 1),
@@ -217,4 +278,3 @@ def get_battery_soc_forecast(user, horizon_hours: int = 48) -> dict:
         },
         "timeline": sim_timeline,
     }
-

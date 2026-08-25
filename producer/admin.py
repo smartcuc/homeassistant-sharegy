@@ -9,6 +9,7 @@ from producer.models import (
     GeneratorString,
     GeneratorType,
     Orientation,
+    StorageSystem,
 )
 
 
@@ -73,3 +74,19 @@ class GeneratorSystemAdmin(admin.ModelAdmin):
     inlines = [
         GeneratorStringInline,
     ]
+
+
+@admin.register(StorageSystem)
+class StorageSystemAdmin(admin.ModelAdmin):
+    list_display = (
+        "name",
+        "home",
+        "capacity_kwh",
+        "max_charge_power_kw",
+        "max_discharge_power_kw",
+        "min_soc_reserve_pct",
+        "primary_device",
+        "active",
+    )
+    list_filter = ("active", "is_auto_detected")
+    search_fields = ("name", "home__name")

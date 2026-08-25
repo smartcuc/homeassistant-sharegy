@@ -4,9 +4,12 @@
 
 from django.urls import path
 
-from producer.api.views import generator_list, generator_create, generator_update, generator_delete
-from producer.api.views import string_create, string_update, string_delete
-from producer.api.views import generator_type_list, orientation_list
+from producer.api.views import (
+    generator_list, generator_create, generator_update, generator_delete,
+    string_create, string_update, string_delete,
+    generator_type_list, orientation_list,
+    storage_list, storage_create, storage_update, storage_delete, storage_detect,
+)
 
 
 urlpatterns = [
@@ -50,5 +53,31 @@ urlpatterns = [
     path(
         "string/<uuid:string_id>/delete/",
         string_delete,
+    ),
+    # 🔋 Storage Systems
+    path(
+        "storage/",
+        storage_list,
+        name="storage-list",
+    ),
+    path(
+        "storage/create/",
+        storage_create,
+        name="storage-create",
+    ),
+    path(
+        "storage/detect/",
+        storage_detect,
+        name="storage-detect",
+    ),
+    path(
+        "storage/<uuid:storage_id>/",
+        storage_update,
+        name="storage-update",
+    ),
+    path(
+        "storage/<uuid:storage_id>/delete/",
+        storage_delete,
+        name="storage-delete",
     ),
 ]

@@ -309,3 +309,243 @@ def string_update(
             "success": True,
         }
     )
+
+
+# ============================================================
+# ✅ STORAGE SYSTEM (BATTERIESPEICHER) APIS
+# ============================================================
+
+from producer.models import StorageSystem
+from devices.models import Device, DeviceLatestMetric
+from django.db.models import Q
+
+
+def serialize_storage_system(storage):
+    live_soc = storage.get_live_soc()
+    live_power = storage.get_live_power()
+    capacity = float(storage.capacity_kwh)
+    current_stored_kwh = round((live_soc / 100.0) * capacity, 2) if (live_soc is not None) else None
+
+    # Status bestimmen
+    status = "idle"
+    if live_power is not None:
+        if live_power > 50:
+            status = "charging"
+        elif live_power < -50:
+            status = "discharging"
+        elif live_soc is not None and live_soc >= float(storage.max_soc_pct) - 2.0:
+            status = "full"
+        elif live_soc is not None and live_soc <= float(storage.min_soc_reserve_pct) + 2.0:
+            status = "empty_reserve"
+
+    def get_dev_info(dev):
+        if not dev:
+            return None, None
+        name = dev.config.name if hasattr(dev, "config") and dev.config and dev.config.name else dev.identifier
+        return str(dev.id), name
+
+    p_id, p_name = get_dev_info(storage.primary_device)
+    soc_id, soc_name = get_dev_info(storage.soc_device)
+    pwr_id, pwr_name = get_dev_info(storage.power_device)
+    cin_id, cin_name = get_dev_info(storage.charge_energy_device)
+    cout_id, cout_name = get_dev_info(storage.discharge_energy_device)
+
+    return {
+        "id": str(storage.id),
+        "name": storage.name,
+        "capacity_kwh": capacity,
+        "max_charge_power_kw": float(storage.max_charge_power_kw),
+        "max_discharge_power_kw": float(storage.max_discharge_power_kw),
+        "min_soc_reserve_pct": float(storage.min_soc_reserve_pct),
+        "max_soc_pct": float(storage.max_soc_pct),
+        "charge_efficiency_pct": float(storage.charge_efficiency_pct),
+        "discharge_efficiency_pct": float(storage.discharge_efficiency_pct),
+        "active": storage.active,
+        "is_auto_detected": storage.is_auto_detected,
+        # Live Metrics
+        "live_soc_pct": live_soc,
+        "live_power_w": live_power,
+        "current_stored_kwh": current_stored_kwh,
+        "status": status,
+        # Mapped Signals
+        "primary_device": {"id": p_id, "name": p_name} if p_id else None,
+        "soc_device": {"id": soc_id, "name": soc_name, "metric_key": storage.soc_metric_key} if soc_id else None,
+        "power_device": {"id": pwr_id, "name": pwr_name, "metric_key": storage.power_metric_key} if pwr_id else None,
+        "charge_energy_device": {"id": cin_id, "name": cin_name, "metric_key": storage.charge_energy_metric_key} if cin_id else None,
+        "discharge_energy_device": {"id": cout_id, "name": cout_name, "metric_key": storage.discharge_energy_metric_key} if cout_id else None,
+        "created_at": storage.created_at.isoformat(),
+        "updated_at": storage.updated_at.isoformat(),
+    }
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def storage_list(request):
+    home = request.user.homes.first()
+    if not home:
+        return Response([])
+
+    storages = StorageSystem.objects.filter(home=home).select_related(
+        "primary_device", "soc_device", "power_device", "charge_energy_device", "discharge_energy_device"
+    ).order_by("name")
+
+    return Response([serialize_storage_system(s) for s in storages])
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def storage_create(request):
+    home = request.user.homes.first()
+    if not home:
+        return Response({"error": "No home found"}, status=400)
+
+    data = request.data
+    storage = StorageSystem.objects.create(
+        home=home,
+        name=data.get("name", "Hausspeicher"),
+        capacity_kwh=data.get("capacity_kwh", 10.0),
+        max_charge_power_kw=data.get("max_charge_power_kw", 5.0),
+        max_discharge_power_kw=data.get("max_discharge_power_kw", 5.0),
+        min_soc_reserve_pct=data.get("min_soc_reserve_pct", 10.0),
+        max_soc_pct=data.get("max_soc_pct", 100.0),
+        charge_efficiency_pct=data.get("charge_efficiency_pct", 95.0),
+        discharge_efficiency_pct=data.get("discharge_efficiency_pct", 95.0),
+        soc_metric_key=data.get("soc_metric_key", "soc"),
+        power_metric_key=data.get("power_metric_key", "power"),
+        charge_energy_metric_key=data.get("charge_energy_metric_key", "energy_in"),
+        discharge_energy_metric_key=data.get("discharge_energy_metric_key", "energy_out"),
+        active=data.get("active", True),
+    )
+
+    # Devices verknüpfen
+    if data.get("primary_device_id"):
+        storage.primary_device = Device.objects.filter(id=data["primary_device_id"], home=home).first()
+    if data.get("soc_device_id"):
+        storage.soc_device = Device.objects.filter(id=data["soc_device_id"], home=home).first()
+    if data.get("power_device_id"):
+        storage.power_device = Device.objects.filter(id=data["power_device_id"], home=home).first()
+    if data.get("charge_energy_device_id"):
+        storage.charge_energy_device = Device.objects.filter(id=data["charge_energy_device_id"], home=home).first()
+    if data.get("discharge_energy_device_id"):
+        storage.discharge_energy_device = Device.objects.filter(id=data["discharge_energy_device_id"], home=home).first()
+
+    storage.save()
+    return Response(serialize_storage_system(storage), status=201)
+
+
+@api_view(["PATCH", "PUT"])
+@permission_classes([IsAuthenticated])
+def storage_update(request, storage_id):
+    home = request.user.homes.first()
+    try:
+        storage = StorageSystem.objects.get(id=storage_id, home=home)
+    except StorageSystem.DoesNotExist:
+        return Response({"error": "Storage system not found"}, status=404)
+
+    data = request.data
+    for field in [
+        "name", "capacity_kwh", "max_charge_power_kw", "max_discharge_power_kw",
+        "min_soc_reserve_pct", "max_soc_pct", "charge_efficiency_pct",
+        "discharge_efficiency_pct", "soc_metric_key", "power_metric_key",
+        "charge_energy_metric_key", "discharge_energy_metric_key", "active"
+    ]:
+        if field in data:
+            setattr(storage, field, data[field])
+
+    # Devices updaten (auch null erlaubt)
+    if "primary_device_id" in data:
+        p_id = data["primary_device_id"]
+        storage.primary_device = Device.objects.filter(id=p_id, home=home).first() if p_id else None
+    if "soc_device_id" in data:
+        soc_id = data["soc_device_id"]
+        storage.soc_device = Device.objects.filter(id=soc_id, home=home).first() if soc_id else None
+    if "power_device_id" in data:
+        pwr_id = data["power_device_id"]
+        storage.power_device = Device.objects.filter(id=pwr_id, home=home).first() if pwr_id else None
+    if "charge_energy_device_id" in data:
+        cin_id = data["charge_energy_device_id"]
+        storage.charge_energy_device = Device.objects.filter(id=cin_id, home=home).first() if cin_id else None
+    if "discharge_energy_device_id" in data:
+        cout_id = data["discharge_energy_device_id"]
+        storage.discharge_energy_device = Device.objects.filter(id=cout_id, home=home).first() if cout_id else None
+
+    storage.save()
+    return Response(serialize_storage_system(storage))
+
+
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
+def storage_delete(request, storage_id):
+    home = request.user.homes.first()
+    try:
+        storage = StorageSystem.objects.get(id=storage_id, home=home)
+    except StorageSystem.DoesNotExist:
+        return Response({"error": "Storage system not found"}, status=404)
+
+    storage.delete()
+    return Response({"success": True})
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def storage_detect(request):
+    """
+    Scannt alle Geräte des Haushalts nach Speicher-Metriken (SoC, Ladeleistung)
+    und liefert intelligente Vorschläge zur 1-Klick-Übernahme.
+    """
+    home = request.user.homes.first()
+    if not home:
+        return Response({"candidates": [], "devices": []})
+
+    devices = Device.objects.filter(home=home, active=True, pending_delete=False)
+    candidates = []
+    device_options = []
+
+    for dev in devices:
+        name = dev.config.name if hasattr(dev, "config") and dev.config and dev.config.name else dev.identifier
+        role = dev.config.role.key if (hasattr(dev, "config") and dev.config and dev.config.role) else ""
+
+        # Vorhandene Metriken abfragen
+        metrics = list(DeviceLatestMetric.objects.filter(device=dev).values_list("metric_key", flat=True))
+
+        has_soc = any(k in ["soc", "battery_soc", "state_of_charge"] for k in metrics)
+        has_power = any(k in ["power", "battery_power", "battery_w", "power_w"] for k in metrics)
+        has_energy = any(k in ["energy_in", "energy_out", "total_charge", "total_discharge"] for k in metrics)
+
+        is_candidate = (
+            role in ["battery", "storage", "akku", "inverter", "producer"]
+            or "battery" in dev.identifier.lower()
+            or "storage" in dev.identifier.lower()
+            or has_soc
+        )
+
+        dev_data = {
+            "id": str(dev.id),
+            "name": name,
+            "identifier": dev.identifier,
+            "role": role,
+            "metrics": metrics,
+            "has_soc": has_soc,
+            "has_power": has_power,
+            "has_energy": has_energy,
+        }
+        device_options.append(dev_data)
+
+        if is_candidate:
+            # Vorschlag erstellen
+            soc_key = "soc" if "soc" in metrics else ("battery_soc" if "battery_soc" in metrics else "value")
+            pwr_key = "battery_power" if "battery_power" in metrics else ("power" if "power" in metrics else "value")
+
+            candidates.append({
+                "device": dev_data,
+                "suggested_name": f"{name} (Speicher)",
+                "suggested_soc_metric": soc_key,
+                "suggested_power_metric": pwr_key,
+                "confidence": "high" if has_soc and has_power else ("medium" if has_soc or role in ["battery", "storage"] else "low"),
+            })
+
+    return Response({
+        "candidates": candidates,
+        "devices": device_options,
+    })
+

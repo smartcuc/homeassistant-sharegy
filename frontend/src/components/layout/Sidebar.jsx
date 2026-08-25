@@ -64,7 +64,7 @@ export default function Sidebar() {
                     badge: count > 0 ? count : null,
                     isDeviceSetupBadge: true,
                 },
-                { name: t("nav.producers", "Erzeugeranlagen"), path: "/app/producers", icon: "☀️" },
+                { name: t("nav.producers", "Erzeuger & Speicher"), path: "/app/producers", icon: "☀️" },
                 { name: t("nav.floors", "Etagen & Räume"), path: "/app/structure", icon: "🏢" },
             ],
         },

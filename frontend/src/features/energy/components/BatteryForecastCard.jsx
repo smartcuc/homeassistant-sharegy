@@ -31,7 +31,7 @@ export default function BatteryForecastCard() {
         );
     }
 
-    if (!data.has_battery && timeline.length === 0) {
+    if (!data.has_battery) {
         return null;
     }
 
@@ -66,8 +66,8 @@ export default function BatteryForecastCard() {
                             key={btn.val}
                             onClick={() => setHorizon(btn.val)}
                             className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${horizon === btn.val
-                                    ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/40"
-                                    : "text-emerald-200/70 hover:text-white"
+                                ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/40"
+                                : "text-emerald-200/70 hover:text-white"
                                 }`}
                         >
                             {btn.label}
