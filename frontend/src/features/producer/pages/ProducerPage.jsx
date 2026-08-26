@@ -133,7 +133,7 @@ export default function ProducerPage() {
                             <div className="text-4xl">☀️</div>
                             <div className="font-bold text-gray-900">{t("producers.empty", "Noch keine Erzeugersysteme vorhanden.")}</div>
                             <p className="text-xs text-gray-400 max-w-sm mx-auto">
-                                Lege deine PV-Anlage oder BHKW an, um Strings, Modulausrichtungen und Neigungen zu erfassen.
+                                {t("producers.empty_desc", "Lege deine PV-Anlage oder BHKW an, um Strings, Modulausrichtungen und Neigungen zu erfassen.")}
                             </p>
                         </div>
                     )}
@@ -188,23 +188,23 @@ export default function ProducerPage() {
 
                                 <div className="grid grid-cols-3 gap-3 text-xs bg-slate-50 p-3 rounded-xl border border-slate-100">
                                     <div>
-                                        <div className="text-[10px] text-gray-400 uppercase font-semibold">Gesamtleistung</div>
+                                        <div className="text-[10px] text-gray-400 uppercase font-semibold">{t("producers.total_power", "Gesamtleistung")}</div>
                                         <div className="font-bold text-gray-900 font-mono">
                                             {producer.peak_power_kw ? `${producer.peak_power_kw} kWp` : "-"}
                                         </div>
                                     </div>
 
                                     <div>
-                                        <div className="text-[10px] text-gray-400 uppercase font-semibold">Wechselrichter</div>
+                                        <div className="text-[10px] text-gray-400 uppercase font-semibold">{t("producers.inverter_power", "Wechselrichter")}</div>
                                         <div className="font-bold text-gray-900 font-mono">
                                             {producer.inverter_power_kw ? `${producer.inverter_power_kw} kW` : "-"}
                                         </div>
                                     </div>
 
                                     <div>
-                                        <div className="text-[10px] text-gray-400 uppercase font-semibold">Strings</div>
+                                        <div className="text-[10px] text-gray-400 uppercase font-semibold">{t("producers.strings_count_label", "Strings")}</div>
                                         <div className="font-bold text-gray-900 font-mono">
-                                            {producer.string_count} Strings ({producer.total_string_power_kwp} kWp)
+                                            {producer.string_count} {t("producers.strings", "Strings")} ({producer.total_string_power_kwp} kWp)
                                         </div>
                                     </div>
                                 </div>
@@ -212,7 +212,7 @@ export default function ProducerPage() {
                                 {/* Strings List */}
                                 <div className="space-y-2 pt-2 border-t border-gray-100">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-xs font-bold text-gray-700">PV-Strings & Ausrichtung</span>
+                                        <span className="text-xs font-bold text-gray-700">{t("producers.strings_and_orientation", "PV-Strings & Ausrichtung")}</span>
                                         <button
                                             onClick={() => {
                                                 setSelectedGenerator(producer.id);
@@ -220,7 +220,7 @@ export default function ProducerPage() {
                                             }}
                                             className="text-[11px] font-bold text-amber-600 hover:underline cursor-pointer"
                                         >
-                                            + String hinzufügen
+                                            + {t("producers.add_string", "String hinzufügen")}
                                         </button>
                                     </div>
 
@@ -233,7 +233,7 @@ export default function ProducerPage() {
                                                 <div>
                                                     <span className="font-bold text-gray-800">{str.name}</span>
                                                     <span className="text-gray-500 ml-2">
-                                                        {str.peak_power_kwp} kWp · {str.orientation} · {str.tilt_deg}° Neigung
+                                                        {str.peak_power_kwp} kWp · {str.orientation} · {str.tilt_deg}° {t("producers.tilt", "Neigung")}
                                                     </span>
                                                 </div>
 
@@ -250,7 +250,7 @@ export default function ProducerPage() {
                                                     </button>
                                                     <button
                                                         onClick={async () => {
-                                                            if (!window.confirm(`String "${str.name}" wirklich löschen?`)) return;
+                                                            if (!window.confirm(t("producers.delete_string_confirm", { name: str.name, defaultValue: `String "${str.name}" wirklich löschen?` }))) return;
                                                             await apiFetch(`/api/producer/string/${str.id}/delete/`, { method: "DELETE" });
                                                             queryClient.invalidateQueries({ queryKey: ["producers"] });
                                                         }}
@@ -279,7 +279,7 @@ export default function ProducerPage() {
                             <div className="text-4xl">🔋</div>
                             <div className="font-bold text-gray-900">{t("storage.empty_title", "Keine Batteriespeicher angelegt")}</div>
                             <p className="text-xs text-gray-400 max-w-md mx-auto">
-                                Lege deinen Hausspeicher an und ordne flexibel zu, welches Gerät den Ladestand (SoC %) und die Ladeleistung liefert (All-in-One Wechselrichter oder getrennte Sensoren).
+                                {t("storage.empty_desc", "Lege deinen Hausspeicher an und ordne flexibel zu, welches Gerät den Ladestand (SoC %) und die Ladeleistung liefert (All-in-One Wechselrichter oder getrennte Sensoren).")}
                             </p>
                             <button
                                 onClick={() => {
@@ -288,7 +288,7 @@ export default function ProducerPage() {
                                 }}
                                 className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
                             >
-                                + Batteriespeicher hinzufügen
+                                + {t("storage.add_btn", "Batteriespeicher hinzufügen")}
                             </button>
                         </div>
                     )}

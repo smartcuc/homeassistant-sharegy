@@ -188,9 +188,9 @@ export default function HelpCenterPage() {
                 ) : articles.length === 0 ? (
                     <div className="p-12 text-center bg-white rounded-3xl border border-gray-200 text-gray-500 space-y-3">
                         <div className="text-4xl">🔍</div>
-                        <div className="text-base font-bold text-gray-900">Keine Artikel gefunden</div>
+                        <div className="text-base font-bold text-gray-900">{t("help.no_articles_found", "Keine Artikel gefunden")}</div>
                         <p className="text-xs text-gray-400 max-w-sm mx-auto">
-                            Für diesen Suchbegriff oder diese Kategorie existieren noch keine Beiträge.
+                            {t("help.no_articles_desc", "Für diesen Suchbegriff oder diese Kategorie existieren noch keine Beiträge.")}
                         </p>
                     </div>
                 ) : (
@@ -212,7 +212,7 @@ export default function HelpCenterPage() {
                                                 <span>{isEnglish && art.category_title_en ? art.category_title_en : art.category_title_de}</span>
                                             </span>
                                             <span className="text-[11px] text-gray-400 font-mono">
-                                                {art.views_count} Aufrufe
+                                                {art.views_count} {t("help.views_count", "Aufrufe")}
                                             </span>
                                         </div>
 
@@ -236,7 +236,7 @@ export default function HelpCenterPage() {
                                             ))}
                                         </div>
                                         <span className="font-bold text-indigo-600 group-hover:translate-x-0.5 transition">
-                                            Öffnen →
+                                            {t("help.open_link", "Öffnen →")}
                                         </span>
                                     </div>
                                 </Link>

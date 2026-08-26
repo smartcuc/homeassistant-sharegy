@@ -51,7 +51,7 @@ export default function StorageSystemCard({ storage, onEdit, onDelete }) {
             icon: "💤",
         },
     }[status] || {
-        label: "Bereit",
+        label: t("common.ready", "Bereit"),
         badge: "bg-slate-700/40 text-slate-300 border-slate-600/40",
         powerText: "-",
         powerColor: "text-slate-400",
@@ -85,7 +85,7 @@ export default function StorageSystemCard({ storage, onEdit, onDelete }) {
                             </span>
                         </div>
                         <p className="text-xs text-slate-400 font-mono mt-0.5">
-                            {capacity} kWh Nennkapazität · max. {storage.max_charge_power_kw} kW
+                            {t("storage_system.specs", { cap: capacity, power: storage.max_charge_power_kw, defaultValue: `${capacity} kWh Nennkapazität · max. ${storage.max_charge_power_kw} kW` })}
                         </p>
                     </div>
                 </div>
@@ -95,14 +95,14 @@ export default function StorageSystemCard({ storage, onEdit, onDelete }) {
                     <button
                         onClick={() => onEdit(storage)}
                         className="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition cursor-pointer border border-slate-700"
-                        title="Speicher & Messpunkte bearbeiten"
+                        title={t("storage_system.edit_title", "Speicher & Messpunkte bearbeiten")}
                     >
-                        ✏️ Bearbeiten
+                        ✏️ {t("common.edit", "Bearbeiten")}
                     </button>
                     <button
                         onClick={() => onDelete(storage.id, storage.name)}
                         className="p-1.5 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 text-xs transition cursor-pointer border border-rose-900/50"
-                        title="Löschen"
+                        title={t("common.delete", "Löschen")}
                     >
                         🗑️
                     </button>
@@ -114,7 +114,7 @@ export default function StorageSystemCard({ storage, onEdit, onDelete }) {
                 {/* 1. Ladestand SoC */}
                 <div className="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/60 space-y-2">
                     <div className="flex items-center justify-between text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                        <span>⚡ Live-Ladestand</span>
+                        <span>⚡ {t("storage_system.live_soc", "Live-Ladestand")}</span>
                         <span className="font-mono text-emerald-400">{storedKwh} / {capacity} kWh</span>
                     </div>
 
@@ -137,7 +137,7 @@ export default function StorageSystemCard({ storage, onEdit, onDelete }) {
                 {/* 2. Aktuelle Leistung */}
                 <div className="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/60 space-y-2">
                     <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                        ⚡ Lade- / Entladefluss
+                        ⚡ {t("storage_system.charge_flow", "Lade- / Entladefluss")}
                     </div>
 
                     <div className="flex items-baseline gap-2">
@@ -147,7 +147,7 @@ export default function StorageSystemCard({ storage, onEdit, onDelete }) {
                     </div>
 
                     <div className="text-[10px] text-slate-400 truncate">
-                        Effizienz: {storage.charge_efficiency_pct}% · Reserve: {storage.min_soc_reserve_pct}%
+                        {t("storage_system.eff_reserve", { eff: storage.charge_efficiency_pct, res: storage.min_soc_reserve_pct, defaultValue: `Effizienz: ${storage.charge_efficiency_pct}% · Reserve: ${storage.min_soc_reserve_pct}%` })}
                     </div>
                 </div>
             </div>
@@ -155,10 +155,10 @@ export default function StorageSystemCard({ storage, onEdit, onDelete }) {
             {/* Mapped Signal Sources (Bündelung von Messpunkten) */}
             <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-2.5">
                 <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
-                    <span>📡 Verknüpfte Messpunkte & Sensoren</span>
+                    <span>📡 {t("storage_system.linked_sensors", "Verknüpfte Messpunkte & Sensoren")}</span>
                     {storage.primary_device && (
                         <span className="text-[10px] text-indigo-300 bg-indigo-950/80 px-2 py-0.5 rounded-md border border-indigo-800/60">
-                            Zentrales Gerät
+                            {t("storage_system.central_device", "Zentrales Gerät")}
                         </span>
                     )}
                 </div>
@@ -168,9 +168,9 @@ export default function StorageSystemCard({ storage, onEdit, onDelete }) {
                     <div className="flex items-center gap-2 p-2 rounded-xl bg-slate-900/90 border border-slate-800">
                         <span className="text-emerald-400">🔋</span>
                         <div className="truncate">
-                            <div className="text-[10px] text-slate-400">SoC-Sensor (%)</div>
+                            <div className="text-[10px] text-slate-400">{t("storage_system.soc_sensor", "SoC-Sensor (%)")}</div>
                             <div className="font-semibold text-slate-200 truncate">
-                                {storage.soc_device?.name || storage.primary_device?.name || "Nicht zugeordnet"}
+                                {storage.soc_device?.name || storage.primary_device?.name || t("common.unassigned", "Nicht zugeordnet")}
                             </div>
                         </div>
                     </div>
@@ -179,9 +179,9 @@ export default function StorageSystemCard({ storage, onEdit, onDelete }) {
                     <div className="flex items-center gap-2 p-2 rounded-xl bg-slate-900/90 border border-slate-800">
                         <span className="text-amber-400">⚡</span>
                         <div className="truncate">
-                            <div className="text-[10px] text-slate-400">Leistungsmesser (W)</div>
+                            <div className="text-[10px] text-slate-400">{t("storage_system.power_meter", "Leistungsmesser (W)")}</div>
                             <div className="font-semibold text-slate-200 truncate">
-                                {storage.power_device?.name || storage.primary_device?.name || "Nicht zugeordnet"}
+                                {storage.power_device?.name || storage.primary_device?.name || t("common.unassigned", "Nicht zugeordnet")}
                             </div>
                         </div>
                     </div>

@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../../api/client";
 
 export default function MatterPairingModal({ open, onClose, onCommissioned }) {
+    const { t } = useTranslation();
     const [name, setName] = useState("");
     const [pairingMode, setPairingMode] = useState("qr"); // qr, manual, pin
     const [pairingCode, setPairingCode] = useState("");
@@ -14,12 +16,12 @@ export default function MatterPairingModal({ open, onClose, onCommissioned }) {
     if (!open) return null;
 
     const deviceTypes = [
-        { id: "smart_plug", label: "Smart Plug / Zwischenstecker", icon: "🔌", defaultRole: "consumer" },
-        { id: "evse", label: "Matter EVSE (Wallbox)", icon: "🚗", defaultRole: "consumer" },
-        { id: "heatpump", label: "Wärmepumpe / Heizstab", icon: "♨️", defaultRole: "consumer" },
-        { id: "solar_inverter", label: "Solar-Wechselrichter / BKW", icon: "☀️", defaultRole: "producer" },
-        { id: "battery", label: "Batteriespeicher", icon: "🔋", defaultRole: "battery" },
-        { id: "meter", label: "Matter Smart Meter", icon: "⚡", defaultRole: "grid" },
+        { id: "smart_plug", label: t("matter.type_smart_plug", "Smart Plug / Zwischenstecker"), icon: "🔌", defaultRole: "consumer" },
+        { id: "evse", label: t("matter.type_evse", "Matter EVSE (Wallbox)"), icon: "🚗", defaultRole: "consumer" },
+        { id: "heatpump", label: t("matter.type_heatpump", "Wärmepumpe / Heizstab"), icon: "♨️", defaultRole: "consumer" },
+        { id: "solar_inverter", label: t("matter.type_inverter", "Solar-Wechselrichter / BKW"), icon: "☀️", defaultRole: "producer" },
+        { id: "battery", label: t("matter.type_battery", "Batteriespeicher"), icon: "🔋", defaultRole: "battery" },
+        { id: "meter", label: t("matter.type_meter", "Matter Smart Meter"), icon: "⚡", defaultRole: "grid" },
     ];
 
     const handleDeviceTypeChange = (typeId) => {
@@ -42,7 +44,7 @@ export default function MatterPairingModal({ open, onClose, onCommissioned }) {
             const res = await apiFetch("/api/matter/commission/", {
                 method: "POST",
                 body: JSON.stringify({
-                    name: name.trim() || "Neues Matter-Gerät",
+                    name: name.trim() || t("matter.default_device_name", "Neues Matter-Gerät"),
                     pairing_code: codeToSend,
                     device_type: deviceType,
                     role: role,
@@ -57,7 +59,7 @@ export default function MatterPairingModal({ open, onClose, onCommissioned }) {
                 setError(res.error);
             }
         } catch (err) {
-            setError(err.message || "Kopplung mit Matter-Gerät fehlgeschlagen.");
+            setError(err.message || t("matter.pairing_failed", "Kopplung mit Matter-Gerät fehlgeschlagen."));
         } finally {
             setLoading(false);
         }
@@ -74,8 +76,8 @@ export default function MatterPairingModal({ open, onClose, onCommissioned }) {
                             ⚡
                         </div>
                         <div>
-                            <h2 className="text-lg font-bold">Matter 1.3 Gerät koppeln</h2>
-                            <p className="text-xs text-emerald-100">Commissioning via Matter Fabric (Thread / Wi-Fi / IP)</p>
+                            <h2 className="text-lg font-bold">{t("matter.modal_title", "Matter 1.3 Gerät koppeln")}</h2>
+                            <p className="text-xs text-emerald-100">{t("matter.modal_subtitle", "Commissioning via Matter Fabric (Thread / Wi-Fi / IP)")}</p>
                         </div>
                     </div>
                     <button
@@ -97,12 +99,12 @@ export default function MatterPairingModal({ open, onClose, onCommissioned }) {
                     {/* Geräte-Name */}
                     <div>
                         <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
-                            Gerätename
+                            {t("matter.device_name_label", "Gerätename")}
                         </label>
                         <input
                             type="text"
                             required
-                            placeholder="z. B. Eve Energy Küche oder Easee Wallbox"
+                            placeholder={t("matter.device_name_placeholder", "z. B. Eve Energy Küche oder Easee Wallbox")}
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:bg-white outline-none transition-all"
@@ -112,7 +114,7 @@ export default function MatterPairingModal({ open, onClose, onCommissioned }) {
                     {/* Gerätetyp */}
                     <div>
                         <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
-                            Matter 1.3 Gerätetyp
+                            {t("matter.device_type_label", "Matter 1.3 Gerätetyp")}
                         </label>
                         <div className="grid grid-cols-2 gap-2">
                             {deviceTypes.map((dt) => (
@@ -135,7 +137,7 @@ export default function MatterPairingModal({ open, onClose, onCommissioned }) {
                     {/* Pairing Modus Tabs */}
                     <div>
                         <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
-                            Pairing-Methode
+                            {t("matter.pairing_method", "Pairing-Methode")}
                         </label>
                         <div className="flex bg-gray-100 p-1 rounded-xl gap-1 text-xs">
                             <button
@@ -168,9 +170,9 @@ export default function MatterPairingModal({ open, onClose, onCommissioned }) {
                     {/* Code Eingabe */}
                     <div>
                         <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
-                            {pairingMode === "qr" && "Matter QR-Code Payload (MT:...)"}
-                            {pairingMode === "manual" && "Manueller Pairing-Code (11 oder 21 Ziffern)"}
-                            {pairingMode === "pin" && "Matter Setup-PIN (8 Ziffern)"}
+                            {pairingMode === "qr" && t("matter.qr_payload_label", "Matter QR-Code Payload (MT:...)")}
+                            {pairingMode === "manual" && t("matter.manual_code_label", "Manueller Pairing-Code (11 oder 21 Ziffern)")}
+                            {pairingMode === "pin" && t("matter.setup_pin_label", "Matter Setup-PIN (8 Ziffern)")}
                         </label>
                         <input
                             type="text"
@@ -187,20 +189,20 @@ export default function MatterPairingModal({ open, onClose, onCommissioned }) {
                             className="w-full px-3.5 py-2.5 font-mono text-sm bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:bg-white outline-none transition-all"
                         />
                         <p className="text-[11px] text-gray-400 mt-1">
-                            {pairingMode === "qr" && "Steht auf dem Typenschild des Matter-Geräts oder im Beipackzettel."}
-                            {pairingMode === "manual" && "Zifferncode ohne Bindestriche eingeben."}
-                            {pairingMode === "pin" && "Standard Setup-Code zur Direkt-Kopplung im lokalen Netzwerk."}
+                            {pairingMode === "qr" && t("matter.qr_hint", "Steht auf dem Typenschild des Matter-Geräts oder im Beipackzettel.")}
+                            {pairingMode === "manual" && t("matter.manual_hint", "Zifferncode ohne Bindestriche eingeben.")}
+                            {pairingMode === "pin" && t("matter.pin_hint", "Standard Setup-Code zur Direkt-Kopplung im lokalen Netzwerk.")}
                         </p>
                     </div>
 
                     {/* Optional IP */}
                     <div>
                         <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
-                            IP-Adresse (Optional / LAN)
+                            {t("matter.ip_label", "IP-Adresse (Optional / LAN)")}
                         </label>
                         <input
                             type="text"
-                            placeholder="z. B. 192.168.1.145 (leer lassen für Auto-Discovery)"
+                            placeholder={t("matter.ip_placeholder", "z. B. 192.168.1.145 (leer lassen für Auto-Discovery)")}
                             value={ipAddress}
                             onChange={(e) => setIpAddress(e.target.value)}
                             className="w-full px-3.5 py-2 bg-gray-50 border border-gray-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:bg-white outline-none transition-all"
@@ -214,7 +216,7 @@ export default function MatterPairingModal({ open, onClose, onCommissioned }) {
                             onClick={onClose}
                             className="px-4 py-2 text-xs font-semibold text-gray-600 hover:text-gray-900 transition-colors"
                         >
-                            Abbrechen
+                            {t("common.cancel", "Abbrechen")}
                         </button>
                         <button
                             type="submit"
@@ -224,10 +226,10 @@ export default function MatterPairingModal({ open, onClose, onCommissioned }) {
                             {loading ? (
                                 <>
                                     <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                                    Kopple Gerät...
+                                    {t("matter.pairing_in_progress", "Kopple Gerät...")}
                                 </>
                             ) : (
-                                <>⚡ Gerät verbinden</>
+                                <>⚡ {t("matter.connect_device", "Gerät verbinden")}</>
                             )}
                         </button>
                     </div>

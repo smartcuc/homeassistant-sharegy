@@ -61,45 +61,45 @@ export default function DateRangePickerModal({ isOpen, onClose, onApply, initial
                     <div className="flex flex-wrap gap-2">
                         <button
                             type="button"
-                            onClick={() => setPreset(0, "Heute")}
+                            onClick={() => setPreset(0, t("common.today", "Heute"))}
                             className="px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer"
                         >
-                            Heute
+                            {t("common.today", "Heute")}
                         </button>
                         <button
                             type="button"
-                            onClick={() => setPreset(1, "Gestern")}
+                            onClick={() => setPreset(1, t("common.yesterday", "Gestern"))}
                             className="px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer"
                         >
-                            Gestern
+                            {t("common.yesterday", "Gestern")}
                         </button>
                         <button
                             type="button"
-                            onClick={() => setPreset(7, "7 Tage")}
+                            onClick={() => setPreset(7, t("energy.last_7_days", "Letzte 7 Tage"))}
                             className="px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer"
                         >
-                            Letzte 7 Tage
+                            {t("energy.last_7_days", "Letzte 7 Tage")}
                         </button>
                         <button
                             type="button"
-                            onClick={() => setPreset(30, "30 Tage")}
+                            onClick={() => setPreset(30, t("energy.last_30_days", "Letzte 30 Tage"))}
                             className="px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer"
                         >
-                            Letzte 30 Tage
+                            {t("energy.last_30_days", "Letzte 30 Tage")}
                         </button>
                         <button
                             type="button"
                             onClick={() => setMonthPreset(0)}
                             className="px-2.5 py-1 text-xs font-medium rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 transition cursor-pointer"
                         >
-                            Dieser Monat
+                            {t("energy.this_month", "Dieser Monat")}
                         </button>
                         <button
                             type="button"
                             onClick={() => setMonthPreset(1)}
                             className="px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer"
                         >
-                            Letzter Monat
+                            {t("energy.last_month", "Letzter Monat")}
                         </button>
                     </div>
                 </div>

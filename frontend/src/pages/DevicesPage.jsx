@@ -828,7 +828,7 @@ export default function DevicesPage() {
                 {/* STRUCTURE TOGGLES */}
 
                 <button
-                    title="Geräte nach Etagen gruppieren"
+                    title={t("devices.group_by_floors", "Geräte nach Etagen gruppieren")}
                     onClick={() =>
                         saveSettings({
                             ...settings,
@@ -851,7 +851,7 @@ export default function DevicesPage() {
                 </button>
 
                 <button
-                    title="Geräte nach Räumen gruppieren"
+                    title={t("devices.group_by_rooms", "Geräte nach Räumen gruppieren")}
                     onClick={() =>
                         saveSettings({
                             ...settings,

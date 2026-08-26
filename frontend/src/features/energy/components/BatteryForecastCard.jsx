@@ -61,8 +61,8 @@ export default function BatteryForecastCard() {
                 {/* Horizon Switcher */}
                 <div className="inline-flex bg-slate-800/90 p-1.5 rounded-2xl border border-emerald-700/40 shadow-inner self-start sm:self-auto gap-1">
                     {[
-                        { val: 24, label: "24 Stunden" },
-                        { val: 48, label: "48 Stunden" },
+                        { val: 24, label: t("load_forecast.horizon_24h", "24 Stunden") },
+                        { val: 48, label: t("load_forecast.horizon_48h", "48 Stunden") },
                     ].map((btn) => (
                         <button
                             key={btn.val}
@@ -86,11 +86,11 @@ export default function BatteryForecastCard() {
                 <div className="p-4 rounded-2xl bg-emerald-950/50 border border-emerald-500/30 space-y-1">
                     <div className="text-[11px] font-bold text-emerald-300 uppercase tracking-wider flex items-center justify-between gap-1">
                         <span className="flex items-center gap-1">
-                            <span>⚡</span> Start-Ladestand
+                            <span>⚡</span> {t("battery_forecast.start_soc", "Start-Ladestand")}
                         </span>
                         {params.has_live_soc === false && (
                             <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 normal-case font-semibold">
-                                geschätzt
+                                {t("battery_forecast.estimated", "geschätzt")}
                             </span>
                         )}
                     </div>
@@ -99,7 +99,7 @@ export default function BatteryForecastCard() {
                     </div>
                     <div className="text-[10px] text-emerald-200/70">
                         {params.has_live_soc === false ? (
-                            <span className="text-amber-300/80">Kein Sensor · Notstromreserve ({params.min_soc_reserve_pct}%)</span>
+                            <span className="text-amber-300/80">{t("battery_forecast.no_sensor_reserve", { reserve: params.min_soc_reserve_pct, defaultValue: `Kein Sensor · Notstromreserve (${params.min_soc_reserve_pct}%)` })}</span>
                         ) : (
                             `${((kpis.start_soc_pct / 100) * params.capacity_kwh).toFixed(1)} / ${params.capacity_kwh} kWh`
                         )}
@@ -109,20 +109,20 @@ export default function BatteryForecastCard() {
                 {/* 2. Voll-Ladezeitpunkt */}
                 <div className="p-4 rounded-2xl bg-indigo-950/50 border border-indigo-500/30 space-y-1">
                     <div className="text-[11px] font-bold text-indigo-300 uppercase tracking-wider flex items-center gap-1">
-                        <span>🏆</span> Voll geladen (100%)
+                        <span>🏆</span> {t("battery_forecast.full_charge_100", "Voll geladen (100%)")}
                     </div>
                     <div className="text-lg font-black text-white truncate">
                         {kpis.full_charge_time}
                     </div>
                     <div className="text-[10px] text-indigo-200/70">
-                        +{Number(kpis.total_charged_kwh || 0).toFixed(1)} kWh PV-Ladung
+                        +{Number(kpis.total_charged_kwh || 0).toFixed(1)} kWh {t("battery_forecast.pv_charge", "PV-Ladung")}
                     </div>
                 </div>
 
                 {/* 3. Nacht-Autarkie */}
                 <div className="p-4 rounded-2xl bg-teal-950/50 border border-teal-500/30 space-y-1">
                     <div className="text-[11px] font-bold text-teal-300 uppercase tracking-wider flex items-center gap-1">
-                        <span>🌙</span> Nacht-Autarkie
+                        <span>🌙</span> {t("battery_forecast.night_autarky", "Nacht-Autarkie")}
                     </div>
                     <div className="text-2xl font-black text-teal-300 font-mono">
                         {kpis.night_autarky_pct} %
@@ -135,13 +135,13 @@ export default function BatteryForecastCard() {
                 {/* 4. Vermiedene Netzkosten */}
                 <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-700/50 space-y-1">
                     <div className="text-[11px] font-bold text-gray-300 uppercase tracking-wider flex items-center gap-1">
-                        <span>💶</span> Vermiedene Netzkosten
+                        <span>💶</span> {t("battery_forecast.avoided_costs", "Vermiedene Netzkosten")}
                     </div>
                     <div className="text-2xl font-black text-emerald-400 font-mono">
                         +{Number(kpis.saved_grid_costs_eur || 0).toFixed(2)} €
                     </div>
                     <div className="text-[10px] text-gray-400">
-                        durch {Number(kpis.total_discharged_kwh || 0).toFixed(1)} kWh Entladung
+                        {t("battery_forecast.discharge_amount", { kwh: Number(kpis.total_discharged_kwh || 0).toFixed(1), defaultValue: `durch ${Number(kpis.total_discharged_kwh || 0).toFixed(1)} kWh Entladung` })}
                     </div>
                 </div>
             </div>
@@ -152,17 +152,17 @@ export default function BatteryForecastCard() {
             <div className="space-y-3 pt-2">
                 <div className="flex items-center justify-between text-xs">
                     <div className="font-bold uppercase tracking-wider text-emerald-200 flex items-center gap-2">
-                        <span>📈</span> 48h SoC-Verlaufskurve (State of Charge)
+                        <span>📈</span> {t("battery_forecast.soc_curve", "48h SoC-Verlaufskurve (State of Charge)")}
                     </div>
                     <div className="flex items-center gap-4 text-[11px] font-medium">
                         <span className="flex items-center gap-1.5 text-emerald-400">
-                            <span className="w-2.5 h-2.5 rounded-xs bg-emerald-400 inline-block" /> Laden (&gt;60%)
+                            <span className="w-2.5 h-2.5 rounded-xs bg-emerald-400 inline-block" /> {t("battery_forecast.charging_high", "Laden (>60%)")}
                         </span>
                         <span className="flex items-center gap-1.5 text-amber-400">
-                            <span className="w-2.5 h-2.5 rounded-xs bg-amber-400 inline-block" /> Mittel (25-60%)
+                            <span className="w-2.5 h-2.5 rounded-xs bg-amber-400 inline-block" /> {t("battery_forecast.charging_mid", "Mittel (25-60%)")}
                         </span>
                         <span className="flex items-center gap-1.5 text-rose-400">
-                            <span className="w-2.5 h-2.5 rounded-xs bg-rose-500 inline-block" /> Reserve (&lt;25%)
+                            <span className="w-2.5 h-2.5 rounded-xs bg-rose-500 inline-block" /> {t("battery_forecast.charging_low", "Reserve (<25%)")}
                         </span>
                     </div>
                 </div>
@@ -220,7 +220,7 @@ export default function BatteryForecastCard() {
                     <div className="mt-3 flex items-center justify-between text-[11px] text-emerald-200/60 font-medium">
                         <span>{timeline[0]?.date_label} ({timeline[0]?.time_label})</span>
                         <span className="text-emerald-300 font-semibold">
-                            Notstromreserve-Boden: {params.min_soc_reserve_pct}% ({((params.min_soc_reserve_pct / 100) * params.capacity_kwh).toFixed(1)} kWh)
+                            {t("battery_forecast.reserve_floor", { pct: params.min_soc_reserve_pct, kwh: ((params.min_soc_reserve_pct / 100) * params.capacity_kwh).toFixed(1), defaultValue: `Notstromreserve-Boden: ${params.min_soc_reserve_pct}% (${((params.min_soc_reserve_pct / 100) * params.capacity_kwh).toFixed(1)} kWh)` })}
                         </span>
                         <span>{timeline[timeline.length - 1]?.date_label}</span>
                     </div>
@@ -233,15 +233,15 @@ export default function BatteryForecastCard() {
             <div className="p-4 bg-emerald-950/40 border border-emerald-800/40 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs text-emerald-200/80">
                 <div className="flex items-center gap-2">
                     <span className="text-lg">⚙️</span>
-                    <span>Speicherparameter:</span>
+                    <span>{t("battery_forecast.specs_title", "Speicherparameter:")}</span>
                 </div>
                 <div className="flex flex-wrap gap-4 text-xs font-mono items-center">
-                    <span>Kapazität: <strong>{params.capacity_kwh} kWh</strong></span>
-                    <span>Max. Ladeleistung: <strong>{params.max_charge_kw} kW</strong></span>
-                    <span>Wirkungsgrad: <strong>{params.roundtrip_efficiency_pct}%</strong></span>
-                    <span>Notstromreserve: <strong>{params.min_soc_reserve_pct}%</strong></span>
+                    <span>{t("battery_forecast.capacity_label", "Kapazität:")} <strong>{params.capacity_kwh} kWh</strong></span>
+                    <span>{t("battery_forecast.max_charge_label", "Max. Ladeleistung:")} <strong>{params.max_charge_kw} kW</strong></span>
+                    <span>{t("battery_forecast.efficiency_label", "Wirkungsgrad:")} <strong>{params.roundtrip_efficiency_pct}%</strong></span>
+                    <span>{t("battery_forecast.reserve_label", "Notstromreserve:")} <strong>{params.min_soc_reserve_pct}%</strong></span>
                     <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${params.has_live_soc === false ? "bg-amber-500/20 text-amber-300 border border-amber-500/30" : "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"}`}>
-                        {params.has_live_soc === false ? "⚠️ Kein Live-SoC Sensor" : "✓ SoC Live-Sensor aktiv"}
+                        {params.has_live_soc === false ? t("battery_forecast.no_live_sensor", "⚠️ Kein Live-SoC Sensor") : t("battery_forecast.live_sensor_active", "✓ SoC Live-Sensor aktiv")}
                     </span>
                 </div>
             </div>

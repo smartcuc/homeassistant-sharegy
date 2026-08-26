@@ -3,12 +3,14 @@
 */
 
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function TimezoneAlertBanner({
     timezone,
     onAccept,
     onSettings,
 }) {
+    const { t } = useTranslation();
 
     const detectedTimezone = useMemo(
         () =>
@@ -38,17 +40,15 @@ export default function TimezoneAlertBanner({
         >
             <div>
                 <div className="text-amber-900 font-medium">
-                    ⚠️ Zeitzone nicht konfiguriert
+                    {t("banners.timezone_warning", "⚠️ Zeitzone nicht konfiguriert")}
                 </div>
 
                 <div className="text-sm text-amber-800 mt-1">
-                    Für korrekte Zeitreihen, Berichte und
-                    Benachrichtigungen sollte eine
-                    Zeitzone ausgewählt werden.
+                    {t("banners.timezone_desc", "Für korrekte Zeitreihen, Berichte und Benachrichtigungen sollte eine Zeitzone ausgewählt werden.")}
                 </div>
 
                 <div className="text-xs text-amber-700 mt-2">
-                    Erkannte Zeitzone:
+                    {t("banners.detected_timezone", "Erkannte Zeitzone:")}
                     <span className="font-semibold ml-1">
                         {detectedTimezone}
                     </span>
@@ -69,7 +69,7 @@ export default function TimezoneAlertBanner({
                         hover:bg-amber-600
                     "
                 >
-                    {detectedTimezone} übernehmen
+                    {t("banners.accept_timezone", { tz: detectedTimezone, defaultValue: `${detectedTimezone} übernehmen` })}
                 </button>
 
                 <button
@@ -86,7 +86,7 @@ export default function TimezoneAlertBanner({
                         hover:bg-amber-100
                     "
                 >
-                    Einstellungen öffnen
+                    {t("banners.open_settings", "Einstellungen öffnen")}
                 </button>
 
             </div>

@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../../api/client";
 import MatterPairingModal from "./MatterPairingModal";
 
 export default function MatterHubCard() {
+    const { t } = useTranslation();
     const [statusData, setStatusData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isPairingOpen, setIsPairingOpen] = useState(false);
@@ -63,7 +65,7 @@ export default function MatterHubCard() {
     };
 
     const handleDeleteNode = async (nodeId, nodeName) => {
-        if (!window.confirm(`Möchtest du das Matter-Gerät "${nodeName}" wirklich entkoppeln?`)) {
+        if (!window.confirm(t("matter.confirm_unpair", { name: nodeName, defaultValue: `Möchtest du das Matter-Gerät "${nodeName}" wirklich entkoppeln?` }))) {
             return;
         }
         setActionLoading(`del_${nodeId}`);
@@ -72,7 +74,7 @@ export default function MatterHubCard() {
                 method: "DELETE",
             });
             await loadStatus();
-            setFeedbackMsg(`Gerät "${nodeName}" erfolgreich entkoppelt.`);
+            setFeedbackMsg(t("matter.unpair_success", { name: nodeName, defaultValue: `Gerät "${nodeName}" erfolgreich entkoppelt.` }));
             setTimeout(() => setFeedbackMsg(null), 4000);
         } catch (err) {
             console.error("Delete error:", err);
@@ -86,7 +88,7 @@ export default function MatterHubCard() {
         try {
             const res = await apiFetch("/api/matter/simulate/", { method: "POST" });
             if (res) {
-                setFeedbackMsg(`Telemetrie für ${res.updated_nodes || 0} Matter-Geräte aktualisiert!`);
+                setFeedbackMsg(t("matter.simulate_success", { count: res.updated_nodes || 0, defaultValue: `Telemetrie für ${res.updated_nodes || 0} Matter-Geräte aktualisiert!` }));
                 setTimeout(() => setFeedbackMsg(null), 3000);
                 await loadStatus();
             }
@@ -120,11 +122,11 @@ export default function MatterHubCard() {
                         <div className="flex items-center gap-2">
                             <h2 className="text-lg font-bold text-gray-900">Matter 1.3 Energy Hub</h2>
                             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                CSA Matter 1.3 Certified
+                                {t("matter.certified_badge", "CSA Matter 1.3 Certified")}
                             </span>
                         </div>
                         <p className="text-xs text-gray-500 mt-0.5">
-                            Direkte Anbindung von Smart Plugs, EVSE-Wallboxen und Wechselrichtern via Matter-over-Thread / Wi-Fi & Cluster 0x0090/0x0091.
+                            {t("matter.hub_subtitle", "Direkte Anbindung von Smart Plugs, EVSE-Wallboxen und Wechselrichtern via Matter-over-Thread / Wi-Fi & Cluster 0x0090/0x0091.")}
                         </p>
                     </div>
                 </div>
@@ -134,15 +136,15 @@ export default function MatterHubCard() {
                         onClick={handleSimulate}
                         disabled={actionLoading === "simulate" || !statusData?.nodes_count}
                         className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-xl transition-all disabled:opacity-40 flex items-center gap-1.5"
-                        title="Simuliert Live-Leistungsmessung für alle gekoppelten Geräte"
+                        title={t("matter.live_test_title", "Simuliert Live-Leistungsmessung für alle gekoppelten Geräte")}
                     >
-                        {actionLoading === "simulate" ? "Aktualisiere..." : "🔄 Live-Test"}
+                        {actionLoading === "simulate" ? t("common.updating", "Aktualisiere...") : t("matter.live_test", "🔄 Live-Test")}
                     </button>
                     <button
                         onClick={() => setIsPairingOpen(true)}
                         className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-600/20 flex items-center gap-1.5 transition-all"
                     >
-                        <span>+</span> Neues Matter-Gerät koppeln
+                        <span>+</span> {t("matter.pair_device", "Neues Matter-Gerät koppeln")}
                     </button>
                 </div>
             </div>
@@ -150,19 +152,19 @@ export default function MatterHubCard() {
             {/* Hub Info Bar */}
             <div className="px-6 py-3 bg-gray-50/70 border-b border-gray-100 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
                 <div>
-                    <span className="text-gray-400 block text-[10px] uppercase font-semibold">Fabric-ID</span>
+                    <span className="text-gray-400 block text-[10px] uppercase font-semibold">{t("matter.fabric_id", "Fabric-ID")}</span>
                     <span className="font-mono font-medium text-gray-800">{statusData?.fabric_id || "-"}</span>
                 </div>
                 <div>
-                    <span className="text-gray-400 block text-[10px] uppercase font-semibold">Controller Node</span>
+                    <span className="text-gray-400 block text-[10px] uppercase font-semibold">{t("matter.controller_node", "Controller Node")}</span>
                     <span className="font-mono font-medium text-gray-800">Node #{statusData?.controller_node_id || 1}</span>
                 </div>
                 <div>
-                    <span className="text-gray-400 block text-[10px] uppercase font-semibold">Gekoppelte Geräte</span>
-                    <span className="font-bold text-gray-800">{statusData?.nodes_count || 0} Geräte</span>
+                    <span className="text-gray-400 block text-[10px] uppercase font-semibold">{t("matter.paired_devices", "Gekoppelte Geräte")}</span>
+                    <span className="font-bold text-gray-800">{t("matter.devices_count", { count: statusData?.nodes_count || 0, defaultValue: `${statusData?.nodes_count || 0} Geräte` })}</span>
                 </div>
                 <div>
-                    <span className="text-gray-400 block text-[10px] uppercase font-semibold">Standard-Cluster</span>
+                    <span className="text-gray-400 block text-[10px] uppercase font-semibold">{t("matter.standard_clusters", "Standard-Cluster")}</span>
                     <span className="text-emerald-700 font-semibold">0x0090 (Power), 0x0091 (Energy)</span>
                 </div>
             </div>
@@ -179,20 +181,20 @@ export default function MatterHubCard() {
                 {loading ? (
                     <div className="py-8 text-center text-xs text-gray-400 flex items-center justify-center gap-2">
                         <span className="w-4 h-4 border-2 border-emerald-500/30 border-t-emerald-600 rounded-full animate-spin"></span>
-                        Lade Matter-Geräte...
+                        {t("common.loading", "Lade Matter-Geräte...")}
                     </div>
                 ) : !statusData?.nodes || statusData.nodes.length === 0 ? (
                     <div className="py-10 text-center border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50/50">
                         <div className="text-3xl mb-2">⚡</div>
-                        <h3 className="text-sm font-bold text-gray-700 mb-1">Noch keine Matter-Geräte gekoppelt</h3>
+                        <h3 className="text-sm font-bold text-gray-700 mb-1">{t("matter.no_devices_title", "Noch keine Matter-Geräte gekoppelt")}</h3>
                         <p className="text-xs text-gray-400 max-w-sm mx-auto mb-4">
-                            Kopple moderne Matter 1.3 Smart Plugs (z. B. Eve Energy, Shelly Matter) oder Wallboxen per QR-Code oder 11-stelligem Pairing-Code.
+                            {t("matter.no_devices_desc", "Kopple moderne Matter 1.3 Smart Plugs (z. B. Eve Energy, Shelly Matter) oder Wallboxen per QR-Code oder 11-stelligem Pairing-Code.")}
                         </p>
                         <button
                             onClick={() => setIsPairingOpen(true)}
                             className="px-4 py-2 bg-emerald-600 text-white text-xs font-semibold rounded-xl hover:bg-emerald-700 transition-all"
                         >
-                            Jetzt erstes Gerät koppeln
+                            {t("matter.pair_first_device", "Jetzt erstes Gerät koppeln")}
                         </button>
                     </div>
                 ) : (
@@ -229,16 +231,16 @@ export default function MatterHubCard() {
                                                 onClick={() => handleToggleNode(node.node_id)}
                                                 disabled={actionLoading === `toggle_${node.node_id}`}
                                                 className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm ${isOn
-                                                        ? "bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-600/20"
-                                                        : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+                                                    ? "bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-600/20"
+                                                    : "bg-gray-100 text-gray-400 hover:bg-gray-200"
                                                     }`}
                                             >
                                                 {actionLoading === `toggle_${node.node_id}` ? (
                                                     <span className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin"></span>
                                                 ) : isOn ? (
-                                                    <>🟢 EIN</>
+                                                    <>{t("matter.status_on", "🟢 EIN")}</>
                                                 ) : (
-                                                    <>⚪ AUS</>
+                                                    <>{t("matter.status_off", "⚪ AUS")}</>
                                                 )}
                                             </button>
                                         </div>
@@ -246,15 +248,15 @@ export default function MatterHubCard() {
                                         {/* Live Metrics Grid */}
                                         <div className="grid grid-cols-2 gap-2 my-3 p-2.5 bg-gray-50 rounded-xl border border-gray-100 text-xs">
                                             <div>
-                                                <span className="text-gray-400 block text-[10px]">Live-Leistung (0x0090)</span>
+                                                <span className="text-gray-400 block text-[10px]">{t("matter.live_power", "Live-Leistung (0x0090)")}</span>
                                                 <span className="font-bold text-gray-800 text-sm">
-                                                    {powerW.toLocaleString("de-DE", { maximumFractionDigits: 1 })} W
+                                                    {powerW.toLocaleString(undefined, { maximumFractionDigits: 1 })} W
                                                 </span>
                                             </div>
                                             <div>
-                                                <span className="text-gray-400 block text-[10px]">Zählerstand (0x0091)</span>
+                                                <span className="text-gray-400 block text-[10px]">{t("matter.meter_reading", "Zählerstand (0x0091)")}</span>
                                                 <span className="font-semibold text-gray-700 text-sm">
-                                                    {energyKwh.toLocaleString("de-DE", { maximumFractionDigits: 2 })} kWh
+                                                    {energyKwh.toLocaleString(undefined, { maximumFractionDigits: 2 })} kWh
                                                 </span>
                                             </div>
                                         </div>
@@ -263,14 +265,14 @@ export default function MatterHubCard() {
                                     {/* Footer Actions */}
                                     <div className="pt-2.5 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-400">
                                         <span className="truncate">
-                                            Clusters: {node.clusters?.length || 0} aktiv
+                                            {t("matter.clusters_active", { count: node.clusters?.length || 0, defaultValue: `Clusters: ${node.clusters?.length || 0} aktiv` })}
                                         </span>
                                         <button
                                             onClick={() => handleDeleteNode(node.node_id, node.name)}
                                             disabled={actionLoading === `del_${node.node_id}`}
                                             className="text-red-500 hover:text-red-700 font-semibold hover:underline"
                                         >
-                                            Entkoppeln
+                                            {t("matter.unpair", "Entkoppeln")}
                                         </button>
                                     </div>
                                 </div>
@@ -285,7 +287,7 @@ export default function MatterHubCard() {
                 open={isPairingOpen}
                 onClose={() => setIsPairingOpen(false)}
                 onCommissioned={(newNode) => {
-                    setFeedbackMsg(`Matter-Gerät "${newNode.name}" erfolgreich gekoppelt!`);
+                    setFeedbackMsg(t("matter.pair_success", { name: newNode.name, defaultValue: `Matter-Gerät "${newNode.name}" erfolgreich gekoppelt!` }));
                     setTimeout(() => setFeedbackMsg(null), 5000);
                     loadStatus();
                 }}

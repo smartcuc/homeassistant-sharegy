@@ -39,11 +39,11 @@ export default function BatteryArbitrageCard() {
                             </h2>
                             {data.is_arbitrage_profitable ? (
                                 <span className="px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                    🟢 Rentabel (+{data.price_spread_ct_per_kwh} ct/kWh)
+                                    🟢 {t("arbitrage.profitable", "Rentabel")} (+{data.price_spread_ct_per_kwh} ct/kWh)
                                 </span>
                             ) : (
                                 <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-600">
-                                    ⚪ PV-Priorität
+                                    {t("arbitrage.pv_priority", "⚪ PV-Priorität")}
                                 </span>
                             )}
                         </div>
@@ -55,10 +55,10 @@ export default function BatteryArbitrageCard() {
 
                 <div className="text-right self-start sm:self-auto bg-indigo-50/70 border border-indigo-100/80 px-3.5 py-1.5 rounded-xl">
                     <div className="text-[10px] font-bold uppercase tracking-wider text-indigo-700">
-                        Zusatzerlös / Ersparnis
+                        {t("arbitrage.savings_projected", "Zusatzerlös / Ersparnis")}
                     </div>
                     <div className="text-lg font-black text-indigo-900">
-                        ~{data.projected_yearly_savings_eur?.toFixed(0) || "0"} € <span className="text-xs font-semibold text-indigo-600">/ Jahr</span>
+                        ~{data.projected_yearly_savings_eur?.toFixed(0) || "0"} € <span className="text-xs font-semibold text-indigo-600">{t("arbitrage.per_year", "/ Jahr")}</span>
                     </div>
                 </div>
             </div>
@@ -67,49 +67,49 @@ export default function BatteryArbitrageCard() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
                 <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
                     <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                        🌙 Günstigster Ladepreis
+                        {t("arbitrage.best_charge_price", "🌙 Günstigster Ladepreis")}
                     </div>
                     <div className="text-lg font-extrabold text-indigo-600 mt-1">
                         {data.avg_charge_price_ct?.toFixed(1) || "12.0"} <span className="text-xs font-semibold">ct/kWh</span>
                     </div>
                     <div className="text-[11px] text-slate-500 font-medium mt-0.5">
-                        Fenster: {data.best_charge_window || "-"}
+                        {t("arbitrage.window", "Fenster")}: {data.best_charge_window || "-"}
                     </div>
                 </div>
 
                 <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
                     <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                        ⚡ Vermiedener Peak-Preis
+                        {t("arbitrage.avoided_peak_price", "⚡ Vermiedener Peak-Preis")}
                     </div>
                     <div className="text-lg font-extrabold text-amber-600 mt-1">
                         {data.avg_discharge_price_ct?.toFixed(1) || "34.5"} <span className="text-xs font-semibold">ct/kWh</span>
                     </div>
                     <div className="text-[11px] text-slate-500 font-medium mt-0.5">
-                        Fenster: {data.best_discharge_window || "-"}
+                        {t("arbitrage.window", "Fenster")}: {data.best_discharge_window || "-"}
                     </div>
                 </div>
 
                 <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
                     <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                        🔄 Wirkungsgrad (Roundtrip)
+                        {t("arbitrage.roundtrip_efficiency", "🔄 Wirkungsgrad (Roundtrip)")}
                     </div>
                     <div className="text-lg font-extrabold text-slate-800 mt-1">
                         {data.roundtrip_efficiency_pct || "90.0"} %
                     </div>
                     <div className="text-[11px] text-slate-500 font-medium mt-0.5">
-                        Nutzbar: {data.usable_capacity_kwh || "9.0"} kWh
+                        {t("arbitrage.usable", "Nutzbar")}: {data.usable_capacity_kwh || "9.0"} kWh
                     </div>
                 </div>
 
                 <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
                     <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                        💰 Ertrag pro Zyklus
+                        {t("arbitrage.profit_per_cycle", "💰 Ertrag pro Zyklus")}
                     </div>
                     <div className="text-lg font-extrabold text-emerald-600 mt-1">
                         +{data.daily_profit_eur?.toFixed(2) || "0.00"} €
                     </div>
                     <div className="text-[11px] text-emerald-700/80 font-medium mt-0.5">
-                        Monat: ~{data.projected_monthly_savings_eur?.toFixed(2) || "0.00"} €
+                        {t("arbitrage.month_projected", { amount: data.projected_monthly_savings_eur?.toFixed(2) || "0.00", defaultValue: `Monat: ~${data.projected_monthly_savings_eur?.toFixed(2) || "0.00"} €` })}
                     </div>
                 </div>
             </div>
@@ -118,11 +118,11 @@ export default function BatteryArbitrageCard() {
             {timeline.length > 0 && (
                 <div className="mt-5">
                     <div className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 flex items-center justify-between">
-                        <span>24h Lade- & Arbitrage-Fahrplan</span>
-                        <div className="flex items-center gap-3 text-[11px] font-semibold text-slate-500 lowercase">
-                            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-indigo-500"></span> Netzladen</span>
-                            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Entladen</span>
-                            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Solar</span>
+                        <span>{t("arbitrage.schedule_24h", "24h Lade- & Arbitrage-Fahrplan")}</span>
+                        <div className="flex items-center gap-3 text-[11px] font-semibold text-slate-500">
+                            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-indigo-500"></span> {t("arbitrage.action_charge", "Netzladen")}</span>
+                            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span> {t("arbitrage.action_discharge", "Entladen")}</span>
+                            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> {t("arbitrage.action_pv", "Solar")}</span>
                         </div>
                     </div>
 
@@ -130,20 +130,19 @@ export default function BatteryArbitrageCard() {
                         {timeline.slice(0, 12).map((slot, idx) => (
                             <div
                                 key={idx}
-                                className={`p-2 rounded-xl text-center border transition-all ${
-                                    slot.action === "grid_charge"
+                                className={`p-2 rounded-xl text-center border transition-all ${slot.action === "grid_charge"
                                         ? "bg-indigo-600 text-white border-indigo-600 shadow-xs"
                                         : slot.action === "discharge"
-                                        ? "bg-amber-500 text-white border-amber-500 shadow-xs"
-                                        : slot.action === "solar_charge"
-                                        ? "bg-emerald-500 text-white border-emerald-500 shadow-xs"
-                                        : "bg-white text-slate-700 border-slate-200/80"
-                                }`}
+                                            ? "bg-amber-500 text-white border-amber-500 shadow-xs"
+                                            : slot.action === "solar_charge"
+                                                ? "bg-emerald-500 text-white border-emerald-500 shadow-xs"
+                                                : "bg-white text-slate-700 border-slate-200/80"
+                                    }`}
                             >
                                 <div className="text-[10px] font-bold opacity-80">{slot.time_label}</div>
                                 <div className="text-xs font-black mt-0.5">{slot.effective_price_ct}</div>
                                 <div className="text-[9px] truncate font-medium mt-0.5 opacity-90">
-                                    {slot.action === "grid_charge" ? "Laden" : slot.action === "discharge" ? "Peak" : slot.action === "solar_charge" ? "PV" : "Idle"}
+                                    {slot.action === "grid_charge" ? t("arbitrage.action_charge", "Laden") : slot.action === "discharge" ? t("arbitrage.action_peak", "Peak") : slot.action === "solar_charge" ? t("arbitrage.action_pv", "PV") : t("arbitrage.action_idle", "Standby")}
                                 </div>
                             </div>
                         ))}

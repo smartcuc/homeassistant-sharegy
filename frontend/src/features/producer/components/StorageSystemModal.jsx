@@ -199,21 +199,21 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
                         <div className="p-4 bg-emerald-50/80 border border-emerald-200 rounded-2xl space-y-2">
                             <div className="flex items-center justify-between">
                                 <span className="text-xs font-bold text-emerald-900 flex items-center gap-1.5">
-                                    <span>💡</span> Erkannter Speicher aus Plugin / Wechselrichter
+                                    <span>💡</span> {t("storage_system.detected_storage", "Erkannter Speicher aus Plugin / Wechselrichter")}
                                 </span>
                                 <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-emerald-200/60 text-emerald-800">
-                                    Auto-Discovery
+                                    {t("storage_system.auto_discovery", "Auto-Discovery")}
                                 </span>
                             </div>
                             <p className="text-xs text-emerald-800/80">
-                                Es wurde ein Gerät mit Speicher-Metriken (SoC/Leistung) gefunden: <strong>{candidates[0].device.name}</strong>.
+                                {t("storage_system.detected_desc", { name: candidates[0].device.name, defaultValue: `Es wurde ein Gerät mit Speicher-Metriken (SoC/Leistung) gefunden: ${candidates[0].device.name}.` })}
                             </p>
                             <button
                                 type="button"
                                 onClick={() => handleApplyCandidate(candidates[0])}
                                 className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
                             >
-                                ✨ Vorschlag mit 1-Klick übernehmen
+                                {t("storage_system.apply_suggestion", "✨ Vorschlag mit 1-Klick übernehmen")}
                             </button>
                         </div>
                     )}
@@ -221,13 +221,13 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
                     {/* Basic Info */}
                     <div className="space-y-4">
                         <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                            1. Allgemeine Angaben & Kapazität
+                            {t("storage_system.section_general", "1. Allgemeine Angaben & Kapazität")}
                         </h3>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                                    Bezeichnung *
+                                    {t("common.name", "Bezeichnung")} *
                                 </label>
                                 <input
                                     type="text"
@@ -240,7 +240,7 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
 
                             <div>
                                 <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                                    Nennkapazität (kWh) *
+                                    {t("storage_system.nominal_capacity", "Nennkapazität (kWh)")} *
                                 </label>
                                 <input
                                     type="number"
@@ -258,7 +258,7 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                             <div>
                                 <label className="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">
-                                    Max. Laden (kW)
+                                    {t("storage_system.max_charge_power", "Max. Laden (kW)")}
                                 </label>
                                 <input
                                     type="number"
@@ -271,7 +271,7 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
 
                             <div>
                                 <label className="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">
-                                    Max. Entladen (kW)
+                                    {t("storage_system.max_discharge_power", "Max. Entladen (kW)")}
                                 </label>
                                 <input
                                     type="number"
@@ -284,7 +284,7 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
 
                             <div>
                                 <label className="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">
-                                    Notstromreserve (%)
+                                    {t("storage_system.backup_reserve", "Notstromreserve (%)")}
                                 </label>
                                 <input
                                     type="number"
@@ -299,7 +299,7 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
 
                             <div>
                                 <label className="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">
-                                    Wirkungsgrad (%)
+                                    {t("storage_system.efficiency", "Wirkungsgrad (%)")}
                                 </label>
                                 <input
                                     type="number"
@@ -322,7 +322,7 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
                     <div className="space-y-4 pt-4 border-t border-gray-100">
                         <div className="flex items-center justify-between">
                             <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                                2. Messpunkt- & Sensor-Zuordnung
+                                {t("storage_system.section_sensors", "2. Messpunkt- & Sensor-Zuordnung")}
                             </h3>
 
                             {/* Mode Toggle */}
@@ -332,14 +332,14 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
                                     onClick={() => setMode("all_in_one")}
                                     className={`px-3 py-1 rounded-lg transition ${mode === "all_in_one" ? "bg-white text-gray-900 shadow-xs font-bold" : "text-gray-500"}`}
                                 >
-                                    🎯 All-in-One (Ein Gerät)
+                                    {t("storage_system.mode_all_in_one", "🎯 All-in-One (Ein Gerät)")}
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setMode("separated")}
                                     className={`px-3 py-1 rounded-lg transition ${mode === "separated" ? "bg-white text-gray-900 shadow-xs font-bold" : "text-gray-500"}`}
                                 >
-                                    🔀 Getrennte Messpunkte
+                                    {t("storage_system.mode_separated", "🔀 Getrennte Messpunkte")}
                                 </button>
                             </div>
                         </div>
@@ -347,22 +347,22 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
                         {mode === "all_in_one" ? (
                             <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200 space-y-3">
                                 <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                    Hauptgerät auswählen (z. B. Hybrid-Wechselrichter oder All-in-One Speicher)
+                                    {t("storage_system.select_primary_device", "Hauptgerät auswählen (z. B. Hybrid-Wechselrichter oder All-in-One Speicher)")}
                                 </label>
                                 <select
                                     value={formData.primary_device_id}
                                     onChange={(e) => setFormData({ ...formData, primary_device_id: e.target.value })}
                                     className="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-emerald-500 transition"
                                 >
-                                    <option value="">-- Kein Gerät verknüpft (Manuell) --</option>
+                                    <option value="">{t("storage_system.no_device_manual", "-- Kein Gerät verknüpft (Manuell) --")}</option>
                                     {devices.map((d) => (
                                         <option key={d.id} value={d.id}>
-                                            {d.name} {d.has_soc ? "(mit SoC-Sensor)" : ""}
+                                            {d.name} {d.has_soc ? t("storage_system.with_soc_sensor", "(mit SoC-Sensor)") : ""}
                                         </option>
                                     ))}
                                 </select>
                                 <p className="text-[11px] text-gray-500">
-                                    Das ausgewählte Gerät liefert sowohl den aktuellen Ladestand (SoC %) als auch die Lade- und Entladeleistung.
+                                    {t("storage_system.all_in_one_hint", "Das ausgewählte Gerät liefert sowohl den aktuellen Ladestand (SoC %) als auch die Lade- und Entladeleistung.")}
                                 </p>
                             </div>
                         ) : (
@@ -371,14 +371,14 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <div>
                                         <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                                            🔋 Gerät für Ladestand (SoC %)
+                                            🔋 {t("storage_system.soc_device_label", "Gerät für Ladestand (SoC %)")}
                                         </label>
                                         <select
                                             value={formData.soc_device_id}
                                             onChange={(e) => setFormData({ ...formData, soc_device_id: e.target.value })}
                                             className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500 transition"
                                         >
-                                            <option value="">-- Kein Gerät --</option>
+                                            <option value="">{t("common.none", "-- Kein Gerät --")}</option>
                                             {devices.map((d) => (
                                                 <option key={d.id} value={d.id}>
                                                     {d.name}
@@ -388,7 +388,7 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
                                     </div>
                                     <div>
                                         <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                                            Datenpunkt / Metrikschlüssel
+                                            {t("storage_system.metric_key_label", "Datenpunkt / Metrikschlüssel")}
                                         </label>
                                         <input
                                             type="text"
@@ -404,14 +404,14 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <div>
                                         <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                                            ⚡ Gerät für Ladeleistung (W)
+                                            ⚡ {t("storage_system.power_device_label", "Gerät für Ladeleistung (W)")}
                                         </label>
                                         <select
                                             value={formData.power_device_id}
                                             onChange={(e) => setFormData({ ...formData, power_device_id: e.target.value })}
                                             className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500 transition"
                                         >
-                                            <option value="">-- Kein Gerät --</option>
+                                            <option value="">{t("common.none", "-- Kein Gerät --")}</option>
                                             {devices.map((d) => (
                                                 <option key={d.id} value={d.id}>
                                                     {d.name}
@@ -421,7 +421,7 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
                                     </div>
                                     <div>
                                         <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                                            Datenpunkt / Metrikschlüssel
+                                            {t("storage_system.metric_key_label", "Datenpunkt / Metrikschlüssel")}
                                         </label>
                                         <input
                                             type="text"
@@ -443,7 +443,7 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
                             onClick={onClose}
                             className="px-4 py-2 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition cursor-pointer"
                         >
-                            Abbrechen
+                            {t("common.cancel", "Abbrechen")}
                         </button>
 
                         <button
@@ -451,7 +451,7 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
                             disabled={isSubmitting}
                             className="px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-xs transition cursor-pointer disabled:opacity-50"
                         >
-                            {isSubmitting ? "Speichere..." : isEdit ? "Änderungen speichern" : "Speicher anlegen"}
+                            {isSubmitting ? t("common.saving", "Speichere...") : isEdit ? t("storage.save_changes", "Änderungen speichern") : t("storage.create", "Speicher anlegen")}
                         </button>
                     </div>
                 </form>

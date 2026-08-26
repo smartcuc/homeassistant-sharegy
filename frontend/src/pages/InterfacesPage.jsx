@@ -23,7 +23,7 @@ export default function InterfacesPage() {
             setCopiedKey(key);
             setTimeout(() => setCopiedKey(null), 1500);
         } else {
-            alert("Kopieren nicht unterstützt");
+            alert(t("interfaces.copy_not_supported", "Kopieren nicht unterstützt"));
         }
     }
 
@@ -37,7 +37,7 @@ export default function InterfacesPage() {
                 await regenerateMqttPassword();
                 alert(t("interfaces.regenerate_success", "Neues MQTT-Passwort erfolgreich generiert!"));
             } catch {
-                alert("Fehler beim Generieren des neuen Passworts.");
+                alert(t("interfaces.regenerate_error", "Fehler beim Generieren des neuen Passworts."));
             }
         }
     }

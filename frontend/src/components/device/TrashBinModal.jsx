@@ -154,7 +154,7 @@ export default function TrashBinModal({
         }
 
         const confirmed = window.confirm(
-            "Ausgewählte Geräte endgültig löschen?"
+            t("device_trash.confirm_purge", "Ausgewählte Geräte endgültig löschen?")
         );
 
         if (!confirmed) {

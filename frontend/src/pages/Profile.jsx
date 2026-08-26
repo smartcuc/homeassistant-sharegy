@@ -144,15 +144,15 @@ export default function Profile() {
                     </div>
                     <div className="space-y-3 text-sm">
                         <div>
-                            <span className="text-xs text-gray-400 block uppercase font-bold">Status</span>
+                            <span className="text-xs text-gray-400 block uppercase font-bold">{t("common.status", "Status")}</span>
                             <span className="font-medium text-gray-800">
-                                {subscriptionQuery.data?.subscription?.status === "active" ? "🟢 Aktiv" : "Inaktiv"}
+                                {subscriptionQuery.data?.subscription?.status === "active" ? `🟢 ${t("common.active", "Aktiv")}` : t("common.inactive", "Inaktiv")}
                             </span>
                         </div>
                         <div>
-                            <span className="text-xs text-gray-400 block uppercase font-bold">Rechnungen</span>
+                            <span className="text-xs text-gray-400 block uppercase font-bold">{t("billing.invoices_title", "Rechnungen")}</span>
                             <span className="font-medium text-gray-800">
-                                {subscriptionQuery.data?.invoices?.length || 0} archivierte Belege
+                                {t("profile.invoices_count", { count: subscriptionQuery.data?.invoices?.length || 0, defaultValue: `${subscriptionQuery.data?.invoices?.length || 0} archivierte Belege` })}
                             </span>
                         </div>
                         <div className="pt-2">
@@ -160,7 +160,7 @@ export default function Profile() {
                                 to="/app/billing"
                                 className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-xl text-xs border border-indigo-200 transition"
                             >
-                                Tarife verwalten & Rechnungen ansehen →
+                                {t("profile.manage_plans_link", "Tarife verwalten & Rechnungen ansehen →")}
                             </Link>
                         </div>
                     </div>

@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "../../../api/client";
 import SubscriptionPlanCard from "../components/SubscriptionPlanCard";
@@ -6,6 +7,7 @@ import BillingAddressCard from "../components/BillingAddressCard";
 import InvoicesListCard from "../components/InvoicesListCard";
 
 export default function BillingPage() {
+    const { t } = useTranslation();
     const { data: billingData, isLoading, refetch } = useQuery({
         queryKey: ["billingOverview"],
         queryFn: () => apiFetch("/api/billing/subscription/me/"),
@@ -14,7 +16,7 @@ export default function BillingPage() {
     if (isLoading) {
         return (
             <div className="max-w-5xl mx-auto p-6 text-gray-400 text-center py-20">
-                Lade Abrechnungs- & Abonnement-Informationen...
+                {t("billing.loading", "Lade Abrechnungs- & Abonnement-Informationen...")}
             </div>
         );
     }
@@ -25,10 +27,10 @@ export default function BillingPage() {
             <div>
                 <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
                     <span>💳</span>
-                    Abonnement, Tarife & Abrechnung
+                    {t("billing.title", "Abonnement, Tarife & Abrechnung")}
                 </h1>
                 <p className="text-gray-500 mt-1 text-sm">
-                    Verwalte deinen Sharegy EMS-Tarif, deine Rechnungsadresse und lade Rechnungen als PDF herunter.
+                    {t("billing.subtitle", "Verwalte deinen Sharegy EMS-Tarif, deine Rechnungsadresse und lade Rechnungen als PDF herunter.")}
                 </p>
             </div>
 

@@ -54,8 +54,8 @@ export default function ExportDropdown({ period, startDate, endDate }) {
                     >
                         <span className="text-base">📊</span>
                         <div>
-                            <div className="font-semibold">Excel Arbeitsmappe (.xlsx)</div>
-                            <div className="text-[10px] text-slate-400">Mit KPIs, Submetering & Stundendaten</div>
+                            <div className="font-semibold">{t("energy.export_excel", "Excel Arbeitsmappe (.xlsx)")}</div>
+                            <div className="text-[10px] text-slate-400">{t("energy.export_excel_desc", "Mit KPIs, Submetering & Stundendaten")}</div>
                         </div>
                     </button>
 
@@ -65,8 +65,8 @@ export default function ExportDropdown({ period, startDate, endDate }) {
                     >
                         <span className="text-base">📄</span>
                         <div>
-                            <div className="font-semibold">Druckfähiger PDF-Bericht</div>
-                            <div className="text-[10px] text-slate-400">Für Eigentümer & Abrechnung</div>
+                            <div className="font-semibold">{t("energy.export_pdf", "Druckfähiger PDF-Bericht")}</div>
+                            <div className="text-[10px] text-slate-400">{t("energy.export_pdf_desc", "Für Eigentümer & Abrechnung")}</div>
                         </div>
                     </button>
 
@@ -76,8 +76,8 @@ export default function ExportDropdown({ period, startDate, endDate }) {
                     >
                         <span className="text-base">📝</span>
                         <div>
-                            <div className="font-semibold">CSV-Datei (Semikolon)</div>
-                            <div className="text-[10px] text-slate-400">Für Buchhaltung & Steuerberater</div>
+                            <div className="font-semibold">{t("energy.export_csv", "CSV-Datei (Semikolon)")}</div>
+                            <div className="text-[10px] text-slate-400">{t("energy.export_csv_desc", "Für Buchhaltung & Steuerberater")}</div>
                         </div>
                     </button>
 
@@ -87,8 +87,8 @@ export default function ExportDropdown({ period, startDate, endDate }) {
                     >
                         <span className="text-base">💾</span>
                         <div>
-                            <div className="font-semibold">JSON-Rohdaten</div>
-                            <div className="text-[10px] text-slate-400">Für Smart-Home & Backups</div>
+                            <div className="font-semibold">{t("energy.export_json", "JSON-Rohdaten")}</div>
+                            <div className="text-[10px] text-slate-400">{t("energy.export_json_desc", "Für Smart-Home & Backups")}</div>
                         </div>
                     </button>
                 </div>

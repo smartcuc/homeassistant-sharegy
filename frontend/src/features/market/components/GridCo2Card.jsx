@@ -28,8 +28,8 @@ export default function GridCo2Card() {
         data.current_level === "green"
             ? "bg-emerald-100 text-emerald-800 border-emerald-200"
             : data.current_level === "red"
-            ? "bg-rose-100 text-rose-800 border-rose-200"
-            : "bg-amber-100 text-amber-800 border-amber-200";
+                ? "bg-rose-100 text-rose-800 border-rose-200"
+                : "bg-amber-100 text-amber-800 border-amber-200";
 
     return (
         <div className="p-6 bg-white rounded-3xl border border-slate-200/80 shadow-xs hover:border-slate-300 transition-all">
@@ -56,10 +56,10 @@ export default function GridCo2Card() {
 
                 <div className="text-right self-start sm:self-auto bg-teal-50/70 border border-teal-100/80 px-3.5 py-1.5 rounded-xl">
                     <div className="text-[10px] font-bold uppercase tracking-wider text-teal-700">
-                        Erneuerbaren-Anteil
+                        {t("co2.renewable_share", "Erneuerbaren-Anteil")}
                     </div>
                     <div className="text-lg font-black text-teal-900">
-                        {data.current_renewable_share_pct || "65.0"} <span className="text-xs font-semibold text-teal-600">% Grünstrom</span>
+                        {data.current_renewable_share_pct || "65.0"} <span className="text-xs font-semibold text-teal-600">{t("co2_grid.green_share", "% Grünstrom")}</span>
                     </div>
                 </div>
             </div>
@@ -68,44 +68,44 @@ export default function GridCo2Card() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
                 <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
                     <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                        ⚡ Live CO₂-Intensität
+                        {t("co2_grid.live_intensity", "⚡ Live CO₂-Intensität")}
                     </div>
                     <div className="text-xl font-black mt-1" style={{ color: data.current_color || "#10B981" }}>
                         {data.current_co2_intensity_g_per_kwh || 220}{" "}
                         <span className="text-xs font-semibold text-slate-500">g/kWh</span>
                     </div>
                     <div className="text-[11px] text-slate-500 font-medium mt-0.5">
-                        Aktueller Netzmix DE
+                        {t("co2.current_grid_mix", "Aktueller Netzmix DE")}
                     </div>
                 </div>
 
                 <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
                     <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                        🌱 Bestes Öko-Fenster
+                        {t("co2_grid.best_eco_window", "🌱 Bestes Öko-Fenster")}
                     </div>
                     <div className="text-lg font-extrabold text-emerald-700 mt-1 truncate" title={data.best_eco_window}>
                         {data.best_eco_window || "12:00 - 15:00"}
                     </div>
                     <div className="text-[11px] text-slate-500 font-medium mt-0.5">
-                        Minimale Emissionen
+                        {t("co2.min_emissions", "Minimale Emissionen")}
                     </div>
                 </div>
 
                 <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
                     <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                        📊 24h-Durchschnitt
+                        📊 {t("co2.avg_24h", "24h-Durchschnitt")}
                     </div>
                     <div className="text-lg font-extrabold text-slate-800 mt-1">
                         {data.avg_co2_intensity_g_per_kwh || 310} <span className="text-xs font-semibold text-slate-500">g/kWh</span>
                     </div>
                     <div className="text-[11px] text-slate-500 font-medium mt-0.5">
-                        Tagesprognose
+                        {t("co2.daily_forecast", "Tagesprognose")}
                     </div>
                 </div>
 
                 <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
                     <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                        🔋 Ø Grünstromanteil
+                        {t("co2_grid.avg_green_share", "🔋 Ø Grünstromanteil")}
                     </div>
                     <div className="text-lg font-extrabold text-teal-700 mt-1">
                         {data.avg_renewable_share_pct || 62.5} %
@@ -120,9 +120,9 @@ export default function GridCo2Card() {
             {timeline.length > 0 && (
                 <div className="mt-5">
                     <div className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 flex items-center justify-between">
-                        <span>24h CO₂-Emissions-Timeline (g CO₂ / kWh)</span>
+                        <span>{t("co2.timeline_title", "24h CO₂-Emissions-Timeline (g CO₂ / kWh)")}</span>
                         <span className="text-[11px] font-semibold text-emerald-600">
-                            🟢 &lt; 250g (Grün) · 🟡 250-420g · 🔴 &gt; 420g
+                            {t("co2_grid.legend", "🟢 < 250g (Grün) · 🟡 250-420g · 🔴 > 420g")}
                         </span>
                     </div>
 
@@ -130,13 +130,12 @@ export default function GridCo2Card() {
                         {timeline.slice(0, 12).map((slot, idx) => (
                             <div
                                 key={idx}
-                                className={`p-2 rounded-xl text-center border transition-all ${
-                                    slot.level === "green"
+                                className={`p-2 rounded-xl text-center border transition-all ${slot.level === "green"
                                         ? "bg-emerald-50 text-emerald-900 border-emerald-200"
                                         : slot.level === "red"
-                                        ? "bg-rose-50 text-rose-900 border-rose-200"
-                                        : "bg-amber-50 text-amber-900 border-amber-200"
-                                }`}
+                                            ? "bg-rose-50 text-rose-900 border-rose-200"
+                                            : "bg-amber-50 text-amber-900 border-amber-200"
+                                    }`}
                             >
                                 <div className="text-[10px] font-bold opacity-80">{slot.time_label}</div>
                                 <div className="text-xs font-black mt-0.5">{slot.co2_intensity_g_per_kwh}g</div>

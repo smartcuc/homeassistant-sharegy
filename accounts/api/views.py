@@ -2,9 +2,12 @@
 # accounts/api/views.py
 #######################
 
+import logging
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model, login, logout
+
+logger = logging.getLogger(__name__)
 
 from zoneinfo import available_timezones
 
@@ -376,10 +379,12 @@ class RequestMagicLinkView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        email = request.data.get("email")
+        email = request.data.get("email", "")
+        if isinstance(email, str):
+            email = email.strip().lower()
 
-        if not email:
-            return Response({"error": "email required"}, status=400)
+        if not email or "@" not in email:
+            return Response({"error": "Bitte eine gültige E-Mail-Adresse eingeben."}, status=400)
 
         user, _ = User.objects.get_or_create(
             email=email,
@@ -390,7 +395,7 @@ class RequestMagicLinkView(APIView):
         last_token = MagicLoginToken.objects.filter(user=user).order_by("-created_at").first()
 
         if last_token and last_token.created_at > timezone.now() - timedelta(seconds=30):
-            return Response({"error": "too many requests"}, status=429)
+            return Response({"error": "Bitte warte kurz vor einer erneuten Anfrage."}, status=400)
 
         MagicLoginToken.objects.filter(user=user, is_used=False).delete()
 
@@ -398,10 +403,15 @@ class RequestMagicLinkView(APIView):
             user=user,
         )
 
-        # ✅ BEST PRACTICE: LINK IMMER BACKEND
-        link = f"{settings.FRONTEND_URL}/t/{token.token}"
+        # ✅ BEST PRACTICE: LINK IMMER FRONTEND / TRACKING
+        frontend_url = getattr(settings, "FRONTEND_URL", "https://sharegy.de").rstrip("/")
+        link = f"{frontend_url}/t/{token.token}"
 
-        send_magic_link_email(user, link, token.token)
+        try:
+            send_magic_link_email(user, link, token.token)
+        except Exception as exc:
+            logger.exception("Failed to send magic link email to %s: %s", user.email, exc)
+            return Response({"error": f"Mailversand fehlgeschlagen: {str(exc)}"}, status=400)
 
         return Response({"status": "sent"})
 
@@ -481,7 +491,8 @@ def track_magic_click(request, token):
         obj.clicked_at = timezone.now()
         obj.save()
 
-    return redirect(f"{settings.FRONTEND_BASE_URL}/auth/magic/{token}")
+    frontend_url = getattr(settings, "FRONTEND_BASE_URL", getattr(settings, "FRONTEND_URL", "https://sharegy.de")).rstrip("/")
+    return redirect(f"{frontend_url}/t/{token}")
 
 
 def track_open(request, token):

@@ -115,9 +115,9 @@ function HomeTariffForm({ initialData, onSaved }) {
                             type="button"
                             onClick={() => setValidFrom(todayStr)}
                             className="text-xs px-2.5 py-1.5 rounded-lg bg-gray-200 hover:bg-gray-300 font-semibold text-gray-700 transition cursor-pointer"
-                            title="Auf heutigen Tag setzen"
+                            title={t("tariffs.set_today_title", "Auf heutigen Tag setzen")}
                         >
-                            Heute
+                            {t("common.today", "Heute")}
                         </button>
                     </div>
                 </div>
@@ -538,10 +538,10 @@ export default function HomeTariffSettingsCard() {
                             <div
                                 key={entry.id}
                                 className={`p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all ${entry.is_active
-                                        ? "bg-emerald-50/50 border-emerald-300 shadow-2xs"
-                                        : entry.is_future
-                                            ? "bg-indigo-50/50 border-indigo-200 shadow-2xs"
-                                            : "bg-gray-50/70 border-gray-200 opacity-80"
+                                    ? "bg-emerald-50/50 border-emerald-300 shadow-2xs"
+                                    : entry.is_future
+                                        ? "bg-indigo-50/50 border-indigo-200 shadow-2xs"
+                                        : "bg-gray-50/70 border-gray-200 opacity-80"
                                     }`}
                             >
                                 <div className="flex items-start sm:items-center gap-3">
@@ -551,25 +551,25 @@ export default function HomeTariffSettingsCard() {
                                     <div>
                                         <div className="flex flex-wrap items-center gap-2">
                                             <span className="font-bold text-sm text-gray-900">
-                                                Gültig ab {new Date(entry.valid_from).toLocaleDateString([], { day: "2-digit", month: "2-digit", year: "numeric" })}
+                                                {t("tariffs.valid_from_prefix", "Gültig ab")} {new Date(entry.valid_from).toLocaleDateString([], { day: "2-digit", month: "2-digit", year: "numeric" })}
                                             </span>
                                             {entry.is_active && (
                                                 <span className="text-[10px] px-2 py-0.5 font-bold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                                    Aktuell aktiv
+                                                    {t("tariffs.currently_active", "Aktuell aktiv")}
                                                 </span>
                                             )}
                                             {entry.is_future && (
                                                 <span className="text-[10px] px-2 py-0.5 font-bold rounded-full bg-indigo-100 text-indigo-800 border border-indigo-200">
-                                                    Geplant (Zukunft)
+                                                    {t("tariffs.planned_future", "Geplant (Zukunft)")}
                                                 </span>
                                             )}
                                         </div>
                                         <div className="text-xs text-gray-600 mt-1 flex flex-wrap items-center gap-x-4 gap-y-1">
                                             <span>
-                                                ⚡ <strong>Bezug:</strong> {entry.tariff_type === "static" ? `Festpreis (${entry.static_price_ct?.toFixed(2)} ct/kWh)` : "Dynamischer Börsentarif"}
+                                                ⚡ <strong>{t("tariffs.import_label", "Bezug:")}</strong> {entry.tariff_type === "static" ? `${t("tariffs.fixed_price", "Festpreis")} (${entry.static_price_ct?.toFixed(2)} ct/kWh)` : t("tariffs.dynamic_market_tariff", "Dynamischer Börsentarif")}
                                             </span>
                                             <span>
-                                                ☀️ <strong>Einspeisung:</strong> {entry.feed_in_tariff_type === "static" ? `EEG (${entry.feed_in_tariff_ct?.toFixed(2)} ct/kWh)` : entry.feed_in_tariff_type === "dynamic" ? "Marktwert Solar" : "Nulleinspeisung (0 ct)"}
+                                                ☀️ <strong>{t("tariffs.export_label", "Einspeisung:")}</strong> {entry.feed_in_tariff_type === "static" ? `EEG (${entry.feed_in_tariff_ct?.toFixed(2)} ct/kWh)` : entry.feed_in_tariff_type === "dynamic" ? t("tariffs.market_value_solar", "Marktwert Solar") : t("tariffs.zero_feedin", "Nulleinspeisung (0 ct)")}
                                             </span>
                                         </div>
                                     </div>
@@ -590,23 +590,23 @@ export default function HomeTariffSettingsCard() {
                                             window.scrollTo({ top: 0, behavior: "smooth" });
                                         }}
                                         className="text-xs px-3 py-1.5 rounded-lg bg-white border border-gray-200 font-semibold text-gray-700 hover:bg-gray-100 transition cursor-pointer shadow-2xs"
-                                        title="Diesen Tarif im Formular bearbeiten"
+                                        title={t("tariffs.edit_in_form", "Diesen Tarif im Formular bearbeiten")}
                                     >
-                                        Bearbeiten
+                                        {t("common.edit", "Bearbeiten")}
                                     </button>
                                     {historyList.length > 1 && (
                                         <button
                                             type="button"
                                             onClick={() => {
-                                                if (window.confirm(`Möchtest du den Tarifeintrag ab ${entry.valid_from} wirklich löschen?`)) {
+                                                if (window.confirm(t("tariffs.confirm_delete_history", { date: entry.valid_from, defaultValue: `Möchtest du den Tarifeintrag ab ${entry.valid_from} wirklich löschen?` }))) {
                                                     deleteMutation.mutate(entry.id);
                                                 }
                                             }}
                                             disabled={deleteMutation.isPending}
                                             className="text-xs px-2.5 py-1.5 rounded-lg bg-rose-50 border border-rose-200 font-semibold text-rose-700 hover:bg-rose-100 transition cursor-pointer"
-                                            title="Tarifeintrag löschen"
+                                            title={t("tariffs.delete_entry", "Tarifeintrag löschen")}
                                         >
-                                            Löschen
+                                            {t("common.delete", "Löschen")}
                                         </button>
                                     )}
                                 </div>

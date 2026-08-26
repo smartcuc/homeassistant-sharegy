@@ -3,8 +3,10 @@
 */
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function UserEnergyPanel() {
+    const { t } = useTranslation();
     const [power, setPower] = useState(0);
 
     useEffect(() => {
@@ -32,7 +34,7 @@ export default function UserEnergyPanel() {
 
     return (
         <div style={{ padding: "2rem" }}>
-            <h3>Dein aktueller Verbrauch</h3>
+            <h3>{t("energy_kpis.current_consumption", "Dein aktueller Verbrauch")}</h3>
             <div style={{ fontSize: "2rem" }}>{power} W</div>
         </div>
     );

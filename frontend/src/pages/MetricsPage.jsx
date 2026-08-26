@@ -247,12 +247,12 @@ export default function MetricsPage() {
                     <table className="w-full text-left text-sm">
                         <thead className="bg-gray-50 border-b text-xs font-semibold text-gray-500 uppercase tracking-wider">
                             <tr>
-                                <th className="py-3 px-4">Status</th>
-                                <th className="py-3 px-4">Gerät / Sensor</th>
-                                <th className="py-3 px-4">Messgröße</th>
-                                <th className="py-3 px-4">Ort / Raum</th>
-                                <th className="py-3 px-4 text-right">Aktueller Wert</th>
-                                <th className="py-3 px-4 text-center">Aktionen</th>
+                                <th className="py-3 px-4">{t("common.status", "Status")}</th>
+                                <th className="py-3 px-4">{t("metrics.table_device_sensor", "Gerät / Sensor")}</th>
+                                <th className="py-3 px-4">{t("metrics.table_metric", "Messgröße")}</th>
+                                <th className="py-3 px-4">{t("metrics.table_location", "Ort / Raum")}</th>
+                                <th className="py-3 px-4 text-right">{t("metrics.table_current_value", "Aktueller Wert")}</th>
+                                <th className="py-3 px-4 text-center">{t("metrics.table_actions", "Aktionen")}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">

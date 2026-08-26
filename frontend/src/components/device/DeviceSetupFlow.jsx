@@ -3,26 +3,27 @@
 */
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function DeviceSetupFlow({ device, onDone }) {
-
+    const { t } = useTranslation();
     const [type, setType] = useState(null);
     const [metrics, setMetrics] = useState([]);
     const [loading, setLoading] = useState(false);
 
     const typeOptions = [
-        ["heatpump", "Wärmepumpe"],
-        ["pv", "PV Anlage"],
-        ["battery", "Batterie"],
-        ["meter", "Zähler"],
-        ["other", "Sonstiges"]
+        ["heatpump", t("device_setup.type_heatpump", "Wärmepumpe")],
+        ["pv", t("device_setup.type_pv", "PV Anlage")],
+        ["battery", t("device_setup.type_battery", "Batterie")],
+        ["meter", t("device_setup.type_meter", "Zähler")],
+        ["other", t("device_setup.type_other", "Sonstiges")]
     ];
 
     const metricOptions = [
-        ["power", "Strom"],
-        ["temperature", "Temperatur"],
-        ["status", "Status"],
-        ["energy", "Energie"]
+        ["power", t("device_setup.metric_power", "Strom")],
+        ["temperature", t("device_setup.metric_temperature", "Temperatur")],
+        ["status", t("device_setup.metric_status", "Status")],
+        ["energy", t("device_setup.metric_energy", "Energie")]
     ];
 
     function toggleMetric(m) {
@@ -52,7 +53,7 @@ export default function DeviceSetupFlow({ device, onDone }) {
             onDone();
 
         } catch (e) {
-            alert("Fehler beim Speichern");
+            alert(t("common.error_saving", "Fehler beim Speichern"));
         } finally {
             setLoading(false);
         }
@@ -62,13 +63,13 @@ export default function DeviceSetupFlow({ device, onDone }) {
         <div className="p-6 max-w-md mx-auto">
 
             <h2 className="text-lg font-semibold mb-4">
-                Gerät einrichten
+                {t("device_setup.title", "Gerät einrichten")}
             </h2>
 
             {/* TYPE */}
             <div className="mb-6">
                 <h3 className="text-sm text-gray-500 mb-2">
-                    Was ist das für ein Gerät?
+                    {t("device_setup.type_question", "Was ist das für ein Gerät?")}
                 </h3>
 
                 <div className="space-y-2">
@@ -77,8 +78,8 @@ export default function DeviceSetupFlow({ device, onDone }) {
                             key={key}
                             onClick={() => setType(key)}
                             className={`w-full p-3 rounded border ${type === key
-                                    ? "bg-indigo-100 border-indigo-500"
-                                    : "bg-white"
+                                ? "bg-indigo-100 border-indigo-500"
+                                : "bg-white"
                                 }`}
                         >
                             {label}
@@ -90,7 +91,7 @@ export default function DeviceSetupFlow({ device, onDone }) {
             {/* METRICS */}
             <div className="mb-6">
                 <h3 className="text-sm text-gray-500 mb-2">
-                    Was misst das Gerät?
+                    {t("device_setup.metric_question", "Was misst das Gerät?")}
                 </h3>
 
                 <div className="space-y-2">
@@ -113,7 +114,7 @@ export default function DeviceSetupFlow({ device, onDone }) {
                 disabled={!type || loading}
                 className="w-full bg-indigo-600 text-white px-4 py-2 rounded disabled:opacity-50"
             >
-                {loading ? "Speichere..." : "Gerät fertig einrichten"}
+                {loading ? t("common.saving", "Speichere...") : t("device_setup.submit_btn", "Gerät fertig einrichten")}
             </button>
 
         </div>

@@ -129,9 +129,9 @@ export default function HelpDrawer() {
                     {displayedArticles.length === 0 && !contextQuery.isLoading && !searchQuery.isLoading && (
                         <div className="p-8 text-center bg-gray-50 rounded-2xl border border-gray-200 text-gray-500 text-xs space-y-2">
                             <div className="text-3xl">🔍</div>
-                            <div className="font-semibold">Keine passenden Artikel gefunden</div>
+                            <div className="font-semibold">{t("help.no_matching_articles", "Keine passenden Artikel gefunden")}</div>
                             <p className="text-[11px] text-gray-400">
-                                Versuche andere Suchbegriffe oder stöbere im vollständigen Handbuch.
+                                {t("help.try_other_search", "Versuche andere Suchbegriffe oder stöbere im vollständigen Handbuch.")}
                             </p>
                         </div>
                     )}
@@ -159,7 +159,7 @@ export default function HelpDrawer() {
                                                 setEditingArticle(article);
                                             }}
                                             className="text-[10px] px-2 py-0.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-lg transition font-medium cursor-pointer"
-                                            title="Staff: Artikel bearbeiten"
+                                            title={t("help.edit_article_staff", "Staff: Artikel bearbeiten")}
                                         >
                                             ✏️ Edit
                                         </button>

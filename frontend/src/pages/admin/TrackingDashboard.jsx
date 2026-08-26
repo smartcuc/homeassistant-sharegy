@@ -5,6 +5,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import ReactECharts from "echarts-for-react";
 import { apiFetch } from "../../api/client";
 
@@ -17,6 +18,7 @@ function formatStats(stats) {
 }
 
 export default function TrackingDashboard() {
+    const { t } = useTranslation();
     const { data, isLoading } = useQuery({
         queryKey: ["tracking"],
         queryFn: () => apiFetch("/api/tracking/stats/"),
@@ -27,13 +29,13 @@ export default function TrackingDashboard() {
     const map = formatStats(stats);
 
     const funnel = [
-        { key: "landing_view", label: "Landing Page Aufruf", icon: "🌐" },
-        { key: "signup_click", label: "Registrierung geklickt", icon: "📝" },
-        { key: "magic_link_requested", label: "Magic-Link angefordert", icon: "✉️" },
-        { key: "email_open", label: "E-Mail geöffnet", icon: "📬" },
-        { key: "magic_link_click", label: "Link angeklickt", icon: "🖱️" },
-        { key: "magic_login_success", label: "Erfolgreich eingeloggt", icon: "🔑" },
-        { key: "dashboard_open", label: "Dashboard geöffnet", icon: "🏠" },
+        { key: "landing_view", label: t("tracking.landing_view", "Landing Page Aufruf"), icon: "🌐" },
+        { key: "signup_click", label: t("tracking.signup_click", "Registrierung geklickt"), icon: "📝" },
+        { key: "magic_link_requested", label: t("tracking.magic_link_requested", "Magic-Link angefordert"), icon: "✉️" },
+        { key: "email_open", label: t("tracking.email_open", "E-Mail geöffnet"), icon: "📬" },
+        { key: "magic_link_click", label: t("tracking.magic_link_click", "Link angeklickt"), icon: "🖱️" },
+        { key: "magic_login_success", label: t("tracking.magic_login_success", "Erfolgreich eingeloggt"), icon: "🔑" },
+        { key: "dashboard_open", label: t("tracking.dashboard_open", "Dashboard geöffnet"), icon: "🏠" },
     ];
 
     const chartOption = useMemo(() => {
@@ -95,7 +97,7 @@ export default function TrackingDashboard() {
     if (isLoading) {
         return (
             <div className="p-8 max-w-7xl mx-auto flex items-center justify-center text-gray-400 text-sm animate-pulse">
-                Lade Tracking- und Eventdaten…
+                {t("common.loading", "Lade Tracking- und Eventdaten…")}
             </div>
         );
     }
@@ -109,13 +111,13 @@ export default function TrackingDashboard() {
                 <div>
                     <div className="flex items-center gap-2.5">
                         <span className="text-2xl">📈</span>
-                        <h1 className="text-2xl font-black text-gray-900 tracking-tight">Event-Tracking & Telemetrie-Analytics</h1>
+                        <h1 className="text-2xl font-black text-gray-900 tracking-tight">{t("tracking.title", "Event-Tracking & Telemetrie-Analytics")}</h1>
                         <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-50 text-purple-700 border border-purple-100">
-                            {totalEventsCount.toLocaleString()} Gesamt-Events
+                            {totalEventsCount.toLocaleString()} {t("tracking.total_events", "Gesamt-Events")}
                         </span>
                     </div>
                     <p className="text-xs text-gray-500 mt-1">
-                        Detaillierte Erfassung von Nutzerinteraktionen, Feature-Nutzung und Registrierungstrichter.
+                        {t("tracking.subtitle", "Detaillierte Erfassung von Nutzerinteraktionen, Feature-Nutzung und Registrierungstrichter.")}
                     </p>
                 </div>
 
@@ -124,7 +126,7 @@ export default function TrackingDashboard() {
                         to="/app/admin/dashboard"
                         className="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-xs rounded-xl transition flex items-center gap-1.5"
                     >
-                        <span>📊</span> Admin Dashboard
+                        <span>📊</span> {t("admin.title", "Admin Dashboard")}
                     </Link>
                     <a
                         href="/admin/"
@@ -141,9 +143,9 @@ export default function TrackingDashboard() {
             <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-xs space-y-4">
                 <div className="flex items-center justify-between">
                     <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
-                        <span>📅</span> Event-Aktivität (Letzte 7 Tage)
+                        <span>📅</span> {t("tracking.chart_title", "Event-Aktivität (Letzte 7 Tage)")}
                     </h2>
-                    <span className="text-xs text-gray-400 font-mono">Tägliche Interaktionen</span>
+                    <span className="text-xs text-gray-400 font-mono">{t("tracking.chart_subtitle", "Tägliche Interaktionen")}</span>
                 </div>
 
                 <div className="h-72 w-full">
@@ -156,7 +158,7 @@ export default function TrackingDashboard() {
                         />
                     ) : (
                         <div className="h-full flex items-center justify-center text-gray-400 text-xs">
-                            Keine Daten für die letzten 7 Tage
+                            {t("tracking.no_data_7_days", "Keine Daten für die letzten 7 Tage")}
                         </div>
                     )}
                 </div>
@@ -168,7 +170,7 @@ export default function TrackingDashboard() {
                 <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-xs space-y-4">
                     <div className="flex items-center justify-between border-b border-gray-100 pb-3">
                         <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
-                            <span>🎯</span> User Funnel Schritte
+                            <span>🎯</span> {t("tracking.funnel_title", "User Funnel Schritte")}
                         </h2>
                         <span className="text-xs text-gray-400">Step-by-Step Conversion</span>
                     </div>
@@ -206,7 +208,7 @@ export default function TrackingDashboard() {
                 <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-xs space-y-4">
                     <div className="flex items-center justify-between border-b border-gray-100 pb-3">
                         <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
-                            <span>🔥</span> Häufigste Event-Typen
+                            <span>🔥</span> {t("tracking.top_events_title", "Häufigste Event-Typen")}
                         </h2>
                         <span className="text-xs text-gray-400">Top 10 Events</span>
                     </div>

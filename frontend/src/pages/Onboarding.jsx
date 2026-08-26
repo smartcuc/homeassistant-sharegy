@@ -4,11 +4,13 @@
 
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useSettings } from "../hooks/useSettings";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "../api/client";
 
 export default function Onboarding() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const queryClient = useQueryClient();
 
@@ -91,25 +93,25 @@ export default function Onboarding() {
                 {!started && (
                     <>
                         <h1 className="text-2xl font-bold text-center mb-4">
-                            Willkommen bei Sharegy ⚡
+                            {t("onboarding.welcome_title", "Willkommen bei Sharegy ⚡")}
                         </h1>
 
                         <p className="text-gray-500 text-center mb-6">
-                            Dein persönliches Energy Dashboard ist nur einen Schritt entfernt.
+                            {t("onboarding.welcome_subtitle", "Dein persönliches Energy Dashboard ist nur einen Schritt entfernt.")}
                         </p>
 
                         <div className="space-y-3 text-gray-700 text-sm">
-                            <p>✅ Echtzeit Energieübersicht</p>
-                            <p>✅ Produktion & Verbrauch im Blick</p>
-                            <p>✅ Automatische Optimierung</p>
+                            <p>✅ {t("onboarding.feature_realtime", "Echtzeit Energieübersicht")}</p>
+                            <p>✅ {t("onboarding.feature_production_load", "Produktion & Verbrauch im Blick")}</p>
+                            <p>✅ {t("onboarding.feature_optimization", "Automatische Optimierung")}</p>
                         </div>
 
                         <button
                             onClick={() => updateStep("setup")}
                             disabled={mutation.isLoading}
-                            className="mt-8 w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg transition"
+                            className="mt-8 w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg transition font-medium"
                         >
-                            {mutation.isLoading ? "…" : "Los geht’s"}
+                            {mutation.isLoading ? "…" : t("onboarding.get_started_btn", "Los geht’s")}
                         </button>
                     </>
                 )}
@@ -117,11 +119,11 @@ export default function Onboarding() {
                 {started && needsTimezone && (
                     <>
                         <h2 className="text-xl font-semibold text-center mb-4">
-                            🌍 Regionale Einstellungen
+                            {t("onboarding.regional_settings", "🌍 Regionale Einstellungen")}
                         </h2>
 
                         <p className="text-gray-500 text-center mb-3">
-                            Wir haben folgende Zeitzone erkannt:
+                            {t("onboarding.detected_timezone_label", "Wir haben folgende Zeitzone erkannt:")}
                         </p>
 
                         <div className="text-center mb-2">
@@ -141,9 +143,7 @@ export default function Onboarding() {
                         </div>
 
                         <p className="text-xs text-gray-400 text-center mb-6">
-                            Die Erkennung basiert auf den Einstellungen
-                            deines Browsers und kann durch VPNs oder
-                            Proxys abweichen.
+                            {t("onboarding.timezone_disclaimer", "Die Erkennung basiert auf den Einstellungen deines Browsers und kann durch VPNs oder Proxys abweichen.")}
                         </p>
 
                         <div className="space-y-2">
@@ -157,9 +157,10 @@ export default function Onboarding() {
                                 text-white
                                 py-3
                                 rounded-lg
+                                font-medium
                             "
                             >
-                                Übernehmen
+                                {t("common.apply", "Übernehmen")}
                             </button>
 
                             <button
@@ -171,9 +172,10 @@ export default function Onboarding() {
                                 py-3
                                 rounded-lg
                                 hover:bg-gray-50
+                                font-medium
                            "
                             >
-                                Überspringen
+                                {t("common.skip", "Überspringen")}
                             </button>
 
                         </div>
@@ -183,11 +185,11 @@ export default function Onboarding() {
                 {started && !needsTimezone && (
                     <>
                         <h2 className="text-xl font-semibold text-center mb-4">
-                            Dein Dashboard ist bereit 🚀
+                            {t("onboarding.ready_title", "Dein Dashboard ist bereit 🚀")}
                         </h2>
 
                         <p className="text-gray-500 text-center mb-6">
-                            Starte jetzt mit deinem Energiemanagement.
+                            {t("onboarding.ready_subtitle", "Starte jetzt mit deinem Energiemanagement.")}
                         </p>
 
                         <button
@@ -200,9 +202,10 @@ export default function Onboarding() {
                             text-white
                             py-3
                             rounded-lg
+                            font-medium
                         "
                         >
-                            {mutation.isLoading ? "…" : "Zum Dashboard"}
+                            {mutation.isLoading ? "…" : t("onboarding.to_dashboard_btn", "Zum Dashboard")}
                         </button>
                     </>
                 )}

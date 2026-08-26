@@ -1,7 +1,10 @@
+import logging
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
+
+logger = logging.getLogger(__name__)
 
 
 def send_email(template, subject, user, context):
@@ -13,7 +16,7 @@ def send_email(template, subject, user, context):
     # ✅ Fallback (super wichtig!)
     brand_color = "#00C48C"
     logo_url = "https://sharegy.de/logo.png"
-    from_email = settings.DEFAULT_FROM_EMAIL
+    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "Sharegy <invite@sharegy.cloud>")
 
     if tenant:
         brand_color = tenant.primary_color or brand_color
@@ -46,21 +49,23 @@ def send_email(template, subject, user, context):
 
 def send_magic_link_email(user, link, token):
     subject = "Dein Login-Link für Sharegy"
+    tracking_url = getattr(settings, "TRACKING_BASE_URL", getattr(settings, "BACKEND_URL", "https://api.sharegy.de"))
+    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "Sharegy <invite@sharegy.cloud>")
 
     html_message = render_to_string("emails/magic_login.html", {
         "magic_link": link,
         "token": token,
-
-        # ✅ DAS IST NEU
-        "tracking_base_url": settings.TRACKING_BASE_URL,
+        "tracking_base_url": tracking_url,
     })
 
     plain_message = f"Login-Link: {link}"
 
+    logger.info("Sending magic link email to %s via %s (Host: %s:%s)", user.email, from_email, getattr(settings, "EMAIL_HOST", None), getattr(settings, "EMAIL_PORT", None))
+
     send_mail(
         subject,
         plain_message,
-        settings.DEFAULT_FROM_EMAIL,
+        from_email,
         [user.email],
         html_message=html_message,
     )

@@ -132,7 +132,7 @@ export default function EnergyDashboard() {
                                 ? "bg-indigo-600 text-white shadow-xs font-bold"
                                 : "text-gray-600 hover:text-gray-900"
                                 }`}
-                            title="Frei wählbaren Zeitraum einstellen"
+                            title={t("energy.custom_period_tooltip", "Frei wählbaren Zeitraum einstellen")}
                         >
                             <span>📅</span>
                             <span>{period === "custom" && customDates.label ? customDates.label : t("energy.custom_period", "Zeitraum...")}</span>
@@ -172,11 +172,11 @@ export default function EnergyDashboard() {
                         🏠 {t("energy.household_load", "Verbrauch")}
                     </div>
                     <div className="text-2xl font-extrabold text-gray-900 mt-1.5">
-                        {Number(kpis.house_consumption_kwh || 0).toLocaleString("de-DE", { maximumFractionDigits: 1 })}{" "}
+                        {Number(kpis.house_consumption_kwh || 0).toLocaleString(undefined, { maximumFractionDigits: 1 })}{" "}
                         <span className="text-xs font-semibold text-gray-500">kWh</span>
                     </div>
                     <div className="text-[11px] text-blue-800/80 mt-1 font-medium">
-                        Netzbezug: {Number(kpis.grid_import_kwh || 0).toFixed(1)} kWh
+                        {t("energy_kpis.grid_import_kwh", { val: Number(kpis.grid_import_kwh || 0).toFixed(1), defaultValue: `Netzbezug: ${Number(kpis.grid_import_kwh || 0).toFixed(1)} kWh` })}
                     </div>
                 </div>
 
@@ -189,7 +189,7 @@ export default function EnergyDashboard() {
                         {Number(kpis.autarky_rate || 0).toFixed(0)} %
                     </div>
                     <div className="text-[11px] text-emerald-800/80 mt-1 font-medium">
-                        Netzunabhängig
+                        {t("energy_kpis.grid_independent", "Netzunabhängig")}
                     </div>
                 </div>
 
@@ -202,7 +202,7 @@ export default function EnergyDashboard() {
                         {Number(kpis.self_consumption_rate || 0).toFixed(0)} %
                     </div>
                     <div className="text-[11px] text-purple-800/80 mt-1 font-medium">
-                        PV-Nutzungsgrad
+                        {t("energy.pv_utilization", "PV-Nutzungsgrad")}
                     </div>
                 </div>
 
@@ -213,10 +213,10 @@ export default function EnergyDashboard() {
                     </div>
                     <div className="text-2xl font-extrabold text-indigo-900 mt-1.5">
                         {Number(kpis.net_benefit_eur || 0) >= 0 ? "+" : ""}
-                        {Number(kpis.net_benefit_eur || 0).toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
+                        {Number(kpis.net_benefit_eur || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
                     </div>
                     <div className="text-[11px] text-indigo-800/80 mt-1 font-medium truncate" title={kpis.tariff_label}>
-                        Ersparnis: {Number(kpis.savings_eur || 0).toFixed(2)} € · <span className="font-semibold">{kpis.tariff_label || "Standard"}</span>
+                        {t("energy_kpis.savings_label", { val: Number(kpis.savings_eur || 0).toFixed(2), defaultValue: `Ersparnis: ${Number(kpis.savings_eur || 0).toFixed(2)} €` })} · <span className="font-semibold">{kpis.tariff_label || "Standard"}</span>
                     </div>
                 </div>
 
@@ -226,11 +226,11 @@ export default function EnergyDashboard() {
                         🌿 {t("energy.co2_saved", "CO₂ vermieden")}
                     </div>
                     <div className="text-2xl font-extrabold text-teal-900 mt-1.5">
-                        {Number(kpis.co2_saved_kg || 0).toLocaleString("de-DE", { maximumFractionDigits: 1 })}{" "}
+                        {Number(kpis.co2_saved_kg || 0).toLocaleString(undefined, { maximumFractionDigits: 1 })}{" "}
                         <span className="text-xs font-semibold text-gray-500">kg</span>
                     </div>
                     <div className="text-[11px] text-teal-800/80 mt-1 font-medium">
-                        Ökobilanz
+                        {t("energy_kpis.eco_balance", "Ökobilanz")}
                     </div>
                 </div>
             </div>
@@ -242,7 +242,7 @@ export default function EnergyDashboard() {
                 <div className="flex items-center gap-2.5">
                     <span className="text-xl p-2 bg-white rounded-xl shadow-2xs">⚡</span>
                     <div>
-                        <div className="text-[10px] uppercase font-bold text-gray-500">PV Spitzenleistung</div>
+                        <div className="text-[10px] uppercase font-bold text-gray-500">{t("energy.pv_peak_power", "PV Spitzenleistung")}</div>
                         <div className="text-sm font-black text-gray-900 font-mono">{kpis.peak_pv_kw || 0} kW</div>
                     </div>
                 </div>
@@ -250,7 +250,7 @@ export default function EnergyDashboard() {
                 <div className="flex items-center gap-2.5">
                     <span className="text-xl p-2 bg-white rounded-xl shadow-2xs">📈</span>
                     <div>
-                        <div className="text-[10px] uppercase font-bold text-gray-500">Max. Lastspitze</div>
+                        <div className="text-[10px] uppercase font-bold text-gray-500">{t("energy.max_load_peak", "Max. Lastspitze")}</div>
                         <div className="text-sm font-black text-gray-900 font-mono">{kpis.peak_load_kw || 0} kW</div>
                     </div>
                 </div>
@@ -258,7 +258,7 @@ export default function EnergyDashboard() {
                 <div className="flex items-center gap-2.5">
                     <span className="text-xl p-2 bg-white rounded-xl shadow-2xs">☀️</span>
                     <div>
-                        <div className="text-[10px] uppercase font-bold text-gray-500">Ø Erzeugung / Tag</div>
+                        <div className="text-[10px] uppercase font-bold text-gray-500">{t("energy_kpis.avg_gen_day", "Ø Erzeugung / Tag")}</div>
                         <div className="text-sm font-black text-gray-900 font-mono">{kpis.daily_avg_generation_kwh || 0} kWh</div>
                     </div>
                 </div>
@@ -266,7 +266,7 @@ export default function EnergyDashboard() {
                 <div className="flex items-center gap-2.5">
                     <span className="text-xl p-2 bg-white rounded-xl shadow-2xs">🏠</span>
                     <div>
-                        <div className="text-[10px] uppercase font-bold text-gray-500">Ø Bedarf / Tag</div>
+                        <div className="text-[10px] uppercase font-bold text-gray-500">{t("energy_kpis.avg_load_day", "Ø Bedarf / Tag")}</div>
                         <div className="text-sm font-black text-gray-900 font-mono">{kpis.daily_avg_consumption_kwh || 0} kWh</div>
                     </div>
                 </div>
@@ -274,7 +274,7 @@ export default function EnergyDashboard() {
                 <div className="flex items-center gap-2.5">
                     <span className="text-xl p-2 bg-white rounded-xl shadow-2xs">🚗</span>
                     <div>
-                        <div className="text-[10px] uppercase font-bold text-gray-500">Solar-Fahrleistung</div>
+                        <div className="text-[10px] uppercase font-bold text-gray-500">{t("energy.ev_range_km", "Solar-Fahrleistung")}</div>
                         <div className="text-sm font-black text-emerald-700 font-mono">+{kpis.ev_km_equivalent || 0} km</div>
                     </div>
                 </div>
@@ -282,8 +282,8 @@ export default function EnergyDashboard() {
                 <div className="flex items-center gap-2.5">
                     <span className="text-xl p-2 bg-white rounded-xl shadow-2xs">🌳</span>
                     <div>
-                        <div className="text-[10px] uppercase font-bold text-gray-500">Baum-Kompensation</div>
-                        <div className="text-sm font-black text-teal-700 font-mono">{kpis.trees_equivalent || 0} Bäume</div>
+                        <div className="text-[10px] uppercase font-bold text-gray-500">{t("energy.tree_offset", "Baum-Kompensation")}</div>
+                        <div className="text-sm font-black text-teal-700 font-mono">{t("energy_kpis.trees_count", { count: kpis.trees_equivalent || 0, defaultValue: `${kpis.trees_equivalent || 0} Bäume` })}</div>
                     </div>
                 </div>
             </div>
@@ -342,7 +342,7 @@ export default function EnergyDashboard() {
                                 ? "bg-slate-50/70 border-dashed border-slate-300 hover:border-slate-400 hover:shadow-xs"
                                 : "bg-white border-gray-200 hover:border-indigo-300 hover:shadow-md"
                                 }`}
-                            title="Klick: Historische Zeitreihen & Trends öffnen"
+                            title={t("submeters.click_to_open_trends", "Klick: Historische Zeitreihen & Trends öffnen")}
                         >
                             {/* Meter Header */}
                             <div className="flex items-center justify-between gap-2">
@@ -369,10 +369,10 @@ export default function EnergyDashboard() {
                             <div className="mt-4 flex items-baseline justify-between border-b border-gray-100 pb-3">
                                 <div>
                                     <div className="text-2xl font-black text-gray-900 font-mono">
-                                        {Number(meter.consumption_kwh).toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}{" "}
+                                        {Number(meter.consumption_kwh).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}{" "}
                                         <span className="text-xs font-normal text-gray-500">kWh</span>
                                     </div>
-                                    <div className="text-[11px] text-gray-400">Verbrauch im Zeitraum</div>
+                                    <div className="text-[11px] text-gray-400">{t("submeters.period_consumption", "Verbrauch im Zeitraum")}</div>
                                 </div>
                                 <div className="text-right">
                                     <div className="text-sm font-bold text-gray-800 font-mono">
@@ -457,7 +457,7 @@ export default function EnergyDashboard() {
                                 ))}
                             </svg>
                             <div className="absolute text-center">
-                                <div className="text-xs text-gray-400 font-semibold uppercase">Gesamt</div>
+                                <div className="text-xs text-gray-400 font-semibold uppercase">{t("energy_kpis.total_uppercase", "Gesamt")}</div>
                                 <div className="text-base font-black text-gray-900 font-mono">
                                     {Number(kpis.house_consumption_kwh || 0).toFixed(1)}
                                 </div>
@@ -497,18 +497,18 @@ export default function EnergyDashboard() {
                         {/* Erzeugung Matrix */}
                         <div className="p-3.5 bg-amber-50/60 border border-amber-100 rounded-xl space-y-2">
                             <div className="font-bold text-amber-900 border-b border-amber-200/60 pb-1">
-                                ☀️ PV-Erzeugung ({Number(kpis.pv_generation_kwh || 0).toFixed(1)} kWh)
+                                ☀️ {t("energy.pv", "PV-Erzeugung")} ({Number(kpis.pv_generation_kwh || 0).toFixed(1)} kWh)
                             </div>
                             <div className="flex justify-between text-gray-700">
-                                <span>🏠 Direktverbrauch:</span>
+                                <span>🏠 {t("energy.direct_consumption", "Direktverbrauch")}:</span>
                                 <span className="font-mono font-bold">{Number(kpis.direct_consumption_kwh || 0).toFixed(1)} kWh</span>
                             </div>
                             <div className="flex justify-between text-gray-700">
-                                <span>🔋 In Batterie:</span>
+                                <span>🔋 {t("energy.into_battery", "In Batterie")}:</span>
                                 <span className="font-mono font-bold">{Number(kpis.battery_charge_kwh || 0).toFixed(1)} kWh</span>
                             </div>
                             <div className="flex justify-between text-gray-700">
-                                <span>🔌 Netzeinspeisung:</span>
+                                <span>🔌 {t("energy.grid_export", "Netzeinspeisung")}:</span>
                                 <span className="font-mono font-bold">{Number(kpis.grid_export_kwh || 0).toFixed(1)} kWh</span>
                             </div>
                         </div>
@@ -516,18 +516,18 @@ export default function EnergyDashboard() {
                         {/* Verbrauch Matrix */}
                         <div className="p-3.5 bg-blue-50/60 border border-blue-100 rounded-xl space-y-2">
                             <div className="font-bold text-blue-900 border-b border-blue-200/60 pb-1">
-                                🏠 Hausbedarf ({Number(kpis.house_consumption_kwh || 0).toFixed(1)} kWh)
+                                🏠 {t("energy.load", "Hausbedarf")} ({Number(kpis.house_consumption_kwh || 0).toFixed(1)} kWh)
                             </div>
                             <div className="flex justify-between text-gray-700">
-                                <span>☀️ Aus PV-Direkt:</span>
+                                <span>☀️ {t("energy.from_pv_direct", "Aus PV-Direkt")}:</span>
                                 <span className="font-mono font-bold">{Number(kpis.direct_consumption_kwh || 0).toFixed(1)} kWh</span>
                             </div>
                             <div className="flex justify-between text-gray-700">
-                                <span>🔋 Aus Batterie:</span>
+                                <span>🔋 {t("energy.from_battery", "Aus Batterie")}:</span>
                                 <span className="font-mono font-bold">{Number(kpis.battery_discharge_kwh || 0).toFixed(1)} kWh</span>
                             </div>
                             <div className="flex justify-between text-gray-700">
-                                <span>🔌 Aus Stromnetz:</span>
+                                <span>🔌 {t("energy.from_grid", "Aus Stromnetz")}:</span>
                                 <span className="font-mono font-bold">{Number(kpis.grid_import_kwh || 0).toFixed(1)} kWh</span>
                             </div>
                         </div>
@@ -535,11 +535,11 @@ export default function EnergyDashboard() {
 
                     {/* Monetary summary strip */}
                     <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between text-xs">
-                        <span className="text-gray-600 font-medium">Kostenbilanz im Zeitraum:</span>
+                        <span className="text-gray-600 font-medium">{t("energy.cost_summary_period", "Kostenbilanz im Zeitraum:")}</span>
                         <div className="flex items-center gap-4 font-mono font-semibold">
-                            <span className="text-emerald-700">+{Number(kpis.savings_eur || 0).toFixed(2)} € Ersparnis</span>
-                            <span className="text-amber-700">+{Number(kpis.feed_in_revenue_eur || 0).toFixed(2)} € Einspeisung</span>
-                            <span className="text-rose-700">-{Number(kpis.grid_costs_eur || 0).toFixed(2)} € Netzkosten</span>
+                            <span className="text-emerald-700">+{Number(kpis.savings_eur || 0).toFixed(2)} € {t("energy.savings_short", "Ersparnis")}</span>
+                            <span className="text-amber-700">{t("energy_kpis.feed_in_rev", { val: Number(kpis.feed_in_revenue_eur || 0).toFixed(2), defaultValue: `+${Number(kpis.feed_in_revenue_eur || 0).toFixed(2)} € Einspeisung` })}</span>
+                            <span className="text-rose-700">-{Number(kpis.grid_costs_eur || 0).toFixed(2)} € {t("energy.grid_costs_short", "Netzkosten")}</span>
                         </div>
                     </div>
                 </div>
@@ -555,10 +555,10 @@ export default function EnergyDashboard() {
                     </h3>
                     <div className="flex items-center gap-4 text-xs font-semibold">
                         <div className="flex items-center gap-1.5 text-amber-700">
-                            <span className="w-3 h-3 rounded-xs bg-amber-400" /> ☀️ Erzeugung (kWh)
+                            <span className="w-3 h-3 rounded-xs bg-amber-400" /> ☀️ {t("energy.pv_kwh", "Erzeugung (kWh)")}
                         </div>
                         <div className="flex items-center gap-1.5 text-blue-700">
-                            <span className="w-3 h-3 rounded-xs bg-blue-500" /> 🏠 Verbrauch (kWh)
+                            <span className="w-3 h-3 rounded-xs bg-blue-500" /> {t("energy_kpis.load_kwh", "🏠 Verbrauch (kWh)")}
                         </div>
                     </div>
                 </div>
@@ -577,13 +577,13 @@ export default function EnergyDashboard() {
                                         <div
                                             className="w-1/2 max-w-[24px] bg-amber-400 rounded-t-sm transition-all duration-300 group-hover:bg-amber-500"
                                             style={{ height: `${Math.max(pvHeight, 2)}%` }}
-                                            title={`Erzeugung: ${pt.pv} kWh`}
+                                            title={`${t("energy.production", "Erzeugung")}: ${pt.pv} kWh`}
                                         />
                                         {/* Load Bar */}
                                         <div
                                             className="w-1/2 max-w-[24px] bg-blue-500 rounded-t-sm transition-all duration-300 group-hover:bg-blue-600"
                                             style={{ height: `${Math.max(loadHeight, 2)}%` }}
-                                            title={`Verbrauch: ${pt.load} kWh`}
+                                            title={`${t("energy.consumption", "Verbrauch")}: ${pt.load} kWh`}
                                         />
                                     </div>
                                     <span className="text-[10px] text-gray-400 font-mono mt-1 whitespace-nowrap truncate w-full text-center">

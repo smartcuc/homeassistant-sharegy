@@ -82,7 +82,7 @@ export default function HelpArticleDetailPage() {
                         onClick={() => setIsEditing(true)}
                         className="text-xs px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 rounded-xl font-semibold flex items-center gap-1.5 transition cursor-pointer shadow-2xs"
                     >
-                        <span>✏️</span> Artikel bearbeiten (Staff)
+                        <span>✏️</span> {t("help.edit_article_staff_btn", "Artikel bearbeiten (Staff)")}
                     </button>
                 )}
             </div>

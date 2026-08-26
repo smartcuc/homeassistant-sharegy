@@ -3,6 +3,7 @@
 */
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import ReactECharts from "echarts-for-react";
 import { apiFetch } from "../../../api/client";
 
@@ -10,6 +11,7 @@ export default function SpotPriceModal({
     open,
     onClose,
 }) {
+    const { t } = useTranslation();
     const [range, setRange] = useState("2d");
     const [zoomRange, setZoomRange] = useState({ start: 0, end: 100 });
     const [isZoomed, setIsZoomed] = useState(false); // ✅ FIX: Fehlender State hinzugefügt
@@ -153,15 +155,15 @@ export default function SpotPriceModal({
                         <div>
 
                             <div className="text-xs text-gray-500">
-                                Spotmarkt analysieren
+                                {t("spot_price.analyze_title", "Spotmarkt analysieren")}
                             </div>
 
                             <h3 className="font-semibold text-lg text-gray-900">
-                                💰 EPEX Spotpreise DE-LU
+                                💰 {t("spot_price.epex_title", "EPEX Spotpreise DE-LU")}
                             </h3>
 
                             <div className="text-xs text-gray-500">
-                                Datenquelle: Energy Charts
+                                {t("spot_price.data_source", "Datenquelle: Energy Charts")}
                             </div>
 
                         </div>
@@ -171,10 +173,10 @@ export default function SpotPriceModal({
                             <div className="flex rounded-lg overflow-hidden border shadow-sm bg-white">
 
                                 {[
-                                    ["2d", "Heute + Morgen"],
-                                    ["today", "Heute"],
-                                    ["tomorrow", "Morgen"],
-                                    ["5d", "5 Tage"],
+                                    ["2d", t("spot_price.range_2d", "Heute + Morgen")],
+                                    ["today", t("spot_price.range_today", "Heute")],
+                                    ["tomorrow", t("spot_price.range_tomorrow", "Morgen")],
+                                    ["5d", t("spot_price.range_5d", "5 Tage")],
                                 ].map(([value, label]) => (
 
                                     <button
@@ -216,7 +218,7 @@ export default function SpotPriceModal({
                                     style={{
                                         backgroundColor: "#f59e0b"
                                     }}
-                                    title="Kommt später 😉"
+                                    title="Coming soon"
                                 >
                                     {label}
                                 </button>
@@ -239,7 +241,7 @@ export default function SpotPriceModal({
                                         transition-colors
                                     "
                                 >
-                                    Reset
+                                    {t("common.reset", "Reset")}
                                 </button>
                             )}
 
@@ -262,7 +264,7 @@ export default function SpotPriceModal({
 
                                 <div className="bg-white/70 rounded-lg p-3 min-h-[64px] flex flex-col justify-center shadow-sm">
                                     <div className="text-xs text-gray-500">
-                                        Spotpreis
+                                        {t("spot_price.spot_price", "Spotpreis")}
                                     </div>
                                     <div className="font-semibold text-amber-600">
                                         {(data.current_spot ?? 0).toFixed(2)} ct
@@ -271,7 +273,7 @@ export default function SpotPriceModal({
 
                                 <div className="bg-white/70 rounded-lg p-3 min-h-[64px] flex flex-col justify-center shadow-sm">
                                     <div className="text-xs text-gray-500">
-                                        Endpreis
+                                        {t("spot_price.effective_price", "Endpreis")}
                                     </div>
                                     <div className="font-semibold text-red-600">
                                         {(data.current_effective ?? 0).toFixed(2)} ct
@@ -279,21 +281,21 @@ export default function SpotPriceModal({
                                 </div>
 
                                 <div className="bg-white/70 rounded-lg p-3 min-h-[64px] flex flex-col justify-center shadow-sm">
-                                    <div className="text-xs text-gray-500">Minimum</div>
+                                    <div className="text-xs text-gray-500">{t("spot_price.minimum", "Minimum")}</div>
                                     <div className="font-semibold text-green-600">
                                         {liveStats.min.toFixed(2)} ct
                                     </div>
                                 </div>
 
                                 <div className="bg-white/70 rounded-lg p-3 min-h-[64px] flex flex-col justify-center shadow-sm">
-                                    <div className="text-xs text-gray-500">Maximum</div>
+                                    <div className="text-xs text-gray-500">{t("spot_price.maximum", "Maximum")}</div>
                                     <div className="font-semibold text-red-600">
                                         {liveStats.max.toFixed(2)} ct
                                     </div>
                                 </div>
 
                                 <div className="bg-white/70 rounded-lg p-3 min-h-[64px] flex flex-col justify-center shadow-sm">
-                                    <div className="text-xs text-gray-500">Durchschnitt</div>
+                                    <div className="text-xs text-gray-500">{t("spot_price.average", "Durchschnitt")}</div>
                                     <div className="font-semibold text-gray-700">
                                         {liveStats.avg.toFixed(2)} ct
                                     </div>

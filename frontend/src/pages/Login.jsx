@@ -2,9 +2,11 @@
 # src/pages/Login.jsx
 */
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { apiFetch } from "../api/client";
 
 export default function Login() {
+    const { t } = useTranslation();
     const [email, setEmail] = useState("");
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState("");
@@ -22,7 +24,7 @@ export default function Login() {
                 body: JSON.stringify({ email }),
             });
 
-            setStatus("✅ Check deine E-Mails – dein Login-Link ist unterwegs!");
+            setStatus(t("auth.magic_link_sent", "✅ Check deine E-Mails – dein Login-Link ist unterwegs!"));
             setEmail("");
 
             // ✅ cooldown starten (15 Sekunden)
@@ -39,12 +41,14 @@ export default function Login() {
             }, 1000);
 
         } catch (err) {
-            if (err?.type === "validation") {
-                // ✅ Backend Fehler anzeigen
-                setStatus(`❌ ${err.data?.error || "Ungültige Eingabe"}`);
+            if (err?.type === "validation" && err.data?.error) {
+                // ✅ Backend Validierungsfehler anzeigen
+                setStatus(`❌ ${err.data.error}`);
+            } else if (err?.message) {
+                setStatus(`❌ ${err.message}`);
             } else {
                 // ✅ generischer Fehler
-                setStatus("❌ Fehler beim Senden. Bitte erneut versuchen.");
+                setStatus(t("auth.send_error", "❌ Fehler beim Senden. Bitte erneut versuchen."));
             }
         }
 
@@ -62,17 +66,17 @@ export default function Login() {
                         Sharegy ⚡
                     </h1>
                     <p className="text-sm text-gray-500">
-                        Energie verstehen & intelligent nutzen
+                        {t("auth.app_tagline", "Energie verstehen & intelligent nutzen")}
                     </p>
                 </div>
 
                 {/* TITLE */}
                 <h2 className="text-xl font-semibold text-center mb-2">
-                    Willkommen zurück 👋
+                    {t("auth.welcome_back", "Willkommen zurück 👋")}
                 </h2>
 
                 <p className="text-gray-500 text-sm text-center mb-6">
-                    Gib deine E-Mail ein – wir schicken dir einen sicheren Login-Link.
+                    {t("auth.enter_email_desc", "Gib deine E-Mail ein – wir schicken dir einen sicheren Login-Link.")}
                 </p>
 
                 {/* INPUT */}
@@ -95,10 +99,10 @@ export default function Login() {
                     className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-medium transition transform hover:scale-[1.02] disabled:opacity-50"
                 >
                     {loading
-                        ? "Sende Login-Link…"
+                        ? t("auth.sending_link", "Sende Login-Link…")
                         : cooldown > 0
-                            ? `Erneut senden in ${cooldown}s`
-                            : "Login-Link erhalten"}
+                            ? t("auth.resend_in", { sec: cooldown, defaultValue: `Erneut senden in ${cooldown}s` })
+                            : t("auth.get_link_btn", "Login-Link erhalten")}
                 </button>
 
                 {/* STATUS */}
@@ -111,18 +115,18 @@ export default function Login() {
                 {/* SPAM HINWEIS ✅ */}
                 {status && (
                     <p className="mt-2 text-xs text-center text-gray-400">
-                        Falls du nichts siehst: prüfe bitte auch deinen Spam-Ordner 📬
+                        {t("auth.check_spam", "Falls du nichts siehst: prüfe bitte auch deinen Spam-Ordner 📬")}
                     </p>
                 )}
 
                 {/* FOOTER */}
                 <div className="mt-6 text-xs text-gray-400 text-center">
-                    🔒 Kein Passwort nötig – sicher per Magic Link
+                    {t("auth.no_password_needed", "🔒 Kein Passwort nötig – sicher per Magic Link")}
                 </div>
 
                 <div className="mt-6 text-sm text-center">
                     <a href="/" className="text-indigo-500 hover:underline">
-                        ← Zurück zur Startseite
+                        {t("auth.back_to_home", "← Zurück zur Startseite")}
                     </a>
                 </div>
 

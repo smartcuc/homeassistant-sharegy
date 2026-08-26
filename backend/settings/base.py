@@ -34,7 +34,9 @@ allowed_hosts_raw = os.getenv("ALLOWED_HOSTS", "*")
 ALLOWED_HOSTS = [h.strip() for h in allowed_hosts_raw.split(",") if h.strip()]
 
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+FRONTEND_BASE_URL = FRONTEND_URL
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
+TRACKING_BASE_URL = os.getenv("TRACKING_BASE_URL", BACKEND_URL)
 
 
 # =============================
@@ -104,12 +106,16 @@ else:
 # Email
 # =============================
 
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-
+EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend")
 EMAIL_HOST = os.getenv("EMAIL_HOST")
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", 465))
-EMAIL_USE_SSL = True
-EMAIL_USE_TLS = False
+
+# Intelligente SSL/TLS Erkennung mit Env-Override
+_default_ssl = "True" if EMAIL_PORT == 465 else "False"
+_default_tls = "True" if EMAIL_PORT == 587 else "False"
+EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", _default_ssl).lower() == "true"
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", _default_tls).lower() == "true"
+EMAIL_TIMEOUT = int(os.getenv("EMAIL_TIMEOUT", 10))
 
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")

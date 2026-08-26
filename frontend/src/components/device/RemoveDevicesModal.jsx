@@ -134,17 +134,8 @@ export default function RemoveDevicesModal({
 
         const confirmed = window.confirm(
             hasOnlineDevice
-
-                ? `⚠ Mindestens ein ausgewähltes Gerät ist aktuell online.
-
-        Wenn MQTT, Home Assistant oder ioBroker weiterhin Daten senden,
-        kann das Gerät automatisch erneut erkannt werden.
-
-        Entfernen Sie nach Möglichkeit zuerst die Datenquelle.
-
-        Trotzdem in den Papierkorb verschieben?`
-
-                : `${selectedIds.length} Gerät(e) in den Papierkorb verschieben?`
+                ? t("device_remove.online_warning", "⚠ Mindestens ein ausgewähltes Gerät ist aktuell online.\n\nWenn MQTT, Home Assistant oder ioBroker weiterhin Daten senden, kann das Gerät automatisch erneut erkannt werden.\n\nEntfernen Sie nach Möglichkeit zuerst die Datenquelle.\n\nTrotzdem in den Papierkorb verschieben?")
+                : t("device_remove.confirm_trash", { count: selectedIds.length, defaultValue: `${selectedIds.length} Gerät(e) in den Papierkorb verschieben?` })
         );
 
         if (!confirmed) {
@@ -181,7 +172,7 @@ export default function RemoveDevicesModal({
 
             console.error(err);
 
-            alert("Fehler beim Entfernen.");
+            alert(t("device_remove.error", "Fehler beim Entfernen."));
         }
     }
 

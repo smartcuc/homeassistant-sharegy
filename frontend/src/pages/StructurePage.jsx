@@ -190,7 +190,7 @@ export default function StructurePage() {
                                     <span className="text-lg">🏢</span>
                                     <h2 className="text-base font-bold text-gray-900">{floor.name}</h2>
                                     <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-semibold">
-                                        {totalFloorDevices} {totalFloorDevices === 1 ? "Gerät" : "Geräte"}
+                                        {t("structure.devices_count", { count: totalFloorDevices, defaultValue: `${totalFloorDevices} ${totalFloorDevices === 1 ? "Gerät" : "Geräte"}` })}
                                     </span>
                                 </div>
                             </div>
@@ -208,7 +208,7 @@ export default function StructurePage() {
                                                 <span>{room.name}</span>
                                             </div>
                                             <span className="text-xs text-gray-400 font-medium">
-                                                {room.devices.length} {room.devices.length === 1 ? "Gerät" : "Geräte"}
+                                                {t("structure.devices_count", { count: room.devices.length, defaultValue: `${room.devices.length} ${room.devices.length === 1 ? "Gerät" : "Geräte"}` })}
                                             </span>
                                         </div>
 

@@ -23,9 +23,9 @@ export default function EnergyOptimizerCard() {
     const timeline = data.timeline || [];
 
     const durationTabs = [
-        { key: "1h", label: "1 Stunde", icon: "🧺", desc: "Waschmaschine, Geschirrspüler" },
-        { key: "2h", label: "2 Stunden", icon: "♨️", desc: "Wärmepumpe, Wäschetrockner" },
-        { key: "4h", label: "4 Stunden", icon: "🚗", desc: "Wallbox (E-Auto), Speicher" },
+        { key: "1h", label: t("optimizer.duration_1h", "1 Stunde"), icon: "🧺", desc: t("optimizer.duration_1h_desc", "Waschmaschine, Geschirrspüler") },
+        { key: "2h", label: t("optimizer.duration_2h", "2 Stunden"), icon: "♨️", desc: t("optimizer.duration_2h_desc", "Wärmepumpe, Wäschetrockner") },
+        { key: "4h", label: t("optimizer.duration_4h", "4 Stunden"), icon: "🚗", desc: t("optimizer.duration_4h_desc", "Wallbox (E-Auto), Speicher") },
     ];
 
     if (optimizerQuery.isLoading) {
@@ -61,7 +61,7 @@ export default function EnergyOptimizerCard() {
                             {t("energy.optimizer_title", "Smart Energy Optimizer")}
                         </h2>
                         <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                            Live KI-Fahrplan
+                            {t("energy.live_ai_plan", "Live KI-Fahrplan")}
                         </span>
                     </div>
                     <p className="text-xs text-indigo-200/70 mt-1">
@@ -76,8 +76,8 @@ export default function EnergyOptimizerCard() {
                             key={tab.key}
                             onClick={() => setDuration(tab.key)}
                             className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer ${duration === tab.key
-                                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/40"
-                                    : "text-indigo-200/70 hover:text-white hover:bg-slate-700/50"
+                                ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/40"
+                                : "text-indigo-200/70 hover:text-white hover:bg-slate-700/50"
                                 }`}
                         >
                             <span>{tab.icon}</span>
@@ -100,7 +100,7 @@ export default function EnergyOptimizerCard() {
                             🏆 {t("energy.best_slot", "Beste Zeit")} ({duration})
                         </span>
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500 text-slate-950">
-                            {best.source === "pv_surplus" ? "☀️ 100% Solar" : "⚡ Börsentief"}
+                            {best.source === "pv_surplus" ? t("optimizer.solar_100", "☀️ 100% Solar") : t("optimizer.market_low", "⚡ Börsentief")}
                         </span>
                     </div>
 
@@ -114,7 +114,7 @@ export default function EnergyOptimizerCard() {
                     </div>
 
                     <div className="pt-2 border-t border-emerald-800/40 flex items-center justify-between text-xs">
-                        <span className="text-emerald-300/80">Ersparnis vs. Peak:</span>
+                        <span className="text-emerald-300/80">{t("optimizer.savings_vs_peak", "Ersparnis vs. Peak:")}</span>
                         <span className="font-mono font-bold text-emerald-300">
                             +{Number(currentWindow.savings_eur || 0).toFixed(2)} €
                         </span>
@@ -129,7 +129,7 @@ export default function EnergyOptimizerCard() {
                                 🌙 {t("energy.night_slot", "Nacht-Alternative")}
                             </span>
                             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                                Windstrom
+                                {t("energy.wind_power", "Windstrom")}
                             </span>
                         </div>
 
@@ -143,12 +143,12 @@ export default function EnergyOptimizerCard() {
                         </div>
 
                         <div className="pt-2 border-t border-indigo-800/40 text-[11px] text-indigo-300/70">
-                            Ideal für automatisches Laden über Nacht bis zur Abfahrt
+                            {t("optimizer.night_ideal", "Ideal für automatisches Laden über Nacht bis zur Abfahrt")}
                         </div>
                     </div>
                 ) : (
                     <div className="p-5 rounded-2xl bg-slate-800/40 border border-slate-700/50 space-y-3 flex items-center justify-center text-xs text-gray-400">
-                        Kein separates Nachtfenster erforderlich
+                        {t("optimizer.night_none", "Kein separates Nachtfenster erforderlich")}
                     </div>
                 )}
 
@@ -160,7 +160,7 @@ export default function EnergyOptimizerCard() {
                                 ⚠️ {t("energy.worst_slot", "Spitzenzeit (Vermeiden)")}
                             </span>
                             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">
-                                Abendpeak
+                                {t("energy.evening_peak", "Abendpeak")}
                             </span>
                         </div>
 
@@ -174,7 +174,7 @@ export default function EnergyOptimizerCard() {
                         </div>
 
                         <div className="pt-2 border-t border-rose-800/40 text-[11px] text-rose-300/70">
-                            Flexible Lasten in dieser Zeitspanne pausieren oder sperren
+                            {t("optimizer.pause_loads", "Flexible Lasten in dieser Zeitspanne pausieren oder sperren")}
                         </div>
                     </div>
                 )}
@@ -190,13 +190,13 @@ export default function EnergyOptimizerCard() {
                     </div>
                     <div className="flex items-center gap-3 text-[11px] font-medium">
                         <span className="flex items-center gap-1 text-emerald-400">
-                            <span className="w-2.5 h-2.5 rounded-xs bg-emerald-400 inline-block" /> Günstig / Solar
+                            <span className="w-2.5 h-2.5 rounded-xs bg-emerald-400 inline-block" /> {t("optimizer.cheap_solar", "Günstig / Solar")}
                         </span>
                         <span className="flex items-center gap-1 text-amber-400">
-                            <span className="w-2.5 h-2.5 rounded-xs bg-amber-400 inline-block" /> Akzeptabel
+                            <span className="w-2.5 h-2.5 rounded-xs bg-amber-400 inline-block" /> {t("energy.acceptable", "Akzeptabel")}
                         </span>
                         <span className="flex items-center gap-1 text-rose-400">
-                            <span className="w-2.5 h-2.5 rounded-xs bg-rose-500 inline-block" /> Teuer
+                            <span className="w-2.5 h-2.5 rounded-xs bg-rose-500 inline-block" /> {t("energy.expensive", "Teuer")}
                         </span>
                     </div>
                 </div>
@@ -249,11 +249,11 @@ export default function EnergyOptimizerCard() {
                     </div>
 
                     <div className="mt-2.5 flex items-center justify-between text-[11px] text-indigo-300/60 font-medium">
-                        <span>Jetzt ({timeline[0]?.time_label || "00:00"})</span>
+                        <span>{t("energy.now", "Jetzt")} ({timeline[0]?.time_label || "00:00"})</span>
                         <span className="text-emerald-300 font-semibold">
-                            Empfohlenes {duration}-Fenster: {best.start_label} – {best.end_label}
+                            {t("optimizer.recommended_window", { duration, start: best.start_label, end: best.end_label, defaultValue: `Empfohlenes ${duration}-Fenster: ${best.start_label} – ${best.end_label}` })}
                         </span>
-                        <span>In 24 Stunden</span>
+                        <span>{t("optimizer.in_24h", "In 24 Stunden")}</span>
                     </div>
                 </div>
             </div>
@@ -265,16 +265,16 @@ export default function EnergyOptimizerCard() {
                 <div className="flex items-center gap-2.5">
                     <span className="text-2xl p-2 bg-indigo-800/50 rounded-xl">{deviceInfo.icon}</span>
                     <div>
-                        <div className="font-bold text-white">Empfohlenes Einsatzszenario für {duration}:</div>
-                        <div className="text-indigo-200/80">{deviceInfo.device_name} (ca. {currentWindow.total_kwh_typical} kWh Energiebedarf)</div>
+                        <div className="font-bold text-white">{t("optimizer.recommended_for", { duration, defaultValue: `Empfohlenes Einsatzszenario für ${duration}:` })}</div>
+                        <div className="text-indigo-200/80">{deviceInfo.device_name} ({t("optimizer.approx_demand", { kwh: currentWindow.total_kwh_typical, defaultValue: `ca. ${currentWindow.total_kwh_typical} kWh Energiebedarf` })})</div>
                     </div>
                 </div>
 
                 <div className="text-right self-end sm:self-auto">
                     <div className="text-emerald-300 font-mono font-bold text-sm">
-                        +{Number(currentWindow.savings_eur || 0).toFixed(2)} € Ersparnis
+                        {t("optimizer.savings_add", { val: Number(currentWindow.savings_eur || 0).toFixed(2), defaultValue: `+${Number(currentWindow.savings_eur || 0).toFixed(2)} € Ersparnis` })}
                     </div>
-                    <div className="text-[10px] text-indigo-300/60">pro Durchlauf / Ladezyklus</div>
+                    <div className="text-[10px] text-indigo-300/60">{t("optimizer.per_run", "pro Durchlauf / Ladezyklus")}</div>
                 </div>
             </div>
         </div>

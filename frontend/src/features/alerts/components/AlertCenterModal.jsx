@@ -46,12 +46,12 @@ export default function AlertCenterModal({ isOpen, onClose }) {
     const getSeverityBadge = (sev) => {
         switch (sev) {
             case "critical":
-                return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-700 border border-rose-200">🔴 Kritisch</span>;
+                return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-700 border border-rose-200">🔴 {t("alerts.severity_critical", "Kritisch")}</span>;
             case "warning":
-                return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">🟡 Warnung</span>;
+                return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">🟡 {t("alerts.severity_warning", "Warnung")}</span>;
             case "info":
             default:
-                return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">🟢 Spar-Tipp</span>;
+                return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">🟢 {t("alerts.severity_info", "Spar-Tipp")}</span>;
         }
     };
 
@@ -83,19 +83,19 @@ export default function AlertCenterModal({ isOpen, onClose }) {
                 <div className="px-6 py-4 border-b border-gray-100 bg-white space-y-3">
                     <div className="grid grid-cols-4 gap-2">
                         <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-center">
-                            <div className="text-[10px] uppercase font-bold text-gray-500">Aktiv Gesamt</div>
+                            <div className="text-[10px] uppercase font-bold text-gray-500">{t("alerts.summary_total", "Aktiv Gesamt")}</div>
                             <div className="text-lg font-black text-slate-800 font-mono">{summary.active_total}</div>
                         </div>
                         <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-center">
-                            <div className="text-[10px] uppercase font-bold text-rose-600">🔴 Kritisch</div>
+                            <div className="text-[10px] uppercase font-bold text-rose-600">🔴 {t("alerts.severity_critical", "Kritisch")}</div>
                             <div className="text-lg font-black text-rose-700 font-mono">{summary.critical}</div>
                         </div>
                         <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-center">
-                            <div className="text-[10px] uppercase font-bold text-amber-700">🟡 Warnung</div>
+                            <div className="text-[10px] uppercase font-bold text-amber-700">🟡 {t("alerts.severity_warning", "Warnung")}</div>
                             <div className="text-lg font-black text-amber-700 font-mono">{summary.warning}</div>
                         </div>
                         <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-center">
-                            <div className="text-[10px] uppercase font-bold text-emerald-700">🟢 Spar-Tipp</div>
+                            <div className="text-[10px] uppercase font-bold text-emerald-700">🟢 {t("alerts.severity_info", "Spar-Tipp")}</div>
                             <div className="text-lg font-black text-emerald-700 font-mono">{summary.info}</div>
                         </div>
                     </div>
@@ -104,11 +104,11 @@ export default function AlertCenterModal({ isOpen, onClose }) {
                     <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
                         <div className="flex flex-wrap gap-1 bg-gray-100 p-1 rounded-xl text-xs font-semibold">
                             {[
-                                { key: "all", label: "Alle aktiven" },
-                                { key: "critical", label: "Kritisch" },
-                                { key: "warning", label: "Warnungen" },
-                                { key: "info", label: "Spar-Tipps" },
-                                { key: "resolved", label: "Historie" },
+                                { key: "all", label: t("alerts.tab_all", "Alle aktiven") },
+                                { key: "critical", label: t("alerts.severity_critical", "Kritisch") },
+                                { key: "warning", label: t("alerts.severity_warning", "Warnungen") },
+                                { key: "info", label: t("alerts.severity_info", "Spar-Tipps") },
+                                { key: "resolved", label: t("alerts.tab_history", "Historie") },
                             ].map((tab) => (
                                 <button
                                     key={tab.key}
@@ -131,12 +131,12 @@ export default function AlertCenterModal({ isOpen, onClose }) {
                         <div className="py-12 text-center space-y-2">
                             <div className="text-4xl">✨</div>
                             <div className="text-base font-bold text-gray-800">
-                                {filterSeverity === "resolved" ? "Keine gelösten Alarme in der Historie" : "Keine aktiven Alarme"}
+                                {filterSeverity === "resolved" ? t("alerts.empty_history", "Keine gelösten Alarme in der Historie") : t("alerts.empty_active", "Keine aktiven Alarme")}
                             </div>
                             <p className="text-xs text-gray-500">
                                 {filterSeverity === "resolved"
-                                    ? "Es wurden bisher keine Alarme gelöst."
-                                    : "Alle überwachten Systeme, Speicher und Erzeugungsanlagen laufen optimal."}
+                                    ? t("alerts.empty_history_desc", "Es wurden bisher keine Alarme gelöst.")
+                                    : t("alerts.empty_active_desc", "Alle überwachten Systeme, Speicher und Erzeugungsanlagen laufen optimal.")}
                             </p>
                         </div>
                     ) : (
@@ -158,7 +158,7 @@ export default function AlertCenterModal({ isOpen, onClose }) {
                                             {getSeverityBadge(alert.severity)}
                                             <h3 className="font-bold text-sm text-gray-900">{alert.title}</h3>
                                             <span className="text-[10px] text-gray-400 font-mono">
-                                                {new Date(alert.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} Uhr
+                                                {new Date(alert.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                                             </span>
                                         </div>
                                         <p className="text-xs text-gray-700 leading-relaxed pt-0.5">{alert.message}</p>
@@ -179,14 +179,14 @@ export default function AlertCenterModal({ isOpen, onClose }) {
                                                 onClick={() => resolveMutation.mutate(alert.id)}
                                                 className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white border border-gray-200 text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 transition cursor-pointer"
                                             >
-                                                ✓ Erledigt
+                                                {t("alerts.action_resolve", "✓ Erledigt")}
                                             </button>
                                             {alert.status === "active" && (
                                                 <button
                                                     onClick={() => ackMutation.mutate(alert.id)}
                                                     className="px-2 py-0.5 rounded-md text-[10px] font-medium text-gray-400 hover:text-gray-600 cursor-pointer"
                                                 >
-                                                    Gesehen
+                                                    {t("alerts.action_seen", "Gesehen")}
                                                 </button>
                                             )}
                                         </div>
@@ -200,13 +200,13 @@ export default function AlertCenterModal({ isOpen, onClose }) {
                 {/* Footer */}
                 <div className="p-4 border-t border-gray-100 bg-slate-50 flex items-center justify-between text-xs text-gray-500">
                     <span className="flex items-center gap-1">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> Live-Regelüberwachung aktiv
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> {t("alerts.monitoring_active", "Live-Regelüberwachung aktiv")}
                     </span>
                     <button
                         onClick={onClose}
                         className="px-4 py-1.5 rounded-xl font-bold bg-gray-900 text-white hover:bg-black transition cursor-pointer"
                     >
-                        Schließen
+                        {t("common.close", "Schließen")}
                     </button>
                 </div>
             </div>

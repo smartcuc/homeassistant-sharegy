@@ -188,7 +188,7 @@ export default function HelpArticleEditorModal({ article, isOpen, onClose, onSav
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-gray-100">
                         <div>
                             <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                                Kontext-Schlüssel (für Drawer-Matching)
+                                {t("help.context_key_label", "Kontext-Schlüssel (für Drawer-Matching)")}
                             </label>
                             <input
                                 type="text"
@@ -201,11 +201,11 @@ export default function HelpArticleEditorModal({ article, isOpen, onClose, onSav
 
                         <div>
                             <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                                Tags (kommagetrennt)
+                                {t("help.tags_label", "Tags (kommagetrennt)")}
                             </label>
                             <input
                                 type="text"
-                                placeholder="solar, modbus, sma, wechselrichter"
+                                placeholder="solar, modbus, sma, inverter"
                                 value={formData.tags}
                                 onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
                                 className="w-full px-3.5 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium focus:bg-white focus:ring-2 focus:ring-indigo-500 transition"
@@ -221,7 +221,7 @@ export default function HelpArticleEditorModal({ article, isOpen, onClose, onSav
                                 onChange={(e) => setFormData({ ...formData, is_published: e.target.checked })}
                                 className="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4"
                             />
-                            <span>Veröffentlicht (sichtbar für Nutzer)</span>
+                            <span>{t("help.published_label", "Veröffentlicht (sichtbar für Nutzer)")}</span>
                         </label>
 
                         <label className="flex items-center gap-2 text-xs font-semibold text-gray-700 cursor-pointer">
@@ -231,7 +231,7 @@ export default function HelpArticleEditorModal({ article, isOpen, onClose, onSav
                                 onChange={(e) => setFormData({ ...formData, is_featured: e.target.checked })}
                                 className="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4"
                             />
-                            <span>Hervorgehoben (Top-FAQ Startseite)</span>
+                            <span>{t("help.featured_label", "Hervorgehoben (Top-FAQ Startseite)")}</span>
                         </label>
                     </div>
 
@@ -242,7 +242,7 @@ export default function HelpArticleEditorModal({ article, isOpen, onClose, onSav
                             onClick={onClose}
                             className="px-4 py-2 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition cursor-pointer"
                         >
-                            Abbrechen
+                            {t("common.cancel", "Abbrechen")}
                         </button>
 
                         <button
@@ -250,7 +250,7 @@ export default function HelpArticleEditorModal({ article, isOpen, onClose, onSav
                             disabled={isSubmitting}
                             className="px-5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-xs transition cursor-pointer disabled:opacity-50"
                         >
-                            {isSubmitting ? "Speichere..." : "Änderungen live speichern"}
+                            {isSubmitting ? t("common.saving", "Speichere...") : t("help.save_changes_live", "Änderungen live speichern")}
                         </button>
                     </div>
                 </form>

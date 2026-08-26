@@ -48,7 +48,7 @@ export default function HouseholdLoadForecastCard() {
                             {t("forecast.load_title", "Haushalts- & Verbrauchs-Prognose")}
                         </h2>
                         <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-                            Wetter & Lastprofil
+                            {t("load_forecast.weather_load_badge", "Wetter & Lastprofil")}
                         </span>
                     </div>
                     <p className="text-xs text-gray-500 mt-1">
@@ -59,15 +59,15 @@ export default function HouseholdLoadForecastCard() {
                 {/* Horizon Switcher */}
                 <div className="inline-flex bg-gray-100 p-1 rounded-2xl self-start sm:self-auto gap-1">
                     {[
-                        { val: 24, label: "24 Stunden" },
-                        { val: 48, label: "48 Stunden" },
+                        { val: 24, label: t("load_forecast.horizon_24h", "24 Stunden") },
+                        { val: 48, label: t("load_forecast.horizon_48h", "48 Stunden") },
                     ].map((btn) => (
                         <button
                             key={btn.val}
                             onClick={() => setHorizon(btn.val)}
                             className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${horizon === btn.val
-                                    ? "bg-white text-gray-900 shadow-xs"
-                                    : "text-gray-500 hover:text-gray-900"
+                                ? "bg-white text-gray-900 shadow-xs"
+                                : "text-gray-500 hover:text-gray-900"
                                 }`}
                         >
                             {btn.label}
@@ -83,55 +83,55 @@ export default function HouseholdLoadForecastCard() {
                 {/* 1. Gesamtverbrauch */}
                 <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/70 space-y-1">
                     <div className="text-[11px] font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1">
-                        <span>🏠</span> Prognose-Bedarf
+                        <span>🏠</span> {t("load_forecast.forecast_load", "Prognose-Bedarf")}
                     </div>
                     <div className="text-2xl font-black text-slate-800 font-mono">
                         {Number(kpis.total_load_kwh || 0).toFixed(1)}{" "}
                         <span className="text-xs font-semibold text-gray-400">kWh</span>
                     </div>
                     <div className="text-[10px] text-gray-500">
-                        Spitze: {kpis.peak_load_kw} kW ({kpis.peak_load_time})
+                        {t("forecast.peak_hour", "Spitze")}: {kpis.peak_load_kw} kW ({kpis.peak_load_time})
                     </div>
                 </div>
 
                 {/* 2. PV-Ertrag */}
                 <div className="p-4 rounded-2xl bg-amber-50/60 border border-amber-200/70 space-y-1">
                     <div className="text-[11px] font-bold text-amber-700 uppercase tracking-wider flex items-center gap-1">
-                        <span>☀️</span> Solar-Erzeugung
+                        <span>☀️</span> {t("energy.pv_short", "Solar-Erzeugung")}
                     </div>
                     <div className="text-2xl font-black text-amber-700 font-mono">
                         {Number(kpis.total_pv_kwh || 0).toFixed(1)}{" "}
                         <span className="text-xs font-semibold text-amber-600/70">kWh</span>
                     </div>
                     <div className="text-[10px] text-amber-800/80">
-                        Peak: {kpis.peak_pv_kw} kW ({kpis.peak_pv_time})
+                        {t("forecast.peak_hour", "Peak")}: {kpis.peak_pv_kw} kW ({kpis.peak_pv_time})
                     </div>
                 </div>
 
                 {/* 3. Netto-Solarüberschuss */}
                 <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 space-y-1">
                     <div className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider flex items-center gap-1">
-                        <span>🟢</span> Netto-Überschuss
+                        <span>🟢</span> {t("load_forecast.net_surplus", "Netto-Überschuss")}
                     </div>
                     <div className="text-2xl font-black text-emerald-700 font-mono">
                         {Number(kpis.total_surplus_kwh || 0).toFixed(1)}{" "}
                         <span className="text-xs font-semibold text-emerald-600/70">kWh</span>
                     </div>
                     <div className="text-[10px] text-emerald-800/80">
-                        Frei für Wallbox / Batterie
+                        {t("load_forecast.free_for_ev", "Frei für Wallbox / Batterie")}
                     </div>
                 </div>
 
                 {/* 4. Erwartete Autarkie */}
                 <div className="p-4 rounded-2xl bg-indigo-50/70 border border-indigo-200/80 space-y-1">
                     <div className="text-[11px] font-bold text-indigo-800 uppercase tracking-wider flex items-center gap-1">
-                        <span>🏆</span> Erwartete Autarkie
+                        <span>🏆</span> {t("load_forecast.expected_autarky", "Erwartete Autarkie")}
                     </div>
                     <div className="text-2xl font-black text-indigo-700 font-mono">
                         {Number(kpis.autarky_pct || 0).toFixed(0)} %
                     </div>
                     <div className="text-[10px] text-indigo-800/80">
-                        Netzbezug: {Number(kpis.total_grid_import_kwh || 0).toFixed(1)} kWh
+                        {t("load_forecast.grid_import_kwh", { val: Number(kpis.total_grid_import_kwh || 0).toFixed(1), defaultValue: `Netzbezug: ${Number(kpis.total_grid_import_kwh || 0).toFixed(1)} kWh` })}
                     </div>
                 </div>
             </div>
@@ -142,17 +142,17 @@ export default function HouseholdLoadForecastCard() {
             <div className="space-y-3 pt-2">
                 <div className="flex items-center justify-between text-xs">
                     <div className="font-bold uppercase tracking-wider text-gray-700 flex items-center gap-2">
-                        <span>📊</span> Stunden-Gegenüberstellung ({horizon}h Horizont)
+                        <span>📊</span> {t("load_forecast.hourly_comparison", { val: horizon, defaultValue: `Stunden-Gegenüberstellung (${horizon}h Horizont)` })}
                     </div>
                     <div className="flex items-center gap-4 text-[11px] font-medium">
                         <span className="flex items-center gap-1.5 text-amber-600">
-                            <span className="w-2.5 h-2.5 rounded-xs bg-amber-400 inline-block" /> PV-Ertrag
+                            <span className="w-2.5 h-2.5 rounded-xs bg-amber-400 inline-block" /> {t("energy.pv_short", "PV-Ertrag")}
                         </span>
                         <span className="flex items-center gap-1.5 text-blue-600">
-                            <span className="w-2.5 h-2.5 rounded-xs bg-blue-500 inline-block" /> Hausverbrauch
+                            <span className="w-2.5 h-2.5 rounded-xs bg-blue-500 inline-block" /> {t("energy.load_short", "Hausverbrauch")}
                         </span>
                         <span className="flex items-center gap-1.5 text-emerald-600">
-                            <span className="w-2.5 h-2.5 rounded-xs bg-emerald-500 inline-block" /> Netto-Überschuss
+                            <span className="w-2.5 h-2.5 rounded-xs bg-emerald-500 inline-block" /> {t("load_forecast.net_surplus", "Netto-Überschuss")}
                         </span>
                     </div>
                 </div>
@@ -203,7 +203,7 @@ export default function HouseholdLoadForecastCard() {
                     <div className="mt-3 flex items-center justify-between text-[11px] text-slate-400 font-medium">
                         <span>{timeline[0]?.date_label} ({timeline[0]?.time_label})</span>
                         <span className="text-emerald-300 font-semibold">
-                            ☀️ {kpis.total_surplus_kwh} kWh Reiner Solarüberschuss im {horizon}h-Fenster
+                            {t("load_forecast.pure_surplus_badge", { val: kpis.total_surplus_kwh, h: horizon, defaultValue: `☀️ ${kpis.total_surplus_kwh} kWh Reiner Solarüberschuss im ${horizon}h-Fenster` })}
                         </span>
                         <span>{timeline[timeline.length - 1]?.date_label}</span>
                     </div>
@@ -216,15 +216,14 @@ export default function HouseholdLoadForecastCard() {
             <div className="p-4 bg-linear-to-r from-emerald-50 to-teal-50 border border-emerald-200/70 rounded-2xl flex items-center gap-3 text-xs text-emerald-950">
                 <span className="text-2xl p-2 bg-emerald-100 rounded-xl">💡</span>
                 <div>
-                    <span className="font-bold text-emerald-900">Prognose-Erkenntnis: </span>
+                    <span className="font-bold text-emerald-900">{t("load_forecast.insight_title", "Prognose-Erkenntnis:")} </span>
                     {kpis.total_surplus_kwh > 5.0 ? (
                         <span>
-                            In den nächsten {horizon} Stunden werden <strong>{kpis.total_surplus_kwh} kWh</strong> ungenutzter Solarüberschuss erwartet.
-                            Empfehlung: Ladefahrpläne für Wallbox oder Wärmepumpen-Pufferspeicher aktivieren.
+                            {t("load_forecast.surplus_rec", { h: horizon, surplus: kpis.total_surplus_kwh, defaultValue: `In den nächsten ${horizon} Stunden werden ${kpis.total_surplus_kwh} kWh ungenutzter Solarüberschuss erwartet. Empfehlung: Ladefahrpläne für Wallbox oder Wärmepumpen-Pufferspeicher aktivieren.` })}
                         </span>
                     ) : (
                         <span>
-                            Geringer Solarüberschuss erwartet ({kpis.total_surplus_kwh} kWh). Der Grundbedarf von {kpis.total_load_kwh} kWh wird teilweise aus dem Netz bezogen.
+                            {t("load_forecast.low_surplus_rec", { surplus: kpis.total_surplus_kwh, load: kpis.total_load_kwh, defaultValue: `Geringer Solarüberschuss erwartet (${kpis.total_surplus_kwh} kWh). Der Grundbedarf von ${kpis.total_load_kwh} kWh wird teilweise aus dem Netz bezogen.` })}
                         </span>
                     )}
                 </div>

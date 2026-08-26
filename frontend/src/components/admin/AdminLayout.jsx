@@ -2,57 +2,55 @@
 # components/admin/AdminLayout.jsx
 */
 
-import { Link, NavLink } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export default function AdminLayout({ children }) {
+    const { t } = useTranslation();
+
     return (
-        <div className="flex h-screen bg-slate-50">
-            {/* Sidebar */}
-            <aside className="w-64 bg-white border-r border-gray-200 p-4 flex flex-col justify-between shrink-0">
+        <div className="flex h-screen bg-slate-50/50">
+            {/* Admin Sidebar */}
+            <aside className="w-64 bg-white border-r border-gray-200 p-5 flex flex-col justify-between hidden md:flex">
                 <div className="space-y-6">
-                    {/* Brand */}
                     <div className="flex items-center gap-2.5 px-2">
                         <span className="text-2xl">🛡️</span>
                         <div>
-                            <div className="font-black text-base bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                                Sharegy Admin
-                            </div>
-                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                                Staff Portal
-                            </span>
+                            <div className="font-black text-sm text-gray-900 tracking-tight">Staff Portal</div>
+                            <div className="text-[10px] text-gray-400 font-medium">Administration & Control</div>
                         </div>
                     </div>
 
-                    {/* Navigation */}
                     <nav className="space-y-1">
                         <NavLink
-                            to="/admin/dashboard"
+                            to="/app/admin/dashboard"
+                            end
                             className={({ isActive }) =>
                                 `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${isActive ? "bg-indigo-50 text-indigo-700 shadow-2xs" : "text-gray-600 hover:bg-gray-50"
                                 }`
                             }
                         >
-                            <span className="text-sm">📊</span> Onboarding Funnel
+                            <span className="text-sm">📊</span> {t("admin.title", "Dashboard")}
                         </NavLink>
 
                         <NavLink
-                            to="/admin/tracking"
+                            to="/app/admin/tracking"
                             className={({ isActive }) =>
                                 `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${isActive ? "bg-indigo-50 text-indigo-700 shadow-2xs" : "text-gray-600 hover:bg-gray-50"
                                 }`
                             }
                         >
-                            <span className="text-sm">📈</span> Event & Telemetrie
+                            <span className="text-sm">📈</span> {t("admin.event_tracking", "Event-Tracking")}
                         </NavLink>
 
                         <NavLink
-                            to="/admin/tenants"
+                            to="/app/tenant"
                             className={({ isActive }) =>
                                 `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${isActive ? "bg-indigo-50 text-indigo-700 shadow-2xs" : "text-gray-600 hover:bg-gray-50"
                                 }`
                             }
                         >
-                            <span className="text-sm">👥</span> Mandanten & Mieter
+                            <span className="text-sm">👥</span> {t("admin.tenants", "Mandanten & Mieter")}
                         </NavLink>
 
                         <a
@@ -74,7 +72,7 @@ export default function AdminLayout({ children }) {
                         to="/app/dashboard"
                         className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition shadow-2xs"
                     >
-                        <span>←</span> Zurück zum Hauptportal
+                        <span>←</span> {t("admin.back_to_portal", "Zurück zum Hauptportal")}
                     </Link>
                 </div>
             </aside>

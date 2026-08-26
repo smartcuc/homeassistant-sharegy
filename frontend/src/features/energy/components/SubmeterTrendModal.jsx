@@ -32,9 +32,9 @@ export default function SubmeterTrendModal({ meter, isOpen, onClose, defaultPeri
     ];
 
     const chartModes = [
-        { key: "coverage", label: "🟢 Solare Deckung vs. Netz", icon: "☀️" },
-        { key: "consumption", label: "⚡ Gesamtverbrauch", icon: "📊" },
-        { key: "costs", label: "💶 Kosten & Ersparnis", icon: "💰" },
+        { key: "coverage", label: t("submeters.mode_coverage", "🟢 Solare Deckung vs. Netz"), icon: "☀️" },
+        { key: "consumption", label: t("submeters.mode_consumption", "⚡ Gesamtverbrauch"), icon: "📊" },
+        { key: "costs", label: t("submeters.cost_savings_tab", "💶 Kosten & Ersparnis"), icon: "💰" },
     ];
 
     const chartOption = useMemo(() => {
@@ -67,7 +67,7 @@ export default function SubmeterTrendModal({ meter, isOpen, onClose, defaultPeri
                     },
                 },
                 legend: {
-                    data: ["Solar-Eigenstrom", "Netzbezug"],
+                    data: [t("submeters.solar_self_share", "Solar-Eigenstrom"), t("submeters.grid_share", "Netzbezug")],
                     bottom: 0,
                     textStyle: { fontSize: 11, color: "#64748b" },
                 },
@@ -91,14 +91,14 @@ export default function SubmeterTrendModal({ meter, isOpen, onClose, defaultPeri
                 },
                 series: [
                     {
-                        name: "Solar-Eigenstrom",
+                        name: t("submeters.solar_self_share", "Solar-Eigenstrom"),
                         type: "bar",
                         stack: "coverage",
                         itemStyle: { color: "#10b981" },
                         data: currentTimeseries.map((pt) => Number(pt.solar_kwh || 0)),
                     },
                     {
-                        name: "Netzbezug",
+                        name: t("submeters.grid_share", "Netzbezug"),
                         type: "bar",
                         stack: "coverage",
                         itemStyle: { color: "#64748b" },
@@ -119,7 +119,7 @@ export default function SubmeterTrendModal({ meter, isOpen, onClose, defaultPeri
                     formatter: (params) => {
                         const p = params[0];
                         return `<div style="font-weight:bold;">${p.name}</div>
-                            <div style="margin-top:2px;font-size:12px;">Verbrauch: <b>${Number(p.value).toFixed(2)} kWh</b></div>`;
+                            <div style="margin-top:2px;font-size:12px;">${t("submeters.consumption_kwh", "Verbrauch")}: <b>${Number(p.value).toFixed(2)} kWh</b></div>`;
                     },
                 },
                 grid: {
@@ -142,7 +142,7 @@ export default function SubmeterTrendModal({ meter, isOpen, onClose, defaultPeri
                 },
                 series: [
                     {
-                        name: "Verbrauch",
+                        name: t("submeters.consumption_kwh", "Verbrauch"),
                         type: "line",
                         smooth: true,
                         showSymbol: false,
@@ -190,7 +190,7 @@ export default function SubmeterTrendModal({ meter, isOpen, onClose, defaultPeri
                 },
             },
             legend: {
-                data: ["Stromkosten (€)", "Solar-Ersparnis (€)"],
+                data: [t("submeters.electricity_cost", "Stromkosten (€)"), t("submeters.solar_savings", "Solar-Ersparnis (€)")],
                 bottom: 0,
                 textStyle: { fontSize: 11, color: "#64748b" },
             },
@@ -214,20 +214,20 @@ export default function SubmeterTrendModal({ meter, isOpen, onClose, defaultPeri
             },
             series: [
                 {
-                    name: "Stromkosten (€)",
+                    name: t("submeters.electricity_cost", "Stromkosten (€)"),
                     type: "bar",
                     itemStyle: { color: "#f59e0b" },
                     data: currentTimeseries.map((pt) => Number(pt.cost_eur || 0)),
                 },
                 {
-                    name: "Solar-Ersparnis (€)",
+                    name: t("submeters.solar_savings", "Solar-Ersparnis (€)"),
                     type: "bar",
                     itemStyle: { color: "#10b981" },
                     data: currentTimeseries.map((pt) => Number(pt.savings_eur || 0)),
                 },
             ],
         };
-    }, [data, chartMode, meter]);
+    }, [data, chartMode, meter, t]);
 
     if (!isOpen || !meter) return null;
 
@@ -249,11 +249,11 @@ export default function SubmeterTrendModal({ meter, isOpen, onClose, defaultPeri
                                     className="px-2.5 py-0.5 rounded-full text-xs font-bold text-white shadow-2xs"
                                     style={{ backgroundColor: meterMeta.color || "#6366f1" }}
                                 >
-                                    {meterMeta.share_pct || meter.share_pct || 0}% Anteil
+                                    {meterMeta.share_pct || meter.share_pct || 0}% {t("submeters.share", "Anteil")}
                                 </span>
                             </div>
                             <p className="text-xs text-gray-400 mt-0.5">
-                                Historische Zeitreihenanalyse & solare Deckungsquote im Zeitverlauf
+                                {t("submeters.historical_subtitle", "Historische Zeitreihenanalyse & solare Deckungsquote im Zeitverlauf")}
                             </p>
                         </div>
                     </div>
@@ -261,7 +261,7 @@ export default function SubmeterTrendModal({ meter, isOpen, onClose, defaultPeri
                     <button
                         onClick={onClose}
                         className="w-9 h-9 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-900 flex items-center justify-center transition cursor-pointer"
-                        title="Schließen"
+                        title={t("common.close", "Schließen")}
                     >
                         ✕
                     </button>
@@ -309,51 +309,51 @@ export default function SubmeterTrendModal({ meter, isOpen, onClose, defaultPeri
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
                         <div className="p-4 bg-indigo-50/70 border border-indigo-100 rounded-2xl">
                             <div className="text-[11px] font-bold uppercase tracking-wider text-indigo-700">
-                                📊 Gesamtverbrauch
+                                📊 {t("submeters.total_consumption", "Gesamtverbrauch")}
                             </div>
                             <div className="text-xl font-black text-gray-900 mt-1 font-mono">
-                                {Number(meterMeta.total_kwh || meter.consumption_kwh || 0).toLocaleString("de-DE", { maximumFractionDigits: 1 })}{" "}
+                                {Number(meterMeta.total_kwh || meter.consumption_kwh || 0).toLocaleString(undefined, { maximumFractionDigits: 1 })}{" "}
                                 <span className="text-xs font-normal text-gray-500">kWh</span>
                             </div>
                             <div className="text-[10px] text-indigo-600 mt-0.5">
-                                ⌀ {meterMeta.avg_daily_kwh || 0} kWh / Tag
+                                {t("submeters.daily_avg", { val: meterMeta.avg_daily_kwh || 0, defaultValue: `⌀ ${meterMeta.avg_daily_kwh || 0} kWh / Tag` })}
                             </div>
                         </div>
 
                         <div className="p-4 bg-emerald-50/70 border border-emerald-100 rounded-2xl">
                             <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-700">
-                                🛡️ Solar-Deckungsgrad
+                                🛡️ {t("submeters.solar_coverage", "Solar-Deckungsgrad")}
                             </div>
                             <div className="text-xl font-black text-emerald-700 mt-1 font-mono">
                                 {Number(meterMeta.solar_share_pct || meter.solar_share_pct || 0).toFixed(0)} %
                             </div>
                             <div className="text-[10px] text-emerald-600 mt-0.5">
-                                {Number(meterMeta.solar_kwh || 0).toFixed(1)} kWh durch Eigenstrom
+                                {Number(meterMeta.solar_kwh || 0).toFixed(1)} kWh {t("submeters.by_solar", "durch Eigenstrom")}
                             </div>
                         </div>
 
                         <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-2xl">
                             <div className="text-[11px] font-bold uppercase tracking-wider text-slate-700">
-                                📈 Peak-Verbrauchstag
+                                📈 {t("submeters.peak_day", "Peak-Verbrauchstag")}
                             </div>
                             <div className="text-xl font-black text-gray-900 mt-1 font-mono">
                                 {Number(meterMeta.peak_day_kwh || 0).toFixed(1)}{" "}
                                 <span className="text-xs font-normal text-gray-500">kWh</span>
                             </div>
                             <div className="text-[10px] text-slate-500 mt-0.5 truncate">
-                                Datum: {meterMeta.peak_day_date || "-"}
+                                {t("common.date", "Datum")}: {meterMeta.peak_day_date || "-"}
                             </div>
                         </div>
 
                         <div className="p-4 bg-amber-50/70 border border-amber-100 rounded-2xl">
                             <div className="text-[11px] font-bold uppercase tracking-wider text-amber-700">
-                                💶 Stromkosten & Ersparnis
+                                {t("submeters.costs_and_savings", "💶 Stromkosten & Ersparnis")}
                             </div>
                             <div className="text-xl font-black text-gray-900 mt-1 font-mono">
                                 {Number(meterMeta.cost_eur || meter.cost_eur || 0).toFixed(2)} €
                             </div>
                             <div className="text-[10px] text-emerald-600 font-bold mt-0.5">
-                                -{Number(meterMeta.savings_eur || meter.savings_eur || 0).toFixed(2)} € Solar-Ersparnis
+                                -{Number(meterMeta.savings_eur || meter.savings_eur || 0).toFixed(2)} € {t("submeters.solar_savings_short", "Solar-Ersparnis")}
                             </div>
                         </div>
                     </div>
@@ -362,20 +362,20 @@ export default function SubmeterTrendModal({ meter, isOpen, onClose, defaultPeri
                     <div className="bg-slate-50/80 border border-slate-200/80 rounded-2xl p-5 shadow-2xs space-y-3">
                         <div className="flex items-center justify-between text-xs">
                             <span className="font-bold text-gray-700">
-                                Zeitverlauf ({data?.period_label || period})
+                                {t("submeters.trend_label", "Zeitverlauf")} ({data?.period_label || period})
                             </span>
                             <span className="text-gray-400 font-medium">
-                                {timeseries.length} Intervalle
+                                {timeseries.length} {t("submeters.intervals", "Intervalle")}
                             </span>
                         </div>
 
                         {trendQuery.isLoading ? (
                             <div className="h-64 flex items-center justify-center text-gray-400 text-xs animate-pulse">
-                                Lade Zeitreihendaten...
+                                {t("common.loading", "Lade...")}
                             </div>
                         ) : timeseries.length === 0 || !chartOption ? (
                             <div className="h-64 flex items-center justify-center text-gray-400 text-xs">
-                                Keine Messdaten für den gewählten Zeitraum vorhanden.
+                                {t("submeters.no_data", "Keine Messdaten für den gewählten Zeitraum vorhanden.")}
                             </div>
                         ) : (
                             <div className="h-72 w-full">
@@ -393,13 +393,13 @@ export default function SubmeterTrendModal({ meter, isOpen, onClose, defaultPeri
                 {/* Footer */}
                 <div className="p-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between text-xs">
                     <span className="text-gray-400">
-                        Datenbasis: Aggregierte Stundenmessungen & stichtagsgenaue Tarife
+                        {t("submeters.data_basis", "Datenbasis: Aggregierte Stundenmessungen & stichtagsgenaue Tarife")}
                     </span>
                     <button
                         onClick={onClose}
                         className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-xs transition cursor-pointer"
                     >
-                        Fertig
+                        {t("common.finish", "Fertig")}
                     </button>
                 </div>
             </div>
