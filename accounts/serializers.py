@@ -7,7 +7,6 @@ from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 from accounts.models import TenantMembership
 from core.models import Tenant
-
 User = get_user_model()
 
 
