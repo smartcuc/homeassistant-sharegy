@@ -18,7 +18,7 @@ export default function Profile() {
     const { settings } = useSettings();
     const { t } = useTranslation();
 
-    const [timezone, setTimezone] = useState("");
+    const [selectedTimezone, setSelectedTimezone] = useState(null);
     const [saved, setSaved] = useState(false);
     const [savingTimezone, setSavingTimezone] = useState(false);
 
@@ -38,11 +38,7 @@ export default function Profile() {
             tz.startsWith("Europe/") || tz === "UTC"
         ) || [];
 
-    useEffect(() => {
-        if (settings?.timezone) {
-            setTimezone(settings.timezone);
-        }
-    }, [settings]);
+    const activeTimezone = selectedTimezone ?? settings?.timezone ?? "";
 
     async function handleLanguageChange(langId) {
         await i18n.changeLanguage(langId);
@@ -74,9 +70,10 @@ export default function Profile() {
         try {
             await apiFetch("/api/timezone/", {
                 method: "POST",
-                body: JSON.stringify({ timezone }),
+                body: JSON.stringify({ timezone: activeTimezone }),
             });
             await queryClient.invalidateQueries({ queryKey: ["settings"] });
+            setSelectedTimezone(null);
             setSaved(true);
             setTimeout(() => setSaved(false), 2500);
         } finally {
@@ -138,11 +135,10 @@ export default function Profile() {
                         <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
                             <span>💳</span> {t("profile.subscription_title", "Abonnement & Tarif")}
                         </h2>
-                        <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${
-                            subscriptionQuery.data?.subscription?.is_pro
+                        <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${subscriptionQuery.data?.subscription?.is_pro
                                 ? "bg-emerald-100 text-emerald-800 border-emerald-300"
                                 : "bg-gray-100 text-gray-700 border-gray-200"
-                        }`}>
+                            }`}>
                             {subscriptionQuery.data?.subscription?.plan_name || "Sharegy Free"}
                         </span>
                     </div>
@@ -228,8 +224,8 @@ export default function Profile() {
 
                 <div className="max-w-md space-y-3">
                     <select
-                        value={timezone}
-                        onChange={(e) => setTimezone(e.target.value)}
+                        value={activeTimezone}
+                        onChange={(e) => setSelectedTimezone(e.target.value)}
                         className="w-full border rounded-xl px-3.5 py-2.5 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     >
                         <option value="">{t("profile.select_prompt", "Bitte auswählen")}</option>
@@ -241,7 +237,7 @@ export default function Profile() {
                     <div className="flex gap-2 pt-1">
                         <button
                             type="button"
-                            onClick={() => setTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone)}
+                            onClick={() => setSelectedTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone)}
                             className="px-3.5 py-2 border rounded-xl text-xs font-semibold text-gray-700 hover:bg-gray-50 transition"
                         >
                             {t("common.auto_detect", "Automatisch erkennen")}
