@@ -52,8 +52,15 @@
     "settings_group": "System & Tariffs",
     "producers": "Power Generators",
     "tariffs": "Electricity Tariffs",
+    "billing": "Subscription & Billing",
     "mqtt_interfaces": "Interfaces & MQTT",
-    "app_settings": "App Settings"
+    "app_settings": "App Settings",
+    "admin_group": "Administration & Staff",
+    "admin_dashboard": "Admin Dashboard",
+    "admin_tracking": "Events & Tracking",
+    "tenant_management": "Tenants & Landlords",
+    "knowledge_base": "Knowledge Base & FAQ",
+    "alerts": "Alert Center"
   },
   "dashboard": {
     "title": "Your Energy Hub ⚡",

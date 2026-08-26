@@ -1,9 +1,10 @@
 /*
-#
+# src/pages/admin/TrackingDashboard.jsx
 */
 
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
+import { Link } from "react-router-dom";
 import ReactECharts from "echarts-for-react";
 import { apiFetch } from "../../api/client";
 
@@ -19,20 +20,20 @@ export default function TrackingDashboard() {
     const { data, isLoading } = useQuery({
         queryKey: ["tracking"],
         queryFn: () => apiFetch("/api/tracking/stats/"),
+        staleTime: 30_000,
     });
 
     const stats = data?.stats || [];
-
     const map = formatStats(stats);
 
     const funnel = [
-        "landing_view",
-        "signup_click",
-        "magic_link_requested",
-        "email_open",
-        "magic_link_click",
-        "magic_login_success",
-        "dashboard_open",
+        { key: "landing_view", label: "Landing Page Aufruf", icon: "🌐" },
+        { key: "signup_click", label: "Registrierung geklickt", icon: "📝" },
+        { key: "magic_link_requested", label: "Magic-Link angefordert", icon: "✉️" },
+        { key: "email_open", label: "E-Mail geöffnet", icon: "📬" },
+        { key: "magic_link_click", label: "Link angeklickt", icon: "🖱️" },
+        { key: "magic_login_success", label: "Erfolgreich eingeloggt", icon: "🔑" },
+        { key: "dashboard_open", label: "Dashboard geöffnet", icon: "🏠" },
     ];
 
     const chartOption = useMemo(() => {
@@ -92,47 +93,60 @@ export default function TrackingDashboard() {
     }, [data]);
 
     if (isLoading) {
-        return <div className="p-6">Loading…</div>;
+        return (
+            <div className="p-8 max-w-7xl mx-auto flex items-center justify-center text-gray-400 text-sm animate-pulse">
+                Lade Tracking- und Eventdaten…
+            </div>
+        );
     }
 
+    const totalEventsCount = stats.reduce((acc, curr) => acc + (curr.count || 0), 0);
+
     return (
-        <div className="p-6 space-y-8">
+        <div className="p-6 max-w-7xl mx-auto space-y-6">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-gray-200 rounded-3xl p-6 shadow-xs">
+                <div>
+                    <div className="flex items-center gap-2.5">
+                        <span className="text-2xl">📈</span>
+                        <h1 className="text-2xl font-black text-gray-900 tracking-tight">Event-Tracking & Telemetrie-Analytics</h1>
+                        <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-50 text-purple-700 border border-purple-100">
+                            {totalEventsCount.toLocaleString()} Gesamt-Events
+                        </span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                        Detaillierte Erfassung von Nutzerinteraktionen, Feature-Nutzung und Registrierungstrichter.
+                    </p>
+                </div>
 
-            {/* ✅ HEADER */}
-            <h1 className="text-2xl font-semibold">Analytics</h1>
-
-            {/* ✅ FUNNEL */}
-            <div className="bg-white p-6 rounded-2xl shadow">
-                <h2 className="text-lg font-medium mb-4">Conversion Funnel</h2>
-
-                {funnel.map((step, i) => {
-                    const value = map[step] || 0;
-                    const prev = i === 0 ? value : (map[funnel[i - 1]] || 1);
-                    const percent = i === 0 ? 100 : Math.round((value / prev) * 100);
-
-                    return (
-                        <div key={step} className="mb-4">
-                            <div className="flex justify-between text-sm mb-1">
-                                <span>{step}</span>
-                                <span>{value} ({percent}%)</span>
-                            </div>
-
-                            <div className="h-3 bg-gray-100 rounded">
-                                <div
-                                    className="h-3 bg-indigo-500 rounded"
-                                    style={{ width: `${percent}%` }}
-                                />
-                            </div>
-                        </div>
-                    );
-                })}
+                <div className="flex items-center gap-2">
+                    <Link
+                        to="/app/admin/dashboard"
+                        className="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-xs rounded-xl transition flex items-center gap-1.5"
+                    >
+                        <span>📊</span> Admin Dashboard
+                    </Link>
+                    <a
+                        href="/admin/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-4 py-2 bg-slate-900 hover:bg-black text-white font-semibold text-xs rounded-xl transition flex items-center gap-1.5 shadow-xs"
+                    >
+                        <span>⚙️</span> Django Admin <span>↗</span>
+                    </a>
+                </div>
             </div>
 
-            {/* ✅ CHART */}
-            <div className="bg-white p-6 rounded-2xl shadow">
-                <h2 className="text-lg font-medium mb-4">Events (Last 7 Days)</h2>
+            {/* 7-Tage Timeline Chart */}
+            <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-xs space-y-4">
+                <div className="flex items-center justify-between">
+                    <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                        <span>📅</span> Event-Aktivität (Letzte 7 Tage)
+                    </h2>
+                    <span className="text-xs text-gray-400 font-mono">Tägliche Interaktionen</span>
+                </div>
 
-                <div style={{ width: "100%", height: 300 }}>
+                <div className="h-72 w-full">
                     {chartOption ? (
                         <ReactECharts
                             option={chartOption}
@@ -148,24 +162,76 @@ export default function TrackingDashboard() {
                 </div>
             </div>
 
-            {/* ✅ TOP EVENTS */}
-            <div className="bg-white p-6 rounded-2xl shadow">
-                <h2 className="text-lg font-medium mb-4">Top Events</h2>
+            {/* Grid: Conversion Funnel & Top Events */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Conversion Funnel */}
+                <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-xs space-y-4">
+                    <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                        <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                            <span>🎯</span> User Funnel Schritte
+                        </h2>
+                        <span className="text-xs text-gray-400">Step-by-Step Conversion</span>
+                    </div>
 
-                {stats
-                    .sort((a, b) => b.count - a.count)
-                    .slice(0, 10)
-                    .map((item) => (
-                        <div
-                            key={item.event}
-                            className="flex justify-between py-1 text-sm"
-                        >
-                            <span>{item.event}</span>
-                            <span>{item.count}</span>
-                        </div>
-                    ))}
+                    <div className="space-y-4 pt-1">
+                        {funnel.map((item, i) => {
+                            const value = map[item.key] || 0;
+                            const prev = i === 0 ? value : (map[funnel[i - 1].key] || 1);
+                            const percent = i === 0 ? 100 : Math.min(100, Math.round((value / Math.max(prev, 1)) * 100));
+
+                            return (
+                                <div key={item.key} className="space-y-1.5">
+                                    <div className="flex justify-between text-xs font-semibold text-gray-700">
+                                        <span className="flex items-center gap-1.5">
+                                            <span>{item.icon}</span> {item.label}
+                                        </span>
+                                        <span className="font-mono text-gray-500">
+                                            {value} <span className="text-indigo-600">({percent}%)</span>
+                                        </span>
+                                    </div>
+
+                                    <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                                        <div
+                                            className="h-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full transition-all duration-500"
+                                            style={{ width: `${percent}%` }}
+                                        />
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                {/* Top Events Table */}
+                <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-xs space-y-4">
+                    <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                        <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                            <span>🔥</span> Häufigste Event-Typen
+                        </h2>
+                        <span className="text-xs text-gray-400">Top 10 Events</span>
+                    </div>
+
+                    <div className="divide-y divide-gray-100">
+                        {stats
+                            .sort((a, b) => b.count - a.count)
+                            .slice(0, 10)
+                            .map((item, idx) => (
+                                <div
+                                    key={item.event}
+                                    className="flex items-center justify-between py-2.5 text-xs text-gray-700 hover:bg-slate-50 px-2 rounded-lg transition"
+                                >
+                                    <div className="flex items-center gap-2 truncate">
+                                        <span className="font-bold text-gray-400 font-mono w-4">#{idx + 1}</span>
+                                        <span className="font-mono text-gray-800 truncate">{item.event}</span>
+                                    </div>
+                                    <span className="font-bold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-full font-mono text-[11px]">
+                                        {item.count}
+                                    </span>
+                                </div>
+                            ))}
+                    </div>
+                </div>
             </div>
-
         </div>
     );
 }

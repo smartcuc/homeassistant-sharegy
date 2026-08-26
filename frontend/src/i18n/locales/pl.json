@@ -52,8 +52,15 @@
     "settings_group": "System i taryfy",
     "producers": "Instalacje wytwórcze",
     "tariffs": "Taryfy prądu",
+    "billing": "Subskrypcja i rozliczenia",
     "mqtt_interfaces": "Interfejsy i MQTT",
-    "app_settings": "Ustawienia aplikacji"
+    "app_settings": "Ustawienia aplikacji",
+    "admin_group": "Administracja i personel",
+    "admin_dashboard": "Panel administratora",
+    "admin_tracking": "Zdarzenia i analityka",
+    "tenant_management": "Najemcy i społeczności",
+    "knowledge_base": "Baza wiedzy i FAQ",
+    "alerts": "Centrum alertów"
   },
   "dashboard": {
     "title": "Twoje Centrum Energii ⚡",

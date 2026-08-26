@@ -52,8 +52,15 @@
     "settings_group": "System & Tarife",
     "producers": "Erzeugeranlagen",
     "tariffs": "Strompreise & Tarife",
+    "billing": "Abonnement & Tarife",
     "mqtt_interfaces": "Schnittstellen & MQTT",
-    "app_settings": "App-Einstellungen"
+    "app_settings": "App-Einstellungen",
+    "admin_group": "Administration & Staff",
+    "admin_dashboard": "Admin Dashboard",
+    "admin_tracking": "Event & Tracking",
+    "tenant_management": "Mandanten & Mieter",
+    "knowledge_base": "Wissensportal & FAQ",
+    "alerts": "Alarmzentrale"
   },
   "dashboard": {
     "title": "Deine Energiezentrale ⚡",

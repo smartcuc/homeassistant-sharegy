@@ -3,27 +3,35 @@
 */
 
 import { Routes, Route, Navigate } from "react-router-dom";
+import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import TrackingDashboard from "./pages/admin/TrackingDashboard";
+import TenantDashboard from "./pages/TenantDashboard";
+import { useUser } from "./hooks/useUser";
 
 export default function AdminApp() {
+    const { user, loading } = useUser();
 
-    const user = JSON.parse(localStorage.getItem("user"));
-    const loading = false;
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center text-gray-400">
+                Sharegy lädt…
+            </div>
+        );
+    }
 
-    if (loading) return <div>Loading...</div>;
-
-    if (!user) return <Navigate to="/login" />;
-    if (!user.is_staff) return <Navigate to="/app/dashboard" />;
+    if (!user) return <Navigate to="/" replace />;
+    if (!user.is_staff && !user.is_superuser) return <Navigate to="/app/dashboard" replace />;
 
     return (
-        <div style={{ padding: 20 }}>
-            <h1>Admin Panel</h1>
-
+        <AdminLayout>
             <Routes>
-                <Route index element={<AdminDashboard />} />
+                <Route index element={<Navigate to="dashboard" replace />} />
                 <Route path="dashboard" element={<AdminDashboard />} />
+                <Route path="tracking" element={<TrackingDashboard />} />
+                <Route path="tenants" element={<TenantDashboard />} />
+                <Route path="*" element={<Navigate to="dashboard" replace />} />
             </Routes>
-
-        </div>
+        </AdminLayout>
     );
 }

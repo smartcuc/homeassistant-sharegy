@@ -25,6 +25,9 @@ import HelpArticleDetailPage from "../features/help/pages/HelpArticleDetailPage"
 import HelpDrawer from "../features/help/components/HelpDrawer";
 import { HelpDrawerProvider } from "../features/help/context/HelpDrawerContext";
 import BillingPage from "../features/billing/pages/BillingPage";
+import AdminDashboard from "../pages/admin/AdminDashboard";
+import TrackingDashboard from "../pages/admin/TrackingDashboard";
+import TenantDashboard from "../pages/TenantDashboard";
 
 import { Routes, Route, Navigate } from "react-router-dom";
 
@@ -79,6 +82,12 @@ export default function AppShell() {
                             {/* 📚 HELP CENTER & KNOWLEDGE BASE */}
                             <Route path="help" element={<HelpCenterPage />} />
                             <Route path="help/:slug" element={<HelpArticleDetailPage />} />
+
+                            {/* 🛡️ ADMIN & TENANT MANAGEMENT */}
+                            <Route path="admin" element={<Navigate to="/app/admin/dashboard" replace />} />
+                            <Route path="admin/dashboard" element={<AdminDashboard />} />
+                            <Route path="admin/tracking" element={<TrackingDashboard />} />
+                            <Route path="tenant-management" element={<TenantDashboard />} />
 
                             {/* ✅ FALLBACK IMMER UNTEN */}
                             <Route path="*" element={<Navigate to="/app/dashboard" replace />} />

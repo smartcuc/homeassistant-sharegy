@@ -4,6 +4,7 @@
 
 import { NavLink } from "react-router-dom";
 import { useUnconfiguredDevices } from "../../hooks/useUnconfiguredDevices";
+import { useUser } from "../../hooks/useUser";
 import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
@@ -13,6 +14,7 @@ import DeviceSetupModal from "../device/DeviceSetupModal";
 export default function Sidebar() {
     const { t } = useTranslation();
     const query = useUnconfiguredDevices();
+    const { user } = useUser();
 
     const isLoaded = query?.isSuccess;
     const count = query?.data?.count ?? 0;
@@ -32,58 +34,87 @@ export default function Sidebar() {
             ? "bg-amber-100 text-amber-800 border-amber-200"
             : "bg-emerald-100 text-emerald-800 border-emerald-200";
 
-    const sections = useMemo(() => [
-        {
-            title: null,
-            items: [
-                { name: t("nav.dashboard", "Dashboard"), path: "/app/dashboard", icon: "🏠" },
-            ],
-        },
-        {
-            title: `📊 ${t("nav.analytics", "Analysen & Historie")}`,
-            items: [
-                { name: t("energy.energy_balance", "Energiebilanz"), path: "/app/energy", icon: "⚡" },
-                { name: t("nav.solar_forecast", "Solar-Prognose"), path: "/app/solarforecast", icon: "☀️" },
-                { name: t("nav.metrics", "Messwert-Explorer"), path: "/app/metrics", icon: "📈" },
-                {
-                    name: t("nav.alerts", "Alarmzentrale"),
-                    path: "/app/alerts",
-                    icon: "🚨",
-                    badge: alertCount > 0 ? alertCount : null,
-                    badgeClass: alertBadgeClass,
-                },
-            ],
-        },
-        {
-            title: `🏡 ${t("nav.assets_group", "Anlagen & Gebäude")}`,
-            items: [
-                {
-                    name: t("nav.all_devices", "Geräte"),
-                    path: "/app/devices",
-                    icon: "📟",
-                    badge: count > 0 ? count : null,
-                    isDeviceSetupBadge: true,
-                },
-                { name: t("nav.producers", "Erzeuger & Speicher"), path: "/app/producers", icon: "☀️" },
-                { name: t("nav.floors", "Etagen & Räume"), path: "/app/structure", icon: "🏢" },
-            ],
-        },
-        {
-            title: `⚙️ ${t("nav.settings_group", "System & Tarife")}`,
-            items: [
-                { name: t("nav.tariffs", "Strompreise & Tarife"), path: "/app/tariff", icon: "💶" },
-                { name: t("nav.billing", "Abonnement & Tarife"), path: "/app/billing", icon: "💳" },
-                { name: t("nav.mqtt_interfaces", "Schnittstellen & MQTT"), path: "/app/interfaces", icon: "📡" },
-                { name: t("nav.app_settings", "Einstellungen"), path: "/app/settings", icon: "⚙️" },
-            ],
-        },
-        {
+    const isStaffOrAdmin = Boolean(user?.is_staff || user?.is_superuser);
+    const isLandlordMode = user?.usage_mode === "hybrid" || user?.usage_mode === "landlord";
+
+    const sections = useMemo(() => {
+        const sec = [
+            {
+                title: null,
+                items: [
+                    { name: t("nav.dashboard", "Dashboard"), path: "/app/dashboard", icon: "🏠" },
+                ],
+            },
+            {
+                title: `📊 ${t("nav.analytics", "Analysen & Historie")}`,
+                items: [
+                    { name: t("energy.energy_balance", "Energiebilanz"), path: "/app/energy", icon: "⚡" },
+                    { name: t("nav.solar_forecast", "Solar-Prognose"), path: "/app/solarforecast", icon: "☀️" },
+                    { name: t("nav.metrics", "Messwert-Explorer"), path: "/app/metrics", icon: "📈" },
+                    {
+                        name: t("nav.alerts", "Alarmzentrale"),
+                        path: "/app/alerts",
+                        icon: "🚨",
+                        badge: alertCount > 0 ? alertCount : null,
+                        badgeClass: alertBadgeClass,
+                    },
+                ],
+            },
+            {
+                title: `🏡 ${t("nav.assets_group", "Anlagen & Gebäude")}`,
+                items: [
+                    {
+                        name: t("nav.all_devices", "Geräte"),
+                        path: "/app/devices",
+                        icon: "📟",
+                        badge: count > 0 ? count : null,
+                        isDeviceSetupBadge: true,
+                    },
+                    { name: t("nav.producers", "Erzeuger & Speicher"), path: "/app/producers", icon: "☀️" },
+                    { name: t("nav.floors", "Etagen & Räume"), path: "/app/structure", icon: "🏢" },
+                    ...(isLandlordMode && !isStaffOrAdmin
+                        ? [{ name: t("nav.tenant_management", "Mieter-Verwaltung"), path: "/app/tenant-management", icon: "👥" }]
+                        : []),
+                ],
+            },
+            {
+                title: `⚙️ ${t("nav.settings_group", "System & Tarife")}`,
+                items: [
+                    { name: t("nav.tariffs", "Strompreise & Tarife"), path: "/app/tariff", icon: "💶" },
+                    { name: t("nav.billing", "Abonnement & Tarife"), path: "/app/billing", icon: "💳" },
+                    { name: t("nav.mqtt_interfaces", "Schnittstellen & MQTT"), path: "/app/interfaces", icon: "📡" },
+                    { name: t("nav.app_settings", "Einstellungen"), path: "/app/settings", icon: "⚙️" },
+                ],
+            },
+        ];
+
+        // 🛡️ ADMIN & STAFF SECTION
+        if (isStaffOrAdmin) {
+            sec.push({
+                title: `🛡️ ${t("nav.admin_group", "Administration & Staff")}`,
+                items: [
+                    { name: t("nav.admin_dashboard", "Admin Dashboard"), path: "/app/admin/dashboard", icon: "📊" },
+                    { name: t("nav.admin_tracking", "Event & Tracking"), path: "/app/admin/tracking", icon: "📈" },
+                    { name: t("nav.tenant_management", "Mandanten & Mieter"), path: "/app/tenant-management", icon: "👥" },
+                    {
+                        name: "Django Backend",
+                        path: "/admin/",
+                        icon: "⚙️",
+                        isExternal: true,
+                    },
+                ],
+            });
+        }
+
+        sec.push({
             title: `📚 ${t("nav.help_group", "Support & Hilfe")}`,
             items: [
                 { name: t("nav.knowledge_base", "Wissensportal & FAQ"), path: "/app/help", icon: "📖" },
             ],
-        },
-    ], [t, count, alertCount, alertBadgeClass]);
+        });
+
+        return sec;
+    }, [t, count, alertCount, alertBadgeClass, isStaffOrAdmin, isLandlordMode]);
 
     return (
         <div className="w-64 bg-white border-r flex flex-col shrink-0">
@@ -107,46 +138,66 @@ export default function Sidebar() {
 
                         {/* Items */}
                         <div className="space-y-1">
-                            {section.items.map((item) => (
-                                <NavLink
-                                    key={item.path}
-                                    to={item.path}
-                                    className={({ isActive }) =>
-                                        `flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium transition ${isActive
-                                            ? "bg-indigo-50 text-indigo-700 font-semibold shadow-2xs"
-                                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                                        }`
-                                    }
-                                >
-                                    <div className="flex items-center gap-2.5 truncate">
-                                        <span className="text-base">{item.icon}</span>
-                                        <span className="truncate">{item.name}</span>
-                                    </div>
+                            {section.items.map((item) => {
+                                if (item.isExternal) {
+                                    return (
+                                        <a
+                                            key={item.path}
+                                            href={item.path}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition"
+                                        >
+                                            <div className="flex items-center gap-2.5 truncate">
+                                                <span className="text-base">{item.icon}</span>
+                                                <span className="truncate">{item.name}</span>
+                                            </div>
+                                            <span className="text-xs text-gray-400">↗</span>
+                                        </a>
+                                    );
+                                }
 
-                                    {/* Unconfigured Count Badge vs Alert Badge */}
-                                    {item.badge && (
-                                        item.isDeviceSetupBadge && isLoaded ? (
-                                            <button
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    e.stopPropagation();
-                                                    setOpenSetup(true);
-                                                }}
-                                                title="Unkonfigurierte Geräte einrichten"
-                                                className="text-[11px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full hover:bg-amber-200 transition"
-                                            >
-                                                {item.badge}
-                                            </button>
-                                        ) : (
-                                            <span
-                                                className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${item.badgeClass || "bg-indigo-100 text-indigo-800 border-indigo-200"}`}
-                                            >
-                                                {item.badge}
-                                            </span>
-                                        )
-                                    )}
-                                </NavLink>
-                            ))}
+                                return (
+                                    <NavLink
+                                        key={item.path}
+                                        to={item.path}
+                                        className={({ isActive }) =>
+                                            `flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium transition ${isActive
+                                                ? "bg-indigo-50 text-indigo-700 font-semibold shadow-2xs"
+                                                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                                            }`
+                                        }
+                                    >
+                                        <div className="flex items-center gap-2.5 truncate">
+                                            <span className="text-base">{item.icon}</span>
+                                            <span className="truncate">{item.name}</span>
+                                        </div>
+
+                                        {/* Unconfigured Count Badge vs Alert Badge */}
+                                        {item.badge && (
+                                            item.isDeviceSetupBadge && isLoaded ? (
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        setOpenSetup(true);
+                                                    }}
+                                                    title="Unkonfigurierte Geräte einrichten"
+                                                    className="text-[11px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full hover:bg-amber-200 transition"
+                                                >
+                                                    {item.badge}
+                                                </button>
+                                            ) : (
+                                                <span
+                                                    className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${item.badgeClass || "bg-indigo-100 text-indigo-800 border-indigo-200"}`}
+                                                >
+                                                    {item.badge}
+                                                </span>
+                                            )
+                                        )}
+                                    </NavLink>
+                                );
+                            })}
                         </div>
                     </div>
                 ))}
