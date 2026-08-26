@@ -264,7 +264,14 @@
     "residual_meter": "Pozostałe zużycie w domu",
     "direct_use": "Zużycie bezpośrednie",
     "cost_remaining": "Koszty sieciowe",
-    "savings_solar": "Oszczędności solarne"
+    "savings_solar": "Oszczędności solarne",
+    "empty_title": "Brak danych pomiarowych",
+    "empty_desc": "Podłącz swój inteligentny licznik, falownik, magazyn energii lub inteligentne gniazdka w sekcji 'Urządzenia', aby na żywo śledzić bilans energii i autarkię.",
+    "connect_devices": "Skonfiguruj urządzenia",
+    "no_submeters": "Brak skonfigurowanych odbiorników",
+    "no_submeters_desc": "Dodaj inteligentne gniazdka, ładowarki EV lub czujniki pompy ciepła w 'Urządzenia', aby szczegółowo analizować zużycie.",
+    "no_breakdown_data": "Brak podziału zużycia w wybranym okresie",
+    "no_timeseries_data": "Brak danych szeregów czasowych dla tego okresu"
   },
   "interfaces": {
     "title": "MQTT i interfejsy",
@@ -352,7 +359,11 @@
     "expected_today": "Oczekiwana produkcja dzisiaj",
     "expected_tomorrow": "Oczekiwana produkcja jutro",
     "peak_hour": "Szczytowa produkcja",
-    "forecast_chart": "Prognoza produkcji i model pogodowy"
+    "forecast_chart": "Prognoza produkcji i model pogodowy",
+    "empty_title": "Brak skonfigurowanej instalacji PV",
+    "empty_desc": "Skonfiguruj instalację fotowoltaiczną i stringi w sekcji 'Producenci i magazyny', aby obliczać prognozy oparte na pogodzie.",
+    "configure_pv": "Skonfiguruj instalację PV",
+    "no_accuracy_chart_data": "Brak danych dotyczących produkcji lub prognozy dla tego okresu."
   },
   "metrics": {
     "title": "Pomiary i kanały",

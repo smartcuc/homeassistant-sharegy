@@ -149,6 +149,32 @@ export default function EnergyDashboard() {
             </div>
 
             {/* =========================================================
+                EMPTY STATE / ONBOARDING BANNER
+            ========================================================= */}
+            {(!data.has_data && !balanceQuery.isLoading) && (
+                <div className="bg-linear-to-r from-indigo-500/10 via-amber-500/10 to-blue-500/10 border border-indigo-200/80 rounded-2xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div className="flex items-start gap-3.5">
+                        <span className="text-3xl p-2.5 bg-white rounded-xl shadow-2xs border border-indigo-100">⚡</span>
+                        <div>
+                            <h3 className="text-base font-bold text-gray-900">
+                                {t("energy.empty_title", "Noch keine Messdaten vorhanden")}
+                            </h3>
+                            <p className="text-sm text-gray-600 mt-1 max-w-2xl">
+                                {t("energy.empty_desc", "Verbinde deinen Smart Meter, Wechselrichter, Batteriespeicher oder Sensor-Steckdosen unter 'Geräte', um deine Energiebilanz, Autarkie und Sub-Metering-Diagramme live zu erfassen.")}
+                            </p>
+                        </div>
+                    </div>
+                    <a
+                        href="/app/devices"
+                        className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-xs transition whitespace-nowrap flex items-center gap-2 shrink-0"
+                    >
+                        <span>➕</span>
+                        <span>{t("energy.connect_devices", "Geräte einrichten")}</span>
+                    </a>
+                </div>
+            )}
+
+            {/* =========================================================
                 KPI HIGHLIGHTS
             ========================================================= */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
@@ -333,92 +359,104 @@ export default function EnergyDashboard() {
                 </div>
 
                 {/* Submeters Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {submeters.map((meter) => (
-                        <div
-                            key={meter.id}
-                            onClick={() => setSelectedTrendMeter(meter)}
-                            className={`p-5 rounded-2xl border transition shadow-2xs cursor-pointer group hover:scale-[1.01] ${meter.is_residual
-                                ? "bg-slate-50/70 border-dashed border-slate-300 hover:border-slate-400 hover:shadow-xs"
-                                : "bg-white border-gray-200 hover:border-indigo-300 hover:shadow-md"
-                                }`}
-                            title={t("submeters.click_to_open_trends", "Klick: Historische Zeitreihen & Trends öffnen")}
-                        >
-                            {/* Meter Header */}
-                            <div className="flex items-center justify-between gap-2">
-                                <div className="flex items-center gap-2.5 min-w-0">
-                                    <span className="text-2xl shrink-0 p-2 bg-slate-100 group-hover:bg-indigo-50 rounded-xl transition">
-                                        {meter.icon}
-                                    </span>
-                                    <div className="min-w-0">
-                                        <div className="font-bold text-sm text-gray-900 group-hover:text-indigo-600 transition truncate">
-                                            {meter.name}
-                                        </div>
-                                        <div className="text-[11px] text-gray-400 capitalize">{meter.category}</div>
-                                    </div>
-                                </div>
-                                <span
-                                    className="px-2.5 py-1 rounded-full text-xs font-bold text-white shrink-0 shadow-2xs"
-                                    style={{ backgroundColor: meter.color }}
-                                >
-                                    {meter.share_pct} %
-                                </span>
-                            </div>
-
-                            {/* Consumption & Costs */}
-                            <div className="mt-4 flex items-baseline justify-between border-b border-gray-100 pb-3">
-                                <div>
-                                    <div className="text-2xl font-black text-gray-900 font-mono">
-                                        {Number(meter.consumption_kwh).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}{" "}
-                                        <span className="text-xs font-normal text-gray-500">kWh</span>
-                                    </div>
-                                    <div className="text-[11px] text-gray-400">{t("submeters.period_consumption", "Verbrauch im Zeitraum")}</div>
-                                </div>
-                                <div className="text-right">
-                                    <div className="text-sm font-bold text-gray-800 font-mono">
-                                        {Number(meter.cost_eur || 0).toFixed(2)} €
-                                    </div>
-                                    <div className="text-[11px] text-emerald-600 font-medium">
-                                        -{Number(meter.savings_eur || 0).toFixed(2)} € Solar
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Solar vs. Grid Coverage Bar */}
-                            <div className="mt-3 space-y-1.5">
-                                <div className="flex justify-between text-[11px] font-medium">
-                                    <span className="text-emerald-700 flex items-center gap-1">
-                                        <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
-                                        {t("energy.solar_share", "Solarstrom")}: {meter.solar_share_pct.toFixed(0)}%
-                                    </span>
-                                    <span className="text-slate-500 flex items-center gap-1">
-                                        <span className="w-2 h-2 rounded-full bg-slate-400 inline-block" />
-                                        {t("energy.grid_share", "Netzstrom")}: {(100 - meter.solar_share_pct).toFixed(0)}%
-                                    </span>
-                                </div>
-
-                                <div className="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden flex">
-                                    <div
-                                        className="bg-emerald-500 h-full transition-all duration-500"
-                                        style={{ width: `${meter.solar_share_pct}%` }}
-                                        title={`Solarstrom: ${meter.solar_share_pct}%`}
-                                    />
-                                    <div
-                                        className="bg-slate-400 h-full transition-all duration-500"
-                                        style={{ width: `${100 - meter.solar_share_pct}%` }}
-                                        title={`Netzstrom: ${100 - meter.solar_share_pct}%`}
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Footer Link / Action Prompt */}
-                            <div className="mt-3 pt-2 border-t border-gray-100 flex items-center justify-between text-[11px] text-indigo-600 font-semibold opacity-0 group-hover:opacity-100 transition">
-                                <span>📈 Trends & Historie anzeigen</span>
-                                <span className="group-hover:translate-x-1 transition">→</span>
-                            </div>
+                {submeters.length === 0 ? (
+                    <div className="bg-slate-50/60 border border-dashed border-slate-300 rounded-2xl p-6 text-center space-y-2">
+                        <span className="text-2xl">🔌</span>
+                        <div className="font-bold text-gray-800 text-sm">
+                            {t("energy.no_submeters", "Keine Einzelverbraucher konfiguriert")}
                         </div>
-                    ))}
-                </div>
+                        <p className="text-xs text-gray-500 max-w-md mx-auto">
+                            {t("energy.no_submeters_desc", "Füge unter 'Geräte' smarte Steckdosen, Wallboxen oder Wärmepumpen-Sensoren hinzu, um Verbräuche hier separat aufzuschlüsseln.")}
+                        </p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {submeters.map((meter) => (
+                            <div
+                                key={meter.id}
+                                onClick={() => setSelectedTrendMeter(meter)}
+                                className={`p-5 rounded-2xl border transition shadow-2xs cursor-pointer group hover:scale-[1.01] ${meter.is_residual
+                                    ? "bg-slate-50/70 border-dashed border-slate-300 hover:border-slate-400 hover:shadow-xs"
+                                    : "bg-white border-gray-200 hover:border-indigo-300 hover:shadow-md"
+                                    }`}
+                                title={t("submeters.click_to_open_trends", "Klick: Historische Zeitreihen & Trends öffnen")}
+                            >
+                                {/* Meter Header */}
+                                <div className="flex items-center justify-between gap-2">
+                                    <div className="flex items-center gap-2.5 min-w-0">
+                                        <span className="text-2xl shrink-0 p-2 bg-slate-100 group-hover:bg-indigo-50 rounded-xl transition">
+                                            {meter.icon}
+                                        </span>
+                                        <div className="min-w-0">
+                                            <div className="font-bold text-sm text-gray-900 group-hover:text-indigo-600 transition truncate">
+                                                {meter.name}
+                                            </div>
+                                            <div className="text-[11px] text-gray-400 capitalize">{meter.category}</div>
+                                        </div>
+                                    </div>
+                                    <span
+                                        className="px-2.5 py-1 rounded-full text-xs font-bold text-white shrink-0 shadow-2xs"
+                                        style={{ backgroundColor: meter.color }}
+                                    >
+                                        {meter.share_pct} %
+                                    </span>
+                                </div>
+
+                                {/* Consumption & Costs */}
+                                <div className="mt-4 flex items-baseline justify-between border-b border-gray-100 pb-3">
+                                    <div>
+                                        <div className="text-2xl font-black text-gray-900 font-mono">
+                                            {Number(meter.consumption_kwh).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}{" "}
+                                            <span className="text-xs font-normal text-gray-500">kWh</span>
+                                        </div>
+                                        <div className="text-[11px] text-gray-400">{t("submeters.period_consumption", "Verbrauch im Zeitraum")}</div>
+                                    </div>
+                                    <div className="text-right">
+                                        <div className="text-sm font-bold text-gray-800 font-mono">
+                                            {Number(meter.cost_eur || 0).toFixed(2)} €
+                                        </div>
+                                        <div className="text-[11px] text-emerald-600 font-medium">
+                                            -{Number(meter.savings_eur || 0).toFixed(2)} € Solar
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Solar vs. Grid Coverage Bar */}
+                                <div className="mt-3 space-y-1.5">
+                                    <div className="flex justify-between text-[11px] font-medium">
+                                        <span className="text-emerald-700 flex items-center gap-1">
+                                            <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
+                                            {t("energy.solar_share", "Solarstrom")}: {meter.solar_share_pct.toFixed(0)}%
+                                        </span>
+                                        <span className="text-slate-500 flex items-center gap-1">
+                                            <span className="w-2 h-2 rounded-full bg-slate-400 inline-block" />
+                                            {t("energy.grid_share", "Netzstrom")}: {(100 - meter.solar_share_pct).toFixed(0)}%
+                                        </span>
+                                    </div>
+
+                                    <div className="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden flex">
+                                        <div
+                                            className="bg-emerald-500 h-full transition-all duration-500"
+                                            style={{ width: `${meter.solar_share_pct}%` }}
+                                            title={`Solarstrom: ${meter.solar_share_pct}%`}
+                                        />
+                                        <div
+                                            className="bg-slate-400 h-full transition-all duration-500"
+                                            style={{ width: `${100 - meter.solar_share_pct}%` }}
+                                            title={`Netzstrom: ${100 - meter.solar_share_pct}%`}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Footer Link / Action Prompt */}
+                                <div className="mt-3 pt-2 border-t border-gray-100 flex items-center justify-between text-[11px] text-indigo-600 font-semibold opacity-0 group-hover:opacity-100 transition">
+                                    <span>📈 Trends & Historie anzeigen</span>
+                                    <span className="group-hover:translate-x-1 transition">→</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
 
                 {/* Gestapelte historische Trendanalyse aller Zähler */}
                 <SubmeterStackedTrendChart
@@ -437,54 +475,60 @@ export default function EnergyDashboard() {
                         <span>📊</span> {t("energy.breakdown_title", "Verbrauchsaufteilung")}
                     </h3>
 
-                    <div className="flex flex-col sm:flex-row items-center gap-6">
-                        {/* Custom SVG Donut */}
-                        <div className="relative w-44 h-44 shrink-0 flex items-center justify-center">
-                            <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
-                                {donutSlices.map((item, idx) => (
-                                    <circle
-                                        key={idx}
-                                        cx="50"
-                                        cy="50"
-                                        r="40"
-                                        fill="transparent"
-                                        stroke={item.color}
-                                        strokeWidth="16"
-                                        strokeDasharray={item.strokeDasharray}
-                                        strokeDashoffset={item.strokeDashoffset}
-                                        className="transition-all duration-500 hover:opacity-80"
-                                    />
-                                ))}
-                            </svg>
-                            <div className="absolute text-center">
-                                <div className="text-xs text-gray-400 font-semibold uppercase">{t("energy_kpis.total_uppercase", "Gesamt")}</div>
-                                <div className="text-base font-black text-gray-900 font-mono">
-                                    {Number(kpis.house_consumption_kwh || 0).toFixed(1)}
+                    {breakdown.length === 0 ? (
+                        <div className="py-12 text-center text-gray-400 text-xs font-medium bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+                            {t("energy.no_breakdown_data", "Keine Verbrauchsaufteilung im gewählten Zeitraum")}
+                        </div>
+                    ) : (
+                        <div className="flex flex-col sm:flex-row items-center gap-6">
+                            {/* Custom SVG Donut */}
+                            <div className="relative w-44 h-44 shrink-0 flex items-center justify-center">
+                                <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
+                                    {donutSlices.map((item, idx) => (
+                                        <circle
+                                            key={idx}
+                                            cx="50"
+                                            cy="50"
+                                            r="40"
+                                            fill="transparent"
+                                            stroke={item.color}
+                                            strokeWidth="16"
+                                            strokeDasharray={item.strokeDasharray}
+                                            strokeDashoffset={item.strokeDashoffset}
+                                            className="transition-all duration-500 hover:opacity-80"
+                                        />
+                                    ))}
+                                </svg>
+                                <div className="absolute text-center">
+                                    <div className="text-xs text-gray-400 font-semibold uppercase">{t("energy_kpis.total_uppercase", "Gesamt")}</div>
+                                    <div className="text-base font-black text-gray-900 font-mono">
+                                        {Number(kpis.house_consumption_kwh || 0).toFixed(1)}
+                                    </div>
+                                    <div className="text-[10px] text-gray-500">kWh</div>
                                 </div>
-                                <div className="text-[10px] text-gray-500">kWh</div>
+                            </div>
+
+                            {/* Legend */}
+                            <div className="flex-1 w-full space-y-2">
+                                {breakdown.map((item, idx) => {
+                                    const total = breakdown.reduce((acc, b) => acc + b.value, 0) || 1;
+                                    const pct = ((item.value / total) * 100).toFixed(1);
+
+                                    return (
+                                        <div key={idx} className="flex items-center justify-between text-xs">
+                                            <div className="flex items-center gap-2 truncate">
+                                                <span className="w-3 h-3 rounded-md shrink-0" style={{ backgroundColor: item.color }} />
+                                                <span className="font-medium text-gray-700 truncate">{item.name}</span>
+                                            </div>
+                                            <div className="font-mono font-bold text-gray-900 shrink-0 ml-2">
+                                                {Number(item.value).toFixed(1)} kWh <span className="text-gray-400 font-normal">({pct}%)</span>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
-
-                        {/* Legend */}
-                        <div className="flex-1 w-full space-y-2">
-                            {breakdown.map((item, idx) => {
-                                const total = breakdown.reduce((acc, b) => acc + b.value, 0) || 1;
-                                const pct = ((item.value / total) * 100).toFixed(1);
-
-                                return (
-                                    <div key={idx} className="flex items-center justify-between text-xs">
-                                        <div className="flex items-center gap-2 truncate">
-                                            <span className="w-3 h-3 rounded-md shrink-0" style={{ backgroundColor: item.color }} />
-                                            <span className="font-medium text-gray-700 truncate">{item.name}</span>
-                                        </div>
-                                        <div className="font-mono font-bold text-gray-900 shrink-0 ml-2">
-                                            {Number(item.value).toFixed(1)} kWh <span className="text-gray-400 font-normal">({pct}%)</span>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
+                    )}
                 </div>
 
                 {/* 2. Energetische Mengenbilanz (In & Out Flussmatrix) */}
@@ -564,36 +608,42 @@ export default function EnergyDashboard() {
                 </div>
 
                 {/* Visual Bar Columns */}
-                <div className="pt-6 pb-2">
-                    <div className="h-48 flex items-end justify-between gap-2 border-b border-gray-200 pb-2">
-                        {timeseries.map((pt, idx) => {
-                            const pvHeight = (pt.pv / maxBarValue) * 100;
-                            const loadHeight = (pt.load / maxBarValue) * 100;
-
-                            return (
-                                <div key={idx} className="flex-1 flex flex-col items-center gap-1 h-full justify-end group">
-                                    <div className="w-full flex items-end justify-center gap-1 h-full">
-                                        {/* PV Bar */}
-                                        <div
-                                            className="w-1/2 max-w-[24px] bg-amber-400 rounded-t-sm transition-all duration-300 group-hover:bg-amber-500"
-                                            style={{ height: `${Math.max(pvHeight, 2)}%` }}
-                                            title={`${t("energy.production", "Erzeugung")}: ${pt.pv} kWh`}
-                                        />
-                                        {/* Load Bar */}
-                                        <div
-                                            className="w-1/2 max-w-[24px] bg-blue-500 rounded-t-sm transition-all duration-300 group-hover:bg-blue-600"
-                                            style={{ height: `${Math.max(loadHeight, 2)}%` }}
-                                            title={`${t("energy.consumption", "Verbrauch")}: ${pt.load} kWh`}
-                                        />
-                                    </div>
-                                    <span className="text-[10px] text-gray-400 font-mono mt-1 whitespace-nowrap truncate w-full text-center">
-                                        {pt.time}
-                                    </span>
-                                </div>
-                            );
-                        })}
+                {timeseries.length === 0 ? (
+                    <div className="py-12 text-center text-gray-400 text-xs font-medium bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+                        {t("energy.no_timeseries_data", "Keine Zeitreihendaten für diesen Zeitraum erfasst")}
                     </div>
-                </div>
+                ) : (
+                    <div className="pt-6 pb-2">
+                        <div className="h-48 flex items-end justify-between gap-2 border-b border-gray-200 pb-2">
+                            {timeseries.map((pt, idx) => {
+                                const pvHeight = (pt.pv / maxBarValue) * 100;
+                                const loadHeight = (pt.load / maxBarValue) * 100;
+
+                                return (
+                                    <div key={idx} className="flex-1 flex flex-col items-center gap-1 h-full justify-end group">
+                                        <div className="w-full flex items-end justify-center gap-1 h-full">
+                                            {/* PV Bar */}
+                                            <div
+                                                className="w-1/2 max-w-[24px] bg-amber-400 rounded-t-sm transition-all duration-300 group-hover:bg-amber-500"
+                                                style={{ height: `${Math.max(pvHeight, 2)}%` }}
+                                                title={`${t("energy.production", "Erzeugung")}: ${pt.pv} kWh`}
+                                            />
+                                            {/* Load Bar */}
+                                            <div
+                                                className="w-1/2 max-w-[24px] bg-blue-500 rounded-t-sm transition-all duration-300 group-hover:bg-blue-600"
+                                                style={{ height: `${Math.max(loadHeight, 2)}%` }}
+                                                title={`${t("energy.consumption", "Verbrauch")}: ${pt.load} kWh`}
+                                            />
+                                        </div>
+                                        <span className="text-[10px] text-gray-400 font-mono mt-1 whitespace-nowrap truncate w-full text-center">
+                                            {pt.time}
+                                        </span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* =========================================================

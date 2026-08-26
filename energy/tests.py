@@ -222,7 +222,16 @@ class SubmeterTrendsTest(TestCase):
     def test_submeter_trends_api_and_service(self):
         from energy.services.submeter_trends import get_submeter_trends
 
-        # 1. Service Test
+        # 1. Leerer Zustand Test
+        data_empty = get_submeter_trends(self.user, period="30d")
+        self.assertIn("meters", data_empty)
+        self.assertIn("timeseries", data_empty)
+
+        # 2. Mit Demodaten
+        self.client.force_login(self.user)
+        seed_resp = self.client.post("/api/energy/seed-demo/")
+        self.assertEqual(seed_resp.status_code, 200)
+
         data_30d = get_submeter_trends(self.user, period="30d")
         self.assertIn("meters", data_30d)
         self.assertIn("timeseries", data_30d)
@@ -230,8 +239,7 @@ class SubmeterTrendsTest(TestCase):
         self.assertIn("selected_meter", data_30d)
         self.assertIn("selected_timeseries", data_30d)
 
-        # 2. API Endpoint Test
-        self.client.force_login(self.user)
+        # 3. API Endpoint Test
         response = self.client.get("/api/energy/submeters/trends/?period=7d")
         self.assertEqual(response.status_code, 200)
         json_data = response.json()

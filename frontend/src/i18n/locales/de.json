@@ -264,7 +264,14 @@
     "residual_meter": "Restlicher Hausverbrauch",
     "direct_use": "Direktverbrauch",
     "cost_remaining": "Netzkosten",
-    "savings_solar": "Solar-Ersparnis"
+    "savings_solar": "Solar-Ersparnis",
+    "empty_title": "Noch keine Messdaten vorhanden",
+    "empty_desc": "Verbinde deinen Smart Meter, Wechselrichter, Batteriespeicher oder Sensor-Steckdosen unter 'Geräte', um deine Energiebilanz, Autarkie und Sub-Metering-Diagramme live zu erfassen.",
+    "connect_devices": "Geräte einrichten",
+    "no_submeters": "Keine Einzelverbraucher konfiguriert",
+    "no_submeters_desc": "Füge unter 'Geräte' smarte Steckdosen, Wallboxen oder Wärmepumpen-Sensoren hinzu, um Verbräuche hier separat aufzuschlüsseln.",
+    "no_breakdown_data": "Keine Verbrauchsaufteilung im gewählten Zeitraum",
+    "no_timeseries_data": "Keine Zeitreihendaten für diesen Zeitraum erfasst"
   },
   "interfaces": {
     "title": "MQTT & Schnittstellen",
@@ -352,7 +359,11 @@
     "expected_today": "Erwarteter Ertrag Heute",
     "expected_tomorrow": "Erwarteter Ertrag Morgen",
     "peak_hour": "Peak-Erzeugung",
-    "forecast_chart": "Erzeugungsprognose & Wettermodell"
+    "forecast_chart": "Erzeugungsprognose & Wettermodell",
+    "empty_title": "Keine PV-Anlage oder Ertragsdaten konfiguriert",
+    "empty_desc": "Richte deine Photovoltaikanlage und Strings unter 'Erzeuger & Speicher' ein, um standortgenaue Wetter- und Ertragsprognosen zu berechnen.",
+    "configure_pv": "PV-Anlage einrichten",
+    "no_accuracy_chart_data": "Noch keine Erzeugungs- oder Prognosedaten für diesen Zeitraum erfasst."
   },
   "metrics": {
     "title": "Messwerte & Kanäle",

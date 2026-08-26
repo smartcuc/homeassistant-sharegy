@@ -187,51 +187,57 @@ export default function SolarForecastAccuracyCard({ stringId = "all" }) {
                             </div>
 
                             {/* Chart Bars */}
-                            <div className="h-56 sm:h-64 flex items-end gap-1 sm:gap-2 pt-6 pb-2 px-2 overflow-x-auto">
-                                {points.map((pt, idx) => {
-                                    const actHeight = Math.max(Math.min((pt.actual_kwh / maxChartValue) * 100, 100), pt.actual_kwh > 0 ? 4 : 0);
-                                    const fcHeight = Math.max(Math.min((pt.forecast_kwh / maxChartValue) * 100, 100), pt.forecast_kwh > 0 ? 4 : 0);
+                            {points.length === 0 ? (
+                                <div className="py-12 text-center text-gray-400 text-xs font-medium bg-white/60 rounded-xl border border-dashed border-slate-200">
+                                    {t("forecast.no_accuracy_chart_data", "Noch keine Erzeugungs- oder Prognosedaten für diesen Zeitraum erfasst.")}
+                                </div>
+                            ) : (
+                                <div className="h-56 sm:h-64 flex items-end gap-1 sm:gap-2 pt-6 pb-2 px-2 overflow-x-auto">
+                                    {points.map((pt, idx) => {
+                                        const actHeight = Math.max(Math.min((pt.actual_kwh / maxChartValue) * 100, 100), pt.actual_kwh > 0 ? 4 : 0);
+                                        const fcHeight = Math.max(Math.min((pt.forecast_kwh / maxChartValue) * 100, 100), pt.forecast_kwh > 0 ? 4 : 0);
 
-                                    return (
-                                        <div
-                                            key={idx}
-                                            className="flex-1 min-w-[28px] sm:min-w-[34px] flex flex-col items-center justify-end h-full group relative"
-                                        >
-                                            {/* Hover Tooltip */}
-                                            <div className="absolute -top-12 z-20 hidden group-hover:flex flex-col items-center pointer-events-none transition-all duration-150">
-                                                <div className="bg-slate-900 text-white text-[11px] font-semibold py-1 px-2.5 rounded-lg shadow-xl whitespace-nowrap border border-slate-700 flex items-center gap-2">
-                                                    <span>⏰ {pt.time_str}</span>
-                                                    <span className="text-amber-400">☀️ Ist: {formatNumber(pt.actual_kwh, 2)} kWh</span>
-                                                    <span className="text-indigo-300">⛅ Soll: {formatNumber(pt.forecast_kwh, 2)} kWh</span>
-                                                    {pt.accuracy_pct !== null && (
-                                                        <span className="text-emerald-400 font-bold">🎯 {pt.accuracy_pct}%</span>
-                                                    )}
+                                        return (
+                                            <div
+                                                key={idx}
+                                                className="flex-1 min-w-[28px] sm:min-w-[34px] flex flex-col items-center justify-end h-full group relative"
+                                            >
+                                                {/* Hover Tooltip */}
+                                                <div className="absolute -top-12 z-20 hidden group-hover:flex flex-col items-center pointer-events-none transition-all duration-150">
+                                                    <div className="bg-slate-900 text-white text-[11px] font-semibold py-1 px-2.5 rounded-lg shadow-xl whitespace-nowrap border border-slate-700 flex items-center gap-2">
+                                                        <span>⏰ {pt.time_str}</span>
+                                                        <span className="text-amber-400">☀️ Ist: {formatNumber(pt.actual_kwh, 2)} kWh</span>
+                                                        <span className="text-indigo-300">⛅ Soll: {formatNumber(pt.forecast_kwh, 2)} kWh</span>
+                                                        {pt.accuracy_pct !== null && (
+                                                            <span className="text-emerald-400 font-bold">🎯 {pt.accuracy_pct}%</span>
+                                                        )}
+                                                    </div>
+                                                    <div className="w-2 h-2 bg-slate-900 rotate-45 -mt-1" />
                                                 </div>
-                                                <div className="w-2 h-2 bg-slate-900 rotate-45 -mt-1" />
-                                            </div>
 
-                                            {/* Dual Bars Visualization */}
-                                            <div className="w-full h-full flex items-end justify-center gap-0.5 sm:gap-1 px-0.5">
-                                                {/* Actual Bar (Amber) */}
-                                                <div
-                                                    style={{ height: `${actHeight}%` }}
-                                                    className="w-1/2 bg-gradient-to-t from-amber-500 to-amber-400 rounded-t-sm transition-all duration-300 hover:brightness-110 shadow-2xs"
-                                                />
-                                                {/* Forecast Bar (Indigo/Cyan) */}
-                                                <div
-                                                    style={{ height: `${fcHeight}%` }}
-                                                    className="w-1/2 bg-gradient-to-t from-indigo-500/80 to-indigo-400/70 border border-indigo-400/50 rounded-t-sm transition-all duration-300 hover:brightness-110"
-                                                />
-                                            </div>
+                                                {/* Dual Bars Visualization */}
+                                                <div className="w-full h-full flex items-end justify-center gap-0.5 sm:gap-1 px-0.5">
+                                                    {/* Actual Bar (Amber) */}
+                                                    <div
+                                                        style={{ height: `${actHeight}%` }}
+                                                        className="w-1/2 bg-gradient-to-t from-amber-500 to-amber-400 rounded-t-sm transition-all duration-300 hover:brightness-110 shadow-2xs"
+                                                    />
+                                                    {/* Forecast Bar (Indigo/Cyan) */}
+                                                    <div
+                                                        style={{ height: `${fcHeight}%` }}
+                                                        className="w-1/2 bg-gradient-to-t from-indigo-600 to-cyan-500 rounded-t-sm transition-all duration-300 hover:brightness-110 shadow-2xs"
+                                                    />
+                                                </div>
 
-                                            {/* X-Axis Label */}
-                                            <div className="text-[10px] text-gray-500 mt-1 font-mono tracking-tighter truncate w-full text-center">
-                                                {pt.time_str}
+                                                {/* Time Label */}
+                                                <span className="text-[10px] text-gray-400 font-mono mt-1 whitespace-nowrap truncate w-full text-center">
+                                                    {pt.time_str}
+                                                </span>
                                             </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
                         </div>
 
                         {/* Insights & Self-Learning Feedback Loop */}

@@ -82,8 +82,25 @@ export default function ForecastPage() {
             {!query.isLoading && !query.isError && (
                 <>
                     {!points.length && (
-                        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-yellow-800">
-                            ⚠️ {t("forecast.no_data", "Keine Forecast-Daten verfügbar. Führe ein Update der Wetterprognose durch.")}
+                        <div className="bg-linear-to-r from-amber-500/10 via-orange-500/10 to-yellow-500/10 border border-amber-200/80 rounded-2xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                            <div className="flex items-start gap-3.5">
+                                <span className="text-3xl p-2.5 bg-white rounded-xl shadow-2xs border border-amber-100">☀️</span>
+                                <div>
+                                    <h3 className="text-base font-bold text-gray-900">
+                                        {t("forecast.empty_title", "Keine PV-Anlage oder Ertragsdaten konfiguriert")}
+                                    </h3>
+                                    <p className="text-sm text-gray-600 mt-1 max-w-2xl">
+                                        {t("forecast.empty_desc", "Richte deine Photovoltaikanlage und Strings unter 'Erzeuger & Speicher' ein, um standortgenaue Wetter- und Ertragsprognosen zu berechnen.")}
+                                    </p>
+                                </div>
+                            </div>
+                            <a
+                                href="/app/producers"
+                                className="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold rounded-xl shadow-xs transition whitespace-nowrap flex items-center gap-2 shrink-0"
+                            >
+                                <span>➕</span>
+                                <span>{t("forecast.configure_pv", "PV-Anlage einrichten")}</span>
+                            </a>
                         </div>
                     )}
 

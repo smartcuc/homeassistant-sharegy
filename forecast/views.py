@@ -413,10 +413,19 @@ def home_solar_forecast(request):
 
     user_homes = request.user.homes.all()
     if not user_homes.exists():
-        if request.user.is_staff:
-            home = Home.objects.first()
-        else:
-            return Response({"error": "No home configured"}, status=404)
+        return Response({
+            "home_id": None,
+            "home_name": "Mein Zuhause",
+            "source": source,
+            "hours": hours,
+            "strings": [],
+            "selected_string_id": "all",
+            "total_kwh": 0.0,
+            "peak_kwh": 0.0,
+            "peak_time": None,
+            "points": [],
+            "has_pv": False,
+        })
     else:
         if home_id:
             home = user_homes.filter(id=home_id).first() or user_homes.first()
@@ -432,7 +441,19 @@ def home_solar_forecast(request):
     )
 
     if not strings:
-        strings = list(GeneratorString.objects.all().select_related("generator", "orientation"))
+        return Response({
+            "home_id": str(home.id),
+            "home_name": home.name,
+            "source": source,
+            "hours": hours,
+            "strings": [],
+            "selected_string_id": "all",
+            "total_kwh": 0.0,
+            "peak_kwh": 0.0,
+            "peak_time": None,
+            "points": [],
+            "has_pv": False,
+        })
 
     if string_id and string_id != "all":
         target_strings = [s for s in strings if str(s.id) == str(string_id)]

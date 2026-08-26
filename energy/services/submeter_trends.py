@@ -73,6 +73,8 @@ def get_submeter_trends(user, period: str = "30d", meter_id: str = None) -> dict
         else 0.32
     )
 
+    tariff_label = f"Festpreis ({base_elec_price * 100:.1f} ct/kWh)" if tariff_type == "static" else "Dynamisch (EPEX Spot)"
+
     spot_prices_map = {}
     if tariff_type == HomeTariff.TARIFF_DYNAMIC:
         spot_qs = SpotPrice.objects.filter(
@@ -165,44 +167,16 @@ def get_submeter_trends(user, period: str = "30d", meter_id: str = None) -> dict
                 "color": color_palette[idx % len(color_palette)],
                 "is_residual": False,
             })
-    else:
-        # Standard-Submeter für Demo/Haushalte ohne Einzelsensoren
-        meters_meta = [
-            {
-                "id": "sub_wallbox",
-                "name": "Wallbox (E-Auto)",
-                "icon": "🚗",
-                "category": "mobility",
-                "color": "#6366f1",
-                "is_residual": False,
-            },
-            {
-                "id": "sub_heatpump",
-                "name": "Wärmepumpe & Warmwasser",
-                "icon": "♨️",
-                "category": "heating",
-                "color": "#f59e0b",
-                "is_residual": False,
-            },
-            {
-                "id": "sub_kitchen",
-                "name": "Küche & Großgeräte",
-                "icon": "🍳",
-                "category": "kitchen",
-                "color": "#10b981",
-                "is_residual": False,
-            },
-        ]
 
-    # Residual-Zähler immer ergänzen
-    meters_meta.append({
-        "id": "residual",
-        "name": "Restlicher Hausverbrauch (Grundlast)",
-        "icon": "💡",
-        "category": "residual",
-        "color": "#94a3b8",
-        "is_residual": True,
-    })
+        # Residual-Zähler ergänzen wenn Verbraucher existieren
+        meters_meta.append({
+            "id": "residual",
+            "name": "Restlicher Hausverbrauch (Grundlast)",
+            "icon": "💡",
+            "category": "residual",
+            "color": "#94a3b8",
+            "is_residual": True,
+        })
 
     # 6. Zeitreihen auswerten & per-Meter Statistiken aufbauen
     timeseries = []
@@ -216,22 +190,21 @@ def get_submeter_trends(user, period: str = "30d", meter_id: str = None) -> dict
         "peak_date": "",
     })
 
-    # Fallback-Generierung bei leerer Historie (Demo-Haushalt)
     has_real_metrics = len(metric_rows) > 0
 
-    for b_idx, b_key in enumerate(bucket_order):
-        b_entry = bucket_data[b_key]
-        tariff_price = b_entry["tariff_price_eur"]
+    if meters_meta and has_real_metrics:
+        for b_idx, b_key in enumerate(bucket_order):
+            b_entry = bucket_data[b_key]
+            tariff_price = b_entry["tariff_price_eur"]
 
-        ts_point = {
-            "date": b_key,
-            "meters": {},
-            "total_load_kwh": 0.0,
-            "total_solar_covered_kwh": 0.0,
-            "total_grid_kwh": 0.0,
-        }
+            ts_point = {
+                "date": b_key,
+                "meters": {},
+                "total_load_kwh": 0.0,
+                "total_solar_covered_kwh": 0.0,
+                "total_grid_kwh": 0.0,
+            }
 
-        if has_real_metrics:
             pv_kwh = b_entry["pv_kwh"]
             batt_discharge = b_entry["battery_discharge_kwh"]
             solar_available = pv_kwh + batt_discharge
@@ -278,59 +251,10 @@ def get_submeter_trends(user, period: str = "30d", meter_id: str = None) -> dict
                 ts_point["total_solar_covered_kwh"] += m_solar
                 ts_point["total_grid_kwh"] += m_grid
 
-        else:
-            # Realistische Demo-Simulation für Trends
-            import math
-            day_cycle = math.sin((b_idx + 1) * 0.45)
-            wb_kwh = max(0.0, round(3.8 + 2.5 * day_cycle, 2))
-            hp_kwh = max(0.0, round(2.9 + 1.2 * math.cos((b_idx + 1) * 0.35), 2))
-            kit_kwh = max(0.0, round(1.8 + 0.8 * math.sin((b_idx + 1) * 0.2), 2))
-            res_kwh = max(0.0, round(3.2 + 0.5 * math.cos((b_idx + 1) * 0.1), 2))
-            tot_kwh = wb_kwh + hp_kwh + kit_kwh + res_kwh
-
-            solar_cov = 0.68 if (b_idx % 4 != 0) else 0.42
-
-            demo_values = {
-                "sub_wallbox": wb_kwh,
-                "sub_heatpump": hp_kwh,
-                "sub_kitchen": kit_kwh,
-                "residual": res_kwh,
-            }
-
-            for m in meters_meta:
-                m_id = m["id"]
-                m_kwh = demo_values.get(m_id, res_kwh)
-                m_solar = round(m_kwh * solar_cov, 2)
-                m_grid = round(m_kwh * (1.0 - solar_cov), 2)
-                m_cost = round(m_grid * base_elec_price, 2)
-                m_savings = round(m_solar * base_elec_price, 2)
-
-                ts_point["meters"][m_id] = {
-                    "kwh": m_kwh,
-                    "solar_kwh": m_solar,
-                    "grid_kwh": m_grid,
-                    "cost_eur": m_cost,
-                    "savings_eur": m_savings,
-                }
-
-                stats = meter_totals[m_id]
-                stats["total_kwh"] += m_kwh
-                stats["solar_kwh"] += m_solar
-                stats["grid_kwh"] += m_grid
-                stats["cost_eur"] += m_cost
-                stats["savings_eur"] += m_savings
-                if m_kwh > stats["peak_kwh"]:
-                    stats["peak_kwh"] = m_kwh
-                    stats["peak_date"] = b_key
-
-                ts_point["total_load_kwh"] += m_kwh
-                ts_point["total_solar_covered_kwh"] += m_solar
-                ts_point["total_grid_kwh"] += m_grid
-
-        ts_point["total_load_kwh"] = round(ts_point["total_load_kwh"], 2)
-        ts_point["total_solar_covered_kwh"] = round(ts_point["total_solar_covered_kwh"], 2)
-        ts_point["total_grid_kwh"] = round(ts_point["total_grid_kwh"], 2)
-        timeseries.append(ts_point)
+            ts_point["total_load_kwh"] = round(ts_point["total_load_kwh"], 2)
+            ts_point["total_solar_covered_kwh"] = round(ts_point["total_solar_covered_kwh"], 2)
+            ts_point["total_grid_kwh"] = round(ts_point["total_grid_kwh"], 2)
+            timeseries.append(ts_point)
 
     # 7. Aggregierte Übersichtskarten für jeden Zähler berechnen
     days_count = max(1, len(timeseries))
@@ -388,6 +312,8 @@ def get_submeter_trends(user, period: str = "30d", meter_id: str = None) -> dict
     return {
         "period": period,
         "period_label": period_label,
+        "days_count": days_count,
+        "tariff_label": tariff_label,
         "meters": meters_summary,
         "timeseries": timeseries,
         "selected_meter": selected_meta,

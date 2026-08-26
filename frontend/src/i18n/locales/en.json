@@ -264,7 +264,14 @@
     "residual_meter": "Residual Household Demand",
     "direct_use": "Direct Consumption",
     "cost_remaining": "Grid Cost",
-    "savings_solar": "Solar Savings"
+    "savings_solar": "Solar Savings",
+    "empty_title": "No telemetry or measurement data yet",
+    "empty_desc": "Connect your smart meter, solar inverter, battery storage, or smart plugs under 'Devices' to track your energy balance, autarky, and sub-metering charts live.",
+    "connect_devices": "Set Up Devices",
+    "no_submeters": "No sub-metered consumers configured",
+    "no_submeters_desc": "Add smart sockets, EV wallboxes, or heat pump sensors under 'Devices' to break down your household consumption here.",
+    "no_breakdown_data": "No consumption breakdown for the selected period",
+    "no_timeseries_data": "No time series data recorded for this period"
   },
   "interfaces": {
     "title": "MQTT & Interfaces",
@@ -352,7 +359,11 @@
     "expected_today": "Expected Yield Today",
     "expected_tomorrow": "Expected Yield Tomorrow",
     "peak_hour": "Peak Generation",
-    "forecast_chart": "Generation Forecast & Weather Model"
+    "forecast_chart": "Generation Forecast & Weather Model",
+    "empty_title": "No PV system or yield data configured",
+    "empty_desc": "Set up your photovoltaic system and strings under 'Producers & Storage' to enable location-based AI weather and yield forecasts.",
+    "configure_pv": "Set Up PV System",
+    "no_accuracy_chart_data": "No generation or forecast data recorded for this period yet."
   },
   "metrics": {
     "title": "Metrics & Channels",

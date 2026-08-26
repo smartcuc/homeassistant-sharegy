@@ -154,10 +154,15 @@ def get_solar_forecast_accuracy(user_or_home, period: str = "today", string_id: 
         wape = total_abs_diff / denom
         accuracy_percent = round(max(0.0, min(100.0, (1.0 - wape) * 100.0)), 1)
     else:
-        accuracy_percent = 95.0 if points else 0.0
+        accuracy_percent = 0.0
 
     # 7. Güte-Klassifikation & Bewertung
-    if accuracy_percent >= 90.0:
+    if total_actual == 0 and total_forecast == 0:
+        rating = "no_data"
+        rating_label = "Keine Daten"
+        rating_desc = "Noch keine Mess- oder Prognosedaten für diesen Zeitraum vorhanden."
+        badge_color = "gray"
+    elif accuracy_percent >= 90.0:
         rating = "excellent"
         rating_label = "Hervorragend"
         rating_desc = "Die Solar-Prognose stimmt nahezu perfekt mit den Messwerten überein."
@@ -175,7 +180,9 @@ def get_solar_forecast_accuracy(user_or_home, period: str = "today", string_id: 
 
     # 8. Intelligente Erkenntnisse & Kalibrierungs-Tipps
     insights = []
-    if accuracy_percent >= 90.0:
+    if total_actual == 0 and total_forecast == 0:
+        insights.append("Noch keine Messdaten vorhanden. Sobald deine PV-Anlage Strom erzeugt, wird hier die Prognosegüte analysiert.")
+    elif accuracy_percent >= 90.0:
         insights.append(f"🎯 Exzellente Trefferquote von {accuracy_percent}% für diesen Zeitraum.")
     else:
         insights.append(f"📊 Aktuelle Prognosegenauigkeit: {accuracy_percent}%.")
@@ -184,7 +191,7 @@ def get_solar_forecast_accuracy(user_or_home, period: str = "today", string_id: 
         insights.append(f"☀️ Mehrertrag: Die Solaranlage hat {abs(delta_kwh):.2f} kWh (+{abs(delta_percent):.1f}%) mehr erzeugt als vorhergesagt.")
     elif delta_kwh < -0.5:
         insights.append(f"⛅ Minderertrag: Die Erzeugung lag um {abs(delta_kwh):.2f} kWh (-{abs(delta_percent):.1f}%) unter der Wetterprognose.")
-    else:
+    elif total_actual > 0 or total_forecast > 0:
         insights.append("⚖️ Punktlandung: Die kumulierte Gesamterzeugung deckt sich mit der Prognose.")
 
     calib_factor = round((total_actual / total_forecast), 3) if total_forecast > 0 else 1.000

@@ -192,16 +192,21 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
     total_grid_kwh = sum(device_energy_sum[d_id] for d_id in grid_device_ids)
     total_measured_consumer_kwh = sum(device_energy_sum[d.id] for d in consumer_devices)
 
-    # Fallbacks für neue oder Demo-Haushalte
-    if total_pv_kwh == 0 and total_measured_consumer_kwh == 0 and total_grid_kwh == 0:
-        days_factor = 1.0 if period == "today" else (7.0 if period == "7d" else (30.0 if period == "30d" else 365.0))
-        total_pv_kwh = round(16.5 * days_factor, 2)
-        total_house_consumption_kwh = round(13.2 * days_factor, 2)
-        total_battery_discharge_kwh = round(4.2 * days_factor, 2)
-        total_battery_charge_kwh = round(4.8 * days_factor, 2)
-        total_grid_import_kwh = round(2.5 * days_factor, 2)
-        total_grid_export_kwh = round(8.3 * days_factor, 2)
-        direct_consumption_kwh = round(6.5 * days_factor, 2)
+    has_devices = len(devices) > 0
+    has_data = (total_pv_kwh > 0 or total_measured_consumer_kwh > 0 or total_grid_kwh > 0 or len(metric_rows) > 0)
+
+    if not has_data:
+        total_pv_kwh = 0.0
+        total_house_consumption_kwh = 0.0
+        total_battery_discharge_kwh = 0.0
+        total_battery_charge_kwh = 0.0
+        total_grid_import_kwh = 0.0
+        total_grid_export_kwh = 0.0
+        direct_consumption_kwh = 0.0
+        solar_supplied_kwh = 0.0
+        self_consumption_kwh = 0.0
+        autarky_rate = 0.0
+        self_consumption_rate = 0.0
     else:
         total_battery_discharge_kwh = round(total_battery_charge_kwh * 0.9, 2)
         total_grid_import_kwh = round(max(0.0, total_grid_kwh), 2)
@@ -211,14 +216,14 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
         if total_house_consumption_kwh < total_measured_consumer_kwh:
             total_house_consumption_kwh = total_measured_consumer_kwh
 
-    # Autarkie & Eigenverbrauch
-    solar_supplied_kwh = direct_consumption_kwh + total_battery_discharge_kwh
-    autarky_rate = round((solar_supplied_kwh / total_house_consumption_kwh * 100.0), 1) if total_house_consumption_kwh > 0 else 0.0
-    autarky_rate = min(100.0, max(0.0, autarky_rate))
+        # Autarkie & Eigenverbrauch
+        solar_supplied_kwh = direct_consumption_kwh + total_battery_discharge_kwh
+        autarky_rate = round((solar_supplied_kwh / total_house_consumption_kwh * 100.0), 1) if total_house_consumption_kwh > 0 else 0.0
+        autarky_rate = min(100.0, max(0.0, autarky_rate))
 
-    self_consumption_kwh = direct_consumption_kwh + total_battery_charge_kwh
-    self_consumption_rate = round((self_consumption_kwh / total_pv_kwh * 100.0), 1) if total_pv_kwh > 0 else 0.0
-    self_consumption_rate = min(100.0, max(0.0, self_consumption_rate))
+        self_consumption_kwh = direct_consumption_kwh + total_battery_charge_kwh
+        self_consumption_rate = round((self_consumption_kwh / total_pv_kwh * 100.0), 1) if total_pv_kwh > 0 else 0.0
+        self_consumption_rate = min(100.0, max(0.0, self_consumption_rate))
 
     # =========================================================================
     # 2.5 Tarif-, Börsenpreis- und Einspeisevergütungs-Berechnung (Zeitgenau nach Datum)
@@ -329,82 +334,48 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
     submeters = []
     color_palette = ["#6366f1", "#f59e0b", "#10b981", "#ec4899", "#8b5cf6", "#06b6d4", "#f97316"]
     color_idx = 0
-
     running_measured_kwh = 0.0
 
-    for dev in consumer_devices:
-        dev_kwh = round(device_energy_sum[dev.id], 2)
-        if dev_kwh <= 0 and total_house_consumption_kwh > 0:
-            dev_kwh = round(total_house_consumption_kwh * 0.25, 2)
+    if has_data and total_house_consumption_kwh > 0:
+        for dev in consumer_devices:
+            dev_kwh = round(device_energy_sum[dev.id], 2)
+            running_measured_kwh += dev_kwh
+            share_pct = round((dev_kwh / total_house_consumption_kwh * 100.0), 1) if total_house_consumption_kwh > 0 else 0.0
+            dev_name = get_device_name(dev)
+            icon, category = get_consumer_icon_and_category(dev_name, "consumer")
 
-        running_measured_kwh += dev_kwh
-        share_pct = round((dev_kwh / total_house_consumption_kwh * 100.0), 1) if total_house_consumption_kwh > 0 else 0.0
-        dev_name = get_device_name(dev)
-        icon, category = get_consumer_icon_and_category(dev_name, "consumer")
+            submeters.append({
+                "id": dev.id,
+                "name": dev_name,
+                "icon": icon,
+                "category": category,
+                "consumption_kwh": dev_kwh,
+                "share_pct": share_pct,
+                "solar_share_pct": autarky_rate,
+                "cost_eur": round(dev_kwh * ((100 - autarky_rate) / 100.0) * elec_price, 2),
+                "savings_eur": round(dev_kwh * (autarky_rate / 100.0) * elec_price, 2),
+                "color": color_palette[color_idx % len(color_palette)],
+                "is_residual": False,
+            })
+            color_idx += 1
 
-        submeters.append({
-            "id": dev.id,
-            "name": dev_name,
-            "icon": icon,
-            "category": category,
-            "consumption_kwh": dev_kwh,
-            "share_pct": share_pct,
-            "solar_share_pct": autarky_rate,
-            "cost_eur": round(dev_kwh * ((100 - autarky_rate) / 100.0) * elec_price, 2),
-            "savings_eur": round(dev_kwh * (autarky_rate / 100.0) * elec_price, 2),
-            "color": color_palette[color_idx % len(color_palette)],
-            "is_residual": False,
-        })
-        color_idx += 1
-
-    # Automatischer Residual-Zähler (Restlicher Hausverbrauch)
-    residual_kwh = round(max(0.0, total_house_consumption_kwh - running_measured_kwh), 2)
-    if not submeters or residual_kwh > 0:
-        if not submeters and total_house_consumption_kwh > 0:
-            submeters.extend([
-                {
-                    "id": "sub_wallbox",
-                    "name": "Wallbox (E-Auto)",
-                    "icon": "🚗",
-                    "category": "mobility",
-                    "consumption_kwh": round(total_house_consumption_kwh * 0.42, 2),
-                    "share_pct": 42.0,
-                    "solar_share_pct": min(100.0, autarky_rate + 8.0),
-                    "cost_eur": round(total_house_consumption_kwh * 0.42 * elec_price * ((100 - autarky_rate) / 100.0), 2),
-                    "savings_eur": round(total_house_consumption_kwh * 0.42 * elec_price * (autarky_rate / 100.0), 2),
-                    "color": "#6366f1",
-                    "is_residual": False,
-                },
-                {
-                    "id": "sub_heatpump",
-                    "name": "Wärmepumpe & Warmwasser",
-                    "icon": "♨️",
-                    "category": "heating",
-                    "consumption_kwh": round(total_house_consumption_kwh * 0.28, 2),
-                    "share_pct": 28.0,
-                    "solar_share_pct": max(0.0, autarky_rate - 5.0),
-                    "cost_eur": round(total_house_consumption_kwh * 0.28 * elec_price * ((100 - autarky_rate) / 100.0), 2),
-                    "savings_eur": round(total_house_consumption_kwh * 0.28 * elec_price * (autarky_rate / 100.0), 2),
-                    "color": "#f59e0b",
-                    "is_residual": False,
-                },
-            ])
-            residual_kwh = round(total_house_consumption_kwh * 0.30, 2)
-
-        residual_share = round((residual_kwh / total_house_consumption_kwh * 100.0), 1) if total_house_consumption_kwh > 0 else 0.0
-        submeters.append({
-            "id": "residual",
-            "name": "Restlicher Hausverbrauch (Grundlast)",
-            "icon": "💡",
-            "category": "residual",
-            "consumption_kwh": residual_kwh,
-            "share_pct": residual_share,
-            "solar_share_pct": autarky_rate,
-            "cost_eur": round(residual_kwh * ((100 - autarky_rate) / 100.0) * elec_price, 2),
-            "savings_eur": round(residual_kwh * (autarky_rate / 100.0) * elec_price, 2),
-            "color": "#94a3b8",
-            "is_residual": True,
-        })
+        # Automatischer Residual-Zähler (Restlicher Hausverbrauch)
+        residual_kwh = round(max(0.0, total_house_consumption_kwh - running_measured_kwh), 2)
+        if residual_kwh > 0 or not submeters:
+            residual_share = round((residual_kwh / total_house_consumption_kwh * 100.0), 1) if total_house_consumption_kwh > 0 else 0.0
+            submeters.append({
+                "id": "residual",
+                "name": "Restlicher Hausverbrauch (Grundlast)",
+                "icon": "💡",
+                "category": "residual",
+                "consumption_kwh": residual_kwh,
+                "share_pct": residual_share,
+                "solar_share_pct": autarky_rate,
+                "cost_eur": round(residual_kwh * ((100 - autarky_rate) / 100.0) * elec_price, 2),
+                "savings_eur": round(residual_kwh * (autarky_rate / 100.0) * elec_price, 2),
+                "color": "#94a3b8",
+                "is_residual": True,
+            })
 
     # Donut Chart Data
     breakdown_data = [
@@ -424,40 +395,36 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
                 "grid_import": round(vals["grid_import"], 2),
                 "grid_export": round(vals["grid_export"], 2),
             })
-    else:
-        sample_points = 8 if period == "today" else 7
-        for i in range(sample_points):
-            t_label = f"{i*3:02d}:00" if period == "today" else f"Tag {i+1}"
-            timeseries_data.append({
-                "time": t_label,
-                "pv": round(total_pv_kwh / sample_points, 2),
-                "load": round(total_house_consumption_kwh / sample_points, 2),
-                "battery_discharge": round(total_battery_discharge_kwh / sample_points, 2),
-                "grid_import": round(total_grid_import_kwh / sample_points, 2),
-                "grid_export": round(total_grid_export_kwh / sample_points, 2),
-            })
 
     # Insights
     insights = []
-    if autarky_rate >= 75.0:
-        insights.append(f"Exzellente Autarkie: {autarky_rate} % deines Strombedarfs stammten im Zeitraum aus eigener Solarenergie.")
-    elif autarky_rate >= 50.0:
-        insights.append(f"Gute Eigenversorgung: {autarky_rate} % solarer Deckungsgrad im gewählten Zeitraum.")
+    if not has_data:
+        insights.append("Noch keine Messdaten für diesen Zeitraum vorhanden. Verbinde deine Geräte unter 'Geräte', um deine Energieflüsse live zu erfassen.")
     else:
-        insights.append(f"Hoher Netzbezug: Nur {autarky_rate} % deines Strombedarfs wurden durch PV/Speicher gedeckt.")
+        if autarky_rate >= 75.0:
+            insights.append(f"Exzellente Autarkie: {autarky_rate} % deines Strombedarfs stammten im Zeitraum aus eigener Solarenergie.")
+        elif autarky_rate >= 50.0:
+            insights.append(f"Gute Eigenversorgung: {autarky_rate} % solarer Deckungsgrad im gewählten Zeitraum.")
+        else:
+            insights.append(f"Hoher Netzbezug: Nur {autarky_rate} % deines Strombedarfs wurden durch PV/Speicher gedeckt.")
 
-    top_consumer = max(submeters, key=lambda s: s["consumption_kwh"]) if submeters else None
-    if top_consumer and not top_consumer.get("is_residual"):
-        insights.append(f"Größter Verbraucher: {top_consumer['name']} mit {top_consumer['share_pct']} % des Gesamtstroms ({top_consumer['solar_share_pct']}% Solaranteil).")
+        top_consumer = max(submeters, key=lambda s: s["consumption_kwh"]) if submeters else None
+        if top_consumer and not top_consumer.get("is_residual") and top_consumer["consumption_kwh"] > 0:
+            insights.append(f"Größter Verbraucher: {top_consumer['name']} mit {top_consumer['share_pct']} % des Gesamtstroms ({top_consumer['solar_share_pct']}% Solaranteil).")
 
-    insights.append(f"Finanzieller Vorteil: Durch Eigenverbrauch und Einspeisung wurden netto {net_benefit_eur:.2f} € erzielt.")
+        if net_benefit_eur > 0:
+            insights.append(f"Finanzieller Vorteil: Durch Eigenverbrauch und Einspeisung wurden netto {net_benefit_eur:.2f} € erzielt.")
 
     # Zusätzliche Metriken & Benchmarks
     days_count = 1 if period == "today" else (7 if period == "7d" else (30 if period == "30d" else 365))
     daily_avg_gen = round(total_pv_kwh / days_count, 1)
     daily_avg_con = round(total_house_consumption_kwh / days_count, 1)
-    peak_pv_kw = round(max([row.get("avg", 0) for row in metric_rows if row["device_id"] in pv_device_ids] or [7800.0]) / 1000.0, 1)
-    peak_load_kw = round(max([row.get("avg", 0) for row in metric_rows if row["device_id"] not in pv_device_ids and row["device_id"] not in grid_device_ids] or [5400.0]) / 1000.0, 1)
+
+    pv_peaks = [row.get("avg", 0) for row in metric_rows if row["device_id"] in pv_device_ids]
+    peak_pv_kw = round(max(pv_peaks) / 1000.0, 1) if pv_peaks else 0.0
+
+    load_peaks = [row.get("avg", 0) for row in metric_rows if row["device_id"] not in pv_device_ids and row["device_id"] not in grid_device_ids]
+    peak_load_kw = round(max(load_peaks) / 1000.0, 1) if load_peaks else 0.0
 
     trees_equivalent = round(co2_saved_kg / 12.5, 1)
     ev_km_equivalent = round(solar_supplied_kwh * 6.0, 0)
@@ -465,6 +432,8 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
     return {
         "period": period,
         "period_label": period_label,
+        "has_devices": has_devices,
+        "has_data": has_data,
         "kpis": {
             "pv_generation_kwh": total_pv_kwh,
             "house_consumption_kwh": total_house_consumption_kwh,
