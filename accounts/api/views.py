@@ -376,6 +376,7 @@ class DeactivateInviteView(APIView):
 # ---------------- MAGIC LINK LOGIN ---------------- #
 
 class RequestMagicLinkView(APIView):
+    authentication_classes = []
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -417,6 +418,7 @@ class RequestMagicLinkView(APIView):
 
 
 class MagicLoginView(APIView):
+    authentication_classes = []
     permission_classes = [AllowAny]
 
     def get(self, request):

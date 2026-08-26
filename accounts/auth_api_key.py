@@ -35,9 +35,9 @@ class APIKeyOrTokenAuthentication(BaseAuthentication):
                 if len(parts) == 2 and parts[0].lower() in ["bearer", "token", "apikey"]:
                     token = parts[1]
 
-        # 3. Check Query-Parameter
+        # 3. Check Query-Parameter (nur explizites 'api_key', um Konflikte mit magic token zu verhindern)
         if not token:
-            token = request.GET.get("api_key") or request.GET.get("token")
+            token = request.GET.get("api_key")
 
         if not token:
             return None  # Keine Token-Auth versucht -> andere Auth-Klassen dürfen greifen
