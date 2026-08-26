@@ -10,7 +10,7 @@ import { defaultTheme } from "./theme/themes";
 import AppRoutes from "./AppRoutes";   // ✅ PUBLIC
 import PrivateApp from "./PrivateApp"; // ✅ PRIVATE
 import AdminApp from "./AdminApp";     // ✅ ADMIN
-
+import CookieConsentBanner from "./components/legal/CookieConsentBanner";
 
 export default function App() {
 
@@ -31,6 +31,9 @@ export default function App() {
           <Route path="/*" element={<AppRoutes />} />
 
         </Routes>
+
+        {/* 🍪 GLOBAL DSGVO & TDDDG COOKIE CONSENT MANAGER */}
+        <CookieConsentBanner />
 
       </BrowserRouter>
 

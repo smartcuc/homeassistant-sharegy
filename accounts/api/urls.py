@@ -20,6 +20,7 @@ from .views import DemoLoginView
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from .views import MeView, LogoutView
+from .views import GDPRExportView, GDPRDeleteAccountView
 
 
 urlpatterns = [
@@ -89,4 +90,6 @@ urlpatterns += [
 
 urlpatterns += [
     path("demo/", DemoLoginView.as_view(), name="demo-login",),
+    path("gdpr/export/", GDPRExportView.as_view(), name="gdpr-export"),
+    path("gdpr/delete-account/", GDPRDeleteAccountView.as_view(), name="gdpr-delete-account"),
 ]

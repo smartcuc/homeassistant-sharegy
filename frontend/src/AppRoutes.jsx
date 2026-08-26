@@ -12,6 +12,8 @@ import Join from "./pages/Join";
 import EnergyPage from "./pages/EnergyPage";
 import Impressum from "./pages/Impressum";
 import Datenschutz from "./pages/Datenschutz";
+import Agb from "./pages/Agb";
+import Widerruf from "./pages/Widerruf";
 
 export default function AppRoutes() {
     return (
@@ -26,6 +28,8 @@ export default function AppRoutes() {
 
             <Route path="/impressum" element={<Impressum />} />
             <Route path="/datenschutz" element={<Datenschutz />} />
+            <Route path="/agb" element={<Agb />} />
+            <Route path="/widerruf" element={<Widerruf />} />
 
             <Route
                 path="/tenant/:tenantSlug/:pageSlug"

@@ -618,3 +618,150 @@ class DemoLoginView(View):
         )
 
         return redirect("/app/dashboard")
+
+
+# ---------------- GDPR / DSGVO COMPLIANCE ---------------- #
+
+class GDPRExportView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+
+        # 1. Base User info
+        user_data = {
+            "id": str(user.id),
+            "username": getattr(user, "username", ""),
+            "email": user.email,
+            "date_joined": user.date_joined.isoformat() if hasattr(user, "date_joined") and user.date_joined else None,
+            "last_login": user.last_login.isoformat() if user.last_login else None,
+            "is_active": user.is_active,
+        }
+
+        # 2. User Settings & Profile
+        settings_data = {}
+        try:
+            settings_obj = getattr(user, "settings", None)
+            if settings_obj:
+                settings_data = {
+                    "language": getattr(settings_obj, "language", "de"),
+                    "timezone": getattr(settings_obj, "timezone", "Europe/Berlin"),
+                    "dashboard_mode": getattr(settings_obj, "dashboard_mode", "user"),
+                    "usage_mode": getattr(settings_obj, "usage_mode", "standard"),
+                    "onboarding_step": getattr(settings_obj, "onboarding_step", None),
+                }
+        except Exception:
+            pass
+
+        profile_data = {}
+        try:
+            profile_obj = getattr(user, "profile", None)
+            if profile_obj:
+                profile_data = {
+                    "street": getattr(profile_obj, "street", ""),
+                    "postal_code": getattr(profile_obj, "postal_code", ""),
+                    "city": getattr(profile_obj, "city", ""),
+                    "country": getattr(profile_obj, "country", "DE"),
+                    "phone": getattr(profile_obj, "phone", ""),
+                    "company_name": getattr(profile_obj, "company_name", ""),
+                    "vat_id": getattr(profile_obj, "vat_id", ""),
+                    "consent_given": getattr(profile_obj, "consent_given", True),
+                    "consent_timestamp": getattr(profile_obj, "consent_timestamp", None).isoformat() if getattr(profile_obj, "consent_timestamp", None) else None,
+                }
+        except Exception:
+            pass
+
+        # 3. Memberships / Tenants
+        memberships_data = []
+        if hasattr(user, "memberships"):
+            for m in user.memberships.select_related("tenant").all():
+                memberships_data.append({
+                    "tenant_name": m.tenant.name if m.tenant else None,
+                    "tenant_slug": m.tenant.slug if m.tenant else None,
+                    "role": getattr(m, "role", "member"),
+                    "is_active": getattr(m, "is_active", True),
+                    "joined_at": m.created_at.isoformat() if hasattr(m, "created_at") else None,
+                })
+
+        # 4. Homes & Devices
+        homes_data = []
+        if hasattr(user, "homes"):
+            for home in user.homes.prefetch_related("devices").all():
+                devices_list = []
+                for dev in home.devices.all():
+                    devices_list.append({
+                        "id": str(dev.id),
+                        "name": getattr(dev, "name", ""),
+                        "device_type": getattr(dev, "device_type", ""),
+                        "category": getattr(dev, "category", ""),
+                        "is_active": getattr(dev, "is_active", True),
+                        "mqtt_topic": getattr(dev, "mqtt_topic", ""),
+                    })
+                homes_data.append({
+                    "id": str(home.id),
+                    "name": getattr(home, "name", ""),
+                    "address": getattr(home, "address", ""),
+                    "devices": devices_list,
+                })
+
+        # 5. Billing / Subscription
+        billing_data = {}
+        if hasattr(user, "ems_subscription"):
+            sub = user.ems_subscription
+            billing_data["subscription"] = {
+                "plan": getattr(sub, "plan", "free"),
+                "status": getattr(sub, "status", "active"),
+                "current_period_end": sub.current_period_end.isoformat() if getattr(sub, "current_period_end", None) else None,
+            }
+
+        # 6. Assemble Full Export
+        export_payload = {
+            "export_metadata": {
+                "title": "Sharegy GDPR Personal Data Export",
+                "export_date": timezone.now().isoformat(),
+                "service": "Sharegy HEMS/EMS (smartEvo GmbH)",
+                "gdpr_reference": "Article 15 & Article 20 GDPR",
+            },
+            "user": user_data,
+            "settings": settings_data,
+            "profile": profile_data,
+            "memberships": memberships_data,
+            "homes_and_devices": homes_data,
+            "billing": billing_data,
+        }
+
+        response = Response(export_payload)
+        safe_email = user.email.replace("@", "_at_")
+        filename = f"sharegy_datenexport_{safe_email}_{timezone.now().strftime('%Y%m%d')}.json"
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        return response
+
+
+class GDPRDeleteAccountView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        confirmation = request.data.get("confirmation", "").strip()
+
+        # Confirmation check: must match user email or "DELETE" / "LÖSCHEN"
+        valid_confirmations = [user.email.lower(), "delete", "löschen", "loeschen"]
+        if confirmation.lower() not in valid_confirmations:
+            return Response(
+                {"error": "Bitte bestätige die Löschung durch Eingabe deiner E-Mail-Adresse oder 'LÖSCHEN'."},
+                status=400
+            )
+
+        from django.db import transaction
+        with transaction.atomic():
+            logger.info("GDPR Account deletion executed for user %s (ID: %s)", user.email, user.id)
+
+            # Flush user session & logout
+            logout(request)
+            request.session.flush()
+
+            # Delete user (cascades to Profile, Settings, Devices, Homes, Memberships, MagicLoginTokens)
+            user.delete()
+
+        return Response({"status": "deleted", "message": "Dein Benutzerkonto und alle personenbezogenen Daten wurden unwiderruflich gelöscht."})
+
