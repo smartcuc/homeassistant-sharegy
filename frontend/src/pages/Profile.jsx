@@ -2,7 +2,7 @@
 # src/pages/Profile.jsx
 */
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import Card from "../components/ui/Card";
 import { apiFetch } from "../api/client";
