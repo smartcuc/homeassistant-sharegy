@@ -385,26 +385,27 @@
 
 ```
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ NÄCHSTER MEILENSTEIN (Sofort starten)                                         │
+│ PRIORITÄT 1: HARDWARE-ABSTRAKTION & ONBOARDING (Sofort starten)               │
 ├───────────────────────────────────────────────────────────────────────────────┤
-│ 1. 📅 Task 5.15: Frei wählbarer Zeitraum & Multi-Format Daten-Export          │
-│ 2. 📄 Task 5.7: Deklaratives Device-Profile Addon-System (YAML-Templates)     │
+│ 1. 📄 Task 5.7: Deklaratives Device-Profile Addon-System (YAML-Templates)     │
+│    -> Vorgefertigte Profile für Sungrow, SMA, Deye, Huawei, Kostal, Fronius   │
+│    -> 1-Klick Hardware-Zuweisung im Onboarding-Wizard                         │
 └───────────────────────────────────────────────────────────────────────────────┘
                                        │
                                        ▼
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ MOBILE APPS & PUSH-BENACHRICHTIGUNGEN                                         │
+│ PRIORITÄT 2: MOBILE APPS & PUSH-BENACHRICHTIGUNGEN                            │
 ├───────────────────────────────────────────────────────────────────────────────┤
-│ 3. 📲 Task 5.9: Mobile Push & Notification Engine (FCM & APNs Dispatcher)    │
-│ 4. 📱 Task 5.10: Native iOS & Android Apps via Capacitor (Widgets & Stores)   │
+│ 2. 📲 Task 5.9: Mobile Push & Notification Engine (FCM & APNs Dispatcher)    │
+│ 3. 📱 Task 5.10: Native iOS & Android Apps via Capacitor (Widgets & Stores)   │
 └───────────────────────────────────────────────────────────────────────────────┘
                                        │
                                        ▼
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ SAAS-MONETARISIERUNG & STRIPE BILLING                                         │
+│ PRIORITÄT 3: SAAS-MONETARISIERUNG & STRIPE BILLING                            │
 ├───────────────────────────────────────────────────────────────────────────────┤
-│ 5. 💳 Task 5.11: Subscription- & SaaS-Lizenzmodell (Stripe / Feature-Gating)  │
-│ 6. 🧹 Task 4.1: Tenant-Modell Konsolidierung                                  │
+│ 4. 💳 Task 5.11: Subscription- & SaaS-Lizenzmodell (Stripe / Feature-Gating)  │
+│ 5. 🧹 Task 4.1: Tenant-Modell Konsolidierung                                  │
 └───────────────────────────────────────────────────────────────────────────────┘
 ```
 
