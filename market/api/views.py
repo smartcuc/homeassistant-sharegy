@@ -239,9 +239,10 @@ def home_tariff_detail(request):
     """
     home = request.user.homes.first()
     if not home:
-        return Response(
-            {"detail": "Kein Zuhause für diesen Benutzer gefunden."},
-            status=404,
+        from devices.models import Home
+        home, _ = Home.objects.get_or_create(
+            user=request.user,
+            defaults={"name": "Mein Zuhause", "timezone": "Europe/Berlin"}
         )
 
     today = timezone.now().date()

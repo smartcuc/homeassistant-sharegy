@@ -436,6 +436,15 @@ class MagicLoginView(APIView):
         user = magic.user
         login(request, user)
 
+        # ✅ Sicherstellen, dass ein Standard-Zuhause existiert
+        from devices.models import Home
+        if not user.homes.exists():
+            Home.objects.create(
+                user=user,
+                name="Mein Zuhause",
+                timezone="Europe/Berlin"
+            )
+
         # ✅ LOGIN TRACKING (NEU)
         magic.last_login_at = timezone.now()
         
