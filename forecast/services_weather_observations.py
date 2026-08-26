@@ -96,10 +96,15 @@ def store_sensor_community_observations(
 
         if timestamp.tzinfo is None:
             timestamp = timestamp.replace(tzinfo=dt_timezone.utc)
+        else:
+            timestamp = timestamp.astimezone(dt_timezone.utc)
+
+        timestamp = timestamp.replace(microsecond=0)
 
         sensor = row.get("sensor") or {}
+        location_obj = row.get("location") or {}
 
-        station_id = str(sensor.get("id")) if sensor.get("id") else None
+        station_id = str(sensor.get("id")) if sensor.get("id") else (str(location_obj.get("id")) if location_obj.get("id") else "unknown")
 
         temperature_c = None
         humidity_pct = None
@@ -143,10 +148,11 @@ def store_sensor_community_observations(
             )
         )
 
-    # In-Memory Deduplizierung nach (provider, station_id, timestamp) gegen PostgreSQL CardinalityViolation
+    # In-Memory Deduplizierung nach (provider, station_id, timestamp-epoch) gegen PostgreSQL CardinalityViolation
     unique_map = {}
     for obj in objs_to_save:
-        key = (obj.provider, str(obj.station_id), obj.timestamp)
+        ts_epoch = int(obj.timestamp.timestamp()) if hasattr(obj.timestamp, "timestamp") else str(obj.timestamp)
+        key = (str(obj.provider), str(obj.station_id or ""), ts_epoch)
         if key in unique_map:
             existing = unique_map[key]
             if existing.temperature_c is None and obj.temperature_c is not None:
@@ -170,6 +176,7 @@ def store_sensor_community_observations(
                 "temperature_c",
                 "humidity_pct",
             ],
+            batch_size=500,
         )
 
     return {
