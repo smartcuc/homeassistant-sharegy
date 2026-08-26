@@ -17,6 +17,7 @@ export default function SubmeterTrendModal({ meter, isOpen, onClose, defaultPeri
         queryKey: ["submeter-trends", period, meter?.id],
         queryFn: () => apiFetch(`/api/energy/submeters/trends/?period=${period}&meter_id=${meter?.id}`),
         enabled: Boolean(isOpen && meter?.id),
+        staleTime: 60_000,
     });
 
     const data = trendQuery.data;

@@ -104,6 +104,21 @@ def get_submeter_trends(user, period: str = "30d", meter_id: str = None) -> dict
             bucket_order.append(b_key)
         curr_time += step
 
+    price_cache = {}
+
+    def get_price_for_time(b_time):
+        h_key = b_time.replace(minute=0, second=0, microsecond=0)
+        if h_key in price_cache:
+            return price_cache[h_key]
+        if tariff_type == HomeTariff.TARIFF_DYNAMIC:
+            spot_ct = spot_prices_map.get(h_key, 10.5)
+            effective_ct = calculate_effective_price(home, b_time, spot_ct) if home else (spot_ct + 17.59)
+            res = effective_ct / 100.0
+        else:
+            res = base_elec_price
+        price_cache[h_key] = res
+        return res
+
     for row in metric_rows:
         dev_id = row["device_id"]
         wh = float(row["energy_wh"] or 0)
@@ -115,13 +130,7 @@ def get_submeter_trends(user, period: str = "30d", meter_id: str = None) -> dict
             bucket_order.append(b_key)
 
         entry = bucket_data[b_key]
-
-        # Tarifpreis für Stunde ermitteln
-        if tariff_type == HomeTariff.TARIFF_DYNAMIC:
-            h_key = b_time.replace(minute=0, second=0, microsecond=0)
-            spot_ct = spot_prices_map.get(h_key, 10.5)
-            effective_ct = calculate_effective_price(home, b_time, spot_ct) if home else (spot_ct + 17.59)
-            entry["tariff_price_eur"] = effective_ct / 100.0
+        entry["tariff_price_eur"] = get_price_for_time(b_time)
 
         if dev_id in pv_device_ids:
             entry["pv_kwh"] += kwh

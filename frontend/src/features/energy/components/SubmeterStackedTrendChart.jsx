@@ -15,6 +15,7 @@ export default function SubmeterStackedTrendChart({ period = "30d", onSelectMete
     const trendQuery = useQuery({
         queryKey: ["submeter-stacked-trends", period],
         queryFn: () => apiFetch(`/api/energy/submeters/trends/?period=${period}`),
+        staleTime: 60_000,
     });
 
     const data = trendQuery.data;

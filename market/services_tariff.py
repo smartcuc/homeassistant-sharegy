@@ -10,12 +10,23 @@ from market.models_price_config import (
 )
 
 
+_home_tariff_cache = {}
+_price_config_cache = {}
+
+
 def get_home_tariff(
     home,
     date,
 ):
+    if not home:
+        return None
 
-    return (
+    home_id = getattr(home, "id", str(home))
+    cache_key = (home_id, str(date))
+    if cache_key in _home_tariff_cache:
+        return _home_tariff_cache[cache_key]
+
+    tariff = (
         HomeTariff.objects.filter(
             home=home,
             valid_from__lte=date,
@@ -23,11 +34,17 @@ def get_home_tariff(
         .order_by("-valid_from")
         .first()
     )
+    _home_tariff_cache[cache_key] = tariff
+    return tariff
 
 
 def get_price_config(
     date,
 ):
+    year = date.year if hasattr(date, "year") else str(date)[:4]
+    if year in _price_config_cache:
+        return _price_config_cache[year]
+
     config = (
         ElectricityPriceConfig.objects.filter(
             valid_from__lte=date,
@@ -48,6 +65,7 @@ def get_price_config(
                 "vat_percent": Decimal("19.00"),
             },
         )
+    _price_config_cache[year] = config
     return config
 
 
