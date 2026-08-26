@@ -69,9 +69,14 @@ def calculate_battery_arbitrage(user, horizon_hours: int = 36) -> dict:
     if home:
         for gen in home.generator_systems.all():
             for s in gen.strings.all():
-                for sf in SolarForecast.objects.filter(generator_string=s, timestamp__gte=start_hour, timestamp__lte=end_hour):
-                    t_loc = sf.timestamp.astimezone(tz).replace(minute=0, second=0, microsecond=0)
-                    pv_map[t_loc] += float(sf.expected_power_w or 0)
+                forecast_qs = SolarForecast.objects.filter(
+                    generator_string=s,
+                    timestamp__gte=start_hour,
+                    timestamp__lte=end_hour,
+                ).values("timestamp", "forecast_kwh")
+                for sf in forecast_qs:
+                    t_loc = sf["timestamp"].astimezone(tz).replace(minute=0, second=0, microsecond=0)
+                    pv_map[t_loc] += float(sf["forecast_kwh"] or 0) * 1000.0
 
     # 4. Stunden-Slots aufbauen
     slots = []

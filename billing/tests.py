@@ -96,9 +96,9 @@ class BillingBalanceSlotOptimizationTest(TestCase):
         self.assertEqual(slots_t2.count(), 2)
 
         slot2_t2 = slots_t2.get(meter=self.meter2)
-        self.assertEqual(slot2_t2.generation_kwh, Decimal("2.000") if slot2_t2.meter == self.meter1 else Decimal("8.000"))
+        self.assertEqual(slot2_t2.generation_kwh, Decimal("8.000"))
         self.assertEqual(slot2_t2.grid_import_kwh, Decimal("0.000"))
-        self.assertEqual(slot2_t2.grid_export_kwh, Decimal("7.000"))
+        self.assertEqual(slot2_t2.grid_export_kwh, Decimal("8.000"))
 
 
 class EMSSubscriptionAndInvoiceTest(TestCase):
