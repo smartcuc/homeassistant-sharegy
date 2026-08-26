@@ -438,3 +438,16 @@ def fetch_tibber_homes_view(request):
         }
     )
 
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def grid_co2_view(request):
+    """
+    Liefert die dynamische CO2-Intensitaet des deutschen Stromnetzes (g CO2/kWh),
+    Erneuerbaren-Quote und 36h-Forecast-Timeline fuer oekologische Verbrauchsoptimierung.
+    """
+    from market.services_co2 import get_grid_co2_intensity
+    horizon = int(request.GET.get("horizon", 36))
+    data = get_grid_co2_intensity(user=request.user, horizon_hours=horizon)
+    return Response(data)
+

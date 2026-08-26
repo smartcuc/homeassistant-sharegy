@@ -2,9 +2,10 @@
 # energy/api/views.py
 #####################
 
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, renderer_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.renderers import BaseRenderer
 from zoneinfo import ZoneInfo
 from django.utils import timezone
 from django.http import HttpResponse
@@ -59,7 +60,68 @@ def dashboard_me(request):
 @permission_classes([IsAuthenticated])
 def energy_balance(request):
     period = request.GET.get("period", "today")
-    data = get_energy_balance(request.user, period=period)
+    start_date = request.GET.get("start_date", None)
+    end_date = request.GET.get("end_date", None)
+    data = get_energy_balance(request.user, period=period, start_date=start_date, end_date=end_date)
+    return Response(data)
+
+
+class JSONExportRenderer(BaseRenderer):
+    media_type = "application/json"
+    format = "json"
+
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        return data
+
+
+class CSVExportRenderer(BaseRenderer):
+    media_type = "text/csv"
+    format = "csv"
+
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        return data
+
+
+class XLSXExportRenderer(BaseRenderer):
+    media_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    format = "xlsx"
+
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        return data
+
+
+class PDFExportRenderer(BaseRenderer):
+    media_type = "application/pdf"
+    format = "pdf"
+
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        return data
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+@renderer_classes([JSONExportRenderer, CSVExportRenderer, XLSXExportRenderer, PDFExportRenderer])
+def export_energy_balance_view(request, format=None):
+    from energy.services.export_manager import export_energy_balance
+    period = request.GET.get("period", "today")
+    start_date = request.GET.get("start_date", None)
+    end_date = request.GET.get("end_date", None)
+    export_format = request.GET.get("export_format") or request.GET.get("format") or format or "xlsx"
+    return export_energy_balance(
+        user=request.user,
+        period=period,
+        start_date=start_date,
+        end_date=end_date,
+        export_format=export_format.lower(),
+    )
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def battery_arbitrage_view(request):
+    from energy.services.battery_arbitrage import calculate_battery_arbitrage
+    horizon = int(request.GET.get("horizon", 36))
+    data = calculate_battery_arbitrage(request.user, horizon_hours=horizon)
     return Response(data)
 
 
@@ -110,8 +172,10 @@ def battery_forecast_view(request):
 def chart_data(request):
     metric = request.GET.get("metric")
     period = request.GET.get("period", "24h")
+    start_date = request.GET.get("start_date", None)
+    end_date = request.GET.get("end_date", None)
 
-    if period not in ["1h", "6h", "24h", "5d"]:
+    if period not in ["1h", "6h", "24h", "5d", "7d", "30d", "year", "custom"]:
         return Response({"detail": "invalid period"}, status=400)
 
     if metric not in ["load", "pv", "grid", "battery", "today"]:
@@ -154,6 +218,8 @@ def chart_data(request):
         device_ids,
         period,
         timezone_name=timezone_name,
+        start_date=start_date,
+        end_date=end_date,
     )
 
     return Response(data)

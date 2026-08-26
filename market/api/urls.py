@@ -9,6 +9,7 @@ from .views import (
     home_tariff_detail,
     delete_home_tariff_view,
     fetch_tibber_homes_view,
+    grid_co2_view,
 )
 
 urlpatterns = [
@@ -21,6 +22,11 @@ urlpatterns = [
         "chart/",
         spot_price_chart,
         name="spot-price-chart",
+    ),
+    path(
+        "co2/",
+        grid_co2_view,
+        name="grid-co2",
     ),
     path(
         "tariff/",

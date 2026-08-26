@@ -117,3 +117,21 @@ class HomeTariffAPITest(TestCase):
         self.assertEqual(data_none["static_price_ct"], 29.50)
         self.assertEqual(data_none["feed_in_tariff_type"], "none")
         self.assertEqual(data_none["feed_in_tariff_ct"], 0.0)
+
+
+class GridCO2SignalTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="co2testuser", password="password123")
+        self.home = Home.objects.create(user=self.user, name="CO2 Test Home")
+        self.client.force_login(self.user)
+
+    def test_grid_co2_intensity_calculation(self):
+        res = self.client.get("/api/market/co2/")
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertIn("current_co2_intensity_g_per_kwh", data)
+        self.assertIn("current_renewable_share_pct", data)
+        self.assertIn("current_level", data)
+        self.assertIn("timeline", data)
+        self.assertGreater(len(data["timeline"]), 0)
+        self.assertIn("best_eco_window", data)

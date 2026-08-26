@@ -8,19 +8,31 @@ import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../api/client";
 import EnergyOptimizerCard from "./components/EnergyOptimizerCard";
 import BatteryForecastCard from "./components/BatteryForecastCard";
+import BatteryArbitrageCard from "./components/BatteryArbitrageCard";
 import SubmeterTrendModal from "./components/SubmeterTrendModal";
 import SubmeterStackedTrendChart from "./components/SubmeterStackedTrendChart";
+import DateRangePickerModal from "./components/DateRangePickerModal";
+import ExportDropdown from "./components/ExportDropdown";
 import AlertNotificationBanner from "../alerts/components/AlertNotificationBanner";
+import GridCo2Card from "../market/components/GridCo2Card";
 
 export default function EnergyDashboard() {
     const { t } = useTranslation();
     const [period, setPeriod] = useState("today");
     const [selectedTrendMeter, setSelectedTrendMeter] = useState(null);
+    const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+    const [customDates, setCustomDates] = useState({ startDate: null, endDate: null, label: null });
 
     // Fetch energy balance & submeters
     const balanceQuery = useQuery({
-        queryKey: ["energy-balance", period],
-        queryFn: () => apiFetch(`/api/energy/balance/?period=${period}`),
+        queryKey: ["energy-balance", period, customDates.startDate, customDates.endDate],
+        queryFn: () => {
+            let url = `/api/energy/balance/?period=${period}`;
+            if (period === "custom" && customDates.startDate) {
+                url += `&start_date=${customDates.startDate}&end_date=${customDates.endDate}`;
+            }
+            return apiFetch(url);
+        },
         refetchInterval: 10000,
     });
 
@@ -79,7 +91,7 @@ export default function EnergyDashboard() {
             <AlertNotificationBanner />
 
             {/* =========================================================
-                HEADER & TIMEFRAME SELECTOR
+                HEADER & TIMEFRAME SELECTOR + EXPORT (TASK 5.15)
             ========================================================= */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
@@ -88,17 +100,25 @@ export default function EnergyDashboard() {
                     </h1>
                     <p className="text-sm text-gray-500 mt-1">
                         {t("energy.subtitle", "Detaillierte Mengen-, Verbrauchs- und Kostenanalyse nach Zeiträumen.")}
+                        {period === "custom" && customDates.label && (
+                            <span className="ml-2 font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">
+                                📅 {customDates.label}
+                            </span>
+                        )}
                     </p>
                 </div>
 
-                <div className="flex items-center gap-2.5 self-start sm:self-auto">
+                <div className="flex flex-wrap items-center gap-2.5 self-start sm:self-auto">
                     {/* Period Selector Tabs */}
                     <div className="inline-flex bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-2xs">
                         {periods.map((p) => (
                             <button
                                 key={p.key}
-                                onClick={() => setPeriod(p.key)}
-                                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${period === p.key
+                                onClick={() => {
+                                    setPeriod(p.key);
+                                    setCustomDates({ startDate: null, endDate: null, label: null });
+                                }}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${period === p.key
                                     ? "bg-white text-indigo-600 shadow-xs font-bold"
                                     : "text-gray-600 hover:text-gray-900"
                                     }`}
@@ -106,7 +126,25 @@ export default function EnergyDashboard() {
                                 {p.label}
                             </button>
                         ))}
+                        <button
+                            onClick={() => setIsDatePickerOpen(true)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer flex items-center gap-1 ${period === "custom"
+                                ? "bg-indigo-600 text-white shadow-xs font-bold"
+                                : "text-gray-600 hover:text-gray-900"
+                                }`}
+                            title="Frei wählbaren Zeitraum einstellen"
+                        >
+                            <span>📅</span>
+                            <span>{period === "custom" && customDates.label ? customDates.label : t("energy.custom_period", "Zeitraum...")}</span>
+                        </button>
                     </div>
+
+                    {/* Multi-Format Export Dropdown (Task 5.15) */}
+                    <ExportDropdown
+                        period={period}
+                        startDate={customDates.startDate}
+                        endDate={customDates.endDate}
+                    />
                 </div>
             </div>
 
@@ -559,6 +597,14 @@ export default function EnergyDashboard() {
             </div>
 
             {/* =========================================================
+                BATTERY ARBITRAGE & GRID CO2 SIGNAL (TASK 5.16 & 5.17)
+            ========================================================= */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <BatteryArbitrageCard />
+                <GridCo2Card />
+            </div>
+
+            {/* =========================================================
                 SUBMETER TREND & HISTORY MODAL (TASK 5.14)
             ========================================================= */}
             <SubmeterTrendModal
@@ -566,6 +612,24 @@ export default function EnergyDashboard() {
                 isOpen={Boolean(selectedTrendMeter)}
                 onClose={() => setSelectedTrendMeter(null)}
                 defaultPeriod={period}
+            />
+
+            {/* =========================================================
+                CUSTOM DATE RANGE PICKER MODAL (TASK 5.15)
+            ========================================================= */}
+            <DateRangePickerModal
+                isOpen={isDatePickerOpen}
+                onClose={() => setIsDatePickerOpen(false)}
+                initialStart={customDates.startDate}
+                initialEnd={customDates.endDate}
+                onApply={(res) => {
+                    setPeriod("custom");
+                    setCustomDates({
+                        startDate: res.startDate,
+                        endDate: res.endDate,
+                        label: res.label,
+                    });
+                }}
             />
         </div>
     );

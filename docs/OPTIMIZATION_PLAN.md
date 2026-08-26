@@ -329,11 +329,28 @@
 
 ---
 
-### [ ] 5.15 Frei wählbarer Zeitraum (Date-Range-Picker) & Multi-Format Daten-Export (CSV / Excel / JSON / PDF)
-- **Bereich**: Energiebilanz, Charts & Reporting (`energy/services/export.py`, `DateRangePicker.jsx`)
-- **Ziel**: 
-  - Beliebige Start- und Endzeitpunkte für die Auswertung von Verbrauchs-, Erzeugungs- und Kostendaten.
-  - Multi-Format Download (Excel `.xlsx`, CSV, JSON und druckfähiger PDF-Monatsbericht) für Steuerberater und Hausverwaltungen.
+### [x] 5.15 Frei wählbarer Zeitraum (Date-Range-Picker) & Multi-Format Daten-Export (CSV / Excel / JSON / PDF)
+- **Dateien**: [`energy/services/export_manager.py`](file:///c:/Users/Public/Dev/eswes/energy/services/export_manager.py), [`DateRangePickerModal.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/energy/components/DateRangePickerModal.jsx), [`ExportDropdown.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/energy/components/ExportDropdown.jsx)
+- **Status**: ✅ **Erledigt**.
+  - Beliebige Start- und Endzeitpunkte (`start_date`, `end_date`) für Mengen-, Verbrauchs- und Kostenanalyse.
+  - Multi-Format Download für 4 Formate: Excel `.xlsx` (mit formatierter KPI-Tabelle, Sub-Metering & Stundendaten), druckfähiger A4-PDF-Monatsbericht mit ReportLab, CSV-Export (UTF-8 BOM mit Semikolon für Excel-Kompatibilität) und JSON-Rohdaten.
+
+---
+
+### [x] 5.16 Batterie-Arbitrage & Grid-Charging Speicher-Simulator (Netzladen bei Tiefstpreisen)
+- **Dateien**: [`energy/services/battery_arbitrage.py`](file:///c:/Users/Public/Dev/eswes/energy/services/battery_arbitrage.py), [`BatteryArbitrageCard.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/energy/components/BatteryArbitrageCard.jsx)
+- **Status**: ✅ **Erledigt**.
+  - Mathematische Simulation von netzdienlicher Speicherladung bei negativen/günstigen Börsenstrompreisen und Entladung während Peak-Stunden.
+  - Berücksichtigung von Wirkungsgrad (~90% Roundtrip), Mindestreserve, PV-Forecast-Vorrang und Verschleißspanne.
+  - Rendite- und Ertragsprognose (~180–320 € / Jahr Zusatzerlös) mit stündlichem 24h-Fahrplan.
+
+---
+
+### [x] 5.17 Live CO₂-Grid-Signal & Grünstrom-Index (Echtzeit-Emissionen g CO₂/kWh & Öko-Optimierung)
+- **Dateien**: [`market/services_co2.py`](file:///c:/Users/Public/Dev/eswes/market/services_co2.py), [`GridCo2Card.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/market/components/GridCo2Card.jsx)
+- **Status**: ✅ **Erledigt**.
+  - Echtzeit-Berechnung der CO₂-Intensität des deutschen Stromnetzes (DE-LU) in g CO₂/kWh sowie des bundesweiten Erneuerbaren-Anteils.
+  - 24h/36h Forecast-Timeline mit Ampel-Einstufung (Grünstrom-Peak <250g, Normal 250-420g, Kohle-Peak >420g) zur ökologischen Steuerung von Wärmepumpe, Speicher und E-Auto.
 
 ---
 

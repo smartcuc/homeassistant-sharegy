@@ -39,8 +39,49 @@ def get_consumer_icon_and_category(device_name, role_key):
     return "🔌", "device"
 
 
-def get_period_range(period_str, tz):
+def get_period_range(period_str, tz, start_date=None, end_date=None):
     now = timezone.now().astimezone(tz)
+
+    if period_str == "custom" and start_date:
+        try:
+            if isinstance(start_date, str):
+                if "T" in start_date:
+                    start_dt = datetime.fromisoformat(start_date)
+                else:
+                    start_dt = datetime.strptime(start_date, "%Y-%m-%d")
+                if timezone.is_naive(start_dt):
+                    start_dt = start_dt.replace(tzinfo=tz)
+            else:
+                start_dt = start_date
+
+            if end_date:
+                if isinstance(end_date, str):
+                    if "T" in end_date:
+                        end_dt = datetime.fromisoformat(end_date)
+                    else:
+                        end_dt = datetime.strptime(end_date, "%Y-%m-%d").replace(hour=23, minute=59, second=59)
+                    if timezone.is_naive(end_dt):
+                        end_dt = end_dt.replace(tzinfo=tz)
+                else:
+                    end_dt = end_date
+            else:
+                end_dt = now
+
+            duration_days = (end_dt - start_dt).days
+            label = f"{start_dt.strftime('%d.%m.%Y')} - {end_dt.strftime('%d.%m.%Y')}"
+
+            if duration_days <= 1:
+                bucket_format = "%H:00"
+            elif duration_days <= 3:
+                bucket_format = "%d.%m. %H:00"
+            elif duration_days <= 60:
+                bucket_format = "%d.%m."
+            else:
+                bucket_format = "%b %Y"
+
+            return start_dt, end_dt, label, bucket_format
+        except Exception:
+            pass
 
     if period_str == "7d":
         start = (now - timedelta(days=7)).replace(hour=0, minute=0, second=0, microsecond=0)
@@ -63,17 +104,18 @@ def get_period_range(period_str, tz):
     return start, end, label, bucket_format
 
 
-def get_energy_balance(user, period="today") -> dict:
+def get_energy_balance(user, period="today", start_date=None, end_date=None) -> dict:
     """
     Berechnet die umfassende Energie-, Mengen-, Kosten- und Verbrauchsbilanz
     inklusive Sub-Metering (virtuelle Zähler), Residual-Zähler und zeitfenstergenauer
     Tarifbewertung (Festpreis vs. dynamischer EPEX Spot Marktpreis & EEG Einspeisesatz).
+    Unterstützt freie Zeiträume via period='custom', start_date & end_date.
     """
     home = user.homes.first() if hasattr(user, "homes") else None
     tz_name = home.timezone if home and home.timezone else "Europe/Berlin"
     tz = ZoneInfo(tz_name)
 
-    start_dt, end_dt, period_label, bucket_format = get_period_range(period, tz)
+    start_dt, end_dt, period_label, bucket_format = get_period_range(period, tz, start_date=start_date, end_date=end_date)
 
     # 1. Alle Geräte des Nutzers laden
     devices = list(

@@ -150,9 +150,11 @@ def get_chart_data(
     device_ids,
     period="24h",
     timezone_name="UTC",
+    start_date=None,
+    end_date=None,
 ):
     """
-    Modalchart für 1h, 6h, 24h, 5d.
+    Modalchart für 1h, 6h, 24h, 5d, 7d, 30d, year und custom.
     """
     now = timezone.now()
     try:
@@ -169,8 +171,43 @@ def get_chart_data(
             "values": [],
         }
 
+    # Custom Zeitraum
+    if period == "custom" and start_date:
+        from datetime import datetime
+        try:
+            if isinstance(start_date, str):
+                s_dt = datetime.fromisoformat(start_date) if "T" in start_date else datetime.strptime(start_date, "%Y-%m-%d")
+                if timezone.is_naive(s_dt):
+                    s_dt = s_dt.replace(tzinfo=tz)
+            else:
+                s_dt = start_date
+
+            if end_date:
+                if isinstance(end_date, str):
+                    e_dt = datetime.fromisoformat(end_date) if "T" in end_date else datetime.strptime(end_date, "%Y-%m-%d").replace(hour=23, minute=59, second=59)
+                    if timezone.is_naive(e_dt):
+                        e_dt = e_dt.replace(tzinfo=tz)
+                else:
+                    e_dt = end_date
+            else:
+                e_dt = now
+
+            dur_days = (e_dt - s_dt).days
+            if dur_days <= 1:
+                rows, time_field = _query_period_data(device_ids, DeviceMetric15m, DeviceMetric1h, s_dt)
+                date_fmt = "%H:%M"
+            elif dur_days <= 7:
+                rows, time_field = _query_period_data(device_ids, DeviceMetric1h, DeviceMetric15m, s_dt)
+                date_fmt = "%d.%m %H:%M"
+            else:
+                rows, time_field = _query_period_data(device_ids, DeviceMetric1h, None, s_dt)
+                date_fmt = "%d.%m."
+        except Exception:
+            rows, time_field = [], "bucket"
+            date_fmt = "%d.%m."
+
     # 1 Stunde (1m Aggregationen, Fallback Rohdaten)
-    if period == "1h":
+    elif period == "1h":
         since = now - timedelta(hours=1)
         rows, time_field = _query_period_data(device_ids, DeviceMetric1m, DeviceMetric, since)
         date_fmt = "%H:%M"
@@ -194,6 +231,12 @@ def get_chart_data(
         since = now - timedelta(days=5)
         rows, time_field = _query_period_data(device_ids, DeviceMetric1h, DeviceMetric15m, since)
         date_fmt = "%d.%m %H:%M"
+
+    elif period in ("7d", "30d"):
+        days = 7 if period == "7d" else 30
+        since = now - timedelta(days=days)
+        rows, time_field = _query_period_data(device_ids, DeviceMetric1h, DeviceMetric15m, since)
+        date_fmt = "%d.%m."
 
     else:
         return {

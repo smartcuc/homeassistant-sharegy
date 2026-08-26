@@ -326,5 +326,60 @@ class GrafanaAndHomeAssistantPluginTest(TestCase):
         self.assertEqual(data.get("saved_metrics"), 2)
         self.assertIn("shelly_3em_ha", data.get("devices_updated"))
 
+    def test_custom_date_range_and_multi_format_exports(self):
+        self.client.force_login(self.user)
+
+        # 1. Custom Date Range Balance
+        res_custom = self.client.get(
+            "/api/energy/balance/?period=custom&start_date=2026-05-01&end_date=2026-08-15"
+        )
+        self.assertEqual(res_custom.status_code, 200)
+        data = res_custom.json()
+        self.assertEqual(data.get("period"), "custom")
+        self.assertIn("kpis", data)
+        self.assertIn("01.05.2026", data.get("period_label", ""))
+
+        # 2. JSON Export
+        res_json = self.client.get(
+            "/api/energy/export/balance/?period=custom&start_date=2026-05-01&end_date=2026-08-15&format=json"
+        )
+        self.assertEqual(res_json.status_code, 200)
+        self.assertEqual(res_json["Content-Type"], "application/json; charset=utf-8")
+
+        # 3. CSV Export
+        res_csv = self.client.get(
+            "/api/energy/export/balance/?period=30d&format=csv"
+        )
+        self.assertEqual(res_csv.status_code, 200)
+        self.assertIn("text/csv", res_csv["Content-Type"])
+
+        # 4. XLSX Export
+        res_xlsx = self.client.get(
+            "/api/energy/export/balance/?period=today&format=xlsx"
+        )
+        self.assertEqual(res_xlsx.status_code, 200)
+        self.assertIn("spreadsheetml.sheet", res_xlsx["Content-Type"])
+
+        # 5. PDF Export
+        res_pdf = self.client.get(
+            "/api/energy/export/balance/?period=today&format=pdf"
+        )
+        self.assertEqual(res_pdf.status_code, 200)
+        self.assertEqual(res_pdf["Content-Type"], "application/pdf")
+
+    def test_battery_arbitrage_view(self):
+        self.client.force_login(self.user)
+        res = self.client.get(
+            "/api/energy/battery-arbitrage/"
+        )
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertIn("has_battery", data)
+        self.assertIn("capacity_kwh", data)
+        self.assertIn("roundtrip_efficiency_pct", data)
+        self.assertIn("daily_profit_eur", data)
+        self.assertIn("timeline", data)
+        self.assertGreater(len(data["timeline"]), 0)
+
 
 
