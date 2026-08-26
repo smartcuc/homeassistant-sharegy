@@ -274,132 +274,151 @@ CELERY_RESULT_EXTENDED = True
 CELERY_TIMEZONE = "Europe/Berlin"
 CELERY_ENABLE_UTC = True
 
+# Standard-Queue für alle nicht explizit gerouteten Tasks
+CELERY_TASK_DEFAULT_QUEUE = "analytics"
+CELERY_TASK_DEFAULT_EXCHANGE = "analytics"
+CELERY_TASK_DEFAULT_ROUTING_KEY = "analytics"
+
+# ==============================================================================
+# 4-STUFEN CELERY TASK ROUTING ARCHITEKTUR
+# 1. fiscal:     OBIS-Zählerdaten, Lastgänge, Abrechnung & Billing (Höchste Prio)
+# 2. realtime:   MQTT Ingest-Puffer, Gerätesteuerbefehle & System-Health
+# 3. analytics:  1m/5m/15m/1h Aggregationen, Spotpreise, Tibber, PV/Last-Forecasts
+# 4. background: Scikit-Learn KI-Training, 8.7MB Wetter-Bulk, Retention & Purge
+# ==============================================================================
 CELERY_TASK_ROUTES = {
-    "market.tasks.*": {
-        "queue": "market",
-    },
-    "devices.tasks.*": {
-        "queue": "aggregation",
-    },
-    "core.tasks.*": {
-        "queue": "aggregation",
-    },
-    "integrations.tasks.*": {
-        "queue": "telemetry",
-    },
-    "demo.tasks.*": {
-        "queue": "demo",
-    },
-    "forecast.tasks.*": {
-        "queue": "forecast",
-    },
-    "billing.tasks.*": {
-        "queue": "critical",
-    },
-    "accounts.tasks.*": {
-        "queue": "critical",
-    },
+    # 💶 1. FISCAL & BILLING (Prio 1 - Höchste Integrität & Eichrecht)
+    "core.tasks.*": {"queue": "fiscal"},
+    "billing.tasks.*": {"queue": "fiscal"},
+    "accounts.tasks.*": {"queue": "fiscal"},
+
+    # ⚡ 2. EMS REALTIME & CONTROL (Prio 2 - Schnelle Reaktionszeit)
+    "integrations.tasks.flush_mqtt_buffer": {"queue": "realtime"},
+    "integrations.tasks.process_inbound_webhook_event": {"queue": "realtime"},
+    "energy.tasks.*": {"queue": "realtime"},
+    "operations.tasks.*": {"queue": "realtime"},
+
+    # 💤 4. BACKGROUND & KI (Prio 4 - Schwere Batch-Jobs & Retention)
+    "forecast.tasks_weather_observations.*": {"queue": "background"},
+    "forecast.tasks.train_all_generator_ml_models": {"queue": "background"},
+    "demo.tasks.cleanup_demo": {"queue": "background"},
+    "devices.tasks.purge_pending_devices": {"queue": "background"},
+
+    # 📊 3. EMS ANALYTICS & MARKT (Prio 3 - Standard)
+    "devices.tasks.*": {"queue": "analytics"},
+    "market.tasks.*": {"queue": "analytics"},
+    "market.tasks_analysis.*": {"queue": "analytics"},
+    "forecast.tasks.*": {"queue": "analytics"},
+    "forecast.tasks_weather.*": {"queue": "analytics"},
+    "integrations.tasks.*": {"queue": "analytics"},
+    "demo.tasks.*": {"queue": "analytics"},
 }
 
 CELERY_BEAT_SCHEDULE = {
-    # ✅ Multi-Queue-Monitoring
+    # ✅ Multi-Queue-Monitoring (realtime)
     "health-checks": {
         "task": "operations.tasks.run_health_checks",
         "schedule": 300.0,
     },
-    # Balance regelmäßig nachziehen
+    # 💶 Balance regelmäßig nachziehen (fiscal)
     "compute-balance": {
         "task": "billing.tasks.compute_balance_last_24h",
         "schedule": 300.0,
     },
+    # 💶 Mieter- & Prosumer-Abrechnungsslots (fiscal)
     "allocate-user-balance": {
         "task": "billing.tasks.allocate_user_balance_last_24h",
         "schedule": crontab(minute="*/15"),
     },
-    # ✅ DB Aggregation triggern
+    # 💶 OBIS Zähler-Rollup auf DB-Ebene (fiscal)
     "rollup-15min": {
         "task": "core.tasks.rollup_15min",
         "schedule": 60.0,
     },
-    # ✅ Balance berechnen (dirty slots)
+    # 💶 Dirty Balance berechnen auf DB-Ebene (fiscal)
     "process-dirty-balance": {
         "task": "core.tasks.process_dirty_balance",
         "schedule": 60.0,
     },
-    # ✅ Tibber Daten holen
-    "tibber-sync": {
-        "task": "integrations.tasks.sync_tibber",
-        "schedule": 1800.0,
-    },
-    # ✅ Strompreise Day-Ahead Fenster (13:00 - 18:59 alle 15m + 00:05 Safety)
-    "fetch-spot-prices-daily": {
-        "task": "market.tasks.fetch_spot_prices_retry",
-        "schedule": crontab(hour="0,13,14,15,16,17,18", minute="5,20,35,50"),
-    },
-    # ✅ MagicLogin CleanUp
-    "cleanup_tokens": {
-        "task": "accounts.tasks.cleanup_tokens",
-        "schedule": crontab(hour=3, minute=0),
-    },
-    # ✅ MQTT Buffer
+    # ⚡ MQTT Buffer Ingest (realtime)
     "flush-mqtt-buffer": {
         "task": "integrations.tasks.flush_mqtt_buffer",
         "schedule": 5.0,  # alle 5 Sekunden
     },
-    # ✅ 1m Aggregation
+    # 📊 1m Aggregation (analytics)
     "aggregate-1m": {
         "task": "devices.tasks.run_1m_aggregation",
         "schedule": 60.0,
     },
-    # ✅ 5m Aggregation
+    # 📊 5m Aggregation (analytics)
     "aggregate-5m": {
         "task": "devices.tasks.run_5m_aggregation",
         "schedule": crontab(minute="*/5"),
     },
-    # ✅ 15m Aggregation
+    # 📊 15m Aggregation (analytics)
     "aggregate-15m": {
         "task": "devices.tasks.run_15m_aggregation",
         "schedule": crontab(minute="*/15"),
     },
-    # ✅ 1h Aggregation
+    # 📊 1h Aggregation (analytics)
     "aggregate-1h": {
         "task": "devices.tasks.run_1h_aggregation",
         "schedule": crontab(minute=0),
     },
-    # ✅ Device purge
-    "purge-pending-devices": {
-        "task": "devices.tasks.purge_pending_devices",
-        "schedule": crontab(hour="*/6"),
+    # 📊 Tibber Daten holen (analytics)
+    "tibber-sync": {
+        "task": "integrations.tasks.sync_tibber",
+        "schedule": 1800.0,
     },
-    # ✅ Autonome Demo Live-Simulation (alle 15 Sekunden)
-    "sync-demo-metrics": {
-        "task": "demo.tasks.sync_demo_metrics",
-        "schedule": 15.0,
+    # 📊 Strompreise Day-Ahead Fenster (analytics)
+    "fetch-spot-prices-daily": {
+        "task": "market.tasks.fetch_spot_prices_retry",
+        "schedule": crontab(hour="0,13,14,15,16,17,18", minute="5,20,35,50"),
     },
-    # ✅ Tägliche Demo-Metriken Bereinigung (Retention)
-    "demo-cleanup": {
-        "task": "demo.tasks.cleanup_demo",
-        "schedule": crontab(hour=3, minute=0),
+    # 📊 Tägliche Strompreis-Analyse & Zeitfenster-Ranking (analytics)
+    "compute-daily-spot-summary": {
+        "task": "market.tasks_analysis.compute_daily_spot_summary",
+        "schedule": crontab(hour="0,14", minute=5),
     },
-    # ✅ Forecast Weather Update
+    # 📊 Forecast Weather Update (analytics)
     "update-forecasts-every-30-minutes": {
         "task": "forecast.tasks.update_all_forecasts",
         "schedule": crontab(minute="*/30"),
     },
-    # ✅ Forecast Weather Data
+    # 📊 Forecast Weather Data Open-Meteo (analytics)
     "fetch-weather-data": {
         "task": "forecast.tasks_weather.fetch_weather_data",
         "schedule": 60 * 30,
     },
-    #  ✅ Forecast Weather Realtime Update
+    # 📊 Autonome Demo Live-Simulation (analytics)
+    "sync-demo-metrics": {
+        "task": "demo.tasks.sync_demo_metrics",
+        "schedule": 15.0,
+    },
+    # 💤 Forecast Weather Realtime Bulk-Observations Sensor.Community (background)
     "fetch-weather-observations": {
         "task": "forecast.tasks_weather_observations.fetch_weather_observations",
         "schedule": 60 * 15,
     },
-    #  ✅ ML Forecast Training (nächtlich)
+    # 💤 ML Forecast Training nächtlich (background)
     "train-ml-forecast-models": {
         "task": "forecast.tasks.train_all_generator_ml_models",
         "schedule": crontab(hour=2, minute=30),
+    },
+    # 💤 MagicLogin CleanUp (fiscal/background)
+    "cleanup_tokens": {
+        "task": "accounts.tasks.cleanup_tokens",
+        "schedule": crontab(hour=3, minute=0),
+    },
+    # 💤 Device purge (background)
+    "purge-pending-devices": {
+        "task": "devices.tasks.purge_pending_devices",
+        "schedule": crontab(hour="*/6"),
+    },
+    # 💤 Tägliche Demo-Metriken Bereinigung (background)
+    "demo-cleanup": {
+        "task": "demo.tasks.cleanup_demo",
+        "schedule": crontab(hour=3, minute=0),
     },
 }
 

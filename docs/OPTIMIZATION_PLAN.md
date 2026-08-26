@@ -10,8 +10,8 @@
 |---|---|---|---|---|---|
 | **Phase 1** | Kritische Bugs & Flusslogik | 🟢 EMS-Free & Core | 🟢 Abgeschlossen | 1.1, 1.2, 1.3, 1.4, 1.6 | 1.5 (Sharing) |
 | **Phase 2** | DB- & Performance-Optimierung | 🟢 EMS-Free & Sharing | 🟢 100% Abgeschlossen | 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7 | – |
-| **Phase 3** | Celery & Buffer-Härtung | 🟢 EMS-Free Stabilität | 🟢 Abgeschlossen | 3.1, 3.2, 3.3, 3.4 | – |
-| **Phase 4** | Architektur & Diagramme | 🟢 EMS-Free Sankey & Tests | 🟢 Abgeschlossen | 4.2, 4.3, 4.4 | 4.1 (Sharing) |
+| **Phase 3** | Celery & Buffer-Härtung | 🟢 EMS-Free Stabilität | 🟢 100% Abgeschlossen | 3.1, 3.2, 3.3, 3.4, 3.5 | – |
+| **Phase 4** | Architektur & Diagramme | 🟢 EMS-Free Sankey & Tests | 🟢 100% Abgeschlossen | 4.1, 4.2, 4.3, 4.4 | – |
 | **Phase 5** | EMS-Pro, KI, Apps & Alerting | 🚀 Next Milestones | 🟡 In Umsetzung (5.1-5.6, 5.15-5.17 fertig) | – | 5.1 – 5.17 |
 
 ---
@@ -197,6 +197,17 @@
   - 📡 **Letzter MQTT-Message-Eingang** (`check_mqtt` mit Alters-Check).
   - ⚡ **Anzahl aktiver Devices** (`check_active_devices` mit 15m-Online-Status).
   - Visuelle Farb-Badges (🟢 OK, 🟡 WARN, 🔴 ERROR), formatierte JSON-Details und manueller Ausführen-Action-Button im Django Admin.
+
+---
+
+### [x] 3.5 4-Stufen Celery Queue Prioritäts-Architektur (`fiscal`, `realtime`, `analytics`, `background`)
+- **Dateien**: [`backend/settings/base.py`](file:///c:/Users/Public/Dev/eswes/backend/settings/base.py), [`operations/tasks.py`](file:///c:/Users/Public/Dev/eswes/operations/tasks.py), [`operations/admin.py`](file:///c:/Users/Public/Dev/eswes/operations/admin.py), [`docs/OPERATIONS_AND_DEPLOYMENT.md`](file:///c:/Users/Public/Dev/eswes/docs/OPERATIONS_AND_DEPLOYMENT.md)
+- **Status**: ✅ **Erledigt**.
+  - **1️⃣ `fiscal` (Höchste Prio)**: OBIS-Zählerdaten Rollup (`rollup_15min`), `process_dirty_balance`, Mieter- & Prosumer-Abrechnungsslots (`allocate_user_balance_last_24h`, `compute_balance_last_24h`), Auth-Tokens.
+  - **2️⃣ `realtime` (Hohe Prio)**: 5s MQTT-Puffer (`flush_mqtt_buffer`), Gerätesteuerbefehle (`publish_pending_device_commands`), System-Health (`run_health_checks`).
+  - **3️⃣ `analytics` (Normale Prio)**: 1m/5m/15m/1h Metrik-Aggregationen, Spotmarkt-Day-Ahead & Tagesanalysen (`compute_daily_spot_summary`), PV-/Lastprognosen (`update_all_forecasts`), Tibber-Sync.
+  - **4️⃣ `background` (Niedrige Prio)**: Scikit-Learn KI-Training (`train_all_generator_ml_models`), 8.7 MB Sensor.Community Bulk-Download (`fetch_weather_observations`), Retention-Cleanup.
+  - Worker-Aufruf: `celery -A backend worker -Q fiscal,realtime,analytics,background`.
 
 ---
 

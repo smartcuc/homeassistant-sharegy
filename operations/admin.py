@@ -51,13 +51,11 @@ class HealthStateAdmin(admin.ModelAdmin):
         "aggregation_5m": "⏱️ 5m Aggregation",
         "aggregation_15m": "⏱️ 15m Aggregation",
         "aggregation_1h": "⏱️ 1h Aggregation",
-        "celery_queue_celery": "⚙️ Celery Queue: Default",
-        "celery_queue_critical": "🚨 Celery Queue: Critical",
-        "celery_queue_market": "📈 Celery Queue: Market",
-        "celery_queue_aggregation": "⏱️ Celery Queue: Aggregation",
-        "celery_queue_telemetry": "📡 Celery Queue: Telemetry",
-        "celery_queue_forecast": "☀️ Celery Queue: Forecast",
-        "celery_queue_demo": "🎮 Celery Queue: Demo",
+        "celery_queue_fiscal": "💶 Celery: Fiscal & Billing (Prio 1)",
+        "celery_queue_realtime": "⚡ Celery: EMS Realtime & Steuerung (Prio 2)",
+        "celery_queue_analytics": "📊 Celery: EMS Analytics & Markt (Prio 3)",
+        "celery_queue_background": "💤 Celery: Background & KI (Prio 4)",
+        "celery_queue_celery": "⚙️ Celery: Default Fallback",
     }
 
     def service_name(self, obj):

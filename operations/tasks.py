@@ -113,13 +113,11 @@ def check_celery_queues():
     client = redis.from_url(redis_url)
 
     queues = [
+        "fiscal",
+        "realtime",
+        "analytics",
+        "background",
         "celery",
-        "critical",
-        "market",
-        "aggregation",
-        "telemetry",
-        "forecast",
-        "demo",
     ]
 
     for queue in queues:
