@@ -28,8 +28,7 @@ export default function AdminLayout({ children }) {
                         <NavLink
                             to="/admin/dashboard"
                             className={({ isActive }) =>
-                                `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${
-                                    isActive ? "bg-indigo-50 text-indigo-700 shadow-2xs" : "text-gray-600 hover:bg-gray-50"
+                                `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${isActive ? "bg-indigo-50 text-indigo-700 shadow-2xs" : "text-gray-600 hover:bg-gray-50"
                                 }`
                             }
                         >
@@ -39,8 +38,7 @@ export default function AdminLayout({ children }) {
                         <NavLink
                             to="/admin/tracking"
                             className={({ isActive }) =>
-                                `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${
-                                    isActive ? "bg-indigo-50 text-indigo-700 shadow-2xs" : "text-gray-600 hover:bg-gray-50"
+                                `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${isActive ? "bg-indigo-50 text-indigo-700 shadow-2xs" : "text-gray-600 hover:bg-gray-50"
                                 }`
                             }
                         >
@@ -50,8 +48,7 @@ export default function AdminLayout({ children }) {
                         <NavLink
                             to="/admin/tenants"
                             className={({ isActive }) =>
-                                `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${
-                                    isActive ? "bg-indigo-50 text-indigo-700 shadow-2xs" : "text-gray-600 hover:bg-gray-50"
+                                `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${isActive ? "bg-indigo-50 text-indigo-700 shadow-2xs" : "text-gray-600 hover:bg-gray-50"
                                 }`
                             }
                         >
