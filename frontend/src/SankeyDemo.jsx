@@ -2,43 +2,66 @@
 # SankeyDemo.jsx
 */
 
-import { Sankey, Tooltip } from "recharts";
+import { useMemo } from "react";
+import ReactECharts from "echarts-for-react";
 
 export default function SankeyDemo({ theme }) {
-
-    const data = {
-        nodes: [
-            { name: "Solar" },
-            { name: "Netz" },
-            { name: "Haushalt" },
-            { name: "Batterie" },
-        ],
-        links: [
-            { source: 0, target: 2, value: 7 }, // Solar → Haushalt
-            { source: 0, target: 3, value: 3 }, // Solar → Batterie
-            { source: 1, target: 2, value: 4 }, // Netz → Haushalt
-        ],
-    };
+    const chartOption = useMemo(() => {
+        return {
+            tooltip: {
+                trigger: "item",
+                triggerOn: "mousemove",
+                formatter: "{b}: {c} kW",
+            },
+            series: [
+                {
+                    type: "sankey",
+                    layout: "none",
+                    emphasis: {
+                        focus: "adjacency",
+                    },
+                    nodeAlign: "justify",
+                    nodeGap: 24,
+                    nodeWidth: 20,
+                    data: [
+                        { name: "Solar", itemStyle: { color: "#fbbf24" } },
+                        { name: "Netz", itemStyle: { color: "#60a5fa" } },
+                        { name: "Haushalt", itemStyle: { color: theme?.primary || "#6366f1" } },
+                        { name: "Batterie", itemStyle: { color: "#34d399" } },
+                    ],
+                    links: [
+                        { source: "Solar", target: "Haushalt", value: 7 },
+                        { source: "Solar", target: "Batterie", value: 3 },
+                        { source: "Netz", target: "Haushalt", value: 4 },
+                    ],
+                    lineStyle: {
+                        color: "gradient",
+                        curveness: 0.5,
+                        opacity: 0.4,
+                    },
+                    label: {
+                        color: "#1e293b",
+                        fontSize: 12,
+                        fontWeight: "bold",
+                    },
+                },
+            ],
+        };
+    }, [theme]);
 
     return (
-        <div className="max-w-5xl mx-auto bg-white p-8 rounded-xl shadow">
-
-            <h3 className="text-xl font-bold mb-6 text-center">
+        <div className="max-w-5xl mx-auto bg-white p-8 rounded-2xl shadow-xs border border-gray-100">
+            <h3 className="text-xl font-bold mb-6 text-center text-gray-900">
                 Energiefluss (Demo)
             </h3>
-
-            <Sankey
-                width={700}
-                height={300}
-                data={data}
-                nodePadding={30}
-                margin={{ top: 20, bottom: 20 }}
-                linkCurvature={0.5}
-                node={{ fill: theme?.primary }}
-            >
-                <Tooltip />
-            </Sankey>
-
+            <div style={{ width: "100%", height: 320 }}>
+                <ReactECharts
+                    option={chartOption}
+                    style={{ height: "100%", width: "100%" }}
+                    notMerge={true}
+                    lazyUpdate={true}
+                />
+            </div>
         </div>
     );
 }

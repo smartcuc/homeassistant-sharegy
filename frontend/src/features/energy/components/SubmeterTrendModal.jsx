@@ -2,21 +2,10 @@
 # src/features/energy/components/SubmeterTrendModal.jsx
 */
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import {
-    ResponsiveContainer,
-    BarChart,
-    Bar,
-    XAxis,
-    YAxis,
-    Tooltip,
-    CartesianGrid,
-    Legend,
-    AreaChart,
-    Area,
-} from "recharts";
+import ReactECharts from "echarts-for-react";
 import { apiFetch } from "../../../api/client";
 
 export default function SubmeterTrendModal({ meter, isOpen, onClose, defaultPeriod = "30d" }) {
@@ -30,11 +19,9 @@ export default function SubmeterTrendModal({ meter, isOpen, onClose, defaultPeri
         enabled: Boolean(isOpen && meter?.id),
     });
 
-    if (!isOpen || !meter) return null;
-
-    const data = trendQuery.data || {};
-    const meterMeta = data.selected_meter || meter;
-    const timeseries = data.selected_timeseries || [];
+    const data = trendQuery.data;
+    const meterMeta = data?.selected_meter || meter;
+    const timeseries = data?.selected_timeseries || [];
 
     const periods = [
         { key: "today", label: t("energy.period_today", "Heute") },
@@ -48,6 +35,200 @@ export default function SubmeterTrendModal({ meter, isOpen, onClose, defaultPeri
         { key: "consumption", label: "⚡ Gesamtverbrauch", icon: "📊" },
         { key: "costs", label: "💶 Kosten & Ersparnis", icon: "💰" },
     ];
+
+    const chartOption = useMemo(() => {
+        const currentTimeseries = data?.selected_timeseries || [];
+        const currentMeterMeta = data?.selected_meter || meter;
+        if (!currentTimeseries || currentTimeseries.length === 0) return null;
+
+        const dates = currentTimeseries.map((pt) => pt.date);
+
+        if (chartMode === "coverage") {
+            return {
+                tooltip: {
+                    trigger: "axis",
+                    axisPointer: { type: "shadow" },
+                    backgroundColor: "rgba(255, 255, 255, 0.95)",
+                    borderColor: "#e2e8f0",
+                    textStyle: { color: "#1e293b", fontSize: 12 },
+                    extraCssText: "box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); border-radius: 0.75rem;",
+                    formatter: (params) => {
+                        if (!params || !params.length) return "";
+                        let html = `<div style="font-weight:bold;margin-bottom:4px;">${params[0].name}</div>`;
+                        params.forEach((item) => {
+                            const val = Number(item.value || 0);
+                            html += `<div style="display:flex;justify-content:space-between;gap:12px;font-size:11px;">
+                                <span>${item.marker} ${item.seriesName}:</span>
+                                <span style="font-weight:bold;font-family:monospace;">${val.toFixed(2)} kWh</span>
+                            </div>`;
+                        });
+                        return html;
+                    },
+                },
+                legend: {
+                    data: ["Solar-Eigenstrom", "Netzbezug"],
+                    bottom: 0,
+                    textStyle: { fontSize: 11, color: "#64748b" },
+                },
+                grid: {
+                    left: "2%",
+                    right: "2%",
+                    bottom: "12%",
+                    top: "10%",
+                    containLabel: true,
+                },
+                xAxis: {
+                    type: "category",
+                    data: dates,
+                    axisLabel: { fontSize: 11, color: "#94a3b8" },
+                    axisLine: { lineStyle: { color: "#cbd5e1" } },
+                },
+                yAxis: {
+                    type: "value",
+                    axisLabel: { formatter: "{value} kWh", fontSize: 11, color: "#94a3b8" },
+                    splitLine: { lineStyle: { color: "#f1f5f9", type: "dashed" } },
+                },
+                series: [
+                    {
+                        name: "Solar-Eigenstrom",
+                        type: "bar",
+                        stack: "coverage",
+                        itemStyle: { color: "#10b981" },
+                        data: currentTimeseries.map((pt) => Number(pt.solar_kwh || 0)),
+                    },
+                    {
+                        name: "Netzbezug",
+                        type: "bar",
+                        stack: "coverage",
+                        itemStyle: { color: "#64748b" },
+                        data: currentTimeseries.map((pt) => Number(pt.grid_kwh || 0)),
+                    },
+                ],
+            };
+        }
+
+        if (chartMode === "consumption") {
+            return {
+                tooltip: {
+                    trigger: "axis",
+                    backgroundColor: "rgba(255, 255, 255, 0.95)",
+                    borderColor: "#e2e8f0",
+                    textStyle: { color: "#1e293b", fontSize: 12 },
+                    extraCssText: "box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); border-radius: 0.75rem;",
+                    formatter: (params) => {
+                        const p = params[0];
+                        return `<div style="font-weight:bold;">${p.name}</div>
+                            <div style="margin-top:2px;font-size:12px;">Verbrauch: <b>${Number(p.value).toFixed(2)} kWh</b></div>`;
+                    },
+                },
+                grid: {
+                    left: "2%",
+                    right: "2%",
+                    bottom: "5%",
+                    top: "10%",
+                    containLabel: true,
+                },
+                xAxis: {
+                    type: "category",
+                    data: dates,
+                    axisLabel: { fontSize: 11, color: "#94a3b8" },
+                    axisLine: { lineStyle: { color: "#cbd5e1" } },
+                },
+                yAxis: {
+                    type: "value",
+                    axisLabel: { formatter: "{value} kWh", fontSize: 11, color: "#94a3b8" },
+                    splitLine: { lineStyle: { color: "#f1f5f9", type: "dashed" } },
+                },
+                series: [
+                    {
+                        name: "Verbrauch",
+                        type: "line",
+                        smooth: true,
+                        showSymbol: false,
+                        itemStyle: { color: currentMeterMeta?.color || "#6366f1" },
+                        lineStyle: { width: 3, color: currentMeterMeta?.color || "#6366f1" },
+                        areaStyle: {
+                            color: {
+                                type: "linear",
+                                x: 0,
+                                y: 0,
+                                x2: 0,
+                                y2: 1,
+                                colorStops: [
+                                    { offset: 0, color: currentMeterMeta?.color ? `${currentMeterMeta.color}66` : "rgba(99, 102, 241, 0.4)" },
+                                    { offset: 1, color: currentMeterMeta?.color ? `${currentMeterMeta.color}00` : "rgba(99, 102, 241, 0.0)" },
+                                ],
+                            },
+                        },
+                        data: currentTimeseries.map((pt) => Number(pt.kwh || 0)),
+                    },
+                ],
+            };
+        }
+
+        // Costs Mode
+        return {
+            tooltip: {
+                trigger: "axis",
+                axisPointer: { type: "shadow" },
+                backgroundColor: "rgba(255, 255, 255, 0.95)",
+                borderColor: "#e2e8f0",
+                textStyle: { color: "#1e293b", fontSize: 12 },
+                extraCssText: "box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); border-radius: 0.75rem;",
+                formatter: (params) => {
+                    if (!params || !params.length) return "";
+                    let html = `<div style="font-weight:bold;margin-bottom:4px;">${params[0].name}</div>`;
+                    params.forEach((item) => {
+                        const val = Number(item.value || 0);
+                        html += `<div style="display:flex;justify-content:space-between;gap:12px;font-size:11px;">
+                            <span>${item.marker} ${item.seriesName}:</span>
+                            <span style="font-weight:bold;font-family:monospace;">${val.toFixed(2)} €</span>
+                        </div>`;
+                    });
+                    return html;
+                },
+            },
+            legend: {
+                data: ["Stromkosten (€)", "Solar-Ersparnis (€)"],
+                bottom: 0,
+                textStyle: { fontSize: 11, color: "#64748b" },
+            },
+            grid: {
+                left: "2%",
+                right: "2%",
+                bottom: "12%",
+                top: "10%",
+                containLabel: true,
+            },
+            xAxis: {
+                type: "category",
+                data: dates,
+                axisLabel: { fontSize: 11, color: "#94a3b8" },
+                axisLine: { lineStyle: { color: "#cbd5e1" } },
+            },
+            yAxis: {
+                type: "value",
+                axisLabel: { formatter: "{value} €", fontSize: 11, color: "#94a3b8" },
+                splitLine: { lineStyle: { color: "#f1f5f9", type: "dashed" } },
+            },
+            series: [
+                {
+                    name: "Stromkosten (€)",
+                    type: "bar",
+                    itemStyle: { color: "#f59e0b" },
+                    data: currentTimeseries.map((pt) => Number(pt.cost_eur || 0)),
+                },
+                {
+                    name: "Solar-Ersparnis (€)",
+                    type: "bar",
+                    itemStyle: { color: "#10b981" },
+                    data: currentTimeseries.map((pt) => Number(pt.savings_eur || 0)),
+                },
+            ],
+        };
+    }, [data, chartMode, meter]);
+
+    if (!isOpen || !meter) return null;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs transition-opacity animate-fade-in">
@@ -191,92 +372,18 @@ export default function SubmeterTrendModal({ meter, isOpen, onClose, defaultPeri
                             <div className="h-64 flex items-center justify-center text-gray-400 text-xs animate-pulse">
                                 Lade Zeitreihendaten...
                             </div>
-                        ) : timeseries.length === 0 ? (
+                        ) : timeseries.length === 0 || !chartOption ? (
                             <div className="h-64 flex items-center justify-center text-gray-400 text-xs">
                                 Keine Messdaten für den gewählten Zeitraum vorhanden.
                             </div>
                         ) : (
                             <div className="h-72 w-full">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    {chartMode === "coverage" ? (
-                                        <BarChart data={timeseries} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                                            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                                            <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="#94a3b8" />
-                                            <YAxis tick={{ fontSize: 11 }} stroke="#94a3b8" unit=" kWh" />
-                                            <Tooltip
-                                                formatter={(value, name) => [
-                                                    `${Number(value).toFixed(2)} kWh`,
-                                                    name === "solar_kwh" ? "🟢 Solarstrom" : "🔵 Netzstrom",
-                                                ]}
-                                                contentStyle={{
-                                                    borderRadius: "1rem",
-                                                    border: "1px solid #e2e8f0",
-                                                    boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                                                    fontSize: "12px",
-                                                }}
-                                            />
-                                            <Legend
-                                                formatter={(val) => (val === "solar_kwh" ? "Solar-Eigenstrom" : "Netzbezug")}
-                                                wrapperStyle={{ fontSize: "11px", paddingTop: "8px" }}
-                                            />
-                                            <Bar dataKey="solar_kwh" name="solar_kwh" stackId="a" fill="#10b981" radius={[0, 0, 0, 0]} />
-                                            <Bar dataKey="grid_kwh" name="grid_kwh" stackId="a" fill="#64748b" radius={[4, 4, 0, 0]} />
-                                        </BarChart>
-                                    ) : chartMode === "consumption" ? (
-                                        <AreaChart data={timeseries} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                                            <defs>
-                                                <linearGradient id="colorCons" x1="0" y1="0" x2="0" y2="1">
-                                                    <stop offset="5%" stopColor={meterMeta.color || "#6366f1"} stopOpacity={0.4} />
-                                                    <stop offset="95%" stopColor={meterMeta.color || "#6366f1"} stopOpacity={0.0} />
-                                                </linearGradient>
-                                            </defs>
-                                            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                                            <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="#94a3b8" />
-                                            <YAxis tick={{ fontSize: 11 }} stroke="#94a3b8" unit=" kWh" />
-                                            <Tooltip
-                                                formatter={(value) => [`${Number(value).toFixed(2)} kWh`, "Verbrauch"]}
-                                                contentStyle={{
-                                                    borderRadius: "1rem",
-                                                    border: "1px solid #e2e8f0",
-                                                    boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                                                    fontSize: "12px",
-                                                }}
-                                            />
-                                            <Area
-                                                type="monotone"
-                                                dataKey="kwh"
-                                                stroke={meterMeta.color || "#6366f1"}
-                                                strokeWidth={2.5}
-                                                fillOpacity={1}
-                                                fill="url(#colorCons)"
-                                            />
-                                        </AreaChart>
-                                    ) : (
-                                        <BarChart data={timeseries} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                                            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                                            <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="#94a3b8" />
-                                            <YAxis tick={{ fontSize: 11 }} stroke="#94a3b8" unit=" €" />
-                                            <Tooltip
-                                                formatter={(value, name) => [
-                                                    `${Number(value).toFixed(2)} €`,
-                                                    name === "cost_eur" ? "Kosten (Netz)" : "🟢 Vermiedene Kosten (Solar)",
-                                                ]}
-                                                contentStyle={{
-                                                    borderRadius: "1rem",
-                                                    border: "1px solid #e2e8f0",
-                                                    boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                                                    fontSize: "12px",
-                                                }}
-                                            />
-                                            <Legend
-                                                formatter={(val) => (val === "cost_eur" ? "Stromkosten (€)" : "Solar-Ersparnis (€)")}
-                                                wrapperStyle={{ fontSize: "11px", paddingTop: "8px" }}
-                                            />
-                                            <Bar dataKey="cost_eur" name="cost_eur" fill="#f59e0b" radius={[4, 4, 0, 0]} />
-                                            <Bar dataKey="savings_eur" name="savings_eur" fill="#10b981" radius={[4, 4, 0, 0]} />
-                                        </BarChart>
-                                    )}
-                                </ResponsiveContainer>
+                                <ReactECharts
+                                    option={chartOption}
+                                    style={{ height: "100%", width: "100%" }}
+                                    notMerge={true}
+                                    lazyUpdate={true}
+                                />
                             </div>
                         )}
                     </div>

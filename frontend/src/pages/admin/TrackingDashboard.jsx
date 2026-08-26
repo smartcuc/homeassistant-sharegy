@@ -3,16 +3,9 @@
 */
 
 import { useQuery } from "@tanstack/react-query";
-import { apiFetch } from "../api/client";
-
-import {
-    LineChart,
-    Line,
-    XAxis,
-    YAxis,
-    Tooltip,
-    ResponsiveContainer,
-} from "recharts";
+import { useMemo } from "react";
+import ReactECharts from "echarts-for-react";
+import { apiFetch } from "../../api/client";
 
 function formatStats(stats) {
     const map = {};
@@ -28,12 +21,7 @@ export default function TrackingDashboard() {
         queryFn: () => apiFetch("/api/tracking/stats/"),
     });
 
-    if (isLoading) {
-        return <div className="p-6">Loading…</div>;
-    }
-
-    const stats = data.stats || [];
-    const daily = data.daily || [];
+    const stats = data?.stats || [];
 
     const map = formatStats(stats);
 
@@ -46,6 +34,66 @@ export default function TrackingDashboard() {
         "magic_login_success",
         "dashboard_open",
     ];
+
+    const chartOption = useMemo(() => {
+        const dailyList = data?.daily || [];
+        if (!dailyList || dailyList.length === 0) return null;
+        return {
+            tooltip: {
+                trigger: "axis",
+                backgroundColor: "rgba(255, 255, 255, 0.95)",
+                borderColor: "#e2e8f0",
+                textStyle: { color: "#1e293b", fontSize: 12 },
+            },
+            grid: {
+                left: "3%",
+                right: "3%",
+                bottom: "5%",
+                top: "10%",
+                containLabel: true,
+            },
+            xAxis: {
+                type: "category",
+                data: dailyList.map((d) => d.date),
+                axisLabel: { color: "#94a3b8", fontSize: 11 },
+                axisLine: { lineStyle: { color: "#cbd5e1" } },
+            },
+            yAxis: {
+                type: "value",
+                axisLabel: { color: "#94a3b8", fontSize: 11 },
+                splitLine: { lineStyle: { color: "#f1f5f9", type: "dashed" } },
+            },
+            series: [
+                {
+                    name: "Events",
+                    type: "line",
+                    smooth: true,
+                    showSymbol: true,
+                    symbolSize: 6,
+                    itemStyle: { color: "#6366f1" },
+                    lineStyle: { width: 2.5, color: "#6366f1" },
+                    areaStyle: {
+                        color: {
+                            type: "linear",
+                            x: 0,
+                            y: 0,
+                            x2: 0,
+                            y2: 1,
+                            colorStops: [
+                                { offset: 0, color: "rgba(99, 102, 241, 0.35)" },
+                                { offset: 1, color: "rgba(99, 102, 241, 0.0)" },
+                            ],
+                        },
+                    },
+                    data: dailyList.map((d) => d.count),
+                },
+            ],
+        };
+    }, [data]);
+
+    if (isLoading) {
+        return <div className="p-6">Loading…</div>;
+    }
 
     return (
         <div className="p-6 space-y-8">
@@ -85,19 +133,18 @@ export default function TrackingDashboard() {
                 <h2 className="text-lg font-medium mb-4">Events (Last 7 Days)</h2>
 
                 <div style={{ width: "100%", height: 300 }}>
-                    <ResponsiveContainer>
-                        <LineChart data={daily}>
-                            <XAxis dataKey="date" />
-                            <YAxis />
-                            <Tooltip />
-                            <Line
-                                type="monotone"
-                                dataKey="count"
-                                stroke="#6366f1"
-                                strokeWidth={2}
-                            />
-                        </LineChart>
-                    </ResponsiveContainer>
+                    {chartOption ? (
+                        <ReactECharts
+                            option={chartOption}
+                            style={{ height: "100%", width: "100%" }}
+                            notMerge={true}
+                            lazyUpdate={true}
+                        />
+                    ) : (
+                        <div className="h-full flex items-center justify-center text-gray-400 text-xs">
+                            Keine Daten für die letzten 7 Tage
+                        </div>
+                    )}
                 </div>
             </div>
 

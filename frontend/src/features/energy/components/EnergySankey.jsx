@@ -2,8 +2,8 @@
 # src/features/energy/components/EnergySankey.jsx
 */
 
-import { ResponsiveSankey } from "@nivo/sankey";
 import { useMemo, useState } from "react";
+import LiveEnergySankeyECharts from "./LiveEnergySankeyECharts";
 import useEnergySocket from "../hooks/useEnergySocket";
 import { useEnergy } from "../context/EnergyContext";
 
@@ -109,7 +109,7 @@ export default function EnergySankey() {
         return { nodes, links };
     }, [devices, grouped]);
 
-    // ✅ FINAL SAFETY (entscheidend für deinen Crash!)
+    // ✅ FINAL SAFETY
     if (
         !data ||
         !Array.isArray(data.nodes) ||
@@ -121,27 +121,25 @@ export default function EnergySankey() {
     }
 
     return (
-        <div>
+        <div className="space-y-4">
             {/* ✅ TOGGLE */}
-            <div style={{ marginBottom: 10 }}>
-                <button onClick={() => setGrouped(true)}>Grouped</button>
-                <button onClick={() => setGrouped(false)}>Devices</button>
+            <div className="inline-flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+                <button
+                    onClick={() => setGrouped(true)}
+                    className={`px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer ${grouped ? "bg-white text-indigo-700 shadow-xs font-bold" : "text-gray-600"}`}
+                >
+                    Gruppiert
+                </button>
+                <button
+                    onClick={() => setGrouped(false)}
+                    className={`px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer ${!grouped ? "bg-white text-indigo-700 shadow-xs font-bold" : "text-gray-600"}`}
+                >
+                    Einzelgeräte
+                </button>
             </div>
 
             <div style={{ height: 500 }}>
-                <ResponsiveSankey
-                    data={data}
-                    nodeThickness={20}
-                    nodeSpacing={24}
-                    animate={true}
-                    motionConfig="gentle"
-                    colors={(node) => {
-                        if (node.id === "pv") return "#f59e0b";
-                        if (node.id === "battery") return "#10b981";
-                        if (node.id === "house") return "#3b82f6";
-                        return "#ef4444";
-                    }}
-                />
+                <LiveEnergySankeyECharts data={data} />
             </div>
         </div>
     );
