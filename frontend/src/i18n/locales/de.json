@@ -567,7 +567,11 @@
     "pure_surplus_badge": "☀️ {{val}} kWh Reiner Solarüberschuss im {{h}}h-Fenster",
     "insight_title": "Prognose-Erkenntnis:",
     "surplus_rec": "In den nächsten {{h}} Stunden werden {{surplus}} kWh ungenutzter Solarüberschuss erwartet. Empfehlung: Ladefahrpläne für Wallbox oder Wärmepumpen-Pufferspeicher aktivieren.",
-    "low_surplus_rec": "Geringer Solarüberschuss erwartet ({{surplus}} kWh). Der Grundbedarf von {{load}} kWh wird teilweise aus dem Netz bezogen."
+    "low_surplus_rec": "Geringer Solarüberschuss erwartet ({{surplus}} kWh). Der Grundbedarf von {{load}} kWh wird teilweise aus dem Netz bezogen.",
+    "peak_load": "Spitzenlast",
+    "peak_pv": "Spitzenerzeugung",
+    "no_devices": "Keine Messgeräte oder Lastprofile vorhanden",
+    "no_devices_desc": "Sobald Smart Meter, Wechselrichter oder Verbraucher unter 'Geräte' verknüpft sind, wird hier die 24h/48h Lastprognose berechnet."
   },
   "co2_grid": {
     "title": "Live CO₂-Grid-Signal & Grünstrom-Index",

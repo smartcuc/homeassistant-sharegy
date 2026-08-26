@@ -42,6 +42,34 @@ def get_household_load_forecast(user, horizon_hours: int = 48) -> dict:
     start_hour = now.replace(minute=0, second=0, microsecond=0)
     end_hour = start_hour + timedelta(hours=horizon_hours)
 
+    has_devices = bool(home and Device.objects.filter(home=home, active=True).exists())
+    has_generators = bool(home and home.generator_systems.exists())
+
+    if not has_devices and not has_generators:
+        return {
+            "horizon_hours": horizon_hours,
+            "has_custom_history": False,
+            "has_heatpump": False,
+            "has_pv": False,
+            "has_devices": False,
+            "kpis": {
+                "total_load_kwh": 0.0,
+                "total_pv_kwh": 0.0,
+                "total_surplus_kwh": 0.0,
+                "total_grid_import_kwh": 0.0,
+                "total_self_consumption_kwh": 0.0,
+                "autarky_pct": 0.0,
+                "self_consumption_rate_pct": 0.0,
+                "peak_load_kw": 0.0,
+                "peak_load_time": "-",
+                "peak_pv_kw": 0.0,
+                "peak_pv_time": "-",
+                "peak_surplus_kw": 0.0,
+                "peak_surplus_time": "-",
+            },
+            "timeline": [],
+        }
+
     # 1. Historische Lastprofile aus DeviceMetric1h laden (letzte 30 Tage)
     historical_hourly = defaultdict(lambda: {"sum": 0.0, "count": 0})
     has_custom_history = False
@@ -164,11 +192,6 @@ def get_household_load_forecast(user, horizon_hours: int = 48) -> dict:
 
         # C. PV-Leistung für den Slot
         pv_kw = round(pv_forecast_map.get(slot_dt, 0.0), 3)
-        if pv_kw == 0.0 and has_pv:
-            # Physikalische Ertragskurve als realistischer Fallback
-            if 6 <= hour <= 20:
-                peak_factor = 6.8
-                pv_kw = round(max(0.0, peak_factor * (1.0 - ((hour - 13) / 7.0) ** 2)), 3)
 
         # D. Netto-Bilanzen
         net_surplus_kw = round(max(0.0, pv_kw - total_slot_load_kw), 3)

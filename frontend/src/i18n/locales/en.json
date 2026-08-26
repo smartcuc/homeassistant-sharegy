@@ -567,7 +567,11 @@
     "pure_surplus_badge": "☀️ {{val}} kWh Pure Solar Surplus in {{h}}h Window",
     "insight_title": "Forecast Insight:",
     "surplus_rec": "In the next {{h}} hours, {{surplus}} kWh of unused solar surplus is expected. Recommendation: Activate charging schedules for EV wallbox or heat pump thermal storage.",
-    "low_surplus_rec": "Low solar surplus expected ({{surplus}} kWh). Base demand of {{load}} kWh will partially be drawn from the grid."
+    "low_surplus_rec": "Low solar surplus expected ({{surplus}} kWh). Base demand of {{load}} kWh will partially be drawn from the grid.",
+    "peak_load": "Peak Load",
+    "peak_pv": "Peak Generation",
+    "no_devices": "No devices or load profiles configured",
+    "no_devices_desc": "Once smart meters, inverters, or consumers are linked under 'Devices', the 24h/48h load forecast will be calculated here."
   },
   "co2_grid": {
     "title": "Live CO₂ Grid Signal & Green Energy Index",

@@ -567,7 +567,11 @@
     "pure_surplus_badge": "☀️ {{val}} kWh Czystej nadwyżki w oknie {{h}}h",
     "insight_title": "Wnioski z prognozy:",
     "surplus_rec": "W ciągu najbliższych {{h}} godzin spodziewane jest {{surplus}} kWh niewykorzystanej nadwyżki PV. Zalecenie: Aktywuj harmonogram ładowania EV lub pompy ciepła.",
-    "low_surplus_rec": "Spodziewana niska nadwyżka PV ({{surplus}} kWh). Zapotrzebowanie {{load}} kWh będzie częściowo pobierane z sieci."
+    "low_surplus_rec": "Spodziewana niska nadwyżka PV ({{surplus}} kWh). Zapotrzebowanie {{load}} kWh będzie częściowo pobierane z sieci.",
+    "peak_load": "Szczytowe zapotrzebowanie",
+    "peak_pv": "Szczytowa produkcja",
+    "no_devices": "Brak urządzeń lub profili obciążenia",
+    "no_devices_desc": "Gdy inteligentne liczniki, falowniki lub odbiorniki zostaną połączone w 'Urządzenia', zostanie tutaj obliczona prognoza obciążenia."
   },
   "co2_grid": {
     "title": "Sygnał CO₂ sieci i indeks zielonej energii",

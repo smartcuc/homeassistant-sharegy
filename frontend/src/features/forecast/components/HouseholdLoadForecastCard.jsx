@@ -90,7 +90,7 @@ export default function HouseholdLoadForecastCard() {
                         <span className="text-xs font-semibold text-gray-400">kWh</span>
                     </div>
                     <div className="text-[10px] text-gray-500">
-                        {t("forecast.peak_hour", "Spitze")}: {kpis.peak_load_kw} kW ({kpis.peak_load_time})
+                        {t("load_forecast.peak_load", "Spitzenlast")}: {kpis.peak_load_kw} kW ({kpis.peak_load_time})
                     </div>
                 </div>
 
@@ -104,7 +104,7 @@ export default function HouseholdLoadForecastCard() {
                         <span className="text-xs font-semibold text-amber-600/70">kWh</span>
                     </div>
                     <div className="text-[10px] text-amber-800/80">
-                        {t("forecast.peak_hour", "Peak")}: {kpis.peak_pv_kw} kW ({kpis.peak_pv_time})
+                        {t("load_forecast.peak_pv", "Spitzenerzeugung")}: {kpis.peak_pv_kw} kW ({kpis.peak_pv_time})
                     </div>
                 </div>
 
@@ -158,56 +158,68 @@ export default function HouseholdLoadForecastCard() {
                 </div>
 
                 {/* Chart Bars */}
-                <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 pt-8 text-white">
-                    <div className="h-44 flex items-end justify-between gap-1 border-b border-slate-700/60 pb-2 overflow-x-auto">
-                        {timeline.map((pt, idx) => {
-                            const pvHeight = Math.min(100, (pt.pv_forecast_kw / maxChartKw) * 100);
-                            const loadHeight = Math.min(100, (pt.total_load_kw / maxChartKw) * 100);
-                            const hasSurplus = pt.has_surplus;
+                {timeline.length === 0 ? (
+                    <div className="bg-slate-50/70 border border-dashed border-slate-200 rounded-3xl p-8 text-center space-y-2">
+                        <span className="text-3xl">🏠</span>
+                        <div className="font-bold text-gray-800 text-sm">
+                            {t("load_forecast.no_devices", "Keine Messgeräte oder Lastprofile vorhanden")}
+                        </div>
+                        <p className="text-xs text-gray-500 max-w-md mx-auto">
+                            {t("load_forecast.no_devices_desc", "Sobald Smart Meter, Wechselrichter oder Verbraucher unter 'Geräte' verknüpft sind, wird hier die 24h/48h Lastprognose berechnet.")}
+                        </p>
+                    </div>
+                ) : (
+                    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 pt-8 text-white">
+                        <div className="h-44 flex items-end justify-between gap-1 border-b border-slate-700/60 pb-2 overflow-x-auto">
+                            {timeline.map((pt, idx) => {
+                                const pvHeight = Math.min(100, (pt.pv_forecast_kw / maxChartKw) * 100);
+                                const loadHeight = Math.min(100, (pt.total_load_kw / maxChartKw) * 100);
+                                const hasSurplus = pt.has_surplus;
 
-                            return (
-                                <div
-                                    key={idx}
-                                    className="flex-1 min-w-[20px] max-w-[40px] flex flex-col items-center gap-1 h-full justify-end group relative transition"
-                                >
-                                    {/* Surplus Indicator Dot */}
-                                    {hasSurplus && (
-                                        <div className="absolute -top-4 w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-xs shadow-emerald-400/80" />
-                                    )}
+                                return (
+                                    <div
+                                        key={idx}
+                                        className="flex-1 min-w-[20px] max-w-[40px] flex flex-col items-center gap-1 h-full justify-end group relative transition"
+                                    >
+                                        {/* Surplus Indicator Dot */}
+                                        {hasSurplus && (
+                                            <div className="absolute -top-4 w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-xs shadow-emerald-400/80" />
+                                        )}
 
-                                    {/* Dual Side-by-Side Mini Bars */}
-                                    <div className="w-full flex items-end justify-center gap-0.5 h-full">
-                                        {/* Load Bar */}
-                                        <div
-                                            className="w-1/2 bg-blue-500/80 group-hover:bg-blue-400 rounded-t-xs transition-all duration-200"
-                                            style={{ height: `${Math.max(6, loadHeight)}%` }}
-                                            title={`Last: ${pt.total_load_kw} kW (${pt.temperature_c}°C)`}
-                                        />
-                                        {/* PV Bar */}
-                                        <div
-                                            className="w-1/2 bg-amber-400/90 group-hover:bg-amber-300 rounded-t-xs transition-all duration-200"
-                                            style={{ height: `${Math.max(2, pvHeight)}%` }}
-                                            title={`Solar: ${pt.pv_forecast_kw} kW`}
-                                        />
+                                        {/* Dual Side-by-Side Mini Bars */}
+                                        <div className="w-full flex items-end justify-center gap-0.5 h-full">
+                                            {/* Load Bar */}
+                                            <div
+                                                className="w-1/2 bg-blue-500/80 group-hover:bg-blue-400 rounded-t-xs transition-all duration-200"
+                                                style={{ height: `${Math.max(6, loadHeight)}%` }}
+                                                title={`Last: ${pt.total_load_kw} kW (${pt.temperature_c}°C)`}
+                                            />
+                                            {/* PV Bar */}
+                                            <div
+                                                className="w-1/2 bg-amber-400/90 group-hover:bg-amber-300 rounded-t-xs transition-all duration-200"
+                                                style={{ height: `${Math.max(2, pvHeight)}%` }}
+                                                title={`Solar: ${pt.pv_forecast_kw} kW`}
+                                            />
+                                        </div>
+
+                                        {/* Hour Label */}
+                                        <span className="text-[9px] font-mono text-slate-400 truncate w-full text-center mt-1">
+                                            {pt.hour % 3 === 0 ? pt.time_label : "·"}
+                                        </span>
                                     </div>
+                                );
+                            })}
+                        </div>
 
-                                    {/* Hour Label */}
-                                    <span className="text-[9px] font-mono text-slate-400 truncate w-full text-center mt-1">
-                                        {pt.hour % 3 === 0 ? pt.time_label : "·"}
-                                    </span>
-                                </div>
-                            );
-                        })}
+                        <div className="mt-3 flex items-center justify-between text-[11px] text-slate-400 font-medium">
+                            <span>{timeline[0]?.date_label} ({timeline[0]?.time_label})</span>
+                            <span className="text-emerald-300 font-semibold">
+                                {t("load_forecast.pure_surplus_badge", { val: kpis.total_surplus_kwh, h: horizon, defaultValue: `☀️ ${kpis.total_surplus_kwh} kWh Reiner Solarüberschuss im ${horizon}h-Fenster` })}
+                            </span>
+                            <span>{timeline[timeline.length - 1]?.date_label}</span>
+                        </div>
                     </div>
-
-                    <div className="mt-3 flex items-center justify-between text-[11px] text-slate-400 font-medium">
-                        <span>{timeline[0]?.date_label} ({timeline[0]?.time_label})</span>
-                        <span className="text-emerald-300 font-semibold">
-                            {t("load_forecast.pure_surplus_badge", { val: kpis.total_surplus_kwh, h: horizon, defaultValue: `☀️ ${kpis.total_surplus_kwh} kWh Reiner Solarüberschuss im ${horizon}h-Fenster` })}
-                        </span>
-                        <span>{timeline[timeline.length - 1]?.date_label}</span>
-                    </div>
-                </div>
+                )}
             </div>
 
             {/* =========================================================
