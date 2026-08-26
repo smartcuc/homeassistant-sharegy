@@ -362,7 +362,7 @@ export default function SubmeterTrendModal({ meter, isOpen, onClose, defaultPeri
                     <div className="bg-slate-50/80 border border-slate-200/80 rounded-2xl p-5 shadow-2xs space-y-3">
                         <div className="flex items-center justify-between text-xs">
                             <span className="font-bold text-gray-700">
-                                Zeitverlauf ({data.period_label || period})
+                                Zeitverlauf ({data?.period_label || period})
                             </span>
                             <span className="text-gray-400 font-medium">
                                 {timeseries.length} Intervalle

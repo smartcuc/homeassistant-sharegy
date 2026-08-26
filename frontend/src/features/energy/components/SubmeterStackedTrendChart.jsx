@@ -151,7 +151,7 @@ export default function SubmeterStackedTrendChart({ period = "30d", onSelectMete
                 </div>
 
                 <span className="text-xs font-semibold px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-xl self-start sm:self-auto">
-                    {data.period_label || period}
+                    {data?.period_label || period}
                 </span>
             </div>
 

@@ -551,7 +551,7 @@ export default function EnergyDashboard() {
             <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-xs space-y-4">
                 <div className="flex items-center justify-between">
                     <h3 className="font-bold text-base text-gray-900 flex items-center gap-2">
-                        <span>📈</span> {t("energy.generation_vs_load", "Erzeugung vs. Verbrauch")} ({data.period_label || period})
+                        <span>📈</span> {t("energy.generation_vs_load", "Erzeugung vs. Verbrauch")} ({data?.period_label || period})
                     </h3>
                     <div className="flex items-center gap-4 text-xs font-semibold">
                         <div className="flex items-center gap-1.5 text-amber-700">
