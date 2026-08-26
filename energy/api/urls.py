@@ -9,6 +9,8 @@ from .views import (
     configure_device,
     chart_data,
     energy_balance,
+    export_energy_balance_view,
+    battery_arbitrage_view,
     submeter_trends_view,
     energy_optimizer,
     battery_forecast_view,
@@ -26,6 +28,8 @@ urlpatterns = [
 urlpatterns += [
     path("dashboard/me/", dashboard_me),
     path("balance/", energy_balance),
+    path("export/balance/", export_energy_balance_view),
+    path("battery-arbitrage/", battery_arbitrage_view),
     path("submeters/trends/", submeter_trends_view),
     path("optimizer/", energy_optimizer),
     path("battery-forecast/", battery_forecast_view),

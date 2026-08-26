@@ -9,10 +9,10 @@
 | Phase | Bereich | Fokus | Status | Erledigt | Offen |
 |---|---|---|---|---|---|
 | **Phase 1** | Kritische Bugs & Flusslogik | 🟢 EMS-Free & Core | 🟢 Abgeschlossen | 1.1, 1.2, 1.3, 1.4, 1.6 | 1.5 (Sharing) |
-| **Phase 2** | DB- & Performance-Optimierung | 🟢 EMS-Free (TimescaleDB) | 🟢 Abgeschlossen | 2.1, 2.3, 2.4, 2.5, 2.6, 2.7 | 2.2 (Sharing) |
+| **Phase 2** | DB- & Performance-Optimierung | 🟢 EMS-Free & Sharing | 🟢 100% Abgeschlossen | 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7 | – |
 | **Phase 3** | Celery & Buffer-Härtung | 🟢 EMS-Free Stabilität | 🟢 Abgeschlossen | 3.1, 3.2, 3.3, 3.4 | – |
 | **Phase 4** | Architektur & Diagramme | 🟢 EMS-Free Sankey & Tests | 🟢 Abgeschlossen | 4.2, 4.3, 4.4 | 4.1 (Sharing) |
-| **Phase 5** | EMS-Pro, KI, Apps & Alerting | 🚀 Next Milestones | 🟡 In Planung | – | 5.1 – 5.10 |
+| **Phase 5** | EMS-Pro, KI, Apps & Alerting | 🚀 Next Milestones | 🟡 In Umsetzung (5.1-5.6, 5.15-5.17 fertig) | – | 5.1 – 5.17 |
 
 ---
 
@@ -67,9 +67,9 @@
 
 ---
 
-### [ ] 2.2 Billing-Balance Berechnung (24.000+ Queries -> 1 Query)
+### [x] 2.2 Billing-Balance Berechnung (24.000+ Queries -> 1 Query)
 - **Datei**: [`billing/services_balance.py`](file:///c:/Users/Public/Dev/eswes/billing/services_balance.py#L65-L82)
-- **Problem**: `compute_balance_range` führt pro Slot und Zähler 4-5 Queries aus (Schleife über 96 Slots).
+- **Status**: ✅ **Erledigt**. Batch-Aggregation via 1 Django ORM `.values().annotate(consumption=Sum(...), generation=Sum(...))` Abfrage und atomares `BalanceSlot.objects.bulk_create(..., update_conflicts=True)` implementiert & unit-getestet.
 - **Lösung**: Datenbank-seitige Aggregation via Django ORM:
   ```python
   from django.db.models import Sum, Q

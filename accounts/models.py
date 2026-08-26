@@ -58,6 +58,7 @@ class UserProfile(models.Model):
     # Business optional
     company_name = models.CharField(max_length=255, blank=True)
     vat_id = models.CharField(max_length=50, blank=True)
+    billing_name = models.CharField(max_length=255, blank=True)
 
     # DSGVO / Consent
     consent_given = models.BooleanField(default=False)

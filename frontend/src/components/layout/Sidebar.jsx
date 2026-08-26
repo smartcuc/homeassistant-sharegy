@@ -72,6 +72,7 @@ export default function Sidebar() {
             title: `⚙️ ${t("nav.settings_group", "System & Tarife")}`,
             items: [
                 { name: t("nav.tariffs", "Strompreise & Tarife"), path: "/app/tariff", icon: "💶" },
+                { name: t("nav.billing", "Abonnement & Tarife"), path: "/app/billing", icon: "💳" },
                 { name: t("nav.mqtt_interfaces", "Schnittstellen & MQTT"), path: "/app/interfaces", icon: "📡" },
                 { name: t("nav.app_settings", "Einstellungen"), path: "/app/settings", icon: "⚙️" },
             ],

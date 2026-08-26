@@ -3,6 +3,7 @@
 */
 
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import Card from "../components/ui/Card";
 import { apiFetch } from "../api/client";
 import { useSettings } from "../hooks/useSettings";
@@ -25,6 +26,11 @@ export default function Profile() {
         queryKey: ["timezones"],
         queryFn: () => apiFetch("/api/timezones/"),
         staleTime: Infinity,
+    });
+
+    const subscriptionQuery = useQuery({
+        queryKey: ["billingOverview"],
+        queryFn: () => apiFetch("/api/billing/subscription/me/"),
     });
 
     const commonTimezones =
@@ -122,6 +128,44 @@ export default function Profile() {
                             <span className="font-medium text-gray-800">
                                 {user?.homes?.length || 1} {user?.homes?.length === 1 ? t("profile.home_single", "Haushalt") : t("profile.home_multi", "Haushalte")}
                             </span>
+                        </div>
+                    </div>
+                </Card>
+
+                {/* SUBSCRIPTION & BILLING SUMMARY */}
+                <Card>
+                    <div className="flex items-center justify-between mb-3">
+                        <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                            <span>💳</span> {t("profile.subscription_title", "Abonnement & Tarif")}
+                        </h2>
+                        <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${
+                            subscriptionQuery.data?.subscription?.is_pro
+                                ? "bg-emerald-100 text-emerald-800 border-emerald-300"
+                                : "bg-gray-100 text-gray-700 border-gray-200"
+                        }`}>
+                            {subscriptionQuery.data?.subscription?.plan_name || "Sharegy Free"}
+                        </span>
+                    </div>
+                    <div className="space-y-3 text-sm">
+                        <div>
+                            <span className="text-xs text-gray-400 block uppercase font-bold">Status</span>
+                            <span className="font-medium text-gray-800">
+                                {subscriptionQuery.data?.subscription?.status === "active" ? "🟢 Aktiv" : "Inaktiv"}
+                            </span>
+                        </div>
+                        <div>
+                            <span className="text-xs text-gray-400 block uppercase font-bold">Rechnungen</span>
+                            <span className="font-medium text-gray-800">
+                                {subscriptionQuery.data?.invoices?.length || 0} archivierte Belege
+                            </span>
+                        </div>
+                        <div className="pt-2">
+                            <Link
+                                to="/app/billing"
+                                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-xl text-xs border border-indigo-200 transition"
+                            >
+                                Tarife verwalten & Rechnungen ansehen →
+                            </Link>
                         </div>
                     </div>
                 </Card>

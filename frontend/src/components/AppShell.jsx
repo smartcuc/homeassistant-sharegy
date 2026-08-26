@@ -24,6 +24,7 @@ import HelpCenterPage from "../features/help/pages/HelpCenterPage";
 import HelpArticleDetailPage from "../features/help/pages/HelpArticleDetailPage";
 import HelpDrawer from "../features/help/components/HelpDrawer";
 import { HelpDrawerProvider } from "../features/help/context/HelpDrawerContext";
+import BillingPage from "../features/billing/pages/BillingPage";
 
 import { Routes, Route, Navigate } from "react-router-dom";
 
@@ -60,6 +61,7 @@ export default function AppShell() {
 
                             <Route path="dashboard" element={<Dashboard user={user} />} />
                             <Route path="profile" element={<Profile />} />
+                            <Route path="billing" element={<BillingPage />} />
 
                             <Route path="overview" element={<OverviewPage />} />
                             <Route path="energy" element={<EnergyDashboard />} />
