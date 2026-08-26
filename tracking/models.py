@@ -27,7 +27,7 @@ class EventLog(models.Model):
 
     # CONTEXT (CRITICAL)
     tenant = models.ForeignKey(
-        "tenants.Tenant",
+        "core.Tenant",
         null=True,
         blank=True,
         on_delete=models.CASCADE,

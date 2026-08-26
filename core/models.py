@@ -24,6 +24,11 @@ class Tenant(models.Model):
 
     is_public = models.BooleanField(default=False)
 
+    # Theme & Branding Felder (aus tenants.models konsolidiert)
+    primary_color = models.CharField(max_length=50, default="from-orange-400")
+    secondary_color = models.CharField(max_length=50, default="to-orange-600")
+    button_color = models.CharField(max_length=50, default="bg-orange-500")
+
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.name)

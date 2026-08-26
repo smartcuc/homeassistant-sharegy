@@ -225,6 +225,11 @@ class BalanceSlotAdmin(admin.ModelAdmin):
 
 @admin.register(Tenant)
 class TenantAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "slug", "is_public")
+    list_display = ("id", "name", "slug", "is_public", "primary_color")
     search_fields = ("name", "slug")
+    fieldsets = (
+        ("Stammdaten", {"fields": ("name", "slug", "is_public")}),
+        ("Geokoordinaten", {"fields": ("latitude", "longitude")}),
+        ("Theme & Farben", {"fields": ("primary_color", "secondary_color", "button_color")}),
+    )
 

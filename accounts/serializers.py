@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 from accounts.models import TenantMembership
-from tenants.models import Tenant
+from core.models import Tenant
 
 User = get_user_model()
 

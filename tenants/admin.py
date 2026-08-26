@@ -1,11 +1,2 @@
-##################
 # tenants/admin.py
-##################
-
-from django.contrib import admin
-from .models import Tenant
-
-
-@admin.register(Tenant)
-class TenantAdmin(admin.ModelAdmin):
-    list_display = ("name", "slug", "primary_color")
+# Hinweis: Das zentrale Tenant-Modell (core.Tenant) wird in core/admin.py registriert.

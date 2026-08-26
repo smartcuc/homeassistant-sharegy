@@ -202,10 +202,13 @@
 
 ## Phase 4 — Architektur-Konsolidierung & Code-Qualität
 
-### [ ] 4.1 Doppeltes `Tenant` Modell zusammenführen
+### [x] 4.1 Doppeltes `Tenant` Modell zusammenführen
 - **Dateien**: [`core/models.py`](file:///c:/Users/Public/Dev/eswes/core/models.py#L16-L35) vs. [`tenants/models.py`](file:///c:/Users/Public/Dev/eswes/tenants/models.py#L10-L23)
-- **Problem**: Zwei separate Tenant-Tabellen mit unterschiedlichen Feldern.
-- **Lösung**: Ein zentrales Tenant-Modell etablieren und Fremdschlüssel (`tracking.EventLog`) konsolidieren.
+- **Status**: ✅ **Erledigt**.
+  - `core.models.Tenant` als zentrales Modell etabliert und um Theme-Felder (`primary_color`, `secondary_color`, `button_color`) erweitert.
+  - Fremdschlüssel in `tracking.EventLog` auf `core.Tenant` migriert.
+  - `tenants/models.py` re-exportiert `core.models.Tenant` für vollständige Abwärtskompatibilität.
+  - Redundante Admin-Registrierung in `tenants/admin.py` bereinigt und in `core/admin.py` konsolidiert.
 
 ---
 

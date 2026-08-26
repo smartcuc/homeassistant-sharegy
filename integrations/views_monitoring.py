@@ -8,7 +8,7 @@ from rest_framework.permissions import AllowAny
 from django.utils import timezone
 from django.core.cache import cache
 
-from tenants.models import Tenant
+from core.models import Tenant
 from django.conf import settings
 
 from market.services_price_analysis import get_price_insights
