@@ -136,8 +136,8 @@ export default function Profile() {
                             <span>💳</span> {t("profile.subscription_title", "Abonnement & Tarif")}
                         </h2>
                         <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${subscriptionQuery.data?.subscription?.is_pro
-                                ? "bg-emerald-100 text-emerald-800 border-emerald-300"
-                                : "bg-gray-100 text-gray-700 border-gray-200"
+                            ? "bg-emerald-100 text-emerald-800 border-emerald-300"
+                            : "bg-gray-100 text-gray-700 border-gray-200"
                             }`}>
                             {subscriptionQuery.data?.subscription?.plan_name || "Sharegy Free"}
                         </span>
