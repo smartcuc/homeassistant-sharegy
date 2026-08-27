@@ -234,7 +234,7 @@ class DeviceAggregationTest(TestCase):
         self.client.force_login(self.user)
 
         # 1. JSON Export
-        resp_json = self.client.get(f"/api/devices/{self.device.id}/export/?range=24h&metric=power&format=json")
+        resp_json = self.client.get(f"/api/devices/{self.device.id}/export/?range=24h&metric=power&export_format=json")
         self.assertEqual(resp_json.status_code, 200)
         self.assertEqual(resp_json["Content-Type"], "application/json; charset=utf-8")
         data_json = resp_json.json()
@@ -245,7 +245,7 @@ class DeviceAggregationTest(TestCase):
         self.assertEqual(data_json["statistics"]["latest"], 450.5)
 
         # 2. CSV Export
-        resp_csv = self.client.get(f"/api/devices/{self.device.id}/export/?range=24h&metric=power&format=csv")
+        resp_csv = self.client.get(f"/api/devices/{self.device.id}/export/?range=24h&metric=power&export_format=csv")
         self.assertEqual(resp_csv.status_code, 200)
         self.assertEqual(resp_csv["Content-Type"], "text/csv; charset=utf-8")
         csv_content = resp_csv.content.decode("utf-8")
@@ -253,13 +253,13 @@ class DeviceAggregationTest(TestCase):
         self.assertIn("Zeitpunkt;Messwert", csv_content)
 
         # 3. XLSX Export
-        resp_xlsx = self.client.get(f"/api/devices/{self.device.id}/export/?range=24h&metric=power&format=xlsx")
+        resp_xlsx = self.client.get(f"/api/devices/{self.device.id}/export/?range=24h&metric=power&export_format=xlsx")
         self.assertEqual(resp_xlsx.status_code, 200)
         self.assertEqual(resp_xlsx["Content-Type"], "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
         self.assertTrue(len(resp_xlsx.content) > 1000)
 
         # 4. PDF Export
-        resp_pdf = self.client.get(f"/api/devices/{self.device.id}/export/?range=24h&metric=power&format=pdf")
+        resp_pdf = self.client.get(f"/api/devices/{self.device.id}/export/?range=24h&metric=power&export_format=pdf")
         self.assertEqual(resp_pdf.status_code, 200)
         self.assertEqual(resp_pdf["Content-Type"], "application/pdf")
         self.assertTrue(resp_pdf.content.startswith(b"%PDF"))
@@ -268,7 +268,7 @@ class DeviceAggregationTest(TestCase):
         start_d = (now - timedelta(days=5)).strftime("%Y-%m-%d")
         end_d = now.strftime("%Y-%m-%d")
         resp_custom = self.client.get(
-            f"/api/devices/{self.device.id}/export/?range=custom&start_date={start_d}&end_date={end_d}&format=json"
+            f"/api/devices/{self.device.id}/export/?range=custom&start_date={start_d}&end_date={end_d}&export_format=json"
         )
         self.assertEqual(resp_custom.status_code, 200)
         data_custom = resp_custom.json()

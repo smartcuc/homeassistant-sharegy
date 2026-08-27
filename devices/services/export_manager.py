@@ -282,7 +282,7 @@ def export_device_timeseries(user, device_id, range_str="24h", requested_metric=
     Generates and returns an export file (XLSX, PDF, CSV, JSON) for a device's timeseries data.
     """
     device = get_object_or_404(
-        Device.objects.select_related("home", "config__metric_definition"),
+        Device.objects.select_related("home"),
         id=device_id,
     )
 

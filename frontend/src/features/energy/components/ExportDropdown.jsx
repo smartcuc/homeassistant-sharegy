@@ -32,12 +32,12 @@ export default function ExportDropdown({
 
         let url;
         if (endpoint) {
-            url = `${endpoint}${endpoint.includes("?") ? "&" : "?"}export_format=${format}&format=${format}&period=${period || "24h"}&range=${period || "24h"}`;
+            url = `${endpoint}${endpoint.includes("?") ? "&" : "?"}export_format=${format}&period=${period || "24h"}&range=${period || "24h"}`;
         } else if (deviceId) {
-            url = `/api/devices/${deviceId}/export/?export_format=${format}&format=${format}&period=${period || "24h"}&range=${period || "24h"}`;
+            url = `/api/devices/${deviceId}/export/?export_format=${format}&period=${period || "24h"}&range=${period || "24h"}`;
             if (metric) url += `&metric=${encodeURIComponent(metric)}`;
         } else {
-            url = `/api/energy/export/balance/?export_format=${format}&format=${format}&period=${period || "today"}`;
+            url = `/api/energy/export/balance/?export_format=${format}&period=${period || "today"}`;
         }
 
         if (startDate) url += `&start_date=${startDate}`;
