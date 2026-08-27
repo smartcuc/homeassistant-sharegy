@@ -64,7 +64,7 @@ export default function Sidebar() {
                 title: `🏡 ${t("nav.assets_group", "Anlagen & Gebäude")}`,
                 items: [
                     {
-                        name: t("nav.all_devices", "Geräte"),
+                        name: t("nav.all_devices", "Geräteübersicht"),
                         path: "/app/devices",
                         icon: "📟",
                         badge: count > 0 ? count : null,
@@ -118,11 +118,15 @@ export default function Sidebar() {
 
     return (
         <div className="w-64 bg-white border-r flex flex-col shrink-0">
-            {/* ✅ Logo */}
+            {/* ✅ Logo -> Link zur Homepage */}
             <div className="h-14 flex items-center px-4 border-b">
-                <span className="font-bold text-lg bg-gradient-to-r from-indigo-500 to-purple-600 text-transparent bg-clip-text flex items-center gap-1.5">
+                <NavLink
+                    to="/"
+                    title="Zur Sharegy Startseite & Info"
+                    className="font-bold text-lg bg-gradient-to-r from-indigo-500 to-purple-600 text-transparent bg-clip-text flex items-center gap-1.5 hover:opacity-80 transition cursor-pointer"
+                >
                     <span>⚡</span> <span>Sharegy</span>
-                </span>
+                </NavLink>
             </div>
 
             {/* ✅ Navigation */}

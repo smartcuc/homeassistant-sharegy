@@ -217,3 +217,61 @@ class DeviceAggregationTest(TestCase):
         self.assertEqual(data["status"], "ok")
         self.assertEqual(data["device"]["display_name"], "Hauptzähler Wohnzimmer")
         self.assertEqual(data["device"]["config"]["role"]["id"], self.role_consumer.id)
+
+    def test_device_timeseries_exports_and_custom_date_range(self):
+        now = timezone.now()
+        bucket_time = floor_bucket(now, 900) - timedelta(minutes=30)
+        DeviceMetric15m.objects.create(
+            device=self.device,
+            metric_key="power",
+            bucket=bucket_time,
+            avg=450.5,
+            min=400.0,
+            max=500.0,
+            count=15,
+        )
+
+        self.client.force_login(self.user)
+
+        # 1. JSON Export
+        resp_json = self.client.get(f"/api/devices/{self.device.id}/export/?range=24h&metric=power&format=json")
+        self.assertEqual(resp_json.status_code, 200)
+        self.assertEqual(resp_json["Content-Type"], "application/json; charset=utf-8")
+        data_json = resp_json.json()
+        self.assertIn("meta", data_json)
+        self.assertIn("statistics", data_json)
+        self.assertIn("points", data_json)
+        self.assertEqual(data_json["meta"]["device_id"], self.device.id)
+        self.assertEqual(data_json["statistics"]["latest"], 450.5)
+
+        # 2. CSV Export
+        resp_csv = self.client.get(f"/api/devices/{self.device.id}/export/?range=24h&metric=power&format=csv")
+        self.assertEqual(resp_csv.status_code, 200)
+        self.assertEqual(resp_csv["Content-Type"], "text/csv; charset=utf-8")
+        csv_content = resp_csv.content.decode("utf-8")
+        self.assertIn("# Sharegy HEMS - Geräte-Zeitreihenexport", csv_content)
+        self.assertIn("Zeitpunkt;Messwert", csv_content)
+
+        # 3. XLSX Export
+        resp_xlsx = self.client.get(f"/api/devices/{self.device.id}/export/?range=24h&metric=power&format=xlsx")
+        self.assertEqual(resp_xlsx.status_code, 200)
+        self.assertEqual(resp_xlsx["Content-Type"], "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        self.assertTrue(len(resp_xlsx.content) > 1000)
+
+        # 4. PDF Export
+        resp_pdf = self.client.get(f"/api/devices/{self.device.id}/export/?range=24h&metric=power&format=pdf")
+        self.assertEqual(resp_pdf.status_code, 200)
+        self.assertEqual(resp_pdf["Content-Type"], "application/pdf")
+        self.assertTrue(resp_pdf.content.startswith(b"%PDF"))
+
+        # 5. Custom Date Range Export
+        start_d = (now - timedelta(days=5)).strftime("%Y-%m-%d")
+        end_d = now.strftime("%Y-%m-%d")
+        resp_custom = self.client.get(
+            f"/api/devices/{self.device.id}/export/?range=custom&start_date={start_d}&end_date={end_d}&format=json"
+        )
+        self.assertEqual(resp_custom.status_code, 200)
+        data_custom = resp_custom.json()
+        self.assertEqual(data_custom["meta"]["period"], "custom")
+        self.assertIn("points", data_custom)
+

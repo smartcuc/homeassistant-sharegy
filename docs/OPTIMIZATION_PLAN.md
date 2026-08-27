@@ -387,11 +387,53 @@
 
 ---
 
-### [ ] 5.11 Subscription- & SaaS-Lizenzmodell (Stripe)
-- **Bereich**: Monetarisierung & Billing (`billing/subscriptions/`, `stripe`)
+### [x] 5.11 Subscription- & SaaS-Lizenzmodell (Stripe / Feature-Gating)
+- **Dateien**: [`billing/models_subscription.py`](file:///c:/Users/Public/Dev/eswes/billing/models_subscription.py), [`billing/services_subscription.py`](file:///c:/Users/Public/Dev/eswes/billing/services_subscription.py), [`billing/views_subscription.py`](file:///c:/Users/Public/Dev/eswes/billing/views_subscription.py), [`BillingPage.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/billing/pages/BillingPage.jsx)
+- **Status**: ✅ **Erledigt**.
+  - Drei SaaS-Stufen: **Free** (0 €), **Pro** (4,99 €/M bzw. 49,90 €/J), **Vermieter** (14,99 €/M bzw. 149,00 €/J).
+  - Feature-Gating im Backend via Decorator `@require_feature("export_pdf")` / `@require_feature("matter_hub")` etc.
+  - Stripe-Checkout & Webhook-Synchronisation, Kundenportal-Integration und automatisierte PDF-Rechnungserstellung mit ReportLab.
+  - Frontend-Verwaltung unter `/app/billing` mit Status-Badges, Feature-Vergleich und Kündigungs-/Upgrade-Modal.
+
+---
+
+### [x] 5.18 Rechtliche Absicherung nach deutschem Recht & DSGVO
+- **Dateien**: [`frontend/src/pages/Impressum.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/pages/Impressum.jsx), [`Datenschutz.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/pages/Datenschutz.jsx), [`Agb.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/pages/Agb.jsx), [`Widerruf.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/pages/Widerruf.jsx), [`CookieConsentBanner.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/components/legal/CookieConsentBanner.jsx), [`accounts/api/views.py`](file:///c:/Users/Public/Dev/eswes/accounts/api/views.py)
+- **Status**: ✅ **Erledigt**.
+  - Vollständiges Impressum nach § 5 DDG (smartEvo GmbH, GF Rüdiger Könen), Datenschutzerklärung nach DSGVO/TDDDG, AGB & Nutzungsbedingungen sowie gesetzliche Widerrufsbelehrung.
+  - Globales, modales Cookie-Consent-Banner mit granulierten Präferenzen (Essenziell, Analyse, Marketing).
+  - **Art. 15 DSGVO Recht auf Auskunft**: Vollständiger JSON-Export aller Nutzer-, Gebäude-, Geräte-, Tarif- und Messdaten (`/api/auth/gdpr-export/`).
+  - **Art. 17 DSGVO Recht auf Löschung**: Kaskadierende, vollständige Kontolöschung (`/api/auth/delete-account/`).
+
+---
+
+### [x] 5.19 Zero-State Onboarding, UI/UX-Härtung & Navigation
+- **Dateien**: [`energy/services/balance.py`](file:///c:/Users/Public/Dev/eswes/energy/services/balance.py), [`forecast/services_load_forecast.py`](file:///c:/Users/Public/Dev/eswes/forecast/services_load_forecast.py), [`market/api/views.py`](file:///c:/Users/Public/Dev/eswes/market/api/views.py), [`Topbar.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/components/layout/Topbar.jsx), [`Sidebar.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/components/layout/Sidebar.jsx), [`LandingPage.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/LandingPage.jsx)
+- **Status**: ✅ **Erledigt**.
+  - Saubere Zero-States für Neukonten ohne Daten: Keine synthetischen Demodaten-Leaks mehr in Energiebilanz, Submetering oder Lastprognose; aufgeräumte Onboarding-Banner.
+  - Auto-Provisioning von `Home` in Market- & Auth-APIs zur Beseitigung von 404-Fehlern.
+  - Zwangsumleitung auf der Landing Page aufgehoben (Homepage bleibt auch im angemeldeten Zustand über Klick auf das Logo erreichbar).
+  - Topbar-Redundanz eliminiert: Zeigt links den Liegenschafts-Kontext (`🏡 Mein Zuhause` bzw. Multi-Home Dropdown) statt doppelter Seitentitel.
+  - Durchgängig vereinheitlichte Bezeichnung **`📟 Geräteübersicht`** in Sidebar, Topbar und allen Sprachdateien (DE, EN, PL).
+
+---
+
+### [ ] 5.9 Mobile Push & Notification Engine
+- **Bereich**: Backend Benachrichtigungen (`notifications/`, `tasks_push.py`)
 - **Ziel**: 
-  - Free / Pro (€ 4,99 / Monat) / Vermieter (€ 14,99 / Monat) Pläne mit automatischer Stripe-Abrechnung.
-  - Feature-Gating im Backend und Frontend.
+  - Anbindung von Firebase Cloud Messaging (FCM für Android) und Apple Push Notification Service (APNs für iOS).
+  - Verwaltung von Geräte-Tokens (`DeviceToken`-Modell mit Platform, Last-Active, Token).
+  - Intelligente Ruhezeiten (Quiet Hours) und Filter für unkritische Hinweise vs. Notfall-Alarme.
+
+---
+
+### [ ] 5.10 Native Mobile Apps (iOS & Android via Capacitor)
+- **Bereich**: Mobile Frontend & App Store Deployment (`mobile/`, `@capacitor/core`)
+- **Ziel**: 
+  - Cross-Platform Wrapper der React/Tailwind Web-App via Capacitor.
+  - Biometrie-Login (FaceID / TouchID / Fingerabdruck).
+  - Native Lockscreen- & Homescreen-Widgets (Live-PV-Leistung, Batterie-SoC & Optimizer-Bestzeit).
+  - Bereitstellung im Apple App Store & Google Play Store.
 
 ---
 
@@ -416,10 +458,10 @@
                                        │
                                        ▼
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ PRIORITÄT 3: SAAS-MONETARISIERUNG & STRIPE BILLING                            │
+│ PRIORITÄT 3: SÄULE 2 - ENERGY SHARING COMMUNITIES & § 14a EnWG                │
 ├───────────────────────────────────────────────────────────────────────────────┤
-│ 4. 💳 Task 5.11: Subscription- & SaaS-Lizenzmodell (Stripe / Feature-Gating)  │
-│ 5. 🧹 Task 4.1: Tenant-Modell Konsolidierung                                  │
+│ 4. 🏢 Task 4.1: Tenant-Modell Konsolidierung & 15-Min P2P-Clearing            │
+│ 5. ⚡ Task 3.6: § 14a EnWG Steuerbox-Schnittstelle & Pflichtdimmung (4,2 kW)  │
 └───────────────────────────────────────────────────────────────────────────────┘
 ```
 

@@ -1,7 +1,16 @@
 import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
-export default function ExportDropdown({ period, startDate, endDate }) {
+export default function ExportDropdown({
+    period,
+    startDate,
+    endDate,
+    deviceId,
+    metric,
+    endpoint,
+    className = "",
+    buttonStyle,
+}) {
     const { t } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
     const [downloading, setDownloading] = useState(false);
@@ -21,7 +30,16 @@ export default function ExportDropdown({ period, startDate, endDate }) {
         setDownloading(true);
         setIsOpen(false);
 
-        let url = `/api/energy/export/balance/?export_format=${format}&format=${format}&period=${period}`;
+        let url;
+        if (endpoint) {
+            url = `${endpoint}${endpoint.includes("?") ? "&" : "?"}export_format=${format}&format=${format}&period=${period || "24h"}&range=${period || "24h"}`;
+        } else if (deviceId) {
+            url = `/api/devices/${deviceId}/export/?export_format=${format}&format=${format}&period=${period || "24h"}&range=${period || "24h"}`;
+            if (metric) url += `&metric=${encodeURIComponent(metric)}`;
+        } else {
+            url = `/api/energy/export/balance/?export_format=${format}&format=${format}&period=${period || "today"}`;
+        }
+
         if (startDate) url += `&start_date=${startDate}`;
         if (endDate) url += `&end_date=${endDate}`;
 
@@ -30,11 +48,12 @@ export default function ExportDropdown({ period, startDate, endDate }) {
     };
 
     return (
-        <div className="relative inline-block text-left" ref={menuRef}>
+        <div className={`relative inline-block text-left ${className}`} ref={menuRef}>
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
                 disabled={downloading}
+                style={buttonStyle}
                 className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-2xs flex items-center gap-2 transition cursor-pointer disabled:opacity-50"
             >
                 <span>📥</span>

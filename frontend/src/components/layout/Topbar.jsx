@@ -1,7 +1,3 @@
-/*
-# src/components/layout/Topbar.jsx
-*/
-
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -9,6 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import { apiFetch } from "../../api/client";
 import { useUser } from "../../hooks/useUser";
+import { useHomes } from "../../hooks/useHomes";
 import { useDeviceStatus } from "../../hooks/useDevices";
 import UserMenu from "../UserMenu";
 import SpotPriceModal from "../../features/market/components/SpotPriceModal";
@@ -17,6 +14,7 @@ import { useHelpDrawer } from "../../features/help/context/useHelpDrawer";
 export default function AppTopbar() {
     const { t } = useTranslation();
     const { user } = useUser();
+    const { homes = [], primaryHome } = useHomes();
     const { toggleHelp } = useHelpDrawer();
 
     // 📶 Live Geräte-Status aus dem Backend
@@ -56,33 +54,41 @@ export default function AppTopbar() {
 
     return (
         <div className="h-14 bg-white border-b flex items-center justify-between px-4">
-            {/* LEFT */}
-            <div className="flex items-center gap-4">
-                {/* 🏠 Home Switcher */}
-                {user?.homes?.length > 1 && (
-                    <select
-                        className="
-                            border
-                            rounded-lg
-                            px-3
-                            py-1
-                            text-sm
-                            bg-white
-                            hover:border-indigo-400
-                        "
-                    >
-                        {user.homes.map((h) => (
-                            <option key={h.id} value={h.id}>
-                                {h.name}
-                            </option>
-                        ))}
-                    </select>
+            {/* LEFT: 🏡 Gebäude- / Liegenschafts-Kontext */}
+            <div className="flex items-center gap-3">
+                {homes.length > 1 ? (
+                    <div className="flex items-center gap-1.5">
+                        <span className="text-sm">🏡</span>
+                        <select
+                            className="
+                                border border-slate-200
+                                rounded-xl
+                                px-2.5
+                                py-1
+                                text-xs
+                                font-semibold
+                                text-slate-700
+                                bg-slate-50
+                                hover:border-indigo-400
+                                focus:outline-none focus:ring-2 focus:ring-indigo-500/20
+                                transition
+                                cursor-pointer
+                            "
+                            defaultValue={primaryHome?.id}
+                        >
+                            {homes.map((h) => (
+                                <option key={h.id} value={h.id}>
+                                    {h.name || "Mein Zuhause"}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                ) : (
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 bg-slate-100/80 border border-slate-200/90 px-3 py-1.5 rounded-xl shadow-2xs">
+                        <span className="text-sm">🏡</span>
+                        <span>{primaryHome?.name || t("common.my_home", "Mein Zuhause")}</span>
+                    </div>
                 )}
-
-                {/* 📍 Kontext */}
-                <div className="text-sm text-gray-400">
-                    Dashboard
-                </div>
             </div>
 
             {/* RIGHT */}

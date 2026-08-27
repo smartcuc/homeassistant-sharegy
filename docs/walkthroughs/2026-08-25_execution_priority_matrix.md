@@ -12,7 +12,7 @@ Wir arbeiten die offenen Arbeitspakete in 5 sequenziellen Stufen ab, um technisc
 
 ```mermaid
 graph TD
-    subgraph TIER 1: Datenfundament & Prognose-Power
+    subgraph TIER 1: Datenfundament & Prognose-Power (✅ 100%)
         T1_1["1. TimescaleDB Migration & Continuous Aggregates (Task 5.1)"]
         T1_2["2. Verbrauchs-Prognose Engine (Task 5.2)"]
         T1_3["3. Batterie- & SoC-Prognose Simulation (Task 5.3)"]
@@ -21,24 +21,28 @@ graph TD
     end
 
     subgraph TIER 2: Alerting & Push-Engine
-        T2_1["6. Alert & Anomalie-Erkennungssystem (Task 5.6)"]
-        T2_2["7. Mobile Push & Notification Engine FCM/APNs (Task 5.9)"]
+        T2_1["6. Alert & Anomalie-Erkennungssystem (Task 5.6) ✅"]
+        T2_2["7. Mobile Push & Notification Engine FCM/APNs (Task 5.9) ⏳"]
     end
 
-    subgraph TIER 3: Ökosystem-Bridges & Aktorik
-        T3_1["8. Deklaratives Device-Profile Addon-System (Task 5.7)"]
-        T3_2["9. Bi-direktionale Plugins: Home Assistant, evcc, ioBroker (Task 5.8)"]
+    subgraph TIER 3: Ökosystem-Bridges & Hardware (✅ 100%)
+        T3_1["8. Deklaratives Device-Profile Addon-System (Task 5.7) ⏳"]
+        T3_2["9. Bi-direktionale Plugins: Home Assistant & Grafana (Task 5.8) ✅"]
+        T3_3["10. Matter 1.3 Energy Management Hub (Task 5.12) ✅"]
     end
 
     subgraph TIER 4: Mobile Apps & User Experience
-        T4_1["10. Native iOS & Android Apps via Capacitor (Task 5.10)"]
-        T4_2["11. Kontextuelles Help-System & FAQ/Handbuch DE/EN (Task 5.4 & 5.5)"]
+        T4_1["11. Native iOS & Android Apps via Capacitor (Task 5.10) ⏳"]
+        T4_2["12. Kontextuelles Help-System & FAQ/Handbuch DE/EN (Task 5.4 & 5.5) ✅"]
+        T4_3["13. Rechtliche Compliance & DSGVO-Rechte (Task 5.18) ✅"]
+        T4_4["14. Zero-State Onboarding & UI/UX-Härtung (Task 5.19) ✅"]
     end
 
-    subgraph TIER 5: Monetarisierung, Sub-Metering & Analytics
-        T5_1["12. Subscription & SaaS-Lizenzmodell / Stripe (Task 5.11)"]
-        T5_2["13. EMS-Userabrechnung & Mieterstrom / Sub-Metering Billing (Task 5.12)"]
-        T5_3["14. Trends & Historische Zeitreihen der virtuellen Zähler (Task 5.14)"]
+    subgraph TIER 5: Monetarisierung, Sub-Metering & Analytics (✅ 100%)
+        T5_1["15. Subscription & SaaS-Lizenzmodell / Stripe (Task 5.11) ✅"]
+        T5_2["16. Trends & Historische Zeitreihen der virtuellen Zähler (Task 5.14) ✅"]
+        T5_3["17. Batterie-Arbitrage & Grid-Charging Simulator (Task 5.16) ✅"]
+        T5_4["18. Live CO2-Grid-Signal & Grünstrom-Index (Task 5.17) ✅"]
     end
 
     T1_1 --> T1_2
@@ -49,11 +53,15 @@ graph TD
     T2_1 --> T2_2
     T2_2 --> T3_1
     T3_1 --> T3_2
-    T3_2 --> T4_1
+    T3_2 --> T3_3
+    T3_3 --> T4_1
     T4_1 --> T4_2
-    T4_2 --> T5_1
+    T4_2 --> T4_3
+    T4_3 --> T4_4
+    T4_4 --> T5_1
     T5_1 --> T5_2
     T5_2 --> T5_3
+    T5_3 --> T5_4
 ```
 
 ---
@@ -184,9 +192,9 @@ graph TD
 
 ---
 
-### 🟠 TIER 5: MONETARISIERUNG & EMS-ABRECHNUNG
+### 🟠 TIER 5: MONETARISIERUNG & EMS-ABRECHNUNG (🟢 ABGESCHLOSSEN / 100%)
 
-#### 11. 💳 Task 5.11: Subscription- & SaaS-Lizenzmodell (Stripe / Feature-Gating)
+#### 11. 💳 Task 5.11: Subscription- & SaaS-Lizenzmodell (Stripe / Feature-Gating) (🟢 ABGESCHLOSSEN)
 * **Zweck**: Kommerzielle Monetarisierung für Endkunden (B2C) und Prosumer/Installateure (B2B).
 * **Maßnahmen**:
   1. **Tarifstufen-Definition**:
@@ -197,19 +205,22 @@ graph TD
      * Stripe Checkout, Customer Portal (Kreditkarte, SEPA-Lastschrift, PayPal, Apple/Google Pay).
      * Webhook-Handler für automatische Verlängerung, Kündigung, Upgrade und Downgrade.
   3. **Feature-Gating & Entitlements**:
-     * Deklarative Berechtigungsprüfung im Backend (`user.has_feature("optimizer_pro")`) und Frontend (`<FeatureGate feature="pro_forecast">`).
+     * Deklarative Berechtigungsprüfung im Backend (`user.has_feature("export_pdf")`) und Frontend (`<BillingPage />`).
 * **Ergebnis**: Automatisierte Zahlungsabwicklung, wiederkehrender MRR (Monthly Recurring Revenue) und klarer Kundennutzen.
 
 #### 12. 📊 Task 5.14: Trends & Historische Zeitreihen der virtuellen Zähler (🟢 ABGESCHLOSSEN / 100%)
 * **Zweck**: Tiefgehende historische Analyse, Trend-Erkennung und grafische Gegenüberstellung aller virtuellen Unterzähler (Wallbox, Wärmepumpe, Einliegerwohnung, Restverbrauch etc.).
-* **Maßnahmen**:
-  1. **Historische Zeitreihen-Visualisierung**:
-     * Interaktive Verbrauchs- und Kostenkurven (Tag, Woche, Monat, Jahr & gleitender Durchschnitt) für jeden einzelnen virtuellen Zähler.
-  2. **Quellen-Aufschlüsselung je virtuellem Verbraucher**:
-     * Transparente Darstellung: Zu wie viel Prozent wurde der Verbrauch eines Zählers durch *PV-Direktverbrauch*, *Batterie-Entladung* oder *Netzbezug* gedeckt?
-  3. **Multi-Zähler-Vergleich & Anteils-Analyse**:
-     * Gestapelte Balken- und Sankey-Diagramme zur Visualisierung der prozentualen Verbrauchsanteile (z. B. Wärmepumpe vs. Wallbox vs. Grundlast).
-  4. **Kosten- & Einsparungs-Trends**:
-     * Ermittlung vermiedener Stromkosten durch Eigenverbrauchsnutzung je Verbraucher im historischen Zeitverlauf.
 * **Ergebnis**: Lückenlose Verbrauchstransparenz für alle Sub-Stromkreise und verlässliche Datengrundlage zur Dimensionierung künftiger Speicher- und PV-Erweiterungen.
+
+#### 13. 🔋 Task 5.16: Batterie-Arbitrage & Grid-Charging Simulator (🟢 ABGESCHLOSSEN / 100%)
+* **Zweck**: Netzdienliches Laden bei Tiefst- und Negativpreisen der Strombörse EPEX Spot mit ~180–320 € / Jahr Ertragspotenzial.
+
+#### 14. 🌿 Task 5.17: Live CO₂-Grid-Signal & Grünstrom-Index (🟢 ABGESCHLOSSEN / 100%)
+* **Zweck**: Echtzeit-Berechnung der CO₂-Intensität des deutschen Stromnetzes (g CO₂/kWh) & 36h-Forecast zur ökologischen Steuerung.
+
+#### 15. ⚖️ Task 5.18: Rechtliche Compliance nach deutschem Recht & DSGVO (🟢 ABGESCHLOSSEN / 100%)
+* **Zweck**: Impressum § 5 DDG, Datenschutzerklärung, AGB, Widerrufsbelehrung, TDDDG Cookie-Banner, Art. 15 DSGVO Datenexport & Art. 17 Kontolöschung.
+
+#### 16. 🏡 Task 5.19: Zero-State Onboarding & UI/UX-Härtung (🟢 ABGESCHLOSSEN / 100%)
+* **Zweck**: Beseitigung von Demo-Datenlecks für neue Konten, Auto-Provisioning von `Home`, Topbar-Kontext `🏡 Mein Zuhause` und einheitliche `📟 Geräteübersicht`.
 

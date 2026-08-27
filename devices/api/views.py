@@ -668,117 +668,72 @@ def device_available_metrics(request, device_id):
 
 @api_view(["GET"])
 def device_timeseries(request, device_id):
-    range_str = request.GET.get("range", "24h")
+    range_str = request.GET.get("range") or request.GET.get("period") or "24h"
     requested_metric = request.GET.get("metric")
+    start_date = request.GET.get("start_date")
+    end_date = request.GET.get("end_date")
 
-    try:
-        config = get_range_config(range_str)
-    except ValueError:
-        return Response(
-            {"error": "invalid_range"},
-            status=400,
-        )
+    from devices.services.export_manager import get_device_timeseries_dataset
 
     device = get_object_or_404(
-        Device.objects.select_related("config__metric_definition"),
+        Device.objects.select_related("home", "config__metric_definition"),
         id=device_id,
     )
 
-    lead_key = (
-        device.config.metric_definition.key
-        if hasattr(device, "config") and device.config and device.config.metric_definition
-        else "power"
+    dataset = get_device_timeseries_dataset(
+        device=device,
+        range_str=range_str,
+        requested_metric=requested_metric,
+        start_date=start_date,
+        end_date=end_date,
     )
-
-    POWER_KEYS = {"power", "value", "active_power", "p_total", "val", "w", "watt"}
-
-    is_power_query = (
-        (not requested_metric)
-        or (requested_metric.lower() in POWER_KEYS)
-        or (requested_metric == lead_key)
-    )
-
-    if is_power_query:
-        possible_keys = list(POWER_KEYS)
-        if lead_key and lead_key not in possible_keys:
-            possible_keys.append(lead_key)
-        metric_filter = Q(metric_key__in=possible_keys) | Q(metric_key__isnull=True)
-        effective_metric = lead_key or "power"
-    else:
-        metric_filter = Q(metric_key=requested_metric)
-        effective_metric = requested_metric
-
-    now = timezone.now()
-    field = config["field"]
-
-    if field == "bucket":
-        now = now.replace(
-            second=0,
-            microsecond=0,
-        )
-
-    start = now - config["delta"]
-
-    # 1. Primäre Abfrage auf das Ziel-Aggregationsmodell
-    qs = list(
-        config["model"]
-        .objects.filter(device_id=device_id)
-        .filter(metric_filter)
-        .filter(**{f"{field}__gte": start, f"{field}__lte": now})
-        .order_by(field)
-    )
-    value_field = config["value_field"]
-
-    # 2. Multi-Tier Fallback Kaskade (5m -> 1m -> raw DeviceMetric)
-    if not qs:
-        fallback_chain = [
-            (DeviceMetric5m, "bucket", "avg"),
-            (DeviceMetric1m, "bucket", "avg"),
-            (DeviceMetric, "timestamp", "value"),
-        ]
-        for fb_model, fb_field, fb_val in fallback_chain:
-            qs = list(
-                fb_model.objects.filter(device_id=device_id)
-                .filter(metric_filter)
-                .filter(**{f"{fb_field}__gte": start, f"{fb_field}__lte": now})
-                .order_by(fb_field)
-            )
-            if qs:
-                field = fb_field
-                value_field = fb_val
-                break
-
-    points = []
-    for row in qs:
-        t = getattr(row, field).timestamp()
-        v = getattr(row, value_field)
-        points.append(
-            {
-                "t": int(t),
-                "v": round(float(v), 2) if v is not None else 0.0,
-                "min": getattr(row, "min", None),
-                "max": getattr(row, "max", None),
-            }
-        )
-
-    unit = "W"
-    latest_m = DeviceLatestMetric.objects.filter(device_id=device_id, metric_key=effective_metric).first()
-    if latest_m and latest_m.unit:
-        unit = latest_m.unit
-    else:
-        def_obj = MetricDefinition.objects.filter(key=effective_metric).first()
-        if def_obj and def_obj.unit:
-            unit = def_obj.unit
 
     return Response(
         {
             "device": device_id,
             "range": range_str,
-            "metric": effective_metric,
-            "unit": unit,
-            "points": points,
+            "period_label": dataset["period_label"],
+            "metric": dataset["metric_key"],
+            "metric_name": dataset["metric_name"],
+            "unit": dataset["unit"],
+            "stats": dataset["stats"],
+            "points": [
+                {
+                    "t": p["t"],
+                    "v": p["v"],
+                    "min": p["min"],
+                    "max": p["max"],
+                }
+                for p in dataset["points"]
+            ],
         }
     )
+
+
+@api_view(["GET"])
+def export_device_timeseries_view(request, device_id):
+    export_format = (
+        request.GET.get("export_format")
+        or request.GET.get("format")
+        or "xlsx"
+    ).lower()
+    range_str = request.GET.get("range") or request.GET.get("period") or "24h"
+    metric = request.GET.get("metric")
+    start_date = request.GET.get("start_date")
+    end_date = request.GET.get("end_date")
+
+    from devices.services.export_manager import export_device_timeseries
+
+    return export_device_timeseries(
+        user=request.user,
+        device_id=device_id,
+        range_str=range_str,
+        requested_metric=metric,
+        start_date=start_date,
+        end_date=end_date,
+        export_format=export_format,
+    )
+
 
 
 @api_view(["GET"])

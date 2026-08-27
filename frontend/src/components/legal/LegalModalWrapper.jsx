@@ -4,10 +4,14 @@
 
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useUser } from "../../hooks/useUser";
 
 export default function LegalModalWrapper({ title, children, onClose }) {
     const { t } = useTranslation();
+    const { user } = useUser();
     const navigate = useNavigate();
+
+    const isLoggedIn = Boolean(user && (user.id || user.email || user.is_authenticated));
 
     // Modal Mode (opened from Footer popup)
     if (onClose) {
@@ -73,12 +77,22 @@ export default function LegalModalWrapper({ title, children, onClose }) {
                             <span>←</span>
                             <span>{t("common.back", "Zurück")}</span>
                         </button>
-                        <Link
-                            to="/login"
-                            className="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shadow-xs"
-                        >
-                            {t("auth.login", "Anmelden")}
-                        </Link>
+                        {isLoggedIn ? (
+                            <Link
+                                to="/app/dashboard"
+                                className="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shadow-xs flex items-center gap-1.5"
+                            >
+                                <span>{t("nav.dashboard", "Dashboard")}</span>
+                                <span>→</span>
+                            </Link>
+                        ) : (
+                            <Link
+                                to="/login"
+                                className="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shadow-xs"
+                            >
+                                {t("auth.login", "Anmelden")}
+                            </Link>
+                        )}
                     </div>
                 </div>
             </header>

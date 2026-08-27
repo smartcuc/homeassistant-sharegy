@@ -16,7 +16,7 @@ export default function Impressum({ onClose }) {
                 </h2>
 
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-sm space-y-1 font-medium">
-                    <p className="font-bold text-base text-gray-900">smartEvo GmbH</p>
+                    <p className="font-bold text-base text-gray-900">smartEvo UG</p>
                     <p>Zeisigweg 17</p>
                     <p>50389 Wesseling</p>
                     <p>Deutschland</p>
@@ -62,7 +62,7 @@ export default function Impressum({ onClose }) {
                 <h3 className="text-base font-bold text-gray-900">Registereintrag</h3>
                 <p>
                     <strong>Registergericht:</strong> Amtsgericht Köln<br />
-                    <strong>Handelsregisternummer:</strong> HRB (in Eintragung / Köln)
+                    <strong>Handelsregisternummer:</strong> HRB 83631
                 </p>
             </section>
 
@@ -70,7 +70,7 @@ export default function Impressum({ onClose }) {
                 <h3 className="text-base font-bold text-gray-900">Umsatzsteuer-Identifikationsnummer</h3>
                 <p>
                     Umsatzsteuer-Identifikationsnummer gemäß § 27 a Umsatzsteuergesetz (UStG):<br />
-                    <span className="font-mono bg-slate-100 px-2 py-0.5 rounded text-xs">DE (Beantragt / in Zuteilung)</span>
+                    <span className="font-mono bg-slate-100 px-2 py-0.5 rounded text-xs">DE 300 917 919</span>
                 </p>
             </section>
 

@@ -17,22 +17,12 @@ export default function LandingPage() {
     const { user, loading } = useUser();
     const navigate = useNavigate();
 
-    const [variant] = useState(Math.random() > 0.5 ? "A" : "B");
+    const [variant] = useState(() => (Math.random() > 0.5 ? "A" : "B"));
 
     useEffect(() => {
-
         document.title = "Sharegy – Dein Energy OS";
-
         trackEvent("landing_view", { variant });
-
     }, [variant]);
-
-    // ✅ NEU: Redirect wenn eingeloggt
-    useEffect(() => {
-        if (!loading && user) {
-            navigate("/app/dashboard", { replace: true });
-        }
-    }, [user, loading, navigate]);
 
 
     const handleStart = () => {

@@ -8,6 +8,10 @@ Dieses Verzeichnis enthält detaillierte Protokolle und Änderungsberichte zu de
 
 | Datum | Titel | Bereich | Dokument |
 |---|---|---|---|
+| **26.08.2026** | **Rechtliche Compliance nach deutschem Recht, DSGVO & Zero-State Härtung** | Legal Compliance, Betroffenenrechte & UI/UX | [📄 `2026-08-26_legal_compliance_and_gdpr_implementation.md`](./2026-08-26_legal_compliance_and_gdpr_implementation.md) |
+| **26.08.2026** | **CSA Matter 1.3 Energy Management Hub & Bridge (Task 5.12)** | Hardware, Matter 1.3 & Smart Home | [📄 `2026-08-26_task_5_12_matter_hub_and_1_3_energy_management.md`](./2026-08-26_task_5_12_matter_hub_and_1_3_energy_management.md) |
+| **26.08.2026** | **SaaS User Subscription, Stripe Billing & Balance Query Optimization** | Monetarisierung, Billing & DB-Perf | [📄 `2026-08-26_ems_user_subscription_billing_and_balance_query_optimization.md`](./2026-08-26_ems_user_subscription_billing_and_balance_query_optimization.md) |
+| **26.08.2026** | **HEMS Markt-Benchmark, USPs & Strategische Gap-Analyse** | Strategie, Category Leadership & Roadmap | [📄 `2026-08-26_hems_market_benchmark_and_strategic_gap_analysis.md`](./2026-08-26_hems_market_benchmark_and_strategic_gap_analysis.md) |
 | **25.08.2026** | **Kontextuelles Help-System & Wissensportal (Task 5.4 & 5.5)** | In-App Support, Help Drawer & Knowledge Base | [📄 `2026-08-25_help_system_and_faq_portal_concept.md`](./2026-08-25_help_system_and_faq_portal_concept.md) |
 | **25.08.2026** | **Ausführungs- & Prioritätenliste (Execution Backlog Tiers 1–5: Core bis Subscription & Billing)** | Sprint-Planung & Implementation | [📄 `2026-08-25_execution_priority_matrix.md`](./2026-08-25_execution_priority_matrix.md) |
 | **25.08.2026** | **Markt- & Wettbewerbsanalyse v2 (Future-State & Target Architecture)** | Strategie, Category Leader & Roadmap | [📄 `2026-08-25_competitive_analysis_hems_ems_v2_future_state.md`](./2026-08-25_competitive_analysis_hems_ems_v2_future_state.md) |

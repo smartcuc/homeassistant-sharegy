@@ -99,10 +99,12 @@
   ├── 2.13 ✅ Live CO₂-Grid-Signal & Grünstrom-Index (Echtzeit-Emissionen g CO₂/kWh & 36h Timeline)
   ├── 2.14 ✅ CSA Matter 1.3 Energy Management Hub & Bridge Engine
   ├── 2.15 ✅ Bi-direktionale Ökosystem-Plugins (Home Assistant Custom Component & Grafana REST-Bridge)
-  ├── 2.16 ⏳ Deklaratives Device-Profile Addon-System (Sungrow, SMA, Deye, Huawei, Kostal, Fronius YAML)
-  ├── 2.17 ⏳ Mobile Push Notification Engine (FCM Android & APNs iOS Dispatcher)
-  ├── 2.18 ⏳ Native Mobile Apps via Capacitor (iOS & Android mit Widgets & Biometrie)
-  └── 2.19 ⏳ Stripe Subscription-Integration & Feature-Gating (Free vs. Pro vs. Vermieter)
+  ├── 2.16 ✅ Subscription- & SaaS-Lizenzmodell (Free, Pro 4,99 €, Vermieter 14,99 €, PDF-Invoicing & Feature-Gating)
+  ├── 2.17 ✅ Rechtliche Compliance & DSGVO-Rechte (Impressum § 5 DDG, Datenschutz, AGB, Widerruf, Cookie-Manager, Art. 15 Export & Art. 17 Löschung)
+  ├── 2.18 ✅ Production-Härtung leere Accounts & UI/UX-Ergonomie (Zero-State Onboarding-Banner, Auto-Home-Provisioning, Topbar-Kontext)
+  ├── 2.19 ⏳ Deklaratives Device-Profile Addon-System (Sungrow, SMA, Deye, Huawei, Kostal, Fronius YAML)
+  ├── 2.20 ⏳ Mobile Push Notification Engine (FCM Android & APNs iOS Dispatcher)
+  └── 2.21 ⏳ Native Mobile Apps via Capacitor (iOS & Android mit Widgets & Biometrie)
 
 ┌───────────────────────────────────────────────────────────────────────────────┐
 │ MEILENSTEIN 3: ENERGY SHARING COMMUNITIES & § 14a EnWG (Säule 2)              │
@@ -119,10 +121,10 @@
 
 ## 📋 4. Konkreter Action-Plan für die nächsten Meilensteine
 
-| Schritt | Modul | Maßnahme | Priorität | Impact |
+| Schritt | Modul | Maßnahme | Status / Prio | Impact |
 |---|---|---|:---:|---|
 | **Step 1** | `devices/profiles/` | **Deklaratives Device-Profile Addon-System**: Vorgefertigte YAML-Templates für Sungrow, SMA, Deye, Huawei, Kostal, Fronius, SolarEdge, Victron | 🔥 **P1 (Sofort)** | 1-Klick Hardware-Setup ohne manuelle Register-Eingabe |
 | **Step 2** | `notifications/` | **Mobile Push Notification Engine**: FCM & APNs Dispatcher für PV-Ausfall-, Notreserve- & Negativpreis-Pushs | 📱 **P2** | Aktive Alarmierung auf Smartphones bei geschlossener App |
 | **Step 3** | `mobile/` | **Capacitor Mobile App (iOS & Android)**: Biometrie-Login & native Homescreen-Widgets (Live-PV, SoC) | 📱 **P2** | App Store / Play Store Listung & maximale Kundenbindung |
-| **Step 4** | `billing/` | **Stripe Subscription Billing**: Free vs. Pro (4,99 €) vs. Vermieter (14,99 €) mit Feature-Gating | 💳 **P3** | Automatisierte SaaS-Monetarisierung & Checkout |
-| **Step 5** | `tenants/` | **Tenant-Modell Konsolidierung & P2P-Clearing**: 15-Min-Bilanzierung für Mieterstrom & Quartiere | 🏢 **P3** | Kommerzieller Rollout von Säule 2 (Energy Sharing) |
+| **Step 4** | `tenants/` | **Tenant-Modell Konsolidierung & P2P-Clearing**: 15-Min-Bilanzierung für Mieterstrom & Quartiere | 🏢 **P3** | Kommerzieller Rollout von Säule 2 (Energy Sharing) |
+| **Step 5** | `grid/enwg/` | **§ 14a EnWG Steuerbox & Dimmung**: Dynamische Leistungsbegrenzung auf 4,2 kW für SteuVE (WP, Wallbox, Speicher) | ⚡ **P3** | Gesetzliche Netzbetreiber-Konformität in Deutschland |

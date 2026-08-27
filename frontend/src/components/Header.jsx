@@ -9,38 +9,43 @@ export default function Header({ theme, user }) {
     const primary = theme?.primary || "#f97316";
     const secondary = theme?.secondary || "#7c3aed";
 
+    const isLoggedIn = Boolean(user && (user.id || user.email || user.is_authenticated));
+
     return (
-        <header className="bg-white shadow-sm border-b">
+        <header className="bg-white shadow-xs border-b border-gray-100">
             <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
 
-                {/* LOGO */}
-                <div
-                    className="text-2xl font-bold"
+                {/* LOGO -> Link zur Startseite */}
+                <Link
+                    to="/"
+                    title="Sharegy Startseite"
+                    className="text-2xl font-bold flex items-center gap-1.5 hover:opacity-90 transition cursor-pointer"
                     style={{
                         background: `linear-gradient(to right, ${primary}, ${secondary})`,
                         WebkitBackgroundClip: "text",
                         color: "transparent",
                     }}
                 >
-                    Sharegy
-                </div>
+                    <span>⚡</span>
+                    <span>Sharegy</span>
+                </Link>
 
                 {/* ✅ RECHTE SEITE */}
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
 
                     {/* 🔓 NICHT eingeloggt */}
-                    {!user?.is_authenticated && (
+                    {!isLoggedIn && (
                         <>
                             <Link
                                 to="/login"
-                                className="text-gray-600 hover:text-black"
+                                className="text-sm font-semibold text-gray-700 hover:text-indigo-600 px-3 py-2 transition"
                             >
                                 Login
                             </Link>
 
                             <Link
                                 to="/join"
-                                className="bg-indigo-600 text-white px-4 py-2 rounded"
+                                className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2 rounded-xl shadow-xs transition"
                             >
                                 Beitreten
                             </Link>
@@ -48,26 +53,14 @@ export default function Header({ theme, user }) {
                     )}
 
                     {/* 🔐 eingeloggter User */}
-                    {user?.is_authenticated && (
-                        <>
-                            <Link
-                                to="/"
-                                className="text-gray-600 hover:text-black"
-                            >
-                                Dashboard
-                            </Link>
-
-                            <button
-                                onClick={() => {
-                                    localStorage.removeItem("access");
-                                    localStorage.removeItem("refresh");
-                                    window.location.reload();
-                                }}
-                                className="text-red-600"
-                            >
-                                Logout
-                            </button>
-                        </>
+                    {isLoggedIn && (
+                        <Link
+                            to="/app/dashboard"
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2 rounded-xl shadow-xs transition flex items-center gap-1.5"
+                        >
+                            <span>Zum Dashboard</span>
+                            <span>→</span>
+                        </Link>
                     )}
 
                 </div>

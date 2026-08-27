@@ -7,13 +7,18 @@ import { useQuery } from "@tanstack/react-query";
 import ReactECharts from "echarts-for-react";
 import { apiFetch } from "../../api/client";
 import { useTranslation } from "react-i18next";
+import ExportDropdown from "../../features/energy/components/ExportDropdown";
+import DateRangePickerModal from "../../features/energy/components/DateRangePickerModal";
 
 /* =========================================
    HELPERS
 ========================================= */
 
-function formatTime(ts) {
+function formatTime(ts, isMultiDay = false) {
     const d = new Date(ts * 1000);
+    if (isMultiDay) {
+        return `${d.getDate().toString().padStart(2, '0')}.${(d.getMonth() + 1).toString().padStart(2, '0')} ${d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+    }
     return d.toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit"
@@ -67,6 +72,8 @@ function getDeviceStyle(device) {
 function DeviceChartModal({ device, onClose }) {
     const { t } = useTranslation();
     const [range, setRange] = useState("24h");
+    const [customDates, setCustomDates] = useState({ startDate: null, endDate: null, label: null });
+    const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
     const [live, setLive] = useState(false);
     const [isZoomed, setIsZoomed] = useState(false);
     const [selectedMetric, setSelectedMetric] = useState(null);
@@ -98,11 +105,16 @@ function DeviceChartModal({ device, onClose }) {
     const activeMetricKey = selectedMetric || primaryMetricKey;
     const activeMetricObj = availableMetrics.find(m => m.key === activeMetricKey) || availableMetrics[0];
 
-    /* ✅ DATA FETCHING (Absolut stabilisiert für Live-Updates & Multi-Metric) */
+    /* ✅ DATA FETCHING (Absolut stabilisiert für Live-Updates, Multi-Metric & Custom Date-Ranges) */
     const query = useQuery({
-        queryKey: ["timeseries", device.id, range, activeMetricKey],
-        queryFn: () =>
-            apiFetch(`/api/devices/${device.id}/timeseries/?range=${range}&metric=${activeMetricKey}`),
+        queryKey: ["timeseries", device.id, range, activeMetricKey, customDates.startDate, customDates.endDate],
+        queryFn: () => {
+            let url = `/api/devices/${device.id}/timeseries/?range=${range}&metric=${encodeURIComponent(activeMetricKey)}`;
+            if (range === "custom" && customDates.startDate && customDates.endDate) {
+                url += `&start_date=${customDates.startDate}&end_date=${customDates.endDate}`;
+            }
+            return apiFetch(url);
+        },
         refetchInterval: live ? 3000 : false,
         refetchIntervalInBackground: true,
         refetchOnWindowFocus: false,
@@ -110,6 +122,7 @@ function DeviceChartModal({ device, onClose }) {
 
     const data = query.data;
     const unit = data?.unit || activeMetricObj?.unit || device.unit || "";
+    const isMultiDay = range === "5d" || range === "7d" || range === "30d" || range === "custom";
 
     /* ✅ DATA FORMATTING FOR ECHARTS */
     const chartData = useMemo(() => {
@@ -128,12 +141,12 @@ function DeviceChartModal({ device, onClose }) {
         const seriesData = [];
 
         points.forEach(p => {
-            xAxisData.push(formatTime(p.t));
+            xAxisData.push(formatTime(p.t, isMultiDay));
             seriesData.push(Number(p.v ?? 0));
         });
 
         return { xAxisData, seriesData };
-    }, [data]);
+    }, [data, isMultiDay]);
 
     /* ✅ REAKTIVE STATS (Präzise Berechnung der sichtbaren Punkte) */
     const liveStats = useMemo(() => {
@@ -431,7 +444,7 @@ function DeviceChartModal({ device, onClose }) {
 
                             <div className="flex rounded-lg overflow-hidden border shadow-sm bg-white">
 
-                                {["1h", "6h", "24h", "5d"].map(period => (
+                                {["1h", "6h", "24h", "5d", "30d"].map(period => (
 
                                     <button
                                         key={period}
@@ -463,29 +476,42 @@ function DeviceChartModal({ device, onClose }) {
 
                                 ))}
 
+                                <button
+                                    onClick={() => setIsDatePickerOpen(true)}
+                                    className={`
+                                        px-3 py-1
+                                        text-sm
+                                        font-medium
+                                        transition-colors
+                                        flex items-center gap-1
+                                        ${range === "custom"
+                                            ? "text-white"
+                                            : "text-gray-500 hover:bg-gray-50"
+                                        }
+                                    `}
+                                    style={
+                                        range === "custom"
+                                            ? { backgroundColor: mainColor }
+                                            : undefined
+                                    }
+                                    title={t("energy.custom_period_tooltip", "Frei wählbaren Zeitraum einstellen")}
+                                >
+                                    <span>📅</span>
+                                    <span className="hidden sm:inline">
+                                        {range === "custom" && customDates.label ? customDates.label : t("energy.custom_period", "Zeitraum...")}
+                                    </span>
+                                </button>
+
                             </div>
 
-                            {["CSV", "XLSX", "PDF"].map(label => (
-                                <button
-                                    key={label}
-                                    disabled
-                                    className="
-                                        px-3
-                                        py-1
-                                        text-sm
-                                        rounded-lg
-                                        text-white
-                                        shadow-sm
-                                        font-medium
-                                        opacity-60
-                                        cursor-not-allowed
-                                    "
-                                    style={{ backgroundColor: mainColor }}
-                                    title="Kommt später 😉"
-                                >
-                                    {label}
-                                </button>
-                            ))}
+                            {/* Multi-Format Export Dropdown (Task 2.11) */}
+                            <ExportDropdown
+                                deviceId={device.id}
+                                metric={activeMetricKey}
+                                period={range}
+                                startDate={customDates.startDate}
+                                endDate={customDates.endDate}
+                            />
 
                             {isZoomed && (
                                 <button
@@ -630,6 +656,23 @@ function DeviceChartModal({ device, onClose }) {
                     )}
                 </div>
             </div>
+
+            {/* Date-Range-Picker Modal (Task 2.11) */}
+            <DateRangePickerModal
+                isOpen={isDatePickerOpen}
+                onClose={() => setIsDatePickerOpen(false)}
+                initialStart={customDates.startDate}
+                initialEnd={customDates.endDate}
+                onApply={(applied) => {
+                    setRange(applied.period);
+                    setCustomDates({
+                        startDate: applied.startDate,
+                        endDate: applied.endDate,
+                        label: applied.label,
+                    });
+                    setLive(false);
+                }}
+            />
         </div>
     );
 }
