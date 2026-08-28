@@ -1,0 +1,13 @@
+{
+  "include": [
+    "."
+  ],
+  "venvPath": "C:/Users/Public/Dev/eswes",
+  "venv": "venv",
+  "extraPaths": [
+    "C:/Users/Public/Dev/eswes/venv/Lib/site-packages",
+    "C:/Users/Public/Dev/eswes"
+  ],
+  "reportMissingImports": "none",
+  "pythonPlatform": "Windows"
+}

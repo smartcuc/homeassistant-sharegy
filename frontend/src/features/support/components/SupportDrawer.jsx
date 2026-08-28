@@ -3,8 +3,7 @@
 # Context-aware Universal Support Drawer with FAQ Deflection & Ticket Management
 */
 
-import React, { useState, useEffect } from "react";
-import { useTranslation } from "react-i18next";
+import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import {
     X,
@@ -13,13 +12,10 @@ import {
     Inbox,
     BookOpen,
     Send,
-    Paperclip,
     AlertCircle,
     CheckCircle2,
-    Clock,
     Sparkles,
     ExternalLink,
-    HelpCircle,
     ChevronRight,
     RefreshCw,
 } from "lucide-react";
@@ -27,7 +23,6 @@ import { fetchUserTickets, createTicket, fetchDeflectionSuggestions } from "../a
 import TicketChatModal from "./TicketChatModal";
 
 export default function SupportDrawer({ isOpen, onClose, defaultContext = {} }) {
-    const { t } = useTranslation();
     const location = useLocation();
 
     const [activeTab, setActiveTab] = useState("new_ticket"); // 'new_ticket' | 'my_tickets' | 'help'
@@ -46,30 +41,28 @@ export default function SupportDrawer({ isOpen, onClose, defaultContext = {} }) 
 
     // Deflection state
     const [deflectionArticles, setDeflectionArticles] = useState([]);
-    const [loadingDeflection, setLoadingDeflection] = useState(false);
 
-    // Live search deflection when user types subject
+    // Live search deflection when user types subject (debounced, 300ms)
     useEffect(() => {
         if (!subject || subject.trim().length < 3) {
-            setDeflectionArticles([]);
-            return;
+            // Schedule the clear inside a microtask to avoid setState-in-effect
+            const id = setTimeout(() => setDeflectionArticles([]), 0);
+            return () => clearTimeout(id);
         }
 
         const timer = setTimeout(async () => {
-            setLoadingDeflection(true);
             try {
                 const results = await fetchDeflectionSuggestions(subject);
                 setDeflectionArticles(results);
             } catch (e) {
                 console.error("Deflection lookup error:", e);
-            } finally {
-                setLoadingDeflection(false);
             }
         }, 300);
 
         return () => clearTimeout(timer);
     }, [subject]);
 
+    // Standalone loader — called by event handlers (tab switch, after ticket create)
     const loadTickets = async () => {
         setLoadingTickets(true);
         try {
@@ -83,9 +76,20 @@ export default function SupportDrawer({ isOpen, onClose, defaultContext = {} }) 
     };
 
     useEffect(() => {
-        if (isOpen) {
-            loadTickets();
-        }
+        if (!isOpen) return;
+        let cancelled = false;
+        (async () => {
+            setLoadingTickets(true);
+            try {
+                const data = await fetchUserTickets();
+                if (!cancelled) setTickets(data);
+            } catch (err) {
+                console.error("Error loading tickets:", err);
+            } finally {
+                if (!cancelled) setLoadingTickets(false);
+            }
+        })();
+        return () => { cancelled = true; };
     }, [isOpen]);
 
     if (!isOpen) return null;
@@ -173,8 +177,8 @@ export default function SupportDrawer({ isOpen, onClose, defaultContext = {} }) 
                         type="button"
                         onClick={() => setActiveTab("new_ticket")}
                         className={`pb-2.5 px-3 text-xs font-semibold border-b-2 flex items-center gap-1.5 transition-colors ${activeTab === "new_ticket"
-                                ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
-                                : "border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400"
+                            ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
+                            : "border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400"
                             }`}
                     >
                         <PlusCircle className="w-3.5 h-3.5" />
@@ -188,8 +192,8 @@ export default function SupportDrawer({ isOpen, onClose, defaultContext = {} }) 
                             loadTickets();
                         }}
                         className={`pb-2.5 px-3 text-xs font-semibold border-b-2 flex items-center gap-1.5 transition-colors ${activeTab === "my_tickets"
-                                ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
-                                : "border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400"
+                            ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
+                            : "border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400"
                             }`}
                     >
                         <Inbox className="w-3.5 h-3.5" />
@@ -205,8 +209,8 @@ export default function SupportDrawer({ isOpen, onClose, defaultContext = {} }) 
                         type="button"
                         onClick={() => setActiveTab("help")}
                         className={`pb-2.5 px-3 text-xs font-semibold border-b-2 flex items-center gap-1.5 transition-colors ${activeTab === "help"
-                                ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
-                                : "border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400"
+                            ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
+                            : "border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400"
                             }`}
                     >
                         <BookOpen className="w-3.5 h-3.5" />
@@ -385,12 +389,12 @@ export default function SupportDrawer({ isOpen, onClose, defaultContext = {} }) 
                                             </span>
                                             <span
                                                 className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${t.status === "open"
-                                                        ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
-                                                        : t.status === "in_progress"
-                                                            ? "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300"
-                                                            : t.status === "waiting_customer"
-                                                                ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
-                                                                : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                                                    ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+                                                    : t.status === "in_progress"
+                                                        ? "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300"
+                                                        : t.status === "waiting_customer"
+                                                            ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+                                                            : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300"
                                                     }`}
                                             >
                                                 {t.status_display}

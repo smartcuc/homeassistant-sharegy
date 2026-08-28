@@ -3,14 +3,12 @@
 # Modern, real-time Ticket Chat Thread with attachments and status controls
 */
 
-import React, { useState, useEffect, useRef } from "react";
-import { useTranslation } from "react-i18next";
+import { useState, useEffect, useRef } from "react";
 import {
     X,
     Send,
     Paperclip,
     CheckCircle2,
-    Clock,
     AlertTriangle,
     ShieldAlert,
     FileText,
@@ -24,7 +22,6 @@ import {
 import { fetchTicketDetail, postTicketMessage, updateTicketStatus } from "../api";
 
 export default function TicketChatModal({ ticketId, isOpen, onClose, onTicketUpdated }) {
-    const { t } = useTranslation();
     const [ticket, setTicket] = useState(null);
     const [loading, setLoading] = useState(true);
     const [replyText, setReplyText] = useState("");
@@ -34,6 +31,7 @@ export default function TicketChatModal({ ticketId, isOpen, onClose, onTicketUpd
     const messagesEndRef = useRef(null);
     const fileInputRef = useRef(null);
 
+    // Separate imperative loader for event handlers (send message, toggle resolve).
     const loadDetail = async () => {
         if (!ticketId) return;
         try {
@@ -47,10 +45,20 @@ export default function TicketChatModal({ ticketId, isOpen, onClose, onTicketUpd
     };
 
     useEffect(() => {
-        if (isOpen && ticketId) {
+        if (!isOpen || !ticketId) return;
+        let cancelled = false;
+        (async () => {
             setLoading(true);
-            loadDetail();
-        }
+            try {
+                const data = await fetchTicketDetail(ticketId);
+                if (!cancelled) setTicket(data);
+            } catch (err) {
+                console.error("Error loading ticket detail:", err);
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        })();
+        return () => { cancelled = true; };
     }, [isOpen, ticketId]);
 
     useEffect(() => {
@@ -149,8 +157,8 @@ export default function TicketChatModal({ ticketId, isOpen, onClose, onTicketUpd
                             type="button"
                             onClick={handleToggleResolve}
                             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 ${ticket?.status === "resolved" || ticket?.status === "closed"
-                                    ? "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200"
-                                    : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
+                                ? "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200"
+                                : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
                                 }`}
                         >
                             <CheckCircle2 className="w-3.5 h-3.5" />
@@ -214,8 +222,8 @@ export default function TicketChatModal({ ticketId, isOpen, onClose, onTicketUpd
 
                                     <div
                                         className={`rounded-2xl px-4 py-3 shadow-sm ${isStaff
-                                                ? "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-tl-none"
-                                                : "bg-indigo-600 text-white rounded-tr-none"
+                                            ? "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-tl-none"
+                                            : "bg-indigo-600 text-white rounded-tr-none"
                                             }`}
                                     >
                                         <div className="flex items-center justify-between gap-4 mb-1 text-[11px] opacity-80 font-medium">
@@ -244,8 +252,8 @@ export default function TicketChatModal({ ticketId, isOpen, onClose, onTicketUpd
                                                         target="_blank"
                                                         rel="noreferrer"
                                                         className={`flex items-center gap-1.5 text-xs py-1 px-2 rounded transition-colors ${isStaff
-                                                                ? "bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200"
-                                                                : "bg-indigo-700/60 text-white hover:bg-indigo-700"
+                                                            ? "bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200"
+                                                            : "bg-indigo-700/60 text-white hover:bg-indigo-700"
                                                             }`}
                                                     >
                                                         <FileText className="w-3.5 h-3.5" />

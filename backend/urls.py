@@ -77,9 +77,8 @@ urlpatterns = [
                 path("user-settings/", include("user_settings.api.urls")),
                 path("public/", include("forecast.urls_public")),
                 path("track/", include("tracking.api_urls")),
-                path("tracking/", include("tracking.api_urls")),
-                path("help/", include("helpcenter.urls")),
-                path("grafana/", include("energy.api.urls_grafana")),
+                path("help/", include("support_desk.api.urls_help")),
+
                 path("matter/", include("providers.matter.api.urls")),
                 path("billing/", include("billing.urls")),
                 path("support/", include("support_desk.api.urls")),

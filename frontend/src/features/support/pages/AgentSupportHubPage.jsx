@@ -3,30 +3,9 @@
 # Unified Support Agent Command Center for Sharegy & Factofy
 */
 
-import React, { useState, useEffect } from "react";
-import { useTranslation } from "react-i18next";
-import {
-    LifeBuoy,
-    Search,
-    Filter,
-    Layers,
-    UserCheck,
-    CheckCircle2,
-    Clock,
-    AlertTriangle,
-    ShieldAlert,
-    Send,
-    FileText,
-    Download,
-    RefreshCw,
-    MessageSquare,
-    Eye,
-    Tag,
-    ChevronRight,
-    Sparkles,
-    User,
-    Bot,
-} from "lucide-react";
+import { useState, useEffect } from "react";
+
+import { LifeBuoy, Search, RefreshCw, Send } from "lucide-react";
 import {
     fetchAgentTickets,
     fetchTicketDetail,
@@ -37,7 +16,6 @@ import {
 } from "../api";
 
 export default function AgentSupportHubPage() {
-    const { t } = useTranslation();
 
     const [kpis, setKpis] = useState({ total: 0, open: 0, in_progress: 0, waiting_customer: 0, resolved: 0, sharegy_count: 0, factofy_count: 0 });
     const [tickets, setTickets] = useState([]);
@@ -46,7 +24,7 @@ export default function AgentSupportHubPage() {
     // Filters
     const [selectedProject, setSelectedProject] = useState("all"); // 'all' | 'sharegy' | 'factofy'
     const [selectedStatus, setSelectedStatus] = useState("all");
-    const [selectedPriority, setSelectedPriority] = useState("all");
+    const [selectedPriority] = useState("all");
     const [searchQuery, setSearchQuery] = useState("");
 
     // Selected Ticket Pane
@@ -57,31 +35,37 @@ export default function AgentSupportHubPage() {
     const [cannedResponses, setCannedResponses] = useState([]);
     const [submittingReply, setSubmittingReply] = useState(false);
 
-    const loadTickets = async () => {
-        setLoading(true);
-        try {
-            const data = await fetchAgentTickets({
-                project_key: selectedProject,
-                status: selectedStatus,
-                priority: selectedPriority,
-                search: searchQuery,
-            });
-            setKpis(data.kpis);
-            setTickets(data.tickets);
-        } catch (err) {
-            console.error("Error loading agent tickets:", err);
-        } finally {
-            setLoading(false);
-        }
-    };
+    // Bump refreshCounter to trigger a re-fetch from event handlers.
+    const [refreshCounter, setRefreshCounter] = useState(0);
+    const triggerRefresh = () => setRefreshCounter((c) => c + 1);
 
     useEffect(() => {
-        loadTickets();
-    }, [selectedProject, selectedStatus, selectedPriority]);
+        let cancelled = false;
+        (async () => {
+            setLoading(true);
+            try {
+                const data = await fetchAgentTickets({
+                    project_key: selectedProject,
+                    status: selectedStatus,
+                    priority: selectedPriority,
+                    search: searchQuery,
+                });
+                if (!cancelled) {
+                    setKpis(data.kpis);
+                    setTickets(data.tickets);
+                }
+            } catch (err) {
+                console.error("Error loading agent tickets:", err);
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        })();
+        return () => { cancelled = true; };
+    }, [selectedProject, selectedStatus, selectedPriority, refreshCounter]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleSearchSubmit = (e) => {
         e.preventDefault();
-        loadTickets();
+        triggerRefresh();
     };
 
     const handleSelectTicket = async (ticketId) => {
@@ -114,7 +98,7 @@ export default function AgentSupportHubPage() {
             setReplyText("");
             const updated = await fetchTicketDetail(activeTicket.id);
             setActiveTicket(updated);
-            await loadTickets();
+            triggerRefresh();
         } catch (err) {
             alert("Fehler beim Senden: " + err.message);
         } finally {
@@ -128,7 +112,7 @@ export default function AgentSupportHubPage() {
             await updateAgentTicket(activeTicket.id, { status: newStatus });
             const updated = await fetchTicketDetail(activeTicket.id);
             setActiveTicket(updated);
-            await loadTickets();
+            triggerRefresh();
         } catch (err) {
             alert("Statusänderung fehlgeschlagen: " + err.message);
         }
@@ -166,8 +150,8 @@ export default function AgentSupportHubPage() {
                             type="button"
                             onClick={() => setSelectedProject("all")}
                             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${selectedProject === "all"
-                                    ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-xs"
-                                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                                ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-xs"
+                                : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
                                 }`}
                         >
                             🌐 Alle ({kpis.total})
@@ -176,8 +160,8 @@ export default function AgentSupportHubPage() {
                             type="button"
                             onClick={() => setSelectedProject("sharegy")}
                             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${selectedProject === "sharegy"
-                                    ? "bg-emerald-600 text-white shadow-xs"
-                                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                                ? "bg-emerald-600 text-white shadow-xs"
+                                : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
                                 }`}
                         >
                             ☀️ Sharegy ({kpis.sharegy_count})
@@ -186,8 +170,8 @@ export default function AgentSupportHubPage() {
                             type="button"
                             onClick={() => setSelectedProject("factofy")}
                             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${selectedProject === "factofy"
-                                    ? "bg-blue-600 text-white shadow-xs"
-                                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                                ? "bg-blue-600 text-white shadow-xs"
+                                : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
                                 }`}
                         >
                             🏙️ Factofy ({kpis.factofy_count})
@@ -200,8 +184,8 @@ export default function AgentSupportHubPage() {
                     <div
                         onClick={() => setSelectedStatus("open")}
                         className={`p-4 rounded-xl border transition-all cursor-pointer ${selectedStatus === "open"
-                                ? "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 shadow-xs"
-                                : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-emerald-300"
+                            ? "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 shadow-xs"
+                            : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-emerald-300"
                             }`}
                     >
                         <div className="text-xs font-medium text-emerald-700 dark:text-emerald-400 mb-1">Neu / Offen</div>
@@ -211,8 +195,8 @@ export default function AgentSupportHubPage() {
                     <div
                         onClick={() => setSelectedStatus("in_progress")}
                         className={`p-4 rounded-xl border transition-all cursor-pointer ${selectedStatus === "in_progress"
-                                ? "bg-blue-50 dark:bg-blue-950/40 border-blue-500 shadow-xs"
-                                : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-blue-300"
+                            ? "bg-blue-50 dark:bg-blue-950/40 border-blue-500 shadow-xs"
+                            : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-blue-300"
                             }`}
                     >
                         <div className="text-xs font-medium text-blue-700 dark:text-blue-400 mb-1">In Bearbeitung</div>
@@ -222,8 +206,8 @@ export default function AgentSupportHubPage() {
                     <div
                         onClick={() => setSelectedStatus("waiting_customer")}
                         className={`p-4 rounded-xl border transition-all cursor-pointer ${selectedStatus === "waiting_customer"
-                                ? "bg-amber-50 dark:bg-amber-950/40 border-amber-500 shadow-xs"
-                                : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-amber-300"
+                            ? "bg-amber-50 dark:bg-amber-950/40 border-amber-500 shadow-xs"
+                            : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-amber-300"
                             }`}
                     >
                         <div className="text-xs font-medium text-amber-700 dark:text-amber-400 mb-1">Wartet auf Kunde</div>
@@ -233,8 +217,8 @@ export default function AgentSupportHubPage() {
                     <div
                         onClick={() => setSelectedStatus("resolved")}
                         className={`p-4 rounded-xl border transition-all cursor-pointer ${selectedStatus === "resolved"
-                                ? "bg-slate-100 dark:bg-slate-800 border-slate-500 shadow-xs"
-                                : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-400"
+                            ? "bg-slate-100 dark:bg-slate-800 border-slate-500 shadow-xs"
+                            : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-400"
                             }`}
                     >
                         <div className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Gelöst</div>
@@ -285,16 +269,16 @@ export default function AgentSupportHubPage() {
                                             key={t.id}
                                             onClick={() => handleSelectTicket(t.id)}
                                             className={`p-3.5 transition-all cursor-pointer ${isSelected
-                                                    ? "bg-indigo-50/80 dark:bg-indigo-950/40 border-l-4 border-indigo-600"
-                                                    : "hover:bg-slate-50 dark:hover:bg-slate-800/40"
+                                                ? "bg-indigo-50/80 dark:bg-indigo-950/40 border-l-4 border-indigo-600"
+                                                : "hover:bg-slate-50 dark:hover:bg-slate-800/40"
                                                 }`}
                                         >
                                             <div className="flex items-center justify-between mb-1">
                                                 <div className="flex items-center gap-1.5">
                                                     <span
                                                         className={`text-[9px] font-bold px-1.5 py-0.2 rounded uppercase ${t.project_key === "factofy"
-                                                                ? "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300"
-                                                                : "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+                                                            ? "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300"
+                                                            : "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
                                                             }`}
                                                     >
                                                         {t.project_key}
@@ -404,10 +388,10 @@ export default function AgentSupportHubPage() {
                                             <div
                                                 key={msg.id}
                                                 className={`p-3.5 rounded-xl text-xs leading-relaxed ${isInternal
-                                                        ? "bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-700/60 text-amber-950 dark:text-amber-200"
-                                                        : isStaff
-                                                            ? "bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/40 text-slate-900 dark:text-white ml-6"
-                                                            : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white mr-6"
+                                                    ? "bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-700/60 text-amber-950 dark:text-amber-200"
+                                                    : isStaff
+                                                        ? "bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/40 text-slate-900 dark:text-white ml-6"
+                                                        : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white mr-6"
                                                     }`}
                                             >
                                                 <div className="flex items-center justify-between mb-1 font-semibold text-[11px] opacity-75">
@@ -437,8 +421,8 @@ export default function AgentSupportHubPage() {
                                                 type="button"
                                                 onClick={() => setIsInternalNote(false)}
                                                 className={`px-2.5 py-1 rounded-md font-semibold transition-colors ${!isInternalNote
-                                                        ? "bg-indigo-600 text-white"
-                                                        : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
+                                                    ? "bg-indigo-600 text-white"
+                                                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
                                                     }`}
                                             >
                                                 Öffentliche Antwort
@@ -447,8 +431,8 @@ export default function AgentSupportHubPage() {
                                                 type="button"
                                                 onClick={() => setIsInternalNote(true)}
                                                 className={`px-2.5 py-1 rounded-md font-semibold transition-colors ${isInternalNote
-                                                        ? "bg-amber-500 text-white"
-                                                        : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
+                                                    ? "bg-amber-500 text-white"
+                                                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
                                                     }`}
                                             >
                                                 🔒 Interne Notiz (Gelb)
@@ -490,16 +474,16 @@ export default function AgentSupportHubPage() {
                                                     : "Antwort an den Kunden verfassen..."
                                             }
                                             className={`flex-1 p-2.5 text-xs rounded-xl border focus:outline-none focus:ring-2 dark:text-white ${isInternalNote
-                                                    ? "border-amber-300 dark:border-amber-700/60 bg-amber-50/50 dark:bg-amber-950/20 focus:ring-amber-500"
-                                                    : "border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-indigo-500"
+                                                ? "border-amber-300 dark:border-amber-700/60 bg-amber-50/50 dark:bg-amber-950/20 focus:ring-amber-500"
+                                                : "border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-indigo-500"
                                                 }`}
                                         />
                                         <button
                                             type="submit"
                                             disabled={!replyText.trim() || submittingReply}
                                             className={`px-4 rounded-xl text-xs font-bold text-white flex flex-col items-center justify-center gap-1 shadow-sm transition-all shrink-0 ${isInternalNote
-                                                    ? "bg-amber-600 hover:bg-amber-700"
-                                                    : "bg-indigo-600 hover:bg-indigo-700"
+                                                ? "bg-amber-600 hover:bg-amber-700"
+                                                : "bg-indigo-600 hover:bg-indigo-700"
                                                 }`}
                                         >
                                             <Send className="w-4 h-4" />

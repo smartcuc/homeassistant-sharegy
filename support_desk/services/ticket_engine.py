@@ -262,37 +262,6 @@ def assign_ticket(ticket: Ticket, agent_user, actor_user = None) -> Ticket:
     return ticket
 
 
-def search_deflection_articles(query_str: str, limit: int = 3) -> list:
-    """
-    Searches the HelpCenter knowledge base for matching articles based on the ticket subject.
-    Returns article suggestions for self-service deflection before ticket submission.
-    """
-    if not query_str or len(query_str.strip()) < 3:
-        return []
+from support_desk.services.knowledge_engine import search_deflection_articles
 
-    try:
-        from helpcenter.models import HelpArticle
-    except ImportError:
-        return []
-
-    tokens = [t.strip() for t in query_str.strip().split() if len(t.strip()) > 2]
-    q_filter = Q()
-    for t in tokens:
-        q_filter |= Q(title_de__icontains=t) | Q(title_en__icontains=t) | Q(summary_de__icontains=t) | Q(tags__icontains=t)
-
-    qs = HelpArticle.objects.filter(is_published=True).filter(q_filter).distinct()[:limit]
-
-    results = []
-    for art in qs:
-        results.append({
-            "id": str(art.id),
-            "slug": art.slug,
-            "title_de": art.title_de,
-            "title_en": art.title_en or art.title_de,
-            "summary_de": art.summary_de,
-            "summary_en": art.summary_en,
-            "category_name": art.category.title_de if art.category else "",
-            "views_count": art.views_count,
-        })
-    return results
 
