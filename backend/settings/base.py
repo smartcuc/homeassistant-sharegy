@@ -161,6 +161,7 @@ INSTALLED_APPS = [
     "operations",
     "tracking",
     "helpcenter",
+    "support_desk",
     "providers.opentelemetry",
     "providers.matter",
 ]
