@@ -10,14 +10,36 @@ from accounts.models import TenantMembership
 from core.models import Tenant
 
 
-# ✅ Rollen → Rechte Mapping
+# ✅ Rollen → Rechte Mapping (Enterprise Multi-Tenant)
 ROLE_PERMISSIONS = {
     "admin": [
+        "manage_community",
         "manage_members",
         "manage_invites",
+        "manage_tickets",
+        "view_reports",
         "edit_data",
         "view_data",
+        "view_audit_log",
     ],
+    "user_admin": [
+        "manage_members",
+        "manage_invites",
+        "view_data",
+    ],
+    "helpdesk": [
+        "manage_tickets",
+        "view_data",
+    ],
+    "auditor": [
+        "view_reports",
+        "view_data",
+        "view_audit_log",
+    ],
+    "member": [
+        "view_data",
+    ],
+    # Legacy Fallbacks
     "editor": [
         "edit_data",
         "view_data",
@@ -30,6 +52,13 @@ ROLE_PERMISSIONS = {
 
 # ✅ zentrale Permission Funktion
 def has_permission(user, tenant, permission):
+    if not user or not user.is_authenticated:
+        return False
+
+    # Platform Admins have super-access
+    if getattr(user, "is_platform_admin", False) or user.is_superuser:
+        return True
+
     membership = TenantMembership.objects.filter(
         user=user,
         tenant=tenant,
@@ -40,8 +69,24 @@ def has_permission(user, tenant, permission):
         return False
 
     role = membership.role
-
     return permission in ROLE_PERMISSIONS.get(role, [])
+
+
+def can_manage_members(user, tenant) -> bool:
+    return has_permission(user, tenant, "manage_members")
+
+
+def can_manage_invites(user, tenant) -> bool:
+    return has_permission(user, tenant, "manage_invites")
+
+
+def can_handle_community_tickets(user, tenant) -> bool:
+    return has_permission(user, tenant, "manage_tickets")
+
+
+def can_view_community_reports(user, tenant) -> bool:
+    return has_permission(user, tenant, "view_reports")
+
 
 
 # ✅ einfacher Zugriff (ohne spezielle Permission)

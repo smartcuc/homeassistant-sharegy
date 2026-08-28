@@ -225,6 +225,72 @@ class SupportDeskEngineTest(TestCase):
         self.assertEqual(len(fact_resp.json()["tickets"]), 1)
         self.assertEqual(fact_resp.json()["tickets"][0]["project_key"], "factofy")
 
+    def test_anonymous_user_cannot_create_ticket(self):
+        # Anonymous users without session or JWT token are rejected
+        resp = self.client.post(
+            "/api/support/tickets/",
+            data={
+                "subject": "Gast Ticket",
+                "message": "Ich bin nicht angemeldet",
+            },
+            format="json",
+        )
+        self.assertEqual(resp.status_code, 401)
+        self.assertIn("error", resp.json())
+
+    def test_free_ems_user_priority_forced_to_low(self):
+        # Free-EMS user attempts to create ticket with priority='high' -> backend forces 'low'
+        self.client.force_login(self.customer)
+        resp = self.client.post(
+            "/api/support/tickets/",
+            data={
+                "subject": "Free User Issue",
+                "priority": "high",
+                "message": "Dringende Frage von Free User",
+            },
+            format="json",
+        )
+        self.assertEqual(resp.status_code, 201)
+        data = resp.json()
+        self.assertEqual(data["priority"], "low")
+
+    def test_pro_and_admin_user_can_set_priority(self):
+        # 1. Staff Agent creates ticket with 'urgent'
+        self.client.force_login(self.staff_agent)
+        resp = self.client.post(
+            "/api/support/tickets/",
+            data={
+                "subject": "Admin Critical Incident",
+                "priority": "urgent",
+                "message": "Netzausfall am Gateway",
+            },
+            format="json",
+        )
+        self.assertEqual(resp.status_code, 201)
+        self.assertEqual(resp.json()["priority"], "urgent")
+
+        # 2. Pro User creates ticket with 'high'
+        from billing.models import EMSSubscription
+        EMSSubscription.objects.create(
+            user=self.customer,
+            plan=EMSSubscription.PLAN_PRO_MONTHLY,
+            status=EMSSubscription.STATUS_ACTIVE,
+        )
+        self.client.force_login(self.customer)
+        pro_resp = self.client.post(
+            "/api/support/tickets/",
+            data={
+                "subject": "EMS Pro High Priority Request",
+                "priority": "high",
+                "message": "Optimierungs-Algorithmus prüfen",
+            },
+            format="json",
+        )
+        self.assertEqual(pro_resp.status_code, 201)
+        self.assertEqual(pro_resp.json()["priority"], "high")
+
+
+
 
 class KnowledgeBaseApiTests(TestCase):
     def setUp(self):

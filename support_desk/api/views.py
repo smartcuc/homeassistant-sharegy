@@ -71,11 +71,12 @@ def _resolve_requester(request):
         name = f"{request.user.first_name} {request.user.last_name}".strip() or request.user.username
         return (
             request.user,
-            str(request.user.id),
+            "",
             name,
             request.user.email or "",
             request.query_params.get("project_key") or "sharegy",
         )
+
 
     # 4. Anonymous / Guest
     return (
@@ -87,13 +88,52 @@ def _resolve_requester(request):
     )
 
 
+def _can_set_custom_priority(user, ext_id=None) -> bool:
+    """
+    ITIL-Priority Rules:
+    - Free-EMS User: Priority is strictly locked to 'low'.
+    - EMS Pro User: Allowed to choose custom priority (low, medium, high).
+    - Energy Admin / Energy User Admin / Energy Helpdesk: Allowed to choose custom priority (low, medium, high, urgent).
+    - Platform Roles (System Admin, Finance, Global User Admin, Platform Helpdesk): Allowed to choose custom priority.
+    - External JWT (e.g. Factofy): Allowed to specify priority.
+    """
+    if ext_id:
+        return True
+
+    if not user or not user.is_authenticated:
+        return False
+
+    if user.is_staff or user.is_superuser:
+        return True
+
+    if getattr(user, "is_platform_admin", False) or getattr(user, "is_platform_helpdesk", False):
+        return True
+
+    # EnergySharing / Tenant Admins, User Admins, Helpdesk
+    try:
+        if user.memberships.filter(is_active=True, role__in=["admin", "user_admin", "helpdesk"]).exists():
+            return True
+    except Exception:
+        pass
+
+    # EMS Pro / Landlord Active Subscription
+    try:
+        if hasattr(user, "ems_subscription") and user.ems_subscription.is_pro_active:
+            return True
+    except Exception:
+        pass
+
+    return False
+
+
+
 @api_view(["GET", "POST"])
 @permission_classes([permissions.AllowAny])
 @parser_classes([JSONParser, MultiPartParser, FormParser])
 def tickets_list_create(request):
     """
     GET: List user's tickets (Sharegy user or Factofy JWT user).
-    POST: Create a new support ticket.
+    POST: Create a new support ticket (Authentication required; Free-EMS locked to 'low' priority).
     """
     user, ext_id, name, email, project_key = _resolve_requester(request)
 
@@ -123,13 +163,34 @@ def tickets_list_create(request):
         return Response(serializer.data)
 
     elif request.method == "POST":
+        # 1. Anonymous users are NOT allowed to create tickets
+        if not user and not ext_id:
+            return Response(
+                {"error": "Nur angemeldete Benutzer können Support-Tickets erstellen. Bitte logge dich ein."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
         subject = request.data.get("subject", "").strip()
         category = request.data.get("category", "general")
-        priority = request.data.get("priority", "medium")
+        requested_priority = str(request.data.get("priority", "")).lower().strip()
         initial_message = request.data.get("message", request.data.get("initial_message", "")).strip()
         context_payload = request.data.get("context_payload", {})
         contact_name = request.data.get("contact_name", name)
         contact_email = request.data.get("contact_email", email)
+
+        # 2. Enforce ITIL priority rules based on role / subscription
+        if _can_set_custom_priority(user, ext_id=ext_id):
+            allowed_priorities = [Ticket.PRIORITY_LOW, Ticket.PRIORITY_MEDIUM, Ticket.PRIORITY_HIGH]
+            if user and (user.is_staff or user.is_superuser):
+                allowed_priorities.append(Ticket.PRIORITY_URGENT)
+
+            if requested_priority in allowed_priorities:
+                priority = requested_priority
+            else:
+                priority = Ticket.PRIORITY_MEDIUM
+        else:
+            # Free-EMS user: priority is strictly forced to 'low'
+            priority = Ticket.PRIORITY_LOW
 
         if isinstance(context_payload, str):
             try:
@@ -158,6 +219,7 @@ def tickets_list_create(request):
 
         serializer = TicketDetailSerializer(ticket, context={"request": request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 
 
 @api_view(["GET", "PATCH"])

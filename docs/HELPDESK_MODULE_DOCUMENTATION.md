@@ -379,22 +379,27 @@ Split-View: Ticket-Liste + Detailbereich mit internen Notizen, Textbaustein-Drop
 
 Das System erkennt die Auth-Methode automatisch (Reihenfolge):
 
-1. **Factofy JWT** (`Authorization: Bearer <token>`) → externer Nutzer
-2. **Django Session** (Cookie) → eingeloggter Sharegy-Nutzer
-3. **Anonym** → Ticket-Erstellung möglich mit `contact_name` / `contact_email`
+1. **Factofy JWT** (`Authorization: Bearer <token>`) → externer Nutzer (Prioritätswahl aktiv)
+2. **Django Session / Token** → eingeloggter Sharegy-Nutzer
+3. **Anonym** → Keine Ticket-Erstellung möglich (Wissensportal bleibt frei zugänglich)
 
-### Berechtigungsmatrix
+### Berechtigungs- & ITIL-Prioritätsmatrix
 
-| Aktion | Anonym | Sharegy-User | Factofy-JWT | Staff/Agent |
-|--------|:------:|:------------:|:-----------:|:-----------:|
-| Ticket erstellen | ✅ | ✅ | ✅ | ✅ |
-| Eigene Tickets lesen | ❌ | ✅ | ✅ | ✅ alle |
-| Nachricht senden | ❌ | ✅ | ✅ | ✅ |
-| Interne Notiz | ❌ | ❌ | ❌ | ✅ |
-| Eigenen Status ändern | ❌ | ✅ | ✅ | ✅ |
-| Alle Tickets verwalten | ❌ | ❌ | ❌ | ✅ |
-| Agent Hub nutzen | ❌ | ❌ | ❌ | ✅ |
-| Textbausteine verwalten | ❌ | ❌ | ❌ | ✅ |
+| Rolle / Benutzergruppe | Ticket erstellen | Prioritäts-Auswahl (ITIL) | Eigene Tickets | Agent Hub |
+|------------------------|:----------------:|:-------------------------:|:--------------:|:---------:|
+| **Anonymer Gast** | ❌ (Login-Aufforderung) | ❌ | ❌ | ❌ |
+| **Free-EMS Nutzer** | ✅ | 🔒 Immer `low` (Standard) | ✅ | ❌ |
+| **EMS Pro Nutzer** | ✅ | ✅ `low`, `medium`, `high` | ✅ | ❌ |
+| **EnergySharing Admin** | ✅ | ✅ `low`, `medium`, `high`, `urgent` | ✅ | ❌ |
+| **Factofy JWT User** | ✅ | ✅ `low`, `medium`, `high` | ✅ | ❌ |
+| **Staff / Support-Agent** | ✅ | ✅ `low`, `medium`, `high`, `urgent` | ✅ alle | ✅ |
+
+> **ITIL-Prioritätsstufen:**
+> - `low` (🟢 Niedrig / Standard — für Free-EMS fixiert)
+> - `medium` (🟡 Normal — Standard für EMS Pro)
+> - `high` (🔴 Hoch — Störungen mit Beeinträchtigung)
+> - `urgent` (⚡ Kritisch / Dringend — Komplettausfall, nur Admins & Support-Staff)
+
 
 ---
 

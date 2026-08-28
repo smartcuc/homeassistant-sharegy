@@ -47,12 +47,20 @@ class TenantSerializer(serializers.ModelSerializer):
         fields = ["id", "name", "theme"]
 
 
+from accounts.permissions import ROLE_PERMISSIONS
+
+
 class MembershipSerializer(serializers.ModelSerializer):
-    tenant = TenantSerializer()  # ✅ HIER!
+    tenant = TenantSerializer()
+    role_display = serializers.CharField(source="get_role_display", read_only=True)
+    permissions = serializers.SerializerMethodField()
 
     class Meta:
         model = TenantMembership
-        fields = ["role", "tenant"]
+        fields = ["role", "role_display", "permissions", "tenant"]
+
+    def get_permissions(self, obj):
+        return ROLE_PERMISSIONS.get(obj.role, [])
 
 
 class UserMeSerializer(serializers.ModelSerializer):
@@ -60,6 +68,11 @@ class UserMeSerializer(serializers.ModelSerializer):
         many=True,
         read_only=True
     )
+    is_pro = serializers.SerializerMethodField()
+    is_platform_admin = serializers.BooleanField(read_only=True)
+    is_finance_admin = serializers.BooleanField(read_only=True)
+    is_global_user_admin = serializers.BooleanField(read_only=True)
+    is_platform_helpdesk = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = User
@@ -67,5 +80,21 @@ class UserMeSerializer(serializers.ModelSerializer):
             "id",
             "email",
             "username",
+            "is_staff",
+            "is_superuser",
+            "platform_role",
+            "is_platform_admin",
+            "is_finance_admin",
+            "is_global_user_admin",
+            "is_platform_helpdesk",
+            "is_pro",
             "memberships",
         ]
+
+    def get_is_pro(self, obj):
+        try:
+            return bool(hasattr(obj, "ems_subscription") and obj.ems_subscription.is_pro_active)
+        except Exception:
+            return False
+
+

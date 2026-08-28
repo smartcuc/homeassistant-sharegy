@@ -120,49 +120,63 @@ export default function TenantDashboard() {
             {/* ✅ INVITES */}
             <section className="mb-8">
                 <h2 className="text-lg font-semibold mb-3">
-                    {t.invites}
+                    {t.invites || "Einladungslinks"}
                 </h2>
 
                 {/* ✅ CREATE */}
-                <div className="flex gap-2 mb-4">
+                <div className="flex flex-wrap gap-2 mb-4">
                     <button
-                        onClick={() => createInvite("viewer")}
-                        className="bg-indigo-600 text-white px-4 py-2 rounded"
+                        onClick={() => createInvite("member")}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow-xs transition"
                     >
-                        {t.viewer_invite}
+                        ⚡ Mitglied einladen
                     </button>
 
                     <button
-                        onClick={() => createInvite("editor")}
-                        className="bg-gray-700 text-white px-4 py-2 rounded"
+                        onClick={() => createInvite("user_admin")}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow-xs transition"
                     >
-                        {t.editor_invite}
+                        👥 Userverwaltung
+                    </button>
+
+                    <button
+                        onClick={() => createInvite("helpdesk")}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow-xs transition"
+                    >
+                        🛟 Helpdesk
+                    </button>
+
+                    <button
+                        onClick={() => createInvite("auditor")}
+                        className="bg-slate-700 hover:bg-slate-800 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow-xs transition"
+                    >
+                        📊 Auditor / Beirat
                     </button>
 
                     <button
                         onClick={() => createInvite("admin")}
-                        className="bg-red-600 text-white px-4 py-2 rounded"
+                        className="bg-red-600 hover:bg-red-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow-xs transition"
                     >
-                        {t.admin_invite}
+                        🏛️ Energy-Admin
                     </button>
                 </div>
 
                 {/* ✅ LIST */}
                 <div className="space-y-2">
                     {invites.map(i => (
-                        <div key={i.token} className="border p-3 rounded flex flex-col">
+                        <div key={i.token} className="border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3.5 rounded-xl flex flex-col shadow-xs">
 
-                            <div className="flex justify-between">
-                                <span className="text-sm text-gray-500">
-                                    {i.role}
+                            <div className="flex justify-between items-center">
+                                <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                    {i.role_display || i.role}
                                 </span>
 
-                                <span className="text-xs text-gray-400">
-                                    used: {i.used}
+                                <span className="text-xs text-slate-400">
+                                    Verwendet: {i.used}
                                 </span>
                             </div>
 
-                            <div className="text-xs break-all mt-1">
+                            <div className="text-xs font-mono text-slate-500 dark:text-slate-400 break-all mt-1 bg-slate-50 dark:bg-slate-800/50 p-1.5 rounded-lg">
                                 {window.location.origin}/onboarding?invite={i.token}
                             </div>
 
@@ -174,14 +188,14 @@ export default function TenantDashboard() {
                                             window.location.origin + "/onboarding?invite=" + i.token
                                         )
                                     }
-                                    className="text-indigo-600 text-xs"
+                                    className="text-indigo-600 dark:text-indigo-400 font-semibold text-xs hover:underline cursor-pointer"
                                 >
-                                    Copy
+                                    Link kopieren
                                 </button>
 
                                 <button
                                     onClick={() => deactivateInvite(i.token)}
-                                    className="text-red-500 text-xs"
+                                    className="text-red-500 text-xs hover:underline cursor-pointer"
                                 >
                                     Deaktivieren
                                 </button>
@@ -195,16 +209,16 @@ export default function TenantDashboard() {
             {/* ✅ MEMBERS */}
             <section>
                 <h2 className="text-lg font-semibold mb-3">
-                    {t.members}
+                    {t.members || "Mitglieder & Rollen"}
                 </h2>
 
                 <div className="space-y-2">
                     {members.map(m => (
                         <div
                             key={m.id}
-                            className="border p-3 rounded flex justify-between items-center"
+                            className="border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3.5 rounded-xl flex justify-between items-center shadow-xs"
                         >
-                            <span>{m.email}</span>
+                            <span className="text-sm font-medium text-slate-900 dark:text-slate-100">{m.email}</span>
 
                             <div className="flex gap-2 items-center">
 
@@ -213,16 +227,18 @@ export default function TenantDashboard() {
                                     onChange={(e) =>
                                         updateRole(m.id, e.target.value)
                                     }
-                                    className="text-sm border rounded p-1"
+                                    className="text-xs font-medium border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg px-2.5 py-1.5 dark:text-white"
                                 >
-                                    <option value="viewer">Viewer</option>
-                                    <option value="editor">Editor</option>
-                                    <option value="admin">Admin</option>
+                                    <option value="member">⚡ Mitglied</option>
+                                    <option value="user_admin">👥 Energy-Userverwaltung</option>
+                                    <option value="helpdesk">🛟 Energy-Helpdesk</option>
+                                    <option value="auditor">📊 Auditor / Kassenprüfer</option>
+                                    <option value="admin">🏛️ Energy-Admin</option>
                                 </select>
 
                                 <button
                                     onClick={() => removeMember(m.id)}
-                                    className="text-red-600 text-sm"
+                                    className="text-red-600 hover:text-red-700 text-xs font-semibold px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-950/30 transition cursor-pointer"
                                 >
                                     Entfernen
                                 </button>
@@ -232,6 +248,7 @@ export default function TenantDashboard() {
                     ))}
                 </div>
             </section>
+
 
             {/* ✅ AUDIT LOG */}
             <section className="mt-10">

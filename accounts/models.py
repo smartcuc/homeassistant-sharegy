@@ -16,10 +16,31 @@ class User(AbstractUser):
     Keine Tenant-Abhängigkeiten hier!
     """
 
+    PLATFORM_ROLE_SYSTEM_ADMIN = "system_admin"
+    PLATFORM_ROLE_FINANCE = "finance"
+    PLATFORM_ROLE_USER_ADMIN = "user_admin"
+    PLATFORM_ROLE_HELPDESK = "helpdesk"
+    PLATFORM_ROLE_NONE = "none"
+
+    PLATFORM_ROLE_CHOICES = [
+        (PLATFORM_ROLE_SYSTEM_ADMIN, "Systemadmin"),
+        (PLATFORM_ROLE_FINANCE, "Finanzen & Billing"),
+        (PLATFORM_ROLE_USER_ADMIN, "Userverwaltung (Global)"),
+        (PLATFORM_ROLE_HELPDESK, "Plattform Helpdesk"),
+        (PLATFORM_ROLE_NONE, "Keine Plattform-Rolle"),
+    ]
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     email = models.EmailField(unique=True)
     is_verified = models.BooleanField(default=False)
+
+    # Globale Plattform-Rolle (Ebene 1)
+    platform_role = models.CharField(
+        max_length=30,
+        choices=PLATFORM_ROLE_CHOICES,
+        default=PLATFORM_ROLE_NONE,
+    )
 
     # ✅ Tibber Integration
     tibber_token = models.CharField(max_length=255, blank=True, null=True)
@@ -27,8 +48,25 @@ class User(AbstractUser):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
+    @property
+    def is_platform_admin(self) -> bool:
+        return bool(self.is_superuser or self.platform_role == self.PLATFORM_ROLE_SYSTEM_ADMIN)
+
+    @property
+    def is_finance_admin(self) -> bool:
+        return bool(self.is_superuser or self.platform_role in [self.PLATFORM_ROLE_SYSTEM_ADMIN, self.PLATFORM_ROLE_FINANCE])
+
+    @property
+    def is_global_user_admin(self) -> bool:
+        return bool(self.is_superuser or self.platform_role in [self.PLATFORM_ROLE_SYSTEM_ADMIN, self.PLATFORM_ROLE_USER_ADMIN])
+
+    @property
+    def is_platform_helpdesk(self) -> bool:
+        return bool(self.is_staff or self.is_superuser or self.platform_role in [self.PLATFORM_ROLE_SYSTEM_ADMIN, self.PLATFORM_ROLE_HELPDESK])
+
     def __str__(self):
         return self.email
+
 
 
 class UserProfile(models.Model):
@@ -135,14 +173,22 @@ class UserSettings(models.Model):
 
 class TenantMembership(models.Model):
 
-    ROLE_ADMIN = "admin"
-    ROLE_EDITOR = "editor"
-    ROLE_VIEWER = "viewer"
+    ROLE_ADMIN = "admin"                    # Energy-Admin (Vollzugriff auf Community & Tarife)
+    ROLE_USER_ADMIN = "user_admin"          # Energy-Userverwaltung (Einladungen & Rollenzuweisung)
+    ROLE_HELPDESK = "helpdesk"              # Energy-Helpdesk (1st-Level Quartierssupport)
+    ROLE_AUDITOR = "auditor"                # Kassenprüfer / Beirat (Read-only Bilanzen & Berichte)
+    ROLE_MEMBER = "member"                  # Standard Community-Mitglied (Consumer/Producer/Prosumer)
+    ROLE_EDITOR = "editor"                  # Legacy Alias -> user_admin / admin
+    ROLE_VIEWER = "viewer"                  # Legacy Alias -> member / auditor
 
     ROLE_CHOICES = [
-        (ROLE_ADMIN, "Admin"),
-        (ROLE_EDITOR, "Editor"),
-        (ROLE_VIEWER, "Viewer"),
+        (ROLE_ADMIN, "Energy Admin"),
+        (ROLE_USER_ADMIN, "Energy Userverwaltung"),
+        (ROLE_HELPDESK, "Energy Helpdesk"),
+        (ROLE_AUDITOR, "Kassenprüfer / Auditor"),
+        (ROLE_MEMBER, "Mitglied"),
+        (ROLE_EDITOR, "Editor (Legacy)"),
+        (ROLE_VIEWER, "Viewer (Legacy)"),
     ]
 
     # ✅ FIX: related_name statt source
@@ -158,7 +204,7 @@ class TenantMembership(models.Model):
         related_name="memberships"
     )
 
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES)
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default=ROLE_MEMBER)
 
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -178,8 +224,9 @@ class TenantInvite(models.Model):
     role = models.CharField(
         max_length=20,
         choices=TenantMembership.ROLE_CHOICES,
-        default="viewer"
+        default=TenantMembership.ROLE_MEMBER
     )
+
 
     max_uses = models.IntegerField(default=1)
     used_count = models.IntegerField(default=0)

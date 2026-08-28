@@ -214,24 +214,38 @@ class UseInviteView(APIView):
         })
 
 
+from accounts.permissions import can_manage_invites, can_manage_members, ROLE_PERMISSIONS
+
+
 class CreateInviteView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
         tenant_id = request.data.get("tenant_id")
-        role = request.data.get("role", "viewer")
+        role = request.data.get("role", TenantMembership.ROLE_MEMBER)
 
         tenant = get_object_or_404(Tenant, id=tenant_id)
 
-        is_admin = TenantMembership.objects.filter(
+        valid_roles = [c[0] for c in TenantMembership.ROLE_CHOICES]
+        if role not in valid_roles:
+            return Response({"error": "invalid role"}, status=400)
+
+        # Check permission (Admin or User Admin)
+        if not can_manage_invites(request.user, tenant):
+            return Response({"error": "not allowed"}, status=403)
+
+        # User-Admin cannot invite new Admins
+        user_membership = TenantMembership.objects.filter(
             user=request.user,
             tenant=tenant,
-            role="admin",
             is_active=True
-        ).exists()
+        ).first()
 
-        if not is_admin:
-            return Response({"error": "not allowed"}, status=403)
+        is_tenant_admin = user_membership and user_membership.role == TenantMembership.ROLE_ADMIN
+        is_global_admin = getattr(request.user, "is_platform_admin", False) or request.user.is_superuser
+
+        if role in [TenantMembership.ROLE_ADMIN, TenantMembership.ROLE_USER_ADMIN] and not (is_tenant_admin or is_global_admin):
+            return Response({"error": "Only Energy Admins can invite administrative roles."}, status=403)
 
         invite = TenantInvite.objects.create(
             tenant=tenant,
@@ -241,7 +255,9 @@ class CreateInviteView(APIView):
 
         return Response({
             "link": f"{settings.FRONTEND_URL}/join?token={invite.token}",
-            "token": str(invite.token)
+            "token": str(invite.token),
+            "role": invite.role,
+            "role_display": invite.get_role_display(),
         })
 
 
@@ -272,7 +288,9 @@ class MyTenantView(APIView):
                 {
                     "id": str(m.user.id),
                     "email": m.user.email,
-                    "role": m.role
+                    "role": m.role,
+                    "role_display": m.get_role_display(),
+                    "permissions": ROLE_PERMISSIONS.get(m.role, []),
                 }
                 for m in members
             ],
@@ -280,6 +298,7 @@ class MyTenantView(APIView):
                 {
                     "token": str(i.token),
                     "role": i.role,
+                    "role_display": i.get_role_display(),
                     "used": i.used_count
                 }
                 for i in invites
@@ -295,18 +314,27 @@ class UpdateMemberRoleView(APIView):
         user_id = request.data.get("user_id")
         new_role = request.data.get("role")
 
-        if new_role not in ["admin", "editor", "viewer"]:
+        valid_roles = [c[0] for c in TenantMembership.ROLE_CHOICES]
+        if new_role not in valid_roles:
             return Response({"error": "invalid role"}, status=400)
 
-        is_admin = TenantMembership.objects.filter(
-            user=request.user,
-            tenant_id=tenant_id,
-            role="admin",
-            is_active=True
-        ).exists()
+        tenant = get_object_or_404(Tenant, id=tenant_id)
 
-        if not is_admin:
+        if not can_manage_members(request.user, tenant):
             return Response({"error": "not allowed"}, status=403)
+
+        user_membership = TenantMembership.objects.filter(
+            user=request.user,
+            tenant=tenant,
+            is_active=True
+        ).first()
+
+        is_tenant_admin = user_membership and user_membership.role == TenantMembership.ROLE_ADMIN
+        is_global_admin = getattr(request.user, "is_platform_admin", False) or request.user.is_superuser
+
+        # User-Admin cannot promote/demote to/from Admin
+        if new_role in [TenantMembership.ROLE_ADMIN, TenantMembership.ROLE_USER_ADMIN] and not (is_tenant_admin or is_global_admin):
+            return Response({"error": "Only Energy Admins can assign administrative roles."}, status=403)
 
         membership = get_object_or_404(
             TenantMembership,
@@ -314,10 +342,17 @@ class UpdateMemberRoleView(APIView):
             user_id=user_id
         )
 
+        if membership.role == TenantMembership.ROLE_ADMIN and not (is_tenant_admin or is_global_admin):
+            return Response({"error": "Cannot modify Energy Admin role."}, status=403)
+
         membership.role = new_role
         membership.save()
 
-        return Response({"status": "updated"})
+        return Response({
+            "status": "updated",
+            "role": membership.role,
+            "role_display": membership.get_role_display(),
+        })
 
 
 class RemoveMemberView(APIView):
@@ -327,14 +362,9 @@ class RemoveMemberView(APIView):
         tenant_id = request.data.get("tenant_id")
         user_id = request.data.get("user_id")
 
-        is_admin = TenantMembership.objects.filter(
-            user=request.user,
-            tenant_id=tenant_id,
-            role="admin",
-            is_active=True
-        ).exists()
+        tenant = get_object_or_404(Tenant, id=tenant_id)
 
-        if not is_admin:
+        if not can_manage_members(request.user, tenant):
             return Response({"error": "not allowed"}, status=403)
 
         membership = get_object_or_404(
@@ -343,10 +373,24 @@ class RemoveMemberView(APIView):
             user_id=user_id
         )
 
+        user_membership = TenantMembership.objects.filter(
+            user=request.user,
+            tenant=tenant,
+            is_active=True
+        ).first()
+
+        is_tenant_admin = user_membership and user_membership.role == TenantMembership.ROLE_ADMIN
+        is_global_admin = getattr(request.user, "is_platform_admin", False) or request.user.is_superuser
+
+        # User Admin cannot remove Energy Admin
+        if membership.role == TenantMembership.ROLE_ADMIN and not (is_tenant_admin or is_global_admin):
+            return Response({"error": "Cannot remove Energy Admin."}, status=403)
+
         membership.is_active = False
         membership.save()
 
         return Response({"status": "removed"})
+
 
 
 class DeactivateInviteView(APIView):
