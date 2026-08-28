@@ -25,6 +25,7 @@ import HelpArticleDetailPage from "../features/help/pages/HelpArticleDetailPage"
 import HelpDrawer from "../features/help/components/HelpDrawer";
 import { HelpDrawerProvider } from "../features/help/context/HelpDrawerContext";
 import BillingPage from "../features/billing/pages/BillingPage";
+import AgentSupportHubPage from "../features/support/pages/AgentSupportHubPage";
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import TrackingDashboard from "../pages/admin/TrackingDashboard";
 import TenantDashboard from "../pages/TenantDashboard";
@@ -82,6 +83,10 @@ export default function AppShell() {
                             {/* 📚 HELP CENTER & KNOWLEDGE BASE */}
                             <Route path="help" element={<HelpCenterPage />} />
                             <Route path="help/:slug" element={<HelpArticleDetailPage />} />
+
+                            {/* 🛟 SUPPORT & INCIDENT HUB */}
+                            <Route path="support" element={<AgentSupportHubPage />} />
+                            <Route path="support-hub" element={<AgentSupportHubPage />} />
 
                             {/* 🛡️ ADMIN & TENANT MANAGEMENT */}
                             <Route path="admin" element={<Navigate to="/app/admin/dashboard" replace />} />

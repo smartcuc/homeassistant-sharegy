@@ -781,5 +781,22 @@
     "confirm_delete": "Delete Permanently",
     "deleting": "Deleting account...",
     "delete_failed": "Deletion failed."
+  },
+  "support": {
+    "btn_label": "Support",
+    "open_drawer_title": "Support & Helpdesk Tickets (Open Drawer)",
+    "title": "Support & Incident Desk",
+    "new_ticket": "New Ticket",
+    "my_tickets": "My Tickets",
+    "subject": "Subject / Summary",
+    "category": "Category",
+    "priority": "Priority",
+    "description": "Detailed Description",
+    "submit": "Create Ticket",
+    "status_open": "New / Open",
+    "status_in_progress": "In Progress",
+    "status_waiting_customer": "Waiting on You",
+    "status_resolved": "Resolved",
+    "status_closed": "Closed"
   }
 }

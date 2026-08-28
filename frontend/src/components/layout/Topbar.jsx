@@ -10,6 +10,8 @@ import { useDeviceStatus } from "../../hooks/useDevices";
 import UserMenu from "../UserMenu";
 import SpotPriceModal from "../../features/market/components/SpotPriceModal";
 import { useHelpDrawer } from "../../features/help/context/useHelpDrawer";
+import SupportDrawer from "../../features/support/components/SupportDrawer";
+import { LifeBuoy } from "lucide-react";
 
 export default function AppTopbar() {
     const { t } = useTranslation();
@@ -40,6 +42,7 @@ export default function AppTopbar() {
                 : "text-red-600";
 
     const [spotModalOpen, setSpotModalOpen] = useState(false);
+    const [supportOpen, setSupportOpen] = useState(false);
 
     // Status-Punkt Farbe
     const statusDotClass = isDeviceLoading
@@ -160,10 +163,24 @@ export default function AppTopbar() {
                     <span className="hidden sm:inline">{t("help.btn_label", "Hilfe")}</span>
                 </button>
 
+                {/* 🛟 Support Drawer Trigger */}
+                <button
+                    onClick={() => setSupportOpen(true)}
+                    title={t("support.open_drawer_title", "Support & Hilfe-Tickets")}
+                    className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-lg transition cursor-pointer shadow-2xs"
+                >
+                    <LifeBuoy className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                    <span className="hidden sm:inline">{t("support.btn_label", "Support")}</span>
+                </button>
+
                 <UserMenu user={user} />
                 <SpotPriceModal
                     open={spotModalOpen}
                     onClose={() => setSpotModalOpen(false)}
+                />
+                <SupportDrawer
+                    isOpen={supportOpen}
+                    onClose={() => setSupportOpen(false)}
                 />
             </div>
         </div>

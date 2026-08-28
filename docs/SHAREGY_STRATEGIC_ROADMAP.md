@@ -102,9 +102,10 @@
   ├── 2.16 ✅ Subscription- & SaaS-Lizenzmodell (Free, Pro 4,99 €, Vermieter 14,99 €, PDF-Invoicing & Feature-Gating)
   ├── 2.17 ✅ Rechtliche Compliance & DSGVO-Rechte (Impressum § 5 DDG, Datenschutz, AGB, Widerruf, Cookie-Manager, Art. 15 Export & Art. 17 Löschung)
   ├── 2.18 ✅ Production-Härtung leere Accounts & UI/UX-Ergonomie (Zero-State Onboarding-Banner, Auto-Home-Provisioning, Topbar-Kontext)
-  ├── 2.19 ⏳ Deklaratives Device-Profile Addon-System (Sungrow, SMA, Deye, Huawei, Kostal, Fronius YAML)
-  ├── 2.20 ⏳ Mobile Push Notification Engine (FCM Android & APNs iOS Dispatcher)
-  └── 2.21 ⏳ Native Mobile Apps via Capacitor (iOS & Android mit Widgets & Biometrie)
+  ├── 2.19 ✅ Universal Helpdesk- & Incident-System (Cross-Project Support für Sharegy HEMS & Factofy Digital Twin)
+  ├── 2.20 ⏳ Deklaratives Device-Profile Addon-System (Sungrow, SMA, Deye, Huawei, Kostal, Fronius YAML)
+  ├── 2.21 ⏳ Mobile Push Notification Engine (FCM Android & APNs iOS Dispatcher)
+  └── 2.22 ⏳ Native Mobile Apps via Capacitor (iOS & Android mit Widgets & Biometrie)
 
 ┌───────────────────────────────────────────────────────────────────────────────┐
 │ MEILENSTEIN 3: ENERGY SHARING COMMUNITIES & § 14a EnWG (Säule 2)              │

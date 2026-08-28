@@ -60,8 +60,17 @@ class APIKeyOrTokenAuthentication(BaseAuthentication):
             Q(username__iexact=token) | Q(email__iexact=token),
             is_active=True,
         ).first()
-        if user:
-            return (user, token)
+        # 3. Check Support Desk JWT (Factofy / external apps)
+        try:
+            from support_desk.services.auth_jwt import verify_support_jwt
+            is_valid, payload, err = verify_support_jwt(token)
+            if is_valid and payload:
+                from django.contrib.auth.models import AnonymousUser
+                anon = AnonymousUser()
+                anon.support_jwt_payload = payload
+                return (anon, token)
+        except Exception:
+            pass
 
         raise AuthenticationFailed("Ungültiger oder abgelaufener API-Key / Token.")
 
