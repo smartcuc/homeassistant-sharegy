@@ -219,6 +219,17 @@ class BalanceSlotAdmin(admin.ModelAdmin):
         return False
 
 
+from accounts.models import TenantMembership
+
+
+class TenantMembershipInline(admin.TabularInline):
+    model = TenantMembership
+    extra = 1
+    raw_id_fields = ("user",)
+    fields = ("user", "role", "is_active", "created_at")
+    readonly_fields = ("created_at",)
+
+
 # ============================================================
 # ✅TENANT ANLEGEN
 # ============================================================
@@ -232,4 +243,6 @@ class TenantAdmin(admin.ModelAdmin):
         ("Geokoordinaten", {"fields": ("latitude", "longitude")}),
         ("Theme & Farben", {"fields": ("primary_color", "secondary_color", "button_color")}),
     )
+    inlines = [TenantMembershipInline]
+
 

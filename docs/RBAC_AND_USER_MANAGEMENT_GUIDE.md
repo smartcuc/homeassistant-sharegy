@@ -115,13 +115,24 @@ Die Berechtigungsprüfung erfolgt zentral über `accounts/permissions.py`:
 ## 6. Schritt-für-Schritt Anleitungen
 
 ### 6.1 Wie lege ich eine neue Energy Community an und mache einen Nutzer zum Admin?
+
+**Methode A (Empfohlen – Direkt beim Tenant):**
 1. Öffne `https://sharegy.de/admin/`.
-2. Gehe auf **Core ➔ Tenants ➔ Tenant hinzufügen**.
-3. Gib den Namen ein (z. B. *"Quartier Sonnengarten"*). Der Slug wird automatisch erzeugt.
-4. Gehe auf **Accounts ➔ Tenant memberships ➔ Mitgliedschaft hinzufügen**.
-5. Wähle den gewünschten Benutzer und die neu angelegte Community aus.
-6. Setze die Rolle auf **`Energy Admin` (`admin`)** und speichere.
-7. Der Nutzer hat ab sofort vollen Zugriff auf `https://sharegy.de/app/tenant`.
+2. Gehe auf **Core ➔ Tenants ➔ Tenant hinzufügen** (oder bestehenden Tenant bearbeiten).
+3. Gib den Namen ein (z. B. *"Quartier Sonnengarten"*).
+4. Scrolle nach unten zur Tabelle **„Tenant memberships“** (Inline):
+   - Wähle den gewünschten Benutzer aus.
+   - Setze die Rolle auf **`Energy Admin` (`admin`)**.
+   - Setze das Häkchen bei `Is active`.
+5. Klicke auf **Speichern**.
+
+**Methode B (Über das Menü Accounts):**
+1. Gehe auf **Accounts ➔ Tenant memberships ➔ Tenant membership hinzufügen**.
+2. Wähle den Benutzer, die Community und die Rolle **`Energy Admin`**.
+3. Klicke auf **Speichern**.
+
+Der Nutzer hat ab sofort vollen Zugriff auf das Betreiber-Dashboard unter `https://sharegy.de/app/tenant`.
+
 
 ### 6.2 Wie lade ich als Energy-Admin neue Nachbarn oder Helfer ein?
 1. Melde dich in der App an und navigiere zu `https://sharegy.de/app/tenant`.
