@@ -1,6 +1,6 @@
 [
 {
-  "model": "helpcenter.helpcategory",
+  "model": "support_desk.helpcategory",
   "pk": "b9285d9d-9bcf-43e8-8b95-b71a47ac13b7",
   "fields": {
     "key": "getting-started",
@@ -15,7 +15,7 @@
   }
 },
 {
-  "model": "helpcenter.helpcategory",
+  "model": "support_desk.helpcategory",
   "pk": "e647af9a-8938-4ab9-af5a-0713a15f79b1",
   "fields": {
     "key": "inverters-meters",
@@ -30,7 +30,7 @@
   }
 },
 {
-  "model": "helpcenter.helpcategory",
+  "model": "support_desk.helpcategory",
   "pk": "6b4ea9d4-7b47-49dc-b2c5-f5bd3ff9a33d",
   "fields": {
     "key": "forecast",
@@ -45,7 +45,7 @@
   }
 },
 {
-  "model": "helpcenter.helpcategory",
+  "model": "support_desk.helpcategory",
   "pk": "e6ddda15-7508-4ce7-a852-5fa4afee4696",
   "fields": {
     "key": "optimizer",
@@ -60,7 +60,7 @@
   }
 },
 {
-  "model": "helpcenter.helpcategory",
+  "model": "support_desk.helpcategory",
   "pk": "ca1f67ff-b20d-4308-85cd-6217fbcb5418",
   "fields": {
     "key": "tariffs",
@@ -75,7 +75,7 @@
   }
 },
 {
-  "model": "helpcenter.helpcategory",
+  "model": "support_desk.helpcategory",
   "pk": "b3517643-2ffa-4db8-bf4d-3097077006f2",
   "fields": {
     "key": "alerts",
@@ -90,7 +90,7 @@
   }
 },
 {
-  "model": "helpcenter.helpcategory",
+  "model": "support_desk.helpcategory",
   "pk": "164079f1-625b-4e67-bfc3-6366fdc379d6",
   "fields": {
     "key": "billing",
@@ -105,7 +105,7 @@
   }
 },
 {
-  "model": "helpcenter.helpcategory",
+  "model": "support_desk.helpcategory",
   "pk": "34745af8-0e4e-4d2f-a386-36f4fe5a8c0f",
   "fields": {
     "key": "devices-protocols",
@@ -120,7 +120,7 @@
   }
 },
 {
-  "model": "helpcenter.helparticle",
+  "model": "support_desk.helparticle",
   "pk": "6aa481ee-55a8-4bd2-b63b-10fb8cfe14f5",
   "fields": {
     "category": "b9285d9d-9bcf-43e8-8b95-b71a47ac13b7",
@@ -151,7 +151,7 @@
   }
 },
 {
-  "model": "helpcenter.helparticle",
+  "model": "support_desk.helparticle",
   "pk": "8e652672-c988-443f-a0c1-4ac8abc923e5",
   "fields": {
     "category": "e647af9a-8938-4ab9-af5a-0713a15f79b1",
@@ -182,7 +182,7 @@
   }
 },
 {
-  "model": "helpcenter.helparticle",
+  "model": "support_desk.helparticle",
   "pk": "4c05102f-72e8-434a-af39-4d6eeb24b29e",
   "fields": {
     "category": "e647af9a-8938-4ab9-af5a-0713a15f79b1",
@@ -214,7 +214,7 @@
   }
 },
 {
-  "model": "helpcenter.helparticle",
+  "model": "support_desk.helparticle",
   "pk": "e3da92e6-538e-4a3f-9859-39929fcb8b25",
   "fields": {
     "category": "6b4ea9d4-7b47-49dc-b2c5-f5bd3ff9a33d",
@@ -245,7 +245,7 @@
   }
 },
 {
-  "model": "helpcenter.helparticle",
+  "model": "support_desk.helparticle",
   "pk": "3572d690-7a22-47f0-8652-e71b89ccb5e6",
   "fields": {
     "category": "6b4ea9d4-7b47-49dc-b2c5-f5bd3ff9a33d",
@@ -275,7 +275,7 @@
   }
 },
 {
-  "model": "helpcenter.helparticle",
+  "model": "support_desk.helparticle",
   "pk": "d0b596a4-a1f6-4b13-9e7a-21af3648a24c",
   "fields": {
     "category": "e6ddda15-7508-4ce7-a852-5fa4afee4696",
@@ -307,7 +307,7 @@
   }
 },
 {
-  "model": "helpcenter.helparticle",
+  "model": "support_desk.helparticle",
   "pk": "00d103ad-df12-45ad-8f03-719e40d22a76",
   "fields": {
     "category": "ca1f67ff-b20d-4308-85cd-6217fbcb5418",
@@ -338,7 +338,7 @@
   }
 },
 {
-  "model": "helpcenter.helparticle",
+  "model": "support_desk.helparticle",
   "pk": "5c912163-53e9-4abe-882a-d0b0f2c9aac1",
   "fields": {
     "category": "ca1f67ff-b20d-4308-85cd-6217fbcb5418",
@@ -369,7 +369,7 @@
   }
 },
 {
-  "model": "helpcenter.helparticle",
+  "model": "support_desk.helparticle",
   "pk": "d991a75d-c5b8-4fcb-b616-c5617605b554",
   "fields": {
     "category": "b3517643-2ffa-4db8-bf4d-3097077006f2",
@@ -400,7 +400,7 @@
   }
 },
 {
-  "model": "helpcenter.helparticle",
+  "model": "support_desk.helparticle",
   "pk": "5d52e1e8-f91d-4a89-833c-f5b739b6c8ef",
   "fields": {
     "category": "164079f1-625b-4e67-bfc3-6366fdc379d6",
@@ -431,7 +431,7 @@
   }
 },
 {
-  "model": "helpcenter.helparticle",
+  "model": "support_desk.helparticle",
   "pk": "819dac9d-73cf-4a57-a342-7a9b3119128e",
   "fields": {
     "category": "34745af8-0e4e-4d2f-a386-36f4fe5a8c0f",
@@ -461,7 +461,7 @@
   }
 },
 {
-  "model": "helpcenter.helparticle",
+  "model": "support_desk.helparticle",
   "pk": "debed73b-f63b-4a70-93ee-caa59c436377",
   "fields": {
     "category": "34745af8-0e4e-4d2f-a386-36f4fe5a8c0f",
@@ -492,7 +492,7 @@
   }
 },
 {
-  "model": "helpcenter.helparticle",
+  "model": "support_desk.helparticle",
   "pk": "29cf697f-2ff7-4fb9-acd1-7789650cfd5f",
   "fields": {
     "category": "34745af8-0e4e-4d2f-a386-36f4fe5a8c0f",
@@ -523,7 +523,7 @@
   }
 },
 {
-  "model": "helpcenter.helparticle",
+  "model": "support_desk.helparticle",
   "pk": "b8ba37f3-c8fb-4bfd-ba78-5c8812f714ca",
   "fields": {
     "category": "34745af8-0e4e-4d2f-a386-36f4fe5a8c0f",
@@ -555,3 +555,4 @@
   }
 }
 ]
+
