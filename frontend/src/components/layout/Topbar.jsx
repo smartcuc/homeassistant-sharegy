@@ -9,7 +9,6 @@ import { useHomes } from "../../hooks/useHomes";
 import { useDeviceStatus } from "../../hooks/useDevices";
 import UserMenu from "../UserMenu";
 import SpotPriceModal from "../../features/market/components/SpotPriceModal";
-import { useHelpDrawer } from "../../features/help/context/useHelpDrawer";
 import SupportDrawer from "../../features/support/components/SupportDrawer";
 import { LifeBuoy } from "lucide-react";
 
@@ -17,7 +16,7 @@ export default function AppTopbar() {
     const { t } = useTranslation();
     const { user } = useUser();
     const { homes = [], primaryHome } = useHomes();
-    const { toggleHelp } = useHelpDrawer();
+
 
     // 📶 Live Geräte-Status aus dem Backend
     const { data: devices = [], isLoading: isDeviceLoading } = useDeviceStatus();
@@ -153,25 +152,16 @@ export default function AppTopbar() {
                     </button>
                 )}
 
-                {/* 💡 Help Drawer Trigger */}
-                <button
-                    onClick={toggleHelp}
-                    title={t("help.open_drawer_title", "Hilfe & Schnellanleitungen (Drawer öffnen)")}
-                    className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition cursor-pointer shadow-2xs"
-                >
-                    <span>💡</span>
-                    <span className="hidden sm:inline">{t("help.btn_label", "Hilfe")}</span>
-                </button>
-
-                {/* 🛟 Support Drawer Trigger */}
+                {/* 🛟 Einheitlicher Hilfe & Support Trigger */}
                 <button
                     onClick={() => setSupportOpen(true)}
-                    title={t("support.open_drawer_title", "Support & Hilfe-Tickets")}
-                    className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-lg transition cursor-pointer shadow-2xs"
+                    title={t("support.open_drawer_title", "Hilfe, Wissensportal & Support-Tickets")}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-lg transition cursor-pointer shadow-2xs"
                 >
                     <LifeBuoy className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
-                    <span className="hidden sm:inline">{t("support.btn_label", "Support")}</span>
+                    <span className="hidden sm:inline">{t("support.btn_unified_label", "Hilfe & Support")}</span>
                 </button>
+
 
                 <UserMenu user={user} />
                 <SpotPriceModal

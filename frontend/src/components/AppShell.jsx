@@ -22,9 +22,8 @@ import StructurePage from "../pages/StructurePage";
 import AlertsPage from "../features/alerts/pages/AlertsPage";
 import HelpCenterPage from "../features/help/pages/HelpCenterPage";
 import HelpArticleDetailPage from "../features/help/pages/HelpArticleDetailPage";
-import HelpDrawer from "../features/help/components/HelpDrawer";
-import { HelpDrawerProvider } from "../features/help/context/HelpDrawerContext";
 import BillingPage from "../features/billing/pages/BillingPage";
+
 import AgentSupportHubPage from "../features/support/pages/AgentSupportHubPage";
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import TrackingDashboard from "../pages/admin/TrackingDashboard";
@@ -45,68 +44,64 @@ export default function AppShell() {
     }
 
     return (
-        <HelpDrawerProvider>
-            <div className="flex h-screen">
+        <div className="flex h-screen">
 
-                {/* ✅ SIDEBAR */}
-                <Sidebar />
+            {/* ✅ SIDEBAR */}
+            <Sidebar />
 
-                <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col">
 
-                    {/* ✅ TOPBAR */}
-                    <AppTopbar />
+                {/* ✅ TOPBAR */}
+                <AppTopbar />
 
-                    {/* ✅ CONTENT */}
-                    <div className="flex-1 overflow-auto">
-                        <Routes>
+                {/* ✅ CONTENT */}
+                <div className="flex-1 overflow-auto">
+                    <Routes>
 
-                            {/* ✅ DEFAULT */}
-                            <Route index element={<Navigate to="/app/dashboard" replace />} />
+                        {/* ✅ DEFAULT */}
+                        <Route index element={<Navigate to="/app/dashboard" replace />} />
 
-                            <Route path="dashboard" element={<Dashboard user={user} />} />
-                            <Route path="profile" element={<Profile />} />
-                            <Route path="billing" element={<BillingPage />} />
+                        <Route path="dashboard" element={<Dashboard user={user} />} />
+                        <Route path="profile" element={<Profile />} />
+                        <Route path="billing" element={<BillingPage />} />
 
-                            <Route path="overview" element={<OverviewPage />} />
-                            <Route path="energy" element={<EnergyDashboard />} />
-                            <Route path="devices" element={<DevicesPage />} />
-                            <Route path="producers" element={<ProducerPage />} />
-                            <Route path="tariff" element={<TariffPage />} />
-                            <Route path="interfaces" element={<InterfacesPage />} />
-                            <Route path="settings" element={<Settings />} />
+                        <Route path="overview" element={<OverviewPage />} />
+                        <Route path="energy" element={<EnergyDashboard />} />
+                        <Route path="devices" element={<DevicesPage />} />
+                        <Route path="producers" element={<ProducerPage />} />
+                        <Route path="tariff" element={<TariffPage />} />
+                        <Route path="interfaces" element={<InterfacesPage />} />
+                        <Route path="settings" element={<Settings />} />
 
-                            <Route path="solarforecast" element={<ForecastPage />} />
-                            <Route path="metrics" element={<MetricsPage />} />
-                            <Route path="structure" element={<StructurePage />} />
-                            <Route path="alerts" element={<AlertsPage />} />
+                        <Route path="solarforecast" element={<ForecastPage />} />
+                        <Route path="metrics" element={<MetricsPage />} />
+                        <Route path="structure" element={<StructurePage />} />
+                        <Route path="alerts" element={<AlertsPage />} />
 
-                            {/* 📚 HELP CENTER & KNOWLEDGE BASE */}
-                            <Route path="help" element={<HelpCenterPage />} />
-                            <Route path="help/:slug" element={<HelpArticleDetailPage />} />
+                        {/* 📚 HELP CENTER & KNOWLEDGE BASE */}
+                        <Route path="help" element={<HelpCenterPage />} />
+                        <Route path="help/:slug" element={<HelpArticleDetailPage />} />
 
-                            {/* 🛟 SUPPORT & INCIDENT HUB */}
-                            <Route path="support" element={<AgentSupportHubPage />} />
-                            <Route path="support-hub" element={<AgentSupportHubPage />} />
+                        {/* 🛟 SUPPORT & INCIDENT HUB */}
+                        <Route path="support" element={<AgentSupportHubPage />} />
+                        <Route path="support-hub" element={<AgentSupportHubPage />} />
 
-                            {/* 🛡️ ADMIN & TENANT MANAGEMENT */}
-                            <Route path="admin" element={<Navigate to="/app/admin/dashboard" replace />} />
-                            <Route path="admin/dashboard" element={<AdminDashboard />} />
-                            <Route path="admin/tracking" element={<TrackingDashboard />} />
-                            <Route path="tenant-management" element={<TenantDashboard />} />
+                        {/* 🛡️ ADMIN & TENANT MANAGEMENT */}
+                        <Route path="admin" element={<Navigate to="/app/admin/dashboard" replace />} />
+                        <Route path="admin/dashboard" element={<AdminDashboard />} />
+                        <Route path="admin/tracking" element={<TrackingDashboard />} />
+                        <Route path="tenant-management" element={<TenantDashboard />} />
 
-                            {/* ✅ FALLBACK IMMER UNTEN */}
-                            <Route path="*" element={<Navigate to="/app/dashboard" replace />} />
+                        {/* ✅ FALLBACK IMMER UNTEN */}
+                        <Route path="*" element={<Navigate to="/app/dashboard" replace />} />
 
-                        </Routes>
-                    </div>
-
+                    </Routes>
                 </div>
 
-                {/* 💡 SLIDE-OVER HELP DRAWER */}
-                <HelpDrawer />
             </div>
-        </HelpDrawerProvider>
+        </div>
     );
+
 }
 
 
