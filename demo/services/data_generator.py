@@ -33,6 +33,8 @@ from devices.services.ingest import ingest_metric_payload
 from forecast.services_weather import fetch_and_store_weather_for_group
 from forecast.services_store import save_all_forecasts_for_generator_string
 
+from demo.models import DemoDeviceMap, DemoDeviceSimulation
+
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
@@ -55,8 +57,11 @@ def setup_demo_household(target_user=None):
             },
         )
 
-    # 1. Altes Home sauber bereinigen
+    # 1. Altes Home und alte Mappings sauber bereinigen
     target_user.homes.all().delete()
+    DemoDeviceMap.objects.all().delete()
+    DemoDeviceSimulation.objects.all().delete()
+
 
     # 2. Neues Prosumer-Demo-Haus erstellen
     demo_home = Home.objects.create(
