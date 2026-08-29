@@ -9,29 +9,67 @@ import { useTranslation } from "react-i18next";
 export const CONSENT_STORAGE_KEY = "sharegy_cookie_consent_v1";
 
 export function getStoredConsent() {
+    // 1. Try localStorage
     try {
         const stored = localStorage.getItem(CONSENT_STORAGE_KEY);
-        return stored ? JSON.parse(stored) : null;
+        if (stored) {
+            const parsed = JSON.parse(stored);
+            if (parsed && typeof parsed === "object") return parsed;
+        }
     } catch {
-        return null;
+        // Fallthrough if localStorage is restricted
     }
+
+    // 2. Try document.cookie as fallback
+    try {
+        if (typeof document !== "undefined" && document.cookie) {
+            const match = document.cookie
+                .split("; ")
+                .find((row) => row.startsWith(`${CONSENT_STORAGE_KEY}=`));
+            if (match) {
+                const cookieVal = decodeURIComponent(match.split("=")[1]);
+                return JSON.parse(cookieVal);
+            }
+        }
+    } catch {
+        // Fallthrough
+    }
+
+    return null;
 }
 
 export function saveConsent(consent) {
+    const data = {
+        essential: true,
+        functional: Boolean(consent.functional),
+        analytics: Boolean(consent.analytics),
+        timestamp: new Date().toISOString(),
+    };
+
+    // 1. Save in localStorage
     try {
-        const data = {
-            essential: true,
-            functional: Boolean(consent.functional),
-            analytics: Boolean(consent.analytics),
-            timestamp: new Date().toISOString(),
-        };
         localStorage.setItem(CONSENT_STORAGE_KEY, JSON.stringify(data));
-        window.dispatchEvent(new CustomEvent("cookie-consent-updated", { detail: data }));
-        return data;
-    } catch {
-        return null;
+    } catch (e) {
+        console.warn("Could not save cookie consent to localStorage:", e);
     }
+
+    // 2. Save in document.cookie (1 year persistence)
+    try {
+        if (typeof document !== "undefined") {
+            const isSecure = window.location.protocol === "https:" ? "; Secure" : "";
+            document.cookie = `${CONSENT_STORAGE_KEY}=${encodeURIComponent(JSON.stringify(data))}; path=/; max-age=31536000; SameSite=Lax${isSecure}`;
+        }
+    } catch (e) {
+        console.warn("Could not save cookie consent to document.cookie:", e);
+    }
+
+    try {
+        window.dispatchEvent(new CustomEvent("cookie-consent-updated", { detail: data }));
+    } catch {}
+
+    return data;
 }
+
 
 export default function CookieConsentBanner() {
     const { t } = useTranslation();

@@ -11,6 +11,7 @@ import logging
 import os
 import ssl
 
+from django.db import close_old_connections, InterfaceError, OperationalError
 from django.core.cache import cache  # 💡 Ganz wichtig: Hier importieren
 from django.core.management.base import BaseCommand
 from django.utils import timezone
@@ -20,6 +21,7 @@ from devices.services.ingest import ingest_metric_payload
 from integrations.mqtt_profiles import get_parser
 
 import paho.mqtt.client as mqtt
+
 
 
 logger = logging.getLogger(__name__)
@@ -341,14 +343,29 @@ class Command(BaseCommand):
 
         LAST_MESSAGE_TS = timezone.now()
 
+        close_old_connections()
         try:
             ingest(
                 topic=msg.topic,
                 payload=msg.payload,
                 auto_prov=True,
             )
+        except (InterfaceError, OperationalError) as db_err:
+            logger.warning("DB connection stale during MQTT ingest (%s), reconnecting...", db_err)
+            close_old_connections()
+            try:
+                ingest(
+                    topic=msg.topic,
+                    payload=msg.payload,
+                    auto_prov=True,
+                )
+            except Exception as retry_err:
+                logger.exception("Ingest failed after retry for topic=%s: %s", msg.topic, retry_err)
         except Exception as e:
             logger.exception("Ingest failed for topic=%s: %s", msg.topic, e)
+        finally:
+            close_old_connections()
+
 
 
 # ============================================================

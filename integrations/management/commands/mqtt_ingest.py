@@ -10,12 +10,14 @@ from datetime import datetime
 
 from django.core.management.base import BaseCommand
 from django.utils import timezone
+from django.db import close_old_connections, InterfaceError, OperationalError
 
 import paho.mqtt.client as mqtt  # pip install paho-mqtt
 
 from integrations.models import InboundWebhookEvent
 from integrations.tasks import process_inbound_webhook_event
 from core.models import Meter
+
 
 logger = logging.getLogger(__name__)
 
@@ -150,49 +152,58 @@ class Command(BaseCommand):
                 logger.error("mqtt.connect.failed", extra={"rc": rc})
 
         def on_message(c, userdata, msg):
-            serial, payload = _normalize_payload(msg.topic, msg.payload)
-            if not serial or not payload:
-                return
+            close_old_connections()
+            try:
+                serial, payload = _normalize_payload(msg.topic, msg.payload)
+                if not serial or not payload:
+                    return
 
-            meter = (
-                Meter.objects.filter(serial_number=serial)
-                .select_related("tenant")
-                .first()
-            )
-
-            # Tenant Mapping: über serial_number → Meter → tenant
-            tenant = meter.tenant if meter else None
-
-            if not tenant and default_tenant_id:
-                # optionaler Fallback
-                tenant = (
-                    type(meter)
-                    .tenant.field.related_model.objects.filter(id=default_tenant_id)
+                meter = (
+                    Meter.objects.filter(serial_number=serial)
+                    .select_related("tenant")
                     .first()
                 )
 
-            if not tenant:
-                logger.warning(
-                    "mqtt.unknown_meter_or_tenant",
-                    extra={"serial": serial, "topic": msg.topic},
+                # Tenant Mapping: über serial_number → Meter → tenant
+                tenant = meter.tenant if meter else None
+
+                if not tenant and default_tenant_id:
+                    # optionaler Fallback
+                    tenant = (
+                        type(meter)
+                        .tenant.field.related_model.objects.filter(id=default_tenant_id)
+                        .first()
+                    )
+
+                if not tenant:
+                    logger.warning(
+                        "mqtt.unknown_meter_or_tenant",
+                        extra={"serial": serial, "topic": msg.topic},
+                    )
+                    return
+
+                # Audit Event speichern
+                evt = InboundWebhookEvent.objects.create(
+                    tenant=tenant,
+                    event_type="MQTT",
+                    status=InboundWebhookEvent.Status.RECEIVED,
+                    payload=payload,
                 )
-                return
 
-            # Audit Event speichern
-            evt = InboundWebhookEvent.objects.create(
-                tenant=tenant,
-                event_type="MQTT",
-                status=InboundWebhookEvent.Status.RECEIVED,
-                payload=payload,
-                # received_at hat dein Model vermutlich; falls nicht, ignoriere
-            )
+                # Celery Processing triggern
+                process_inbound_webhook_event.delay(str(evt.id))
 
-            # Celery Processing triggern
-            process_inbound_webhook_event.delay(str(evt.id))
+                logger.info(
+                    "mqtt.event.accepted", extra={"event_id": str(evt.id), "serial": serial}
+                )
+            except (InterfaceError, OperationalError) as db_err:
+                logger.warning("DB connection lost in mqtt_ingest (%s), reset connection...", db_err)
+                close_old_connections()
+            except Exception as e:
+                logger.exception("Error in mqtt_ingest on_message: %s", e)
+            finally:
+                close_old_connections()
 
-            logger.info(
-                "mqtt.event.accepted", extra={"event_id": str(evt.id), "serial": serial}
-            )
 
         client.on_connect = on_connect
         client.on_message = on_message
