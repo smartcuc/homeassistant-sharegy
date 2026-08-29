@@ -41,41 +41,54 @@ def process_incoming_telemetry(token, payload_str, user):
             clean_tok = str(token).strip()
             no_hyphens = clean_tok.replace("-", "")
 
-            # A) Direkte Suche nach mqtt_token
-            home = (
-                Home.objects.filter(mqtt_token__iexact=clean_tok).select_related("user").first()
-                or Home.objects.filter(mqtt_token__iexact=no_hyphens).select_related("user").first()
-                or Home.objects.filter(mqtt_token__istartswith=no_hyphens).select_related("user").first()
-            )
-            # B) Suche nach numerischer ID
+            # A) User UUID / User ID matching (Priorität 1)
+            try:
+                home = Home.objects.filter(user__id=clean_tok).select_related("user").first()
+            except Exception:
+                pass
+
+            # B) Direkte Suche nach mqtt_token (exakt oder auf 16 Zeichen gekürzt)
+            if not home:
+                home = (
+                    Home.objects.filter(mqtt_token__iexact=clean_tok).select_related("user").first()
+                    or Home.objects.filter(mqtt_token__iexact=clean_tok[:16]).select_related("user").first()
+                    or Home.objects.filter(mqtt_token__iexact=no_hyphens).select_related("user").first()
+                    or Home.objects.filter(mqtt_token__iexact=no_hyphens[:16]).select_related("user").first()
+                    or Home.objects.filter(mqtt_token__istartswith=clean_tok[:8]).select_related("user").first()
+                )
+
+            # C) Suche nach Email
+            if not home:
+                home = Home.objects.filter(user__email__iexact=clean_tok).select_related("user").first()
+
+            # D) Suche nach numerischer Home ID
             if not home and clean_tok.isdigit():
                 try:
                     home = Home.objects.filter(id=int(clean_tok)).select_related("user").first()
                 except Exception:
                     pass
-            # C) Suche nach User UUID
-            if not home:
-                try:
-                    home = Home.objects.filter(user__id=clean_tok).select_related("user").first()
-                except Exception:
-                    pass
 
-        # D) Authentifizierter User Fallback
+        # E) Authentifizierter User Fallback
         if not home and user and user.is_authenticated:
-            home = Home.objects.filter(user=user).first()
+            home = Home.objects.filter(user=user).select_related("user").first()
 
-        # E) Token aus JSON-Body
+        # F) Token aus JSON-Body
         if not home:
             body_token = str(data.get("token") or data.get("home_token") or data.get("user_id") or "").strip()
             if body_token:
                 no_hy = body_token.replace("-", "")
-                home = (
-                    Home.objects.filter(mqtt_token__iexact=body_token).select_related("user").first()
-                    or Home.objects.filter(mqtt_token__iexact=no_hy).select_related("user").first()
-                    or Home.objects.filter(mqtt_token__istartswith=no_hy).select_related("user").first()
-                )
+                try:
+                    home = Home.objects.filter(user__id=body_token).select_related("user").first()
+                except Exception:
+                    pass
+                if not home:
+                    home = (
+                        Home.objects.filter(mqtt_token__iexact=body_token).select_related("user").first()
+                        or Home.objects.filter(mqtt_token__iexact=body_token[:16]).select_related("user").first()
+                        or Home.objects.filter(mqtt_token__iexact=no_hy[:16]).select_related("user").first()
+                    )
 
-        # F) Systemweiter Single-Home Fallback (DAU-Sicherheit)
+        # G) Systemweiter Single-Home Fallback
         if not home:
             home = Home.objects.first()
 
@@ -94,18 +107,22 @@ def process_incoming_telemetry(token, payload_str, user):
         )
         identifier = str(raw_src).strip()
 
-        # 3. Device automatisch anlegen
-        device, created = Device.objects.get_or_create(
-            home=home,
-            identifier=identifier,
-            defaults={
-                "configured": True,
-                "active": True,
-            },
-        )
-
-        if created:
+        # 3. Device finden oder anlegen (und falls zuvor im falschen Test-Home angelegt, automatisch umhängen!)
+        device = Device.objects.filter(identifier=identifier).first()
+        if device:
+            if device.home_id != home.id:
+                device.home = home
+                device.save(update_fields=["home"])
+                logger.info("[WS-Ingest] 🔄 Gerät %s wurde zu Haushalt '%s' verschoben.", identifier, home.name)
+        else:
+            device = Device.objects.create(
+                home=home,
+                identifier=identifier,
+                configured=True,
+                active=True,
+            )
             logger.info("[WS-Ingest] 🚀 Neues Gerät per WebSocket automatisch entdeckt: %s (Haushalt: %s)", identifier, home.name)
+
 
         # 4. Metriken extrahieren (Unterstützt params, result oder flaches JSON)
         metrics = {}
@@ -137,7 +154,7 @@ def process_incoming_telemetry(token, payload_str, user):
                     total_power += p
                     has_power = True
 
-                # B) Einzelrelais / Smart Plugs (Shelly Plus 1PM, PlugS)
+                # B) Einzelrelais / Smart Plugs (Shelly Plus 1PM, Shelly 1PM Gen3, PlugS)
                 if "apower" in val and val["apower"] is not None:
                     total_power += float(val["apower"])
                     has_power = True
@@ -193,7 +210,7 @@ def process_incoming_telemetry(token, payload_str, user):
             except Exception:
                 ts = timezone.now()
 
-        # 6. Ingest & Live-Broadcast
+        # 6. Ingest & Live-Broadcast an Dashboards
         if metrics:
             ingest_metric_payload(
                 device=device,
@@ -229,6 +246,7 @@ class EnergyConsumer(AsyncWebsocketConsumer):
         super().__init__(*args, **kwargs)
         self.poll_task = None
         self.msg_counter = 1
+        self.is_device = False
 
     async def connect(self):
         self.group_name = "energy"
@@ -247,39 +265,48 @@ class EnergyConsumer(AsyncWebsocketConsumer):
             or query_params.get("user", [None])[0]
         )
 
-        # 2. Gruppen registrieren
-        await self.channel_layer.group_add(self.group_name, self.channel_name)
-
         user = self.scope.get("user")
-        if user and user.is_authenticated:
-            self.user_group_name = f"energy_{user.id}"
-            await self.channel_layer.group_add(self.user_group_name, self.channel_name)
+
+        # 2. Unterscheidung zwischen Frontend-Browser und Shelly-Gerät:
+        # Wenn ein Token in der URL übergeben wird, ist es ein Ingestion-Client (Shelly)
+        if self.token:
+            self.is_device = True
+        else:
+            self.is_device = False
+
+        # 3. Nur Browser-Clients treten der Broadcast-Gruppe bei
+        if not self.is_device:
+            await self.channel_layer.group_add(self.group_name, self.channel_name)
+            if user and user.is_authenticated:
+                self.user_group_name = f"energy_{user.id}"
+                await self.channel_layer.group_add(self.user_group_name, self.channel_name)
 
         await self.accept()
         logger.info(
-            "[WebSocket:EnergyConsumer] 🔌 Client verbunden (User: %s, Token: %s, Channel: %s)",
+            "[WebSocket:EnergyConsumer] 🔌 %s verbunden (User: %s, Token: %s, Channel: %s)",
+            "Gerät (Shelly)" if self.is_device else "Browser-Client",
             user if user and user.is_authenticated else "Anonymous/Device",
             self.token,
             self.channel_name,
         )
 
-        # 3. DAU-Feature: Proaktiv sofort Status beim Shelly anfragen
-        try:
-            get_status_req = {
-                "id": self.msg_counter,
-                "src": "sharegy",
-                "method": "Shelly.GetStatus",
-            }
-            self.msg_counter += 1
-            await self.send(text_data=json.dumps(get_status_req))
-        except Exception:
-            pass
+        # 4. Wenn ein Shelly verbunden ist: Initialen Status anfordern & zyklisch abfragen
+        if self.is_device:
+            try:
+                get_status_req = {
+                    "id": self.msg_counter,
+                    "src": "sharegy",
+                    "method": "Shelly.GetStatus",
+                }
+                self.msg_counter += 1
+                await self.send(text_data=json.dumps(get_status_req))
+            except Exception:
+                pass
 
-        # 4. Periodischen Poller starten (fordert alle 5 Sekunden Live-Werte an)
-        self.poll_task = asyncio.create_task(self._periodic_shelly_poller())
+            self.poll_task = asyncio.create_task(self._periodic_shelly_poller())
 
     async def _periodic_shelly_poller(self):
-        """Hält die Verbindung aktiv und fordert regelmäßig Live-Daten an."""
+        """Fragt den Shelly alle 5 Sekunden nach dem aktuellen Status."""
         try:
             while True:
                 await asyncio.sleep(5)
@@ -299,9 +326,10 @@ class EnergyConsumer(AsyncWebsocketConsumer):
         if self.poll_task:
             self.poll_task.cancel()
 
-        await self.channel_layer.group_discard(self.group_name, self.channel_name)
-        if self.user_group_name:
-            await self.channel_layer.group_discard(self.user_group_name, self.channel_name)
+        if not self.is_device:
+            await self.channel_layer.group_discard(self.group_name, self.channel_name)
+            if self.user_group_name:
+                await self.channel_layer.group_discard(self.user_group_name, self.channel_name)
 
         logger.debug("[WebSocket:EnergyConsumer] 🔌 Client getrennt: %s (Code: %s)", self.channel_name, close_code)
 
@@ -316,8 +344,8 @@ class EnergyConsumer(AsyncWebsocketConsumer):
         user = self.scope.get("user")
         res = await process_incoming_telemetry(self.token, payload, user)
 
-        # Quittierung an den Shelly zurücksenden
-        if res and res.get("msg_id") is not None:
+        # Quittierung nur an den Shelly zurücksenden falls er eine ID mitgeschickt hat
+        if res and res.get("msg_id") is not None and self.is_device:
             try:
                 ack_msg = {
                     "id": res["msg_id"],
@@ -329,7 +357,11 @@ class EnergyConsumer(AsyncWebsocketConsumer):
                 pass
 
     async def send_energy_update(self, event):
-        await self.send(text_data=json.dumps(event["data"]))
+        # Nur an Browser-Clients senden, nicht an den Shelly selbst!
+        if not self.is_device:
+            await self.send(text_data=json.dumps(event["data"]))
 
     async def send_device_update(self, event):
-        await self.send(text_data=json.dumps(event["data"]))
+        # Nur an Browser-Clients senden, nicht an den Shelly selbst!
+        if not self.is_device:
+            await self.send(text_data=json.dumps(event["data"]))
