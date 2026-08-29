@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import Card from "../../../components/ui/Card";
 import { apiFetch } from "../../../api/client";
+import { trackEvent } from "../../../tracking/ga";
 
 export default function SubscriptionPlanCard({ subscriptionData, onRefresh }) {
     const { t } = useTranslation();
@@ -9,30 +9,131 @@ export default function SubscriptionPlanCard({ subscriptionData, onRefresh }) {
     const [loadingPlan, setLoadingPlan] = useState(null);
     const [actionMsg, setActionMsg] = useState(null);
 
+    // AGB Zustimmung & E-Mail
+    const [termsAccepted, setTermsAccepted] = useState(true);
+
+    // Gutschein State
+    const [couponCode, setCouponCode] = useState("");
+    const [couponLoading, setCouponLoading] = useState(false);
+    const [validatedCoupon, setValidatedCoupon] = useState(null);
+    const [couponMsg, setCouponMsg] = useState(null);
+
     const currentPlan = subscriptionData?.subscription?.plan || "free";
     const isPro = subscriptionData?.subscription?.is_pro;
     const isLandlord = subscriptionData?.subscription?.is_landlord;
     const currentPeriodEnd = subscriptionData?.subscription?.current_period_end;
     const cancelAtEnd = subscriptionData?.subscription?.cancel_at_period_end;
 
+    // Plan-Wechsel
     const handlePlanChange = async (targetPlan) => {
+        if (targetPlan !== "free" && !termsAccepted) {
+            setActionMsg({
+                type: "error",
+                text: t("billing.terms_required", "Bitte bestätige die AGB und Datenschutzbestimmungen, um fortzufahren."),
+            });
+            return;
+        }
+
         setLoadingPlan(targetPlan);
         setActionMsg(null);
         try {
             const res = await apiFetch("/api/billing/subscription/change-plan/", {
                 method: "POST",
-                body: JSON.stringify({ plan: targetPlan }),
+                body: JSON.stringify({
+                    plan: targetPlan,
+                    terms_accepted: termsAccepted,
+                }),
             });
             if (res.status === "success") {
+                trackEvent("plan_upgrade", "billing", targetPlan);
                 setActionMsg({ type: "success", text: res.message });
                 if (onRefresh) onRefresh();
             } else {
-                setActionMsg({ type: "error", text: res.message || t("billing.plan_change_error", "Fehler beim Wechseln des Plans.") });
+                setActionMsg({
+                    type: "error",
+                    text: res.message || t("billing.plan_change_error", "Fehler beim Wechseln des Plans."),
+                });
             }
         } catch (err) {
-            setActionMsg({ type: "error", text: t("billing.network_error", "Netzwerkfehler beim Planwechsel.") });
+            setActionMsg({
+                type: "error",
+                text: err.message || t("billing.network_error", "Netzwerkfehler beim Planwechsel."),
+            });
         } finally {
             setLoadingPlan(null);
+        }
+    };
+
+    // Gutschein validieren
+    const handleValidateCoupon = async (e) => {
+        if (e) e.preventDefault();
+        const clean = couponCode.trim();
+        if (!clean) return;
+
+        setCouponLoading(true);
+        setCouponMsg(null);
+        setValidatedCoupon(null);
+
+        try {
+            const res = await apiFetch("/api/billing/subscription/coupons/validate/", {
+                method: "POST",
+                body: JSON.stringify({ code: clean }),
+            });
+            if (res.status === "success" && res.coupon) {
+                setValidatedCoupon(res.coupon);
+                setCouponMsg({
+                    type: "success",
+                    text: `✅ Code '${res.coupon.code}' gültig: ${res.coupon.description}`,
+                });
+            } else {
+                setCouponMsg({
+                    type: "error",
+                    text: res.message || "Gutscheincode konnte nicht validiert werden.",
+                });
+            }
+        } catch (err) {
+            setCouponMsg({
+                type: "error",
+                text: err.message || "Ungültiger oder abgelaufener Gutscheincode.",
+            });
+        } finally {
+            setCouponLoading(false);
+        }
+    };
+
+    // Gutschein einlösen
+    const handleRedeemCoupon = async () => {
+        if (!validatedCoupon) return;
+        if (!termsAccepted) {
+            setCouponMsg({
+                type: "error",
+                text: t("billing.terms_required", "Bitte bestätige die AGB und Datenschutzbestimmungen, um den Gutschein einzulösen."),
+            });
+            return;
+        }
+
+        setCouponLoading(true);
+        try {
+            const res = await apiFetch("/api/billing/subscription/coupons/redeem/", {
+                method: "POST",
+                body: JSON.stringify({
+                    code: validatedCoupon.code,
+                    terms_accepted: termsAccepted,
+                }),
+            });
+            if (res.status === "success") {
+                trackEvent("coupon_redeemed", "billing", validatedCoupon.code);
+                setCouponMsg({ type: "success", text: res.message });
+                setValidatedCoupon(null);
+                setCouponCode("");
+                if (onRefresh) onRefresh();
+            } else {
+                setCouponMsg({ type: "error", text: res.message || "Fehler beim Einlösen des Gutscheins." });
+            }
+        } catch (err) {
+            setCouponMsg({ type: "error", text: err.message || "Fehler beim Einlösen." });
+        } finally {
+            setCouponLoading(false);
         }
     };
 
@@ -65,7 +166,7 @@ export default function SubscriptionPlanCard({ subscriptionData, onRefresh }) {
             id: "free",
             name: t("billing.plan_free_name", "Sharegy Free"),
             badge: t("billing.plan_free_badge", "Basis"),
-            iconEmoji: "🛡️",
+            iconEmoji: "🌱",
             priceMonthly: "0 €",
             priceYearly: "0 €",
             priceSub: t("billing.free_forever", "Dauerhaft kostenlos"),
@@ -73,7 +174,7 @@ export default function SubscriptionPlanCard({ subscriptionData, onRefresh }) {
             features: [
                 t("billing.f_sankey", "Live-Sankey Energiefluss & 24h-Historie"),
                 t("billing.f_weather", "Basis-Wetter- & Solarprognose (24h)"),
-                t("billing.f_matter", "Matter 1.3 Energy Management Hub"),
+                t("billing.f_shelly", "Shelly WSS & Live Relais-Aktorik"),
                 t("billing.f_bridge", "Home Assistant & Grafana Bridge"),
                 t("billing.f_residual", "Residual-Zähler & Grundlastmessung"),
             ],
@@ -139,7 +240,7 @@ export default function SubscriptionPlanCard({ subscriptionData, onRefresh }) {
                     </div>
                     <button
                         onClick={handleReactivate}
-                        className="px-3.5 py-1.5 bg-white border border-amber-300 text-amber-900 rounded-xl text-xs font-bold shadow-xs hover:bg-amber-100 transition"
+                        className="px-3.5 py-1.5 bg-white border border-amber-300 text-amber-900 rounded-xl text-xs font-bold shadow-xs hover:bg-amber-100 transition cursor-pointer"
                     >
                         {t("billing.revoke_cancel", "Kündigung widerrufen")}
                     </button>
@@ -147,16 +248,82 @@ export default function SubscriptionPlanCard({ subscriptionData, onRefresh }) {
             )}
 
             {actionMsg && (
-                <div className={`p-4 rounded-2xl border text-sm font-semibold ${actionMsg.type === "success" ? "border-emerald-300 bg-emerald-50 text-emerald-900" : "border-rose-300 bg-rose-50 text-rose-900"
-                    }`}>
+                <div className={`p-4 rounded-2xl border text-sm font-semibold ${
+                    actionMsg.type === "success" ? "border-emerald-300 bg-emerald-50 text-emerald-900" : "border-rose-300 bg-rose-50 text-rose-900"
+                }`}>
                     {actionMsg.text}
                 </div>
             )}
 
+            {/* GUTSCHEIN & PROMO-CODE BEREICH */}
+            <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-5 rounded-2xl shadow-md border border-indigo-800/50">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <div className="flex items-center gap-2">
+                            <span className="text-xl">🎟️</span>
+                            <h3 className="font-bold text-base text-white">
+                                {t("billing.coupon_title", "Gutschein- oder Beta-Aktionscode")}
+                            </h3>
+                        </div>
+                        <p className="text-xs text-indigo-200 mt-0.5">
+                            {t("billing.coupon_subtitle", "Hast du einen Aktionscode (z. B. BETA100 für 3 Monate Pro kostenlos)? Löse ihn hier ein.")}
+                        </p>
+                    </div>
+
+                    <form onSubmit={handleValidateCoupon} className="flex items-center gap-2">
+                        <input
+                            type="text"
+                            placeholder="z. B. BETA100"
+                            value={couponCode}
+                            onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                            className="bg-slate-800/90 border border-indigo-700/60 rounded-xl px-3.5 py-2 text-xs font-mono font-bold text-white placeholder-indigo-300/50 focus:outline-hidden focus:ring-2 focus:ring-indigo-400 uppercase w-36 sm:w-44"
+                        />
+                        <button
+                            type="submit"
+                            disabled={couponLoading || !couponCode.trim()}
+                            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer shrink-0"
+                        >
+                            {couponLoading ? "..." : t("billing.check_code", "Prüfen")}
+                        </button>
+                    </form>
+                </div>
+
+                {/* Validierungs-Ergebnis & Sofort-Einlösen */}
+                {validatedCoupon && (
+                    <div className="mt-4 p-3.5 bg-indigo-900/60 border border-indigo-500/50 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in">
+                        <div className="text-xs">
+                            <div className="font-bold text-emerald-300 flex items-center gap-1.5">
+                                <span>🎉</span>
+                                <span>{validatedCoupon.description}</span>
+                            </div>
+                            <div className="text-indigo-200 text-[11px] mt-0.5">
+                                Code <span className="font-mono font-bold text-white">{validatedCoupon.code}</span> schaltet deinen Tarif sofort frei.
+                            </div>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={handleRedeemCoupon}
+                            disabled={couponLoading}
+                            className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs rounded-xl transition shadow-xs cursor-pointer shrink-0"
+                        >
+                            {couponLoading ? "Wird aktiviert..." : "Jetzt kostenlos aktivieren →"}
+                        </button>
+                    </div>
+                )}
+
+                {couponMsg && (
+                    <div className={`mt-3 text-xs font-semibold px-3 py-1.5 rounded-lg ${
+                        couponMsg.type === "success" ? "bg-emerald-950/80 text-emerald-300 border border-emerald-800" : "bg-rose-950/80 text-rose-300 border border-rose-800"
+                    }`}>
+                        {couponMsg.text}
+                    </div>
+                )}
+            </div>
+
             {/* Billing Interval Toggle */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-gray-200 shadow-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-4 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-xs">
                 <div>
-                    <h3 className="font-bold text-gray-900 text-base flex items-center gap-2">
+                    <h3 className="font-bold text-gray-900 dark:text-white text-base flex items-center gap-2">
                         <span>✨</span>
                         {t("billing.plans_title", "Verfügbare Tarife & Abonnement-Pläne")}
                     </h3>
@@ -165,20 +332,22 @@ export default function SubscriptionPlanCard({ subscriptionData, onRefresh }) {
                     </p>
                 </div>
 
-                <div className="flex items-center bg-gray-100 p-1 rounded-xl self-start sm:self-auto border border-gray-200">
+                <div className="flex items-center bg-gray-100 dark:bg-slate-800 p-1 rounded-xl self-start sm:self-auto border border-gray-200 dark:border-slate-700">
                     <button
                         type="button"
                         onClick={() => setInterval("month")}
-                        className={`px-4 py-1.5 rounded-lg text-xs font-bold transition ${interval === "month" ? "bg-white text-gray-900 shadow-xs" : "text-gray-500 hover:text-gray-900"
-                            }`}
+                        className={`px-4 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
+                            interval === "month" ? "bg-white dark:bg-slate-900 text-gray-900 dark:text-white shadow-xs" : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
+                        }`}
                     >
                         {t("billing.monthly", "Monatlich")}
                     </button>
                     <button
                         type="button"
                         onClick={() => setInterval("year")}
-                        className={`px-4 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${interval === "year" ? "bg-white text-emerald-800 shadow-xs" : "text-gray-500 hover:text-gray-900"
-                            }`}
+                        className={`px-4 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                            interval === "year" ? "bg-white dark:bg-slate-900 text-emerald-800 dark:text-emerald-400 shadow-xs" : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
+                        }`}
                     >
                         <span>{t("billing.yearly", "Jährlich")}</span>
                         <span className="bg-emerald-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-extrabold uppercase">
@@ -197,44 +366,50 @@ export default function SubscriptionPlanCard({ subscriptionData, onRefresh }) {
                     return (
                         <div
                             key={p.id}
-                            className={`rounded-2xl p-6 transition flex flex-col justify-between relative border ${p.highlight
-                                    ? "bg-gradient-to-b from-emerald-50/50 to-white border-emerald-400 ring-2 ring-emerald-500/20 shadow-md"
-                                    : "bg-white border-gray-200 hover:border-gray-300 shadow-xs"
-                                }`}
+                            className={`rounded-2xl p-6 transition flex flex-col justify-between relative border ${
+                                p.highlight
+                                    ? "bg-gradient-to-b from-emerald-50/50 to-white dark:from-emerald-950/20 dark:to-slate-900 border-emerald-400 ring-2 ring-emerald-500/20 shadow-md"
+                                    : "bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-800 hover:border-gray-300 shadow-xs"
+                            }`}
                         >
                             {p.badge && (
-                                <span className={`absolute -top-3 right-5 text-[11px] font-extrabold px-2.5 py-0.5 rounded-full border shadow-xs ${p.badgeColor || "bg-gray-100 text-gray-700 border-gray-300"
-                                    }`}>
+                                <span className={`absolute -top-3 right-5 text-[11px] font-extrabold px-2.5 py-0.5 rounded-full border shadow-xs ${
+                                    p.badgeColor || "bg-gray-100 text-gray-700 border-gray-300 dark:bg-slate-800 dark:text-gray-300 dark:border-slate-700"
+                                }`}>
                                     {p.badge}
                                 </span>
                             )}
 
                             <div>
                                 <div className="flex items-center gap-3 mb-3">
-                                    <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-lg">
+                                    <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-slate-800 flex items-center justify-center text-lg">
                                         {p.iconEmoji}
                                     </div>
                                     <div>
-                                        <h4 className="font-bold text-gray-900 text-base">{p.name}</h4>
+                                        <h4 className="font-bold text-gray-900 dark:text-white text-base">{p.name}</h4>
                                         <div className="text-[11px] text-gray-400 font-medium">SaaS Cloud</div>
                                     </div>
                                 </div>
 
                                 <div className="my-4">
                                     <div className="flex items-baseline gap-1">
-                                        <span className="text-3xl font-extrabold text-gray-900">{price}</span>
-                                        <span className="text-xs text-gray-500 font-semibold">{interval === "year" ? t("billing.per_year", "/ Jahr") : t("billing.per_month", "/ Monat")}</span>
+                                        <span className="text-3xl font-extrabold text-gray-900 dark:text-white">{price}</span>
+                                        <span className="text-xs text-gray-500 font-semibold">
+                                            {interval === "year" ? t("billing.per_year", "/ Jahr") : t("billing.per_month", "/ Monat")}
+                                        </span>
                                     </div>
-                                    <div className="text-[11px] text-emerald-700 font-semibold mt-0.5">{p.priceSub}</div>
+                                    <div className="text-[11px] text-emerald-700 dark:text-emerald-400 font-semibold mt-0.5">{p.priceSub}</div>
                                     <p className="text-xs text-gray-500 mt-2">{p.desc}</p>
                                 </div>
 
-                                <hr className="my-4 border-gray-100" />
+                                <hr className="my-4 border-gray-100 dark:border-slate-800" />
 
                                 <div className="space-y-2.5 mb-6">
-                                    <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">{t("billing.included_features", "Enthaltene Features")}</div>
+                                    <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+                                        {t("billing.included_features", "Enthaltene Features")}
+                                    </div>
                                     {p.features.map((feat, idx) => (
-                                        <div key={idx} className="flex items-start gap-2 text-xs text-gray-700">
+                                        <div key={idx} className="flex items-start gap-2 text-xs text-gray-700 dark:text-gray-300">
                                             <span className="text-emerald-600 font-bold">✓</span>
                                             <span>{feat}</span>
                                         </div>
@@ -245,14 +420,14 @@ export default function SubscriptionPlanCard({ subscriptionData, onRefresh }) {
                             <div>
                                 {isCurrent ? (
                                     <div className="space-y-2">
-                                        <div className="w-full py-2.5 rounded-xl bg-emerald-100 text-emerald-800 text-xs font-bold text-center border border-emerald-200">
+                                        <div className="w-full py-2.5 rounded-xl bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 text-xs font-bold text-center border border-emerald-200 dark:border-emerald-800">
                                             {t("billing.current_plan", "✅ Dein aktueller Plan")}
                                         </div>
                                         {p.id !== "free" && !cancelAtEnd && (
                                             <button
                                                 type="button"
                                                 onClick={handleCancel}
-                                                className="w-full text-center text-[11px] text-gray-400 hover:text-rose-600 transition pt-1"
+                                                className="w-full text-center text-[11px] text-gray-400 hover:text-rose-600 transition pt-1 cursor-pointer"
                                             >
                                                 {t("billing.cancel_sub", "Abonnement kündigen")}
                                             </button>
@@ -263,16 +438,19 @@ export default function SubscriptionPlanCard({ subscriptionData, onRefresh }) {
                                         type="button"
                                         disabled={loadingPlan !== null}
                                         onClick={() => handlePlanChange(p.id)}
-                                        className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition shadow-xs ${p.highlight
+                                        className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition shadow-xs cursor-pointer ${
+                                            p.highlight
                                                 ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                                                : "bg-gray-900 hover:bg-black text-white"
-                                            }`}
+                                                : "bg-gray-900 hover:bg-black dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white"
+                                        }`}
                                     >
                                         {loadingPlan === p.id ? (
                                             <span>{t("billing.switching", "Wird umgestellt...")}</span>
                                         ) : (
                                             <>
-                                                <span>{p.id === "free" ? t("billing.switch_to_free", "Auf Free wechseln") : t("billing.choose_plan", "Diesen Plan wählen")}</span>
+                                                <span>
+                                                    {p.id === "free" ? t("billing.switch_to_free", "Auf Free wechseln") : t("billing.choose_plan", "Diesen Plan wählen")}
+                                                </span>
                                                 <span>→</span>
                                             </>
                                         )}
@@ -282,6 +460,20 @@ export default function SubscriptionPlanCard({ subscriptionData, onRefresh }) {
                         </div>
                     );
                 })}
+            </div>
+
+            {/* AGB & DATENSCHUTZ ZUSTIMMUNG (AUDIT-PROOF) */}
+            <div className="p-4 bg-slate-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-2xl flex items-start gap-3">
+                <input
+                    type="checkbox"
+                    id="terms_consent_checkbox"
+                    checked={termsAccepted}
+                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                    className="mt-0.5 w-4 h-4 rounded text-indigo-600 border-gray-300 focus:ring-indigo-500 cursor-pointer"
+                />
+                <label htmlFor="terms_consent_checkbox" className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed cursor-pointer">
+                    Ich erkläre mich mit den <span className="font-semibold text-gray-900 dark:text-white">Allgemeinen Geschäftsbedingungen (AGB)</span>, der Widerrufsbelehrung für digitale Dienstleistungen und der <span className="font-semibold text-gray-900 dark:text-white">Datenschutzerklärung</span> von Sharegy einverstanden. Die Zustimmung wird revisionssicher dokumentiert.
+                </label>
             </div>
         </div>
     );

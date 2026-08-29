@@ -351,3 +351,80 @@ class EMSInvoice(models.Model):
 
     def __str__(self):
         return f"{self.invoice_number} - {self.user.email} ({self.amount_gross_eur} €)"
+
+
+class Coupon(models.Model):
+    """
+    Gutschein- und Promo-Codes für Abonnements und Rabatte.
+    """
+    TYPE_PERCENT = "percent"            # z. B. 100% oder 20%
+    TYPE_FIXED_AMOUNT = "fixed_amount"  # z. B. 10.00 EUR
+    TYPE_FREE_MONTHS = "free_months"    # z. B. 3 Monate Pro kostenlos
+
+    TYPE_CHOICES = [
+        (TYPE_PERCENT, "Prozentualer Rabatt (%)"),
+        (TYPE_FIXED_AMOUNT, "Fester Rabattbetrag (€)"),
+        (TYPE_FREE_MONTHS, "Gratismonate"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    code = models.CharField(max_length=64, unique=True)
+    description = models.CharField(max_length=255, blank=True)
+    discount_type = models.CharField(max_length=20, choices=TYPE_CHOICES, default=TYPE_FREE_MONTHS)
+    discount_value = models.DecimalField(max_digits=10, decimal_places=2, default=100.00)
+    free_plan = models.CharField(max_length=32, default=EMSSubscription.PLAN_PRO_MONTHLY)
+    duration_months = models.PositiveIntegerField(default=3)
+
+    valid_from = models.DateTimeField(null=True, blank=True)
+    valid_until = models.DateTimeField(null=True, blank=True)
+
+    max_redemptions = models.PositiveIntegerField(default=100)
+    redemptions_count = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "billing_coupon"
+        indexes = [
+            models.Index(fields=["code", "is_active"]),
+        ]
+
+    def __str__(self):
+        return f"{self.code} ({self.discount_type}: {self.discount_value})"
+
+    @property
+    def is_valid(self):
+        from django.utils import timezone
+        now = timezone.now()
+        if not self.is_active:
+            return False
+        if self.valid_from and now < self.valid_from:
+            return False
+        if self.valid_until and now > self.valid_until:
+            return False
+        if self.max_redemptions > 0 and self.redemptions_count >= self.max_redemptions:
+            return False
+        return True
+
+
+class CouponRedemption(models.Model):
+    """
+    Dokumentiert die Einlösung eines Gutscheins durch einen Benutzer.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    coupon = models.ForeignKey(Coupon, on_delete=models.CASCADE, related_name="redemptions")
+    user = models.ForeignKey("accounts.User", on_delete=models.CASCADE, related_name="coupon_redemptions")
+    subscription = models.ForeignKey(EMSSubscription, on_delete=models.SET_NULL, null=True, blank=True)
+    applied_discount = models.CharField(max_length=255, blank=True)
+    redeemed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "billing_coupon_redemption"
+        unique_together = ("coupon", "user")
+        ordering = ["-redeemed_at"]
+
+    def __str__(self):
+        return f"{self.user.email} löste {self.coupon.code} ein ({self.redeemed_at})"
+

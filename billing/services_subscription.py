@@ -217,12 +217,60 @@ def update_billing_address(user, data):
     return profile
 
 
-def change_subscription_plan(user, new_plan_id, payment_method="Kreditkarte (via Stripe)"):
+DISPOSABLE_EMAIL_DOMAINS = {
+    "mailinator.com", "trashmail.com", "tempmail.com", "guerrillamail.com",
+    "sharklasers.com", "10minutemail.com", "yopmail.com", "temp-mail.org",
+    "dispostable.com", "getairmail.com", "throwawaymail.com",
+}
+
+
+def validate_upgrade_eligibility(user, terms_accepted=True, request_meta=None):
+    """
+    Prüft vor dem Wechsel auf einen Pro-/Bezahlplan:
+    1. Gültige E-Mail-Adresse (keine Wegwerf-Mail).
+    2. Dokumentierte Zustimmung zu den AGBs.
+    """
+    import re
+    from accounts.models import UserTermsConsent
+
+    email = (user.email or "").strip().lower()
+    if not email or not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email):
+        raise ValueError("Für ein Pro-Abonnement ist eine gültige E-Mail-Adresse erforderlich.")
+
+    domain = email.split("@")[-1]
+    if domain in DISPOSABLE_EMAIL_DOMAINS:
+        raise ValueError("Wegwerf-E-Mail-Adressen sind für Pro-Abonnements nicht zugelassen. Bitte hinterlege eine dauerhafte E-Mail-Adresse.")
+
+    if not terms_accepted:
+        raise ValueError("Bitte bestätige die AGB und Datenschutzbestimmungen, um das Abonnement abzuschließen.")
+
+    # AGB-Zustimmung rechtssicher protokollieren
+    ip = None
+    ua = ""
+    if request_meta:
+        ip = request_meta.get("HTTP_X_FORWARDED_FOR", "").split(",")[0].strip() or request_meta.get("REMOTE_ADDR")
+        ua = request_meta.get("HTTP_USER_AGENT", "")[:500]
+
+    UserTermsConsent.objects.create(
+        user=user,
+        terms_version="2026-08",
+        privacy_version="2026-08",
+        consent_type=UserTermsConsent.CONSENT_UPGRADE_PRO,
+        ip_address=ip if ip and len(ip) <= 45 else None,
+        user_agent=ua,
+    )
+
+
+def change_subscription_plan(user, new_plan_id, payment_method="Kreditkarte (via Stripe)", terms_accepted=True, request_meta=None):
     """
     Upgraded oder Downgraded das Abonnement und erzeugt bei Bezahlplänen eine Rechnung.
     """
     if new_plan_id not in PLANS_CONFIG:
         raise ValueError(f"Ungültiger Plan: {new_plan_id}")
+
+    # Wenn Upgrade auf Bezahlplan (Pro / Landlord): Validierung durchführen
+    if new_plan_id != EMSSubscription.PLAN_FREE:
+        validate_upgrade_eligibility(user, terms_accepted=terms_accepted, request_meta=request_meta)
 
     sub = get_or_create_subscription(user)
     plan_info = PLANS_CONFIG[new_plan_id]
@@ -256,6 +304,84 @@ def change_subscription_plan(user, new_plan_id, payment_method="Kreditkarte (via
         )
 
     return sub
+
+
+def validate_coupon_code(code, user=None):
+    """
+    Prüft einen Gutscheincode auf Gültigkeit und berechnet den Rabatt/Vorteil.
+    """
+    from billing.models import Coupon, CouponRedemption
+
+    clean_code = (code or "").strip().upper()
+    if not clean_code:
+        raise ValueError("Bitte gib einen Gutscheincode ein.")
+
+    coupon = Coupon.objects.filter(code=clean_code).first()
+    if not coupon:
+        raise ValueError(f"Gutscheincode '{clean_code}' ist ungültig oder existiert nicht.")
+
+    if not coupon.is_valid:
+        raise ValueError(f"Gutscheincode '{clean_code}' ist abgelaufen oder hat das Einlösungslimit erreicht.")
+
+    if user and CouponRedemption.objects.filter(coupon=coupon, user=user).exists():
+        raise ValueError(f"Du hast den Gutscheincode '{clean_code}' bereits eingelöst.")
+
+    return {
+        "valid": True,
+        "code": coupon.code,
+        "description": coupon.description or (
+            f"{coupon.duration_months} Monate Pro kostenlos"
+            if coupon.discount_type == Coupon.TYPE_FREE_MONTHS
+            else f"{coupon.discount_value}% Rabatt"
+        ),
+        "discount_type": coupon.discount_type,
+        "discount_value": float(coupon.discount_value),
+        "free_plan": coupon.free_plan,
+        "duration_months": coupon.duration_months,
+    }
+
+
+def redeem_coupon_code(code, user, terms_accepted=True, request_meta=None):
+    """
+    Löst einen Gutschein ein und schaltet das entsprechende Abonnement frei.
+    """
+    from billing.models import Coupon, CouponRedemption
+
+    coupon_info = validate_coupon_code(code, user=user)
+    coupon = Coupon.objects.get(code=coupon_info["code"])
+
+    # E-Mail & AGB prüfen
+    validate_upgrade_eligibility(user, terms_accepted=terms_accepted, request_meta=request_meta)
+
+    sub = get_or_create_subscription(user)
+    now = timezone.now()
+
+    # Freischaltung durchführen
+    if coupon.discount_type == Coupon.TYPE_FREE_MONTHS or (coupon.discount_type == Coupon.TYPE_PERCENT and coupon.discount_value >= Decimal("100.00")):
+        duration_days = coupon.duration_months * 30
+        sub.plan = coupon.free_plan or EMSSubscription.PLAN_PRO_MONTHLY
+        sub.status = EMSSubscription.STATUS_ACTIVE
+        sub.current_period_start = now
+        sub.current_period_end = now + timedelta(days=duration_days)
+        sub.cancel_at_period_end = False
+        sub.payment_method = "coupon"
+        sub.payment_method_brand = "promo"
+        sub.payment_method_last4 = coupon.code[:4]
+        sub.save()
+
+    # Redemption speichern
+    CouponRedemption.objects.create(
+        coupon=coupon,
+        user=user,
+        subscription=sub,
+        applied_discount=coupon_info["description"],
+    )
+
+    coupon.redemptions_count += 1
+    coupon.save(update_fields=["redemptions_count"])
+
+    return sub
+
 
 
 def cancel_subscription(user, at_period_end=True):

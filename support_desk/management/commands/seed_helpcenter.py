@@ -228,61 +228,63 @@ Under **Producers & Storage**, configure your solar panel arrays, generator stri
             },
 
             # ---------------------------------------------------------------------
-            # 3. INVERTERS & MODBUS TCP
+            # 3. INVERTERS VIA HOME ASSISTANT & IOBROKER BRIDGE
             # ---------------------------------------------------------------------
             {
                 "category": cats["inverters-meters"],
                 "slug": "sma-sungrow-modbus-tcp-einrichten",
                 "context_key": "devices",
-                "title_de": "Modbus TCP für SMA, Sungrow, Fronius & Deye freischalten",
-                "title_en": "Enabling Modbus TCP for SMA, Sungrow, Fronius & Deye",
-                "summary_de": "Schritt-für-Schritt-Anleitung zur Aktivierung der lokalen Modbus-TCP-Schnittstelle im Wechselrichter-Webinterface.",
-                "summary_en": "Step-by-step instructions to enable local Modbus TCP in your inverter's web portal.",
-                "content_de": """# Modbus TCP für Wechselrichter aktivieren
+                "title_de": "Wechselrichter (SMA, Sungrow, Fronius, Deye) via Home Assistant anbinden",
+                "title_en": "Connecting Inverters (SMA, Sungrow, Fronius, Deye) via Home Assistant",
+                "summary_de": "Da Modbus TCP ein rein lokales Netzwerkprotokoll ist, liest Home Assistant oder ioBroker den Wechselrichter aus und streamt die Datenpunkte in die Sharegy Cloud.",
+                "summary_en": "Since Modbus TCP operates locally within your LAN, Home Assistant or ioBroker reads the inverter and streams telemetry into Sharegy Cloud.",
+                "content_de": """# Wechselrichter & Speicher via Home Assistant Bridge anbinden ☀️🏠
 
-Modbus TCP ermöglicht die verzögerungsfreie Direktabfrage aller Leistungswerte im lokalen Netzwerk ohne Umweg über Hersteller-Clouds.
+Klassische Solar-Wechselrichter und Batteriespeicher (wie **SMA Sunny Tripower**, **Sungrow SH**, **Fronius GEN24**, **Deye**, **Huawei SUN2000**) kommunizieren im lokalen Heimnetzwerk über das industrielle **Modbus TCP** Protokoll (Port 502).
 
-## 1. SMA Sunny Tripower / Hybrid
-1. Im Browser die IP-Adresse des SMA-Wechselrichters aufrufen.
-2. Als **Installateur** einloggen.
-3. Zu **Gerätekonfiguration → Externe Kommunikation → Modbus** navigieren.
-4. **TCP-Server aktivieren** (Port: `502`, Unit-ID: `126` oder `3`).
-5. Speichern.
+## Warum erfolgt die Anbindung über Home Assistant oder ioBroker?
+* 🔒 **Sicherheit & Router-Schutz**: Modbus TCP ist unverschlüsselt und darf niemals direkt ins Internet geöffnet werden.
+* 🌐 **SaaS Cloud-Architektur**: Sharegy verbindet sich nicht invasiv in dein privates Heimnetzwerk, sondern empfängt die Datenpunkte verschlüsselt von deiner lokalen Zentrale.
+* ⚡ **1-Klick Auswahl**: Dein lokaler **Home Assistant** (oder ioBroker) liest den Wechselrichter per lokaler Integration (z. B. SunSpec, SMA oder Sungrow) aus – und du wählst die Sensoren in der Sharegy Integration einfach per Klick aus!
 
-## 2. Sungrow SH5.0 / SH10RT
-1. In der **iSolarCloud**-App oder im lokalen Webportal einloggen.
-2. In den **Erweiterten Einstellungen → Modbus TCP** auf **Aktiviert** setzen.
-3. Standard-Port: `502`.
+---
 
-## 3. Fronius Symo / Primo GEN24
-1. Webinterface des Fronius Datamanager aufrufen.
-2. Unter **Einstellungen → Modbus** das Protokoll **Modbus TCP** auswählen.
-3. Datenausgabeformat auf **Float** einstellen.
+## Einrichtung in 3 einfachen Schritten
 
-> [!TIP]
-> Reserviere im WLAN-Router (z. B. FRITZ!Box) eine feste IP-Adresse für den Wechselrichter (*„Diesem Netzwerkgerät immer die gleiche IPv4-Adresse zuweisen“*).
+### Schritt 1: Modbus TCP im Wechselrichter aktivieren
+1. Rufe das lokale Webportal deines Wechselrichters auf (z. B. im Installateurs-Menü).
+2. Aktiviere **Modbus TCP** (Standard-Port: `502`).
+
+### Schritt 2: Wechselrichter in Home Assistant hinzufügen
+Füge in Home Assistant die passende Hersteller-Integration hinzu (z. B. *SMA Solar*, *Sungrow*, *Fronius* oder *SunSpec*). Home Assistant erkennt sofort alle Live-Werte:
+* PV-Erzeugung (W)
+* Netzeinspeisung / Bezug (W)
+* Batterie-Ladestand (SoC %) & Batterieleistung (W)
+
+### Schritt 3: In der Sharegy Home Assistant Integration auswählen
+1. Öffne in Home Assistant **Einstellungen → Geräte & Dienste → Sharegy → Konfigurieren**.
+2. Wähle die vom Wechselrichter bereitgestellten Entitäten im **1-Klick Entity Picker** aus.
+3. Fertig! Ab sofort fließen alle Erzeugungs- und Speicherdaten in Echtzeit und mit 48h Offline-Puffer in dein Sharegy Dashboard.
 """,
-                "content_en": """# Enabling Modbus TCP on Inverters
+                "content_en": """# Connecting Inverters & Storage via Home Assistant Bridge ☀️🏠
 
-Modbus TCP provides low-latency local telemetry without reliance on external cloud APIs.
+Solar inverters and battery systems (such as **SMA Sunny Tripower**, **Sungrow SH**, **Fronius GEN24**, **Deye**, **Huawei**) communicate locally via **Modbus TCP** (Port 502).
 
-## 1. SMA Sunny Tripower
-1. Open the inverter's IP address in your browser and sign in as **Installer**.
-2. Navigate to **Device Configuration → External Communication → Modbus**.
-3. Enable the **TCP Server** (Port: `502`, Unit ID: `126` or `3`).
+## Why bridge through Home Assistant or ioBroker?
+* 🔒 **Network Security**: Raw Modbus TCP is unencrypted and should never be exposed to the public internet.
+* 🌐 **Clean SaaS Architecture**: Sharegy receives outbound encrypted telemetry without requiring local network ingress.
+* ⚡ **1-Click Entity Selection**: Home Assistant reads the inverter locally, and you simply map the entities to Sharegy in seconds.
 
-## 2. Sungrow SH Series
-1. Sign in to the local web interface or iSolarCloud.
-2. In **Advanced Settings → Modbus TCP**, toggle to **Enabled** (Port: `502`).
-
-## 3. Fronius GEN24 / Symo
-1. Open the Fronius Datamanager interface.
-2. Under **Settings → Modbus**, select **Modbus TCP** and choose **Float** as data format.
+## Setup Workflow
+1. **Enable Modbus TCP** in your inverter's local web portal (Port 502).
+2. **Add Inverter Integration** in Home Assistant (e.g. SMA, Sungrow, Fronius, SunSpec).
+3. **Map Sensors in Sharegy Integration**: Select the discovered entities in the Sharegy configuration flow.
 """,
-                "tags": ["modbus", "inverter", "sma", "sungrow", "fronius", "deye", "tcp"],
+                "tags": ["modbus", "inverter", "homeassistant", "sma", "sungrow", "fronius", "deye", "huawei"],
                 "is_featured": True,
                 "sort_order": 3,
             },
+
 
             # ---------------------------------------------------------------------
             # 4. FORECAST: SOLAR PROGNOSE & GÜTEABGLEICH

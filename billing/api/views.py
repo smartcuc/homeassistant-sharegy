@@ -17,7 +17,10 @@ from billing.services_subscription import (
     reactivate_subscription,
     generate_invoice_pdf,
     seed_demo_invoices,
+    validate_coupon_code,
+    redeem_coupon_code,
 )
+
 
 
 @api_view(["GET"])
@@ -70,6 +73,8 @@ def change_plan_view(request):
     """
     plan = request.data.get("plan")
     payment_method = request.data.get("payment_method", "Kreditkarte (via Stripe)")
+    terms_accepted = request.data.get("terms_accepted", True)
+
     if not plan:
         return Response(
             {"status": "error", "message": "Feld 'plan' ist erforderlich."},
@@ -77,12 +82,65 @@ def change_plan_view(request):
         )
 
     try:
-        change_subscription_plan(request.user, plan, payment_method=payment_method)
+        change_subscription_plan(
+            request.user,
+            plan,
+            payment_method=payment_method,
+            terms_accepted=terms_accepted,
+            request_meta=request.META,
+        )
         data = get_subscription_overview(request.user)
         return Response(
             {
                 "status": "success",
                 "message": f"Abonnement erfolgreich auf '{plan}' umgestellt.",
+                "data": data,
+            }
+        )
+    except ValueError as e:
+        return Response(
+            {"status": "error", "message": str(e)},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def validate_coupon_view(request):
+    """
+    Validiert einen eingegebenen Gutscheincode vorab.
+    """
+    code = request.data.get("code")
+    try:
+        info = validate_coupon_code(code, user=request.user)
+        return Response({"status": "success", "coupon": info})
+    except ValueError as e:
+        return Response(
+            {"status": "error", "message": str(e)},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def redeem_coupon_view(request):
+    """
+    Löst einen Gutscheincode ein und schaltet das Abonnement frei.
+    """
+    code = request.data.get("code")
+    terms_accepted = request.data.get("terms_accepted", True)
+    try:
+        sub = redeem_coupon_code(
+            code=code,
+            user=request.user,
+            terms_accepted=terms_accepted,
+            request_meta=request.META,
+        )
+        data = get_subscription_overview(request.user)
+        return Response(
+            {
+                "status": "success",
+                "message": f"Gutschein '{code.upper()}' erfolgreich eingelöst! Dein Pro-Tarif ist jetzt aktiv.",
                 "data": data,
             }
         )

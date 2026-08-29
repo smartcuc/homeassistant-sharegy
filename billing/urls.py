@@ -8,6 +8,8 @@ from billing.api.views import (
     reactivate_subscription_view,
     invoice_pdf_view,
     seed_demo_billing_view,
+    validate_coupon_view,
+    redeem_coupon_view,
 )
 
 urlpatterns = [
@@ -19,4 +21,7 @@ urlpatterns = [
     path("subscription/reactivate/", reactivate_subscription_view, name="subscription_reactivate"),
     path("subscription/invoices/<uuid:invoice_id>/pdf/", invoice_pdf_view, name="subscription_invoice_pdf"),
     path("subscription/seed-demo/", seed_demo_billing_view, name="subscription_seed_demo"),
+    path("subscription/coupons/validate/", validate_coupon_view, name="subscription_coupon_validate"),
+    path("subscription/coupons/redeem/", redeem_coupon_view, name="subscription_coupon_redeem"),
 ]
+

@@ -189,20 +189,21 @@
     "category": "e647af9a-8938-4ab9-af5a-0713a15f79b1",
     "slug": "sma-sungrow-modbus-tcp-einrichten",
     "context_key": "devices",
-    "title_de": "Modbus TCP für SMA, Sungrow, Fronius & Deye freischalten",
-    "title_en": "Enabling Modbus TCP for SMA, Sungrow, Fronius & Deye",
-    "summary_de": "Schritt-für-Schritt-Anleitung zur Aktivierung der lokalen Modbus-TCP-Schnittstelle im Wechselrichter-Webinterface.",
-    "summary_en": "Step-by-step instructions to enable local Modbus TCP in your inverter's web portal.",
-    "content_de": "# Modbus TCP für Wechselrichter aktivieren\n\nModbus TCP ermöglicht die verzögerungsfreie Direktabfrage aller Leistungswerte im lokalen Netzwerk ohne Umweg über Hersteller-Clouds.\n\n## 1. SMA Sunny Tripower / Hybrid\n1. Im Browser die IP-Adresse des SMA-Wechselrichters aufrufen.\n2. Als **Installateur** einloggen.\n3. Zu **Gerätekonfiguration → Externe Kommunikation → Modbus** navigieren.\n4. **TCP-Server aktivieren** (Port: `502`, Unit-ID: `126` oder `3`).\n5. Speichern.\n\n## 2. Sungrow SH5.0 / SH10RT\n1. In der **iSolarCloud**-App oder im lokalen Webportal einloggen.\n2. In den **Erweiterten Einstellungen → Modbus TCP** auf **Aktiviert** setzen.\n3. Standard-Port: `502`.\n\n## 3. Fronius Symo / Primo GEN24\n1. Webinterface des Fronius Datamanager aufrufen.\n2. Unter **Einstellungen → Modbus** das Protokoll **Modbus TCP** auswählen.\n3. Datenausgabeformat auf **Float** einstellen.\n\n> [!TIP]\n> Reserviere im WLAN-Router (z. B. FRITZ!Box) eine feste IP-Adresse für den Wechselrichter (*„Diesem Netzwerkgerät immer die gleiche IPv4-Adresse zuweisen“*).\n",
-    "content_en": "# Enabling Modbus TCP on Inverters\n\nModbus TCP provides low-latency local telemetry without reliance on external cloud APIs.\n\n## 1. SMA Sunny Tripower\n1. Open the inverter's IP address in your browser and sign in as **Installer**.\n2. Navigate to **Device Configuration → External Communication → Modbus**.\n3. Enable the **TCP Server** (Port: `502`, Unit ID: `126` or `3`).\n\n## 2. Sungrow SH Series\n1. Sign in to the local web interface or iSolarCloud.\n2. In **Advanced Settings → Modbus TCP**, toggle to **Enabled** (Port: `502`).\n\n## 3. Fronius GEN24 / Symo\n1. Open the Fronius Datamanager interface.\n2. Under **Settings → Modbus**, select **Modbus TCP** and choose **Float** as data format.\n",
+    "title_de": "Wechselrichter (SMA, Sungrow, Fronius, Deye) via Home Assistant anbinden",
+    "title_en": "Connecting Inverters (SMA, Sungrow, Fronius, Deye) via Home Assistant",
+    "summary_de": "Da Modbus TCP ein rein lokales Netzwerkprotokoll ist, liest Home Assistant oder ioBroker den Wechselrichter aus und streamt die Datenpunkte in die Sharegy Cloud.",
+    "summary_en": "Since Modbus TCP operates locally within your LAN, Home Assistant or ioBroker reads the inverter and streams telemetry into Sharegy Cloud.",
+    "content_de": "# Wechselrichter & Speicher via Home Assistant Bridge anbinden ☀️🏠\n\nKlassische Solar-Wechselrichter und Batteriespeicher (wie **SMA Sunny Tripower**, **Sungrow SH**, **Fronius GEN24**, **Deye**, **Huawei SUN2000**) kommunizieren im lokalen Heimnetzwerk über das industrielle **Modbus TCP** Protokoll (Port 502).\n\n## Warum erfolgt die Anbindung über Home Assistant oder ioBroker?\n* 🔒 **Sicherheit & Router-Schutz**: Modbus TCP ist unverschlüsselt und darf niemals direkt ins Internet geöffnet werden.\n* 🌐 **SaaS Cloud-Architektur**: Sharegy verbindet sich nicht invasiv in dein privates Heimnetzwerk, sondern empfängt die Datenpunkte verschlüsselt von deiner lokalen Zentrale.\n* ⚡ **1-Klick Auswahl**: Dein lokaler **Home Assistant** (oder ioBroker) liest den Wechselrichter per lokaler Integration (z. B. SunSpec, SMA oder Sungrow) aus – und du wählst die Sensoren in der Sharegy Integration einfach per Klick aus!\n\n---\n\n## Einrichtung in 3 einfachen Schritten\n\n### Schritt 1: Modbus TCP im Wechselrichter aktivieren\n1. Rufe das lokale Webportal deines Wechselrichters auf (z. B. im Installateurs-Menü).\n2. Aktiviere **Modbus TCP** (Standard-Port: `502`).\n\n### Schritt 2: Wechselrichter in Home Assistant hinzufügen\nFüge in Home Assistant die passende Hersteller-Integration hinzu (z. B. *SMA Solar*, *Sungrow*, *Fronius* oder *SunSpec*). Home Assistant erkennt sofort alle Live-Werte:\n* PV-Erzeugung (W)\n* Netzeinspeisung / Bezug (W)\n* Batterie-Ladestand (SoC %) & Batterieleistung (W)\n\n### Schritt 3: In der Sharegy Home Assistant Integration auswählen\n1. Öffne in Home Assistant **Einstellungen → Geräte & Dienste → Sharegy → Konfigurieren**.\n2. Wähle die vom Wechselrichter bereitgestellten Entitäten im **1-Klick Entity Picker** aus.\n3. Fertig! Ab sofort fließen alle Erzeugungs- und Speicherdaten in Echtzeit und mit 48h Offline-Puffer in dein Sharegy Dashboard.\n",
+    "content_en": "# Connecting Inverters & Storage via Home Assistant Bridge ☀️🏠\n\nSolar inverters and battery systems (such as **SMA Sunny Tripower**, **Sungrow SH**, **Fronius GEN24**, **Deye**, **Huawei**) communicate locally via **Modbus TCP** (Port 502).\n\n## Why bridge through Home Assistant or ioBroker?\n* 🔒 **Network Security**: Raw Modbus TCP is unencrypted and should never be exposed to the public internet.\n* 🌐 **Clean SaaS Architecture**: Sharegy receives outbound encrypted telemetry without requiring local network ingress.\n* ⚡ **1-Click Entity Selection**: Home Assistant reads the inverter locally, and you simply map the entities to Sharegy in seconds.\n\n## Setup Workflow\n1. **Enable Modbus TCP** in your inverter's local web portal (Port 502).\n2. **Add Inverter Integration** in Home Assistant (e.g. SMA, Sungrow, Fronius, SunSpec).\n3. **Map Sensors in Sharegy Integration**: Select the discovered entities in the Sharegy configuration flow.\n",
     "tags": [
       "modbus",
       "inverter",
+      "homeassistant",
       "sma",
       "sungrow",
       "fronius",
       "deye",
-      "tcp"
+      "huawei"
     ],
     "is_published": true,
     "is_featured": true,
@@ -211,9 +212,10 @@
     "helpful_yes": 0,
     "helpful_no": 0,
     "created_at": "2026-08-25T11:23:37.250Z",
-    "updated_at": "2026-08-25T22:33:36.157Z"
+    "updated_at": "2026-08-29T22:40:00.000Z"
   }
 },
+
 {
   "model": "support_desk.helparticle",
   "pk": "e3da92e6-538e-4a3f-9859-39929fcb8b25",

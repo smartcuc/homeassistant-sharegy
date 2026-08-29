@@ -206,3 +206,82 @@ class EMSSubscriptionAndInvoiceTest(TestCase):
         )
         self.assertEqual(res_pdf.status_code, 200)
         self.assertEqual(res_pdf["Content-Type"], "application/pdf")
+
+
+class CouponAndTermsValidationTest(TestCase):
+    """
+    Testet Gutschein-Einlösung, E-Mail-Validierung und AGB-Zustimmungs-Audit-Logging.
+    """
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="betatester",
+            email="tester@sharegy.de",
+            password="securepassword123",
+        )
+        self.client = Client()
+        self.client.force_login(self.user)
+
+    def test_coupon_validation_and_redemption(self):
+        from billing.models import Coupon, CouponRedemption
+        from accounts.models import UserTermsConsent
+
+        coupon = Coupon.objects.create(
+            code="BETA100",
+            description="3 Monate Pro gratis",
+            discount_type=Coupon.TYPE_FREE_MONTHS,
+            discount_value=Decimal("100.00"),
+            duration_months=3,
+            max_redemptions=10,
+        )
+
+        # 1. Validieren via API
+        res_val = self.client.post(
+            "/api/billing/subscription/coupons/validate/",
+            data={"code": "BETA100"},
+            content_type="application/json",
+            HTTP_HOST="localhost",
+        )
+        self.assertEqual(res_val.status_code, 200)
+        self.assertEqual(res_val.json()["coupon"]["code"], "BETA100")
+
+        # 2. Einlösen via API
+        res_redeem = self.client.post(
+            "/api/billing/subscription/coupons/redeem/",
+            data={"code": "BETA100", "terms_accepted": True},
+            content_type="application/json",
+            HTTP_HOST="localhost",
+        )
+        self.assertEqual(res_redeem.status_code, 200)
+        self.assertTrue(res_redeem.json()["data"]["subscription"]["is_pro"])
+
+        # Prüfe CouponRedemption & AGB-Zustimmung
+        self.assertTrue(CouponRedemption.objects.filter(coupon=coupon, user=self.user).exists())
+        self.assertTrue(UserTermsConsent.objects.filter(user=self.user, consent_type="upgrade_pro").exists())
+
+        # 3. Zweite Einlösung durch denselben User muss abgelehnt werden
+        res_repeat = self.client.post(
+            "/api/billing/subscription/coupons/redeem/",
+            data={"code": "BETA100", "terms_accepted": True},
+            content_type="application/json",
+            HTTP_HOST="localhost",
+        )
+        self.assertEqual(res_repeat.status_code, 400)
+
+    def test_disposable_email_rejection_on_pro_upgrade(self):
+        disposable_user = User.objects.create_user(
+            username="trashuser",
+            email="spammer@mailinator.com",
+            password="securepassword123",
+        )
+        self.client.force_login(disposable_user)
+
+        res = self.client.post(
+            "/api/billing/subscription/change-plan/",
+            data={"plan": "pro_monthly", "terms_accepted": True},
+            content_type="application/json",
+            HTTP_HOST="localhost",
+        )
+        self.assertEqual(res.status_code, 400)
+        self.assertIn("Wegwerf-E-Mail", res.json()["message"])
+

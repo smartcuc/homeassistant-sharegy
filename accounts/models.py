@@ -297,3 +297,38 @@ class MagicLoginToken(models.Model):
 
     def __str__(self):
         return f"{self.user} - {self.token}"
+
+
+class UserTermsConsent(models.Model):
+    """
+    Dokumentierte, revisionssichere Zustimmung zu AGB & Datenschutz (DSGVO-Nachweispflicht).
+    """
+    CONSENT_REGISTRATION = "registration"
+    CONSENT_UPGRADE_PRO = "upgrade_pro"
+    CONSENT_TERMS_UPDATE = "terms_update"
+
+    CONSENT_CHOICES = [
+        (CONSENT_REGISTRATION, "Registrierung"),
+        (CONSENT_UPGRADE_PRO, "Pro/Landlord Upgrade"),
+        (CONSENT_TERMS_UPDATE, "AGB-Aktualisierung"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="terms_consents")
+    terms_version = models.CharField(max_length=32, default="2026-08")
+    privacy_version = models.CharField(max_length=32, default="2026-08")
+    consent_type = models.CharField(max_length=32, choices=CONSENT_CHOICES, default=CONSENT_REGISTRATION)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "accounts_user_terms_consent"
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["user", "-created_at"]),
+        ]
+
+    def __str__(self):
+        return f"{self.user.email} - {self.consent_type} ({self.terms_version}) am {self.created_at}"
+
