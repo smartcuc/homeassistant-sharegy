@@ -82,13 +82,14 @@ class Command(BaseCommand):
             {
                 "key": "devices-protocols",
                 "icon": "🔌",
-                "title_de": "Geräte, MQTT & Protokolle",
-                "title_en": "Devices, MQTT & Protocols",
-                "description_de": "Integration von Home Assistant, ioBroker, Shelly, Tasmota, Modbus RTU/TCP und REST APIs.",
-                "description_en": "Integration with Home Assistant, ioBroker, Shelly, Tasmota, Modbus, and REST APIs.",
+                "title_de": "Geräte, Schnittstellen & Protokolle",
+                "title_en": "Devices, Interfaces & Protocols",
+                "description_de": "Integration von Home Assistant, Shelly WSS, Tasmota, OpenDTU, Modbus TCP und MQTT Gateways.",
+                "description_en": "Integration with Home Assistant, Shelly WSS, Tasmota, OpenDTU, Modbus TCP, and MQTT gateways.",
                 "sort_order": 8,
             },
         ]
+
 
         cats = {}
         for cdata in categories_data:
@@ -598,13 +599,13 @@ The sub-metering engine enables precise breakdown of total household consumption
                 "category": cats["devices-protocols"],
                 "slug": "mqtt-und-smart-home-integration",
                 "context_key": "devices",
-                "title_de": "MQTT, ioBroker & Shelly Zähler anbinden",
-                "title_en": "Connecting MQTT, ioBroker & Shelly Meters",
-                "summary_de": "Integration von Smart-Home-Zählern und Relais über den integrierten MQTT-Broker und REST-APIs.",
-                "summary_en": "Integrating smart home meters and relays via MQTT broker and REST APIs.",
-                "content_de": """# MQTT & Smart Home Integration
+                "title_de": "MQTT, ioBroker, Node-RED & Smart-Home Gateways",
+                "title_en": "Connecting MQTT, ioBroker, Node-RED & Gateways",
+                "summary_de": "Integration von Smart-Home-Zentralen und Custom-Zählern über den integrierten MQTT-Broker und REST-APIs.",
+                "summary_en": "Integrating smart home systems and custom telemetry via MQTT broker and REST APIs.",
+                "content_de": """# MQTT & Smart Home Gateway Integration
 
-Sharegy lässt sich nahtlos mit bestehenden Smart-Home-Systemen wie **ioBroker**, **OpenHAB** oder **Shelly** verbinden.
+Sharegy lässt sich nahtlos mit lokalen Smart-Home-Zentralen wie **ioBroker**, **Node-RED** oder **OpenHAB** verbinden.
 
 ## Anbindung via MQTT
 * **Broker-Host**: IP deines Sharegy-Servers (oder externer Mosquitto Broker).
@@ -619,12 +620,15 @@ Sharegy lässt sich nahtlos mit bestehenden Smart-Home-Systemen wie **ioBroker**
 }
 ```
 
-## Shelly 3EM & Pro 3EM Direkt-Integration
-Trage im Webinterface des Shelly unter **Advanced - Developer Settings → MQTT** einfach die Broker-Zugangsdaten ein. Die Messdaten werden automatisch erkannt.
+> [!IMPORTANT]
+> **Shelly-Geräte bitte NICHT über MQTT anbinden!**  
+> Für alle Shelly-Geräte (Gen2 / Gen3 / Plus / Pro / Mini) steht die native **Outbound-WebSocket (WSS)** Schnittstelle zur Verfügung.  
+> * **Warum kein MQTT bei Shelly?** MQTT erfordert komplexe Broker-Konfigurationen, scheitert an Routern/Firewalls und unterstützt keine zuverlässige bidirektionale Aktorik in Cloud-Umgebungen.  
+> * **Empfohlener Weg:** Nutze für Shelly immer **Outbound WebSocket (Port 443)** (siehe Handbuch-Artikel *„Shelly Outbound WebSocket & Bidirektionale Relais-Steuerung“*). Dies funktioniert in 2 Minuten ohne Routerfreigaben und ermöglicht sekundenschnelle Relais-Schaltung direkt im Dashboard.
 """,
-                "content_en": """# MQTT & Smart Home Integration
+                "content_en": """# MQTT & Smart Home Gateway Integration
 
-Connect Sharegy to your smart home environment including **ioBroker**, **OpenHAB**, or **Shelly** meters.
+Connect Sharegy to your smart home environment including **ioBroker**, **Node-RED**, or **OpenHAB**.
 
 ## MQTT Configuration
 * **Broker Host**: IP address of your server.
@@ -637,11 +641,16 @@ Connect Sharegy to your smart home environment including **ioBroker**, **OpenHAB
   "energy_kwh": 1420.8
 }
 ```
+
+> [!IMPORTANT]
+> **Do NOT use MQTT for Shelly devices!**  
+> For all Shelly devices (Gen2 / Gen3 / Plus / Pro / Mini), always use the native **Outbound WebSocket (WSS)** interface over Port 443. It requires zero router configuration and enables low-latency bidirectional relay switching.
 """,
-                "tags": ["mqtt", "iobroker", "shelly", "smart home", "protokolle"],
+                "tags": ["mqtt", "iobroker", "nodered", "openhab", "smart home", "protokolle"],
                 "is_featured": False,
                 "sort_order": 11,
             },
+
 
             # ---------------------------------------------------------------------
             # 12. GRAFANA INTEGRATION & COCKPIT DASHBOARDS
