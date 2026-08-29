@@ -99,11 +99,11 @@ def process_incoming_telemetry(token, payload_str, user):
             home=home,
             identifier=identifier,
             defaults={
-                "name": identifier,
                 "configured": True,
                 "active": True,
             },
         )
+
         if created:
             logger.info("[WS-Ingest] 🚀 Neues Gerät per WebSocket automatisch entdeckt: %s (Haushalt: %s)", identifier, home.name)
 
