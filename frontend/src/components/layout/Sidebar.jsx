@@ -34,8 +34,14 @@ export default function Sidebar() {
             ? "bg-amber-100 text-amber-800 border-amber-200"
             : "bg-emerald-100 text-emerald-800 border-emerald-200";
 
-    const isStaffOrAdmin = Boolean(user?.is_staff || user?.is_superuser);
+    const isStaffOrAdmin = Boolean(user?.is_staff || user?.is_superuser || user?.is_platform_admin);
     const isLandlordMode = user?.usage_mode === "hybrid" || user?.usage_mode === "landlord";
+    const hasTenantAccess = Boolean(
+        isStaffOrAdmin ||
+        user?.is_global_user_admin ||
+        user?.memberships?.some((m) => ["admin", "user_admin"].includes(m.role)) ||
+        isLandlordMode
+    );
 
     const sections = useMemo(() => {
         const sec = [
@@ -72,8 +78,8 @@ export default function Sidebar() {
                     },
                     { name: t("nav.producers", "Erzeuger & Speicher"), path: "/app/producers", icon: "☀️" },
                     { name: t("nav.floors", "Etagen & Räume"), path: "/app/structure", icon: "🏢" },
-                    ...(isLandlordMode && !isStaffOrAdmin
-                        ? [{ name: t("nav.tenant_management", "Mieter-Verwaltung"), path: "/app/tenant-management", icon: "👥" }]
+                    ...(hasTenantAccess && !isStaffOrAdmin
+                        ? [{ name: t("nav.tenant_management", "Community & Mieter"), path: "/app/tenant", icon: "👥" }]
                         : []),
                 ],
             },
@@ -96,7 +102,7 @@ export default function Sidebar() {
                     { name: t("nav.agent_support_hub", "Support-Zentrale (Triage)"), path: "/app/support-hub", icon: "🛟" },
                     { name: t("nav.admin_dashboard", "Admin Dashboard"), path: "/app/admin/dashboard", icon: "📊" },
                     { name: t("nav.admin_tracking", "Event & Tracking"), path: "/app/admin/tracking", icon: "📈" },
-                    { name: t("nav.tenant_management", "Mandanten & Mieter"), path: "/app/tenant-management", icon: "👥" },
+                    { name: t("nav.tenant_management", "Mandanten & Mieter"), path: "/app/tenant", icon: "👥" },
                     {
                         name: "Django Backend",
                         path: "/admin/",
@@ -106,6 +112,7 @@ export default function Sidebar() {
                 ],
             });
         }
+
 
         sec.push({
             title: `📚 ${t("nav.help_group", "Support & Hilfe")}`,

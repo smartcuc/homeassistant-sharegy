@@ -13,7 +13,9 @@ from .views import MyTenantView
 from .views import UpdateMemberRoleView
 from .views import RemoveMemberView
 from .views import DeactivateInviteView
+from .views import AuditLogView
 from .views import RequestMagicLinkView, MagicLoginView, MagicLinkStatsView, LiveLoginsView, TenantStatsView
+
 from .views import DashboardStatsView
 from .views import DemoLoginView
 ##from .views import TrackEventView
@@ -61,8 +63,10 @@ path("remove-member/", RemoveMemberView.as_view()),
 ]
 
 urlpatterns += [
-path("deactivate-invite/", DeactivateInviteView.as_view()),
+    path("deactivate-invite/", DeactivateInviteView.as_view()),
+    path("audit-log/", AuditLogView.as_view()),
 ]
+
 
 urlpatterns += [
     path("request-magic-link/", RequestMagicLinkView.as_view()),

@@ -13,12 +13,15 @@ export default function TenantDashboard() {
     const [members, setMembers] = useState([]);
     const [invites, setInvites] = useState([]);
     const [logs, setLogs] = useState([]);
+    const [loading, setLoading] = useState(true);
+
 
     const { lang } = useLang();
     const t = texts[lang];
 
     // ✅ Daten laden
     async function loadData() {
+        setLoading(true);
         try {
             const data = await apiFetch("/api/my-tenant/");
 
@@ -30,12 +33,16 @@ export default function TenantDashboard() {
             setLogs(logData || []);
         } catch (err) {
             console.error("Load failed:", err);
+        } finally {
+            setLoading(false);
         }
     }
 
     useEffect(() => {
         loadData();
     }, []);
+
+
 
     // ✅ INVITE ERSTELLEN
     async function createInvite(role) {
@@ -109,13 +116,44 @@ export default function TenantDashboard() {
         return new Date(date).toLocaleString();
     }
 
+    if (loading) {
+        return (
+            <div className="p-12 text-center text-slate-400 text-sm animate-pulse">
+                Lade Energy Community Dashboard...
+            </div>
+        );
+    }
+
+    if (!tenant) {
+        return (
+            <div className="p-8 max-w-xl mx-auto text-center space-y-4 my-8 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs">
+                <div className="text-4xl">🏛️</div>
+                <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                    Keine aktive Energy Community
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                    Du bist aktuell noch keiner Energy Community zugewiesen oder hast noch keinen Einladungslink eingelöst.
+                </p>
+                <div className="pt-2">
+                    <button
+                        onClick={() => window.location.href = "/app/dashboard"}
+                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-xs transition cursor-pointer"
+                    >
+                        Zurück zum Dashboard
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="p-6 max-w-4xl mx-auto">
 
             {/* ✅ TITLE */}
             <h1 className="text-2xl font-bold mb-6">
-                {t.tenant_dashboard} – {tenant?.name}
+                {t.tenant_dashboard || "Energy Community"} – {tenant.name}
             </h1>
+
 
             {/* ✅ INVITES */}
             <section className="mb-8">

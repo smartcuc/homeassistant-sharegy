@@ -45,42 +45,41 @@ def cleanup_demo_metrics(days=28):
 
     total_deleted = 0
 
-    # 1. TimescaleDB Decompression Limit für diese DB-Session aufheben (0 = unbegrenzt)
+    # 1. TimescaleDB Decompression Limit & Raw Device Metrics Löschung
     try:
-        with connection.cursor() as cursor:
-            cursor.execute("SET timescaledb.max_tuples_decompressed_per_dml_transaction = 0;")
-    except Exception as e:
-        logger.debug("[DemoCleanup] TimescaleDB GUC nicht verfügbar oder nicht erforderlich: %s", e)
-
-    # 2. Raw Device Metrics löschen
-    try:
-        deleted, _ = DeviceMetric.objects.filter(
-            device_id__in=demo_ids,
-            timestamp__lt=cutoff,
-        ).delete()
-        total_deleted += deleted
-        logger.info("[DemoCleanup] %d veraltete DeviceMetric-Einträge gelöscht (älter als %d Tage).", deleted, days)
-    except Exception as e:
-        logger.error("[DemoCleanup] Standard-Delete fehlgeschlagen, versuche SQL-Fallback mit SET LOCAL: %s", e)
-        # Fallback: Direktes SQL mit gesetztem LOCAL GUC
-        try:
+        from django.db import transaction
+        with transaction.atomic():
             with connection.cursor() as cursor:
+                try:
+                    cursor.execute("SET LOCAL timescaledb.max_tuples_decompressed_per_dml_transaction = 0;")
+                except Exception as guc_err:
+                    logger.debug("[DemoCleanup] TimescaleDB GUC nicht verfügbar: %s", guc_err)
+
                 cursor.execute(
                     """
-                    SET LOCAL timescaledb.max_tuples_decompressed_per_dml_transaction = 0;
                     DELETE FROM devices_devicemetric 
                     WHERE device_id = ANY(%s) AND timestamp < %s;
                     """,
                     [demo_ids, cutoff],
                 )
                 deleted = cursor.rowcount
-                total_deleted += deleted
-                logger.info("[DemoCleanup] SQL-Fallback erfolgreich: %d Einträge gelöscht.", deleted)
-        except Exception as fb_err:
-            logger.error("[DemoCleanup] Auch SQL-Fallback fehlgeschlagen: %s", fb_err)
-            raise fb_err
+                if deleted is not None and deleted > 0:
+                    total_deleted += deleted
+                    logger.info("[DemoCleanup] %d veraltete DeviceMetric-Einträge via SQL gelöscht.", deleted)
+    except Exception as e:
+        logger.warning("[DemoCleanup] Direktes SQL fehlgeschlagen (%s), versuche ORM-Löschung...", e)
+        try:
+            deleted, _ = DeviceMetric.objects.filter(
+                device_id__in=demo_ids,
+                timestamp__lt=cutoff,
+            ).delete()
+            total_deleted += deleted
+            logger.info("[DemoCleanup] %d veraltete DeviceMetric-Einträge via ORM gelöscht.", deleted)
+        except Exception as orm_err:
+            logger.error("[DemoCleanup] Auch ORM-Löschung fehlgeschlagen: %s", orm_err)
 
-    # 3. Aggregierte Tabellen bereinigen (1m, 5m, 15m, 1h)
+    # 2. Aggregierte Tabellen bereinigen (1m, 5m, 15m, 1h)
+
     for model_cls, name in [
         (DeviceMetric1m, "1m"),
         (DeviceMetric5m, "5m"),

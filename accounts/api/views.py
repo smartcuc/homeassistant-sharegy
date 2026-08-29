@@ -25,13 +25,14 @@ from django.utils.decorators import method_decorator
 
 from core.models import Tenant
 from accounts.serializers import UserMeSerializer
-from accounts.models import MagicLoginToken
 from accounts.models import (
     UserSettings,
     UserProfile,
     TenantInvite,
     TenantMembership,
+    AuditLog,
 )
+
 
 from accounts.services.email_service import send_magic_link_email
 from django.db.models import Count, Q
@@ -253,6 +254,13 @@ class CreateInviteView(APIView):
             max_uses=10
         )
 
+        AuditLog.objects.create(
+            user=request.user,
+            tenant=tenant,
+            action="invite_created",
+            metadata={"role": invite.role, "token": str(invite.token)},
+        )
+
         return Response({
             "link": f"{settings.FRONTEND_URL}/join?token={invite.token}",
             "token": str(invite.token),
@@ -345,8 +353,17 @@ class UpdateMemberRoleView(APIView):
         if membership.role == TenantMembership.ROLE_ADMIN and not (is_tenant_admin or is_global_admin):
             return Response({"error": "Cannot modify Energy Admin role."}, status=403)
 
+        old_role = membership.role
         membership.role = new_role
         membership.save()
+
+        AuditLog.objects.create(
+            user=request.user,
+            tenant=tenant,
+            action="role_updated",
+            target_user=membership.user,
+            metadata={"old_role": old_role, "new_role": new_role},
+        )
 
         return Response({
             "status": "updated",
@@ -389,8 +406,14 @@ class RemoveMemberView(APIView):
         membership.is_active = False
         membership.save()
 
-        return Response({"status": "removed"})
+        AuditLog.objects.create(
+            user=request.user,
+            tenant=tenant,
+            action="member_removed",
+            target_user=membership.user,
+        )
 
+        return Response({"status": "removed"})
 
 
 class DeactivateInviteView(APIView):
@@ -414,7 +437,41 @@ class DeactivateInviteView(APIView):
         invite.is_active = False
         invite.save()
 
+        AuditLog.objects.create(
+            user=request.user,
+            tenant=invite.tenant,
+            action="invite_deactivated",
+            metadata={"token": str(invite.token)},
+        )
+
         return Response({"status": "deactivated"})
+
+
+class AuditLogView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        membership = request.user.memberships.filter(is_active=True).first()
+        if not membership:
+            return Response([])
+
+        logs = (
+            AuditLog.objects.filter(tenant=membership.tenant)
+            .select_related("user", "target_user")
+            .order_by("-created_at")[:50]
+        )
+        return Response([
+            {
+                "id": l.id,
+                "action": l.action,
+                "user": l.user.email if l.user else "System",
+                "target_user": l.target_user.email if l.target_user else "",
+                "created_at": l.created_at.isoformat(),
+                "metadata": l.metadata,
+            }
+            for l in logs
+        ])
+
 
 
 # ---------------- MAGIC LINK LOGIN ---------------- #

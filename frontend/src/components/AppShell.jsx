@@ -90,7 +90,9 @@ export default function AppShell() {
                         <Route path="admin" element={<Navigate to="/app/admin/dashboard" replace />} />
                         <Route path="admin/dashboard" element={<AdminDashboard />} />
                         <Route path="admin/tracking" element={<TrackingDashboard />} />
+                        <Route path="tenant" element={<TenantDashboard />} />
                         <Route path="tenant-management" element={<TenantDashboard />} />
+
 
                         {/* ✅ FALLBACK IMMER UNTEN */}
                         <Route path="*" element={<Navigate to="/app/dashboard" replace />} />
