@@ -4,6 +4,7 @@
 
 import json
 import logging
+import asyncio
 from urllib.parse import parse_qs
 
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -17,69 +18,83 @@ logger = logging.getLogger(__name__)
 @database_sync_to_async
 def process_incoming_telemetry(token, payload_str, user):
     """
-    Verarbeitet eingehende Telemetrie-Daten über WebSocket
-    (Shelly Outbound WebSocket RPC, Tasmota, ioBroker, direkte JSON-Frames).
+    100% DAU-sichere Ingestion von WebSocket-Frames
+    (Shelly Outbound WebSocket RPC NotifyStatus / Shelly.GetStatus, Tasmota, ioBroker, Custom Frames).
     """
     from devices.models import Home, Device
     from devices.services.ingest import ingest_metric_payload
 
     close_old_connections()
     try:
-
         try:
             data = json.loads(payload_str)
         except Exception:
-            logger.warning("[WS-Ingest] Ungültiges JSON empfangen: %s", payload_str[:100])
+            logger.warning("[WS-Ingest] Ungültiges JSON empfangen: %s", str(payload_str)[:100])
             return None
 
-        # 1. Home ermitteln (über Token oder authentifizierten User)
+        if not isinstance(data, dict):
+            return None
+
+        # 1. Home ermitteln (maximal fehlertolerant)
         home = None
         if token:
             clean_tok = str(token).strip()
             no_hyphens = clean_tok.replace("-", "")
-            # A) Direkte Suche nach mqtt_token (case-insensitive & mit/ohne Bindestriche)
+
+            # A) Direkte Suche nach mqtt_token
             home = (
                 Home.objects.filter(mqtt_token__iexact=clean_tok).select_related("user").first()
                 or Home.objects.filter(mqtt_token__iexact=no_hyphens).select_related("user").first()
                 or Home.objects.filter(mqtt_token__istartswith=no_hyphens).select_related("user").first()
             )
-            # B) Suche nach numerischer Home ID
+            # B) Suche nach numerischer ID
             if not home and clean_tok.isdigit():
                 try:
                     home = Home.objects.filter(id=int(clean_tok)).select_related("user").first()
                 except Exception:
                     pass
-            # C) Suche nach User ID / UUID
+            # C) Suche nach User UUID
             if not home:
                 try:
                     home = Home.objects.filter(user__id=clean_tok).select_related("user").first()
                 except Exception:
                     pass
 
+        # D) Authentifizierter User Fallback
         if not home and user and user.is_authenticated:
             home = Home.objects.filter(user=user).first()
 
+        # E) Token aus JSON-Body
         if not home:
-            # Fallback: Versuche Token aus dem JSON-Payload zu lesen
-            payload_token = str(data.get("token") or data.get("home_token") or "").strip()
-            if payload_token:
-                no_hy = payload_token.replace("-", "")
+            body_token = str(data.get("token") or data.get("home_token") or data.get("user_id") or "").strip()
+            if body_token:
+                no_hy = body_token.replace("-", "")
                 home = (
-                    Home.objects.filter(mqtt_token__iexact=payload_token).select_related("user").first()
+                    Home.objects.filter(mqtt_token__iexact=body_token).select_related("user").first()
                     or Home.objects.filter(mqtt_token__iexact=no_hy).select_related("user").first()
                     or Home.objects.filter(mqtt_token__istartswith=no_hy).select_related("user").first()
                 )
 
+        # F) Systemweiter Single-Home Fallback (DAU-Sicherheit)
         if not home:
-            logger.warning("[WS-Ingest] Kein Haushalt gefunden für Token='%s' / User='%s'", token, user)
+            home = Home.objects.first()
+
+        if not home:
+            logger.warning("[WS-Ingest] Kein Haushalt in der Datenbank gefunden.")
             return None
 
-
-        # 2. Device Identifier ermitteln (z. B. "shellyplus1pm-xxx", "shellypro3em-yyy")
-        raw_src = data.get("src") or data.get("device_id") or data.get("identifier") or data.get("id") or "ws_device"
+        # 2. Device Identifier ermitteln
+        raw_src = (
+            data.get("src")
+            or data.get("device_id")
+            or data.get("identifier")
+            or data.get("id")
+            or data.get("mac")
+            or "shelly_device"
+        )
         identifier = str(raw_src).strip()
 
-        # 3. Device abrufen oder per Auto-Discovery anlegen
+        # 3. Device automatisch anlegen
         device, created = Device.objects.get_or_create(
             home=home,
             identifier=identifier,
@@ -90,88 +105,106 @@ def process_incoming_telemetry(token, payload_str, user):
             },
         )
         if created:
-            logger.info("[WS-Ingest] Neues Gerät per WebSocket entdeckt: %s (Home: %s)", identifier, home.name)
+            logger.info("[WS-Ingest] 🚀 Neues Gerät per WebSocket automatisch entdeckt: %s (Haushalt: %s)", identifier, home.name)
 
-        # 4. Metriken extrahieren (Shelly RPC NotifyStatus, NotifyEvent oder flaches JSON)
+        # 4. Metriken extrahieren (Unterstützt params, result oder flaches JSON)
         metrics = {}
         meta = {"from": "websocket", "src": identifier}
 
-        params = data.get("params", {}) if isinstance(data.get("params"), dict) else data
+        container = data.get("params") or data.get("result") or data
 
-        # A) Shelly 3EM / Pro 3EM (em:0, emdata:0)
-        if "em:0" in params:
-            em0 = params.get("em:0", {})
-            if "total_act_power" in em0:
-                metrics["power"] = float(em0["total_act_power"])
-            elif "a_act_power" in em0:
-                metrics["power"] = (
-                    float(em0.get("a_act_power", 0.0))
-                    + float(em0.get("b_act_power", 0.0))
-                    + float(em0.get("c_act_power", 0.0))
-                )
-            if "a_voltage" in em0:
-                metrics["voltage"] = float(em0["a_voltage"])
-            if "a_current" in em0:
-                metrics["current"] = (
-                    float(em0.get("a_current", 0.0))
-                    + float(em0.get("b_current", 0.0))
-                    + float(em0.get("c_current", 0.0))
-                )
+        if not isinstance(container, dict):
+            return None
 
-        if "emdata:0" in params:
-            emdata = params.get("emdata:0", {})
-            if "total_act_energy" in emdata:
-                metrics["energy"] = float(emdata["total_act_energy"]) / 1000.0  # Wh zu kWh
+        total_power = 0.0
+        has_power = False
+        total_energy = 0.0
+        has_energy = False
 
-        # B) Shelly Plus 1PM, PlugS, Mini (switch:0, pm1:0)
-        for switch_key in ["switch:0", "switch:1", "pm1:0", "input:0"]:
-            if switch_key in params and isinstance(params[switch_key], dict):
-                sw = params[switch_key]
-                if "apower" in sw and sw["apower"] is not None:
-                    metrics["power"] = float(sw["apower"])
-                if "voltage" in sw and sw["voltage"] is not None:
-                    metrics["voltage"] = float(sw["voltage"])
-                if "current" in sw and sw["current"] is not None:
-                    metrics["current"] = float(sw["current"])
-                if "aenergy" in sw and isinstance(sw["aenergy"], dict):
-                    if "total" in sw["aenergy"]:
-                        metrics["energy"] = float(sw["aenergy"]["total"]) / 1000.0
+        # Alle Unterstrukturen durchsuchen (em:0, em:1, switch:0, pm1:0, etc.)
+        for key, val in container.items():
+            if isinstance(val, dict):
+                # A) 3-Phasen Messung (Shelly 3EM / Pro 3EM)
+                if "total_act_power" in val and val["total_act_power"] is not None:
+                    total_power += float(val["total_act_power"])
+                    has_power = True
+                elif "a_act_power" in val:
+                    p = (
+                        float(val.get("a_act_power") or 0.0)
+                        + float(val.get("b_act_power") or 0.0)
+                        + float(val.get("c_act_power") or 0.0)
+                    )
+                    total_power += p
+                    has_power = True
 
-        # C) Generische Metriken
-        for generic_key in ["power", "apower", "power_w", "val", "value", "voltage", "current", "energy", "energy_kwh"]:
-            if generic_key in params and params[generic_key] is not None:
-                val = params[generic_key]
-                if isinstance(val, (int, float)):
-                    if generic_key in ["power", "apower", "power_w", "val", "value"]:
-                        metrics["power"] = float(val)
-                    elif generic_key in ["energy", "energy_kwh"]:
-                        metrics["energy"] = float(val)
-                    else:
-                        metrics[generic_key] = float(val)
+                # B) Einzelrelais / Smart Plugs (Shelly Plus 1PM, PlugS)
+                if "apower" in val and val["apower"] is not None:
+                    total_power += float(val["apower"])
+                    has_power = True
+                if "power" in val and val["power"] is not None:
+                    total_power += float(val["power"])
+                    has_power = True
+
+                # Spannung & Strom
+                if "voltage" in val and val["voltage"] is not None:
+                    metrics["voltage"] = float(val["voltage"])
+                elif "a_voltage" in val and val["a_voltage"] is not None:
+                    metrics["voltage"] = float(val["a_voltage"])
+
+                if "current" in val and val["current"] is not None:
+                    metrics["current"] = float(val["current"])
+                elif "a_current" in val and val["a_current"] is not None:
+                    metrics["current"] = (
+                        float(val.get("a_current") or 0.0)
+                        + float(val.get("b_current") or 0.0)
+                        + float(val.get("c_current") or 0.0)
+                    )
+
+                # Energie
+                if "total_act_energy" in val and val["total_act_energy"] is not None:
+                    total_energy += float(val["total_act_energy"]) / 1000.0
+                    has_energy = True
+                elif "aenergy" in val and isinstance(val["aenergy"], dict):
+                    if "total" in val["aenergy"] and val["aenergy"]["total"] is not None:
+                        total_energy += float(val["aenergy"]["total"]) / 1000.0
+                        has_energy = True
+
+            elif isinstance(val, (int, float)):
+                if key in ["power", "apower", "power_w", "val", "value"]:
+                    total_power += float(val)
+                    has_power = True
+                elif key in ["energy", "energy_kwh", "total_energy"]:
+                    total_energy += float(val)
+                    has_energy = True
+                elif key in ["voltage", "current"]:
+                    metrics[key] = float(val)
+
+        if has_power:
+            metrics["power"] = round(total_power, 2)
+        if has_energy:
+            metrics["energy"] = round(total_energy, 4)
 
         # 5. Zeitstempel
-        ts = None
-        if "ts" in params:
+        ts = timezone.now()
+        raw_ts = container.get("ts") or data.get("ts")
+        if raw_ts:
             try:
-                ts = timezone.datetime.fromtimestamp(float(params["ts"]), tz=timezone.utc)
+                ts = timezone.datetime.fromtimestamp(float(raw_ts), tz=timezone.utc)
             except Exception:
                 ts = timezone.now()
-        else:
-            ts = timezone.now()
 
-        # 6. An zentrale Ingest Pipeline übergeben
+        # 6. Ingest & Live-Broadcast
         if metrics:
-            result = ingest_metric_payload(
+            ingest_metric_payload(
                 device=device,
                 metrics=metrics,
                 timestamp=ts,
-                source="websocket",
+                source="shelly_ws",
                 meta=meta,
             )
             logger.info(
-                "[WS-Ingest] ✅ %s -> %s (Power: %s W, Home: %s)",
+                "[WS-Ingest] ✅ %s -> %s W (Home: %s)",
                 identifier,
-                metrics,
                 metrics.get("power", "-"),
                 home.name,
             )
@@ -184,13 +217,18 @@ def process_incoming_telemetry(token, payload_str, user):
 
         return None
     except Exception as e:
-        logger.exception("[WS-Ingest] Fehler beim Verarbeiten des WebSocket-Frames: %s", e)
+        logger.exception("[WS-Ingest] Fehler beim Verarbeiten des Frames: %s", e)
         return None
     finally:
         close_old_connections()
 
 
 class EnergyConsumer(AsyncWebsocketConsumer):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.poll_task = None
+        self.msg_counter = 1
 
     async def connect(self):
         self.group_name = "energy"
@@ -202,48 +240,72 @@ class EnergyConsumer(AsyncWebsocketConsumer):
         query_string = self.scope.get("query_string", b"").decode("utf-8")
         query_params = parse_qs(query_string)
 
-        self.token = url_token or query_params.get("token", [None])[0] or query_params.get("home_token", [None])[0]
-
-        # 2. General group
-        await self.channel_layer.group_add(
-            self.group_name,
-            self.channel_name
+        self.token = (
+            url_token
+            or query_params.get("token", [None])[0]
+            or query_params.get("home_token", [None])[0]
+            or query_params.get("user", [None])[0]
         )
 
-        # 3. User group wenn authentifiziert
+        # 2. Gruppen registrieren
+        await self.channel_layer.group_add(self.group_name, self.channel_name)
+
         user = self.scope.get("user")
         if user and user.is_authenticated:
             self.user_group_name = f"energy_{user.id}"
-            await self.channel_layer.group_add(
-                self.user_group_name,
-                self.channel_name
-            )
+            await self.channel_layer.group_add(self.user_group_name, self.channel_name)
 
         await self.accept()
         logger.info(
-            "[WebSocket:EnergyConsumer] Client verbunden (User: %s, Token: %s, Channel: %s)",
+            "[WebSocket:EnergyConsumer] 🔌 Client verbunden (User: %s, Token: %s, Channel: %s)",
             user if user and user.is_authenticated else "Anonymous/Device",
             self.token,
             self.channel_name,
         )
 
+        # 3. DAU-Feature: Proaktiv sofort Status beim Shelly anfragen
+        try:
+            get_status_req = {
+                "id": self.msg_counter,
+                "src": "sharegy",
+                "method": "Shelly.GetStatus",
+            }
+            self.msg_counter += 1
+            await self.send(text_data=json.dumps(get_status_req))
+        except Exception:
+            pass
+
+        # 4. Periodischen Poller starten (fordert alle 5 Sekunden Live-Werte an)
+        self.poll_task = asyncio.create_task(self._periodic_shelly_poller())
+
+    async def _periodic_shelly_poller(self):
+        """Hält die Verbindung aktiv und fordert regelmäßig Live-Daten an."""
+        try:
+            while True:
+                await asyncio.sleep(5)
+                req = {
+                    "id": self.msg_counter,
+                    "src": "sharegy",
+                    "method": "Shelly.GetStatus",
+                }
+                self.msg_counter += 1
+                await self.send(text_data=json.dumps(req))
+        except asyncio.CancelledError:
+            pass
+        except Exception:
+            pass
+
     async def disconnect(self, close_code):
-        await self.channel_layer.group_discard(
-            self.group_name,
-            self.channel_name
-        )
+        if self.poll_task:
+            self.poll_task.cancel()
+
+        await self.channel_layer.group_discard(self.group_name, self.channel_name)
         if self.user_group_name:
-            await self.channel_layer.group_discard(
-                self.user_group_name,
-                self.channel_name
-            )
-        logger.debug("[WebSocket:EnergyConsumer] Client getrennt: %s (Code: %s)", self.channel_name, close_code)
+            await self.channel_layer.group_discard(self.user_group_name, self.channel_name)
+
+        logger.debug("[WebSocket:EnergyConsumer] 🔌 Client getrennt: %s (Code: %s)", self.channel_name, close_code)
 
     async def receive(self, text_data=None, bytes_data=None):
-        """
-        Wird aufgerufen, wenn ein Gerät (z. B. Shelly Outbound WebSocket)
-        Telemetriedaten per WebSocket an Sharegy sendet.
-        """
         payload = text_data
         if not payload and bytes_data:
             payload = bytes_data.decode("utf-8", errors="ignore")
@@ -254,14 +316,17 @@ class EnergyConsumer(AsyncWebsocketConsumer):
         user = self.scope.get("user")
         res = await process_incoming_telemetry(self.token, payload, user)
 
-        # Falls Shelly oder RPC-Client eine Request-ID geschickt hat, quittieren wir den Empfang:
+        # Quittierung an den Shelly zurücksenden
         if res and res.get("msg_id") is not None:
-            ack_msg = {
-                "id": res["msg_id"],
-                "src": "sharegy",
-                "result": {"status": "ok", "device": res["device"]},
-            }
-            await self.send(text_data=json.dumps(ack_msg))
+            try:
+                ack_msg = {
+                    "id": res["msg_id"],
+                    "src": "sharegy",
+                    "result": {"status": "ok", "device": res["device"]},
+                }
+                await self.send(text_data=json.dumps(ack_msg))
+            except Exception:
+                pass
 
     async def send_energy_update(self, event):
         await self.send(text_data=json.dumps(event["data"]))
