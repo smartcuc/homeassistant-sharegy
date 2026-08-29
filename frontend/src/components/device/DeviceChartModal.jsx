@@ -2,8 +2,9 @@
 # src/components/device/DeviceChartModal.jsx
 */
 
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback, memo } from "react";
 import { useQuery } from "@tanstack/react-query";
+
 import ReactECharts from "echarts-for-react";
 import { apiFetch } from "../../api/client";
 import { useTranslation } from "react-i18next";
@@ -97,7 +98,8 @@ function DeviceChartModal({ device, onClose }) {
     const metricsQuery = useQuery({
         queryKey: ["device-metrics", device.id],
         queryFn: () => apiFetch(`/api/devices/${device.id}/metrics/`),
-        staleTime: 30000,
+        staleTime: 1000 * 60 * 30, // 30 Minuten
+        refetchOnWindowFocus: false,
     });
 
     const availableMetrics = metricsQuery.data?.metrics || [];
@@ -105,7 +107,7 @@ function DeviceChartModal({ device, onClose }) {
     const activeMetricKey = selectedMetric || primaryMetricKey;
     const activeMetricObj = availableMetrics.find(m => m.key === activeMetricKey) || availableMetrics[0];
 
-    /* ✅ DATA FETCHING (Absolut stabilisiert für Live-Updates, Multi-Metric & Custom Date-Ranges) */
+    /* ✅ DATA FETCHING (Ruhiggestellt für Stunden/Tage; nur bei Live alle 10s) */
     const query = useQuery({
         queryKey: ["timeseries", device.id, range, activeMetricKey, customDates.startDate, customDates.endDate],
         queryFn: () => {
@@ -115,10 +117,13 @@ function DeviceChartModal({ device, onClose }) {
             }
             return apiFetch(url);
         },
-        refetchInterval: live ? 3000 : false,
-        refetchIntervalInBackground: true,
+        staleTime: live ? 0 : 1000 * 60 * 15, // 15 Minuten Cache für historische Stunden/Tageswerte
+        refetchInterval: live ? 10000 : false, // Nur bei aktivem Live-Modus alle 10 Sekunden
+        refetchIntervalInBackground: false,
         refetchOnWindowFocus: false,
+        refetchOnMount: false,
     });
+
 
     const data = query.data;
     const unit = data?.unit || activeMetricObj?.unit || device.unit || "";
@@ -677,4 +682,4 @@ function DeviceChartModal({ device, onClose }) {
     );
 }
 
-export default DeviceChartModal;
+export default memo(DeviceChartModal);

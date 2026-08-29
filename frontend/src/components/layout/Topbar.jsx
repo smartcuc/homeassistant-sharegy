@@ -164,10 +164,12 @@ export default function AppTopbar() {
 
 
                 <UserMenu user={user} />
-                <SpotPriceModal
-                    open={spotModalOpen}
-                    onClose={() => setSpotModalOpen(false)}
-                />
+                {spotModalOpen && (
+                    <SpotPriceModal
+                        open={spotModalOpen}
+                        onClose={() => setSpotModalOpen(false)}
+                    />
+                )}
                 <SupportDrawer
                     isOpen={supportOpen}
                     onClose={() => setSupportOpen(false)}

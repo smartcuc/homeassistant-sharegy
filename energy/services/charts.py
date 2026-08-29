@@ -26,13 +26,14 @@ def get_dashboard_chart(device_ids):
         return []
 
     since = timezone.now() - timedelta(hours=24)
+    key_filter = Q(metric_key__in=["power", "value", "a_act_power", "apower", "load"]) | Q(metric_key__isnull=True)
 
     # 1. Versuch: 1h Aggregationen
     rows = list(
         DeviceMetric1h.objects.filter(
             device_id__in=device_ids,
         )
-        .filter(Q(metric_key__in=["power", "value"]) | Q(metric_key__isnull=True))
+        .filter(key_filter)
         .filter(bucket__gte=since)
         .values("bucket")
         .annotate(value=Sum("avg"))
@@ -40,12 +41,12 @@ def get_dashboard_chart(device_ids):
     )
 
     if not rows:
-        # Fallback: 15m Aggregationen
+        # Fallback 1: 15m Aggregationen
         rows = list(
             DeviceMetric15m.objects.filter(
                 device_id__in=device_ids,
             )
-            .filter(Q(metric_key__in=["power", "value"]) | Q(metric_key__isnull=True))
+            .filter(key_filter)
             .filter(bucket__gte=since)
             .values("bucket")
             .annotate(value=Sum("avg"))
@@ -53,17 +54,34 @@ def get_dashboard_chart(device_ids):
         )
 
     if not rows:
-        # Fallback: 1m Aggregationen
+        # Fallback 2: 1m Aggregationen
         rows = list(
             DeviceMetric1m.objects.filter(
                 device_id__in=device_ids,
             )
-            .filter(Q(metric_key__in=["power", "value"]) | Q(metric_key__isnull=True))
+            .filter(key_filter)
             .filter(bucket__gte=since)
             .values("bucket")
             .annotate(value=Sum("avg"))
             .order_by("bucket")
         )
+
+    if not rows:
+        # Fallback 3: Raw DeviceMetric
+        rows = list(
+            DeviceMetric.objects.filter(
+                device_id__in=device_ids,
+            )
+            .filter(key_filter)
+            .filter(timestamp__gte=since)
+            .values("timestamp")
+            .annotate(value=Sum("value"))
+            .order_by("timestamp")
+        )
+        # Wenn sehr viele Punkte da sind, sub-samplen auf ca. 24-48 Punkte
+        if len(rows) > 48:
+            step = len(rows) // 48
+            rows = rows[::step]
 
     return [round(row["value"] or 0, 1) for row in rows]
 
@@ -78,6 +96,7 @@ def get_house_demand_chart(
     """
     since = timezone.now() - timedelta(hours=24)
     data = defaultdict(float)
+    key_filter = Q(metric_key__in=["power", "value", "a_act_power", "apower", "load"]) | Q(metric_key__isnull=True)
 
     for dev_ids in [pv_ids, battery_ids, grid_ids]:
         if not dev_ids:
@@ -86,7 +105,7 @@ def get_house_demand_chart(
             DeviceMetric1h.objects.filter(
                 device_id__in=dev_ids,
             )
-            .filter(Q(metric_key__in=["power", "value"]) | Q(metric_key__isnull=True))
+            .filter(key_filter)
             .filter(bucket__gte=since)
             .values("bucket")
             .annotate(value=Sum("avg"))
@@ -103,7 +122,7 @@ def get_house_demand_chart(
                 DeviceMetric15m.objects.filter(
                     device_id__in=dev_ids,
                 )
-                .filter(Q(metric_key__in=["power", "value"]) | Q(metric_key__isnull=True))
+                .filter(key_filter)
                 .filter(bucket__gte=since)
                 .values("bucket")
                 .annotate(value=Sum("avg"))
@@ -111,7 +130,25 @@ def get_house_demand_chart(
             for r in rows:
                 data[r["bucket"]] += r["value"] or 0
 
+    if not data:
+        # Fallback Raw DeviceMetric
+        for dev_ids in [pv_ids, battery_ids, grid_ids]:
+            if not dev_ids:
+                continue
+            rows = (
+                DeviceMetric.objects.filter(
+                    device_id__in=dev_ids,
+                )
+                .filter(key_filter)
+                .filter(timestamp__gte=since)
+                .values("timestamp")
+                .annotate(value=Sum("value"))
+            )
+            for r in rows:
+                data[r["timestamp"]] += r["value"] or 0
+
     return [round(value, 1) for _, value in sorted(data.items())]
+
 
 
 def _query_period_data(device_ids, primary_model, fallback_model, since, time_field="bucket", val_field="avg"):

@@ -1,7 +1,7 @@
 # 🚀 Sharegy Strategische Produkt- & Architektur-Roadmap
 
 **Mission**: Die führende SaaS-Plattform für **Home Energy Management (EMS)** und **Energy Sharing Communities (ESC)**.  
-**Stand**: 26. August 2026 (Live v3)
+**Stand**: 29. August 2026 (Live v3.2)
 
 ---
 
@@ -16,15 +16,15 @@
                  ▼                                                               ▼
    ┌───────────────────────────────┐                               ┌───────────────────────────────┐
    │    🟢 SÄULE 1: EMS (FREE/PRO) │                               │    🔵 SÄULE 2: ENERGY SHARING │
-   │    Status: PRODUKTIV / GEHÄRTET│                               │    Status: IN VORBEREITUNG    │
+   │    Status: PRODUKTIV / GEHÄRTET│                               │    Status: IN ENTWICKLUNG     │
    ├───────────────────────────────┤                               ├───────────────────────────────┤
    │ • Ziel: Für jeden Haushalt    │                               │ • Ziel: Bürgerenergie/Quartier│
-   │ • Daten: MQTT, OTel, Modbus,  │                               │ • Daten: iMSys Zähler (OBIS   │
-   │   Matter 1.3, HA, Inverter    │                               │   1.8.0 Bezug, 2.8.0 Einspeis)│
+   │ • Daten: WSS, MQTT, OTel,     │                               │ • Daten: iMSys Zähler (OBIS   │
+   │   Modbus, Matter 1.3, HA      │                               │   1.8.0 Bezug, 2.8.0 Einspeis)│
    │ • Takt: Sekunden / Minuten (W)│                               │ • Takt: 15-Minuten-Raster     │
    │ • Features: Live-Fluss,       │                               │ • Features: P2P-Bilanzierung, │
-   │   Sankey, Spotpreise, Forecast│                               │   Allokation, Mieterstrom-    │
-   │   Arbitrage, CO2, AI-Alerts   │                               │   Clearing, PDF-Abrechnungen  │
+   │   Sankey, Spotpreise, Forecast│                               │   Tenant-RBAC, Allokation,    │
+   │   Arbitrage, CO2, Aktorik     │                               │   Mieterstrom, Audit-Log      │
    │ • Monetarisierung: SaaS-Abo   │                               │ • Monetarisierung: Gebühren   │
    │   (Free vs. Pro 4,99 €/M)     │                               │   pro Zähler / kWh-Clearing   │
    └───────────────────────────────┘                               └───────────────────────────────┘
@@ -38,16 +38,19 @@
 - `core_intervalreading` und `devices_devicemetric` laufen als optimierte TimescaleDB Hypertables.
 - Sub-Sekunden-Snapshots über `DeviceLatestMetric` für $O(1)$-Statusabfragen ohne teure Tabellenscans.
 - Continuous Aggregates (1h, 1d) für verzögerungsfreie Langzeit-Ladezeiten (< 10 ms).
+- **TimescaleDB Decompression-Härtung**: Automatischer Schutz vor Dekomprimierungslimits bei großen Cleanup-Jobs (`SET LOCAL timescaledb.max_tuples_decompressed_per_dml_transaction = 0;`).
 
-### ✅ B. Energiefluss, Live-Sankey & Sub-Metering Disaggregation
-- Vollständige physikalische Flussverteilung in `energy/flow_engine.py` (PV → Last → Batterie → Netz).
-- Flackerfreies ECharts & SVG Live-Sankey mit Etagen- und Raum-Gruppierung.
-- Automatische Restlast-Disaggregation ($E_{	ext{residual}} = E_{	ext{Haus}} - \sum E_{	ext{gemessen}}$) & historische Trend-Analysen.
-
-### ✅ C. Ingestion & Interoperabilität (Matter 1.3, HA, Grafana)
+### ✅ B. Live-Telemetrie & Plug-and-Play Ingestion (WSS, MQTT, Matter, HA)
+- **Outbound WSS Ingestion (`wss://sharegy.de/ws/energy/`)**: DAU-sichere WebSocket-Anbindung für alle Shelly Gen2/Gen3/Pro Geräte (z. B. Shelly 1PM Gen3, Pro 3EM) mit automatischem 5s Live-Polling (`Shelly.GetStatus`) und robuster UUID/Token-Zuordnung.
+- **Resilienter MQTT-Consumer**: Automatischer Connection-Reset bei Verbindungsabbrüchen ohne Hänger.
 - **Matter 1.3 Hub**: Volle Unterstützung von Cluster `0x0090` (Power), `0x0091` (Energy), `0x0098`/`0x0099` (EVSE/Energy Management) und QR-Code/PIN-Commissioning.
 - **Home Assistant Custom Component**: 9 Live-Sensoren, Outbound-HTTPS (`https://sharegy.de`), Telemetrie-Push-Service (`sharegy.push_telemetry`) & Lade-Blueprints.
 - **Grafana Enterprise Data Source Bridge**: JSON/Infinity REST-Bridge (`/api/grafana/*`) & Cockpit-Template.
+
+### ✅ C. Energiefluss, Live-Sankey & Sub-Metering Disaggregation
+- Vollständige physikalische Flussverteilung in `energy/flow_engine.py` (PV → Last → Batterie → Netz).
+- Flackerfreies ECharts & SVG Live-Sankey mit Etagen- und Raum-Gruppierung.
+- Automatische Restlast-Disaggregation ($E_{\text{residual}} = E_{\text{Haus}} - \sum E_{\text{gemessen}}$) & historische Trend-Analysen.
 
 ### ✅ D. Forecast-Trio, Batterie-Arbitrage & Live-CO₂-Signal
 - **48h PV-Prognose** mit Hybrid Physics + ML (Open-Meteo 96h + PLZ-Geocoding) & Ist-vs-Soll-Trefferquote (WAPE).
@@ -59,6 +62,12 @@
 - **Date-Range-Picker**: Frei wählbare Auswertungszeiträume mit Schnellwahl-Presets.
 - **Multi-Format Export-Engine**: Excel `.xlsx` (formatiert mit Formeln), druckfähiger PDF-Bericht (ReportLab), CSV (UTF-8 BOM Semikolon) und JSON-Rohdaten.
 - **Proaktive Alarmzentrale**: 8 Erkennungsregeln (PV-Ertragsausfall, Nachtdauerlast-Leckage, Speicher-Notreserve, Börsen-Preisspitzen).
+
+### ✅ F. Multi-Tenant RBAC, Audit-Log & Helpdesk
+- **Quartiers- & Tenant-Rollen**: Granulare Rechte (`admin`, `manager`, `member`, `auditor`).
+- **Revisionssicheres Audit-Log**: Automatische Protokollierung von Rollenänderungen, Einladungen und Mitglieder-Entfernungen.
+- **Vereinter Hilfe- & Support-Desk**: Ein einzelner Topbar-Button für Wissensportal, FAQ-Deflection und Live-Ticket-Support.
+- **Duale Cookie-Persistenz**: 365 Tage Speicherung über `localStorage` + persistenten HTTP-Cookie (`sharegy_cookie_consent_v1`).
 
 ---
 
@@ -79,10 +88,10 @@
   ├── 1.9 ✅ Enterprise Multi-Metric Support (OTel/MQTT multi-channel Ingest)
   ├── 1.10 ✅ Smart Device Onboarding & Simulator (ioBroker/Shelly/HA)
   ├── 1.11 ✅ Zentraler MQTT-Hub & Multi-Language i18n (DE, EN, PL in UI & Navigation)
-  └── 1.12 ✅ End-to-End Test Suite & CI/CD Stabilität (19/19 Tests OK)
+  └── 1.12 ✅ End-to-End Test Suite & CI/CD Stabilität (100% Tests OK)
 
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ MEILENSTEIN 2: EMS-PRO & KI-INTELLIGENZ (✅ Weitgehend fertiggestellt)        │
+│ MEILENSTEIN 2: EMS-PRO & AKTORIK (✅ In Umsetzung / Aktualisiert)               │
 └───────────────────────────────────────────────────────────────────────────────┘
   ├── 2.1 ✅ Smart Energy Optimizer (1h, 2h, 4h Zeitfenster nach PV-Forecast & Börsenstrom)
   ├── 2.2 ✅ Verbrauchsbilanz, Virtuelle Zähler & Residual-Last Disaggregation
@@ -90,8 +99,8 @@
   ├── 2.4 ✅ Solar-Prognosegüte & Ist-vs-Soll-Vergleich (%-Genauigkeit / WAPE)
   ├── 2.5 ✅ Verbrauchs-Prognose (Household Load Forecast Engine & Netto-Überschuss)
   ├── 2.6 ✅ Batterie- & SoC-Prognose (24h/48h Simulation & Nachtautarkie)
-  ├── 2.7 ✅ Kontextuelles Help-System & In-App Drawer (DE / EN)
-  ├── 2.8 ✅ FAQ-Portal & Digitales Benutzerhandbuch (DE / EN)
+  ├── 2.7 ✅ Vereinter Helpdesk & Support Desk (Wissensportal + FAQ-Deflection + Tickets)
+  ├── 2.8 ✅ Duale Cookie-Persistenz (DSGVO/TDDDG konform, 365 Tage Lebensdauer)
   ├── 2.9 ✅ Intelligentes Alert- & Anomalie-Erkennungssystem (Alarmzentrale & 8 Regeln)
   ├── 2.10 ✅ Submeter-Trends & Historische Zeitreihen virtueller Zähler
   ├── 2.11 ✅ Frei wählbarer Zeitraum (Date-Range-Picker) & Multi-Format Daten-Export (XLSX, PDF, CSV, JSON)
@@ -99,33 +108,37 @@
   ├── 2.13 ✅ Live CO₂-Grid-Signal & Grünstrom-Index (Echtzeit-Emissionen g CO₂/kWh & 36h Timeline)
   ├── 2.14 ✅ CSA Matter 1.3 Energy Management Hub & Bridge Engine
   ├── 2.15 ✅ Bi-direktionale Ökosystem-Plugins (Home Assistant Custom Component & Grafana REST-Bridge)
-  ├── 2.16 ✅ Subscription- & SaaS-Lizenzmodell (Free, Pro 4,99 €, Vermieter 14,99 €, PDF-Invoicing & Feature-Gating)
-  ├── 2.17 ✅ Rechtliche Compliance & DSGVO-Rechte (Impressum § 5 DDG, Datenschutz, AGB, Widerruf, Cookie-Manager, Art. 15 Export & Art. 17 Löschung)
-  ├── 2.18 ✅ Production-Härtung leere Accounts & UI/UX-Ergonomie (Zero-State Onboarding-Banner, Auto-Home-Provisioning, Topbar-Kontext)
-  ├── 2.19 ✅ Universal Helpdesk- & Incident-System (Cross-Project Support für Sharegy HEMS & Factofy Digital Twin)
-  ├── 2.20 ⏳ Deklaratives Device-Profile Addon-System (Sungrow, SMA, Deye, Huawei, Kostal, Fronius YAML)
-  ├── 2.21 ⏳ Mobile Push Notification Engine (FCM Android & APNs iOS Dispatcher)
-  └── 2.22 ⏳ Native Mobile Apps via Capacitor (iOS & Android mit Widgets & Biometrie)
+  ├── 2.16 ✅ Outbound-WSS Ingestion für alle Shelly Gen2/Gen3/Pro Modelle (`wss://sharegy.de/ws/energy/`)
+  ├── 2.17 ⏳ **NEU: Bidirektionale Aktorik & Relais-Steuerung**:
+  │          • REST Endpoint `POST /api/devices/<id>/switch/` (Turn ON/OFF/Toggle)
+  │          • Direkte WebSocket JSON-RPC Steuerung (`Switch.Set`, `Switch.Toggle`)
+  │          • UI Toggle-Schalter auf Gerätekacheln & Dashboard
+  │          • Regelbasierte Automatisierung (PV-Überschuss & Negativpreis-Schaltung)
+  ├── 2.18 ⏳ Deklaratives Device-Profile Addon-System (Sungrow, SMA, Deye, Huawei, Kostal YAML)
+  ├── 2.19 ⏳ Mobile Push Notification Engine (FCM Android & APNs iOS Dispatcher)
+  └── 2.20 ⏳ Native Mobile Apps via Capacitor (iOS & Android mit Widgets & Biometrie)
 
 ┌───────────────────────────────────────────────────────────────────────────────┐
 │ MEILENSTEIN 3: ENERGY SHARING COMMUNITIES & § 14a EnWG (Säule 2)              │
 └───────────────────────────────────────────────────────────────────────────────┘
-  ├── 3.1 Zähler- & iMSys-Datenmodell finalisieren (`AggregatedReading` OBIS 1.8.0/2.8.0)
-  ├── 3.2 Tenant-Modell Konsolidierung (`core.Tenant`)
-  ├── 3.3 15-Minuten Community-Bilanzierung & Allokationsschlüssel
-  ├── 3.4 Sharing-Tarife, Umlagen & kaufmännische Abrechnungsperioden
-  ├── 3.5 B2B/B2C Community-Portal (Erzeuger, Verbraucher, Prosumer)
-  └── 3.6 § 14a EnWG Steuerbox-Schnittstelle & Pflichtdimmung auf 4,2 kW (SteuVE)
+  ├── 3.1 ✅ Multi-Tenant RBAC & Rollenhierarchie (`admin`, `manager`, `member`, `auditor`)
+  ├── 3.2 ✅ Revisionssicheres Audit-Log für Tenant-Events (`accounts.AuditLog`)
+  ├── 3.3 ✅ Tenant-Dashboard & Mitgliedereinladungen (`/app/tenant`)
+  ├── 3.4 ⏳ 15-Minuten Community-Bilanzierung & Allokationsschlüssel (OBIS 1.8.0 / 2.8.0)
+  ├── 3.5 ⏳ Sharing-Tarife, Umlagen & kaufmännische Abrechnungsperioden
+  ├── 3.6 ⏳ B2B/B2C Community-Portal (Erzeuger, Verbraucher, Prosumer)
+  └── 3.7 ⏳ § 14a EnWG Steuerbox-Schnittstelle & Pflichtdimmung auf 4,2 kW (SteuVE)
 ```
 
 ---
 
-## 📋 4. Konkreter Action-Plan für die nächsten Meilensteine
+## 📋 4. Konkreter Action-Plan für die nächsten Schritte
 
 | Schritt | Modul | Maßnahme | Status / Prio | Impact |
 |---|---|---|:---:|---|
-| **Step 1** | `devices/profiles/` | **Deklaratives Device-Profile Addon-System**: Vorgefertigte YAML-Templates für Sungrow, SMA, Deye, Huawei, Kostal, Fronius, SolarEdge, Victron | 🔥 **P1 (Sofort)** | 1-Klick Hardware-Setup ohne manuelle Register-Eingabe |
-| **Step 2** | `notifications/` | **Mobile Push Notification Engine**: FCM & APNs Dispatcher für PV-Ausfall-, Notreserve- & Negativpreis-Pushs | 📱 **P2** | Aktive Alarmierung auf Smartphones bei geschlossener App |
-| **Step 3** | `mobile/` | **Capacitor Mobile App (iOS & Android)**: Biometrie-Login & native Homescreen-Widgets (Live-PV, SoC) | 📱 **P2** | App Store / Play Store Listung & maximale Kundenbindung |
-| **Step 4** | `tenants/` | **Tenant-Modell Konsolidierung & P2P-Clearing**: 15-Min-Bilanzierung für Mieterstrom & Quartiere | 🏢 **P3** | Kommerzieller Rollout von Säule 2 (Energy Sharing) |
-| **Step 5** | `grid/enwg/` | **§ 14a EnWG Steuerbox & Dimmung**: Dynamische Leistungsbegrenzung auf 4,2 kW für SteuVE (WP, Wallbox, Speicher) | ⚡ **P3** | Gesetzliche Netzbetreiber-Konformität in Deutschland |
+| **Step 1** | `devices/control/` | **Bidirektionale Relais-Steuerung (Shelly WSS)**: UI-Toggle-Schalter & REST-Endpoint `POST /api/devices/<id>/switch/` für Live-Schaltung von Verbrauchern | 🔥 **P1 (Sofort)** | Direkte Fernsteuerung von Relais & Lasten im Dashboard |
+| **Step 2** | `energy/optimizer/` | **PV-Überschuss-Aktorik**: Automatische Schaltung von Relais bei Überschuss oder Negativstrompreisen | 🔥 **P1 (Hoch)** | Erhöhung des Eigenverbrauchs & Automatisierung |
+| **Step 3** | `devices/profiles/` | **Deklaratives Device-Profile Addon-System**: Vorgefertigte YAML-Templates für Wechselrichter (Sungrow, SMA, Deye, Huawei, Fronius) | ⚡ **P2** | 1-Klick Hardware-Setup ohne manuelle Register-Eingabe |
+| **Step 4** | `notifications/` | **Mobile Push Notification Engine**: FCM & APNs Dispatcher für PV-Ausfall-, Notreserve- & Negativpreis-Pushs | 📱 **P2** | Aktive Alarmierung auf Smartphones bei geschlossener App |
+| **Step 5** | `tenants/` | **P2P-Clearing & 15-Minuten-Bilanzierung**: Zähler-Allokation für Energy Sharing & Mieterstrom | 🏢 **P3** | Kommerzieller Rollout von Säule 2 (Energy Sharing) |
+| **Step 6** | `grid/enwg/` | **§ 14a EnWG Steuerbox & Dimmung**: Dynamische Leistungsbegrenzung auf 4,2 kW für SteuVE (WP, Wallbox, Speicher) | ⚡ **P3** | Gesetzliche Netzbetreiber-Konformität in Deutschland |

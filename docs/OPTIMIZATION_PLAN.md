@@ -8,11 +8,12 @@
 
 | Phase | Bereich | Fokus | Status | Erledigt | Offen |
 |---|---|---|---|---|---|
-| **Phase 1** | Kritische Bugs & Flusslogik | 🟢 EMS-Free & Core | 🟢 Abgeschlossen | 1.1, 1.2, 1.3, 1.4, 1.6 | 1.5 (Sharing) |
-| **Phase 2** | DB- & Performance-Optimierung | 🟢 EMS-Free & Sharing | 🟢 100% Abgeschlossen | 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7 | – |
+| **Phase 1** | Kritische Bugs & Flusslogik | 🟢 EMS-Free & Core | 🟢 Abgeschlossen | 1.1, 1.2, 1.3, 1.4, 1.6, 1.7, 1.8, 1.9, 1.10 | 1.5 (Sharing) |
+| **Phase 2** | DB- & Performance-Optimierung | 🟢 EMS-Free & Sharing | 🟢 100% Abgeschlossen | 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8 | – |
 | **Phase 3** | Celery & Buffer-Härtung | 🟢 EMS-Free Stabilität | 🟢 100% Abgeschlossen | 3.1, 3.2, 3.3, 3.4, 3.5 | – |
 | **Phase 4** | Architektur & Diagramme | 🟢 EMS-Free Sankey & Tests | 🟢 100% Abgeschlossen | 4.1, 4.2, 4.3, 4.4 | – |
-| **Phase 5** | EMS-Pro, KI, Apps & Alerting | 🚀 Next Milestones | 🟡 In Umsetzung (5.1-5.6, 5.15-5.17 fertig) | – | 5.1 – 5.17 |
+| **Phase 5** | EMS-Pro, KI, Apps & Aktorik | 🚀 Next Milestones | 🟡 In Umsetzung (5.1-5.6, 5.15-5.17 fertig) | – | 5.7 – 5.18 |
+
 
 ---
 
@@ -437,13 +438,27 @@
 
 ---
 
+### [ ] 5.18 Bidirektionale Aktorik & Relais-Steuerung (Shelly WSS RPC & Smart Automation)
+- **Bereich**: Device Control, WebSocket Ingestion & UI Aktorik (`devices/consumers.py`, `devices/api/views.py`, `frontend/src/pages/DevicesPage.jsx`)
+- **Status**: ⏳ **In Vorbereitung (Priorität 1)**
+- **Ziel**:
+  - **REST Control Endpoint**: `POST /api/devices/<id>/switch/` mit Payload `{"on": true/false, "action": "toggle"}`.
+  - **Daphne JSON-RPC Dispatch**: Versand von `{"method": "Switch.Set", "params": {"id": 0, "on": ...}}` direkt über den bestehenden WebSocket-Kanal an den Shelly (< 5 ms Latenz).
+  - **UI Toggle Buttons**: Interaktiver Ein-/Aus-Schalter auf den Gerätekacheln in `/app/devices` und im Dashboard mit Live-Feedback.
+  - **PV-Überschuss-Schaltung**: Automatische Triggerung von steuerbaren Lasten (Warmwasser, Wallbox, Klima), sobald die PV-Erzeugung den Hausverbrauch übersteigt.
+
+---
+
 ## 🎯 6. Verbindliche Prioritätenliste für die nächsten Schritte
 
 ```
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ PRIORITÄT 1: HARDWARE-ABSTRAKTION & ONBOARDING (Sofort starten)               │
+│ PRIORITÄT 1: AKTORIK & HARDWARE-ABSTRAKTION (Sofort starten)                  │
 ├───────────────────────────────────────────────────────────────────────────────┤
-│ 1. 📄 Task 5.7: Deklaratives Device-Profile Addon-System (YAML-Templates)     │
+│ 1. ⚡ Task 5.18: Bidirektionale Relais-Steuerung (Shelly WSS RPC & UI Toggles)│
+│    -> REST Endpoint POST /api/devices/<id>/switch/ + WebSocket Switch.Set     │
+│    -> UI-Schalter im Dashboard & automatischer Überschuss-Schalter            │
+│ 2. 📄 Task 5.7: Deklaratives Device-Profile Addon-System (YAML-Templates)     │
 │    -> Vorgefertigte Profile für Sungrow, SMA, Deye, Huawei, Kostal, Fronius   │
 │    -> 1-Klick Hardware-Zuweisung im Onboarding-Wizard                         │
 └───────────────────────────────────────────────────────────────────────────────┘
@@ -452,17 +467,18 @@
 ┌───────────────────────────────────────────────────────────────────────────────┐
 │ PRIORITÄT 2: MOBILE APPS & PUSH-BENACHRICHTIGUNGEN                            │
 ├───────────────────────────────────────────────────────────────────────────────┤
-│ 2. 📲 Task 5.9: Mobile Push & Notification Engine (FCM & APNs Dispatcher)    │
-│ 3. 📱 Task 5.10: Native iOS & Android Apps via Capacitor (Widgets & Stores)   │
+│ 3. 📲 Task 5.9: Mobile Push & Notification Engine (FCM & APNs Dispatcher)    │
+│ 4. 📱 Task 5.10: Native iOS & Android Apps via Capacitor (Widgets & Stores)   │
 └───────────────────────────────────────────────────────────────────────────────┘
                                        │
                                        ▼
 ┌───────────────────────────────────────────────────────────────────────────────┐
 │ PRIORITÄT 3: SÄULE 2 - ENERGY SHARING COMMUNITIES & § 14a EnWG                │
 ├───────────────────────────────────────────────────────────────────────────────┤
-│ 4. 🏢 Task 4.1: Tenant-Modell Konsolidierung & 15-Min P2P-Clearing            │
-│ 5. ⚡ Task 3.6: § 14a EnWG Steuerbox-Schnittstelle & Pflichtdimmung (4,2 kW)  │
+│ 5. 🏢 Task 4.1: Tenant-Modell Konsolidierung & 15-Min P2P-Clearing            │
+│ 6. ⚡ Task 3.6: § 14a EnWG Steuerbox-Schnittstelle & Pflichtdimmung (4,2 kW)  │
 └───────────────────────────────────────────────────────────────────────────────┘
 ```
+
 
 

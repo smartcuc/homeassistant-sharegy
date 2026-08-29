@@ -116,17 +116,22 @@ def get_energy_data(user):
         "today_source": today["source"] if today else None,
     }
 
+    demand_chart = get_house_demand_chart(
+        list(pv_ids),
+        list(grid_ids),
+        list(battery_ids),
+    )
+    if not demand_chart and all_user_devices:
+        demand_chart = get_dashboard_chart([d.id for d in all_user_devices])
+
     charts = {
-        "load": get_house_demand_chart(
-            list(pv_ids),
-            list(grid_ids),
-            list(battery_ids),
-        ),
+        "load": demand_chart,
         "pv": get_dashboard_chart(list(pv_ids)),
         "grid": get_dashboard_chart(list(grid_ids)),
         "battery": get_dashboard_chart(list(battery_ids)),
         "today": today["history"] if today else [],
     }
+
 
     has_grid = len(grid_ids) > 0
     has_load = load.get("consumption") is not None
