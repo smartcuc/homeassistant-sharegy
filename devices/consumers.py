@@ -201,7 +201,7 @@ def process_incoming_telemetry(token, payload_str, user):
         if has_energy:
             metrics["energy"] = round(total_energy, 4)
 
-        # 5. Zeitstempel
+        # 5. Zeitstempel & Relais-Zustand (output)
         ts = timezone.now()
         raw_ts = container.get("ts") or data.get("ts")
         if raw_ts:
@@ -210,24 +210,47 @@ def process_incoming_telemetry(token, payload_str, user):
             except Exception:
                 ts = timezone.now()
 
+        # Prüfe auf Relais-Schaltzustand (switch:0, switch:1, relay:0 etc.)
+        relay_state = None
+        for k, v in container.items():
+            if isinstance(v, dict) and ("output" in v or "state" in v or "ison" in v):
+                out_val = v.get("output") if "output" in v else (v.get("state") if "state" in v else v.get("ison"))
+                if isinstance(out_val, bool):
+                    relay_state = out_val
+                    break
+                elif isinstance(out_val, str) and out_val.lower() in ("on", "true", "1"):
+                    relay_state = True
+                    break
+                elif isinstance(out_val, str) and out_val.lower() in ("off", "false", "0"):
+                    relay_state = False
+                    break
+
+        if relay_state is not None:
+            cache.set(f"device_relay_state_{device.id}", relay_state, timeout=3600)
+            cache.set(f"device_switchable_{device.id}", True, timeout=86400)
+
         # 6. Ingest & Live-Broadcast an Dashboards
-        if metrics:
-            ingest_metric_payload(
-                device=device,
-                metrics=metrics,
-                timestamp=ts,
-                source="shelly_ws",
-                meta=meta,
-            )
+        if metrics or relay_state is not None:
+            if metrics:
+                ingest_metric_payload(
+                    device=device,
+                    metrics=metrics,
+                    timestamp=ts,
+                    source="shelly_ws",
+                    meta=meta,
+                )
             logger.info(
-                "[WS-Ingest] ✅ %s -> %s W (Home: %s)",
+                "[WS-Ingest] ✅ %s -> %s W (Relais: %s, Home: %s)",
                 identifier,
                 metrics.get("power", "-"),
+                "AN" if relay_state is True else ("AUS" if relay_state is False else "-"),
                 home.name,
             )
             return {
                 "status": "ok",
                 "device": identifier,
+                "device_id": device.id,
+                "relay_state": relay_state,
                 "metrics": metrics,
                 "msg_id": data.get("id"),
             }
@@ -247,6 +270,8 @@ class EnergyConsumer(AsyncWebsocketConsumer):
         self.poll_task = None
         self.msg_counter = 1
         self.is_device = False
+        self.joined_devices = set()
+
 
     async def connect(self):
         self.group_name = "energy"
@@ -330,6 +355,12 @@ class EnergyConsumer(AsyncWebsocketConsumer):
             await self.channel_layer.group_discard(self.group_name, self.channel_name)
             if self.user_group_name:
                 await self.channel_layer.group_discard(self.user_group_name, self.channel_name)
+        else:
+            for grp in self.joined_devices:
+                try:
+                    await self.channel_layer.group_discard(grp, self.channel_name)
+                except Exception:
+                    pass
 
         logger.debug("[WebSocket:EnergyConsumer] 🔌 Client getrennt: %s (Code: %s)", self.channel_name, close_code)
 
@@ -344,6 +375,19 @@ class EnergyConsumer(AsyncWebsocketConsumer):
         user = self.scope.get("user")
         res = await process_incoming_telemetry(self.token, payload, user)
 
+        # Wenn ein Gerät identifiziert wurde, dynamisch der Channel-Gruppe für Aktorik beitreten
+        if res and res.get("device_id") and self.is_device:
+            dev_id = res["device_id"]
+            dev_ident = res.get("device")
+            grp_id = f"device_{dev_id}"
+            grp_ident = f"device_{dev_ident}"
+            if grp_id not in self.joined_devices:
+                await self.channel_layer.group_add(grp_id, self.channel_name)
+                self.joined_devices.add(grp_id)
+            if grp_ident and grp_ident not in self.joined_devices:
+                await self.channel_layer.group_add(grp_ident, self.channel_name)
+                self.joined_devices.add(grp_ident)
+
         # Quittierung nur an den Shelly zurücksenden falls er eine ID mitgeschickt hat
         if res and res.get("msg_id") is not None and self.is_device:
             try:
@@ -355,6 +399,29 @@ class EnergyConsumer(AsyncWebsocketConsumer):
                 await self.send(text_data=json.dumps(ack_msg))
             except Exception:
                 pass
+
+    async def relay_command(self, event):
+        """
+        Empfängt einen Schaltbefehl aus dem Channel-Layer (z. B. ausgelöst per REST API)
+        und sendet einen standardisierten Shelly Gen2/Gen3 RPC Frame über die WebSocket-Verbindung.
+        """
+        if self.is_device:
+            cmd = event.get("command", "toggle")  # "on", "off", "toggle"
+            channel = event.get("channel", 0)
+            rpc_req = {
+                "id": self.msg_counter,
+                "src": "sharegy",
+                "method": "Switch.Set" if cmd in ("on", "off") else "Switch.Toggle",
+                "params": {
+                    "id": channel,
+                },
+            }
+            if cmd in ("on", "off"):
+                rpc_req["params"]["on"] = (cmd == "on")
+
+            self.msg_counter += 1
+            logger.info("[WebSocket:EnergyConsumer] ⚡ Sende Schaltbefehl an Relais: %s", rpc_req)
+            await self.send(text_data=json.dumps(rpc_req))
 
     async def send_energy_update(self, event):
         # Nur an Browser-Clients senden, nicht an den Shelly selbst!

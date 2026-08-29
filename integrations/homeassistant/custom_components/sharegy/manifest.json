@@ -1,0 +1,12 @@
+{
+  "domain": "sharegy",
+  "name": "Sharegy Cloud Energy Bridge",
+  "codeowners": ["@sharegy"],
+  "config_flow": true,
+  "documentation": "https://sharegy.de/docs/integrations/homeassistant",
+  "integration_type": "hub",
+  "iot_class": "cloud_push",
+  "issue_tracker": "https://sharegy.de/support",
+  "requirements": ["aiohttp>=3.9.0"],
+  "version": "1.0.0"
+}

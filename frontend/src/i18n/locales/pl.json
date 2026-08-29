@@ -276,8 +276,9 @@
   },
   "interfaces": {
     "title": "Interfejsy",
-    "subtitle": "Zarządzaj interfejsami IoT i telemetrii dla MQTT, WebSocket i Matter 1.3.",
+    "subtitle": "Połącz swoje urządzenia smart home i centrale bezpośrednio przez Outbound-WebSocket lub MQTT z chmurą Sharegy.",
     "broker_host": "Host brokera",
+
     "port": "Port (TCP)",
     "username": "Nazwa użytkownika",
     "password": "Hasło",

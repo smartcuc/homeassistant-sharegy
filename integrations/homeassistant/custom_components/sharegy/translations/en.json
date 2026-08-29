@@ -1,0 +1,52 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Sharegy Cloud Authentication",
+        "description": "Connect your Home Assistant instance with the Sharegy Cloud Platform.",
+        "data": {
+          "host": "Sharegy Cloud Host (e.g. https://sharegy.de)",
+          "home_token": "Your Home Token (UUID)",
+          "protocol": "Transmission Protocol"
+        }
+      },
+      "entities": {
+        "title": "Assign Sensors & Entities",
+        "description": "Select which Home Assistant sensors should be streamed to Sharegy for live energy balance.",
+        "data": {
+          "grid_power_sensor": "Grid Import / Export (Watts)",
+          "pv_power_sensor": "Solar Generation / PV (Watts)",
+          "battery_power_sensor": "Battery Charge / Discharge (Watts)",
+          "battery_soc_sensor": "Battery State of Charge (SoC %)",
+          "load_power_sensor": "Total House Demand (Watts)",
+          "submeter_sensors": "Submeters / Smart Plugs (Multi-Select)",
+          "sync_interval": "Sync Interval (Seconds)"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Invalid token or authentication failure.",
+      "cannot_connect": "Failed to connect to Sharegy Cloud."
+    },
+    "abort": {
+      "already_configured": "This Sharegy Home is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Edit Sharegy Sensors",
+        "description": "Update your sensor and submeter mappings live.",
+        "data": {
+          "grid_power_sensor": "Grid Import / Export (Watts)",
+          "pv_power_sensor": "Solar Generation / PV (Watts)",
+          "battery_power_sensor": "Battery Charge / Discharge (Watts)",
+          "battery_soc_sensor": "Battery State of Charge (SoC %)",
+          "load_power_sensor": "Total House Demand (Watts)",
+          "submeter_sensors": "Submeters / Smart Plugs",
+          "sync_interval": "Sync Interval (Seconds)"
+        }
+      }
+    }
+  }
+}

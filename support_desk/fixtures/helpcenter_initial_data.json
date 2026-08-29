@@ -498,18 +498,19 @@
     "category": "34745af8-0e4e-4d2f-a386-36f4fe5a8c0f",
     "slug": "home-assistant-integration-und-telemetrie-push",
     "context_key": "interfaces",
-    "title_de": "Home Assistant Custom Integration & Telemetrie-Push",
-    "title_en": "Home Assistant Custom Integration & Telemetry Push",
-    "summary_de": "Einrichtung der nativen Home Assistant Integration (9 Sensoren, Ladefenster) und verschlüsselter Messwerte-Push (sharegy.push_telemetry).",
-    "summary_en": "Setting up the native Home Assistant integration (9 sensors, charging windows) and secure telemetry push (sharegy.push_telemetry).",
-    "content_de": "# Home Assistant Integration & Telemetrie-Push\n\nDie Sharegy Custom Component verbindet dein Smart Home bidirektional mit Sharegy HEMS.\n\n## 1. Die 9 Home Assistant Live-Sensoren\nNach der Einrichtung im HA Config Flow stehen folgende Sensoren für Dashboards und Automationen bereit:\n1. `sensor.sharegy_solar_erzeugung` (W)\n2. `sensor.sharegy_hausverbrauch` (W)\n3. `sensor.sharegy_netzleistung` (W)\n4. `sensor.sharegy_batterieleistung` (W)\n5. `sensor.sharegy_batterie_ladestand_soc` (%)\n6. `sensor.sharegy_autarkiegrad` (%)\n7. `sensor.sharegy_eigenverbrauchsquote` (%)\n8. `sensor.sharegy_borsenstrompreis` (ct/kWh)\n9. `sensor.sharegy_optimizer_best_zeitfenster` (z. B. `13:00 - 15:00` für smarte Aktorik)\n\n## 2. Lokale Messwerte an Sharegy senden (`sharegy.push_telemetry`)\nMit dem Service `sharegy.push_telemetry` kann Home Assistant Messwerte lokaler Zähler (Shelly 3EM, Zigbee-Steckdosen, Wallbox, Wärmepumpe) gebündelt an Sharegy senden:\n\n```yaml\nalias: \"Sharegy: Zählerdaten übertragen\"\ntrigger:\n  - platform: time_pattern\n    seconds: \"/10\"\naction:\n  - service: sharegy.push_telemetry\n    data:\n      devices:\n        - identifier: \"ha_grid_meter\"\n          name: \"Hausanschluss\"\n          power_w: \"{{ states('sensor.shelly_3em_total_power') | float(0) }}\"\n          energy_kwh: \"{{ states('sensor.shelly_3em_total_energy') | float(0) }}\"\n          role: \"grid\"\n        - identifier: \"ha_wallbox\"\n          name: \"Wallbox\"\n          power_w: \"{{ states('sensor.wallbox_power') | float(0) }}\"\n          role: \"consumer\"\n```\n",
-    "content_en": "# Home Assistant Integration & Telemetry Push\n\nThe Sharegy custom component bridges Home Assistant bidirectionally with Sharegy HEMS.\n\n## 1. Live Sensors\n1. `sensor.sharegy_solar_erzeugung` (W)\n2. `sensor.sharegy_hausverbrauch` (W)\n3. `sensor.sharegy_netzleistung` (W)\n4. `sensor.sharegy_batterie_ladestand_soc` (%)\n5. `sensor.sharegy_autarkiegrad` (%)\n6. `sensor.sharegy_borsenstrompreis` (ct/kWh)\n7. `sensor.sharegy_optimizer_best_zeitfenster` (e.g. `13:00 - 15:00`)\n\n## 2. Sending Local Telemetry (`sharegy.push_telemetry`)\nPush local energy meters (Shelly 3EM, Smart Plugs, Wallbox) automatically via Home Assistant automations.\n",
+    "title_de": "Home Assistant Native Integration & 1-Klick Entity Bridge",
+    "title_en": "Home Assistant Native Integration & 1-Click Entity Bridge",
+    "summary_de": "Vollständige Anleitung für die offizielle Sharegy Home Assistant Integration mit 1-Klick Entity Picker, Outbound WSS und 48h Offline-Puffer.",
+    "summary_en": "Complete guide for the official Sharegy Home Assistant integration with 1-click entity selector, outbound WSS, and 48h offline buffer.",
+    "content_de": "# Sharegy Cloud Energy Bridge für Home Assistant ⚡🏠\n\nDie offizielle **Sharegy Home Assistant Integration** überträgt alle deine lokalen Energiedaten ohne Portfreigaben und vollkommen verschlüsselt an die Sharegy Cloud.\n\n## 🌟 Highlights der Integration\n* **🎯 1-Klick Entity Picker**: Wähle deine Zähler (Netzbezug, PV-Erzeugung, Batteriespeicher, Wallbox, Wärmepumpe, Einzel-Zwischenstecker) direkt in der Home Assistant Benutzeroberfläche aus.\n* **⚡ Outbound WebSocket (WSS)**: Direkte verschlüsselte Verbindung zu `wss://sharegy.de/ws/energy/<TOKEN>/` über Standard-Port 443 (funktioniert durch jede FRITZ!Box und Firewall ohne VPN oder Portweiterleitung).\n* **💾 48h SQLite Store & Forward Puffer**: Bei Internet- oder Stromausfällen speichert Home Assistant alle Messdaten lokal in einer SQLite-Datenbank und sendet sie nach Wiederverbindung lückenlos nach.\n* **🔄 Live-Anpassung (Options Flow)**: Konfigurierte Sensoren können jederzeit unter *Einstellungen → Geräte & Dienste → Sharegy → Konfigurieren* angepasst werden.\n\n## 🚀 Installation & Einrichtung\n\n### Methode 1: Über HACS (Empfohlen)\n1. Öffne **HACS** in deinem Home Assistant.\n2. Klicke oben rechts auf das Drei-Punkte-Menü → **Benutzerdefinierte Repositories**.\n3. Trage die Repository-URL deines Sharegy-Projekts ein (Kategorie: *Integration*).\n4. Klicke auf **Herunterladen** und starte Home Assistant neu.\n5. Gehe zu **Einstellungen → Geräte & Dienste → Integration hinzufügen → Sharegy** und trage deinen persönlichen Haushalts-Token ein.\n\n### Methode 2: Manuelle Installation\n1. Kopiere den Ordner `custom_components/sharegy` in deinen HA-Ordner `config/custom_components/`.\n2. Starte Home Assistant neu und füge Sharegy unter *Geräte & Dienste* hinzu.\n",
+    "content_en": "# Sharegy Cloud Energy Bridge for Home Assistant ⚡🏠\n\nThe official **Sharegy Home Assistant Integration** streams all your local smart home and energy data securely to the Sharegy Cloud without firewall changes or open ports.\n\n## 🌟 Key Features\n* **🎯 1-Click Entity Picker**: Select your energy sensors (Grid, Solar PV, Battery Storage, EV Charger, Heat Pump, Smart Plugs) natively inside the HA UI.\n* **⚡ Outbound WebSocket (WSS)**: Secure streaming directly to `wss://sharegy.de/ws/energy/<TOKEN>/` over standard Port 443.\n* **💾 48h SQLite Store & Forward Buffer**: If your internet connection drops, telemetry is buffered locally and automatically synchronized once reconnected.\n* **🔄 Live Options Flow**: Easily modify mapped sensors anytime under *Settings → Devices & Services → Sharegy → Configure*.\n",
     "tags": [
       "homeassistant",
       "custom component",
-      "push_telemetry",
-      "aktoren",
-      "wallbox",
+      "hacs",
+      "websocket",
+      "offline buffer",
+      "entity picker",
       "shelly"
     ],
     "is_published": true,
@@ -519,7 +520,7 @@
     "helpful_yes": 0,
     "helpful_no": 0,
     "created_at": "2026-08-25T22:33:36.287Z",
-    "updated_at": "2026-08-25T22:33:36.287Z"
+    "updated_at": "2026-08-29T22:30:00.000Z"
   }
 },
 {
@@ -527,22 +528,24 @@
   "pk": "b8ba37f3-c8fb-4bfd-ba78-5c8812f714ca",
   "fields": {
     "category": "34745af8-0e4e-4d2f-a386-36f4fe5a8c0f",
-    "slug": "matter-1-3-energy-management-und-hub",
+    "slug": "shelly-wss-und-relais-steuerung",
     "context_key": "interfaces",
-    "title_de": "Matter 1.3 Energy Hub (Smart Plugs, EVSE & Inverter)",
-    "title_en": "Matter 1.3 Energy Hub (Smart Plugs, EVSE & Inverters)",
-    "summary_de": "Kopplung und Steuerung moderner Matter-Geräte via Thread/Wi-Fi/IP unter Nutzung des CSA Matter 1.3 Energy Management Standards.",
-    "summary_en": "Commissioning and controlling Matter devices via Thread/Wi-Fi/IP utilizing the CSA Matter 1.3 Energy Management standard.",
-    "content_de": "# Matter 1.3 Energy Management Hub\n\nSharegy verfügt über einen nativen **Matter Hub** mit voller Unterstützung des **CSA Matter 1.3 Energy Management Standards**.\n\n## 1. Unterstützte Matter-Cluster\n* **`0x0090` (Electrical Power Measurement)**: Misst Live-Leistung (`ActivePower` in W/mW), Spannung (`RMSVoltage` in mV), Stromstärke (`ActiveCurrent` in mA) und Power Factor.\n* **`0x0091` (Electrical Energy Measurement)**: Erfasst kumulierte Zählerstände (`CumulativeEnergyImported`) in kWh.\n* **`0x0006` (On/Off Cluster)**: Schaltet Relais und Zwischenstecker ein, aus oder toggelt ihren Zustand.\n* **`0x0098` / `0x0099` (Device Energy Management & EVSE)**: Dynamische Leistungsbegrenzung (`power_adjustment_limit_w`) und Ladestromsteuerung (`max_charge_current_a`) für Wallboxen und Wärmepumpen.\n\n## 2. Gerät per QR-Code oder Pairing-Code koppeln\n1. Gehe in Sharegy auf **Schnittstellen & MQTT → Matter 1.3 Energy Hub**.\n2. Klicke auf **+ Neues Matter-Gerät koppeln**.\n3. Wähle die Kopplungsmethode:\n   * **📷 QR-Code Payload**: z. B. `MT:Y.K9042C00KA0648G00`\n   * **🔢 Manueller Code**: 11-stellig (z. B. `34970112332`) oder 21-stellig\n   * **🔑 Setup-PIN**: 8-stelliger Geräte-PIN (z. B. `20202021`)\n4. Nach dem Klick auf **Gerät verbinden** wird das Gerät automatisch in der Matter Fabric registriert und in die Sharegy-Zählerhierarchie eingebunden.\n",
-    "content_en": "# Matter 1.3 Energy Management Hub\n\nSharegy provides a native **Matter Hub** fully compliant with the **CSA Matter 1.3 Energy Management standard**.\n\n## 1. Supported Matter Clusters\n* **`0x0090` (Electrical Power Measurement)**: Real-time active power (W), RMS voltage, active current, and power factor.\n* **`0x0091` (Electrical Energy Measurement)**: Cumulative imported energy (kWh).\n* **`0x0006` (On/Off Cluster)**: Smart plug relay toggling and switching.\n* **`0x0098` / `0x0099` (Device Energy Management & EVSE)**: Dynamic EV charging limits and heat pump modulation.\n\n## 2. Commissioning Devices\nPair devices in seconds via QR-Code (`MT:...`), 11-/21-digit manual pairing codes, or setup PINs directly from the **Matter 1.3 Energy Hub** card.\n",
+    "title_de": "Shelly Outbound WebSocket & Bidirektionale Relais-Steuerung",
+    "title_en": "Shelly Outbound WebSocket & Bidirectional Relay Actuation",
+    "summary_de": "Einrichtung von Shelly Gen2/Gen3/Pro Relais per Outbound WSS (Port 443) und Live-Schaltung von Verbrauchern direkt im Sharegy Dashboard.",
+    "summary_en": "Setting up Shelly Gen2/Gen3/Pro devices via Outbound WSS (Port 443) and live consumer actuation directly from the Sharegy dashboard.",
+    "content_de": "# Shelly Outbound WebSocket & Bidirektionale Relais-Steuerung 🔌⚡\n\nSharegy unterstützt die direkte, bidirektionale Steuerung von **Shelly-Geräten der 2. und 3. Generation** (Plus, Pro, Gen3, Mini) über verschlüsselte Outbound-WebSockets.\n\n## 1. Vorteile der Outbound-WSS-Technologie\n* 🔒 **Keine offenen Ports oder Portweiterleitungen**: Das Gerät baut von innen heraus eine sichere TLS-Verbindung zu Sharegy auf.\n* ⚡ **Echtzeit-Latenz (< 10 ms)**: Messwerte (W, V, A, kWh) und Schaltbefehle (Relais AN / AUS) werden ohne Verzögerung übertragen.\n* 💡 **Optimistisches Dashboard-Feedback**: Schalte smarte Zwischenstecker, Warmwasserstäbe oder Wallbox-Freigaben direkt per Klick im Dashboard.\n\n## 2. Einrichtung im Shelly Webinterface (in 2 Minuten)\n1. Öffne die IP-Adresse deines Shelly-Geräts im Webbrowser (oder in der Shelly Smart Control App).\n2. Navigiere zu **Settings → Outbound WebSocket** (oder *Advanced - Developer Settings*).\n3. Aktiviere den WebSocket-Schalter (**Enable**).\n4. Wähle als Server-Typ: **`ws`** oder **`wss`**.\n5. Trage deine persönliche Sharegy-URL ein:\n   > `wss://sharegy.de/ws/energy/<DEIN_HAUSHALTS_TOKEN>/`\n6. Klicke auf **Save Settings**.\n\nSobald der Shelly verbunden ist, wird er automatisch in deiner **Geräteliste** angelegt und der **Relais-Schalter** steht sofort bereit!\n\n## 3. Unterstützte Geräte & Protokolle\n* **Shelly Smart Plugs & Relais**: Shelly Plus 1PM, Shelly 1PM Gen3, Shelly Plus Plug S, Shelly Pro 1PM, Pro 4PM, Mini 1PM.\n* **Dreiphasige Energiemesser**: Shelly Pro 3EM, Shelly 3EM.\n* **Tasmota Smart Plugs**: Nous A1T, Gosund SP111, Sonoff POW Elite/Origin.\n* **Balkonkraftwerk-Wechselrichter**: OpenDTU / AhoyDTU für Hoymiles (inkl. Nulleinspeisung/Leistungsbegrenzung).\n* **Wallboxen**: OCPP 1.6-J über WSS für dynamisches PV-Überschussladen.\n",
+    "content_en": "# Shelly Outbound WebSocket & Bidirectional Relay Actuation 🔌⚡\n\nSharegy provides native bidirectional control for **Shelly Gen2, Gen3, and Pro series** devices over encrypted Outbound WebSockets.\n\n## 1. Outbound WSS Benefits\n* 🔒 **Zero Port Forwarding**: The device initiates an outbound TLS connection over standard Port 443.\n* ⚡ **Real-time Latency (< 10ms)**: High-speed telemetry and immediate relay actuation.\n* 💡 **Interactive UI Switches**: Toggle relays and smart plugs directly from your Sharegy dashboard.\n\n## 2. Configuration Steps\n1. Open your Shelly's local web portal.\n2. Navigate to **Settings → Outbound WebSocket**.\n3. Enable WebSockets and enter your Sharegy connection URL:\n   > `wss://sharegy.de/ws/energy/<YOUR_HOME_TOKEN>/`\n4. Click **Save Settings**.\n",
     "tags": [
-      "matter",
-      "matter 1.3",
-      "csa",
-      "thread",
+      "shelly",
+      "wss",
+      "relais",
+      "aktorik",
+      "schalten",
       "smart plug",
-      "evse",
-      "energy management"
+      "tasmota",
+      "opendtu",
+      "ocpp"
     ],
     "is_published": true,
     "is_featured": true,
@@ -551,8 +554,9 @@
     "helpful_yes": 0,
     "helpful_no": 0,
     "created_at": "2026-08-25T22:33:36.292Z",
-    "updated_at": "2026-08-25T22:33:36.292Z"
+    "updated_at": "2026-08-29T22:30:00.000Z"
   }
 }
 ]
+
 

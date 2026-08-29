@@ -260,6 +260,8 @@ class DeviceSerializer(serializers.ModelSerializer):
 
     display_name = serializers.SerializerMethodField()
     classified = serializers.SerializerMethodField()
+    is_switchable = serializers.SerializerMethodField()
+    relay_state = serializers.SerializerMethodField()
 
     last_seen = serializers.DateTimeField(
         read_only=True,
@@ -279,6 +281,8 @@ class DeviceSerializer(serializers.ModelSerializer):
             "identifier",
             "display_name",
             "classified",
+            "is_switchable",
+            "relay_state",
             "last_seen",
             "delete_after",
             "config",
@@ -293,6 +297,24 @@ class DeviceSerializer(serializers.ModelSerializer):
         if hasattr(obj, "config") and obj.config:
             return obj.config.is_classified()
         return False
+
+    def get_is_switchable(self, obj):
+        from django.core.cache import cache
+        if cache.get(f"device_switchable_{obj.id}"):
+            return True
+        ident = (obj.identifier or "").lower()
+        if any(k in ident for k in ["shelly", "plug", "switch", "relay", "1pm", "plus1", "pro1", "pro2", "pro4"]):
+            return True
+        if hasattr(obj, "config") and obj.config:
+            if obj.config.role and obj.config.role.key in ("consumer", "heatpump", "evse"):
+                return True
+        return False
+
+    def get_relay_state(self, obj):
+        from django.core.cache import cache
+        state = cache.get(f"device_relay_state_{obj.id}")
+        return state if state is not None else False
+
 
 
 # ============================================================

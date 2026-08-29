@@ -923,3 +923,91 @@ def regenerate_mqtt_password(request):
     return Response(HomeSerializer(home).data)
 
 
+# ============================================================
+# ✅ BIDIRECTIONAL RELAY SWITCHING (ACTUATION)
+# ============================================================
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def device_switch(request, device_id):
+    """
+    Schaltet das Relais eines Geräts (Shelly WSS / MQTT / Smart Plug) ein, aus oder toggelt es.
+    Body:
+    {
+        "state": "on" | "off" | "toggle",
+        "channel": 0
+    }
+    """
+    import logging
+    from django.core.cache import cache
+    from channels.layers import get_channel_layer
+    from asgiref.sync import async_to_sync
+
+    logger = logging.getLogger(__name__)
+    device = get_object_or_404(Device, id=device_id)
+
+    # Berechtigungsprüfung
+    user_homes = request.user.homes.all()
+    if device.home not in user_homes and not request.user.is_staff and not request.user.is_superuser:
+        return Response({"error": "Keine Berechtigung für dieses Gerät."}, status=403)
+
+    state = str(request.data.get("state", "toggle")).lower().strip()
+    channel = int(request.data.get("channel", 0))
+
+    if state not in ("on", "off", "toggle", "true", "false", "1", "0"):
+        return Response({"error": "Ungültiger Zustand. Erlaubt sind 'on', 'off' oder 'toggle'."}, status=400)
+
+    if state in ("true", "1"):
+        state = "on"
+    elif state in ("false", "0"):
+        state = "off"
+
+    # 1. Ermittle neuen Zielzustand
+    current_state = cache.get(f"device_relay_state_{device.id}", False)
+    if state == "toggle":
+        target_state = not current_state
+        cmd = "on" if target_state else "off"
+    else:
+        target_state = (state == "on")
+        cmd = state
+
+    # 2. Cache sofort optimistisch aktualisieren
+    cache.set(f"device_relay_state_{device.id}", target_state, timeout=3600)
+    cache.set(f"device_switchable_{device.id}", True, timeout=86400)
+
+    # 3. Befehl über Channels Layer an den verbundenen WebSocket (Daphne) senden
+    channel_layer = get_channel_layer()
+    if channel_layer:
+        try:
+            async_to_sync(channel_layer.group_send)(
+                f"device_{device.id}",
+                {
+                    "type": "relay_command",
+                    "command": cmd,
+                    "channel": channel,
+                },
+            )
+            async_to_sync(channel_layer.group_send)(
+                f"device_{device.identifier}",
+                {
+                    "type": "relay_command",
+                    "command": cmd,
+                    "channel": channel,
+                },
+            )
+        except Exception as e:
+            logger.warning("[Device-Switch] Fehler beim Senden an Channel-Layer: %s", e)
+
+    logger.info("[Device-Switch] ⚡ Relais für %s (ID: %s) geschaltet: %s -> %s (Kanal: %s)", device.identifier, device.id, current_state, target_state, channel)
+
+    return Response({
+        "status": "success",
+        "device_id": device.id,
+        "identifier": device.identifier,
+        "relay_state": target_state,
+        "command": cmd,
+        "channel": channel,
+    })
+
+
+

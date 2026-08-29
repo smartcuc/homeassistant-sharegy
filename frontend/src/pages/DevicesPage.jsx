@@ -110,6 +110,37 @@ function DeviceCard({ device, onSelect, onEdit, onDelete }) {
     const isOnline = device.status === "online";
     const missing = isIncomplete(config);
 
+    const [isSwitching, setIsSwitching] = useState(false);
+    const [relayState, setRelayState] = useState(device.relay_state ?? false);
+
+    useEffect(() => {
+        if (device.relay_state !== undefined) {
+            setRelayState(device.relay_state);
+        }
+    }, [device.relay_state]);
+
+    const handleToggleRelay = async (e) => {
+        e.stopPropagation();
+        if (isSwitching) return;
+        setIsSwitching(true);
+        const target = !relayState;
+        setRelayState(target); // Optimistisches Feedback
+        try {
+            const res = await apiFetch(`/api/devices/${device.id}/switch/`, {
+                method: "POST",
+                body: JSON.stringify({ state: "toggle" }),
+            });
+            if (res && res.relay_state !== undefined) {
+                setRelayState(res.relay_state);
+            }
+        } catch (err) {
+            console.error("Relay switch error:", err);
+            setRelayState(!target); // Revert bei Fehler
+        } finally {
+            setIsSwitching(false);
+        }
+    };
+
     const roleStyle = getRoleColor(config);
 
     function getIcon(config) {
@@ -173,7 +204,7 @@ function DeviceCard({ device, onSelect, onEdit, onDelete }) {
                             e.stopPropagation();
                             onEdit(device);
                         }}
-                        className="text-gray-400 hover:text-gray-600 p-1 rounded hover:bg-gray-100"
+                        className="text-gray-400 hover:text-gray-600 p-1 rounded hover:bg-gray-100 cursor-pointer"
                         title={t("devices.setup_title", "Konfigurieren")}
                     >
                         ⚙️
@@ -184,7 +215,7 @@ function DeviceCard({ device, onSelect, onEdit, onDelete }) {
                             e.stopPropagation();
                             onDelete(device);
                         }}
-                        className="text-gray-400 hover:text-rose-600 p-1 rounded hover:bg-gray-100"
+                        className="text-gray-400 hover:text-rose-600 p-1 rounded hover:bg-gray-100 cursor-pointer"
                         title={t("nav.remove_device", "In den Papierkorb verschieben")}
                     >
                         🗑️
@@ -230,6 +261,31 @@ function DeviceCard({ device, onSelect, onEdit, onDelete }) {
                 </div>
             )}
 
+            {/* ⚡ INTERAKTIVER RELAIS-SCHALTER (AKTORIK) */}
+            {device.is_switchable && (
+                <div className="mt-3 pt-2.5 border-t border-gray-200/60 flex items-center justify-between">
+                    <span className="text-xs font-semibold text-gray-700 flex items-center gap-1">
+                        <span>⚡</span>
+                        <span>{relayState ? t("devices.relay_on", "Relais AN") : t("devices.relay_off", "Relais AUS")}</span>
+                    </span>
+                    <button
+                        type="button"
+                        onClick={handleToggleRelay}
+                        disabled={isSwitching}
+                        className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
+                            relayState ? "bg-emerald-500" : "bg-gray-300"
+                        } ${isSwitching ? "opacity-60 cursor-wait" : ""}`}
+                        title={relayState ? t("devices.relay_turn_off", "Relais ausschalten") : t("devices.relay_turn_on", "Relais einschalten")}
+                    >
+                        <span
+                            className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                                relayState ? "translate-x-5" : "translate-x-0"
+                            }`}
+                        />
+                    </button>
+                </div>
+            )}
+
             {missing && (
                 <div className="text-xs text-yellow-700 mt-2">
                     {t("devices.incomplete_badge", "⚠ Unvollständig konfiguriert")}
@@ -238,6 +294,7 @@ function DeviceCard({ device, onSelect, onEdit, onDelete }) {
         </div>
     );
 }
+
 
 /* =========================================================
    PAGE

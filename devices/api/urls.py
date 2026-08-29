@@ -23,7 +23,9 @@ from .views import (
     device_dashboard_values,
     simulate_telemetry,
     regenerate_mqtt_password,
+    device_switch,
 )
+
 
 from devices.views import (
     device_status_list,
@@ -51,7 +53,9 @@ urlpatterns = [
     path("<int:device_id>/export", export_device_timeseries_view),
     path("<int:device_id>/timeseries/export/", export_device_timeseries_view),
     path("<int:device_id>/simulate/", simulate_telemetry),
+    path("<int:device_id>/switch/", device_switch),
     path("sankey/", sankey_data),
+
     path("homes/", list_homes),
     path("homes/regenerate-mqtt/", regenerate_mqtt_password),
     path("mqtt-profiles/", mqtt_profile_list),

@@ -52,8 +52,9 @@ export default function Settings() {
                             <span>📡</span> {t("interfaces.title", "Schnittstellen")}
                         </h2>
                         <p className="text-xs text-gray-500 mt-0.5">
-                            {t("settings.interfaces_desc", "Zugangsdaten für MQTT, Outbound-WebSocket (Shelly) und Matter 1.3.")}
+                            {t("settings.interfaces_desc", "Zugangsdaten für Outbound-WebSocket (Shelly) und MQTT (Home Assistant / ioBroker).")}
                         </p>
+
 
                     </div>
                     <Link
