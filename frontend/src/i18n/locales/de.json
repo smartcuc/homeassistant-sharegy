@@ -53,8 +53,9 @@
     "producers": "Erzeugeranlagen",
     "tariffs": "Strompreise & Tarife",
     "billing": "Abonnement & Tarife",
-    "mqtt_interfaces": "Schnittstellen & MQTT",
+    "mqtt_interfaces": "Schnittstellen",
     "app_settings": "App-Einstellungen",
+
     "admin_group": "Administration & Staff",
     "admin_dashboard": "Admin Dashboard",
     "admin_tracking": "Event & Tracking",
@@ -274,9 +275,10 @@
     "no_timeseries_data": "Keine Zeitreihendaten für diesen Zeitraum erfasst"
   },
   "interfaces": {
-    "title": "MQTT & Schnittstellen",
-    "subtitle": "Globale Zugangsdaten für ioBroker, Home Assistant, OpenTelemetry, Node-RED & Shelly",
+    "title": "Schnittstellen",
+    "subtitle": "Verwalte deine IoT- und Telemetrie-Schnittstellen für MQTT, WebSocket und Matter 1.3.",
     "broker_host": "Broker Host",
+
     "port": "Port (TCP)",
     "username": "Benutzername",
     "password": "Passwort",

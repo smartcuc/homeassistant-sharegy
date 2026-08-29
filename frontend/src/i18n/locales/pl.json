@@ -53,8 +53,9 @@
     "producers": "Instalacje wytwórcze",
     "tariffs": "Taryfy prądu",
     "billing": "Subskrypcja i rozliczenia",
-    "mqtt_interfaces": "Interfejsy i MQTT",
+    "mqtt_interfaces": "Interfejsy",
     "app_settings": "Ustawienia aplikacji",
+
     "admin_group": "Administracja i personel",
     "admin_dashboard": "Panel administratora",
     "admin_tracking": "Zdarzenia i analityka",
@@ -274,8 +275,8 @@
     "no_timeseries_data": "Brak danych szeregów czasowych dla tego okresu"
   },
   "interfaces": {
-    "title": "MQTT i interfejsy",
-    "subtitle": "Globalne dane dostępowe dla ioBroker, Home Assistant, OpenTelemetry, Node-RED i Shelly",
+    "title": "Interfejsy",
+    "subtitle": "Zarządzaj interfejsami IoT i telemetrii dla MQTT, WebSocket i Matter 1.3.",
     "broker_host": "Host brokera",
     "port": "Port (TCP)",
     "username": "Nazwa użytkownika",

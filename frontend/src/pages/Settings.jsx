@@ -49,11 +49,12 @@ export default function Settings() {
                 <div className="flex items-center justify-between">
                     <div>
                         <h2 className="font-semibold text-gray-900 flex items-center gap-2">
-                            <span>📡</span> {t("interfaces.title", "MQTT & Schnittstellen")}
+                            <span>📡</span> {t("interfaces.title", "Schnittstellen")}
                         </h2>
                         <p className="text-xs text-gray-500 mt-0.5">
-                            {t("settings.interfaces_desc", "Zugangsdaten für ioBroker, Home Assistant, OpenTelemetry und Shelly.")}
+                            {t("settings.interfaces_desc", "Zugangsdaten für MQTT, Outbound-WebSocket (Shelly) und Matter 1.3.")}
                         </p>
+
                     </div>
                     <Link
                         to="/app/interfaces"

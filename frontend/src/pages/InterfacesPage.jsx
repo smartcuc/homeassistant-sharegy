@@ -48,32 +48,34 @@ export default function InterfacesPage() {
     const mqttPass = primaryHome?.mqtt_password || "-";
     const baseTopic = primaryHome?.mqtt_token ? `h/${primaryHome.mqtt_token}/#` : "h/<token>/#";
 
+    const wsUrl = `wss://${window.location.host || "sharegy.de"}/ws/energy/${primaryHome?.mqtt_token || "<TOKEN>"}/`;
+
     return (
-        <div className="p-6 max-w-4xl space-y-6">
+        <div className="p-6 max-w-4xl space-y-8">
 
             {/* HEADER */}
             <div>
                 <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                    <span>📡</span> {t("interfaces.title", "MQTT & Schnittstellen")}
+                    <span>📡</span> {t("interfaces.title", "Schnittstellen")}
                 </h1>
                 <p className="text-sm text-gray-500 mt-1">
-                    {t("interfaces.subtitle", "Verwalte deine globalen IoT-Telemetrie-Zugangsdaten für MQTT und OpenTelemetry.")}
+                    {t("interfaces.subtitle", "Verwalte deine IoT- und Telemetrie-Schnittstellen für MQTT, WebSocket und Matter 1.3.")}
                 </p>
             </div>
 
-            {/* MAIN INTERFACE CARD */}
-            <div className="bg-white border border-indigo-100 rounded-2xl shadow-sm overflow-hidden ring-1 ring-indigo-50">
-                <div className="p-5 bg-gradient-to-r from-indigo-50/80 via-blue-50/40 to-white border-b border-indigo-100 flex flex-wrap items-center justify-between gap-3">
+            {/* 1. SECTION: MQTT INTERFACE CARD */}
+            <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+                <div className="p-5 bg-gradient-to-r from-slate-50 via-indigo-50/30 to-white border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xl shadow-sm">
+                        <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xl shadow-xs">
                             📡
                         </div>
                         <div>
                             <h2 className="text-base font-bold text-gray-900">
-                                {t("interfaces.title", "MQTT & Smart Home Schnittstelle")}
+                                1. MQTT Broker Schnittstelle
                             </h2>
                             <p className="text-xs text-gray-500">
-                                {t("interfaces.subtitle", "Globale Zugangsdaten für ioBroker, Home Assistant, Node-RED, OTel & Shelly")}
+                                Standard-IoT-Protokoll für ioBroker, Home Assistant, Node-RED & OpenTelemetry
                             </p>
                         </div>
                     </div>
@@ -81,7 +83,7 @@ export default function InterfacesPage() {
                     <div className="flex items-center gap-2">
                         <button
                             onClick={() => setShowQR(true)}
-                            className="px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-gray-700 text-xs font-semibold rounded-lg shadow-xs transition flex items-center gap-1.5"
+                            className="px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-gray-700 text-xs font-semibold rounded-lg shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
                         >
                             <span>📱</span> {t("interfaces.qr_code", "QR-Code")}
                         </button>
@@ -90,7 +92,7 @@ export default function InterfacesPage() {
                                 const text = `Host: ${mqttHost}\nPort: ${mqttPort}\nUser: ${mqttUser}\nPass: ${mqttPass}\nBase Topic: ${baseTopic}`;
                                 safeCopy(text, "all_mqtt");
                             }}
-                            className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-xs transition flex items-center gap-1.5"
+                            className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
                         >
                             {copiedKey === "all_mqtt" ? `✅ ${t("common.copied", "Kopiert!")}` : t("interfaces.copy_all", "📋 Alle Daten kopieren")}
                         </button>
@@ -114,7 +116,7 @@ export default function InterfacesPage() {
                                         <span>{mqttHost}</span>
                                         <button
                                             onClick={() => safeCopy(mqttHost, "host")}
-                                            className="text-gray-400 hover:text-indigo-600 text-xs ml-1"
+                                            className="text-gray-400 hover:text-indigo-600 text-xs ml-1 cursor-pointer"
                                             title={t("common.copy", "Kopieren")}
                                         >
                                             {copiedKey === "host" ? "✓" : "📋"}
@@ -142,7 +144,7 @@ export default function InterfacesPage() {
                                         <span className="truncate">{mqttUser}</span>
                                         <button
                                             onClick={() => safeCopy(mqttUser, "user")}
-                                            className="text-gray-400 hover:text-indigo-600 text-xs ml-1"
+                                            className="text-gray-400 hover:text-indigo-600 text-xs ml-1 cursor-pointer"
                                             title={t("common.copy", "Kopieren")}
                                         >
                                             {copiedKey === "user" ? "✓" : "📋"}
@@ -161,14 +163,14 @@ export default function InterfacesPage() {
                                         <div className="flex items-center gap-1.5 ml-1">
                                             <button
                                                 onClick={() => setShowPassword((v) => !v)}
-                                                className="text-gray-400 hover:text-indigo-600 text-xs"
+                                                className="text-gray-400 hover:text-indigo-600 text-xs cursor-pointer"
                                                 title={showPassword ? "Verstecken" : "Anzeigen"}
                                             >
                                                 {showPassword ? "🙈" : "👁️"}
                                             </button>
                                             <button
                                                 onClick={() => safeCopy(mqttPass, "pass")}
-                                                className="text-gray-400 hover:text-indigo-600 text-xs"
+                                                className="text-gray-400 hover:text-indigo-600 text-xs cursor-pointer"
                                                 title={t("common.copy", "Kopieren")}
                                             >
                                                 {copiedKey === "pass" ? "✓" : "📋"}
@@ -179,7 +181,7 @@ export default function InterfacesPage() {
                             </div>
 
                             {/* BASE TOPIC BANNER */}
-                            <div className="p-3.5 bg-indigo-50/60 border border-indigo-100 rounded-xl flex flex-wrap items-center justify-between gap-3 text-xs">
+                            <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl flex flex-wrap items-center justify-between gap-3 text-xs">
                                 <div>
                                     <span className="text-gray-500 font-medium">{t("interfaces.base_topic", "Dein persönliches Basis-Topic:")} </span>
                                     <code className="font-mono font-bold text-indigo-700 bg-white px-2 py-0.5 rounded border border-indigo-200">
@@ -189,7 +191,7 @@ export default function InterfacesPage() {
                                 <button
                                     onClick={handleRegeneratePassword}
                                     disabled={isRegenerating}
-                                    className="text-xs text-red-600 hover:text-red-700 font-semibold hover:underline flex items-center gap-1"
+                                    className="text-xs text-red-600 hover:text-red-700 font-semibold hover:underline flex items-center gap-1 cursor-pointer"
                                 >
                                     <span>🔄</span> {isRegenerating ? t("common.loading", "Generiere...") : t("interfaces.regenerate_btn", "Passwort neu generieren")}
                                 </button>
@@ -199,15 +201,15 @@ export default function InterfacesPage() {
                             <div className="border border-slate-200 rounded-xl overflow-hidden">
                                 <div className="flex bg-slate-50 border-b border-slate-200 text-xs font-semibold overflow-x-auto">
                                     {[
-                                        { id: "iobroker", label: t("interfaces.tab_iobroker", "🔧 ioBroker Anleitung") },
-                                        { id: "homeassistant", label: t("interfaces.tab_ha", "🏠 Home Assistant") },
-                                        { id: "otel", label: t("interfaces.tab_otel", "🔭 OpenTelemetry (OTel)") },
-                                        { id: "shelly", label: t("interfaces.tab_shelly", "⚡ Shelly Web-UI") },
+                                        { id: "iobroker", label: "🔧 ioBroker" },
+                                        { id: "homeassistant", label: "🏠 Home Assistant" },
+                                        { id: "otel", label: "🔭 OpenTelemetry (OTel)" },
+                                        { id: "shelly_mqtt", label: "⚡ Shelly (MQTT)" },
                                     ].map((tab) => (
                                         <button
                                             key={tab.id}
                                             onClick={() => setGuideTab(tab.id)}
-                                            className={`px-4 py-2.5 transition whitespace-nowrap ${guideTab === tab.id
+                                            className={`px-4 py-2.5 transition whitespace-nowrap cursor-pointer ${guideTab === tab.id
                                                 ? "bg-white text-indigo-600 border-b-2 border-indigo-600 font-bold"
                                                 : "text-gray-500 hover:text-gray-900"
                                                 }`}
@@ -275,7 +277,7 @@ exporters:
                                         </div>
                                     )}
 
-                                    {guideTab === "shelly" && (
+                                    {guideTab === "shelly_mqtt" && (
                                         <div className="space-y-1.5 text-gray-600">
                                             <p>1. Öffne die Weboberfläche deines Shelly im Browser $\rightarrow$ <strong>Settings</strong> $\rightarrow$ <strong>MQTT</strong>.</p>
                                             <p>2. Aktiviere <strong>Enable MQTT</strong> und trage Server <code className="bg-slate-100 px-1 rounded font-mono">{mqttHost}:{mqttPort}</code> ein.</p>
@@ -289,8 +291,116 @@ exporters:
                 </div>
             </div>
 
-            {/* MATTER 1.3 ENERGY HUB */}
-            <MatterHubCard />
+            {/* 2. SECTION: WEBSOCKET INTERFACE (SHELLY WSS) */}
+            <div className="bg-white border border-amber-200/80 rounded-2xl shadow-xs overflow-hidden ring-1 ring-amber-100">
+                <div className="p-5 bg-gradient-to-r from-amber-50/80 via-orange-50/30 to-white border-b border-amber-200/80 flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center text-xl shadow-xs">
+                            ⚡
+                        </div>
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <h2 className="text-base font-bold text-gray-900">
+                                    2. Outbound-WebSocket Schnittstelle (Shelly Gen2 / Gen3 / Pro)
+                                </h2>
+                                <span className="text-[10px] font-bold px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full border border-amber-200">
+                                    Empfohlen & DAU-sicher
+                                </span>
+                            </div>
+                            <p className="text-xs text-gray-500">
+                                Voll verschlüsselte Live-Verbindung über Port 443 (WSS) für Shelly 1PM Gen3, Pro 3EM, Plus 1PM uvm.
+                            </p>
+                        </div>
+                    </div>
+
+                    <button
+                        onClick={() => safeCopy(wsUrl, "ws_url")}
+                        className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold rounded-lg shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
+                    >
+                        {copiedKey === "ws_url" ? "✅ WSS-URL kopiert!" : "📋 WSS-URL kopieren"}
+                    </button>
+                </div>
+
+                <div className="p-6 space-y-5">
+                    {/* WSS URL DISPLAY */}
+                    <div>
+                        <div className="text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5">
+                            Deine persönliche WebSocket Server-URL
+                        </div>
+                        <div className="flex items-center justify-between p-3.5 bg-amber-50/50 border border-amber-200 rounded-xl font-mono text-xs text-amber-900 font-semibold break-all gap-2">
+                            <span>{wsUrl}</span>
+                            <button
+                                onClick={() => safeCopy(wsUrl, "ws_url")}
+                                className="px-2.5 py-1 bg-white hover:bg-amber-100 border border-amber-300 text-amber-900 rounded-lg text-xs font-bold shrink-0 transition cursor-pointer"
+                            >
+                                {copiedKey === "ws_url" ? "✓ Kopiert" : "Kopieren"}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* FEATURES BADGES */}
+                    <div className="grid sm:grid-cols-3 gap-3 text-xs">
+                        <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-start gap-2.5">
+                            <span className="text-base">🔒</span>
+                            <div>
+                                <div className="font-bold text-gray-900">TLS Verschlüsselt</div>
+                                <div className="text-gray-500 text-[11px]">Sichere WSS-Verbindung über Standard HTTPS (Port 443).</div>
+                            </div>
+                        </div>
+                        <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-start gap-2.5">
+                            <span className="text-base">🛡️</span>
+                            <div>
+                                <div className="font-bold text-gray-900">Keine Portweiterleitung</div>
+                                <div className="text-gray-500 text-[11px]">Funktioniert hinter jeder Fritz!Box & Router ohne Freigaben.</div>
+                            </div>
+                        </div>
+                        <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-start gap-2.5">
+                            <span className="text-base">⚡</span>
+                            <div>
+                                <div className="font-bold text-gray-900">Bidirektional & Aktorik</div>
+                                <div className="text-gray-500 text-[11px]">Live-Leistungsmessung & Relais-Schaltung in 5 ms.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* 3-STEP INSTRUCTIONS */}
+                    <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl text-xs space-y-3">
+                        <div className="font-bold text-gray-900 text-sm flex items-center gap-1.5">
+                            <span>📖</span> 3-Schritte Einrichtung im Shelly Web-Interface:
+                        </div>
+                        <ol className="list-decimal list-inside space-y-2 text-gray-700 leading-relaxed">
+                            <li>
+                                Öffne die Weboberfläche deines Shelly im Browser (<code className="bg-white px-1.5 py-0.5 rounded border border-slate-300 font-mono">http://&lt;shelly-ip&gt;</code>).
+                            </li>
+                            <li>
+                                Klicke im Menü links auf <strong>Settings</strong> $\rightarrow$ <strong>Outbound WebSocket</strong>.
+                            </li>
+                            <li>
+                                Setze ein Häkchen bei <strong>Enable</strong>, wähle TLS/SSL und füge oben stehende <strong>Server-URL</strong> ein $\rightarrow$ Klicke auf <strong>Save Settings</strong>.
+                            </li>
+                        </ol>
+                        <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-800 text-[11px] font-medium flex items-center gap-2">
+                            <span>🚀</span>
+                            <span>
+                                <strong>Fertig!</strong> Der Shelly verbindet sich automatisch mit Sharegy. Das Gerät wird sofort erkannt und taucht unter <strong>Geräte</strong> und im <strong>Dashboard</strong> auf.
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* 3. SECTION: MATTER 1.3 ENERGY HUB */}
+            <div>
+                <div className="mb-3">
+                    <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                        <span>🌐</span> 3. Matter 1.3 Energy Management Hub
+                    </h2>
+                    <p className="text-xs text-gray-500">
+                        Zukunftssicherer Smart Home Standard für Energy Management & EVSE Wallboxen (Cluster 0x0090 / 0x0091)
+                    </p>
+                </div>
+                <MatterHubCard />
+            </div>
 
             {/* QR FULLSCREEN MODAL */}
             {showQR && primaryHome && (
@@ -319,7 +429,7 @@ exporters:
                         </div>
                         <button
                             onClick={() => setShowQR(false)}
-                            className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 rounded-xl text-xs transition"
+                            className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 rounded-xl text-xs transition cursor-pointer"
                         >
                             {t("common.close", "Schließen")}
                         </button>
@@ -329,4 +439,3 @@ exporters:
         </div>
     );
 }
-

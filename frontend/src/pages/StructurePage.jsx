@@ -5,6 +5,7 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import { apiFetch } from "../api/client";
 import DeviceSetupModal from "../components/device/DeviceSetupModal";
 
@@ -45,7 +46,7 @@ export default function StructurePage() {
         return map;
     }, [valuesQuery.data]);
 
-    // Group devices by Floor -> Room
+    // Group devices by Floor -> Room (Nur Etagen anzeigen, auf denen mindestens 1 Gerät liegt!)
     const structureTree = useMemo(() => {
         const floorMap = {};
 
@@ -62,7 +63,7 @@ export default function StructurePage() {
         // "Ohne Etage" bucket
         floorMap["unassigned"] = {
             id: "unassigned",
-            name: t("devices.no_floor", "Ohne Etage"),
+            name: t("devices.no_floor", "Ohne Etage (Nicht zugewiesen)"),
             rooms: {},
             unassignedDevices: [],
         };
@@ -71,7 +72,7 @@ export default function StructurePage() {
         devices.forEach((dev) => {
             const config = dev.config || {};
             const floorId = config.floor?.id || "unassigned";
-            const floorName = config.floor?.name || t("devices.no_floor", "Ohne Etage");
+            const floorName = config.floor?.name || t("devices.no_floor", "Ohne Etage (Nicht zugewiesen)");
             const roomId = config.room?.id || "unassigned";
             const roomName = config.room?.name || t("devices.no_room", "Ohne Raum");
 
@@ -100,15 +101,32 @@ export default function StructurePage() {
             }
         });
 
+        // 🎯 FILTER: Nur Etagen behalten, die mindestens 1 Gerät enthalten!
         return Object.values(floorMap).filter((f) => {
-            // Keep floors that have rooms or devices, or are official floors
-            return Object.keys(f.rooms).length > 0 || f.unassignedDevices.length > 0 || f.id !== "unassigned";
+            const roomDevicesCount = Object.values(f.rooms).reduce(
+                (acc, r) => acc + (r.devices?.length || 0),
+                0
+            );
+            const totalDevices = roomDevicesCount + (f.unassignedDevices?.length || 0);
+
+            // Wenn Suchfilter aktiv ist, prüfen wir auch den Namen
+            if (searchQuery.trim()) {
+                const query = searchQuery.toLowerCase();
+                const matchesFloor = f.name.toLowerCase().includes(query);
+                const matchesRoom = Object.values(f.rooms).some(r => r.name.toLowerCase().includes(query));
+                const matchesDev = f.unassignedDevices.some(d => (d.display_name || d.identifier || "").toLowerCase().includes(query)) ||
+                    Object.values(f.rooms).some(r => r.devices.some(d => (d.display_name || d.identifier || "").toLowerCase().includes(query)));
+
+                return totalDevices > 0 && (matchesFloor || matchesRoom || matchesDev);
+            }
+
+            return totalDevices > 0;
         });
-    }, [devices, floors, t]);
+    }, [devices, floors, searchQuery, t]);
 
     // Stats
-    const totalFloorsCount = floors.length;
-    const totalRoomsCount = rooms.length;
+    const activeFloorsCount = structureTree.filter((f) => f.id !== "unassigned").length;
+    const activeRoomsCount = structureTree.reduce((acc, f) => acc + Object.keys(f.rooms).length, 0);
     const assignedDevicesCount = devices.filter((d) => d.config?.room && d.config?.floor).length;
     const unassignedDevicesCount = devices.length - assignedDevicesCount;
 
@@ -121,17 +139,17 @@ export default function StructurePage() {
                         <span>🏡</span> {t("structure.title", "Etagen & Räume")}
                     </h1>
                     <p className="text-sm text-gray-500 mt-1">
-                        {t("structure.subtitle", "Strukturiere deine Gebäude und ordne Geräte Räumen zu.")}
+                        {t("structure.subtitle", "Übersicht aller belegten Etagen, Räume und zugeordneten Smart Devices.")}
                     </p>
                 </div>
 
                 <div className="flex items-center gap-2">
                     <input
                         type="text"
-                        placeholder={t("common.search", "Suchen...")}
+                        placeholder={t("common.search", "Suchen (Etage, Raum, Gerät)...")}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="px-3.5 py-2 border rounded-xl text-sm w-48 sm:w-64"
+                        className="px-3.5 py-2 border rounded-xl text-sm w-48 sm:w-72 bg-white shadow-2xs focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                     />
                 </div>
             </div>
@@ -140,19 +158,19 @@ export default function StructurePage() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-xs">
                     <div className="text-xs font-semibold uppercase text-gray-500">
-                        {t("structure.title", "Etagen")}
+                        Belegte Etagen
                     </div>
                     <div className="text-2xl font-bold text-gray-900 mt-1">
-                        {totalFloorsCount}
+                        {activeFloorsCount} <span className="text-xs text-gray-400 font-normal">/ {floors.length} verfügbar</span>
                     </div>
                 </div>
 
                 <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-xs">
                     <div className="text-xs font-semibold uppercase text-gray-500">
-                        Räume
+                        Belegte Räume
                     </div>
                     <div className="text-2xl font-bold text-gray-900 mt-1">
-                        {totalRoomsCount}
+                        {activeRoomsCount} <span className="text-xs text-gray-400 font-normal">/ {rooms.length} verfügbar</span>
                     </div>
                 </div>
 
@@ -161,7 +179,7 @@ export default function StructurePage() {
                         Zugeordnet
                     </div>
                     <div className="text-2xl font-bold text-emerald-600 mt-1">
-                        {assignedDevicesCount} <span className="text-xs text-gray-400 font-normal">/ {devices.length}</span>
+                        {assignedDevicesCount} <span className="text-xs text-gray-400 font-normal">/ {devices.length} Geräte</span>
                     </div>
                 </div>
 
@@ -176,106 +194,147 @@ export default function StructurePage() {
             </div>
 
             {/* BUILDING HIERARCHY CARDS */}
-            <div className="space-y-6">
-                {structureTree.map((floor) => {
-                    const roomList = Object.values(floor.rooms);
-                    const totalFloorDevices =
-                        roomList.reduce((acc, r) => acc + r.devices.length, 0) + floor.unassignedDevices.length;
+            {structureTree.length === 0 ? (
+                <div className="bg-white border border-dashed border-slate-300 rounded-2xl p-8 text-center space-y-3">
+                    <div className="text-4xl">🏢</div>
+                    <h3 className="font-bold text-base text-gray-900">
+                        {searchQuery ? "Keine passenden Geräte oder Etagen gefunden" : "Noch keine Geräte auf Etagen zugeordnet"}
+                    </h3>
+                    <p className="text-xs text-gray-500 max-w-md mx-auto">
+                        {searchQuery
+                            ? "Passe deinen Suchbegriff an oder setze die Suche zurück."
+                            : "Ordne deine Smart-Plugs, Zähler und Wechselrichter unter 'Geräte' Räumen und Etagen zu, um sie hier übersichtlich zu gruppieren."}
+                    </p>
+                    <div className="pt-2">
+                        {searchQuery ? (
+                            <button
+                                onClick={() => setSearchQuery("")}
+                                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold rounded-xl transition cursor-pointer"
+                            >
+                                Suche zurücksetzen
+                            </button>
+                        ) : (
+                            <Link
+                                to="/app/devices"
+                                className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl shadow-xs transition"
+                            >
+                                <span>⚡</span> Zu den Geräten
+                            </Link>
+                        )}
+                    </div>
+                </div>
+            ) : (
+                <div className="space-y-6">
+                    {structureTree.map((floor) => {
+                        const roomList = Object.values(floor.rooms);
+                        const totalFloorDevices =
+                            roomList.reduce((acc, r) => acc + r.devices.length, 0) + floor.unassignedDevices.length;
 
-                    return (
-                        <div key={floor.id} className="bg-white border border-gray-200 rounded-2xl p-5 shadow-xs">
-                            {/* Floor Title */}
-                            <div className="flex items-center justify-between border-b pb-3 mb-4">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-lg">🏢</span>
-                                    <h2 className="text-base font-bold text-gray-900">{floor.name}</h2>
-                                    <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-semibold">
-                                        {t("structure.devices_count", { count: totalFloorDevices, defaultValue: `${totalFloorDevices} ${totalFloorDevices === 1 ? "Gerät" : "Geräte"}` })}
-                                    </span>
+                        return (
+                            <div key={floor.id} className="bg-white border border-gray-200 rounded-2xl p-5 shadow-xs">
+                                {/* Floor Title */}
+                                <div className="flex items-center justify-between border-b pb-3 mb-4">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-lg">
+                                            {floor.id === "unassigned" ? "📦" : "🏢"}
+                                        </span>
+                                        <h2 className="text-base font-bold text-gray-900">{floor.name}</h2>
+                                        <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-semibold">
+                                            {t("structure.devices_count", {
+                                                count: totalFloorDevices,
+                                                defaultValue: `${totalFloorDevices} ${totalFloorDevices === 1 ? "Gerät" : "Geräte"}`,
+                                            })}
+                                        </span>
+                                    </div>
                                 </div>
-                            </div>
 
-                            {/* Rooms Grid */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {roomList.map((room) => (
-                                    <div
-                                        key={room.id}
-                                        className="bg-slate-50/80 border border-slate-200/70 rounded-xl p-4 space-y-3"
-                                    >
-                                        <div className="flex items-center justify-between">
-                                            <div className="font-semibold text-sm text-gray-800 flex items-center gap-1.5">
-                                                <span>🚪</span>
-                                                <span>{room.name}</span>
+                                {/* Rooms Grid */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {roomList.map((room) => (
+                                        <div
+                                            key={room.id}
+                                            className="bg-slate-50/80 border border-slate-200/70 rounded-xl p-4 space-y-3"
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <div className="font-semibold text-sm text-gray-800 flex items-center gap-1.5">
+                                                    <span>🚪</span>
+                                                    <span>{room.name}</span>
+                                                </div>
+                                                <span className="text-xs text-gray-400 font-medium">
+                                                    {t("structure.devices_count", {
+                                                        count: room.devices.length,
+                                                        defaultValue: `${room.devices.length} ${room.devices.length === 1 ? "Gerät" : "Geräte"}`,
+                                                    })}
+                                                </span>
                                             </div>
-                                            <span className="text-xs text-gray-400 font-medium">
-                                                {t("structure.devices_count", { count: room.devices.length, defaultValue: `${room.devices.length} ${room.devices.length === 1 ? "Gerät" : "Geräte"}` })}
-                                            </span>
+
+                                            {/* Device Pills */}
+                                            <div className="space-y-1.5">
+                                                {room.devices.map((dev) => {
+                                                    const devVals = valueMap[dev.id] || {};
+                                                    const power = devVals.value !== undefined ? devVals.value : devVals.power;
+
+                                                    return (
+                                                        <div
+                                                            key={dev.id}
+                                                            onClick={() => setSelectedDeviceForSetup(dev)}
+                                                            className="flex items-center justify-between p-2 bg-white rounded-lg border border-gray-100 hover:border-indigo-300 hover:shadow-xs transition cursor-pointer text-xs"
+                                                        >
+                                                            <div className="flex items-center gap-1.5 truncate">
+                                                                <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                                                                <span className="font-medium text-gray-800 truncate">
+                                                                    {dev.display_name || dev.identifier}
+                                                                </span>
+                                                            </div>
+                                                            <div className="font-mono font-semibold text-gray-700 shrink-0 ml-2">
+                                                                {power !== null && power !== undefined
+                                                                    ? `${Number(power).toFixed(0)} W`
+                                                                    : "-"}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
                                         </div>
+                                    ))}
 
-                                        {/* Device Pills */}
-                                        <div className="space-y-1.5">
-                                            {room.devices.map((dev) => {
-                                                const devVals = valueMap[dev.id] || {};
-                                                const power = devVals.value !== undefined ? devVals.value : devVals.power;
+                                    {/* Unassigned to Room in this Floor */}
+                                    {floor.unassignedDevices.length > 0 && (
+                                        <div className="bg-amber-50/50 border border-amber-200/60 rounded-xl p-4 space-y-3">
+                                            <div className="flex items-center justify-between">
+                                                <div className="font-semibold text-sm text-amber-800 flex items-center gap-1.5">
+                                                    <span>⚠️</span>
+                                                    <span>{t("devices.no_room", "Ohne Raum")}</span>
+                                                </div>
+                                                <span className="text-xs text-amber-600 font-medium">
+                                                    {floor.unassignedDevices.length}
+                                                </span>
+                                            </div>
 
-                                                return (
+                                            <div className="space-y-1.5">
+                                                {floor.unassignedDevices.map((dev) => (
                                                     <div
                                                         key={dev.id}
                                                         onClick={() => setSelectedDeviceForSetup(dev)}
-                                                        className="flex items-center justify-between p-2 bg-white rounded-lg border border-gray-100 hover:border-indigo-300 hover:shadow-xs transition cursor-pointer text-xs"
+                                                        className="flex items-center justify-between p-2 bg-white rounded-lg border border-amber-200 hover:border-amber-400 hover:shadow-xs transition cursor-pointer text-xs"
                                                     >
-                                                        <div className="flex items-center gap-1.5 truncate">
-                                                            <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
-                                                            <span className="font-medium text-gray-800 truncate">
-                                                                {dev.display_name || dev.identifier}
-                                                            </span>
-                                                        </div>
-                                                        <div className="font-mono font-semibold text-gray-700 shrink-0 ml-2">
-                                                            {power !== null && power !== undefined ? `${Number(power).toFixed(0)} W` : "-"}
-                                                        </div>
+                                                        <span className="font-medium text-gray-800 truncate">
+                                                            {dev.display_name || dev.identifier}
+                                                        </span>
+                                                        <span className="text-[11px] text-amber-700 font-medium">
+                                                            Raum zuweisen →
+                                                        </span>
                                                     </div>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                ))}
-
-                                {/* Unassigned to Room in this Floor */}
-                                {floor.unassignedDevices.length > 0 && (
-                                    <div className="bg-amber-50/50 border border-amber-200/60 rounded-xl p-4 space-y-3">
-                                        <div className="flex items-center justify-between">
-                                            <div className="font-semibold text-sm text-amber-800 flex items-center gap-1.5">
-                                                <span>⚠️</span>
-                                                <span>{t("devices.no_room", "Ohne Raum")}</span>
+                                                ))}
                                             </div>
-                                            <span className="text-xs text-amber-600 font-medium">
-                                                {floor.unassignedDevices.length}
-                                            </span>
                                         </div>
-
-                                        <div className="space-y-1.5">
-                                            {floor.unassignedDevices.map((dev) => (
-                                                <div
-                                                    key={dev.id}
-                                                    onClick={() => setSelectedDeviceForSetup(dev)}
-                                                    className="flex items-center justify-between p-2 bg-white rounded-lg border border-amber-200 hover:border-amber-400 hover:shadow-xs transition cursor-pointer text-xs"
-                                                >
-                                                    <span className="font-medium text-gray-800 truncate">
-                                                        {dev.display_name || dev.identifier}
-                                                    </span>
-                                                    <span className="text-[11px] text-amber-700 font-medium">
-                                                        Raum zuweisen →
-                                                    </span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    );
-                })}
-            </div>
+                        );
+                    })}
+                </div>
+            )}
 
             {/* SETUP MODAL */}
             {selectedDeviceForSetup && (

@@ -28,12 +28,22 @@ import AgentSupportHubPage from "../features/support/pages/AgentSupportHubPage";
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import TrackingDashboard from "../pages/admin/TrackingDashboard";
 import TenantDashboard from "../pages/TenantDashboard";
+import { useRef, useEffect } from "react";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 
-import { Routes, Route, Navigate } from "react-router-dom";
 
 export default function AppShell() {
 
     const { user, loading } = useUser();
+    const location = useLocation();
+    const contentRef = useRef(null);
+
+    // 🔄 Bei jedem Navigationswechsel sofort nach ganz oben scrollen
+    useEffect(() => {
+        if (contentRef.current) {
+            contentRef.current.scrollTop = 0;
+        }
+    }, [location.pathname]);
 
     if (loading) {
         return <div className="p-6">Loading...</div>;
@@ -55,8 +65,9 @@ export default function AppShell() {
                 <AppTopbar />
 
                 {/* ✅ CONTENT */}
-                <div className="flex-1 overflow-auto">
+                <div ref={contentRef} className="flex-1 overflow-auto">
                     <Routes>
+
 
                         {/* ✅ DEFAULT */}
                         <Route index element={<Navigate to="/app/dashboard" replace />} />
