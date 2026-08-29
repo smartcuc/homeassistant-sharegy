@@ -1,0 +1,52 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Sharegy Cloud Authentifizierung",
+        "description": "Verbinde deinen Home Assistant mit der Sharegy Cloud Plattform. Gib deinen Host und dein persönliches Home Token ein.",
+        "data": {
+          "host": "Sharegy Cloud Host (z. B. https://sharegy.de)",
+          "home_token": "Dein persönliches Home Token (UUID)",
+          "protocol": "Übertragungsprotokoll"
+        }
+      },
+      "entities": {
+        "title": "Sensoren & Entitäten zuordnen",
+        "description": "Wähle per Klick aus, welche Home Assistant Sensoren für das Energiemanagement an Sharegy übertragen werden sollen.",
+        "data": {
+          "grid_power_sensor": "Netzbezug / Einspeisung (Watt)",
+          "pv_power_sensor": "Solarerzeugung / PV (Watt)",
+          "battery_power_sensor": "Batteriespeicher Be-/Entladung (Watt)",
+          "battery_soc_sensor": "Batterie Ladestand (SoC %)",
+          "load_power_sensor": "Gesamter Hausverbrauch (Watt)",
+          "submeter_sensors": "Einzelverbraucher / Smarte Steckdosen (Multi-Select)",
+          "sync_interval": "Übertragungsintervall (Sekunden)"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Ungültiges Token oder Authentifizierungsfehler.",
+      "cannot_connect": "Verbindung zur Sharegy Cloud fehlgeschlagen."
+    },
+    "abort": {
+      "already_configured": "Dieses Sharegy-Zuhause ist bereits in Home Assistant konfiguriert."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Sharegy Sensoren bearbeiten",
+        "description": "Passe die Zuordnung deiner Sensoren und Einzelverbraucher live an.",
+        "data": {
+          "grid_power_sensor": "Netzbezug / Einspeisung (Watt)",
+          "pv_power_sensor": "Solarerzeugung / PV (Watt)",
+          "battery_power_sensor": "Batteriespeicher Be-/Entladung (Watt)",
+          "battery_soc_sensor": "Batterie Ladestand (SoC %)",
+          "load_power_sensor": "Gesamter Hausverbrauch (Watt)",
+          "submeter_sensors": "Einzelverbraucher / Smarte Steckdosen",
+          "sync_interval": "Übertragungsintervall (Sekunden)"
+        }
+      }
+    }
+  }
+}
