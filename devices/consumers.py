@@ -11,9 +11,6 @@ from channels.db import database_sync_to_async
 from django.utils import timezone
 from django.db import close_old_connections
 
-from devices.models import Home, Device
-from devices.services.ingest import ingest_metric_payload
-
 logger = logging.getLogger(__name__)
 
 
@@ -23,8 +20,12 @@ def process_incoming_telemetry(token, payload_str, user):
     Verarbeitet eingehende Telemetrie-Daten über WebSocket
     (Shelly Outbound WebSocket RPC, Tasmota, ioBroker, direkte JSON-Frames).
     """
+    from devices.models import Home, Device
+    from devices.services.ingest import ingest_metric_payload
+
     close_old_connections()
     try:
+
         try:
             data = json.loads(payload_str)
         except Exception:
@@ -34,20 +35,45 @@ def process_incoming_telemetry(token, payload_str, user):
         # 1. Home ermitteln (über Token oder authentifizierten User)
         home = None
         if token:
-            home = Home.objects.filter(mqtt_token=token).select_related("user").first()
+            clean_tok = str(token).strip()
+            no_hyphens = clean_tok.replace("-", "")
+            # A) Direkte Suche nach mqtt_token (case-insensitive & mit/ohne Bindestriche)
+            home = (
+                Home.objects.filter(mqtt_token__iexact=clean_tok).select_related("user").first()
+                or Home.objects.filter(mqtt_token__iexact=no_hyphens).select_related("user").first()
+                or Home.objects.filter(mqtt_token__istartswith=no_hyphens).select_related("user").first()
+            )
+            # B) Suche nach numerischer Home ID
+            if not home and clean_tok.isdigit():
+                try:
+                    home = Home.objects.filter(id=int(clean_tok)).select_related("user").first()
+                except Exception:
+                    pass
+            # C) Suche nach User ID / UUID
+            if not home:
+                try:
+                    home = Home.objects.filter(user__id=clean_tok).select_related("user").first()
+                except Exception:
+                    pass
 
         if not home and user and user.is_authenticated:
             home = Home.objects.filter(user=user).first()
 
         if not home:
             # Fallback: Versuche Token aus dem JSON-Payload zu lesen
-            payload_token = data.get("token") or data.get("home_token")
+            payload_token = str(data.get("token") or data.get("home_token") or "").strip()
             if payload_token:
-                home = Home.objects.filter(mqtt_token=payload_token).select_related("user").first()
+                no_hy = payload_token.replace("-", "")
+                home = (
+                    Home.objects.filter(mqtt_token__iexact=payload_token).select_related("user").first()
+                    or Home.objects.filter(mqtt_token__iexact=no_hy).select_related("user").first()
+                    or Home.objects.filter(mqtt_token__istartswith=no_hy).select_related("user").first()
+                )
 
         if not home:
             logger.warning("[WS-Ingest] Kein Haushalt gefunden für Token='%s' / User='%s'", token, user)
             return None
+
 
         # 2. Device Identifier ermitteln (z. B. "shellyplus1pm-xxx", "shellypro3em-yyy")
         raw_src = data.get("src") or data.get("device_id") or data.get("identifier") or data.get("id") or "ws_device"
