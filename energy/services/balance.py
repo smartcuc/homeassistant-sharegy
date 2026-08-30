@@ -192,11 +192,13 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
 
     try:
         from producer.models import GeneratorSystem, StorageSystem
-        for gs in GeneratorSystem.objects.filter(home__user=user, active=True).select_related("device"):
+        for gs in GeneratorSystem.objects.filter(home__user=user, active=True).select_related("device__config__metric_definition"):
             if gs.device_id and not _is_non_power_sensor(gs.device):
                 pv_device_ids.add(gs.device_id)
 
-        for ss in StorageSystem.objects.filter(home__user=user, active=True).select_related("power_device", "primary_device"):
+        for ss in StorageSystem.objects.filter(home__user=user, active=True).select_related(
+            "power_device__config__metric_definition", "primary_device__config__metric_definition"
+        ):
             if ss.power_device_id and not _is_non_power_sensor(ss.power_device):
                 battery_device_ids.add(ss.power_device_id)
             elif ss.primary_device_id and not _is_non_power_sensor(ss.primary_device):
