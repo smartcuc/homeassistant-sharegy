@@ -444,8 +444,8 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
                                 {/* Current Device (Optional for signed direction) */}
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-gray-200/60">
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                                            🔌 {t("storage_system.current_device_label", "Batteriestrom für Vorzeichen/Richtung (A) (Optional)")}
+                                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1 truncate" title="Batteriestrom für Richtung (+ Entladen, - Laden)">
+                                            🔌 {t("storage_system.current_device_label", "Batteriestrom für Richtung (A) (Opt.)")}
                                         </label>
                                         <select
                                             value={formData.current_device_id}
@@ -461,7 +461,7 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1 truncate">
                                             {t("storage_system.current_metric_key_label", "Strom-Datenpunkt (A)")}
                                         </label>
                                         <input

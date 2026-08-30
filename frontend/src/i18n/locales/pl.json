@@ -791,5 +791,20 @@
     "confirm_delete": "Usuń ostatecznie",
     "deleting": "Usuwanie konta...",
     "delete_failed": "Usuwanie nie powiodło się."
+  },
+  "storage_system": {
+    "specs": "{{cap}} kWh Pojemność nominalna · maks. {{power}} kW",
+    "nominal_capacity": "Pojemność nominalna (kWh)",
+    "current_device_label": "Prąd baterii dla kierunku (A) (Opcjonalnie)",
+    "current_metric_key_label": "Klucz prądu (A)",
+    "live_soc": "Poziom naładowania na żywo",
+    "charge_flow": "Przepływ ładowania / rozładowania",
+    "eff_reserve": "Wydajność: {{eff}}% · Rezerwa: {{res}}%",
+    "linked_sensors": "Powiązane punkty pomiarowe i czujniki",
+    "central_device": "Urządzenie centralne",
+    "soc_sensor": "Czujnik SoC (%)",
+    "power_meter": "Miernik mocy (W)",
+    "current_sensor": "Czujnik prądu (A)",
+    "edit_title": "Edytuj magazyn i czujniki"
   }
 }

@@ -811,5 +811,20 @@
     "status_waiting_customer": "Waiting on You",
     "status_resolved": "Resolved",
     "status_closed": "Closed"
+  },
+  "storage_system": {
+    "specs": "{{cap}} kWh Nominal Capacity · max. {{power}} kW",
+    "nominal_capacity": "Nominal Capacity (kWh)",
+    "current_device_label": "Battery Current for Direction (A) (Opt.)",
+    "current_metric_key_label": "Current Metric Key (A)",
+    "live_soc": "Live State of Charge",
+    "charge_flow": "Charge / Discharge Flow",
+    "eff_reserve": "Efficiency: {{eff}}% · Reserve: {{res}}%",
+    "linked_sensors": "Linked Measurement Points & Sensors",
+    "central_device": "Central Device",
+    "soc_sensor": "SoC Sensor (%)",
+    "power_meter": "Power Meter (W)",
+    "current_sensor": "Current Sensor (A)",
+    "edit_title": "Edit Storage & Sensors"
   }
 }

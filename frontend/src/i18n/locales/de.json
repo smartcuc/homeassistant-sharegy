@@ -811,5 +811,20 @@
     "status_waiting_customer": "Wartet auf dich",
     "status_resolved": "Gelöst",
     "status_closed": "Geschlossen"
+  },
+  "storage_system": {
+    "specs": "{{cap}} kWh Nennkapazität · max. {{power}} kW",
+    "nominal_capacity": "Nennkapazität (kWh)",
+    "current_device_label": "Batteriestrom für Richtung (A) (Opt.)",
+    "current_metric_key_label": "Strom-Datenpunkt (A)",
+    "live_soc": "Live-Ladestand",
+    "charge_flow": "Lade- / Entladefluss",
+    "eff_reserve": "Effizienz: {{eff}}% · Reserve: {{res}}%",
+    "linked_sensors": "Verknüpfte Messpunkte & Sensoren",
+    "central_device": "Zentrales Gerät",
+    "soc_sensor": "SoC-Sensor (%)",
+    "power_meter": "Leistungsmesser (W)",
+    "current_sensor": "Stromsensor (A)",
+    "edit_title": "Speicher & Messpunkte bearbeiten"
   }
 }
