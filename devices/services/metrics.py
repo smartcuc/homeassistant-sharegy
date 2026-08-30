@@ -13,6 +13,100 @@ from devices.services.device_health import ONLINE_TIMEOUT
 logger = logging.getLogger("django")
 
 
+def resolve_battery_direction(direction_val):
+    """
+    Ermittelt die physikalische Richtung eines Batteriespeichers (Sungrow, Huawei, Deye, SMA, Victron, etc.):
+    Rückgabe:
+      1: Discharging (Entladen ins Haus, physikalisch positive Wirkleistung)
+     -1: Charging (Laden aus PV/Netz, physikalisch negative Wirkleistung / Last)
+      0: Idle / Standby
+      None: Unbekannt / Nicht angegeben
+    """
+    if direction_val is None:
+        return None
+
+    if isinstance(direction_val, (int, float)):
+        # Sungrow & Modbus Standard: 1 = Charge, 2 = Discharge, 0 = Idle/Standby
+        if direction_val == 1:
+            return -1  # Charge (negativ)
+        elif direction_val == 2:
+            return 1   # Discharge (positiv)
+        elif direction_val == 0:
+            return 0   # Idle
+        elif direction_val == -1:
+            return -1  # Manche Hersteller nutzen -1 für Charge
+
+    str_val = str(direction_val).strip().lower()
+    if str_val in ["charge", "charging", "laden", "in", "inflow", "chg", "1", "0x0008", "0x0001"]:
+        return -1
+    elif str_val in ["discharge", "discharging", "entladen", "out", "outflow", "dischg", "2", "0x0004", "0x0002"]:
+        return 1
+    elif str_val in ["idle", "standby", "off", "stop", "0", "0x0000"]:
+        return 0
+
+    return None
+
+
+def normalize_battery_metrics(metrics, state=None, meta=None):
+    """
+    Prüft, ob in den eingehenden Daten (z. B. Sungrow Inverter) separate Lade-/Entlade-Leistungen
+    oder Richtungs-Parameter vorliegen und passt das Vorzeichen von 'power' bzw. 'battery_power' an.
+    """
+    if not isinstance(metrics, dict):
+        return metrics
+
+    res = dict(metrics)
+
+    # A) Separate Lade- und Entlade-Leistungen (z. B. Home Assistant / MQTT)
+    charging_power = res.get("battery_charging_power") or res.get("charging_power") or res.get("charge_power")
+    discharging_power = res.get("battery_discharging_power") or res.get("discharging_power") or res.get("discharge_power")
+
+    if charging_power is not None and float(charging_power or 0) > 0:
+        res["power"] = -abs(float(charging_power))
+        res["battery_power"] = -abs(float(charging_power))
+        return res
+    elif discharging_power is not None and float(discharging_power or 0) > 0:
+        res["power"] = abs(float(discharging_power))
+        res["battery_power"] = abs(float(discharging_power))
+        return res
+
+    # B) Richtungs-Parameter prüfen (Sungrow Modbus, MQTT etc.)
+    all_dicts = [res, state or {}, meta or {}]
+    direction_keys = [
+        "battery_direction", "battery_power_direction", "direction",
+        "battery_charge_discharge_state", "charge_discharge_state",
+        "running_state", "running_status", "battery_status",
+        "charge_state", "battery_state", "state", "status", "mode"
+    ]
+
+    dir_val = None
+    for d in all_dicts:
+        if isinstance(d, dict):
+            for k in direction_keys:
+                if k in d and d[k] is not None:
+                    dir_val = d[k]
+                    break
+            if dir_val is not None:
+                break
+
+    resolved_dir = resolve_battery_direction(dir_val)
+    if resolved_dir is not None:
+        power_key = next((k for k in ["power", "battery_power", "active_power", "val", "value"] if k in res and res[k] is not None), None)
+        if power_key:
+            raw_p = abs(float(res[power_key]))
+            if resolved_dir == -1:  # Charge
+                res[power_key] = -raw_p
+                res["power"] = -raw_p
+            elif resolved_dir == 1:  # Discharge
+                res[power_key] = raw_p
+                res["power"] = raw_p
+            elif resolved_dir == 0:  # Idle
+                res[power_key] = 0.0
+                res["power"] = 0.0
+
+    return res
+
+
 def get_latest_values(device_ids):
     if not device_ids:
         return {}
@@ -51,6 +145,17 @@ def get_latest_values(device_ids):
             metric_key__in=POWER_METRIC_KEYS,
         ).values_list("device_id", "value", "timestamp")
 
+        # Prüfe auf separate Richtungs-Metriken (Sungrow running_state / battery_direction)
+        dir_rows = dict(
+            DeviceLatestMetric.objects.filter(
+                device_id__in=missing_ids,
+                metric_key__in=[
+                    "battery_direction", "battery_power_direction", "direction",
+                    "battery_charge_discharge_state", "running_state", "charge_state", "state"
+                ],
+            ).values_list("device_id", "value")
+        )
+
         found_ids = set()
         for d_id, val, ts in latest_rows:
             found_ids.add(d_id)
@@ -60,6 +165,15 @@ def get_latest_values(device_ids):
                     float_val = 0.0
                 else:
                     float_val = float(val)
+                    # Richtung korrigieren falls Richtungsmetrik vorliegt
+                    if d_id in dir_rows:
+                        resolved_dir = resolve_battery_direction(dir_rows[d_id])
+                        if resolved_dir == -1:  # Charge -> negativ
+                            float_val = -abs(float_val)
+                        elif resolved_dir == 1:  # Discharge -> positiv
+                            float_val = abs(float_val)
+                        elif resolved_dir == 0:  # Idle
+                            float_val = 0.0
 
                 result[d_id] = float_val
                 try:
