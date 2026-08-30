@@ -393,37 +393,66 @@ def storage_list(request):
         "primary_device", "soc_device", "power_device", "current_device", "voltage_device", "charge_energy_device", "discharge_energy_device"
     ).order_by("created_at"))
 
-    # Auto-Deduplizierung: Falls durch vorherige Registrierungen zwei Speicher für dasselbe System existieren
+    # 1. Strikte Konsolidierung: Ein Haushalt besitzt im UI genau 1 logisches Batteriesystem
     if len(storages) > 1:
-        primary_storage = None
-        redundant_storages = []
+        primary = storages[0]
+        for duplicate in storages[1:]:
+            # Übernehme fehlende Bindungen aus dem Duplikat in das primäre System
+            if not primary.soc_device and duplicate.soc_device:
+                primary.soc_device = duplicate.soc_device
+                primary.soc_metric_key = duplicate.soc_metric_key
+            if not primary.power_device and duplicate.power_device:
+                primary.power_device = duplicate.power_device
+                primary.power_metric_key = duplicate.power_metric_key
+            if not primary.current_device and (duplicate.current_device or duplicate.primary_device):
+                primary.current_device = duplicate.current_device or duplicate.primary_device
+                primary.current_metric_key = duplicate.current_metric_key or "battery_current"
+            if not primary.voltage_device and duplicate.voltage_device:
+                primary.voltage_device = duplicate.voltage_device
+                primary.voltage_metric_key = duplicate.voltage_metric_key
+            if duplicate.capacity_kwh and float(duplicate.capacity_kwh) > float(primary.capacity_kwh or 0):
+                primary.capacity_kwh = duplicate.capacity_kwh
+            duplicate.delete()
+        primary.save()
+        storages = [primary]
 
-        for s in storages:
-            dev = s.power_device or s.primary_device
-            cfg = getattr(dev, "config", None) if dev else None
-            mdef = cfg.metric_definition if cfg else None
-            is_current_sensor = mdef and (mdef.unit in ["A", "a"] or mdef.key in ["current", "battery_current"])
-            dev_name = (dev.identifier or "").lower() if dev else ""
-            if any(w in dev_name for w in ["_current", "stromstärke", "battery_current"]) and not any(w in dev_name for w in ["power", "leistung", "watt"]):
-                is_current_sensor = True
+    # 2. Auto-Wiring: Falls ein Speicher existiert, aber einzelne Sensoren noch nicht verknüpft sind
+    if storages:
+        storage = storages[0]
+        home_devs = list(Device.objects.filter(home=home, pending_delete=False))
+        updated = False
 
-            if not is_current_sensor and not primary_storage:
-                primary_storage = s
-            elif is_current_sensor or (primary_storage and not s.power_device and not s.soc_device):
-                redundant_storages.append(s)
+        for d in home_devs:
+            d_name = (getattr(d.config, "name", None) or d.identifier or "").lower()
+            role_key = (getattr(d.config.role, "key", "") if getattr(d, "config", None) and d.config.role else "").lower()
+            mdef = getattr(d.config, "metric_definition", None) if getattr(d, "config", None) else None
+            unit = (mdef.unit or "").strip().lower() if mdef else ""
+            m_key = (mdef.key or "").strip().lower() if mdef else ""
 
-        if primary_storage and redundant_storages:
-            for red in redundant_storages:
-                curr_dev = red.current_device or red.primary_device or red.power_device
-                if curr_dev and not primary_storage.current_device:
-                    primary_storage.current_device = curr_dev
-                    primary_storage.current_metric_key = "battery_current"
-                    primary_storage.save(update_fields=["current_device", "current_metric_key"])
-                red.delete()
+            is_current = unit in ["a", "ma"] or m_key in ["current", "battery_current"] or any(k in d_name for k in ["_current", "stromstärke", "battery_current"])
+            is_soc = unit in ["%"] or m_key in ["soc", "battery_soc", "battery_level"] or any(k in d_name for k in ["_soc", "ladestand", "battery_soc", "battery_level"])
+            is_voltage = unit in ["v", "mv"] or m_key in ["voltage", "battery_voltage"] or any(k in d_name for k in ["_voltage", "spannung", "battery_voltage"])
+            is_power = (unit in ["w", "kw"] or m_key in ["power", "battery_power", "active_power"] or any(k in d_name for k in ["power", "leistung", "battery_power"])) and not is_current
 
-            storages = list(StorageSystem.objects.filter(home=home).select_related(
-                "primary_device", "soc_device", "power_device", "current_device", "voltage_device", "charge_energy_device", "discharge_energy_device"
-            ).order_by("name"))
+            if is_soc and not storage.soc_device:
+                storage.soc_device = d
+                storage.soc_metric_key = m_key or "soc"
+                updated = True
+            elif is_current and not storage.current_device:
+                storage.current_device = d
+                storage.current_metric_key = m_key or "battery_current"
+                updated = True
+            elif is_power and not storage.power_device:
+                storage.power_device = d
+                storage.power_metric_key = m_key or "power"
+                updated = True
+            elif is_voltage and not storage.voltage_device:
+                storage.voltage_device = d
+                storage.voltage_metric_key = m_key or "battery_voltage"
+                updated = True
+
+        if updated:
+            storage.save()
 
     return Response([serialize_storage_system(s) for s in storages])
 

@@ -380,14 +380,25 @@ class StorageSystem(models.Model):
 
     def get_live_soc(self):
         """Ermittelt den aktuellen Live-Ladestand in %."""
+        from devices.models import DeviceMetric
         target_device = self.soc_device or self.primary_device
-        keys = []
-        if self.soc_metric_key:
-            keys.append(self.soc_metric_key)
-        keys += [
+        keys = [
             "soc", "battery_soc", "battery_soc_pct", "state_of_charge",
             "battery_percent", "soc_pct", "battery_level", "value", "state"
         ]
+        if self.soc_metric_key and self.soc_metric_key not in keys:
+            keys.insert(0, self.soc_metric_key)
+
+        def _extract_soc(queryset):
+            for m in queryset:
+                if m.value is not None:
+                    try:
+                        val = float(m.value)
+                        if 0.0 <= val <= 100.0:
+                            return round(val, 1)
+                    except (ValueError, TypeError):
+                        pass
+            return None
 
         if target_device:
             # 1. Redis Cache prüfen
@@ -399,56 +410,71 @@ class StorageSystem(models.Model):
                     pass
 
             # 2. DeviceLatestMetric prüfen
-            metric = DeviceLatestMetric.objects.filter(
-                device=target_device,
-                metric_key__in=keys,
-            ).order_by("-timestamp").first()
-            if metric and metric.value is not None:
-                try:
-                    return round(float(metric.value), 1)
-                except (ValueError, TypeError):
-                    pass
+            val = _extract_soc(DeviceLatestMetric.objects.filter(device=target_device, metric_key__in=keys).order_by("-timestamp"))
+            if val is not None:
+                return val
 
             # 3. Beliebige Metrik des SoC-Geräts prüfen
-            any_metric = DeviceLatestMetric.objects.filter(
-                device=target_device
-            ).order_by("-timestamp").first()
-            if any_metric and any_metric.value is not None:
-                try:
-                    val = float(any_metric.value)
-                    if 0.0 <= val <= 100.0:
-                        return round(val, 1)
-                except (ValueError, TypeError):
-                    pass
+            val = _extract_soc(DeviceLatestMetric.objects.filter(device=target_device).order_by("-timestamp"))
+            if val is not None:
+                return val
 
-        # Fallback: Suche in allen aktiven Geräten des Haushalts
-        metric = DeviceLatestMetric.objects.filter(
+            # 4. DeviceMetric Zeitreihe prüfen
+            val = _extract_soc(DeviceMetric.objects.filter(device=target_device, metric_key__in=keys).order_by("-timestamp")[:5])
+            if val is not None:
+                return val
+
+        # Fallback: Suche in allen Geräten des Haushalts
+        val = _extract_soc(DeviceLatestMetric.objects.filter(
             device__home=self.home,
-            device__active=True,
-            metric_key__in=["soc", "battery_soc", "battery_soc_pct", "state_of_charge", "battery_percent", "soc_pct", "battery_level"],
-        ).order_by("-timestamp").first()
-        if metric and metric.value is not None:
-            try:
-                return round(float(metric.value), 1)
-            except (ValueError, TypeError):
-                pass
+            metric_key__in=keys,
+        ).order_by("-timestamp")[:10])
+        if val is not None:
+            return val
 
-        return None
+        # Fallback auf Geräte mit Rolle 'battery' / 'storage'
+        val = _extract_soc(DeviceLatestMetric.objects.filter(
+            device__home=self.home,
+            device__config__role__key__in=["battery", "storage", "akku"],
+        ).order_by("-timestamp")[:10])
+        if val is not None:
+            return val
+
+        # Fallback auf DeviceMetric Zeitreihe
+        val = _extract_soc(DeviceMetric.objects.filter(
+            device__home=self.home,
+            metric_key__in=["soc", "battery_soc", "battery_soc_pct", "battery_level"],
+        ).order_by("-timestamp")[:10])
+        return val
 
     def get_live_power(self):
         """
         Ermittelt die aktuelle Lade-/Entladeleistung in Watt mit exaktem Vorzeichen.
         Ampere (A) werden niemals direkt als Watt interpretiert!
         """
+        from devices.models import DeviceMetric
+
         # 1. Reine Wirkleistung suchen (W)
         power_val = None
         target_device = self.power_device or self.primary_device
-        keys = []
+        keys = [
+            "power", "battery_power", "battery_power_w", "battery_w",
+            "active_power", "p_total", "value", "state", "p", "w"
+        ]
         if self.power_metric_key and self.power_metric_key not in ["current", "battery_current", "voltage", "battery_voltage"]:
-            keys.append(self.power_metric_key)
-        keys += ["power", "battery_power", "battery_power_w", "battery_w", "active_power", "p_total", "value", "state"]
+            keys.insert(0, self.power_metric_key)
 
-        if target_device:
+        def _is_curr_dev(dev):
+            if not dev:
+                return False
+            cfg = getattr(dev, "config", None)
+            mdef = cfg.metric_definition if cfg else None
+            if mdef and (mdef.unit in ["A", "a"] or mdef.key in ["current", "battery_current"]):
+                return True
+            d_name = (dev.identifier or "").lower()
+            return any(w in d_name for w in ["_current", "stromstärke", "battery_current"]) and not any(w in d_name for w in ["power", "leistung", "watt"])
+
+        if target_device and not _is_curr_dev(target_device):
             # 1a. Redis Cache prüfen
             c_pwr = cache.get(f"device:{target_device.id}:latest_power")
             if c_pwr is not None:
@@ -459,45 +485,55 @@ class StorageSystem(models.Model):
 
             # 1b. DeviceLatestMetric prüfen
             if power_val is None:
-                metric = DeviceLatestMetric.objects.filter(
-                    device=target_device,
-                    metric_key__in=keys,
-                ).order_by("-timestamp").first()
-                if metric and metric.value is not None:
-                    # Prüfe, ob die Einheit des Geräts nicht versehentlich Strom (A) ist
-                    is_current = hasattr(target_device, "config") and target_device.config and target_device.config.metric_definition and target_device.config.metric_definition.unit in ["A", "a"]
-                    if not is_current:
-                        try:
-                            power_val = float(metric.value)
-                        except (ValueError, TypeError):
-                            pass
+                m = DeviceLatestMetric.objects.filter(device=target_device, metric_key__in=keys).order_by("-timestamp").first()
+                if m and m.value is not None:
+                    try:
+                        power_val = float(m.value)
+                    except (ValueError, TypeError):
+                        pass
+
+            # 1c. DeviceMetric Zeitreihe prüfen
+            if power_val is None:
+                m = DeviceMetric.objects.filter(device=target_device, metric_key__in=keys).order_by("-timestamp").first()
+                if m and m.value is not None:
+                    try:
+                        power_val = float(m.value)
+                    except (ValueError, TypeError):
+                        pass
 
         # Fallback auf Haushalts-Geräte
         if power_val is None:
-            metric = DeviceLatestMetric.objects.filter(
+            m = DeviceLatestMetric.objects.filter(
                 device__home=self.home,
-                device__active=True,
                 metric_key__in=["battery_power", "battery_power_w", "battery_w"],
             ).order_by("-timestamp").first()
-            if metric and metric.value is not None:
+            if m and m.value is not None:
                 try:
-                    power_val = float(metric.value)
+                    power_val = float(m.value)
                 except (ValueError, TypeError):
                     pass
+
+        # Fallback auf Geräte mit Batterie-Rolle (ohne Stromsensoren)
+        if power_val is None:
+            for d in self.home.devices.filter(config__role__key__in=["battery", "storage", "akku"]):
+                if not _is_curr_dev(d):
+                    m = DeviceLatestMetric.objects.filter(device=d, metric_key__in=keys).order_by("-timestamp").first()
+                    if m and m.value is not None:
+                        try:
+                            power_val = float(m.value)
+                            break
+                        except (ValueError, TypeError):
+                            pass
 
         # 2. Stromstärke ermitteln (A)
         curr_val = None
         curr_device = self.current_device or self.primary_device
-        curr_keys = []
+        curr_keys = ["battery_current", "current", "battery_current_a", "current_a", "value"]
         if self.current_metric_key:
-            curr_keys.append(self.current_metric_key)
-        curr_keys += ["battery_current", "current", "battery_current_a", "current_a"]
+            curr_keys.insert(0, self.current_metric_key)
 
         if curr_device:
-            c_metric = DeviceLatestMetric.objects.filter(
-                device=curr_device,
-                metric_key__in=curr_keys,
-            ).order_by("-timestamp").first()
+            c_metric = DeviceLatestMetric.objects.filter(device=curr_device, metric_key__in=curr_keys).order_by("-timestamp").first()
             if c_metric and c_metric.value is not None:
                 try:
                     curr_val = float(c_metric.value)
@@ -507,7 +543,6 @@ class StorageSystem(models.Model):
         if curr_val is None:
             c_metric = DeviceLatestMetric.objects.filter(
                 device__home=self.home,
-                device__active=True,
                 metric_key__in=["battery_current", "current"],
             ).order_by("-timestamp").first()
             if c_metric and c_metric.value is not None:
@@ -519,20 +554,15 @@ class StorageSystem(models.Model):
         # 3. Falls keine direkte Leistung vorliegt, aber Spannung und Strom: P = U * I
         if power_val is None and curr_val is not None:
             volt_device = self.voltage_device or self.primary_device
-            v_keys = []
+            v_keys = ["battery_voltage", "voltage", "battery_voltage_v", "value"]
             if self.voltage_metric_key:
-                v_keys.append(self.voltage_metric_key)
-            v_keys += ["battery_voltage", "voltage", "battery_voltage_v"]
+                v_keys.insert(0, self.voltage_metric_key)
             v_metric = None
             if volt_device:
-                v_metric = DeviceLatestMetric.objects.filter(
-                    device=volt_device,
-                    metric_key__in=v_keys,
-                ).order_by("-timestamp").first()
+                v_metric = DeviceLatestMetric.objects.filter(device=volt_device, metric_key__in=v_keys).order_by("-timestamp").first()
             if not v_metric:
                 v_metric = DeviceLatestMetric.objects.filter(
                     device__home=self.home,
-                    device__active=True,
                     metric_key__in=["battery_voltage", "voltage"],
                 ).order_by("-timestamp").first()
             if v_metric and v_metric.value is not None:
