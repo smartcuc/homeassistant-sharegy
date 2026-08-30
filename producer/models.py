@@ -5,42 +5,35 @@
 import uuid
 
 from django.db import models
-
-from devices.models import Home, Device
+from django.core.cache import cache
+from devices.models import Home, Device, DeviceLatestMetric
 
 
 class GeneratorType(models.Model):
-
     key = models.CharField(
         max_length=50,
         unique=True,
     )
-
     name = models.CharField(
         max_length=100,
     )
-
     icon = models.CharField(
         max_length=20,
         blank=True,
         default="⚡",
     )
-
     active = models.BooleanField(
         default=True,
     )
-
     sort_order = models.IntegerField(
         default=0,
     )
 
     class Meta:
-
         ordering = [
             "sort_order",
             "name",
         ]
-
         verbose_name = "Generator Typ"
         verbose_name_plural = "Generator Typen"
 
@@ -49,32 +42,25 @@ class GeneratorType(models.Model):
 
 
 class Orientation(models.Model):
-
     key = models.CharField(
         max_length=10,
         unique=True,
     )
-
     name = models.CharField(
         max_length=50,
     )
-
     azimuth_deg = models.IntegerField()
-
     sort_order = models.IntegerField(
         default=0,
     )
-
     active = models.BooleanField(
         default=True,
     )
 
     class Meta:
-
         ordering = [
-                "sort_order",
-            ]
-
+            "sort_order",
+        ]
         verbose_name = "Ausrichtung"
         verbose_name_plural = "Ausrichtungen"
 
@@ -83,7 +69,6 @@ class Orientation(models.Model):
 
 
 class GeneratorSystem(models.Model):
-
     id = models.UUIDField(
         primary_key=True,
         default=uuid.uuid4,
@@ -94,7 +79,6 @@ class GeneratorSystem(models.Model):
         on_delete=models.CASCADE,
         related_name="generator_systems",
     )
-
     device = models.OneToOneField(
         Device,
         null=True,
@@ -102,11 +86,9 @@ class GeneratorSystem(models.Model):
         on_delete=models.SET_NULL,
         related_name="generator_system",
     )
-
     name = models.CharField(
         max_length=100,
     )
-
     generator_type = models.ForeignKey(
         GeneratorType,
         on_delete=models.PROTECT,
@@ -121,7 +103,6 @@ class GeneratorSystem(models.Model):
         blank=True,
         help_text="Gesamtleistung des Systems in kW/kWp",
     )
-
     inverter_power_kw = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -129,7 +110,6 @@ class GeneratorSystem(models.Model):
         blank=True,
         help_text="Wechselrichterleistung",
     )
-
     battery_capacity_kwh = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -137,112 +117,87 @@ class GeneratorSystem(models.Model):
         blank=True,
         help_text="Speicherkapazität",
     )
-
     active = models.BooleanField(
         default=True,
     )
-
     created_at = models.DateTimeField(
         auto_now_add=True,
     )
 
     class Meta:
-
         ordering = [
-
             "name",
         ]
 
     @property
     def string_count(self):
-
         return self.strings.count()
 
     @property
     def total_string_power_kwp(self):
-
         return sum(float(s.peak_power_kwp) for s in self.strings.all())
 
     @property
     def needs_configuration(self):
-
         if not self.generator_type:
             return True
-
-        if (
-            self.generator_type.key == "pv"
-            and self.strings.count() == 0
-        ):
+        if self.generator_type.key == "pv" and self.strings.count() == 0:
             return True
-
         return False
 
     def __str__(self):
-
-        return f"{self.home.name} | " f"{self.name}"
+        return f"{self.home.name} | {self.name}"
 
 
 class GeneratorString(models.Model):
-
     id = models.UUIDField(
         primary_key=True,
         default=uuid.uuid4,
         editable=False,
     )
-
     generator = models.ForeignKey(
         GeneratorSystem,
         on_delete=models.CASCADE,
         related_name="strings",
     )
-
     name = models.CharField(
         max_length=100,
     )
-
     module_count = models.PositiveIntegerField(
         default=0,
     )
-
     peak_power_kwp = models.DecimalField(
         max_digits=10,
         decimal_places=2,
     )
-
     orientation = models.ForeignKey(
         Orientation,
         on_delete=models.PROTECT,
         related_name="strings",
     )
-
     tilt_deg = models.IntegerField(
         default=35,
         help_text="Dachneigung",
     )
-
     shading_percent = models.DecimalField(
         max_digits=5,
         decimal_places=2,
         default=0,
     )
-
     created_at = models.DateTimeField(
         auto_now_add=True,
     )
 
     class Meta:
-
         ordering = [
             "name",
         ]
 
     def __str__(self):
-
-        return f"{self.generator.name} | " f"{self.name}"
+        return f"{self.generator.name} | {self.name}"
 
     @property
     def azimuth_deg(self):
-
         return self.orientation.azimuth_deg
 
 
@@ -425,29 +380,58 @@ class StorageSystem(models.Model):
 
     def get_live_soc(self):
         """Ermittelt den aktuellen Live-Ladestand in %."""
-        from devices.models import DeviceLatestMetric
         target_device = self.soc_device or self.primary_device
         keys = []
         if self.soc_metric_key:
             keys.append(self.soc_metric_key)
-        keys += ["soc", "battery_soc", "state_of_charge", "battery_percent", "soc_pct", "battery_level", "value"]
+        keys += [
+            "soc", "battery_soc", "battery_soc_pct", "state_of_charge",
+            "battery_percent", "soc_pct", "battery_level", "value", "state"
+        ]
 
         if target_device:
+            # 1. Redis Cache prüfen
+            c_soc = cache.get(f"device:{target_device.id}:latest_soc")
+            if c_soc is not None:
+                try:
+                    return round(float(c_soc), 1)
+                except (ValueError, TypeError):
+                    pass
+
+            # 2. DeviceLatestMetric prüfen
             metric = DeviceLatestMetric.objects.filter(
                 device=target_device,
                 metric_key__in=keys,
-            ).first()
+            ).order_by("-timestamp").first()
             if metric and metric.value is not None:
-                return round(float(metric.value), 1)
+                try:
+                    return round(float(metric.value), 1)
+                except (ValueError, TypeError):
+                    pass
+
+            # 3. Beliebige Metrik des SoC-Geräts prüfen
+            any_metric = DeviceLatestMetric.objects.filter(
+                device=target_device
+            ).order_by("-timestamp").first()
+            if any_metric and any_metric.value is not None:
+                try:
+                    val = float(any_metric.value)
+                    if 0.0 <= val <= 100.0:
+                        return round(val, 1)
+                except (ValueError, TypeError):
+                    pass
 
         # Fallback: Suche in allen aktiven Geräten des Haushalts
         metric = DeviceLatestMetric.objects.filter(
             device__home=self.home,
             device__active=True,
-            metric_key__in=["soc", "battery_soc", "state_of_charge", "battery_percent", "soc_pct", "battery_level"],
-        ).first()
+            metric_key__in=["soc", "battery_soc", "battery_soc_pct", "state_of_charge", "battery_percent", "soc_pct", "battery_level"],
+        ).order_by("-timestamp").first()
         if metric and metric.value is not None:
-            return round(float(metric.value), 1)
+            try:
+                return round(float(metric.value), 1)
+            except (ValueError, TypeError):
+                pass
 
         return None
 
@@ -456,36 +440,50 @@ class StorageSystem(models.Model):
         Ermittelt die aktuelle Lade-/Entladeleistung in Watt mit exaktem Vorzeichen.
         Ampere (A) werden niemals direkt als Watt interpretiert!
         """
-        from devices.models import DeviceLatestMetric
-
         # 1. Reine Wirkleistung suchen (W)
         power_val = None
         target_device = self.power_device or self.primary_device
         keys = []
         if self.power_metric_key and self.power_metric_key not in ["current", "battery_current", "voltage", "battery_voltage"]:
             keys.append(self.power_metric_key)
-        keys += ["power", "battery_power", "battery_w", "active_power"]
+        keys += ["power", "battery_power", "battery_power_w", "battery_w", "active_power", "p_total", "value", "state"]
 
         if target_device:
-            metric = DeviceLatestMetric.objects.filter(
-                device=target_device,
-                metric_key__in=keys,
-            ).first()
-            if metric and metric.value is not None:
-                # Prüfe, ob die Einheit des Geräts nicht versehentlich Strom (A) ist
-                is_current = hasattr(target_device, "config") and target_device.config and target_device.config.metric_definition and target_device.config.metric_definition.unit in ["A", "a"]
-                if not is_current:
-                    power_val = float(metric.value)
+            # 1a. Redis Cache prüfen
+            c_pwr = cache.get(f"device:{target_device.id}:latest_power")
+            if c_pwr is not None:
+                try:
+                    power_val = float(c_pwr)
+                except (ValueError, TypeError):
+                    pass
+
+            # 1b. DeviceLatestMetric prüfen
+            if power_val is None:
+                metric = DeviceLatestMetric.objects.filter(
+                    device=target_device,
+                    metric_key__in=keys,
+                ).order_by("-timestamp").first()
+                if metric and metric.value is not None:
+                    # Prüfe, ob die Einheit des Geräts nicht versehentlich Strom (A) ist
+                    is_current = hasattr(target_device, "config") and target_device.config and target_device.config.metric_definition and target_device.config.metric_definition.unit in ["A", "a"]
+                    if not is_current:
+                        try:
+                            power_val = float(metric.value)
+                        except (ValueError, TypeError):
+                            pass
 
         # Fallback auf Haushalts-Geräte
         if power_val is None:
             metric = DeviceLatestMetric.objects.filter(
                 device__home=self.home,
                 device__active=True,
-                metric_key__in=["battery_power", "battery_w"],
-            ).first()
+                metric_key__in=["battery_power", "battery_power_w", "battery_w"],
+            ).order_by("-timestamp").first()
             if metric and metric.value is not None:
-                power_val = float(metric.value)
+                try:
+                    power_val = float(metric.value)
+                except (ValueError, TypeError):
+                    pass
 
         # 2. Stromstärke ermitteln (A)
         curr_val = None
@@ -493,13 +491,13 @@ class StorageSystem(models.Model):
         curr_keys = []
         if self.current_metric_key:
             curr_keys.append(self.current_metric_key)
-        curr_keys += ["battery_current", "current"]
+        curr_keys += ["battery_current", "current", "battery_current_a", "current_a"]
 
         if curr_device:
             c_metric = DeviceLatestMetric.objects.filter(
                 device=curr_device,
                 metric_key__in=curr_keys,
-            ).first()
+            ).order_by("-timestamp").first()
             if c_metric and c_metric.value is not None:
                 try:
                     curr_val = float(c_metric.value)
@@ -511,7 +509,7 @@ class StorageSystem(models.Model):
                 device__home=self.home,
                 device__active=True,
                 metric_key__in=["battery_current", "current"],
-            ).first()
+            ).order_by("-timestamp").first()
             if c_metric and c_metric.value is not None:
                 try:
                     curr_val = float(c_metric.value)
@@ -524,19 +522,19 @@ class StorageSystem(models.Model):
             v_keys = []
             if self.voltage_metric_key:
                 v_keys.append(self.voltage_metric_key)
-            v_keys += ["battery_voltage", "voltage"]
+            v_keys += ["battery_voltage", "voltage", "battery_voltage_v"]
             v_metric = None
             if volt_device:
                 v_metric = DeviceLatestMetric.objects.filter(
                     device=volt_device,
                     metric_key__in=v_keys,
-                ).first()
+                ).order_by("-timestamp").first()
             if not v_metric:
                 v_metric = DeviceLatestMetric.objects.filter(
                     device__home=self.home,
                     device__active=True,
                     metric_key__in=["battery_voltage", "voltage"],
-                ).first()
+                ).order_by("-timestamp").first()
             if v_metric and v_metric.value is not None:
                 try:
                     volt_val = float(v_metric.value)

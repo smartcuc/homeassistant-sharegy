@@ -612,10 +612,18 @@
     "connect_btn": "⚡ Połącz urządzenie"
   },
   "storage_system": {
-    "nominal_capacity": "{{cap}} kWh Pojemność nominalna · maks. {{power}} kW",
+    "nominal_capacity": "Pojemność nominalna (kWh)",
+    "specs": "{{cap}} kWh Pojemność nominalna · maks. {{power}} kW",
+    "edit_title": "Edytuj magazyn i punkty pomiarowe",
     "edit_tooltip": "Edytuj magazyn i punkty pomiarowe",
-    "linked_sensors": "📡 Powiązane czujniki i punkty pomiarowe",
+    "live_soc": "Poziom naładowania na żywo",
+    "charge_flow": "Przepływ ładowania / rozładowania",
+    "eff_reserve": "Wydajność: {{eff}}% · Rezerwa: {{res}}%",
+    "linked_sensors": "Powiązane czujniki i punkty pomiarowe",
     "central_device": "Urządzenie centralne",
+    "soc_sensor": "Czujnik SoC (%)",
+    "power_meter": "Miernik mocy (W)",
+    "current_sensor": "Czujnik prądu (A)",
     "not_assigned": "Nieprzypisane"
   },
   "banners": {

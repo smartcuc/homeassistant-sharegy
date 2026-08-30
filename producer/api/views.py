@@ -389,9 +389,41 @@ def storage_list(request):
     if not home:
         return Response([])
 
-    storages = StorageSystem.objects.filter(home=home).select_related(
+    storages = list(StorageSystem.objects.filter(home=home).select_related(
         "primary_device", "soc_device", "power_device", "current_device", "voltage_device", "charge_energy_device", "discharge_energy_device"
-    ).order_by("name")
+    ).order_by("created_at"))
+
+    # Auto-Deduplizierung: Falls durch vorherige Registrierungen zwei Speicher für dasselbe System existieren
+    if len(storages) > 1:
+        primary_storage = None
+        redundant_storages = []
+
+        for s in storages:
+            dev = s.power_device or s.primary_device
+            cfg = getattr(dev, "config", None) if dev else None
+            mdef = cfg.metric_definition if cfg else None
+            is_current_sensor = mdef and (mdef.unit in ["A", "a"] or mdef.key in ["current", "battery_current"])
+            dev_name = (dev.identifier or "").lower() if dev else ""
+            if any(w in dev_name for w in ["_current", "stromstärke", "battery_current"]) and not any(w in dev_name for w in ["power", "leistung", "watt"]):
+                is_current_sensor = True
+
+            if not is_current_sensor and not primary_storage:
+                primary_storage = s
+            elif is_current_sensor or (primary_storage and not s.power_device and not s.soc_device):
+                redundant_storages.append(s)
+
+        if primary_storage and redundant_storages:
+            for red in redundant_storages:
+                curr_dev = red.current_device or red.primary_device or red.power_device
+                if curr_dev and not primary_storage.current_device:
+                    primary_storage.current_device = curr_dev
+                    primary_storage.current_metric_key = "battery_current"
+                    primary_storage.save(update_fields=["current_device", "current_metric_key"])
+                red.delete()
+
+            storages = list(StorageSystem.objects.filter(home=home).select_related(
+                "primary_device", "soc_device", "power_device", "current_device", "voltage_device", "charge_energy_device", "discharge_energy_device"
+            ).order_by("name"))
 
     return Response([serialize_storage_system(s) for s in storages])
 

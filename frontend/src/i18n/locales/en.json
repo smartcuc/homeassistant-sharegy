@@ -613,10 +613,18 @@
     "connect_btn": "⚡ Connect Device"
   },
   "storage_system": {
-    "nominal_capacity": "{{cap}} kWh Nominal Capacity · max. {{power}} kW",
-    "edit_tooltip": "Edit storage & measurement points",
-    "linked_sensors": "📡 Linked Sensors & Measurement Points",
+    "nominal_capacity": "Nominal Capacity (kWh)",
+    "specs": "{{cap}} kWh Nominal Capacity · max. {{power}} kW",
+    "edit_title": "Edit Storage & Measurement Points",
+    "edit_tooltip": "Edit Storage & Measurement Points",
+    "live_soc": "Live State of Charge",
+    "charge_flow": "Charge / Discharge Flow",
+    "eff_reserve": "Efficiency: {{eff}}% · Reserve: {{res}}%",
+    "linked_sensors": "Linked Sensors & Measurement Points",
     "central_device": "Central Device",
+    "soc_sensor": "SoC Sensor (%)",
+    "power_meter": "Power Meter (W)",
+    "current_sensor": "Current Sensor (A)",
     "not_assigned": "Not assigned"
   },
   "banners": {

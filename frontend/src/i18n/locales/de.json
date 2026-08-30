@@ -613,10 +613,18 @@
     "connect_btn": "⚡ Gerät verbinden"
   },
   "storage_system": {
-    "nominal_capacity": "{{cap}} kWh Nennkapazität · max. {{power}} kW",
+    "nominal_capacity": "Nennkapazität (kWh)",
+    "specs": "{{cap}} kWh Nennkapazität · max. {{power}} kW",
+    "edit_title": "Speicher & Messpunkte bearbeiten",
     "edit_tooltip": "Speicher & Messpunkte bearbeiten",
-    "linked_sensors": "📡 Verknüpfte Messpunkte & Sensoren",
+    "live_soc": "Live-Ladestand",
+    "charge_flow": "Lade- / Entladefluss",
+    "eff_reserve": "Effizienz: {{eff}}% · Reserve: {{res}}%",
+    "linked_sensors": "Verknüpfte Messpunkte & Sensoren",
     "central_device": "Zentrales Gerät",
+    "soc_sensor": "SoC-Sensor (%)",
+    "power_meter": "Leistungsmesser (W)",
+    "current_sensor": "Strom-Sensor (A)",
     "not_assigned": "Nicht zugeordnet"
   },
   "banners": {
