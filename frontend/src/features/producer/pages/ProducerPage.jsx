@@ -15,7 +15,14 @@ import StorageSystemModal from "../components/StorageSystemModal";
 export default function ProducerPage() {
     const { t } = useTranslation();
     const queryClient = useQueryClient();
-    const [activeTab, setActiveTab] = useState("generators"); // "generators" | "storage"
+    const [activeTab, setActiveTabState] = useState(() => {
+        return localStorage.getItem("sharegy_producer_tab") || "storage";
+    });
+
+    const setActiveTab = (tab) => {
+        localStorage.setItem("sharegy_producer_tab", tab);
+        setActiveTabState(tab);
+    };
 
     // 1. Erzeugeranlagen
     const { data: producers = [] } = useQuery({

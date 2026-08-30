@@ -416,7 +416,25 @@ def storage_list(request):
         primary.save()
         storages = [primary]
 
-    # 2. Auto-Wiring: Falls ein Speicher existiert, aber einzelne Sensoren noch nicht verknüpft sind
+    # 2. Auto-Creation & Wiring: Falls noch kein Speicher existiert oder Sensoren unvollständig sind
+    if not storages:
+        home_devs = list(Device.objects.filter(home=home, pending_delete=False))
+        has_battery_devs = any(
+            (getattr(d.config.role, "key", "") if getattr(d, "config", None) and d.config.role else "").lower() in ["battery", "storage", "akku"]
+            or any(k in (getattr(d.config, "name", None) or d.identifier or "").lower() for k in ["battery", "batterie", "speicher", "soc"])
+            for d in home_devs
+        )
+        if has_battery_devs:
+            storage = StorageSystem.objects.create(
+                home=home,
+                name="Hausspeicher",
+                capacity_kwh=10.0,
+                max_charge_power_kw=5.0,
+                max_discharge_power_kw=5.0,
+                is_auto_detected=True,
+            )
+            storages = [storage]
+
     if storages:
         storage = storages[0]
         home_devs = list(Device.objects.filter(home=home, pending_delete=False))
