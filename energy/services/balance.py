@@ -156,14 +156,18 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
         ).values("device_id", "bucket", "energy_wh", "avg")
     )
 
-    # Summen nach Geräten & Zeitreihen-Buckets berechnen
     device_energy_sum = defaultdict(float)
     bucket_map = defaultdict(lambda: {"pv": 0.0, "load": 0.0, "battery_charge": 0.0, "battery_discharge": 0.0, "grid_import": 0.0, "grid_export": 0.0})
+    battery_charge_map = defaultdict(float)
+    battery_discharge_map = defaultdict(float)
+    grid_import_kwh_total = 0.0
+    grid_export_kwh_total = 0.0
 
     for row in metric_rows:
         dev_id = row["device_id"]
         wh = float(row["energy_wh"] or 0)
         kwh = wh / 1000.0
+        avg_w = float(row.get("avg") or 0)
         device_energy_sum[dev_id] += kwh
 
         b_time = row["bucket"].astimezone(tz)
@@ -172,28 +176,43 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
         if dev_id in pv_device_ids:
             bucket_map[b_key]["pv"] += kwh
         elif dev_id in grid_device_ids:
-            avg_w = float(row["avg"] or 0)
             if avg_w >= 0:
                 bucket_map[b_key]["grid_import"] += kwh
+                grid_import_kwh_total += kwh
             else:
                 bucket_map[b_key]["grid_export"] += kwh
+                grid_export_kwh_total += kwh
         elif dev_id in battery_device_ids:
-            avg_w = float(row["avg"] or 0)
             if avg_w >= 0:
                 bucket_map[b_key]["battery_charge"] += kwh
+                battery_charge_map[dev_id] += kwh
             else:
                 bucket_map[b_key]["battery_discharge"] += kwh
+                battery_discharge_map[dev_id] += kwh
         else:
             bucket_map[b_key]["load"] += kwh
 
     # Gesamtwerte berechnen
-    total_pv_kwh = sum(device_energy_sum[d_id] for d_id in pv_device_ids)
-    total_battery_charge_kwh = sum(device_energy_sum[d_id] for d_id in battery_device_ids)
-    total_grid_kwh = sum(device_energy_sum[d_id] for d_id in grid_device_ids)
-    total_measured_consumer_kwh = sum(device_energy_sum[d.id] for d in consumer_devices)
+    total_pv_kwh = round(sum(device_energy_sum[d_id] for d_id in pv_device_ids), 2)
+    battery_devices = [d for d in devices if d.id in battery_device_ids]
+    
+    total_battery_charge_kwh = round(sum(battery_charge_map.values()), 2)
+    total_battery_discharge_kwh = round(sum(battery_discharge_map.values()), 2)
+
+    # Fallback falls Batterie-Metriken ohne Vorzeichen vorliegen:
+    if battery_device_ids and total_battery_charge_kwh == 0 and total_battery_discharge_kwh == 0:
+        raw_batt_kwh = sum(device_energy_sum[d_id] for d_id in battery_device_ids)
+        total_battery_charge_kwh = round(raw_batt_kwh, 2)
+        total_battery_discharge_kwh = round(raw_batt_kwh * 0.9, 2)
+        for b_id in battery_device_ids:
+            battery_charge_map[b_id] = device_energy_sum[b_id]
+
+    total_grid_import_kwh = round(grid_import_kwh_total, 2)
+    total_grid_export_kwh = round(grid_export_kwh_total, 2)
+    total_measured_consumer_kwh = round(sum(device_energy_sum[d.id] for d in consumer_devices), 2)
 
     has_devices = len(devices) > 0
-    has_data = (total_pv_kwh > 0 or total_measured_consumer_kwh > 0 or total_grid_kwh > 0 or len(metric_rows) > 0)
+    has_data = (total_pv_kwh > 0 or total_measured_consumer_kwh > 0 or total_grid_import_kwh > 0 or total_battery_charge_kwh > 0 or len(metric_rows) > 0)
 
     if not has_data:
         total_pv_kwh = 0.0
@@ -208,20 +227,27 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
         autarky_rate = 0.0
         self_consumption_rate = 0.0
     else:
-        total_battery_discharge_kwh = round(total_battery_charge_kwh * 0.9, 2)
-        total_grid_import_kwh = round(max(0.0, total_grid_kwh), 2)
-        total_grid_export_kwh = round(max(0.0, total_pv_kwh - total_battery_charge_kwh - total_measured_consumer_kwh), 2)
+        # Falls kein Netzzähler existiert, Überschusseinspeisung rechnerisch ermitteln
+        if not grid_device_ids:
+            total_grid_export_kwh = round(max(0.0, total_pv_kwh - total_battery_charge_kwh - total_measured_consumer_kwh), 2)
+            total_grid_import_kwh = 0.0
+
+        # Physische Bilanz:
+        # 1. Direkter PV-Verbrauch im Haus = PV - Einspeisung - Batterieladung
         direct_consumption_kwh = round(max(0.0, total_pv_kwh - total_grid_export_kwh - total_battery_charge_kwh), 2)
+        
+        # 2. Gesamt-Hausverbrauch = Direkter PV-Verbrauch + Batterie-Entladung + Netzbezug
         total_house_consumption_kwh = round(direct_consumption_kwh + total_battery_discharge_kwh + total_grid_import_kwh, 2)
         if total_house_consumption_kwh < total_measured_consumer_kwh:
             total_house_consumption_kwh = total_measured_consumer_kwh
 
-        # Autarkie & Eigenverbrauch
-        solar_supplied_kwh = direct_consumption_kwh + total_battery_discharge_kwh
+        # 3. Autarkie (Wie viel % des Hausverbrauchs wurden durch Solar + Batterie-Entladung gedeckt?):
+        solar_supplied_kwh = round(direct_consumption_kwh + total_battery_discharge_kwh, 2)
         autarky_rate = round((solar_supplied_kwh / total_house_consumption_kwh * 100.0), 1) if total_house_consumption_kwh > 0 else 0.0
         autarky_rate = min(100.0, max(0.0, autarky_rate))
 
-        self_consumption_kwh = direct_consumption_kwh + total_battery_charge_kwh
+        # 4. Eigenverbrauchsquote (Wie viel % der PV-Erzeugung wurden direkt verbraucht oder im Speicher geladen?):
+        self_consumption_kwh = round(direct_consumption_kwh + total_battery_charge_kwh, 2)
         self_consumption_rate = round((self_consumption_kwh / total_pv_kwh * 100.0), 1) if total_pv_kwh > 0 else 0.0
         self_consumption_rate = min(100.0, max(0.0, self_consumption_rate))
 
@@ -336,7 +362,8 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
     color_idx = 0
     running_measured_kwh = 0.0
 
-    if has_data and total_house_consumption_kwh > 0:
+    if has_data and (total_house_consumption_kwh > 0 or total_battery_charge_kwh > 0):
+        # A) Reale gemessene Haushalts-Verbraucher (Wallbox, WP, etc.)
         for dev in consumer_devices:
             dev_kwh = round(device_energy_sum[dev.id], 2)
             running_measured_kwh += dev_kwh
@@ -356,10 +383,33 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
                 "savings_eur": round(dev_kwh * (autarky_rate / 100.0) * elec_price, 2),
                 "color": color_palette[color_idx % len(color_palette)],
                 "is_residual": False,
+                "is_battery": False,
             })
             color_idx += 1
 
-        # Automatischer Residual-Zähler (Restlicher Hausverbrauch)
+        # B) Batteriespeicher-Ladung als virtueller Zähler / Energie-Puffer
+        for b_dev in battery_devices:
+            b_charge_kwh = round(battery_charge_map.get(b_dev.id, 0.0), 2)
+            if b_charge_kwh > 0:
+                b_name = get_device_name(b_dev)
+                total_energy_allocated = total_house_consumption_kwh + total_battery_charge_kwh
+                b_share = round((b_charge_kwh / total_energy_allocated * 100.0), 1) if total_energy_allocated > 0 else 0.0
+                submeters.append({
+                    "id": b_dev.id,
+                    "name": f"{b_name} (Akkuladung)",
+                    "icon": "🔋",
+                    "category": "battery",
+                    "consumption_kwh": b_charge_kwh,
+                    "share_pct": b_share,
+                    "solar_share_pct": 100.0,
+                    "cost_eur": 0.0,
+                    "savings_eur": round(b_charge_kwh * elec_price, 2),
+                    "color": "#8b5cf6",
+                    "is_residual": False,
+                    "is_battery": True,
+                })
+
+        # C) Automatischer Residual-Zähler (Restlicher Hausverbrauch / Grundlast)
         residual_kwh = round(max(0.0, total_house_consumption_kwh - running_measured_kwh), 2)
         if residual_kwh > 0 or not submeters:
             residual_share = round((residual_kwh / total_house_consumption_kwh * 100.0), 1) if total_house_consumption_kwh > 0 else 0.0
@@ -375,6 +425,7 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
                 "savings_eur": round(residual_kwh * (autarky_rate / 100.0) * elec_price, 2),
                 "color": "#94a3b8",
                 "is_residual": True,
+                "is_battery": False,
             })
 
     # Donut Chart Data

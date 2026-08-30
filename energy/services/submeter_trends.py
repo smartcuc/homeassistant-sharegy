@@ -90,8 +90,10 @@ def get_submeter_trends(user, period: str = "30d", meter_id: str = None) -> dict
     bucket_order = []
     bucket_data = defaultdict(lambda: {
         "pv_kwh": 0.0,
+        "battery_charge_kwh": 0.0,
         "battery_discharge_kwh": 0.0,
         "grid_import_kwh": 0.0,
+        "grid_export_kwh": 0.0,
         "total_load_kwh": 0.0,
         "consumers": defaultdict(float),  # meter_id -> kwh
         "tariff_price_eur": base_elec_price,
@@ -137,13 +139,18 @@ def get_submeter_trends(user, period: str = "30d", meter_id: str = None) -> dict
         if dev_id in pv_device_ids:
             entry["pv_kwh"] += kwh
         elif dev_id in battery_device_ids:
-            avg_w = float(row["avg"] or 0)
-            if avg_w < 0:
+            avg_w = float(row.get("avg") or 0)
+            if avg_w >= 0:
+                entry["battery_charge_kwh"] += kwh
+                entry["consumers"][str(dev_id)] += kwh
+            else:
                 entry["battery_discharge_kwh"] += kwh
         elif dev_id in grid_device_ids:
-            avg_w = float(row["avg"] or 0)
+            avg_w = float(row.get("avg") or 0)
             if avg_w > 0:
                 entry["grid_import_kwh"] += kwh
+            else:
+                entry["grid_export_kwh"] += kwh
         elif any(c.id == dev_id for c in consumer_devices):
             entry["consumers"][str(dev_id)] += kwh
             entry["total_load_kwh"] += kwh
@@ -154,8 +161,9 @@ def get_submeter_trends(user, period: str = "30d", meter_id: str = None) -> dict
     color_palette = ["#6366f1", "#f59e0b", "#10b981", "#ec4899", "#8b5cf6", "#06b6d4", "#f97316"]
 
     # 5. Definition aller virtuellen Zähler (Metadaten)
+    battery_devices = [d for d in devices if d.id in battery_device_ids]
     meters_meta = []
-    if consumer_devices:
+    if consumer_devices or battery_devices:
         for idx, dev in enumerate(consumer_devices):
             dev_name = get_device_name(dev)
             icon, category = get_consumer_icon_and_category(dev_name, "consumer")
@@ -166,9 +174,22 @@ def get_submeter_trends(user, period: str = "30d", meter_id: str = None) -> dict
                 "category": category,
                 "color": color_palette[idx % len(color_palette)],
                 "is_residual": False,
+                "is_battery": False,
             })
 
-        # Residual-Zähler ergänzen wenn Verbraucher existieren
+        for b_idx, b_dev in enumerate(battery_devices):
+            dev_name = get_device_name(b_dev)
+            meters_meta.append({
+                "id": str(b_dev.id),
+                "name": f"{dev_name} (Akkuladung)",
+                "icon": "🔋",
+                "category": "battery",
+                "color": "#8b5cf6",
+                "is_residual": False,
+                "is_battery": True,
+            })
+
+        # Residual-Zähler ergänzen
         meters_meta.append({
             "id": "residual",
             "name": "Restlicher Hausverbrauch (Grundlast)",
@@ -176,6 +197,7 @@ def get_submeter_trends(user, period: str = "30d", meter_id: str = None) -> dict
             "category": "residual",
             "color": "#94a3b8",
             "is_residual": True,
+            "is_battery": False,
         })
 
     # 6. Zeitreihen auswerten & per-Meter Statistiken aufbauen
@@ -219,12 +241,18 @@ def get_submeter_trends(user, period: str = "30d", meter_id: str = None) -> dict
                 m_id = m["id"]
                 if not m["is_residual"]:
                     m_kwh = b_entry["consumers"][m_id]
-                    measured_sub_sum += m_kwh
+                    if not m.get("is_battery"):
+                        measured_sub_sum += m_kwh
                 else:
                     m_kwh = max(0.0, tot_load - measured_sub_sum)
 
-                m_solar = round(m_kwh * solar_coverage_ratio, 3)
-                m_grid = round(m_kwh * (1.0 - solar_coverage_ratio), 3)
+                if m.get("is_battery"):
+                    m_solar = m_kwh
+                    m_grid = 0.0
+                else:
+                    m_solar = round(m_kwh * solar_coverage_ratio, 3)
+                    m_grid = round(m_kwh * (1.0 - solar_coverage_ratio), 3)
+
                 m_cost = round(m_grid * tariff_price, 3)
                 m_savings = round(m_solar * tariff_price, 3)
 
