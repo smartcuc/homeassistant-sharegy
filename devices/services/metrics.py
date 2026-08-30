@@ -40,9 +40,15 @@ def get_latest_values(device_ids):
         now = timezone.now()
         cutoff = now - timedelta(minutes=10)
 
+        POWER_METRIC_KEYS = [
+            "power", "value", "apower", "a_act_power", "pv_power",
+            "load_power", "grid_power", "active_power", "p_total",
+            "p", "w", "watt", "load", "val", "energy"
+        ]
+
         latest_rows = DeviceLatestMetric.objects.filter(
             device_id__in=missing_ids,
-            metric_key__in=["power", "value"],
+            metric_key__in=POWER_METRIC_KEYS,
         ).values_list("device_id", "value", "timestamp")
 
         found_ids = set()
@@ -68,7 +74,7 @@ def get_latest_values(device_ids):
                 fallback_m = (
                     DeviceMetric.objects.filter(
                         device_id=d_id,
-                        metric_key__in=["power", "value"],
+                        metric_key__in=POWER_METRIC_KEYS,
                     )
                     .order_by("-timestamp")
                     .first()

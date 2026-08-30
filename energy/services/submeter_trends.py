@@ -72,6 +72,14 @@ def get_submeter_trends(user, period: str = "30d", meter_id: str = None) -> dict
         else:
             consumer_devices.append(d)
 
+    try:
+        from producer.models import GeneratorSystem
+        for gs in GeneratorSystem.objects.filter(home__user=user, active=True).select_related("device"):
+            if gs.device_id:
+                pv_device_ids.add(gs.device_id)
+    except Exception:
+        pass
+
     # 2. Aggregierte Stunden-Daten aus DeviceMetric1h laden (mit Intraday-Fallbacks)
     all_device_ids = [d.id for d in devices]
     metric_rows = list(
@@ -180,6 +188,9 @@ def get_submeter_trends(user, period: str = "30d", meter_id: str = None) -> dict
     for row in metric_rows:
         dev_id = row["device_id"]
         wh = float(row["energy_wh"] or 0)
+        avg_w = float(row.get("avg") or 0)
+        if wh == 0 and avg_w > 0:
+            wh = avg_w  # 1h Intervall: Avg(Watt) * 1h = Wh
         kwh = wh / 1000.0
         b_time = row["bucket"].astimezone(tz)
         b_key = b_time.strftime(bucket_format)

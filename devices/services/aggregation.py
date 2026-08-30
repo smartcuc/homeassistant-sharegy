@@ -89,7 +89,7 @@ def aggregate_1m(target_time=None):
         metric_key = row.get("metric_key") or configs.get(row["device_id"]) or "power"
 
         energy_wh = None
-        if metric_key in ["power", "value"] and row["avg"] is not None:
+        if row["avg"] is not None:
             energy_wh = row["avg"] / 60
 
         min_val = row["min"] if row["min"] is not None else row["avg"]
@@ -207,7 +207,7 @@ def rollup(
         )
 
         energy_wh = sum(
-            item.energy_wh or 0
+            (item.energy_wh if item.energy_wh is not None else ((item.avg or 0) * (bucket_seconds / 3600.0) / len(items)))
             for item in items
         )
 

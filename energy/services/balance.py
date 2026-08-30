@@ -169,6 +169,14 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
         else:
             consumer_devices.append(d)
 
+    try:
+        from producer.models import GeneratorSystem
+        for gs in GeneratorSystem.objects.filter(home__user=user, active=True).select_related("device"):
+            if gs.device_id:
+                pv_device_ids.add(gs.device_id)
+    except Exception:
+        pass
+
     # 2. Aggregierte Stunden-Daten aus DeviceMetric1h laden (mit Intraday-Fallbacks)
     all_device_ids = [d.id for d in devices]
     metric_rows = list(
@@ -227,8 +235,10 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
     for row in metric_rows:
         dev_id = row["device_id"]
         wh = float(row["energy_wh"] or 0)
-        kwh = wh / 1000.0
         avg_w = float(row.get("avg") or 0)
+        if wh == 0 and avg_w > 0:
+            wh = avg_w  # 1h Intervall: Avg(Watt) * 1h = Wh
+        kwh = wh / 1000.0
         device_energy_sum[dev_id] += kwh
 
         b_time = row["bucket"].astimezone(tz)
@@ -272,7 +282,7 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
     if period == "today" and total_pv_kwh == 0 and pv_device_ids:
         latest_pv_rows = DeviceLatestMetric.objects.filter(
             device_id__in=pv_device_ids,
-            metric_key__in=["power", "value", "pv_power", "apower"],
+            metric_key__in=["power", "value", "pv_power", "apower", "a_act_power", "active_power"],
         ).values("device_id", "value")
         live_pv_watts = sum(float(r["value"] or 0) for r in latest_pv_rows)
         if live_pv_watts > 0:
@@ -317,9 +327,36 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
         if total_house_consumption_kwh < total_measured_consumer_kwh:
             total_house_consumption_kwh = total_measured_consumer_kwh
 
-        # 3. Autarkie (Wie viel % des Hausverbrauchs wurden durch Solar + Batterie-Entladung gedeckt?):
-        solar_supplied_kwh = round(direct_consumption_kwh + total_battery_discharge_kwh, 2)
-        autarky_rate = round((solar_supplied_kwh / total_house_consumption_kwh * 100.0), 1) if total_house_consumption_kwh > 0 else 0.0
+        # 3. Bucket-by-Bucket Solardeckung berechnen
+        sum_solar_supplied = 0.0
+        sum_house_consumption = 0.0
+        for b_data in bucket_map.values():
+            b_pv = b_data.get("pv", 0.0)
+            b_bat_chg = b_data.get("battery_charge", 0.0)
+            b_bat_dis = b_data.get("battery_discharge", 0.0)
+            b_grid_imp = b_data.get("grid_import", 0.0)
+            b_grid_exp = b_data.get("grid_export", 0.0)
+            b_load = b_data.get("load", 0.0)
+
+            b_solar_avail = max(0.0, b_pv - b_bat_chg - b_grid_exp) if grid_device_ids else max(0.0, b_pv - b_bat_chg)
+            b_house_load = max(b_load, b_solar_avail + b_bat_dis + b_grid_imp)
+            b_solar_supplied = min(b_house_load, b_solar_avail + b_bat_dis) if b_house_load > 0 else 0.0
+
+            sum_solar_supplied += b_solar_supplied
+            sum_house_consumption += b_house_load
+
+        if sum_house_consumption > 0 and sum_solar_supplied > 0:
+            autarky_rate = round((sum_solar_supplied / sum_house_consumption * 100.0), 1)
+            solar_supplied_kwh = round(sum_solar_supplied, 2)
+            total_house_consumption_kwh = round(sum_house_consumption, 2)
+        else:
+            solar_supplied_kwh = round(direct_consumption_kwh + total_battery_discharge_kwh, 2)
+            autarky_rate = round((solar_supplied_kwh / total_house_consumption_kwh * 100.0), 1) if total_house_consumption_kwh > 0 else 0.0
+
+        if total_pv_kwh > 0 and total_grid_import_kwh == 0:
+            autarky_rate = 100.0
+            solar_supplied_kwh = total_house_consumption_kwh
+
         autarky_rate = min(100.0, max(0.0, autarky_rate))
 
         # 4. Eigenverbrauchsquote (Wie viel % der PV-Erzeugung wurden direkt verbraucht oder im Speicher geladen?):
