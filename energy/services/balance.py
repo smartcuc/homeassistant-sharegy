@@ -126,27 +126,50 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
         ).select_related("config__role", "config__energy_signal_type", "config__metric_definition")
     )
 
-    pv_device_ids = set()
-    battery_device_ids = set()
-    grid_device_ids = set()
+    # 1. EMS Signal Sources laden (höchste Priorität für die Zuordnung)
+    from energy.ems.models import EMSSignalSource
+    from devices.models import DeviceMetric15m, DeviceMetric, DeviceLatestMetric
+
+    ems_sources = list(
+        EMSSignalSource.objects.filter(home__user=user)
+        .select_related("signal_type", "device")
+    )
+    ems_pv_ids = {s.device_id for s in ems_sources if s.signal_type.key in ["pv", "solar", "producer", "production"]}
+    ems_battery_ids = {s.device_id for s in ems_sources if s.signal_type.key in ["battery", "storage"]}
+    ems_grid_ids = {s.device_id for s in ems_sources if s.signal_type.key in ["grid", "grid_import", "grid_feed_in", "meter"]}
+    ems_consumer_ids = {s.device_id for s in ems_sources if s.signal_type.key in ["consumer", "load", "consumption"]}
+
+    pv_device_ids = set(ems_pv_ids)
+    battery_device_ids = set(ems_battery_ids)
+    grid_device_ids = set(ems_grid_ids)
     consumer_devices = []
 
     for d in devices:
+        if d.id in ems_pv_ids:
+            continue
+        if d.id in ems_battery_ids:
+            continue
+        if d.id in ems_grid_ids:
+            continue
+
         cfg = getattr(d, "config", None)
-        role_key = cfg.role.key if cfg and cfg.role else ""
-        sig_key = cfg.energy_signal_type.key if cfg and cfg.energy_signal_type else ""
+        role_key = (cfg.role.key if cfg and cfg.role else "").lower()
+        sig_key = (cfg.energy_signal_type.key if cfg and cfg.energy_signal_type else "").lower()
         is_grid = getattr(cfg, "is_grid_source", False)
 
-        if is_grid or role_key == "grid" or sig_key in ["grid", "grid_import", "grid_feed_in"]:
+        dev_name = (get_device_name(d) or "").lower()
+        dev_ident = (d.identifier or "").lower()
+
+        if is_grid or role_key == "grid" or sig_key in ["grid", "grid_import", "grid_feed_in", "meter"] or "grid" in dev_name:
             grid_device_ids.add(d.id)
-        elif role_key in ["producer", "pv", "solar"] or sig_key in ["pv", "solar", "producer"]:
+        elif role_key in ["producer", "pv", "solar", "inverter", "wechselrichter", "balkonkraftwerk"] or sig_key in ["pv", "solar", "producer", "production"] or any(k in dev_name for k in ["solar", "wechselrichter", "inverter", "balkonkraftwerk", "pv-", "bkw", "pv"]) or any(k in dev_ident for k in ["solar", "inverter", "pv"]):
             pv_device_ids.add(d.id)
-        elif role_key in ["battery", "storage"] or sig_key in ["battery", "storage"]:
+        elif role_key in ["battery", "storage", "speicher", "batterie"] or sig_key in ["battery", "storage"] or any(k in dev_name for k in ["speicher", "batterie", "battery"]):
             battery_device_ids.add(d.id)
-        elif role_key == "consumer" or sig_key in ["consumer", "load"]:
+        else:
             consumer_devices.append(d)
 
-    # 2. Aggregierte Stunden-Daten aus DeviceMetric1h laden
+    # 2. Aggregierte Stunden-Daten aus DeviceMetric1h laden (mit Intraday-Fallbacks)
     all_device_ids = [d.id for d in devices]
     metric_rows = list(
         DeviceMetric1h.objects.filter(
@@ -155,6 +178,44 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
             bucket__lte=end_dt,
         ).values("device_id", "bucket", "energy_wh", "avg")
     )
+
+    # Intraday-Fallback 1: 15-Minuten Aggregate
+    if not metric_rows and all_device_ids:
+        mid_rows = list(
+            DeviceMetric15m.objects.filter(
+                device_id__in=all_device_ids,
+                bucket__gte=start_dt,
+                bucket__lte=end_dt,
+            ).values("device_id", "bucket", "energy_wh", "avg")
+        )
+        if mid_rows:
+            metric_rows = mid_rows
+        else:
+            # Intraday-Fallback 2: Roh-Telemetrie des heutigen Tages
+            raw_metrics = list(
+                DeviceMetric.objects.filter(
+                    device_id__in=all_device_ids,
+                    timestamp__gte=start_dt,
+                    timestamp__lte=end_dt,
+                ).values("device_id", "timestamp", "value")
+                .order_by("timestamp")
+            )
+            if raw_metrics:
+                dev_hour_map = defaultdict(lambda: defaultdict(list))
+                for r in raw_metrics:
+                    b_t = r["timestamp"].astimezone(tz).replace(minute=0, second=0, microsecond=0)
+                    dev_hour_map[r["device_id"]][b_t].append(float(r["value"] or 0))
+
+                for dev_id, h_map in dev_hour_map.items():
+                    for b_t, vals in h_map.items():
+                        avg_w = sum(vals) / len(vals)
+                        wh = avg_w * (len(vals) * 5 / 3600.0) if len(vals) < 720 else avg_w
+                        metric_rows.append({
+                            "device_id": dev_id,
+                            "bucket": b_t,
+                            "energy_wh": wh,
+                            "avg": avg_w,
+                        })
 
     device_energy_sum = defaultdict(float)
     bucket_map = defaultdict(lambda: {"pv": 0.0, "load": 0.0, "battery_charge": 0.0, "battery_discharge": 0.0, "grid_import": 0.0, "grid_export": 0.0})
@@ -206,6 +267,21 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
         total_battery_discharge_kwh = round(raw_batt_kwh * 0.9, 2)
         for b_id in battery_device_ids:
             battery_charge_map[b_id] = device_energy_sum[b_id]
+
+    # Live Realtime Overlay für den laufenden Tag, falls Stunden-Aggregate noch 0 kWh sind
+    if period == "today" and total_pv_kwh == 0 and pv_device_ids:
+        latest_pv_rows = DeviceLatestMetric.objects.filter(
+            device_id__in=pv_device_ids,
+            metric_key__in=["power", "value", "pv_power", "apower"],
+        ).values("device_id", "value")
+        live_pv_watts = sum(float(r["value"] or 0) for r in latest_pv_rows)
+        if live_pv_watts > 0:
+            hours_active = max(1.0, min(8.0, (now - now.replace(hour=6, minute=0)).total_seconds() / 3600.0))
+            estimated_pv_kwh = round((live_pv_watts * 0.65 * hours_active) / 1000.0, 2)
+            if estimated_pv_kwh > 0:
+                total_pv_kwh = estimated_pv_kwh
+                for pv_id in pv_device_ids:
+                    device_energy_sum[pv_id] = total_pv_kwh / len(pv_device_ids)
 
     total_grid_import_kwh = round(grid_import_kwh_total, 2)
     total_grid_export_kwh = round(grid_export_kwh_total, 2)
