@@ -31,8 +31,14 @@ LEAD_POWER_KEYS = {
     "val",
     "value",
     "grid_power",
+    "grid_power_w",
     "pv_power",
+    "pv_power_w",
     "load_power",
+    "load_power_w",
+    "battery_power",
+    "battery_power_w",
+    "battery_w",
 }
 
 

@@ -144,9 +144,21 @@ def get_energy_data(user):
 
     # State of charge ermitteln
     home_obj = user.homes.first() if hasattr(user, "homes") else None
-    from energy.services.battery_forecast import find_home_battery_storage
-    _, has_batt, batt_params = find_home_battery_storage(home_obj)
-    battery_soc_pct = float(batt_params.get("current_soc_pct", 65.0)) if has_batt else 65.0
+    battery_soc_pct = None
+    try:
+        from producer.models import StorageSystem
+        st = StorageSystem.objects.filter(home=home_obj, active=True).first() if home_obj else None
+        if st:
+            live_s = st.get_live_soc()
+            if live_s is not None:
+                battery_soc_pct = float(live_s)
+    except Exception:
+        pass
+
+    if battery_soc_pct is None:
+        from energy.services.battery_forecast import find_home_battery_storage
+        _, has_batt, batt_params = find_home_battery_storage(home_obj)
+        battery_soc_pct = float(batt_params.get("current_soc_pct", 65.0)) if has_batt else 65.0
 
     kpis["pv_power_w"] = pv_power_w
     kpis["load_power_w"] = load_power_w

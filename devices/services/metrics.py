@@ -165,9 +165,10 @@ def get_latest_values(device_ids):
         cutoff = now - timedelta(minutes=10)
 
         POWER_METRIC_KEYS = [
-            "power", "value", "apower", "a_act_power", "pv_power",
-            "load_power", "grid_power", "active_power", "p_total",
-            "p", "w", "watt", "load", "val", "energy"
+            "power", "value", "apower", "a_act_power", "pv_power", "pv_power_w",
+            "load_power", "load_power_w", "grid_power", "grid_power_w",
+            "battery_power", "battery_power_w", "battery_w",
+            "active_power", "p_total", "p", "w", "watt", "load", "val", "energy"
         ]
 
         latest_rows = DeviceLatestMetric.objects.filter(

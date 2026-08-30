@@ -142,12 +142,25 @@ def build_device_signals(user):
     # Bei Batteriespeichern gilt:
     # Entladen (Strom fließt ins Haus): positiv
     # Laden (Strom fließt in den Speicher): negativ (bzw. abs)
-    battery_power = sum(values.get(d_id, 0) for d_id in battery_device_ids)
+    battery_power = None
+    try:
+        from producer.models import StorageSystem
+        storage = StorageSystem.objects.filter(home__user=user, active=True).first()
+        if storage:
+            live_p = storage.get_live_power()
+            if live_p is not None:
+                battery_power = float(live_p)
+    except Exception:
+        pass
+
+    if battery_power is None:
+        battery_power = sum(values.get(d_id, 0) for d_id in battery_device_ids)
+
     if battery_power >= 0:
         signals["battery"]["discharge"] = battery_power
-        signals["battery"]["charge"] = 0
+        signals["battery"]["charge"] = 0.0
     else:
-        signals["battery"]["discharge"] = 0
+        signals["battery"]["discharge"] = 0.0
         signals["battery"]["charge"] = abs(battery_power)
 
     # 7. Last (Hausverbrauch & getrackte Einzelgeräte)

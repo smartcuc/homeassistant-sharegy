@@ -98,7 +98,7 @@ class StorageSystemTests(TestCase):
         self.assertEqual(created_data["name"], "Hauptspeicher")
         self.assertEqual(created_data["live_soc_pct"], 78.5)
         self.assertEqual(created_data["live_power_w"], -1850.0)
-        self.assertEqual(created_data["status"], "discharging")
+        self.assertEqual(created_data["status"], "charging")
 
         # 2. List API
         list_resp = self.client.get("/api/producer/storage/")
