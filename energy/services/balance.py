@@ -196,10 +196,19 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
         for gs in GeneratorSystem.objects.filter(home__user=user, active=True).select_related("device__config__metric_definition"):
             if gs.device_id and not _is_non_power_sensor(gs.device):
                 pv_device_ids.add(gs.device_id)
+                grid_device_ids.discard(gs.device_id)
+                battery_device_ids.discard(gs.device_id)
+                consumer_devices = [d for d in consumer_devices if d.id != gs.device_id]
 
         for ss in StorageSystem.objects.filter(home__user=user, active=True).select_related(
             "power_device__config__metric_definition", "primary_device__config__metric_definition"
         ):
+            b_ids = {ss.power_device_id, ss.primary_device_id, ss.soc_device_id, ss.current_device_id, ss.voltage_device_id} - {None}
+            for b_id in b_ids:
+                grid_device_ids.discard(b_id)
+                pv_device_ids.discard(b_id)
+                consumer_devices = [d for d in consumer_devices if d.id != b_id]
+
             if ss.power_device_id and not _is_non_power_sensor(ss.power_device):
                 battery_device_ids.add(ss.power_device_id)
             elif ss.primary_device_id and not _is_non_power_sensor(ss.primary_device):
@@ -374,17 +383,12 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
             sum_solar_supplied += b_solar_supplied
             sum_house_consumption += b_house_load
 
-        if sum_house_consumption > 0 and sum_solar_supplied > 0:
-            autarky_rate = round((sum_solar_supplied / sum_house_consumption * 100.0), 1)
-            solar_supplied_kwh = round(sum_solar_supplied, 2)
-            total_house_consumption_kwh = round(sum_house_consumption, 2)
-        else:
-            solar_supplied_kwh = round(direct_consumption_kwh + total_battery_discharge_kwh, 2)
-            autarky_rate = round((solar_supplied_kwh / total_house_consumption_kwh * 100.0), 1) if total_house_consumption_kwh > 0 else 0.0
-
-        if (total_pv_kwh > 0 or total_battery_discharge_kwh > 0) and total_grid_import_kwh == 0 and total_house_consumption_kwh > 0:
+        if total_grid_import_kwh == 0 and total_house_consumption_kwh > 0:
             autarky_rate = 100.0
             solar_supplied_kwh = total_house_consumption_kwh
+        elif total_house_consumption_kwh > 0:
+            autarky_rate = round(max(0.0, min(100.0, (1.0 - (total_grid_import_kwh / total_house_consumption_kwh)) * 100.0)), 1)
+            solar_supplied_kwh = round(max(0.0, total_house_consumption_kwh - total_grid_import_kwh), 2)
 
         autarky_rate = min(100.0, max(0.0, autarky_rate))
 
