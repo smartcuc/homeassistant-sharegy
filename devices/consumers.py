@@ -11,6 +11,8 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.utils import timezone
 from django.db import close_old_connections
+from django.core.cache import cache
+
 
 logger = logging.getLogger(__name__)
 
