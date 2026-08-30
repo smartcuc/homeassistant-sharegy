@@ -228,6 +228,89 @@ Under **Producers & Storage**, configure your solar panel arrays, generator stri
             },
 
             # ---------------------------------------------------------------------
+            # 2b. VENDOR-NEUTRAL TELEMETRY & METRIC SPECIFICATION
+            # ---------------------------------------------------------------------
+            {
+                "category": cats["inverters-meters"],
+                "slug": "benoetigte-messwerte-und-geraetebindung",
+                "context_key": "devices",
+                "title_de": "Welche Messwerte benötigt Sharegy? (Herstellerunabhängige Übersicht)",
+                "title_en": "Which Telemetry Metrics Does Sharegy Require? (Universal Guide)",
+                "summary_de": "Vom reinen Verbraucher-Tracking bis zum Hybrid-System mit Speicher: Welche physikalischen Größen für Bilanzierung, Autarkie und Sub-Metering nötig sind.",
+                "summary_en": "From dynamic tariff tracking without PV to complex solar storage hybrids: What physical metrics are required for energy balance and sub-metering.",
+                "content_de": """# Welche Messwerte benötigt Sharegy? ⚡📊
+
+Sharegy ist vollständig **hersteller- und hardwareunabhängig**. Egal ob du Daten über Home Assistant, MQTT, ioBroker, Shelly, REST-Webhooks oder Matter einspeist: Sharegy verarbeitet die physikalischen Standardgrößen.
+
+---
+
+## 1. Funktioniert Sharegy auch ohne PV oder Batteriespeicher?
+**Ja, absolut!** Sharegy ist modular aufgebaut:
+* **Reine Verbraucher- & Tarifoptimierung**: Auch ohne eigene Erzeugung nutzt Sharegy Börsenstrompreise (EPEX Spot), steuert schaltbare Steckdosen und berechnet den Verbrauch einzelner Geräte (Sub-Metering).
+* **Balkonkraftwerk-Setup**: Erfasst bereits mit einem einfachen Zwischenstecker an der Balkon-PV deinen erzeugten Solarstrom und berechnet, wie viel davon deine Haushaltsgeräte direkt nutzen.
+* **Vollständiges Hybrid-System**: Mit PV-Anlage, Batteriespeicher und Smart Meter schöpfst du das maximale Potenzial für Autarkie und Lastoptimierung aus.
+
+---
+
+## 2. Die physikalischen Messgrößen im Überblick
+
+| Messgröße | Einheit | Datenpunkt-Beispiele | Wofür wird der Wert genutzt? |
+| :--- | :---: | :--- | :--- |
+| **Wirkleistung** | **Watt (W)** | `power`, `pv_power`, `battery_power`, `grid_power`, `load_power` | Live-Energieflüsse, Sankey-Diagramm, Leistungsspitzen |
+| **Stromstärke** | **Ampere (A)** | `battery_current`, `current`, `phase_current` | Eindeutige **Flussrichtung** bei Speichern (negativ = Laden, positiv = Entladen) |
+| **Spannung** | **Volt (V)** | `voltage`, `battery_voltage`, `phase_voltage` | Netzstabilität, $P = U \times I$ Ersatzberechnung |
+| **Ladestand** | **%** | `soc`, `battery_soc`, `battery_level` | Speicherstand, EMS-Ladelimits und Entladepuffer |
+| **Zählerstand** | **kWh** | `energy`, `energy_in`, `energy_out`, `total_yield` | Exakte Tages-, Monats- und Jahresbilanzierung |
+
+---
+
+## 3. Die mathematische Grundregel für das Gesamthaus: *„3 von 4 reichen aus!“*
+
+Im Haushalt gilt physikalisch immer der Knotenpunktsatz:
+$$\\text{Hausverbrauch } (P_{\\text{Load}}) = \\text{PV-Erzeugung } (P_{\\text{PV}}) + \\text{Batterieleistung } (P_{\\text{Bat}}) + \\text{Netzübergabe } (P_{\\text{Grid}})$$
+
+* Wenn du **3 dieser 4 Werte** lieferst, errechnet Sharegy den 4. Wert automatisch zu 100 % fehlerfrei.
+* Lieferst du alle 4 Werte (z. B. aus einem modernen Wechselrichter mit Smart Meter), gleicht Sharegy die Werte zusätzlich ab.
+
+---
+
+## 4. Häufige Frage: Warum habe ich 2 Datenpunkte für die Batterie (Strom in A und Leistung in W)?
+Manche Wechselrichter (wie z. B. Sungrow) liefern die Batterieleistung immer als positive Zahl und die Richtung separat über den **Batteriestrom in Ampere (A)**:
+* **Batteriestrom < 0 A**: Batterie lädt aus PV/Netz.
+* **Batteriestrom > 0 A**: Batterie entlädt ins Haus.
+
+In Sharegy wird hierfür **nur 1 virtueller Batteriespeicher** angelegt: In den Einstellungen des Speichers ordnest du die Wirkleistung (W) als *Ladeleistung* und den Strom (A) als *Batteriestrom* zu. Sharegy trennt Lade- und Entladezyklen daraufhin automatisch und physikalisch exakt!
+""",
+                "content_en": """# Telemetry Metrics & Universal Device Mapping ⚡📊
+
+Sharegy is completely **vendor- and hardware-agnostic**. Whether you stream data via Home Assistant, MQTT, ioBroker, Shelly, REST webhooks, or Matter: Sharegy processes standardized physical electrical units.
+
+---
+
+## 1. Does Sharegy work without PV or Battery Storage?
+**Yes, absolutely!** Sharegy is built modularly:
+* **Consumer & Dynamic Tariff Tracking**: Even without generation assets, Sharegy tracks spot market prices (EPEX Spot), schedules smart plugs, and provides granular sub-metering.
+* **Balcony PV (Plug-in Solar)**: Measure solar output with a simple plug and track direct consumption across household appliances.
+* **Full Solar + Storage Hybrid**: Harness maximal self-sufficiency and automated energy optimization.
+
+---
+
+## 2. Core Physical Quantities
+
+| Physical Quantity | Unit | Metric Key Examples | Primary Usage |
+| :--- | :---: | :--- | :--- |
+| **Active Power** | **Watt (W)** | `power`, `pv_power`, `battery_power`, `grid_power` | Real-time energy flow, Sankey diagrams, live load tracking |
+| **Electric Current** | **Ampere (A)** | `battery_current`, `current` | Unambiguous **flow direction** (negative = charging, positive = discharging) |
+| **Voltage** | **Volt (V)** | `voltage`, `battery_voltage` | Grid stability, backup $P = U \times I$ power calculations |
+| **State of Charge** | **%** | `soc`, `battery_soc`, `battery_level` | Battery status, smart reserve thresholds, optimization |
+| **Energy Totals** | **kWh** | `energy`, `energy_in`, `energy_out` | Daily, monthly, and yearly fiscal energy balances |
+""",
+                "tags": ["telemetry", "messwerte", "watt", "ampere", "volt", "soc", "kwh", "hardware"],
+                "is_featured": True,
+                "sort_order": 3,
+            },
+
+            # ---------------------------------------------------------------------
             # 3. INVERTERS VIA HOME ASSISTANT & IOBROKER BRIDGE
             # ---------------------------------------------------------------------
             {

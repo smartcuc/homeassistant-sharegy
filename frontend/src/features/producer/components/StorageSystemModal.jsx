@@ -40,6 +40,8 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
         soc_metric_key: "soc",
         power_device_id: "",
         power_metric_key: "power",
+        current_device_id: "",
+        current_metric_key: "battery_current",
         charge_energy_device_id: "",
         charge_energy_metric_key: "energy_in",
         discharge_energy_device_id: "",
@@ -63,6 +65,8 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
                 soc_metric_key: storage.soc_device?.metric_key || "soc",
                 power_device_id: storage.power_device?.id || "",
                 power_metric_key: storage.power_device?.metric_key || "power",
+                current_device_id: storage.current_device?.id || "",
+                current_metric_key: storage.current_device?.metric_key || "battery_current",
                 charge_energy_device_id: storage.charge_energy_device?.id || "",
                 charge_energy_metric_key: storage.charge_energy_device?.metric_key || "energy_in",
                 discharge_energy_device_id: storage.discharge_energy_device?.id || "",
@@ -70,7 +74,7 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
                 active: storage.active ?? true,
             });
 
-            if (!storage.primary_device?.id && (storage.soc_device?.id || storage.power_device?.id)) {
+            if (!storage.primary_device?.id && (storage.soc_device?.id || storage.power_device?.id || storage.current_device?.id)) {
                 setMode("separated");
             } else {
                 setMode("all_in_one");
@@ -91,6 +95,8 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
                 soc_metric_key: "soc",
                 power_device_id: "",
                 power_metric_key: "power",
+                current_device_id: "",
+                current_metric_key: "battery_current",
                 charge_energy_device_id: "",
                 charge_energy_metric_key: "energy_in",
                 discharge_energy_device_id: "",
@@ -112,6 +118,8 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
             soc_metric_key: candidate.suggested_soc_metric || "soc",
             power_device_id: candidate.device.id,
             power_metric_key: candidate.suggested_power_metric || "power",
+            current_device_id: candidate.device.id,
+            current_metric_key: candidate.suggested_current_metric || "battery_current",
         }));
     };
 
@@ -428,6 +436,39 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
                                             placeholder="z. B. power, battery_power"
                                             value={formData.power_metric_key}
                                             onChange={(e) => setFormData({ ...formData, power_metric_key: e.target.value })}
+                                            className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs font-mono font-medium focus:ring-2 focus:ring-emerald-500 transition"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Current Device (Optional for signed direction) */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-gray-200/60">
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                                            🔌 {t("storage_system.current_device_label", "Batteriestrom für Vorzeichen/Richtung (A) (Optional)")}
+                                        </label>
+                                        <select
+                                            value={formData.current_device_id}
+                                            onChange={(e) => setFormData({ ...formData, current_device_id: e.target.value })}
+                                            className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500 transition"
+                                        >
+                                            <option value="">{t("common.none", "-- Optional (Kein Sensor) --")}</option>
+                                            {devices.map((d) => (
+                                                <option key={d.id} value={d.id}>
+                                                    {d.name} {d.has_current ? "(mit Strom-Sensor)" : ""}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                                            {t("storage_system.current_metric_key_label", "Strom-Datenpunkt (A)")}
+                                        </label>
+                                        <input
+                                            type="text"
+                                            placeholder="z. B. battery_current, current"
+                                            value={formData.current_metric_key}
+                                            onChange={(e) => setFormData({ ...formData, current_metric_key: e.target.value })}
                                             className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs font-mono font-medium focus:ring-2 focus:ring-emerald-500 transition"
                                         />
                                     </div>

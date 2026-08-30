@@ -339,13 +339,41 @@ class StorageSystem(models.Model):
         blank=True,
         on_delete=models.SET_NULL,
         related_name="storage_power_systems",
-        help_text="Gerät, das die Lade-/Entladeleistung liefert",
+        help_text="Gerät, das die Lade-/Entladeleistung liefert (in W)",
     )
     power_metric_key = models.CharField(
         max_length=100,
         default="power",
         blank=True,
         help_text="Datenpunkt für Lade-/Entladeleistung (z. B. power, battery_power, battery_w)",
+    )
+    current_device = models.ForeignKey(
+        Device,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="storage_current_systems",
+        help_text="Optionales Gerät für Batteriestrom (in A) zur Vorzeichen-/Flussrichtungsbestimmung",
+    )
+    current_metric_key = models.CharField(
+        max_length=100,
+        default="battery_current",
+        blank=True,
+        help_text="Datenpunkt für Batteriestrom in Ampere (z. B. battery_current, current)",
+    )
+    voltage_device = models.ForeignKey(
+        Device,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="storage_voltage_systems",
+        help_text="Optionales Gerät für Batteriespannung (in V)",
+    )
+    voltage_metric_key = models.CharField(
+        max_length=100,
+        default="battery_voltage",
+        blank=True,
+        help_text="Datenpunkt für Batteriespannung in Volt (z. B. battery_voltage, voltage)",
     )
     charge_energy_device = models.ForeignKey(
         Device,
@@ -424,13 +452,19 @@ class StorageSystem(models.Model):
         return None
 
     def get_live_power(self):
-        """Ermittelt die aktuelle Lade-/Entladeleistung in Watt."""
+        """
+        Ermittelt die aktuelle Lade-/Entladeleistung in Watt mit exaktem Vorzeichen.
+        Ampere (A) werden niemals direkt als Watt interpretiert!
+        """
         from devices.models import DeviceLatestMetric
+
+        # 1. Reine Wirkleistung suchen (W)
+        power_val = None
         target_device = self.power_device or self.primary_device
         keys = []
-        if self.power_metric_key:
+        if self.power_metric_key and self.power_metric_key not in ["current", "battery_current", "voltage", "battery_voltage"]:
             keys.append(self.power_metric_key)
-        keys += ["power", "battery_power", "battery_w", "value"]
+        keys += ["power", "battery_power", "battery_w", "active_power"]
 
         if target_device:
             metric = DeviceLatestMetric.objects.filter(
@@ -438,15 +472,89 @@ class StorageSystem(models.Model):
                 metric_key__in=keys,
             ).first()
             if metric and metric.value is not None:
-                return round(float(metric.value), 1)
+                # Prüfe, ob die Einheit des Geräts nicht versehentlich Strom (A) ist
+                is_current = hasattr(target_device, "config") and target_device.config and target_device.config.metric_definition and target_device.config.metric_definition.unit in ["A", "a"]
+                if not is_current:
+                    power_val = float(metric.value)
 
-        # Fallback: Suche in allen aktiven Geräten des Haushalts
-        metric = DeviceLatestMetric.objects.filter(
-            device__home=self.home,
-            device__active=True,
-            metric_key__in=["battery_power", "battery_w"],
-        ).first()
-        if metric and metric.value is not None:
-            return round(float(metric.value), 1)
+        # Fallback auf Haushalts-Geräte
+        if power_val is None:
+            metric = DeviceLatestMetric.objects.filter(
+                device__home=self.home,
+                device__active=True,
+                metric_key__in=["battery_power", "battery_w"],
+            ).first()
+            if metric and metric.value is not None:
+                power_val = float(metric.value)
 
-        return None
+        # 2. Stromstärke ermitteln (A)
+        curr_val = None
+        curr_device = self.current_device or self.primary_device
+        curr_keys = []
+        if self.current_metric_key:
+            curr_keys.append(self.current_metric_key)
+        curr_keys += ["battery_current", "current"]
+
+        if curr_device:
+            c_metric = DeviceLatestMetric.objects.filter(
+                device=curr_device,
+                metric_key__in=curr_keys,
+            ).first()
+            if c_metric and c_metric.value is not None:
+                try:
+                    curr_val = float(c_metric.value)
+                except (ValueError, TypeError):
+                    pass
+
+        if curr_val is None:
+            c_metric = DeviceLatestMetric.objects.filter(
+                device__home=self.home,
+                device__active=True,
+                metric_key__in=["battery_current", "current"],
+            ).first()
+            if c_metric and c_metric.value is not None:
+                try:
+                    curr_val = float(c_metric.value)
+                except (ValueError, TypeError):
+                    pass
+
+        # 3. Falls keine direkte Leistung vorliegt, aber Spannung und Strom: P = U * I
+        if power_val is None and curr_val is not None:
+            volt_device = self.voltage_device or self.primary_device
+            v_keys = []
+            if self.voltage_metric_key:
+                v_keys.append(self.voltage_metric_key)
+            v_keys += ["battery_voltage", "voltage"]
+            v_metric = None
+            if volt_device:
+                v_metric = DeviceLatestMetric.objects.filter(
+                    device=volt_device,
+                    metric_key__in=v_keys,
+                ).first()
+            if not v_metric:
+                v_metric = DeviceLatestMetric.objects.filter(
+                    device__home=self.home,
+                    device__active=True,
+                    metric_key__in=["battery_voltage", "voltage"],
+                ).first()
+            if v_metric and v_metric.value is not None:
+                try:
+                    volt_val = float(v_metric.value)
+                    if volt_val > 0:
+                        return round(volt_val * curr_val, 1)
+                except (ValueError, TypeError):
+                    pass
+
+        if power_val is None:
+            return None
+
+        # 4. Vorzeichen über Batteriestrom absichern (falls Leistung positiv übergeben wurde)
+        if curr_val is not None:
+            if curr_val < 0:
+                return -round(abs(power_val), 1)
+            elif curr_val > 0:
+                return round(abs(power_val), 1)
+            else:
+                return 0.0
+
+        return round(power_val, 1)

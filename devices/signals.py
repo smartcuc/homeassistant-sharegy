@@ -77,13 +77,24 @@ def handle_device_config_saved(sender, instance, created, **kwargs):
                 from producer.models import StorageSystem
                 from django.db.models import Q
 
+                mdef = instance.metric_definition
+                is_current_sensor = mdef and (mdef.unit in ["A", "a"] or mdef.key in ["current", "battery_current"])
+                is_voltage_sensor = mdef and (mdef.unit in ["V", "v"] or mdef.key in ["voltage", "battery_voltage"])
+
                 existing = StorageSystem.objects.filter(
                     home=instance.home
-                ).filter(
-                    Q(primary_device=instance.device) | Q(soc_device=instance.device) | Q(power_device=instance.device)
                 ).first()
 
-                if not existing:
+                if existing and (is_current_sensor or is_voltage_sensor):
+                    if is_current_sensor and not existing.current_device:
+                        existing.current_device = instance.device
+                        existing.current_metric_key = mdef.key
+                        existing.save(update_fields=["current_device", "current_metric_key"])
+                    elif is_voltage_sensor and not existing.voltage_device:
+                        existing.voltage_device = instance.device
+                        existing.voltage_metric_key = mdef.key
+                        existing.save(update_fields=["voltage_device", "voltage_metric_key"])
+                elif not existing and not is_current_sensor and not is_voltage_sensor:
                     dev_name = instance.name or instance.device.identifier or "Hausspeicher"
                     storage_name = dev_name if any(w in dev_name.lower() for w in ["speicher", "battery", "akku", "storage"]) else f"{dev_name} (Speicher)"
 
