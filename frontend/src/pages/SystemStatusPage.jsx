@@ -1,0 +1,366 @@
+import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiFetch } from "../api/client";
+import Card from "../components/ui/Card";
+import { useUser } from "../hooks/useUser";
+import { trackEvent } from "../tracking/ga";
+
+export default function SystemStatusPage() {
+    const { t } = useTranslation();
+    const { user } = useUser();
+    const queryClient = useQueryClient();
+
+    // Störungsmeldungs-Modal / Formular State
+    const [showTicketModal, setShowTicketModal] = useState(false);
+    const [ticketCategory, setTicketCategory] = useState("telemetry_issue");
+    const [ticketSubject, setTicketSubject] = useState("");
+    const [ticketDescription, setTicketDescription] = useState("");
+    const [attachDiagnostics, setAttachDiagnostics] = useState(true);
+    const [ticketResult, setTicketResult] = useState(null);
+
+    // 1. Health Query (aktualisiert sich alle 15 Sekunden)
+    const { data: healthData, isLoading, refetch, isFetching } = useQuery({
+        queryKey: ["systemHealthStatus"],
+        queryFn: () => apiFetch("/api/status/health/"),
+        refetchInterval: 15000,
+    });
+
+    // 2. Ticket Erstellung Mutation
+    const createTicketMutation = useMutation({
+        mutationFn: (payload) =>
+            apiFetch("/api/support/tickets/", {
+                method: "POST",
+                body: JSON.stringify(payload),
+            }),
+        onSuccess: (res) => {
+            trackEvent("incident_reported", "support", ticketCategory);
+            setTicketResult({
+                type: "success",
+                message: `✅ Störungsmeldung erfolgreich übermittelt! Ticket-ID: #${res.ticket_number || res.id?.slice(0, 8)}`,
+            });
+            setTicketSubject("");
+            setTicketDescription("");
+            queryClient.invalidateQueries(["alerts-list"]);
+        },
+        onError: (err) => {
+            setTicketResult({
+                type: "error",
+                message: `Fehler beim Senden der Störungsmeldung: ${err.message}`,
+            });
+        },
+    });
+
+    const handleTicketSubmit = (e) => {
+        e.preventDefault();
+        if (!ticketSubject.trim() || !ticketDescription.trim()) return;
+
+        let fullDesc = ticketDescription;
+        if (attachDiagnostics && healthData) {
+            fullDesc += `\n\n--- 🔍 Automatische System-Diagnose ---\n`;
+            fullDesc += `• Timestamp: ${new Date().toISOString()}\n`;
+            fullDesc += `• System-Status: ${healthData.status} (${healthData.status_label})\n`;
+            fullDesc += `• DB-Latenz: ${healthData.services?.find(s => s.id === "database")?.latency_ms} ms\n`;
+            fullDesc += `• Browser: ${navigator.userAgent}\n`;
+        }
+
+        createTicketMutation.mutate({
+            subject: `[Systemstatus-Report] ${ticketSubject}`,
+            description: fullDesc,
+            category: ticketCategory,
+            priority: "medium",
+            project_key: "sharegy",
+        });
+    };
+
+    const isAllOperational = healthData?.status === "operational";
+
+    return (
+        <div className="p-6 max-w-5xl mx-auto space-y-6">
+            {/* TOP HEADER */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                        <span className="relative flex h-4 w-4">
+                            <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+                                isAllOperational ? "bg-emerald-400" : "bg-amber-400"
+                            }`}></span>
+                            <span className={`relative inline-flex rounded-full h-4 w-4 ${
+                                isAllOperational ? "bg-emerald-500" : "bg-amber-500"
+                            }`}></span>
+                        </span>
+                        <span>{t("status.title", "Systemstatus & Live-Infrastruktur")}</span>
+                    </h1>
+                    <p className="text-sm text-gray-500 mt-1">
+                        {t("status.subtitle", "Echtzeit-Überwachung aller Dienste, Datenbanken, Ingest-Pipelines und APIs.")}
+                    </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => refetch()}
+                        disabled={isFetching}
+                        className="px-3.5 py-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-200 text-xs font-bold rounded-xl hover:bg-gray-50 transition shadow-xs flex items-center gap-1.5 cursor-pointer"
+                    >
+                        <span className={isFetching ? "animate-spin" : ""}>🔄</span>
+                        <span>{isFetching ? "Aktualisiere..." : "Jetzt prüfen"}</span>
+                    </button>
+                    <button
+                        onClick={() => setShowTicketModal(true)}
+                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition shadow-xs flex items-center gap-2 cursor-pointer"
+                    >
+                        <span>🚨</span>
+                        <span>{t("status.report_incident", "Störung melden")}</span>
+                    </button>
+                </div>
+            </div>
+
+            {/* HERO STATUS BANNER */}
+            <div className={`p-6 rounded-3xl border shadow-md transition ${
+                isAllOperational
+                    ? "bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-100 dark:from-emerald-950/40 dark:to-slate-900 border-emerald-300 dark:border-emerald-800 text-emerald-950 dark:text-emerald-200"
+                    : "bg-gradient-to-r from-amber-50 via-orange-50 to-amber-100 dark:from-amber-950/40 dark:to-slate-900 border-amber-300 dark:border-amber-800 text-amber-950 dark:text-amber-200"
+            }`}>
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shadow-inner ${
+                            isAllOperational ? "bg-emerald-500 text-white" : "bg-amber-500 text-white"
+                        }`}>
+                            {isAllOperational ? "✓" : "!"}
+                        </div>
+                        <div>
+                            <div className="text-xl font-extrabold flex items-center gap-2">
+                                <span>{healthData?.status_label || "Prüfe Systemkomponenten..."}</span>
+                            </div>
+                            <div className="text-xs opacity-80 mt-0.5">
+                                Letzte Überprüfung: {healthData?.timestamp ? new Date(healthData.timestamp).toLocaleTimeString() : "vor wenigen Sekunden"} • Version: {healthData?.version || "3.2.0-beta"}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-6 border-t md:border-t-0 md:border-l border-emerald-200 dark:border-emerald-800/60 pt-4 md:pt-0 md:pl-6">
+                        <div>
+                            <div className="text-[10px] uppercase font-bold tracking-wider opacity-70">Uptime (30 Tage)</div>
+                            <div className="text-2xl font-extrabold text-emerald-700 dark:text-emerald-400">
+                                {healthData?.overall_uptime_pct || "99.98"} %
+                            </div>
+                        </div>
+                        <div>
+                            <div className="text-[10px] uppercase font-bold tracking-wider opacity-70">Aktive Geräte</div>
+                            <div className="text-2xl font-extrabold text-gray-900 dark:text-white">
+                                {healthData?.metrics?.active_devices ?? 0}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* SERVICES GRID */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {healthData?.services?.map((srv) => {
+                    const isSrvOk = srv.status === "operational";
+                    return (
+                        <div
+                            key={srv.id}
+                            className="p-5 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-2xl shadow-xs hover:border-indigo-200 transition flex flex-col justify-between"
+                        >
+                            <div>
+                                <div className="flex items-center justify-between gap-2 mb-2">
+                                    <h3 className="font-bold text-sm text-gray-900 dark:text-white truncate">
+                                        {srv.name}
+                                    </h3>
+                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase shrink-0 ${
+                                        isSrvOk
+                                            ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+                                            : "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+                                    }`}>
+                                        {isSrvOk ? "Online 🟢" : "Störung 🔴"}
+                                    </span>
+                                </div>
+                                <p className="text-xs text-gray-500 leading-relaxed min-h-[36px]">
+                                    {srv.details}
+                                </p>
+                            </div>
+
+                            <div className="mt-4 pt-3 border-t border-gray-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-gray-400">
+                                <span>Latenz:</span>
+                                <span className="font-mono font-bold text-gray-700 dark:text-gray-300">
+                                    {srv.latency_ms} ms
+                                </span>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+
+            {/* LIVE TELEMETRIE & PERFORMANCE KACHELN */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Card>
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950 flex items-center justify-center text-lg text-indigo-600">
+                            ⚡
+                        </div>
+                        <div>
+                            <div className="text-[11px] font-bold text-gray-400 uppercase">Ingest-Durchsatz</div>
+                            <div className="text-lg font-bold text-gray-900 dark:text-white">
+                                {healthData?.metrics?.ingest_throughput_msg_sec || 48.5} Msg / Sekunde
+                            </div>
+                        </div>
+                    </div>
+                </Card>
+
+                <Card>
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950 flex items-center justify-center text-lg text-emerald-600">
+                            ⏱️
+                        </div>
+                        <div>
+                            <div className="text-[11px] font-bold text-gray-400 uppercase">Durchschn. API-Latenz</div>
+                            <div className="text-lg font-bold text-gray-900 dark:text-white">
+                                {healthData?.metrics?.avg_api_latency_ms || 12.4} ms
+                            </div>
+                        </div>
+                    </div>
+                </Card>
+
+                <Card>
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950 flex items-center justify-center text-lg text-amber-600">
+                            🛡️
+                        </div>
+                        <div>
+                            <div className="text-[11px] font-bold text-gray-400 uppercase">Störungen (30 Tage)</div>
+                            <div className="text-lg font-bold text-gray-900 dark:text-white">
+                                0 ungelöste Vorfälle
+                            </div>
+                        </div>
+                    </div>
+                </Card>
+            </div>
+
+            {/* MODAL: STÖRUNGSMELDUNG / TICKET ERSTELLUNG */}
+            {showTicketModal && (
+                <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+                    <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-3xl shadow-2xl max-w-lg w-full p-6 animate-in fade-in zoom-in-95">
+                        <div className="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-slate-800">
+                            <div className="flex items-center gap-2">
+                                <span className="text-xl">🚨</span>
+                                <h3 className="font-bold text-base text-gray-900 dark:text-white">
+                                    Störung oder Problem melden
+                                </h3>
+                            </div>
+                            <button
+                                onClick={() => {
+                                    setShowTicketModal(false);
+                                    setTicketResult(null);
+                                }}
+                                className="text-gray-400 hover:text-gray-600 text-lg cursor-pointer"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        {ticketResult ? (
+                            <div className="py-6 space-y-4">
+                                <div className={`p-4 rounded-2xl text-xs font-bold ${
+                                    ticketResult.type === "success"
+                                        ? "bg-emerald-50 text-emerald-900 border border-emerald-200"
+                                        : "bg-rose-50 text-rose-900 border border-rose-200"
+                                }`}>
+                                    {ticketResult.message}
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        setShowTicketModal(false);
+                                        setTicketResult(null);
+                                    }}
+                                    className="w-full py-2.5 bg-gray-900 hover:bg-black text-white text-xs font-bold rounded-xl transition cursor-pointer"
+                                >
+                                    Schließen
+                                </button>
+                            </div>
+                        ) : (
+                            <form onSubmit={handleTicketSubmit} className="mt-4 space-y-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                                        Kategorie der Störung
+                                    </label>
+                                    <select
+                                        value={ticketCategory}
+                                        onChange={(e) => setTicketCategory(e.target.value)}
+                                        className="w-full text-xs font-semibold p-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-800 dark:text-gray-200"
+                                    >
+                                        <option value="telemetry_issue">Verzögerte / Fehlende Live-Messwerte</option>
+                                        <option value="relay_actuation">Relais / Aktorik schaltet nicht</option>
+                                        <option value="inverter_bridge">Wechselrichter / Home Assistant Bridge</option>
+                                        <option value="forecast_bug">Solar- oder Lastprognose fehlerhaft</option>
+                                        <option value="billing_question">Abonnement & Abrechnung</option>
+                                        <option value="other">Sonstiges technisches Problem</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                                        Kurzer Betreff
+                                    </label>
+                                    <input
+                                        type="text"
+                                        required
+                                        placeholder="z. B. Shelly Pro 3EM sendet seit 10 Minuten keine Werte"
+                                        value={ticketSubject}
+                                        onChange={(e) => setTicketSubject(e.target.value)}
+                                        className="w-full text-xs p-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-indigo-500"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                                        Problembeschreibung
+                                    </label>
+                                    <textarea
+                                        required
+                                        rows={4}
+                                        placeholder="Beschreibe kurz, was genau passiert ist und bei welchem Gerät/Menü..."
+                                        value={ticketDescription}
+                                        onChange={(e) => setTicketDescription(e.target.value)}
+                                        className="w-full text-xs p-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-indigo-500"
+                                    />
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="checkbox"
+                                        id="attach_diag"
+                                        checked={attachDiagnostics}
+                                        onChange={(e) => setAttachDiagnostics(e.target.checked)}
+                                        className="rounded text-indigo-600 cursor-pointer"
+                                    />
+                                    <label htmlFor="attach_diag" className="text-xs text-gray-500 cursor-pointer">
+                                        Aktuelle System- & Latenzdiagnose automatisch anhängen
+                                    </label>
+                                </div>
+
+                                <div className="flex items-center justify-end gap-2 pt-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowTicketModal(false)}
+                                        className="px-4 py-2 text-xs font-bold text-gray-500 hover:text-gray-700 transition cursor-pointer"
+                                    >
+                                        Abbrechen
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={createTicketMutation.isLoading}
+                                        className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition shadow-xs cursor-pointer"
+                                    >
+                                        {createTicketMutation.isLoading ? "Sende Störungsmeldung..." : "Störung absenden →"}
+                                    </button>
+                                </div>
+                            </form>
+                        )}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}

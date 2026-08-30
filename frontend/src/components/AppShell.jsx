@@ -23,6 +23,7 @@ import AlertsPage from "../features/alerts/pages/AlertsPage";
 import HelpCenterPage from "../features/help/pages/HelpCenterPage";
 import HelpArticleDetailPage from "../features/help/pages/HelpArticleDetailPage";
 import BillingPage from "../features/billing/pages/BillingPage";
+import SystemStatusPage from "../pages/SystemStatusPage";
 
 import AgentSupportHubPage from "../features/support/pages/AgentSupportHubPage";
 import AdminDashboard from "../pages/admin/AdminDashboard";
@@ -82,7 +83,9 @@ export default function AppShell() {
                         <Route path="producers" element={<ProducerPage />} />
                         <Route path="tariff" element={<TariffPage />} />
                         <Route path="interfaces" element={<InterfacesPage />} />
-                        <Route path="settings" element={<Settings />} />
+                        <Route path="status" element={<SystemStatusPage />} />
+                        <Route path="settings" element={<Navigate to="/app/status" replace />} />
+
 
                         <Route path="solarforecast" element={<ForecastPage />} />
                         <Route path="metrics" element={<MetricsPage />} />

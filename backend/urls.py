@@ -83,9 +83,11 @@ urlpatterns = [
                 path("grafana/", include("energy.api.urls_grafana")),
                 path("billing/", include("billing.urls")),
                 path("support/", include("support_desk.api.urls")),
+                path("status/", include("operations.urls")),
             ]
         ),
     ),
+
 
     # ✅ Generic / legacy
     #path("api/", include("integrations.urls")),
