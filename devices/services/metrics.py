@@ -49,15 +49,45 @@ def resolve_battery_direction(direction_val):
 
 def normalize_battery_metrics(metrics, state=None, meta=None):
     """
-    Prüft, ob in den eingehenden Daten (z. B. Sungrow Inverter) separate Lade-/Entlade-Leistungen
-    oder Richtungs-Parameter vorliegen und passt das Vorzeichen von 'power' bzw. 'battery_power' an.
+    Prüft, ob in den eingehenden Daten (z. B. Sungrow Inverter) separate Lade-/Entlade-Leistungen,
+    ein vorzeichenbehafteter Batteriestrom (battery_current) oder Richtungs-Parameter vorliegen
+    und passt das Vorzeichen von 'power' bzw. 'battery_power' an.
     """
     if not isinstance(metrics, dict):
         return metrics
 
     res = dict(metrics)
 
-    # A) Separate Lade- und Entlade-Leistungen (z. B. Home Assistant / MQTT)
+    # A) Vorzeichenbehafteter Batteriestrom (z. B. Sungrow Register 5630/5631 oder 13020/13021)
+    # Negativ (< 0 A): Batterie lädt | Positiv (> 0 A): Batterie entlädt
+    current_val = res.get("battery_current") if "battery_current" in res else (res.get("current") if "current" in res else None)
+    if current_val is not None:
+        try:
+            float_curr = float(current_val)
+            power_key = next((k for k in ["power", "battery_power", "active_power", "val", "value"] if k in res and res[k] is not None), None)
+            if power_key:
+                raw_p = abs(float(res[power_key]))
+                if float_curr < 0:
+                    res[power_key] = -raw_p
+                    res["power"] = -raw_p
+                elif float_curr > 0:
+                    res[power_key] = raw_p
+                    res["power"] = raw_p
+                else:
+                    res[power_key] = 0.0
+                    res["power"] = 0.0
+                return res
+            elif "battery_voltage" in res or "voltage" in res:
+                volt = float(res.get("battery_voltage") or res.get("voltage") or 0)
+                if volt > 0:
+                    calc_p = round(volt * float_curr, 2)
+                    res["power"] = calc_p
+                    res["battery_power"] = calc_p
+                    return res
+        except (ValueError, TypeError):
+            pass
+
+    # B) Separate Lade- und Entlade-Leistungen (z. B. Home Assistant / MQTT)
     charging_power = res.get("battery_charging_power") or res.get("charging_power") or res.get("charge_power")
     discharging_power = res.get("battery_discharging_power") or res.get("discharging_power") or res.get("discharge_power")
 
@@ -70,7 +100,7 @@ def normalize_battery_metrics(metrics, state=None, meta=None):
         res["battery_power"] = abs(float(discharging_power))
         return res
 
-    # B) Richtungs-Parameter prüfen (Sungrow Modbus, MQTT etc.)
+    # C) Richtungs-Parameter prüfen (Sungrow Modbus, MQTT etc.)
     all_dicts = [res, state or {}, meta or {}]
     direction_keys = [
         "battery_direction", "battery_power_direction", "direction",
@@ -145,7 +175,7 @@ def get_latest_values(device_ids):
             metric_key__in=POWER_METRIC_KEYS,
         ).values_list("device_id", "value", "timestamp")
 
-        # Prüfe auf separate Richtungs-Metriken (Sungrow running_state / battery_direction)
+        # Prüfe auf separate Richtungs- und Strom-Metriken (battery_current / running_state / battery_direction)
         dir_rows = dict(
             DeviceLatestMetric.objects.filter(
                 device_id__in=missing_ids,
@@ -153,6 +183,13 @@ def get_latest_values(device_ids):
                     "battery_direction", "battery_power_direction", "direction",
                     "battery_charge_discharge_state", "running_state", "charge_state", "state"
                 ],
+            ).values_list("device_id", "value")
+        )
+
+        curr_rows = dict(
+            DeviceLatestMetric.objects.filter(
+                device_id__in=missing_ids,
+                metric_key__in=["battery_current", "current"],
             ).values_list("device_id", "value")
         )
 
@@ -165,8 +202,20 @@ def get_latest_values(device_ids):
                     float_val = 0.0
                 else:
                     float_val = float(val)
-                    # Richtung korrigieren falls Richtungsmetrik vorliegt
-                    if d_id in dir_rows:
+                    # A) Strom-Vorzeichen prüfen (höchste Genauigkeit!)
+                    if d_id in curr_rows and curr_rows[d_id] is not None:
+                        try:
+                            f_curr = float(curr_rows[d_id])
+                            if f_curr < 0:
+                                float_val = -abs(float_val)
+                            elif f_curr > 0:
+                                float_val = abs(float_val)
+                            else:
+                                float_val = 0.0
+                        except Exception:
+                            pass
+                    # B) Richtung korrigieren falls Richtungsmetrik vorliegt
+                    elif d_id in dir_rows:
                         resolved_dir = resolve_battery_direction(dir_rows[d_id])
                         if resolved_dir == -1:  # Charge -> negativ
                             float_val = -abs(float_val)
@@ -178,6 +227,8 @@ def get_latest_values(device_ids):
                 result[d_id] = float_val
                 try:
                     cache.set(f"device:{d_id}:latest_power", float_val, timeout=300)
+                except Exception:
+                    pass
                 except Exception:
                     pass
 

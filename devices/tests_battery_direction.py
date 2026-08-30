@@ -118,3 +118,49 @@ class BatteryDirectionHandlingTest(TestCase):
         signals = build_device_signals(self.user)
         self.assertEqual(signals["battery"]["charge"], 3200.0)
         self.assertEqual(signals["battery"]["discharge"], 0.0)
+
+    def test_battery_current_signed_charging(self):
+        # Sungrow: battery_power positiv (2800W), aber battery_current negativ (-8.5A)
+        payload = {
+            "battery_power": 2800,
+            "battery_current": -8.5,
+        }
+        res = ingest_metric_payload(self.bat_device, payload, source="modbus_sungrow")
+
+        latest_vals = get_latest_values([self.bat_device.id])
+        self.assertEqual(latest_vals[self.bat_device.id], -2800.0)
+
+        signals = build_device_signals(self.user)
+        self.assertEqual(signals["battery"]["charge"], 2800.0)
+        self.assertEqual(signals["battery"]["discharge"], 0.0)
+
+    def test_battery_current_signed_discharging(self):
+        # Sungrow: battery_power positiv (1750W), battery_current positiv (5.2A)
+        payload = {
+            "battery_power": 1750,
+            "battery_current": 5.2,
+        }
+        res = ingest_metric_payload(self.bat_device, payload, source="modbus_sungrow")
+
+        latest_vals = get_latest_values([self.bat_device.id])
+        self.assertEqual(latest_vals[self.bat_device.id], 1750.0)
+
+        signals = build_device_signals(self.user)
+        self.assertEqual(signals["battery"]["charge"], 0.0)
+        self.assertEqual(signals["battery"]["discharge"], 1750.0)
+
+    def test_battery_voltage_and_current_calculation(self):
+        # Falls Wechselrichter gar keine battery_power sendet, sondern nur U (400V) und I (-7.5A)
+        payload = {
+            "battery_voltage": 400.0,
+            "battery_current": -7.5,
+        }
+        res = ingest_metric_payload(self.bat_device, payload, source="modbus_sungrow")
+
+        latest_vals = get_latest_values([self.bat_device.id])
+        self.assertEqual(latest_vals[self.bat_device.id], -3000.0)
+
+        signals = build_device_signals(self.user)
+        self.assertEqual(signals["battery"]["charge"], 3000.0)
+        self.assertEqual(signals["battery"]["discharge"], 0.0)
+

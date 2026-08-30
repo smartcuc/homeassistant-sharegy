@@ -8,18 +8,22 @@
 
 ## 1. ⚡ Echtzeit-Flüsse & Wirkleistungen (Live-Sankey & Dashboard)
 
-Zur unterbrechungsfreien Visualisierung des Live-Energieflusses im Sharegy Dashboard und Sankey-Diagramm werden die folgenden 4 Kern-Wirkleistungen (in Watt) im Intervall von **5–10 Sekunden** abgefragt:
+Zur unterbrechungsfreien Visualisierung des Live-Energieflusses im Sharegy Dashboard und Sankey-Diagramm werden die folgenden Kern-Wirkleistungen (in Watt) bzw. der Batteriestrom im Intervall von **5–10 Sekunden** abgefragt:
 
 | Parameter | Modbus-Adresse | Register-Nr. | Datentyp | Vorzeichen / Physikalische Bedeutung |
 | :--- | :---: | :---: | :---: | :--- |
 | **PV-Erzeugung Live** | `5016` | `5017–5018` | `uint32` (swap word) | `W` (reine Erzeugung aller MPPTs/Strings zusammen) |
-| **Batterieleistung Live** 🌟 | `5213` | `5214–5215` | `int32` (swap word) | **Vorzeichenbehaftet (TI Spec 1.1.11)!**<br>• **`< 0`**: Batterie **lädt** (Stromaufnahme/Last)<br>• **`> 0`**: Batterie **entlädt** (Einspeisung ins Haus) |
+| **Batteriestrom (Signed)** 🌟 | `5630` oder `13020` | `5631` / `13021` | `int16` (scale `0.1`) | **Zuverlässigste Richtungsquelle auf allen WR!**<br>• **`< 0`**: Batterie **lädt** ($I < 0\,\text{A}$)<br>• **`> 0`**: Batterie **entlädt** ($I > 0\,\text{A}$) |
+| **Batterieleistung (Raw/Positiv)** | `13021` oder `5213` | `13022` / `5214` | `uint16` / `int32` | `W` (wird über `battery_current` automatisch vorzeichenkorrigiert) |
+| **Batteriespannung** | `13019` | `13020` | `uint16` (scale `0.1`) | `V` (für $P = U \times I$ falls keine direkte Leistung vorliegt) |
 | **Netzzähler (Smart Meter)** | `5600` | `5601–5602` | `int32` (swap word) | **Vorzeichenbehaftet!**<br>• **`> 0`**: Netz**bezug** (Import)<br>• **`< 0`**: Netz**einspeisung** (Export) |
 | **Hausverbrauch Gesamt** | `13007` | `13008–13009` | `int32` (swap word) | `W` (echter gemessener Gesamthausverbrauch) |
 
-> [!TIP]
-> **Warum Register `5213` statt alter Register `13021/13022`?**  
-> In älteren Firmwares war `13021` immer positiv (unsigned) und benötigte ein separates Richtungsflag (`running_state`). Sungrow empfiehlt im aktuellen Standardprotokoll offiziell Register `5213`, welches die Batterieleistung nativ als vorzeichenbehaftetes `int32` liefert.
+> [!IMPORTANT]
+> **Praxiserkenntnis zu Register 5213 und 12999 (Running State):**  
+> • Register `5213` liefert bei vielen Inverter-Modellen / Firmwareständen stets `0`.  
+> • Register `12999` ist oft bitmasken-kodiert und herstellerseitig zwischen Firmware-Versionen uneinheitlich.  
+> • **Die robusteste & verlässlichste Methode**: **`battery_current` (Register `5630` bzw. `13020`)**! Da der Strom immer ein klares Vorzeichen besitzt (`-` beim Laden, `+` beim Entladen), nutzt Sharegy diesen Wert direkt, um das Vorzeichen der Batterieleistung zu bestimmen oder $P = U \times I$ hochpräzise zu errechnen.
 
 ---
 
