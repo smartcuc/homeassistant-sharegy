@@ -653,3 +653,61 @@ def storage_detect(request):
         "devices": device_options,
     })
 
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def storage_auto_setup(request):
+    """
+    1-Klick Auto-Setup: Scannt alle Haushalts-Geräte, erstellt das StorageSystem
+    und verknüpft automatisch SoC, Leistung, Stromstärke und Spannung.
+    """
+    home = request.user.homes.first()
+    if not home:
+        return Response({"error": "No home found"}, status=400)
+
+    # 1. Bestehende Speicher abfragen oder neu erstellen
+    storage = StorageSystem.objects.filter(home=home).first()
+    if not storage:
+        storage = StorageSystem.objects.create(
+            home=home,
+            name="Hausspeicher",
+            capacity_kwh=10.0,
+            max_charge_power_kw=5.0,
+            max_discharge_power_kw=5.0,
+            is_auto_detected=True,
+        )
+
+    # 2. Geräte des Haushalts scannen und Sensoren automatisch zuweisen
+    home_devs = list(Device.objects.filter(home=home, pending_delete=False))
+    for d in home_devs:
+        d_name = (getattr(d.config, "name", None) or d.identifier or "").lower()
+        role_key = (getattr(d.config.role, "key", "") if getattr(d, "config", None) and d.config.role else "").lower()
+        mdef = getattr(d.config, "metric_definition", None) if getattr(d, "config", None) else None
+        unit = (mdef.unit or "").strip().lower() if mdef else ""
+        m_key = (mdef.key or "").strip().lower() if mdef else ""
+        latest_keys = list(DeviceLatestMetric.objects.filter(device=d).values_list("metric_key", flat=True))
+
+        is_current = unit in ["a", "ma"] or m_key in ["current", "battery_current"] or any(k in d_name for k in ["_current", "stromstärke", "battery_current"]) or "battery_current" in latest_keys
+        is_soc = unit in ["%"] or m_key in ["soc", "battery_soc", "battery_level"] or any(k in d_name for k in ["_soc", "ladestand", "battery_soc", "battery_level"]) or any(k in latest_keys for k in ["soc", "battery_soc", "battery_level"])
+        is_voltage = unit in ["v", "mv"] or m_key in ["voltage", "battery_voltage"] or any(k in d_name for k in ["_voltage", "spannung", "battery_voltage"]) or "battery_voltage" in latest_keys
+        is_power = (unit in ["w", "kw"] or m_key in ["power", "battery_power", "active_power"] or any(k in d_name for k in ["power", "leistung", "battery_power"]) or any(k in latest_keys for k in ["battery_power", "battery_power_w"])) and not is_current
+
+        if is_soc and not storage.soc_device:
+            storage.soc_device = d
+            storage.soc_metric_key = m_key or "soc"
+        if is_current and not storage.current_device:
+            storage.current_device = d
+            storage.current_metric_key = m_key or "battery_current"
+        if is_power and not storage.power_device:
+            storage.power_device = d
+            storage.power_metric_key = m_key or "power"
+        if is_voltage and not storage.voltage_device:
+            storage.voltage_device = d
+            storage.voltage_metric_key = m_key or "battery_voltage"
+
+    if not storage.power_device and not storage.soc_device and home_devs:
+        storage.primary_device = home_devs[0]
+
+    storage.save()
+    return Response(serialize_storage_system(storage))
+

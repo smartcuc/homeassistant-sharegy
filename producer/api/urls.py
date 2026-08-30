@@ -9,6 +9,7 @@ from producer.api.views import (
     string_create, string_update, string_delete,
     generator_type_list, orientation_list,
     storage_list, storage_create, storage_update, storage_delete, storage_detect,
+    storage_auto_setup,
 )
 
 
@@ -69,6 +70,11 @@ urlpatterns = [
         "storage/detect/",
         storage_detect,
         name="storage-detect",
+    ),
+    path(
+        "storage/auto-setup/",
+        storage_auto_setup,
+        name="storage-auto-setup",
     ),
     path(
         "storage/<uuid:storage_id>/",

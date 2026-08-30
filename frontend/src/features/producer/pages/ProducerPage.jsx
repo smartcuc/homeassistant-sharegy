@@ -282,21 +282,42 @@ export default function ProducerPage() {
             {activeTab === "storage" && (
                 <div className="space-y-4">
                     {storages.length === 0 && (
-                        <div className="bg-white border border-gray-200 rounded-3xl p-12 text-center text-gray-500 space-y-3">
-                            <div className="text-4xl">🔋</div>
-                            <div className="font-bold text-gray-900">{t("storage.empty_title", "Keine Batteriespeicher angelegt")}</div>
-                            <p className="text-xs text-gray-400 max-w-md mx-auto">
-                                {t("storage.empty_desc", "Lege deinen Hausspeicher an und ordne flexibel zu, welches Gerät den Ladestand (SoC %) und die Ladeleistung liefert (All-in-One Wechselrichter oder getrennte Sensoren).")}
-                            </p>
-                            <button
-                                onClick={() => {
-                                    setEditingStorage(null);
-                                    setOpenStorageModal(true);
-                                }}
-                                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
-                            >
-                                + {t("storage.add_btn", "Batteriespeicher hinzufügen")}
-                            </button>
+                        <div className="bg-white border border-gray-200 rounded-3xl p-12 text-center text-gray-500 space-y-4">
+                            <div className="text-5xl">🔋</div>
+                            <div className="space-y-1">
+                                <div className="text-lg font-bold text-gray-900">{t("storage.empty_title", "Keine Batteriespeicher angelegt")}</div>
+                                <p className="text-xs text-gray-400 max-w-md mx-auto">
+                                    {t("storage.empty_desc", "Lege deinen Hausspeicher an und ordne flexibel zu, welches Gerät den Ladestand (SoC %) und die Ladeleistung liefert (All-in-One Wechselrichter oder getrennte Sensoren).")}
+                                </p>
+                            </div>
+
+                            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                                <button
+                                    onClick={async () => {
+                                        try {
+                                            await apiFetch("/api/producer/storage/auto-setup/", { method: "POST" });
+                                            queryClient.invalidateQueries({ queryKey: ["storages"] });
+                                            queryClient.invalidateQueries({ queryKey: ["battery-soc-forecast"] });
+                                        } catch (e) {
+                                            setEditingStorage(null);
+                                            setOpenStorageModal(true);
+                                        }
+                                    }}
+                                    className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer flex items-center gap-2"
+                                >
+                                    <span>✨</span> {t("storage.auto_setup_btn", "Speicher automatisch erkennen & anlegen")}
+                                </button>
+
+                                <button
+                                    onClick={() => {
+                                        setEditingStorage(null);
+                                        setOpenStorageModal(true);
+                                    }}
+                                    className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-xs font-bold transition cursor-pointer"
+                                >
+                                    + {t("storage.add_manual_btn", "Manuell konfigurieren")}
+                                </button>
+                            </div>
                         </div>
                     )}
 
