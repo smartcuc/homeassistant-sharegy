@@ -45,16 +45,20 @@ def run_health_checks():
     ]
 
     for check in checks:
-
         try:
             check()
-
         except Exception:
-
             logger.exception(
                 "health check failed: %s",
                 check.__name__,
             )
+
+    # 🚨 Automatische Ticket-Erstellung bei Abweichungen / Erholungen
+    try:
+        check_and_create_incident_tickets()
+    except Exception:
+        logger.exception("Fehler bei automatischer Incident-Triage")
+
 
 
 def check_spot_prices():
@@ -396,4 +400,73 @@ def check_active_devices():
             },
         },
     )
+
+
+def check_and_create_incident_tickets():
+    """
+    Automatische Triage & Incident-Erstellung:
+    Prüft alle HealthState-Einträge. Wenn ein Subsystem auf 'error' steht,
+    wird automatisch ein Support-Ticket mit Prio 'urgent' oder 'high' erstellt
+    (sofern für diesen Vorfall noch kein offenes Ticket existiert).
+    Bei Erholung ('ok') wird das Ticket automatisch aktualisiert bzw. gelöst.
+    """
+    from support_desk.models import Ticket, TicketMessage
+    from support_desk.services.ticket_engine import create_ticket
+
+    states = HealthState.objects.all()
+    for state in states:
+        marker = f"[Auto-Incident: {state.key}]"
+        open_ticket = Ticket.objects.filter(
+            subject__contains=marker,
+            status__in=[Ticket.STATUS_OPEN, Ticket.STATUS_IN_PROGRESS, Ticket.STATUS_WAITING_INTERNAL],
+        ).first()
+
+        if state.status == "error":
+            if not open_ticket:
+                # 🚨 Neues automatisches Incident-Ticket erstellen
+                subject = f"[System-Incident 🚨] {marker} Störung bei {state.key}"
+                desc = (
+                    f"### 🚨 Automatische System-Störung erkannt\n\n"
+                    f"**Komponente:** `{state.key}`\n"
+                    f"**Status:** `{state.status.upper()}`\n"
+                    f"**Meldung:** {state.value}\n"
+                    f"**Zeitpunkt:** {timezone.now().strftime('%d.%m.%Y %H:%M:%S UTC')}\n\n"
+                    f"#### Diagnosedaten:\n```json\n"
+                    f"{state.details}\n```\n\n"
+                    f"*Dieses Ticket wurde automatisch durch den Sharegy Health Watchdog generiert.*"
+                )
+                try:
+                    ticket = create_ticket(
+                        project_key="sharegy",
+                        subject=subject,
+                        category="infrastructure",
+                        priority=Ticket.PRIORITY_URGENT,
+                        initial_message=desc,
+                        contact_name="Sharegy System Watchdog",
+                        contact_email="system-alerts@sharegy.de",
+                        context_payload={"auto_incident": True, "health_key": state.key, "details": state.details},
+                    )
+                    logger.warning("🚨 Automatisches Incident-Ticket #%s für %s erstellt", ticket.ticket_number, state.key)
+                except Exception as e:
+                    logger.exception("Fehler beim Erstellen des Incident-Tickets für %s: %s", state.key, str(e))
+        elif state.status == "ok" and open_ticket:
+            # ✅ Automatische Entwarnung / Resolution
+            resolution_msg = (
+                f"### ✅ Automatische Entwarnung\n\n"
+                f"Die Komponente `{state.key}` hat sich normalisiert.\n"
+                f"**Aktueller Wert:** {state.value}\n"
+                f"**Zeitpunkt:** {timezone.now().strftime('%d.%m.%Y %H:%M:%S UTC')}"
+            )
+            TicketMessage.objects.create(
+                ticket=open_ticket,
+                external_sender_name="Sharegy System Watchdog",
+                external_sender_email="system-alerts@sharegy.de",
+                body=resolution_msg,
+                is_internal_note=True,
+            )
+            open_ticket.status = Ticket.STATUS_RESOLVED
+            open_ticket.save(update_fields=["status", "updated_at"])
+            logger.info("✅ Incident-Ticket #%s für %s automatisch gelöst", open_ticket.ticket_number, state.key)
+
+
 

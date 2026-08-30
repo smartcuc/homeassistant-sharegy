@@ -6,6 +6,11 @@ import i18n from "./i18n";
 import App from "./App";
 import "./index.css";   // ✅ CSS
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { initSentry } from "./tracking/sentry";
+
+// 🛡️ Sentry Error Tracking aktivieren
+initSentry();
+
 
 // ✅ globaler Cache
 const queryClient = new QueryClient();

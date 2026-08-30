@@ -12,6 +12,9 @@ import os
 from celery.schedules import crontab
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
+from sentry_sdk.integrations.celery import CeleryIntegration
+from sentry_sdk.integrations.redis import RedisIntegration
+
 
 
 BASE_DIR = Path(__file__).resolve().parents[2]
@@ -517,12 +520,20 @@ MQTT_CTRL_PATH = os.getenv("MQTT_CTRL_PATH")
 # Sentry
 # =============================
 
-SENTRY_DSN = os.getenv("SENTRY_DSN")
+SENTRY_DSN = os.getenv("SENTRY_DSN", "https://3fba9b14f3105d8ea0b18b1719a265bd@o4511998045650944.ingest.de.sentry.io/4511998083006544")
+SENTRY_ENVIRONMENT = os.getenv("SENTRY_ENVIRONMENT", "production")
 
 if SENTRY_DSN:
     sentry_sdk.init(
         dsn=SENTRY_DSN,
-        integrations=[DjangoIntegration()],
+        integrations=[
+            DjangoIntegration(),
+            CeleryIntegration(),
+            RedisIntegration(),
+        ],
+        environment=SENTRY_ENVIRONMENT,
+        release="sharegy-backend@3.2.0",
         send_default_pii=False,
-        traces_sample_rate=0.1,
+        traces_sample_rate=float(os.getenv("SENTRY_TRACES_SAMPLE_RATE", "0.1")),
     )
+
