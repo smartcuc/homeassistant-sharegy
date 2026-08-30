@@ -63,6 +63,20 @@ def get_submeter_trends(user, period: str = "30d", meter_id: str = None) -> dict
         dev_name = (get_device_name(d) or "").lower()
         dev_ident = (d.identifier or "").lower()
 
+        # Nicht-Wirkleistungs-Sensoren (A, V, %, °C) aus Energie-Bilanzsummen ausschließen
+        mdef = cfg.metric_definition if cfg else None
+        if mdef:
+            u = (mdef.unit or "").strip().lower()
+            k = (mdef.key or "").strip().lower()
+            if u in ["a", "v", "%", "°c", "c", "bar", "hz"] or k in [
+                "current", "battery_current", "voltage", "battery_voltage",
+                "soc", "battery_soc", "battery_level", "temperature", "frequency"
+            ]:
+                continue
+        if any(w in dev_name or w in dev_ident for w in ["_current", "_voltage", "_soc", "_level", "stromstärke", "spannung"]):
+            if not any(w in dev_name or w in dev_ident for w in ["power", "leistung", "wirkleistung", "watt"]):
+                continue
+
         if is_grid or role_key == "grid" or sig_key in ["grid", "grid_import", "grid_feed_in", "meter"] or "grid" in dev_name:
             grid_device_ids.add(d.id)
         elif role_key in ["producer", "pv", "solar", "inverter", "wechselrichter", "balkonkraftwerk"] or sig_key in ["pv", "solar", "producer", "production"] or any(k in dev_name for k in ["solar", "wechselrichter", "inverter", "balkonkraftwerk", "pv-", "bkw", "pv"]) or any(k in dev_ident for k in ["solar", "inverter", "pv"]):
@@ -73,10 +87,16 @@ def get_submeter_trends(user, period: str = "30d", meter_id: str = None) -> dict
             consumer_devices.append(d)
 
     try:
-        from producer.models import GeneratorSystem
+        from producer.models import GeneratorSystem, StorageSystem
         for gs in GeneratorSystem.objects.filter(home__user=user, active=True).select_related("device"):
             if gs.device_id:
                 pv_device_ids.add(gs.device_id)
+
+        for ss in StorageSystem.objects.filter(home__user=user, active=True).select_related("power_device", "primary_device"):
+            if ss.power_device_id:
+                battery_device_ids.add(ss.power_device_id)
+            elif ss.primary_device_id:
+                battery_device_ids.add(ss.primary_device_id)
     except Exception:
         pass
 

@@ -55,7 +55,41 @@ def build_device_signals(user):
     }
 
     # 3. Fallback: Nur wenn fuer einen Signal-Typ KEINE explizite EMS-Signalquelle existiert
+    def _is_non_power_sensor(d):
+        c = getattr(d, "config", None)
+        if c and c.metric_definition:
+            u = (c.metric_definition.unit or "").strip().lower()
+            k = (c.metric_definition.key or "").strip().lower()
+            if u in ["a", "v", "%", "°c", "c", "bar", "hz"] or k in [
+                "current", "battery_current", "voltage", "battery_voltage",
+                "soc", "battery_soc", "battery_level", "temperature", "frequency"
+            ]:
+                return True
+        d_name = (d.identifier or "").lower()
+        if any(w in d_name for w in ["_current", "_voltage", "_soc", "_level", "stromstärke", "spannung"]):
+            if not any(w in d_name for w in ["power", "leistung", "wirkleistung", "watt"]):
+                return True
+        return False
+
+    # Aus konfigurierten Erzeuger- & Speichersystemen binden
+    try:
+        from producer.models import GeneratorSystem, StorageSystem
+        for gs in GeneratorSystem.objects.filter(home__user=user, active=True).select_related("device"):
+            if gs.device_id and not _is_non_power_sensor(gs.device):
+                pv_device_ids.add(gs.device_id)
+
+        for ss in StorageSystem.objects.filter(home__user=user, active=True).select_related("power_device", "primary_device"):
+            if ss.power_device_id and not _is_non_power_sensor(ss.power_device):
+                battery_device_ids.add(ss.power_device_id)
+            elif ss.primary_device_id and not _is_non_power_sensor(ss.primary_device):
+                battery_device_ids.add(ss.primary_device_id)
+    except Exception:
+        pass
+
     for dev in all_devices:
+        if _is_non_power_sensor(dev):
+            continue
+
         cfg = getattr(dev, "config", None)
         if not cfg:
             continue
