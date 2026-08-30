@@ -337,11 +337,15 @@ def serialize_storage_system(storage):
             status = "full"
         elif live_soc is not None and live_soc <= float(storage.min_soc_reserve_pct) + 2.0:
             status = "empty_reserve"
-
     def get_dev_info(dev):
         if not dev:
             return None, None
-        name = dev.config.name if hasattr(dev, "config") and dev.config and dev.config.name else dev.identifier
+        name = dev.identifier
+        try:
+            if dev.config and dev.config.name:
+                name = dev.config.name
+        except Exception:
+            pass
         return str(dev.id), name
 
     p_id, p_name = get_dev_info(storage.primary_device)
@@ -382,6 +386,27 @@ def serialize_storage_system(storage):
     }
 
 
+def _get_dev_meta(dev):
+    """Sicherer Zugriff auf Name, Rolle, Einheit und Metrikschlüssel eines Geräts."""
+    name = dev.identifier or ""
+    role = ""
+    unit = ""
+    m_key = ""
+    try:
+        cfg = dev.config
+        if cfg:
+            if cfg.name:
+                name = cfg.name
+            if cfg.role:
+                role = (cfg.role.key or "").lower()
+            if cfg.metric_definition:
+                unit = (cfg.metric_definition.unit or "").strip().lower()
+                m_key = (cfg.metric_definition.key or "").strip().lower()
+    except Exception:
+        pass
+    return name, role, unit, m_key
+
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def storage_list(request):
@@ -416,41 +441,21 @@ def storage_list(request):
         primary.save()
         storages = [primary]
 
-    # 2. Auto-Creation & Wiring: Falls noch kein Speicher existiert oder Sensoren unvollständig sind
-    if not storages:
-        home_devs = list(Device.objects.filter(home=home, pending_delete=False))
-        has_battery_devs = any(
-            (getattr(d.config.role, "key", "") if getattr(d, "config", None) and d.config.role else "").lower() in ["battery", "storage", "akku"]
-            or any(k in (getattr(d.config, "name", None) or d.identifier or "").lower() for k in ["battery", "batterie", "speicher", "soc"])
-            for d in home_devs
-        )
-        if has_battery_devs:
-            storage = StorageSystem.objects.create(
-                home=home,
-                name="Hausspeicher",
-                capacity_kwh=10.0,
-                max_charge_power_kw=5.0,
-                max_discharge_power_kw=5.0,
-                is_auto_detected=True,
-            )
-            storages = [storage]
-
+    # 2. Auto-Wiring: Falls ein Speicher existiert, aber einzelne Sensoren noch nicht verknüpft sind
     if storages:
         storage = storages[0]
-        home_devs = list(Device.objects.filter(home=home, pending_delete=False))
+        home_devs = list(Device.objects.filter(home=home))
         updated = False
 
         for d in home_devs:
-            d_name = (getattr(d.config, "name", None) or d.identifier or "").lower()
-            role_key = (getattr(d.config.role, "key", "") if getattr(d, "config", None) and d.config.role else "").lower()
-            mdef = getattr(d.config, "metric_definition", None) if getattr(d, "config", None) else None
-            unit = (mdef.unit or "").strip().lower() if mdef else ""
-            m_key = (mdef.key or "").strip().lower() if mdef else ""
+            d_name, role_key, unit, m_key = _get_dev_meta(d)
+            d_name_low = d_name.lower()
+            latest_keys = list(DeviceLatestMetric.objects.filter(device=d).values_list("metric_key", flat=True))
 
-            is_current = unit in ["a", "ma"] or m_key in ["current", "battery_current"] or any(k in d_name for k in ["_current", "stromstärke", "battery_current"])
-            is_soc = unit in ["%"] or m_key in ["soc", "battery_soc", "battery_level"] or any(k in d_name for k in ["_soc", "ladestand", "battery_soc", "battery_level"])
-            is_voltage = unit in ["v", "mv"] or m_key in ["voltage", "battery_voltage"] or any(k in d_name for k in ["_voltage", "spannung", "battery_voltage"])
-            is_power = (unit in ["w", "kw"] or m_key in ["power", "battery_power", "active_power"] or any(k in d_name for k in ["power", "leistung", "battery_power"])) and not is_current
+            is_current = unit in ["a", "ma"] or m_key in ["current", "battery_current"] or any(k in d_name_low for k in ["_current", "stromstärke", "battery_current"]) or "battery_current" in latest_keys
+            is_soc = unit in ["%"] or m_key in ["soc", "battery_soc", "battery_level"] or any(k in d_name_low for k in ["_soc", "ladestand", "battery_soc", "battery_level"]) or any(k in latest_keys for k in ["soc", "battery_soc", "battery_level"])
+            is_voltage = unit in ["v", "mv"] or m_key in ["voltage", "battery_voltage"] or any(k in d_name_low for k in ["_voltage", "spannung", "battery_voltage"]) or "battery_voltage" in latest_keys
+            is_power = (unit in ["w", "kw"] or m_key in ["power", "battery_power", "active_power"] or any(k in d_name_low for k in ["power", "leistung", "battery_power"]) or any(k in latest_keys for k in ["battery_power", "battery_power_w"])) and not is_current
 
             if is_soc and not storage.soc_device:
                 storage.soc_device = d
@@ -522,7 +527,7 @@ def storage_create(request):
     return Response(serialize_storage_system(storage), status=201)
 
 
-@api_view(["PATCH", "PUT"])
+@api_view(["PATCH"])
 @permission_classes([IsAuthenticated])
 def storage_update(request, storage_id):
     home = request.user.homes.first()
@@ -593,13 +598,12 @@ def storage_detect(request):
     if not home:
         return Response({"candidates": [], "devices": []})
 
-    devices = Device.objects.filter(home=home, active=True, pending_delete=False)
+    devices = Device.objects.filter(home=home)
     candidates = []
     device_options = []
 
     for dev in devices:
-        name = dev.config.name if hasattr(dev, "config") and dev.config and dev.config.name else dev.identifier
-        role = dev.config.role.key if (hasattr(dev, "config") and dev.config and dev.config.role) else ""
+        name, role, unit, m_key = _get_dev_meta(dev)
 
         # Vorhandene Metriken abfragen
         metrics = list(DeviceLatestMetric.objects.filter(device=dev).values_list("metric_key", flat=True))
@@ -611,11 +615,11 @@ def storage_detect(request):
         has_energy = any(k in ["energy_in", "energy_out", "total_charge", "total_discharge"] for k in metrics)
 
         # Reine Stromsensoren sind KEIN eigenständiger Speicher-Kandidat
-        is_pure_current = has_current and not has_power and not has_soc
+        is_pure_current = (has_current or unit in ["a", "ma"]) and not has_power and not has_soc
 
         is_candidate = not is_pure_current and (
             role in ["battery", "storage", "akku"]
-            or ("battery" in dev.identifier.lower() and not "current" in dev.identifier.lower())
+            or ("battery" in (dev.identifier or "").lower() and not "current" in (dev.identifier or "").lower())
             or has_soc
             or has_power
         )
@@ -678,19 +682,16 @@ def storage_auto_setup(request):
         )
 
     # 2. Geräte des Haushalts scannen und Sensoren automatisch zuweisen
-    home_devs = list(Device.objects.filter(home=home, pending_delete=False))
+    home_devs = list(Device.objects.filter(home=home))
     for d in home_devs:
-        d_name = (getattr(d.config, "name", None) or d.identifier or "").lower()
-        role_key = (getattr(d.config.role, "key", "") if getattr(d, "config", None) and d.config.role else "").lower()
-        mdef = getattr(d.config, "metric_definition", None) if getattr(d, "config", None) else None
-        unit = (mdef.unit or "").strip().lower() if mdef else ""
-        m_key = (mdef.key or "").strip().lower() if mdef else ""
+        d_name, role_key, unit, m_key = _get_dev_meta(d)
+        d_name_low = d_name.lower()
         latest_keys = list(DeviceLatestMetric.objects.filter(device=d).values_list("metric_key", flat=True))
 
-        is_current = unit in ["a", "ma"] or m_key in ["current", "battery_current"] or any(k in d_name for k in ["_current", "stromstärke", "battery_current"]) or "battery_current" in latest_keys
-        is_soc = unit in ["%"] or m_key in ["soc", "battery_soc", "battery_level"] or any(k in d_name for k in ["_soc", "ladestand", "battery_soc", "battery_level"]) or any(k in latest_keys for k in ["soc", "battery_soc", "battery_level"])
-        is_voltage = unit in ["v", "mv"] or m_key in ["voltage", "battery_voltage"] or any(k in d_name for k in ["_voltage", "spannung", "battery_voltage"]) or "battery_voltage" in latest_keys
-        is_power = (unit in ["w", "kw"] or m_key in ["power", "battery_power", "active_power"] or any(k in d_name for k in ["power", "leistung", "battery_power"]) or any(k in latest_keys for k in ["battery_power", "battery_power_w"])) and not is_current
+        is_current = unit in ["a", "ma"] or m_key in ["current", "battery_current"] or any(k in d_name_low for k in ["_current", "stromstärke", "battery_current"]) or "battery_current" in latest_keys
+        is_soc = unit in ["%"] or m_key in ["soc", "battery_soc", "battery_level"] or any(k in d_name_low for k in ["_soc", "ladestand", "battery_soc", "battery_level"]) or any(k in latest_keys for k in ["soc", "battery_soc", "battery_level"])
+        is_voltage = unit in ["v", "mv"] or m_key in ["voltage", "battery_voltage"] or any(k in d_name_low for k in ["_voltage", "spannung", "battery_voltage"]) or "battery_voltage" in latest_keys
+        is_power = (unit in ["w", "kw"] or m_key in ["power", "battery_power", "active_power"] or any(k in d_name_low for k in ["power", "leistung", "battery_power"]) or any(k in latest_keys for k in ["battery_power", "battery_power_w"])) and not is_current
 
         if is_soc and not storage.soc_device:
             storage.soc_device = d

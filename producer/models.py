@@ -467,10 +467,13 @@ class StorageSystem(models.Model):
         def _is_curr_dev(dev):
             if not dev:
                 return False
-            cfg = getattr(dev, "config", None)
-            mdef = cfg.metric_definition if cfg else None
-            if mdef and (mdef.unit in ["A", "a"] or mdef.key in ["current", "battery_current"]):
-                return True
+            try:
+                cfg = dev.config
+                mdef = cfg.metric_definition if cfg else None
+                if mdef and (mdef.unit in ["A", "a"] or mdef.key in ["current", "battery_current"]):
+                    return True
+            except Exception:
+                pass
             d_name = (dev.identifier or "").lower()
             return any(w in d_name for w in ["_current", "stromstärke", "battery_current"]) and not any(w in d_name for w in ["power", "leistung", "watt"])
 
@@ -515,7 +518,7 @@ class StorageSystem(models.Model):
 
         # Fallback auf Geräte mit Batterie-Rolle (ohne Stromsensoren)
         if power_val is None:
-            for d in self.home.devices.filter(config__role__key__in=["battery", "storage", "akku"]):
+            for d in self.home.devices.all():
                 if not _is_curr_dev(d):
                     m = DeviceLatestMetric.objects.filter(device=d, metric_key__in=keys).order_by("-timestamp").first()
                     if m and m.value is not None:
