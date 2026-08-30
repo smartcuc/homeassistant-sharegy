@@ -24,7 +24,11 @@ from .views import (
     simulate_telemetry,
     regenerate_mqtt_password,
     device_switch,
+    device_baseline_profile_view,
+    device_baseline_learn_view,
+    device_baseline_evaluate_view,
 )
+
 
 
 from devices.views import (
@@ -54,7 +58,11 @@ urlpatterns = [
     path("<int:device_id>/timeseries/export/", export_device_timeseries_view),
     path("<int:device_id>/simulate/", simulate_telemetry),
     path("<int:device_id>/switch/", device_switch),
+    path("<int:device_id>/profile/", device_baseline_profile_view),
+    path("<int:device_id>/profile/learn/", device_baseline_learn_view),
+    path("<int:device_id>/profile/evaluate/", device_baseline_evaluate_view),
     path("sankey/", sankey_data),
+
 
     path("homes/", list_homes),
     path("homes/regenerate-mqtt/", regenerate_mqtt_password),

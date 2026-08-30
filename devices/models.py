@@ -684,3 +684,103 @@ class DeviceMetric1h(models.Model):
             ),
 
         ]
+
+
+# ============================================================
+# 🧠 GERÄTEPROFILING & BASELINE-ÜBERWACHUNG
+# ============================================================
+
+class DeviceBaselineProfile(models.Model):
+    """
+    Intelligentes Geräteprofil zur Überwachung der Baseline (z. B. Standby-Verbrauch,
+    Betriebsleistung, Zyklus- und Dauerlaufzeiten für BWWP, Wärmepumpen, Kühlschränke, Pumpen).
+    Erkennt frühzeitig Fehlverhalten, Verschleiß, Defekte oder Kriechströme.
+    """
+    APPLIANCE_CHOICES = [
+        ("bwwp", "Brauchwasserwärmepumpe (BWWP)"),
+        ("heatpump", "Heizungs-Wärmepumpe"),
+        ("fridge", "Kühlschrank / Gefriergerät"),
+        ("circulation_pump", "Zirkulationspumpe"),
+        ("heating_pump", "Umwälz- / Heizungspumpe"),
+        ("washing_machine", "Waschmaschine / Trockner"),
+        ("dishwasher", "Geschirrspüler"),
+        ("ev_charger", "Wallbox / E-Auto"),
+        ("ac_inverter", "Klimaanlage / Inverter"),
+        ("generic", "Individuelles Gerät"),
+    ]
+
+    HEALTH_HEALTHY = "healthy"
+    HEALTH_WARNING = "warning"
+    HEALTH_ANOMALY = "anomaly"
+
+    HEALTH_CHOICES = [
+        (HEALTH_HEALTHY, "Normal / Baseline eingehalten"),
+        (HEALTH_WARNING, "Auffällig / Leichte Abweichung"),
+        (HEALTH_ANOMALY, "Kritische Anomalie / Alarm"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    device = models.OneToOneField(
+        "Device",
+        on_delete=models.CASCADE,
+        related_name="baseline_profile",
+    )
+    appliance_type = models.CharField(
+        max_length=40,
+        choices=APPLIANCE_CHOICES,
+        default="generic",
+    )
+    is_active = models.BooleanField(
+        default=True,
+        help_text="Überwachung der Baseline aktiv",
+    )
+
+    # 1. Standby / Ruhe-Baseline
+    standby_power_w = models.FloatField(
+        default=30.0,
+        help_text="Erwarteter Standby-/Ruheverbrauch in Watt (z. B. 30W bei BWWP)",
+    )
+    standby_tolerance_pct = models.FloatField(
+        default=30.0,
+        help_text="Zulässige Abweichung vom Standby in % (z. B. 30%)",
+    )
+    standby_max_w = models.FloatField(
+        default=45.0,
+        help_text="Absolute Obergrenze für den Standby-Zustand (z. B. 45W)",
+    )
+
+    # 2. Betriebs-Leistung (z. B. Kompressor / Pumpe aktiv)
+    operating_power_min_w = models.FloatField(
+        default=350.0,
+        help_text="Minimale Leistung im aktiven Betriebsmodus (z. B. 350W)",
+    )
+    operating_power_max_w = models.FloatField(
+        default=750.0,
+        help_text="Maximale Leistung im regulären Betriebsmodus (z. B. 750W)",
+    )
+
+    # 3. Laufzeit-Überwachung
+    max_continuous_run_hours = models.FloatField(
+        default=6.0,
+        help_text="Maximal zulässige ununterbrochene Laufzeit vor Alarm (z. B. 6.0h)",
+    )
+
+    # 4. Status & Auto-Learning
+    learning_mode = models.BooleanField(
+        default=False,
+        help_text="Lernt automatisch die Baseline aus den realen Messwerten",
+    )
+    last_evaluated_at = models.DateTimeField(null=True, blank=True)
+    current_health_status = models.CharField(
+        max_length=20,
+        choices=HEALTH_CHOICES,
+        default=HEALTH_HEALTHY,
+    )
+    last_measured_standby_w = models.FloatField(null=True, blank=True)
+    last_measured_operating_w = models.FloatField(null=True, blank=True)
+    anomaly_reason = models.TextField(blank=True, default="")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Baseline-Profil ({self.get_appliance_type_display()}) für Device #{self.device_id}"
+

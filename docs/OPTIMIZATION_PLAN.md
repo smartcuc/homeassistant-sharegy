@@ -467,13 +467,14 @@
 
 ---
 
-### [ ] 5.21 Geräteprofiling & Deklaratives Auto-Discovery (Beta & Live Kernkomponente)
-- **Bereich**: Device Intelligence, Hardware Abstraction (`devices/profiles/`, `devices/services_discovery.py`, `devices/models.py`)
-- **Ziel**:
-  - **Automatische Geräte-Klassifizierung**: Erkennung von Inverter, Batterie, Wärmepumpe, Wallbox, Smart Plug und Zählern anhand eingehender Telemetrie-Signaturen.
-  - **Deklarative Hardware-Profile (YAML/JSON)**: Vorgefertigte Profile für Standardhersteller (Sungrow, SMA, Fronius, Deye, Huawei, Kostal, Shelly, Tasmota, OpenDTU).
-  - **Zero-Config Telemetrie-Mapping**: Automatisches Mapping von Rohdaten-Keys (`apower`, `total_act_power`, `grid_power`, `battery_soc`, `inverter_p_ac`) auf Sharegy-Flussvektoren (`solar`, `load`, `battery`, `grid`).
-  - **Signalqualitäts-Diagnose**: Live-Messung von Sampling-Rate (Hz), Signalstärke (RSSI / Wi-Fi dBm), Latenz-Jitter und Fehlerrate pro Gerät.
+### [x] 5.21 Geräteprofiling & Baseline-Anomalieüberwachung (Beta & Live Kernkomponente)
+- **Bereich**: Device Intelligence, Baseline Health & Anomaly Watchdog (`devices/models.py`, `devices/services_profiling.py`, `devices/api/views.py`, `frontend/src/components/device/DeviceBaselineModal.jsx`)
+- **Umgesetzt**:
+  - **DeviceBaselineProfile-Modell**: Speichert Soll-Standby (W), Standby-Maximalgrenze, Betriebsleistung Min/Max und maximale Dauerlaufzeit.
+  - **Intelligente Baseline-Überwachung & Alarmierung**: Erkennt Standby-Anstiege (z. B. BWWP 30W -> 52W) oder ununterbrochenen Dauerlauf (Hang-up/Vereisung) und löst automatisch verifizierte Alerts in der Alarmzentrale (`alerts.AlertEvent`) aus.
+  - **1-Klick Presets & Auto-Learning**: Vordefinierte Profile für BWWP, Wärmepumpe, Kühlschrank, Zirkulationspumpe, Heizungspumpe sowie automatisches 7-Tage-ML-Learning aus realen Messwerten.
+  - **Interaktive UI**: `🧠 Geräteprofil`-Button auf Gerätekarten mit Live-Health-Badge und Konfigurationsmodal.
+
 
 ---
 
@@ -481,32 +482,33 @@
 
 ```
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ PRIORITÄT 1: BETA & GO-LIVE FINALISIERUNG (Sofort starten)                    │
+│ ✅ ERLEDIGT: BETA & GO-LIVE VORAUSSETZUNGEN (100% Abgeschlossen)               │
 ├───────────────────────────────────────────────────────────────────────────────┤
-│ 1. 🟢 Task 5.20: Systemstatus- & Health-Monitoring Engine (Health-API & UI)   │
+│ • 🟢 Task 5.20: Systemstatus- & Health-Monitoring Engine (Health-API & UI)   │
 │    -> GET /api/status/health/ (DB, Redis, Daphne, Celery, Open-Meteo)         │
-│    -> Status-Badge in Topbar & automatisches Incident-Logging                │
-│ 2. 📟 Task 5.21: Geräteprofiling & Deklaratives Auto-Discovery (YAML-Profile) │
-│    -> Vorgefertigte Profile für Sungrow, SMA, Deye, Huawei, Kostal, Fronius   │
-│    -> Zero-Config Key-Mapping & Signalqualitäts-Diagnose                      │
+│    -> Live-Status Dashboard (/app/status) & automatischer Incident-Watchdog  │
+│ • 🧠 Task 5.21: Geräteprofiling & Baseline-Anomalieüberwachung                │
+│    -> DeviceBaselineProfile mit 1-Klick Presets (BWWP, WP, Kühlschrank)       │
+│    -> 7-Tage Auto-ML-Learning & Echtzeit-Anomalie-Alerting (Standby/Dauerlauf)│
 └───────────────────────────────────────────────────────────────────────────────┘
                                        │
                                        ▼
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ PRIORITÄT 2: MOBILE APPS & PUSH-BENACHRICHTIGUNGEN                            │
+│ PRIORITÄT 1: MOBILE APPS & PUSH-BENACHRICHTIGUNGEN (Nächster Schritt)         │
 ├───────────────────────────────────────────────────────────────────────────────┤
-│ 3. 📲 Task 5.9: Mobile Push & Notification Engine (FCM & APNs Dispatcher)    │
-│ 4. 📱 Task 5.10: Native iOS & Android Apps via Capacitor (Widgets & Stores)   │
+│ 1. 📲 Task 5.9: Mobile Push & Notification Engine (FCM & APNs Dispatcher)    │
+│ 2. 📱 Task 5.10: Native iOS & Android Apps via Capacitor (Widgets & Stores)   │
 └───────────────────────────────────────────────────────────────────────────────┘
                                        │
                                        ▼
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ PRIORITÄT 3: SÄULE 2 - ENERGY SHARING COMMUNITIES & § 14a EnWG                │
+│ PRIORITÄT 2: SÄULE 2 - ENERGY SHARING COMMUNITIES & § 14a EnWG                │
 ├───────────────────────────────────────────────────────────────────────────────┤
-│ 5. 🏢 Task 4.1: Tenant-Modell Konsolidierung & 15-Min P2P-Clearing            │
-│ 6. ⚡ Task 3.6: § 14a EnWG Steuerbox-Schnittstelle & Pflichtdimmung (4,2 kW)  │
+│ 3. 🏢 Task 4.1: Tenant-Modell Konsolidierung & 15-Min P2P-Clearing            │
+│ 4. ⚡ Task 3.6: § 14a EnWG Steuerbox-Schnittstelle & Pflichtdimmung (4,2 kW)  │
 └───────────────────────────────────────────────────────────────────────────────┘
 ```
+
 
 
 

@@ -1010,4 +1010,130 @@ def device_switch(request, device_id):
     })
 
 
+# ============================================================
+# 🧠 GERÄTEPROFILING & BASELINE API
+# ============================================================
+
+@api_view(["GET", "POST", "PATCH"])
+@permission_classes([IsAuthenticated])
+def device_baseline_profile_view(request, device_id):
+    """
+    Liefert oder aktualisiert das Baseline-Profil eines Geräts.
+    """
+    from devices.services_profiling import (
+        get_or_create_device_profile,
+        evaluate_device_baseline,
+        APPLIANCE_PRESETS,
+    )
+
+    device = get_object_or_404(Device, id=device_id)
+    user_homes = request.user.homes.all()
+    if device.home not in user_homes and not request.user.is_staff and not request.user.is_superuser:
+        return Response({"error": "Keine Berechtigung für dieses Gerät."}, status=403)
+
+    profile = get_or_create_device_profile(device)
+
+    if request.method in ["POST", "PATCH"]:
+        data = request.data
+        if "appliance_type" in data:
+            profile.appliance_type = data["appliance_type"]
+            # Bei Typ-Wechsel Preset übernehmen, sofern nicht explizit überschrieben
+            if data.get("apply_preset", False) and profile.appliance_type in APPLIANCE_PRESETS:
+                p = APPLIANCE_PRESETS[profile.appliance_type]
+                profile.standby_power_w = p["standby_power_w"]
+                profile.standby_tolerance_pct = p["standby_tolerance_pct"]
+                profile.standby_max_w = p["standby_max_w"]
+                profile.operating_power_min_w = p["operating_power_min_w"]
+                profile.operating_power_max_w = p["operating_power_max_w"]
+                profile.max_continuous_run_hours = p["max_continuous_run_hours"]
+
+        if "is_active" in data:
+            profile.is_active = bool(data["is_active"])
+        if "standby_power_w" in data:
+            profile.standby_power_w = float(data["standby_power_w"])
+        if "standby_tolerance_pct" in data:
+            profile.standby_tolerance_pct = float(data["standby_tolerance_pct"])
+        if "standby_max_w" in data:
+            profile.standby_max_w = float(data["standby_max_w"])
+        if "operating_power_min_w" in data:
+            profile.operating_power_min_w = float(data["operating_power_min_w"])
+        if "operating_power_max_w" in data:
+            profile.operating_power_max_w = float(data["operating_power_max_w"])
+        if "max_continuous_run_hours" in data:
+            profile.max_continuous_run_hours = float(data["max_continuous_run_hours"])
+
+        profile.save()
+        # Sofortige Evaluierung anstoßen
+        evaluate_device_baseline(device)
+        profile.refresh_from_db()
+
+    return Response({
+        "id": str(profile.id),
+        "device_id": device.id,
+        "appliance_type": profile.appliance_type,
+        "appliance_label": profile.get_appliance_type_display(),
+        "is_active": profile.is_active,
+        "standby_power_w": profile.standby_power_w,
+        "standby_tolerance_pct": profile.standby_tolerance_pct,
+        "standby_max_w": profile.standby_max_w,
+        "operating_power_min_w": profile.operating_power_min_w,
+        "operating_power_max_w": profile.operating_power_max_w,
+        "max_continuous_run_hours": profile.max_continuous_run_hours,
+        "learning_mode": profile.learning_mode,
+        "current_health_status": profile.current_health_status,
+        "last_measured_standby_w": profile.last_measured_standby_w,
+        "last_measured_operating_w": profile.last_measured_operating_w,
+        "anomaly_reason": profile.anomaly_reason,
+        "last_evaluated_at": profile.last_evaluated_at.isoformat() if profile.last_evaluated_at else None,
+        "presets": APPLIANCE_PRESETS,
+    })
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def device_baseline_learn_view(request, device_id):
+    """
+    Lernt automatisch die Baseline aus den realen Messwerten der letzten N Tage.
+    """
+    from devices.services_profiling import learn_device_baseline, evaluate_device_baseline
+
+    device = get_object_or_404(Device, id=device_id)
+    user_homes = request.user.homes.all()
+    if device.home not in user_homes and not request.user.is_staff and not request.user.is_superuser:
+        return Response({"error": "Keine Berechtigung für dieses Gerät."}, status=403)
+
+    days = int(request.data.get("days", 7))
+    profile = learn_device_baseline(device, days=days)
+    eval_res = evaluate_device_baseline(device)
+    profile.refresh_from_db()
+
+    return Response({
+        "status": "success",
+        "message": f"Baseline aus {days} Tagen erfolgreich gelernt.",
+        "standby_power_w": profile.standby_power_w,
+        "standby_max_w": profile.standby_max_w,
+        "operating_power_min_w": profile.operating_power_min_w,
+        "operating_power_max_w": profile.operating_power_max_w,
+        "evaluation": eval_res,
+    })
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def device_baseline_evaluate_view(request, device_id):
+    """
+    Führt eine manuelle Baseline-Prüfung durch.
+    """
+    from devices.services_profiling import evaluate_device_baseline
+
+    device = get_object_or_404(Device, id=device_id)
+    user_homes = request.user.homes.all()
+    if device.home not in user_homes and not request.user.is_staff and not request.user.is_superuser:
+        return Response({"error": "Keine Berechtigung für dieses Gerät."}, status=403)
+
+    eval_res = evaluate_device_baseline(device)
+    return Response(eval_res)
+
+
+
 

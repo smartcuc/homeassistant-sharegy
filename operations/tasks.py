@@ -42,6 +42,7 @@ def run_health_checks():
         check_tibber_sync,
         check_weather_sync,
         check_active_devices,
+        check_device_baselines,
     ]
 
     for check in checks:
@@ -58,6 +59,23 @@ def run_health_checks():
         check_and_create_incident_tickets()
     except Exception:
         logger.exception("Fehler bei automatischer Incident-Triage")
+
+
+def check_device_baselines():
+    """
+    Überwacht zyklisch die Baseline aller konfigurierten Geräte (Standby-Anstieg, Dauerlauf).
+    """
+    from devices.services_profiling import evaluate_all_device_baselines
+    res = evaluate_all_device_baselines()
+    HealthState.objects.update_or_create(
+        key="device_baselines",
+        defaults={
+            "status": "error" if res["anomalies"] > 0 else "ok",
+            "value": f"{res['evaluated']} Geräte überwacht, {res['anomalies']} Anomalien",
+            "details": res,
+        },
+    )
+
 
 
 

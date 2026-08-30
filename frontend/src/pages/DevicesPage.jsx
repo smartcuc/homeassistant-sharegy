@@ -8,9 +8,11 @@ import { apiFetch } from "../api/client";
 import KPISparklineECharts from "../components/ui/KPISparklineECharts";
 import DeviceChartModal from "../components/device/DeviceChartModal";
 import DeviceSetupModal from "../components/device/DeviceSetupModal";
+import DeviceBaselineModal from "../components/device/DeviceBaselineModal";
 import AddDeviceModal from "../components/device/AddDeviceModal";
 import RemoveDevicesModal from "../components/device/RemoveDevicesModal";
 import TrashBinModal from "../components/device/TrashBinModal";
+
 import { useTrashCount } from "../hooks/useTrashDevices";
 import useUserPreference from "../hooks/useUserPreference";
 import { useTranslation } from "react-i18next";
@@ -103,7 +105,8 @@ function getRoleColor(config) {
 /* =========================================================
    DEVICE CARD
 ========================================================= */
-function DeviceCard({ device, onSelect, onEdit, onDelete }) {
+function DeviceCard({ device, onSelect, onEdit, onDelete, onBaseline }) {
+
 
     const { t } = useTranslation();
     const config = device.config || {};
@@ -202,6 +205,17 @@ function DeviceCard({ device, onSelect, onEdit, onDelete }) {
                     <button
                         onClick={(e) => {
                             e.stopPropagation();
+                            onBaseline?.(device);
+                        }}
+                        className="text-gray-400 hover:text-indigo-600 p-1 rounded hover:bg-indigo-50 cursor-pointer"
+                        title={t("devices.baseline_title", "Geräteprofil & Baseline-Überwachung")}
+                    >
+                        🧠
+                    </button>
+
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
                             onEdit(device);
                         }}
                         className="text-gray-400 hover:text-gray-600 p-1 rounded hover:bg-gray-100 cursor-pointer"
@@ -223,6 +237,7 @@ function DeviceCard({ device, onSelect, onEdit, onDelete }) {
 
                     <div className={`w-2.5 h-2.5 rounded-full ml-1 ${isOnline ? "bg-green-500" : "bg-gray-300"}`} />
                 </div>
+
             </div>
 
             <div className={`text-sm mb-2 ${roleStyle.text}`}>
@@ -350,8 +365,10 @@ export default function DevicesPage() {
     }), [t]);
 
     const [chartDevice, setChartDevice] = useState(null);
+    const [baselineDevice, setBaselineDevice] = useState(null);
     const [modalMode, setModalMode] = useState(null);
     const [editingDevice, setEditingDevice] = useState(null);
+
     const [openAddDevice, setOpenAddDevice] = useState(false);
     const [openRemoveDevice, setOpenRemoveDevice] = useState(false);
     const [openTrashBin, setOpenTrashBin] = useState(false);
@@ -984,6 +1001,7 @@ export default function DevicesPage() {
                                                     key={d.id}
                                                     device={d}
                                                     onSelect={setChartDevice}
+                                                    onBaseline={setBaselineDevice}
                                                     onEdit={(dev) => {
                                                         setEditingDevice(dev);
                                                         setModalMode("single");
@@ -1017,6 +1035,14 @@ export default function DevicesPage() {
                 />
             )}
 
+            {baselineDevice && (
+                <DeviceBaselineModal
+                    device={baselineDevice}
+                    isOpen={!!baselineDevice}
+                    onClose={() => setBaselineDevice(null)}
+                />
+            )}
+
             <AddDeviceModal
                 open={openAddDevice}
                 onClose={() => setOpenAddDevice(false)}
@@ -1025,6 +1051,7 @@ export default function DevicesPage() {
                     valuesQuery.refetch();
                 }}
             />
+
 
             <RemoveDevicesModal
                 open={openRemoveDevice}
