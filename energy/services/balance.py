@@ -117,6 +117,7 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
 
     start_dt, end_dt, period_label, bucket_format = get_period_range(period, tz, start_date=start_date, end_date=end_date)
     now_dt = timezone.now().astimezone(tz)
+    now = now_dt
 
     # 1. Alle Geräte des Nutzers laden
     devices = list(
