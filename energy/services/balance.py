@@ -116,6 +116,7 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
     tz = ZoneInfo(tz_name)
 
     start_dt, end_dt, period_label, bucket_format = get_period_range(period, tz, start_date=start_date, end_date=end_date)
+    now_dt = timezone.now().astimezone(tz)
 
     # 1. Alle Geräte des Nutzers laden
     devices = list(
@@ -312,7 +313,7 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
         ).values("device_id", "value")
         live_pv_watts = sum(float(r["value"] or 0) for r in latest_pv_rows)
         if live_pv_watts > 0:
-            hours_active = max(1.0, min(8.0, (now - now.replace(hour=6, minute=0)).total_seconds() / 3600.0))
+            hours_active = max(1.0, min(8.0, (now_dt - now_dt.replace(hour=6, minute=0)).total_seconds() / 3600.0))
             estimated_pv_kwh = round((live_pv_watts * 0.65 * hours_active) / 1000.0, 2)
             if estimated_pv_kwh > 0:
                 total_pv_kwh = estimated_pv_kwh
