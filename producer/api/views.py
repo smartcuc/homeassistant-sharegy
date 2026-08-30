@@ -326,16 +326,23 @@ def serialize_storage_system(storage):
     capacity = float(storage.capacity_kwh)
     current_stored_kwh = round((live_soc / 100.0) * capacity, 2) if (live_soc is not None) else None
 
-    # Status bestimmen
+    # Status bestimmen (Physikalische Sharegy-Konvention: P < 0 = Laden / P > 0 = Entladen)
     status = "idle"
     if live_power is not None:
-        if live_power > 50:
-            status = "charging"
-        elif live_power < -50:
-            status = "discharging"
+        if live_power < -30:
+            status = "charging"      # Negativ = Laden (Energie fließt in den Speicher)
+        elif live_power > 30:
+            status = "discharging"   # Positiv = Entladen (Energie fließt ins Hausnetz)
         elif live_soc is not None and live_soc >= float(storage.max_soc_pct) - 2.0:
-            status = "full"
+            status = "full"          # Speicher voll und im Ruhezustand
         elif live_soc is not None and live_soc <= float(storage.min_soc_reserve_pct) + 2.0:
+            status = "empty_reserve" # Speicher an der Notstromreserve
+        else:
+            status = "idle"
+    elif live_soc is not None:
+        if live_soc >= float(storage.max_soc_pct) - 2.0:
+            status = "full"
+        elif live_soc <= float(storage.min_soc_reserve_pct) + 2.0:
             status = "empty_reserve"
     def get_dev_info(dev):
         if not dev:

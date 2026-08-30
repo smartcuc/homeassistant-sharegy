@@ -12,25 +12,25 @@ export default function StorageSystemCard({ storage, onEdit, onDelete }) {
     const capacity = storage.capacity_kwh || 10.0;
     const storedKwh = storage.current_stored_kwh ?? (soc !== null ? ((soc / 100) * capacity).toFixed(1) : "-");
 
-    // Status Styling
+    // Status Styling (Laden: negativ / Entladen: positiv)
     const status = storage.status || "idle";
     const statusConfig = {
         charging: {
             label: t("storage.status_charging", "Lädt"),
             badge: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
-            powerText: `+${((power || 0) / 1000).toFixed(2)} kW`,
+            powerText: `-${(Math.abs(power || 0) / 1000).toFixed(2)} kW`,
             powerColor: "text-emerald-400",
             icon: "⚡",
         },
         discharging: {
             label: t("storage.status_discharging", "Entlädt"),
             badge: "bg-amber-500/20 text-amber-300 border-amber-500/30",
-            powerText: `${((power || 0) / 1000).toFixed(2)} kW`,
+            powerText: `+${(Math.abs(power || 0) / 1000).toFixed(2)} kW`,
             powerColor: "text-amber-400",
             icon: "🔋",
         },
         full: {
-            label: t("storage.status_full", "Voll"),
+            label: t("storage.status_full", "Voll (Standby)"),
             badge: "bg-blue-500/20 text-blue-300 border-blue-500/30",
             powerText: "0.00 kW",
             powerColor: "text-slate-400",
