@@ -109,14 +109,19 @@
   ├── 2.14 ✅ CSA Matter 1.3 Energy Management Hub & Bridge Engine
   ├── 2.15 ✅ Bi-direktionale Ökosystem-Plugins (Home Assistant Custom Component & Grafana REST-Bridge)
   ├── 2.16 ✅ Outbound-WSS Ingestion für alle Shelly Gen2/Gen3/Pro Modelle (`wss://sharegy.de/ws/energy/`)
-  ├── 2.17 ⏳ **NEU: Bidirektionale Aktorik & Relais-Steuerung**:
-  │          • REST Endpoint `POST /api/devices/<id>/switch/` (Turn ON/OFF/Toggle)
-  │          • Direkte WebSocket JSON-RPC Steuerung (`Switch.Set`, `Switch.Toggle`)
-  │          • UI Toggle-Schalter auf Gerätekacheln & Dashboard
-  │          • Regelbasierte Automatisierung (PV-Überschuss & Negativpreis-Schaltung)
-  ├── 2.18 ⏳ Deklaratives Device-Profile Addon-System (Sungrow, SMA, Deye, Huawei, Kostal YAML)
-  ├── 2.19 ⏳ Mobile Push Notification Engine (FCM Android & APNs iOS Dispatcher)
-  └── 2.20 ⏳ Native Mobile Apps via Capacitor (iOS & Android mit Widgets & Biometrie)
+  ├── 2.17 ✅ Bidirektionale Aktorik & Relais-Steuerung (Shelly WSS JSON-RPC `Switch.Set`/`Switch.Toggle` & UI Toggles)
+  ├── 2.18 ✅ Go-Live Checkout & Gutscheinsystem (Coupons, DSGVO AGB-Audit-Consent, E-Mail-Validation, GA4)
+  ├── 2.19 ⏳ **Systemstatus- & Health-Monitoring Engine (Beta & Live Kernkomponente)**:
+  │          • Umfassende Health-Check API (`/api/status/health/`) für DB, Redis, Daphne WSS, Celery, Open-Meteo & Tibber
+  │          • Dashboard- & Topbar-Statusindikator (🟢 *Alle Dienste operativ* / Latenz & Ingest-Durchsatz)
+  │          • Frühwarnung & automatische Störungsmeldungen für SupportDesk / Factofy bei Pipeline-Hängern
+  ├── 2.20 ⏳ **Geräteprofiling & Deklaratives Auto-Discovery (Beta & Live Kernkomponente)**:
+  │          • Automatische Hardware-Erkennung & Typklassifizierung (Inverter, Akku, Wärmepumpe, Wallbox, Smart Plug)
+  │          • Deklarative YAML/JSON-Profile für Standardhersteller (Sungrow, SMA, Fronius, Deye, Huawei, Kostal, Shelly, OpenDTU)
+  │          • Zero-Config Mapping von Rohdaten-Keys auf Sharegy-Flussvektoren (Solar, Last, Speicher, Netz)
+  │          • Live-Diagnose: Sampling-Rate, Jitter/Delay, Signalstärke & Fehlerraten-Überwachung
+  ├── 2.21 ⏳ Mobile Push Notification Engine (FCM Android & APNs iOS Dispatcher)
+  └── 2.22 ⏳ Native Mobile Apps via Capacitor (iOS & Android mit Widgets & Biometrie)
 
 ┌───────────────────────────────────────────────────────────────────────────────┐
 │ MEILENSTEIN 3: ENERGY SHARING COMMUNITIES & § 14a EnWG (Säule 2)              │
@@ -132,13 +137,14 @@
 
 ---
 
-## 📋 4. Konkreter Action-Plan für die nächsten Schritte
+## 📋 4. Konkreter Action-Plan für die nächsten Schritte (Beta & Go-Live)
 
-| Schritt | Modul | Maßnahme | Status / Prio | Impact |
+| Schritt | Modul | Maßnahme | Status / Prio | Impact für Beta & Go-Live |
 |---|---|---|:---:|---|
-| **Step 1** | `devices/control/` | **Bidirektionale Relais-Steuerung (Shelly WSS)**: UI-Toggle-Schalter & REST-Endpoint `POST /api/devices/<id>/switch/` für Live-Schaltung von Verbrauchern | 🔥 **P1 (Sofort)** | Direkte Fernsteuerung von Relais & Lasten im Dashboard |
-| **Step 2** | `energy/optimizer/` | **PV-Überschuss-Aktorik**: Automatische Schaltung von Relais bei Überschuss oder Negativstrompreisen | 🔥 **P1 (Hoch)** | Erhöhung des Eigenverbrauchs & Automatisierung |
-| **Step 3** | `devices/profiles/` | **Deklaratives Device-Profile Addon-System**: Vorgefertigte YAML-Templates für Wechselrichter (Sungrow, SMA, Deye, Huawei, Fronius) | ⚡ **P2** | 1-Klick Hardware-Setup ohne manuelle Register-Eingabe |
+| **Step 1** | `system/status/` | **Systemstatus & Uptime-Monitoring**: Health-API für DB, Cache, Daphne WSS, Celery & Wetter/Spotpreis-APIs mit Dashboard-Status-Widget | 🔥 **P1 (Beta & Live)** | Maximale Transparenz für Betatester & schnelles Erkennen von Serverproblemen |
+| **Step 2** | `devices/profiles/` | **Geräteprofiling & Auto-Discovery**: Deklarative Hardware-Profile (Sungrow, SMA, Deye, Huawei, Shelly) mit automatischem Key-Mapping & Signaldiagnose | 🔥 **P1 (Beta & Live)** | 1-Klick Hardware-Setup ohne manuelle Register-Eingabe |
+| **Step 3** | `energy/optimizer/` | **PV-Überschuss-Aktorik**: Automatische Schaltung von Relais bei Überschuss oder Negativstrompreisen | ⚡ **P2** | Erhöhung des Eigenverbrauchs & Automatisierung |
 | **Step 4** | `notifications/` | **Mobile Push Notification Engine**: FCM & APNs Dispatcher für PV-Ausfall-, Notreserve- & Negativpreis-Pushs | 📱 **P2** | Aktive Alarmierung auf Smartphones bei geschlossener App |
 | **Step 5** | `tenants/` | **P2P-Clearing & 15-Minuten-Bilanzierung**: Zähler-Allokation für Energy Sharing & Mieterstrom | 🏢 **P3** | Kommerzieller Rollout von Säule 2 (Energy Sharing) |
 | **Step 6** | `grid/enwg/` | **§ 14a EnWG Steuerbox & Dimmung**: Dynamische Leistungsbegrenzung auf 4,2 kW für SteuVE (WP, Wallbox, Speicher) | ⚡ **P3** | Gesetzliche Netzbetreiber-Konformität in Deutschland |
+

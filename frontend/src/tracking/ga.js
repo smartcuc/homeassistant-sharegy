@@ -6,7 +6,8 @@
 let isInitialized = false;
 
 export function initGA() {
-    const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID || window.__SHAREGY_GA_ID__;
+    const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID || window.__SHAREGY_GA_ID__ || "G-LDKP00531M";
+
 
     if (!measurementId || isInitialized) {
         return;

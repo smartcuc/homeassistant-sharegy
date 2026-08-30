@@ -174,19 +174,20 @@ export default function UserMenu() {
                     {/* MENÜPUNKTE */}
                     <div className="py-1">
                         <Link
-                            to="/settings"
+                            to="/app/profile"
                             onClick={() => setOpen(false)}
                             className="px-4 py-2.5 text-xs text-gray-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center justify-between transition group"
                         >
                             <span className="flex items-center gap-2.5 font-medium">
                                 <span className="text-base">👤</span>
-                                {t("settings.account", "Profil & Einstellungen")}
+                                {t("settings.account", "Profil & Benutzerkonto")}
                             </span>
                             <span className="text-gray-400 group-hover:translate-x-0.5 transition-transform">→</span>
                         </Link>
 
+
                         <Link
-                            to="/billing"
+                            to="/app/billing"
                             onClick={() => setOpen(false)}
                             className="px-4 py-2.5 text-xs text-gray-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center justify-between transition group"
                         >
@@ -204,7 +205,7 @@ export default function UserMenu() {
                         </Link>
 
                         <Link
-                            to="/structure"
+                            to="/app/structure"
                             onClick={() => setOpen(false)}
                             className="px-4 py-2.5 text-xs text-gray-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center justify-between transition group"
                         >
@@ -216,7 +217,7 @@ export default function UserMenu() {
                         </Link>
 
                         <Link
-                            to="/help"
+                            to="/app/help"
                             onClick={() => setOpen(false)}
                             className="px-4 py-2.5 text-xs text-gray-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center justify-between transition group"
                         >
@@ -227,6 +228,7 @@ export default function UserMenu() {
                             <span className="text-gray-400 group-hover:translate-x-0.5 transition-transform">→</span>
                         </Link>
                     </div>
+
 
                     {/* SPRACH- & THEME-UMSCHALTER */}
                     <div className="px-4 py-2.5 bg-slate-50/80 dark:bg-slate-800/40 border-t border-gray-100 dark:border-slate-800">

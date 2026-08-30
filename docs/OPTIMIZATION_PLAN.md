@@ -438,29 +438,57 @@
 
 ---
 
-### [ ] 5.18 Bidirektionale Aktorik & Relais-Steuerung (Shelly WSS RPC & Smart Automation)
+### [x] 5.18 Bidirektionale Aktorik & Relais-Steuerung (Shelly WSS RPC & Smart Automation)
 - **Bereich**: Device Control, WebSocket Ingestion & UI Aktorik (`devices/consumers.py`, `devices/api/views.py`, `frontend/src/pages/DevicesPage.jsx`)
-- **Status**: ⏳ **In Vorbereitung (Priorität 1)**
-- **Ziel**:
+- **Status**: ✅ **Erledigt**.
   - **REST Control Endpoint**: `POST /api/devices/<id>/switch/` mit Payload `{"on": true/false, "action": "toggle"}`.
   - **Daphne JSON-RPC Dispatch**: Versand von `{"method": "Switch.Set", "params": {"id": 0, "on": ...}}` direkt über den bestehenden WebSocket-Kanal an den Shelly (< 5 ms Latenz).
   - **UI Toggle Buttons**: Interaktiver Ein-/Aus-Schalter auf den Gerätekacheln in `/app/devices` und im Dashboard mit Live-Feedback.
-  - **PV-Überschuss-Schaltung**: Automatische Triggerung von steuerbaren Lasten (Warmwasser, Wallbox, Klima), sobald die PV-Erzeugung den Hausverbrauch übersteigt.
 
 ---
 
-## 🎯 6. Verbindliche Prioritätenliste für die nächsten Schritte
+### [x] 5.19 Go-Live Billing & Gutscheinsystem (Coupons, DSGVO-AGB-Consent, GA4)
+- **Bereich**: Billing, AGB-Dokumentation, Tracking (`billing/models.py`, `billing/services_subscription.py`, `frontend/src/tracking/ga.js`)
+- **Status**: ✅ **Erledigt**.
+  - Google Analytics 4 mit IP-Anonymisierung und automatischem Routen-Tracking.
+  - Revisionssichere `UserTermsConsent`-Dokumentation bei Registrierung & Checkout.
+  - Vollwertiges Gutschein- & Promo-System (`Coupon`, `CouponRedemption`, `/api/billing/subscription/coupons/*`).
+  - Strikte E-Mail-Syntax- & Wegwerfmail-Prüfung bei Pro-Upgrades.
+
+---
+
+### [ ] 5.20 Systemstatus- & Health-Monitoring Engine (Beta & Live Kernkomponente)
+- **Bereich**: Operations, API Monitoring & Frontend Badges (`operations/`, `backend/status/`, `frontend/src/components/common/SystemStatusBadge.jsx`)
+- **Ziel**:
+  - **Umfassende Health-API**: `GET /api/status/health/` prüft PostgreSQL / TimescaleDB, Redis Cache, WebSocket Ingest (Daphne), Celery Worker & Beat sowie externe APIs (Open-Meteo, Tibber / EPEX Spot).
+  - **Latenz- & Durchsatzmessung**: Echtzeit-Erfassung von Ingest-Latenzen (ms), Ingest-Throughput (Messages/s) und Queue-Backlogs.
+  - **Frontend Status-Indikator**: Diskreter Status-Badge in der Topbar / Footer (🟢 *Alle Dienste operativ* / 🟡 *Teilweise beeinträchtigt* / 🔴 *Störung*).
+  - **Automatisches Incident-Logging**: Direkte Weiterleitung von Störungen an den Support Desk / Factofy-Hub.
+
+---
+
+### [ ] 5.21 Geräteprofiling & Deklaratives Auto-Discovery (Beta & Live Kernkomponente)
+- **Bereich**: Device Intelligence, Hardware Abstraction (`devices/profiles/`, `devices/services_discovery.py`, `devices/models.py`)
+- **Ziel**:
+  - **Automatische Geräte-Klassifizierung**: Erkennung von Inverter, Batterie, Wärmepumpe, Wallbox, Smart Plug und Zählern anhand eingehender Telemetrie-Signaturen.
+  - **Deklarative Hardware-Profile (YAML/JSON)**: Vorgefertigte Profile für Standardhersteller (Sungrow, SMA, Fronius, Deye, Huawei, Kostal, Shelly, Tasmota, OpenDTU).
+  - **Zero-Config Telemetrie-Mapping**: Automatisches Mapping von Rohdaten-Keys (`apower`, `total_act_power`, `grid_power`, `battery_soc`, `inverter_p_ac`) auf Sharegy-Flussvektoren (`solar`, `load`, `battery`, `grid`).
+  - **Signalqualitäts-Diagnose**: Live-Messung von Sampling-Rate (Hz), Signalstärke (RSSI / Wi-Fi dBm), Latenz-Jitter und Fehlerrate pro Gerät.
+
+---
+
+## 🎯 6. Verbindliche Prioritätenliste für Beta & Go-Live
 
 ```
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ PRIORITÄT 1: AKTORIK & HARDWARE-ABSTRAKTION (Sofort starten)                  │
+│ PRIORITÄT 1: BETA & GO-LIVE FINALISIERUNG (Sofort starten)                    │
 ├───────────────────────────────────────────────────────────────────────────────┤
-│ 1. ⚡ Task 5.18: Bidirektionale Relais-Steuerung (Shelly WSS RPC & UI Toggles)│
-│    -> REST Endpoint POST /api/devices/<id>/switch/ + WebSocket Switch.Set     │
-│    -> UI-Schalter im Dashboard & automatischer Überschuss-Schalter            │
-│ 2. 📄 Task 5.7: Deklaratives Device-Profile Addon-System (YAML-Templates)     │
+│ 1. 🟢 Task 5.20: Systemstatus- & Health-Monitoring Engine (Health-API & UI)   │
+│    -> GET /api/status/health/ (DB, Redis, Daphne, Celery, Open-Meteo)         │
+│    -> Status-Badge in Topbar & automatisches Incident-Logging                │
+│ 2. 📟 Task 5.21: Geräteprofiling & Deklaratives Auto-Discovery (YAML-Profile) │
 │    -> Vorgefertigte Profile für Sungrow, SMA, Deye, Huawei, Kostal, Fronius   │
-│    -> 1-Klick Hardware-Zuweisung im Onboarding-Wizard                         │
+│    -> Zero-Config Key-Mapping & Signalqualitäts-Diagnose                      │
 └───────────────────────────────────────────────────────────────────────────────┘
                                        │
                                        ▼
@@ -479,6 +507,7 @@
 │ 6. ⚡ Task 3.6: § 14a EnWG Steuerbox-Schnittstelle & Pflichtdimmung (4,2 kW)  │
 └───────────────────────────────────────────────────────────────────────────────┘
 ```
+
 
 
 
