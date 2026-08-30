@@ -285,11 +285,11 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
                 grid_export_kwh_total += kwh
         elif dev_id in battery_device_ids:
             if avg_w >= 0:
-                bucket_map[b_key]["battery_charge"] += kwh
-                battery_charge_map[dev_id] += kwh
-            else:
                 bucket_map[b_key]["battery_discharge"] += kwh
                 battery_discharge_map[dev_id] += kwh
+            else:
+                bucket_map[b_key]["battery_charge"] += kwh
+                battery_charge_map[dev_id] += kwh
         else:
             bucket_map[b_key]["load"] += kwh
 
@@ -303,10 +303,9 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
     # Fallback falls Batterie-Metriken ohne Vorzeichen vorliegen:
     if battery_device_ids and total_battery_charge_kwh == 0 and total_battery_discharge_kwh == 0:
         raw_batt_kwh = sum(device_energy_sum[d_id] for d_id in battery_device_ids)
-        total_battery_charge_kwh = round(raw_batt_kwh, 2)
-        total_battery_discharge_kwh = round(raw_batt_kwh * 0.9, 2)
+        total_battery_discharge_kwh = round(raw_batt_kwh, 2)
         for b_id in battery_device_ids:
-            battery_charge_map[b_id] = device_energy_sum[b_id]
+            battery_discharge_map[b_id] = device_energy_sum[b_id]
 
     # Live Realtime Overlay für den laufenden Tag, falls Stunden-Aggregate noch 0 kWh sind
     if period == "today" and total_pv_kwh == 0 and pv_device_ids:
@@ -328,7 +327,7 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
     total_measured_consumer_kwh = round(sum(device_energy_sum[d.id] for d in consumer_devices), 2)
 
     has_devices = len(devices) > 0
-    has_data = (total_pv_kwh > 0 or total_measured_consumer_kwh > 0 or total_grid_import_kwh > 0 or total_battery_charge_kwh > 0 or len(metric_rows) > 0)
+    has_data = (total_pv_kwh > 0 or total_measured_consumer_kwh > 0 or total_grid_import_kwh > 0 or total_battery_charge_kwh > 0 or total_battery_discharge_kwh > 0 or len(metric_rows) > 0)
 
     if not has_data:
         total_pv_kwh = 0.0
@@ -383,7 +382,7 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
             solar_supplied_kwh = round(direct_consumption_kwh + total_battery_discharge_kwh, 2)
             autarky_rate = round((solar_supplied_kwh / total_house_consumption_kwh * 100.0), 1) if total_house_consumption_kwh > 0 else 0.0
 
-        if total_pv_kwh > 0 and total_grid_import_kwh == 0:
+        if (total_pv_kwh > 0 or total_battery_discharge_kwh > 0) and total_grid_import_kwh == 0 and total_house_consumption_kwh > 0:
             autarky_rate = 100.0
             solar_supplied_kwh = total_house_consumption_kwh
 
