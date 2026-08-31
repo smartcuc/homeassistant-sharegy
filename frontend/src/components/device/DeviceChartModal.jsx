@@ -10,6 +10,9 @@ import { apiFetch } from "../../api/client";
 import { useTranslation } from "react-i18next";
 import ExportDropdown from "../../features/energy/components/ExportDropdown";
 import DateRangePickerModal from "../../features/energy/components/DateRangePickerModal";
+import { useSubscription } from "../../hooks/useSubscription";
+import ProBadge from "../common/ProBadge";
+import ProUpgradeModal from "../common/ProUpgradeModal";
 
 /* =========================================
    HELPERS
@@ -72,15 +75,36 @@ function getDeviceStyle(device) {
 
 function DeviceChartModal({ device, onClose }) {
     const { t } = useTranslation();
+    const { isPro } = useSubscription();
     const [range, setRange] = useState("24h");
     const [customDates, setCustomDates] = useState({ startDate: null, endDate: null, label: null });
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+    const [proModalOpen, setProModalOpen] = useState(false);
     const [live, setLive] = useState(false);
     const [isZoomed, setIsZoomed] = useState(false);
     const [selectedMetric, setSelectedMetric] = useState(null);
     const chartRef = useRef(null);
     const deviceStyle = getDeviceStyle(device);
     const mainColor = deviceStyle.color;
+
+    const handleRangeClick = (period) => {
+        if (period === "30d" && !isPro) {
+            setProModalOpen(true);
+            return;
+        }
+        setRange(period);
+        if (period !== "1h") {
+            setLive(false);
+        }
+    };
+
+    const handleCustomDateClick = () => {
+        if (!isPro) {
+            setProModalOpen(true);
+            return;
+        }
+        setIsDatePickerOpen(true);
+    };
 
     /* ✅ ESC schließen */
     useEffect(() => {
@@ -448,23 +472,16 @@ function DeviceChartModal({ device, onClose }) {
                             )}
 
                             <div className="flex rounded-lg overflow-hidden border shadow-sm bg-white">
-
                                 {["1h", "6h", "24h", "5d", "30d"].map(period => (
-
                                     <button
                                         key={period}
-                                        onClick={() => {
-                                            setRange(period);
-
-                                            if (period !== "1h") {
-                                                setLive(false);
-                                            }
-                                        }}
+                                        onClick={() => handleRangeClick(period)}
                                         className={`
                                             px-3 py-1
                                             text-sm
                                             font-medium
                                             transition-colors
+                                            flex items-center gap-1
                                             ${range === period
                                                 ? "text-white"
                                                 : "text-gray-500 hover:bg-gray-50"
@@ -476,13 +493,13 @@ function DeviceChartModal({ device, onClose }) {
                                                 : undefined
                                         }
                                     >
-                                        {period}
+                                        <span>{period}</span>
+                                        {period === "30d" && !isPro && <ProBadge size="xs" />}
                                     </button>
-
                                 ))}
 
                                 <button
-                                    onClick={() => setIsDatePickerOpen(true)}
+                                    onClick={handleCustomDateClick}
                                     className={`
                                         px-3 py-1
                                         text-sm
@@ -505,8 +522,8 @@ function DeviceChartModal({ device, onClose }) {
                                     <span className="hidden sm:inline">
                                         {range === "custom" && customDates.label ? customDates.label : t("energy.custom_period", "Zeitraum...")}
                                     </span>
+                                    {!isPro && <ProBadge size="xs" />}
                                 </button>
-
                             </div>
 
                             {/* Multi-Format Export Dropdown (Task 2.11) */}
@@ -677,6 +694,14 @@ function DeviceChartModal({ device, onClose }) {
                     });
                     setLive(false);
                 }}
+            />
+
+            {/* Pro Upgrade Modal */}
+            <ProUpgradeModal
+                open={proModalOpen}
+                onClose={() => setProModalOpen(false)}
+                featureName="Langzeit-Messwertanalyse (30 Tage & Custom)"
+                featureDesc="Greife auf unbegrenzte historische Sensordaten, 30-Tage-Verläufe und benutzerdefinierte Auswertungszeiträume zu mit Sharegy Pro."
             />
         </div>
     );

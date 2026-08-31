@@ -15,12 +15,18 @@ import DateRangePickerModal from "./components/DateRangePickerModal";
 import ExportDropdown from "./components/ExportDropdown";
 import AlertNotificationBanner from "../alerts/components/AlertNotificationBanner";
 import GridCo2Card from "../market/components/GridCo2Card";
+import { useSubscription } from "../../hooks/useSubscription";
+import ProBadge from "../../components/common/ProBadge";
+import ProUpgradeModal from "../../components/common/ProUpgradeModal";
 
 export default function EnergyDashboard() {
     const { t } = useTranslation();
+    const { isPro } = useSubscription();
     const [period, setPeriod] = useState("today");
     const [selectedTrendMeter, setSelectedTrendMeter] = useState(null);
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+    const [proModalOpen, setProModalOpen] = useState(false);
+    const [proModalFeature, setProModalFeature] = useState({ name: "Pro Feature", desc: "" });
     const [customDates, setCustomDates] = useState({ startDate: null, endDate: null, label: null });
 
     // Fetch energy balance & submeters
@@ -47,9 +53,34 @@ export default function EnergyDashboard() {
     const periods = [
         { key: "today", label: t("energy.period_today", "Heute") },
         { key: "7d", label: t("energy.period_7d", "Letzte 7 Tage") },
-        { key: "30d", label: t("energy.period_30d", "Letzte 30 Tage") },
-        { key: "year", label: t("energy.period_year", "Dieses Jahr") },
+        { key: "30d", label: t("energy.period_30d", "Letzte 30 Tage"), isProGated: true },
+        { key: "year", label: t("energy.period_year", "Dieses Jahr"), isProGated: true },
     ];
+
+    const handlePeriodClick = (p) => {
+        if (p.isProGated && !isPro) {
+            setProModalFeature({
+                name: `Langzeit-Historie (${p.label})`,
+                desc: "Unbegrenzte historische Verbrauchsanalysen, Monatsvergleiche und Jahrestrends stehen exklusiv in Sharegy Pro zur Verfügung.",
+            });
+            setProModalOpen(true);
+            return;
+        }
+        setPeriod(p.key);
+        setCustomDates({ startDate: null, endDate: null, label: null });
+    };
+
+    const handleCustomDatePickerClick = () => {
+        if (!isPro) {
+            setProModalFeature({
+                name: "Frei wählbarer Analyse-Zeitraum",
+                desc: "Benutzerdefinierte Datumsbereiche und historische Langzeit-Filter stehen exklusiv in Sharegy Pro zur Verfügung.",
+            });
+            setProModalOpen(true);
+            return;
+        }
+        setIsDatePickerOpen(true);
+    };
 
     // Pre-calculate SVG donut slices purely and immutably via reduce
     const donutSlices = useMemo(() => {
@@ -114,21 +145,19 @@ export default function EnergyDashboard() {
                         {periods.map((p) => (
                             <button
                                 key={p.key}
-                                onClick={() => {
-                                    setPeriod(p.key);
-                                    setCustomDates({ startDate: null, endDate: null, label: null });
-                                }}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${period === p.key
+                                onClick={() => handlePeriodClick(p)}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 ${period === p.key
                                     ? "bg-white text-indigo-600 shadow-xs font-bold"
                                     : "text-gray-600 hover:text-gray-900"
                                     }`}
                             >
-                                {p.label}
+                                <span>{p.label}</span>
+                                {p.isProGated && !isPro && <ProBadge size="xs" />}
                             </button>
                         ))}
                         <button
-                            onClick={() => setIsDatePickerOpen(true)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer flex items-center gap-1 ${period === "custom"
+                            onClick={handleCustomDatePickerClick}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 ${period === "custom"
                                 ? "bg-indigo-600 text-white shadow-xs font-bold"
                                 : "text-gray-600 hover:text-gray-900"
                                 }`}
@@ -136,6 +165,7 @@ export default function EnergyDashboard() {
                         >
                             <span>📅</span>
                             <span>{period === "custom" && customDates.label ? customDates.label : t("energy.custom_period", "Zeitraum...")}</span>
+                            {!isPro && <ProBadge size="xs" />}
                         </button>
                     </div>
 
@@ -680,6 +710,16 @@ export default function EnergyDashboard() {
                         label: res.label,
                     });
                 }}
+            />
+
+            {/* =========================================================
+                PRO UPGRADE DIALOG
+            ========================================================= */}
+            <ProUpgradeModal
+                open={proModalOpen}
+                onClose={() => setProModalOpen(false)}
+                featureName={proModalFeature.name}
+                featureDesc={proModalFeature.desc}
             />
         </div>
     );

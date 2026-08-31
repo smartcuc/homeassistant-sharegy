@@ -59,10 +59,22 @@ def dashboard_me(request):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def energy_balance(request):
+    sub = getattr(request.user, "ems_subscription", None)
+    is_pro = sub and sub.is_pro_active
+
     period = request.GET.get("period", "today")
     start_date = request.GET.get("start_date", None)
     end_date = request.GET.get("end_date", None)
+
+    # 🛡️ Feature Gating: 30d, year und custom sind Pro-exklusiv (Free: today & 7d)
+    if not is_pro and period in ["30d", "year", "custom"]:
+        period = "7d"
+        start_date = None
+        end_date = None
+
     data = get_energy_balance(request.user, period=period, start_date=start_date, end_date=end_date)
+    if isinstance(data, dict):
+        data["is_pro"] = bool(is_pro)
     return Response(data)
 
 
@@ -103,10 +115,25 @@ class PDFExportRenderer(BaseRenderer):
 @renderer_classes([JSONExportRenderer, CSVExportRenderer, XLSXExportRenderer, PDFExportRenderer])
 def export_energy_balance_view(request, format=None):
     from energy.services.export_manager import export_energy_balance
+    sub = getattr(request.user, "ems_subscription", None)
+    is_pro = sub and sub.is_pro_active
+
     period = request.GET.get("period", "today")
     start_date = request.GET.get("start_date", None)
     end_date = request.GET.get("end_date", None)
     export_format = request.GET.get("export_format") or request.GET.get("format") or format or "xlsx"
+
+    # 🛡️ Pro Gating für Excel/PDF
+    if not is_pro and export_format.lower() in ["xlsx", "pdf"]:
+        return Response(
+            {
+                "error": "pro_subscription_required",
+                "message": "Excel (.xlsx) und PDF-Exporte sind exklusiv in Sharegy Pro verfügbar.",
+                "upgrade_url": "/app/billing",
+            },
+            status=403,
+        )
+
     return export_energy_balance(
         user=request.user,
         period=period,

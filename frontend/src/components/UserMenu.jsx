@@ -10,8 +10,9 @@ import { useAuth } from "../hooks/useAuth";
 import { useTranslation } from "react-i18next";
 import i18n from "../i18n";
 import { apiFetch } from "../api/client";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useHomes } from "../hooks/useHomes";
+import { useSubscription } from "../hooks/useSubscription";
 
 export default function UserMenu() {
     const theme = useTheme();
@@ -21,16 +22,10 @@ export default function UserMenu() {
     const queryClient = useQueryClient();
     const { t } = useTranslation();
     const { homes, primaryHome } = useHomes();
+    const { isPro, isLandlord, planName } = useSubscription();
 
     const [open, setOpen] = useState(false);
     const dropdownRef = useRef(null);
-
-    // Abo-Status für Plan-Badge abfragen
-    const { data: subData } = useQuery({
-        queryKey: ["billingOverview"],
-        queryFn: () => apiFetch("/api/billing/subscription/me/"),
-        staleTime: 1000 * 60 * 5,
-    });
 
     const currentLang = (i18n.resolvedLanguage || i18n.language || "de").substring(0, 2);
 
@@ -55,15 +50,6 @@ export default function UserMenu() {
     const initials = user?.first_name
         ? `${user.first_name[0]}${user.last_name?.[0] || ""}`.toUpperCase()
         : user?.email?.slice(0, 2).toUpperCase();
-
-    // Plan-Ermittlung
-    const isPro = subData?.is_pro_active ?? false;
-    const isLandlord = subData?.is_landlord_active ?? false;
-    const planName = isLandlord
-        ? t("billing.plan_landlord", "Vermieter & Quartiere")
-        : isPro
-        ? t("billing.plan_pro", "Sharegy Pro")
-        : t("billing.plan_free", "Kostenlos (Free)");
 
     async function handleLogout() {
         setOpen(false);
@@ -112,7 +98,7 @@ export default function UserMenu() {
                         {displayName}
                     </span>
                     <span className="text-[10px] text-gray-400 font-medium">
-                        {isPro || isLandlord ? "⭐ " + (isLandlord ? "Vermieter" : "Pro") : "Free Plan"}
+                        {isLandlord ? "⭐ Vermieter" : isPro ? "⭐ Pro Plan" : "Free Plan"}
                     </span>
                 </div>
 
