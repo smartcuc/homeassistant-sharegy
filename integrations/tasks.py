@@ -25,6 +25,8 @@ from devices.services.ingest import ingest_metric_payload
 
 from core.models import Meter
 from core.constants.obis import OBIS_MAP
+from core.services_validation import validate_obis_reading
+from billing.tasks import recalculate_late_slot
 
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
@@ -78,14 +80,19 @@ def process_inbound_webhook_event(self, event_id: str):
             obis_meta = OBIS_MAP.get(obis, {})
             unit = r.get("unit", obis_meta.get("unit", "kWh"))
 
-            # ✅ 4. VALUE
-            value = Decimal(str(r["value_kwh"]))
+            # ✅ 4. VALUE & VALIDIERUNG
+            raw_val = Decimal(str(r["value_kwh"]))
+            validation = validate_obis_reading(obis, raw_val, unit)
+            if not validation["is_valid"]:
+                logger.warning("Reading rejected by validation: %s", validation.get("error"))
+                continue
+            value = validation["sanitized_value"]
 
             # ✅ 5. LATE LOGIC
             delay = (received_at - ts).total_seconds()
             is_late = delay > 60
 
-            # ✅ 6. DUPLICATES
+            # ✅ 6. DUPLICATES & UPDATES
             existing = IntervalReading.objects.filter(
                 meter=meter,
                 ts_start=ts,
@@ -101,6 +108,11 @@ def process_inbound_webhook_event(self, event_id: str):
                     existing.is_late = is_late
                     existing.ingestion_delay_seconds = int(delay)
                     existing.save()
+                    # Bei Wertänderung: Sofortige Nachberechnung triggern
+                    try:
+                        recalculate_late_slot.delay(str(meter.id), ts.isoformat())
+                    except Exception:
+                        pass
                     continue
 
             # ✅ 7. REGISTER
@@ -119,6 +131,13 @@ def process_inbound_webhook_event(self, event_id: str):
                 is_duplicate=False,
                 ingestion_delay_seconds=int(delay),
             )
+
+            # Wenn verspätet eingetroffen: Sofortige Nachberechnung anstoßen
+            if is_late:
+                try:
+                    recalculate_late_slot.delay(str(meter.id), ts.isoformat())
+                except Exception:
+                    pass
 
             written += 1
 

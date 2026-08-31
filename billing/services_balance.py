@@ -21,19 +21,27 @@ def _sum_kwh(qs):
 def compute_balance_for_meter_slot(meter, slot_start):
     """
     Berechnet Balance für genau EINEN Meter und Slot.
+    Liest aus AggregatedReading oder direkt aus IntervalReading.
     """
+    from core.models import IntervalReading
 
     base = AggregatedReading.objects.filter(
         meter=meter,
         period_start=slot_start,
     )
     
-    # fallback
     if not base.exists():
-        return None
-
-    consumption = _sum_kwh(base.filter(obis_code__startswith="1.8"))
-    generation = _sum_kwh(base.filter(obis_code__startswith="2.8"))
+        intervals = IntervalReading.objects.filter(
+            meter=meter,
+            ts_start=slot_start,
+        )
+        if not intervals.exists():
+            return None
+        consumption = _sum_kwh(intervals.filter(obis_code__startswith="1.8"))
+        generation = _sum_kwh(intervals.filter(obis_code__startswith="2.8"))
+    else:
+        consumption = _sum_kwh(base.filter(obis_code__startswith="1.8"))
+        generation = _sum_kwh(base.filter(obis_code__startswith="2.8"))
 
     self_consumption = min(consumption, generation)
     grid_import = max(consumption - generation, Decimal("0"))
@@ -111,3 +119,32 @@ def compute_balance_range(start, end):
             ],
             unique_fields=["meter", "period_start"],
         )
+
+
+def recalculate_meter_slot(meter_id, slot_start):
+    """
+    Berechnet die Balance und User-Allokation für genau einen Zähler und Slot nach.
+    Wird bei eintreffenden Nachzüglern (is_late=True) sofort aufgerufen.
+    """
+    from billing.services_allocation import allocate_user_balance_for_slot
+    from core.models import Meter
+
+    slot_start = floor_to_billing_slot(slot_start)
+    meter = Meter.objects.filter(id=meter_id).first()
+    if not meter:
+        return None
+
+    # 1. Meter BalanceSlot neu berechnen
+    balance = compute_balance_for_meter_slot(meter, slot_start)
+
+    # 2. User-Allokation für diesen Slot sofort nachziehen
+    allocation = allocate_user_balance_for_slot(slot_start)
+
+    return {
+        "status": "ok",
+        "meter_id": str(meter_id),
+        "slot_start": slot_start.isoformat(),
+        "balance_id": str(balance.id) if balance else None,
+        "allocation": allocation,
+    }
+

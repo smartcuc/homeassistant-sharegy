@@ -359,6 +359,11 @@ CELERY_BEAT_SCHEDULE = {
         "task": "billing.tasks.allocate_user_balance_last_24h",
         "schedule": crontab(minute="*/15"),
     },
+    # 💶 Wöchentlicher 30-Tage Fiskal-Abgleich für extreme Offline-Zeiten (fiscal)
+    "reconcile-balance-30d": {
+        "task": "billing.tasks.reconcile_balance_last_30d",
+        "schedule": crontab(hour=3, minute=0, day_of_week="sunday"),
+    },
     # 💶 OBIS Zähler-Rollup auf DB-Ebene (fiscal)
     "rollup-15min": {
         "task": "core.tasks.rollup_15min",
