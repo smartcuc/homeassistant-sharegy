@@ -95,3 +95,5 @@ vine==5.1.0
 wcwidth==0.7.0
 websockets==16.0
 zope.interface==8.4
+pywebpush==2.5.0
+py-vapid==1.9.4

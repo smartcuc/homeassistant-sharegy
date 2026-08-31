@@ -419,12 +419,13 @@
 
 ---
 
-### [ ] 5.9 Mobile Push & Notification Engine
-- **Bereich**: Backend Benachrichtigungen (`notifications/`, `tasks_push.py`)
-- **Ziel**: 
-  - Anbindung von Firebase Cloud Messaging (FCM für Android) und Apple Push Notification Service (APNs für iOS).
-  - Verwaltung von Geräte-Tokens (`DeviceToken`-Modell mit Platform, Last-Active, Token).
-  - Intelligente Ruhezeiten (Quiet Hours) und Filter für unkritische Hinweise vs. Notfall-Alarme.
+### [x] 5.9 Mobile Push & Notification Engine
+- **Bereich**: Backend Benachrichtigungen (`notifications/`, `notifications/services.py`, `frontend/public/sw.js`)
+- **Status**: ✅ **Erledigt**.
+  - **W3C Web-Push & VAPID**: Nativer Push-Versand für Safari iOS 16.4+, Chrome, Edge und Firefox via `pywebpush` ohne Zusatzkosten.
+  - **Geräte- & Token-Verwaltung**: `DeviceSubscription` Modell mit Endpoint-, Auth- und P256DH-Schlüsseln, Platform und Device-Name.
+  - **Intelligente Ruhezeiten (Quiet Hours)**: Konfigurierbare Nachtruhe (z. B. 22:00 bis 07:00 Uhr) mit Override für kritische Notfall-Alarme (z. B. Batterie leer, Frostschutz).
+  - **Frontend Service Worker & 1-Klick Permission**: `sw.js` für Sperrbildschirm-Zustellung, Deep-Linking auf Klick und 1-Klick Test-Push Generator in den Einstellungen (`Settings.jsx`) und der Alarmzentrale (`AlertsPage.jsx`).
 
 ---
 

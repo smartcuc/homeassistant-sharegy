@@ -84,6 +84,7 @@ urlpatterns = [
                 path("billing/", include("billing.urls")),
                 path("support/", include("support_desk.api.urls")),
                 path("status/", include("operations.urls")),
+                path("notifications/", include("notifications.api.urls")),
             ]
         ),
     ),

@@ -164,10 +164,29 @@ INSTALLED_APPS = [
     "operations",
     "tracking",
     "support_desk",
+    "notifications",
     "providers.opentelemetry",
 
     "providers.matter",
 ]
+
+
+# =============================
+# Web-Push (VAPID) / Notifications
+# =============================
+
+VAPID_PUBLIC_KEY = os.getenv(
+    "VAPID_PUBLIC_KEY",
+    "BKn7y_ZtYm2yS2p3P9qM9n_Q2WzY_6u2R4fV1gK9v_A6d3c2B1a0z_9x8y7w6v5u4t3s2r1q0p9o8n7m6l5k4j3="
+)
+VAPID_PRIVATE_KEY = os.getenv(
+    "VAPID_PRIVATE_KEY",
+    "u4t3s2r1q0p9o8n7m6l5k4j3i2h1g0f9e8d7c6b5a4="
+)
+VAPID_ADMIN_EMAIL = os.getenv(
+    "VAPID_ADMIN_EMAIL",
+    "mailto:support@sharegy.cloud"
+)
 
 
 # =============================

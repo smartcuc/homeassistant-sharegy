@@ -6,6 +6,7 @@ import Card from "../components/ui/Card";
 import { useUser } from "../hooks/useUser";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
+import PushNotificationSettings from "../features/alerts/components/PushNotificationSettings";
 
 export default function Settings() {
     const { user } = useUser();
@@ -54,8 +55,6 @@ export default function Settings() {
                         <p className="text-xs text-gray-500 mt-0.5">
                             {t("settings.interfaces_desc", "Zugangsdaten für Outbound-WebSocket (Shelly) und MQTT (Home Assistant / ioBroker).")}
                         </p>
-
-
                     </div>
                     <Link
                         to="/app/interfaces"
@@ -65,6 +64,9 @@ export default function Settings() {
                     </Link>
                 </div>
             </Card>
+
+            {/* PUSH NOTIFICATIONS & QUIET HOURS */}
+            <PushNotificationSettings />
 
             {/* DISPLAY & THEME */}
             <Card>

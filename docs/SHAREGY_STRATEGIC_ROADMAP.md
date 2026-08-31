@@ -120,7 +120,11 @@
   │          • 1-Klick Presets für BWWP, Wärmepumpen, Kühlschränke, Zirkulationspumpen & Umwälzpumpen
   │          • 7-Tage Auto-ML-Learning aus realen Telemetrie-Zeitreihen (Quantil-Segmentierung)
   │          • Echtzeit-Watchdog mit automatischer Alarmierung bei Ruhestrom-Anstieg (z. B. 30W -> 52W) oder Dauerlauf
-  ├── 2.21 ⏳ Mobile Push Notification Engine (FCM Android & APNs iOS Dispatcher)
+  ├── 2.21 ✅ **Mobile Push & Notification Engine (Web-Push VAPID, FCM/APNs & Service Worker)**:
+  │          • W3C Web-Push mit VAPID-Verschlüsselung für iPhones (iOS Safari 16.4+), Android & Desktop
+  │          • `DeviceSubscription` & `NotificationPreference` Modelle mit Quiet Hours & Notfall-Override
+  │          • Service Worker (`sw.js`) für Sperrbildschirm-Zustellung und Deep-Link-Fokussierung
+  │          • 1-Klick Permission Request & Sofort-Test-Push in Einstellungen & Alarmzentrale
   └── 2.22 ⏳ Native Mobile Apps via Capacitor (iOS & Android mit Widgets & Biometrie)
 
 ┌───────────────────────────────────────────────────────────────────────────────┐
@@ -143,8 +147,8 @@
 |---|---|---|:---:|---|
 | **Step 1** | `system/status/` | **Systemstatus & Uptime-Monitoring**: Health-API für DB, Cache, Daphne WSS, Celery, Open-Meteo & Tibber mit Incident-Watchdog | ✅ **ERLEDIGT** | 100% Transparenz & automatische Störungs-Tickets |
 | **Step 2** | `devices/profiling/` | **Geräteprofiling & Baseline-Überwachung**: Auto-ML-Baseline, 1-Klick Presets für BWWP/WP/Kühlschrank & Anomalie-Alarmierung | ✅ **ERLEDIGT** | Predictive Maintenance & Früherkennung von Kriechstrom/Defekten |
-| **Step 3** | `notifications/` | **Mobile Push Notification Engine**: FCM & APNs Dispatcher für PV-Ausfall-, Notreserve- & Negativpreis-Pushs | 🔥 **P1 (Nächster Schritt)** | Aktive Alarmierung auf Smartphones bei geschlossener App |
-| **Step 4** | `mobile/apps/` | **Native Mobile Apps (Capacitor)**: iOS & Android Builds mit App-Store-Ready Manifest & Widgets | 📱 **P1** | Mobile First Experience für Endanwender |
+| **Step 3** | `notifications/` | **Mobile Push Notification Engine**: W3C Web-Push VAPID, Service Worker, Quiet Hours & 1-Klick Test-Push | ✅ **ERLEDIGT** | Aktive Alarmierung auf Smartphones bei geschlossener App |
+| **Step 4** | `mobile/apps/` | **Native Mobile Apps (Capacitor)**: iOS & Android Builds mit App-Store-Ready Manifest & Widgets | 📱 **P1 (Nächster Schritt)** | Mobile First Experience für Endanwender |
 | **Step 5** | `tenants/` | **P2P-Clearing & 15-Minuten-Bilanzierung**: Zähler-Allokation für Energy Sharing & Mieterstrom | 🏢 **P2** | Kommerzieller Rollout von Säule 2 (Energy Sharing) |
 | **Step 6** | `grid/enwg/` | **§ 14a EnWG Steuerbox & Dimmung**: Dynamische Leistungsbegrenzung auf 4,2 kW für SteuVE (WP, Wallbox, Speicher) | ⚡ **P2** | Gesetzliche Netzbetreiber-Konformität in Deutschland |
 

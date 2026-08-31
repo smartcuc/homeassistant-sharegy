@@ -7,10 +7,13 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../../api/client";
 
+import PushNotificationSettings from "../components/PushNotificationSettings";
+
 export default function AlertsPage() {
     const { t } = useTranslation();
     const queryClient = useQueryClient();
     const [filterSeverity, setFilterSeverity] = useState("all");
+    const [showPushSettings, setShowPushSettings] = useState(false);
 
     const query = useQuery({
         queryKey: ["alerts-list"],
@@ -63,7 +66,28 @@ export default function AlertsPage() {
                         {t("alerts.page_subtitle", "Echtzeit-Überwachung von Ertragsausfällen, Akkuzustand, Dauerlasten und Börsenstrom-Chancen.")}
                     </p>
                 </div>
+
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => setShowPushSettings(!showPushSettings)}
+                        className={`px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-xs flex items-center gap-1.5 cursor-pointer ${
+                            showPushSettings
+                                ? "bg-indigo-50 border border-indigo-200 text-indigo-700"
+                                : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"
+                        }`}
+                    >
+                        <span>📲</span>
+                        <span>{showPushSettings ? t("notifications.hide_settings", "Push-Einstellungen schließen") : t("notifications.configure_push", "Push-Alarme einrichten")}</span>
+                    </button>
+                </div>
             </div>
+
+            {/* PUSH NOTIFICATIONS SETTINGS DRAWER / SECTION */}
+            {showPushSettings && (
+                <div className="animate-in fade-in duration-200">
+                    <PushNotificationSettings />
+                </div>
+            )}
 
             {/* Summary Counters */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
