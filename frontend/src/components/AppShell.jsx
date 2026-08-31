@@ -9,7 +9,6 @@ import Sidebar from "../components/layout/Sidebar";
 
 import Dashboard from "../pages/dashboard/Dashboard";
 import OverviewPage from "../pages/dashboard/overview/OverviewPage";
-import Settings from "../pages/Settings";
 import InterfacesPage from "../pages/InterfacesPage";
 import EnergyDashboard from "../features/energy/EnergyDashboard";
 import ProducerPage from "../features/producer/pages/ProducerPage";

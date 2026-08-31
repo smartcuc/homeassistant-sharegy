@@ -5,6 +5,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import Card from "../components/ui/Card";
+import PushNotificationSettings from "../features/alerts/components/PushNotificationSettings";
 import { apiFetch } from "../api/client";
 import { useSettings } from "../hooks/useSettings";
 import { useUser } from "../hooks/useUser";
@@ -207,6 +208,9 @@ export default function Profile() {
                         </div>
                     </div>
                 </Card>
+
+                {/* PUSH NOTIFICATIONS & QUIET HOURS */}
+                <PushNotificationSettings />
 
                 {/* LANGUAGE SELECTION */}
                 <Card>
