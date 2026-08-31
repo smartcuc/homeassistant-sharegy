@@ -31,6 +31,7 @@ from accounts.models import (
     TenantInvite,
     TenantMembership,
     AuditLog,
+    MagicLoginToken,
 )
 
 
