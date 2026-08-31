@@ -148,11 +148,44 @@ CANONICAL_METRIC_UNITS = {
 
 
 def _infer_canonical_unit(metric_key: str, given_unit: str, config: Any = None) -> str:
+    k = (metric_key or "").strip().lower()
+
+    # 1. Spezifische physikalische Schlüssel haben IMMER Vorrang
+    if k in CANONICAL_METRIC_UNITS:
+        if given_unit and given_unit.strip():
+            return given_unit.strip()
+        return CANONICAL_METRIC_UNITS[k]
+
+    # Pattern-Matching für dynamische Keys (z. B. a_voltage, l1_current, pv1_voltage, etc.)
+    if any(w in k for w in ["voltage", "volt", "spannung"]) and "power" not in k:
+        return "V"
+    if any(w in k for w in ["current", "strom", "amper"]) and "power" not in k:
+        return "A"
+    if any(w in k for w in ["frequency", "frequenz", "freq"]):
+        return "Hz"
+    if any(w in k for w in ["temp", "grad_c", "celsius"]):
+        return "°C"
+    if any(w in k for w in ["soc", "soh", "humidity", "feuchte", "level", "percent", "pct"]):
+        return "%"
+    if any(w in k for w in ["energy", "yield", "ertrag", "zaehlerstand", "total"]):
+        if "wh" in k and "kwh" not in k:
+            return "Wh"
+        return "kWh"
+    if any(w in k for w in ["power", "leistung", "wirkleistung", "watt"]):
+        if "kw" in k and "kwh" not in k:
+            return "kW"
+        return "W"
+
     if given_unit and given_unit.strip():
         return given_unit.strip()
-    if config and config.metric_definition and config.metric_definition.unit:
-        return config.metric_definition.unit.strip()
-    return CANONICAL_METRIC_UNITS.get(metric_key.lower().strip(), "")
+
+    # 2. Nur bei rein generischen Keys (value, val) auf die Gerätekonfiguration zurückfallen
+    if k in ["value", "val", "main", "lead", ""]:
+        if config and config.metric_definition and config.metric_definition.unit:
+            return config.metric_definition.unit.strip()
+        return "W"
+
+    return ""
 
 
 def ingest_metric_payload(

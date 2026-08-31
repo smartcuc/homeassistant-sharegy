@@ -71,10 +71,33 @@ const CANONICAL_UNITS = {
 
 function getMetricMeta(rawKey, givenUnit, config = {}, t = (k, d) => d) {
     const k = (rawKey || "").trim().toLowerCase();
-    const unit = (givenUnit && givenUnit.trim()) || config?.metric_definition?.unit || CANONICAL_UNITS[k] || "";
+
+    // 1. Zuerst exakte oder musterbasierte SI-Einheit für den konkreten Kanal bestimmen
+    let unit = "";
+    if (CANONICAL_UNITS[k]) {
+        unit = (givenUnit && givenUnit.trim()) || CANONICAL_UNITS[k];
+    } else if (k.includes("voltage") || k.includes("volt") || k.includes("spannung")) {
+        unit = (givenUnit && givenUnit.trim()) || "V";
+    } else if (k.includes("current") || k.includes("strom") || k.includes("amper")) {
+        unit = (givenUnit && givenUnit.trim()) || "A";
+    } else if (k.includes("frequency") || k.includes("freq") || k.includes("frequenz")) {
+        unit = (givenUnit && givenUnit.trim()) || "Hz";
+    } else if (k.includes("temp") || k.includes("celsius")) {
+        unit = (givenUnit && givenUnit.trim()) || "°C";
+    } else if (k.includes("soc") || k.includes("soh") || k.includes("humidity") || k.includes("feuchte") || k.includes("level")) {
+        unit = (givenUnit && givenUnit.trim()) || "%";
+    } else if (k.includes("energy") || k.includes("yield") || k.includes("ertrag") || k.includes("total")) {
+        unit = (givenUnit && givenUnit.trim()) || (k.includes("wh") && !k.includes("kwh") ? "Wh" : "kWh");
+    } else if (k.includes("power") || k.includes("watt") || k.includes("leistung")) {
+        unit = (givenUnit && givenUnit.trim()) || (k.includes("kw") && !k.includes("kwh") ? "kW" : "W");
+    } else if (givenUnit && givenUnit.trim()) {
+        unit = givenUnit.trim();
+    } else if (k === "value" || k === "val" || k === "main") {
+        unit = config?.metric_definition?.unit || "W";
+    }
 
     let icon = "📊";
-    if (unit === "W" || unit === "kW" || k.includes("power") || k.includes("watt") || k === "val" || k === "value") {
+    if (unit === "W" || unit === "kW" || k.includes("power") || k.includes("watt")) {
         icon = "🔌";
     } else if (unit === "kWh" || unit === "Wh" || k.includes("energy") || k.includes("yield")) {
         icon = "📊";
@@ -92,13 +115,12 @@ function getMetricMeta(rawKey, givenUnit, config = {}, t = (k, d) => d) {
 
     let fallbackLabel = rawKey;
     if (k === "value" || k === "val") {
-        if (unit === "W" || unit === "kW") fallbackLabel = t("metric_definitions.power", "Wirkleistung");
-        else if (unit === "kWh" || unit === "Wh") fallbackLabel = t("metric_definitions.energy", "Zählerstand / Energie");
-        else if (unit === "V") fallbackLabel = t("metric_definitions.voltage", "Netzspannung");
+        if (unit === "V") fallbackLabel = t("metric_definitions.voltage", "Netzspannung");
         else if (unit === "A") fallbackLabel = t("metric_definitions.current", "Stromstärke");
-        else if (unit === "%") fallbackLabel = t("metric_definitions.soc", "Ladezustand (SoC)");
+        else if (unit === "kWh" || unit === "Wh") fallbackLabel = t("metric_definitions.energy", "Zählerstand / Energie");
         else if (unit === "Hz") fallbackLabel = t("metric_definitions.frequency", "Netzfrequenz");
         else if (unit === "°C") fallbackLabel = t("metric_definitions.temperature", "Temperatur");
+        else if (unit === "%") fallbackLabel = t("metric_definitions.soc", "Ladezustand (SoC)");
         else fallbackLabel = config?.metric_definition?.name || t("metric_definitions.power", "Wirkleistung");
     } else if (k === "power" || k === "active_power" || k === "apower" || k === "p_total") {
         fallbackLabel = t("metric_definitions.power", "Wirkleistung");
