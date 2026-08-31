@@ -1,10 +1,7 @@
-/*
-# src/features/energy/components/BatteryForecastCard.jsx
-*/
-
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import ReactECharts from "echarts-for-react";
 import { apiFetch } from "../../../api/client";
 import { useSubscription } from "../../../hooks/useSubscription";
 import ProBadge from "../../../components/common/ProBadge";
@@ -34,6 +31,244 @@ export default function BatteryForecastCard() {
         }
         setHorizon(val);
     };
+
+    const chartOption = useMemo(() => {
+        if (!timeline || timeline.length === 0) return {};
+
+        const categories = timeline.map((slot) => {
+            return `${slot.time_label}`;
+        });
+
+        const socValues = timeline.map((s) => Number(s.soc_pct ?? s.sim_soc_pct ?? 0));
+        const solarValues = timeline.map((s) => Number(s.pv_kw ?? s.solar_kw ?? 0));
+        const loadValues = timeline.map((s) => Number(s.load_kw ?? 0));
+        const chargeValues = timeline.map((s) => {
+            const ch = s.charge_kw ?? (s.bat_flow_kw > 0 ? s.bat_flow_kw : 0);
+            return Number(ch) > 0 ? Number(ch) : 0;
+        });
+        const dischargeValues = timeline.map((s) => {
+            const dis = s.discharge_kw ?? (s.bat_flow_kw < 0 ? Math.abs(s.bat_flow_kw) : 0);
+            return Number(dis) > 0 ? Number(dis) : 0;
+        });
+
+        return {
+            backgroundColor: "transparent",
+            animation: true,
+            tooltip: {
+                trigger: "axis",
+                backgroundColor: "rgba(15, 23, 42, 0.95)",
+                borderColor: "rgba(16, 185, 129, 0.4)",
+                borderWidth: 1,
+                textStyle: { color: "#f8fafc", fontSize: 12 },
+                padding: [10, 14],
+                formatter: function (items) {
+                    if (!items || items.length === 0) return "";
+                    const idx = items[0].dataIndex;
+                    const slot = timeline[idx];
+                    if (!slot) return "";
+
+                    const socVal = Number(slot.soc_pct ?? slot.sim_soc_pct ?? 0).toFixed(1);
+                    const storedVal = Number(slot.stored_kwh ?? 0).toFixed(2);
+                    const solarVal = Number(slot.pv_kw ?? slot.solar_kw ?? 0).toFixed(2);
+                    const loadVal = Number(slot.load_kw ?? 0).toFixed(2);
+                    const chargeVal = Number(slot.charge_kw ?? (slot.bat_flow_kw > 0 ? slot.bat_flow_kw : 0));
+                    const dischargeVal = Number(slot.discharge_kw ?? (slot.bat_flow_kw < 0 ? Math.abs(slot.bat_flow_kw) : 0));
+
+                    return `
+                        <div style="font-weight: bold; margin-bottom: 6px; border-bottom: 1px solid rgba(51, 65, 85, 0.8); padding-bottom: 4px; color: #fff;">
+                            ${slot.date_label || ""} ${slot.time_label} Uhr ${slot.is_night ? "🌙" : "☀️"}
+                        </div>
+                        <div style="display: flex; justify-content: space-between; gap: 16px; margin: 3px 0; color: #34d399;">
+                            <span>🔋 Ladestand (SoC):</span>
+                            <b style="font-family: monospace;">${socVal}% (${storedVal} kWh)</b>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; gap: 16px; margin: 3px 0; color: #fbbf24;">
+                            <span>☀️ Solar-Ertrag:</span>
+                            <b style="font-family: monospace;">+${solarVal} kW</b>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; gap: 16px; margin: 3px 0; color: #60a5fa;">
+                            <span>🏠 Hauslast:</span>
+                            <b style="font-family: monospace;">-${loadVal} kW</b>
+                        </div>
+                        ${
+                            chargeVal > 0.01
+                                ? `<div style="display: flex; justify-content: space-between; gap: 16px; margin: 3px 0; color: #4ade80; font-weight: bold; border-top: 1px solid rgba(51, 65, 85, 0.6); padding-top: 3px;">
+                                    <span>⚡ Speicher-Ladung:</span>
+                                    <b style="font-family: monospace;">+${chargeVal.toFixed(2)} kW</b>
+                                   </div>`
+                                : ""
+                        }
+                        ${
+                            dischargeVal > 0.01
+                                ? `<div style="display: flex; justify-content: space-between; gap: 16px; margin: 3px 0; color: #38bdf8; font-weight: bold; border-top: 1px solid rgba(51, 65, 85, 0.6); padding-top: 3px;">
+                                    <span>🔄 Speicher-Entladung:</span>
+                                    <b style="font-family: monospace;">-${dischargeVal.toFixed(2)} kW</b>
+                                   </div>`
+                                : ""
+                        }
+                    `;
+                },
+            },
+            legend: {
+                show: false,
+            },
+            grid: {
+                top: 24,
+                left: 45,
+                right: 45,
+                bottom: 32,
+            },
+            xAxis: {
+                type: "category",
+                data: categories,
+                boundaryGap: false,
+                axisLine: { lineStyle: { color: "rgba(110, 231, 183, 0.2)" } },
+                axisTick: { show: false },
+                axisLabel: {
+                    color: "#94a3b8",
+                    fontSize: 10,
+                    interval: horizon === 48 ? 3 : 1,
+                },
+            },
+            yAxis: [
+                {
+                    type: "value",
+                    name: "SoC %",
+                    nameTextStyle: { color: "#34d399", fontSize: 10 },
+                    min: 0,
+                    max: 100,
+                    interval: 25,
+                    splitLine: { lineStyle: { color: "rgba(51, 65, 85, 0.35)", type: "dashed" } },
+                    axisLabel: {
+                        color: "#6ee7b7",
+                        fontSize: 10,
+                        formatter: "{value}%",
+                    },
+                },
+                {
+                    type: "value",
+                    name: "kW",
+                    nameTextStyle: { color: "#94a3b8", fontSize: 10 },
+                    splitLine: { show: false },
+                    axisLabel: {
+                        color: "#94a3b8",
+                        fontSize: 10,
+                        formatter: "{value} kW",
+                    },
+                },
+            ],
+            series: [
+                {
+                    name: "SoC (%)",
+                    type: "line",
+                    yAxisIndex: 0,
+                    smooth: 0.35,
+                    showSymbol: false,
+                    data: socValues,
+                    z: 10,
+                    lineStyle: {
+                        width: 3.5,
+                        color: "#10b981",
+                        shadowColor: "rgba(16, 185, 129, 0.6)",
+                        shadowBlur: 10,
+                    },
+                    areaStyle: {
+                        color: {
+                            type: "linear",
+                            x: 0,
+                            y: 0,
+                            x2: 0,
+                            y2: 1,
+                            colorStops: [
+                                { offset: 0, color: "rgba(16, 185, 129, 0.40)" },
+                                { offset: 0.8, color: "rgba(6, 182, 212, 0.12)" },
+                                { offset: 1, color: "rgba(15, 23, 42, 0.0)" },
+                            ],
+                        },
+                    },
+                    markLine: {
+                        silent: true,
+                        symbol: "none",
+                        data: [
+                            {
+                                yAxis: params.min_soc_reserve_pct || 10,
+                                lineStyle: { color: "#f59e0b", type: "dashed", width: 1.5 },
+                                label: {
+                                    show: true,
+                                    position: "end",
+                                    formatter: `Reserve ${params.min_soc_reserve_pct || 10}%`,
+                                    color: "#fcd34d",
+                                    fontSize: 9,
+                                },
+                            },
+                        ],
+                    },
+                },
+                {
+                    name: "Solar-Ertrag (kW)",
+                    type: "line",
+                    yAxisIndex: 1,
+                    smooth: 0.35,
+                    showSymbol: false,
+                    data: solarValues,
+                    z: 5,
+                    lineStyle: {
+                        width: 2,
+                        color: "#f59e0b",
+                    },
+                    areaStyle: {
+                        color: {
+                            type: "linear",
+                            x: 0,
+                            y: 0,
+                            x2: 0,
+                            y2: 1,
+                            colorStops: [
+                                { offset: 0, color: "rgba(245, 158, 11, 0.25)" },
+                                { offset: 1, color: "rgba(245, 158, 11, 0.0)" },
+                            ],
+                        },
+                    },
+                },
+                {
+                    name: "Hauslast (kW)",
+                    type: "line",
+                    yAxisIndex: 1,
+                    smooth: 0.35,
+                    showSymbol: false,
+                    data: loadValues,
+                    z: 6,
+                    lineStyle: {
+                        width: 2,
+                        color: "#60a5fa",
+                        type: "dashed",
+                    },
+                },
+                {
+                    name: "Ladung (kW)",
+                    type: "bar",
+                    yAxisIndex: 1,
+                    data: chargeValues,
+                    z: 3,
+                    itemStyle: {
+                        color: "rgba(52, 211, 153, 0.55)",
+                        borderRadius: [3, 3, 0, 0],
+                    },
+                },
+                {
+                    name: "Entladung (kW)",
+                    type: "bar",
+                    yAxisIndex: 1,
+                    data: dischargeValues,
+                    z: 3,
+                    itemStyle: {
+                        color: "rgba(56, 189, 248, 0.55)",
+                        borderRadius: [3, 3, 0, 0],
+                    },
+                },
+            ],
+        };
+    }, [timeline, horizon, params]);
 
     if (query.isLoading) {
         return (
@@ -159,104 +394,43 @@ export default function BatteryForecastCard() {
             </div>
 
             {/* =========================================================
-                SIMULATION TIMELINE BAR CHART
+                SIMULATION TIMELINE ECHARTS CHART
             ========================================================= */}
             <div className="space-y-3 pt-2">
                 <div className="flex items-center justify-between text-xs text-emerald-200/80">
                     <span className="font-bold flex items-center gap-1.5">
                         <span>📈</span> {t("battery_forecast.timeline_title", "Simulierter SoC-Verlauf & Ladefluss")}
                     </span>
-                    <div className="flex items-center gap-3 text-[11px]">
+                    <div className="flex flex-wrap items-center gap-3 text-[11px]">
                         <span className="flex items-center gap-1">
-                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block" /> {t("battery_forecast.legend_soc", "SoC %")}
+                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block shadow-xs shadow-emerald-400/50" /> {t("battery_forecast.legend_soc", "SoC %")}
                         </span>
                         <span className="flex items-center gap-1">
-                            <span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block" /> {t("battery_forecast.legend_charge", "Laden")}
+                            <span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block" /> {t("battery_forecast.legend_solar", "Solar")}
                         </span>
                         <span className="flex items-center gap-1">
-                            <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 inline-block" /> {t("battery_forecast.legend_discharge", "Entladen")}
+                            <span className="w-2.5 h-2.5 rounded-full bg-blue-400 inline-block" /> {t("battery_forecast.legend_load", "Hauslast")}
+                        </span>
+                        <span className="flex items-center gap-1">
+                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-300 inline-block" /> {t("battery_forecast.legend_charge", "Ladung")}
+                        </span>
+                        <span className="flex items-center gap-1">
+                            <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 inline-block" /> {t("battery_forecast.legend_discharge", "Entladung")}
                         </span>
                     </div>
                 </div>
 
-                {/* Timeline Grid */}
-                <div className="bg-slate-950/70 border border-emerald-900/40 rounded-2xl p-4 overflow-x-auto">
-                    <div className="min-w-[650px] flex items-end gap-1 h-36 pt-4 pb-1">
-                        {timeline.map((slot, idx) => {
-                            const socHeight = Math.max(4, Math.round((slot.sim_soc_pct / 100.0) * 100));
-                            const isNight = slot.is_night;
-                            const isCharging = slot.charge_kw > 0;
-                            const isDischarging = slot.discharge_kw > 0;
+                {/* ECharts Area Container */}
+                <div className="bg-slate-950/80 border border-emerald-900/50 rounded-2xl p-2 pt-3 shadow-inner">
+                    <ReactECharts
+                        option={chartOption}
+                        style={{ height: 260, width: "100%" }}
+                        notMerge={true}
+                        lazyUpdate={true}
+                    />
 
-                            return (
-                                <div
-                                    key={idx}
-                                    className="flex-1 flex flex-col items-center justify-end h-full group relative"
-                                >
-                                    {/* Tooltip Hover */}
-                                    <div className="absolute bottom-full mb-2 hidden group-hover:flex flex-col bg-slate-900 border border-emerald-500/50 rounded-xl p-2.5 shadow-2xl text-[11px] z-50 whitespace-nowrap pointer-events-none min-w-[140px]">
-                                        <div className="font-bold text-white border-b border-slate-800 pb-1 mb-1">
-                                            {slot.hour_label} Uhr {isNight ? "🌙" : "☀️"}
-                                        </div>
-                                        <div className="flex justify-between text-emerald-300">
-                                            <span>SoC:</span>
-                                            <span className="font-mono font-bold">{slot.sim_soc_pct}% ({slot.stored_kwh} kWh)</span>
-                                        </div>
-                                        <div className="flex justify-between text-amber-300">
-                                            <span>Solar:</span>
-                                            <span className="font-mono font-bold">+{slot.solar_kw} kW</span>
-                                        </div>
-                                        <div className="flex justify-between text-rose-300">
-                                            <span>Haushalt:</span>
-                                            <span className="font-mono font-bold">-{slot.load_kw} kW</span>
-                                        </div>
-                                        {isCharging && (
-                                            <div className="flex justify-between text-emerald-400 font-bold pt-1 border-t border-slate-800/80">
-                                                <span>Ladung:</span>
-                                                <span className="font-mono">+{slot.charge_kw} kW</span>
-                                            </div>
-                                        )}
-                                        {isDischarging && (
-                                            <div className="flex justify-between text-cyan-400 font-bold pt-1 border-t border-slate-800/80">
-                                                <span>Entladung:</span>
-                                                <span className="font-mono">-{slot.discharge_kw} kW</span>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* SoC Bar */}
-                                    <div className="w-full flex items-end justify-center h-28 bg-slate-900/60 rounded-t-sm relative overflow-hidden">
-                                        {/* Reserve Indicator Line */}
-                                        <div
-                                            className="absolute w-full border-t border-dashed border-amber-500/50 pointer-events-none"
-                                            style={{ bottom: `${params.min_soc_reserve_pct}%` }}
-                                            title={`Notstromreserve: ${params.min_soc_reserve_pct}%`}
-                                        />
-
-                                        <div
-                                            className={`w-full rounded-t-sm transition-all duration-300 ${
-                                                slot.sim_soc_pct <= (params.min_soc_reserve_pct + 1)
-                                                    ? "bg-amber-500/80 border-t border-amber-300"
-                                                    : isCharging
-                                                    ? "bg-gradient-to-t from-emerald-600 via-emerald-500 to-amber-300 shadow-xs shadow-amber-400/20"
-                                                    : isDischarging
-                                                    ? "bg-gradient-to-t from-emerald-700 via-emerald-500 to-cyan-300 shadow-xs shadow-cyan-400/20"
-                                                    : "bg-gradient-to-t from-emerald-600 to-emerald-400"
-                                            }`}
-                                            style={{ height: `${Math.max(6, socHeight)}%` }}
-                                        />
-                                    </div>
-
-                                    {/* Hour & Date Label */}
-                                    <div className="text-[9px] font-mono text-slate-400 mt-1.5 truncate text-center w-full">
-                                        {idx % (horizon === 48 ? 4 : 2) === 0 ? slot.hour_label : "·"}
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
                     {/* Timeline footer dates */}
-                    <div className="mt-3 flex items-center justify-between text-[11px] text-slate-400 font-medium px-1 border-t border-slate-800/60 pt-2">
+                    <div className="mt-1 flex items-center justify-between text-[11px] text-slate-400 font-medium px-4 pb-2 border-t border-slate-800/60 pt-2">
                         <span>{timeline[0]?.date_label} ({timeline[0]?.time_label})</span>
                         <span className="text-emerald-300 font-semibold">
                             🔋 {params.battery_name || "Speicher"} · {kpis.night_autarky_pct || 0}% Nachtautarkie
