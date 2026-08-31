@@ -79,35 +79,46 @@ function fallbackByUnit(unit, t) {
     return t("metric_definitions.power", "Wirkleistung");
 }
 
+const VALID_UNITS = {
+    voltage: ["V", "kV", "mV", "v"],
+    current: ["A", "mA", "kA", "a"],
+    frequency: ["Hz", "kHz", "hz"],
+    temperature: ["°C", "C", "c", "K", "°F"],
+    soc: ["%", "pct"],
+    energy: ["kWh", "Wh", "MWh", "kwh", "wh"],
+    power: ["W", "kW", "MW", "w", "kw"],
+};
+
 function getMetricMeta(rawKey, givenUnit, config = {}, t = (k, d) => d) {
     const k = (rawKey || "").trim().toLowerCase();
     const cfgDef = config?.metric_definition;
     const cfgUnit = cfgDef?.unit?.trim() || "";
     const cfgKey = cfgDef?.key?.toLowerCase()?.trim() || "";
     const cfgName = cfgDef?.name?.trim() || "";
+    const u = (givenUnit || "").trim();
 
     // 1. Zuerst exakte oder musterbasierte SI-Einheit für den konkreten Kanal bestimmen
     let unit = "";
-    if (CANONICAL_UNITS[k]) {
-        unit = (givenUnit && givenUnit.trim()) || CANONICAL_UNITS[k];
-    } else if (k.includes("voltage") || k.includes("volt") || k.includes("spannung")) {
-        unit = (givenUnit && givenUnit.trim()) || "V";
+    if (k.includes("voltage") || k.includes("volt") || k.includes("spannung")) {
+        unit = VALID_UNITS.voltage.includes(u) ? u : "V";
     } else if (k.includes("current") || k.includes("strom") || k.includes("amper")) {
-        unit = (givenUnit && givenUnit.trim()) || "A";
+        unit = VALID_UNITS.current.includes(u) ? u : "A";
     } else if (k.includes("frequency") || k.includes("freq") || k.includes("frequenz")) {
-        unit = (givenUnit && givenUnit.trim()) || "Hz";
+        unit = VALID_UNITS.frequency.includes(u) ? u : "Hz";
     } else if (k.includes("temp") || k.includes("celsius")) {
-        unit = (givenUnit && givenUnit.trim()) || "°C";
+        unit = VALID_UNITS.temperature.includes(u) ? u : "°C";
     } else if (k.includes("soc") || k.includes("soh") || k.includes("humidity") || k.includes("feuchte") || k.includes("level")) {
-        unit = (givenUnit && givenUnit.trim()) || "%";
+        unit = VALID_UNITS.soc.includes(u) ? u : "%";
     } else if (k.includes("energy") || k.includes("yield") || k.includes("ertrag") || k.includes("total")) {
-        unit = (givenUnit && givenUnit.trim()) || (k.includes("wh") && !k.includes("kwh") ? "Wh" : "kWh");
+        unit = VALID_UNITS.energy.includes(u) ? u : (k.includes("wh") && !k.includes("kwh") ? "Wh" : "kWh");
     } else if (k.includes("power") || k.includes("watt") || k.includes("leistung")) {
-        unit = (givenUnit && givenUnit.trim()) || (k.includes("kw") && !k.includes("kwh") ? "kW" : "W");
-    } else if (givenUnit && givenUnit.trim()) {
-        unit = givenUnit.trim();
+        unit = VALID_UNITS.power.includes(u) ? u : (k.includes("kw") && !k.includes("kwh") ? "kW" : "W");
+    } else if (CANONICAL_UNITS[k]) {
+        unit = CANONICAL_UNITS[k];
     } else if (cfgUnit) {
         unit = cfgUnit;
+    } else if (u) {
+        unit = u;
     } else {
         unit = "W";
     }

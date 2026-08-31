@@ -147,45 +147,82 @@ CANONICAL_METRIC_UNITS = {
 }
 
 
+VALID_PHYSICAL_UNITS = {
+    "voltage": {"V", "kV", "mV", "v", "kv", "mv"},
+    "current": {"A", "mA", "kA", "a", "ma", "ka"},
+    "frequency": {"Hz", "kHz", "hz", "khz"},
+    "temperature": {"°C", "C", "c", "K", "°F", "F"},
+    "soc": {"%", "pct", "percent"},
+    "soh": {"%", "pct", "percent"},
+    "humidity": {"%", "pct", "percent"},
+    "energy": {"kWh", "Wh", "MWh", "kwh", "wh", "mwh"},
+    "power": {"W", "kW", "MW", "w", "kw", "mw"},
+}
+
+
 def _infer_canonical_unit(metric_key: str, given_unit: str, config: Any = None) -> str:
     k = (metric_key or "").strip().lower()
+    u = (given_unit or "").strip()
 
-    # 1. Spezifische physikalische Schlüssel haben IMMER Vorrang
-    if k in CANONICAL_METRIC_UNITS:
-        if given_unit and given_unit.strip():
-            return given_unit.strip()
-        return CANONICAL_METRIC_UNITS[k]
-
-    # Pattern-Matching für dynamische Keys (z. B. a_voltage, l1_current, pv1_voltage, etc.)
+    # 1. Spannungen (Voltage)
     if any(w in k for w in ["voltage", "volt", "spannung"]) and "power" not in k:
+        if u in VALID_PHYSICAL_UNITS["voltage"]:
+            return u
         return "V"
+
+    # 2. Stromstärken (Current)
     if any(w in k for w in ["current", "strom", "amper"]) and "power" not in k:
+        if u in VALID_PHYSICAL_UNITS["current"]:
+            return u
         return "A"
+
+    # 3. Frequenz (Frequency)
     if any(w in k for w in ["frequency", "frequenz", "freq"]):
+        if u in VALID_PHYSICAL_UNITS["frequency"]:
+            return u
         return "Hz"
+
+    # 4. Temperatur (Temperature)
     if any(w in k for w in ["temp", "grad_c", "celsius"]):
+        if u in VALID_PHYSICAL_UNITS["temperature"]:
+            return u
         return "°C"
+
+    # 5. Prozentwerte (SoC, SoH, Luftfeuchte)
     if any(w in k for w in ["soc", "soh", "humidity", "feuchte", "level", "percent", "pct"]):
+        if u in VALID_PHYSICAL_UNITS["soc"]:
+            return u
         return "%"
-    if any(w in k for w in ["energy", "yield", "ertrag", "zaehlerstand", "total"]):
+
+    # 6. Energie / Zählerstand (Energy / Yield)
+    if any(w in k for w in ["energy", "yield", "ertrag", "zaehlerstand"]) or (k.endswith("_wh") or k.endswith("_kwh")):
+        if u in VALID_PHYSICAL_UNITS["energy"]:
+            return u
         if "wh" in k and "kwh" not in k:
             return "Wh"
         return "kWh"
-    if any(w in k for w in ["power", "leistung", "wirkleistung", "watt"]):
+
+    # 7. Leistung (Power)
+    if any(w in k for w in ["power", "leistung", "wirkleistung", "watt"]) or k in LEAD_POWER_KEYS:
+        if u in VALID_PHYSICAL_UNITS["power"]:
+            return u
         if "kw" in k and "kwh" not in k:
             return "kW"
         return "W"
 
-    if given_unit and given_unit.strip():
-        return given_unit.strip()
+    # 8. Konfigurierte MetricDefinition des Geräts prüfen (falls Gerät eine SoC- oder Spannungs-Messung ist)
+    if config and config.metric_definition:
+        cfg_u = (config.metric_definition.unit or "").strip()
+        cfg_k = (config.metric_definition.key or "").strip().lower()
+        if cfg_u:
+            return cfg_u
+        if cfg_k in CANONICAL_METRIC_UNITS:
+            return CANONICAL_METRIC_UNITS[cfg_k]
 
-    # 2. Nur bei rein generischen Keys (value, val) auf die Gerätekonfiguration zurückfallen
-    if k in ["value", "val", "main", "lead", ""]:
-        if config and config.metric_definition and config.metric_definition.unit:
-            return config.metric_definition.unit.strip()
-        return "W"
+    if u:
+        return u
 
-    return ""
+    return "W"
 
 
 def ingest_metric_payload(
