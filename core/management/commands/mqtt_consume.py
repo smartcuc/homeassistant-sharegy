@@ -229,6 +229,16 @@ def ingest(topic: str, payload: bytes, auto_prov: bool):
             logger.warning("Invalid payload format: %s", payload_str)
             return
 
+    # Extract unit_map if provided in payload
+    unit_map = {}
+    if isinstance(data, dict):
+        raw_u = data.get("unit") or data.get("unit_of_measurement") or data.get("u")
+        if raw_u:
+            for k in metrics.keys():
+                unit_map[k] = str(raw_u).strip()
+        if "units" in data and isinstance(data["units"], dict):
+            unit_map.update(data["units"])
+
     # ========================================================
     # ✅ TIMESTAMP + SOURCE
     # ========================================================
@@ -281,6 +291,7 @@ def ingest(topic: str, payload: bytes, auto_prov: bool):
         source=source,
         meta=meta,
         state=state,
+        unit_map=unit_map,
     )
 
 

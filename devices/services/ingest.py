@@ -28,8 +28,6 @@ LEAD_POWER_KEYS = {
     "p",
     "w",
     "watt",
-    "val",
-    "value",
     "grid_power",
     "grid_power_w",
     "pv_power",
@@ -39,6 +37,10 @@ LEAD_POWER_KEYS = {
     "battery_power",
     "battery_power_w",
     "battery_w",
+    "apower",
+    "a_act_power",
+    "b_act_power",
+    "c_act_power",
 }
 
 
@@ -164,37 +166,50 @@ def _infer_canonical_unit(metric_key: str, given_unit: str, config: Any = None) 
     k = (metric_key or "").strip().lower()
     u = (given_unit or "").strip()
 
-    # 1. Spannungen (Voltage)
+    # 1. Bei generischen Keys (value, val) IMMER zuerst die Gerätekonfiguration befragen
+    if k in ["value", "val", "main", "lead", ""]:
+        if config and config.metric_definition:
+            cfg_u = (config.metric_definition.unit or "").strip()
+            cfg_k = (config.metric_definition.key or "").strip().lower()
+            if cfg_u:
+                return cfg_u
+            if cfg_k in CANONICAL_METRIC_UNITS:
+                return CANONICAL_METRIC_UNITS[cfg_k]
+        if u:
+            return u
+        return "W"
+
+    # 2. Spannungen (Voltage)
     if any(w in k for w in ["voltage", "volt", "spannung"]) and "power" not in k:
         if u in VALID_PHYSICAL_UNITS["voltage"]:
             return u
         return "V"
 
-    # 2. Stromstärken (Current)
+    # 3. Stromstärken (Current)
     if any(w in k for w in ["current", "strom", "amper"]) and "power" not in k:
         if u in VALID_PHYSICAL_UNITS["current"]:
             return u
         return "A"
 
-    # 3. Frequenz (Frequency)
+    # 4. Frequenz (Frequency)
     if any(w in k for w in ["frequency", "frequenz", "freq"]):
         if u in VALID_PHYSICAL_UNITS["frequency"]:
             return u
         return "Hz"
 
-    # 4. Temperatur (Temperature)
+    # 5. Temperatur (Temperature)
     if any(w in k for w in ["temp", "grad_c", "celsius"]):
         if u in VALID_PHYSICAL_UNITS["temperature"]:
             return u
         return "°C"
 
-    # 5. Prozentwerte (SoC, SoH, Luftfeuchte)
+    # 6. Prozentwerte (SoC, SoH, Luftfeuchte)
     if any(w in k for w in ["soc", "soh", "humidity", "feuchte", "level", "percent", "pct"]):
         if u in VALID_PHYSICAL_UNITS["soc"]:
             return u
         return "%"
 
-    # 6. Energie / Zählerstand (Energy / Yield)
+    # 7. Energie / Zählerstand (Energy / Yield)
     if any(w in k for w in ["energy", "yield", "ertrag", "zaehlerstand"]) or (k.endswith("_wh") or k.endswith("_kwh")):
         if u in VALID_PHYSICAL_UNITS["energy"]:
             return u
@@ -202,7 +217,7 @@ def _infer_canonical_unit(metric_key: str, given_unit: str, config: Any = None) 
             return "Wh"
         return "kWh"
 
-    # 7. Leistung (Power)
+    # 8. Leistung (Power)
     if any(w in k for w in ["power", "leistung", "wirkleistung", "watt"]) or k in LEAD_POWER_KEYS:
         if u in VALID_PHYSICAL_UNITS["power"]:
             return u
@@ -210,7 +225,7 @@ def _infer_canonical_unit(metric_key: str, given_unit: str, config: Any = None) 
             return "kW"
         return "W"
 
-    # 8. Konfigurierte MetricDefinition des Geräts prüfen (falls Gerät eine SoC- oder Spannungs-Messung ist)
+    # 9. Fallback auf konfigurierte MetricDefinition
     if config and config.metric_definition:
         cfg_u = (config.metric_definition.unit or "").strip()
         cfg_k = (config.metric_definition.key or "").strip().lower()

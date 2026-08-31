@@ -28,8 +28,6 @@ const CANONICAL_UNITS = {
     a_act_power: "W",
     b_act_power: "W",
     c_act_power: "W",
-    value: "W",
-    val: "W",
     energy: "kWh",
     energy_kwh: "kWh",
     energy_wh: "Wh",
@@ -99,7 +97,17 @@ function getMetricMeta(rawKey, givenUnit, config = {}, t = (k, d) => d) {
 
     // 1. Zuerst exakte oder musterbasierte SI-Einheit für den konkreten Kanal bestimmen
     let unit = "";
-    if (k.includes("voltage") || k.includes("volt") || k.includes("spannung")) {
+    if (k === "value" || k === "val" || k === "main" || k === "") {
+        if (cfgUnit) {
+            unit = cfgUnit;
+        } else if (cfgKey && CANONICAL_UNITS[cfgKey]) {
+            unit = CANONICAL_UNITS[cfgKey];
+        } else if (u && u !== "W" && u !== "w") {
+            unit = u;
+        } else {
+            unit = "W";
+        }
+    } else if (k.includes("voltage") || k.includes("volt") || k.includes("spannung")) {
         unit = VALID_UNITS.voltage.includes(u) ? u : "V";
     } else if (k.includes("current") || k.includes("strom") || k.includes("amper")) {
         unit = VALID_UNITS.current.includes(u) ? u : "A";
