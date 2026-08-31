@@ -181,16 +181,18 @@ def get_subscription_overview(user):
             "entitlements": sub.entitlements,
         },
         "billing_address": {
-            "billing_name": profile.billing_name or f"{user.first_name} {user.last_name}".strip() or user.username,
-            "customer_type": profile.customer_type,
-            "company_name": profile.company_name,
-            "vat_id": profile.vat_id,
-            "street": profile.street,
-            "house_number": profile.house_number,
-            "postal_code": profile.postal_code,
-            "city": profile.city,
-            "country": profile.country,
-            "email": user.email,
+            "first_name": user.first_name or "",
+            "last_name": user.last_name or "",
+            "billing_name": profile.billing_name or f"{user.first_name} {user.last_name}".strip(),
+            "customer_type": profile.customer_type or "private",
+            "company_name": profile.company_name or "",
+            "vat_id": profile.vat_id or "",
+            "street": profile.street or "",
+            "house_number": profile.house_number or "",
+            "postal_code": profile.postal_code or "",
+            "city": profile.city or "",
+            "country": profile.country or "DE",
+            "email": user.email or "",
         },
         "available_plans": PLANS_CONFIG,
         "invoices": invoices,
@@ -199,11 +201,29 @@ def get_subscription_overview(user):
 
 def update_billing_address(user, data):
     """
-    Aktualisiert die Rechnungsadresse im Benutzerprofil.
+    Aktualisiert die Rechnungsadresse und Personendaten im Benutzerprofil.
     """
     profile, _ = UserProfile.objects.get_or_create(user=user)
 
-    profile.billing_name = data.get("billing_name", profile.billing_name)
+    first_name = data.get("first_name")
+    last_name = data.get("last_name")
+    user_updated = False
+    if first_name is not None:
+        user.first_name = first_name.strip()
+        user_updated = True
+    if last_name is not None:
+        user.last_name = last_name.strip()
+        user_updated = True
+    if user_updated:
+        user.save(update_fields=["first_name", "last_name"])
+
+    # Billing Name ermitteln / aktualisieren
+    billing_name = data.get("billing_name")
+    if billing_name is not None:
+        profile.billing_name = billing_name.strip()
+    elif user_updated:
+        profile.billing_name = f"{user.first_name} {user.last_name}".strip()
+
     profile.customer_type = data.get("customer_type", profile.customer_type)
     profile.company_name = data.get("company_name", profile.company_name)
     profile.vat_id = data.get("vat_id", profile.vat_id)
@@ -433,7 +453,7 @@ def create_invoice_for_subscription(subscription, plan_id, payment_method, perio
     seq = EMSInvoice.objects.filter(created_at__year=now.year).count() + 1
     invoice_number = f"SHG-{now.year}-{seq:05d}"
 
-    recipient = profile.billing_name or f"{user.first_name} {user.last_name}".strip() or user.username
+    recipient = profile.billing_name or f"{user.first_name} {user.last_name}".strip() or "Kunde"
     street = f"{profile.street} {profile.house_number}".strip() or "Musterstraße 1"
     postal = profile.postal_code or "10115"
     city = profile.city or "Berlin"

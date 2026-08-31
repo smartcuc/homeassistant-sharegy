@@ -877,5 +877,27 @@
     "power_meter": "Power Meter (W)",
     "current_sensor": "Current Sensor (A)",
     "edit_title": "Edit Storage & Sensors"
+  },
+  "billing": {
+    "title": "Subscription, Plans & Billing",
+    "subtitle": "Manage your Sharegy EMS plan, billing address and download invoices as PDF.",
+    "loading": "Loading billing and subscription info...",
+    "address_title": "Billing Address & Master Data",
+    "address_desc": "Used for monthly PDF invoices and tax deduction.",
+    "address_saved": "✓ Saved",
+    "private_customer": "👤 Private Customer",
+    "business_customer": "🏢 Business Customer",
+    "first_name": "First Name",
+    "first_name_placeholder": "e.g. Max",
+    "last_name": "Last Name",
+    "last_name_placeholder": "e.g. Mustermann",
+    "company_label": "Company Name",
+    "vat_label": "VAT ID",
+    "street_label": "Street",
+    "house_number": "No.",
+    "zip_label": "ZIP",
+    "city_label": "City",
+    "save_address": "Save Master Data",
+    "address_error": "Error saving billing address."
   }
 }

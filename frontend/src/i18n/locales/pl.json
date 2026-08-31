@@ -828,5 +828,27 @@
     "power_meter": "Miernik mocy (W)",
     "current_sensor": "Czujnik prądu (A)",
     "edit_title": "Edytuj magazyn i czujniki"
+  },
+  "billing": {
+    "title": "Subskrypcja, Plany i Rozliczenia",
+    "subtitle": "Zarządzaj swoim planem Sharegy EMS, adresem rozliczeniowym i pobieraj faktury w formacie PDF.",
+    "loading": "Ładowanie informacji o rozliczeniach i subskrypcji...",
+    "address_title": "Adres rozliczeniowy i dane podstawowe",
+    "address_desc": "Używane do comiesięcznych faktur PDF i odliczeń podatkowych.",
+    "address_saved": "✓ Zapisano",
+    "private_customer": "👤 Klient indywidualny",
+    "business_customer": "🏢 Klient biznesowy",
+    "first_name": "Imię",
+    "first_name_placeholder": "np. Jan",
+    "last_name": "Nazwisko",
+    "last_name_placeholder": "np. Kowalski",
+    "company_label": "Nazwa firmy",
+    "vat_label": "NIP (VAT ID)",
+    "street_label": "Ulica",
+    "house_number": "Nr",
+    "zip_label": "Kod pocztowy",
+    "city_label": "Miejscowość / Miasto",
+    "save_address": "Zapisz dane podstawowe",
+    "address_error": "Błąd podczas zapisywania adresu rozliczeniowego."
   }
 }

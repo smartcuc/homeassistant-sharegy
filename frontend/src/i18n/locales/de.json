@@ -877,5 +877,27 @@
     "power_meter": "Leistungsmesser (W)",
     "current_sensor": "Stromsensor (A)",
     "edit_title": "Speicher & Messpunkte bearbeiten"
+  },
+  "billing": {
+    "title": "Abonnement, Tarife & Abrechnung",
+    "subtitle": "Verwalte deinen Sharegy EMS-Tarif, deine Rechnungsadresse und lade Rechnungen als PDF herunter.",
+    "loading": "Lade Abrechnungs- & Abonnement-Informationen...",
+    "address_title": "Rechnungsanschrift & Stammdaten",
+    "address_desc": "Wird für monatliche PDF-Rechnungen und Vorsteuerabzug verwendet.",
+    "address_saved": "✓ Gespeichert",
+    "private_customer": "👤 Privatkunde",
+    "business_customer": "🏢 Geschäftskunde",
+    "first_name": "Vorname",
+    "first_name_placeholder": "z. B. Max",
+    "last_name": "Nachname",
+    "last_name_placeholder": "z. B. Mustermann",
+    "company_label": "Firmenname",
+    "vat_label": "USt-IdNr. (VAT ID)",
+    "street_label": "Straße",
+    "house_number": "Hausnr.",
+    "zip_label": "PLZ",
+    "city_label": "Wohnort / Stadt",
+    "save_address": "Stammdaten speichern",
+    "address_error": "Fehler beim Speichern der Rechnungsadresse."
   }
 }

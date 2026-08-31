@@ -80,6 +80,8 @@ class UserMeSerializer(serializers.ModelSerializer):
             "id",
             "email",
             "username",
+            "first_name",
+            "last_name",
             "is_staff",
             "is_superuser",
             "platform_role",
