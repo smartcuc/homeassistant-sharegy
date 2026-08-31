@@ -34,16 +34,31 @@ class EMSInvoiceAdmin(admin.ModelAdmin):
         "paid_at",
         "created_at",
     )
-    list_filter = ("status", "plan_id")
-    search_fields = ("invoice_number", "recipient_name", "recipient_email")
-    raw_id_fields = ("subscription",)
+    list_filter = ("status", "payment_method")
+    search_fields = ("invoice_number", "recipient_name", "user__email")
+    raw_id_fields = ("subscription", "user")
 
 
 @admin.register(Coupon)
 class CouponAdmin(admin.ModelAdmin):
-    list_display = ("code", "discount_type", "discount_value", "is_active", "times_redeemed", "valid_until")
+    list_display = (
+        "code",
+        "discount_type",
+        "discount_value",
+        "is_active",
+        "redemptions_count",
+        "max_redemptions",
+        "valid_until",
+    )
     list_filter = ("is_active", "discount_type")
     search_fields = ("code", "description")
+
+
+@admin.register(CouponRedemption)
+class CouponRedemptionAdmin(admin.ModelAdmin):
+    list_display = ("coupon", "user", "applied_discount", "redeemed_at")
+    search_fields = ("coupon__code", "user__email")
+    raw_id_fields = ("coupon", "user", "subscription")
 
 
 @admin.register(BankAccount)
