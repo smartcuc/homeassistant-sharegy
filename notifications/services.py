@@ -34,6 +34,27 @@ def is_in_quiet_hours(pref: NotificationPreference) -> bool:
         return now_time >= start or now_time <= end
 
 
+def _get_vapid_instance():
+    """
+    Erzeugt eine Vapid-Instanz aus den Settings (PEM-String, Dateipfad oder raw).
+    """
+    raw_key = getattr(settings, "VAPID_PRIVATE_KEY", "")
+    if not raw_key:
+        return None
+    try:
+        from py_vapid import Vapid
+        if isinstance(raw_key, str):
+            raw_bytes = raw_key.encode("utf-8")
+        else:
+            raw_bytes = raw_key
+        if b"BEGIN PRIVATE KEY" in raw_bytes or b"BEGIN EC PRIVATE KEY" in raw_bytes:
+            return Vapid.from_pem(raw_bytes)
+        return Vapid.from_string(raw_key)
+    except Exception as ex:
+        logger.error("Fehler beim Laden des VAPID Private Keys: %s", ex)
+        return None
+
+
 def send_web_push(subscription: DeviceSubscription, payload: Dict[str, Any]) -> bool:
     """
     Sendet eine Web-Push Benachrichtigung über die W3C VAPID Schnittstelle.
@@ -50,7 +71,7 @@ def send_web_push(subscription: DeviceSubscription, payload: Dict[str, Any]) -> 
         },
     }
 
-    vapid_private_key = getattr(settings, "VAPID_PRIVATE_KEY", None)
+    vapid_instance = _get_vapid_instance()
     vapid_claims = {
         "sub": getattr(settings, "VAPID_ADMIN_EMAIL", "mailto:support@sharegy.cloud"),
     }
@@ -59,13 +80,14 @@ def send_web_push(subscription: DeviceSubscription, payload: Dict[str, Any]) -> 
         response = webpush(
             subscription_info=subscription_info,
             data=json.dumps(payload),
-            vapid_private_key=vapid_private_key,
+            vapid_private_key=vapid_instance,
             vapid_claims=vapid_claims,
             ttl=86400,  # 24 Stunden Vorhaltezeit beim Push-Server
         )
         subscription.last_used_at = timezone.now()
         subscription.save(update_fields=["last_used_at"])
-        logger.info("Web-Push erfolgreich gesendet an %s (Status: %s)", subscription.device_name or subscription.id, response.status_code if hasattr(response, "status_code") else 200)
+        status_code = getattr(response, "status_code", 200)
+        logger.info("Web-Push erfolgreich gesendet an %s (Status: %s)", subscription.device_name or subscription.id, status_code)
         return True
     except WebPushException as ex:
         status_code = ex.response.status_code if ex.response is not None else 0
