@@ -85,6 +85,76 @@ def broadcast_live_update(device: Device, metric_key: str, value: float, unit: s
         logger.debug("WebSocket broadcast skipped: %s", e)
 
 
+CANONICAL_METRIC_UNITS = {
+    "power": "W",
+    "active_power": "W",
+    "p_total": "W",
+    "p": "W",
+    "w": "W",
+    "watt": "W",
+    "pv_power": "W",
+    "pv_power_w": "W",
+    "load_power": "W",
+    "load_power_w": "W",
+    "grid_power": "W",
+    "grid_power_w": "W",
+    "battery_power": "W",
+    "battery_power_w": "W",
+    "battery_w": "W",
+    "apower": "W",
+    "a_act_power": "W",
+    "b_act_power": "W",
+    "c_act_power": "W",
+    "value": "W",
+    "val": "W",
+    "energy": "kWh",
+    "energy_kwh": "kWh",
+    "energy_wh": "Wh",
+    "energy_in": "kWh",
+    "energy_out": "kWh",
+    "total_energy": "kWh",
+    "total_energy_kwh": "kWh",
+    "total_charge": "kWh",
+    "total_discharge": "kWh",
+    "total_yield": "kWh",
+    "daily_yield": "kWh",
+    "a_total_energy": "Wh",
+    "b_total_energy": "Wh",
+    "c_total_energy": "Wh",
+    "voltage": "V",
+    "battery_voltage": "V",
+    "grid_voltage": "V",
+    "a_voltage": "V",
+    "b_voltage": "V",
+    "c_voltage": "V",
+    "current": "A",
+    "battery_current": "A",
+    "grid_current": "A",
+    "a_current": "A",
+    "b_current": "A",
+    "c_current": "A",
+    "soc": "%",
+    "battery_soc": "%",
+    "soh": "%",
+    "battery_level": "%",
+    "humidity": "%",
+    "frequency": "Hz",
+    "grid_frequency": "Hz",
+    "temperature": "°C",
+    "temp": "°C",
+    "device_temp": "°C",
+    "battery_temp": "°C",
+}
+
+
+def _infer_canonical_unit(metric_key: str, given_unit: str, config: Any = None) -> str:
+    if given_unit and given_unit.strip():
+        return given_unit.strip()
+    if config and config.metric_definition and config.metric_definition.unit:
+        return config.metric_definition.unit.strip()
+    return CANONICAL_METRIC_UNITS.get(metric_key.lower().strip(), "")
+
+
 def ingest_metric_payload(
     device: Device,
     metrics: Dict[str, Any],
@@ -151,7 +221,8 @@ def ingest_metric_payload(
             continue
 
         metric_key = str(key).strip()
-        unit = unit_map.get(metric_key, "")
+        raw_unit = unit_map.get(metric_key, "")
+        unit = _infer_canonical_unit(metric_key, raw_unit, config=config)
 
         # Lead-Wirkleistung erkennen
         is_lead = (

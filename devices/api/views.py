@@ -477,6 +477,10 @@ def device_dashboard_values(request):
                         round(float(v), 2) for v in reversed(recent_raw) if v is not None
                     ]
 
+    from devices.services.ingest import _infer_canonical_unit
+
+    device_cfg_map = {d.id: getattr(d, "config", None) for d in devices}
+
     all_latest = list(
         DeviceLatestMetric.objects.filter(device_id__in=device_ids).values(
             "device_id", "metric_key", "value", "unit", "timestamp"
@@ -484,9 +488,11 @@ def device_dashboard_values(request):
     )
     device_metrics_map = defaultdict(dict)
     for row in all_latest:
+        cfg = device_cfg_map.get(row["device_id"])
+        inferred_u = _infer_canonical_unit(row["metric_key"], row["unit"] or "", config=cfg)
         device_metrics_map[row["device_id"]][row["metric_key"]] = {
             "value": round(float(row["value"]), 2) if row["value"] is not None else None,
-            "unit": row["unit"] or "",
+            "unit": inferred_u,
             "timestamp": row["timestamp"].isoformat() if row["timestamp"] else None,
         }
 
@@ -497,6 +503,8 @@ def device_dashboard_values(request):
         metric = (
             config.metric_definition if config and config.metric_definition else None
         )
+        lead_key = metric.key if metric else "power"
+        top_unit = _infer_canonical_unit(lead_key, metric.unit if metric else "", config=config)
 
         sparkline_pts = sparkline_map.get(d.id, [])
         if len(sparkline_pts) == 1:
@@ -506,7 +514,7 @@ def device_dashboard_values(request):
             {
                 "device": d.id,
                 "value": values.get(d.id),
-                "unit": metric.unit if metric else "",
+                "unit": top_unit,
                 "sparkline": sparkline_pts,
                 "metrics": device_metrics_map.get(d.id, {}),
             }
