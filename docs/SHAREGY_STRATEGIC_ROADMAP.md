@@ -125,35 +125,56 @@
   │          • `DeviceSubscription` & `NotificationPreference` Modelle mit Quiet Hours & Notfall-Override
   │          • Service Worker (`sw.js`) für Sperrbildschirm-Zustellung und Deep-Link-Fokussierung
   │          • 1-Klick Permission Request & Sofort-Test-Push in Einstellungen & Alarmzentrale
-  └── 2.22 ✅ **Native Mobile Apps via Capacitor (Android Initialisierung, Gradle & Deep Linking)**:
-             • Capacitor 7 Plattform-Engine für Android (`frontend/android/`, `de.sharegy.app`)
-             • Natives Lifecycle-Management, Status Bar Styling & flackerfreier Splashscreen
-             • Deep-Linking Intent-Filter für Magic-Links (`https://sharegy.de/t/*`) & Alarme
-             • Integrierte Build- & Sync-Pipelines (`npm run cap:sync`, `npm run cap:open`)
+  ├── 2.22 ✅ **Native Mobile Apps via Capacitor (Android Initialisierung, Gradle & Deep Linking)**:
+│          • Capacitor 7 Plattform-Engine für Android (`frontend/android/`, `de.sharegy.app`)
+│          • Natives Lifecycle-Management, Status Bar Styling & flackerfreier Splashscreen
+│          • Deep-Linking Intent-Filter für Magic-Links (`https://sharegy.de/t/*`) & Alarme
+│          • Integrierte Build- & Sync-Pipelines (`npm run cap:open`)
+  ├── 2.23 ✅ **UX/UI & Navigation Overhaul (Slim Sidebar & Zentraler Support-Desk)**:
+│          • Schlanke Sidebar mit neuer Sektion `⚙️ Systemeinstellungen` (ohne redundante Links)
+│          • Vollständig integrierter `🛟 Hilfe & Support`-Drawer in der Topbar (Tickets, Triage & FAQ)
+│          • `📖 Wissensportal & Handbuch` (`/app/help`) mit Staff Live-Editor (Markdown, DE/EN)
+  └── 2.24 ✅ **Operations & Celery-Prioritäts-Queues Härtung**:
+             • 5-Stufen Prioritäts-Architektur (`fiscal`, `realtime`, `analytics`, `background`, `celery`)
+             • Automatisches HealthState-Pruning veralteter Queues & exakter Device-Count für echte Geräte
 
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ MEILENSTEIN 3: ENERGY SHARING COMMUNITIES & § 14a EnWG (Säule 2)              │
+│ MEILENSTEIN 3: PAYMENT, MONETARISIERUNG & BILLING-ARCHITEKTUR (💳 P1 - FOKUS) │
 └───────────────────────────────────────────────────────────────────────────────┘
-  ├── 3.1 ✅ Multi-Tenant RBAC & Rollenhierarchie (`admin`, `manager`, `member`, `auditor`)
-  ├── 3.2 ✅ Revisionssicheres Audit-Log für Tenant-Events (`accounts.AuditLog`)
-  ├── 3.3 ✅ Tenant-Dashboard & Mitgliedereinladungen (`/app/tenant`)
-  ├── 3.4 ⏳ 15-Minuten Community-Bilanzierung & Allokationsschlüssel (OBIS 1.8.0 / 2.8.0)
-  ├── 3.5 ⏳ Sharing-Tarife, Umlagen & kaufmännische Abrechnungsperioden
-  ├── 3.6 ⏳ B2B/B2C Community-Portal (Erzeuger, Verbraucher, Prosumer)
-  └── 3.7 ⏳ § 14a EnWG Steuerbox-Schnittstelle & Pflichtdimmung auf 4,2 kW (SteuVE)
+  ├── 3.1 ⏳ **Tarif- & Plan-Modellierung**:
+  │          • Free vs. Pro (Monatlich 4,99 € / Jährlich 49,99 €) & Vermieter-/Quartiers-Pakete
+  │          • Feature-Gating Matrix (Alarmzentrale, ML-Solarprognose, Batterie-Arbitrage)
+  ├── 3.2 ⏳ **Stripe Checkout & Customer Portal Flow**:
+  │          • Reibungsloser Checkout ohne Medienbruch (SEPA-Lastschrift, Kreditkarte, Apple/Google Pay)
+  │          • Self-Service Customer Portal für Abo-Kündigung, Zahlungsmittel-Update & Rechnungsdownload
+  ├── 3.3 ⏳ **Automatische Rechnungsstellung & Fiskal-Sicherheit**:
+  │          • PDF-Rechnungserstellung (ReportLab mit USt-Ausweis, fortlaufender Rechnungsnummer & Anschrift)
+  │          • E-Mail-Versand mit PDF-Anhang bei erfolgreicher Abbuchung (`fiscal` Queue Prio 1)
+  ├── 3.4 ⏳ **Payment & Webhook-Monitoring (Infrastruktur)**:
+  │          • Stripe-Webhook Health-Check im Systemstatus (`/app/status`)
+  │          • SMTP/E-Mail-Server Erreichbarkeits-Überwachung für transaktionale Mails
+
+┌───────────────────────────────────────────────────────────────────────────────┐
+│ MEILENSTEIN 4: ENERGY SHARING COMMUNITIES & § 14a EnWG (Säule 2)              │
+└───────────────────────────────────────────────────────────────────────────────┘
+  ├── 4.1 ✅ Multi-Tenant RBAC & Rollenhierarchie (`admin`, `manager`, `member`, `auditor`)
+  ├── 4.2 ✅ Revisionssicheres Audit-Log für Tenant-Events (`accounts.AuditLog`)
+  ├── 4.3 ✅ Tenant-Dashboard & Mitgliedereinladungen (`/app/tenant`)
+  ├── 4.4 ⏳ 15-Minuten Community-Bilanzierung & Allokationsschlüssel (OBIS 1.8.0 / 2.8.0)
+  ├── 4.5 ⏳ Sharing-Tarife, Umlagen & kaufmännische Abrechnungsperioden
+  ├── 4.6 ⏳ B2B/B2C Community-Portal (Erzeuger, Verbraucher, Prosumer)
+  └── 4.7 ⏳ § 14a EnWG Steuerbox-Schnittstelle & Pflichtdimmung auf 4,2 kW (SteuVE)
 ```
 
 ---
 
-## 📋 4. Konkreter Action-Plan für die nächsten Schritte (Beta & Go-Live)
+## 📋 4. Konkreter Action-Plan für die nächsten Schritte (Entscheidungsmatrix)
 
-| Schritt | Modul | Maßnahme | Status / Prio | Impact für Beta & Go-Live |
+| Schritt | Modul | Maßnahme | Status / Prio | Ziel & Nächste Entscheidung |
 |---|---|---|:---:|---|
-| **Step 1** | `system/status/` | **Systemstatus & Uptime-Monitoring**: Health-API für DB, Cache, Daphne WSS, Celery, Open-Meteo & Tibber mit Incident-Watchdog | ✅ **ERLEDIGT** | 100% Transparenz & automatische Störungs-Tickets |
-| **Step 2** | `devices/profiling/` | **Geräteprofiling & Baseline-Überwachung**: Auto-ML-Baseline, 1-Klick Presets für BWWP/WP/Kühlschrank & Anomalie-Alarmierung | ✅ **ERLEDIGT** | Predictive Maintenance & Früherkennung von Kriechstrom/Defekten |
-| **Step 3** | `notifications/` | **Mobile Push Notification Engine**: W3C Web-Push VAPID, Service Worker, Quiet Hours & 1-Klick Test-Push | ✅ **ERLEDIGT** | Aktive Alarmierung auf Smartphones bei geschlossener App |
-| **Step 4** | `mobile/apps/` | **Native Mobile Apps (Capacitor)**: iOS & Android Builds mit App-Store-Ready Manifest & Widgets | 📱 **P1 (Nächster Schritt)** | Mobile First Experience für Endanwender |
-| **Step 5** | `tenants/` | **P2P-Clearing & 15-Minuten-Bilanzierung**: Zähler-Allokation für Energy Sharing & Mieterstrom | 🏢 **P2** | Kommerzieller Rollout von Säule 2 (Energy Sharing) |
-| **Step 6** | `grid/enwg/` | **§ 14a EnWG Steuerbox & Dimmung**: Dynamische Leistungsbegrenzung auf 4,2 kW für SteuVE (WP, Wallbox, Speicher) | ⚡ **P2** | Gesetzliche Netzbetreiber-Konformität in Deutschland |
+| **Step 1** | `billing/payment/` | **Payment- & Monetarisierungs-Konzept**: Klärung von Preisplänen (Free, Pro, Landlord), Stripe Checkout, SEPA/Kreditkarte, USt-Behandlung & PDF-Rechnungsflow | 💳 **P1 (Nächster Fokus)** | Vollständige Konzeption & Durchdenken vor Live-Schaltung |
+| **Step 2** | `system/status/` | **Status-Erweiterung (Payment & Mail)**: Stripe-Webhook-Health & SMTP-Dienst-Monitoring zur Status-Seite hinzufügen | 🛡️ **P1** | 100% lückenlose Überwachung aller Zahlungs- und Benachrichtigungskanäle |
+| **Step 3** | `tenants/` | **P2P-Clearing & 15-Minuten-Bilanzierung**: Zähler-Allokation für Energy Sharing & Mieterstrom | 🏢 **P2** | Kommerzieller Rollout von Säule 2 (Energy Sharing) |
+| **Step 4** | `grid/enwg/` | **§ 14a EnWG Steuerbox & Dimmung**: Dynamische Leistungsbegrenzung auf 4,2 kW für SteuVE (WP, Wallbox, Speicher) | ⚡ **P2** | Gesetzliche Netzbetreiber-Konformität in Deutschland |
 
 
