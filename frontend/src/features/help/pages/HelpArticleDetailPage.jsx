@@ -9,15 +9,16 @@ import { useTranslation } from "react-i18next";
 import { fetchHelpArticle, sendArticleFeedback } from "../api";
 import HelpArticleEditorModal from "../components/HelpArticleEditorModal";
 import MarkdownViewer from "../components/MarkdownViewer";
+import { useUser } from "../../../hooks/useUser";
 
 export default function HelpArticleDetailPage() {
     const { slug } = useParams();
     const { t, i18n } = useTranslation();
+    const { user } = useUser();
     const [feedbackSent, setFeedbackSent] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
 
-    const currentUser = JSON.parse(localStorage.getItem("user") || "null");
-    const isStaff = currentUser?.is_staff || false;
+    const isStaff = Boolean(user?.is_staff || user?.is_superuser || user?.is_platform_admin);
     const isEnglish = i18n.language?.startsWith("en");
 
     const query = useQuery({
