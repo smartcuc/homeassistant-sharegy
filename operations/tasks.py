@@ -142,6 +142,10 @@ def check_celery_queues():
         "celery",
     ]
 
+    valid_keys = [f"celery_queue_{q}" for q in queues]
+    # 🧹 Veraltete Queue-Keys aus früheren Versionen automatisch bereinigen
+    HealthState.objects.filter(key__startswith="celery_queue_").exclude(key__in=valid_keys).delete()
+
     for queue in queues:
 
         queue_length = client.llen(queue)
@@ -388,17 +392,29 @@ def check_weather_sync():
 
 
 def check_active_devices():
-    """Ermittelt die Anzahl aktiver vs. inaktiver EMS-Geräte."""
-    total_configured = Device.objects.filter(configured=True).count()
+    """Ermittelt die Anzahl aktiver vs. inaktiver realer EMS-Geräte (Demo-Accounts ausgenommen)."""
+    demo_emails = ["demo@sharegy.de", "demo@sharegy.local", "dev@example.com"]
+    demo_usernames = ["demo", "dev_tibber"]
+
+    real_devices = Device.objects.filter(
+        active=True,
+        pending_delete=False,
+    ).exclude(
+        home__user__email__in=demo_emails
+    ).exclude(
+        home__user__username__in=demo_usernames
+    )
+
+    total_configured = real_devices.filter(configured=True).count()
     active_cutoff = timezone.now() - timedelta(minutes=15)
-    active_count = Device.objects.filter(configured=True, last_seen__gte=active_cutoff).count()
+    active_count = real_devices.filter(configured=True, last_seen__gte=active_cutoff).count()
 
     if total_configured == 0:
-        status = "warn"
-        val = "Keine konfigurierten Geräte vorhanden"
+        status = "ok"
+        val = f"1 Reales Gerät registriert (warten auf Ingest)" if real_devices.count() > 0 else "Keine konfigurierten Geräte vorhanden"
     elif active_count == 0:
-        status = "error"
-        val = f"0 von {total_configured} Geräten online"
+        status = "warn"
+        val = f"0 von {total_configured} Geräten online (letzte 15 Min.)"
     elif active_count < total_configured:
         status = "warn"
         val = f"{active_count} von {total_configured} Geräten online ({int(active_count / total_configured * 100)}%)"

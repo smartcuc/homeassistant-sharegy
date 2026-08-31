@@ -153,9 +153,28 @@ def system_health_status_view(request):
         "details": market_details,
     })
 
-    # 7. 📊 Echte Live-Kennzahlen aus der Datenbank
+    # 7. 📊 Echte Live-Kennzahlen aus der Datenbank (Demo-Geräte ausschließen)
+    demo_emails = ["demo@sharegy.de", "demo@sharegy.local", "dev@example.com"]
+    demo_usernames = ["demo", "dev_tibber"]
+
     try:
-        active_devices_count = Device.objects.filter(is_active=True).count()
+        if request.user and request.user.is_authenticated and not (getattr(request.user, "is_staff", False) or getattr(request.user, "is_superuser", False)):
+            # Für eingeloggte Endnutzer: Eigene aktive Geräte im Haushalt
+            active_devices_count = Device.objects.filter(
+                home__user=request.user,
+                active=True,
+                pending_delete=False,
+            ).count()
+        else:
+            # Global / Admin: Alle echten Geräte (ohne simulierte Demo-Accounts)
+            active_devices_count = Device.objects.filter(
+                active=True,
+                pending_delete=False,
+            ).exclude(
+                home__user__email__in=demo_emails
+            ).exclude(
+                home__user__username__in=demo_usernames
+            ).count()
     except Exception:
         active_devices_count = 0
 
