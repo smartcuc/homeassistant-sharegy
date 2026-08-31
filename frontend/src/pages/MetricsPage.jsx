@@ -362,10 +362,16 @@ export default function MetricsPage() {
                         onClick={() => {
                             devicesQuery.refetch();
                             valuesQuery.refetch();
+                            statusQuery.refetch();
                         }}
-                        className="px-3.5 py-2 rounded-xl border border-gray-200 hover:bg-gray-50 text-sm font-medium text-gray-700 flex items-center gap-1.5 transition"
+                        className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-700 text-xs font-semibold hover:bg-emerald-100/70 transition shadow-2xs"
+                        title="Live-Telemetrie aktiv (Klicken für sofortigen Refetch)"
                     >
-                        <span>🔄</span> {t("common.refresh", "Aktualisieren")}
+                        <span className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        </span>
+                        <span>Live-Sync (~3s)</span>
                     </button>
                 </div>
             </div>
