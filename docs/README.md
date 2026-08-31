@@ -14,6 +14,7 @@ Willkommen in der offiziellen Dokumentation der **Sharegy**-Plattform (Smart Hom
 | 💶 **[`TARIFF_AND_MARKET.md`](./TARIFF_AND_MARKET.md)** | Stromtarife (Statisch / Dynamisch), EPEX Spot Börsenpreise & Tibber API-Integration |
 | ☀️ **[`SOLAR_FORECAST.md`](./SOLAR_FORECAST.md)** | 96h Hybrid-Prognose (Open-Meteo Wetter, Physik-Modell & Random Forest ML) |
 | 👥 **[`RBAC_AND_USER_MANAGEMENT_GUIDE.md`](./RBAC_AND_USER_MANAGEMENT_GUIDE.md)** | Multi-Tenant Rollen- & Berechtigungskonzept (Plattform & Energy Communities) |
+| 📲 **[`NOTIFICATIONS_AND_MOBILE_PUSH.md`](./NOTIFICATIONS_AND_MOBILE_PUSH.md)** | Mobile Push & Notification Engine (W3C Web-Push, VAPID, Service Worker & Quiet Hours) |
 | 🎫 **[`HELPDESK_MODULE_DOCUMENTATION.md`](./HELPDESK_MODULE_DOCUMENTATION.md)** | Support Desk, Ticket-System, ITIL-Prioritäten, Deflection & Factofy-Integration |
 | 🚀 **[`OPERATIONS_AND_DEPLOYMENT.md`](./OPERATIONS_AND_DEPLOYMENT.md)** | Deployment Guide (Ubuntu/Pi), Systemd Services, Redis, Celery & Health-Checks |
 | 🛠️ **[`OPTIMIZATION_PLAN.md`](./OPTIMIZATION_PLAN.md)** | Audit-Ergebnisse, Stabilitäts-Härtung und abgeschlossene Meilensteine |

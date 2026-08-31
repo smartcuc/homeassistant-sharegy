@@ -895,6 +895,82 @@ Sharegy provides native bidirectional control for **Shelly Gen2, Gen3, and Pro s
                 "is_featured": True,
                 "sort_order": 14,
             },
+            {
+                "category": cats["alerts"],
+                "slug": "mobile-push-notifications",
+                "context_key": "alerts",
+                "title_de": "Mobile Push-Benachrichtigungen & Ruhezeiten einrichten 📲🔔",
+                "title_en": "Setting up Mobile Push Notifications & Quiet Hours 📲🔔",
+                "summary_de": "So aktivierst du Echtzeit-Alarme auf dem Sperrbildschirm deines Smartphones (iOS & Android) oder PCs und konfigurierst intelligente Ruhezeiten.",
+                "summary_en": "How to enable real-time lockscreen alerts on your smartphone (iOS & Android) or PC and configure intelligent quiet hours.",
+                "content_de": """# Mobile Push-Benachrichtigungen & Ruhezeiten 📲🔔
+
+Mit Sharegy verpasst du keine kritischen Ereignisse in deinem Heimnetzwerk mehr. Erhalte wichtige Alarme direkt als **native Push-Benachrichtigung auf den Sperrbildschirm deines Smartphones (Apple iPhone & Android) oder PCs** – auch wenn die App vollständig geschlossen ist.
+
+---
+
+## 1. Was kann die Push-Engine?
+* 🔋 **Speicher-Notreserve**: Sofortige Warnung, wenn dein Batteriespeicher unter die kritische Notstrom-Schwelle (z. B. 10%) fällt.
+* 💧 **1 kW Nachtdauerlast-Leckagen**: Erkennt vergessene Großverbraucher (wie Sauna, Heizlüfter, Poolpumpe) zwischen 01:00 und 05:00 Uhr.
+* ☀️ **PV-Ertragsausfälle**: Alarmierung bei strahlendem Sonnenschein, wenn der Wechselrichter unerwartet 0 W liefert.
+* 📉 **Börsenstrom-Negativpreise**: Chancen-Hinweise bei negativen EPEX-Spotpreisen (Geld verdienen beim Verbrauch).
+* 🔌 **Geräte-Offline-Watchdog**: Erkennt ausgefallene Smart Plugs oder Ingest-Störungen.
+
+---
+
+## 2. In 1 Klick auf deinem Gerät aktivieren
+
+### Auf dem Smartphone (Apple iOS & Android):
+1. Öffne Sharegy im mobilen Browser (z. B. **Safari auf dem iPhone** oder **Chrome/Firefox auf Android**).
+   > *Tipp für iPhone (iOS 16.4+)*: Tippe unten auf **Teilen (Viereck mit Pfeil nach oben)** und wähle **„Zum Home-Bildschirm“**. Öffne Sharegy danach über das Home-Icon.
+2. Gehe in Sharegy auf **👤 Profil** oder **🚨 Alarme** → *„📲 Push-Alarme einrichten“*.
+3. Klicke auf den lila Button **`🔔 Push auf diesem Gerät aktivieren`**.
+4. Bestätige den Browser-Dialog mit **„Erlauben“**.
+5. Klicke auf **`⚡ Test-Push`** – die Nachricht poppt sofort auf deinem Sperrbildschirm auf!
+
+### Auf dem PC / Laptop (Firefox, Chrome, Edge, Safari):
+1. Klicke unter **👤 Profil** oder **🚨 Alarme** auf **`🔔 Push auf diesem Gerät aktivieren`**.
+2. Erlaube Benachrichtigungen oben links in der Adressleiste deines Browsers.
+3. Klicke auf **`⚡ Test-Push`** – die Windows-/Mac-Benachrichtigung erscheint sofort unten bzw. oben rechts.
+
+---
+
+## 3. Intelligente Ruhezeiten (Quiet Hours) konfigurieren
+Du möchtest nachts nicht durch normale Hinweise geweckt werden?
+* **Ruhezeiten aktivieren**: Lege feste Zeitfenster fest (z. B. von **22:00 bis 07:00 Uhr**).
+* **Notfall-Override für kritische Alarme**: Ist dieser Schalter aktiv, werden lebenswichtige Alarme (z. B. Speicher-Tiefentladung, Frostschutz, Fehler im Hauptstromnetz) auch während der Ruhezeit zugestellt.
+* **Kategorie-Filter**: Schalte gezielt einzelne Alarmkategorien (Batterie, Leckagen, PV-Ertrag, Strompreise, Gerätestatus) ein oder aus.
+""",
+                "content_en": """# Mobile Push Notifications & Quiet Hours 📲🔔
+
+Stay informed about critical events in your smart energy home. Receive **real-time lockscreen alerts on your smartphone (Apple iPhone & Android) and desktop PC** even when the app is completely closed.
+
+---
+
+## 1. Key Push Alerts
+* 🔋 **Battery Critical Reserve**: Instant warning when battery SoC drops below safe emergency reserves.
+* 💧 **Night Baseload Leakages**: Detects forgotten heavy loads (e.g. sauna, space heater) between 1 AM and 5 AM.
+* ☀️ **PV Yield Losses**: Notifies you on sunny days if an inverter unexpectedly outputs 0 W.
+* 📉 **Negative Price Opportunities**: Alerts when dynamic spot prices turn negative.
+
+---
+
+## 2. 1-Click Device Activation
+1. Navigate to **👤 Profile** or **🚨 Alerts** → *\"Setup Push Notifications\"*.
+2. Click **`🔔 Enable Push on this Device`**.
+3. Confirm the browser permission prompt with **\"Allow\"**.
+4. Click **`⚡ Test-Push`** to verify delivery.
+
+---
+
+## 3. Quiet Hours & Emergency Overrides
+* Set nighttime quiet hours (e.g. **22:00 to 07:00**).
+* Enable the **Critical Emergency Override** to ensure severe battery or power alerts still come through.
+""",
+                "tags": ["push", "benachrichtigung", "alarme", "sperrbildschirm", "quiet hours", "ruhezeiten", "iphone", "android", "firefox", "vapid", "web-push"],
+                "is_featured": True,
+                "sort_order": 15,
+            },
         ]
 
 
