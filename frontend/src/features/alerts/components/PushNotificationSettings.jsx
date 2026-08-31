@@ -18,7 +18,7 @@ export default function PushNotificationSettings() {
     const queryClient = useQueryClient();
 
     const [isSubscribedOnDevice, setIsSubscribedOnDevice] = useState(false);
-    const [isDeviceChecking, setIsDeviceChecking] = useState(true);
+    const [isDeviceChecking, setIsDeviceChecking] = useState(false);
     const [actionLoading, setActionLoading] = useState(false);
     const [feedbackMessage, setFeedbackMessage] = useState(null);
 
@@ -216,8 +216,8 @@ export default function PushNotificationSettings() {
                 <div className="flex items-center gap-2.5 shrink-0">
                     <button
                         onClick={handleToggleDeviceSubscription}
-                        disabled={!supported || actionLoading || isDeviceChecking}
-                        className={`px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs flex items-center gap-1.5 ${
+                        disabled={!supported || actionLoading}
+                        className={`px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs flex items-center gap-1.5 cursor-pointer ${
                             isSubscribedOnDevice
                                 ? "bg-white hover:bg-rose-50 text-rose-700 border border-rose-200"
                                 : "bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-200"

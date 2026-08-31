@@ -35,7 +35,6 @@ export async function registerServiceWorker() {
         const registration = await navigator.serviceWorker.register("/sw.js", {
             scope: "/",
         });
-        await navigator.serviceWorker.ready;
         return registration;
     } catch (err) {
         console.error("ServiceWorker registration failed:", err);
@@ -47,7 +46,8 @@ export async function getCurrentPushSubscription() {
     if (!isPushSupported()) return null;
 
     try {
-        const registration = await navigator.serviceWorker.ready;
+        const registration = await navigator.serviceWorker.getRegistration();
+        if (!registration || !registration.pushManager) return null;
         return await registration.pushManager.getSubscription();
     } catch (err) {
         console.error("Error getting push subscription:", err);
