@@ -959,5 +959,9 @@
     "confirm_remove_device": "Do you really want to unregister this device?",
     "remove_device": "Unregister Device",
     "devices_total": "Total Devices"
+  },
+  "settings": {
+    "account": "User Account & Settings",
+    "language": "Language"
   }
 }

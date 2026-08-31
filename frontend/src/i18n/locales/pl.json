@@ -910,5 +910,9 @@
     "confirm_remove_device": "Czy na pewno chcesz wyrejestrować to urządzenie?",
     "remove_device": "Wyrejestruj urządzenie",
     "devices_total": "Wszystkich urządzeń"
+  },
+  "settings": {
+    "account": "Konto użytkownika i ustawienia",
+    "language": "Język"
   }
 }

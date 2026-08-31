@@ -959,5 +959,9 @@
     "confirm_remove_device": "Möchtest du dieses Gerät wirklich abmelden?",
     "remove_device": "Gerät abmelden",
     "devices_total": "Geräte insgesamt"
+  },
+  "settings": {
+    "account": "Benutzerkonto & Einstellungen",
+    "language": "Sprache"
   }
 }

@@ -180,7 +180,7 @@ export default function UserMenu() {
                         >
                             <span className="flex items-center gap-2.5 font-medium">
                                 <span className="text-base">👤</span>
-                                {t("settings.account", "Profil & Benutzerkonto")}
+                                {t("settings.account", "Benutzerkonto & Einstellungen")}
                             </span>
                             <span className="text-gray-400 group-hover:translate-x-0.5 transition-transform">→</span>
                         </Link>
@@ -202,18 +202,6 @@ export default function UserMenu() {
                             ) : (
                                 <span className="text-gray-400 group-hover:translate-x-0.5 transition-transform">→</span>
                             )}
-                        </Link>
-
-                        <Link
-                            to="/app/structure"
-                            onClick={() => setOpen(false)}
-                            className="px-4 py-2.5 text-xs text-gray-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center justify-between transition group"
-                        >
-                            <span className="flex items-center gap-2.5 font-medium">
-                                <span className="text-base">🏢</span>
-                                {t("nav.structure", "Etagen & Räume")}
-                            </span>
-                            <span className="text-gray-400 group-hover:translate-x-0.5 transition-transform">→</span>
                         </Link>
 
                         <Link

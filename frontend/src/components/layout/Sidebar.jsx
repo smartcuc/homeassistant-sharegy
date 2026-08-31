@@ -77,7 +77,6 @@ export default function Sidebar() {
                         isDeviceSetupBadge: true,
                     },
                     { name: t("nav.producers", "Erzeuger & Speicher"), path: "/app/producers", icon: "☀️" },
-                    { name: t("nav.floors", "Etagen & Räume"), path: "/app/structure", icon: "🏢" },
                     ...(hasTenantAccess && !isStaffOrAdmin
                         ? [{ name: t("nav.tenant_management", "Community & Mieter"), path: "/app/tenant", icon: "👥" }]
                         : []),

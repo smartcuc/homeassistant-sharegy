@@ -120,8 +120,17 @@ def export_energy_balance_view(request, format=None):
 @permission_classes([IsAuthenticated])
 def battery_arbitrage_view(request):
     from energy.services.battery_arbitrage import calculate_battery_arbitrage
+    sub = getattr(request.user, "ems_subscription", None)
+    is_pro = sub and sub.is_pro_active
+
     horizon = int(request.GET.get("horizon", 36))
+    if not is_pro and horizon > 24:
+        horizon = 24
+
     data = calculate_battery_arbitrage(request.user, horizon_hours=horizon)
+    if isinstance(data, dict):
+        data["is_pro"] = bool(is_pro)
+        data["max_horizon_available"] = 48 if is_pro else 24
     return Response(data)
 
 
@@ -153,8 +162,17 @@ def seed_demo_data(request):
 @permission_classes([IsAuthenticated])
 def energy_optimizer(request):
     from energy.services.optimizer import get_optimizer_schedule
+    sub = getattr(request.user, "ems_subscription", None)
+    is_pro = sub and sub.is_pro_active
+
     horizon = int(request.GET.get("horizon", 36))
+    if not is_pro and horizon > 24:
+        horizon = 24
+
     data = get_optimizer_schedule(request.user, horizon_hours=horizon)
+    if isinstance(data, dict):
+        data["is_pro"] = bool(is_pro)
+        data["max_horizon_available"] = 48 if is_pro else 24
     return Response(data)
 
 
@@ -162,8 +180,17 @@ def energy_optimizer(request):
 @permission_classes([IsAuthenticated])
 def battery_forecast_view(request):
     from energy.services.battery_forecast import get_battery_soc_forecast
+    sub = getattr(request.user, "ems_subscription", None)
+    is_pro = sub and sub.is_pro_active
+
     horizon = int(request.GET.get("horizon", 48))
+    if not is_pro and horizon > 24:
+        horizon = 24
+
     data = get_battery_soc_forecast(request.user, horizon_hours=horizon)
+    if isinstance(data, dict):
+        data["is_pro"] = bool(is_pro)
+        data["max_horizon_available"] = 48 if is_pro else 24
     return Response(data)
 
 

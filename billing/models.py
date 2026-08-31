@@ -428,3 +428,29 @@ class CouponRedemption(models.Model):
     def __str__(self):
         return f"{self.user.email} löste {self.coupon.code} ein ({self.redeemed_at})"
 
+
+# =========================================================
+# 🔄 SIGNALS: AUTOMATISCHE FREE-PLAN ZUWEISUNG BEI REGISTRIERUNG
+# =========================================================
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.conf import settings
+from django.utils import timezone
+
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def auto_create_free_ems_subscription(sender, instance, created, **kwargs):
+    """
+    Stellt sicher, dass jede Neuregistrierung sofort den kostenlosen Free-Plan erhält.
+    """
+    if created:
+        EMSSubscription.objects.get_or_create(
+            user=instance,
+            defaults={
+                "plan": EMSSubscription.PLAN_FREE,
+                "status": EMSSubscription.STATUS_ACTIVE,
+                "current_period_start": timezone.now(),
+                "payment_method": "stripe",
+            },
+        )
+
+

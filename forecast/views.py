@@ -411,6 +411,12 @@ def home_solar_forecast(request):
     source = request.GET.get("source", "hybrid")
     hours = int(request.GET.get("hours", 24))
 
+    # 🛡️ Feature Gating: 48h Prognose ist Pro-exklusiv, Free erhält bis zu 24h
+    sub = getattr(request.user, "ems_subscription", None)
+    is_pro = sub and sub.is_pro_active
+    if not is_pro and hours > 24:
+        hours = 24
+
     user_homes = request.user.homes.all()
     if not user_homes.exists():
         return Response({
@@ -418,6 +424,8 @@ def home_solar_forecast(request):
             "home_name": "Mein Zuhause",
             "source": source,
             "hours": hours,
+            "is_pro": bool(is_pro),
+            "max_hours_available": 48 if is_pro else 24,
             "strings": [],
             "selected_string_id": "all",
             "total_kwh": 0.0,
@@ -501,6 +509,8 @@ def home_solar_forecast(request):
         "home_name": home.name,
         "source": source,
         "hours": hours,
+        "is_pro": bool(is_pro),
+        "max_hours_available": 48 if is_pro else 24,
         "strings": [
             {
                 "id": str(s.id),

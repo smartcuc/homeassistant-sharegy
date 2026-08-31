@@ -6,10 +6,15 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../../api/client";
+import { useSubscription } from "../../../hooks/useSubscription";
+import ProBadge from "../../../components/common/ProBadge";
+import ProUpgradeModal from "../../../components/common/ProUpgradeModal";
 
 export default function BatteryForecastCard() {
     const { t } = useTranslation();
+    const { isPro } = useSubscription();
     const [horizon, setHorizon] = useState(24);
+    const [proModalOpen, setProModalOpen] = useState(false);
 
     const query = useQuery({
         queryKey: ["battery-soc-forecast", horizon],
@@ -21,6 +26,14 @@ export default function BatteryForecastCard() {
     const params = data.parameters || {};
     const kpis = data.kpis || {};
     const timeline = data.timeline || [];
+
+    const handleHorizonClick = (val) => {
+        if (val === 48 && !isPro) {
+            setProModalOpen(true);
+            return;
+        }
+        setHorizon(val);
+    };
 
     if (query.isLoading) {
         return (
@@ -62,17 +75,20 @@ export default function BatteryForecastCard() {
                 <div className="inline-flex bg-slate-800/90 p-1.5 rounded-2xl border border-emerald-700/40 shadow-inner self-start sm:self-auto gap-1">
                     {[
                         { val: 24, label: t("load_forecast.horizon_24h", "24 Stunden") },
-                        { val: 48, label: t("load_forecast.horizon_48h", "48 Stunden") },
+                        { val: 48, label: t("load_forecast.horizon_48h", "48 Stunden"), isProGated: true },
                     ].map((btn) => (
                         <button
                             key={btn.val}
-                            onClick={() => setHorizon(btn.val)}
-                            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${horizon === btn.val
-                                ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/40"
-                                : "text-emerald-200/70 hover:text-white"
-                                }`}
+                            type="button"
+                            onClick={() => handleHorizonClick(btn.val)}
+                            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
+                                horizon === btn.val
+                                    ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/40"
+                                    : "text-emerald-200/70 hover:text-white"
+                            }`}
                         >
-                            {btn.label}
+                            <span>{btn.label}</span>
+                            {btn.isProGated && !isPro && <ProBadge size="xs" />}
                         </button>
                     ))}
                 </div>
@@ -98,131 +114,146 @@ export default function BatteryForecastCard() {
                         {kpis.start_soc_pct} <span className="text-xs font-semibold text-emerald-400/80">%</span>
                     </div>
                     <div className="text-[10px] text-emerald-200/70">
-                        {params.has_live_soc === false ? (
-                            <span className="text-amber-300/80">{t("battery_forecast.no_sensor_reserve", { reserve: params.min_soc_reserve_pct, defaultValue: `Kein Sensor · Notstromreserve (${params.min_soc_reserve_pct}%)` })}</span>
-                        ) : (
-                            `${((kpis.start_soc_pct / 100) * params.capacity_kwh).toFixed(1)} / ${params.capacity_kwh} kWh`
-                        )}
+                        {kpis.start_stored_kwh} kWh im Speicher
                     </div>
                 </div>
 
-                {/* 2. Voll-Ladezeitpunkt */}
-                <div className="p-4 rounded-2xl bg-indigo-950/50 border border-indigo-500/30 space-y-1">
-                    <div className="text-[11px] font-bold text-indigo-300 uppercase tracking-wider flex items-center gap-1">
-                        <span>🏆</span> {t("battery_forecast.full_charge_100", "Voll geladen (100%)")}
+                {/* 2. Erwartete Ladung */}
+                <div className="p-4 rounded-2xl bg-emerald-950/50 border border-emerald-500/30 space-y-1">
+                    <div className="text-[11px] font-bold text-emerald-300 uppercase tracking-wider flex items-center gap-1">
+                        <span>☀️</span> {t("battery_forecast.expected_charge", "Erwartete Ladung")}
                     </div>
-                    <div className="text-lg font-black text-white truncate">
-                        {kpis.full_charge_time}
+                    <div className="text-2xl font-black text-white font-mono">
+                        +{kpis.total_charged_kwh} <span className="text-xs font-semibold text-emerald-400/80">kWh</span>
                     </div>
-                    <div className="text-[10px] text-indigo-200/70">
-                        +{Number(kpis.total_charged_kwh || 0).toFixed(1)} kWh {t("battery_forecast.pv_charge", "PV-Ladung")}
+                    <div className="text-[10px] text-emerald-200/70">
+                        {kpis.full_charge_time ? `Voll um ${kpis.full_charge_time} Uhr` : "Erreicht keine 100%"}
                     </div>
                 </div>
 
-                {/* 3. Nacht-Autarkie */}
-                <div className="p-4 rounded-2xl bg-teal-950/50 border border-teal-500/30 space-y-1">
-                    <div className="text-[11px] font-bold text-teal-300 uppercase tracking-wider flex items-center gap-1">
+                {/* 3. Erwartete Entladung */}
+                <div className="p-4 rounded-2xl bg-emerald-950/50 border border-emerald-500/30 space-y-1">
+                    <div className="text-[11px] font-bold text-emerald-300 uppercase tracking-wider flex items-center gap-1">
+                        <span>🏠</span> {t("battery_forecast.expected_discharge", "Erwartete Abgabe")}
+                    </div>
+                    <div className="text-2xl font-black text-white font-mono">
+                        -{kpis.total_discharged_kwh} <span className="text-xs font-semibold text-emerald-400/80">kWh</span>
+                    </div>
+                    <div className="text-[10px] text-emerald-200/70">
+                        Deckung für Haushaltslast
+                    </div>
+                </div>
+
+                {/* 4. Nachtautarkie */}
+                <div className="p-4 rounded-2xl bg-emerald-950/50 border border-emerald-500/30 space-y-1">
+                    <div className="text-[11px] font-bold text-emerald-300 uppercase tracking-wider flex items-center gap-1">
                         <span>🌙</span> {t("battery_forecast.night_autarky", "Nacht-Autarkie")}
                     </div>
-                    <div className="text-2xl font-black text-teal-300 font-mono">
-                        {kpis.night_autarky_pct} %
-                    </div>
-                    <div className="text-[10px] text-teal-200/70 truncate">
-                        {kpis.depleted_time}
-                    </div>
-                </div>
-
-                {/* 4. Vermiedene Netzkosten */}
-                <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-700/50 space-y-1">
-                    <div className="text-[11px] font-bold text-gray-300 uppercase tracking-wider flex items-center gap-1">
-                        <span>💶</span> {t("battery_forecast.avoided_costs", "Vermiedene Netzkosten")}
-                    </div>
                     <div className="text-2xl font-black text-emerald-400 font-mono">
-                        +{Number(kpis.saved_grid_costs_eur || 0).toFixed(2)} €
+                        {kpis.night_autarky_pct} <span className="text-xs font-semibold text-emerald-300">%</span>
                     </div>
-                    <div className="text-[10px] text-gray-400">
-                        {t("battery_forecast.discharge_amount", { kwh: Number(kpis.total_discharged_kwh || 0).toFixed(1), defaultValue: `durch ${Number(kpis.total_discharged_kwh || 0).toFixed(1)} kWh Entladung` })}
+                    <div className="text-[10px] text-emerald-200/70">
+                        {kpis.depleted_time ? `Reserve um ${kpis.depleted_time} Uhr erreicht` : "Reicht komplett über Nacht"}
                     </div>
                 </div>
             </div>
 
             {/* =========================================================
-                INTERACTIVE SOC SIMULATION TIMELINE
+                SIMULATION TIMELINE BAR CHART
             ========================================================= */}
             <div className="space-y-3 pt-2">
-                <div className="flex items-center justify-between text-xs">
-                    <div className="font-bold uppercase tracking-wider text-emerald-200 flex items-center gap-2">
-                        <span>📈</span> {t("battery_forecast.soc_curve", "48h SoC-Verlaufskurve (State of Charge)")}
-                    </div>
-                    <div className="flex items-center gap-4 text-[11px] font-medium">
-                        <span className="flex items-center gap-1.5 text-emerald-400">
-                            <span className="w-2.5 h-2.5 rounded-xs bg-emerald-400 inline-block" /> {t("battery_forecast.charging_high", "Laden (>60%)")}
+                <div className="flex items-center justify-between text-xs text-emerald-200/80">
+                    <span className="font-bold flex items-center gap-1.5">
+                        <span>📈</span> {t("battery_forecast.timeline_title", "Simulierter SoC-Verlauf & Ladefluss")}
+                    </span>
+                    <div className="flex items-center gap-3 text-[11px]">
+                        <span className="flex items-center gap-1">
+                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block" /> {t("battery_forecast.legend_soc", "SoC %")}
                         </span>
-                        <span className="flex items-center gap-1.5 text-amber-400">
-                            <span className="w-2.5 h-2.5 rounded-xs bg-amber-400 inline-block" /> {t("battery_forecast.charging_mid", "Mittel (25-60%)")}
+                        <span className="flex items-center gap-1">
+                            <span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block" /> {t("battery_forecast.legend_charge", "Laden")}
                         </span>
-                        <span className="flex items-center gap-1.5 text-rose-400">
-                            <span className="w-2.5 h-2.5 rounded-xs bg-rose-500 inline-block" /> {t("battery_forecast.charging_low", "Reserve (<25%)")}
+                        <span className="flex items-center gap-1">
+                            <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 inline-block" /> {t("battery_forecast.legend_discharge", "Entladen")}
                         </span>
                     </div>
                 </div>
 
-                {/* Timeline Visual Bars */}
-                <div className="bg-slate-950/80 border border-emerald-900/60 rounded-3xl p-5 pt-8">
-                    <div className="h-44 flex items-end justify-between gap-1 border-b border-slate-800 pb-2 overflow-x-auto">
-                        {timeline.map((pt, idx) => {
-                            const barHeight = Math.max(10, pt.soc_pct);
-
-                            let barColor = "bg-amber-400 hover:bg-amber-300";
-                            if (pt.soc_pct > 60) {
-                                barColor = "bg-emerald-400 hover:bg-emerald-300";
-                            } else if (pt.soc_pct < 25) {
-                                barColor = "bg-rose-500 hover:bg-rose-400";
-                            }
-
-                            const isCharging = pt.bat_flow_kw > 0.1;
-                            const isDischarging = pt.bat_flow_kw < -0.1;
+                {/* Timeline Grid */}
+                <div className="bg-slate-950/70 border border-emerald-900/40 rounded-2xl p-4 overflow-x-auto">
+                    <div className="min-w-[650px] flex items-end gap-1 h-36 pt-4 pb-1">
+                        {timeline.map((slot, idx) => {
+                            const socHeight = Math.max(4, Math.round((slot.sim_soc_pct / 100.0) * 100));
+                            const isNight = slot.is_night;
+                            const isCharging = slot.charge_kw > 0;
+                            const isDischarging = slot.discharge_kw > 0;
 
                             return (
                                 <div
                                     key={idx}
-                                    className="flex-1 min-w-[20px] max-w-[36px] flex flex-col items-center gap-1 h-full justify-end group relative transition"
+                                    className="flex-1 flex flex-col items-center justify-end h-full group relative"
                                 >
-                                    {/* Flow Arrow Indicator */}
-                                    {isCharging && (
-                                        <div className="absolute -top-4 text-[9px] font-bold text-emerald-300">
-                                            ⬆
+                                    {/* Tooltip Hover */}
+                                    <div className="absolute bottom-full mb-2 hidden group-hover:flex flex-col bg-slate-900 border border-emerald-500/50 rounded-xl p-2.5 shadow-2xl text-[11px] z-50 whitespace-nowrap pointer-events-none min-w-[140px]">
+                                        <div className="font-bold text-white border-b border-slate-800 pb-1 mb-1">
+                                            {slot.hour_label} Uhr {isNight ? "🌙" : "☀️"}
                                         </div>
-                                    )}
-                                    {isDischarging && (
-                                        <div className="absolute -top-4 text-[9px] font-bold text-blue-300">
-                                            ⬇
+                                        <div className="flex justify-between text-emerald-300">
+                                            <span>SoC:</span>
+                                            <span className="font-mono font-bold">{slot.sim_soc_pct}% ({slot.stored_kwh} kWh)</span>
                                         </div>
-                                    )}
+                                        <div className="flex justify-between text-amber-300">
+                                            <span>Solar:</span>
+                                            <span className="font-mono font-bold">+{slot.solar_kw} kW</span>
+                                        </div>
+                                        <div className="flex justify-between text-rose-300">
+                                            <span>Haushalt:</span>
+                                            <span className="font-mono font-bold">-{slot.load_kw} kW</span>
+                                        </div>
+                                        {isCharging && (
+                                            <div className="flex justify-between text-emerald-400 font-bold pt-1 border-t border-slate-800/80">
+                                                <span>Ladung:</span>
+                                                <span className="font-mono">+{slot.charge_kw} kW</span>
+                                            </div>
+                                        )}
+                                        {isDischarging && (
+                                            <div className="flex justify-between text-cyan-400 font-bold pt-1 border-t border-slate-800/80">
+                                                <span>Entladung:</span>
+                                                <span className="font-mono">-{slot.discharge_kw} kW</span>
+                                            </div>
+                                        )}
+                                    </div>
 
-                                    {/* Bar Column */}
-                                    <div
-                                        className={`w-full rounded-t-xs transition-all duration-300 shadow-sm ${barColor} ${isCharging ? "ring-1 ring-emerald-300" : ""
+                                    {/* SoC Bar */}
+                                    <div className="w-full flex items-end justify-center h-28 bg-slate-900/60 rounded-t-sm relative overflow-hidden">
+                                        {/* Reserve Indicator Line */}
+                                        <div
+                                            className="absolute w-full border-t border-dashed border-rose-500/50 pointer-events-none"
+                                            style={{ bottom: `${params.min_soc_reserve_pct}%` }}
+                                            title={`Notstromreserve: ${params.min_soc_reserve_pct}%`}
+                                        />
+
+                                        <div
+                                            className={`w-full rounded-t-sm transition-all duration-300 ${
+                                                slot.sim_soc_pct <= (params.min_soc_reserve_pct + 1)
+                                                    ? "bg-rose-500/80"
+                                                    : isCharging
+                                                    ? "bg-gradient-to-t from-emerald-600 to-amber-400"
+                                                    : isDischarging
+                                                    ? "bg-gradient-to-t from-emerald-600 to-cyan-400"
+                                                    : "bg-emerald-500/70"
                                             }`}
-                                        style={{ height: `${barHeight}%` }}
-                                        title={`${pt.date_label} ${pt.time_label}: SoC ${pt.soc_pct}% (${pt.stored_kwh} kWh) | Fluss: ${pt.bat_flow_kw > 0 ? `+${pt.bat_flow_kw}` : pt.bat_flow_kw} kW`}
-                                    />
+                                            style={{ height: `${socHeight}%` }}
+                                        />
+                                    </div>
 
-                                    {/* Hour Label */}
-                                    <span className="text-[9px] font-mono text-slate-400 truncate w-full text-center mt-1">
-                                        {pt.hour % 3 === 0 ? pt.time_label : "·"}
-                                    </span>
+                                    {/* Hour Label (Jede 3. Stunde anzeigen für Übersicht) */}
+                                    <div className="text-[9px] font-mono text-slate-400 mt-1.5 truncate">
+                                        {idx % (horizon === 48 ? 4 : 2) === 0 ? slot.hour_label : "·"}
+                                    </div>
                                 </div>
                             );
                         })}
-                    </div>
-
-                    <div className="mt-3 flex items-center justify-between text-[11px] text-emerald-200/60 font-medium">
-                        <span>{timeline[0]?.date_label} ({timeline[0]?.time_label})</span>
-                        <span className="text-emerald-300 font-semibold">
-                            {t("battery_forecast.reserve_floor", { pct: params.min_soc_reserve_pct, kwh: ((params.min_soc_reserve_pct / 100) * params.capacity_kwh).toFixed(1), defaultValue: `Notstromreserve-Boden: ${params.min_soc_reserve_pct}% (${((params.min_soc_reserve_pct / 100) * params.capacity_kwh).toFixed(1)} kWh)` })}
-                        </span>
-                        <span>{timeline[timeline.length - 1]?.date_label}</span>
                     </div>
                 </div>
             </div>
@@ -245,7 +276,14 @@ export default function BatteryForecastCard() {
                     </span>
                 </div>
             </div>
+
+            {/* Pro Upgrade Modal */}
+            <ProUpgradeModal
+                open={proModalOpen}
+                onClose={() => setProModalOpen(false)}
+                featureName="48-Stunden Speicher- & SoC-Simulation"
+                featureDesc="Simuliere den Ladezustand (SoC), Speicherentladungen und deine Nachtautarkie für volle 48 Stunden im Voraus mit Sharegy Pro."
+            />
         </div>
     );
 }
-
