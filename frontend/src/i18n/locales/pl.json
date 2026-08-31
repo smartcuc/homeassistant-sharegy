@@ -430,8 +430,6 @@
     "active_power": "Moc czynna",
     "p_total": "Całkowita moc",
     "apower": "Moc czynna",
-    "value": "Moc czynna / Wartość",
-    "val": "Moc czynna / Wartość",
     "a_act_power": "Moc czynna L1",
     "b_act_power": "Moc czynna L2",
     "c_act_power": "Moc czynna L3",

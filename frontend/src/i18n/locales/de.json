@@ -431,8 +431,6 @@
     "active_power": "Wirkleistung",
     "p_total": "Gesamtleistung",
     "apower": "Wirkleistung",
-    "value": "Wirkleistung / Messwert",
-    "val": "Wirkleistung / Messwert",
     "a_act_power": "Wirkleistung L1",
     "b_act_power": "Wirkleistung L2",
     "c_act_power": "Wirkleistung L3",

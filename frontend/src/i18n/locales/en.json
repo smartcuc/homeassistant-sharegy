@@ -431,8 +431,6 @@
     "active_power": "Active Power",
     "p_total": "Total Power",
     "apower": "Active Power",
-    "value": "Active Power / Metric",
-    "val": "Active Power / Metric",
     "a_act_power": "Active Power L1",
     "b_act_power": "Active Power L2",
     "c_act_power": "Active Power L3",

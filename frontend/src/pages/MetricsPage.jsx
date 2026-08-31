@@ -69,8 +69,22 @@ const CANONICAL_UNITS = {
     battery_temp: "°C",
 };
 
+function fallbackByUnit(unit, t) {
+    if (unit === "%") return t("metric_definitions.soc", "Ladezustand (SoC)");
+    if (unit === "V") return t("metric_definitions.voltage", "Netzspannung");
+    if (unit === "A") return t("metric_definitions.current", "Stromstärke");
+    if (unit === "kWh" || unit === "Wh") return t("metric_definitions.energy", "Zählerstand / Energie");
+    if (unit === "Hz") return t("metric_definitions.frequency", "Netzfrequenz");
+    if (unit === "°C") return t("metric_definitions.temperature", "Temperatur");
+    return t("metric_definitions.power", "Wirkleistung");
+}
+
 function getMetricMeta(rawKey, givenUnit, config = {}, t = (k, d) => d) {
     const k = (rawKey || "").trim().toLowerCase();
+    const cfgDef = config?.metric_definition;
+    const cfgUnit = cfgDef?.unit?.trim() || "";
+    const cfgKey = cfgDef?.key?.toLowerCase()?.trim() || "";
+    const cfgName = cfgDef?.name?.trim() || "";
 
     // 1. Zuerst exakte oder musterbasierte SI-Einheit für den konkreten Kanal bestimmen
     let unit = "";
@@ -92,10 +106,13 @@ function getMetricMeta(rawKey, givenUnit, config = {}, t = (k, d) => d) {
         unit = (givenUnit && givenUnit.trim()) || (k.includes("kw") && !k.includes("kwh") ? "kW" : "W");
     } else if (givenUnit && givenUnit.trim()) {
         unit = givenUnit.trim();
-    } else if (k === "value" || k === "val" || k === "main") {
-        unit = config?.metric_definition?.unit || "W";
+    } else if (cfgUnit) {
+        unit = cfgUnit;
+    } else {
+        unit = "W";
     }
 
+    // 2. Passendes Icon
     let icon = "📊";
     if (unit === "W" || unit === "kW" || k.includes("power") || k.includes("watt")) {
         icon = "🔌";
@@ -113,74 +130,49 @@ function getMetricMeta(rawKey, givenUnit, config = {}, t = (k, d) => d) {
         icon = "🌡️";
     }
 
-    let fallbackLabel = rawKey;
-    if (k === "value" || k === "val") {
-        if (unit === "V") fallbackLabel = t("metric_definitions.voltage", "Netzspannung");
-        else if (unit === "A") fallbackLabel = t("metric_definitions.current", "Stromstärke");
-        else if (unit === "kWh" || unit === "Wh") fallbackLabel = t("metric_definitions.energy", "Zählerstand / Energie");
-        else if (unit === "Hz") fallbackLabel = t("metric_definitions.frequency", "Netzfrequenz");
-        else if (unit === "°C") fallbackLabel = t("metric_definitions.temperature", "Temperatur");
-        else if (unit === "%") fallbackLabel = t("metric_definitions.soc", "Ladezustand (SoC)");
-        else fallbackLabel = config?.metric_definition?.name || t("metric_definitions.power", "Wirkleistung");
-    } else if (k === "power" || k === "active_power" || k === "apower" || k === "p_total") {
-        fallbackLabel = t("metric_definitions.power", "Wirkleistung");
-    } else if (k === "a_act_power") {
-        fallbackLabel = t("metric_definitions.a_act_power", "Wirkleistung L1");
-    } else if (k === "b_act_power") {
-        fallbackLabel = t("metric_definitions.b_act_power", "Wirkleistung L2");
-    } else if (k === "c_act_power") {
-        fallbackLabel = t("metric_definitions.c_act_power", "Wirkleistung L3");
-    } else if (k === "grid_power" || k === "grid_power_w") {
-        fallbackLabel = t("metric_definitions.grid_power", "Netzleistung");
-    } else if (k === "pv_power" || k === "pv_power_w") {
-        fallbackLabel = t("metric_definitions.pv_power", "PV-Erzeugung");
-    } else if (k === "battery_power" || k === "battery_power_w" || k === "battery_w") {
-        fallbackLabel = t("metric_definitions.battery_power", "Batterieleistung");
-    } else if (k === "load_power" || k === "load_power_w") {
-        fallbackLabel = t("metric_definitions.load_power", "Hauslast");
-    } else if (k === "energy" || k === "energy_kwh" || k === "energy_wh" || k === "total_energy" || k === "total_energy_kwh") {
-        fallbackLabel = t("metric_definitions.energy", "Zählerstand / Energie");
-    } else if (k === "a_total_energy") {
-        fallbackLabel = t("metric_definitions.a_total_energy", "Energie L1");
-    } else if (k === "b_total_energy") {
-        fallbackLabel = t("metric_definitions.b_total_energy", "Energie L2");
-    } else if (k === "c_total_energy") {
-        fallbackLabel = t("metric_definitions.c_total_energy", "Energie L3");
-    } else if (k === "voltage" || k === "grid_voltage") {
-        fallbackLabel = t("metric_definitions.voltage", "Netzspannung");
-    } else if (k === "battery_voltage") {
-        fallbackLabel = t("metric_definitions.battery_voltage", "Batteriespannung");
-    } else if (k === "a_voltage") {
-        fallbackLabel = t("metric_definitions.a_voltage", "Spannung L1");
-    } else if (k === "b_voltage") {
-        fallbackLabel = t("metric_definitions.b_voltage", "Spannung L2");
-    } else if (k === "c_voltage") {
-        fallbackLabel = t("metric_definitions.c_voltage", "Spannung L3");
-    } else if (k === "current" || k === "grid_current") {
-        fallbackLabel = t("metric_definitions.current", "Stromstärke");
-    } else if (k === "battery_current") {
-        fallbackLabel = t("metric_definitions.battery_current", "Batteriestrom");
-    } else if (k === "a_current") {
-        fallbackLabel = t("metric_definitions.a_current", "Strom L1");
-    } else if (k === "b_current") {
-        fallbackLabel = t("metric_definitions.b_current", "Strom L2");
-    } else if (k === "c_current") {
-        fallbackLabel = t("metric_definitions.c_current", "Strom L3");
-    } else if (k === "soc" || k === "battery_soc" || k === "battery_level") {
-        fallbackLabel = t("metric_definitions.soc", "Ladezustand (SoC)");
-    } else if (k === "soh") {
-        fallbackLabel = t("metric_definitions.soh", "Batteriegesundheit (SoH)");
-    } else if (k === "frequency" || k === "grid_frequency") {
-        fallbackLabel = t("metric_definitions.frequency", "Netzfrequenz");
-    } else if (k === "temperature" || k === "temp" || k === "device_temp" || k === "battery_temp") {
-        fallbackLabel = t("metric_definitions.temperature", "Temperatur");
-    } else if (k === "humidity") {
-        fallbackLabel = t("metric_definitions.humidity", "Luftfeuchtigkeit");
-    } else if (config?.metric_definition?.name) {
-        fallbackLabel = config.metric_definition.name;
-    }
+    // 3. Eindeutiges, sauberes Label bestimmen
+    let label = "";
 
-    const label = t(`metric_definitions.${k}`, fallbackLabel);
+    if (k === "value" || k === "val" || k === "main" || k === "") {
+        // Generischer Key -> Schau zuerst auf die konfigurierte MetricDefinition
+        if (cfgKey && cfgKey !== "value" && cfgKey !== "val") {
+            label = t(`metric_definitions.${cfgKey}`, cfgName || fallbackByUnit(unit, t));
+        } else if (cfgName && cfgName.toLowerCase() !== "value" && cfgName.toLowerCase() !== "val") {
+            label = cfgName;
+        } else {
+            label = fallbackByUnit(unit, t);
+        }
+    } else {
+        // Spezifischer Metrik-Key vorhanden
+        if (k === "power" || k === "active_power" || k === "apower" || k === "p_total") label = t("metric_definitions.power", "Wirkleistung");
+        else if (k === "a_act_power") label = t("metric_definitions.a_act_power", "Wirkleistung L1");
+        else if (k === "b_act_power") label = t("metric_definitions.b_act_power", "Wirkleistung L2");
+        else if (k === "c_act_power") label = t("metric_definitions.c_act_power", "Wirkleistung L3");
+        else if (k === "grid_power" || k === "grid_power_w") label = t("metric_definitions.grid_power", "Netzleistung");
+        else if (k === "pv_power" || k === "pv_power_w") label = t("metric_definitions.pv_power", "PV-Erzeugung");
+        else if (k === "battery_power" || k === "battery_power_w" || k === "battery_w") label = t("metric_definitions.battery_power", "Batterieleistung");
+        else if (k === "load_power" || k === "load_power_w") label = t("metric_definitions.load_power", "Hauslast");
+        else if (k === "energy" || k === "energy_kwh" || k === "energy_wh" || k === "total_energy" || k === "total_energy_kwh") label = t("metric_definitions.energy", "Zählerstand / Energie");
+        else if (k === "a_total_energy") label = t("metric_definitions.a_total_energy", "Energie L1");
+        else if (k === "b_total_energy") label = t("metric_definitions.b_total_energy", "Energie L2");
+        else if (k === "c_total_energy") label = t("metric_definitions.c_total_energy", "Energie L3");
+        else if (k === "voltage" || k === "grid_voltage") label = t("metric_definitions.voltage", "Netzspannung");
+        else if (k === "battery_voltage") label = t("metric_definitions.battery_voltage", "Batteriespannung");
+        else if (k === "a_voltage") label = t("metric_definitions.a_voltage", "Spannung L1");
+        else if (k === "b_voltage") label = t("metric_definitions.b_voltage", "Spannung L2");
+        else if (k === "c_voltage") label = t("metric_definitions.c_voltage", "Spannung L3");
+        else if (k === "current" || k === "grid_current") label = t("metric_definitions.current", "Stromstärke");
+        else if (k === "battery_current") label = t("metric_definitions.battery_current", "Batteriestrom");
+        else if (k === "a_current") label = t("metric_definitions.a_current", "Strom L1");
+        else if (k === "b_current") label = t("metric_definitions.b_current", "Strom L2");
+        else if (k === "c_current") label = t("metric_definitions.c_current", "Strom L3");
+        else if (k === "soc" || k === "battery_soc" || k === "battery_level") label = t("metric_definitions.soc", "Ladezustand (SoC)");
+        else if (k === "soh") label = t("metric_definitions.soh", "Batteriegesundheit (SoH)");
+        else if (k === "frequency" || k === "grid_frequency") label = t("metric_definitions.frequency", "Netzfrequenz");
+        else if (k === "temperature" || k === "temp" || k === "device_temp" || k === "battery_temp") label = t("metric_definitions.temperature", "Temperatur");
+        else if (k === "humidity") label = t("metric_definitions.humidity", "Luftfeuchtigkeit");
+        else label = t(`metric_definitions.${k}`, cfgName || rawKey);
+    }
 
     return { label, unit, icon };
 }
