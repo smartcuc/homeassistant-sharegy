@@ -11,6 +11,7 @@ from forecast.models import WeatherForecast
 
 def predict_next_24h_physics_for_generator_string(
     generator_string,
+    horizon_hours: int = 72,
 ):
     """
     Erste echte Producer-basierte Physics-Version.
@@ -29,7 +30,7 @@ def predict_next_24h_physics_for_generator_string(
     weather_rows = WeatherForecast.objects.filter(
         home=home,
         ts__gte=timezone.now(),
-    ).order_by("ts")[:24]
+    ).order_by("ts")[:horizon_hours]
 
     if not weather_rows:
         return []

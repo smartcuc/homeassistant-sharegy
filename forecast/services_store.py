@@ -43,6 +43,7 @@ def _store_forecast_run(
     generator_string,
     rows,
     source,
+    horizon_hours: int = 72,
 ):
     rows = rows or []
 
@@ -53,7 +54,7 @@ def _store_forecast_run(
         generator_string=generator_string,
         source=source,
         generated_at=timezone.now(),
-        horizon_hours=24,
+        horizon_hours=horizon_hours,
         resolution_minutes=60,
     )
 
@@ -71,11 +72,12 @@ def _store_forecast_run(
     return run
 
 
-def save_all_forecasts_for_generator_string(generator_string):
+def save_all_forecasts_for_generator_string(generator_string, horizon_hours: int = 72):
 
     phys = (
         predict_next_24h_physics_for_generator_string(
             generator_string,
+            horizon_hours=horizon_hours,
         )
         or []
     )
@@ -83,6 +85,7 @@ def save_all_forecasts_for_generator_string(generator_string):
     ml = (
         predict_next_24h_ml_for_generator_string(
             generator_string,
+            horizon_hours=horizon_hours,
         )
         or []
     )

@@ -139,17 +139,45 @@ def get_household_load_forecast(user, horizon_hours: int = 48) -> dict:
 
     # 4. PV-Forecast laden
     pv_forecast_map = defaultdict(float)
-    if home:
-        for generator in home.generator_systems.all():
-            for string in generator.strings.all():
-                f_qs = SolarForecast.objects.filter(
-                    generator_string=string,
-                    timestamp__gte=start_hour,
-                    timestamp__lte=end_hour,
-                ).values("timestamp", "forecast_kwh")
-                for row in f_qs:
-                    ts_loc = row["timestamp"].astimezone(tz).replace(minute=0, second=0, microsecond=0)
-                    pv_forecast_map[ts_loc] += float(row["forecast_kwh"] or 0)
+    if home and home.generator_systems.exists():
+        strings = [s for g in home.generator_systems.all() for s in g.strings.all()]
+        for string in strings:
+            f_qs = SolarForecast.objects.filter(
+                generator_string=string,
+                timestamp__gte=start_hour,
+                timestamp__lte=end_hour,
+            ).values("timestamp", "forecast_kwh")
+            for row in f_qs:
+                ts_loc = row["timestamp"].astimezone(tz).replace(minute=0, second=0, microsecond=0)
+                pv_forecast_map[ts_loc] += float(row["forecast_kwh"] or 0)
+
+        # 🔄 Falls weniger Datenpunkte als horizon_hours vorhanden: Automatisch nachgenerieren
+        if len(pv_forecast_map) < horizon_hours and strings:
+            try:
+                from forecast.services_weather import (
+                    resolve_forecast_coordinates,
+                    get_weather_forecast,
+                    store_weather_payload_for_home,
+                )
+                from forecast.services_store import save_all_forecasts_for_generator_string
+                lat, lon = resolve_forecast_coordinates(home)
+                weather_payload = get_weather_forecast(lat, lon, hours=120)
+                store_weather_payload_for_home(home, weather_payload)
+                for string in strings:
+                    save_all_forecasts_for_generator_string(string, horizon_hours=max(72, horizon_hours + 12))
+
+                pv_forecast_map.clear()
+                for string in strings:
+                    f_qs = SolarForecast.objects.filter(
+                        generator_string=string,
+                        timestamp__gte=start_hour,
+                        timestamp__lte=end_hour,
+                    ).values("timestamp", "forecast_kwh")
+                    for row in f_qs:
+                        ts_loc = row["timestamp"].astimezone(tz).replace(minute=0, second=0, microsecond=0)
+                        pv_forecast_map[ts_loc] += float(row["forecast_kwh"] or 0)
+            except Exception:
+                pass
 
     # 5. Timeline für die nächsten horizon_hours aufbauen
     timeline = []

@@ -216,7 +216,7 @@ def load_generator_string_model(generator_string_id):
         return None
 
 
-def predict_next_24h_ml_for_generator_string(generator_string):
+def predict_next_24h_ml_for_generator_string(generator_string, horizon_hours: int = 72):
     home = generator_string.generator.home
     if not home:
         return []
@@ -234,7 +234,7 @@ def predict_next_24h_ml_for_generator_string(generator_string):
         WeatherForecast.objects.filter(
             home=home,
             ts__gte=timezone.now(),
-        ).order_by("ts")[:24]
+        ).order_by("ts")[:horizon_hours]
     )
 
     if not weather_rows:

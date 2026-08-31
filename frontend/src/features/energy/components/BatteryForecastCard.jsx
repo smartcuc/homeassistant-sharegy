@@ -228,7 +228,7 @@ export default function BatteryForecastCard() {
                                     <div className="w-full flex items-end justify-center h-28 bg-slate-900/60 rounded-t-sm relative overflow-hidden">
                                         {/* Reserve Indicator Line */}
                                         <div
-                                            className="absolute w-full border-t border-dashed border-rose-500/50 pointer-events-none"
+                                            className="absolute w-full border-t border-dashed border-amber-500/50 pointer-events-none"
                                             style={{ bottom: `${params.min_soc_reserve_pct}%` }}
                                             title={`Notstromreserve: ${params.min_soc_reserve_pct}%`}
                                         />
@@ -236,24 +236,32 @@ export default function BatteryForecastCard() {
                                         <div
                                             className={`w-full rounded-t-sm transition-all duration-300 ${
                                                 slot.sim_soc_pct <= (params.min_soc_reserve_pct + 1)
-                                                    ? "bg-rose-500/80"
+                                                    ? "bg-amber-500/80 border-t border-amber-300"
                                                     : isCharging
-                                                    ? "bg-gradient-to-t from-emerald-600 to-amber-400"
+                                                    ? "bg-gradient-to-t from-emerald-600 via-emerald-500 to-amber-300 shadow-xs shadow-amber-400/20"
                                                     : isDischarging
-                                                    ? "bg-gradient-to-t from-emerald-600 to-cyan-400"
-                                                    : "bg-emerald-500/70"
+                                                    ? "bg-gradient-to-t from-emerald-700 via-emerald-500 to-cyan-300 shadow-xs shadow-cyan-400/20"
+                                                    : "bg-gradient-to-t from-emerald-600 to-emerald-400"
                                             }`}
-                                            style={{ height: `${socHeight}%` }}
+                                            style={{ height: `${Math.max(6, socHeight)}%` }}
                                         />
                                     </div>
 
-                                    {/* Hour Label (Jede 3. Stunde anzeigen für Übersicht) */}
-                                    <div className="text-[9px] font-mono text-slate-400 mt-1.5 truncate">
+                                    {/* Hour & Date Label */}
+                                    <div className="text-[9px] font-mono text-slate-400 mt-1.5 truncate text-center w-full">
                                         {idx % (horizon === 48 ? 4 : 2) === 0 ? slot.hour_label : "·"}
                                     </div>
                                 </div>
                             );
                         })}
+                    </div>
+                    {/* Timeline footer dates */}
+                    <div className="mt-3 flex items-center justify-between text-[11px] text-slate-400 font-medium px-1 border-t border-slate-800/60 pt-2">
+                        <span>{timeline[0]?.date_label} ({timeline[0]?.time_label})</span>
+                        <span className="text-emerald-300 font-semibold">
+                            🔋 {params.battery_name || "Speicher"} · {kpis.night_autarky_pct || 0}% Nachtautarkie
+                        </span>
+                        <span>{timeline[timeline.length - 1]?.date_label} ({timeline[timeline.length - 1]?.time_label})</span>
                     </div>
                 </div>
             </div>

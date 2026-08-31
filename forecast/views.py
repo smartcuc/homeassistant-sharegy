@@ -492,6 +492,43 @@ def home_solar_forecast(request):
     for row in qs:
         points_by_ts[row.timestamp] += float(row.forecast_kwh or 0)
 
+    # 🔄 Falls weniger Datenpunkte als angefordert vorhanden sind (z.B. bei 48h Pro-Forecast):
+    # Wetterdaten & String-Forecasts für bis zu 72h generieren
+    if len(points_by_ts) < hours:
+        try:
+            from forecast.services_weather import (
+                resolve_forecast_coordinates,
+                get_weather_forecast,
+                store_weather_payload_for_home,
+            )
+            from forecast.services_store import save_all_forecasts_for_generator_string
+
+            lat, lon = resolve_forecast_coordinates(home)
+            weather_payload = get_weather_forecast(lat, lon, hours=120)
+            store_weather_payload_for_home(home, weather_payload)
+
+            for s in target_strings:
+                save_all_forecasts_for_generator_string(s, horizon_hours=max(72, hours + 12))
+
+            qs = SolarForecast.objects.filter(
+                generator_string_id__in=target_string_ids,
+                source=source,
+                timestamp__gte=now,
+            ).order_by("timestamp")
+            if not qs.exists():
+                qs = SolarForecast.objects.filter(
+                    generator_string_id__in=target_string_ids,
+                    source="physics",
+                    timestamp__gte=now,
+                ).order_by("timestamp")
+                source = "physics"
+
+            points_by_ts = defaultdict(float)
+            for row in qs:
+                points_by_ts[row.timestamp] += float(row.forecast_kwh or 0)
+        except Exception:
+            pass
+
     sorted_ts = sorted(points_by_ts.keys())[:hours]
     points = [
         {

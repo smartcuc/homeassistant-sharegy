@@ -27,7 +27,7 @@ def find_home_battery_storage(home):
             storage_sys = storage_systems[0]
             live_soc = storage_sys.get_live_soc()
             has_live_soc = (live_soc is not None)
-            current_soc_pct = live_soc if has_live_soc else float(storage_sys.min_soc_reserve_pct)
+            current_soc_pct = live_soc if has_live_soc else 50.0
             c_eff = float(storage_sys.charge_efficiency_pct) / 100.0
             d_eff = float(storage_sys.discharge_efficiency_pct) / 100.0
             params = {
@@ -57,7 +57,7 @@ def find_home_battery_storage(home):
                 if s_soc is not None:
                     has_any_live = True
                 else:
-                    s_soc = float(s.min_soc_reserve_pct)
+                    s_soc = 50.0
                 weighted_soc_sum += (float(s.capacity_kwh) * s_soc)
 
             current_soc_pct = round(weighted_soc_sum / max(0.001, total_cap), 1)
@@ -159,9 +159,9 @@ def find_home_battery_storage(home):
             current_soc_pct = max(0.0, min(100.0, float(latest_soc.value)))
         except (ValueError, TypeError):
             has_live_soc = False
-            current_soc_pct = min_soc_pct
+            current_soc_pct = 50.0
     else:
-        current_soc_pct = min_soc_pct
+        current_soc_pct = 50.0
 
     battery_name = (
         bat_device.config.name
