@@ -138,6 +138,7 @@ export default function PushNotificationSettings() {
     };
 
     const supported = isPushSupported();
+    const isPermissionBlocked = typeof window !== "undefined" && "Notification" in window && Notification.permission === "denied";
 
     return (
         <div className="bg-white border border-gray-200/80 rounded-2xl p-6 shadow-xs space-y-6">
@@ -158,6 +159,19 @@ export default function PushNotificationSettings() {
                     </span>
                 </div>
             </div>
+
+            {/* Permission Denied in Firefox/Browser Warning */}
+            {isPermissionBlocked && (
+                <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs space-y-1.5 shadow-2xs">
+                    <div className="font-bold flex items-center gap-2">
+                        <span>🔒</span>
+                        <span>Benachrichtigungen sind in deinem Browser für diese Seite blockiert</span>
+                    </div>
+                    <p className="leading-relaxed">
+                        Klicke oben links in der Adressleiste auf das <strong>durchgestrichene Symbol / Schloss</strong> neben <code>sharegy.de</code> und hebe die Blockierung für <em>Benachrichtigungen senden</em> auf (auf <strong>„Erlauben“</strong> stellen oder das Kreuzchen entfernen). Lade die Seite danach neu.
+                    </p>
+                </div>
+            )}
 
             {/* Feedback Message */}
             {feedbackMessage && (

@@ -60,10 +60,14 @@ export async function subscribeToPushNotifications() {
         throw new Error("Web-Push wird von diesem Browser oder Gerät nicht unterstützt.");
     }
 
+    if (Notification.permission === "denied") {
+        throw new Error("Benachrichtigungen sind in Firefox für sharegy.de blockiert. Bitte klicke links neben der Adressleiste auf das Symbol und hebe die Blockierung auf.");
+    }
+
     // 1. Berechtigung beim Nutzer anfragen
     const permission = await Notification.requestPermission();
     if (permission !== "granted") {
-        throw new Error("Push-Berechtigung wurde im Browser verweigert oder geschlossen.");
+        throw new Error("Push-Berechtigung wurde im Browser nicht erteilt.");
     }
 
     // 2. Service Worker sicherstellen
@@ -80,21 +84,26 @@ export async function subscribeToPushNotifications() {
 
     const applicationServerKey = urlBase64ToUint8Array(keyData.publicKey);
 
-    // 4. Browser-Abonnement erzeugen
+    // 4. Browser-Abonnement erzeugen (stale subscriptions sicher ablösen)
     let subscription = await registration.pushManager.getSubscription();
-    if (!subscription) {
-        subscription = await registration.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey,
-        });
+    if (subscription) {
+        try {
+            await subscription.unsubscribe();
+        } catch { }
     }
+
+    subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey,
+    });
 
     const subJson = subscription.toJSON();
 
-    // 5. Gerätename ableiten (z. B. "iPhone / Safari", "Chrome auf Windows")
+    // 5. Gerätename ableiten
     let deviceName = "Web-Browser";
     const ua = navigator.userAgent;
-    if (ua.includes("iPhone")) deviceName = "Apple iPhone";
+    if (ua.includes("Firefox")) deviceName = "Firefox auf PC";
+    else if (ua.includes("iPhone")) deviceName = "Apple iPhone";
     else if (ua.includes("iPad")) deviceName = "Apple iPad";
     else if (ua.includes("Android")) deviceName = "Android Smartphone";
     else if (ua.includes("Macintosh")) deviceName = "Apple Mac";
