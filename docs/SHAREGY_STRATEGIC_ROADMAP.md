@@ -125,7 +125,11 @@
   │          • `DeviceSubscription` & `NotificationPreference` Modelle mit Quiet Hours & Notfall-Override
   │          • Service Worker (`sw.js`) für Sperrbildschirm-Zustellung und Deep-Link-Fokussierung
   │          • 1-Klick Permission Request & Sofort-Test-Push in Einstellungen & Alarmzentrale
-  └── 2.22 ⏳ Native Mobile Apps via Capacitor (iOS & Android mit Widgets & Biometrie)
+  └── 2.22 ✅ **Native Mobile Apps via Capacitor (Android Initialisierung, Gradle & Deep Linking)**:
+             • Capacitor 7 Plattform-Engine für Android (`frontend/android/`, `de.sharegy.app`)
+             • Natives Lifecycle-Management, Status Bar Styling & flackerfreier Splashscreen
+             • Deep-Linking Intent-Filter für Magic-Links (`https://sharegy.de/t/*`) & Alarme
+             • Integrierte Build- & Sync-Pipelines (`npm run cap:sync`, `npm run cap:open`)
 
 ┌───────────────────────────────────────────────────────────────────────────────┐
 │ MEILENSTEIN 3: ENERGY SHARING COMMUNITIES & § 14a EnWG (Säule 2)              │

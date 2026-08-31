@@ -19,6 +19,7 @@ Willkommen in der offiziellen Dokumentation der **Sharegy**-Plattform (Smart Hom
 | 🚀 **[`OPERATIONS_AND_DEPLOYMENT.md`](./OPERATIONS_AND_DEPLOYMENT.md)** | Deployment Guide (Ubuntu/Pi), Systemd Services, Redis, Celery & Health-Checks |
 | 🛠️ **[`OPTIMIZATION_PLAN.md`](./OPTIMIZATION_PLAN.md)** | Audit-Ergebnisse, Stabilitäts-Härtung und abgeschlossene Meilensteine |
 | 🗺️ **[`SHAREGY_STRATEGIC_ROADMAP.md`](./SHAREGY_STRATEGIC_ROADMAP.md)** | Strategische Produkt-Roadmap (EMS Pro, Smarte Laststeuerung, Energy Sharing) |
+| 📱 **[`ANDROID_APP_BUILD_AND_RELEASE.md`](./ANDROID_APP_BUILD_AND_RELEASE.md)** | Native Android App (Capacitor 7, Gradle Build, Deep Linking & Play Store Release) |
 | 📋 **[`walkthroughs/`](./walkthroughs/README.md)** | Detaillierte Meilenstein- und Änderungsprotokolle der Entwicklung |
 | 📱 **[`marketing/APP_TEASER.md`](./marketing/APP_TEASER.md)** | App Store Beschreibungen, Teaser-Texte und Marken-Farbkonzepte |
 

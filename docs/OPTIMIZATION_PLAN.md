@@ -429,13 +429,13 @@
 
 ---
 
-### [ ] 5.10 Native Mobile Apps (iOS & Android via Capacitor)
-- **Bereich**: Mobile Frontend & App Store Deployment (`mobile/`, `@capacitor/core`)
-- **Ziel**: 
-  - Cross-Platform Wrapper der React/Tailwind Web-App via Capacitor.
-  - Biometrie-Login (FaceID / TouchID / Fingerabdruck).
-  - Native Lockscreen- & Homescreen-Widgets (Live-PV-Leistung, Batterie-SoC & Optimizer-Bestzeit).
-  - Bereitstellung im Apple App Store & Google Play Store.
+### [x] 5.10 Native Mobile Apps (Android via Capacitor 7)
+- **Bereich**: Mobile Frontend & App Store Deployment (`frontend/android/`, `@capacitor/core`, `@capacitor/android`)
+- **Status**: ✅ **Erledigt**.
+  - **Natives Android-Projekt**: Vollständige Gradle-Projektstruktur (`de.sharegy.app`) mit minSdkVersion 24 und targetSdkVersion 35.
+  - **Capacitor 7 Core & Plugins**: Status Bar Styling (`#0F172A`), Splashscreen-Handling, Haptic Feedback & Android Hardware-Zurück-Taste.
+  - **Deep-Linking Intent Filter**: Automatisches Öffnen von Magic-Links (`https://sharegy.de/t/*`) direkt in der App.
+  - **Sync & Build-Skripte**: Integrierter `npm run cap:sync` Workflow und Build-Leitfaden (`docs/ANDROID_APP_BUILD_AND_RELEASE.md`).
 
 ---
 
