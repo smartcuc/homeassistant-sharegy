@@ -18,9 +18,11 @@ export default function PushNotificationSettings() {
     const queryClient = useQueryClient();
 
     const [isSubscribedOnDevice, setIsSubscribedOnDevice] = useState(false);
-    const [isDeviceChecking, setIsDeviceChecking] = useState(false);
+    const [isDeviceChecking, setIsDeviceChecking] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
     const [feedbackMessage, setFeedbackMessage] = useState(null);
+    const [showDevicesModal, setShowDevicesModal] = useState(false);
+    const [deletingDeviceId, setDeletingDeviceId] = useState(null);
 
     // 1. Preferences vom Server laden
     const prefQuery = useQuery({
@@ -40,6 +42,7 @@ export default function PushNotificationSettings() {
         notify_prices: true,
         notify_device_status: true,
         active_devices_count: 0,
+        devices: [],
     };
 
     // 2. Lokalen Browser-Abonnement-Status ermitteln
@@ -79,6 +82,22 @@ export default function PushNotificationSettings() {
         },
     });
 
+    const deleteDeviceMutation = useMutation({
+        mutationFn: (deviceId) =>
+            apiFetch(`/api/notifications/devices/${deviceId}/delete/`, { method: "POST" }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["notification-preferences"] });
+            setFeedbackMessage({
+                type: "info",
+                text: t("notifications.device_removed", "Gerät erfolgreich abgemeldet."),
+            });
+            setTimeout(() => setFeedbackMessage(null), 4000);
+        },
+        onError: (err) => {
+            alert(err.message || "Fehler beim Abmelden des Geräts.");
+        },
+    });
+
     const testPushMutation = useMutation({
         mutationFn: () =>
             apiFetch("/api/notifications/test-push/", { method: "POST" }),
@@ -108,7 +127,7 @@ export default function PushNotificationSettings() {
                 setIsSubscribedOnDevice(false);
                 setFeedbackMessage({
                     type: "info",
-                    text: t("notifications.unsubscribed", "Push-Benachrichtigungen auf diesem Gerät deaktiviert."),
+                    text: t("notifications.unsubscribed", "Push-Benachrichtigungen auf diesem Gerät erfolgreich abgemeldet."),
                 });
             } else {
                 await subscribeToPushNotifications();
@@ -122,7 +141,7 @@ export default function PushNotificationSettings() {
         } catch (err) {
             setFeedbackMessage({
                 type: "error",
-                text: err.message || "Fehler beim Aktivieren der Benachrichtigungen.",
+                text: err.message || "Fehler beim Aktualisieren der Benachrichtigungen.",
             });
         } finally {
             setActionLoading(false);
@@ -141,23 +160,40 @@ export default function PushNotificationSettings() {
     const isPermissionBlocked = typeof window !== "undefined" && "Notification" in window && Notification.permission === "denied";
 
     return (
-        <div className="bg-white border border-gray-200/80 rounded-2xl p-6 shadow-xs space-y-6">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 pb-5">
-                <div>
-                    <h2 className="font-bold text-gray-900 text-base flex items-center gap-2">
+        <div className="bg-white border border-gray-200/80 rounded-3xl p-6 shadow-xs space-y-6">
+            {/* Header - Überschrift über die gesamte Breite der Kachel */}
+            <div className="border-b border-gray-100 pb-4 space-y-1.5 w-full">
+                <div className="flex flex-wrap items-center justify-between gap-3 w-full">
+                    <h2 className="font-bold text-gray-900 text-lg flex items-center gap-2">
                         <span>📲</span> {t("notifications.title", "Mobile Push & Echtzeit-Alarme")}
                     </h2>
-                    <p className="text-xs text-gray-500 mt-1">
-                        {t("notifications.desc", "Erhalte kritische Alarme, Speicherwarnungen und Negativpreis-Chancen direkt auf den Sperrbildschirm deines Smartphones oder Desktops.")}
-                    </p>
-                </div>
 
-                <div className="flex items-center gap-2">
-                    <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-slate-100 text-slate-700">
-                        {pref.active_devices_count || 0} {t("notifications.registered_devices", "Geräte registriert")}
-                    </span>
+                    {/* Klickbare Geräteanzahl */}
+                    {pref.active_devices_count > 0 ? (
+                        <button
+                            type="button"
+                            onClick={() => setShowDevicesModal(true)}
+                            className="text-xs font-semibold px-3 py-1 rounded-full bg-slate-100 hover:bg-indigo-50 text-slate-800 hover:text-indigo-900 border border-slate-300/80 hover:border-indigo-300 transition flex items-center gap-1.5 cursor-pointer shadow-2xs group"
+                            title={t("notifications.view_devices_tooltip", "Klicken, um registrierte Geräte anzuzeigen")}
+                        >
+                            <span>📱</span>
+                            <span>
+                                {pref.active_devices_count}{" "}
+                                {pref.active_devices_count === 1
+                                    ? t("notifications.device_registered_single", "Gerät registriert")
+                                    : t("notifications.registered_devices", "Geräte registriert")}
+                            </span>
+                            <span className="text-gray-400 group-hover:text-indigo-600 text-[10px]">▼</span>
+                        </button>
+                    ) : (
+                        <span className="text-xs font-semibold px-3 py-1 rounded-full bg-slate-100 text-slate-500 border border-slate-200/60">
+                            0 {t("notifications.registered_devices", "Geräte registriert")}
+                        </span>
+                    )}
                 </div>
+                <p className="text-xs text-gray-500 leading-relaxed w-full">
+                    {t("notifications.desc", "Erhalte kritische Alarme, Speicherwarnungen und Negativpreis-Chancen direkt auf den Sperrbildschirm deines Smartphones oder Desktops.")}
+                </p>
             </div>
 
             {/* Permission Denied in Firefox/Browser Warning */}
@@ -188,54 +224,66 @@ export default function PushNotificationSettings() {
             )}
 
             {/* Device Activation Card */}
-            <div className="bg-gradient-to-br from-indigo-50/70 to-slate-50 border border-indigo-100 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="space-y-1">
+            <div className="bg-gradient-to-br from-indigo-50/70 via-slate-50 to-white border border-indigo-100 rounded-2xl p-5 space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
-                        <span className="font-semibold text-sm text-gray-900">
+                        <span className="text-base">📱</span>
+                        <span className="font-bold text-sm text-gray-900">
                             {t("notifications.this_device", "Dieses Gerät (Browser / Smartphone)")}
                         </span>
-                        {!isDeviceChecking && (
-                            <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
-                                isSubscribedOnDevice
-                                    ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
-                                    : "bg-gray-200/80 text-gray-700"
-                            }`}>
-                                {isSubscribedOnDevice ? t("notifications.status_active", "🟢 Aktiv") : t("notifications.status_inactive", "⚪ Nicht abonniert")}
-                            </span>
-                        )}
                     </div>
-                    <p className="text-xs text-gray-600">
-                        {supported
-                            ? isSubscribedOnDevice
-                                ? t("notifications.device_ready", "Dieses Gerät empfängt Push-Nachrichten zuverlässig im Hintergrund.")
-                                : t("notifications.device_not_registered", "Klicke auf Aktivieren, um Alarme auch bei geschlossener App auf dieses Gerät zu erhalten.")
-                            : t("notifications.not_supported", "Web-Push wird von diesem Browser nicht nativ unterstützt.")}
-                    </p>
+                    {!isDeviceChecking && (
+                        <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                            isSubscribedOnDevice
+                                ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                                : "bg-gray-200/80 text-gray-700"
+                        }`}>
+                            {isSubscribedOnDevice ? t("notifications.status_active", "🟢 Aktiv angemeldet") : t("notifications.status_inactive", "⚪ Nicht angemeldet")}
+                        </span>
+                    )}
                 </div>
 
-                <div className="flex items-center gap-2.5 shrink-0">
-                    <button
-                        onClick={handleToggleDeviceSubscription}
-                        disabled={!supported || actionLoading}
-                        className={`px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs flex items-center gap-1.5 cursor-pointer ${
-                            isSubscribedOnDevice
-                                ? "bg-white hover:bg-rose-50 text-rose-700 border border-rose-200"
-                                : "bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-200"
-                        } disabled:opacity-50 disabled:cursor-not-allowed`}
-                    >
-                        <span>{isSubscribedOnDevice ? "🔕" : "🔔"}</span>
-                        <span>{isSubscribedOnDevice ? t("notifications.disable_device", "Auf diesem Gerät deaktivieren") : t("notifications.enable_device", "Push auf diesem Gerät aktivieren")}</span>
-                    </button>
+                <p className="text-xs text-gray-600 leading-relaxed">
+                    {supported
+                        ? isSubscribedOnDevice
+                            ? t("notifications.device_ready", "Dieses Gerät empfängt Push-Nachrichten zuverlässig im Hintergrund.")
+                            : t("notifications.device_not_registered", "Klicke auf Aktivieren, um Alarme auch bei geschlossener App auf dieses Gerät zu erhalten.")
+                        : t("notifications.not_supported", "Web-Push wird von diesem Browser nicht nativ unterstützt.")}
+                </p>
 
-                    {isSubscribedOnDevice && (
+                {/* Buttons unter dem Text */}
+                <div className="pt-2 flex flex-wrap items-center gap-3">
+                    {isSubscribedOnDevice ? (
+                        <>
+                            <button
+                                onClick={() => testPushMutation.mutate()}
+                                disabled={testPushMutation.isPending}
+                                className="px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white transition shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                                title="Sendet sofort eine Test-Push-Nachricht an deine registrierten Geräte"
+                            >
+                                <span>⚡</span>
+                                <span>{testPushMutation.isPending ? t("common.sending", "Sendet...") : t("notifications.test_push", "Test-Push senden")}</span>
+                            </button>
+
+                            {/* Abmelde-Button: Nur sichtbar wenn das Gerät angemeldet ist */}
+                            <button
+                                onClick={handleToggleDeviceSubscription}
+                                disabled={!supported || actionLoading}
+                                className="px-4 py-2 rounded-xl text-xs font-semibold bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 hover:border-rose-300 transition shadow-2xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                            >
+                                <span>🔕</span>
+                                <span>{actionLoading ? t("common.loading", "Lädt...") : t("notifications.disable_device", "Auf diesem Gerät abmelden")}</span>
+                            </button>
+                        </>
+                    ) : (
+                        /* Aktivieren-Button wenn Gerät noch nicht angemeldet */
                         <button
-                            onClick={() => testPushMutation.mutate()}
-                            disabled={testPushMutation.isPending}
-                            className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 transition shadow-2xs flex items-center gap-1"
-                            title="Sendet sofort eine Test-Push-Nachricht an deine registrierten Geräte"
+                            onClick={handleToggleDeviceSubscription}
+                            disabled={!supported || actionLoading}
+                            className="px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs shadow-indigo-200 transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                         >
-                            <span>⚡</span>
-                            <span>{testPushMutation.isPending ? t("common.sending", "Sendet...") : t("notifications.test_push", "Test-Push")}</span>
+                            <span>🔔</span>
+                            <span>{actionLoading ? t("common.loading", "Lädt...") : t("notifications.enable_device", "Push auf diesem Gerät aktivieren")}</span>
                         </button>
                     )}
                 </div>
@@ -339,6 +387,125 @@ export default function PushNotificationSettings() {
                     ))}
                 </div>
             </div>
+
+            {/* MODAL: REGISTRIERTE GERÄTE MIT DATUM/UHRZEIT & AUDIT-INFOS */}
+            {showDevicesModal && (
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-fade-in">
+                    <div className="bg-white rounded-3xl shadow-2xl border border-gray-200 w-full max-w-xl overflow-hidden flex flex-col max-h-[85vh]">
+                        {/* Modal Header */}
+                        <div className="p-5 bg-gradient-to-r from-slate-900 to-indigo-950 text-white flex items-center justify-between">
+                            <div className="flex items-center gap-2.5">
+                                <span className="text-2xl">📱</span>
+                                <div>
+                                    <h3 className="text-base font-bold">
+                                        {t("notifications.modal_devices_title", "Registrierte Push-Geräte")}
+                                    </h3>
+                                    <p className="text-xs text-indigo-200">
+                                        {t("notifications.modal_devices_subtitle", "Übersicht aller Geräte, die Push-Nachrichten für dieses Konto empfangen.")}
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setShowDevicesModal(false)}
+                                className="text-white/70 hover:text-white p-1.5 rounded-xl hover:bg-white/10 transition cursor-pointer text-sm"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        {/* Modal Content / Devices List */}
+                        <div className="p-5 overflow-y-auto space-y-3 divide-y divide-gray-100">
+                            {(!pref.devices || pref.devices.length === 0) ? (
+                                <div className="text-center py-8 text-gray-500 text-sm">
+                                    {t("notifications.no_devices_found", "Keine aktiven Geräte registriert.")}
+                                </div>
+                            ) : (
+                                pref.devices.map((device) => {
+                                    const regDate = device.created_at
+                                        ? new Date(device.created_at).toLocaleString("de-DE", {
+                                            day: "2-digit",
+                                            month: "2-digit",
+                                            year: "numeric",
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                        })
+                                        : "-";
+
+                                    const lastUsed = device.last_used_at
+                                        ? new Date(device.last_used_at).toLocaleString("de-DE", {
+                                            day: "2-digit",
+                                            month: "2-digit",
+                                            year: "numeric",
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                        })
+                                        : null;
+
+                                    return (
+                                        <div key={device.id} className="pt-3 first:pt-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                            <div className="space-y-1">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="font-bold text-sm text-gray-900">
+                                                        {device.device_name}
+                                                    </span>
+                                                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                                        🟢 {t("common.active", "Aktiv")}
+                                                    </span>
+                                                </div>
+                                                <div className="text-xs text-gray-600 flex flex-wrap gap-x-4 gap-y-1 font-medium">
+                                                    <span>
+                                                        📅 {t("notifications.registered_at", "Registriert:")} <strong>{regDate} Uhr</strong>
+                                                    </span>
+                                                    {device.registered_ip && device.registered_ip !== "-" && (
+                                                        <span className="text-gray-500">
+                                                            🌐 IP: <code className="font-mono text-indigo-600">{device.registered_ip}</code>
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                {lastUsed && (
+                                                    <div className="text-[11px] text-gray-400">
+                                                        {t("notifications.last_active", "Letzte Aktivität:")} {lastUsed} Uhr
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <button
+                                                onClick={async () => {
+                                                    if (window.confirm(t("notifications.confirm_remove_device", "Möchtest du dieses Gerät wirklich abmelden?"))) {
+                                                        setDeletingDeviceId(device.id);
+                                                        try {
+                                                            await deleteDeviceMutation.mutateAsync(device.id);
+                                                        } finally {
+                                                            setDeletingDeviceId(null);
+                                                        }
+                                                    }
+                                                }}
+                                                disabled={deletingDeviceId === device.id}
+                                                className="px-3 py-1.5 rounded-xl border border-rose-200 text-rose-700 hover:bg-rose-50 text-xs font-semibold transition flex items-center gap-1 shrink-0 self-start sm:self-center cursor-pointer disabled:opacity-50"
+                                            >
+                                                <span>🔕</span>
+                                                <span>{deletingDeviceId === device.id ? t("common.loading", "Wird abgemeldet...") : t("notifications.remove_device", "Gerät abmelden")}</span>
+                                            </button>
+                                        </div>
+                                    );
+                                })
+                            )}
+                        </div>
+
+                        {/* Modal Footer */}
+                        <div className="p-4 bg-slate-50 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+                            <span>{pref.devices?.length || 0} {t("notifications.devices_total", "Geräte insgesamt")}</span>
+                            <button
+                                type="button"
+                                onClick={() => setShowDevicesModal(false)}
+                                className="px-4 py-2 rounded-xl bg-gray-900 hover:bg-black text-white font-bold transition shadow-xs cursor-pointer"
+                            >
+                                {t("common.close", "Schließen")}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

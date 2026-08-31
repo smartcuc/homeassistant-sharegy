@@ -10,5 +10,6 @@ urlpatterns = [
     path("subscribe/", views.subscribe_device, name="notifications_subscribe"),
     path("unsubscribe/", views.unsubscribe_device, name="notifications_unsubscribe"),
     path("preferences/", views.notification_preferences, name="notifications_preferences"),
+    path("devices/<uuid:device_id>/delete/", views.delete_device_subscription, name="notifications_device_delete"),
     path("test-push/", views.trigger_test_push, name="notifications_test_push"),
 ]

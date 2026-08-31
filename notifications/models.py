@@ -62,6 +62,11 @@ class DeviceSubscription(models.Model):
     user_agent = models.CharField(max_length=512, blank=True, default="")
     is_active = models.BooleanField(default=True, db_index=True)
 
+    # 🛡️ Audit & Sicherheit
+    registered_ip = models.GenericIPAddressField(null=True, blank=True, help_text="IP-Adresse bei Aktivierung")
+    unregistered_ip = models.GenericIPAddressField(null=True, blank=True, help_text="IP-Adresse bei Deaktivierung")
+    unregistered_at = models.DateTimeField(null=True, blank=True, help_text="Zeitpunkt der Deaktivierung")
+
     created_at = models.DateTimeField(auto_now_add=True)
     last_used_at = models.DateTimeField(default=timezone.now)
 

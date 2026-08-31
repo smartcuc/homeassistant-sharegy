@@ -150,7 +150,7 @@ export default function Profile() {
                 {/* USER DATA */}
                 <Card>
                     <h2 className="text-base font-bold text-gray-900 mb-3 flex items-center gap-2">
-                        <span>📧</span> {t("profile.account_info", "Kontoinformationen")}
+                        <span>📧</span> {t("profile.profile_info", "Profilinformationen")}
                     </h2>
                     <div className="space-y-3 text-sm">
                         <div>
@@ -158,9 +158,9 @@ export default function Profile() {
                             <span className="font-medium text-gray-800">{user?.email}</span>
                         </div>
                         <div>
-                            <span className="text-xs text-gray-400 block uppercase font-bold">{t("profile.name", "Name")}</span>
+                            <span className="text-xs text-gray-400 block uppercase font-bold">{t("profile.profile_name", "Profilname")}</span>
                             <span className="font-medium text-gray-800">
-                                {user?.first_name ? `${user.first_name} ${user.last_name || ""}` : t("profile.not_specified", "Nicht angegeben")}
+                                {user?.first_name ? `${user.first_name} ${user.last_name || ""}`.trim() : t("profile.not_specified", "Nicht angegeben")}
                             </span>
                         </div>
                         <div>
@@ -209,8 +209,12 @@ export default function Profile() {
                     </div>
                 </Card>
 
-                {/* PUSH NOTIFICATIONS & QUIET HOURS */}
-                <PushNotificationSettings />
+            </div>
+
+            {/* PUSH NOTIFICATIONS & REALTIME ALERTS (FULL WIDTH CARD) */}
+            <PushNotificationSettings />
+
+            <div className="grid gap-6 md:grid-cols-2">
 
                 {/* LANGUAGE SELECTION */}
                 <Card>
@@ -257,49 +261,49 @@ export default function Profile() {
                     </div>
                 </Card>
 
-            </div>
+                {/* TIMEZONE SETTINGS */}
+                <Card>
+                    <h2 className="text-base font-bold text-gray-900 mb-1 flex items-center gap-2">
+                        <span>🕒</span> {t("profile.timezone_title", "Zeitzone & Region")}
+                    </h2>
+                    <p className="text-xs text-gray-500 mb-4">
+                        {t("profile.timezone_desc", "Wichtig für korrekte Zeitachsen in Diagrammen und stundengenaue Strompreis-Analysen.")}
+                    </p>
 
-            {/* TIMEZONE SETTINGS */}
-            <Card>
-                <h2 className="text-base font-bold text-gray-900 mb-1 flex items-center gap-2">
-                    <span>🕒</span> {t("profile.timezone_title", "Zeitzone & Region")}
-                </h2>
-                <p className="text-xs text-gray-500 mb-4">
-                    {t("profile.timezone_desc", "Wichtig für korrekte Zeitachsen in Diagrammen und stundengenaue Strompreis-Analysen.")}
-                </p>
-
-                <div className="max-w-md space-y-3">
-                    <select
-                        value={activeTimezone}
-                        onChange={(e) => setSelectedTimezone(e.target.value)}
-                        className="w-full border rounded-xl px-3.5 py-2.5 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    >
-                        <option value="">{t("profile.select_prompt", "Bitte auswählen")}</option>
-                        {commonTimezones.map((tz) => (
-                            <option key={tz} value={tz}>{tz}</option>
-                        ))}
-                    </select>
-
-                    <div className="flex gap-2 pt-1">
-                        <button
-                            type="button"
-                            onClick={() => setSelectedTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone)}
-                            className="px-3.5 py-2 border rounded-xl text-xs font-semibold text-gray-700 hover:bg-gray-50 transition cursor-pointer"
+                    <div className="space-y-3">
+                        <select
+                            value={activeTimezone}
+                            onChange={(e) => setSelectedTimezone(e.target.value)}
+                            className="w-full border rounded-xl px-3.5 py-2.5 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         >
-                            {t("common.auto_detect", "Automatisch erkennen")}
-                        </button>
+                            <option value="">{t("profile.select_prompt", "Bitte auswählen")}</option>
+                            {commonTimezones.map((tz) => (
+                                <option key={tz} value={tz}>{tz}</option>
+                            ))}
+                        </select>
 
-                        <button
-                            type="button"
-                            onClick={saveTimezone}
-                            disabled={savingTimezone}
-                            className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-xs transition cursor-pointer"
-                        >
-                            {savingTimezone ? t("common.saving", "Speichere...") : t("profile.save_timezone", "Zeitzone speichern")}
-                        </button>
+                        <div className="flex gap-2 pt-1">
+                            <button
+                                type="button"
+                                onClick={() => setSelectedTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone)}
+                                className="px-3.5 py-2 border rounded-xl text-xs font-semibold text-gray-700 hover:bg-gray-50 transition cursor-pointer"
+                            >
+                                {t("common.auto_detect", "Automatisch erkennen")}
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={saveTimezone}
+                                disabled={savingTimezone}
+                                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-xs transition cursor-pointer"
+                            >
+                                {savingTimezone ? t("common.saving", "Speichere...") : t("profile.save_timezone", "Zeitzone speichern")}
+                            </button>
+                        </div>
                     </div>
-                </div>
-            </Card>
+                </Card>
+
+            </div>
 
             {/* GDPR / PRIVACY & DATA RIGHTS (Art. 15, Art. 20, Art. 17 DSGVO) */}
             <Card>
