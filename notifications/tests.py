@@ -21,6 +21,8 @@ class NotificationTestCase(TestCase):
             postal_code="10115",
             timezone="Europe/Berlin",
         )
+        from billing.models import EMSSubscription
+        EMSSubscription.objects.update_or_create(user=self.user, defaults={"plan": "pro_monthly", "status": "active"})
 
     def test_device_subscription_creation(self):
         sub = DeviceSubscription.objects.create(

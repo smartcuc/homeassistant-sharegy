@@ -59,6 +59,18 @@ def subscribe_device(request):
     user_agent = request.META.get("HTTP_USER_AGENT", "")[:512]
     client_ip = get_client_ip(request)
 
+    # 🛡️ Feature Gating: Push-Geräte sind exklusiv für Pro-Abonnenten
+    user_sub = getattr(request.user, "ems_subscription", None)
+    if not (user_sub and user_sub.is_pro_active):
+        return Response(
+            {
+                "error": "pro_subscription_required",
+                "message": "Mobile Push-Benachrichtigungen & Echtzeit-Alarme sind exklusiv in Sharegy Pro verfügbar.",
+                "upgrade_url": "/app/billing",
+            },
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
     # Ermittle Standard-Home des Nutzers falls vorhanden
     home = getattr(request.user, "homes", None)
     default_home = home.first() if home and hasattr(home, "first") else None

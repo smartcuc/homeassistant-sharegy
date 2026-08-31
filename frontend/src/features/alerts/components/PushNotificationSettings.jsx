@@ -12,9 +12,12 @@ import {
     subscribeToPushNotifications,
     unsubscribeFromPushNotifications,
 } from "../../../utils/pushManager";
+import { useSubscription } from "../../../hooks/useSubscription";
+import ProUpgradeModal from "../../../components/common/ProUpgradeModal";
 
 export default function PushNotificationSettings() {
     const { t } = useTranslation();
+    const { isPro } = useSubscription();
     const queryClient = useQueryClient();
 
     const [isSubscribedOnDevice, setIsSubscribedOnDevice] = useState(false);
@@ -22,6 +25,7 @@ export default function PushNotificationSettings() {
     const [actionLoading, setActionLoading] = useState(false);
     const [feedbackMessage, setFeedbackMessage] = useState(null);
     const [showDevicesModal, setShowDevicesModal] = useState(false);
+    const [proModalOpen, setProModalOpen] = useState(false);
     const [deletingDeviceId, setDeletingDeviceId] = useState(null);
 
     // 1. Preferences vom Server laden
@@ -119,6 +123,10 @@ export default function PushNotificationSettings() {
 
     // 4. Push auf aktuellem Gerät ein-/ausschalten
     const handleToggleDeviceSubscription = async () => {
+        if (!isSubscribedOnDevice && !isPro) {
+            setProModalOpen(true);
+            return;
+        }
         setActionLoading(true);
         setFeedbackMessage(null);
         try {
@@ -506,6 +514,14 @@ export default function PushNotificationSettings() {
                     </div>
                 </div>
             )}
+
+            {/* Pro Upgrade Dialog */}
+            <ProUpgradeModal
+                open={proModalOpen}
+                onClose={() => setProModalOpen(false)}
+                featureName="Mobile Push-Benachrichtigungen"
+                featureDesc="Erhalte sofortige Push-Alarme bei Ausfällen, Netztrennungen und Speicher-Tiefentladungen direkt auf dein Smartphone mit Sharegy Pro."
+            />
         </div>
     );
 }

@@ -6,19 +6,24 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../../api/client";
-
+import { useSubscription } from "../../../hooks/useSubscription";
 import PushNotificationSettings from "../components/PushNotificationSettings";
+import ProBadge from "../../../components/common/ProBadge";
+import ProUpgradeModal from "../../../components/common/ProUpgradeModal";
 
 export default function AlertsPage() {
     const { t } = useTranslation();
+    const { isPro } = useSubscription();
     const queryClient = useQueryClient();
     const [filterSeverity, setFilterSeverity] = useState("all");
     const [showPushSettings, setShowPushSettings] = useState(false);
+    const [proModalOpen, setProModalOpen] = useState(false);
 
     const query = useQuery({
         queryKey: ["alerts-list"],
         queryFn: () => apiFetch("/api/alerts/"),
         refetchInterval: 30000,
+        enabled: isPro,
     });
 
     const ackMutation = useMutation({
@@ -54,6 +59,125 @@ export default function AlertsPage() {
         }
     };
 
+    // =========================================================
+    // 🛡️ PRO-SPERRSEITE FÜR FREE-NUTZER
+    // =========================================================
+    if (!isPro) {
+        return (
+            <div className="p-6 max-w-5xl space-y-6">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h1 className="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2.5">
+                            <span className="text-2xl">🚨</span> {t("alerts.page_title", "Alarm- & Notifikationszentrale")}
+                            <ProBadge size="sm" />
+                        </h1>
+                        <p className="text-sm text-gray-500 mt-1">
+                            {t("alerts.page_subtitle", "Echtzeit-Überwachung von Ertragsausfällen, Akkuzustand, Dauerlasten und Börsenstrom-Chancen.")}
+                        </p>
+                    </div>
+                </div>
+
+                {/* Hero Upgrade Card */}
+                <div className="bg-linear-to-br from-slate-900 via-indigo-950 to-slate-950 border border-indigo-500/40 rounded-3xl p-8 sm:p-10 shadow-2xl text-white relative overflow-hidden space-y-8">
+                    {/* Background glow */}
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none" />
+                    <div className="absolute bottom-0 left-0 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+
+                    <div className="relative z-10 max-w-3xl space-y-4">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 text-xs font-bold uppercase tracking-wider">
+                            <span>⭐</span>
+                            <span>Sharegy Pro Exklusiv</span>
+                        </div>
+                        <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight">
+                            Schütze dein Zuhause mit automatischen Echtzeit-Alarmen & Push-Nachrichten
+                        </h2>
+                        <p className="text-indigo-200/80 text-sm sm:text-base leading-relaxed">
+                            Verpasse nie wieder Wechselrichterausfälle, Speicher-Tiefentladungen oder extreme Börsenstrom-Preistiefs. Werde sofort mobil auf deinem Smartphone benachrichtigt.
+                        </p>
+                    </div>
+
+                    {/* Features Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 relative z-10">
+                        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
+                            <div className="text-2xl">📲</div>
+                            <h3 className="text-sm font-bold text-white">Mobile Push-Alarme</h3>
+                            <p className="text-xs text-indigo-200/70 leading-relaxed">
+                                Benachrichtigungen direkt auf dein Android- und iOS-Handy – ohne die App öffnen zu müssen.
+                            </p>
+                        </div>
+
+                        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
+                            <div className="text-2xl">☀️</div>
+                            <h3 className="text-sm font-bold text-white">Ertrags- & Ausfallwächter</h3>
+                            <p className="text-xs text-indigo-200/70 leading-relaxed">
+                                Erkennt stillstehende PV-Strings, Netzabschaltungen und unerwartete Leistungsabfälle sofort.
+                            </p>
+                        </div>
+
+                        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
+                            <div className="text-2xl">🔋</div>
+                            <h3 className="text-sm font-bold text-white">Batterie- & Notstromschutz</h3>
+                            <p className="text-xs text-indigo-200/70 leading-relaxed">
+                                Warnt bei Unterschreitung der Notstromreserve und schützt vor Tiefentladungen im Winter.
+                            </p>
+                        </div>
+
+                        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
+                            <div className="text-2xl">⚡</div>
+                            <h3 className="text-sm font-bold text-white">Dynamische Preis-Peaks</h3>
+                            <p className="text-xs text-indigo-200/70 leading-relaxed">
+                                Sofortwarnung vor teuren Verbrauchsspitzen und Hinweis auf negative Börsenstrompreise.
+                            </p>
+                        </div>
+
+                        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
+                            <div className="text-2xl">🔌</div>
+                            <h3 className="text-sm font-bold text-white">Dauerlast- & Leckage-Finder</h3>
+                            <p className="text-xs text-indigo-200/70 leading-relaxed">
+                                Erkennt vergessene Großverbraucher (z. B. Heizlüfter, Poolpumpe) und hohe Standby-Verbräuche.
+                            </p>
+                        </div>
+
+                        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
+                            <div className="text-2xl">💡</div>
+                            <h3 className="text-sm font-bold text-white">KI-Spar-Empfehlungen</h3>
+                            <p className="text-xs text-indigo-200/70 leading-relaxed">
+                                Handlungsanweisungen zur Maximierung deiner Autarkie und Senkung deiner Netzbezugskosten.
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* CTA Actions */}
+                    <div className="pt-4 border-t border-indigo-800/40 relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div className="text-xs text-indigo-200/70 text-center sm:text-left">
+                            Bereits ab <strong className="text-white font-mono">4,17 €</strong> / Monat (jährliche Zahlweise) · Jederzeit kündbar
+                        </div>
+                        <div className="flex items-center gap-3 w-full sm:w-auto">
+                            <button
+                                type="button"
+                                onClick={() => setProModalOpen(true)}
+                                className="w-full sm:w-auto px-6 py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 text-sm font-black rounded-2xl shadow-xl shadow-amber-500/20 transition cursor-pointer flex items-center justify-center gap-2"
+                            >
+                                <span>⭐</span>
+                                <span>Alarmzentrale mit Sharegy Pro freischalten</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <ProUpgradeModal
+                    open={proModalOpen}
+                    onClose={() => setProModalOpen(false)}
+                    featureName="Alarmzentrale & Mobile Push-Benachrichtigungen"
+                    featureDesc="Schütze deine PV-Anlage, Heimspeicher und Haushaltsgeräte mit automatischen Echtzeit-Alarmen direkt auf dein Smartphone."
+                />
+            </div>
+        );
+    }
+
+    // =========================================================
+    // ✅ PRO USER VIEW (VOLLE ALARMZENTRALE)
+    // =========================================================
     return (
         <div className="p-6 max-w-5xl space-y-6">
             {/* Header */}
@@ -210,4 +334,3 @@ export default function AlertsPage() {
         </div>
     );
 }
-

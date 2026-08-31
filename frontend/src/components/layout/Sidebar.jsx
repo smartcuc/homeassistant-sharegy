@@ -10,9 +10,12 @@ import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "../../api/client";
 import DeviceSetupModal from "../device/DeviceSetupModal";
+import { useSubscription } from "../../hooks/useSubscription";
+import ProBadge from "../common/ProBadge";
 
 export default function Sidebar() {
     const { t } = useTranslation();
+    const { isPro } = useSubscription();
     const query = useUnconfiguredDevices();
     const { user } = useUser();
 
@@ -61,7 +64,8 @@ export default function Sidebar() {
                         name: t("nav.alerts", "Alarmzentrale"),
                         path: "/app/alerts",
                         icon: "🚨",
-                        badge: alertCount > 0 ? alertCount : null,
+                        isProGated: true,
+                        badge: isPro && alertCount > 0 ? alertCount : null,
                         badgeClass: alertBadgeClass,
                     },
                 ],
@@ -184,6 +188,7 @@ export default function Sidebar() {
                                         <div className="flex items-center gap-2.5 truncate">
                                             <span className="text-base">{item.icon}</span>
                                             <span className="truncate">{item.name}</span>
+                                            {item.isProGated && !isPro && <ProBadge size="xs" />}
                                         </div>
 
                                         {/* Unconfigured Count Badge vs Alert Badge */}

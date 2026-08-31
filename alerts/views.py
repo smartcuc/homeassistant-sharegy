@@ -14,11 +14,25 @@ from alerts.services import evaluate_home_alerts
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def alerts_list(request):
+    sub = getattr(request.user, "ems_subscription", None)
+    is_pro = sub and sub.is_pro_active
+
+    if not is_pro:
+        return Response({
+            "is_pro": False,
+            "pro_required": True,
+            "summary": {"critical": 0, "warning": 0, "info": 0, "active_total": 0},
+            "alerts": [],
+            "history": [],
+        })
+
     home = request.user.homes.first() if hasattr(request.user, "homes") else None
     if not home:
         return Response({
+            "is_pro": True,
             "summary": {"critical": 0, "warning": 0, "info": 0, "active_total": 0},
             "alerts": [],
+            "history": [],
         })
 
     # Führe Live-Regelauswertung aus
@@ -96,6 +110,10 @@ def alerts_list(request):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def acknowledge_alert(request, alert_id):
+    sub = getattr(request.user, "ems_subscription", None)
+    if not (sub and sub.is_pro_active):
+        return Response({"error": "pro_subscription_required"}, status=403)
+
     home = request.user.homes.first() if hasattr(request.user, "homes") else None
     if not home:
         return Response({"error": "No home found"}, status=400)
@@ -113,6 +131,10 @@ def acknowledge_alert(request, alert_id):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def resolve_alert(request, alert_id):
+    sub = getattr(request.user, "ems_subscription", None)
+    if not (sub and sub.is_pro_active):
+        return Response({"error": "pro_subscription_required"}, status=403)
+
     home = request.user.homes.first() if hasattr(request.user, "homes") else None
     if not home:
         return Response({"error": "No home found"}, status=400)

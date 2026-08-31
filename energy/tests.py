@@ -261,6 +261,8 @@ class GrafanaAndHomeAssistantPluginTest(TestCase):
             name="Plugin Test Home",
         )
         self.token = self.home.mqtt_token
+        from billing.models import EMSSubscription
+        EMSSubscription.objects.update_or_create(user=self.user, defaults={"plan": "pro_monthly", "status": "active"})
 
     def test_grafana_endpoints_with_auth(self):
         # 1. Test unauthenticated request fails

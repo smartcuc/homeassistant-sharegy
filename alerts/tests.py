@@ -45,12 +45,28 @@ class AlertsEngineTest(TestCase):
         self.assertEqual(bat_alert.severity, AlertEvent.SEVERITY_CRITICAL)
 
     def test_alerts_api_list_and_acknowledge(self):
-        # 1. Seed demo alerts
-        self.client.force_login(self.user)
-        seed_resp = self.client.post("/api/alerts/seed-demo/")
-        self.assertEqual(seed_resp.status_code, 200)
+        from billing.models import EMSSubscription
+        sub = EMSSubscription.objects.filter(user=self.user).first()
+        if sub:
+            sub.plan = "pro_monthly"
+            sub.status = "active"
+            sub.save()
+        else:
+            EMSSubscription.objects.create(user=self.user, plan="pro_monthly", status="active")
+
+        # 1. Erstelle Batterie-Gerät mit niedrigem SoC
+        role_bat, _ = DeviceRole.objects.get_or_create(key="battery", defaults={"label": "Hausspeicher"})
+        bat_dev = Device.objects.create(home=self.home, identifier="bat_test_ack", configured=True)
+        DeviceConfig.objects.create(device=bat_dev, home=self.home, role=role_bat)
+        DeviceLatestMetric.objects.create(
+            device=bat_dev,
+            metric_key="soc",
+            value=7.0,
+            timestamp="2026-08-25T02:00:00Z",
+        )
 
         # 2. Get alerts list
+        self.client.force_login(self.user)
         list_resp = self.client.get("/api/alerts/")
         self.assertEqual(list_resp.status_code, 200)
         data = list_resp.json()
@@ -70,6 +86,15 @@ class AlertsEngineTest(TestCase):
         res_resp = self.client.post(f"/api/alerts/{alert_id}/resolve/")
         self.assertEqual(res_resp.status_code, 200)
         self.assertEqual(res_resp.json()["status"], "resolved")
+
+    def test_alerts_free_user_gating(self):
+        # Free User must get pro_required: True and empty alerts
+        self.client.force_login(self.user)
+        list_resp = self.client.get("/api/alerts/")
+        self.assertEqual(list_resp.status_code, 200)
+        data = list_resp.json()
+        self.assertFalse(data.get("is_pro"))
+        self.assertTrue(data.get("pro_required"))
 
     def test_negative_pv_generation_does_not_trigger_no_pv_alert(self):
         role_pv = DeviceRole.objects.create(key="producer", label="PV Wechselrichter")
