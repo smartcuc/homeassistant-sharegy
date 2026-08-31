@@ -49,18 +49,21 @@
     "analytics": "Analizy i historia",
     "solar_forecast": "Prognoza solarna",
     "metrics": "Eksplorator pomiarów",
-    "settings_group": "System i taryfy",
+    "settings_group": "Ustawienia systemowe",
     "producers": "Instalacje wytwórcze",
     "tariffs": "Taryfy prądu",
     "billing": "Subskrypcja i rozliczenia",
     "mqtt_interfaces": "Interfejsy",
+    "system_status": "Status systemu",
     "app_settings": "Ustawienia aplikacji",
 
     "admin_group": "Administracja i personel",
     "admin_dashboard": "Panel administratora",
     "admin_tracking": "Zdarzenia i analityka",
     "tenant_management": "Najemcy i społeczności",
-    "knowledge_base": "Baza wiedzy i FAQ",
+    "help_group": "Pomoc i wsparcie",
+    "support_tickets": "Wsparcie i zgłoszenia",
+    "knowledge_base": "Baza wiedzy i podręcznik",
     "alerts": "Centrum alertów"
   },
   "dashboard": {

@@ -49,18 +49,21 @@
     "analytics": "Analytics & History",
     "solar_forecast": "Solar Forecast",
     "metrics": "Metric Explorer",
-    "settings_group": "System & Tariffs",
+    "settings_group": "System Settings",
     "producers": "Power Generators",
     "tariffs": "Electricity Tariffs",
     "billing": "Subscription & Billing",
     "mqtt_interfaces": "Interfaces",
+    "system_status": "System Status",
     "app_settings": "App Settings",
 
     "admin_group": "Administration & Staff",
     "admin_dashboard": "Admin Dashboard",
     "admin_tracking": "Events & Tracking",
     "tenant_management": "Tenants & Landlords",
-    "knowledge_base": "Knowledge Base & FAQ",
+    "help_group": "Help & Support",
+    "support_tickets": "Support & Tickets",
+    "knowledge_base": "Knowledge Base & Manual",
     "alerts": "Alert Center"
   },
   "dashboard": {

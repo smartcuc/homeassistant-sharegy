@@ -10,6 +10,7 @@ import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "../../api/client";
 import DeviceSetupModal from "../device/DeviceSetupModal";
+import SupportDrawer from "../../features/support/components/SupportDrawer";
 import { useSubscription } from "../../hooks/useSubscription";
 import ProBadge from "../common/ProBadge";
 
@@ -22,6 +23,7 @@ export default function Sidebar() {
     const isLoaded = query?.isSuccess;
     const count = query?.data?.count ?? 0;
     const [openSetup, setOpenSetup] = useState(false);
+    const [supportOpen, setSupportOpen] = useState(false);
 
     const alertsQuery = useQuery({
         queryKey: ["alerts-list"],
@@ -87,10 +89,9 @@ export default function Sidebar() {
                 ],
             },
             {
-                title: `⚙️ ${t("nav.settings_group", "System & Tarife")}`,
+                title: `⚙️ ${t("nav.settings_group", "Systemeinstellungen")}`,
                 items: [
                     { name: t("nav.tariffs", "Strompreise & Tarife"), path: "/app/tariff", icon: "💶" },
-                    { name: t("nav.billing", "Abonnement & Tarife"), path: "/app/billing", icon: "💳" },
                     { name: t("nav.mqtt_interfaces", "Schnittstellen"), path: "/app/interfaces", icon: "📡" },
                     { name: t("nav.system_status", "Systemstatus"), path: "/app/status", icon: "🟢" },
                 ],
@@ -119,15 +120,23 @@ export default function Sidebar() {
 
 
         sec.push({
-            title: `📚 ${t("nav.help_group", "Support & Hilfe")}`,
+            title: `📚 ${t("nav.help_group", "Hilfe & Support")}`,
             items: [
-                { name: t("nav.support_tickets", "Support & Tickets"), path: "/app/support", icon: "🎫" },
-                { name: t("nav.knowledge_base", "Wissensportal & FAQ"), path: "/app/help", icon: "📖" },
+                {
+                    name: t("nav.support_tickets", "Support & Tickets"),
+                    icon: "🎫",
+                    onClick: () => setSupportOpen(true),
+                },
+                {
+                    name: t("nav.knowledge_base", "Wissensportal & Handbuch"),
+                    path: "/app/help",
+                    icon: "📖",
+                },
             ],
         });
 
         return sec;
-    }, [t, count, alertCount, alertBadgeClass, isStaffOrAdmin, isLandlordMode]);
+    }, [t, count, alertCount, alertBadgeClass, isStaffOrAdmin, isLandlordMode, isPro]);
 
     return (
         <div className="w-64 bg-white border-r flex flex-col shrink-0">
@@ -155,7 +164,23 @@ export default function Sidebar() {
 
                         {/* Items */}
                         <div className="space-y-1">
-                            {section.items.map((item) => {
+                            {section.items.map((item, itemIdx) => {
+                                if (item.onClick) {
+                                    return (
+                                        <button
+                                            key={item.name || itemIdx}
+                                            type="button"
+                                            onClick={item.onClick}
+                                            className="w-full text-left flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition cursor-pointer"
+                                        >
+                                            <div className="flex items-center gap-2.5 truncate">
+                                                <span className="text-base">{item.icon}</span>
+                                                <span className="truncate">{item.name}</span>
+                                            </div>
+                                        </button>
+                                    );
+                                }
+
                                 if (item.isExternal) {
                                     return (
                                         <a
@@ -225,6 +250,12 @@ export default function Sidebar() {
             <DeviceSetupModal
                 open={openSetup}
                 onClose={() => setOpenSetup(false)}
+            />
+
+            {/* 🛟 DRAWER FOR SUPPORT & TICKETS */}
+            <SupportDrawer
+                open={supportOpen}
+                onClose={() => setSupportOpen(false)}
             />
         </div>
     );

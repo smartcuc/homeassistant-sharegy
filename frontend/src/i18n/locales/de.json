@@ -49,18 +49,21 @@
     "analytics": "Analysen & Historie",
     "solar_forecast": "Solar-Prognose",
     "metrics": "Messwert-Explorer",
-    "settings_group": "System & Tarife",
+    "settings_group": "Systemeinstellungen",
     "producers": "Erzeugeranlagen",
     "tariffs": "Strompreise & Tarife",
     "billing": "Abonnement & Tarife",
     "mqtt_interfaces": "Schnittstellen",
+    "system_status": "Systemstatus",
     "app_settings": "App-Einstellungen",
 
     "admin_group": "Administration & Staff",
     "admin_dashboard": "Admin Dashboard",
     "admin_tracking": "Event & Tracking",
     "tenant_management": "Mandanten & Mieter",
-    "knowledge_base": "Wissensportal & FAQ",
+    "help_group": "Hilfe & Support",
+    "support_tickets": "Support & Tickets",
+    "knowledge_base": "Wissensportal & Handbuch",
     "alerts": "Alarmzentrale"
   },
   "dashboard": {
