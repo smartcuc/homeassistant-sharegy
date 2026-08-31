@@ -57,6 +57,18 @@ def setup_demo_household(target_user=None):
             },
         )
 
+    # ⭐ 0. Demo-User standardmäßig mit aktivem Pro-Plan ausstatten (voller Funktionsumfang)
+    from billing.models import EMSSubscription
+    EMSSubscription.objects.update_or_create(
+        user=target_user,
+        defaults={
+            "plan": "pro_yearly",
+            "status": "active",
+            "current_period_end": timezone.now() + timedelta(days=365),
+            "payment_provider": "stripe",
+        },
+    )
+
     # 1. Altes Home und alte Mappings sauber bereinigen
     target_user.homes.all().delete()
     DemoDeviceMap.objects.all().delete()
