@@ -10,7 +10,6 @@ import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "../../api/client";
 import DeviceSetupModal from "../device/DeviceSetupModal";
-import SupportDrawer from "../../features/support/components/SupportDrawer";
 import { useSubscription } from "../../hooks/useSubscription";
 import ProBadge from "../common/ProBadge";
 
@@ -23,7 +22,6 @@ export default function Sidebar() {
     const isLoaded = query?.isSuccess;
     const count = query?.data?.count ?? 0;
     const [openSetup, setOpenSetup] = useState(false);
-    const [supportOpen, setSupportOpen] = useState(false);
 
     const alertsQuery = useQuery({
         queryKey: ["alerts-list"],
@@ -118,23 +116,6 @@ export default function Sidebar() {
             });
         }
 
-
-        sec.push({
-            title: `📚 ${t("nav.help_group", "Hilfe & Support")}`,
-            items: [
-                {
-                    name: t("nav.support_tickets", "Support & Tickets"),
-                    icon: "🎫",
-                    onClick: () => setSupportOpen(true),
-                },
-                {
-                    name: t("nav.knowledge_base", "Wissensportal & Handbuch"),
-                    path: "/app/help",
-                    icon: "📖",
-                },
-            ],
-        });
-
         return sec;
     }, [t, count, alertCount, alertBadgeClass, isStaffOrAdmin, isLandlordMode, isPro]);
 
@@ -164,23 +145,7 @@ export default function Sidebar() {
 
                         {/* Items */}
                         <div className="space-y-1">
-                            {section.items.map((item, itemIdx) => {
-                                if (item.onClick) {
-                                    return (
-                                        <button
-                                            key={item.name || itemIdx}
-                                            type="button"
-                                            onClick={item.onClick}
-                                            className="w-full text-left flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition cursor-pointer"
-                                        >
-                                            <div className="flex items-center gap-2.5 truncate">
-                                                <span className="text-base">{item.icon}</span>
-                                                <span className="truncate">{item.name}</span>
-                                            </div>
-                                        </button>
-                                    );
-                                }
-
+                            {section.items.map((item) => {
                                 if (item.isExternal) {
                                     return (
                                         <a
@@ -250,12 +215,6 @@ export default function Sidebar() {
             <DeviceSetupModal
                 open={openSetup}
                 onClose={() => setOpenSetup(false)}
-            />
-
-            {/* 🛟 DRAWER FOR SUPPORT & TICKETS */}
-            <SupportDrawer
-                open={supportOpen}
-                onClose={() => setSupportOpen(false)}
             />
         </div>
     );
