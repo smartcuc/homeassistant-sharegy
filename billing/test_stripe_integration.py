@@ -206,3 +206,47 @@ class StripeIntegrationTests(TestCase):
         self.assertEqual(res["status"], "success")
 
         self.assertEqual(sub.invoices.count(), initial_count + 1)
+
+    def test_webhook_with_valid_signature_header(self):
+        """Testet die kryptografische Webhook-Signaturverifikation mit dem konfigurierten Secret."""
+        import time
+        import hmac
+        import hashlib
+        from django.conf import settings
+
+        mock_event = {
+            "id": "evt_test_sig_123",
+            "type": "checkout.session.completed",
+            "data": {
+                "object": {
+                    "id": "cs_test_sig",
+                    "customer": "cus_test_sig",
+                    "metadata": {"user_id": str(self.user.id), "plan_id": "pro_monthly"},
+                }
+            },
+        }
+        payload = json.dumps(mock_event)
+        timestamp = int(time.time())
+        secret = getattr(settings, "STRIPE_WEBHOOK_SECRET", "") or "whsec_test_mock_secret"
+
+        signed_payload = f"{timestamp}.{payload}"
+        signature = hmac.new(
+            secret.encode("utf-8"),
+            signed_payload.encode("utf-8"),
+            hashlib.sha256,
+        ).hexdigest()
+        sig_header = f"t={timestamp},v1={signature}"
+
+        with self.settings(STRIPE_WEBHOOK_SECRET=secret):
+            res = handle_stripe_webhook_event(payload.encode("utf-8"), sig_header=sig_header)
+            self.assertEqual(res["status"], "success")
+
+            # Auch HTTP Webhook Endpoint testen
+            response = self.client.post(
+                "/api/billing/stripe/webhook/",
+                data=payload,
+                content_type="application/json",
+                HTTP_STRIPE_SIGNATURE=sig_header,
+            )
+            self.assertEqual(response.status_code, 200)
+
