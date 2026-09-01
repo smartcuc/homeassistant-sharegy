@@ -105,6 +105,7 @@ export default function AppShell() {
                         <Route path="admin/tracking" element={<TrackingDashboard />} />
                         <Route path="tenant" element={<TenantDashboard />} />
                         <Route path="tenant-management" element={<TenantDashboard />} />
+                        <Route path="community" element={<TenantDashboard />} />
 
 
                         {/* ✅ FALLBACK IMMER UNTEN */}

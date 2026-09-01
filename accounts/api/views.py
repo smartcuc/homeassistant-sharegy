@@ -717,10 +717,18 @@ class DashboardStatsView(APIView):
 
 # ---------------- DEMO SYSTEM ---------------- #
 class DemoLoginView(View):
-
     def get(self, request):
+        role = request.GET.get("role", "").lower().strip()
+        if role in ("sharing-admin", "sharing_admin", "admin"):
+            return DemoSharingAdminLoginView().get(request)
+        elif role in ("sharing-user", "sharing_user", "community", "user"):
+            return DemoSharingUserLoginView().get(request)
 
-        demo_user = User.objects.get(email="demo@sharegy.de")
+        # Standard Dashboard Demo
+        demo_user, _ = User.objects.get_or_create(
+            email="demo@sharegy.de",
+            defaults={"username": "demo@sharegy.de", "first_name": "Demo", "last_name": "User", "is_active": True}
+        )
 
         login(
             request,
@@ -729,6 +737,46 @@ class DemoLoginView(View):
         )
 
         return redirect("/app/dashboard")
+
+
+class DemoSharingAdminLoginView(View):
+    """
+    Loggt den Sharing-Admin ein und leitet direkt auf den Multi-Community Hub weiter.
+    """
+    def get(self, request):
+        from accounts.services_demo_sharing import seed_sharing_demo_environment
+
+        data = seed_sharing_demo_environment()
+        admin_user = data["admin_user"]
+
+        login(
+            request,
+            admin_user,
+            backend="django.contrib.auth.backends.ModelBackend",
+        )
+
+        # Weiterleitung auf den Multi-Community Management Hub
+        return redirect("/admin/communities")
+
+
+class DemoSharingUserLoginView(View):
+    """
+    Loggt den Sharing-User / Community-Teilnehmer ein und leitet auf das Energy Sharing Cockpit weiter.
+    """
+    def get(self, request):
+        from accounts.services_demo_sharing import seed_sharing_demo_environment
+
+        data = seed_sharing_demo_environment()
+        member_user = data["member_user"]
+
+        login(
+            request,
+            member_user,
+            backend="django.contrib.auth.backends.ModelBackend",
+        )
+
+        # Weiterleitung auf das persönliche Community Cockpit
+        return redirect("/app/tenant")
 
 
 # ---------------- GDPR / DSGVO COMPLIANCE ---------------- #

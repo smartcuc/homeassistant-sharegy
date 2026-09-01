@@ -17,7 +17,7 @@ from .views import AuditLogView
 from .views import RequestMagicLinkView, MagicLoginView, MagicLinkStatsView, LiveLoginsView, TenantStatsView
 
 from .views import DashboardStatsView
-from .views import DemoLoginView
+from .views import DemoLoginView, DemoSharingAdminLoginView, DemoSharingUserLoginView
 ##from .views import TrackEventView
 from rest_framework_simplejwt.views import TokenRefreshView
 
@@ -43,45 +43,41 @@ urlpatterns += [
 ]
 
 urlpatterns += [
-   path("use-invite/", UseInviteView.as_view()),
+    path("invite/use/", UseInviteView.as_view()),
+    path("invite/create/", CreateInviteView.as_view()),
+    path("invite/deactivate/", DeactivateInviteView.as_view()),
 ]
 
 urlpatterns += [
-    path("create-invite/", CreateInviteView.as_view()),
+    path("tenant/me/", MyTenantView.as_view()),
+    path("tenant/stats/", TenantStatsView.as_view()),
 ]
 
 urlpatterns += [
-    path("my-tenant/", MyTenantView.as_view()),
+    path("tenant/members/role/", UpdateMemberRoleView.as_view()),
+    path("tenant/members/remove/", RemoveMemberView.as_view()),
 ]
 
 urlpatterns += [
-path("update-role/", UpdateMemberRoleView.as_view()),
-]
-
-urlpatterns += [
-path("remove-member/", RemoveMemberView.as_view()),
-]
-
-urlpatterns += [
-    path("deactivate-invite/", DeactivateInviteView.as_view()),
     path("audit-log/", AuditLogView.as_view()),
 ]
 
-
 urlpatterns += [
-    path("request-magic-link/", RequestMagicLinkView.as_view()),
+    path("magic-link/request/", RequestMagicLinkView.as_view()),
+    path("magic-link/stats/", MagicLinkStatsView.as_view()),
     path("magic-login/", MagicLoginView.as_view()),
-    path("stats/magic-links/", MagicLinkStatsView.as_view()),
-    path("stats/live-logins/", LiveLoginsView.as_view()),
-    path("stats/tenants/", TenantStatsView.as_view()),
-    path("stats/dashboard/", DashboardStatsView.as_view()),
-##    path("track/", TrackEventView.as_view()),
 ]
 
 urlpatterns += [
-    # Refresh
-    path("auth/refresh/", TokenRefreshView.as_view()),
-    # Logout
+    path("dashboard-stats/", DashboardStatsView.as_view()),
+]
+
+urlpatterns += [
+    path("admin/live-logins/", LiveLoginsView.as_view()),
+]
+
+urlpatterns += [
+    path("auth/token/refresh/", TokenRefreshView.as_view()),
     path("auth/logout/", LogoutView.as_view()),
     # Current user
     path("auth/me/", MeView.as_view()),
@@ -93,7 +89,11 @@ urlpatterns += [
 ]
 
 urlpatterns += [
-    path("demo/", DemoLoginView.as_view(), name="demo-login",),
+    path("demo/", DemoLoginView.as_view(), name="demo-login"),
+    path("demo/sharing-admin/", DemoSharingAdminLoginView.as_view(), name="demo-sharing-admin"),
+    path("demo/sharing-user/", DemoSharingUserLoginView.as_view(), name="demo-sharing-user"),
+    path("demo/admin/", DemoSharingAdminLoginView.as_view(), name="demo-admin"),
+    path("demo/community/", DemoSharingUserLoginView.as_view(), name="demo-community"),
     path("gdpr/export/", GDPRExportView.as_view(), name="gdpr-export"),
     path("gdpr/delete-account/", GDPRDeleteAccountView.as_view(), name="gdpr-delete-account"),
 ]
