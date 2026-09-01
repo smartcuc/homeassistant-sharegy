@@ -29,6 +29,13 @@ from billing.api.views_community import (
     community_mscons_import_view,
 )
 
+from billing.api.views_stripe import (
+    StripeConfigView,
+    StripeCheckoutView,
+    StripeCustomerPortalView,
+    StripeWebhookView,
+)
+
 urlpatterns = [
     path("consumption/", consumption_view, name="billing_consumption"),
     path("subscription/me/", subscription_me_view, name="subscription_me"),
@@ -40,6 +47,12 @@ urlpatterns = [
     path("subscription/seed-demo/", seed_demo_billing_view, name="subscription_seed_demo"),
     path("subscription/coupons/validate/", validate_coupon_view, name="subscription_coupon_validate"),
     path("subscription/coupons/redeem/", redeem_coupon_view, name="subscription_coupon_redeem"),
+    # 💳 STRIPE PAYMENTS & SANDBOX
+    path("stripe/config/", StripeConfigView.as_view(), name="stripe_config"),
+    path("stripe/checkout/", StripeCheckoutView.as_view(), name="stripe_checkout"),
+    path("stripe/portal/", StripeCustomerPortalView.as_view(), name="stripe_portal"),
+    path("stripe/webhook/", StripeWebhookView.as_view(), name="stripe_webhook"),
+    # ⚡ COMMUNITY & ENERGY SHARING
     path("community/cockpit/", community_cockpit_view, name="community_cockpit"),
     path("community/tariffs/", community_tariffs_view, name="community_tariffs"),
     path("community/shares/", community_member_shares_view, name="community_member_shares"),
@@ -56,6 +69,7 @@ urlpatterns = [
     path("communities/<uuid:tenant_id>/announcements/", community_announcements_view, name="community_announcements"),
     path("communities/<uuid:tenant_id>/settings/", community_settings_update_view, name="community_settings_update"),
 ]
+
 
 
 

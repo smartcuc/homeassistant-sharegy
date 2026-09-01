@@ -24,7 +24,10 @@ export default function SubscriptionPlanCard({ subscriptionData, onRefresh }) {
     const currentPeriodEnd = subscriptionData?.subscription?.current_period_end;
     const cancelAtEnd = subscriptionData?.subscription?.cancel_at_period_end;
 
-    // Plan-Wechsel
+    // Stripe Portal State
+    const [portalLoading, setPortalLoading] = useState(false);
+
+    // Plan-Wechsel (via Stripe Checkout für Bezahlpläne)
     const handlePlanChange = async (targetPlan) => {
         if (targetPlan !== "free" && !termsAccepted) {
             setActionMsg({
@@ -37,22 +40,42 @@ export default function SubscriptionPlanCard({ subscriptionData, onRefresh }) {
         setLoadingPlan(targetPlan);
         setActionMsg(null);
         try {
-            const res = await apiFetch("/api/billing/subscription/change-plan/", {
-                method: "POST",
-                body: JSON.stringify({
-                    plan: targetPlan,
-                    terms_accepted: termsAccepted,
-                }),
-            });
-            if (res.status === "success") {
-                trackEvent("plan_upgrade", "billing", targetPlan);
-                setActionMsg({ type: "success", text: res.message });
-                if (onRefresh) onRefresh();
-            } else {
-                setActionMsg({
-                    type: "error",
-                    text: res.message || t("billing.plan_change_error", "Fehler beim Wechseln des Plans."),
+            if (targetPlan === "free") {
+                // Direktes Downgrade auf Free
+                const res = await apiFetch("/api/billing/subscription/change-plan/", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        plan: "free",
+                        terms_accepted: termsAccepted,
+                    }),
                 });
+                if (res.status === "success") {
+                    trackEvent("plan_downgrade", "billing", "free");
+                    setActionMsg({ type: "success", text: res.message });
+                    if (onRefresh) onRefresh();
+                } else {
+                    setActionMsg({ type: "error", text: res.message || "Fehler beim Wechseln auf Free." });
+                }
+            } else {
+                // Stripe Checkout Session für Bezahlpläne initialisieren
+                const res = await apiFetch("/api/billing/stripe/checkout/", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        plan: targetPlan,
+                        terms_accepted: termsAccepted,
+                    }),
+                });
+
+                if (res.status === "success" && res.checkout_url) {
+                    trackEvent("stripe_checkout_initiated", "billing", targetPlan);
+                    // Weiterleitung zur Stripe Checkout Session
+                    window.location.href = res.checkout_url;
+                } else {
+                    setActionMsg({
+                        type: "error",
+                        text: res.message || t("billing.plan_change_error", "Fehler beim Starten des Checkouts."),
+                    });
+                }
             }
         } catch (err) {
             setActionMsg({
@@ -61,6 +84,27 @@ export default function SubscriptionPlanCard({ subscriptionData, onRefresh }) {
             });
         } finally {
             setLoadingPlan(null);
+        }
+    };
+
+    // Stripe Customer Portal öffnen
+    const handleOpenStripePortal = async () => {
+        setPortalLoading(true);
+        setActionMsg(null);
+        try {
+            const res = await apiFetch("/api/billing/stripe/portal/", {
+                method: "POST",
+                body: JSON.stringify({ return_url: window.location.href }),
+            });
+            if (res.status === "success" && res.portal_url) {
+                window.location.href = res.portal_url;
+            } else {
+                setActionMsg({ type: "error", text: res.message || "Kundenportal konnte nicht geöffnet werden." });
+            }
+        } catch (err) {
+            setActionMsg({ type: "error", text: err.message || "Fehler beim Verbinden mit dem Kundenportal." });
+        } finally {
+            setPortalLoading(false);
         }
     };
 
@@ -423,6 +467,17 @@ export default function SubscriptionPlanCard({ subscriptionData, onRefresh }) {
                                         <div className="w-full py-2.5 rounded-xl bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 text-xs font-bold text-center border border-emerald-200 dark:border-emerald-800">
                                             {t("billing.current_plan", "✅ Dein aktueller Plan")}
                                         </div>
+                                        {p.id !== "free" && (
+                                            <button
+                                                type="button"
+                                                disabled={portalLoading}
+                                                onClick={handleOpenStripePortal}
+                                                className="w-full py-1.5 px-3 rounded-lg bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 text-[11px] font-bold transition flex items-center justify-center gap-1.5 border border-indigo-200 dark:border-indigo-800/60 cursor-pointer"
+                                            >
+                                                <span>⚙️</span>
+                                                <span>{portalLoading ? "Verbinde..." : t("billing.manage_stripe", "Zahlungsdaten im Stripe Portal verwalten")}</span>
+                                            </button>
+                                        )}
                                         {p.id !== "free" && !cancelAtEnd && (
                                             <button
                                                 type="button"

@@ -561,3 +561,20 @@ if SENTRY_DSN:
         traces_sample_rate=float(os.getenv("SENTRY_TRACES_SAMPLE_RATE", "0.1")),
     )
 
+
+# =============================
+# 💳 STRIPE PAYMENTS & SANDBOX CONFIG
+# =============================
+STRIPE_SECRET_KEY = os.getenv("STRIPE_TEST_SECRET_KEY", os.getenv("STRIPE_SECRET_KEY", "")).strip()
+STRIPE_PUBLIC_KEY = os.getenv("STRIPE_TEST_PUBLIC_KEY", os.getenv("STRIPE_PUBLIC_KEY", "")).strip()
+STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "").strip()
+STRIPE_SANDBOX_MODE = os.getenv("STRIPE_SANDBOX_MODE", "True").lower() in ("true", "1", "yes")
+
+# Optional: Explizite Stripe Price-IDs für wiederkehrende Pläne (falls in Stripe Dashboard angelegt)
+STRIPE_PRICE_IDS = {
+    "pro_monthly": os.getenv("STRIPE_PRICE_PRO_MONTHLY", ""),
+    "pro_yearly": os.getenv("STRIPE_PRICE_PRO_YEARLY", ""),
+    "landlord_monthly": os.getenv("STRIPE_PRICE_LANDLORD_MONTHLY", ""),
+    "landlord_yearly": os.getenv("STRIPE_PRICE_LANDLORD_YEARLY", ""),
+}
+

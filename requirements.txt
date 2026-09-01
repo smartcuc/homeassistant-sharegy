@@ -98,3 +98,4 @@ zope.interface==8.4
 pywebpush==2.5.0
 py-vapid==1.9.4
 firebase-admin>=7.5.0
+stripe>=10.0.0
