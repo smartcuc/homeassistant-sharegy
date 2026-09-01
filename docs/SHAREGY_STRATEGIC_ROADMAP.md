@@ -157,7 +157,7 @@
              • SMTP/E-Mail-Server Erreichbarkeits-Überwachung für transaktionale Mails
 
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ MEILENSTEIN 4: ENERGY SHARING COMMUNITIES & CLEARING (Säule 2 - ✅ 90% LIVE)  │
+│ MEILENSTEIN 4: ENERGY SHARING COMMUNITIES & CLEARING (Säule 2 - ✅ 95% LIVE)  │
 └───────────────────────────────────────────────────────────────────────────────┘
   ├── 4.1 ✅ Multi-Tenant RBAC & Rollenhierarchie (`admin`, `user_admin`, `helpdesk`, `auditor`, `member`)
   ├── 4.2 ✅ Revisionssicheres Audit-Log für Tenant-Events (`accounts.AuditLog`)
@@ -177,7 +177,7 @@
   ├── 4.6 ✅ **Sharing-Tarife & Automatische Monatsabrechnungs-Engine (Clearing)**:
   │          • `CommunityTariff`: Bezugspreis (Ct/kWh), Einspeisevergütung (Ct/kWh), Community-Umlage, Netzentgelt-Rabatt (§ 42b EnWG)
   │          • `CommunityMonthlyStatement`: Cent-genaue Verrechnung von Gutschriften & Forderungen mit Netto-Saldo (€)
-  │          • 1-Klick Abrechnungs-Trigger im Frontend
+  │          • 1-Klick Abrechnungs-Trigger im Frontend & Django Admin Integration
   ├── 4.7 ✅ **Zentrales Multi-Community Management Hub & Portfolio-Dashboard**:
   │          • Portfolio-Übersicht (`/admin/communities`) mit Portfolio-Gesamterzeugung, Autarkie & Ersparnis
   │          • Detaillierte Drilldown-Ansicht für jede Energiegemeinschaft (Teilnehmer, Zähler, Tarife, Einstellungen)
@@ -186,9 +186,12 @@
   │          • Publikationsreifer Guide [`docs/ENERGY_SHARING_METER_INGEST_GUIDE.md`](file:///c:/Users/Public/Dev/eswes/docs/ENERGY_SHARING_METER_INGEST_GUIDE.md)
   │          • 3 Zählerpfade (wMSB REST/SFTP, gMSB HAN-Schnittstelle, Submetering)
   │          • VNB-Marktkommunikation & Vermeidung von Doppelabrechnungen beim Reststromversorger
-  ├── 4.9 ⏳ **Detaillierter Export von Abrechnungsdaten (CSV / XML / XLSX / PDF) & ERP-Schnittstelle**:
-  │          • Download von Monatsabrechnungs-PDFs mit USt-Ausweis für Mitglieder
-  │          • Standardisierter ERP- & Buchhaltungs-Export (DATEV / CSV / XML) für Hausverwaltungen & Versorger
+  ├── 4.9 ✅ **PDF-Monatsabrechnungsnachweise & Multi-Format Exporte (Excel, CSV, XML / ERP)**:
+  │          • Druckfähiges ReportLab PDF gem. § 42b EnWG mit Abrechnungsnummer, Mengenbilanz & Saldobox
+  │          • Excel-Export (`.xlsx`) mit Spaltenformatierung, Währungsformaten & automatischen Summenformeln
+  │          • CSV-Export mit UTF-8 BOM und Semikolon für direkte DATEV-/Excel-Kompatibilität
+  │          • Standardisierter XML-Export (`<EnergySharingSettlementExport>`) für Hausverwaltungs- & ERP-Schnittstellen
+  │          • Integriert im Tenant-Dashboard (`TenantDashboard.jsx`) & Multi-Community Hub (`CommunitiesManagementHub.jsx`)
   ├── 4.10 ⏳ **Erweiterte Allokationsmodelle & Beteiligungsquoten**:
   │          • Standort- & eigentumsbasierte Quoten (statische Beteiligungs-% an Gemeinschafts-PV vs. dynamisch-proportional)
   └── 4.11 ⏳ **§ 14a EnWG Steuerbox-Schnittstelle & Pflichtdimmung auf 4,2 kW (SteuVE)**:
@@ -201,11 +204,12 @@
 
 | Schritt | Modul | Maßnahme | Status / Prio | Ziel & Nächste Entscheidung |
 |---|---|---|:---:|---|
-| **Step 1** | `billing/sharing/` | **Abrechnungs-Exporte & PDF-Download**: PDF-Generierung für Monatsabrechnungen (`CommunityMonthlyStatement`) + CSV/XLSX-Export für Mitglieder & ERP | ⚡ **P1 (Sofort)** | Druck- und buchungsfähige Abrechnungsnachweise für Mitglieder & Hausverwaltungen |
-| **Step 2** | `billing/sharing/` | **Beteiligungsquoten & Allokationsmodelle**: Unterstützung von festen Beteiligungs-% an Gemeinschaftsanlagen | ⚡ **P1** | Flexible Allokation bei gemeinsamen Dachanlagen / Mieterstrom |
+| **Step 1** | `billing/sharing/` | **Beteiligungsquoten & Allokationsmodelle**: Unterstützung von festen Beteiligungs-% an Gemeinschaftsanlagen (statische Quoten vs. dynamische Allokation) | ⚡ **P1 (Nächster Schritt)** | Flexible Allokation bei gemeinsamen Dachanlagen / Mieterstrom |
+| **Step 2** | `grid/enwg/` | **§ 14a EnWG Steuerbox & Dimmung**: Dynamische Leistungsbegrenzung auf 4,2 kW für SteuVE (WP, Wallbox, Speicher) via REST/Modbus | ⚡ **P1** | Gesetzliche Netzbetreiber-Konformität in Deutschland |
 | **Step 3** | `billing/tariffs/` | **Dynamische & Börsenpreis-gekoppelte Tarife**: Indexierte Sharing-Tarife (Day-Ahead Spotpreis + Formelaufschlag) | ⚡ **P2** | Dynamische Preissignale innerhalb der Community |
-| **Step 4** | `grid/enwg/` | **§ 14a EnWG Steuerbox & Dimmung**: Dynamische Leistungsbegrenzung auf 4,2 kW für SteuVE (WP, Wallbox, Speicher) | ⚡ **P2** | Gesetzliche Netzbetreiber-Konformität in Deutschland |
-| **Step 5** | `billing/payment/` | **Payment- & Provider-Evaluierung**: Klärung von Zahlungsdienstleistern (Stripe, SEPA, GoCardless) | 💳 **P3 (Nach Evaluierung)** | Vorbereitung des automatischen Einzugs von Mitgliedsbeiträgen |
+| **Step 4** | `billing/payment/` | **Payment- & Provider-Evaluierung**: Klärung von Zahlungsdienstleistern (Stripe, SEPA, GoCardless) für automatischen Beitragseinzug | 💳 **P2 (Nach Evaluierung)** | Vorbereitung des automatischen Einzugs von Mitgliedsbeiträgen |
+| **Step 5** | `billing/edifact/` | **Standardisierte Marktkommunikations-Bridge**: Export-Mapping auf MSCONS / EDIFACT zur VNB-Abstimmung | ⚡ **P3** | Nahtloser Austausch mit Netzbetreibern und Aggregatoren |
+
 
 
 

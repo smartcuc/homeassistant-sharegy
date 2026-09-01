@@ -13,7 +13,8 @@
 | **Phase 3** | Celery & Buffer-Härtung | 🟢 EMS-Free Stabilität | 🟢 100% Abgeschlossen | 3.1, 3.2, 3.3, 3.4, 3.5 | – |
 | **Phase 4** | Architektur & Diagramme | 🟢 EMS-Free Sankey & Tests | 🟢 100% Abgeschlossen | 4.1, 4.2, 4.3, 4.4 | – |
 | **Phase 5** | EMS-Pro, KI, Apps & Aktorik | 🟢 EMS-Pro & Mobile | 🟢 100% Abgeschlossen | 5.1 – 5.21 | – |
-| **Phase 6** | Säule 2: Energy Sharing & Clearing | 🟢 ESC & Multi-Community Hub | 🟢 100% Abgeschlossen | 6.1 (OBIS Ingest), 6.2 (Guide), 6.3 (Cockpit), 6.4 (Tarife & Settlement), 6.5 (Multi-Community Hub) | 6.6 (§ 14a EnWG) |
+| **Phase 6** | Säule 2: Energy Sharing & Clearing | 🟢 ESC & Multi-Community Hub | 🟢 95% Abgeschlossen | 6.1 (OBIS Ingest), 6.2 (Cockpit), 6.3 (Guide), 6.4 (Tarife & Settlement), 6.5 (Multi-Community Hub), 6.6 (PDF & Multi-Format Exporte) | 6.7 (Beteiligungsquoten), 6.8 (§ 14a EnWG) |
+
 
 
 
@@ -509,34 +510,81 @@
 
 ---
 
+### [x] 6.4 Sharing-Tarife & Automatische Monatsabrechnungs-Engine (Clearing)
+- **Bereich**: Billing Models, Admin & Calculation Engine (`billing/models.py`, `billing/admin.py`, `billing/services_balance.py`, `billing/api/views_community.py`)
+- **Status**: ✅ **Erledigt**.
+  - `CommunityTariff` mit Bezugspreis (Ct/kWh), Einspeisevergütung (Ct/kWh), Community-Umlage und Netzentgelt-Rabatt gem. § 42b EnWG.
+  - Cent-genaue Verrechnung aller erzeugten und bezogenen Mengen in `CommunityMonthlyStatement` mit automatischer Netto-Saldoberechnung.
+  - Vollständige Registrierung in Django Admin (`admin/billing/`) und 1-Klick Abrechnungs-Trigger im Frontend.
+
+---
+
+### [x] 6.5 Zentrales Multi-Community Management Hub & Portfolio-Dashboard
+- **Bereich**: Super-Admin & Quartiers-Management (`frontend/src/pages/admin/CommunitiesManagementHub.jsx`, `accounts/api/views.py`, `billing/models.py`)
+- **Status**: ✅ **Erledigt**.
+  - **Portfolio-KPIs**: Gesamterzeugung (2.8.0), Gesamtverbrauch (1.8.0), Portfolio-Autarkie (%) und erzielte Gesamtersparnis (€).
+  - **Drilldown-Modal**: Zähler- und Mitgliederübersicht, Tarife, Einladungen und Einstellungen je Quartier.
+  - **Quartiers-Rundschreiben**: `CommunityAnnouncement`-Engine für Broadcast-Nachrichten mit Dringlichkeitsstufen.
+
+---
+
+### [x] 6.6 PDF-Monatsabrechnungsnachweise & Multi-Format Exporte (Excel, CSV, XML / ERP)
+- **Bereich**: Billing Export Engine & Member Self-Service (`billing/services_sharing_exports.py`, `billing/api/views_community.py`, `frontend/src/pages/TenantDashboard.jsx`)
+- **Status**: ✅ **Erledigt**.
+  - **ReportLab PDF-Monatsnachweis**: Rechtssicherer Abrechnungsnachweis gem. § 42b EnWG mit Abrechnungsnummer, 15m-Mengenbilanz, Tarifpositionen und farbcodierter Highlight-Saldobox (Guthaben/Nachzahlung).
+  - **Excel-Export (`.xlsx`)**: Vollständig formatiertes Arbeitsblatt mit Währungsformaten, Farbcodierung und automatischen Summenformeln (`=SUM(...)`).
+  - **CSV-Export (`.csv`)**: UTF-8 mit BOM (für sofortige deutsche Sonderzeichen in Excel) und Semikolon-Trennzeichen.
+  - **XML-Export (`.xml`)**: Standardisiertes ERP-Export-Format (`<EnergySharingSettlementExport>`) zur automatisierten Schnittstellenanbindung für Versorger und Hausverwaltungen.
+  - **Frontend-Integration**: 1-Klick PDF-Download und Export-Leiste im `TenantDashboard.jsx` und im `CommunitiesManagementHub.jsx`.
+
+---
+
+### [ ] 6.7 Erweiterte Allokationsmodelle & Beteiligungsquoten (Statische vs. dynamische Quoten)
+- **Bereich**: Allokations-Engine (`billing/services_balance.py`, `billing/models.py`)
+- **Ziel**:
+  - Unterstützung von statischen Beteiligungsquoten (z. B. 10 kWp Gemeinschaftsanlage aufgeteilt nach Miteigentumsanteilen MEA / festen Prozenten).
+  - Hybride Allokation: Vorrangige Quotenzuteilung mit dynamischer Rest-Verteilung im 15-Minuten-Raster.
+
+---
+
+### [ ] 6.8 § 14a EnWG Steuerbox-Schnittstelle & Pflichtdimmung auf 4,2 kW (SteuVE)
+- **Bereich**: Grid Control & Aktorik (`grid/enwg/`, `devices/adapters/`)
+- **Ziel**:
+  - REST/Modbus TCP/EEBUS Schnittstelle zur Netzbetreiber-Steuerbox (CLS-Kanal / FNN-Steuerbox).
+  - Automatisierte Leistungsbegrenzung steuerbarer Verbrauchseinrichtungen (Wärmepumpen, Wallboxen, Batteriespeicher) auf 4,2 kW bei Netzüberlastung.
+
+---
+
 ## 🎯 7. Verbindliche Prioritätenliste (Stand: 1. September 2026)
 
 ```
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ ✅ ERLEDIGT: SÄULE 1 (EMS) & SÄULE 2 (ENERGY SHARING BASIS)                    │
+│ ✅ ERLEDIGT: SÄULE 1 (EMS) & SÄULE 2 (ENERGY SHARING CLEARING LIVE)            │
 ├───────────────────────────────────────────────────────────────────────────────┤
 │ • 🟢 Säule 1 (EMS-Free & Pro): WSS Ingest, Live-Sankey, Forecasts, Aktorik,   │
 │    Systemstatus-Monitoring (/app/status), Geräteprofiling & Mobile Apps       │
 │ • ⚡ Säule 2 (Energy Sharing): 15m OBIS-Clearing, Community Cockpit,          │
-│    48h KI-Prognosen, Late Ingestion Recalculation & MsbG Ingest-Leitfaden     │
+│    Sharing-Tarife, Multi-Community Hub, PDF-Nachweise & Multi-Format Exporte  │
 └───────────────────────────────────────────────────────────────────────────────┘
                                        │
                                        ▼
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ PRIORITÄT 1: SHARING-TARIFE & INTERNE ABRECHNUNGS-GUTSCHRIFTEN                │
+│ PRIORITÄT 1: ERWEITERTE ALLOKATION & REGULATORISCHE NETZINTEGRATION (§ 14a)   │
 ├───────────────────────────────────────────────────────────────────────────────┤
-│ 1. ⚡ Task 6.4: Sharing-Tarife, Umlagenschlüssel & monatliche Abrechnungs-PDFs│
-│ 2. 💳 Task 3.1: Payment- & Provider-Evaluierung (Stripe, SEPA, GoCardless)   │
+│ 1. ⚡ Task 6.7: Statische Beteiligungsquoten (MEA) & hybride PV-Allokation     │
+│ 2. ⚡ Task 6.8: § 14a EnWG Steuerbox-Schnittstelle & Pflichtdimmung (4,2 kW)  │
 └───────────────────────────────────────────────────────────────────────────────┘
                                        │
                                        ▼
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ PRIORITÄT 2: REGULATORISCHE NETZ-INTEGRATION (§ 14a EnWG)                     │
+│ PRIORITÄT 2: DYNAMISCHE TARIFE & ZAHLUNGSSCHNITTSTELLEN                       │
 ├───────────────────────────────────────────────────────────────────────────────┤
-│ 3. ⚡ Task 6.5: § 14a EnWG Steuerbox-Schnittstelle & Pflichtdimmung (4,2 kW)  │
-│ 4. 🛡️ Task 3.4: Payment- & Mail-Webhook Monitoring auf Status-Dashboard       │
+│ 3. 📈 Task: Dynamische & Börsenpreis-indexierte Sharing-Tarife                │
+│ 4. 💳 Task 3.1: Payment-Provider Evaluierung (Stripe / SEPA-Lastschriften)   │
+│ 5. 🔌 Task: Standardisierte Marktkommunikations-Bridge (MSCONS / EDIFACT)     │
 └───────────────────────────────────────────────────────────────────────────────┘
 ```
+
 
 
 
