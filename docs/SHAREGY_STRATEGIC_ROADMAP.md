@@ -157,11 +157,11 @@
              • SMTP/E-Mail-Server Erreichbarkeits-Überwachung für transaktionale Mails
 
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ MEILENSTEIN 4: ENERGY SHARING COMMUNITIES & § 14a EnWG (Säule 2 - ✅ LIVE)    │
+│ MEILENSTEIN 4: ENERGY SHARING COMMUNITIES & CLEARING (Säule 2 - ✅ 90% LIVE)  │
 └───────────────────────────────────────────────────────────────────────────────┘
   ├── 4.1 ✅ Multi-Tenant RBAC & Rollenhierarchie (`admin`, `user_admin`, `helpdesk`, `auditor`, `member`)
   ├── 4.2 ✅ Revisionssicheres Audit-Log für Tenant-Events (`accounts.AuditLog`)
-  ├── 4.3 ✅ Tenant-Dashboard & Mitgliedereinladungen (`/app/tenant`)
+  ├── 4.3 ✅ Tenant-Dashboard, Einladungslinks & Onboarding-Flow (`/app/tenant`)
   ├── 4.4 ✅ **15-Minuten Community-Bilanzierung & Resiliente Ingestion (OBIS 1.8.0 / 2.8.0)**:
   │          • Eichrechtskonforme 15m-Slot-Aggregation in `BalanceSlot`
   │          • Automatische Plausibilitätsprüfung & Ausreißer-Erkennung (`validate_obis_reading`)
@@ -173,26 +173,39 @@
   │          • 5 Hero-KPIs: Produziert (2.8.0), Verbraucht (1.8.0), Geteilt (Autarkie %), Zugekauft (Reststrom) & Ersparnis (€)
   │          • 15-Minuten Lastgang-Timeline der letzten 24 Stunden
   │          • 48-Stunden KI-Erzeugungsprognose mit Hervorhebung günstiger Ladefenster (*Peak Windows*)
-  │          • Tab-Navigation (`⚡ Energy Cockpit`, `👥 Mitglieder & Zähler`, `📜 Audit`)
-  ├── 4.6 ✅ **Gesetzlicher Ingestion- & Reststrom-Leitfaden (MsbG & MaKo / MSCONS)**:
+  │          • Tab-Navigation (`⚡ Energy Cockpit`, `💰 Tarife & Abrechnungen`, `👥 Mitglieder & Zähler`, `📜 Audit`)
+  ├── 4.6 ✅ **Sharing-Tarife & Automatische Monatsabrechnungs-Engine (Clearing)**:
+  │          • `CommunityTariff`: Bezugspreis (Ct/kWh), Einspeisevergütung (Ct/kWh), Community-Umlage, Netzentgelt-Rabatt (§ 42b EnWG)
+  │          • `CommunityMonthlyStatement`: Cent-genaue Verrechnung von Gutschriften & Forderungen mit Netto-Saldo (€)
+  │          • 1-Klick Abrechnungs-Trigger im Frontend
+  ├── 4.7 ✅ **Zentrales Multi-Community Management Hub & Portfolio-Dashboard**:
+  │          • Portfolio-Übersicht (`/admin/communities`) mit Portfolio-Gesamterzeugung, Autarkie & Ersparnis
+  │          • Detaillierte Drilldown-Ansicht für jede Energiegemeinschaft (Teilnehmer, Zähler, Tarife, Einstellungen)
+  │          • Community-Rundschreiben & Broadcast-Mitteilungen (`CommunityAnnouncement`)
+  ├── 4.8 ✅ **Gesetzlicher Ingestion- & Reststrom-Leitfaden (MsbG & MaKo / MSCONS)**:
   │          • Publikationsreifer Guide [`docs/ENERGY_SHARING_METER_INGEST_GUIDE.md`](file:///c:/Users/Public/Dev/eswes/docs/ENERGY_SHARING_METER_INGEST_GUIDE.md)
   │          • 3 Zählerpfade (wMSB REST/SFTP, gMSB HAN-Schnittstelle, Submetering)
   │          • VNB-Marktkommunikation & Vermeidung von Doppelabrechnungen beim Reststromversorger
-  ├── 4.7 ⏳ **Sharing-Tarife, Umlagen & kaufmännische Abrechnungsperioden**:
-  │          • Dynamische Community-Tarifmodelle & interne Abrechnungsgutschriften
-  └── 4.8 ⏳ **§ 14a EnWG Steuerbox-Schnittstelle & Pflichtdimmung auf 4,2 kW (SteuVE)**:
+  ├── 4.9 ⏳ **Detaillierter Export von Abrechnungsdaten (CSV / XML / XLSX / PDF) & ERP-Schnittstelle**:
+  │          • Download von Monatsabrechnungs-PDFs mit USt-Ausweis für Mitglieder
+  │          • Standardisierter ERP- & Buchhaltungs-Export (DATEV / CSV / XML) für Hausverwaltungen & Versorger
+  ├── 4.10 ⏳ **Erweiterte Allokationsmodelle & Beteiligungsquoten**:
+  │          • Standort- & eigentumsbasierte Quoten (statische Beteiligungs-% an Gemeinschafts-PV vs. dynamisch-proportional)
+  └── 4.11 ⏳ **§ 14a EnWG Steuerbox-Schnittstelle & Pflichtdimmung auf 4,2 kW (SteuVE)**:
              • EEBUS / Modbus TCP / REST Steuerbox-Anbindung für Wärmepumpen & Wallboxen
 ```
 
 ---
 
-## 📋 4. Konkreter Action-Plan für die nächsten Schritte (Entscheidungsmatrix)
+## 📋 4. Konkreter Action-Plan für die nächsten Schritte (Prioritätenmatrix)
 
 | Schritt | Modul | Maßnahme | Status / Prio | Ziel & Nächste Entscheidung |
 |---|---|---|:---:|---|
-| **Step 1** | `billing/sharing/` | **Sharing-Tarife & Abrechnung**: Interne Verrechnungssätze (Ct/kWh), Umlagen und automatische Monatsabrechnungs-PDFs für Erzeuger/Verbraucher | ⚡ **P1 (Nächster Fokus)** | Kommerzieller Rollout & interne Gutschriften in Communities |
-| **Step 2** | `billing/payment/` | **Payment- & Provider-Evaluierung**: Klärung von Zahlungsdienstleistern (Stripe, SEPA, GoCardless), Gebührenstruktur & Abwicklung | 💳 **P1 (Nach Evaluierung)** | Vorbereitung des automatischen Einzugs von Mitgliedsbeiträgen |
-| **Step 3** | `grid/enwg/` | **§ 14a EnWG Steuerbox & Dimmung**: Dynamische Leistungsbegrenzung auf 4,2 kW für SteuVE (WP, Wallbox, Speicher) | ⚡ **P2** | Gesetzliche Netzbetreiber-Konformität in Deutschland |
-| **Step 4** | `system/status/` | **Status-Erweiterung (Payment & Mail)**: Webhook-Health & SMTP-Dienst-Monitoring zur Status-Seite hinzufügen | 🛡️ **P2** | Lückenlose Überwachung aller Zahlungs- und Benachrichtigungskanäle |
+| **Step 1** | `billing/sharing/` | **Abrechnungs-Exporte & PDF-Download**: PDF-Generierung für Monatsabrechnungen (`CommunityMonthlyStatement`) + CSV/XLSX-Export für Mitglieder & ERP | ⚡ **P1 (Sofort)** | Druck- und buchungsfähige Abrechnungsnachweise für Mitglieder & Hausverwaltungen |
+| **Step 2** | `billing/sharing/` | **Beteiligungsquoten & Allokationsmodelle**: Unterstützung von festen Beteiligungs-% an Gemeinschaftsanlagen | ⚡ **P1** | Flexible Allokation bei gemeinsamen Dachanlagen / Mieterstrom |
+| **Step 3** | `billing/tariffs/` | **Dynamische & Börsenpreis-gekoppelte Tarife**: Indexierte Sharing-Tarife (Day-Ahead Spotpreis + Formelaufschlag) | ⚡ **P2** | Dynamische Preissignale innerhalb der Community |
+| **Step 4** | `grid/enwg/` | **§ 14a EnWG Steuerbox & Dimmung**: Dynamische Leistungsbegrenzung auf 4,2 kW für SteuVE (WP, Wallbox, Speicher) | ⚡ **P2** | Gesetzliche Netzbetreiber-Konformität in Deutschland |
+| **Step 5** | `billing/payment/` | **Payment- & Provider-Evaluierung**: Klärung von Zahlungsdienstleistern (Stripe, SEPA, GoCardless) | 💳 **P3 (Nach Evaluierung)** | Vorbereitung des automatischen Einzugs von Mitgliedsbeiträgen |
+
 
 
