@@ -946,6 +946,7 @@ def community_member_shares_view(request):
         "community_id": str(tenant.id),
         "community_name": tenant.name,
         "total_allocated_percent": round(float(total_percent), 4),
+        "total_configured_share_percent": round(float(total_percent), 4),
         "is_balanced_100": is_balanced_100,
         "shares": shares_list,
     })

@@ -357,7 +357,7 @@ export default function TenantDashboard() {
                             </div>
                             <div className="mt-3">
                                 <div className="text-2xl font-black text-amber-900 dark:text-amber-100">
-                                    {currentStats.produced_kwh.toFixed(1)} <span className="text-xs font-normal">kWh</span>
+                                    {Number(currentStats?.produced_kwh ?? 0).toFixed(1)} <span className="text-xs font-normal">kWh</span>
                                 </div>
                                 <div className="text-[11px] text-amber-700/80 dark:text-amber-300/80 mt-0.5">
                                     Gesamte Solar-Erzeugung
@@ -375,7 +375,7 @@ export default function TenantDashboard() {
                             </div>
                             <div className="mt-3">
                                 <div className="text-2xl font-black text-sky-900 dark:text-sky-100">
-                                    {currentStats.consumed_kwh.toFixed(1)} <span className="text-xs font-normal">kWh</span>
+                                    {Number(currentStats?.consumed_kwh ?? 0).toFixed(1)} <span className="text-xs font-normal">kWh</span>
                                 </div>
                                 <div className="text-[11px] text-sky-700/80 dark:text-sky-300/80 mt-0.5">
                                     Bedarf aller Mitglieder
@@ -393,10 +393,10 @@ export default function TenantDashboard() {
                             </div>
                             <div className="mt-3">
                                 <div className="text-2xl font-black text-emerald-900 dark:text-emerald-100">
-                                    {currentStats.shared_kwh.toFixed(1)} <span className="text-xs font-normal">kWh</span>
+                                    {Number(currentStats?.shared_kwh ?? 0).toFixed(1)} <span className="text-xs font-normal">kWh</span>
                                 </div>
                                 <div className="text-[11px] text-emerald-700/80 dark:text-emerald-300/80 mt-0.5 font-semibold">
-                                    Autarkiegrad: {currentStats.autarky_pct}%
+                                    Autarkiegrad: {currentStats?.autarky_pct ?? 0}%
                                 </div>
                             </div>
                         </div>
@@ -411,7 +411,7 @@ export default function TenantDashboard() {
                             </div>
                             <div className="mt-3">
                                 <div className="text-2xl font-black text-rose-900 dark:text-rose-100">
-                                    {currentStats.grid_import_kwh.toFixed(1)} <span className="text-xs font-normal">kWh</span>
+                                    {Number(currentStats?.grid_import_kwh ?? 0).toFixed(1)} <span className="text-xs font-normal">kWh</span>
                                 </div>
                                 <div className="text-[11px] text-rose-700/80 dark:text-rose-300/80 mt-0.5">
                                     Über Restversorger bezogen
@@ -429,7 +429,7 @@ export default function TenantDashboard() {
                             </div>
                             <div className="mt-3">
                                 <div className="text-2xl font-black text-indigo-900 dark:text-indigo-100">
-                                    {currentStats.savings_eur.toFixed(2)} <span className="text-xs font-normal">€</span>
+                                    {Number(currentStats?.savings_eur ?? 0).toFixed(2)} <span className="text-xs font-normal">€</span>
                                 </div>
                                 <div className="text-[11px] text-indigo-700/80 dark:text-indigo-300/80 mt-0.5 font-semibold">
                                     vs. Grundversorger
@@ -598,7 +598,7 @@ export default function TenantDashboard() {
                                 <div>
                                     <div className="text-[11px] text-indigo-300 font-semibold uppercase">Bezugspreis (Sharing)</div>
                                     <div className="text-2xl font-black mt-1 text-white">
-                                        {activeTariff.sharing_price_ct_kwh.toFixed(2)} <span className="text-xs font-normal">Ct/kWh</span>
+                                        {Number(activeTariff?.sharing_price_ct_kwh ?? 0).toFixed(2)} <span className="text-xs font-normal">Ct/kWh</span>
                                     </div>
                                     <div className="text-[10px] text-indigo-300/70 mt-0.5">für Solar-Abnehmer</div>
                                 </div>
@@ -606,7 +606,7 @@ export default function TenantDashboard() {
                                 <div>
                                     <div className="text-[11px] text-indigo-300 font-semibold uppercase">Einspeisevergütung</div>
                                     <div className="text-2xl font-black mt-1 text-emerald-300">
-                                        {activeTariff.producer_payout_ct_kwh.toFixed(2)} <span className="text-xs font-normal">Ct/kWh</span>
+                                        {Number(activeTariff?.producer_payout_ct_kwh ?? 0).toFixed(2)} <span className="text-xs font-normal">Ct/kWh</span>
                                     </div>
                                     <div className="text-[10px] text-indigo-300/70 mt-0.5">Gutschrift an Einspeiser</div>
                                 </div>
@@ -614,7 +614,7 @@ export default function TenantDashboard() {
                                 <div>
                                     <div className="text-[11px] text-indigo-300 font-semibold uppercase">Community-Umlage</div>
                                     <div className="text-2xl font-black mt-1 text-amber-300">
-                                        {activeTariff.community_fee_ct_kwh.toFixed(2)} <span className="text-xs font-normal">Ct/kWh</span>
+                                        {Number(activeTariff?.community_fee_ct_kwh ?? 0).toFixed(2)} <span className="text-xs font-normal">Ct/kWh</span>
                                     </div>
                                     <div className="text-[10px] text-indigo-300/70 mt-0.5">Betrieb & Software</div>
                                 </div>
@@ -634,11 +634,11 @@ export default function TenantDashboard() {
                                     <div className="flex items-center gap-2">
                                         <span>⚖️</span>
                                         <span className="text-indigo-200">
-                                            Konfigurierte Beteiligungsquoten: <strong>{sharesData.shares.length} Mitglieder</strong> (Gesamt: {sharesData.total_configured_share_percent.toFixed(1)} %)
+                                            Konfigurierte Beteiligungsquoten: <strong>{sharesData.shares.length} Mitglieder</strong> (Gesamt: {Number(sharesData.total_allocated_percent ?? sharesData.total_configured_share_percent ?? 0).toFixed(1)} %)
                                         </span>
                                     </div>
                                     <span className="text-[11px] text-indigo-300 font-mono">
-                                        Modell: {activeTariff.allocation_model.toUpperCase()}
+                                        Modell: {(activeTariff?.allocation_model || "DYNAMIC").toUpperCase()}
                                     </span>
                                 </div>
                             )}
@@ -715,9 +715,9 @@ export default function TenantDashboard() {
                                                     Mitglied: <span className="font-medium text-slate-700 dark:text-slate-300">{stmt.user_email}</span>
                                                 </div>
                                                 <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs pt-1 text-slate-600 dark:text-slate-400">
-                                                    <span>☀️ Erzeugt: <strong>{stmt.produced_total_kwh.toFixed(1)} kWh</strong></span>
-                                                    <span>🏠 Verbraucht: <strong>{stmt.consumed_total_kwh.toFixed(1)} kWh</strong></span>
-                                                    <span>🤝 Geteilt: <strong>{(stmt.shared_imported_kwh + stmt.shared_exported_kwh).toFixed(1)} kWh</strong></span>
+                                                    <span>☀️ Erzeugt: <strong>{Number(stmt.produced_total_kwh ?? 0).toFixed(1)} kWh</strong></span>
+                                                    <span>🏠 Verbraucht: <strong>{Number(stmt.consumed_total_kwh ?? 0).toFixed(1)} kWh</strong></span>
+                                                    <span>🤝 Geteilt: <strong>{(Number(stmt.shared_imported_kwh ?? 0) + Number(stmt.shared_exported_kwh ?? 0)).toFixed(1)} kWh</strong></span>
                                                 </div>
                                             </div>
 
@@ -730,10 +730,10 @@ export default function TenantDashboard() {
                                                         ? "text-emerald-600 dark:text-emerald-400"
                                                         : "text-rose-600 dark:text-rose-400"
                                                 }`}>
-                                                    {stmt.is_payout ? "+" : ""}{stmt.net_balance_eur.toFixed(2)} €
+                                                    {stmt.is_payout ? "+" : ""}{Number(stmt.net_balance_eur ?? 0).toFixed(2)} €
                                                 </div>
                                                 <div className="text-[10px] text-slate-400 mt-0.5">
-                                                    Gutschrift: {stmt.credit_shared_export_eur.toFixed(2)} € | Bezug: {stmt.charge_shared_import_eur.toFixed(2)} €
+                                                    Gutschrift: {Number(stmt.credit_shared_export_eur ?? 0).toFixed(2)} € | Bezug: {Number(stmt.charge_shared_import_eur ?? 0).toFixed(2)} €
                                                 </div>
                                             </div>
                                         </div>

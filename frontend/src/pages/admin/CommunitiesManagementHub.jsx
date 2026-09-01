@@ -350,21 +350,21 @@ export default function CommunitiesManagementHub() {
                 <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs">
                     <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">Erzeugung</span>
                     <div className="text-2xl font-black text-amber-600 dark:text-amber-400 mt-1">
-                        ☀️ {portfolio.total_produced_kwh.toFixed(0)} <span className="text-xs font-semibold">kWh</span>
+                        ☀️ {Number(portfolio?.total_produced_kwh ?? 0).toFixed(0)} <span className="text-xs font-semibold">kWh</span>
                     </div>
                 </div>
 
                 <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs">
                     <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Autarkiegrad</span>
                     <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">
-                        ⚡ {portfolio.portfolio_autarky_pct.toFixed(1)}%
+                        ⚡ {Number(portfolio?.portfolio_autarky_pct ?? 0).toFixed(1)}%
                     </div>
                 </div>
 
                 <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs">
                     <span className="text-[11px] font-bold text-cyan-600 dark:text-cyan-400 uppercase tracking-wider">Ersparnis</span>
                     <div className="text-2xl font-black text-cyan-600 dark:text-cyan-400 mt-1">
-                        💶 {portfolio.total_savings_eur.toFixed(0)} €
+                        💶 {Number(portfolio?.total_savings_eur ?? 0).toFixed(0)} €
                     </div>
                 </div>
             </div>
@@ -409,12 +409,12 @@ export default function CommunitiesManagementHub() {
                                     <div className="space-y-1 pt-1">
                                         <div className="flex justify-between text-xs font-semibold">
                                             <span className="text-slate-500 dark:text-slate-400">Autarkiegrad</span>
-                                            <span className="text-emerald-600 dark:text-emerald-400">{c.autarky_pct}%</span>
+                                            <span className="text-emerald-600 dark:text-emerald-400">{Number(c.autarky_pct ?? 0).toFixed(1)}%</span>
                                         </div>
                                         <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
                                             <div
                                                 className="bg-emerald-500 h-full rounded-full transition-all"
-                                                style={{ width: `${Math.min(c.autarky_pct, 100)}%` }}
+                                                style={{ width: `${Math.min(c.autarky_pct ?? 0, 100)}%` }}
                                             ></div>
                                         </div>
                                     </div>
@@ -424,25 +424,25 @@ export default function CommunitiesManagementHub() {
                                         <div>
                                             <span className="text-slate-400 text-[10px]">Monat Erzeugung</span>
                                             <div className="font-bold text-amber-600 dark:text-amber-400">
-                                                ☀️ {c.month_produced_kwh.toFixed(1)} kWh
+                                                ☀️ {Number(c.month_produced_kwh ?? 0).toFixed(1)} kWh
                                             </div>
                                         </div>
                                         <div>
                                             <span className="text-slate-400 text-[10px]">Geteilt (Sharing)</span>
                                             <div className="font-bold text-emerald-600 dark:text-emerald-400">
-                                                🤝 {c.month_shared_kwh.toFixed(1)} kWh
+                                                🤝 {Number(c.month_shared_kwh ?? 0).toFixed(1)} kWh
                                             </div>
                                         </div>
                                         <div>
                                             <span className="text-slate-400 text-[10px]">Mitglieder & Zähler</span>
                                             <div className="font-semibold text-slate-700 dark:text-slate-300">
-                                                👥 {c.members_count} / 🔌 {c.meters_count}
+                                                👥 {c.members_count ?? 0} / 🔌 {c.meters_count ?? 0}
                                             </div>
                                         </div>
                                         <div>
                                             <span className="text-slate-400 text-[10px]">Aktiver Tarif</span>
                                             <div className="font-semibold text-indigo-600 dark:text-indigo-400">
-                                                {c.tariff ? `${c.tariff.sharing_price_ct_kwh.toFixed(1)} Ct/kWh` : "Standard"}
+                                                {c.tariff ? `${Number(c.tariff.sharing_price_ct_kwh ?? 0).toFixed(1)} Ct/kWh` : "Standard"}
                                             </div>
                                         </div>
                                     </div>
@@ -578,20 +578,20 @@ export default function CommunitiesManagementHub() {
                                             <div>
                                                 <div className="text-[10px] text-slate-400">Erzeugt (Mtl.)</div>
                                                 <div className="font-bold text-amber-600 dark:text-amber-400">
-                                                    ☀️ {m.month_produced_kwh} kWh
+                                                    ☀️ {Number(m.month_produced_kwh ?? 0).toFixed(1)} kWh
                                                 </div>
                                             </div>
                                             <div>
                                                 <div className="text-[10px] text-slate-400">Verbraucht (Mtl.)</div>
                                                 <div className="font-bold text-sky-600 dark:text-sky-400">
-                                                    🏠 {m.month_consumed_kwh} kWh
+                                                    🏠 {Number(m.month_consumed_kwh ?? 0).toFixed(1)} kWh
                                                 </div>
                                             </div>
                                             {m.last_statement && (
                                                 <div className="pl-3 border-l border-slate-200 dark:border-slate-700">
                                                     <div className="text-[10px] text-slate-400">Letzter Saldo</div>
-                                                    <div className={`font-bold ${m.last_statement.net_balance_eur >= 0 ? "text-emerald-600" : "text-rose-600"}`}>
-                                                        {m.last_statement.net_balance_eur >= 0 ? "+" : ""}{m.last_statement.net_balance_eur.toFixed(2)} €
+                                                    <div className={`font-bold ${Number(m.last_statement.net_balance_eur ?? 0) >= 0 ? "text-emerald-600" : "text-rose-600"}`}>
+                                                        {Number(m.last_statement.net_balance_eur ?? 0) >= 0 ? "+" : ""}{Number(m.last_statement.net_balance_eur ?? 0).toFixed(2)} €
                                                     </div>
                                                 </div>
                                             )}
