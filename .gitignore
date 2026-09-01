@@ -40,3 +40,8 @@ Thumbs.db
 # ML Models
 ml_models/
 *.joblib
+
+# Firebase / Secrets
+config/firebase_credentials.json
+*credentials*.json
+*.pem
