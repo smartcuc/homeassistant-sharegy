@@ -7,6 +7,7 @@ Automatisches Seeding von repräsentativen, produktionsreifen Demo-Daten für:
 """
 
 import uuid
+import logging
 from decimal import Decimal
 from datetime import datetime, date, timedelta, time
 from django.utils import timezone
@@ -21,52 +22,55 @@ from billing.models import (
     CommunityMonthlyStatement,
     CommunityAnnouncement,
 )
-from market.models import SpotPrice
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 
 @transaction.atomic
 def seed_sharing_demo_environment():
     """
     Erstellt oder aktualisiert realistische Test- und Demo-Daten für Sharing-Admins und Sharing-User.
+    Defensiv implementiert gegen Unique-Constraints und bestehende Test-Daten.
     """
-    # 1. USERS ERSTELLEN
-    admin_user, _ = User.objects.get_or_create(
-        email="sharing-admin@sharegy.de",
-        defaults={
-            "username": "sharing-admin@sharegy.de",
-            "first_name": "Alexander",
-            "last_name": "Quartiermanager",
-            "is_staff": True,
-            "is_active": True,
-        },
-    )
+    # 1. USERS ERSTELLEN ODER HOLEN
+    admin_user = User.objects.filter(email="sharing-admin@sharegy.de").first() or User.objects.filter(username="sharing-admin@sharegy.de").first()
+    if not admin_user:
+        admin_user = User.objects.create(
+            email="sharing-admin@sharegy.de",
+            username="sharing-admin@sharegy.de",
+            first_name="Alexander",
+            last_name="Quartiermanager",
+            is_staff=True,
+            is_active=True,
+        )
     admin_user.set_password("DemoSharingAdmin2026!")
     admin_user.is_staff = True
     admin_user.save()
 
-    member_user, _ = User.objects.get_or_create(
-        email="sharing-user@sharegy.de",
-        defaults={
-            "username": "sharing-user@sharegy.de",
-            "first_name": "Julia",
-            "last_name": "Sonnenschein",
-            "is_active": True,
-        },
-    )
+    member_user = User.objects.filter(email="sharing-user@sharegy.de").first() or User.objects.filter(username="sharing-user@sharegy.de").first()
+    if not member_user:
+        member_user = User.objects.create(
+            email="sharing-user@sharegy.de",
+            username="sharing-user@sharegy.de",
+            first_name="Julia",
+            last_name="Sonnenschein",
+            is_active=True,
+        )
     member_user.set_password("DemoSharingUser2026!")
     member_user.save()
 
-    neighbor_user, _ = User.objects.get_or_create(
-        email="nachbar.mueller@sharegy.de",
-        defaults={
-            "username": "nachbar.mueller@sharegy.de",
-            "first_name": "Markus",
-            "last_name": "Müller",
-            "is_active": True,
-        },
-    )
+    neighbor_user = User.objects.filter(email="nachbar.mueller@sharegy.de").first() or User.objects.filter(username="nachbar.mueller@sharegy.de").first()
+    if not neighbor_user:
+        neighbor_user = User.objects.create(
+            email="nachbar.mueller@sharegy.de",
+            username="nachbar.mueller@sharegy.de",
+            first_name="Markus",
+            last_name="Müller",
+            is_active=True,
+        )
+        neighbor_user.set_password("DemoSharingNeighbor2026!")
+        neighbor_user.save()
 
     # UserSettings anlegen
     UserSettings.objects.get_or_create(
@@ -79,7 +83,7 @@ def seed_sharing_demo_environment():
     )
 
     # 2. DEMO COMMUNITIES (TENANTS) ERSTELLEN
-    tenant_sonnenfeld, _ = Tenant.objects.get_or_create(
+    tenant_sonnenfeld, _ = Tenant.objects.update_or_create(
         slug="quartier-sonnenfeld",
         defaults={
             "name": "Quartier Sonnenfeld (Energy Sharing Community)",
@@ -88,7 +92,7 @@ def seed_sharing_demo_environment():
         },
     )
 
-    tenant_amselweg, _ = Tenant.objects.get_or_create(
+    tenant_amselweg, _ = Tenant.objects.update_or_create(
         slug="bioenergie-dorf-amselweg",
         defaults={
             "name": "Bioenergie-Dorf Amselweg & Solarpark",
@@ -98,24 +102,24 @@ def seed_sharing_demo_environment():
     )
 
     # 3. MITGLIEDSCHAFTEN (MEMBERSHIPS)
-    admin_membership, _ = TenantMembership.objects.get_or_create(
+    admin_membership, _ = TenantMembership.objects.update_or_create(
         tenant=tenant_sonnenfeld,
         user=admin_user,
         defaults={"role": "admin", "is_active": True},
     )
-    TenantMembership.objects.get_or_create(
+    TenantMembership.objects.update_or_create(
         tenant=tenant_amselweg,
         user=admin_user,
         defaults={"role": "admin", "is_active": True},
     )
 
-    member_membership, _ = TenantMembership.objects.get_or_create(
+    member_membership, _ = TenantMembership.objects.update_or_create(
         tenant=tenant_sonnenfeld,
         user=member_user,
         defaults={"role": "member", "is_active": True},
     )
 
-    neighbor_membership, _ = TenantMembership.objects.get_or_create(
+    neighbor_membership, _ = TenantMembership.objects.update_or_create(
         tenant=tenant_sonnenfeld,
         user=neighbor_user,
         defaults={"role": "member", "is_active": True},
@@ -189,28 +193,28 @@ def seed_sharing_demo_environment():
     )
 
     # 6. ZÄHLER ANLEGEN
-    pv_central_meter, _ = Meter.objects.get_or_create(
-        tenant=tenant_sonnenfeld,
+    pv_central_meter, _ = Meter.objects.update_or_create(
         serial_number="1EMH-PV-SONNENFELD-01",
         defaults={
+            "tenant": tenant_sonnenfeld,
             "meter_type": "pv",
             "owner_membership": admin_membership,
         },
     )
 
-    user_meter, _ = Meter.objects.get_or_create(
-        tenant=tenant_sonnenfeld,
+    user_meter, _ = Meter.objects.update_or_create(
         serial_number="1EMH-USER-JULIA-02",
         defaults={
+            "tenant": tenant_sonnenfeld,
             "meter_type": "electricity",
             "owner_membership": member_membership,
         },
     )
 
-    neighbor_meter, _ = Meter.objects.get_or_create(
-        tenant=tenant_sonnenfeld,
+    neighbor_meter, _ = Meter.objects.update_or_create(
         serial_number="1EMH-USER-MUELLER-03",
         defaults={
+            "tenant": tenant_sonnenfeld,
             "meter_type": "electricity",
             "owner_membership": neighbor_membership,
         },
@@ -235,14 +239,12 @@ def seed_sharing_demo_environment():
             # PV Profil (Sonne zwischen 06:00 und 20:00 Uhr)
             pv_kwh = Decimal("0.0")
             if 6 <= hour <= 19:
-                # Glockenkurve um 13 Uhr
                 peak = Decimal("7.5")  # 30 kWp Anlage / 4 = max 7.5 kWh pro 15m Slot
                 factor = Decimal(max(0, 1 - abs(hour - 13) / 7.0))
                 pv_kwh = (peak * factor).quantize(Decimal("0.001"))
 
             # User Verbrauch (0.2 bis 0.8 kWh pro 15m)
             user_con_kwh = Decimal("0.25") if (hour < 6 or hour > 22) else Decimal("0.65")
-            neighbor_con_kwh = Decimal("0.20") if (hour < 6 or hour > 22) else Decimal("0.55")
 
             # PV Erzeugungs-Slot
             slots_to_create.append(BalanceSlot(
@@ -296,17 +298,16 @@ def seed_sharing_demo_environment():
 
     # 8. MONATLICHE ABRECHNUNGSNACHWEISE (STATEMENTS)
     current_month_start = date(now.year, now.month, 1)
-    prev_month_date = current_month_start - timedelta(days=15)
-    prev_month_start = date(prev_month_date.year, prev_month_date.month, 1)
-    prev_month_end = date(prev_month_date.year, prev_month_date.month, 28)
+    prev_month_end = current_month_start - timedelta(days=1)
+    prev_month_start = date(prev_month_end.year, prev_month_end.month, 1)
 
-    # Statement für Julia (Member)
+    statement_num = f"SHR-SONN-{prev_month_start.year}{prev_month_start.month:02d}-JULIA"
     CommunityMonthlyStatement.objects.update_or_create(
-        membership=member_membership,
-        period_start=prev_month_start,
-        period_end=prev_month_end,
+        statement_number=statement_num,
         defaults={
-            "statement_number": f"SHR-SONN-{prev_month_date.year}{prev_month_date.month:02d}-JULIA",
+            "membership": member_membership,
+            "period_start": prev_month_start,
+            "period_end": prev_month_end,
             "tenant": tenant_sonnenfeld,
             "user": member_user,
             "tariff": tariff_sonnenfeld,

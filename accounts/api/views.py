@@ -744,10 +744,20 @@ class DemoSharingAdminLoginView(View):
     Loggt den Sharing-Admin ein und leitet direkt auf den Multi-Community Hub weiter.
     """
     def get(self, request):
+        import logging
         from accounts.services_demo_sharing import seed_sharing_demo_environment
 
-        data = seed_sharing_demo_environment()
-        admin_user = data["admin_user"]
+        logger = logging.getLogger(__name__)
+        try:
+            data = seed_sharing_demo_environment()
+            admin_user = data["admin_user"]
+        except Exception as e:
+            logger.exception("Demo seeding error in DemoSharingAdminLoginView: %s", e)
+            admin_user = (
+                User.objects.filter(email="sharing-admin@sharegy.de").first()
+                or User.objects.filter(is_staff=True).first()
+                or User.objects.first()
+            )
 
         login(
             request,
@@ -764,10 +774,20 @@ class DemoSharingUserLoginView(View):
     Loggt den Sharing-User / Community-Teilnehmer ein und leitet auf das Energy Sharing Cockpit weiter.
     """
     def get(self, request):
+        import logging
         from accounts.services_demo_sharing import seed_sharing_demo_environment
 
-        data = seed_sharing_demo_environment()
-        member_user = data["member_user"]
+        logger = logging.getLogger(__name__)
+        try:
+            data = seed_sharing_demo_environment()
+            member_user = data["member_user"]
+        except Exception as e:
+            logger.exception("Demo seeding error in DemoSharingUserLoginView: %s", e)
+            member_user = (
+                User.objects.filter(email="sharing-user@sharegy.de").first()
+                or User.objects.filter(email="demo@sharegy.de").first()
+                or User.objects.first()
+            )
 
         login(
             request,
