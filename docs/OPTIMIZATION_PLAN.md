@@ -13,7 +13,8 @@
 | **Phase 3** | Celery & Buffer-Härtung | 🟢 EMS-Free Stabilität | 🟢 100% Abgeschlossen | 3.1, 3.2, 3.3, 3.4, 3.5 | – |
 | **Phase 4** | Architektur & Diagramme | 🟢 EMS-Free Sankey & Tests | 🟢 100% Abgeschlossen | 4.1, 4.2, 4.3, 4.4 | – |
 | **Phase 5** | EMS-Pro, KI, Apps & Aktorik | 🟢 EMS-Pro & Mobile | 🟢 100% Abgeschlossen | 5.1 – 5.21 | – |
-| **Phase 6** | Säule 2: Energy Sharing & Clearing | 🟢 ESC & MsbG iMSys | 🟢 100% Abgeschlossen (Kern) | 6.1, 6.2, 6.3 | 6.4 (Tarife), 6.5 (§ 14a) |
+| **Phase 6** | Säule 2: Energy Sharing & Clearing | 🟢 ESC & Multi-Community Hub | 🟢 100% Abgeschlossen | 6.1 (OBIS Ingest), 6.2 (Guide), 6.3 (Cockpit), 6.4 (Tarife & Settlement), 6.5 (Multi-Community Hub) | 6.6 (§ 14a EnWG) |
+
 
 
 ---
