@@ -203,9 +203,9 @@ class AggregatedReading(models.Model):
 
     class Meta:
         db_table = "core_aggregatedreading"
-        unique_together = ("meter", "period_start")
+        unique_together = ("meter", "period_start", "obis_code")
         indexes = [
-            models.Index(fields=["meter", "period_start"]),
+            models.Index(fields=["meter", "period_start", "obis_code"]),
         ]
 
 

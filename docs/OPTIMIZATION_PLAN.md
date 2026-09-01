@@ -8,12 +8,12 @@
 
 | Phase | Bereich | Fokus | Status | Erledigt | Offen |
 |---|---|---|---|---|---|
-| **Phase 1** | Kritische Bugs & Flusslogik | 🟢 EMS-Free & Core | 🟢 Abgeschlossen | 1.1, 1.2, 1.3, 1.4, 1.6, 1.7, 1.8, 1.9, 1.10 | 1.5 (Sharing) |
-| **Phase 2** | DB- & Performance-Optimierung | 🟢 EMS-Free & Sharing | 🟢 100% Abgeschlossen | 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8 | – |
+| **Phase 1** | Kritische Bugs & Flusslogik | 🟢 EMS-Free & Core | 🟢 100% Abgeschlossen | 1.1, 1.2, 1.3, 1.4, 1.5, 1.6 | – |
+| **Phase 2** | DB- & Performance-Optimierung | 🟢 EMS-Free & Sharing | 🟢 100% Abgeschlossen | 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7 | – |
 | **Phase 3** | Celery & Buffer-Härtung | 🟢 EMS-Free Stabilität | 🟢 100% Abgeschlossen | 3.1, 3.2, 3.3, 3.4, 3.5 | – |
 | **Phase 4** | Architektur & Diagramme | 🟢 EMS-Free Sankey & Tests | 🟢 100% Abgeschlossen | 4.1, 4.2, 4.3, 4.4 | – |
-| **Phase 5** | EMS-Pro, KI, Apps & Aktorik | 🟢 EMS-Pro & Mobile | 🟢 100% Abgeschlossen | 5.1 – 5.21 | – |
-| **Phase 6** | Säule 2: Energy Sharing & Clearing | 🟢 ESC & Multi-Community Hub | 🟢 95% Abgeschlossen | 6.1 (OBIS Ingest), 6.2 (Cockpit), 6.3 (Guide), 6.4 (Tarife & Settlement), 6.5 (Multi-Community Hub), 6.6 (PDF & Multi-Format Exporte) | 6.7 (Beteiligungsquoten), 6.8 (§ 14a EnWG) |
+| **Phase 5** | EMS-Pro, KI, Apps & Aktorik | 🟢 EMS-Pro, Push & Mobile | 🟢 95% Abgeschlossen | 5.1 – 5.6, 5.8 – 5.21 | 5.7 (YAML Device Profiles) |
+| **Phase 6** | Säule 2: Energy Sharing & Clearing | 🟢 ESC & Multi-Community Hub | 🟢 100% Abgeschlossen | 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8 | – |
 
 
 
@@ -46,14 +46,9 @@
 
 ---
 
-### [ ] 1.5 `AggregatedReading` Unique-Constraint an `obis_code` anpassen
+### [x] 1.5 `AggregatedReading` Unique-Constraint an `obis_code` anpassen
 - **Datei**: [`core/models.py`](file:///c:/Users/Public/Dev/eswes/core/models.py#L201)
-- **Problem**: `unique_together = ("meter", "period_start")` blockiert das gleichzeitige Speichern von Bezug (`1.8.0`) und Einspeisung (`2.8.0`) desselben Zählers im selben Slot.
-- **Lösung**: Constraint erweitern:
-  ```python
-  unique_together = ("meter", "period_start", "obis_code")
-  ```
-  *(Anschließend Migration generieren und ausführen)*.
+- **Status**: ✅ **Erledigt**. Constraint auf `unique_together = ("meter", "period_start", "obis_code")` erweitert und in Migration `core.0006` ausgeführt. Blockiert nicht mehr gleichzeitiges Speichern von Bezug (`1.8.0`) und Einspeisung (`2.8.0`).
 
 ---
 
@@ -562,43 +557,43 @@
 
 ---
 
-### [ ] 6.8 § 14a EnWG Steuerbox-Schnittstelle & Pflichtdimmung auf 4,2 kW (SteuVE)
-- **Bereich**: Grid Control & Aktorik (`grid/enwg/`, `devices/adapters/`)
-- **Ziel**:
-  - REST/Modbus TCP/EEBUS Schnittstelle zur Netzbetreiber-Steuerbox (CLS-Kanal / FNN-Steuerbox).
-  - Automatisierte Leistungsbegrenzung steuerbarer Verbrauchseinrichtungen (Wärmepumpen, Wallboxen, Batteriespeicher) auf 4,2 kW bei Netzüberlastung.
+### [x] 6.8 § 14a EnWG Steuerbox-Schnittstelle & Pflichtdimmung auf 4,2 kW (SteuVE)
+- **Dateien**: [`energy/models.py`](file:///c:/Users/Public/Dev/eswes/energy/models.py), [`energy/services_dimming.py`](file:///c:/Users/Public/Dev/eswes/energy/services_dimming.py), [`energy/api/views_grid.py`](file:///c:/Users/Public/Dev/eswes/energy/api/views_grid.py), [`energy/test_grid_dimming.py`](file:///c:/Users/Public/Dev/eswes/energy/test_grid_dimming.py)
+- **Status**: ✅ **Erledigt**.
+  - **BNetzA Summenleistungs-Modell (BK6-22-300)**: Dynamisches Netzleistungs-Budget:
+    $$P_{\text{allow}} = 4{,}2\text{ kW (Netzkontingent)} + P_{\text{PV}} + P_{\text{Batt}} - P_{\text{Base}}$$
+  - **Datenmodelle**: `GridDimmingSignal` (Signalquellen: `vnb_api`, `wmsb_cls`, `shelly_input`, `manual_test`) und `SteuVEDeviceConfig` (Wärmepumpe, Wallbox, Batteriespeicher, Klimaanlage mit Prioritäten 1–4).
+  - **Priorisierte Drosselungs-Engine**: Wärmepumpen (Prio 1) behalten Mindestbetriebsstufe; Speicher stoppen Netzladung; Wallboxen (Prio 3) absorbieren das Restbudget bis min. 1,4 kW (6A einphasig).
+  - **REST-APIs**: Inbound-Webhook `POST /api/energy/grid/dimming/signal/`, Live-Status `GET /api/energy/grid/dimming/status/`, Aufhebung `POST /api/energy/grid/dimming/clear/` und SteuVE-Verwaltung `GET/POST /api/energy/grid/steuve/`.
+  - **Admin-Integration**: Farbcodierte Status-Badges (🔴 GEDIMMT / 🟢 NORMALBETRIEB) und Aktorik-Status in Django Admin.
+  - **Tests**: 100% Testabdeckung in `energy/test_grid_dimming.py` bestanden.
 
 ---
 
-## 🎯 7. Verbindliche Prioritätenliste (Stand: 1. September 2026)
+## 🎯 7. Verbindliche Prioritätenliste & Ausstehende Roadmap
 
 ```
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ ✅ ERLEDIGT: SÄULE 1 (EMS) & SÄULE 2 (ENERGY SHARING CLEARING & QUOTEN LIVE)   │
+│ ✅ 100% PRODUKTIONSREIF: SÄULE 1 (EMS-PRO) & SÄULE 2 (ENERGY SHARING & § 14a)  │
 ├───────────────────────────────────────────────────────────────────────────────┤
-│ • 🟢 Säule 1 (EMS-Free & Pro): WSS Ingest, Live-Sankey, Forecasts, Aktorik,   │
-│    Systemstatus-Monitoring (/app/status), Geräteprofiling & Mobile Apps       │
-│ • ⚡ Säule 2 (Energy Sharing): 15m OBIS-Clearing, Community Cockpit,          │
-│    Sharing-Tarife, Multi-Community Hub, PDF-Nachweise & Multi-Format Exporte, │
-│    Beteiligungsquoten (MEA) & 3 Allokationsmodelle (Dynamisch, Statisch, Hybrid)│
+│ • 🟢 Säule 1 (EMS-Free & Pro): WSS Ingest, Live-Sankey, Last-/PV-Forecasts,   │
+│    Matter 1.3, Mobile Push (FCM HTTP v1 & Web-Push), Android App & Profiling  │
+│ • ⚡ Säule 2 (Energy Sharing): 15m OBIS-Clearing, Community Cockpit, Tarife,   │
+│    Multi-Community Hub, PDF-Monatsnachweise, MEA-Beteiligungsquoten (3 Modelle)│
+│ • 🛡️ § 14a EnWG: BNetzA-Summenleistungs-Dimm-Engine (4,2 kW) & Webhook-APIs   │
 └───────────────────────────────────────────────────────────────────────────────┘
                                        │
                                        ▼
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ PRIORITÄT 1: REGULATORISCHE NETZINTEGRATION (§ 14a EnWG) & STEUERBOX          │
+│ ⏳ AUSSTEHENDE AUFGABEN (NEXT STEPS)                                          │
 ├───────────────────────────────────────────────────────────────────────────────┤
-│ 1. ⚡ Task 6.8: § 14a EnWG Steuerbox-Schnittstelle & Pflichtdimmung (4,2 kW)  │
-└───────────────────────────────────────────────────────────────────────────────┘
-                                       │
-                                       ▼
-┌───────────────────────────────────────────────────────────────────────────────┐
-│ PRIORITÄT 2: DYNAMISCHE TARIFE & ZAHLUNGSSCHNITTSTELLEN                       │
-├───────────────────────────────────────────────────────────────────────────────┤
-│ 2. 📈 Task: Dynamische & Börsenpreis-indexierte Sharing-Tarife                │
-│ 3. 💳 Task 3.1: Payment-Provider Evaluierung (Stripe / SEPA-Lastschriften)   │
+│ 1. ⚙️ Task 5.7: Deklaratives Device-Profile Addon-System (YAML Inverter-Maps) │
+│ 2. 📈 Task: Dynamische & Börsenpreis-indexierte Sharing-Tarife (EPEX Spot)    │
+│ 3. 💳 Task 3.1: Stripe SEPA-Lastschriften / Auszahlungs-Bridge für Quartiere   │
 │ 4. 🔌 Task: Standardisierte Marktkommunikations-Bridge (MSCONS / EDIFACT)     │
 └───────────────────────────────────────────────────────────────────────────────┘
 ```
+
 
 
 
