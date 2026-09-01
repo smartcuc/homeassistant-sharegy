@@ -1061,4 +1061,103 @@ def community_allocation_preview_view(request):
     return Response(preview_data)
 
 
+# =========================================================================
+# 5. MSCONS / EDIFACT EXPORT & IMPORT (MARKTKOMMUNIKATION)
+# =========================================================================
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def community_mscons_export_view(request):
+    """
+    Exportiert 15-Minuten Lastgänge der Community im BNetzA-konformen EDIFACT MSCONS Format.
+    """
+    from django.http import HttpResponse
+    from datetime import date
+    import calendar
+    from billing.services_mscons import generate_community_mscons_export
+
+    user = request.user
+    tenant_id = request.headers.get("X-Tenant-ID") or request.GET.get("tenant_id")
+
+    if tenant_id:
+        membership = TenantMembership.objects.filter(user=user, tenant_id=tenant_id, is_active=True).first()
+        if not membership and not user.is_staff and not user.is_superuser:
+            return Response({"error": "Forbidden"}, status=403)
+        tenant = Tenant.objects.filter(id=tenant_id).first()
+    else:
+        membership = TenantMembership.objects.filter(user=user, is_active=True).first()
+        tenant = membership.tenant if membership else None
+
+    if not tenant:
+        return Response({"error": "No community found"}, status=404)
+
+    now = timezone.now()
+    year = int(request.GET.get("year", now.year))
+    month = int(request.GET.get("month", now.month))
+    _, last_day = calendar.monthrange(year, month)
+
+    period_start = date(year, month, 1)
+    period_end = date(year, month, last_day)
+
+    obis_param = request.GET.get("obis", "1.8.0,2.8.0")
+    obis_codes = [c.strip() for c in obis_param.split(",") if c.strip()]
+
+    sender_id = request.GET.get("sender_id", "9901234567890")
+    receiver_id = request.GET.get("receiver_id", "9909876543210")
+
+    mscons_text = generate_community_mscons_export(
+        tenant=tenant,
+        period_start=period_start,
+        period_end=period_end,
+        obis_codes=obis_codes,
+        sender_mp_id=sender_id,
+        receiver_mp_id=receiver_id,
+    )
+
+    t_slug = tenant.name.lower().replace(" ", "_")[:12]
+    filename = f"mscons_{t_slug}_{year}_{month:02d}.edi"
+
+    response = HttpResponse(mscons_text, content_type="text/plain; charset=iso-8859-1")
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def community_mscons_import_view(request):
+    """
+    Importiert eine empfangene MSCONS-Datei (EDIFACT) von VNB oder wMSB und schreibt Messwerte in die Datenbank.
+    """
+    from billing.services_mscons import import_mscons_to_database
+
+    user = request.user
+    tenant_id = request.headers.get("X-Tenant-ID") or request.data.get("tenant_id") or request.GET.get("tenant_id")
+
+    if tenant_id:
+        membership = TenantMembership.objects.filter(user=user, tenant_id=tenant_id, is_active=True).first()
+        if not membership and not user.is_staff and not user.is_superuser:
+            return Response({"error": "Forbidden"}, status=403)
+        tenant = Tenant.objects.filter(id=tenant_id).first()
+    else:
+        membership = TenantMembership.objects.filter(user=user, is_active=True).first()
+        tenant = membership.tenant if membership else None
+
+    if not tenant:
+        return Response({"error": "No community found"}, status=404)
+
+    edi_content = None
+    if "file" in request.FILES:
+        uploaded = request.FILES["file"]
+        edi_content = uploaded.read().decode("iso-8859-1", errors="replace")
+    elif "edi_content" in request.data:
+        edi_content = request.data["edi_content"]
+
+    if not edi_content:
+        return Response({"error": "No file or edi_content provided"}, status=400)
+
+    result = import_mscons_to_database(tenant, edi_content)
+    return Response(result)
+
+
+
 

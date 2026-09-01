@@ -25,6 +25,8 @@ from billing.api.views_community import (
     community_member_shares_view,
     community_member_shares_bulk_view,
     community_allocation_preview_view,
+    community_mscons_export_view,
+    community_mscons_import_view,
 )
 
 urlpatterns = [
@@ -43,6 +45,8 @@ urlpatterns = [
     path("community/shares/", community_member_shares_view, name="community_member_shares"),
     path("community/shares/bulk/", community_member_shares_bulk_view, name="community_member_shares_bulk"),
     path("community/allocation-preview/", community_allocation_preview_view, name="community_allocation_preview"),
+    path("community/mscons/export/", community_mscons_export_view, name="community_mscons_export"),
+    path("community/mscons/import/", community_mscons_import_view, name="community_mscons_import"),
     path("community/statements/export/", statements_export_view, name="community_statements_export"),
     path("community/statements/generate/", generate_community_statements_view, name="community_statements_generate"),
     path("community/statements/<uuid:statement_id>/pdf/", statement_pdf_download_view, name="community_statement_pdf"),

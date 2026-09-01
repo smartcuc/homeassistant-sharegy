@@ -465,12 +465,29 @@ class CommunityTariff(models.Model):
         help_text="Verfahren zur Verteilung von Solarstrom innerhalb der Gemeinschaft",
     )
 
+    PRICING_MODEL_STATIC = "static"
+    PRICING_MODEL_SPOT_INDEXED = "spot_indexed"
+    PRICING_MODEL_TIME_OF_USE = "time_of_use"
+
+    PRICING_MODEL_CHOICES = [
+        (PRICING_MODEL_STATIC, "Statischer Festpreis"),
+        (PRICING_MODEL_SPOT_INDEXED, "Börsenpreis-indexiert (EPEX Spot Day-Ahead)"),
+        (PRICING_MODEL_TIME_OF_USE, "Dynamischer Zeittarif (HT/NT)"),
+    ]
+
+    pricing_model = models.CharField(
+        max_length=30,
+        choices=PRICING_MODEL_CHOICES,
+        default=PRICING_MODEL_STATIC,
+        help_text="Preismechanismus: Festpreis, EPEX Spotmarkt-Indexierung oder Zeittarif",
+    )
+
     # Preise in Cent pro kWh
     sharing_price_ct_kwh = models.DecimalField(
         max_digits=6,
         decimal_places=2,
         default=12.00,
-        help_text="Bezugspreis für geteilten Solarstrom (Cent/kWh)",
+        help_text="Bezugspreis für geteilten Solarstrom (Cent/kWh) im statischen Modell",
     )
     producer_payout_ct_kwh = models.DecimalField(
         max_digits=6,
@@ -489,6 +506,34 @@ class CommunityTariff(models.Model):
         decimal_places=2,
         default=0.00,
         help_text="Ermäßigte Netzentgelte gem. § 42b EnWG (Cent/kWh)",
+    )
+
+    # Parameter für Börsenpreis-indexierte Tarife
+    spot_markup_ct_kwh = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        default=3.50,
+        help_text="Aufschlag auf den EPEX Spotpreis in Cent/kWh (z. B. +3,50 Ct)",
+    )
+    spot_floor_price_ct_kwh = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Mindestpreisuntergrenze in Cent/kWh (Floor)",
+    )
+    spot_cap_price_ct_kwh = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Maximalpreisobergrenze / Preisbremse in Cent/kWh (Cap)",
+    )
+    feed_in_spot_share_pct = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=80.00,
+        help_text="Prozentuale Beteiligung des Einspeisers am Börsenpreis (%)",
     )
 
     valid_from = models.DateTimeField(default=timezone.now)

@@ -13,7 +13,7 @@
 | **Phase 3** | Celery & Buffer-Härtung | 🟢 EMS-Free Stabilität | 🟢 100% Abgeschlossen | 3.1, 3.2, 3.3, 3.4, 3.5 | – |
 | **Phase 4** | Architektur & Diagramme | 🟢 EMS-Free Sankey & Tests | 🟢 100% Abgeschlossen | 4.1, 4.2, 4.3, 4.4 | – |
 | **Phase 5** | EMS-Pro, KI, Apps & Aktorik | 🟢 EMS-Pro, Push & Mobile | 🟢 95% Abgeschlossen | 5.1 – 5.6, 5.8 – 5.21 | 5.7 (YAML Device Profiles) |
-| **Phase 6** | Säule 2: Energy Sharing & Clearing | 🟢 ESC & Multi-Community Hub | 🟢 100% Abgeschlossen | 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8 | – |
+| **Phase 6** | Säule 2: Energy Sharing & Clearing | 🟢 ESC & Multi-Community Hub | 🟢 100% Abgeschlossen | 6.1 – 6.10 | – |
 
 
 
@@ -568,6 +568,25 @@
   - **Admin-Integration**: Farbcodierte Status-Badges (🔴 GEDIMMT / 🟢 NORMALBETRIEB) und Aktorik-Status in Django Admin.
   - **Tests**: 100% Testabdeckung in `energy/test_grid_dimming.py` bestanden.
 
+### [x] 6.9 Dynamische & Börsenpreis-indexierte Sharing-Tarife (EPEX Spot)
+- **Dateien**: [`billing/models.py`](file:///c:/Users/Public/Dev/eswes/billing/models.py), [`billing/services_sharing_settlement.py`](file:///c:/Users/Public/Dev/eswes/billing/services_sharing_settlement.py), [`billing/test_mscons_and_dynamic_tariffs.py`](file:///c:/Users/Public/Dev/eswes/billing/test_mscons_and_dynamic_tariffs.py)
+- **Status**: ✅ **Erledigt**.
+  - **Tarifmodelle in `CommunityTariff`**: `static` (Festpreis), `spot_indexed` (EPEX Spot Day-Ahead Indexierung) und `time_of_use` (HT/NT Zeittarif).
+  - **Preismechanismus & Absicherung**:
+    $$P_{\text{eff}}(t) = \text{clamp}\Big(P_{\text{spot}}(t) + \text{Markup} + \text{Umlage} - \text{Netzentgelt-Rabatt}, \text{Floor}, \text{Cap}\Big)$$
+  - Dynamische Einspeisevergütung für Erzeuger (`feed_in_spot_share_pct`, z. B. 80% des Spotpreises).
+  - Volle Integration in die Monatsabrechnungs- & Clearing-Engine und automatisierte Tests.
+
+---
+
+### [x] 6.10 Standardisierte Marktkommunikations-Bridge (MSCONS / EDIFACT)
+- **Dateien**: [`billing/services_mscons.py`](file:///c:/Users/Public/Dev/eswes/billing/services_mscons.py), [`billing/api/views_community.py`](file:///c:/Users/Public/Dev/eswes/billing/api/views_community.py), [`billing/urls.py`](file:///c:/Users/Public/Dev/eswes/billing/urls.py), [`frontend/src/pages/admin/CommunitiesManagementHub.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/pages/admin/CommunitiesManagementHub.jsx)
+- **Status**: ✅ **Erledigt**.
+  - **BNetzA-konformer Generator & Parser**: Standardnachricht `MSCONS:D:04B:UN:EAN008` für 15-Minuten Lastgänge (`1.8.0` Bezug & `2.8.0` Einspeisung) mit UNA/UNB/UNH/BGM/LOC/PIA/QTY/DTM/UNT/UNZ.
+  - **REST APIs**: `GET /api/billing/community/mscons/export/` (Download `.edi` / `.mscons`) und `POST /api/billing/community/mscons/import/` (Inbound-Schnittstelle von VNBs und Messstellenbetreibern).
+  - **UI-Integration**: 1-Klick `📄 MSCONS (EDI)` Download-Button im Multi-Community Management Hub.
+  - **Unit-Tests**: 100% Testabdeckung in `billing/test_mscons_and_dynamic_tariffs.py`.
+
 ---
 
 ## 🎯 7. Verbindliche Prioritätenliste & Ausstehende Roadmap
@@ -579,7 +598,8 @@
 │ • 🟢 Säule 1 (EMS-Free & Pro): WSS Ingest, Live-Sankey, Last-/PV-Forecasts,   │
 │    Matter 1.3, Mobile Push (FCM HTTP v1 & Web-Push), Android App & Profiling  │
 │ • ⚡ Säule 2 (Energy Sharing): 15m OBIS-Clearing, Community Cockpit, Tarife,   │
-│    Multi-Community Hub, PDF-Monatsnachweise, MEA-Beteiligungsquoten (3 Modelle)│
+│    Multi-Community Hub, PDF-Monatsnachweise, MEA-Beteiligungsquoten,          │
+│    Börsenpreis-indexierte Tarife (EPEX Spot) & BNetzA MSCONS EDIFACT Bridge   │
 │ • 🛡️ § 14a EnWG: BNetzA-Summenleistungs-Dimm-Engine (4,2 kW) & Webhook-APIs   │
 └───────────────────────────────────────────────────────────────────────────────┘
                                        │
@@ -588,11 +608,10 @@
 │ ⏳ AUSSTEHENDE AUFGABEN (NEXT STEPS)                                          │
 ├───────────────────────────────────────────────────────────────────────────────┤
 │ 1. ⚙️ Task 5.7: Deklaratives Device-Profile Addon-System (YAML Inverter-Maps) │
-│ 2. 📈 Task: Dynamische & Börsenpreis-indexierte Sharing-Tarife (EPEX Spot)    │
-│ 3. 💳 Task 3.1: Stripe SEPA-Lastschriften / Auszahlungs-Bridge für Quartiere   │
-│ 4. 🔌 Task: Standardisierte Marktkommunikations-Bridge (MSCONS / EDIFACT)     │
+│ 2. 💳 Task 3.1: Stripe SEPA-Lastschriften / Auszahlungs-Bridge für Quartiere   │
 └───────────────────────────────────────────────────────────────────────────────┘
 ```
+
 
 
 

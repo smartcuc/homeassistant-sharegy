@@ -15,7 +15,7 @@ from collections import defaultdict
 from datetime import date, datetime, time
 from decimal import Decimal
 from django.utils import timezone
-from django.db.models import Sum, Q
+from django.db.models import Sum, Q, Avg
 
 from core.models import Tenant, Meter, BalanceSlot
 from accounts.models import TenantMembership
@@ -216,11 +216,66 @@ def calculate_sharing_allocation_for_slot(
     }
 
 
+def get_effective_tariff_prices_for_slot(
+    tariff: CommunityTariff,
+    slot_dt: datetime,
+    spot_price_ct_kwh: Decimal = None,
+) -> tuple[Decimal, Decimal, Decimal]:
+    """
+    Ermittelt die effektiven Arbeitspreise (Ct/kWh) für genau einen Zeitschlitz:
+    Rückgabe: (effective_sharing_price_ct, effective_producer_payout_ct, community_fee_ct)
+    """
+    community_fee_ct = tariff.community_fee_ct_kwh or Decimal("0.00")
+
+    # 1. Statischer Festpreis
+    if tariff.pricing_model == CommunityTariff.PRICING_MODEL_STATIC:
+        sharing_price = tariff.sharing_price_ct_kwh
+        producer_payout = tariff.producer_payout_ct_kwh
+
+    # 2. Börsenpreis-indexierter dynamischer Tarif (EPEX Spot)
+    elif tariff.pricing_model == CommunityTariff.PRICING_MODEL_SPOT_INDEXED:
+        spot_ct = spot_price_ct_kwh if spot_price_ct_kwh is not None else Decimal("10.00")
+        
+        # Basis = Spotpreis + Aufschlag - Netzentgelt-Rabatt
+        sharing_price = spot_ct + (tariff.spot_markup_ct_kwh or Decimal("3.50")) - (tariff.grid_fee_saved_ct_kwh or Decimal("0.00"))
+        
+        # Floor (Mindestpreis) anwenden
+        if tariff.spot_floor_price_ct_kwh is not None:
+            sharing_price = max(sharing_price, tariff.spot_floor_price_ct_kwh)
+            
+        # Cap (Preisbremse / Obergrenze) anwenden
+        if tariff.spot_cap_price_ct_kwh is not None:
+            sharing_price = min(sharing_price, tariff.spot_cap_price_ct_kwh)
+
+        # Einspeisevergütung: prozentualer Anteil des Börsenpreises
+        share_factor = (tariff.feed_in_spot_share_pct or Decimal("80.00")) / Decimal("100.0")
+        producer_payout = max(Decimal("0.00"), spot_ct * share_factor)
+
+    # 3. Zeittarif (HT / NT)
+    elif tariff.pricing_model == CommunityTariff.PRICING_MODEL_TIME_OF_USE:
+        # HT = 06:00 bis 22:00 Uhr, NT = 22:00 bis 06:00 Uhr
+        hour = slot_dt.hour
+        is_ht = 6 <= hour < 22
+        if is_ht:
+            sharing_price = tariff.sharing_price_ct_kwh
+            producer_payout = tariff.producer_payout_ct_kwh
+        else:
+            # NT: 20% Rabatt auf Bezug, 10% Abschlag auf Einspeisung
+            sharing_price = (tariff.sharing_price_ct_kwh * Decimal("0.80")).quantize(Decimal("0.01"))
+            producer_payout = (tariff.producer_payout_ct_kwh * Decimal("0.90")).quantize(Decimal("0.01"))
+    else:
+        sharing_price = tariff.sharing_price_ct_kwh
+        producer_payout = tariff.producer_payout_ct_kwh
+
+    return sharing_price, producer_payout, community_fee_ct
+
+
 def calculate_monthly_community_statements(
     tenant: Tenant, year: int, month: int, force_model: str = None
 ) -> list[CommunityMonthlyStatement]:
     """
     Erstellt oder aktualisiert monatliche Abrechnungsnachweise für alle Mitglieder einer Community.
+    Unterstützt alle Allokationsmodelle sowie statische, börsenpreis-indexierte und Zeittarife.
     """
     _, last_day = calendar.monthrange(year, month)
     period_start = date(year, month, 1)
@@ -236,6 +291,20 @@ def calculate_monthly_community_statements(
     memberships = list(TenantMembership.objects.filter(tenant=tenant).select_related("user"))
     if not memberships:
         return []
+
+    # Durchschnittlichen Spotpreis für den Monat als Referenz ermitteln
+    from market.models import SpotPrice
+    avg_spot_record = SpotPrice.objects.filter(
+        timestamp__gte=period_start_dt,
+        timestamp__lte=period_end_dt,
+    ).aggregate(avg_price=Avg("price_eur_per_kwh"))
+    
+    avg_spot_eur = avg_spot_record.get("avg_price")
+    avg_spot_ct = (Decimal(str(avg_spot_eur)) * Decimal("100.0")) if avg_spot_eur is not None else Decimal("10.00")
+
+    effective_sharing_price_ct, effective_payout_ct, effective_fee_ct = get_effective_tariff_prices_for_slot(
+        tariff, period_start_dt, spot_price_ct_kwh=avg_spot_ct
+    )
 
     created_statements = []
 
@@ -303,10 +372,10 @@ def calculate_monthly_community_statements(
                 elif allocation_model == CommunityTariff.ALLOCATION_HYBRID:
                     shared_imported_kwh = min(consumed_kwh, allocated_community_pv)
 
-        # Finanzielle Beträge berechnen
-        charge_import_eur = (shared_imported_kwh * (tariff.sharing_price_ct_kwh / Decimal("100.0"))).quantize(Decimal("0.01"))
-        credit_export_eur = (shared_exported_kwh * (tariff.producer_payout_ct_kwh / Decimal("100.0"))).quantize(Decimal("0.01"))
-        community_fee_eur = (shared_imported_kwh * (tariff.community_fee_ct_kwh / Decimal("100.0"))).quantize(Decimal("0.01"))
+        # Finanzielle Beträge basierend auf den dynamisch ermittelten Tarifpreisen berechnen
+        charge_import_eur = (shared_imported_kwh * (effective_sharing_price_ct / Decimal("100.0"))).quantize(Decimal("0.01"))
+        credit_export_eur = (shared_exported_kwh * (effective_payout_ct / Decimal("100.0"))).quantize(Decimal("0.01"))
+        community_fee_eur = (shared_imported_kwh * (effective_fee_ct / Decimal("100.0"))).quantize(Decimal("0.01"))
         net_balance_eur = (credit_export_eur - charge_import_eur - community_fee_eur).quantize(Decimal("0.01"))
 
         t_prefix = str(tenant.id)[:4].upper()

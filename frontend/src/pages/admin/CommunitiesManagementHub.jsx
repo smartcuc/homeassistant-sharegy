@@ -248,6 +248,34 @@ export default function CommunitiesManagementHub() {
         }
     }
 
+    // 📄 BNetzA MSCONS EDIFACT Export
+    async function exportMscons(tenantId) {
+        setExportingFormat("mscons");
+        try {
+            const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+            const response = await fetch(`/api/billing/community/mscons/export/?tenant_id=${tenantId || ""}`, {
+                headers: {
+                    Authorization: token ? `Bearer ${token}` : "",
+                }
+            });
+            if (!response.ok) throw new Error("MSCONS Export fehlgeschlagen.");
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `Sharegy_MSCONS_${drilldownData?.community?.slug || "community"}_${new Date().toISOString().slice(0, 10)}.edi`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error("MSCONS export error:", err);
+            alert("Fehler beim MSCONS EDIFACT Export.");
+        } finally {
+            setExportingFormat(null);
+        }
+    }
+
     // 🔍 Filterung nach Suche
     const filteredCommunities = useMemo(() => {
         if (!portfolioData || !portfolioData.communities) return [];
@@ -924,6 +952,13 @@ export default function CommunitiesManagementHub() {
                                             className="px-3 py-1.5 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 shadow-2xs"
                                         >
                                             <span>📦</span> {exportingFormat === "xml" ? "Exportiere..." : "XML / ERP"}
+                                        </button>
+                                        <button
+                                            onClick={() => exportMscons(selectedTenantId)}
+                                            disabled={exportingFormat === "mscons"}
+                                            className="px-3 py-1.5 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                                        >
+                                            <span>📄</span> {exportingFormat === "mscons" ? "Exportiere..." : "MSCONS (EDI)"}
                                         </button>
                                     </div>
                                 </div>
