@@ -28,6 +28,7 @@ import AgentSupportHubPage from "../features/support/pages/AgentSupportHubPage";
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import TrackingDashboard from "../pages/admin/TrackingDashboard";
 import TenantDashboard from "../pages/TenantDashboard";
+import CommunitiesManagementHub from "../pages/admin/CommunitiesManagementHub";
 import { useRef, useEffect } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 
@@ -103,6 +104,8 @@ export default function AppShell() {
                         <Route path="admin" element={<Navigate to="/app/admin/dashboard" replace />} />
                         <Route path="admin/dashboard" element={<AdminDashboard />} />
                         <Route path="admin/tracking" element={<TrackingDashboard />} />
+                        <Route path="admin/communities" element={<CommunitiesManagementHub />} />
+                        <Route path="communities" element={<CommunitiesManagementHub />} />
                         <Route path="tenant" element={<TenantDashboard />} />
                         <Route path="tenant-management" element={<TenantDashboard />} />
                         <Route path="community" element={<TenantDashboard />} />

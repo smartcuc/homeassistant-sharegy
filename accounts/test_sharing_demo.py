@@ -43,7 +43,7 @@ class SharingDemoTests(TestCase):
         """Testet den Endpoint /api/demo/sharing-admin/."""
         response = self.client.get("/api/demo/sharing-admin/")
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, "/admin/communities")
+        self.assertEqual(response.url, "/app/admin/communities")
 
         # Prüfe ob eingeloggt
         user_id = self.client.session.get("_auth_user_id")
@@ -67,7 +67,7 @@ class SharingDemoTests(TestCase):
         """Testet /api/demo/?role=sharing-admin und /api/demo/?role=sharing-user."""
         res_admin = self.client.get("/api/demo/?role=sharing-admin")
         self.assertEqual(res_admin.status_code, 302)
-        self.assertEqual(res_admin.url, "/admin/communities")
+        self.assertEqual(res_admin.url, "/app/admin/communities")
 
         res_user = self.client.get("/api/demo/?role=sharing-user")
         self.assertEqual(res_user.status_code, 302)

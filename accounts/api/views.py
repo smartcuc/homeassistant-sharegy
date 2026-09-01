@@ -755,8 +755,8 @@ class DemoSharingAdminLoginView(View):
             backend="django.contrib.auth.backends.ModelBackend",
         )
 
-        # Weiterleitung auf den Multi-Community Management Hub
-        return redirect("/admin/communities")
+        # Weiterleitung auf den Multi-Community Management Hub im App-Bereich
+        return redirect("/app/admin/communities")
 
 
 class DemoSharingUserLoginView(View):

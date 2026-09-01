@@ -43,18 +43,28 @@ urlpatterns += [
 ]
 
 urlpatterns += [
+    # Invites (both new and legacy URLs)
+    path("use-invite/", UseInviteView.as_view()),
     path("invite/use/", UseInviteView.as_view()),
+    path("create-invite/", CreateInviteView.as_view()),
     path("invite/create/", CreateInviteView.as_view()),
+    path("deactivate-invite/", DeactivateInviteView.as_view()),
     path("invite/deactivate/", DeactivateInviteView.as_view()),
 ]
 
 urlpatterns += [
+    # Tenant / Community (both legacy and new URLs)
+    path("my-tenant/", MyTenantView.as_view()),
     path("tenant/me/", MyTenantView.as_view()),
+    path("stats/tenants/", TenantStatsView.as_view()),
     path("tenant/stats/", TenantStatsView.as_view()),
 ]
 
 urlpatterns += [
+    # Members
+    path("update-role/", UpdateMemberRoleView.as_view()),
     path("tenant/members/role/", UpdateMemberRoleView.as_view()),
+    path("remove-member/", RemoveMemberView.as_view()),
     path("tenant/members/remove/", RemoveMemberView.as_view()),
 ]
 
@@ -63,20 +73,25 @@ urlpatterns += [
 ]
 
 urlpatterns += [
+    path("request-magic-link/", RequestMagicLinkView.as_view()),
     path("magic-link/request/", RequestMagicLinkView.as_view()),
+    path("stats/magic-links/", MagicLinkStatsView.as_view()),
     path("magic-link/stats/", MagicLinkStatsView.as_view()),
     path("magic-login/", MagicLoginView.as_view()),
 ]
 
 urlpatterns += [
+    path("stats/dashboard/", DashboardStatsView.as_view()),
     path("dashboard-stats/", DashboardStatsView.as_view()),
 ]
 
 urlpatterns += [
+    path("stats/live-logins/", LiveLoginsView.as_view()),
     path("admin/live-logins/", LiveLoginsView.as_view()),
 ]
 
 urlpatterns += [
+    path("auth/refresh/", TokenRefreshView.as_view()),
     path("auth/token/refresh/", TokenRefreshView.as_view()),
     path("auth/logout/", LogoutView.as_view()),
     # Current user
