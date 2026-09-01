@@ -129,6 +129,7 @@ def create_checkout_session(user, plan_id, success_url=None, cancel_url=None, te
 
             session = stripe.checkout.Session.create(
                 customer=customer_id,
+                customer_update={"name": "auto", "address": "auto"},
                 payment_method_types=["card", "sepa_debit"],
                 line_items=line_items,
                 mode="subscription",
