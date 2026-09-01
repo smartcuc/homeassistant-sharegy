@@ -100,3 +100,55 @@ Sharegy kombiniert die exakte Abrechnung mit vorausdenkender KI-Steuerung:
   ]
 }
 ```
+
+---
+
+## 💶 6. Verrechnung mit dem Reststromversorger & Ausschluss von Doppelabrechnungen
+
+Ein zentraler Baustein des deutschen Energy-Sharing-Modells ist die nahtlose Abstimmung mit dem **Reststrom-Lieferanten** (z. B. den lokalen Stadtwerken oder dem bestehenden Stromanbieter des Consumers), um Doppelabrechnungen oder Abrechnungslücken absolut auszuschließen.
+
+```
+                       [ 1. Smart Meter Gateway (iMSys) ]
+                                      │
+                                      ▼
+                        [ 2. Messstellenbetreiber (MSB) ]
+                                      │
+                       ┌──────────────┴──────────────┐
+                       ▼                             ▼
+              [ SHAREGY PLATTFORM ]         [ 3. Verteilnetzbetreiber (VNB) ]
+             • 15m-Community-Clearing      • Bilanzieller Abzug der Sharing-kWh
+             • Interne Abrechnung            (300 kWh - 100 kWh = 200 kWh)
+             • Transparenz-App & Audit                       │
+                                                             ▼
+                                                [ 4. Marktkommunikation (MSCONS) ]
+                                                 Übermittelt den bereinigten Lastgang
+                                                             │
+                                                             ▼
+                                                [ 5. Reststrom-Lieferant ]
+                                                 (z. B. Stadtwerke Bonn)
+                                                 Stellt exakt 200 kWh in Rechnung!
+```
+
+### ⚙️ Der Abrechnungsablauf im Detail:
+
+1. **Messung am Hausanschluss (Gesamtbezug):**  
+   Das iMSys-Gateway des Consumers misst im Abrechnungsmonat beispielsweise einen Gesamtbezug von **$300\text{ kWh}$** (OBIS `1.8.0`).
+2. **15-Minuten-Sharing-Allokation durch Sharegy:**  
+   Die Sharegy-Bilanzierungsengine weist dem Consumer zeitgleich erzeugten Solarstrom der Community in Höhe von **$100\text{ kWh}$** zu.
+3. **Netzseitige Saldierung durch den Verteilnetzbetreiber (VNB):**  
+   Der zuständige Verteilnetzbetreiber führt auf Basis der 15-Minuten-Messwerte die offizielle energiewirtschaftliche Saldierung durch:
+   $$\text{Abrechnungsmenge Reststrom} = \text{Gesamtbezug (1.8.0)} - \text{zugewiesener Sharing-Strom}$$
+   $$200\text{ kWh} = 300\text{ kWh} - 100\text{ kWh}$$
+4. **Elektronische Marktkommunikation (EDIFACT / MSCONS):**  
+   Der Netzbetreiber übermittelt dem Reststromversorger im monatlichen Datenaustausch **ausschließlich den bereinigten Reststrom-Lastgang ($200\text{ kWh}$)**.
+5. **Rechnungsstellung an den Endkunden:**
+   * **Reststrom-Lieferant:** Stellt genau $200\text{ kWh}$ zum regulären Arbeitspreis (z. B. $32\text{ Ct/kWh}$) in Rechnung.
+   * **Sharegy / Community:** Stellt $100\text{ kWh}$ zum günstigen Community-Sharing-Tarif (z. B. $12\text{ Ct/kWh}$) in Rechnung.
+   * **Ergebnis:** Keine Doppelabrechnung, $100\,\%$ eichrechts- und bilanzkreiskonform.
+
+### 🛡️ Sharegy Audit- & Clearing-Berichte
+
+Zur lückenlosen Transparenz und für eventuelle Rückfragen beim Stromversorger stellt Sharegy für jedes Mitglied automatisch bereit:
+* **Monatlicher Clearing-Report (PDF & CSV):** 15-Minuten-genaue Dokumentation aller bezogenen kWh, aufgeschlüsselt nach Sharing-Strom und Netzbezug.
+* **Transparenz-Dashboard:** Mitglieder sehen tagesaktuell ihren Autarkiegrad, ihre Einsparungen in Euro und den genauen Split zwischen Community-Strom und Reststrom.
+
