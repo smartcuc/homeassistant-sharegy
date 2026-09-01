@@ -1,9 +1,102 @@
-##################
-# billing/admin.py
-##################
-
 from django.contrib import admin
-from .models import BankAccount, Contract, EMSSubscription, EMSInvoice, Coupon, CouponRedemption
+from django.utils.html import format_html
+from .models import (
+    BankAccount,
+    Contract,
+    UserMeterAssignment,
+    UserBalanceSlot,
+    EMSSubscription,
+    EMSInvoice,
+    Coupon,
+    CouponRedemption,
+    CommunityTariff,
+    CommunityMonthlyStatement,
+)
+
+
+@admin.register(CommunityTariff)
+class CommunityTariffAdmin(admin.ModelAdmin):
+    list_display = (
+        "name",
+        "tenant",
+        "sharing_price_ct_kwh",
+        "producer_payout_ct_kwh",
+        "community_fee_ct_kwh",
+        "grid_fee_saved_ct_kwh",
+        "is_active",
+        "valid_from",
+        "valid_to",
+        "created_at",
+    )
+    list_filter = ("tenant", "is_active")
+    search_fields = ("name", "tenant__name")
+    raw_id_fields = ("tenant",)
+
+
+@admin.register(CommunityMonthlyStatement)
+class CommunityMonthlyStatementAdmin(admin.ModelAdmin):
+    list_display = (
+        "statement_number",
+        "tenant",
+        "user",
+        "period_start",
+        "period_end",
+        "produced_total_kwh",
+        "consumed_total_kwh",
+        "shared_imported_kwh",
+        "shared_exported_kwh",
+        "balance_colored",
+        "status",
+        "finalized_at",
+    )
+    list_filter = ("tenant", "status", "period_start")
+    search_fields = ("statement_number", "user__email", "tenant__name")
+    raw_id_fields = ("tenant", "membership", "user", "tariff")
+    date_hierarchy = "period_start"
+
+    def balance_colored(self, obj):
+        val = float(obj.net_balance_eur)
+        if val > 0:
+            return format_html("<b style='color:green;'>+{} €</b>", f"{val:.2f}")
+        elif val < 0:
+            return format_html("<b style='color:red;'>{} €</b>", f"{val:.2f}")
+        return format_html("<span>0.00 €</span>")
+    balance_colored.short_description = "Netto-Saldo (€)"
+
+
+@admin.register(UserMeterAssignment)
+class UserMeterAssignmentAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "user",
+        "meter",
+        "valid_from",
+        "valid_to",
+        "is_active",
+        "created_at",
+    )
+    list_filter = ("is_active",)
+    search_fields = ("user__email", "meter__serial_number")
+    raw_id_fields = ("user", "meter")
+
+
+@admin.register(UserBalanceSlot)
+class UserBalanceSlotAdmin(admin.ModelAdmin):
+    list_display = (
+        "period_start",
+        "user",
+        "meter",
+        "tenant",
+        "consumption_kwh",
+        "generation_kwh",
+        "self_consumption_kwh",
+        "grid_import_kwh",
+        "grid_export_kwh",
+    )
+    list_filter = ("tenant",)
+    search_fields = ("user__email", "meter__serial_number")
+    raw_id_fields = ("tenant", "user", "meter")
+    date_hierarchy = "period_start"
 
 
 @admin.register(EMSSubscription)
