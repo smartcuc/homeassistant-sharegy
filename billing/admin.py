@@ -11,7 +11,16 @@ from .models import (
     CouponRedemption,
     CommunityTariff,
     CommunityMonthlyStatement,
+    CommunityAnnouncement,
 )
+
+
+@admin.register(CommunityAnnouncement)
+class CommunityAnnouncementAdmin(admin.ModelAdmin):
+    list_display = ("title", "tenant", "category", "author", "is_active", "created_at")
+    list_filter = ("tenant", "category", "is_active")
+    search_fields = ("title", "message", "tenant__name")
+    raw_id_fields = ("tenant", "author")
 
 
 @admin.register(CommunityTariff)

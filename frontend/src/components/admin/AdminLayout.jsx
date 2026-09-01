@@ -23,18 +23,28 @@ export default function AdminLayout({ children }) {
 
                     <nav className="space-y-1">
                         <NavLink
-                            to="/app/admin/dashboard"
+                            to="/admin/communities"
+                            className={({ isActive }) =>
+                                `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${isActive ? "bg-indigo-50 text-indigo-700 shadow-2xs" : "text-gray-600 hover:bg-gray-50"
+                                }`
+                            }
+                        >
+                            <span className="text-sm">🏘️</span> Energiegemeinschaften
+                        </NavLink>
+
+                        <NavLink
+                            to="/admin/dashboard"
                             end
                             className={({ isActive }) =>
                                 `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${isActive ? "bg-indigo-50 text-indigo-700 shadow-2xs" : "text-gray-600 hover:bg-gray-50"
                                 }`
                             }
                         >
-                            <span className="text-sm">📊</span> {t("admin.title", "Dashboard")}
+                            <span className="text-sm">📊</span> {t("admin.title", "Conversion & Funnel")}
                         </NavLink>
 
                         <NavLink
-                            to="/app/admin/tracking"
+                            to="/admin/tracking"
                             className={({ isActive }) =>
                                 `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${isActive ? "bg-indigo-50 text-indigo-700 shadow-2xs" : "text-gray-600 hover:bg-gray-50"
                                 }`
@@ -44,13 +54,13 @@ export default function AdminLayout({ children }) {
                         </NavLink>
 
                         <NavLink
-                            to="/app/tenant"
+                            to="/admin/tenants"
                             className={({ isActive }) =>
                                 `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${isActive ? "bg-indigo-50 text-indigo-700 shadow-2xs" : "text-gray-600 hover:bg-gray-50"
                                 }`
                             }
                         >
-                            <span className="text-sm">👥</span> {t("admin.tenants", "Mandanten & Mieter")}
+                            <span className="text-sm">👥</span> Community Cockpit
                         </NavLink>
 
                         <a

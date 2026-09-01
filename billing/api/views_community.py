@@ -371,3 +371,351 @@ def generate_community_statements_view(request):
         "message": f"Successfully generated {len(statements)} statements for {month:02d}/{year}",
         "count": len(statements),
     })
+
+
+# ==============================================================================
+# 🌐 ZENTRALES MULTI-COMMUNITY MANAGEMENT & PORTFOLIO HUB
+# ==============================================================================
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def community_portfolio_overview_view(request):
+    """
+    Zentrale Portfolio-Übersicht über alle Energiegemeinschaften:
+    - Gesamt-KPIs (Autarkie, Gesamterzeugung, Gesamtverbrauch, Gesamt-Sharing, Ersparnis)
+    - Liste aller verwalteten Energiegemeinschaften mit Performance-Indikatoren
+    - Tarif- und Abrechnungs-Status pro Community
+    """
+    user = request.user
+    now = timezone.now()
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+    # 1. Berechtigte Tenants ermitteln
+    if user.is_staff or user.is_superuser:
+        tenants_qs = Tenant.objects.all().order_by("name")
+    else:
+        # User sieht Communities, in denen er Admin, UserAdmin, Auditor oder Mitglied ist
+        tenant_ids = TenantMembership.objects.filter(
+            user=user, is_active=True
+        ).values_list("tenant_id", flat=True)
+        tenants_qs = Tenant.objects.filter(id__in=tenant_ids).order_by("name")
+
+    total_communities = tenants_qs.count()
+    if total_communities == 0:
+        return Response({
+            "portfolio": {
+                "total_communities": 0,
+                "total_members": 0,
+                "total_meters": 0,
+                "total_produced_kwh": 0.0,
+                "total_consumed_kwh": 0.0,
+                "total_shared_kwh": 0.0,
+                "portfolio_autarky_pct": 0.0,
+                "total_savings_eur": 0.0,
+            },
+            "communities": [],
+        })
+
+    from billing.models import CommunityTariff, CommunityMonthlyStatement, CommunityAnnouncement
+    from billing.services_sharing_settlement import get_active_community_tariff
+
+    communities_list = []
+    portfolio_prod = Decimal("0")
+    portfolio_cons = Decimal("0")
+    portfolio_shared = Decimal("0")
+    portfolio_members = 0
+    portfolio_meters = 0
+
+    for t in tenants_qs:
+        m_count = TenantMembership.objects.filter(tenant=t, is_active=True).count()
+        meter_count = Meter.objects.filter(tenant=t, removed_at__isnull=True).count()
+        portfolio_members += m_count
+        portfolio_meters += meter_count
+
+        # Monats-Performance berechnen
+        month_slots = BalanceSlot.objects.filter(
+            meter__tenant=t,
+            period_start__gte=month_start,
+            period_start__lte=now,
+        )
+        agg = month_slots.aggregate(
+            prod=Sum("generation_kwh"),
+            cons=Sum("consumption_kwh"),
+        )
+        prod = agg["prod"] or Decimal("0")
+        cons = agg["cons"] or Decimal("0")
+        shared = min(prod, cons)
+        autarky = (shared / cons * 100) if cons > Decimal("0") else Decimal("0")
+        savings = shared * Decimal("0.22")
+
+        portfolio_prod += prod
+        portfolio_cons += cons
+        portfolio_shared += shared
+
+        tariff = get_active_community_tariff(t, now.date())
+        announcements_count = CommunityAnnouncement.objects.filter(tenant=t, is_active=True).count()
+        statements_count = CommunityMonthlyStatement.objects.filter(tenant=t).count()
+
+        communities_list.append({
+            "id": str(t.id),
+            "name": t.name,
+            "slug": t.slug,
+            "is_public": t.is_public,
+            "primary_color": t.primary_color,
+            "members_count": m_count,
+            "meters_count": meter_count,
+            "month_produced_kwh": round(float(prod), 1),
+            "month_consumed_kwh": round(float(cons), 1),
+            "month_shared_kwh": round(float(shared), 1),
+            "autarky_pct": round(float(autarky), 1),
+            "savings_eur": round(float(savings), 2),
+            "tariff": {
+                "name": tariff.name,
+                "sharing_price_ct_kwh": float(tariff.sharing_price_ct_kwh),
+                "producer_payout_ct_kwh": float(tariff.producer_payout_ct_kwh),
+                "community_fee_ct_kwh": float(tariff.community_fee_ct_kwh),
+            } if tariff else None,
+            "announcements_count": announcements_count,
+            "statements_count": statements_count,
+        })
+
+    portfolio_autarky = (portfolio_shared / portfolio_cons * 100) if portfolio_cons > Decimal("0") else Decimal("0")
+    portfolio_savings = portfolio_shared * Decimal("0.22")
+
+    return Response({
+        "portfolio": {
+            "total_communities": total_communities,
+            "total_members": portfolio_members,
+            "total_meters": portfolio_meters,
+            "total_produced_kwh": round(float(portfolio_prod), 1),
+            "total_consumed_kwh": round(float(portfolio_cons), 1),
+            "total_shared_kwh": round(float(portfolio_shared), 1),
+            "portfolio_autarky_pct": round(float(portfolio_autarky), 1),
+            "total_savings_eur": round(float(portfolio_savings), 2),
+        },
+        "communities": communities_list,
+        "is_platform_admin": bool(user.is_staff or user.is_superuser),
+    })
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def community_drilldown_view(request, tenant_id):
+    """
+    Detaillierte Drill-Down-Ansicht für eine einzelne Community:
+    - Mitglieder & Zähler-Zuordnungen mit individuellen kWh-Mengen
+    - Leistungs- und Lastgangverlauf
+    - Tarife, Abrechnungsnachweise & Mitteilungen
+    - Community-Einstellungen
+    """
+    user = request.user
+    tenant = Tenant.objects.filter(id=tenant_id).first()
+    if not tenant:
+        return Response({"error": "Community not found."}, status=404)
+
+    # Permission Check
+    membership = TenantMembership.objects.filter(user=user, tenant=tenant, is_active=True).first()
+    is_admin = user.is_staff or user.is_superuser or (membership and membership.role in ["admin", "owner", "user_admin", "auditor"])
+    if not is_admin:
+        return Response({"error": "Forbidden: Insufficient permissions for community drilldown."}, status=403)
+
+    from billing.models import CommunityTariff, CommunityMonthlyStatement, CommunityAnnouncement
+    from billing.services_sharing_settlement import get_active_community_tariff
+
+    now = timezone.now()
+    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+    # 1. Mitglieder & Zähler
+    memberships = TenantMembership.objects.filter(tenant=tenant).select_related("user").order_by("created_at")
+    members_data = []
+    for m in memberships:
+        # Zähler des Mitglieds
+        meters = Meter.objects.filter(tenant=tenant, owner_membership=m, removed_at__isnull=True)
+        meter_list = [
+            {
+                "id": str(mtr.id),
+                "serial_number": mtr.serial_number,
+                "meter_type": mtr.meter_type,
+                "integration_type": mtr.integration_type,
+            }
+            for mtr in meters
+        ]
+
+        # Individuelle Monatsmengen
+        member_slots = BalanceSlot.objects.filter(
+            meter__owner_membership=m,
+            period_start__gte=month_start,
+            period_start__lte=now,
+        )
+        agg = member_slots.aggregate(
+            prod=Sum("generation_kwh"),
+            cons=Sum("consumption_kwh"),
+        )
+        prod = float(agg["prod"] or 0.0)
+        cons = float(agg["cons"] or 0.0)
+
+        # Letztes Statement
+        last_stmt = CommunityMonthlyStatement.objects.filter(membership=m).order_by("-period_start").first()
+
+        members_data.append({
+            "membership_id": str(m.id),
+            "user_id": str(m.user.id),
+            "email": m.user.email,
+            "role": m.role,
+            "is_active": m.is_active,
+            "created_at": m.created_at.isoformat(),
+            "meters": meter_list,
+            "month_produced_kwh": round(prod, 1),
+            "month_consumed_kwh": round(cons, 1),
+            "last_statement": {
+                "statement_number": last_stmt.statement_number,
+                "net_balance_eur": float(last_stmt.net_balance_eur),
+                "period_start": last_stmt.period_start.isoformat(),
+            } if last_stmt else None,
+        })
+
+    # 2. Aktiver Tarif
+    active_tariff = get_active_community_tariff(tenant, now.date())
+
+    # 3. Ankündigungen
+    announcements = CommunityAnnouncement.objects.filter(tenant=tenant).select_related("author").order_by("-created_at")[:10]
+    announcements_data = [
+        {
+            "id": str(a.id),
+            "title": a.title,
+            "message": a.message,
+            "category": a.category,
+            "is_active": a.is_active,
+            "author_email": a.author.email if a.author else "System",
+            "created_at": a.created_at.isoformat(),
+        }
+        for a in announcements
+    ]
+
+    return Response({
+        "community": {
+            "id": str(tenant.id),
+            "name": tenant.name,
+            "slug": tenant.slug,
+            "is_public": tenant.is_public,
+            "primary_color": tenant.primary_color,
+            "secondary_color": tenant.secondary_color,
+            "button_color": tenant.button_color,
+            "latitude": float(tenant.latitude) if tenant.latitude else None,
+            "longitude": float(tenant.longitude) if tenant.longitude else None,
+        },
+        "members": members_data,
+        "active_tariff": {
+            "id": str(active_tariff.id),
+            "name": active_tariff.name,
+            "sharing_price_ct_kwh": float(active_tariff.sharing_price_ct_kwh),
+            "producer_payout_ct_kwh": float(active_tariff.producer_payout_ct_kwh),
+            "community_fee_ct_kwh": float(active_tariff.community_fee_ct_kwh),
+            "grid_fee_saved_ct_kwh": float(active_tariff.grid_fee_saved_ct_kwh),
+        } if active_tariff else None,
+        "announcements": announcements_data,
+        "is_admin": is_admin,
+    })
+
+
+@api_view(["GET", "POST"])
+@permission_classes([IsAuthenticated])
+def community_announcements_view(request, tenant_id):
+    """
+    Rundschreiben & Mitteilungen für eine Community abrufen und neu erstellen.
+    """
+    user = request.user
+    tenant = Tenant.objects.filter(id=tenant_id).first()
+    if not tenant:
+        return Response({"error": "Community not found."}, status=404)
+
+    from billing.models import CommunityAnnouncement
+
+    if request.method == "GET":
+        announcements = CommunityAnnouncement.objects.filter(tenant=tenant, is_active=True).select_related("author").order_by("-created_at")
+        return Response({
+            "announcements": [
+                {
+                    "id": str(a.id),
+                    "title": a.title,
+                    "message": a.message,
+                    "category": a.category,
+                    "author_email": a.author.email if a.author else "System",
+                    "created_at": a.created_at.isoformat(),
+                }
+                for a in announcements
+            ]
+        })
+
+    # POST: Nur Admins
+    membership = TenantMembership.objects.filter(user=user, tenant=tenant, is_active=True).first()
+    if not user.is_staff and (not membership or membership.role not in ["admin", "owner", "user_admin"]):
+        return Response({"error": "Forbidden: Only community admins can post announcements."}, status=403)
+
+    title = request.data.get("title")
+    message = request.data.get("message")
+    category = request.data.get("category", "info")
+
+    if not title or not message:
+        return Response({"error": "Title and message are required."}, status=400)
+
+    announcement = CommunityAnnouncement.objects.create(
+        tenant=tenant,
+        author=user,
+        title=title,
+        message=message,
+        category=category,
+        is_active=True,
+    )
+
+    return Response({
+        "message": "Announcement created successfully.",
+        "id": str(announcement.id),
+    }, status=201)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def community_settings_update_view(request, tenant_id):
+    """
+    Einstellungen & Stammdaten einer Energiegemeinschaft aktualisieren.
+    """
+    user = request.user
+    tenant = Tenant.objects.filter(id=tenant_id).first()
+    if not tenant:
+        return Response({"error": "Community not found."}, status=404)
+
+    membership = TenantMembership.objects.filter(user=user, tenant=tenant, is_active=True).first()
+    if not user.is_staff and (not membership or membership.role not in ["admin", "owner"]):
+        return Response({"error": "Forbidden: Only community admins can update settings."}, status=403)
+
+    name = request.data.get("name")
+    if name:
+        tenant.name = name.strip()
+
+    if "is_public" in request.data:
+        tenant.is_public = bool(request.data["is_public"])
+
+    if "primary_color" in request.data:
+        tenant.primary_color = request.data["primary_color"]
+
+    if "latitude" in request.data:
+        tenant.latitude = request.data["latitude"]
+
+    if "longitude" in request.data:
+        tenant.longitude = request.data["longitude"]
+
+    tenant.save()
+
+    return Response({
+        "message": "Community settings updated successfully.",
+        "community": {
+            "id": str(tenant.id),
+            "name": tenant.name,
+            "slug": tenant.slug,
+            "is_public": tenant.is_public,
+            "primary_color": tenant.primary_color,
+        }
+    })
+

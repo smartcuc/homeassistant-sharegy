@@ -7,6 +7,7 @@ import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import TrackingDashboard from "./pages/admin/TrackingDashboard";
 import TenantDashboard from "./pages/TenantDashboard";
+import CommunitiesManagementHub from "./pages/admin/CommunitiesManagementHub";
 import { useUser } from "./hooks/useUser";
 
 export default function AdminApp() {
@@ -26,12 +27,14 @@ export default function AdminApp() {
     return (
         <AdminLayout>
             <Routes>
-                <Route index element={<Navigate to="dashboard" replace />} />
+                <Route index element={<Navigate to="communities" replace />} />
+                <Route path="communities" element={<CommunitiesManagementHub />} />
                 <Route path="dashboard" element={<AdminDashboard />} />
                 <Route path="tracking" element={<TrackingDashboard />} />
                 <Route path="tenants" element={<TenantDashboard />} />
-                <Route path="*" element={<Navigate to="dashboard" replace />} />
+                <Route path="*" element={<Navigate to="communities" replace />} />
             </Routes>
         </AdminLayout>
     );
 }
+

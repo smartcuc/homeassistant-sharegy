@@ -574,6 +574,52 @@ class CommunityMonthlyStatement(models.Model):
         return f"{self.statement_number} - {self.user.email} ({self.period_start} bis {self.period_end}): {self.net_balance_eur} €"
 
 
+class CommunityAnnouncement(models.Model):
+    """
+    Zentrale Rundschreiben / Mitteilungen für eine Energiegemeinschaft.
+    Ermöglicht Betreibern & Admins, alle Teilnehmer über Tarife, Zählerwechsel
+    oder Wartungsarbeiten zentral zu informieren.
+    """
+    CATEGORY_INFO = "info"
+    CATEGORY_TARIFF = "tariff"
+    CATEGORY_MAINTENANCE = "maintenance"
+    CATEGORY_IMPORTANT = "important"
+
+    CATEGORY_CHOICES = [
+        (CATEGORY_INFO, "Information"),
+        (CATEGORY_TARIFF, "Tarif & Abrechnung"),
+        (CATEGORY_MAINTENANCE, "Wartung & Zähler"),
+        (CATEGORY_IMPORTANT, "Wichtig / Dringend"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    tenant = models.ForeignKey(
+        "core.Tenant",
+        on_delete=models.CASCADE,
+        related_name="announcements",
+    )
+    author = models.ForeignKey(
+        "accounts.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="community_announcements",
+    )
+    title = models.CharField(max_length=200)
+    message = models.TextField()
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default=CATEGORY_INFO)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "billing_community_announcement"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"[{self.tenant.name}] {self.title}"
+
+
 # =========================================================
 # 🔄 SIGNALS: AUTOMATISCHE FREE-PLAN ZUWEISUNG BEI REGISTRIERUNG
 # =========================================================
