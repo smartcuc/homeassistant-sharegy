@@ -176,3 +176,198 @@ def community_cockpit_view(request):
             "hours": forecast_items,
         },
     })
+
+
+@api_view(["GET", "POST"])
+@permission_classes([IsAuthenticated])
+def community_tariffs_view(request):
+    """
+    GET: Ruft alle Tarife der Community ab und kennzeichnet den aktiven Tarif.
+    POST: Erstellt einen neuen Sharing-Tarif (nur für Community-Admins).
+    """
+    user = request.user
+    tenant_id = request.headers.get("X-Tenant-ID") or request.GET.get("tenant_id") or request.data.get("tenant_id")
+
+    if tenant_id:
+        membership = TenantMembership.objects.filter(user=user, tenant_id=tenant_id, is_active=True).first()
+        if not membership and not user.is_staff:
+            return Response({"error": "Forbidden: No active membership in requested community."}, status=403)
+        tenant = Tenant.objects.filter(id=tenant_id).first()
+    else:
+        membership = TenantMembership.objects.filter(user=user, is_active=True).first()
+        tenant = membership.tenant if membership else None
+
+    if not tenant:
+        return Response({"error": "No active community found for user."}, status=404)
+
+    from billing.models import CommunityTariff
+    from billing.services_sharing_settlement import get_active_community_tariff
+
+    if request.method == "POST":
+        if not user.is_staff and (not membership or membership.role not in ["admin", "owner"]):
+            return Response({"error": "Forbidden: Only community admins can configure tariffs."}, status=403)
+
+        name = request.data.get("name", "Sharing Tarif")
+        sharing_price = Decimal(str(request.data.get("sharing_price_ct_kwh", "12.00")))
+        producer_payout = Decimal(str(request.data.get("producer_payout_ct_kwh", "10.00")))
+        community_fee = Decimal(str(request.data.get("community_fee_ct_kwh", "2.00")))
+        grid_fee_saved = Decimal(str(request.data.get("grid_fee_saved_ct_kwh", "0.00")))
+
+        # Vorherige Tarife deaktivieren, falls gewünscht
+        if request.data.get("set_active", True):
+            CommunityTariff.objects.filter(tenant=tenant).update(is_active=False)
+
+        new_tariff = CommunityTariff.objects.create(
+            tenant=tenant,
+            name=name,
+            sharing_price_ct_kwh=sharing_price,
+            producer_payout_ct_kwh=producer_payout,
+            community_fee_ct_kwh=community_fee,
+            grid_fee_saved_ct_kwh=grid_fee_saved,
+            valid_from=timezone.now(),
+            is_active=True,
+        )
+
+        return Response({
+            "message": "Tariff created successfully",
+            "tariff": {
+                "id": str(new_tariff.id),
+                "name": new_tariff.name,
+                "sharing_price_ct_kwh": float(new_tariff.sharing_price_ct_kwh),
+                "producer_payout_ct_kwh": float(new_tariff.producer_payout_ct_kwh),
+                "community_fee_ct_kwh": float(new_tariff.community_fee_ct_kwh),
+                "grid_fee_saved_ct_kwh": float(new_tariff.grid_fee_saved_ct_kwh),
+                "valid_from": new_tariff.valid_from.isoformat(),
+                "is_active": new_tariff.is_active,
+            }
+        }, status=201)
+
+    active_tariff = get_active_community_tariff(tenant)
+    all_tariffs = CommunityTariff.objects.filter(tenant=tenant).order_by("-valid_from")
+
+    return Response({
+        "active_tariff": {
+            "id": str(active_tariff.id),
+            "name": active_tariff.name,
+            "sharing_price_ct_kwh": float(active_tariff.sharing_price_ct_kwh),
+            "producer_payout_ct_kwh": float(active_tariff.producer_payout_ct_kwh),
+            "community_fee_ct_kwh": float(active_tariff.community_fee_ct_kwh),
+            "grid_fee_saved_ct_kwh": float(active_tariff.grid_fee_saved_ct_kwh),
+            "valid_from": active_tariff.valid_from.isoformat(),
+            "is_active": active_tariff.is_active,
+        },
+        "tariffs": [
+            {
+                "id": str(t.id),
+                "name": t.name,
+                "sharing_price_ct_kwh": float(t.sharing_price_ct_kwh),
+                "producer_payout_ct_kwh": float(t.producer_payout_ct_kwh),
+                "community_fee_ct_kwh": float(t.community_fee_ct_kwh),
+                "grid_fee_saved_ct_kwh": float(t.grid_fee_saved_ct_kwh),
+                "valid_from": t.valid_from.isoformat(),
+                "is_active": t.is_active,
+            }
+            for t in all_tariffs
+        ]
+    })
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def community_statements_view(request):
+    """
+    Ruft die monatlichen Abrechnungsnachweise ab.
+    Mitglieder sehen ihre eigenen Abrechnungen.
+    Admins/Auditoren sehen alle Abrechnungen der Community.
+    """
+    user = request.user
+    tenant_id = request.headers.get("X-Tenant-ID") or request.GET.get("tenant_id")
+
+    if tenant_id:
+        membership = TenantMembership.objects.filter(user=user, tenant_id=tenant_id, is_active=True).first()
+        if not membership and not user.is_staff:
+            return Response({"error": "Forbidden: No active membership in requested community."}, status=403)
+        tenant = Tenant.objects.filter(id=tenant_id).first()
+    else:
+        membership = TenantMembership.objects.filter(user=user, is_active=True).first()
+        tenant = membership.tenant if membership else None
+
+    if not tenant:
+        return Response({"error": "No active community found for user."}, status=404)
+
+    from billing.models import CommunityMonthlyStatement
+
+    is_admin_or_auditor = user.is_staff or (membership and membership.role in ["admin", "owner", "auditor"])
+
+    qs = CommunityMonthlyStatement.objects.filter(tenant=tenant)
+    if not is_admin_or_auditor:
+        qs = qs.filter(user=user)
+
+    statements = qs.select_related("user", "tariff").order_by("-period_start", "-created_at")
+
+    results = []
+    for s in statements:
+        results.append({
+            "id": str(s.id),
+            "statement_number": s.statement_number,
+            "period_start": s.period_start.isoformat(),
+            "period_end": s.period_end.isoformat(),
+            "user_email": s.user.email,
+            "produced_total_kwh": float(s.produced_total_kwh),
+            "consumed_total_kwh": float(s.consumed_total_kwh),
+            "shared_imported_kwh": float(s.shared_imported_kwh),
+            "shared_exported_kwh": float(s.shared_exported_kwh),
+            "grid_residual_import_kwh": float(s.grid_residual_import_kwh),
+            "grid_residual_export_kwh": float(s.grid_residual_export_kwh),
+            "charge_shared_import_eur": float(s.charge_shared_import_eur),
+            "credit_shared_export_eur": float(s.credit_shared_export_eur),
+            "community_fee_eur": float(s.community_fee_eur),
+            "net_balance_eur": float(s.net_balance_eur),
+            "is_payout": float(s.net_balance_eur) > 0,
+            "status": s.status,
+            "finalized_at": s.finalized_at.isoformat() if s.finalized_at else None,
+        })
+
+    return Response({
+        "statements": results,
+        "is_admin": is_admin_or_auditor,
+    })
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def generate_community_statements_view(request):
+    """
+    Generiert oder aktualisiert die Monatsabrechnungen für einen angegebenen Monat.
+    Nur für Community-Admins und Staff zugelassen.
+    """
+    user = request.user
+    tenant_id = request.headers.get("X-Tenant-ID") or request.data.get("tenant_id")
+
+    if tenant_id:
+        membership = TenantMembership.objects.filter(user=user, tenant_id=tenant_id, is_active=True).first()
+        if not membership and not user.is_staff:
+            return Response({"error": "Forbidden: No active membership in requested community."}, status=403)
+        tenant = Tenant.objects.filter(id=tenant_id).first()
+    else:
+        membership = TenantMembership.objects.filter(user=user, is_active=True).first()
+        tenant = membership.tenant if membership else None
+
+    if not tenant:
+        return Response({"error": "No active community found for user."}, status=404)
+
+    if not user.is_staff and (not membership or membership.role not in ["admin", "owner"]):
+        return Response({"error": "Forbidden: Only community admins can trigger monthly settlements."}, status=403)
+
+    now = timezone.now()
+    year = int(request.data.get("year", now.year))
+    month = int(request.data.get("month", now.month))
+
+    from billing.services_sharing_settlement import calculate_monthly_community_statements
+
+    statements = calculate_monthly_community_statements(tenant, year, month)
+
+    return Response({
+        "message": f"Successfully generated {len(statements)} statements for {month:02d}/{year}",
+        "count": len(statements),
+    })

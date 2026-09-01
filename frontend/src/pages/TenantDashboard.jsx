@@ -13,9 +13,12 @@ export default function TenantDashboard() {
     const [invites, setInvites] = useState([]);
     const [logs, setLogs] = useState([]);
     const [cockpit, setCockpit] = useState(null);
-    const [activeTab, setActiveTab] = useState("cockpit"); // 'cockpit' | 'members' | 'audit'
+    const [tariffData, setTariffData] = useState(null);
+    const [statementsData, setStatementsData] = useState(null);
+    const [activeTab, setActiveTab] = useState("cockpit"); // 'cockpit' | 'settlement' | 'members' | 'audit'
     const [timeRange, setTimeRange] = useState("today"); // 'today' | 'month'
     const [loading, setLoading] = useState(true);
+    const [settling, setSettling] = useState(false);
 
     const { lang } = useLang();
     const t = texts[lang] || texts["de"] || {};
@@ -29,13 +32,17 @@ export default function TenantDashboard() {
             setMembers(data.members || []);
             setInvites(data.invites || []);
 
-            const [logData, cockpitData] = await Promise.all([
+            const [logData, cockpitData, tariffsRes, statementsRes] = await Promise.all([
                 apiFetch("/api/audit-log/").catch(() => []),
                 apiFetch("/api/billing/community/cockpit/").catch(() => null),
+                apiFetch("/api/billing/community/tariffs/").catch(() => null),
+                apiFetch("/api/billing/community/statements/").catch(() => null),
             ]);
 
             setLogs(logData || []);
             setCockpit(cockpitData);
+            setTariffData(tariffsRes);
+            setStatementsData(statementsRes);
         } catch (err) {
             console.error("Load failed:", err);
         } finally {
@@ -46,6 +53,29 @@ export default function TenantDashboard() {
     useEffect(() => {
         loadData();
     }, []);
+
+    // ✅ MONATLICHE ABRECHNUNG ANSTOSSEN
+    async function triggerSettlement() {
+        setSettling(true);
+        try {
+            const now = new Date();
+            const res = await apiFetch("/api/billing/community/statements/generate/", {
+                method: "POST",
+                body: JSON.stringify({
+                    tenant_id: tenant.id,
+                    year: now.getFullYear(),
+                    month: now.getMonth() + 1,
+                }),
+            });
+            alert(res.message || "Abrechnung erfolgreich generiert.");
+            const statementsRes = await apiFetch("/api/billing/community/statements/").catch(() => null);
+            setStatementsData(statementsRes);
+        } catch (err) {
+            alert("Abrechnungsfehler: " + (err.message || "Unbekannter Fehler"));
+        } finally {
+            setSettling(false);
+        }
+    }
 
     // ✅ INVITE ERSTELLEN
     async function createInvite(role) {
@@ -145,6 +175,8 @@ export default function TenantDashboard() {
     }
 
     const currentStats = cockpit ? (timeRange === "today" ? cockpit.today : cockpit.month) : null;
+    const activeTariff = tariffData ? tariffData.active_tariff : null;
+    const statements = statementsData ? statementsData.statements : [];
 
     return (
         <div className="p-4 sm:p-6 max-w-6xl mx-auto space-y-6">
@@ -170,7 +202,7 @@ export default function TenantDashboard() {
                 <div className="flex bg-slate-100 dark:bg-slate-800/70 p-1 rounded-xl text-xs font-semibold">
                     <button
                         onClick={() => setActiveTab("cockpit")}
-                        className={`px-3.5 py-1.5 rounded-lg transition cursor-pointer ${
+                        className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
                             activeTab === "cockpit"
                                 ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs"
                                 : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
@@ -179,18 +211,28 @@ export default function TenantDashboard() {
                         ⚡ Energy Cockpit
                     </button>
                     <button
+                        onClick={() => setActiveTab("settlement")}
+                        className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
+                            activeTab === "settlement"
+                                ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs"
+                                : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                        }`}
+                    >
+                        💰 Tarife & Abrechnungen
+                    </button>
+                    <button
                         onClick={() => setActiveTab("members")}
-                        className={`px-3.5 py-1.5 rounded-lg transition cursor-pointer ${
+                        className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
                             activeTab === "members"
                                 ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs"
                                 : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                         }`}
                     >
-                        👥 Mitglieder & Zähler ({members.length})
+                        👥 Mitglieder ({members.length})
                     </button>
                     <button
                         onClick={() => setActiveTab("audit")}
-                        className={`px-3.5 py-1.5 rounded-lg transition cursor-pointer ${
+                        className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
                             activeTab === "audit"
                                 ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs"
                                 : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
@@ -450,7 +492,150 @@ export default function TenantDashboard() {
             )}
 
             {/* ======================================================== */}
-            {/* 2. MEMBERS & INVITES TAB */}
+            {/* 2. TARIFE & ABRECHNUNGEN TAB */}
+            {/* ======================================================== */}
+            {activeTab === "settlement" && (
+                <div className="space-y-6">
+
+                    {/* AKTIVER SHARING TARIF */}
+                    {activeTariff && (
+                        <div className="bg-gradient-to-br from-indigo-900 to-slate-900 text-white rounded-2xl p-6 border border-indigo-700/50 shadow-md">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xl">🏷️</span>
+                                        <h2 className="text-lg font-black tracking-tight">{activeTariff.name}</h2>
+                                        <span className="bg-emerald-400/20 text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-400/30">
+                                            Aktiv
+                                        </span>
+                                    </div>
+                                    <p className="text-xs text-indigo-200/80 mt-1">
+                                        Gültige Konditionen für alle Teilnehmer dieser Energy Sharing Community
+                                    </p>
+                                </div>
+
+                                {statementsData?.is_admin && (
+                                    <button
+                                        onClick={triggerSettlement}
+                                        disabled={settling}
+                                        className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white rounded-xl text-xs font-bold shadow-xs transition cursor-pointer flex items-center gap-1.5"
+                                    >
+                                        <span>⚡</span> {settling ? "Berechne..." : "Monatsabrechnung anstoßen"}
+                                    </button>
+                                )}
+                            </div>
+
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-indigo-800/60">
+                                <div>
+                                    <div className="text-[11px] text-indigo-300 font-semibold uppercase">Bezugspreis (Sharing)</div>
+                                    <div className="text-2xl font-black mt-1 text-white">
+                                        {activeTariff.sharing_price_ct_kwh.toFixed(2)} <span className="text-xs font-normal">Ct/kWh</span>
+                                    </div>
+                                    <div className="text-[10px] text-indigo-300/70 mt-0.5">für Solar-Abnehmer</div>
+                                </div>
+
+                                <div>
+                                    <div className="text-[11px] text-indigo-300 font-semibold uppercase">Einspeisevergütung</div>
+                                    <div className="text-2xl font-black mt-1 text-emerald-300">
+                                        {activeTariff.producer_payout_ct_kwh.toFixed(2)} <span className="text-xs font-normal">Ct/kWh</span>
+                                    </div>
+                                    <div className="text-[10px] text-indigo-300/70 mt-0.5">Gutschrift an Einspeiser</div>
+                                </div>
+
+                                <div>
+                                    <div className="text-[11px] text-indigo-300 font-semibold uppercase">Community-Umlage</div>
+                                    <div className="text-2xl font-black mt-1 text-amber-300">
+                                        {activeTariff.community_fee_ct_kwh.toFixed(2)} <span className="text-xs font-normal">Ct/kWh</span>
+                                    </div>
+                                    <div className="text-[10px] text-indigo-300/70 mt-0.5">Betrieb & Software</div>
+                                </div>
+
+                                <div>
+                                    <div className="text-[11px] text-indigo-300 font-semibold uppercase">Ersparnis vs. Netz</div>
+                                    <div className="text-2xl font-black mt-1 text-cyan-300">
+                                        ~22,00 <span className="text-xs font-normal">Ct/kWh</span>
+                                    </div>
+                                    <div className="text-[10px] text-indigo-300/70 mt-0.5">ggü. Grundversorger</div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* MONATLICHE ABRECHNUNGSNACHWEISE */}
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs">
+                        <div className="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                                    Monatliche Abrechnungsnachweise
+                                </h3>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">
+                                    15-Minuten-scharfe Verrechnung von Erzeugung, Bezug und internen Gutschriften
+                                </p>
+                            </div>
+                            <span className="text-xs font-semibold text-slate-500">
+                                {statements.length} Nachweise
+                            </span>
+                        </div>
+
+                        {statements.length > 0 ? (
+                            <div className="space-y-2.5">
+                                {statements.map(stmt => (
+                                    <div
+                                        key={stmt.id}
+                                        className="border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs"
+                                    >
+                                        <div className="space-y-1">
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-mono font-bold text-xs text-slate-900 dark:text-white">
+                                                    {stmt.statement_number}
+                                                </span>
+                                                <span className="bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-[10px] font-semibold px-2 py-0.5 rounded-md">
+                                                    {stmt.period_start} bis {stmt.period_end}
+                                                </span>
+                                                <span className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-md border border-emerald-500/20">
+                                                    {stmt.status === "finalized" ? "Abgerechnet" : stmt.status}
+                                                </span>
+                                            </div>
+                                            <div className="text-xs text-slate-500 dark:text-slate-400">
+                                                Mitglied: <span className="font-medium text-slate-700 dark:text-slate-300">{stmt.user_email}</span>
+                                            </div>
+                                            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs pt-1 text-slate-600 dark:text-slate-400">
+                                                <span>☀️ Erzeugt: <strong>{stmt.produced_total_kwh.toFixed(1)} kWh</strong></span>
+                                                <span>🏠 Verbraucht: <strong>{stmt.consumed_total_kwh.toFixed(1)} kWh</strong></span>
+                                                <span>🤝 Geteilt: <strong>{(stmt.shared_imported_kwh + stmt.shared_exported_kwh).toFixed(1)} kWh</strong></span>
+                                            </div>
+                                        </div>
+
+                                        <div className="text-right sm:border-l sm:border-slate-200 dark:sm:border-slate-700 sm:pl-6">
+                                            <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                                                {stmt.is_payout ? "Gutschrift / Auszahlung" : "Forderung / Nachzahlung"}
+                                            </div>
+                                            <div className={`text-xl font-black mt-0.5 ${
+                                                stmt.is_payout
+                                                    ? "text-emerald-600 dark:text-emerald-400"
+                                                    : "text-rose-600 dark:text-rose-400"
+                                            }`}>
+                                                {stmt.is_payout ? "+" : ""}{stmt.net_balance_eur.toFixed(2)} €
+                                            </div>
+                                            <div className="text-[10px] text-slate-400 mt-0.5">
+                                                Gutschrift: {stmt.credit_shared_export_eur.toFixed(2)} € | Bezug: {stmt.charge_shared_import_eur.toFixed(2)} €
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-10 text-xs text-slate-400 bg-slate-50 dark:bg-slate-800/30 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+                                📜 Noch keine Monatsabrechnungen erstellt. Klicke auf &quot;Monatsabrechnung anstoßen&quot;, um den aktuellen Monat abzurechnen.
+                            </div>
+                        )}
+                    </div>
+
+                </div>
+            )}
+
+            {/* ======================================================== */}
+            {/* 3. MEMBERS & INVITES TAB */}
             {/* ======================================================== */}
             {activeTab === "members" && (
                 <div className="space-y-6">
@@ -568,7 +753,7 @@ export default function TenantDashboard() {
             )}
 
             {/* ======================================================== */}
-            {/* 3. AUDIT TAB */}
+            {/* 4. AUDIT TAB */}
             {/* ======================================================== */}
             {activeTab === "audit" && (
                 <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs">
@@ -609,5 +794,6 @@ export default function TenantDashboard() {
         </div>
     );
 }
+
 
 

@@ -11,7 +11,12 @@ from billing.api.views import (
     validate_coupon_view,
     redeem_coupon_view,
 )
-from billing.api.views_community import community_cockpit_view
+from billing.api.views_community import (
+    community_cockpit_view,
+    community_tariffs_view,
+    community_statements_view,
+    generate_community_statements_view,
+)
 
 urlpatterns = [
     path("consumption/", consumption_view, name="billing_consumption"),
@@ -25,5 +30,8 @@ urlpatterns = [
     path("subscription/coupons/validate/", validate_coupon_view, name="subscription_coupon_validate"),
     path("subscription/coupons/redeem/", redeem_coupon_view, name="subscription_coupon_redeem"),
     path("community/cockpit/", community_cockpit_view, name="community_cockpit"),
+    path("community/tariffs/", community_tariffs_view, name="community_tariffs"),
+    path("community/statements/", community_statements_view, name="community_statements"),
+    path("community/statements/generate/", generate_community_statements_view, name="community_statements_generate"),
 ]
 

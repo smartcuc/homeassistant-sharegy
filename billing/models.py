@@ -4,6 +4,7 @@
 
 import uuid
 from django.db import models
+from django.utils import timezone
 from core.ownership import owner_xor_constraints
 
 
@@ -430,6 +431,150 @@ class CouponRedemption(models.Model):
 
 
 # =========================================================
+# ⚡ ENERGY SHARING: TARIFE & MONATSABRECHNUNGEN (SÄULE 2)
+# =========================================================
+
+class CommunityTariff(models.Model):
+    """
+    Tarifstruktur für eine Energy Sharing Community.
+    Definiert Bezugs- und Einspeisevergütung sowie Community-Umlagen pro kWh.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    tenant = models.ForeignKey(
+        "core.Tenant",
+        on_delete=models.CASCADE,
+        related_name="community_tariffs",
+    )
+    name = models.CharField(max_length=150, default="Standard Sharing Tarif")
+
+    # Preise in Cent pro kWh
+    sharing_price_ct_kwh = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        default=12.00,
+        help_text="Bezugspreis für geteilten Solarstrom (Cent/kWh)",
+    )
+    producer_payout_ct_kwh = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        default=10.00,
+        help_text="Vergütung für geteilten Solarstrom an Einspeiser (Cent/kWh)",
+    )
+    community_fee_ct_kwh = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        default=2.00,
+        help_text="Betriebsumlage der Energy Community (Cent/kWh)",
+    )
+    grid_fee_saved_ct_kwh = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        default=0.00,
+        help_text="Ermäßigte Netzentgelte gem. § 42b EnWG (Cent/kWh)",
+    )
+
+    valid_from = models.DateTimeField(default=timezone.now)
+    valid_to = models.DateTimeField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "billing_community_tariff"
+        ordering = ["-valid_from"]
+        indexes = [
+            models.Index(fields=["tenant", "is_active"]),
+            models.Index(fields=["tenant", "valid_from"]),
+        ]
+
+    def __str__(self):
+        return f"{self.tenant.name} - {self.name} ({self.sharing_price_ct_kwh} Ct/kWh)"
+
+
+class CommunityMonthlyStatement(models.Model):
+    """
+    Monatlicher Abrechnungsnachweis pro Mitglied einer Energy Sharing Community.
+    Weist geteilte Erzeugung vs. Verbrauch sowie Netto-Gutschrift/Forderung aus.
+    """
+    STATUS_DRAFT = "draft"
+    STATUS_FINALIZED = "finalized"
+    STATUS_SETTLED = "settled"
+
+    STATUS_CHOICES = [
+        (STATUS_DRAFT, "Entwurf"),
+        (STATUS_FINALIZED, "Abgerechnet"),
+        (STATUS_SETTLED, "Ausgeglichen"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    statement_number = models.CharField(max_length=64, unique=True)
+
+    tenant = models.ForeignKey(
+        "core.Tenant",
+        on_delete=models.CASCADE,
+        related_name="monthly_statements",
+    )
+    membership = models.ForeignKey(
+        "accounts.TenantMembership",
+        on_delete=models.CASCADE,
+        related_name="sharing_statements",
+    )
+    user = models.ForeignKey(
+        "accounts.User",
+        on_delete=models.CASCADE,
+        related_name="sharing_statements",
+    )
+    tariff = models.ForeignKey(
+        CommunityTariff,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="statements",
+    )
+
+    period_start = models.DateField()
+    period_end = models.DateField()
+
+    # Mengenbilanz (kWh)
+    produced_total_kwh = models.DecimalField(max_digits=12, decimal_places=3, default=0.0)
+    consumed_total_kwh = models.DecimalField(max_digits=12, decimal_places=3, default=0.0)
+    shared_imported_kwh = models.DecimalField(max_digits=12, decimal_places=3, default=0.0)
+    shared_exported_kwh = models.DecimalField(max_digits=12, decimal_places=3, default=0.0)
+    grid_residual_import_kwh = models.DecimalField(max_digits=12, decimal_places=3, default=0.0)
+    grid_residual_export_kwh = models.DecimalField(max_digits=12, decimal_places=3, default=0.0)
+
+    # Finanzielle Verrechnung (€)
+    charge_shared_import_eur = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    credit_shared_export_eur = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    community_fee_eur = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    net_balance_eur = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0.00,
+        help_text="Netto-Saldo: Positiv = Gutschrift/Auszahlung, Negativ = Nachzahlung",
+    )
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_DRAFT)
+    finalized_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "billing_community_monthly_statement"
+        ordering = ["-period_start", "-created_at"]
+        unique_together = ("membership", "period_start", "period_end")
+        indexes = [
+            models.Index(fields=["tenant", "period_start"]),
+            models.Index(fields=["user", "period_start"]),
+            models.Index(fields=["statement_number"]),
+        ]
+
+    def __str__(self):
+        return f"{self.statement_number} - {self.user.email} ({self.period_start} bis {self.period_end}): {self.net_balance_eur} €"
+
+
+# =========================================================
 # 🔄 SIGNALS: AUTOMATISCHE FREE-PLAN ZUWEISUNG BEI REGISTRIERUNG
 # =========================================================
 from django.db.models.signals import post_save
@@ -452,5 +597,6 @@ def auto_create_free_ems_subscription(sender, instance, created, **kwargs):
                 "payment_method": "stripe",
             },
         )
+
 
 
