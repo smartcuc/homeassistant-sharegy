@@ -16,6 +16,7 @@ export default function TenantDashboard() {
     const [tariffData, setTariffData] = useState(null);
     const [statementsData, setStatementsData] = useState(null);
     const [sharesData, setSharesData] = useState(null);
+    const [timeRange, setTimeRange] = useState("today"); // 'today' | 'month'
     const [activeTab, setActiveTab] = useState("cockpit"); // 'cockpit' | 'settlement' | 'members' | 'audit'
     const [loading, setLoading] = useState(true);
     const [settling, setSettling] = useState(false);

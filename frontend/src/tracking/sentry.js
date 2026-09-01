@@ -16,7 +16,6 @@ export function initSentry() {
         // 1. Script Tag für Sentry Browser SDK Bundle laden
         const script = document.createElement("script");
         script.src = "https://browser.sentry-cdn.com/8.40.0/bundle.min.js";
-        script.integrity = "sha384-F1Rj14Jt0d2Yl4W1Ew+5aC2sJ/Kx0P7o3b0Jp5v1u9c=";
         script.crossOrigin = "anonymous";
         script.async = true;
 
