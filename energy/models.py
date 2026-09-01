@@ -3,8 +3,10 @@
 ##################
 
 import uuid
+from decimal import Decimal
 from django.db import models
 from django.db.models import Q
+from django.utils import timezone
 
 from .ems.models import EMSSignalSource
 from .ems.models_signal_type import EMSSignalType
@@ -286,5 +288,110 @@ class SmartEnergySettings(models.Model):
     def __str__(self):
         scope = "standalone" if self.owner_user_id else "tenant"
         return f"SmartEnergySettings({scope}, mode={self.optimization_mode})"
-    
-    
+
+
+# ---------------------------------------------------------------------
+# § 14a EnWG: GridDimmingSignal (Netzbetreiber-Dimmsignal)
+# ---------------------------------------------------------------------
+class GridDimmingSignal(models.Model):
+    """
+    Protokolliert und verwaltet Netzbetreiber-Dimmsignale gem. § 14a EnWG
+    (Reduzierung des Netzbezugs auf 4,2 kW bei lokaler Netzüberlastung).
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    tenant = models.ForeignKey(
+        "core.Tenant", on_delete=models.CASCADE, null=True, blank=True, related_name="grid_dimming_signals"
+    )
+    owner_user = models.ForeignKey(
+        "accounts.User", on_delete=models.CASCADE, null=True, blank=True, related_name="grid_dimming_signals"
+    )
+    home = models.ForeignKey(
+        "devices.Home", on_delete=models.CASCADE, null=True, blank=True, related_name="grid_dimming_signals"
+    )
+
+    SOURCE_CHOICES = [
+        ("vnb_api", "VNB Inbound REST API"),
+        ("wmsb_cls", "Smart Meter Gateway (CLS-Kanal)"),
+        ("shelly_input", "Shelly Koppelrelais Digital-Input"),
+        ("manual_test", "Manueller Test / Installateur-Audit"),
+    ]
+    source = models.CharField(max_length=30, choices=SOURCE_CHOICES, default="vnb_api")
+
+    target_max_grid_kw = models.DecimalField(
+        max_digits=6, decimal_places=2, default=Decimal("4.20"),
+        help_text="Maximal erlaubter Netzbezug in kW gem. § 14a EnWG"
+    )
+
+    started_at = models.DateTimeField(default=timezone.now)
+    expires_at = models.DateTimeField(null=True, blank=True)
+
+    is_active = models.BooleanField(default=True)
+    cleared_at = models.DateTimeField(null=True, blank=True)
+
+    raw_payload = models.JSONField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-started_at"]
+        indexes = [
+            models.Index(fields=["is_active", "started_at"]),
+            models.Index(fields=["home", "is_active"]),
+        ]
+
+    def __str__(self):
+        status = "🔴 AKTIV" if self.is_active else "🟢 BEENDET"
+        return f"§ 14a Dimmsignal ({self.target_max_grid_kw} kW, {self.source}) - {status}"
+
+
+# ---------------------------------------------------------------------
+# § 14a EnWG: SteuVEDeviceConfig (Steuerbare Verbrauchseinrichtung)
+# ---------------------------------------------------------------------
+class SteuVEDeviceConfig(models.Model):
+    """
+    Konfiguration einer steuerbaren Verbrauchseinrichtung (SteuVE gem. § 14a EnWG:
+    Wärmepumpe, private Wallbox, Batteriespeicher oder Klimaanlage >= 4,2 kW).
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    device = models.OneToOneField(
+        "devices.Device", on_delete=models.CASCADE, related_name="steuve_config"
+    )
+
+    TYPE_CHOICES = [
+        ("heat_pump", "Wärmepumpe"),
+        ("wallbox", "Wallbox (Ladeeinrichtung)"),
+        ("battery_storage", "Batteriespeicher (Netzladen)"),
+        ("ac_cooling", "Klimagerät / Raumkühlung"),
+    ]
+    steuve_type = models.CharField(max_length=30, choices=TYPE_CHOICES, default="wallbox")
+
+    rated_power_kw = models.DecimalField(
+        max_digits=6, decimal_places=2, default=Decimal("11.00"),
+        help_text="Nennleistung in kW"
+    )
+    minimum_power_kw = models.DecimalField(
+        max_digits=6, decimal_places=2, default=Decimal("1.40"),
+        help_text="Minimale Dimmleistung (z. B. 1-phasig 6A = 1,4 kW)"
+    )
+
+    priority = models.PositiveSmallIntegerField(
+        default=2,
+        help_text="1: Höchste Priorität (Wärme), 2: Speicher, 3: Nachrangig / Drosselbar (Wallbox)"
+    )
+
+    is_dimmable = models.BooleanField(default=True)
+    is_currently_dimmed = models.BooleanField(default=False)
+    current_power_limit_kw = models.DecimalField(
+        max_digits=6, decimal_places=2, null=True, blank=True
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["priority", "-rated_power_kw"]
+
+    def __str__(self):
+        dim_state = f"⚠️ Gedimmt auf {self.current_power_limit_kw} kW" if self.is_currently_dimmed else "🟢 Normalbetrieb"
+        return f"SteuVE: {self.device.name} ({self.get_steuve_type_display()}) - {dim_state}"

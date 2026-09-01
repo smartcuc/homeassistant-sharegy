@@ -25,6 +25,13 @@ urlpatterns = [
 ]
 
 
+from .views_grid import (
+    grid_dimming_status_view,
+    grid_dimming_signal_webhook,
+    grid_dimming_clear_view,
+    steuve_devices_config_view,
+)
+
 urlpatterns += [
     path("dashboard/me/", dashboard_me),
     path("balance/", energy_balance),
@@ -39,4 +46,9 @@ urlpatterns += [
     path("chart/export/csv/", export_chart_csv),
     path("chart/export/pdf/", export_chart_pdf),
     path("devices/<int:device_id>/configure/", configure_device),
+    # ⚡ § 14a EnWG Steuerbox & Dimm-Engine Routes
+    path("grid/dimming/status/", grid_dimming_status_view),
+    path("grid/dimming/signal/", grid_dimming_signal_webhook),
+    path("grid/dimming/clear/", grid_dimming_clear_view),
+    path("grid/steuve/", steuve_devices_config_view),
 ]
