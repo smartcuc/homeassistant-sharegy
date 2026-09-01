@@ -16,9 +16,11 @@ export default function TenantDashboard() {
     const [tariffData, setTariffData] = useState(null);
     const [statementsData, setStatementsData] = useState(null);
     const [activeTab, setActiveTab] = useState("cockpit"); // 'cockpit' | 'settlement' | 'members' | 'audit'
-    const [timeRange, setTimeRange] = useState("today"); // 'today' | 'month'
     const [loading, setLoading] = useState(true);
     const [settling, setSettling] = useState(false);
+    const [downloadingId, setDownloadingId] = useState(null);
+    const [exportingFormat, setExportingFormat] = useState(null);
+
 
     const { lang } = useLang();
     const t = texts[lang] || texts["de"] || {};
@@ -90,7 +92,67 @@ export default function TenantDashboard() {
         alert(`${t.invite_link || "Einladungslink"}:\n${window.location.origin}${data.link}`);
     }
 
+    // ✅ PDF STATEMENT DOWNLOAD
+    async function downloadStatementPdf(statementId, statementNumber) {
+        setDownloadingId(statementId);
+        try {
+            const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+            const response = await fetch(`/api/billing/community/statements/${statementId}/pdf/`, {
+                headers: {
+                    Authorization: token ? `Bearer ${token}` : "",
+                    "X-Tenant-ID": tenant?.id || "",
+                }
+            });
+            if (!response.ok) throw new Error("Download fehlgeschlagen.");
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `Abrechnungsnachweis_${statementNumber}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error("PDF Download error:", err);
+            alert("Fehler beim Herunterladen des PDF-Abrechnungsnachweises.");
+        } finally {
+            setDownloadingId(null);
+        }
+    }
+
+    // ✅ MULTI-FORMAT EXPORT (XLSX, CSV, XML)
+    async function exportCommunityStatements(format = "xlsx") {
+        setExportingFormat(format);
+        try {
+            const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+            const response = await fetch(`/api/billing/community/statements/export/?export_format=${format}&tenant_id=${tenant?.id || ""}`, {
+                headers: {
+                    Authorization: token ? `Bearer ${token}` : "",
+                    "X-Tenant-ID": tenant?.id || "",
+                }
+            });
+            if (!response.ok) throw new Error("Export fehlgeschlagen.");
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            const ext = format === "xlsx" ? "xlsx" : format === "csv" ? "csv" : "xml";
+            a.download = `Sharegy_Abrechnungsdaten_${tenant?.slug || "community"}_${new Date().toISOString().slice(0, 10)}.${ext}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error("Export error:", err);
+            alert(`Fehler beim ${format.toUpperCase()}-Export.`);
+        } finally {
+            setExportingFormat(null);
+        }
+    }
+
     // ✅ ROLE UPDATE
+
     async function updateRole(userId, role) {
         await apiFetch("/api/update-role/", {
             method: "POST",
@@ -563,7 +625,7 @@ export default function TenantDashboard() {
 
                     {/* MONATLICHE ABRECHNUNGSNACHWEISE */}
                     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs">
-                        <div className="flex items-center justify-between mb-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                             <div>
                                 <h3 className="text-sm font-bold text-slate-900 dark:text-white">
                                     Monatliche Abrechnungsnachweise
@@ -572,54 +634,96 @@ export default function TenantDashboard() {
                                     15-Minuten-scharfe Verrechnung von Erzeugung, Bezug und internen Gutschriften
                                 </p>
                             </div>
-                            <span className="text-xs font-semibold text-slate-500">
-                                {statements.length} Nachweise
-                            </span>
+                            <div className="flex flex-wrap items-center gap-2">
+                                <span className="text-xs font-semibold text-slate-500 mr-1">
+                                    {statements.length} Nachweise
+                                </span>
+                                {statements.length > 0 && (
+                                    <div className="flex items-center gap-1.5">
+                                        <button
+                                            onClick={() => exportCommunityStatements("xlsx")}
+                                            disabled={exportingFormat === "xlsx"}
+                                            className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition cursor-pointer flex items-center gap-1 border border-slate-200 dark:border-slate-700"
+                                            title="Als formatierte Excel-Arbeitsmappe exportieren"
+                                        >
+                                            <span>📗</span> {exportingFormat === "xlsx" ? "Exportiere..." : "Excel"}
+                                        </button>
+                                        <button
+                                            onClick={() => exportCommunityStatements("csv")}
+                                            disabled={exportingFormat === "csv"}
+                                            className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition cursor-pointer flex items-center gap-1 border border-slate-200 dark:border-slate-700"
+                                            title="Als CSV für DATEV/ERP exportieren"
+                                        >
+                                            <span>📊</span> {exportingFormat === "csv" ? "Exportiere..." : "CSV"}
+                                        </button>
+                                        <button
+                                            onClick={() => exportCommunityStatements("xml")}
+                                            disabled={exportingFormat === "xml"}
+                                            className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition cursor-pointer flex items-center gap-1 border border-slate-200 dark:border-slate-700"
+                                            title="Als standardisiertes ERP XML exportieren"
+                                        >
+                                            <span>📦</span> {exportingFormat === "xml" ? "Exportiere..." : "XML"}
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         {statements.length > 0 ? (
-                            <div className="space-y-2.5">
+                            <div className="space-y-3">
                                 {statements.map(stmt => (
                                     <div
                                         key={stmt.id}
-                                        className="border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs"
+                                        className="border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 p-4 rounded-xl shadow-xs space-y-3"
                                     >
-                                        <div className="space-y-1">
-                                            <div className="flex items-center gap-2">
-                                                <span className="font-mono font-bold text-xs text-slate-900 dark:text-white">
-                                                    {stmt.statement_number}
-                                                </span>
-                                                <span className="bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-[10px] font-semibold px-2 py-0.5 rounded-md">
-                                                    {stmt.period_start} bis {stmt.period_end}
-                                                </span>
-                                                <span className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-md border border-emerald-500/20">
-                                                    {stmt.status === "finalized" ? "Abgerechnet" : stmt.status}
-                                                </span>
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                            <div className="space-y-1">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="font-mono font-bold text-xs text-slate-900 dark:text-white">
+                                                        {stmt.statement_number}
+                                                    </span>
+                                                    <span className="bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-[10px] font-semibold px-2 py-0.5 rounded-md">
+                                                        {stmt.period_start} bis {stmt.period_end}
+                                                    </span>
+                                                    <span className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-md border border-emerald-500/20">
+                                                        {stmt.status === "finalized" ? "Abgerechnet" : stmt.status}
+                                                    </span>
+                                                </div>
+                                                <div className="text-xs text-slate-500 dark:text-slate-400">
+                                                    Mitglied: <span className="font-medium text-slate-700 dark:text-slate-300">{stmt.user_email}</span>
+                                                </div>
+                                                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs pt-1 text-slate-600 dark:text-slate-400">
+                                                    <span>☀️ Erzeugt: <strong>{stmt.produced_total_kwh.toFixed(1)} kWh</strong></span>
+                                                    <span>🏠 Verbraucht: <strong>{stmt.consumed_total_kwh.toFixed(1)} kWh</strong></span>
+                                                    <span>🤝 Geteilt: <strong>{(stmt.shared_imported_kwh + stmt.shared_exported_kwh).toFixed(1)} kWh</strong></span>
+                                                </div>
                                             </div>
-                                            <div className="text-xs text-slate-500 dark:text-slate-400">
-                                                Mitglied: <span className="font-medium text-slate-700 dark:text-slate-300">{stmt.user_email}</span>
-                                            </div>
-                                            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs pt-1 text-slate-600 dark:text-slate-400">
-                                                <span>☀️ Erzeugt: <strong>{stmt.produced_total_kwh.toFixed(1)} kWh</strong></span>
-                                                <span>🏠 Verbraucht: <strong>{stmt.consumed_total_kwh.toFixed(1)} kWh</strong></span>
-                                                <span>🤝 Geteilt: <strong>{(stmt.shared_imported_kwh + stmt.shared_exported_kwh).toFixed(1)} kWh</strong></span>
+
+                                            <div className="text-right sm:border-l sm:border-slate-200 dark:sm:border-slate-700 sm:pl-6">
+                                                <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                                                    {stmt.is_payout ? "Gutschrift / Auszahlung" : "Forderung / Nachzahlung"}
+                                                </div>
+                                                <div className={`text-xl font-black mt-0.5 ${
+                                                    stmt.is_payout
+                                                        ? "text-emerald-600 dark:text-emerald-400"
+                                                        : "text-rose-600 dark:text-rose-400"
+                                                }`}>
+                                                    {stmt.is_payout ? "+" : ""}{stmt.net_balance_eur.toFixed(2)} €
+                                                </div>
+                                                <div className="text-[10px] text-slate-400 mt-0.5">
+                                                    Gutschrift: {stmt.credit_shared_export_eur.toFixed(2)} € | Bezug: {stmt.charge_shared_import_eur.toFixed(2)} €
+                                                </div>
                                             </div>
                                         </div>
 
-                                        <div className="text-right sm:border-l sm:border-slate-200 dark:sm:border-slate-700 sm:pl-6">
-                                            <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                                                {stmt.is_payout ? "Gutschrift / Auszahlung" : "Forderung / Nachzahlung"}
-                                            </div>
-                                            <div className={`text-xl font-black mt-0.5 ${
-                                                stmt.is_payout
-                                                    ? "text-emerald-600 dark:text-emerald-400"
-                                                    : "text-rose-600 dark:text-rose-400"
-                                            }`}>
-                                                {stmt.is_payout ? "+" : ""}{stmt.net_balance_eur.toFixed(2)} €
-                                            </div>
-                                            <div className="text-[10px] text-slate-400 mt-0.5">
-                                                Gutschrift: {stmt.credit_shared_export_eur.toFixed(2)} € | Bezug: {stmt.charge_shared_import_eur.toFixed(2)} €
-                                            </div>
+                                        <div className="pt-2.5 border-t border-slate-200/70 dark:border-slate-700/70 flex justify-end">
+                                            <button
+                                                onClick={() => downloadStatementPdf(stmt.id, stmt.statement_number)}
+                                                disabled={downloadingId === stmt.id}
+                                                className="px-3 py-1.5 bg-white dark:bg-slate-900 hover:bg-indigo-50 dark:hover:bg-slate-800 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/80 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                                            >
+                                                <span>📄</span> {downloadingId === stmt.id ? "Erzeuge PDF..." : "PDF-Nachweis herunterladen"}
+                                            </button>
                                         </div>
                                     </div>
                                 ))}
@@ -630,6 +734,7 @@ export default function TenantDashboard() {
                             </div>
                         )}
                     </div>
+
 
                 </div>
             )}

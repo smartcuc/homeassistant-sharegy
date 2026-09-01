@@ -719,3 +719,103 @@ def community_settings_update_view(request, tenant_id):
         }
     })
 
+
+# ==============================================================================
+# 📥 DOWNLOAD & EXPORTE: PDF, EXCEL, CSV, XML
+# ==============================================================================
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def statement_pdf_download_view(request, statement_id):
+    """
+    Generiert das druckfähige PDF für einen Monatsabrechnungsnachweis.
+    """
+    user = request.user
+    from billing.models import CommunityMonthlyStatement
+    from billing.services_sharing_exports import generate_statement_pdf
+
+    statement = CommunityMonthlyStatement.objects.filter(id=statement_id).select_related("tenant", "user", "tariff").first()
+    if not statement:
+        return Response({"error": "Statement not found."}, status=404)
+
+    # Permission Check
+    membership = TenantMembership.objects.filter(user=user, tenant=statement.tenant, is_active=True).first()
+    is_admin = user.is_staff or user.is_superuser or (membership and membership.role in ["admin", "owner", "auditor"])
+    if statement.user != user and not is_admin:
+        return Response({"error": "Forbidden: You cannot access this statement."}, status=403)
+
+    return generate_statement_pdf(statement)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def statements_export_view(request):
+    """
+    Exportiert Abrechnungsdaten als CSV, XLSX oder XML für ERP- und Buchhaltungszwecke.
+    Query-Parameter:
+    - format: 'csv' | 'xlsx' | 'xml' (Default: 'xlsx')
+    - tenant_id: UUID der Energiegemeinschaft (Optional für Superadmin)
+    - year: int (Optional)
+    - month: int (Optional)
+    """
+    user = request.user
+    tenant_id = (
+        request.headers.get("X-Tenant-ID")
+        or request.query_params.get("tenant_id")
+        or request.GET.get("tenant_id")
+    )
+    export_format = (
+        request.query_params.get("export_format")
+        or request.query_params.get("format_type")
+        or request.query_params.get("type")
+        or request.query_params.get("format")
+        or "xlsx"
+    ).lower()
+    year = request.query_params.get("year") or request.GET.get("year")
+    month = request.query_params.get("month") or request.GET.get("month")
+
+
+    tenant = None
+    if tenant_id:
+        membership = TenantMembership.objects.filter(user=user, tenant_id=tenant_id, is_active=True).first()
+        if not membership and not user.is_staff and not user.is_superuser:
+            return Response({"error": "Forbidden: No active membership in requested community."}, status=403)
+        tenant = Tenant.objects.filter(id=tenant_id).first()
+    else:
+        membership = TenantMembership.objects.filter(user=user, is_active=True).first()
+        tenant = membership.tenant if membership else None
+
+
+    if not tenant and not (user.is_staff or user.is_superuser):
+        return Response({"error": "No community specified."}, status=400)
+
+    from billing.models import CommunityMonthlyStatement
+    from billing.services_sharing_exports import (
+        export_statements_csv,
+        export_statements_xlsx,
+        export_statements_xml,
+    )
+
+    qs = CommunityMonthlyStatement.objects.all().select_related("user", "tenant", "tariff")
+    if tenant:
+        qs = qs.filter(tenant=tenant)
+    
+    is_admin = user.is_staff or user.is_superuser or (membership and membership.role in ["admin", "owner", "auditor"])
+    if not is_admin:
+        qs = qs.filter(user=user)
+
+    if year:
+        qs = qs.filter(period_start__year=int(year))
+    if month:
+        qs = qs.filter(period_start__month=int(month))
+
+    tenant_name = tenant.name if tenant else "Alle_Gemeinschaften"
+
+    if export_format == "csv":
+        return export_statements_csv(qs, tenant_name=tenant_name)
+    elif export_format == "xml":
+        return export_statements_xml(qs, tenant_name=tenant_name)
+    else:
+        return export_statements_xlsx(qs, tenant_name=tenant_name)
+
+

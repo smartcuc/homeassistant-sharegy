@@ -15,9 +15,10 @@ export default function CommunitiesManagementHub() {
     const [drilldownLoading, setDrilldownLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [announcementModal, setAnnouncementModal] = useState(false);
-    const [newAnnouncement, setNewAnnouncement] = useState({ title: "", message: "", category: "info" });
     const [settingsForm, setSettingsForm] = useState({ name: "", primary_color: "#10b981", is_public: true });
     const [savingSettings, setSavingSettings] = useState(false);
+    const [exportingFormat, setExportingFormat] = useState(null);
+
 
     // ✅ Portfolio-Daten laden
     async function loadPortfolio() {
@@ -95,7 +96,37 @@ export default function CommunitiesManagementHub() {
         }
     }
 
+    // 📥 Multi-Format Abrechnungsexport
+    async function exportStatements(tenantId, format = "xlsx") {
+        setExportingFormat(format);
+        try {
+            const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+            const response = await fetch(`/api/billing/community/statements/export/?export_format=${format}&tenant_id=${tenantId || ""}`, {
+                headers: {
+                    Authorization: token ? `Bearer ${token}` : "",
+                }
+            });
+            if (!response.ok) throw new Error("Export fehlgeschlagen.");
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            const ext = format === "xlsx" ? "xlsx" : format === "csv" ? "csv" : "xml";
+            a.download = `Sharegy_Abrechnungsdaten_${drilldownData?.community?.slug || "community"}_${new Date().toISOString().slice(0, 10)}.${ext}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error("Export error:", err);
+            alert(`Fehler beim ${format.toUpperCase()}-Export.`);
+        } finally {
+            setExportingFormat(null);
+        }
+    }
+
     // 🔍 Filterung nach Suche
+
     const filteredCommunities = useMemo(() => {
         if (!portfolioData || !portfolioData.communities) return [];
         if (!searchQuery.trim()) return portfolioData.communities;
@@ -499,8 +530,44 @@ export default function CommunitiesManagementHub() {
                                         </div>
                                     </div>
                                 </div>
+
+                                {/* Export & Clearing Box */}
+                                <div className="bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                    <div>
+                                        <h4 className="text-xs font-bold text-slate-900 dark:text-white">
+                                            Abrechnungs- & Clearing-Exporte
+                                        </h4>
+                                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                                            Export aller Monatsabrechnungen dieses Quartiers für ERP, DATEV und Buchhaltung
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => exportStatements(selectedTenantId, "xlsx")}
+                                            disabled={exportingFormat === "xlsx"}
+                                            className="px-3 py-1.5 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                                        >
+                                            <span>📗</span> {exportingFormat === "xlsx" ? "Exportiere..." : "Excel (.xlsx)"}
+                                        </button>
+                                        <button
+                                            onClick={() => exportStatements(selectedTenantId, "csv")}
+                                            disabled={exportingFormat === "csv"}
+                                            className="px-3 py-1.5 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                                        >
+                                            <span>📊</span> {exportingFormat === "csv" ? "Exportiere..." : "CSV"}
+                                        </button>
+                                        <button
+                                            onClick={() => exportStatements(selectedTenantId, "xml")}
+                                            disabled={exportingFormat === "xml"}
+                                            className="px-3 py-1.5 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                                        >
+                                            <span>📦</span> {exportingFormat === "xml" ? "Exportiere..." : "XML / ERP"}
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         )}
+
 
                         {/* 3. ANNOUNCEMENTS DRILLDOWN */}
                         {drilldownTab === "announcements" && (
