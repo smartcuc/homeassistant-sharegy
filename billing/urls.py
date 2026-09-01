@@ -11,6 +11,7 @@ from billing.api.views import (
     validate_coupon_view,
     redeem_coupon_view,
 )
+from billing.api.views_community import community_cockpit_view
 
 urlpatterns = [
     path("consumption/", consumption_view, name="billing_consumption"),
@@ -23,5 +24,6 @@ urlpatterns = [
     path("subscription/seed-demo/", seed_demo_billing_view, name="subscription_seed_demo"),
     path("subscription/coupons/validate/", validate_coupon_view, name="subscription_coupon_validate"),
     path("subscription/coupons/redeem/", redeem_coupon_view, name="subscription_coupon_redeem"),
+    path("community/cockpit/", community_cockpit_view, name="community_cockpit"),
 ]
 
