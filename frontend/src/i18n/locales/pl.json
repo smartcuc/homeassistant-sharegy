@@ -214,8 +214,8 @@
   "producers": {
     "title": "☀️ Wytwórcy i PV",
     "subtitle": "Zarządzaj fotowoltaiką, ogniwami paliwowymi, kogeneracją i generatorami.",
-    "add_producer": "+ Wytwórca",
-    "add_string": "+ String",
+    "add_producer": "Dodaj wytwórcę",
+    "add_string": "Dodaj string",
     "empty": "Brak zarejestrowanych systemów wytwórczych.",
     "power": "Moc",
     "strings": "Stringi",

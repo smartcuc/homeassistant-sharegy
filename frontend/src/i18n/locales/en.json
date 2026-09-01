@@ -214,8 +214,8 @@
   "producers": {
     "title": "☀️ Solar & Generators",
     "subtitle": "Manage photovoltaic systems, fuel cells, CHP, and generation units.",
-    "add_producer": "+ Producer",
-    "add_string": "+ String",
+    "add_producer": "Add Producer",
+    "add_string": "Add String",
     "empty": "No generation systems registered yet.",
     "power": "Power",
     "strings": "Strings",

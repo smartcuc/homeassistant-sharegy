@@ -214,8 +214,8 @@
   "producers": {
     "title": "☀️ Erzeuger",
     "subtitle": "Verwalte Photovoltaik, Brennstoffzellen, BHKW und weitere Erzeugersysteme.",
-    "add_producer": "+ Erzeuger",
-    "add_string": "+ String",
+    "add_producer": "Erzeuger anlegen",
+    "add_string": "String hinzufügen",
     "empty": "Noch keine Erzeugersysteme vorhanden.",
     "power": "Leistung",
     "strings": "Strings",
