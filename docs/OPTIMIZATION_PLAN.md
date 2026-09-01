@@ -12,7 +12,8 @@
 | **Phase 2** | DB- & Performance-Optimierung | 🟢 EMS-Free & Sharing | 🟢 100% Abgeschlossen | 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8 | – |
 | **Phase 3** | Celery & Buffer-Härtung | 🟢 EMS-Free Stabilität | 🟢 100% Abgeschlossen | 3.1, 3.2, 3.3, 3.4, 3.5 | – |
 | **Phase 4** | Architektur & Diagramme | 🟢 EMS-Free Sankey & Tests | 🟢 100% Abgeschlossen | 4.1, 4.2, 4.3, 4.4 | – |
-| **Phase 5** | EMS-Pro, KI, Apps & Aktorik | 🚀 Next Milestones | 🟡 In Umsetzung (5.1-5.6, 5.15-5.17 fertig) | – | 5.7 – 5.18 |
+| **Phase 5** | EMS-Pro, KI, Apps & Aktorik | 🟢 EMS-Pro & Mobile | 🟢 100% Abgeschlossen | 5.1 – 5.21 | – |
+| **Phase 6** | Säule 2: Energy Sharing & Clearing | 🟢 ESC & MsbG iMSys | 🟢 100% Abgeschlossen (Kern) | 6.1, 6.2, 6.3 | 6.4 (Tarife), 6.5 (§ 14a) |
 
 
 ---
@@ -458,9 +459,9 @@
 
 ---
 
-### [ ] 5.20 Systemstatus- & Health-Monitoring Engine (Beta & Live Kernkomponente)
+### [x] 5.20 Systemstatus- & Health-Monitoring Engine (Beta & Live Kernkomponente)
 - **Bereich**: Operations, API Monitoring & Frontend Badges (`operations/`, `backend/status/`, `frontend/src/components/common/SystemStatusBadge.jsx`)
-- **Ziel**:
+- **Status**: ✅ **Erledigt**.
   - **Umfassende Health-API**: `GET /api/status/health/` prüft PostgreSQL / TimescaleDB, Redis Cache, WebSocket Ingest (Daphne), Celery Worker & Beat sowie externe APIs (Open-Meteo, Tibber / EPEX Spot).
   - **Latenz- & Durchsatzmessung**: Echtzeit-Erfassung von Ingest-Latenzen (ms), Ingest-Throughput (Messages/s) und Queue-Backlogs.
   - **Frontend Status-Indikator**: Diskreter Status-Badge in der Topbar / Footer (🟢 *Alle Dienste operativ* / 🟡 *Teilweise beeinträchtigt* / 🔴 *Störung*).
@@ -470,43 +471,69 @@
 
 ### [x] 5.21 Geräteprofiling & Baseline-Anomalieüberwachung (Beta & Live Kernkomponente)
 - **Bereich**: Device Intelligence, Baseline Health & Anomaly Watchdog (`devices/models.py`, `devices/services_profiling.py`, `devices/api/views.py`, `frontend/src/components/device/DeviceBaselineModal.jsx`)
-- **Umgesetzt**:
+- **Status**: ✅ **Erledigt**.
   - **DeviceBaselineProfile-Modell**: Speichert Soll-Standby (W), Standby-Maximalgrenze, Betriebsleistung Min/Max und maximale Dauerlaufzeit.
   - **Intelligente Baseline-Überwachung & Alarmierung**: Erkennt Standby-Anstiege (z. B. BWWP 30W -> 52W) oder ununterbrochenen Dauerlauf (Hang-up/Vereisung) und löst automatisch verifizierte Alerts in der Alarmzentrale (`alerts.AlertEvent`) aus.
   - **1-Klick Presets & Auto-Learning**: Vordefinierte Profile für BWWP, Wärmepumpe, Kühlschrank, Zirkulationspumpe, Heizungspumpe sowie automatisches 7-Tage-ML-Learning aus realen Messwerten.
   - **Interaktive UI**: `🧠 Geräteprofil`-Button auf Gerätekarten mit Live-Health-Badge und Konfigurationsmodal.
 
+---
+
+## Phase 6 — Säule 2: Energy Sharing Communities & Clearing-Engine
+
+### [x] 6.1 Eichrechtskonforme 15-Minuten Bilanzierung & Resiliente Ingestion
+- **Bereich**: Core / Billing Ingestion & Celery Tasks (`core/services_validation.py`, `billing/services_balance.py`, `billing/tasks.py`)
+- **Status**: ✅ **Erledigt**.
+  - **OBIS-Plausibilisierung**: `validate_obis_reading` zur Erkennung negativer Werte oder extremer Lastspitzen.
+  - **Resiliente Nachberechnung (Late-Arrivals)**: `recalculate_late_slot` und wöchentlicher 30-Tage Reconciliation-Cron `reconcile_balance_last_30d`.
+  - **Strikte Zähler-Isolation**: Tenant-Scoping im ORM (`core/filter_backends.py`, `core/viewsets.py`).
 
 ---
 
-## 🎯 6. Verbindliche Prioritätenliste für Beta & Go-Live
+### [x] 6.2 Energy Sharing Community Cockpit & KI-Erzeugungsprognose
+- **Bereich**: Billing API & Frontend UI (`billing/api/views_community.py`, `frontend/src/pages/TenantDashboard.jsx`)
+- **Status**: ✅ **Erledigt**.
+  - **Community Aggregations-API**: `GET /api/billing/community/cockpit/` aggregiert Produziert (2.8.0), Verbraucht (1.8.0), Geteilt (Autarkie %), Zugekaufter Reststrom und Ersparnis (€).
+  - **15-Minuten Lastgang-Timeline**: Chronologischer 24h-Verlauf der Erzeugungs- und Verbrauchsmengen.
+  - **48h KI-Solarprognose**: Stündliche Ertragsvorschau mit automatischer Markierung günstiger Spitzen-Ladefenster (*Peak Windows*).
+  - **Reaktive Tab-Navigation**: Schneller Wechsel zwischen `⚡ Energy Cockpit`, `👥 Mitglieder & Zähler` und `📜 Audit`.
+
+---
+
+### [x] 6.3 Gesetzlicher Leitfaden: Zähler-Ingest nach MsbG & Reststrom-Abrechnung
+- **Bereich**: Dokumentation & regulatorische Compliance ([`docs/ENERGY_SHARING_METER_INGEST_GUIDE.md`](file:///c:/Users/Public/Dev/eswes/docs/ENERGY_SHARING_METER_INGEST_GUIDE.md))
+- **Status**: ✅ **Erledigt**.
+  - Vollständiger Leitfaden über Smart Meter Gateways (wMSB REST/SFTP, gMSB HAN, Submetering).
+  - Klärung der VNB-Marktkommunikation (EDIFACT/MSCONS) und Ausschluss von Doppelabrechnungen durch Reststromversorger.
+
+---
+
+## 🎯 7. Verbindliche Prioritätenliste (Stand: 1. September 2026)
 
 ```
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ ✅ ERLEDIGT: BETA & GO-LIVE VORAUSSETZUNGEN (100% Abgeschlossen)               │
+│ ✅ ERLEDIGT: SÄULE 1 (EMS) & SÄULE 2 (ENERGY SHARING BASIS)                    │
 ├───────────────────────────────────────────────────────────────────────────────┤
-│ • 🟢 Task 5.20: Systemstatus- & Health-Monitoring Engine (Health-API & UI)   │
-│    -> GET /api/status/health/ (DB, Redis, Daphne, Celery, Open-Meteo)         │
-│    -> Live-Status Dashboard (/app/status) & automatischer Incident-Watchdog  │
-│ • 🧠 Task 5.21: Geräteprofiling & Baseline-Anomalieüberwachung                │
-│    -> DeviceBaselineProfile mit 1-Klick Presets (BWWP, WP, Kühlschrank)       │
-│    -> 7-Tage Auto-ML-Learning & Echtzeit-Anomalie-Alerting (Standby/Dauerlauf)│
+│ • 🟢 Säule 1 (EMS-Free & Pro): WSS Ingest, Live-Sankey, Forecasts, Aktorik,   │
+│    Systemstatus-Monitoring (/app/status), Geräteprofiling & Mobile Apps       │
+│ • ⚡ Säule 2 (Energy Sharing): 15m OBIS-Clearing, Community Cockpit,          │
+│    48h KI-Prognosen, Late Ingestion Recalculation & MsbG Ingest-Leitfaden     │
 └───────────────────────────────────────────────────────────────────────────────┘
                                        │
                                        ▼
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ PRIORITÄT 1: MOBILE APPS & PUSH-BENACHRICHTIGUNGEN (Nächster Schritt)         │
+│ PRIORITÄT 1: SHARING-TARIFE & INTERNE ABRECHNUNGS-GUTSCHRIFTEN                │
 ├───────────────────────────────────────────────────────────────────────────────┤
-│ 1. 📲 Task 5.9: Mobile Push & Notification Engine (FCM & APNs Dispatcher)    │
-│ 2. 📱 Task 5.10: Native iOS & Android Apps via Capacitor (Widgets & Stores)   │
+│ 1. ⚡ Task 6.4: Sharing-Tarife, Umlagenschlüssel & monatliche Abrechnungs-PDFs│
+│ 2. 💳 Task 3.1: Payment- & Provider-Evaluierung (Stripe, SEPA, GoCardless)   │
 └───────────────────────────────────────────────────────────────────────────────┘
                                        │
                                        ▼
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ PRIORITÄT 2: SÄULE 2 - ENERGY SHARING COMMUNITIES & § 14a EnWG                │
+│ PRIORITÄT 2: REGULATORISCHE NETZ-INTEGRATION (§ 14a EnWG)                     │
 ├───────────────────────────────────────────────────────────────────────────────┤
-│ 3. 🏢 Task 4.1: Tenant-Modell Konsolidierung & 15-Min P2P-Clearing            │
-│ 4. ⚡ Task 3.6: § 14a EnWG Steuerbox-Schnittstelle & Pflichtdimmung (4,2 kW)  │
+│ 3. ⚡ Task 6.5: § 14a EnWG Steuerbox-Schnittstelle & Pflichtdimmung (4,2 kW)  │
+│ 4. 🛡️ Task 3.4: Payment- & Mail-Webhook Monitoring auf Status-Dashboard       │
 └───────────────────────────────────────────────────────────────────────────────┘
 ```
 

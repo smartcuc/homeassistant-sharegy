@@ -1,7 +1,7 @@
 # 🚀 Sharegy Strategische Produkt- & Architektur-Roadmap
 
 **Mission**: Die führende SaaS-Plattform für **Home Energy Management (EMS)** und **Energy Sharing Communities (ESC)**.  
-**Stand**: 29. August 2026 (Live v3.2)
+**Stand**: 1. September 2026 (Live v3.4)
 
 ---
 
@@ -16,18 +16,19 @@
                  ▼                                                               ▼
    ┌───────────────────────────────┐                               ┌───────────────────────────────┐
    │    🟢 SÄULE 1: EMS (FREE/PRO) │                               │    🔵 SÄULE 2: ENERGY SHARING │
-   │    Status: PRODUKTIV / GEHÄRTET│                               │    Status: IN ENTWICKLUNG     │
+   │    Status: PRODUKTIV / GEHÄRTET│                               │    Status: PRODUKTIV / GEHÄRTET│
    ├───────────────────────────────┤                               ├───────────────────────────────┤
    │ • Ziel: Für jeden Haushalt    │                               │ • Ziel: Bürgerenergie/Quartier│
    │ • Daten: WSS, MQTT, OTel,     │                               │ • Daten: iMSys Zähler (OBIS   │
    │   Modbus, Home Assistant      │                               │   1.8.0 Bezug, 2.8.0 Einspeis)│
    │ • Takt: Sekunden / Minuten (W)│                               │ • Takt: 15-Minuten-Raster     │
    │ • Features: Live-Fluss,       │                               │ • Features: P2P-Bilanzierung, │
-   │   Sankey, Spotpreise, Forecast│                               │   Tenant-RBAC, Allokation,    │
-   │   Arbitrage, CO2, Aktorik     │                               │   Mieterstrom, Audit-Log      │
-   │ • Monetarisierung: SaaS-Abo   │                               │ • Monetarisierung: Gebühren   │
-   │   (Free vs. Pro 4,99 €/M)     │                               │   pro Zähler / kWh-Clearing   │
-   └───────────────────────────────┘                               └───────────────────────────────┘
+   │   Sankey, Spotpreise, Forecast│                               │   Tenant-RBAC, Community      │
+   │   Arbitrage, CO2, Aktorik     │                               │   Cockpit, 48h KI-Prognose,   │
+   │ • Monetarisierung: SaaS-Abo   │                               │   Late Ingestion, Audit-Log   │
+   │   (Free vs. Pro 4,99 €/M)     │                               │ • Monetarisierung: Gebühren   │
+   └───────────────────────────────┘                               │   pro Zähler / kWh-Clearing   │
+                                                                   └───────────────────────────────┘
 ```
 
 ---
@@ -139,31 +140,48 @@
              • Automatisches HealthState-Pruning veralteter Queues & exakter Device-Count für echte Geräte
 
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ MEILENSTEIN 3: PAYMENT, MONETARISIERUNG & BILLING-ARCHITEKTUR (💳 P1 - FOKUS) │
+│ MEILENSTEIN 3: PAYMENT, MONETARISIERUNG & BILLING-ARCHITEKTUR (💳 EVALUIERUNG) │
 └───────────────────────────────────────────────────────────────────────────────┘
   ├── 3.1 ⏳ **Tarif- & Plan-Modellierung**:
   │          • Free vs. Pro (Monatlich 4,99 € / Jährlich 49,99 €) & Vermieter-/Quartiers-Pakete
   │          • Feature-Gating Matrix (Alarmzentrale, ML-Solarprognose, Batterie-Arbitrage)
-  ├── 3.2 ⏳ **Stripe Checkout & Customer Portal Flow**:
+  ├── 3.2 ⏳ **Stripe / Payment Gateway Checkout & Customer Portal Flow**:
   │          • Reibungsloser Checkout ohne Medienbruch (SEPA-Lastschrift, Kreditkarte, Apple/Google Pay)
   │          • Self-Service Customer Portal für Abo-Kündigung, Zahlungsmittel-Update & Rechnungsdownload
+  │          • *(Hinweis: Zurückgestellt zur finalen Evaluierung der Zahlungsanbieter)*
   ├── 3.3 ⏳ **Automatische Rechnungsstellung & Fiskal-Sicherheit**:
   │          • PDF-Rechnungserstellung (ReportLab mit USt-Ausweis, fortlaufender Rechnungsnummer & Anschrift)
   │          • E-Mail-Versand mit PDF-Anhang bei erfolgreicher Abbuchung (`fiscal` Queue Prio 1)
-  ├── 3.4 ⏳ **Payment & Webhook-Monitoring (Infrastruktur)**:
-  │          • Stripe-Webhook Health-Check im Systemstatus (`/app/status`)
-  │          • SMTP/E-Mail-Server Erreichbarkeits-Überwachung für transaktionale Mails
+  └── 3.4 ⏳ **Payment & Webhook-Monitoring (Infrastruktur)**:
+             • Stripe-Webhook Health-Check im Systemstatus (`/app/status`)
+             • SMTP/E-Mail-Server Erreichbarkeits-Überwachung für transaktionale Mails
 
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ MEILENSTEIN 4: ENERGY SHARING COMMUNITIES & § 14a EnWG (Säule 2)              │
+│ MEILENSTEIN 4: ENERGY SHARING COMMUNITIES & § 14a EnWG (Säule 2 - ✅ LIVE)    │
 └───────────────────────────────────────────────────────────────────────────────┘
-  ├── 4.1 ✅ Multi-Tenant RBAC & Rollenhierarchie (`admin`, `manager`, `member`, `auditor`)
+  ├── 4.1 ✅ Multi-Tenant RBAC & Rollenhierarchie (`admin`, `user_admin`, `helpdesk`, `auditor`, `member`)
   ├── 4.2 ✅ Revisionssicheres Audit-Log für Tenant-Events (`accounts.AuditLog`)
   ├── 4.3 ✅ Tenant-Dashboard & Mitgliedereinladungen (`/app/tenant`)
-  ├── 4.4 ⏳ 15-Minuten Community-Bilanzierung & Allokationsschlüssel (OBIS 1.8.0 / 2.8.0)
-  ├── 4.5 ⏳ Sharing-Tarife, Umlagen & kaufmännische Abrechnungsperioden
-  ├── 4.6 ⏳ B2B/B2C Community-Portal (Erzeuger, Verbraucher, Prosumer)
-  └── 4.7 ⏳ § 14a EnWG Steuerbox-Schnittstelle & Pflichtdimmung auf 4,2 kW (SteuVE)
+  ├── 4.4 ✅ **15-Minuten Community-Bilanzierung & Resiliente Ingestion (OBIS 1.8.0 / 2.8.0)**:
+  │          • Eichrechtskonforme 15m-Slot-Aggregation in `BalanceSlot`
+  │          • Automatische Plausibilitätsprüfung & Ausreißer-Erkennung (`validate_obis_reading`)
+  │          • Asynchrone Nachberechnung bei verzögerten Zählerständen (`recalculate_late_slot`)
+  │          • Wöchentlicher 30-Tage Reconciliation-Cron (`reconcile_balance_last_30d`)
+  │          • Strikte Tenant-Isolation und Rollenprüfung für Zähler
+  ├── 4.5 ✅ **Energy Sharing Community Cockpit (Frontend & Backend API)**:
+  │          • Aggregations-API (`GET /api/billing/community/cockpit/`)
+  │          • 5 Hero-KPIs: Produziert (2.8.0), Verbraucht (1.8.0), Geteilt (Autarkie %), Zugekauft (Reststrom) & Ersparnis (€)
+  │          • 15-Minuten Lastgang-Timeline der letzten 24 Stunden
+  │          • 48-Stunden KI-Erzeugungsprognose mit Hervorhebung günstiger Ladefenster (*Peak Windows*)
+  │          • Tab-Navigation (`⚡ Energy Cockpit`, `👥 Mitglieder & Zähler`, `📜 Audit`)
+  ├── 4.6 ✅ **Gesetzlicher Ingestion- & Reststrom-Leitfaden (MsbG & MaKo / MSCONS)**:
+  │          • Publikationsreifer Guide [`docs/ENERGY_SHARING_METER_INGEST_GUIDE.md`](file:///c:/Users/Public/Dev/eswes/docs/ENERGY_SHARING_METER_INGEST_GUIDE.md)
+  │          • 3 Zählerpfade (wMSB REST/SFTP, gMSB HAN-Schnittstelle, Submetering)
+  │          • VNB-Marktkommunikation & Vermeidung von Doppelabrechnungen beim Reststromversorger
+  ├── 4.7 ⏳ **Sharing-Tarife, Umlagen & kaufmännische Abrechnungsperioden**:
+  │          • Dynamische Community-Tarifmodelle & interne Abrechnungsgutschriften
+  └── 4.8 ⏳ **§ 14a EnWG Steuerbox-Schnittstelle & Pflichtdimmung auf 4,2 kW (SteuVE)**:
+             • EEBUS / Modbus TCP / REST Steuerbox-Anbindung für Wärmepumpen & Wallboxen
 ```
 
 ---
@@ -172,9 +190,9 @@
 
 | Schritt | Modul | Maßnahme | Status / Prio | Ziel & Nächste Entscheidung |
 |---|---|---|:---:|---|
-| **Step 1** | `billing/payment/` | **Payment- & Monetarisierungs-Konzept**: Klärung von Preisplänen (Free, Pro, Landlord), Stripe Checkout, SEPA/Kreditkarte, USt-Behandlung & PDF-Rechnungsflow | 💳 **P1 (Nächster Fokus)** | Vollständige Konzeption & Durchdenken vor Live-Schaltung |
-| **Step 2** | `system/status/` | **Status-Erweiterung (Payment & Mail)**: Stripe-Webhook-Health & SMTP-Dienst-Monitoring zur Status-Seite hinzufügen | 🛡️ **P1** | 100% lückenlose Überwachung aller Zahlungs- und Benachrichtigungskanäle |
-| **Step 3** | `tenants/` | **P2P-Clearing & 15-Minuten-Bilanzierung**: Zähler-Allokation für Energy Sharing & Mieterstrom | 🏢 **P2** | Kommerzieller Rollout von Säule 2 (Energy Sharing) |
-| **Step 4** | `grid/enwg/` | **§ 14a EnWG Steuerbox & Dimmung**: Dynamische Leistungsbegrenzung auf 4,2 kW für SteuVE (WP, Wallbox, Speicher) | ⚡ **P2** | Gesetzliche Netzbetreiber-Konformität in Deutschland |
+| **Step 1** | `billing/sharing/` | **Sharing-Tarife & Abrechnung**: Interne Verrechnungssätze (Ct/kWh), Umlagen und automatische Monatsabrechnungs-PDFs für Erzeuger/Verbraucher | ⚡ **P1 (Nächster Fokus)** | Kommerzieller Rollout & interne Gutschriften in Communities |
+| **Step 2** | `billing/payment/` | **Payment- & Provider-Evaluierung**: Klärung von Zahlungsdienstleistern (Stripe, SEPA, GoCardless), Gebührenstruktur & Abwicklung | 💳 **P1 (Nach Evaluierung)** | Vorbereitung des automatischen Einzugs von Mitgliedsbeiträgen |
+| **Step 3** | `grid/enwg/` | **§ 14a EnWG Steuerbox & Dimmung**: Dynamische Leistungsbegrenzung auf 4,2 kW für SteuVE (WP, Wallbox, Speicher) | ⚡ **P2** | Gesetzliche Netzbetreiber-Konformität in Deutschland |
+| **Step 4** | `system/status/` | **Status-Erweiterung (Payment & Mail)**: Webhook-Health & SMTP-Dienst-Monitoring zur Status-Seite hinzufügen | 🛡️ **P2** | Lückenlose Überwachung aller Zahlungs- und Benachrichtigungskanäle |
 
 
