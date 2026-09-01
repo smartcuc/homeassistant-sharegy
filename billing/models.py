@@ -3,6 +3,7 @@
 ###################
 
 import uuid
+from decimal import Decimal
 from django.db import models
 from django.utils import timezone
 from core.ownership import owner_xor_constraints
@@ -437,8 +438,19 @@ class CouponRedemption(models.Model):
 class CommunityTariff(models.Model):
     """
     Tarifstruktur für eine Energy Sharing Community.
-    Definiert Bezugs- und Einspeisevergütung sowie Community-Umlagen pro kWh.
+    Definiert Bezugs- und Einspeisevergütung sowie Community-Umlagen pro kWh
+    und das vertragliche Allokationsmodell.
     """
+    ALLOCATION_DYNAMIC = "dynamic"
+    ALLOCATION_STATIC = "static"
+    ALLOCATION_HYBRID = "hybrid"
+
+    ALLOCATION_CHOICES = [
+        (ALLOCATION_DYNAMIC, "Dynamisch nach Verbrauch (Standard)"),
+        (ALLOCATION_STATIC, "Statische Beteiligungsquoten (MEA)"),
+        (ALLOCATION_HYBRID, "Hybrid (Vorrang-Quote + dynamischer Überlauf)"),
+    ]
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     tenant = models.ForeignKey(
         "core.Tenant",
@@ -446,6 +458,12 @@ class CommunityTariff(models.Model):
         related_name="community_tariffs",
     )
     name = models.CharField(max_length=150, default="Standard Sharing Tarif")
+    allocation_model = models.CharField(
+        max_length=20,
+        choices=ALLOCATION_CHOICES,
+        default=ALLOCATION_DYNAMIC,
+        help_text="Verfahren zur Verteilung von Solarstrom innerhalb der Gemeinschaft",
+    )
 
     # Preise in Cent pro kWh
     sharing_price_ct_kwh = models.DecimalField(
@@ -489,7 +507,86 @@ class CommunityTariff(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.tenant.name} - {self.name} ({self.sharing_price_ct_kwh} Ct/kWh)"
+        return f"{self.tenant.name} - {self.name} ({self.sharing_price_ct_kwh} Ct/kWh, {self.allocation_model})"
+
+
+class CommunityMemberShare(models.Model):
+    """
+    Beteiligungsquote eines Mitglieds an den Gemeinschaftserzeugungsanlagen (z. B. PV, Speicher).
+    Unterstützt Prozentangaben, Miteigentumsanteile (MEA) sowie kWp-Zuweisungen.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    tenant = models.ForeignKey(
+        "core.Tenant",
+        on_delete=models.CASCADE,
+        related_name="member_shares",
+    )
+    membership = models.ForeignKey(
+        "accounts.TenantMembership",
+        on_delete=models.CASCADE,
+        related_name="shares",
+    )
+    user = models.ForeignKey(
+        "accounts.User",
+        on_delete=models.CASCADE,
+        related_name="community_shares",
+    )
+
+    # Beteiligungsquote in Prozent (z. B. 25.5000 %)
+    share_percent = models.DecimalField(
+        max_digits=7,
+        decimal_places=4,
+        default=0.0000,
+        help_text="Beteiligungsquote an der Gemeinschafts-PV in Prozent (%)",
+    )
+
+    # Miteigentumsanteile (MEA - z. B. 250 / 1000)
+    mea_numerator = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        help_text="Miteigentumsanteile Zähler (z. B. 250)",
+    )
+    mea_denominator = models.PositiveIntegerField(
+        default=1000,
+        help_text="Miteigentumsanteile Nenner (Standard 1000 oder 10.000)",
+    )
+
+    # Zugewiesene kWp-Leistung (optional)
+    assigned_kwp = models.DecimalField(
+        max_digits=8,
+        decimal_places=3,
+        null=True,
+        blank=True,
+        help_text="Zugewiesener kWp-Anteil an der Gemeinschaftsanlage",
+    )
+
+    valid_from = models.DateTimeField(default=timezone.now)
+    valid_to = models.DateTimeField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "billing_community_member_share"
+        ordering = ["-valid_from"]
+        indexes = [
+            models.Index(fields=["tenant", "is_active"]),
+            models.Index(fields=["membership", "is_active"]),
+            models.Index(fields=["user", "is_active"]),
+        ]
+
+    def __str__(self):
+        return f"{self.tenant.name} - {self.user.email}: {self.share_percent}% ({self.mea_numerator}/{self.mea_denominator} MEA)"
+
+    def save(self, *args, **kwargs):
+        # Automatische Berechnung des Prozentsatzes aus MEA, falls Zähler angegeben
+        if self.mea_numerator is not None and self.mea_denominator and self.mea_denominator > 0:
+            calculated_pct = (Decimal(self.mea_numerator) / Decimal(self.mea_denominator)) * Decimal("100.0")
+            if not self.share_percent or self.share_percent == Decimal("0.0"):
+                self.share_percent = round(calculated_pct, 4)
+        super().save(*args, **kwargs)
+
 
 
 class CommunityMonthlyStatement(models.Model):

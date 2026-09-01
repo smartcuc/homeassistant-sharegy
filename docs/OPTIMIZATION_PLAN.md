@@ -539,11 +539,19 @@
 
 ---
 
-### [ ] 6.7 Erweiterte Allokationsmodelle & Beteiligungsquoten (Statische vs. dynamische Quoten)
-- **Bereich**: Allokations-Engine (`billing/services_balance.py`, `billing/models.py`)
-- **Ziel**:
-  - Unterstützung von statischen Beteiligungsquoten (z. B. 10 kWp Gemeinschaftsanlage aufgeteilt nach Miteigentumsanteilen MEA / festen Prozenten).
-  - Hybride Allokation: Vorrangige Quotenzuteilung mit dynamischer Rest-Verteilung im 15-Minuten-Raster.
+### [x] 6.7 Erweiterte Allokationsmodelle & Beteiligungsquoten (§ 42b / § 42a EnWG)
+- **Bereich**: Allokations-Engine & Member Shares (`billing/models.py`, `billing/services_sharing_settlement.py`, `billing/api/views_community.py`, `billing/admin.py`)
+- **Status**: ✅ **Erledigt**.
+  - **3 Allokationsmodelle**:
+    1. *Dynamisch*: Verbrauchsproportionale 15-Minuten-Echtzeit-Verteilung nach Lastgang.
+    2. *Statisch*: Feste Beteiligungsquoten & Miteigentumsanteile (MEA, z. B. 250 / 1000).
+    3. *Hybrid*: Stufe 1: Vorrangige Quotenzuteilung; Stufe 2: Dynamischer Überlauf von Reststrom auf verbleibenden Bedarf.
+  - **`CommunityMemberShare` Modell**: Speichert Quoten (%), MEA-Zähler/Nenner, kWp-Zuweisungen und Gültigkeitszeiträume mit Validierung.
+  - **Bulk-API & 100%-Normierung**: `/api/billing/community/shares/bulk/` mit automatischer Skalierung auf exakt 100,0000 %.
+  - **Live-Simulationsvergleich**: `/api/billing/community/allocation-preview/` berechnet alle 3 Modelle für einen Abrechnungsmonat parallel und liefert Ertrags-, Autarkie- und Saldenvergleiche.
+  - **UI-Integration**:
+    - `CommunitiesManagementHub.jsx`: Neuer Tab `⚖️ Beteiligungsquoten & Allokation` mit Modell-Umschalter, Live-Quoten-Balken, MEA-Editor und Simulations-Vergleichsbox.
+    - `TenantDashboard.jsx`: Allokationsmodell-Badge und Anzeige konfigurierter Beteiligungsquoten im Tarife-Tab.
 
 ---
 
@@ -559,29 +567,29 @@
 
 ```
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ ✅ ERLEDIGT: SÄULE 1 (EMS) & SÄULE 2 (ENERGY SHARING CLEARING LIVE)            │
+│ ✅ ERLEDIGT: SÄULE 1 (EMS) & SÄULE 2 (ENERGY SHARING CLEARING & QUOTEN LIVE)   │
 ├───────────────────────────────────────────────────────────────────────────────┤
 │ • 🟢 Säule 1 (EMS-Free & Pro): WSS Ingest, Live-Sankey, Forecasts, Aktorik,   │
 │    Systemstatus-Monitoring (/app/status), Geräteprofiling & Mobile Apps       │
 │ • ⚡ Säule 2 (Energy Sharing): 15m OBIS-Clearing, Community Cockpit,          │
-│    Sharing-Tarife, Multi-Community Hub, PDF-Nachweise & Multi-Format Exporte  │
+│    Sharing-Tarife, Multi-Community Hub, PDF-Nachweise & Multi-Format Exporte, │
+│    Beteiligungsquoten (MEA) & 3 Allokationsmodelle (Dynamisch, Statisch, Hybrid)│
 └───────────────────────────────────────────────────────────────────────────────┘
                                        │
                                        ▼
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ PRIORITÄT 1: ERWEITERTE ALLOKATION & REGULATORISCHE NETZINTEGRATION (§ 14a)   │
+│ PRIORITÄT 1: REGULATORISCHE NETZINTEGRATION (§ 14a EnWG) & STEUERBOX          │
 ├───────────────────────────────────────────────────────────────────────────────┤
-│ 1. ⚡ Task 6.7: Statische Beteiligungsquoten (MEA) & hybride PV-Allokation     │
-│ 2. ⚡ Task 6.8: § 14a EnWG Steuerbox-Schnittstelle & Pflichtdimmung (4,2 kW)  │
+│ 1. ⚡ Task 6.8: § 14a EnWG Steuerbox-Schnittstelle & Pflichtdimmung (4,2 kW)  │
 └───────────────────────────────────────────────────────────────────────────────┘
                                        │
                                        ▼
 ┌───────────────────────────────────────────────────────────────────────────────┐
 │ PRIORITÄT 2: DYNAMISCHE TARIFE & ZAHLUNGSSCHNITTSTELLEN                       │
 ├───────────────────────────────────────────────────────────────────────────────┤
-│ 3. 📈 Task: Dynamische & Börsenpreis-indexierte Sharing-Tarife                │
-│ 4. 💳 Task 3.1: Payment-Provider Evaluierung (Stripe / SEPA-Lastschriften)   │
-│ 5. 🔌 Task: Standardisierte Marktkommunikations-Bridge (MSCONS / EDIFACT)     │
+│ 2. 📈 Task: Dynamische & Börsenpreis-indexierte Sharing-Tarife                │
+│ 3. 💳 Task 3.1: Payment-Provider Evaluierung (Stripe / SEPA-Lastschriften)   │
+│ 4. 🔌 Task: Standardisierte Marktkommunikations-Bridge (MSCONS / EDIFACT)     │
 └───────────────────────────────────────────────────────────────────────────────┘
 ```
 

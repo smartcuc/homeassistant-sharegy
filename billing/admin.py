@@ -10,17 +10,37 @@ from .models import (
     Coupon,
     CouponRedemption,
     CommunityTariff,
+    CommunityMemberShare,
     CommunityMonthlyStatement,
     CommunityAnnouncement,
 )
 
 
-@admin.register(CommunityAnnouncement)
-class CommunityAnnouncementAdmin(admin.ModelAdmin):
-    list_display = ("title", "tenant", "category", "author", "is_active", "created_at")
-    list_filter = ("tenant", "category", "is_active")
-    search_fields = ("title", "message", "tenant__name")
-    raw_id_fields = ("tenant", "author")
+@admin.register(CommunityMemberShare)
+class CommunityMemberShareAdmin(admin.ModelAdmin):
+    list_display = (
+        "tenant",
+        "user",
+        "share_percent_display",
+        "mea_display",
+        "assigned_kwp",
+        "is_active",
+        "valid_from",
+        "valid_to",
+    )
+    list_filter = ("tenant", "is_active")
+    search_fields = ("user__email", "tenant__name")
+    raw_id_fields = ("tenant", "membership", "user")
+
+    def share_percent_display(self, obj):
+        return format_html("<b>{:.4f} %</b>", float(obj.share_percent))
+    share_percent_display.short_description = "Quote (%)"
+
+    def mea_display(self, obj):
+        if obj.mea_numerator:
+            return f"{obj.mea_numerator} / {obj.mea_denominator} MEA"
+        return "-"
+    mea_display.short_description = "Miteigentum (MEA)"
 
 
 @admin.register(CommunityTariff)
@@ -28,18 +48,29 @@ class CommunityTariffAdmin(admin.ModelAdmin):
     list_display = (
         "name",
         "tenant",
+        "allocation_model_badge",
         "sharing_price_ct_kwh",
         "producer_payout_ct_kwh",
         "community_fee_ct_kwh",
         "grid_fee_saved_ct_kwh",
         "is_active",
         "valid_from",
-        "valid_to",
         "created_at",
     )
-    list_filter = ("tenant", "is_active")
+    list_filter = ("tenant", "allocation_model", "is_active")
     search_fields = ("name", "tenant__name")
     raw_id_fields = ("tenant",)
+
+    def allocation_model_badge(self, obj):
+        colors = {
+            "dynamic": "green",
+            "static": "blue",
+            "hybrid": "purple",
+        }
+        color = colors.get(obj.allocation_model, "gray")
+        return format_html("<span style='color: {}; font-weight: bold;'>{}</span>", color, obj.get_allocation_model_display())
+    allocation_model_badge.short_description = "Allokationsmodell"
+
 
 
 @admin.register(CommunityMonthlyStatement)

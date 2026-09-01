@@ -1,6 +1,6 @@
 /*
 # src/pages/admin/CommunitiesManagementHub.jsx
-# Zentrales Multi-Community Management Hub für Energiegemeinschaften
+# Zentrales Multi-Community Management Hub für Energiegemeinschaften & Allokationsmodelle
 */
 
 import { useEffect, useState, useMemo } from "react";
@@ -10,15 +10,25 @@ export default function CommunitiesManagementHub() {
     const [portfolioData, setPortfolioData] = useState(null);
     const [selectedTenantId, setSelectedTenantId] = useState(null);
     const [drilldownData, setDrilldownData] = useState(null);
-    const [drilldownTab, setDrilldownTab] = useState("members"); // 'members' | 'tariffs' | 'announcements' | 'settings'
+    const [drilldownTab, setDrilldownTab] = useState("members"); // 'members' | 'tariffs' | 'shares' | 'announcements' | 'settings'
     const [loading, setLoading] = useState(true);
     const [drilldownLoading, setDrilldownLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [announcementModal, setAnnouncementModal] = useState(false);
+    const [newAnnouncement, setNewAnnouncement] = useState({ title: "", message: "", category: "info" });
     const [settingsForm, setSettingsForm] = useState({ name: "", primary_color: "#10b981", is_public: true });
     const [savingSettings, setSavingSettings] = useState(false);
     const [exportingFormat, setExportingFormat] = useState(null);
 
+    // ⚖️ Beteiligungsquoten & Allokation State
+    const [sharesData, setSharesData] = useState(null);
+    const [sharesLoading, setSharesLoading] = useState(false);
+    const [editingShares, setEditingShares] = useState([]);
+    const [savingShares, setSavingShares] = useState(false);
+    const [selectedAllocationModel, setSelectedAllocationModel] = useState("dynamic");
+    const [savingModel, setSavingModel] = useState(false);
+    const [previewData, setPreviewData] = useState(null);
+    const [previewLoading, setPreviewLoading] = useState(false);
 
     // ✅ Portfolio-Daten laden
     async function loadPortfolio() {
@@ -49,10 +59,124 @@ export default function CommunitiesManagementHub() {
                 primary_color: data.community.primary_color || "#10b981",
                 is_public: data.community.is_public,
             });
+            if (data.active_tariff) {
+                setSelectedAllocationModel(data.active_tariff.allocation_model || "dynamic");
+            }
+            loadShares(tenantId);
         } catch (err) {
             alert("Fehler beim Laden der Community-Details: " + (err.message || "Unbekannt"));
         } finally {
             setDrilldownLoading(false);
+        }
+    }
+
+    // ⚖️ Beteiligungsquoten laden
+    async function loadShares(tenantId) {
+        setSharesLoading(true);
+        try {
+            const data = await apiFetch(`/api/billing/community/shares/?tenant_id=${tenantId}`);
+            setSharesData(data);
+            setEditingShares(
+                data.shares.map((s) => ({
+                    membership_id: s.membership_id,
+                    user_email: s.user_email,
+                    share_percent: s.share_percent,
+                    mea_numerator: s.mea_numerator || "",
+                    mea_denominator: s.mea_denominator || 1000,
+                    assigned_kwp: s.assigned_kwp || "",
+                    is_active: s.is_active,
+                }))
+            );
+        } catch (err) {
+            console.error("Failed to load shares:", err);
+        } finally {
+            setSharesLoading(false);
+        }
+    }
+
+    // ⚖️ Quoten ändern (Prozent oder MEA)
+    function handleShareChange(index, field, value) {
+        const updated = [...editingShares];
+        updated[index][field] = value;
+
+        // Falls MEA-Zähler geändert wird, Prozentwert automatisch live berechnen
+        if (field === "mea_numerator") {
+            const num = parseFloat(value);
+            const den = parseFloat(updated[index].mea_denominator || 1000);
+            if (!isNaN(num) && den > 0) {
+                updated[index].share_percent = parseFloat(((num / den) * 100).toFixed(4));
+            }
+        }
+        setEditingShares(updated);
+    }
+
+    // ⚖️ Quoten im Bulk speichern
+    async function saveShares(normalize = false) {
+        setSavingShares(true);
+        try {
+            await apiFetch("/api/billing/community/shares/bulk/", {
+                method: "POST",
+                body: JSON.stringify({
+                    tenant_id: selectedTenantId,
+                    normalize_to_100: normalize,
+                    shares: editingShares.map((s) => ({
+                        membership_id: s.membership_id,
+                        share_percent: parseFloat(s.share_percent) || 0,
+                        mea_numerator: s.mea_numerator ? parseInt(s.mea_numerator) : null,
+                        mea_denominator: parseInt(s.mea_denominator) || 1000,
+                        assigned_kwp: s.assigned_kwp ? parseFloat(s.assigned_kwp) : null,
+                        is_active: s.is_active,
+                    })),
+                }),
+            });
+            alert(normalize ? "Quoten erfolgreich auf 100% normiert und gespeichert!" : "Beteiligungsquoten erfolgreich gespeichert.");
+            loadShares(selectedTenantId);
+        } catch (err) {
+            alert("Fehler beim Speichern der Quoten: " + (err.message || "Unbekannt"));
+        } finally {
+            setSavingShares(false);
+        }
+    }
+
+    // ⚖️ Allokationsmodell im Tarif aktualisieren
+    async function saveAllocationModel() {
+        if (!drilldownData || !drilldownData.active_tariff) return;
+        setSavingModel(true);
+        try {
+            await apiFetch("/api/billing/community/tariffs/", {
+                method: "POST",
+                body: JSON.stringify({
+                    tenant_id: selectedTenantId,
+                    name: drilldownData.active_tariff.name,
+                    allocation_model: selectedAllocationModel,
+                    sharing_price_ct_kwh: drilldownData.active_tariff.sharing_price_ct_kwh,
+                    producer_payout_ct_kwh: drilldownData.active_tariff.producer_payout_ct_kwh,
+                    community_fee_ct_kwh: drilldownData.active_tariff.community_fee_ct_kwh,
+                    grid_fee_saved_ct_kwh: drilldownData.active_tariff.grid_fee_saved_ct_kwh,
+                    set_active: true,
+                }),
+            });
+            alert(`Allokationsmodell erfolgreich auf "${selectedAllocationModel.toUpperCase()}" umgestellt!`);
+            const updated = await apiFetch(`/api/billing/communities/${selectedTenantId}/drilldown/`);
+            setDrilldownData(updated);
+        } catch (err) {
+            alert("Fehler beim Aktualisieren des Allokationsmodells: " + (err.message || "Unbekannt"));
+        } finally {
+            setSavingModel(false);
+        }
+    }
+
+    // 🔍 3-Modelle Simulation laden
+    async function loadSimulationPreview() {
+        setPreviewLoading(true);
+        try {
+            const now = new Date();
+            const data = await apiFetch(`/api/billing/community/allocation-preview/?tenant_id=${selectedTenantId}&year=${now.getFullYear()}&month=${now.getMonth() + 1}`);
+            setPreviewData(data);
+        } catch (err) {
+            alert("Fehler bei der Simulationsberechnung: " + (err.message || "Unbekannt"));
+        } finally {
+            setPreviewLoading(false);
         }
     }
 
@@ -68,7 +192,6 @@ export default function CommunitiesManagementHub() {
             alert("Mitteilung erfolgreich an die Community übermittelt!");
             setAnnouncementModal(false);
             setNewAnnouncement({ title: "", message: "", category: "info" });
-            // Drilldown aktualisieren
             const updated = await apiFetch(`/api/billing/communities/${selectedTenantId}/drilldown/`);
             setDrilldownData(updated);
         } catch (err) {
@@ -126,7 +249,6 @@ export default function CommunitiesManagementHub() {
     }
 
     // 🔍 Filterung nach Suche
-
     const filteredCommunities = useMemo(() => {
         if (!portfolioData || !portfolioData.communities) return [];
         if (!searchQuery.trim()) return portfolioData.communities;
@@ -135,6 +257,11 @@ export default function CommunitiesManagementHub() {
             (c) => c.name.toLowerCase().includes(q) || c.slug.toLowerCase().includes(q)
         );
     }, [portfolioData, searchQuery]);
+
+    // Live-Summe der editierten Quoten
+    const currentSharesSum = useMemo(() => {
+        return editingShares.reduce((acc, s) => acc + (parseFloat(s.share_percent) || 0), 0);
+    }, [editingShares]);
 
     if (loading) {
         return (
@@ -158,147 +285,106 @@ export default function CommunitiesManagementHub() {
     return (
         <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-8">
 
-            {/* ======================================================== */}
-            {/* 1. HEADER & HERO PORTFOLIO METRICS */}
-            {/* ======================================================== */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
+            {/* TOP BAR / TITEL */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800">
                 <div>
                     <div className="flex items-center gap-3">
-                        <span className="text-3xl">🏘️</span>
+                        <span className="text-3xl">🏛️</span>
                         <div>
                             <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
-                                Energiegemeinschaften & Quartiere
+                                Multi-Community Management Hub
                             </h1>
                             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                                Zentrales Multi-Tenant Management: Performance, Tarife, Mitglieder & Abrechnungen
+                                Zentrale Portfolio-Steuerung, Beteiligungsquoten & 15-Minuten Energy Sharing Clearing
                             </p>
                         </div>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <span className="bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 text-xs font-bold px-3 py-1.5 rounded-xl border border-indigo-500/20">
-                        {portfolio.total_communities} Aktive Gemeinschaften
-                    </span>
-                </div>
-            </div>
-
-            {/* 5 HERO KPI CARDS */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-                
-                {/* 1. COMMUNITIES & MITGLIEDER */}
-                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
-                    <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-semibold">
-                        <span>Netzwerk</span>
-                        <span className="text-base">👥</span>
-                    </div>
-                    <div className="mt-2">
-                        <div className="text-2xl font-black text-slate-900 dark:text-white">
-                            {portfolio.total_members} <span className="text-xs font-medium text-slate-400">Nutzer</span>
-                        </div>
-                        <div className="text-[11px] text-slate-500 mt-0.5">
-                            in {portfolio.total_communities} Gemeinschaften ({portfolio.total_meters} Zähler)
-                        </div>
-                    </div>
-                </div>
-
-                {/* 2. GESAMTERZEUGUNG */}
-                <div className="bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 shadow-xs">
-                    <div className="flex items-center justify-between text-amber-700 dark:text-amber-300 text-xs font-bold">
-                        <span>Solar-Erzeugung (Mtl.)</span>
-                        <span className="text-base">☀️</span>
-                    </div>
-                    <div className="mt-2">
-                        <div className="text-2xl font-black text-amber-900 dark:text-amber-100">
-                            {portfolio.total_produced_kwh.toLocaleString()} <span className="text-xs font-normal">kWh</span>
-                        </div>
-                        <div className="text-[11px] text-amber-700/80 dark:text-amber-300/80 mt-0.5">
-                            über alle Einspeiser
-                        </div>
-                    </div>
-                </div>
-
-                {/* 3. GESAMTVERBRAUCH */}
-                <div className="bg-sky-500/5 dark:bg-sky-500/10 border border-sky-500/20 rounded-2xl p-4 shadow-xs">
-                    <div className="flex items-center justify-between text-sky-700 dark:text-sky-300 text-xs font-bold">
-                        <span>Gesamtverbrauch (Mtl.)</span>
-                        <span className="text-base">🏠</span>
-                    </div>
-                    <div className="mt-2">
-                        <div className="text-2xl font-black text-sky-900 dark:text-sky-100">
-                            {portfolio.total_consumed_kwh.toLocaleString()} <span className="text-xs font-normal">kWh</span>
-                        </div>
-                        <div className="text-[11px] text-sky-700/80 dark:text-sky-300/80 mt-0.5">
-                            Gesamtlast der Mitglieder
-                        </div>
-                    </div>
-                </div>
-
-                {/* 4. GETEILTE ENERGIE & AUTARKIE */}
-                <div className="bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4 shadow-xs">
-                    <div className="flex items-center justify-between text-emerald-700 dark:text-emerald-300 text-xs font-bold">
-                        <span>Geteilt (Sharing)</span>
-                        <span className="text-base">🤝</span>
-                    </div>
-                    <div className="mt-2">
-                        <div className="text-2xl font-black text-emerald-900 dark:text-emerald-100">
-                            {portfolio.total_shared_kwh.toLocaleString()} <span className="text-xs font-normal">kWh</span>
-                        </div>
-                        <div className="text-[11px] text-emerald-700/80 dark:text-emerald-300/80 mt-0.5 font-bold">
-                            Ø Autarkie: {portfolio.portfolio_autarky_pct}%
-                        </div>
-                    </div>
-                </div>
-
-                {/* 5. FINANZIELLE ERSPARNIS */}
-                <div className="bg-indigo-500/5 dark:bg-indigo-500/10 border border-indigo-500/20 rounded-2xl p-4 shadow-xs col-span-2 sm:col-span-1">
-                    <div className="flex items-center justify-between text-indigo-700 dark:text-indigo-300 text-xs font-bold">
-                        <span>Portfolio Ersparnis</span>
-                        <span className="text-base">💰</span>
-                    </div>
-                    <div className="mt-2">
-                        <div className="text-2xl font-black text-indigo-900 dark:text-indigo-100">
-                            {portfolio.total_savings_eur.toLocaleString(undefined, { minimumFractionDigits: 2 })} <span className="text-xs font-normal">€</span>
-                        </div>
-                        <div className="text-[11px] text-indigo-700/80 dark:text-indigo-300/80 mt-0.5">
-                            ggü. Grundversorgung
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            {/* ======================================================== */}
-            {/* 2. COMMUNITIES PORTFOLIO LISTE & FILTER */}
-            {/* ======================================================== */}
-            <div className="space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                        Alle Energiegemeinschaften ({filteredCommunities.length})
-                    </h2>
-
-                    {/* SUCHE */}
                     <div className="relative">
                         <input
                             type="text"
-                            placeholder="Gemeinschaft suchen (Name, Slug)..."
+                            placeholder="Gemeinschaft suchen..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full sm:w-72 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-1.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                            className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 w-64 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/40"
                         />
-                        <span className="absolute right-3 top-2 text-slate-400 text-xs">🔍</span>
+                        {searchQuery && (
+                            <button
+                                onClick={() => setSearchQuery("")}
+                                className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 text-xs"
+                            >
+                                ✕
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* ======================================================== */}
+            {/* 1. PORTFOLIO HERO STATS */}
+            {/* ======================================================== */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs">
+                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Communities</span>
+                    <div className="text-2xl font-black text-slate-900 dark:text-white mt-1">
+                        🏛️ {portfolio.total_communities}
                     </div>
                 </div>
 
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs">
+                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Teilnehmer</span>
+                    <div className="text-2xl font-black text-indigo-600 dark:text-indigo-400 mt-1">
+                        👥 {portfolio.total_members}
+                    </div>
+                </div>
+
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs">
+                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Zähler (iMSys)</span>
+                    <div className="text-2xl font-black text-slate-700 dark:text-slate-300 mt-1">
+                        🔌 {portfolio.total_meters}
+                    </div>
+                </div>
+
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs">
+                    <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">Erzeugung</span>
+                    <div className="text-2xl font-black text-amber-600 dark:text-amber-400 mt-1">
+                        ☀️ {portfolio.total_produced_kwh.toFixed(0)} <span className="text-xs font-semibold">kWh</span>
+                    </div>
+                </div>
+
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs">
+                    <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Autarkiegrad</span>
+                    <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">
+                        ⚡ {portfolio.portfolio_autarky_pct.toFixed(1)}%
+                    </div>
+                </div>
+
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs">
+                    <span className="text-[11px] font-bold text-cyan-600 dark:text-cyan-400 uppercase tracking-wider">Ersparnis</span>
+                    <div className="text-2xl font-black text-cyan-600 dark:text-cyan-400 mt-1">
+                        💶 {portfolio.total_savings_eur.toFixed(0)} €
+                    </div>
+                </div>
+            </div>
+
+            {/* ======================================================== */}
+            {/* 2. COMMUNITIES GRID */}
+            {/* ======================================================== */}
+            <div className="space-y-4">
+                <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+                    Verwaltete Energiegemeinschaften ({filteredCommunities.length})
+                </h2>
+
                 {filteredCommunities.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {filteredCommunities.map((c) => (
                             <div
                                 key={c.id}
-                                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs hover:shadow-md transition flex flex-col justify-between"
+                                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 hover:border-indigo-500/40 transition shadow-2xs flex flex-col justify-between"
                             >
                                 <div className="space-y-3">
-                                    {/* Header */}
                                     <div className="flex items-start justify-between gap-2">
                                         <div className="flex items-center gap-2.5">
                                             <div
@@ -362,7 +448,6 @@ export default function CommunitiesManagementHub() {
                                     </div>
                                 </div>
 
-                                {/* Action */}
                                 <div className="pt-4 mt-3 border-t border-slate-100 dark:border-slate-800">
                                     <button
                                         onClick={() => openDrilldown(c.id)}
@@ -386,7 +471,7 @@ export default function CommunitiesManagementHub() {
             {/* ======================================================== */}
             {selectedTenantId && drilldownData && (
                 <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-4xl w-full p-6 space-y-6 shadow-2xl my-8">
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-5xl w-full p-6 space-y-6 shadow-2xl my-8">
                         
                         {/* Modal Header */}
                         <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
@@ -414,7 +499,7 @@ export default function CommunitiesManagementHub() {
                         </div>
 
                         {/* TAB NAVIGATION */}
-                        <div className="flex bg-slate-100 dark:bg-slate-800/70 p-1 rounded-xl text-xs font-semibold">
+                        <div className="flex flex-wrap bg-slate-100 dark:bg-slate-800/70 p-1 rounded-xl text-xs font-semibold gap-1">
                             <button
                                 onClick={() => setDrilldownTab("members")}
                                 className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
@@ -423,7 +508,17 @@ export default function CommunitiesManagementHub() {
                                         : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                                 }`}
                             >
-                                👥 Teilnehmer & Zähler ({drilldownData.members.length})
+                                👥 Teilnehmer ({drilldownData.members.length})
+                            </button>
+                            <button
+                                onClick={() => setDrilldownTab("shares")}
+                                className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
+                                    drilldownTab === "shares"
+                                        ? "bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs"
+                                        : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                                }`}
+                            >
+                                ⚖️ Beteiligungsquoten & Allokation
                             </button>
                             <button
                                 onClick={() => setDrilldownTab("tariffs")}
@@ -433,7 +528,7 @@ export default function CommunitiesManagementHub() {
                                         : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                                 }`}
                             >
-                                💰 Tarife & Konditionen
+                                💰 Tarife & Clearing
                             </button>
                             <button
                                 onClick={() => setDrilldownTab("announcements")}
@@ -506,11 +601,278 @@ export default function CommunitiesManagementHub() {
                             </div>
                         )}
 
-                        {/* 2. TARIFFS DRILLDOWN */}
+                        {/* ======================================================== */}
+                        {/* 2. ⚖️ BETEILIGUNGSQUOTEN & ALLOKATIONSMODELL */}
+                        {/* ======================================================== */}
+                        {drilldownTab === "shares" && (
+                            <div className="space-y-6">
+                                
+                                {/* A. Allokationsmodell-Auswahl */}
+                                <div className="bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-4">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                        <div>
+                                            <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                                                Allokationsmodell für Solarstrom-Verteilung
+                                            </h3>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                                                Bestimmt die mathematische Zuweisung von Gemeinschafts-Solarstrom im 15-Minuten-Raster
+                                            </p>
+                                        </div>
+                                        <button
+                                            onClick={saveAllocationModel}
+                                            disabled={savingModel}
+                                            className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition cursor-pointer"
+                                        >
+                                            {savingModel ? "Speichere..." : "Modell im Tarif aktivieren"}
+                                        </button>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                        <label
+                                            className={`p-3.5 rounded-xl border cursor-pointer transition flex flex-col justify-between ${
+                                                selectedAllocationModel === "dynamic"
+                                                    ? "bg-emerald-500/10 border-emerald-500 text-emerald-950 dark:text-emerald-200"
+                                                    : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                                            }`}
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="radio"
+                                                    name="alloc_model"
+                                                    value="dynamic"
+                                                    checked={selectedAllocationModel === "dynamic"}
+                                                    onChange={(e) => setSelectedAllocationModel(e.target.value)}
+                                                    className="text-emerald-600"
+                                                />
+                                                <span className="font-bold text-xs">🟢 Dynamisch (Lastgang)</span>
+                                            </div>
+                                            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
+                                                Solarstrom wird proportional zum zeitgleichen Echtzeit-Verbrauch im 15-Minuten-Raster aufgeteilt.
+                                            </p>
+                                        </label>
+
+                                        <label
+                                            className={`p-3.5 rounded-xl border cursor-pointer transition flex flex-col justify-between ${
+                                                selectedAllocationModel === "static"
+                                                    ? "bg-blue-500/10 border-blue-500 text-blue-950 dark:text-blue-200"
+                                                    : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                                            }`}
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="radio"
+                                                    name="alloc_model"
+                                                    value="static"
+                                                    checked={selectedAllocationModel === "static"}
+                                                    onChange={(e) => setSelectedAllocationModel(e.target.value)}
+                                                    className="text-blue-600"
+                                                />
+                                                <span className="font-bold text-xs">🔵 Statisch (MEA-Quote)</span>
+                                            </div>
+                                            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
+                                                Jedes Mitglied erhält eine feste Quote (z. B. nach Miteigentumsanteilen). Ungenutzter Strom geht ins Netz.
+                                            </p>
+                                        </label>
+
+                                        <label
+                                            className={`p-3.5 rounded-xl border cursor-pointer transition flex flex-col justify-between ${
+                                                selectedAllocationModel === "hybrid"
+                                                    ? "bg-purple-500/10 border-purple-500 text-purple-950 dark:text-purple-200"
+                                                    : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                                            }`}
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="radio"
+                                                    name="alloc_model"
+                                                    value="hybrid"
+                                                    checked={selectedAllocationModel === "hybrid"}
+                                                    onChange={(e) => setSelectedAllocationModel(e.target.value)}
+                                                    className="text-purple-600"
+                                                />
+                                                <span className="font-bold text-xs">🟣 Hybrid (Vorrang + Überlauf)</span>
+                                            </div>
+                                            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
+                                                Stufe 1: Vorrangige Quote. Stufe 2: Ungenutzte Überschüsse werden dynamisch auf Restbedarf verteilt.
+                                            </p>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                {/* B. Quoten-Tabelle & Validierungsbalken */}
+                                <div className="space-y-4">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                        <div className="flex items-center gap-3">
+                                            <h4 className="font-bold text-xs text-slate-900 dark:text-white">
+                                                Mitglieder-Beteiligungsquoten & MEA-Schlüssel
+                                            </h4>
+                                            <span
+                                                className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                                                    Math.abs(currentSharesSum - 100) < 0.1
+                                                        ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                                                        : "bg-amber-500/10 text-amber-600 border-amber-500/20"
+                                                }`}
+                                            >
+                                                Summe: {currentSharesSum.toFixed(2)} % {Math.abs(currentSharesSum - 100) < 0.1 ? "🟢 Ausgeglichen" : "⚠️ Nicht 100%"}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => saveShares(true)}
+                                                disabled={savingShares || editingShares.length === 0}
+                                                className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold transition cursor-pointer"
+                                            >
+                                                ⚖️ Auf 100% normieren
+                                            </button>
+                                            <button
+                                                onClick={() => saveShares(false)}
+                                                disabled={savingShares || editingShares.length === 0}
+                                                className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition cursor-pointer"
+                                            >
+                                                {savingShares ? "Speichere..." : "Quoten speichern"}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Quoten Progressbar */}
+                                    <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden flex">
+                                        <div
+                                            className={`h-full transition-all ${
+                                                Math.abs(currentSharesSum - 100) < 0.1 ? "bg-emerald-500" : currentSharesSum > 100 ? "bg-rose-500" : "bg-amber-500"
+                                            }`}
+                                            style={{ width: `${Math.min(currentSharesSum, 100)}%` }}
+                                        ></div>
+                                    </div>
+
+                                    {/* Quoten Eingabetabelle */}
+                                    <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden text-xs">
+                                        <table className="w-full text-left border-collapse">
+                                            <thead>
+                                                <tr className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-semibold">
+                                                    <th className="p-3">Mitglied / E-Mail</th>
+                                                    <th className="p-3">Quote (%)</th>
+                                                    <th className="p-3">Miteigentumsanteil (MEA)</th>
+                                                    <th className="p-3">kWp Zuweisung</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                                {editingShares.map((s, idx) => (
+                                                    <tr key={s.membership_id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                                                        <td className="p-3 font-semibold text-slate-900 dark:text-white">
+                                                            {s.user_email}
+                                                        </td>
+                                                        <td className="p-3">
+                                                            <div className="flex items-center gap-1.5">
+                                                                <input
+                                                                    type="number"
+                                                                    step="0.0001"
+                                                                    value={s.share_percent}
+                                                                    onChange={(e) => handleShareChange(idx, "share_percent", e.target.value)}
+                                                                    className="w-24 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1 text-slate-900 dark:text-white font-bold"
+                                                                />
+                                                                <span className="text-slate-400 font-bold">%</span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="p-3">
+                                                            <div className="flex items-center gap-1.5">
+                                                                <input
+                                                                    type="number"
+                                                                    placeholder="z. B. 250"
+                                                                    value={s.mea_numerator}
+                                                                    onChange={(e) => handleShareChange(idx, "mea_numerator", e.target.value)}
+                                                                    className="w-20 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1 text-slate-900 dark:text-white"
+                                                                />
+                                                                <span className="text-slate-400">/</span>
+                                                                <span className="text-slate-500 font-mono">1000 MEA</span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="p-3">
+                                                            <div className="flex items-center gap-1.5">
+                                                                <input
+                                                                    type="number"
+                                                                    step="0.1"
+                                                                    placeholder="z. B. 3.5"
+                                                                    value={s.assigned_kwp}
+                                                                    onChange={(e) => handleShareChange(idx, "assigned_kwp", e.target.value)}
+                                                                    className="w-20 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1 text-slate-900 dark:text-white"
+                                                                />
+                                                                <span className="text-slate-400">kWp</span>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                {/* C. 3-Modelle Simulation & Vergleich */}
+                                <div className="bg-gradient-to-br from-slate-900 to-indigo-950 text-white rounded-2xl p-5 space-y-4">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                        <div>
+                                            <h4 className="font-bold text-sm">
+                                                📊 3-Modelle Simulations- & Ertragsvergleich
+                                            </h4>
+                                            <p className="text-xs text-indigo-300">
+                                                Vergleicht für diesen Abrechnungsmonat den Ertrag und die Deckungsquoten aller 3 Allokationsmethoden
+                                            </p>
+                                        </div>
+                                        <button
+                                            onClick={loadSimulationPreview}
+                                            disabled={previewLoading}
+                                            className="px-3.5 py-1.5 bg-indigo-500 hover:bg-indigo-600 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition cursor-pointer"
+                                        >
+                                            {previewLoading ? "Simuliere..." : "🔍 Vergleich jetzt berechnen"}
+                                        </button>
+                                    </div>
+
+                                    {previewData && previewData.comparison && (
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
+                                            {Object.values(previewData.comparison).map((comp) => (
+                                                <div
+                                                    key={comp.key}
+                                                    className={`p-3.5 rounded-xl border ${
+                                                        comp.key === selectedAllocationModel
+                                                            ? "bg-indigo-500/20 border-indigo-400"
+                                                            : "bg-white/5 border-white/10"
+                                                    }`}
+                                                >
+                                                    <div className="flex justify-between items-start">
+                                                        <span className="font-bold text-xs text-white">{comp.label}</span>
+                                                        {comp.key === selectedAllocationModel && (
+                                                            <span className="bg-indigo-500 text-[9px] font-black px-1.5 py-0.5 rounded">AKTIV</span>
+                                                        )}
+                                                    </div>
+                                                    <div className="mt-3 space-y-1.5 text-xs">
+                                                        <div className="flex justify-between text-indigo-200">
+                                                            <span>Geteilter Strom:</span>
+                                                            <span className="font-bold text-white">{comp.total_shared_kwh} kWh</span>
+                                                        </div>
+                                                        <div className="flex justify-between text-indigo-200">
+                                                            <span>Gesamtersparnis:</span>
+                                                            <span className="font-bold text-emerald-300">{comp.total_savings_eur.toFixed(2)} €</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                            </div>
+                        )}
+
+                        {/* 3. TARIFFS DRILLDOWN */}
                         {drilldownTab === "tariffs" && drilldownData.active_tariff && (
                             <div className="space-y-4">
                                 <div className="bg-gradient-to-br from-indigo-900 to-slate-900 text-white rounded-2xl p-5">
-                                    <h3 className="font-bold text-sm">{drilldownData.active_tariff.name}</h3>
+                                    <div className="flex justify-between items-center">
+                                        <h3 className="font-bold text-sm">{drilldownData.active_tariff.name}</h3>
+                                        <span className="bg-white/10 text-indigo-200 text-xs font-semibold px-2.5 py-1 rounded-lg">
+                                            Modell: {drilldownData.active_tariff.allocation_model.toUpperCase()}
+                                        </span>
+                                    </div>
                                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 text-xs">
                                         <div>
                                             <span className="text-indigo-300 text-[10px]">Bezugspreis (Sharing)</span>
@@ -568,8 +930,7 @@ export default function CommunitiesManagementHub() {
                             </div>
                         )}
 
-
-                        {/* 3. ANNOUNCEMENTS DRILLDOWN */}
+                        {/* 4. ANNOUNCEMENTS DRILLDOWN */}
                         {drilldownTab === "announcements" && (
                             <div className="space-y-4">
                                 <div className="flex justify-between items-center">
@@ -607,7 +968,7 @@ export default function CommunitiesManagementHub() {
                             </div>
                         )}
 
-                        {/* 4. SETTINGS DRILLDOWN */}
+                        {/* 5. SETTINGS DRILLDOWN */}
                         {drilldownTab === "settings" && (
                             <form onSubmit={saveSettings} className="space-y-4 text-xs">
                                 <div>

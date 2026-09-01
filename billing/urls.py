@@ -22,6 +22,9 @@ from billing.api.views_community import (
     community_settings_update_view,
     statement_pdf_download_view,
     statements_export_view,
+    community_member_shares_view,
+    community_member_shares_bulk_view,
+    community_allocation_preview_view,
 )
 
 urlpatterns = [
@@ -37,6 +40,9 @@ urlpatterns = [
     path("subscription/coupons/redeem/", redeem_coupon_view, name="subscription_coupon_redeem"),
     path("community/cockpit/", community_cockpit_view, name="community_cockpit"),
     path("community/tariffs/", community_tariffs_view, name="community_tariffs"),
+    path("community/shares/", community_member_shares_view, name="community_member_shares"),
+    path("community/shares/bulk/", community_member_shares_bulk_view, name="community_member_shares_bulk"),
+    path("community/allocation-preview/", community_allocation_preview_view, name="community_allocation_preview"),
     path("community/statements/export/", statements_export_view, name="community_statements_export"),
     path("community/statements/generate/", generate_community_statements_view, name="community_statements_generate"),
     path("community/statements/<uuid:statement_id>/pdf/", statement_pdf_download_view, name="community_statement_pdf"),

@@ -208,6 +208,7 @@ def community_tariffs_view(request):
             return Response({"error": "Forbidden: Only community admins can configure tariffs."}, status=403)
 
         name = request.data.get("name", "Sharing Tarif")
+        allocation_model = request.data.get("allocation_model", CommunityTariff.ALLOCATION_DYNAMIC)
         sharing_price = Decimal(str(request.data.get("sharing_price_ct_kwh", "12.00")))
         producer_payout = Decimal(str(request.data.get("producer_payout_ct_kwh", "10.00")))
         community_fee = Decimal(str(request.data.get("community_fee_ct_kwh", "2.00")))
@@ -220,6 +221,7 @@ def community_tariffs_view(request):
         new_tariff = CommunityTariff.objects.create(
             tenant=tenant,
             name=name,
+            allocation_model=allocation_model,
             sharing_price_ct_kwh=sharing_price,
             producer_payout_ct_kwh=producer_payout,
             community_fee_ct_kwh=community_fee,
@@ -233,6 +235,7 @@ def community_tariffs_view(request):
             "tariff": {
                 "id": str(new_tariff.id),
                 "name": new_tariff.name,
+                "allocation_model": new_tariff.allocation_model,
                 "sharing_price_ct_kwh": float(new_tariff.sharing_price_ct_kwh),
                 "producer_payout_ct_kwh": float(new_tariff.producer_payout_ct_kwh),
                 "community_fee_ct_kwh": float(new_tariff.community_fee_ct_kwh),
@@ -249,6 +252,7 @@ def community_tariffs_view(request):
         "active_tariff": {
             "id": str(active_tariff.id),
             "name": active_tariff.name,
+            "allocation_model": active_tariff.allocation_model,
             "sharing_price_ct_kwh": float(active_tariff.sharing_price_ct_kwh),
             "producer_payout_ct_kwh": float(active_tariff.producer_payout_ct_kwh),
             "community_fee_ct_kwh": float(active_tariff.community_fee_ct_kwh),
@@ -260,6 +264,7 @@ def community_tariffs_view(request):
             {
                 "id": str(t.id),
                 "name": t.name,
+                "allocation_model": t.allocation_model,
                 "sharing_price_ct_kwh": float(t.sharing_price_ct_kwh),
                 "producer_payout_ct_kwh": float(t.producer_payout_ct_kwh),
                 "community_fee_ct_kwh": float(t.community_fee_ct_kwh),
@@ -817,5 +822,242 @@ def statements_export_view(request):
         return export_statements_xml(qs, tenant_name=tenant_name)
     else:
         return export_statements_xlsx(qs, tenant_name=tenant_name)
+
+
+# ==============================================================================
+# ⚖️ BETEILIGUNGSQUOTEN & ALLOKATIONS-VORSCHAU / SIMULATION
+# ==============================================================================
+
+@api_view(["GET", "POST"])
+@permission_classes([IsAuthenticated])
+def community_member_shares_view(request):
+    """
+    GET: Ruft alle Beteiligungsquoten der Mitglieder einer Community ab.
+    POST: Erstellt oder aktualisiert eine Beteiligungsquote für ein Mitglied (Admin).
+    """
+    user = request.user
+    tenant_id = request.headers.get("X-Tenant-ID") or request.GET.get("tenant_id") or request.data.get("tenant_id")
+
+    if tenant_id:
+        membership = TenantMembership.objects.filter(user=user, tenant_id=tenant_id, is_active=True).first()
+        if not membership and not user.is_staff and not user.is_superuser:
+            return Response({"error": "Forbidden: No active membership in requested community."}, status=403)
+        tenant = Tenant.objects.filter(id=tenant_id).first()
+    else:
+        membership = TenantMembership.objects.filter(user=user, is_active=True).first()
+        tenant = membership.tenant if membership else None
+
+    if not tenant:
+        return Response({"error": "No active community found for user."}, status=404)
+
+    from billing.models import CommunityMemberShare
+
+    if request.method == "POST":
+        is_admin = user.is_staff or user.is_superuser or (membership and membership.role in ["admin", "owner"])
+        if not is_admin:
+            return Response({"error": "Forbidden: Only community admins can configure member shares."}, status=403)
+
+        target_membership_id = request.data.get("membership_id")
+        target_membership = TenantMembership.objects.filter(id=target_membership_id, tenant=tenant).first()
+        if not target_membership:
+            return Response({"error": "Target membership not found in this community."}, status=404)
+
+        share_percent = Decimal(str(request.data.get("share_percent", "0.0000")))
+        mea_numerator = request.data.get("mea_numerator")
+        mea_denominator = int(request.data.get("mea_denominator", 1000))
+        assigned_kwp = request.data.get("assigned_kwp")
+
+        if mea_numerator is not None and int(mea_numerator) > 0 and (not share_percent or share_percent == Decimal("0.0")):
+            share_percent = (Decimal(int(mea_numerator)) / Decimal(mea_denominator)) * Decimal("100.0")
+
+        share, _ = CommunityMemberShare.objects.update_or_create(
+            tenant=tenant,
+            membership=target_membership,
+            user=target_membership.user,
+            defaults={
+                "share_percent": share_percent,
+                "mea_numerator": int(mea_numerator) if mea_numerator is not None else None,
+                "mea_denominator": mea_denominator,
+                "assigned_kwp": Decimal(str(assigned_kwp)) if assigned_kwp is not None else None,
+                "is_active": request.data.get("is_active", True),
+            },
+        )
+
+        return Response({
+            "message": "Member share updated successfully.",
+            "share": {
+                "id": str(share.id),
+                "membership_id": str(share.membership_id),
+                "user_email": share.user.email,
+                "share_percent": float(share.share_percent),
+                "mea_numerator": share.mea_numerator,
+                "mea_denominator": share.mea_denominator,
+                "assigned_kwp": float(share.assigned_kwp) if share.assigned_kwp else None,
+                "is_active": share.is_active,
+            }
+        }, status=201)
+
+    # GET
+    all_memberships = TenantMembership.objects.filter(tenant=tenant, is_active=True).select_related("user")
+    active_shares = {
+        str(s.membership_id): s for s in CommunityMemberShare.objects.filter(tenant=tenant, is_active=True)
+    }
+
+    shares_list = []
+    total_percent = Decimal("0.0")
+
+    for m in all_memberships:
+        if not m.user:
+            continue
+        m_id = str(m.id)
+        share_obj = active_shares.get(m_id)
+        if share_obj:
+            pct = share_obj.share_percent
+            total_percent += pct
+            shares_list.append({
+                "membership_id": m_id,
+                "user_id": str(m.user.id),
+                "user_email": m.user.email,
+                "role": m.role,
+                "has_custom_share": True,
+                "share_percent": float(pct),
+                "mea_numerator": share_obj.mea_numerator,
+                "mea_denominator": share_obj.mea_denominator,
+                "assigned_kwp": float(share_obj.assigned_kwp) if share_obj.assigned_kwp else None,
+                "is_active": share_obj.is_active,
+            })
+        else:
+            shares_list.append({
+                "membership_id": m_id,
+                "user_id": str(m.user.id),
+                "user_email": m.user.email,
+                "role": m.role,
+                "has_custom_share": False,
+                "share_percent": 0.0,
+                "mea_numerator": None,
+                "mea_denominator": 1000,
+                "assigned_kwp": None,
+                "is_active": True,
+            })
+
+    is_balanced_100 = Decimal("99.9") <= total_percent <= Decimal("100.1")
+
+    return Response({
+        "community_id": str(tenant.id),
+        "community_name": tenant.name,
+        "total_allocated_percent": round(float(total_percent), 4),
+        "is_balanced_100": is_balanced_100,
+        "shares": shares_list,
+    })
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def community_member_shares_bulk_view(request):
+    """
+    Speichert Beteiligungsquoten im Bulk (z. B. für alle WEG-Mitglieder auf einmal)
+    und unterstützt optionale Normierung auf 100,00%.
+    """
+    user = request.user
+    tenant_id = request.headers.get("X-Tenant-ID") or request.data.get("tenant_id")
+
+    if tenant_id:
+        membership = TenantMembership.objects.filter(user=user, tenant_id=tenant_id, is_active=True).first()
+        if not membership and not user.is_staff and not user.is_superuser:
+            return Response({"error": "Forbidden: No active membership in requested community."}, status=403)
+        tenant = Tenant.objects.filter(id=tenant_id).first()
+    else:
+        membership = TenantMembership.objects.filter(user=user, is_active=True).first()
+        tenant = membership.tenant if membership else None
+
+    if not tenant:
+        return Response({"error": "No active community found for user."}, status=404)
+
+    is_admin = user.is_staff or user.is_superuser or (membership and membership.role in ["admin", "owner"])
+    if not is_admin:
+        return Response({"error": "Forbidden: Only community admins can configure member shares."}, status=403)
+
+    shares_data = request.data.get("shares", [])
+    if not isinstance(shares_data, list):
+        return Response({"error": "Payload 'shares' must be a list."}, status=400)
+
+    normalize_to_100 = bool(request.data.get("normalize_to_100", False))
+    from billing.models import CommunityMemberShare
+
+    # Falls Normierung gewünscht: Gesamtsumme ermitteln
+    raw_sum = Decimal("0.0")
+    for item in shares_data:
+        raw_sum += Decimal(str(item.get("share_percent", 0)))
+
+    saved_count = 0
+    for item in shares_data:
+        m_id = item.get("membership_id")
+        target_membership = TenantMembership.objects.filter(id=m_id, tenant=tenant).first()
+        if not target_membership:
+            continue
+
+        raw_pct = Decimal(str(item.get("share_percent", 0)))
+        if normalize_to_100 and raw_sum > Decimal("0.0"):
+            pct = (raw_pct / raw_sum) * Decimal("100.0")
+        else:
+            pct = raw_pct
+
+        mea_num = item.get("mea_numerator")
+        mea_den = int(item.get("mea_denominator", 1000))
+        kwp = item.get("assigned_kwp")
+
+        CommunityMemberShare.objects.update_or_create(
+            tenant=tenant,
+            membership=target_membership,
+            user=target_membership.user,
+            defaults={
+                "share_percent": round(pct, 4),
+                "mea_numerator": int(mea_num) if mea_num is not None else None,
+                "mea_denominator": mea_den,
+                "assigned_kwp": Decimal(str(kwp)) if kwp is not None else None,
+                "is_active": bool(item.get("is_active", True)),
+            },
+        )
+        saved_count += 1
+
+    return Response({
+        "message": f"Successfully updated {saved_count} member shares.",
+        "normalized": normalize_to_100,
+    })
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def community_allocation_preview_view(request):
+    """
+    Simuliert und vergleicht für einen Abrechnungsmonat die 3 Allokationsmodelle:
+    1. Dynamisch nach Lastgang
+    2. Statische Beteiligungsquoten (MEA)
+    3. Hybride Vorrangquote mit Überlauf
+    """
+    user = request.user
+    tenant_id = request.headers.get("X-Tenant-ID") or request.GET.get("tenant_id")
+
+    if tenant_id:
+        membership = TenantMembership.objects.filter(user=user, tenant_id=tenant_id, is_active=True).first()
+        if not membership and not user.is_staff and not user.is_superuser:
+            return Response({"error": "Forbidden: No active membership in requested community."}, status=403)
+        tenant = Tenant.objects.filter(id=tenant_id).first()
+    else:
+        membership = TenantMembership.objects.filter(user=user, is_active=True).first()
+        tenant = membership.tenant if membership else None
+
+    if not tenant:
+        return Response({"error": "No active community found for user."}, status=404)
+
+    now = timezone.now()
+    year = int(request.GET.get("year", now.year))
+    month = int(request.GET.get("month", now.month))
+
+    from billing.services_sharing_settlement import get_allocation_comparison_preview
+
+    preview_data = get_allocation_comparison_preview(tenant, year, month)
+    return Response(preview_data)
+
 
 

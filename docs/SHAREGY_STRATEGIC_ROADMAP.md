@@ -192,8 +192,12 @@
   │          • CSV-Export mit UTF-8 BOM und Semikolon für direkte DATEV-/Excel-Kompatibilität
   │          • Standardisierter XML-Export (`<EnergySharingSettlementExport>`) für Hausverwaltungs- & ERP-Schnittstellen
   │          • Integriert im Tenant-Dashboard (`TenantDashboard.jsx`) & Multi-Community Hub (`CommunitiesManagementHub.jsx`)
-  ├── 4.10 ⏳ **Erweiterte Allokationsmodelle & Beteiligungsquoten**:
-  │          • Standort- & eigentumsbasierte Quoten (statische Beteiligungs-% an Gemeinschafts-PV vs. dynamisch-proportional)
+  ├── 4.10 ✅ **Erweiterte Allokationsmodelle & Beteiligungsquoten (§ 42b / § 42a EnWG)**:
+  │          • 3 Allokationsmodelle: Dynamisch (15m Lastgang), Statisch (MEA-Quoten / Miteigentumsanteile), Hybrid (Vorrang + Überlauf)
+  │          • `CommunityMemberShare` Modell mit MEA-Zähler/Nenner, kWp-Zuweisung, automatischer %-Berechnung & 100%-Normierung
+  │          • 15-Minuten-scharfe Allokations-Engine in `billing/services_sharing_settlement.py`
+  │          • Live 3-Modelle Vergleichs- & Simulations-Engine (`/api/billing/community/allocation-preview/`)
+  │          • Integriert im Multi-Community Hub (`CommunitiesManagementHub.jsx`) & Mitglieder-Dashboard (`TenantDashboard.jsx`)
   └── 4.11 ⏳ **§ 14a EnWG Steuerbox-Schnittstelle & Pflichtdimmung auf 4,2 kW (SteuVE)**:
              • EEBUS / Modbus TCP / REST Steuerbox-Anbindung für Wärmepumpen & Wallboxen
 ```
@@ -204,8 +208,8 @@
 
 | Schritt | Modul | Maßnahme | Status / Prio | Ziel & Nächste Entscheidung |
 |---|---|---|:---:|---|
-| **Step 1** | `billing/sharing/` | **Beteiligungsquoten & Allokationsmodelle**: Unterstützung von festen Beteiligungs-% an Gemeinschaftsanlagen (statische Quoten vs. dynamische Allokation) | ⚡ **P1 (Nächster Schritt)** | Flexible Allokation bei gemeinsamen Dachanlagen / Mieterstrom |
-| **Step 2** | `grid/enwg/` | **§ 14a EnWG Steuerbox & Dimmung**: Dynamische Leistungsbegrenzung auf 4,2 kW für SteuVE (WP, Wallbox, Speicher) via REST/Modbus | ⚡ **P1** | Gesetzliche Netzbetreiber-Konformität in Deutschland |
+| **Step 1** | `billing/sharing/` | **Beteiligungsquoten & Allokationsmodelle**: Unterstützung von festen Beteiligungs-% an Gemeinschaftsanlagen (statische Quoten vs. dynamische Allokation vs. Hybrid) | ✅ **100% Live** | Flexible Allokation bei gemeinsamen Dachanlagen / Mieterstrom |
+| **Step 2** | `grid/enwg/` | **§ 14a EnWG Steuerbox & Dimmung**: Dynamische Leistungsbegrenzung auf 4,2 kW für SteuVE (WP, Wallbox, Speicher) via REST/Modbus | ⚡ **P1 (Nächster Schritt)** | Gesetzliche Netzbetreiber-Konformität in Deutschland |
 | **Step 3** | `billing/tariffs/` | **Dynamische & Börsenpreis-gekoppelte Tarife**: Indexierte Sharing-Tarife (Day-Ahead Spotpreis + Formelaufschlag) | ⚡ **P2** | Dynamische Preissignale innerhalb der Community |
 | **Step 4** | `billing/payment/` | **Payment- & Provider-Evaluierung**: Klärung von Zahlungsdienstleistern (Stripe, SEPA, GoCardless) für automatischen Beitragseinzug | 💳 **P2 (Nach Evaluierung)** | Vorbereitung des automatischen Einzugs von Mitgliedsbeiträgen |
 | **Step 5** | `billing/edifact/` | **Standardisierte Marktkommunikations-Bridge**: Export-Mapping auf MSCONS / EDIFACT zur VNB-Abstimmung | ⚡ **P3** | Nahtloser Austausch mit Netzbetreibern und Aggregatoren |

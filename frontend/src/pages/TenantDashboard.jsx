@@ -15,6 +15,7 @@ export default function TenantDashboard() {
     const [cockpit, setCockpit] = useState(null);
     const [tariffData, setTariffData] = useState(null);
     const [statementsData, setStatementsData] = useState(null);
+    const [sharesData, setSharesData] = useState(null);
     const [activeTab, setActiveTab] = useState("cockpit"); // 'cockpit' | 'settlement' | 'members' | 'audit'
     const [loading, setLoading] = useState(true);
     const [settling, setSettling] = useState(false);
@@ -34,17 +35,19 @@ export default function TenantDashboard() {
             setMembers(data.members || []);
             setInvites(data.invites || []);
 
-            const [logData, cockpitData, tariffsRes, statementsRes] = await Promise.all([
+            const [logData, cockpitData, tariffsRes, statementsRes, sharesRes] = await Promise.all([
                 apiFetch("/api/audit-log/").catch(() => []),
                 apiFetch("/api/billing/community/cockpit/").catch(() => null),
                 apiFetch("/api/billing/community/tariffs/").catch(() => null),
                 apiFetch("/api/billing/community/statements/").catch(() => null),
+                apiFetch("/api/billing/community/shares/").catch(() => null),
             ]);
 
             setLogs(logData || []);
             setCockpit(cockpitData);
             setTariffData(tariffsRes);
             setStatementsData(statementsRes);
+            setSharesData(sharesRes);
         } catch (err) {
             console.error("Load failed:", err);
         } finally {
@@ -561,18 +564,21 @@ export default function TenantDashboard() {
 
                     {/* AKTIVER SHARING TARIF */}
                     {activeTariff && (
-                        <div className="bg-gradient-to-br from-indigo-900 to-slate-900 text-white rounded-2xl p-6 border border-indigo-700/50 shadow-md">
+                        <div className="bg-gradient-to-br from-indigo-900 to-slate-900 text-white rounded-2xl p-6 border border-indigo-700/50 shadow-md space-y-6">
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                 <div>
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex flex-wrap items-center gap-2">
                                         <span className="text-xl">🏷️</span>
                                         <h2 className="text-lg font-black tracking-tight">{activeTariff.name}</h2>
                                         <span className="bg-emerald-400/20 text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-400/30">
                                             Aktiv
                                         </span>
+                                        <span className="bg-indigo-400/20 text-indigo-200 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-indigo-400/30">
+                                            Allokation: {activeTariff.allocation_model === "dynamic" ? "🟢 Dynamisch (15m Lastgang)" : activeTariff.allocation_model === "static" ? "🔵 Statisch (MEA-Quote)" : "🟣 Hybrid (Vorrang + Überlauf)"}
+                                        </span>
                                     </div>
                                     <p className="text-xs text-indigo-200/80 mt-1">
-                                        Gültige Konditionen für alle Teilnehmer dieser Energy Sharing Community
+                                        Gültige Konditionen für alle Teilnehmer dieser Energy Sharing Community gem. § 42b EnWG
                                     </p>
                                 </div>
 
@@ -587,7 +593,7 @@ export default function TenantDashboard() {
                                 )}
                             </div>
 
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-indigo-800/60">
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-indigo-800/60">
                                 <div>
                                     <div className="text-[11px] text-indigo-300 font-semibold uppercase">Bezugspreis (Sharing)</div>
                                     <div className="text-2xl font-black mt-1 text-white">
@@ -620,6 +626,21 @@ export default function TenantDashboard() {
                                     <div className="text-[10px] text-indigo-300/70 mt-0.5">ggü. Grundversorger</div>
                                 </div>
                             </div>
+
+                            {/* Quoten-Hinweis falls Quoten konfiguriert */}
+                            {sharesData && sharesData.shares && sharesData.shares.length > 0 && (
+                                <div className="bg-white/5 border border-white/10 rounded-xl p-3 text-xs flex items-center justify-between gap-2">
+                                    <div className="flex items-center gap-2">
+                                        <span>⚖️</span>
+                                        <span className="text-indigo-200">
+                                            Konfigurierte Beteiligungsquoten: <strong>{sharesData.shares.length} Mitglieder</strong> (Gesamt: {sharesData.total_configured_share_percent.toFixed(1)} %)
+                                        </span>
+                                    </div>
+                                    <span className="text-[11px] text-indigo-300 font-mono">
+                                        Modell: {activeTariff.allocation_model.toUpperCase()}
+                                    </span>
+                                </div>
+                            )}
                         </div>
                     )}
 
