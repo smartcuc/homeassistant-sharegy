@@ -372,22 +372,19 @@
 
 ---
 
-### [ ] 5.9 Mobile Push & Notification Engine
+### [x] 5.9 Mobile Push & Notification Engine
 - **Bereich**: Backend Benachrichtigungen (`notifications/`, `tasks.py`, `services.py`)
-- **Status / Bisher umgesetzt**:
+- **Dokumentation**: [`docs/FIREBASE_SETUP_GUIDE.md`](file:///c:/Users/Public/Dev/eswes/docs/FIREBASE_SETUP_GUIDE.md)
+- **Status**: ✅ **Erledigt**.
   - [x] Datenmodelle `DeviceSubscription` (Web-Push, Android, iOS, Token, IP, Platform) und `NotificationPreference` (Quiet Hours, Ausnahmen für kritische Alarme, Kategorie-Filter).
   - [x] W3C Web-Push Engine via `pywebpush` & VAPID.
+  - [x] Native FCM / APNs Dispatcher (Firebase Cloud Messaging HTTP v1 API via `firebase-admin` SDK).
+  - [x] Asynchrone Celery-Task Pipeline ([`notifications/tasks.py`](file:///c:/Users/Public/Dev/eswes/notifications/tasks.py)) zur Entkopplung vom Request-Cycle.
+  - [x] Periodischer Token-Cleanup- & Housekeeping-Task (Deaktivierung nach 90 Tagen, Löschung nach 180 Tagen).
   - [x] REST-API Endpunkte (`/api/notifications/vapid-key/`, `/subscribe/`, `/preferences/`, `/test-push/`, `/devices/`).
   - [x] Anbindung an die Alarm-Engine ([`alerts/services.py`](file:///c:/Users/Public/Dev/eswes/alerts/services.py)).
   - [x] Vollständige Django-Admin Integration ([`notifications/admin.py`](file:///c:/Users/Public/Dev/eswes/notifications/admin.py)).
-- **Ausstehende Aufgaben (Open Tasks)**:
-  - [ ] **1. Native FCM / APNs Dispatcher (Firebase Cloud Messaging)**:
-    - Integration der FCM HTTP v1 API (`firebase-admin` SDK) in `notifications/services.py` für native Benachrichtigungen auf Android- und iOS-Sperrbildschirmen.
-    - Konfigurations-Handling für Service-Account Credentials (`FIREBASE_CREDENTIALS_PATH` / `.json`).
-  - [ ] **2. Asynchrone Celery-Task Entkopplung (`notifications/tasks.py`)**:
-    - Asynchroner Task `dispatch_alert_push_task.delay(alert_event_id)` zur Vermeidung von Latenzen im HTTP-Request-Cycle.
-  - [ ] **3. Periodischer Token-Cleanup-Task**:
-    - Celery-Beat Cleanup für inaktive (>90 Tage) oder von Google/Apple als ungültig gemeldete Geräte-Tokens (`UNREGISTERED` / `410 Gone`).
+  - [x] 7/7 automatisierte Unit-Tests in [`notifications/tests.py`](file:///c:/Users/Public/Dev/eswes/notifications/tests.py) bestanden.
 
 ---
 

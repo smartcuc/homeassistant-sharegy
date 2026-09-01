@@ -101,3 +101,74 @@ class NotificationTestCase(TestCase):
         sub.refresh_from_db()
         self.assertFalse(sub.is_active)
         self.assertEqual(sub.unregistered_ip, "203.0.113.10")
+
+    def test_fcm_device_subscription_and_dispatch(self):
+        """Testet die Registrierung eines nativen FCM-Geräts (Android/iOS)."""
+        sub = DeviceSubscription.objects.create(
+            user=self.user,
+            home=self.home,
+            device_type=DeviceSubscription.DEVICE_ANDROID,
+            fcm_token="fake_fcm_device_token_xyz_12345",
+            device_name="Samsung Galaxy S24",
+        )
+        self.assertTrue(sub.is_active)
+        self.assertEqual(sub.device_type, "android")
+
+        from notifications.services import send_test_push
+        res = send_test_push(self.user)
+        # Firebase Admin ist im Test nicht konfiguriert -> überspringt gracefully ohne Fehler
+        self.assertEqual(res["total_devices"], 1)
+
+    def test_celery_dispatch_alert_push_task(self):
+        """Testet die asynchrone Celery Task-Ausführung für AlertEvents."""
+        from alerts.models import AlertEvent
+        from notifications.tasks import dispatch_alert_push_task
+
+        event = AlertEvent.objects.create(
+            home=self.home,
+            alert_type="battery_empty",
+            severity="critical",
+            title="Batteriespeicher kritisch",
+            message="Batterie unter 10%",
+        )
+
+        res = dispatch_alert_push_task(str(event.id))
+        self.assertEqual(res["status"], "success")
+        self.assertEqual(res["alert_id"], str(event.id))
+
+    def test_cleanup_inactive_subscriptions_task(self):
+        """Testet den Housekeeping-Cleanup-Task für veraltete Tokens."""
+        from datetime import timedelta
+        from django.utils import timezone
+        from notifications.tasks import cleanup_inactive_subscriptions_task
+
+        old_date = timezone.now() - timedelta(days=100)
+        very_old_date = timezone.now() - timedelta(days=200)
+
+        sub1 = DeviceSubscription.objects.create(
+            user=self.user,
+            device_type=DeviceSubscription.DEVICE_WEB_PUSH,
+            endpoint="https://push.example.com/old",
+            p256dh_key="k1",
+            auth_key="k2",
+            is_active=True,
+            last_used_at=old_date,
+        )
+        sub2 = DeviceSubscription.objects.create(
+            user=self.user,
+            device_type=DeviceSubscription.DEVICE_WEB_PUSH,
+            endpoint="https://push.example.com/very_old",
+            p256dh_key="k1",
+            auth_key="k2",
+            is_active=False,
+            last_used_at=very_old_date,
+        )
+
+        res = cleanup_inactive_subscriptions_task(days_inactive=90)
+        self.assertEqual(res["deactivated_count"], 1)
+        self.assertEqual(res["deleted_count"], 1)
+
+        sub1.refresh_from_db()
+        self.assertFalse(sub1.is_active)
+        self.assertFalse(DeviceSubscription.objects.filter(id=sub2.id).exists())
+

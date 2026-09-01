@@ -256,11 +256,16 @@ def _upsert_alert(home, alert_type, severity, title, message, action_hint="", ac
 
     if created:
         try:
-            from notifications.services import dispatch_alert_push
-            dispatch_alert_push(event)
-        except Exception as ex:
-            import logging
-            logging.getLogger(__name__).warning("Fehler beim Push-Dispatch für Alert %s: %s", event.id, str(ex))
+            from notifications.tasks import dispatch_alert_push_task
+            dispatch_alert_push_task.delay(str(event.id))
+        except Exception:
+            # Fallback falls Celery nicht läuft / synchroner Modus
+            try:
+                from notifications.services import dispatch_alert_push
+                dispatch_alert_push(event)
+            except Exception as ex:
+                import logging
+                logging.getLogger(__name__).warning("Fehler beim Push-Dispatch für Alert %s: %s", event.id, str(ex))
     else:
         event.severity = severity
         event.title = title

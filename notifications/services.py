@@ -1,8 +1,5 @@
-##########################
-# notifications/services.py
-##########################
-
 import json
+import os
 import logging
 from typing import Dict, Any, Optional
 from datetime import datetime, time
@@ -13,6 +10,54 @@ from pywebpush import webpush, WebPushException
 from notifications.models import DeviceSubscription, NotificationPreference
 
 logger = logging.getLogger(__name__)
+
+# =========================================================================
+# 1. FIREBASE ADMIN (FCM HTTP v1) INITIALISIERUNG
+# =========================================================================
+
+_firebase_app_initialized = False
+
+def _get_firebase_app():
+    """
+    Initialisiert das Firebase Admin SDK Singleton sicher über Service-Account Credentials.
+    Unterstützt Pfadangabe (FIREBASE_CREDENTIALS_PATH) oder raw JSON (FIREBASE_CREDENTIALS_JSON).
+    """
+    global _firebase_app_initialized
+    if _firebase_app_initialized:
+        return True
+
+    try:
+        import firebase_admin
+        from firebase_admin import credentials
+
+        # Bereits anderweitig initialisiert?
+        if firebase_admin._apps:
+            _firebase_app_initialized = True
+            return True
+
+        cred_path = getattr(settings, "FIREBASE_CREDENTIALS_PATH", os.getenv("FIREBASE_CREDENTIALS_PATH", ""))
+        cred_json = getattr(settings, "FIREBASE_CREDENTIALS_JSON", os.getenv("FIREBASE_CREDENTIALS_JSON", ""))
+
+        cred = None
+        if cred_path and os.path.exists(cred_path):
+            cred = credentials.Certificate(cred_path)
+            logger.info("Firebase Admin initialisiert via Zertifikat: %s", cred_path)
+        elif cred_json:
+            cert_dict = json.loads(cred_json) if isinstance(cred_json, str) else cred_json
+            cred = credentials.Certificate(cert_dict)
+            logger.info("Firebase Admin initialisiert via JSON-Konfiguration.")
+        
+        if cred:
+            firebase_admin.initialize_app(cred)
+            _firebase_app_initialized = True
+            return True
+        else:
+            logger.debug("Keine Firebase-Credentials (FIREBASE_CREDENTIALS_PATH / JSON) hinterlegt. FCM-Versand inaktiv.")
+            return False
+
+    except Exception as ex:
+        logger.warning("Firebase Admin konnte nicht initialisiert werden: %s", ex)
+        return False
 
 
 def is_in_quiet_hours(pref: NotificationPreference) -> bool:
@@ -103,13 +148,87 @@ def send_web_push(subscription: DeviceSubscription, payload: Dict[str, Any]) -> 
         return False
 
 
+def send_fcm_push(subscription: DeviceSubscription, payload: Dict[str, Any]) -> bool:
+    """
+    Sendet eine native Push-Benachrichtigung an Android / iOS via Firebase Cloud Messaging (FCM HTTP v1).
+    """
+    if not subscription.fcm_token:
+        logger.warning("FCM Subscription %s besitzt keinen fcm_token.", subscription.id)
+        return False
+
+    if not _get_firebase_app():
+        logger.debug("FCM-Versand übersprungen: Firebase Admin nicht konfiguriert.")
+        return False
+
+    try:
+        from firebase_admin import messaging, exceptions
+
+        title = payload.get("title", "⚡ Sharegy Alarm")
+        body = payload.get("body", "")
+        raw_data = payload.get("data", {})
+        
+        # FCM verlangt String-Werte im data-Dict
+        string_data = {str(k): str(v) for k, v in raw_data.items()}
+        string_data["url"] = payload.get("data", {}).get("url", "/app/alerts")
+
+        # Native Android-Konfiguration
+        android_config = messaging.AndroidConfig(
+            priority="high",
+            notification=messaging.AndroidNotification(
+                title=title,
+                body=body,
+                icon="ic_stat_sharegy",
+                color="#10b981",
+                sound="default",
+                channel_id="sharegy_alerts",
+            ),
+        )
+
+        # Native iOS (APNs) Konfiguration
+        apns_config = messaging.APNSConfig(
+            headers={"apns-priority": "10"},
+            payload=messaging.APNSPayload(
+                aps=messaging.Aps(
+                    alert=messaging.ApsAlert(title=title, body=body),
+                    sound="default",
+                    badge=1,
+                )
+            ),
+        )
+
+        message = messaging.Message(
+            notification=messaging.Notification(title=title, body=body),
+            data=string_data,
+            token=subscription.fcm_token,
+            android=android_config,
+            apns=apns_config,
+        )
+
+        response = messaging.send(message)
+        subscription.last_used_at = timezone.now()
+        subscription.save(update_fields=["last_used_at"])
+        logger.info("FCM Native Push erfolgreich gesendet an %s (Msg-ID: %s)", subscription.device_name or subscription.id, response)
+        return True
+
+    except Exception as ex:
+        # Prüfen ob Token ungültig oder deinstalliert ist
+        ex_str = str(ex).lower()
+        if "unregistered" in ex_str or "notfound" in ex_str or "invalidargument" in ex_str:
+            logger.info("FCM Token ungültig für Subscription %s -> Deaktiviere Subscription.", subscription.id)
+            subscription.is_active = False
+            subscription.save(update_fields=["is_active"])
+        else:
+            logger.warning("Fehler beim FCM Push-Versand an %s: %s", subscription.id, ex)
+        return False
+
+
 def dispatch_alert_push(alert_event) -> int:
     """
     Verteilt eine AlertEvent-Benachrichtigung an alle aktiven Push-Abonnements des Home-Besitzers / Nutzers.
     Berücksichtigt Quiet Hours und Kategorie-Filter.
-    Gibt die Anzahl der erfolgreich zugestellten Pushes zurück.
+    Unterstützt sowohl W3C Web-Push als auch native FCM (Android/iOS).
     """
-    home = alert_event.home
+    home = getattr(alert_event, "home", None)
     if not home:
         return 0
 
@@ -174,23 +293,23 @@ def dispatch_alert_push(alert_event) -> int:
         if sub.device_type == DeviceSubscription.DEVICE_WEB_PUSH:
             if send_web_push(sub, payload):
                 success_count += 1
-        # Platzhalter für native FCM/APNs Dispatcher
-        elif sub.fcm_token:
-            logger.debug("FCM Native Push Dispatch an %s", sub.device_name)
+        elif sub.fcm_token or sub.device_type in (DeviceSubscription.DEVICE_ANDROID, DeviceSubscription.DEVICE_IOS):
+            if send_fcm_push(sub, payload):
+                success_count += 1
 
     return success_count
 
 
 def send_test_push(user) -> Dict[str, Any]:
     """
-    Versendet eine Sofort-Testnachricht an alle aktiven Geräte des Nutzers.
+    Versendet eine Sofort-Testnachricht an alle aktiven Geräte des Nutzers (Web-Push + Native FCM).
     """
     subscriptions = DeviceSubscription.objects.filter(user=user, is_active=True)
     if not subscriptions.exists():
         return {
             "success": False,
             "count": 0,
-            "message": "Keine aktiven Push-Geräte für dieses Konto registriert. Bitte aktiviere Push zuerst im Browser.",
+            "message": "Keine aktiven Push-Geräte für dieses Konto registriert. Bitte aktiviere Push zuerst im Browser oder der App.",
         }
 
     payload = {
@@ -210,6 +329,9 @@ def send_test_push(user) -> Dict[str, Any]:
         if sub.device_type == DeviceSubscription.DEVICE_WEB_PUSH:
             if send_web_push(sub, payload):
                 sent += 1
+        elif sub.fcm_token or sub.device_type in (DeviceSubscription.DEVICE_ANDROID, DeviceSubscription.DEVICE_IOS):
+            if send_fcm_push(sub, payload):
+                sent += 1
 
     return {
         "success": sent > 0,
@@ -217,3 +339,4 @@ def send_test_push(user) -> Dict[str, Any]:
         "total_devices": subscriptions.count(),
         "message": f"Test-Push erfolgreich an {sent} von {subscriptions.count()} Gerät(en) gesendet.",
     }
+
