@@ -5,40 +5,50 @@ import { useFunnel } from "../../hooks/useFunnel";
 export function FunnelChart() {
     const { data, isLoading } = useFunnel();
 
-    const option = useMemo(() => ({
-        tooltip: {
-            trigger: "axis",
-        },
+    const validData = Array.isArray(data) ? data : [];
 
-        grid: {
-            top: 20,
-            left: 40,
-            right: 20,
-            bottom: 40,
-        },
+    const option = useMemo(() => {
+        if (validData.length === 0) return null;
 
-        xAxis: {
-            type: "category",
-            data: (data || []).map(item => item.label),
-        },
-
-        yAxis: {
-            type: "value",
-        },
-
-        series: [
-            {
-                type: "bar",
-                data: (data || []).map(item => item.count),
-                itemStyle: {
-                    color: "#8884d8",
-                },
+        return {
+            tooltip: {
+                trigger: "axis",
             },
-        ],
-    }), [data]);
+
+            grid: {
+                top: 20,
+                left: 40,
+                right: 20,
+                bottom: 40,
+            },
+
+            xAxis: {
+                type: "category",
+                data: validData.map(item => item?.label || ""),
+            },
+
+            yAxis: {
+                type: "value",
+            },
+
+            series: [
+                {
+                    type: "bar",
+                    data: validData.map(item => item?.count || 0),
+                    itemStyle: {
+                        color: "#8884d8",
+                    },
+                },
+            ],
+        };
+    }, [validData]);
 
     if (isLoading) {
-        return <div>Loading...</div>;
+        return <div className="p-4 text-xs text-gray-400">Lade Funnel-Daten...</div>;
+    }
+
+    if (validData.length === 0 || !option) {
+        return <div className="p-4 text-xs text-gray-400">Keine Trichterdaten verfügbar</div>;
     }
 
     return (
@@ -48,6 +58,8 @@ export function FunnelChart() {
                 width: "500px",
                 height: "300px",
             }}
+            notMerge={true}
+            lazyUpdate={true}
         />
     );
 }

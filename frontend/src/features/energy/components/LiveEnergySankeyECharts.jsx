@@ -39,13 +39,29 @@ export default function LiveEnergySankeyECharts({ data }) {
             return null;
         }
 
-        // Links filtern (Verhindert Geister-Linien mit dem Wert 0)
+        // Map aller deklarierten Knoten
+        const validNodeMap = new Map();
+        data.nodes.forEach((n) => {
+            if (n && n.id != null) {
+                validNodeMap.set(String(n.id), n);
+            }
+        });
+
+        // Links filtern (Verhindert Geister-Linien mit dem Wert 0 und ungültige Referenzen)
         const links = data.links
-            .filter((link) => (link.value || 0) > 0)
+            .filter((link) => {
+                const val = Number(link?.value) || 0;
+                return (
+                    val > 0 &&
+                    link?.source != null &&
+                    link?.target != null &&
+                    String(link.source) !== String(link.target)
+                );
+            })
             .map((link) => ({
-                source: link.source,
-                target: link.target,
-                value: link.value,
+                source: String(link.source),
+                target: String(link.target),
+                value: Number(link.value),
             }));
 
         if (links.length === 0) {
@@ -58,38 +74,46 @@ export default function LiveEnergySankeyECharts({ data }) {
             connectedNodeIds.add(l.target);
         });
 
-        // Nur Knoten übergeben, die an einem aktiven Fluss teilnehmen
-        const nodes = data.nodes
-            .filter((node) => connectedNodeIds.has(node.id))
-            .map((node) => ({
-                name: node.id,
+        // Garantieren, dass für JEDEN in links vorhandenen Endpunkt auch ein Node existiert
+        const nodes = Array.from(connectedNodeIds).map((nodeId) => {
+            const originalNode = validNodeMap.get(nodeId) || { id: nodeId, label: nodeId };
+            return {
+                name: nodeId,
                 itemStyle: {
-                    color: getNodeColor(node),
+                    color: getNodeColor(originalNode),
                 },
-                rawLabel: node.label,
-                nodeType: node.type,
-            }));
+                rawLabel: originalNode.label || nodeId,
+                nodeType: originalNode.type,
+            };
+        });
+
+        if (nodes.length === 0) {
+            return null;
+        }
 
         return {
             animation: false,
             tooltip: {
                 trigger: "item",
                 formatter: (params) => {
+                    if (!params || !params.data) return "";
                     if (params.dataType === "edge") {
-                        const srcNode = data.nodes.find((n) => n.id === params.data.source);
-                        const tgtNode = data.nodes.find((n) => n.id === params.data.target);
+                        const srcNode = validNodeMap.get(String(params.data.source));
+                        const tgtNode = validNodeMap.get(String(params.data.target));
                         const srcLabel = srcNode ? srcNode.label : params.data.source;
                         const tgtLabel = tgtNode ? tgtNode.label : params.data.target;
-                        const valStr = params.data.value >= 1000
-                            ? `${(params.data.value / 1000).toFixed(2)} kW`
-                            : `${params.data.value.toFixed(0)} W`;
+                        const val = Number(params.data.value) || 0;
+                        const valStr = val >= 1000
+                            ? `${(val / 1000).toFixed(2)} kW`
+                            : `${val.toFixed(0)} W`;
                         return `${srcLabel} → ${tgtLabel}: <b>${valStr}</b>`;
                     }
-                    const node = data.nodes.find((n) => n.id === params.name);
+                    const node = validNodeMap.get(String(params.name));
                     const label = node ? node.label : params.name;
-                    const valStr = params.value >= 1000
-                        ? `${(params.value / 1000).toFixed(2)} kW`
-                        : `${params.value.toFixed(0)} W`;
+                    const val = Number(params.value) || 0;
+                    const valStr = val >= 1000
+                        ? `${(val / 1000).toFixed(2)} kW`
+                        : `${val.toFixed(0)} W`;
                     return `${label}: <b>${valStr}</b>`;
                 },
             },
@@ -118,9 +142,10 @@ export default function LiveEnergySankeyECharts({ data }) {
                         color: "#374151",
                         fontSize: 12,
                         formatter: (params) => {
-                            const node = data.nodes.find((n) => n.id === params.name);
+                            if (!params) return "";
+                            const node = validNodeMap.get(String(params.name));
                             const label = node ? node.label : params.name;
-                            const value = params.value || 0;
+                            const value = Number(params.value) || 0;
 
                             return value >= 1000
                                 ? `${label}\n${(value / 1000).toFixed(1)} kW`

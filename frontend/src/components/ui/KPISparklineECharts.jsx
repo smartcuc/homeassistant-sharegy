@@ -1,4 +1,4 @@
-/* Test mit 0-line
+/*
 # src/components/ui/KPISparklineECharts.jsx
 */
 
@@ -10,12 +10,23 @@ export default function KPISparklineECharts({
     chartType = "line",
     unit = "N/A",
 }) {
+    const rawValues = Array.isArray(values) ? values : [];
+    const validNumbers = rawValues
+        .map((v) => (typeof v === "number" ? v : parseFloat(v)))
+        .filter((v) => !isNaN(v));
+
+    if (validNumbers.length === 0) {
+        return (
+            <div className="h-14 mt-1 flex items-center justify-center text-xs text-slate-400 dark:text-slate-500">
+                —
+            </div>
+        );
+    }
+
     const chartValues =
-        Array.isArray(values) && values.length === 1
-            ? [values[0], values[0]]
-            : Array.isArray(values)
-                ? values
-                : [];
+        validNumbers.length === 1
+            ? [validNumbers[0], validNumbers[0]]
+            : validNumbers;
 
     const option = {
         animation: false,
@@ -112,7 +123,6 @@ export default function KPISparklineECharts({
                 `;
             },
         },
-
     };
 
     return (
@@ -123,7 +133,10 @@ export default function KPISparklineECharts({
                     height: "100%",
                     width: "100%",
                 }}
+                notMerge={true}
+                lazyUpdate={true}
             />
         </div>
     );
 }
+

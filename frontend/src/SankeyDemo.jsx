@@ -11,7 +11,13 @@ export default function SankeyDemo({ theme }) {
             tooltip: {
                 trigger: "item",
                 triggerOn: "mousemove",
-                formatter: "{b}: {c} kW",
+                formatter: (params) => {
+                    if (!params || !params.data) return "";
+                    if (params.dataType === "edge") {
+                        return `${params.data.source} → ${params.data.target}: <b>${params.data.value} kW</b>`;
+                    }
+                    return `${params.name}: <b>${params.value || 0} kW</b>`;
+                },
             },
             series: [
                 {
