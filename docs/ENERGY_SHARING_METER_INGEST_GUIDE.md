@@ -1,86 +1,84 @@
-# Praxis-Leitfaden: Zähleranbindung & 15-Minuten-Messwertübermittlung (Punkt 3.3)
+# Architektur & Leitfaden: Deutsches Energy Sharing & 15-Minuten-Clearing
 
-Dieser Leitfaden beschreibt detailliert, wie Zählerdaten (OBIS `1.8.0` Bezug und `2.8.0` Einspeisung) von Messstellenbetreibern (MSB), Smart-Meter-Gateways (iMSys) und Sub-Metern im 15-Minuten-Raster an Sharegy übermittelt werden.
+Dieses Dokument beschreibt die eichrechtskonforme Architektur von Sharegy für Energy Sharing Communities in Deutschland nach dem Messstellenbetriebsgesetz (MsbG) und den Vorgaben der Bundesnetzagentur (BNetzA).
 
 ---
 
-## 🧭 Die 3 Wege zur Zählerübermittlung in der Praxis
+## 🏛️ 1. Regulatorisches Fundament in Deutschland (Eichrecht & MsbG)
 
-Je nach Ausgangslage vor Ort gibt es in Deutschland drei praxiserprobte Wege:
+Im deutschen Stromnetz sind für die offizielle Bilanzierung und Abrechnung von Energy Sharing über das öffentliche Verteilnetz ausschließlich **zertifizierte Smart-Meter-Gateways (iMSys)** des Messstellenbetreibers zugelassen:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│                               3 WEGE DER ZÄHLERANBINDUNG                                │
-├────────────────────────────┬────────────────────────────┬───────────────────────────────┤
-│ WEG A: Lokale Gateways &   │ WEG B: Wettbewerblicher    │ WEG C: Grundzuständiger       │
-│ Sub-Metering (Kundennetz)  │ Messstellenbetreiber (wMSB)│ Messstellenbetreiber (gMSB)   │
-├────────────────────────────┼────────────────────────────┼───────────────────────────────┤
-│ • Shelly Pro 3EM / Modbus  │ • z. B. inexogy, Solandeo, │ • z. B. BonnNetz, Rheinische  │
-│ • Optische IR-Leseköpfe    │   Discovergy               │   NETZGesellschaft, Westnetz  │
-│ • Übermittlung: Push-HTTP  │ • Übermittlung: Cloud-API  │ • Übermittlung: Lokale HAN-   │
-│   direkt vom Gebäude       │   Webhook (MSB -> Sharegy) │   Schnittstelle am iMSys      │
-│ • 🚀 Sofort einsatzbereit  │ • ⚡ Voll digital          │ • 📜 Nach BSI TR-03109-1      │
-└────────────────────────────┴────────────────────────────┴───────────────────────────────┘
+│                     ZULÄSSIGE ZÄHLERDATENQUELLEN NACH MSBG / BNETZA                     │
+├──────────────────────────────────────────┬──────────────────────────────────────────────┤
+│ 1. Wettbewerblicher Messstellenbetreiber │ • z. B. inexogy, Solandeo, Discovergy        │
+│    (wMSB)                                │ • iMSys sendet 15m-Werte an MSB-Backend      │
+│                                          │ • MSB pusht 15m-OBIS-JSON an Sharegy-API     │
+├──────────────────────────────────────────┼──────────────────────────────────────────────┤
+│ 2. Grundzuständiger Messstellenbetreiber │ • z. B. BonnNetz, Rheinische NETZ, Westnetz  │
+│    (gMSB)                                │ • Auslesung der zertifizierten HAN-          │
+│                                          │   Schnittstelle am iMSys nach BSI TR-03109-1 │
+└──────────────────────────────────────────┴──────────────────────────────────────────────┘
+```
+
+> **Wichtig:** Private Sub-Meter oder nicht-eichrechtskonforme Lesegeräte sind für die Abrechnung im öffentlichen Netz rechtlich nicht zulässig. Grundlage sind immer die eichrechtlich gesicherten 15-Minuten-Werte für **OBIS 1.8.0** (Bezug) und **OBIS 2.8.0** (Einspeisung).
+
+---
+
+## 👥 2. Akteure & Rollen im Energy Sharing
+
+* **Producer:** Speist erzeugten Solar-/Windstrom über seinen Zähler (`2.8.0`) in das öffentliche Netz ein.
+* **Consumer:** Bezieht Energie aus dem Netz (`1.8.0`), aufgeteilt in Community-Sharing-Strom und Reststrom.
+* **Prosumer:** Besitzt Erzeugung und Verbrauch (speist Überschuss ein, bezieht bei Bedarf aus dem Netz).
+* **Reststrom-Lieferant:** Liefert und bilanziert die Reststrommenge, die die Community nicht decken kann.
+* **Sharegy (Sharing-Dienstleister):** Führt die 15-Minuten-Allokation, das Clearing, die KI-Prognosen und die Abrechnungserstellung durch.
+
+---
+
+## ⚡ 3. 15-Minuten-Bilanzierung & Allokationsschlüssel
+
+In jedem 15-Minuten-Slot (z. B. `14:00 - 14:15 Uhr`) führt die Sharegy-Engine folgendes Clearing durch:
+
+1. **Summe Einspeisung ($\sum 2.8.0$):** Alle Producer & Prosumer der Community speisen z. B. $10\text{ kWh}$ ein.
+2. **Summe Bezug ($\sum 1.8.0$):** Alle Consumer & Prosumer beziehen im selben Zeitraum z. B. $15\text{ kWh}$.
+3. **Community-Deckung:** $10\text{ kWh}$ werden zu $100\,\%$ als Sharing-Strom im Quartier verrechnet. $5\text{ kWh}$ verbleiben als Netzbezug vom Reststrom-Lieferanten.
+4. **Verteilung auf Consumer:**  
+   Nach dem hinterlegten Allokationsschlüssel (dynamisch/proportional) wird der Sharing-Strom aufgeteilt:  
+   *Beispiel:* Consumer A verbraucht $3\text{ kWh}$ $\rightarrow$ **$1\text{ kWh}$ von Bonn-Sharing ($z\text{ Ct/kWh}$) + $2\text{ kWh}$ vom Restversorger**.
+5. **Vergütung:** Der Producer erhält für seine $10\text{ kWh}$ den vereinbarten Vergütungssatz ($z\text{ Ct/kWh}$) gutgeschrieben.
+
+---
+
+## 🧠 4. Prädiktive KI-Intelligenz in Sharegy
+
+Sharegy kombiniert die exakte Abrechnung mit vorausdenkender KI-Steuerung:
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                                 KI-FUNKTIONEN IN SHAREGY                               │
+├────────────────────────────────────┬───────────────────────────────────────────────────┤
+│ 1. 48h-Community-Verfügbarkeit     │ Wetter- & lastbasierte Prognose des Solarüber-    │
+│                                    │ schusses in der Community für die nächsten 48h    │
+├────────────────────────────────────┼───────────────────────────────────────────────────┤
+│ 2. Lokale dynamische Preissignale  │ Signalisierung günstiger Sharing-Phasen an steuer-│
+│                                    │ bare Verbraucher (Wallbox, Heimspeicher, WP)     │
+├────────────────────────────────────┼───────────────────────────────────────────────────┤
+│ 3. Fahrplan- & Portfolioprognosen  │ Unterstützung von Großverbrauchern und Speichern  │
+│                                    │ zur optimalen Lastverschiebung in Sonnenstunden   │
+├────────────────────────────────────┼───────────────────────────────────────────────────┤
+│ 4. KI-Rechnungserläuterung         │ Verständliche Auswertung für Mitglieder:          │
+│                                    │ Autarkiegrad, Ersparnis & Sharing-Nutzung in €/kWh│
+└────────────────────────────────────┴───────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🛠️ Detaillierte Vorgehensweise für die 3 Wege
+## 📡 5. Einheitliche Ingest-Schnittstelle für den MSB
 
----
-
-### Weg A: Lokale Gateways & IR-Leseköpfe (Schnellster & günstigster Weg)
-*Ideal für: Mehrfamilienhäuser, private Quartiere, WEGs und Kundenanlagen (§ 42b EnWG)*
-
-1. **Hardware vor Ort:**
-   * Jeder Haushalt in Deutschland besitzt bereits eine moderne Messeinrichtung (mME, digitaler Zähler mit Display).
-   * Auf die optische D0/SML-Schnittstelle wird ein magnetischer **Infrarot-Lesekopf** (z. B. Hichi IR mit Tasmota/WiFi, ca. 20–25 €) aufgesetzt.
-   * *Alternativ:* Fest installierte Hutschienen-Zähler (z. B. Shelly Pro 3EM, Eastron SDM630 mit Modbus).
-2. **Datenabruf:**
-   * Der IR-Lesekopf liest den SML-Datenstrom des Zählers im Sekundentakt lokal aus.
-3. **Pushtakt an Sharegy:**
-   * Das Gerät oder ein kleiner lokaler Controller (z. B. ESP32 oder Home Assistant) puffert die 15-Minuten-Werte und sendet alle 15 Minuten einen HTTPS-POST an Sharegy:
-   ```bash
-   POST https://api.sharegy.de/api/v1/ingest/meters/
-   Header: Authorization: Bearer <COMMUNITY_API_KEY>
-   ```
-
----
-
-### Weg B: Wettbewerblicher Messstellenbetreiber (wMSB) – z. B. inexogy / Solandeo
-*Ideal für: Offizielles bundesweites Energy Sharing über das öffentliche Netz*
-
-1. **Beauftragung des wMSB:**
-   * Der Anlagenbetreiber oder die Community beauftragt einen wettbewerblichen MSB (z. B. Solandeo, inexogy, Discovergy).
-   * Der wMSB tauscht die alten Zähler gegen eichrechtskonforme Smart-Meter-Gateways (iMSys) mit eigener LTE-Mobilfunkanbindung aus.
-2. **Datenauslesung durch den wMSB:**
-   * Der wMSB liest die Gateways über seinen zertifizierten Backend-Server (BSI-konform) alle 15 Minuten aus.
-3. **Automatische Weiterleitung an Sharegy:**
-   * Der wMSB richtet einen **automatischen Webhook / API-Push** ein, der die 15-Minuten-Werte direkt als JSON an Sharegy übermittelt.
-   * *Alternativ:* Sharegy pollt die REST-API des wMSB alle 15 Minuten.
-
----
-
-### Weg C: Grundzuständiger Messstellenbetreiber (gMSB, z. B. BonnNetz)
-*Ideal für: Haushalte, die bereits ein iMSys vom lokalen Netzbetreiber erhalten haben*
-
-1. **Freischaltung der HAN-Schnittstelle:**
-   * Gesetzlich hat jeder Anschlussnutzer nach § 61 MsbG das Recht, die Daten aus seinem Smart-Meter-Gateway (SMGW) lokal über die **HAN-Schnittstelle (Home Area Network / Ethernet/WLAN)** auszulesen.
-2. **Lokaler Connect-Agent:**
-   * Ein leichtgewichtiger Sharegy-Connect-Dienst (z. B. als Home-Assistant-Plugin, Docker-Container oder Python-Script) verbindet sich lokal mit dem Gateway.
-3. **Übermittlung an Sharegy:**
-   * Der Connect-Agent sendet die signierten 15-Minuten-Datensätze an den Sharegy Ingestion-Endpoint.
-
----
-
-## 📡 Einheitliches Schnittstellenformat für Sharegy (API-Spezifikation)
-
-Egal welcher der 3 Wege genutzt wird – an Sharegy wird immer dasselbe schlanke JSON-Format übermittelt:
-
-### `POST /api/v1/ingest/meters/`
 ```json
 {
-  "community_id": "bonn-nord-sonne",
+  "community_id": "bonn-share",
   "timestamp": "2026-09-01T14:15:00+02:00",
   "readings": [
     {
@@ -88,24 +86,17 @@ Egal welcher der 3 Wege genutzt wird – an Sharegy wird immer dasselbe schlanke
       "ts_start": "2026-09-01T14:00:00+02:00",
       "ts_end": "2026-09-01T14:15:00+02:00",
       "obis": "1.8.0",
-      "value_kwh": 0.420,
+      "value_kwh": 3.000,
       "unit": "kWh"
     },
     {
-      "meter_serial": "1EMH0012345678",
+      "meter_serial": "1EMH0099887766",
       "ts_start": "2026-09-01T14:00:00+02:00",
       "ts_end": "2026-09-01T14:15:00+02:00",
       "obis": "2.8.0",
-      "value_kwh": 1.250,
+      "value_kwh": 10.000,
       "unit": "kWh"
     }
   ]
 }
 ```
-
----
-
-## 🛡️ Was Sharegy automatisch übernimmt:
-1. **Deduplizierung & Plausibilität:** Erkennt Doppelübertragungen, fehlerhafte Negativwerte und Ausreißer.
-2. **Late-Arrivals-Pufferung:** Fällt das Internet für 24 Stunden aus, werden nachgelieferte Werte rückwirkend in die Bilanzen eingerechnet (`recalculate_late_slot`).
-3. **Tenant-Sicherheit:** Nur autorisierte Zähler der jeweiligen Community werden akzeptiert.
