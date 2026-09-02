@@ -60,7 +60,8 @@ def send_metric_update(sender, instance, created, **kwargs):
                 }
             )
     except Exception as e:
-        logger.error(f"[SIGNAL_CHANNELS_ERROR] Fehler bei WebSocket-Übertragung: {e}")
+        logger.warning(f"[SIGNAL_CHANNELS_WARNING] WebSocket-Übertragung temporär nicht möglich: {e}")
+
 
 
 @receiver(post_save, sender=DeviceConfig)
@@ -144,6 +145,7 @@ def handle_device_config_saved(sender, instance, created, **kwargs):
             }
         )
     except Exception as e:
-        logger.error(f"[SIGNAL_CHANNELS_ERROR] {e}")
+        logger.warning(f"[SIGNAL_CHANNELS_WARNING] {e}")
+
 
     

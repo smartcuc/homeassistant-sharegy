@@ -156,8 +156,9 @@ def get_latest_values(device_ids):
             else:
                 missing_ids.append(d_id)
     except Exception as e:
-        logger.error(f"[REDIS_ERROR] Fehler beim Lesen aus dem Cache: {e}")
+        logger.warning(f"[REDIS_CACHE_FALLBACK] Cache vorübergehend nicht erreichbar, nutze DB-Fallback: {e}")
         missing_ids = list(device_ids)
+
 
     # 3. Fallback: Blitzschnelle 1-Query-Abfrage auf DeviceLatestMetric (O(1) Snapshot)
     if missing_ids:
