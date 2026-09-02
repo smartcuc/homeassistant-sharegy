@@ -382,10 +382,50 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
                         p_data = pts[0]
                         pv = float(p_data.get("p83033") or p_data.get("p83067") or p_data.get("p83329") or 0.0)
                         load = float(p_data.get("p83052") or p_data.get("p83106") or p_data.get("p83330") or 0.0)
-                        grid = float(p_data.get("p83549") or p_data.get("p83328") or 0.0)
-                        bat_pwr = float(p_data.get("p83238") or p_data.get("p83326") or 0.0)
+
+                        # Netz-Kandidaten
+                        grid_cands = [p_data.get("p83549"), p_data.get("p83051"), p_data.get("p83328")]
+                        grid = 0.0
+                        for gc in grid_cands:
+                            if gc is not None:
+                                try:
+                                    g_v = float(gc)
+                                    if abs(g_v) > 0.01:
+                                        grid = g_v
+                                        break
+                                except (ValueError, TypeError):
+                                    pass
+
+                        # Batterie-Leistung Kandidaten
+                        bat_cands = [p_data.get("p83238"), p_data.get("p83326"), p_data.get("p83104"), p_data.get("p83111"), p_data.get("p83112")]
+                        bat_pwr = 0.0
+                        for bc in bat_cands:
+                            if bc is not None:
+                                try:
+                                    b_v = float(bc)
+                                    if abs(b_v) > 0.01:
+                                        bat_pwr = b_v
+                                        break
+                                except (ValueError, TypeError):
+                                    pass
+
+                        # SoC Prozentwert ermitteln (0.348 -> 34.8 %)
                         soc = p_data.get("p83129") or p_data.get("p83252") or p_data.get("p83334")
-                        soc_val = float(soc) if soc is not None else None
+                        soc_val = None
+                        if soc is not None:
+                            try:
+                                s_float = float(soc)
+                                if 0.0 <= s_float <= 1.0:
+                                    soc_val = round(s_float * 100.0, 1)
+                                else:
+                                    soc_val = round(s_float, 1)
+                            except (ValueError, TypeError):
+                                pass
+
+                        # Nacht-Fallback: Wenn PV=0, Netz ~ 0 und Speicher geladen (> 5%), deckt der Speicher die Hauslast
+                        if abs(bat_pwr) < 0.1 and load > 20 and soc_val and soc_val > 5.0 and abs(grid) < 60:
+                            bat_pwr = load
+
                         day_wh = float(p_data.get("p83022") or p_data.get("p83331") or 0.0)
 
                         raw_data["_direct_metrics"] = {
@@ -398,6 +438,7 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
                         }
             except Exception as e:
                 logger.warning("getPowerStationRealTimeData query failed: %s", e)
+
 
             # Details abfragen als Ergänzung
             try:
@@ -641,40 +682,37 @@ def execute_cloud_poll(integration: CloudDeviceIntegration) -> dict:
         if has_battery and device.home:
             try:
                 from producer.models import StorageSystem
-                desired_cap = float(credentials.get("battery_capacity_kwh") or 22.0)
-                storage, created = StorageSystem.objects.get_or_create(
-                    home=device.home,
-                    defaults={
-                        "name": f"{credentials.get('ps_name') or 'Sungrow'} Speicher",
-                        "primary_device": device,
-                        "soc_device": device,
-                        "power_device": device,
-                        "soc_metric_key": "battery_soc",
-                        "power_metric_key": "battery_power",
-                        "capacity_kwh": desired_cap,
-                        "max_charge_power_kw": 10.0,
-                        "max_discharge_power_kw": 10.0,
-                        "is_auto_detected": True,
-                    }
-                )
-                update_fields = []
-                if not storage.soc_device or not storage.power_device:
-                    storage.primary_device = device
-                    storage.soc_device = device
-                    storage.power_device = device
-                    storage.soc_metric_key = "battery_soc"
-                    storage.power_metric_key = "battery_power"
-                    update_fields.extend(["primary_device", "soc_device", "power_device", "soc_metric_key", "power_metric_key"])
-                
-                # Falls Kapazität noch auf dem alten Default (9.6 oder 10.0) steht, auf 22 kWh aktualisieren
-                if float(storage.capacity_kwh) in (9.6, 10.0):
-                    storage.capacity_kwh = desired_cap
-                    update_fields.append("capacity_kwh")
-                
-                if update_fields:
-                    storage.save(update_fields=list(set(update_fields)))
+                desired_cap = float(credentials.get("battery_capacity_kwh") or 22.5)
+                storages = list(StorageSystem.objects.filter(home=device.home))
+                if not storages:
+                    st = StorageSystem.objects.create(
+                        home=device.home,
+                        name=f"{credentials.get('ps_name') or 'Sungrow'} Speicher",
+                        primary_device=device,
+                        soc_device=device,
+                        power_device=device,
+                        soc_metric_key="battery_soc",
+                        power_metric_key="battery_power",
+                        capacity_kwh=desired_cap,
+                        max_charge_power_kw=10.0,
+                        max_discharge_power_kw=10.0,
+                        is_auto_detected=True,
+                    )
+                else:
+                    for st in storages:
+                        # Falls dieser Speicher noch kein Gerät hat oder bereits Sungrow zugeordnet ist
+                        if not st.soc_device or st.soc_device == device or "sungrow" in st.name.lower():
+                            st.primary_device = device
+                            st.soc_device = device
+                            st.power_device = device
+                            st.soc_metric_key = "battery_soc"
+                            st.power_metric_key = "battery_power"
+                            if float(st.capacity_kwh) in (9.6, 10.0):
+                                st.capacity_kwh = desired_cap
+                            st.save()
             except Exception as st_err:
                 logger.warning("Could not auto-link StorageSystem: %s", st_err)
+
 
 
         # 3. Load Power & Grid Power
