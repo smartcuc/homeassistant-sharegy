@@ -320,7 +320,12 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
                     timeout=10,
                 )
                 if list_resp.status_code == 200:
-                    stations = list_resp.json().get("result_data", {}).get("pageList", [])
+                    list_json = list_resp.json()
+                    res_code = list_json.get("result_code")
+                    res_msg = list_json.get("result_msg")
+                    if res_code != "1":
+                        logger.warning("Sungrow getPowerStationList API returned: code=%s, msg=%s", res_code, res_msg)
+                    stations = (list_json.get("result_data") or {}).get("pageList", [])
                     if stations:
                         ps_id = str(stations[0].get("ps_id"))
                         credentials["ps_id"] = ps_id
@@ -338,6 +343,9 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
         resp = requests.post(url, json=body, headers=headers, timeout=12)
         resp.raise_for_status()
         raw_data = resp.json()
+        if raw_data.get("result_code") != "1":
+            logger.warning("Sungrow getPowerStationDetail API returned: code=%s, msg=%s (body=%s)", raw_data.get("result_code"), raw_data.get("result_msg"), raw_data)
+
 
     else:
         # Standard GET/POST
