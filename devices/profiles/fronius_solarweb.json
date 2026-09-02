@@ -4,7 +4,11 @@
   "vendor": "Fronius",
   "category": "inverter_hybrid",
   "protocol": "http_cloud",
-  "description": "Cloud-Schnittstelle für Fronius Wechselrichter über das Fronius Solar.web Portal.",
+  "description": "Cloud-Schnittstelle für Fronius GEN24 Plus, Symo, Primo und Fronius Solar.web Monitoring.",
+  "help": {
+    "de": "1. Logge dich auf solarweb.com ein.\n2. Gehe zu 'Einstellungen' -> 'API-Zugriffsverwaltung'.\n3. Erstelle einen API-Schlüssel und kopiere AccessKeyId und AccessKeyValue.\n4. Deine PV-System-ID findest du in der URL deiner Anlage auf Solar.web.",
+    "en": "1. Log into solarweb.com.\n2. Go to 'Settings' -> 'API Access Management'.\n3. Create an API Key and copy the AccessKeyId and AccessKeyValue.\n4. Find your PV System ID in the URL of your plant on Solar.web."
+  },
   "connection": {
     "auth_type": "api_key_header",
     "default_base_url": "https://api.solarweb.com",

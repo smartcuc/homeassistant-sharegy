@@ -60,6 +60,7 @@ class ProfileRunnerTestCase(TestCase):
         self.assertIn("solaredge_cloud", profile_ids)
         self.assertIn("fronius_solarweb", profile_ids)
         self.assertIn("kostal_solar_portal", profile_ids)
+        self.assertIn("growatt_server", profile_ids)
 
         sungrow = next(p for p in profiles if p["id"] == "sungrow_isolarcloud")
         field_keys = [f["key"] for f in sungrow["fields"]]
@@ -70,6 +71,12 @@ class ProfileRunnerTestCase(TestCase):
         kostal = next(p for p in profiles if p["id"] == "kostal_solar_portal")
         self.assertEqual(kostal["vendor"], "Kostal")
         self.assertIn("api_key", [f["key"] for f in kostal["fields"]])
+
+        growatt = next(p for p in profiles if p["id"] == "growatt_server")
+        self.assertEqual(growatt["vendor"], "Growatt")
+        self.assertIn("token", [f["key"] for f in growatt["fields"]])
+        self.assertIn("de", growatt.get("help", {}))
+
 
 
     def test_03_jsonpath_extractor(self):
@@ -190,4 +197,21 @@ class ProfileRunnerTestCase(TestCase):
         self.assertIn("live_metrics", res)
         self.assertIn("pv_power_w", res["live_metrics"])
         self.assertIn("battery_soc", res["live_metrics"])
+
+    def test_09_load_and_simulate_growatt_profile(self):
+        """Testet das Laden und die Testverbindung für Growatt ShineServer."""
+        profile = load_profile("growatt_server")
+        self.assertEqual(profile["id"], "growatt_server")
+        self.assertEqual(profile["vendor"], "Growatt")
+        self.assertIn("metrics_mapping", profile)
+
+        # Test-Credentials Simulation
+        creds = {"token": "growatt_openapi_secret_token", "plant_id": "194820"}
+        res = test_cloud_credentials("growatt_server", creds)
+        self.assertEqual(res["status"], "success")
+        self.assertTrue(res["simulated"])
+        self.assertIn("live_metrics", res)
+        self.assertIn("pv_power_w", res["live_metrics"])
+        self.assertIn("daily_generation_kwh", res["live_metrics"])
+
 

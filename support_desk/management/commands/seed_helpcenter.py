@@ -228,8 +228,135 @@ Under **Producers & Storage**, configure your solar panel arrays, generator stri
             },
 
             # ---------------------------------------------------------------------
-            # 2b. VENDOR-NEUTRAL TELEMETRY & METRIC SPECIFICATION
+            # 2b. CLOUD INVERTER INTEGRATION GUIDE (SUNGROW, KOSTAL, SOLAREDGE, FRONIUS, GROWATT)
             # ---------------------------------------------------------------------
+            {
+                "category": cats["inverters-meters"],
+                "slug": "wechselrichter-cloud-anbindung-anleitung",
+                "context_key": "devices",
+                "title_de": "Wechselrichter & Speicher Cloud-Kopplung (Sungrow, Kostal, SolarEdge, Fronius, Growatt)",
+                "title_en": "Cloud Inverter & Battery Integration Guide (Sungrow, Kostal, SolarEdge, Fronius, Growatt)",
+                "summary_de": "Schritt-für-Schritt-Anleitung zur direkten Server-zu-Server Anbindung von PV-Wechselrichtern und Batteriespeichern ohne Zusatzhardware.",
+                "summary_en": "Step-by-step setup guide for connecting solar inverters and battery storage directly via cloud APIs without local hardware.",
+                "content_de": """# Direkte Cloud-Kopplung für Wechselrichter & Speicher ☁️🔌
+
+Mit der **Cloud-Kopplung** bindest du deinen Wechselrichter und Batteriespeicher direkt per Server-zu-Server API an Sharegy an – **ganz ohne zusätzliche Hardware vor Ort** (wie Raspberry Pi oder Smart Dongle).
+
+---
+
+## 1. Übersicht der unterstützten Hersteller
+
+| Hersteller | Unterstützte Modelle | Benötigte Zugangsdaten |
+| :--- | :--- | :--- |
+| **Sungrow** | SH5.0–SH25T Hybrid, SG-Serie, SBR-Speicher | `Anlagen-ID (ps_id)`, `E-Mail / Benutzer`, `Passwort`, `AppKey` |
+| **Kostal** | PLENTICORE plus, PIKO IQ, PIKO MP, BYD | `Anlagen-ID (plant_id)`, `API-Schlüssel (api_key)` |
+| **SolarEdge** | SE-Serie, HD-Wave, StorEdge, Optimierer | `Standort-ID (site_id)`, `API-Schlüssel (api_key)` |
+| **Fronius** | GEN24 Plus, Symo, Primo, Tauro | `PV-System-ID`, `AccessKeyId`, `AccessKeyValue` |
+| **Growatt** | MIN, MOD, MID, SPH, SPA, ARK-Speicher | `Anlagen-ID (plant_id)`, `OpenAPI Token` |
+
+---
+
+## 2. Schritt-für-Schritt Anleitung je Hersteller
+
+### ☀️ Sungrow (iSolarCloud)
+1. Logge dich im Browser unter [isolarcloud.eu](https://www.isolarcloud.eu) ein.
+2. Klicke auf deine PV-Anlage. In der Adresszeile deines Browsers findest du die **Power Station ID (`ps_id`)** (z. B. `https://isolarcloud.eu/.../stationDetail?ps_id=1234567`).
+3. Trage in Sharegy deine normale iSolarCloud-E-Mail, dein Passwort, die `ps_id` und den Gateway AppKey ein.
+4. Klicke auf **„Verbindung testen“** und anschließend auf **„Jetzt mit Sharegy verbinden“**.
+
+### ☀️ Kostal (Kostal Solar Portal)
+1. Melde dich im [Kostal Solar Portal](https://www.kostal-solar-portal.com) an.
+2. Navigiere zu **Einstellungen ➔ API-Zugriffsverwaltung** und generiere einen neuen **API-Schlüssel**.
+3. Deine **Anlagen-ID** findest du in deiner Anlagenübersicht im Portal.
+4. Trage den API-Schlüssel und die Anlagen-ID in Sharegy ein und speichere die Verbindung.
+
+### ☀️ SolarEdge (Monitoring Portal)
+1. Logge dich im [SolarEdge Monitoring Portal](https://monitoring.solaredge.com) ein.
+2. Gehe auf **Admin ➔ Standortzugriff (Site Access)**.
+3. Scrolle nach unten zum Bereich **API-Zugriff**, aktiviere diesen und generiere einen **API-Schlüssel**.
+4. Kopiere die **Standort-ID (Site ID)** und den **API-Schlüssel** in Sharegy.
+
+### ☀️ Fronius (Solar.web)
+1. Öffne [solarweb.com](https://www.solarweb.com) und melde dich an.
+2. Gehe zu **Einstellungen ➔ Benutzer- & Zugriffsverwaltung ➔ API-Zugriffsverwaltung**.
+3. Erstelle einen API-Zugangsschlüssel und notiere dir `AccessKeyId` und `AccessKeyValue`.
+4. Die **PV-System-ID** findest du in der URL deiner Anlage.
+
+### ☀️ Growatt (ShineServer / OpenAPI)
+1. Öffne das [Growatt ShineServer Portal](https://server.growatt.com) oder [openapi.growatt.com](https://openapi.growatt.com).
+2. Gehe zu **Benutzerzentrum ➔ API Management** und erzeuge einen **OpenAPI Token**.
+3. Notiere dir deine **Anlagen-ID (Plant ID)** aus der Anlagenübersicht.
+4. Trage den Token und die Anlagen-ID in Sharegy ein.
+
+---
+
+## 3. Häufige Fragen (FAQ)
+
+### Was mache ich, wenn ich mehrere Wechselrichter habe?
+Lege in Sharegy einfach für jeden Wechselrichter ein eigenes Gerät an (z. B. *„Sungrow Süddach“* und *„Sungrow Garage“*). Jedes Gerät pollt seine eigene Seriennummer oder Anlagen-ID. Sharegy aggregiert alle Erträge automatisch im EMS.
+
+### Wie oft werden die Daten aktualisiert?
+Standardmäßig pollt Sharegy die Hersteller-Clouds im 60-Sekunden-Takt.
+""",
+                "content_en": """# Direct Cloud Integration for Inverters & Battery Storage ☁️🔌
+
+With **Cloud Integration**, you connect your solar inverter and battery storage directly to Sharegy via server-to-server APIs – **no local hardware (like a Raspberry Pi or smart dongle) required**.
+
+---
+
+## 1. Supported Inverter Manufacturers
+
+| Manufacturer | Supported Models | Required Credentials |
+| :--- | :--- | :--- |
+| **Sungrow** | SH5.0–SH25T Hybrid, SG Series, SBR Battery | `Plant ID (ps_id)`, `Email/Username`, `Password`, `AppKey` |
+| **Kostal** | PLENTICORE plus, PIKO IQ, PIKO MP, BYD | `Plant ID`, `API Key (api_key)` |
+| **SolarEdge** | SE Series, HD-Wave, StorEdge, Optimizers | `Site ID`, `API Key (api_key)` |
+| **Fronius** | GEN24 Plus, Symo, Primo, Tauro | `PV System ID`, `AccessKeyId`, `AccessKeyValue` |
+| **Growatt** | MIN, MOD, MID, SPH, SPA, ARK Battery | `Plant ID`, `OpenAPI Token` |
+
+---
+
+## 2. Step-by-Step Setup Guides
+
+### ☀️ Sungrow (iSolarCloud)
+1. Log in at [isolarcloud.eu](https://www.isolarcloud.eu).
+2. Open your solar plant. In the browser URL bar, copy your **Power Station ID (`ps_id`)**.
+3. In Sharegy, enter your iSolarCloud email, password, `ps_id`, and AppKey.
+4. Click **"Test Connection"** and then **"Connect with Sharegy"**.
+
+### ☀️ Kostal (Kostal Solar Portal)
+1. Log in at [Kostal Solar Portal](https://www.kostal-solar-portal.com).
+2. Navigate to **Settings ➔ API Access Management** and generate a new **API Key**.
+3. Locate your **Plant ID** in your plant overview.
+4. Enter both credentials into Sharegy and save.
+
+### ☀️ SolarEdge (Monitoring Portal)
+1. Log into [SolarEdge Monitoring Portal](https://monitoring.solaredge.com).
+2. Go to **Admin ➔ Site Access**.
+3. Scroll down to **API Access**, enable it, and generate an **API Key**.
+4. Copy your **Site ID** and **API Key** into Sharegy.
+
+### ☀️ Fronius (Solar.web)
+1. Open [solarweb.com](https://www.solarweb.com) and log in.
+2. Go to **Settings ➔ API Access Management**.
+3. Create an API key and copy `AccessKeyId` and `AccessKeyValue`.
+4. Find your **PV System ID** in your plant URL.
+
+### ☀️ Growatt (ShineServer / OpenAPI)
+1. Open [server.growatt.com](https://server.growatt.com) or [openapi.growatt.com](https://openapi.growatt.com).
+2. Go to **User Center ➔ API Management** and generate an **OpenAPI Token**.
+3. Note your **Plant ID** from your plant dashboard.
+4. Enter your token and Plant ID into Sharegy.
+""",
+                "tags": ["cloud", "sungrow", "kostal", "solaredge", "fronius", "growatt", "wechselrichter", "inverter", "api"],
+                "is_featured": True,
+                "sort_order": 3,
+            },
+
+            # ---------------------------------------------------------------------
+            # 2c. VENDOR-NEUTRAL TELEMETRY & METRIC SPECIFICATION
+            # ---------------------------------------------------------------------
+
             {
                 "category": cats["inverters-meters"],
                 "slug": "benoetigte-messwerte-und-geraetebindung",

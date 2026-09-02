@@ -5,7 +5,12 @@ category: inverter_hybrid
 protocol: http_cloud
 description: "Cloud-Schnittstelle für Kostal PLENTICORE plus, PIKO IQ, PIKO MP plus und BYD/Kostal Batteriespeicher über das Kostal Solar Portal."
 
+help:
+  de: "1. Logge dich im Kostal Solar Portal (kostal-solar-portal.com) ein.\n2. Gehe zu 'Einstellungen' -> 'API' und generiere einen 'API-Schlüssel'.\n3. Deine Anlagen-ID findest du in deiner Anlagenübersicht im Portal.\n4. Trage die Daten in die untenstehenden Felder ein."
+  en: "1. Log into the Kostal Solar Portal (kostal-solar-portal.com).\n2. Go to 'Settings' -> 'API' and generate an 'API Key'.\n3. Find your Plant ID in your portal plant overview.\n4. Enter your credentials in the fields below."
+
 connection:
+
   auth_type: api_key
   default_base_url: "https://www.kostal-solar-portal.com/api/v1"
   polling_interval_seconds: 60

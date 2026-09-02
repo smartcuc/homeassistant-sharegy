@@ -80,6 +80,7 @@ def list_available_profiles() -> list:
                         "category": data.get("category", "inverter_hybrid"),
                         "protocol": data.get("protocol", "http_cloud"),
                         "description": data.get("description", ""),
+                        "help": data.get("help", {}),
                         "fields": data.get("connection", {}).get("fields", []),
                         "default_interval": data.get("connection", {}).get("polling_interval_seconds", 60),
                     }
@@ -100,11 +101,13 @@ def list_available_profiles() -> list:
                             "category": data.get("category", "inverter_hybrid"),
                             "protocol": data.get("protocol", "http_cloud"),
                             "description": data.get("description", ""),
+                            "help": data.get("help", {}),
                             "fields": data.get("connection", {}).get("fields", []),
                             "default_interval": data.get("connection", {}).get("polling_interval_seconds", 60),
                         }
             except Exception as e:
                 logger.warning("Fehler beim Laden von YAML-Profil %s: %s", yaml_file, e)
+
 
     return list(profiles.values())
 

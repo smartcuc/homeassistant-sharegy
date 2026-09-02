@@ -5,6 +5,10 @@ category: "inverter_hybrid"
 protocol: "http_cloud"
 description: "Cloud-Schnittstelle für alle Sungrow Hybrid-Wechselrichter (SH-Serie wie SH5.0RT, SH10RT, SH15T, SH25T) und SBR-Batteriespeicher."
 
+help:
+  de: "1. Logge dich in iSolarCloud (isolarcloud.eu) ein.\n2. Deine Anlagen-ID (Power Station ID / ps_id) findest du in der URL deiner Anlage oder in den Anlagen-Details.\n3. Verwende deine gewohnten iSolarCloud Zugangsdaten (E-Mail und Passwort) sowie deinen Developer/Gateway AppKey."
+  en: "1. Log in to iSolarCloud (isolarcloud.eu).\n2. Find your Power Station ID (ps_id) in the browser URL of your plant or under plant settings.\n3. Enter your iSolarCloud login credentials (email and password) along with your Developer/Gateway AppKey."
+
 # Verbindungskonfiguration & UI-Formularfelder
 connection:
   auth_type: "sungrow_token"     # sungrow_token, bearer_token, api_key_header, basic_auth

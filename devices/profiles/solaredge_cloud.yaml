@@ -3,9 +3,14 @@ name: "SolarEdge Monitoring API"
 vendor: "SolarEdge"
 category: "inverter_hybrid"
 protocol: "http_cloud"
-description: "Cloud-Schnittstelle für alle SolarEdge Wechselrichter via SolarEdge Monitoring Portal API."
+description: "Cloud-Schnittstelle für SolarEdge Monitoring Portal (Wechselrichter, Leistungsoptimierer & StorEdge Speicher)."
+
+help:
+  de: "1. Logge dich im SolarEdge Monitoring Portal (monitoring.solaredge.com) ein.\n2. Gehe auf 'Admin' -> 'Standortzugriff' (Site Access).\n3. Scrolle zum Abschnitt 'API-Zugriff', akzeptiere die Bedingungen und generiere deinen 'API-Schlüssel'.\n4. Notiere dir deine 'Standort-ID' (Site ID) und trage beides unten ein."
+  en: "1. Log into the SolarEdge Monitoring Portal (monitoring.solaredge.com).\n2. Navigate to 'Admin' -> 'Site Access'.\n3. Scroll down to 'API Access', accept terms and generate your 'API Key'.\n4. Copy your 'Site ID' and 'API Key' into the form below."
 
 connection:
+
   auth_type: "api_key_query"     # api_key_query, api_key_header, bearer_token
   default_base_url: "https://monitoringapi.solaredge.com"
   polling_interval_seconds: 60

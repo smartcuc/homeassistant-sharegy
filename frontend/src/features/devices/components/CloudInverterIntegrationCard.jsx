@@ -159,7 +159,26 @@ export default function CloudInverterIntegrationCard({ primaryHome }) {
                         })}
                     </div>
                     <p className="text-xs text-gray-500 mt-2">{currentProfile.description}</p>
+
+                    {/* Detaillierte Schritt-für-Schritt Anleitung */}
+                    {currentProfile.help && (
+                        <div className="mt-3 p-4 rounded-xl bg-blue-50/70 border border-blue-200/70 text-xs text-blue-900 space-y-2">
+                            <div className="flex items-center justify-between font-bold text-blue-950">
+                                <span className="flex items-center gap-1.5">
+                                    <span>💡</span>
+                                    <span>Anleitung zur Einrichtung ({currentProfile.name})</span>
+                                </span>
+                                <span className="text-[10px] text-blue-600 bg-blue-100 px-2 py-0.5 rounded-md font-mono">
+                                    {currentProfile.vendor} API
+                                </span>
+                            </div>
+                            <div className="text-[12px] leading-relaxed text-blue-800 whitespace-pre-line bg-white/70 p-3 rounded-lg border border-blue-100/80">
+                                {currentProfile.help.de || currentProfile.help.en}
+                            </div>
+                        </div>
+                    )}
                 </div>
+
 
                 {/* 2. Gerätename & Zugangsdaten */}
                 <div className="space-y-4 pt-2 border-t border-gray-100">
