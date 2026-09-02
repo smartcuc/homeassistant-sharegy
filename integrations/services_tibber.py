@@ -13,6 +13,11 @@ from core.models import IntervalReading
 TIBBER_API_URL = "https://api.tibber.com/v1-beta/gql"
 
 
+import logging
+
+logger = logging.getLogger("integrations")
+
+
 def get_tibber_homes(token):
     query = """
     {
@@ -34,7 +39,7 @@ def get_tibber_homes(token):
             TIBBER_API_URL,
             json={"query": query},
             headers=tibber_headers(token),
-            timeout=10,
+            timeout=(10, 30),
         )
         data = resp.json()
         if "errors" in data and data["errors"]:
@@ -53,7 +58,11 @@ def get_tibber_homes(token):
                 "address": addr_str,
             })
         return {"status": "ok", "homes": formatted}
+    except requests.exceptions.Timeout:
+        logger.warning("Tibber API timeout during get_tibber_homes")
+        return {"status": "error", "error": "Tibber Server antwortet nicht rechtzeitig (Timeout)."}
     except Exception as e:
+        logger.warning("Tibber API error during get_tibber_homes: %s", e)
         return {"status": "error", "error": str(e)}
 
 
@@ -98,23 +107,32 @@ def fetch_tibber_consumption(home_id, token, hours=24):
     }}
     """
 
-    resp = requests.post(
-        TIBBER_API_URL,
-        json={"query": query},
-        headers=tibber_headers(token),
-        timeout=20,
-    )
-    resp.raise_for_status()
-    data = resp.json()
+    try:
+        resp = requests.post(
+            TIBBER_API_URL,
+            json={"query": query},
+            headers=tibber_headers(token),
+            timeout=(10, 35),
+        )
+        resp.raise_for_status()
+        data = resp.json()
+    except requests.exceptions.Timeout as e:
+        logger.warning("Tibber API timeout in fetch_tibber_consumption: %s", e)
+        return []
+    except requests.exceptions.RequestException as e:
+        logger.warning("Tibber API request failed in fetch_tibber_consumption: %s", e)
+        return []
 
     if "errors" in data:
-        raise ValueError(data["errors"])
+        logger.warning("Tibber API returned errors in consumption: %s", data["errors"])
+        return []
 
-    home = data["data"]["viewer"]["home"]
-    if not home:
-        raise ValueError("No Tibber home data returned")
+    home = data.get("data", {}).get("viewer", {}).get("home")
+    if not home or not home.get("consumption"):
+        return []
 
-    return home["consumption"]["nodes"]
+    return home["consumption"].get("nodes", [])
+
 
 
 def upsert_tibber_interval_readings(meter, home_id, user=None, hours=24, tenant=None):

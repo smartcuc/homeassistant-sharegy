@@ -275,9 +275,19 @@ def sync_tibber():
                 }
             )
 
+        except requests.exceptions.Timeout as e:
+            logger.warning(
+                f"tibber.sync.timeout meter={meter.id} user={getattr(user, 'id', 'none')}: {e}"
+            )
+            results.append(
+                {
+                    "meter_id": str(meter.id),
+                    "error": f"Timeout: {e}",
+                }
+            )
         except Exception as e:
-            logger.exception(
-                f"tibber.sync.failed meter={meter.id} user={getattr(user, 'id', 'none')}"
+            logger.warning(
+                f"tibber.sync.failed meter={meter.id} user={getattr(user, 'id', 'none')}: {e}"
             )
             results.append(
                 {
@@ -285,6 +295,7 @@ def sync_tibber():
                     "error": str(e),
                 }
             )
+
 
     return {
         "status": "ok",

@@ -37,10 +37,14 @@ def get_ws_url(token):
         "User-Agent": "Django/ESWES 1.0",
     }
 
-    resp = requests.post(GRAPHQL_HTTP_URL, json={"query": query}, headers=headers)
-    data = resp.json()
+    try:
+        resp = requests.post(GRAPHQL_HTTP_URL, json={"query": query}, headers=headers, timeout=(10, 25))
+        data = resp.json()
+        return data.get("data", {}).get("viewer", {}).get("websocketSubscriptionUrl")
+    except Exception as e:
+        logger.warning("Could not fetch Tibber websocketSubscriptionUrl: %s", e)
+        return None
 
-    return data["data"]["viewer"]["websocketSubscriptionUrl"]
 
 
 # ✅ EIN einzelner Stream (keine DB Writes)
