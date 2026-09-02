@@ -75,6 +75,17 @@ export default function CloudInverterIntegrationCard({ primaryHome }) {
         }
     }
 
+    async function handleSungrowOAuth() {
+        try {
+            const data = await apiFetch(`/api/devices/sungrow/auth-url/?home_id=${primaryHome?.id || ""}`);
+            if (data?.auth_url) {
+                window.location.href = data.auth_url;
+            }
+        } catch (err) {
+            setErrorMsg(err.message || "Sungrow OAuth konnte nicht gestartet werden.");
+        }
+    }
+
     async function handleIntegrate() {
         setIsSaving(true);
         setSaveSuccess(null);
@@ -97,6 +108,7 @@ export default function CloudInverterIntegrationCard({ primaryHome }) {
             setIsSaving(false);
         }
     }
+
 
 
     return (
@@ -160,8 +172,34 @@ export default function CloudInverterIntegrationCard({ primaryHome }) {
                     </div>
                     <p className="text-xs text-gray-500 mt-2">{currentProfile.description}</p>
 
+                    {/* 🌟 1-Klick Sungrow OAuth2.0 Banner */}
+                    {selectedProfileId === "sungrow_isolarcloud" && (
+                        <div className="mt-3 p-4 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white shadow-xs flex flex-wrap items-center justify-between gap-3">
+                            <div className="space-y-1">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-base">⚡</span>
+                                    <span className="font-bold text-sm text-white">
+                                        Offizielle 1-Klick Sungrow Autorisierung (OAuth 2.0)
+                                    </span>
+                                </div>
+                                <p className="text-xs text-blue-100 max-w-xl">
+                                    Verbinde deinen Wechselrichter und Speicher sicher per 1-Klick über die offizielle iSolarCloud Schnittstelle – ohne dein Passwort in Sharegy einzugeben.
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={handleSungrowOAuth}
+                                className="px-4 py-2.5 bg-white text-blue-700 hover:bg-blue-50 font-bold text-xs rounded-xl shadow-xs transition cursor-pointer flex items-center gap-2"
+                            >
+                                <span>🔑</span>
+                                <span>Jetzt bei Sungrow freigeben</span>
+                            </button>
+                        </div>
+                    )}
+
                     {/* Detaillierte Schritt-für-Schritt Anleitung */}
                     {currentProfile.help && (
+
                         <div className="mt-3 p-4 rounded-xl bg-blue-50/70 border border-blue-200/70 text-xs text-blue-900 space-y-2">
                             <div className="flex items-center justify-between font-bold text-blue-950">
                                 <span className="flex items-center gap-1.5">
