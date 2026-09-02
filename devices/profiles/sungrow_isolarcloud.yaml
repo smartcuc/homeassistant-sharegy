@@ -113,11 +113,3 @@ metrics_mapping:
     min: 0.0
     max: 100.0
     fallback: null
-
-  # 6. Tagesertrag (kWh)
-  daily_generation_kwh:
-    jsonpath: "$.result_data.today_energy"
-    scale: 1.0
-    type: "float"
-    unit: "kWh"
-    fallback: 0.0
