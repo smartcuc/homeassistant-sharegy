@@ -230,7 +230,7 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
             device_id__in=all_device_ids,
             bucket__gte=start_dt,
             bucket__lte=end_dt,
-        ).values("device_id", "bucket", "energy_wh", "avg")
+        ).values("device_id", "metric_key", "bucket", "energy_wh", "avg")
     )
 
     # Intraday-Fallback 1: 15-Minuten Aggregate
@@ -240,32 +240,35 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
                 device_id__in=all_device_ids,
                 bucket__gte=start_dt,
                 bucket__lte=end_dt,
-            ).values("device_id", "bucket", "energy_wh", "avg")
+            ).values("device_id", "metric_key", "bucket", "energy_wh", "avg")
         )
         if mid_rows:
             metric_rows = mid_rows
         else:
-            # Intraday-Fallback 2: Roh-Telemetrie des heutigen Tages
+            # Intraday-Fallback 2: Roh-Telemetrie des heutigen Tages (sekündlich/minütlich wie bei MQTT/OTel)
             raw_metrics = list(
                 DeviceMetric.objects.filter(
                     device_id__in=all_device_ids,
                     timestamp__gte=start_dt,
                     timestamp__lte=end_dt,
-                ).values("device_id", "timestamp", "value")
+                ).values("device_id", "metric_key", "timestamp", "value")
                 .order_by("timestamp")
             )
             if raw_metrics:
                 dev_hour_map = defaultdict(lambda: defaultdict(list))
                 for r in raw_metrics:
                     b_t = r["timestamp"].astimezone(tz).replace(minute=0, second=0, microsecond=0)
-                    dev_hour_map[r["device_id"]][b_t].append(float(r["value"] or 0))
+                    m_k = r.get("metric_key") or "power"
+                    dev_hour_map[(r["device_id"], m_k)][b_t].append(float(r["value"] or 0))
 
-                for dev_id, h_map in dev_hour_map.items():
+                for (dev_id, m_k), h_map in dev_hour_map.items():
                     for b_t, vals in h_map.items():
                         avg_w = sum(vals) / len(vals)
-                        wh = avg_w * (len(vals) * 5 / 3600.0) if len(vals) < 720 else avg_w
+                        # Trapez-/Durchschnittsintegration: Watt * Stunden = Wh
+                        wh = avg_w * (len(vals) * 60 / 3600.0) if len(vals) < 60 else avg_w
                         metric_rows.append({
                             "device_id": dev_id,
+                            "metric_key": m_k,
                             "bucket": b_t,
                             "energy_wh": wh,
                             "avg": avg_w,
@@ -277,70 +280,77 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
     battery_discharge_map = defaultdict(float)
     grid_import_kwh_total = 0.0
     grid_export_kwh_total = 0.0
+    pv_kwh_total = 0.0
+    load_kwh_total = 0.0
 
     for row in metric_rows:
         dev_id = row["device_id"]
+        m_k = (row.get("metric_key") or "").strip().lower()
         wh = float(row["energy_wh"] or 0)
         avg_w = float(row.get("avg") or 0)
-        if wh == 0 and avg_w > 0:
+        if wh == 0 and avg_w != 0:
             wh = avg_w  # 1h Intervall: Avg(Watt) * 1h = Wh
-        kwh = wh / 1000.0
+        kwh = abs(wh) / 1000.0
         device_energy_sum[dev_id] += kwh
 
         b_time = row["bucket"].astimezone(tz)
         b_key = b_time.strftime(bucket_format)
 
-        if dev_id in pv_device_ids:
+        # 1. PV Erzeugung
+        if m_k in ["power", "pv_power", "pv_power_w", "pv"] or (
+            dev_id in pv_device_ids and m_k not in ["load_power", "grid_power", "battery_power"]
+        ):
             bucket_map[b_key]["pv"] += kwh
-        elif dev_id in grid_device_ids:
+            pv_kwh_total += kwh
+
+        # 2. Netzleistung (Import / Export)
+        elif m_k in ["grid_power", "grid_power_w", "grid"] or (
+            dev_id in grid_device_ids and m_k not in ["power", "load_power", "battery_power"]
+        ):
             if avg_w >= 0:
                 bucket_map[b_key]["grid_import"] += kwh
                 grid_import_kwh_total += kwh
             else:
                 bucket_map[b_key]["grid_export"] += kwh
                 grid_export_kwh_total += kwh
-        elif dev_id in battery_device_ids:
-            if avg_w >= 0:
-                bucket_map[b_key]["battery_discharge"] += kwh
-                battery_discharge_map[dev_id] += kwh
-            else:
+
+        # 3. Speicherleistung (Discharge / Charge)
+        elif m_k in ["battery_power", "battery_power_w", "battery"] or (
+            dev_id in battery_device_ids and m_k not in ["power", "load_power", "grid_power"]
+        ):
+            if avg_w < 0:
                 bucket_map[b_key]["battery_charge"] += kwh
                 battery_charge_map[dev_id] += kwh
+            else:
+                bucket_map[b_key]["battery_discharge"] += kwh
+                battery_discharge_map[dev_id] += kwh
+
+        # 4. Hausverbrauch / Consumer
+        elif m_k in ["load_power", "load_power_w", "load", "consumer"]:
+            bucket_map[b_key]["load"] += kwh
+            load_kwh_total += kwh
+
         else:
             bucket_map[b_key]["load"] += kwh
+            load_kwh_total += kwh
 
-    # Gesamtwerte berechnen
-    total_pv_kwh = round(sum(device_energy_sum[d_id] for d_id in pv_device_ids), 2)
+    total_pv_kwh = round(pv_kwh_total, 2)
     battery_devices = [d for d in devices if d.id in battery_device_ids]
     
     total_battery_charge_kwh = round(sum(battery_charge_map.values()), 2)
     total_battery_discharge_kwh = round(sum(battery_discharge_map.values()), 2)
 
-    # Fallback falls Batterie-Metriken ohne Vorzeichen vorliegen:
+    # Fallback falls Batterie-Metriken ohne Vorzeichen vorlagen:
     if battery_device_ids and total_battery_charge_kwh == 0 and total_battery_discharge_kwh == 0:
-        raw_batt_kwh = sum(device_energy_sum[d_id] for d_id in battery_device_ids)
+        raw_batt_kwh = sum(device_energy_sum[d_id] for d_id in battery_device_ids if d_id not in pv_device_ids)
         total_battery_discharge_kwh = round(raw_batt_kwh, 2)
         for b_id in battery_device_ids:
-            battery_discharge_map[b_id] = device_energy_sum[b_id]
-
-    # Live Realtime Overlay für den laufenden Tag, falls Stunden-Aggregate noch 0 kWh sind
-    if period == "today" and total_pv_kwh == 0 and pv_device_ids:
-        latest_pv_rows = DeviceLatestMetric.objects.filter(
-            device_id__in=pv_device_ids,
-            metric_key__in=["power", "value", "pv_power", "apower", "a_act_power", "active_power"],
-        ).values("device_id", "value")
-        live_pv_watts = sum(float(r["value"] or 0) for r in latest_pv_rows)
-        if live_pv_watts > 0:
-            hours_active = max(1.0, min(8.0, (now_dt - now_dt.replace(hour=6, minute=0)).total_seconds() / 3600.0))
-            estimated_pv_kwh = round((live_pv_watts * 0.65 * hours_active) / 1000.0, 2)
-            if estimated_pv_kwh > 0:
-                total_pv_kwh = estimated_pv_kwh
-                for pv_id in pv_device_ids:
-                    device_energy_sum[pv_id] = total_pv_kwh / len(pv_device_ids)
+            if b_id not in pv_device_ids:
+                battery_discharge_map[b_id] = device_energy_sum[b_id]
 
     total_grid_import_kwh = round(grid_import_kwh_total, 2)
     total_grid_export_kwh = round(grid_export_kwh_total, 2)
-    total_measured_consumer_kwh = round(sum(device_energy_sum[d.id] for d in consumer_devices), 2)
+    total_measured_consumer_kwh = round(load_kwh_total, 2)
 
     has_devices = len(devices) > 0
     has_data = (total_pv_kwh > 0 or total_measured_consumer_kwh > 0 or total_grid_import_kwh > 0 or total_battery_charge_kwh > 0 or total_battery_discharge_kwh > 0 or len(metric_rows) > 0)
