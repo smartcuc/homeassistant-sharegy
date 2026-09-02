@@ -23,6 +23,7 @@ def process_incoming_telemetry(token, payload_str, user):
     100% DAU-sichere Ingestion von WebSocket-Frames
     (Shelly Outbound WebSocket RPC NotifyStatus / Shelly.GetStatus, Tasmota, ioBroker, Custom Frames).
     """
+    from django.db import connection, InterfaceError, OperationalError
     from devices.models import Home, Device
     from devices.services.ingest import ingest_metric_payload
 
@@ -33,6 +34,7 @@ def process_incoming_telemetry(token, payload_str, user):
         except Exception:
             logger.warning("[WS-Ingest] Ungültiges JSON empfangen: %s", str(payload_str)[:100])
             return None
+
 
         if not isinstance(data, dict):
             return None
@@ -258,11 +260,19 @@ def process_incoming_telemetry(token, payload_str, user):
             }
 
         return None
+    except (InterfaceError, OperationalError) as db_err:
+        try:
+            connection.close()
+        except Exception:
+            pass
+        logger.warning("[WS-Ingest] DB-Verbindung getrennt, Verbindung wird für nächsten Frame zurückgesetzt: %s", db_err)
+        return None
     except Exception as e:
         logger.exception("[WS-Ingest] Fehler beim Verarbeiten des Frames: %s", e)
         return None
     finally:
         close_old_connections()
+
 
 
 class EnergyConsumer(AsyncWebsocketConsumer):
