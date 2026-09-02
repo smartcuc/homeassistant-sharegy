@@ -383,52 +383,57 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
                     rt_json = rt_resp.json()
                     pts = rt_json.get("result_data", {}).get("device_point_list", [])
                     if pts:
-                        p_data = pts[0]
-                        pv = float(p_data.get("p83033") or p_data.get("p83067") or p_data.get("p83329") or 0.0)
-                        load = float(p_data.get("p83052") or p_data.get("p83106") or p_data.get("p83330") or 0.0)
+                        # Robustes Dict aufbauen: Keys mit und ohne 'p' Präfix
+                        p_data = {}
+                        for item in pts:
+                            if isinstance(item, dict):
+                                if "point_id" in item and "point_value" in item:
+                                    pid = str(item["point_id"])
+                                    p_data[pid] = item["point_value"]
+                                    p_data[f"p{pid}"] = item["point_value"]
+                                else:
+                                    for k, v in item.items():
+                                        ks = str(k)
+                                        p_data[ks] = v
+                                        if not ks.startswith("p"):
+                                            p_data[f"p{ks}"] = v
+
+                        def _get_pt(*keys):
+                            for k in keys:
+                                for variant in [str(k), f"p{k}", f"P{k}"]:
+                                    if variant in p_data and p_data[variant] is not None:
+                                        try:
+                                            return float(p_data[variant])
+                                        except (ValueError, TypeError):
+                                            pass
+                            return None
+
+                        pv = _get_pt("83033", "83067", "83329") or 0.0
+                        load = _get_pt("83052", "83106", "83330") or 0.0
 
                         # Netz-Kandidaten (83051 ist der offizielle Netzübergabepunkt DTSU666)
-                        grid_cands = [p_data.get("p83051"), p_data.get("p83549"), p_data.get("p83328")]
-                        grid = 0.0
-                        for gc in grid_cands:
-                            if gc is not None:
-                                try:
-                                    g_v = float(gc)
-                                    if abs(g_v) > 0.01:
-                                        grid = g_v
-                                        break
-                                except (ValueError, TypeError):
-                                    pass
+                        grid = _get_pt("83051", "83549", "83328") or 0.0
 
                         # Batterie-Leistung Kandidaten
-                        bat_cands = [p_data.get("p83104"), p_data.get("p83238"), p_data.get("p83111"), p_data.get("p83112"), p_data.get("p83326")]
-                        bat_pwr = 0.0
-                        for bc in bat_cands:
-                            if bc is not None:
-                                try:
-                                    b_v = float(bc)
-                                    if abs(b_v) > 0.01:
-                                        bat_pwr = b_v
-                                        break
-                                except (ValueError, TypeError):
-                                    pass
+                        bat_pwr = _get_pt("83104", "83238", "83111", "83112", "83326") or 0.0
 
                         # SoC Prozentwert ermitteln (0.348 -> 34.8 %)
-                        soc = p_data.get("p83129") or p_data.get("p83252") or p_data.get("p83334")
+                        soc_raw = _get_pt("83129", "83252", "83334")
                         soc_val = None
-                        if soc is not None:
-                            try:
-                                s_float = float(soc)
-                                if 0.0 <= s_float <= 1.0:
-                                    soc_val = round(s_float * 100.0, 1)
-                                else:
-                                    soc_val = round(s_float, 1)
-                            except (ValueError, TypeError):
-                                pass
+                        if soc_raw is not None:
+                            if 0.0 <= soc_raw <= 1.0:
+                                soc_val = round(soc_raw * 100.0, 1)
+                            else:
+                                soc_val = round(soc_raw, 1)
 
-                        # Nacht-Fallback: Wenn PV=0, Netz ~ 0 und Speicher geladen (> 5%), deckt der Speicher die Hauslast
-                        if abs(bat_pwr) < 0.1 and load > 20 and soc_val and soc_val > 5.0 and abs(grid) < 60:
+                        # Nacht-Fallback: NUR wenn PV < 20 W, Netz ~ 0 und Speicher geladen (> 5%)
+                        if pv < 20 and abs(bat_pwr) < 0.1 and load > 20 and soc_val and soc_val > 5.0 and abs(grid) < 60:
                             bat_pwr = load
+
+                        # Wenn Speicher VOLL ist (SoC >= 98%), kann physikalisch kein Strom mehr geladen werden
+                        if soc_val is not None and soc_val >= 98.0:
+                            if bat_pwr < 0:
+                                bat_pwr = 0.0
 
                         raw_data["_direct_metrics"] = {
                             "pv_power_w": max(0.0, pv),

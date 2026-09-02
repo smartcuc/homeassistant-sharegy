@@ -45,24 +45,15 @@ def get_today_consumption(user):
     today_start_utc = today_start.astimezone(ZoneInfo("UTC"))
 
     # 1. Relevante Geräte für den Haushalt ermitteln
-    # Priorität A: EMS-Signalquellen für Grid oder Load/Consumer
-    grid_sources = list(
-        EMSSignalSource.objects.filter(
-            home__user=user,
-            signal_type__key__in=["grid", "grid_import", "load", "consumer", "consumption"],
-        ).values_list("device_id", flat=True)
-    )
-
-    # Priorität B: Alle relevanten Verbraucher-Geräte (keine reinen Erzeuger)
-    consumer_devices = list(
+    # Alle aktiven Geräte des Haushalts einbeziehen, da Hybrid-Wechselrichter
+    # und Mehrkanal-Zähler sowohl PV als auch Hauslast (load_power) erfassen!
+    device_ids = list(
         Device.objects.filter(
             home__user=user,
             active=True,
             pending_delete=False,
-        ).exclude(config__role__key="producer").values_list("id", flat=True)
+        ).values_list("id", flat=True)
     )
-
-    device_ids = grid_sources if grid_sources else consumer_devices
 
     if not device_ids:
         return {
@@ -149,7 +140,9 @@ def get_today_consumption(user):
                 for h, val_list in hour_raw.items():
                     if val_list:
                         avg_power_w = sum(val_list) / len(val_list)
-                        kwh = (avg_power_w * (len(val_list) * 5 / 3600.0)) / 1000.0 if len(val_list) < 720 else avg_power_w / 1000.0
+                        # Cloud-Polls alle 60s (60 Pkt = 1h), MQTT alle 5s (720 Pkt = 1h)
+                        hours_coverage = min(1.0, max(len(val_list) / 60.0, 0.05))
+                        kwh = (avg_power_w * hours_coverage) / 1000.0
                         hour_buckets[h] = max(0.0, kwh)
 
     total_kwh = sum(hour_buckets.values())
