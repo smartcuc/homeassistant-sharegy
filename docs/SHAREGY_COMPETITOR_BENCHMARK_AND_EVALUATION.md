@@ -1,7 +1,7 @@
 # 🏆 Sharegy EMS & Energy Sharing: Strategischer Mitbewerber-Vergleich & Gesamtevaluation
 
-**Dokument-Version**: 3.5  
-**Stand**: 1. September 2026  
+**Dokument-Version**: 4.0  
+**Stand**: 2. September 2026  
 **Zielgruppe**: Investoren, Betatester, B2B-Partner, Energiegenossenschaften & Management  
 
 ---
@@ -9,6 +9,8 @@
 ## Executive Summary
 
 Sharegy besetzt eine **einzigartige Marktposition im europäischen Energiemarkt**: Es verbindet ein **herstellerunabhängiges, hochperformantes Home Energy Management System (EMS, Säule 1)** mit einer **vollständigen, eichrechtskonformen Abrechnungs- und Clearing-Plattform für Energy Sharing Communities, Mieterstrom & Quartiere (Säule 2)**.
+
+Mit dem **Release der Zero-Hardware Cloud-Inverter-Integration (1-Klick OAuth 2.0 für Sungrow iSolarCloud sowie nativer Cloud-Profile für Fronius Solar.web, SolarEdge, Kostal Solar Portal und Growatt ShineServer)** eliminiert Sharegy die letzte große Einstiegshürde: Jeder Betreiber einer bestehenden PV- und Speicheranlage kann sein System in unter 60 Sekunden ohne zusätzliche Hardware-Boxen oder Elektroinstallationen mit Sharegy koppeln.
 
 Während B2C-Systeme (1Komma5°, Tibber, Clever-PV) reine Einzelhaushalte ohne P2P-Clearing adressieren und B2B-Enterprise-Lösungen (Exnaton, EDA) als schwergewichtige, teure Abrechnungsmonolithe ohne Geräteintegration und ohne Sub-Sekunden-EMS agieren, vereint Sharegy **Zero-Lock-in, TimescaleDB-Echtzeit-Telemetrie, KI-Anomalieerkennung, Aktorik und automatisiertes 15-Minuten Energy Sharing Clearing in einer integrierten Plattform**.
 
@@ -20,6 +22,7 @@ Während B2C-Systeme (1Komma5°, Tibber, Clever-PV) reine Einzelhaushalte ohne P
 |---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | **Primärer Fokus** | **Dual-Core: Home EMS + Energy Sharing** | B2B Energy Sharing / Stadtwerke | Gesetzlicher Datenaustausch / VNB | Hardware-Verkauf + dynamischer Tarif | Dynamischer Tarif + Zähler | B2C Cloud-Schalter | DIY Smart Home & EV-Laden |
 | **Hardware-Freiheit (Zero-Lock-in)** | 🟢 **100% Offen** (Shelly WSS, Matter 1.3, HA, MQTT, OTel) | 🟡 Nur Zählerdaten (MSCONS/SFTP) | 🔴 Nur registrierte Smart Meter (VNB) | 🔴 Nur Heartbeat-Box & Partner-WR | 🟡 Nur Pulse IR-Lesekopf | 🟢 Cloud-APIs | 🟢 Open-Source |
+| **Zero-Hardware Cloud Inverter (1-Klick)** | 🟢 **Ja** (Sungrow OAuth2.0, Fronius, SolarEdge, Kostal, Growatt) | 🔴 Nein (Nur Zählerlastgänge) | 🔴 Nein (Nur SMGW) | 🔴 Nein (Benötigt Heartbeat-Box) | 🔴 Nein (Nur Pulse am Zähler) | 🟡 Ja (Aber kein Energy Sharing) | 🟡 Über HACS-Add-ons |
 | **Säule 2: Energy Sharing & 15m Clearing** | 🟢 **Integriert** (RBAC, 15m Slots, Tarife, Multi-Community Hub) | 🟢 **Integriert** (Kernfokus B2B) | 🟡 Reiner Daten-Hub (keine Endabrechnung) | 🔴 Nein | 🔴 Nein | 🔴 Nein | 🔴 Nein |
 | **Abrechnungsnachweise & Multi-Format Exporte** | 🟢 **PDF (§ 42b EnWG), Excel .xlsx, CSV, ERP-XML** | 🟢 PDF & ERP-Exporte | 🟡 XML-Rohdaten (MSCONS / EBInterface) | 🔴 Nur monatliche Stromrechnung | 🔴 Nur Tibber-Rechnung | 🔴 Keine | 🔴 Keine |
 | **Echtzeit-Telemetrie & Sub-Sekunden Fluss** | 🟢 **TimescaleDB Sub-Sekunde ($O(1)$)** | 🔴 Nur historische 15m-Lastgänge | 🔴 Nur historische 15m-Vortagesdaten | 🟡 Cloud / Minuten-Takt | 🟡 Nur 1 Zähler (Pulse) | 🔴 1–5 Min Polling | 🟢 Lokal Sub-Sekunde |
@@ -29,6 +32,7 @@ Während B2C-Systeme (1Komma5°, Tibber, Clever-PV) reine Einzelhaushalte ohne P
 | **48h Hybrid Physics + ML PV-Prognose** | 🟢 **Ja (Open-Meteo 96h + WAPE-Güte)** | 🟡 Basis-Portfolio-Forecast | 🔴 Keine | 🟢 Ja | 🟡 Basis-Forecast | 🟡 Basis-Wetter | 🟡 HACS Add-on |
 | **Dynamische Börsenpreise & Arbitrage** | 🟢 **Ja (Tibber/EPEX + Batteriesimulator)** | 🟡 Tarifindexierung | 🔴 Keine | 🟢 Ja (Dynamic Pulse) | 🟢 Ja (Hauptfokus) | 🟢 Ja | 🟢 Ja |
 | **Zielgruppe & Anschaffungskosten** | Prosumer, WEGs, Quartiere, Genossenschaften (**Self-Service SaaS**) | Große Stadtwerke & EVUs (**>10.000 € Setup + B2B-Vertrag**) | Netzbetreiber & registrierte EEGs (**Regulatorischer Hub**) | Eigenheim-Käufer (**>20.000 € Neuanlage**) | Single-Haushalte (Tarifwechsel) | B2C-Balkonkraftwerk / PV (Abo) | Tech-Enthusiasten (Hoher Zeitaufwand) |
+
 
 ---
 
@@ -110,20 +114,22 @@ Während B2C-Systeme (1Komma5°, Tibber, Clever-PV) reine Einzelhaushalte ohne P
 
 ---
 
-## 🌟 3. Die 6 Alleinstellungsmerkmale (USPs) von Sharegy
+## 🌟 3. Die 7 Alleinstellungsmerkmale (USPs) von Sharegy
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│                                DIE 6 KERN-USPs VON SHAREGY                              │
+│                                DIE 7 KERN-USPs VON SHAREGY                              │
 ├─────────────────────────────────────────────────────────────────────────────────────────┤
 │ 1. 🌐 ECHTER ZERO-LOCK-IN: Outbound-WSS (Shelly Gen2/3), Matter 1.3, HA & MQTT          │
-│ 2. ⚡ DUAL-CORE EMS + ENERGY SHARING: Vom Balkonkraftwerk bis zum 500-User-Quartier     │
-│ 3. 💶 GESETZESKONFORMES CLEARING (§ 42b EnWG): 15m-Slots, PDF-Nachweise, Excel & ERP-XML│
-│ 4. 🧠 HYBRIDE KI-ANOMALIE-ERKENNUNG: 7-Tage-ML-Baseline & Kriechstrom-/Dauerlauf-Schutz │
-│ 5. 🚀 ENTERPRISE PERFORMANCE: TimescaleDB Hypertables & Continuous Aggregates (< 10 ms)│
-│ 6. ☀️ HYBRID PHYSICS + ML FORECAST: 48h Solar- & Lastprognose mit WAPE-Güteprüfung      │
+│ 2. ☁️ ZERO-HARDWARE CLOUD-INVERTER: 1-Klick OAuth (Sungrow) & Profile (Fronius/Kostal)   │
+│ 3. ⚡ DUAL-CORE EMS + ENERGY SHARING: Vom Balkonkraftwerk bis zum 500-User-Quartier     │
+│ 4. 💶 GESETZESKONFORMES CLEARING (§ 42b EnWG): 15m-Slots, PDF-Nachweise, Excel & ERP-XML│
+│ 5. 🧠 HYBRIDE KI-ANOMALIE-ERKENNUNG: 7-Tage-ML-Baseline & Kriechstrom-/Dauerlauf-Schutz │
+│ 6. 🚀 ENTERPRISE PERFORMANCE: TimescaleDB Hypertables & Continuous Aggregates (< 10 ms)│
+│ 7. ☀️ HYBRID PHYSICS + ML FORECAST: 48h Solar- & Lastprognose mit WAPE-Güteprüfung      │
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ```
+
 
 ---
 

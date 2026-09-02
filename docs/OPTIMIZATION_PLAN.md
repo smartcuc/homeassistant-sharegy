@@ -361,6 +361,17 @@
 
 ---
 
+### [x] 5.18 Multi-Vendor Zero-Hardware Cloud-Inverter Ökosystem (Sungrow OpenAPI OAuth2.0, Fronius, SolarEdge, Kostal, Growatt)
+- **Dateien**: [`devices/services_profile_runner.py`](file:///c:/Users/Public/Dev/eswes/devices/services_profile_runner.py), [`devices/api/views_sungrow_oauth.py`](file:///c:/Users/Public/Dev/eswes/devices/api/views_sungrow_oauth.py), [`integrations/api_urls.py`](file:///c:/Users/Public/Dev/eswes/integrations/api_urls.py)
+- **Status**: ✅ **Erledigt**.
+  - Vollwertige, offizielle 1-Klick OAuth 2.0 Integration für **Sungrow iSolarCloud** (OpenAPI Token-Exchange, Auto-Refresh, Echtzeit-Messpunkte für PV-Wirkleistung, Hauslast, Netzbezug, Speicher-Lade-/Entladeleistung und echter Batterie-SoC in %).
+  - Automatische Erkennung und Koppelung großer Heimspeicher (z. B. 22–22,5 kWh Kaskaden) mit `StorageSystem`.
+  - Hersteller-Profile für **Fronius Solar.web**, **SolarEdge Monitoring**, **Kostal Solar Portal** und **Growatt ShineServer**.
+  - Vollständiges Hintergrund-Polling im 60s-Takt via Celery-Beat mit automatischer `device.last_seen` Aktualisierung für fehlerfreien Online-Status.
+
+---
+
+
 ### [x] 5.9 Mobile Push & Notification Engine
 - **Bereich**: Backend Benachrichtigungen (`notifications/`, `tasks.py`, `services.py`)
 - **Dokumentation**: [`docs/FIREBASE_SETUP_GUIDE.md`](file:///c:/Users/Public/Dev/eswes/docs/FIREBASE_SETUP_GUIDE.md)
