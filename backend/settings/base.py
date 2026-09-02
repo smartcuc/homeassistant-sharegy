@@ -392,6 +392,12 @@ CELERY_BEAT_SCHEDULE = {
         "task": "integrations.tasks.flush_mqtt_buffer",
         "schedule": 5.0,  # alle 5 Sekunden
     },
+    # ☁️ Zyklisches Polling für Cloud-Wechselrichter (Sungrow, Kostal, SolarEdge, etc.)
+    "poll-cloud-integrations": {
+        "task": "devices.poll_cloud_integrations",
+        "schedule": 60.0,  # alle 60 Sekunden
+    },
+
     # 📊 1m Aggregation (analytics)
     "aggregate-1m": {
         "task": "devices.tasks.run_1m_aggregation",

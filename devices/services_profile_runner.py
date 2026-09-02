@@ -24,7 +24,8 @@ try:
 except ImportError:
     yaml = None
 
-from devices.models import Device, DeviceMetric, CloudDeviceIntegration
+from devices.models import Device, DeviceMetric, DeviceLatestMetric, CloudDeviceIntegration
+
 
 logger = logging.getLogger(__name__)
 
@@ -413,23 +414,61 @@ def execute_cloud_poll(integration: CloudDeviceIntegration) -> dict:
         # Metriken in DB und Redis persistieren
         # 1. PV Power
         if "pv_power_w" in metrics and metrics["pv_power_w"] is not None:
+            val = float(metrics["pv_power_w"])
             DeviceMetric.objects.create(
                 device=device,
                 metric_key="power",
                 unit="W",
-                value=metrics["pv_power_w"],
+                value=val,
                 timestamp=now,
             )
+            DeviceLatestMetric.objects.update_or_create(
+                device=device,
+                metric_key="power",
+                defaults={"value": val, "timestamp": now},
+            )
+            try:
+                cache.set(f"device:{device.id}:latest_power", val, timeout=3600)
+            except Exception as e:
+                logger.warning("Cache write failed for device %s: %s", device.id, e)
 
         # 2. Battery SoC & Power
         if "battery_soc" in metrics and metrics["battery_soc"] is not None:
+            soc_val = float(metrics["battery_soc"])
             DeviceMetric.objects.create(
                 device=device,
                 metric_key="battery_soc",
                 unit="%",
-                value=metrics["battery_soc"],
+                value=soc_val,
                 timestamp=now,
             )
+            DeviceLatestMetric.objects.update_or_create(
+                device=device,
+                metric_key="battery_soc",
+                defaults={"value": soc_val, "timestamp": now},
+            )
+            try:
+                cache.set(f"device:{device.id}:battery_soc", soc_val, timeout=3600)
+            except Exception as e:
+                logger.warning("Cache write failed for battery_soc: %s", e)
+
+        # 3. Load Power & Grid Power
+        if "load_power_w" in metrics and metrics["load_power_w"] is not None:
+            load_val = float(metrics["load_power_w"])
+            DeviceLatestMetric.objects.update_or_create(
+                device=device,
+                metric_key="load_power",
+                defaults={"value": load_val, "timestamp": now},
+            )
+
+        if "grid_power_w" in metrics and metrics["grid_power_w"] is not None:
+            grid_val = float(metrics["grid_power_w"])
+            DeviceLatestMetric.objects.update_or_create(
+                device=device,
+                metric_key="grid_power",
+                defaults={"value": grid_val, "timestamp": now},
+            )
+
 
         # Status aktualisieren
         integration.last_polled_at = now
