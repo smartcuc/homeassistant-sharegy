@@ -363,14 +363,14 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
                         soc_val = float(soc) if soc is not None else None
                         day_wh = float(p_data.get("p83022") or p_data.get("p83331") or 0.0)
 
-                        raw_data["result_data"].update({
-                            "curr_power": pv / 1000.0 if pv > 200 else pv,
-                            "load_power": load / 1000.0 if load > 200 else load,
-                            "grid_power": grid / 1000.0 if abs(grid) > 200 else grid,
-                            "battery_power": bat_pwr / 1000.0 if abs(bat_pwr) > 200 else bat_pwr,
+                        raw_data["_direct_metrics"] = {
+                            "pv_power_w": max(0.0, pv),
+                            "load_power_w": max(0.0, load),
+                            "grid_power_w": grid,
+                            "battery_power_w": bat_pwr,
                             "battery_soc": soc_val,
-                            "today_energy": day_wh / 1000.0 if day_wh > 100 else day_wh,
-                        })
+                            "daily_generation_kwh": round(day_wh / 1000.0 if day_wh > 50 else day_wh, 2),
+                        }
             except Exception as e:
                 logger.warning("getPowerStationRealTimeData query failed: %s", e)
 
@@ -409,9 +409,21 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
                             raw_data["result_data"].update(d_list[0])
             except Exception as e:
                 logger.warning("getPowerStationDetail query failed: %s", e)
+            
+            live_metrics = _parse_metrics_from_payload(profile, raw_data)
+            if raw_data.get("_direct_metrics"):
+                for k, v in raw_data["_direct_metrics"].items():
+                    if v is not None:
+                        live_metrics[k] = v
+            return {
+                "status": "success",
+                "message": f"Live-Verbindung zu {profile.get('name')} erfolgreich!",
+                "live_metrics": live_metrics,
+                "raw_sample": raw_data,
+                "simulated": False,
+            }
 
         else:
-
             # 2. Legacy / Password Login Modus
             if not token:
                 token_info = _execute_sungrow_login(
@@ -421,17 +433,26 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
                     password=credentials.get("user_password"),
                 )
                 token = token_info["token"]
+                credentials["token"] = token
+                credentials["user_id"] = token_info["user_id"]
 
-            ps_id = credentials.get("ps_id")
-            context = {**credentials, "token": token, "ps_id": ps_id, "appkey": appkey}
-            req_cfg = profile["requests"]["telemetry"]
-            url = f"{base_url.rstrip('/')}{_render_template(req_cfg['endpoint'], context)}"
-            headers = _render_template(req_cfg.get("headers", {}), context)
-            body = _render_template(req_cfg.get("body", {}), context)
+            headers = {
+                "Content-Type": "application/json",
+                "sys_code": "901",
+                "token": token,
+            }
+            body = {
+                "appkey": appkey,
+                "ps_id": str(ps_id or ""),
+            }
+            resp = requests.post(
+                f"{base_url.rstrip('/')}/v1/powerStationService/getPowerStationDetail",
+                headers=headers,
+                json=body,
+                timeout=12,
+            )
+            raw_data = resp.json() if resp.status_code == 200 else {}
 
-            resp = requests.post(url, json=body, headers=headers, timeout=12)
-            resp.raise_for_status()
-            raw_data = resp.json()
 
 
 
@@ -595,7 +616,8 @@ def execute_cloud_poll(integration: CloudDeviceIntegration) -> dict:
         if has_battery and device.home:
             try:
                 from producer.models import StorageSystem
-                storage, _ = StorageSystem.objects.get_or_create(
+                desired_cap = float(credentials.get("battery_capacity_kwh") or 22.0)
+                storage, created = StorageSystem.objects.get_or_create(
                     home=device.home,
                     defaults={
                         "name": f"{credentials.get('ps_name') or 'Sungrow'} Speicher",
@@ -604,19 +626,31 @@ def execute_cloud_poll(integration: CloudDeviceIntegration) -> dict:
                         "power_device": device,
                         "soc_metric_key": "battery_soc",
                         "power_metric_key": "battery_power",
-                        "capacity_kwh": 9.6,
+                        "capacity_kwh": desired_cap,
+                        "max_charge_power_kw": 10.0,
+                        "max_discharge_power_kw": 10.0,
                         "is_auto_detected": True,
                     }
                 )
+                update_fields = []
                 if not storage.soc_device or not storage.power_device:
                     storage.primary_device = device
                     storage.soc_device = device
                     storage.power_device = device
                     storage.soc_metric_key = "battery_soc"
                     storage.power_metric_key = "battery_power"
-                    storage.save(update_fields=["primary_device", "soc_device", "power_device", "soc_metric_key", "power_metric_key"])
+                    update_fields.extend(["primary_device", "soc_device", "power_device", "soc_metric_key", "power_metric_key"])
+                
+                # Falls Kapazität noch auf dem alten Default (9.6 oder 10.0) steht, auf 22 kWh aktualisieren
+                if float(storage.capacity_kwh) in (9.6, 10.0):
+                    storage.capacity_kwh = desired_cap
+                    update_fields.append("capacity_kwh")
+                
+                if update_fields:
+                    storage.save(update_fields=list(set(update_fields)))
             except Exception as st_err:
                 logger.warning("Could not auto-link StorageSystem: %s", st_err)
+
 
         # 3. Load Power & Grid Power
         if "load_power_w" in metrics and metrics["load_power_w"] is not None:
