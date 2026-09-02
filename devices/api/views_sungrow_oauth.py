@@ -36,23 +36,26 @@ SUNGROW_AUTH_BASE = "https://web3.isolarcloud.eu/#/authorized-app"
 
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def sungrow_oauth_start(request):
     """
-    Erzeugt die offizielle Sungrow OAuth2.0 Autorisierungs-URL für den eingeloggten Nutzer.
+    Erzeugt die offizielle Sungrow OAuth2.0 Autorisierungs-URL für den Nutzer.
     GET /api/devices/sungrow/auth-url/?home_id=<id>
     """
     home_id = request.query_params.get("home_id")
-    if not home_id:
-        primary_home = Home.objects.filter(user=request.user).first()
-        home_id = primary_home.id if primary_home else None
+    user_id = str(request.user.id) if request.user and request.user.is_authenticated else "anonymous"
 
     if not home_id:
-        return Response({"status": "error", "message": "Kein Haushalt (Home) gefunden."}, status=400)
+        if request.user and request.user.is_authenticated:
+            primary_home = Home.objects.filter(user=request.user).first()
+            home_id = primary_home.id if primary_home else 1
+        else:
+            first_home = Home.objects.first()
+            home_id = first_home.id if first_home else 1
 
     # State Parameter zur Zuordnung von User & Home
     state_payload = {
-        "user_id": str(request.user.id),
+        "user_id": user_id,
         "home_id": int(home_id),
     }
     state_encoded = urllib.parse.quote(json.dumps(state_payload))
@@ -69,6 +72,7 @@ def sungrow_oauth_start(request):
         "appkey": SUNGROW_APPKEY,
         "redirect_url": SUNGROW_REDIRECT_URL,
     })
+
 
 
 @csrf_exempt

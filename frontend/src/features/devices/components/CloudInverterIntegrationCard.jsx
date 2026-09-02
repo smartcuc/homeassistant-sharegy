@@ -76,15 +76,20 @@ export default function CloudInverterIntegrationCard({ primaryHome }) {
     }
 
     async function handleSungrowOAuth() {
+        const directSungrowUrl = `https://web3.isolarcloud.eu/#/authorized-app?cloudId=3&applicationId=4830&redirectUrl=${encodeURIComponent("https://sharegy.de/api/v1/integrations/sungrow/callback")}`;
         try {
             const data = await apiFetch(`/api/devices/sungrow/auth-url/?home_id=${primaryHome?.id || ""}`);
             if (data?.auth_url) {
                 window.location.href = data.auth_url;
+                return;
             }
         } catch (err) {
-            setErrorMsg(err.message || "Sungrow OAuth konnte nicht gestartet werden.");
+            console.warn("API URL fetch failed, using direct Sungrow OAuth redirect:", err);
         }
+        // Fallback: Direkte Weiterleitung
+        window.location.href = directSungrowUrl;
     }
+
 
     async function handleIntegrate() {
         setIsSaving(true);
