@@ -20,5 +20,8 @@ urlpatterns = [
 
     # ☀️ Offizieller Sungrow iSolarCloud OAuth2.0 Callback
     path("integrations/sungrow/callback", sungrow_oauth_callback, name="sungrow_oauth_callback"),
+    path("integrations/sungrow/callback/", sungrow_oauth_callback),
     path("integrations/sungrow/authorize", sungrow_oauth_start, name="sungrow_oauth_authorize"),
-]
+    path("integrations/sungrow/authorize/", sungrow_oauth_start),
+]
+

@@ -171,16 +171,24 @@ def sungrow_oauth_callback(request):
             logger.warning("Could not list power stations during OAuth callback: %s", e)
 
 
-    # Gerät anlegen oder aktualisieren
-    device_identifier = f"sungrow-oauth-{home.id if home else '0'}"
-    device, _ = Device.objects.get_or_create(
-        home=home,
-        identifier=device_identifier,
-        defaults={
-            "configured": True,
-            "active": True,
-        },
-    )
+    # Bestehendes Sungrow-Gerät finden (z. B. ID 1256) oder neues anlegen
+    existing_cdi = CloudDeviceIntegration.objects.filter(
+        profile_id="sungrow_isolarcloud",
+        device__home=home,
+    ).select_related("device").first()
+
+    if existing_cdi and existing_cdi.device:
+        device = existing_cdi.device
+    else:
+        device_identifier = f"cloud-sungrow_isolarcloud-{home.id if home else '0'}"
+        device, _ = Device.objects.get_or_create(
+            home=home,
+            identifier=device_identifier,
+            defaults={
+                "configured": True,
+                "active": True,
+            },
+        )
     from devices.models import DeviceConfig, DeviceRole, MetricDefinition
     role_both = DeviceRole.objects.filter(key="both").first() or DeviceRole.objects.filter(key="producer").first()
     p_metric = MetricDefinition.objects.filter(key="power").first()
@@ -198,26 +206,35 @@ def sungrow_oauth_callback(request):
         dev_cfg.role = role_both
         dev_cfg.save()
 
-    # Cloud Integration anlegen
+    new_credentials = {
+        "appkey": SUNGROW_APPKEY,
+        "user_account": user_account,
+        "token": token,
+        "refresh_token": refresh_token,
+        "ps_id": ps_id,
+        "ps_name": plant_name,
+        "auth_type": "oauth2",
+        "battery_capacity_kwh": 22.0,
+    }
+
+    # Cloud Integration anlegen oder aktualisieren
     integration, _ = CloudDeviceIntegration.objects.update_or_create(
         device=device,
         defaults={
             "profile_id": "sungrow_isolarcloud",
-            "credentials": {
-                "appkey": SUNGROW_APPKEY,
-                "user_account": user_account,
-                "token": token,
-                "refresh_token": refresh_token,
-                "ps_id": ps_id,
-                "ps_name": plant_name,
-                "auth_type": "oauth2",
-                "battery_capacity_kwh": 22.0,
-            },
+            "credentials": new_credentials,
             "polling_interval_seconds": 60,
             "is_active": True,
             "last_status": CloudDeviceIntegration.STATUS_OK,
         },
     )
+
+    # Alle Sungrow-Integrationen dieses Haushalts synchronisieren
+    CloudDeviceIntegration.objects.filter(
+        profile_id="sungrow_isolarcloud",
+        device__home=home,
+    ).update(credentials=new_credentials, is_active=True)
+
 
 
 
