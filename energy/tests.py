@@ -391,5 +391,20 @@ class GrafanaAndHomeAssistantPluginTest(TestCase):
         self.assertIn("timeline", data)
         self.assertGreater(len(data["timeline"]), 0)
 
+    def test_system_setup_status_view(self):
+        self.client.force_login(self.user)
+        res = self.client.get("/api/energy/setup-status/")
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertIn("score", data)
+        self.assertIn("pillars", data)
+        self.assertIn("pv", data["pillars"])
+        self.assertIn("grid", data["pillars"])
+        self.assertIn("battery", data["pillars"])
+        self.assertIn("load", data["pillars"])
+        self.assertIn("recommendations", data)
+        self.assertIn("submeters", data)
+
+
 
 

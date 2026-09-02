@@ -847,3 +847,20 @@ def export_chart_pdf(request):
     response.write(buffer.getvalue())
 
     return response
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def system_setup_status_view(request):
+    """
+    Liefert den Onboarding- und Einrichtungs-Status (Omi-Test) für das
+    Energiesystem des Nutzers:
+    - Status der 4 Kernsäulen (PV, Netz/Zähler, Speicher, Hauslast)
+    - Anzahl der Submeter, Räume & Etagen
+    - Readiness-Score (0-100%)
+    - Konkrete, laienverständliche Handlungsempfehlungen
+    """
+    from energy.services.system_health import check_home_system_status
+    status = check_home_system_status(request.user)
+    return Response(status)
+

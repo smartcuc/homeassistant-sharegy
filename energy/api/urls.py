@@ -18,6 +18,7 @@ from .views import (
     export_chart_xlsx,
     export_chart_csv,
     export_chart_pdf,
+    system_setup_status_view,
 )
 
 urlpatterns = [
@@ -51,4 +52,6 @@ urlpatterns += [
     path("grid/dimming/signal/", grid_dimming_signal_webhook),
     path("grid/dimming/clear/", grid_dimming_clear_view),
     path("grid/steuve/", steuve_devices_config_view),
+    # 🎯 Onboarding & System Readiness Check (Omi-Test)
+    path("setup-status/", system_setup_status_view),
 ]

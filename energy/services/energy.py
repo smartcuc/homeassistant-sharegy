@@ -55,8 +55,9 @@ def get_energy_data(user):
             - (grid.get("export") or 0)
         )
     house_demand = max(0.0, float(house_demand or 0.0))
-    # 4. Heutigen Verbrauch ermitteln
     today = get_today_consumption(user)
+    from energy.services.system_health import check_home_system_status
+    system_status = check_home_system_status(user)
 
     # 5. Device-IDs fuer die Dashboard-Historiencharts sammeln (Batch-Abfrage)
     sources = list(
@@ -178,6 +179,7 @@ def get_energy_data(user):
         "sankey": sankey,
         "kpis": kpis,
         "charts": charts,
+        "system_status": system_status,
         "pv_power_w": pv_power_w,
         "load_power_w": load_power_w,
         "grid_power_w": grid_power_w,
