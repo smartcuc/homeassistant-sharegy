@@ -297,15 +297,40 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
 
     # Echter HTTP-Aufruf
     if auth_type == "sungrow_token" or profile_id == "sungrow_isolarcloud":
-        appkey = credentials.get("appkey") or getattr(settings, "SUNGROW_APPKEY", "988713D7D057090474AEC9584CBA1AAD")
-        app_secret = getattr(settings, "SUNGROW_APP_SECRET", os.getenv("SUNGROW_APP_SECRET", ""))
+        appkey = credentials.get("appkey") or getattr(settings, "SUNGROW_APPKEY", None) or os.getenv("SUNGROW_APPKEY") or "988713D7D057090474AEC9584CBA1AAD"
+        app_secret = getattr(settings, "SUNGROW_APP_SECRET", None) or os.getenv("SUNGROW_APP_SECRET") or "chh8ptt9n6xkchjr0yez6hxadxh58vc9"
         token = credentials.get("token")
         is_oauth = credentials.get("auth_type") == "oauth2" or (token and not str(token).startswith("sg_oauth_"))
 
         if is_oauth and token:
+            # Falls noch ungetauschter Code vorhanden
+            if str(token).startswith("sg_oauth_"):
+                auth_code = str(token).replace("sg_oauth_", "").strip()
+                try:
+                    redir_url = getattr(settings, "SUNGROW_REDIRECT_URL", None) or os.getenv("SUNGROW_REDIRECT_URL") or "https://sharegy.de/api/v1/integrations/sungrow/callback"
+                    t_resp = requests.post(
+                        f"{base_url.rstrip('/')}/openapi/apiManage/token",
+                        json={
+                            "appkey": appkey,
+                            "code": auth_code,
+                            "grant_type": "authorization_code",
+                            "redirect_uri": redir_url,
+                        },
+                        headers={"x-access-key": app_secret, "Content-Type": "application/json"},
+                        timeout=10,
+                    )
+                    if t_resp.status_code == 200 and t_resp.json().get("access_token"):
+                        token = t_resp.json()["access_token"]
+                        credentials["token"] = token
+                        if t_resp.json().get("refresh_token"):
+                            credentials["refresh_token"] = t_resp.json()["refresh_token"]
+                except Exception as ex_err:
+                    logger.warning("Auto token exchange failed: %s", ex_err)
+
             # 1. OAuth2 OpenAPI Modus
             ps_id = credentials.get("ps_id")
             if not ps_id or ps_id in ("default_ps", "12345", ""):
+
                 try:
                     list_resp = requests.post(
                         f"{base_url.rstrip('/')}/openapi/platform/queryPowerStationList",

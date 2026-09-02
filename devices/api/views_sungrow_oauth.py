@@ -24,9 +24,10 @@ from devices.services_profile_runner import execute_cloud_poll
 logger = logging.getLogger(__name__)
 
 # Sungrow Developer Configuration
-SUNGROW_APPKEY = getattr(settings, "SUNGROW_APPKEY", os.getenv("SUNGROW_APPKEY", "988713D7D057090474AEC9584CBA1AAD"))
-SUNGROW_APP_SECRET = getattr(settings, "SUNGROW_APP_SECRET", os.getenv("SUNGROW_APP_SECRET", ""))
+SUNGROW_APPKEY = getattr(settings, "SUNGROW_APPKEY", None) or os.getenv("SUNGROW_APPKEY") or "988713D7D057090474AEC9584CBA1AAD"
+SUNGROW_APP_SECRET = getattr(settings, "SUNGROW_APP_SECRET", None) or os.getenv("SUNGROW_APP_SECRET") or "chh8ptt9n6xkchjr0yez6hxadxh58vc9"
 SUNGROW_GATEWAY_URL = getattr(settings, "SUNGROW_GATEWAY_URL", "https://gateway.isolarcloud.eu")
+
 SUNGROW_REDIRECT_URL = getattr(
     settings,
     "SUNGROW_REDIRECT_URL",
@@ -180,10 +181,22 @@ def sungrow_oauth_callback(request):
             "active": True,
         },
     )
-    if hasattr(device, "config") and device.config:
-        device.config.name = plant_name
-        device.config.energy_source = "pv"
-        device.config.save()
+    from devices.models import DeviceConfig, DeviceRole, MetricDefinition
+    role_both = DeviceRole.objects.filter(key="both").first() or DeviceRole.objects.filter(key="producer").first()
+    p_metric = MetricDefinition.objects.filter(key="power").first()
+    dev_cfg, _ = DeviceConfig.objects.get_or_create(
+        device=device,
+        defaults={
+            "home": home,
+            "name": plant_name,
+            "role": role_both,
+            "metric_definition": p_metric,
+        }
+    )
+    if dev_cfg.name != plant_name or not dev_cfg.role:
+        dev_cfg.name = plant_name
+        dev_cfg.role = role_both
+        dev_cfg.save()
 
     # Cloud Integration anlegen
     integration, _ = CloudDeviceIntegration.objects.update_or_create(
@@ -194,15 +207,18 @@ def sungrow_oauth_callback(request):
                 "appkey": SUNGROW_APPKEY,
                 "user_account": user_account,
                 "token": token,
+                "refresh_token": refresh_token,
                 "ps_id": ps_id,
                 "ps_name": plant_name,
                 "auth_type": "oauth2",
+                "battery_capacity_kwh": 22.0,
             },
             "polling_interval_seconds": 60,
             "is_active": True,
             "last_status": CloudDeviceIntegration.STATUS_OK,
         },
     )
+
 
 
     # Initialen Poll ausführen
