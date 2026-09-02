@@ -370,7 +370,7 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
                         "appkey": appkey,
                         "ps_id_list": [str(ps_id or "")],
                         "point_id_list": MEASURE_POINTS,
-                        "is_get_point_dict": "0",
+                        "is_get_point_dict": "1",
                     },
                     headers={
                         "x-access-key": app_secret,
@@ -381,6 +381,9 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
                 )
                 if rt_resp.status_code == 200:
                     rt_json = rt_resp.json()
+                    point_dict = rt_json.get("result_data", {}).get("point_dict", {})
+                    if point_dict:
+                        logger.info("[SUNGROW_OPENAPI] Discovered Point Dictionary: %s", point_dict)
                     pts = rt_json.get("result_data", {}).get("device_point_list", [])
                     if pts:
                         # Robustes Dict aufbauen: Keys mit und ohne 'p' Präfix
