@@ -389,8 +389,12 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
         elif total_house_consumption_kwh > 0:
             autarky_rate = round(max(0.0, min(100.0, (1.0 - (total_grid_import_kwh / total_house_consumption_kwh)) * 100.0)), 1)
             solar_supplied_kwh = round(max(0.0, total_house_consumption_kwh - total_grid_import_kwh), 2)
+        else:
+            autarky_rate = 0.0
+            solar_supplied_kwh = 0.0
 
         autarky_rate = min(100.0, max(0.0, autarky_rate))
+
 
         # 4. Eigenverbrauchsquote (Wie viel % der PV-Erzeugung wurden direkt verbraucht oder im Speicher geladen?):
         self_consumption_kwh = round(direct_consumption_kwh + total_battery_charge_kwh, 2)

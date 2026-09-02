@@ -327,49 +327,91 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
                 except Exception as e:
                     logger.warning("Auto-fetch ps_id via OpenAPI failed: %s", e)
 
-            # Details abfragen
-            resp = requests.post(
-                f"{base_url.rstrip('/')}/openapi/platform/getPowerStationDetail",
-                json={"appkey": appkey, "ps_ids": str(ps_id or ""), "lang": "_de_DE"},
-                headers={
-                    "x-access-key": app_secret,
-                    "Authorization": f"Bearer {token}",
-                    "Content-Type": "application/json",
-                },
-                timeout=12,
-            )
-            raw_data = resp.json() if resp.status_code == 200 else {}
-            # Falls Token abgelaufen ist, Refresh versuchen
-            if raw_data.get("result_code") in ("2", "000") and credentials.get("refresh_token"):
-                try:
-                    ref_resp = requests.post(
-                        f"{base_url.rstrip('/')}/openapi/apiManage/refreshToken",
-                        json={"appkey": appkey, "refresh_token": credentials["refresh_token"]},
-                        headers={"x-access-key": app_secret, "Content-Type": "application/json"},
-                        timeout=10,
-                    )
-                    if ref_resp.status_code == 200 and ref_resp.json().get("access_token"):
-                        token = ref_resp.json()["access_token"]
-                        credentials["token"] = token
-                        # Erneut abfragen
-                        resp = requests.post(
-                            f"{base_url.rstrip('/')}/openapi/platform/getPowerStationDetail",
-                            json={"appkey": appkey, "ps_ids": str(ps_id or ""), "lang": "_de_DE"},
-                            headers={"x-access-key": app_secret, "Authorization": f"Bearer {token}", "Content-Type": "application/json"},
-                            timeout=12,
-                        )
-                        raw_data = resp.json() if resp.status_code == 200 else {}
-                except Exception as ref_err:
-                    logger.warning("Token refresh error: %s", ref_err)
+            # 1. Realtime Measurement Points abfragen (Offizielle Sungrow OpenAPI)
+            MEASURE_POINTS = [
+                "83033", "83067", "83022", "83052", "83106", "83129", "83252",
+                "83238", "83549", "83326", "83328", "83329", "83330", "83334"
+            ]
+            raw_data = {"result_code": "1", "result_data": {}}
 
-            # Extrahiere data_list in result_data falls Liste
-            if raw_data.get("result_data", {}).get("data_list"):
-                d_list = raw_data["result_data"]["data_list"]
-                if isinstance(d_list, list) and d_list:
-                    # Merge data_list[0] in result_data für einheitliches Parsing
-                    raw_data["result_data"].update(d_list[0])
+            try:
+                rt_resp = requests.post(
+                    f"{base_url.rstrip('/')}/openapi/platform/getPowerStationRealTimeData",
+                    json={
+                        "appkey": appkey,
+                        "ps_id_list": [str(ps_id or "")],
+                        "point_id_list": MEASURE_POINTS,
+                        "is_get_point_dict": "0",
+                    },
+                    headers={
+                        "x-access-key": app_secret,
+                        "Authorization": f"Bearer {token}",
+                        "Content-Type": "application/json",
+                    },
+                    timeout=12,
+                )
+                if rt_resp.status_code == 200:
+                    rt_json = rt_resp.json()
+                    pts = rt_json.get("result_data", {}).get("device_point_list", [])
+                    if pts:
+                        p_data = pts[0]
+                        pv = float(p_data.get("p83033") or p_data.get("p83067") or p_data.get("p83329") or 0.0)
+                        load = float(p_data.get("p83052") or p_data.get("p83106") or p_data.get("p83330") or 0.0)
+                        grid = float(p_data.get("p83549") or p_data.get("p83328") or 0.0)
+                        bat_pwr = float(p_data.get("p83238") or p_data.get("p83326") or 0.0)
+                        soc = p_data.get("p83129") or p_data.get("p83252") or p_data.get("p83334")
+                        soc_val = float(soc) if soc is not None else None
+                        day_wh = float(p_data.get("p83022") or p_data.get("p83331") or 0.0)
+
+                        raw_data["result_data"].update({
+                            "curr_power": pv / 1000.0 if pv > 200 else pv,
+                            "load_power": load / 1000.0 if load > 200 else load,
+                            "grid_power": grid / 1000.0 if abs(grid) > 200 else grid,
+                            "battery_power": bat_pwr / 1000.0 if abs(bat_pwr) > 200 else bat_pwr,
+                            "battery_soc": soc_val,
+                            "today_energy": day_wh / 1000.0 if day_wh > 100 else day_wh,
+                        })
+            except Exception as e:
+                logger.warning("getPowerStationRealTimeData query failed: %s", e)
+
+            # Details abfragen als Ergänzung
+            try:
+                resp = requests.post(
+                    f"{base_url.rstrip('/')}/openapi/platform/getPowerStationDetail",
+                    json={"appkey": appkey, "ps_ids": str(ps_id or ""), "lang": "_de_DE"},
+                    headers={
+                        "x-access-key": app_secret,
+                        "Authorization": f"Bearer {token}",
+                        "Content-Type": "application/json",
+                    },
+                    timeout=12,
+                )
+                if resp.status_code == 200:
+                    det_json = resp.json()
+                    # Falls Token abgelaufen ist, Refresh versuchen
+                    if det_json.get("result_code") in ("2", "000") and credentials.get("refresh_token"):
+                        try:
+                            ref_resp = requests.post(
+                                f"{base_url.rstrip('/')}/openapi/apiManage/refreshToken",
+                                json={"appkey": appkey, "refresh_token": credentials["refresh_token"]},
+                                headers={"x-access-key": app_secret, "Content-Type": "application/json"},
+                                timeout=10,
+                            )
+                            if ref_resp.status_code == 200 and ref_resp.json().get("access_token"):
+                                token = ref_resp.json()["access_token"]
+                                credentials["token"] = token
+                        except Exception as ref_err:
+                            logger.warning("Token refresh error: %s", ref_err)
+
+                    if det_json.get("result_data", {}).get("data_list"):
+                        d_list = det_json["result_data"]["data_list"]
+                        if isinstance(d_list, list) and d_list:
+                            raw_data["result_data"].update(d_list[0])
+            except Exception as e:
+                logger.warning("getPowerStationDetail query failed: %s", e)
 
         else:
+
             # 2. Legacy / Password Login Modus
             if not token:
                 token_info = _execute_sungrow_login(
@@ -487,7 +529,9 @@ def execute_cloud_poll(integration: CloudDeviceIntegration) -> dict:
                 logger.warning("Cache write failed for device %s: %s", device.id, e)
 
         # 2. Battery SoC & Power
+        has_battery = False
         if "battery_soc" in metrics and metrics["battery_soc"] is not None:
+            has_battery = True
             soc_val = float(metrics["battery_soc"])
             DeviceMetric.objects.create(
                 device=device,
@@ -503,8 +547,76 @@ def execute_cloud_poll(integration: CloudDeviceIntegration) -> dict:
             )
             try:
                 cache.set(f"device:{device.id}:battery_soc", soc_val, timeout=3600)
+                cache.set(f"device:{device.id}:latest_soc", soc_val, timeout=3600)
             except Exception as e:
                 logger.warning("Cache write failed for battery_soc: %s", e)
+
+        if "battery_power_w" in metrics and metrics["battery_power_w"] is not None:
+            has_battery = True
+            bat_pwr = float(metrics["battery_power_w"])
+            DeviceMetric.objects.create(
+                device=device,
+                metric_key="battery_power",
+                unit="W",
+                value=bat_pwr,
+                timestamp=now,
+            )
+            DeviceLatestMetric.objects.update_or_create(
+                device=device,
+                metric_key="battery_power",
+                defaults={"value": bat_pwr, "timestamp": now},
+            )
+            try:
+                cache.set(f"device:{device.id}:battery_power", bat_pwr, timeout=3600)
+            except Exception as e:
+                logger.warning("Cache write failed for battery_power: %s", e)
+
+        # Automatische Verknüpfung / Anlegen von DeviceConfig & StorageSystem
+        from devices.models import DeviceConfig, DeviceRole, MetricDefinition
+        try:
+            role_key = "both" if has_battery else "producer"
+            target_role = DeviceRole.objects.filter(key=role_key).first() or DeviceRole.objects.filter(key="producer").first()
+            p_metric = MetricDefinition.objects.filter(key="power").first()
+            dev_cfg, _ = DeviceConfig.objects.get_or_create(
+                device=device,
+                defaults={
+                    "home": device.home,
+                    "name": credentials.get("ps_name") or "Sungrow Hybrid-Anlage",
+                    "role": target_role,
+                    "metric_definition": p_metric,
+                }
+            )
+            if not dev_cfg.role:
+                dev_cfg.role = target_role
+                dev_cfg.save(update_fields=["role"])
+        except Exception as cfg_err:
+            logger.warning("Could not set DeviceConfig: %s", cfg_err)
+
+        if has_battery and device.home:
+            try:
+                from producer.models import StorageSystem
+                storage, _ = StorageSystem.objects.get_or_create(
+                    home=device.home,
+                    defaults={
+                        "name": f"{credentials.get('ps_name') or 'Sungrow'} Speicher",
+                        "primary_device": device,
+                        "soc_device": device,
+                        "power_device": device,
+                        "soc_metric_key": "battery_soc",
+                        "power_metric_key": "battery_power",
+                        "capacity_kwh": 9.6,
+                        "is_auto_detected": True,
+                    }
+                )
+                if not storage.soc_device or not storage.power_device:
+                    storage.primary_device = device
+                    storage.soc_device = device
+                    storage.power_device = device
+                    storage.soc_metric_key = "battery_soc"
+                    storage.power_metric_key = "battery_power"
+                    storage.save(update_fields=["primary_device", "soc_device", "power_device", "soc_metric_key", "power_metric_key"])
+            except Exception as st_err:
+                logger.warning("Could not auto-link StorageSystem: %s", st_err)
 
         # 3. Load Power & Grid Power
         if "load_power_w" in metrics and metrics["load_power_w"] is not None:
@@ -526,6 +638,7 @@ def execute_cloud_poll(integration: CloudDeviceIntegration) -> dict:
 
         # Status aktualisieren
         integration.last_polled_at = now
+
         integration.last_status = CloudDeviceIntegration.STATUS_OK
         integration.last_error_message = ""
         integration.save(update_fields=["last_polled_at", "last_status", "last_error_message", "updated_at"])
