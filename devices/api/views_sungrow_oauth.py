@@ -108,50 +108,67 @@ def sungrow_oauth_callback(request):
         # Fallback: Erster aktiver Haushalt
         home = Home.objects.first()
 
-    # Token-Austausch durchführen (oder Simulator wenn Code=demo/sandbox)
+    # Offizieller OAuth2.0 Token-Austausch über OpenAPI
     token = None
+    refresh_token = ""
     user_account = "sungrow_oauth_user"
     ps_id = "default_ps"
+    plant_name = "Sungrow iSolarCloud Hybrid-Anlage"
 
     if code and code not in ["demo", "test"]:
         try:
             token_resp = requests.post(
-                f"{SUNGROW_GATEWAY_URL}/v1/userService/getAppToken",
+                f"{SUNGROW_GATEWAY_URL}/openapi/apiManage/token",
                 json={
                     "appkey": SUNGROW_APPKEY,
-                    "app_secret": SUNGROW_APP_SECRET,
                     "code": code,
+                    "grant_type": "authorization_code",
+                    "redirect_uri": SUNGROW_REDIRECT_URL,
                 },
-                headers={"Content-Type": "application/json", "sys_code": "901"},
-                timeout=10,
+                headers={
+                    "x-access-key": SUNGROW_APP_SECRET,
+                    "Content-Type": "application/json",
+                },
+                timeout=12,
             )
+            logger.info("Sungrow Token Exchange response [%s]: %s", token_resp.status_code, token_resp.text)
             if token_resp.status_code == 200:
                 resp_json = token_resp.json()
-                token = resp_json.get("result_data", {}).get("token")
-                user_account = resp_json.get("result_data", {}).get("user_account", user_account)
+                token = resp_json.get("access_token")
+                refresh_token = resp_json.get("refresh_token", "")
+                if not token and resp_json.get("result_data"):
+                    token = resp_json["result_data"].get("access_token") or resp_json["result_data"].get("token")
+                    refresh_token = resp_json["result_data"].get("refresh_token", "")
         except Exception as e:
-            logger.warning("Sungrow OAuth token exchange failed: %s", e)
+            logger.error("Sungrow OAuth token exchange failed: %s", e)
 
     if not token:
         token = f"sg_oauth_{code or 'demo_token_12345'}"
 
-    # Echte Anlagen-ID (ps_id) über getPowerStationList abfragen
-    plant_name = "Sungrow iSolarCloud Hybrid-Anlage"
-    try:
-        list_resp = requests.post(
-            f"{SUNGROW_GATEWAY_URL}/v1/powerStationService/getPowerStationList",
-            json={"appkey": SUNGROW_APPKEY, "curPage": 1, "size": 10},
-            headers={"Content-Type": "application/json", "sys_code": "901", "token": token},
-            timeout=10,
-        )
-        if list_resp.status_code == 200:
-            stations = list_resp.json().get("result_data", {}).get("pageList", [])
-            if stations:
-                ps_id = str(stations[0].get("ps_id"))
-                plant_name = stations[0].get("ps_name") or plant_name
-                logger.info("Found Sungrow station: %s (%s)", ps_id, plant_name)
-    except Exception as e:
-        logger.warning("Could not list power stations during OAuth callback: %s", e)
+    # Echte Anlagen-ID (ps_id) über offizielle OpenAPI queryPowerStationList abfragen
+    if token and not token.startswith("sg_oauth_"):
+        try:
+            list_resp = requests.post(
+                f"{SUNGROW_GATEWAY_URL}/openapi/platform/queryPowerStationList",
+                json={"appkey": SUNGROW_APPKEY, "page": 1, "size": 20, "lang": "_de_DE"},
+                headers={
+                    "x-access-key": SUNGROW_APP_SECRET,
+                    "Authorization": f"Bearer {token}",
+                    "Content-Type": "application/json",
+                },
+                timeout=12,
+            )
+            logger.info("Sungrow queryPowerStationList response [%s]: %s", list_resp.status_code, list_resp.text)
+            if list_resp.status_code == 200:
+                list_data = list_resp.json().get("result_data", {})
+                stations = list_data.get("pageList", []) if isinstance(list_data, dict) else []
+                if stations:
+                    ps_id = str(stations[0].get("ps_id") or stations[0].get("id"))
+                    plant_name = stations[0].get("ps_name") or plant_name
+                    logger.info("Auto-discovered Sungrow station: %s (%s)", ps_id, plant_name)
+        except Exception as e:
+            logger.warning("Could not list power stations during OAuth callback: %s", e)
+
 
     # Gerät anlegen oder aktualisieren
     device_identifier = f"sungrow-oauth-{home.id if home else '0'}"

@@ -296,55 +296,101 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
         }
 
     # Echter HTTP-Aufruf
-    if auth_type == "sungrow_token":
+    if auth_type == "sungrow_token" or profile_id == "sungrow_isolarcloud":
         appkey = credentials.get("appkey") or getattr(settings, "SUNGROW_APPKEY", "988713D7D057090474AEC9584CBA1AAD")
+        app_secret = getattr(settings, "SUNGROW_APP_SECRET", os.getenv("SUNGROW_APP_SECRET", ""))
         token = credentials.get("token")
+        is_oauth = credentials.get("auth_type") == "oauth2" or (token and not str(token).startswith("sg_oauth_"))
 
-        if not token:
-            token_info = _execute_sungrow_login(
-                base_url=base_url,
-                appkey=appkey,
-                account=credentials.get("user_account"),
-                password=credentials.get("user_password"),
+        if is_oauth and token:
+            # 1. OAuth2 OpenAPI Modus
+            ps_id = credentials.get("ps_id")
+            if not ps_id or ps_id in ("default_ps", "12345", ""):
+                try:
+                    list_resp = requests.post(
+                        f"{base_url.rstrip('/')}/openapi/platform/queryPowerStationList",
+                        json={"appkey": appkey, "page": 1, "size": 20, "lang": "_de_DE"},
+                        headers={
+                            "x-access-key": app_secret,
+                            "Authorization": f"Bearer {token}",
+                            "Content-Type": "application/json",
+                        },
+                        timeout=12,
+                    )
+                    if list_resp.status_code == 200:
+                        list_data = list_resp.json().get("result_data", {})
+                        stations = list_data.get("pageList", []) if isinstance(list_data, dict) else []
+                        if stations:
+                            ps_id = str(stations[0].get("ps_id") or stations[0].get("id"))
+                            credentials["ps_id"] = ps_id
+                            credentials["ps_name"] = stations[0].get("ps_name", "Sungrow PV-Anlage")
+                except Exception as e:
+                    logger.warning("Auto-fetch ps_id via OpenAPI failed: %s", e)
+
+            # Details abfragen
+            resp = requests.post(
+                f"{base_url.rstrip('/')}/openapi/platform/getPowerStationDetail",
+                json={"appkey": appkey, "ps_ids": str(ps_id or ""), "lang": "_de_DE"},
+                headers={
+                    "x-access-key": app_secret,
+                    "Authorization": f"Bearer {token}",
+                    "Content-Type": "application/json",
+                },
+                timeout=12,
             )
-            token = token_info["token"]
+            raw_data = resp.json() if resp.status_code == 200 else {}
+            # Falls Token abgelaufen ist, Refresh versuchen
+            if raw_data.get("result_code") in ("2", "000") and credentials.get("refresh_token"):
+                try:
+                    ref_resp = requests.post(
+                        f"{base_url.rstrip('/')}/openapi/apiManage/refreshToken",
+                        json={"appkey": appkey, "refresh_token": credentials["refresh_token"]},
+                        headers={"x-access-key": app_secret, "Content-Type": "application/json"},
+                        timeout=10,
+                    )
+                    if ref_resp.status_code == 200 and ref_resp.json().get("access_token"):
+                        token = ref_resp.json()["access_token"]
+                        credentials["token"] = token
+                        # Erneut abfragen
+                        resp = requests.post(
+                            f"{base_url.rstrip('/')}/openapi/platform/getPowerStationDetail",
+                            json={"appkey": appkey, "ps_ids": str(ps_id or ""), "lang": "_de_DE"},
+                            headers={"x-access-key": app_secret, "Authorization": f"Bearer {token}", "Content-Type": "application/json"},
+                            timeout=12,
+                        )
+                        raw_data = resp.json() if resp.status_code == 200 else {}
+                except Exception as ref_err:
+                    logger.warning("Token refresh error: %s", ref_err)
 
-        # Automatische Ermittlung der Anlagen-ID (ps_id) falls noch nicht gesetzt
-        ps_id = credentials.get("ps_id")
-        if not ps_id or ps_id in ("default_ps", "12345", ""):
-            try:
-                list_resp = requests.post(
-                    f"{base_url.rstrip('/')}/v1/powerStationService/getPowerStationList",
-                    json={"appkey": appkey, "curPage": 1, "size": 10},
-                    headers={"Content-Type": "application/json", "sys_code": "901", "token": token},
-                    timeout=10,
+            # Extrahiere data_list in result_data falls Liste
+            if raw_data.get("result_data", {}).get("data_list"):
+                d_list = raw_data["result_data"]["data_list"]
+                if isinstance(d_list, list) and d_list:
+                    # Merge data_list[0] in result_data für einheitliches Parsing
+                    raw_data["result_data"].update(d_list[0])
+
+        else:
+            # 2. Legacy / Password Login Modus
+            if not token:
+                token_info = _execute_sungrow_login(
+                    base_url=base_url,
+                    appkey=appkey,
+                    account=credentials.get("user_account"),
+                    password=credentials.get("user_password"),
                 )
-                if list_resp.status_code == 200:
-                    list_json = list_resp.json()
-                    res_code = list_json.get("result_code")
-                    res_msg = list_json.get("result_msg")
-                    if res_code != "1":
-                        logger.warning("Sungrow getPowerStationList API returned: code=%s, msg=%s", res_code, res_msg)
-                    stations = (list_json.get("result_data") or {}).get("pageList", [])
-                    if stations:
-                        ps_id = str(stations[0].get("ps_id"))
-                        credentials["ps_id"] = ps_id
-                        credentials["ps_name"] = stations[0].get("ps_name", "Sungrow PV-Anlage")
-                        logger.info("Auto-discovered Sungrow power station ID: %s (%s)", ps_id, credentials.get("ps_name"))
-            except Exception as e:
-                logger.warning("Could not auto-fetch Sungrow ps_id: %s", e)
+                token = token_info["token"]
 
-        context = {**credentials, "token": token, "ps_id": ps_id, "appkey": appkey}
-        req_cfg = profile["requests"]["telemetry"]
-        url = f"{base_url.rstrip('/')}{_render_template(req_cfg['endpoint'], context)}"
-        headers = _render_template(req_cfg.get("headers", {}), context)
-        body = _render_template(req_cfg.get("body", {}), context)
+            ps_id = credentials.get("ps_id")
+            context = {**credentials, "token": token, "ps_id": ps_id, "appkey": appkey}
+            req_cfg = profile["requests"]["telemetry"]
+            url = f"{base_url.rstrip('/')}{_render_template(req_cfg['endpoint'], context)}"
+            headers = _render_template(req_cfg.get("headers", {}), context)
+            body = _render_template(req_cfg.get("body", {}), context)
 
-        resp = requests.post(url, json=body, headers=headers, timeout=12)
-        resp.raise_for_status()
-        raw_data = resp.json()
-        if raw_data.get("result_code") != "1":
-            logger.warning("Sungrow getPowerStationDetail API returned: code=%s, msg=%s (body=%s)", raw_data.get("result_code"), raw_data.get("result_msg"), raw_data)
+            resp = requests.post(url, json=body, headers=headers, timeout=12)
+            resp.raise_for_status()
+            raw_data = resp.json()
+
 
 
     else:
