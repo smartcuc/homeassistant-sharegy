@@ -189,6 +189,20 @@ VAPID_ADMIN_EMAIL = os.getenv(
 
 
 # =============================
+# ☀️ Sungrow iSolarCloud OAuth 2.0
+# =============================
+SUNGROW_APPKEY = os.getenv("SUNGROW_APPKEY", "988713D7D057090474AEC9584CBA1AAD")
+SUNGROW_APP_SECRET = os.getenv("SUNGROW_APP_SECRET", "chh8ptt9n6xkchjr0yez6hxadxh58vc9")
+SUNGROW_GATEWAY_URL = os.getenv("SUNGROW_GATEWAY_URL", "https://gateway.isolarcloud.eu")
+SUNGROW_REDIRECT_URL = os.getenv("SUNGROW_REDIRECT_URL", "https://sharegy.de/api/v1/integrations/sungrow/callback")
+SUNGROW_RSA_PUBLIC_KEY = os.getenv(
+    "SUNGROW_RSA_PUBLIC_KEY",
+    "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCXm84m8QmVNVOI1TMm0a_BsSyLICiNQWdld0zgcHRABS92VLtodmeN2IZqxIdLO8YswzEYFgQ9XYmXDCHT-BS20zrIsdLypqZdSKl7asQvGxTaJEKSIjeI0E470C6oj37gfkek_Z4RnLtbFFPkfTUqWZ6Ot2xkzkr6L9y3mnTVQQIDAQAB",
+)
+
+
+
+# =============================
 # Middleware
 # =============================
 
