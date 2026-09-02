@@ -58,7 +58,7 @@ class StorageSystemTests(TestCase):
         )
         DeviceLatestMetric.objects.create(
             device=self.inverter,
-            metric_key="power",
+            metric_key="battery_power",
             value=-1850.0,  # Entladen
             timestamp=timezone.now(),
         )
@@ -74,7 +74,7 @@ class StorageSystemTests(TestCase):
             soc_device=self.bms_sensor,
             soc_metric_key="soc",
             power_device=self.inverter,
-            power_metric_key="power",
+            power_metric_key="battery_power",
         )
 
         self.assertEqual(storage.get_live_soc(), 78.5)
@@ -93,7 +93,7 @@ class StorageSystemTests(TestCase):
                 "soc_device_id": str(self.bms_sensor.id),
                 "soc_metric_key": "soc",
                 "power_device_id": str(self.inverter.id),
-                "power_metric_key": "power",
+                "power_metric_key": "battery_power",
             },
             content_type="application/json",
         )
