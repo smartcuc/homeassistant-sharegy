@@ -375,6 +375,13 @@ def serialize_storage_system(storage):
         "discharge_efficiency_pct": float(storage.discharge_efficiency_pct),
         "active": storage.active,
         "is_auto_detected": storage.is_auto_detected,
+        # ⚡ EMS Control & Smart Charging
+        "ems_control_enabled": storage.ems_control_enabled,
+        "control_mode": storage.control_mode,
+        "target_charge_power_kw": float(storage.target_charge_power_kw),
+        "price_threshold_ct": float(storage.price_threshold_ct),
+        "last_control_command": storage.last_control_command,
+        "last_controlled_at": storage.last_controlled_at.isoformat() if storage.last_controlled_at else None,
         # Live Metrics
         "live_soc_pct": live_soc,
         "live_power_w": live_power,
@@ -549,7 +556,8 @@ def storage_update(request, storage_id):
         "min_soc_reserve_pct", "max_soc_pct", "charge_efficiency_pct",
         "discharge_efficiency_pct", "soc_metric_key", "power_metric_key",
         "current_metric_key", "voltage_metric_key",
-        "charge_energy_metric_key", "discharge_energy_metric_key", "active"
+        "charge_energy_metric_key", "discharge_energy_metric_key", "active",
+        "ems_control_enabled", "control_mode", "target_charge_power_kw", "price_threshold_ct"
     ]:
         if field in data:
             setattr(storage, field, data[field])
@@ -579,6 +587,58 @@ def storage_update(request, storage_id):
 
     storage.save()
     return Response(serialize_storage_system(storage))
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def storage_control(request, storage_id):
+    """
+    Empfängt Steuerbefehle für das Speichersystem (z. B. Forced Charge, Modus-Wechsel).
+    Sendet bei Vorhandensein eines steuerbaren Wechselrichters die entsprechenden Befehle.
+    """
+    home = request.user.homes.first()
+    try:
+        storage = StorageSystem.objects.get(id=storage_id, home=home)
+    except StorageSystem.DoesNotExist:
+        return Response({"error": "Storage system not found"}, status=404)
+
+    mode = request.data.get("mode") or request.data.get("control_mode")
+    charge_power_kw = request.data.get("target_charge_power_kw")
+    price_threshold_ct = request.data.get("price_threshold_ct")
+    ems_enabled = request.data.get("ems_control_enabled")
+
+    if ems_enabled is not None:
+        storage.ems_control_enabled = bool(ems_enabled)
+    if mode:
+        storage.control_mode = mode
+    if charge_power_kw is not None:
+        storage.target_charge_power_kw = float(charge_power_kw)
+    if price_threshold_ct is not None:
+        storage.price_threshold_ct = float(price_threshold_ct)
+
+    now = timezone.now()
+    command_str = f"mode={storage.control_mode}"
+    if storage.control_mode in ["forced_charge", "price_optimized"]:
+        command_str += f" power={storage.target_charge_power_kw}kW"
+
+    storage.last_control_command = command_str
+    storage.last_controlled_at = now
+    storage.save()
+
+    # In Redis für EMS / Modbus Poller als aktiver Sollwert hinterlegen
+    try:
+        from django.core.cache import cache
+        cache.set(f"storage:{storage.id}:control_mode", storage.control_mode, timeout=86400)
+        cache.set(f"storage:{storage.id}:target_power_kw", float(storage.target_charge_power_kw), timeout=86400)
+        cache.set(f"storage:{storage.id}:last_command", command_str, timeout=86400)
+    except Exception as e:
+        logger.warning("Failed to write storage control cache: %s", e)
+
+    return Response({
+        "status": "success",
+        "message": f"Steuerbefehl '{command_str}' erfolgreich aktiviert.",
+        "storage": serialize_storage_system(storage)
+    })
 
 
 @api_view(["DELETE"])

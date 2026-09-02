@@ -63,6 +63,19 @@ export default function ProducerPage() {
         queryClient.invalidateQueries({ queryKey: ["battery-soc-forecast"] });
     };
 
+    const handleControlStorage = async (id, payload) => {
+        try {
+            await apiFetch(`/api/producer/storage/${id}/control/`, {
+                method: "POST",
+                body: JSON.stringify(payload),
+            });
+            queryClient.invalidateQueries({ queryKey: ["storages"] });
+            queryClient.invalidateQueries({ queryKey: ["battery-soc-forecast"] });
+        } catch (err) {
+            alert(err.message || "Fehler beim Senden des Steuerbefehls");
+        }
+    };
+
     return (
         <div className="p-6 max-w-7xl mx-auto space-y-6 animate-fade-in">
             {/* Header */}
@@ -331,6 +344,7 @@ export default function ProducerPage() {
                                     setOpenStorageModal(true);
                                 }}
                                 onDelete={handleDeleteStorage}
+                                onControl={handleControlStorage}
                             />
                         ))}
                     </div>

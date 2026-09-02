@@ -4,7 +4,7 @@
 
 import { useTranslation } from "react-i18next";
 
-export default function StorageSystemCard({ storage, onEdit, onDelete }) {
+export default function StorageSystemCard({ storage, onEdit, onDelete, onControl }) {
     const { t } = useTranslation();
 
     const soc = storage.live_soc_pct;
@@ -149,6 +149,110 @@ export default function StorageSystemCard({ storage, onEdit, onDelete }) {
                     <div className="text-[10px] text-slate-400 truncate">
                         {t("storage_system.eff_reserve", { eff: storage.charge_efficiency_pct, res: storage.min_soc_reserve_pct, defaultValue: `Effizienz: ${storage.charge_efficiency_pct}% · Reserve: ${storage.min_soc_reserve_pct}%` })}
                     </div>
+                </div>
+            </div>
+
+            {/* ⚡ ACTIVE EMS & SMART CHARGING CONTROL WIDGET */}
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-950/60 via-indigo-950/40 to-slate-900 border border-blue-800/60 space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-blue-900/50 pb-2.5">
+                    <div className="flex items-center gap-2">
+                        <span className="text-base">⚡</span>
+                        <span className="text-xs font-bold text-white uppercase tracking-wider">
+                            {t("storage_system.ems_control_title", "Aktive EMS-Steuerung & Smart-Charging")}
+                        </span>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                            storage.ems_control_enabled 
+                                ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" 
+                                : "bg-slate-700/50 text-slate-400 border-slate-600/50"
+                        }`}>
+                            {storage.ems_control_enabled ? "Aktiv" : "Standby"}
+                        </span>
+                    </div>
+
+                    {storage.last_control_command && (
+                        <span className="text-[10px] font-mono text-blue-300 bg-blue-900/60 px-2 py-0.5 rounded-md border border-blue-800/80">
+                            Befehl: {storage.last_control_command}
+                        </span>
+                    )}
+                </div>
+
+                {/* MODUS-AUSWAHL BUTTONS */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                    <button
+                        type="button"
+                        onClick={async () => {
+                            if (onControl) await onControl(storage.id, { control_mode: "self_consumption", ems_control_enabled: true });
+                        }}
+                        className={`p-2.5 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between ${
+                            storage.control_mode === "self_consumption"
+                                ? "border-emerald-500 bg-emerald-950/50 text-white ring-1 ring-emerald-400"
+                                : "border-slate-800 bg-slate-900/80 text-slate-300 hover:bg-slate-800/80"
+                        }`}
+                    >
+                        <div className="flex items-center justify-between font-bold">
+                            <span>☀️ PV-Autarkie</span>
+                            {storage.control_mode === "self_consumption" && <span className="text-emerald-400 text-xs">✓</span>}
+                        </div>
+                        <span className="text-[10px] text-slate-400 mt-1">
+                            Autonome Überschussladung
+                        </span>
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={async () => {
+                            if (onControl) await onControl(storage.id, { control_mode: "price_optimized", ems_control_enabled: true });
+                        }}
+                        className={`p-2.5 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between ${
+                            storage.control_mode === "price_optimized"
+                                ? "border-blue-500 bg-blue-950/50 text-white ring-1 ring-blue-400"
+                                : "border-slate-800 bg-slate-900/80 text-slate-300 hover:bg-slate-800/80"
+                        }`}
+                    >
+                        <div className="flex items-center justify-between font-bold">
+                            <span>💶 Preisgeführt</span>
+                            {storage.control_mode === "price_optimized" && <span className="text-blue-400 text-xs">✓</span>}
+                        </div>
+                        <span className="text-[10px] text-slate-400 mt-1">
+                            Tibber & EPEX Spot Billigstrom
+                        </span>
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={async () => {
+                            if (onControl) await onControl(storage.id, { control_mode: "forced_charge", ems_control_enabled: true });
+                        }}
+                        className={`p-2.5 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between ${
+                            storage.control_mode === "forced_charge"
+                                ? "border-amber-500 bg-amber-950/50 text-white ring-1 ring-amber-400"
+                                : "border-slate-800 bg-slate-900/80 text-slate-300 hover:bg-slate-800/80"
+                        }`}
+                    >
+                        <div className="flex items-center justify-between font-bold">
+                            <span>⚡ Sofortladen</span>
+                            {storage.control_mode === "forced_charge" && <span className="text-amber-400 text-xs">✓</span>}
+                        </div>
+                        <span className="text-[10px] text-slate-400 mt-1">
+                            Zwangsladung mit {storage.target_charge_power_kw || 3.0} kW
+                        </span>
+                    </button>
+                </div>
+
+                {/* PARAMETER ANZEIGE */}
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-[11px] text-slate-300 font-mono">
+                    <span className="flex items-center gap-1">
+                        <span>🎯 Soll-Ladeleistung:</span>
+                        <strong className="text-white">{storage.target_charge_power_kw || 3.0} kW</strong>
+                    </span>
+                    <span className="flex items-center gap-1">
+                        <span>📉 Preisschwelle:</span>
+                        <strong className="text-emerald-400">&le; {storage.price_threshold_ct || 15.0} ct/kWh</strong>
+                    </span>
+                    <span className="flex items-center gap-1">
+                        <span>🛡️ Notstrom-Reserve:</span>
+                        <strong className="text-amber-400">{storage.min_soc_reserve_pct || 10.0}%</strong>
+                    </span>
                 </div>
             </div>
 

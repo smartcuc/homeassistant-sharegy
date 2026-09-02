@@ -72,6 +72,10 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
                 discharge_energy_device_id: storage.discharge_energy_device?.id || "",
                 discharge_energy_metric_key: storage.discharge_energy_device?.metric_key || "energy_out",
                 active: storage.active ?? true,
+                ems_control_enabled: storage.ems_control_enabled ?? false,
+                control_mode: storage.control_mode || "self_consumption",
+                target_charge_power_kw: storage.target_charge_power_kw ?? 3.0,
+                price_threshold_ct: storage.price_threshold_ct ?? 15.0,
             });
 
             if (!storage.primary_device?.id && (storage.soc_device?.id || storage.power_device?.id || storage.current_device?.id)) {
@@ -102,6 +106,10 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
                 discharge_energy_device_id: "",
                 discharge_energy_metric_key: "energy_out",
                 active: true,
+                ems_control_enabled: false,
+                control_mode: "self_consumption",
+                target_charge_power_kw: 3.0,
+                price_threshold_ct: 15.0,
             });
             setMode("all_in_one");
         }
@@ -138,6 +146,10 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
                 max_soc_pct: parseFloat(formData.max_soc_pct),
                 charge_efficiency_pct: parseFloat(formData.charge_efficiency_pct),
                 discharge_efficiency_pct: parseFloat(formData.discharge_efficiency_pct),
+                target_charge_power_kw: parseFloat(formData.target_charge_power_kw || 3.0),
+                price_threshold_ct: parseFloat(formData.price_threshold_ct || 15.0),
+                ems_control_enabled: Boolean(formData.ems_control_enabled),
+                control_mode: formData.control_mode || "self_consumption",
             };
 
             // Im All-in-One Modus werden die Einzelzuordnungen auf das primary_device gesetzt
@@ -326,11 +338,84 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
                         </div>
                     </div>
 
+                    {/* ⚡ Active EMS & Smart Charging Control Section */}
+                    <div className="space-y-4 pt-4 border-t border-gray-100">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
+                                <span>⚡</span> {t("storage_system.section_control", "2. Aktive EMS-Steuerung & Smart-Charging")}
+                            </h3>
+                            <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold">
+                                <input
+                                    type="checkbox"
+                                    checked={formData.ems_control_enabled}
+                                    onChange={(e) => setFormData({ ...formData, ems_control_enabled: e.target.checked })}
+                                    className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 w-4 h-4"
+                                />
+                                <span className={formData.ems_control_enabled ? "text-emerald-700 font-bold" : "text-gray-500"}>
+                                    Steuerung aktiv
+                                </span>
+                            </label>
+                        </div>
+
+                        {formData.ems_control_enabled && (
+                            <div className="p-4 rounded-2xl bg-blue-50/70 border border-blue-200/70 space-y-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                    <div>
+                                        <label className="block text-[11px] font-bold text-blue-900 uppercase tracking-wider mb-1">
+                                            Betriebsmodus
+                                        </label>
+                                        <select
+                                            value={formData.control_mode}
+                                            onChange={(e) => setFormData({ ...formData, control_mode: e.target.value })}
+                                            className="w-full px-3 py-2 bg-white border border-blue-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-blue-500 transition"
+                                        >
+                                            <option value="self_consumption">☀️ PV-Autarkie (Autonom)</option>
+                                            <option value="price_optimized">💶 Preisgeführt (EPEX Spot / Tibber)</option>
+                                            <option value="forced_charge">⚡ Manuelle Zwangsladung</option>
+                                            <option value="idle">💤 Standby / Ladesperre</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-[11px] font-bold text-blue-900 uppercase tracking-wider mb-1">
+                                            Soll-Ladeleistung (kW)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            step="0.1"
+                                            min="0.5"
+                                            max={formData.max_charge_power_kw || 15}
+                                            value={formData.target_charge_power_kw}
+                                            onChange={(e) => setFormData({ ...formData, target_charge_power_kw: e.target.value })}
+                                            className="w-full px-3 py-2 bg-white border border-blue-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-blue-500 transition"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-[11px] font-bold text-blue-900 uppercase tracking-wider mb-1">
+                                            Preisschwelle (ct/kWh)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            step="0.5"
+                                            value={formData.price_threshold_ct}
+                                            onChange={(e) => setFormData({ ...formData, price_threshold_ct: e.target.value })}
+                                            className="w-full px-3 py-2 bg-white border border-blue-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-blue-500 transition"
+                                        />
+                                    </div>
+                                </div>
+                                <p className="text-[11px] text-blue-700 leading-relaxed">
+                                    Bei <strong>Preisgeführt</strong> lädt Sharegy den Batteriespeicher bei dynamischen Tarifen (z. B. Tibber) automatisch aus dem Netz auf, sobald der Börsenstrompreis unter die Preisschwelle fällt.
+                                </p>
+                            </div>
+                        )}
+                    </div>
+
                     {/* Signal & Measurement Point Routing */}
                     <div className="space-y-4 pt-4 border-t border-gray-100">
                         <div className="flex items-center justify-between">
                             <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                                {t("storage_system.section_sensors", "2. Messpunkt- & Sensor-Zuordnung")}
+                                {t("storage_system.section_sensors", "3. Messpunkt- & Sensor-Zuordnung")}
                             </h3>
 
                             {/* Mode Toggle */}

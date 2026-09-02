@@ -265,6 +265,47 @@ class StorageSystem(models.Model):
         help_text="Entladewirkungsgrad in %",
     )
 
+    # ⚡ Aktive EMS-Steuerung & Smart-Charging (Modbus / Sungrow Control)
+    ems_control_enabled = models.BooleanField(
+        default=False,
+        help_text="Aktive Speichersteuerung durch Sharegy EMS freischalten",
+    )
+    control_mode = models.CharField(
+        max_length=30,
+        default="self_consumption",
+        choices=[
+            ("self_consumption", "PV-Autarkie (Autonom)"),
+            ("price_optimized", "Dynamisch / Preisgeführt (EPEX Spot / Tibber)"),
+            ("forced_charge", "Manuelle Zwangsladung"),
+            ("forced_discharge", "Manuelle Zwangsentladung"),
+            ("idle", "Standby / Ladesperre"),
+        ],
+        help_text="Aktiver Betriebsmodus des Speichersystems",
+    )
+    target_charge_power_kw = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        default=3.0,
+        help_text="Soll-Ladeleistung bei aktiver Netzladung in kW",
+    )
+    price_threshold_ct = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        default=15.0,
+        help_text="Preisschwelle in ct/kWh (Netzladung aktiv wenn Börsenpreis <= Schwelle)",
+    )
+    last_control_command = models.CharField(
+        max_length=100,
+        blank=True,
+        default="",
+        help_text="Zuletzt gesendeter Steuerbefehl (z. B. forced_charge 5000W)",
+    )
+    last_controlled_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Zeitpunkt des letzten gesendeten Steuerbefehls",
+    )
+
     # Signal- & Messpunkt-Zuordnung
     primary_device = models.ForeignKey(
         Device,
