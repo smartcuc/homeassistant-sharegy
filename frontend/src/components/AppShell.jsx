@@ -12,6 +12,7 @@ import OverviewPage from "../pages/dashboard/overview/OverviewPage";
 import InterfacesPage from "../pages/InterfacesPage";
 import EnergyDashboard from "../features/energy/EnergyDashboard";
 import ProducerPage from "../features/producer/pages/ProducerPage";
+import ControlPage from "../features/control/pages/ControlPage";
 import TariffPage from "../features/market/pages/TariffPage";
 
 import DevicesPage from "../pages/DevicesPage";
@@ -81,6 +82,7 @@ export default function AppShell() {
                         <Route path="energy" element={<EnergyDashboard />} />
                         <Route path="devices" element={<DevicesPage />} />
                         <Route path="producers" element={<ProducerPage />} />
+                        <Route path="control" element={<ControlPage />} />
                         <Route path="tariff" element={<TariffPage />} />
                         <Route path="interfaces" element={<InterfacesPage />} />
                         <Route path="status" element={<SystemStatusPage />} />

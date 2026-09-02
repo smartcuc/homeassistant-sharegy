@@ -81,6 +81,12 @@ export default function Sidebar() {
                         isDeviceSetupBadge: true,
                     },
                     { name: t("nav.producers", "Erzeuger & Speicher"), path: "/app/producers", icon: "☀️" },
+                    {
+                        name: t("nav.energy_control", "Energiesteuerung"),
+                        path: "/app/control",
+                        icon: "🎛️",
+                        isProGated: true,
+                    },
                     ...(hasTenantAccess && !isStaffOrAdmin
                         ? [{ name: t("nav.tenant_management", "Community & Mieter"), path: "/app/tenant", icon: "👥" }]
                         : []),
