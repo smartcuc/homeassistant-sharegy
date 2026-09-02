@@ -638,7 +638,10 @@ def device_available_metrics(request, device_id):
 
     for lm in latest_metrics:
         k = lm.metric_key
-        if k.startswith("state."):
+        if k.startswith("state.") or k.startswith("daily_") or k in [
+            "daily_charge_kwh", "daily_discharge_kwh", "daily_feed_in_kwh",
+            "daily_generation_kwh", "daily_import_kwh"
+        ]:
             continue
         seen_keys.add(k)
         meta = KEY_METADATA.get(k, {})

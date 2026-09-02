@@ -126,7 +126,8 @@ function DeviceChartModal({ device, onClose }) {
         refetchOnWindowFocus: false,
     });
 
-    const availableMetrics = metricsQuery.data?.metrics || [];
+    const allMetrics = metricsQuery.data?.metrics || [];
+    const availableMetrics = allMetrics.filter(m => !m.key.toLowerCase().startsWith("daily_"));
     const primaryMetricKey = metricsQuery.data?.primary_metric || "power";
     const activeMetricKey = selectedMetric || primaryMetricKey;
     const activeMetricObj = availableMetrics.find(m => m.key === activeMetricKey) || availableMetrics[0];
