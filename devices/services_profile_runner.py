@@ -735,10 +735,15 @@ def execute_cloud_poll(integration: CloudDeviceIntegration) -> dict:
 
         # Status aktualisieren
         integration.last_polled_at = now
-
         integration.last_status = CloudDeviceIntegration.STATUS_OK
         integration.last_error_message = ""
         integration.save(update_fields=["last_polled_at", "last_status", "last_error_message", "updated_at"])
+
+        # Gerät als aktiv & online markieren (für device_health und UI-Status)
+        device.last_seen = now
+        device.active = True
+        device.save(update_fields=["last_seen", "active"])
+
 
         logger.info("Successfully polled cloud integration %s for device %s: %s", profile_id, device.id, metrics)
         return {
