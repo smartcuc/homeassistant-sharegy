@@ -235,8 +235,15 @@ def build_device_signals(user):
             signals["battery"]["discharge"] = round(abs(bat_val), 2)
             signals["battery"]["charge"] = 0.0
     else:
-        signals["battery"]["charge"] = 0.0
-        signals["battery"]["discharge"] = 0.0
+        # Fallback: Falls Inverter/Runner 0 W für den Speicher meldet, aber ein geladener Speicher (SoC > 5%)
+        # vorhanden ist und das Haus mehr Strom braucht als PV liefert:
+        deficit = max(0.0, eff_load_est - pv_power)
+        if soc_val is not None and soc_val > 5.0 and deficit > 30:
+            signals["battery"]["charge"] = 0.0
+            signals["battery"]["discharge"] = round(deficit, 2)
+        else:
+            signals["battery"]["charge"] = 0.0
+            signals["battery"]["discharge"] = 0.0
 
     # 7. Grid-Leistung (Import / Export)
     grid_power = sum(values.get(d_id, 0) for d_id in grid_device_ids if d_id not in pv_device_ids)

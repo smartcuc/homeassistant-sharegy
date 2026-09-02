@@ -426,9 +426,19 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
                             else:
                                 soc_val = round(soc_raw, 1)
 
-                        # Nacht-Fallback: NUR wenn PV < 20 W, Netz ~ 0 und Speicher geladen (> 5%)
+                        # Fallback / Plausibilisierung für Entladung bei gefülltem Speicher:
+                        # 1. Nachts (PV < 20 W): Speicher deckt die Grundlast ab
                         if pv < 20 and abs(bat_pwr) < 0.1 and load > 20 and soc_val and soc_val > 5.0 and abs(grid) < 60:
                             bat_pwr = load
+
+                        # 2. Tag/Dämmerung: Bedarf übersteigt Erzeugung (load > pv + 30 W),
+                        # Speicher hat noch Kapazität (> 5%), aber Inverter meldet bat_pwr = 0 oder fälschlich Netzbezug.
+                        deficit = max(0.0, round(load - pv, 1))
+                        if deficit > 30 and abs(bat_pwr) < 1.0 and soc_val and soc_val > 5.0:
+                            bat_pwr = deficit
+                            # Falls das SmartMeter fälschlicherweise den Fehlbetrag als Netzbezug gemeldet hat:
+                            if abs(grid - deficit) < 100 or abs(grid) < 60:
+                                grid = 0.0
 
                         # Wenn Speicher VOLL ist (SoC >= 98%), kann physikalisch kein Strom mehr geladen werden
                         if soc_val is not None and soc_val >= 98.0:
