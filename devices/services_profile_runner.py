@@ -11,7 +11,6 @@ import os
 import json
 import logging
 import re
-import yaml
 import requests
 from pathlib import Path
 from decimal import Decimal
@@ -19,6 +18,11 @@ from datetime import datetime
 from django.conf import settings
 from django.utils import timezone
 from django.core.cache import cache
+
+try:
+    import yaml
+except ImportError:
+    yaml = None
 
 from devices.models import Device, DeviceMetric, CloudDeviceIntegration
 
@@ -29,36 +33,47 @@ PROFILES_DIR = Path(__file__).resolve().parent / "profiles"
 
 def load_profile(profile_id: str) -> dict:
     """
-    Lädt und validiert ein YAML-Profil aus dem profiles/-Verzeichnis.
+    Lädt und validiert ein Profil (bevorzugt JSON, fallback YAML).
+    Funktioniert ohne externe YAML-Bibliothek via nativem json-Modul!
     """
-    file_path = PROFILES_DIR / f"{profile_id}.yaml"
-    if not file_path.exists():
-        raise FileNotFoundError(f"Device-Profil '{profile_id}' wurde nicht gefunden unter {file_path}")
+    # 1. Bevorzugt JSON (Standardbibliothek, keine Abhängigkeit)
+    json_path = PROFILES_DIR / f"{profile_id}.json"
+    if json_path.exists():
+        with open(json_path, "r", encoding="utf-8") as f:
+            profile_data = json.load(f)
+        if isinstance(profile_data, dict) and "id" in profile_data:
+            return profile_data
 
-    with open(file_path, "r", encoding="utf-8") as f:
-        profile_data = yaml.safe_load(f)
+    # 2. YAML-Fallback
+    yaml_path = PROFILES_DIR / f"{profile_id}.yaml"
+    if yaml_path.exists():
+        if yaml is not None:
+            with open(yaml_path, "r", encoding="utf-8") as f:
+                profile_data = yaml.safe_load(f)
+            if isinstance(profile_data, dict) and "id" in profile_data:
+                return profile_data
+        else:
+            logger.warning("PyYAML ist nicht installiert; lade stattdessen JSON-Profil für %s", profile_id)
 
-    if not isinstance(profile_data, dict) or "id" not in profile_data:
-        raise ValueError(f"Ungültiges Profil-Format in {file_path}")
-
-    return profile_data
+    raise FileNotFoundError(f"Device-Profil '{profile_id}' wurde nicht gefunden unter {PROFILES_DIR}")
 
 
 def list_available_profiles() -> list:
     """
     Scannt das profiles/-Verzeichnis und liefert alle verfügbaren Hersteller-Profile
-    mit Metadaten und UI-Formularfeldern für das Frontend.
+    (unterstützt .json und .yaml ohne Crash bei fehlendem pyyaml).
     """
-    profiles = []
+    profiles = {}
     if not PROFILES_DIR.exists():
-        return profiles
+        return []
 
-    for yaml_file in sorted(PROFILES_DIR.glob("*.yaml")):
+    # 1. Alle JSON-Dateien laden
+    for json_file in sorted(PROFILES_DIR.glob("*.json")):
         try:
-            with open(yaml_file, "r", encoding="utf-8") as f:
-                data = yaml.safe_load(f)
+            with open(json_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
                 if isinstance(data, dict) and "id" in data:
-                    profiles.append({
+                    profiles[data["id"]] = {
                         "id": data.get("id"),
                         "name": data.get("name"),
                         "vendor": data.get("vendor"),
@@ -67,11 +82,32 @@ def list_available_profiles() -> list:
                         "description": data.get("description", ""),
                         "fields": data.get("connection", {}).get("fields", []),
                         "default_interval": data.get("connection", {}).get("polling_interval_seconds", 60),
-                    })
+                    }
         except Exception as e:
-            logger.warning("Fehler beim Laden von Profil %s: %s", yaml_file, e)
+            logger.warning("Fehler beim Laden von JSON-Profil %s: %s", json_file, e)
 
-    return profiles
+    # 2. YAML-Dateien ergänzen (falls pyyaml installiert und nicht bereits via JSON vorhanden)
+    if yaml is not None:
+        for yaml_file in sorted(PROFILES_DIR.glob("*.yaml")):
+            try:
+                with open(yaml_file, "r", encoding="utf-8") as f:
+                    data = yaml.safe_load(f)
+                    if isinstance(data, dict) and "id" in data and data["id"] not in profiles:
+                        profiles[data["id"]] = {
+                            "id": data.get("id"),
+                            "name": data.get("name"),
+                            "vendor": data.get("vendor"),
+                            "category": data.get("category", "inverter_hybrid"),
+                            "protocol": data.get("protocol", "http_cloud"),
+                            "description": data.get("description", ""),
+                            "fields": data.get("connection", {}).get("fields", []),
+                            "default_interval": data.get("connection", {}).get("polling_interval_seconds", 60),
+                        }
+            except Exception as e:
+                logger.warning("Fehler beim Laden von YAML-Profil %s: %s", yaml_file, e)
+
+    return list(profiles.values())
+
 
 
 def extract_jsonpath(data: dict, path_expr: str, fallback=None):

@@ -1,0 +1,78 @@
+{
+  "id": "fronius_solarweb",
+  "name": "Fronius Solar.web API",
+  "vendor": "Fronius",
+  "category": "inverter_hybrid",
+  "protocol": "http_cloud",
+  "description": "Cloud-Schnittstelle für Fronius Wechselrichter über das Fronius Solar.web Portal.",
+  "connection": {
+    "auth_type": "api_key_header",
+    "default_base_url": "https://api.solarweb.com",
+    "polling_interval_seconds": 60,
+    "fields": [
+      {
+        "key": "pv_system_id",
+        "label": "Solar.web PV-System ID",
+        "type": "string",
+        "required": true,
+        "placeholder": "z. B. 01234567-89ab-cdef-0123-456789abcdef"
+      },
+      {
+        "key": "access_key_id",
+        "label": "AccessKey ID",
+        "type": "string",
+        "required": true,
+        "placeholder": "FKS..."
+      },
+      {
+        "key": "access_key_value",
+        "label": "AccessKey Value",
+        "type": "password",
+        "required": true
+      }
+    ]
+  },
+  "requests": {
+    "telemetry": {
+      "method": "GET",
+      "endpoint": "/pvsystems/{{pv_system_id}}/flowdata",
+      "headers": {
+        "AccessKeyId": "{{access_key_id}}",
+        "AccessKeyValue": "{{access_key_value}}"
+      }
+    }
+  },
+  "metrics_mapping": {
+    "pv_power_w": {
+      "jsonpath": "$.data.channels[0].value",
+      "scale": 1.0,
+      "type": "float",
+      "fallback": 0.0
+    },
+    "grid_power_w": {
+      "jsonpath": "$.data.channels[1].value",
+      "scale": 1.0,
+      "type": "float",
+      "fallback": 0.0
+    },
+    "load_power_w": {
+      "jsonpath": "$.data.channels[2].value",
+      "scale": 1.0,
+      "type": "float",
+      "fallback": 0.0
+    },
+    "battery_power_w": {
+      "jsonpath": "$.data.channels[3].value",
+      "scale": 1.0,
+      "type": "float",
+      "fallback": 0.0
+    },
+    "battery_soc": {
+      "jsonpath": "$.data.channels[4].value",
+      "scale": 1.0,
+      "type": "float",
+      "unit": "%",
+      "fallback": null
+    }
+  }
+}
