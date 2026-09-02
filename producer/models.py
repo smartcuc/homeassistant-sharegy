@@ -458,7 +458,7 @@ class StorageSystem(models.Model):
         power_val = None
         target_device = self.power_device or self.primary_device
         keys = [
-            "power", "battery_power", "battery_power_w", "battery_w",
+            "battery_power", "battery_power_w", "battery_w", "power",
             "active_power", "p_total", "value", "state", "p", "w"
         ]
         if self.power_metric_key and self.power_metric_key not in ["current", "battery_current", "voltage", "battery_voltage"]:
@@ -478,13 +478,16 @@ class StorageSystem(models.Model):
             return any(w in d_name for w in ["_current", "stromstärke", "battery_current"]) and not any(w in d_name for w in ["power", "leistung", "watt"])
 
         if target_device and not _is_curr_dev(target_device):
-            # 1a. Redis Cache prüfen
-            c_pwr = cache.get(f"device:{target_device.id}:latest_power")
+            # 1a. Redis Cache prüfen (zuerst battery_power, dann latest_power)
+            c_pwr = cache.get(f"device:{target_device.id}:battery_power")
+            if c_pwr is None:
+                c_pwr = cache.get(f"device:{target_device.id}:latest_power")
             if c_pwr is not None:
                 try:
                     power_val = float(c_pwr)
                 except (ValueError, TypeError):
                     pass
+
 
             # 1b. DeviceLatestMetric prüfen
             if power_val is None:

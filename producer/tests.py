@@ -12,6 +12,9 @@ User = get_user_model()
 
 class StorageSystemTests(TestCase):
     def setUp(self):
+        from django.core.cache import cache
+        cache.clear()
+
         self.user = User.objects.create_user(
             username="storageuser",
             email="storage@example.com",
@@ -19,6 +22,7 @@ class StorageSystemTests(TestCase):
         )
         self.home = Home.objects.create(user=self.user, name="Storage Test Home")
         self.client.force_login(self.user)
+
 
         # Geräte anlegen
         self.inverter = Device.objects.create(
