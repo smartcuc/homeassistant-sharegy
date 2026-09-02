@@ -43,13 +43,18 @@ def get_energy_data(user):
     grid = signals.get("grid", {})
     battery = signals.get("battery", {})
 
-    house_demand = (
-        (pv.get("production") or 0)
-        + (battery.get("discharge") or 0)
-        + (grid.get("import") or 0)
-        - (battery.get("charge") or 0)
-        - (grid.get("export") or 0)
-    )
+    c_val = load.get("consumption")
+    if c_val is not None and float(c_val) > 0:
+        house_demand = float(c_val)
+    else:
+        house_demand = (
+            (pv.get("production") or 0)
+            + (battery.get("discharge") or 0)
+            + (grid.get("import") or 0)
+            - (battery.get("charge") or 0)
+            - (grid.get("export") or 0)
+        )
+    house_demand = max(0.0, float(house_demand or 0.0))
     # 4. Heutigen Verbrauch ermitteln
     today = get_today_consumption(user)
 
@@ -109,6 +114,8 @@ def get_energy_data(user):
         "tracked_load": load.get("consumption", 0),
         "pv": pv.get("production", 0),
         "grid": grid.get("import", 0) - grid.get("export", 0),
+        "grid_import": grid.get("import", 0),
+        "grid_export": grid.get("export", 0),
         "battery": round(battery_net, 2),
         "battery_discharge": battery.get("discharge", 0),
         "battery_charge": battery.get("charge", 0),

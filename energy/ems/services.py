@@ -2,7 +2,8 @@
 # energy/ems/services.py
 ########################
 
-from devices.models import Device
+from django.core.cache import cache
+from devices.models import Device, DeviceLatestMetric
 from devices.services.metrics import get_latest_values
 from energy.models import EMSSignalSource
 
@@ -127,59 +128,139 @@ def build_device_signals(user):
 
     # 4. PV-Erzeugung berechnen
     pv_power = sum(max(values.get(d_id, 0), 0) for d_id in pv_device_ids)
-    signals["pv"]["production"] = pv_power
+    if pv_power <= 0:
+        for dev in all_devices:
+            p_val = cache.get(f"device:{dev.id}:pv_power") or cache.get(f"device:{dev.id}:latest_power")
+            if p_val is None:
+                m = DeviceLatestMetric.objects.filter(device=dev, metric_key__in=["power", "pv_power"]).first()
+                if m and m.value is not None:
+                    p_val = float(m.value)
+            if p_val is not None and float(p_val) > 0:
+                pv_power = float(p_val)
+                break
+    signals["pv"]["production"] = max(0.0, round(pv_power, 2))
 
-    # 5. Grid-Leistung (Import / Export)
-    grid_power = sum(values.get(d_id, 0) for d_id in grid_device_ids)
-    if grid_power >= 0:
-        signals["grid"]["import"] = grid_power
-        signals["grid"]["export"] = 0
-    else:
-        signals["grid"]["import"] = 0
-        signals["grid"]["export"] = abs(grid_power)
-
-    # 6. Batterie-Leistung (Discharge / Charge)
-    # Bei Batteriespeichern gilt:
-    # Entladen (Strom fließt ins Haus): positiv
-    # Laden (Strom fließt in den Speicher): negativ (bzw. abs)
-    battery_power = None
-    try:
-        from producer.models import StorageSystem
-        storage = StorageSystem.objects.filter(home__user=user, active=True).first()
-        if storage:
-            live_p = storage.get_live_power()
-            if live_p is not None:
-                battery_power = float(live_p)
-    except Exception:
-        pass
-
-    if battery_power is None:
-        battery_power = sum(values.get(d_id, 0) for d_id in battery_device_ids)
-
-    if battery_power >= 0:
-        signals["battery"]["discharge"] = battery_power
-        signals["battery"]["charge"] = 0.0
-    else:
-        signals["battery"]["discharge"] = 0.0
-        signals["battery"]["charge"] = abs(battery_power)
-
-    # 7. Last (Hausverbrauch & getrackte Einzelgeräte)
+    # 5. Last (Direkte Messung aus Hybrid-Wechselrichter oder getrackten Einzelgeräten)
     tracked_load_devs = [
         d_id for d_id in load_device_ids
         if d_id not in grid_device_ids and d_id not in pv_device_ids and d_id not in battery_device_ids
     ]
     load_power = sum(max(values.get(d_id, 0), 0) for d_id in tracked_load_devs)
+
+    measured_load = None
+    for dev in all_devices:
+        l_p = cache.get(f"device:{dev.id}:load_power")
+        if l_p is None:
+            m = DeviceLatestMetric.objects.filter(device=dev, metric_key="load_power").first()
+            if m and m.value is not None:
+                l_p = float(m.value)
+        if l_p is not None and float(l_p) > 0:
+            measured_load = float(l_p)
+            break
+
+    # 6. Batterie-Leistung (Discharge / Charge)
+    battery_power = None
+    try:
+        from producer.models import StorageSystem
+        for storage in StorageSystem.objects.filter(home__user=user, active=True):
+            live_p = storage.get_live_power()
+            if live_p is not None and abs(float(live_p)) > 0.01:
+                battery_power = float(live_p)
+                break
+    except Exception:
+        pass
+
+    if battery_power is None:
+        for dev in all_devices:
+            b_p = cache.get(f"device:{dev.id}:battery_power")
+            if b_p is None:
+                m = DeviceLatestMetric.objects.filter(device=dev, metric_key="battery_power").first()
+                if m and m.value is not None:
+                    b_p = float(m.value)
+            if b_p is not None and abs(float(b_p)) > 0.01:
+                battery_power = float(b_p)
+                break
+
+    if battery_power is None:
+        battery_power = sum(values.get(d_id, 0) for d_id in battery_device_ids)
+
+    # Lade- / Entladerichtung des Speichers physikalisch & vorzeichengenau bestimmen
+    bat_val = float(battery_power or 0.0)
+    eff_load_est = measured_load if (measured_load and measured_load > 0) else max(load_power, 300.0)
+
+    if abs(bat_val) > 0.01:
+        # Wenn PV-Erzeugung den Hausverbrauch deutlich übersteigt, lädt der Speicher (Überschussladung)
+        if pv_power > (eff_load_est + 150):
+            signals["battery"]["charge"] = round(abs(bat_val), 2)
+            signals["battery"]["discharge"] = 0.0
+        # Nacht / keine PV-Erzeugung: Speicher liefert Energie an das Haus (Entladung)
+        elif pv_power < 50:
+            signals["battery"]["discharge"] = round(abs(bat_val), 2)
+            signals["battery"]["charge"] = 0.0
+        # Standard-Vorzeichen: negativ = Laden, positiv = Entladen
+        elif bat_val < 0:
+            signals["battery"]["charge"] = round(abs(bat_val), 2)
+            signals["battery"]["discharge"] = 0.0
+        else:
+            signals["battery"]["discharge"] = round(abs(bat_val), 2)
+            signals["battery"]["charge"] = 0.0
+    else:
+        signals["battery"]["charge"] = 0.0
+        signals["battery"]["discharge"] = 0.0
+
+    # 7. Grid-Leistung (Import / Export)
+    grid_power = sum(values.get(d_id, 0) for d_id in grid_device_ids)
+    if not grid_device_ids or abs(grid_power) < 0.01:
+        for dev in all_devices:
+            g_p = cache.get(f"device:{dev.id}:grid_power")
+            if g_p is None:
+                m = DeviceLatestMetric.objects.filter(device=dev, metric_key="grid_power").first()
+                if m and m.value is not None:
+                    g_p = float(m.value)
+            if g_p is not None and abs(float(g_p)) > 0.01:
+                grid_power = float(g_p)
+                break
+
+    if abs(grid_power) > 0.01:
+        # Standard Smart-Meter-Konvention (z.B. DTSU666):
+        # positiv (> 0): Netzbezug (Import)
+        # negativ (< 0): Netzeinspeisung (Export / Überschusseinspeisung)
+        if grid_power >= 0:
+            signals["grid"]["import"] = round(grid_power, 2)
+            signals["grid"]["export"] = 0.0
+        else:
+            signals["grid"]["import"] = 0.0
+            signals["grid"]["export"] = round(abs(grid_power), 2)
+    else:
+        signals["grid"]["import"] = 0.0
+        signals["grid"]["export"] = 0.0
+
+    # 8. Gesamthausbedarf & Netz-Balancierung
     signals["load"]["tracked_consumption"] = load_power
 
-    # Gesamthausbedarf immer physikalisch bilanzieren:
-    # Bedarf = PV-Erzeugung + Batterie-Entladung + Netz-Bezug - Batterie-Ladung - Netz-Einspeisung
-    derived = (
-        signals["pv"]["production"]
-        + signals["battery"]["discharge"]
-        + signals["grid"]["import"]
-        - signals["battery"]["charge"]
-        - signals["grid"]["export"]
-    )
-    signals["load"]["consumption"] = max(derived, load_power, 0)
+    if measured_load is not None and measured_load > 0:
+        signals["load"]["consumption"] = round(measured_load, 2)
+        # Falls Netzleistung nicht direkt übermittelt wurde, physikalische Netzeinspeisung/Netzbezug berechnen
+        if signals["grid"]["import"] == 0 and signals["grid"]["export"] == 0:
+            surplus = (
+                signals["pv"]["production"]
+                + signals["battery"]["discharge"]
+                - signals["load"]["consumption"]
+                - signals["battery"]["charge"]
+            )
+            if surplus > 20:
+                signals["grid"]["export"] = round(surplus, 2)
+            elif surplus < -20:
+                signals["grid"]["import"] = round(abs(surplus), 2)
+    else:
+        # Physikalische Bilanz: Bedarf = PV + Bat_Discharge + Grid_Import - Bat_Charge - Grid_Export
+        derived = (
+            signals["pv"]["production"]
+            + signals["battery"]["discharge"]
+            + signals["grid"]["import"]
+            - signals["battery"]["charge"]
+            - signals["grid"]["export"]
+        )
+        signals["load"]["consumption"] = max(round(derived, 2), load_power, 0.0)
 
     return signals

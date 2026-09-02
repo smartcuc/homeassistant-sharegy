@@ -53,16 +53,16 @@ def get_today_consumption(user):
         ).values_list("device_id", flat=True)
     )
 
-    # Priorität B: Alle aktiven Geräte des Haushalts
-    all_user_devices = list(
+    # Priorität B: Alle relevanten Verbraucher-Geräte (keine reinen Erzeuger)
+    consumer_devices = list(
         Device.objects.filter(
             home__user=user,
             active=True,
             pending_delete=False,
-        ).values_list("id", flat=True)
+        ).exclude(config__role__key="producer").values_list("id", flat=True)
     )
 
-    device_ids = grid_sources if grid_sources else all_user_devices
+    device_ids = grid_sources if grid_sources else consumer_devices
 
     if not device_ids:
         return {
@@ -71,7 +71,10 @@ def get_today_consumption(user):
             "history": [],
         }
 
-    key_filter = Q(metric_key__in=["power", "value", "a_act_power", "apower", "load"]) | Q(metric_key__isnull=True)
+    # Nur echte Verbraucher-Metriken (bei Hybrid-Invertern load_power, niemals das Erzeugungs-Power)
+    key_filter = Q(metric_key__in=["load_power", "load_power_w", "load", "a_act_power", "apower"]) | (
+        Q(metric_key__in=["power", "value"]) & ~Q(device__config__role__key__in=["producer", "both", "hybrid"])
+    )
 
     # 2. Versuch: DeviceMetric1h (Stunden-Aggregate)
     hourly_rows = list(

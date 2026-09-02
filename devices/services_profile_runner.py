@@ -353,9 +353,12 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
                     logger.warning("Auto-fetch ps_id via OpenAPI failed: %s", e)
 
             # 1. Realtime Measurement Points abfragen (Offizielle Sungrow OpenAPI)
+            # 1. Realtime Measurement Points abfragen (Offizielle Sungrow OpenAPI)
             MEASURE_POINTS = [
-                "83033", "83067", "83022", "83052", "83106", "83129", "83252",
-                "83238", "83549", "83326", "83328", "83329", "83330", "83334"
+                "83033", "83067", "83022", "83052", "83106", "83051", "83549",
+                "83129", "83252", "83238", "83104", "83111", "83112", "83326",
+                "83328", "83329", "83330", "83331", "83334", "83025", "83026",
+                "83027", "83028"
             ]
             raw_data = {"result_code": "1", "result_data": {}}
 
@@ -383,8 +386,8 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
                         pv = float(p_data.get("p83033") or p_data.get("p83067") or p_data.get("p83329") or 0.0)
                         load = float(p_data.get("p83052") or p_data.get("p83106") or p_data.get("p83330") or 0.0)
 
-                        # Netz-Kandidaten
-                        grid_cands = [p_data.get("p83549"), p_data.get("p83051"), p_data.get("p83328")]
+                        # Netz-Kandidaten (83051 ist der offizielle Netzübergabepunkt)
+                        grid_cands = [p_data.get("p83051"), p_data.get("p83549"), p_data.get("p83328")]
                         grid = 0.0
                         for gc in grid_cands:
                             if gc is not None:
@@ -397,7 +400,7 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
                                     pass
 
                         # Batterie-Leistung Kandidaten
-                        bat_cands = [p_data.get("p83238"), p_data.get("p83326"), p_data.get("p83104"), p_data.get("p83111"), p_data.get("p83112")]
+                        bat_cands = [p_data.get("p83104"), p_data.get("p83238"), p_data.get("p83111"), p_data.get("p83112"), p_data.get("p83326")]
                         bat_pwr = 0.0
                         for bc in bat_cands:
                             if bc is not None:
@@ -427,6 +430,10 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
                             bat_pwr = load
 
                         day_wh = float(p_data.get("p83022") or p_data.get("p83331") or 0.0)
+                        day_export_wh = float(p_data.get("p83025") or 0.0)
+                        day_import_wh = float(p_data.get("p83026") or 0.0)
+                        day_charge_wh = float(p_data.get("p83027") or 0.0)
+                        day_discharge_wh = float(p_data.get("p83028") or 0.0)
 
                         raw_data["_direct_metrics"] = {
                             "pv_power_w": max(0.0, pv),
@@ -435,9 +442,14 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
                             "battery_power_w": bat_pwr,
                             "battery_soc": soc_val,
                             "daily_generation_kwh": round(day_wh / 1000.0 if day_wh > 50 else day_wh, 2),
+                            "daily_feed_in_kwh": round(day_export_wh / 1000.0 if day_export_wh > 50 else day_export_wh, 2),
+                            "daily_import_kwh": round(day_import_wh / 1000.0 if day_import_wh > 50 else day_import_wh, 2),
+                            "daily_charge_kwh": round(day_charge_wh / 1000.0 if day_charge_wh > 50 else day_charge_wh, 2),
+                            "daily_discharge_kwh": round(day_discharge_wh / 1000.0 if day_discharge_wh > 50 else day_discharge_wh, 2),
                         }
             except Exception as e:
                 logger.warning("getPowerStationRealTimeData query failed: %s", e)
+
 
 
             # Details abfragen als Ergänzung
@@ -612,6 +624,7 @@ def execute_cloud_poll(integration: CloudDeviceIntegration) -> dict:
             )
             try:
                 cache.set(f"device:{device.id}:latest_power", val, timeout=3600)
+                cache.set(f"device:{device.id}:pv_power", val, timeout=3600)
             except Exception as e:
                 logger.warning("Cache write failed for device %s: %s", device.id, e)
 
@@ -718,19 +731,55 @@ def execute_cloud_poll(integration: CloudDeviceIntegration) -> dict:
         # 3. Load Power & Grid Power
         if "load_power_w" in metrics and metrics["load_power_w"] is not None:
             load_val = float(metrics["load_power_w"])
+            DeviceMetric.objects.create(
+                device=device,
+                metric_key="load_power",
+                unit="W",
+                value=load_val,
+                timestamp=now,
+            )
             DeviceLatestMetric.objects.update_or_create(
                 device=device,
                 metric_key="load_power",
                 defaults={"value": load_val, "timestamp": now},
             )
+            try:
+                cache.set(f"device:{device.id}:load_power", load_val, timeout=3600)
+            except Exception as e:
+                logger.warning("Cache write failed for load_power: %s", e)
 
         if "grid_power_w" in metrics and metrics["grid_power_w"] is not None:
             grid_val = float(metrics["grid_power_w"])
+            DeviceMetric.objects.create(
+                device=device,
+                metric_key="grid_power",
+                unit="W",
+                value=grid_val,
+                timestamp=now,
+            )
             DeviceLatestMetric.objects.update_or_create(
                 device=device,
                 metric_key="grid_power",
                 defaults={"value": grid_val, "timestamp": now},
             )
+            try:
+                cache.set(f"device:{device.id}:grid_power", grid_val, timeout=3600)
+            except Exception as e:
+                logger.warning("Cache write failed for grid_power: %s", e)
+
+        # 4. Tages-Energiezähler (kWh) persistieren
+        for day_k in ["daily_generation_kwh", "daily_feed_in_kwh", "daily_import_kwh", "daily_charge_kwh", "daily_discharge_kwh"]:
+            if day_k in metrics and metrics[day_k] is not None:
+                dk_val = float(metrics[day_k])
+                DeviceLatestMetric.objects.update_or_create(
+                    device=device,
+                    metric_key=day_k,
+                    defaults={"value": dk_val, "timestamp": now},
+                )
+                try:
+                    cache.set(f"device:{device.id}:{day_k}", dk_val, timeout=3600)
+                except Exception:
+                    pass
 
 
         # Status aktualisieren

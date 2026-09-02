@@ -205,9 +205,16 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
         ):
             b_ids = {ss.power_device_id, ss.primary_device_id, ss.soc_device_id, ss.current_device_id, ss.voltage_device_id} - {None}
             for b_id in b_ids:
-                grid_device_ids.discard(b_id)
-                pv_device_ids.discard(b_id)
-                consumer_devices = [d for d in consumer_devices if d.id != b_id]
+                dev_obj = next((d for d in devices if d.id == b_id), None)
+                is_hybrid = False
+                if dev_obj and hasattr(dev_obj, "config") and dev_obj.config:
+                    role_k = getattr(dev_obj.config.role, "key", None)
+                    if role_k in ["both", "hybrid"]:
+                        is_hybrid = True
+                if not is_hybrid:
+                    grid_device_ids.discard(b_id)
+                    pv_device_ids.discard(b_id)
+                    consumer_devices = [d for d in consumer_devices if d.id != b_id]
 
             if ss.power_device_id and not _is_non_power_sensor(ss.power_device):
                 battery_device_ids.add(ss.power_device_id)
