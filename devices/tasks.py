@@ -226,3 +226,38 @@ def purge_pending_devices():
 
     return deleted
 
+
+# ============================================================
+# ☁️ CLOUD PROFILES POLLING TASK (SUNGROW / SOLAREDGE / FRONIUS)
+# ============================================================
+
+@shared_task(name="devices.poll_cloud_integrations")
+def poll_cloud_integrations_task():
+    """
+    Fragt zyklisch alle aktiven Cloud-Geräte-Integrationen ab.
+    """
+    from devices.models import CloudDeviceIntegration
+    from devices.services_profile_runner import execute_cloud_poll
+
+    active_integrations = CloudDeviceIntegration.objects.filter(
+        is_active=True,
+        device__active=True,
+    ).select_related("device", "device__home")
+
+    count = 0
+    errors = 0
+
+    for integration in active_integrations:
+        try:
+            res = execute_cloud_poll(integration)
+            if res.get("status") == "success":
+                count += 1
+            else:
+                errors += 1
+        except Exception as e:
+            logger.error("Cloud poll failed for integration %s: %s", integration.id, e)
+            errors += 1
+
+    return {"polled": count, "errors": errors, "total": active_integrations.count()}
+
+

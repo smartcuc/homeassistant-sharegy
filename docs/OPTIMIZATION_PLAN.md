@@ -12,7 +12,7 @@
 | **Phase 2** | DB- & Performance-Optimierung | 🟢 EMS-Free & Sharing | 🟢 100% Abgeschlossen | 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7 | – |
 | **Phase 3** | Celery & Buffer-Härtung | 🟢 EMS-Free Stabilität | 🟢 100% Abgeschlossen | 3.1, 3.2, 3.3, 3.4, 3.5 | – |
 | **Phase 4** | Architektur & Diagramme | 🟢 EMS-Free Sankey & Tests | 🟢 100% Abgeschlossen | 4.1, 4.2, 4.3, 4.4 | – |
-| **Phase 5** | EMS-Pro, KI, Apps & Aktorik | 🟢 EMS-Pro, Push & Mobile | 🟢 95% Abgeschlossen | 5.1 – 5.6, 5.8 – 5.21 | 5.7 (YAML Device Profiles) |
+| **Phase 5** | EMS-Pro, KI, Apps & Aktorik | 🟢 EMS-Pro, Push & Mobile | 🟢 100% Abgeschlossen | 5.1 – 5.21 (inkl. 5.7 YAML Profiles) | – |
 | **Phase 6** | Säule 2: Energy Sharing & Clearing | 🟢 ESC & Multi-Community Hub | 🟢 100% Abgeschlossen | 6.1 – 6.10 | – |
 
 
@@ -298,12 +298,15 @@
 
 ---
 
-### [ ] 5.7 Deklaratives Device-Profile Addon-System (3rd-Party Wechelrichter)
-- **Bereich**: Ingest & Hardware-Abstraktion (`devices/adapters/`, `profiles/`)
-- **Ziel**: 
-  - Standardisiertes YAML/JSON-Profilsystem zur Anbindung von 3rd-Party Wechselrichtern und Speichern (Sungrow, SMA, Fronius, Deye, Huawei, Kostal, SolarEdge).
-  - Deklaratives Mapping von herstellerspezifischen Modbus-/API-Feldern auf standardisierte Sharegy-Metriken (`pv_power_w`, `battery_soc`, etc.).
-- **Impact**: Neue Wechselrichter können in 10 Minuten ohne Backend-Codeänderungen per YAML-Profil eingebunden werden.
+### [x] 5.7 Deklaratives Device-Profile Addon-System (3rd-Party Wechselrichter & Speicher)
+- **Dateien**: [`devices/profiles/sungrow_isolarcloud.yaml`](file:///c:/Users/Public/Dev/eswes/devices/profiles/sungrow_isolarcloud.yaml), [`solaredge_cloud.yaml`](file:///c:/Users/Public/Dev/eswes/devices/profiles/solaredge_cloud.yaml), [`fronius_solarweb.yaml`](file:///c:/Users/Public/Dev/eswes/devices/profiles/fronius_solarweb.yaml), [`devices/services_profile_runner.py`](file:///c:/Users/Public/Dev/eswes/devices/services_profile_runner.py), [`devices/api/views_profiles.py`](file:///c:/Users/Public/Dev/eswes/devices/api/views_profiles.py), [`CloudInverterIntegrationCard.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/devices/components/CloudInverterIntegrationCard.jsx)
+- **Status**: ✅ **Erledigt**.
+  - Standardisiertes YAML-Profilsystem zur deklarativen Anbindung von 3rd-Party Wechselrichtern und Speichern (**Sungrow iSolarCloud OpenAPI / Gateway**, **SolarEdge Monitoring API**, **Fronius Solar.web**).
+  - Generische `ProfileRunner`-Engine zur automatischen Ausführung von Auth-Handshakes, JSONPath-Mappings, Einheiten-Skalierung (kW $\rightarrow$ W) und Persistierung in TimescaleDB & Redis.
+  - Asynchroner Celery-Polling-Task `poll_cloud_integrations_task` mit Fehlerisolation.
+  - REST-APIs unter `/api/devices/cloud-profiles/*` für Profil-Listing, Live-Verbindungstest und Kopplung.
+  - UI-Integration in `InterfacesPage.jsx` mit Sofort-Test, Live-Metrik-Feedback und 1-Klick-Kopplung.
+  - 7/7 automatisierte Tests in [`devices/test_profile_runner.py`](file:///c:/Users/Public/Dev/eswes/devices/test_profile_runner.py) bestanden.
 
 ---
 

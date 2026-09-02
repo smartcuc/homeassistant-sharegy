@@ -38,6 +38,13 @@ from devices.views import (
     device_metrics,
 )
 from .views_telemetry_push import telemetry_push
+from .views_profiles import (
+    list_cloud_profiles_view,
+    test_cloud_connection_view,
+    integrate_cloud_device_view,
+    poll_cloud_device_now_view,
+    get_cloud_integration_status_view,
+)
 
 urlpatterns = [
     path("", device_list),
@@ -61,9 +68,13 @@ urlpatterns = [
     path("<int:device_id>/profile/", device_baseline_profile_view),
     path("<int:device_id>/profile/learn/", device_baseline_learn_view),
     path("<int:device_id>/profile/evaluate/", device_baseline_evaluate_view),
+    # ☁️ CLOUD WECHSELRICHTER & 3RD-PARTY PROFILE (SUNGROW, SOLAREDGE, FRONIUS)
+    path("cloud-profiles/", list_cloud_profiles_view, name="device_cloud_profiles_list"),
+    path("cloud-profiles/test/", test_cloud_connection_view, name="device_cloud_profiles_test"),
+    path("cloud-profiles/integrate/", integrate_cloud_device_view, name="device_cloud_profiles_integrate"),
+    path("<int:device_id>/cloud/poll-now/", poll_cloud_device_now_view, name="device_cloud_poll_now"),
+    path("<int:device_id>/cloud/status/", get_cloud_integration_status_view, name="device_cloud_status"),
     path("sankey/", sankey_data),
-
-
     path("homes/", list_homes),
     path("homes/regenerate-mqtt/", regenerate_mqtt_password),
     path("mqtt-profiles/", mqtt_profile_list),
@@ -75,3 +86,4 @@ urlpatterns = [
     path("dashboard/", device_dashboard_values),
     path("telemetry/push/", telemetry_push),
 ]
+

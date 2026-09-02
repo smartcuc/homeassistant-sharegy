@@ -784,3 +784,65 @@ class DeviceBaselineProfile(models.Model):
     def __str__(self):
         return f"Baseline-Profil ({self.get_appliance_type_display()}) für Device #{self.device_id}"
 
+
+# ============================================================
+# ☁️ CLOUD-INTEGRATION & 3RD-PARTY WECHSELRICHTER-PROFILE
+# ============================================================
+
+class CloudDeviceIntegration(models.Model):
+    """
+    Kopplung eines Geräts an eine Hersteller-Cloud (z. B. Sungrow iSolarCloud, SolarEdge, Fronius).
+    Verwendet deklarative YAML-Profile unter devices/profiles/*.yaml für Abfragen, Auth & Mappings.
+    """
+    STATUS_OK = "ok"
+    STATUS_ERROR = "error"
+    STATUS_PENDING = "pending"
+
+    STATUS_CHOICES = [
+        (STATUS_OK, "Aktiv / Verbunden"),
+        (STATUS_ERROR, "Fehler bei Abfrage"),
+        (STATUS_PENDING, "Ausstehend"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    device = models.OneToOneField(
+        "Device",
+        on_delete=models.CASCADE,
+        related_name="cloud_integration",
+    )
+    profile_id = models.CharField(
+        max_length=64,
+        help_text="ID des YAML-Profils (z. B. sungrow_isolarcloud, solaredge_cloud)",
+    )
+    credentials = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Konfigurations- und Zugangsdaten (z. B. appkey, user_account, password, site_id)",
+    )
+    polling_interval_seconds = models.IntegerField(
+        default=60,
+        help_text="Abfrageintervall in Sekunden (Standard: 60s)",
+    )
+    is_active = models.BooleanField(
+        default=True,
+        help_text="Aktiviert das periodische Polling über Celery",
+    )
+    last_polled_at = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+    last_status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=STATUS_PENDING,
+    )
+    last_error_message = models.TextField(
+        blank=True,
+        default="",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Cloud-Integration ({self.profile_id}) für Device #{self.device_id}"
+

@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useHomes } from "../hooks/useHomes";
 import { QRCodeSVG } from "qrcode.react";
 import { useTranslation } from "react-i18next";
+import CloudInverterIntegrationCard from "../features/devices/components/CloudInverterIntegrationCard";
 
 export default function InterfacesPage() {
     const { primaryHome, isLoading: homeLoading, regenerateMqttPassword, isRegenerating } = useHomes();
@@ -236,7 +237,10 @@ export default function InterfacesPage() {
                 </div>
             </div>
 
-            {/* 3. SECTION: MQTT INTERFACE CARD */}
+            {/* 3. SECTION: HERSTELLER CLOUD KOPPLUNG (SUNGROW, SOLAREDGE, FRONIUS) */}
+            <CloudInverterIntegrationCard primaryHome={primaryHome} />
+
+            {/* 4. SECTION: MQTT INTERFACE CARD */}
             <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
                 <div className="p-5 bg-gradient-to-r from-slate-50 via-indigo-50/30 to-white border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
@@ -245,8 +249,9 @@ export default function InterfacesPage() {
                         </div>
                         <div>
                             <h2 className="text-base font-bold text-gray-900">
-                                3. MQTT Broker Schnittstelle (ioBroker, Node-RED, OTel)
+                                4. MQTT Broker Schnittstelle (ioBroker, Node-RED, OTel)
                             </h2>
+
                             <p className="text-xs text-gray-500">
                                 Standard-IoT-Protokoll zur universellen Anbindung von Smart-Home-Servern und OpenTelemetry
                             </p>
