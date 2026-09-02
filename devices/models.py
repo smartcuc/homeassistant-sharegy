@@ -210,6 +210,14 @@ class Device(models.Model):
     def __str__(self):
         return self.identifier
 
+    @property
+    def name(self):
+        cfg = getattr(self, "config", None)
+        if cfg and cfg.name:
+            return cfg.name
+        return self.identifier
+
+
 
 # ============================================================
 # ✅ DEVICE CONFIG (KERN)
