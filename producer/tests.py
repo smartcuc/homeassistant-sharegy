@@ -117,3 +117,37 @@ class StorageSystemTests(TestCase):
         self.assertIn("candidates", data)
         self.assertIn("devices", data)
         self.assertGreaterEqual(len(data["devices"]), 2)
+
+    def test_storage_control_api(self):
+        storage = StorageSystem.objects.create(
+            home=self.home,
+            name="Test Speicher",
+            capacity_kwh=10.0,
+            max_charge_power_kw=5.0,
+            max_discharge_power_kw=5.0,
+            min_soc_reserve_pct=10.0,
+            soc_device=self.bms_sensor,
+            soc_metric_key="soc",
+            power_device=self.inverter,
+            power_metric_key="battery_power",
+        )
+
+        # POST /api/producer/storage/<id>/control/
+        resp = self.client.post(
+            f"/api/producer/storage/{storage.id}/control/",
+            data={
+                "control_mode": "price_optimized",
+                "ems_control_enabled": True,
+                "target_charge_power_kw": 4.5,
+                "price_threshold_ct": 12.0,
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 200)
+        json_data = resp.json()
+        self.assertEqual(json_data["status"], "success")
+        self.assertEqual(json_data["storage"]["control_mode"], "price_optimized")
+        self.assertTrue(json_data["storage"]["ems_control_enabled"])
+        self.assertEqual(json_data["storage"]["target_charge_power_kw"], 4.5)
+        self.assertEqual(json_data["storage"]["price_threshold_ct"], 12.0)
+        self.assertIn("power=4.5kW", json_data["storage"]["last_control_command"])

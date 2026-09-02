@@ -315,9 +315,13 @@ def string_update(
 # ✅ STORAGE SYSTEM (BATTERIESPEICHER) APIS
 # ============================================================
 
+import logging
+from django.utils import timezone
 from producer.models import StorageSystem
 from devices.models import Device, DeviceLatestMetric
 from django.db.models import Q
+
+logger = logging.getLogger(__name__)
 
 
 def serialize_storage_system(storage):
