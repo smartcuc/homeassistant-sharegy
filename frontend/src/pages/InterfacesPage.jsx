@@ -59,7 +59,7 @@ export default function InterfacesPage() {
                     <span>📡</span> {t("interfaces.title", "Schnittstellen")}
                 </h1>
                 <p className="text-sm text-gray-500 mt-1">
-                    {t("interfaces.subtitle", "Verbinde deine Smart Home Geräte und Zentralen direkt über Outbound-WebSocket, das native Home Assistant Plugin oder MQTT mit der Sharegy Cloud.")}
+                    {t("interfaces.subtitle", "Verbinde deine Geräte und Zentralen direkt über Outbound-WebSocket (Shelly), Sungrow Direkt-Kopplung, Cloud-Wechselrichter, das Home Assistant Plugin oder MQTT mit Sharegy.")}
                 </p>
             </div>
 
@@ -161,7 +161,23 @@ export default function InterfacesPage() {
                 </div>
             </div>
 
-            {/* 2. SECTION: NATIVE HOME ASSISTANT INTEGRATION (HACS / CUSTOM COMPONENT) */}
+            {/* 2. SECTION: SUNGROW DIREKT-KOPPLUNG (1-KLICK OAUTH & ISOLARCLOUD) */}
+            <CloudInverterIntegrationCard 
+                primaryHome={primaryHome} 
+                filterVendor="sungrow" 
+                sectionNumber={2} 
+                cardTitle="2. Sungrow Wechselrichter & Batteriespeicher (SH-Serie)" 
+            />
+
+            {/* 3. SECTION: WEITERE WECHSELRICHTER & CLOUD-DIENSTE */}
+            <CloudInverterIntegrationCard 
+                primaryHome={primaryHome} 
+                filterVendor="others" 
+                sectionNumber={3} 
+                cardTitle="3. Weitere Wechselrichter (SolarEdge, Fronius, Kostal, Growatt)" 
+            />
+
+            {/* 4. SECTION: NATIVE HOME ASSISTANT INTEGRATION (HACS / CUSTOM COMPONENT) */}
             <div className="bg-white border border-cyan-200/80 rounded-2xl shadow-xs overflow-hidden ring-1 ring-cyan-100">
                 <div className="p-5 bg-gradient-to-r from-cyan-50/80 via-blue-50/30 to-white border-b border-cyan-200/80 flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
@@ -171,7 +187,7 @@ export default function InterfacesPage() {
                         <div>
                             <div className="flex items-center gap-2">
                                 <h2 className="text-base font-bold text-gray-900">
-                                    2. Natives Home Assistant Plugin (HACS / Custom Component)
+                                    4. Natives Home Assistant Plugin (HACS / Custom Component)
                                 </h2>
                                 <span className="text-[10px] font-bold px-2 py-0.5 bg-cyan-100 text-cyan-800 rounded-full border border-cyan-200">
                                     Neu & Store-and-Forward
@@ -237,10 +253,7 @@ export default function InterfacesPage() {
                 </div>
             </div>
 
-            {/* 3. SECTION: HERSTELLER CLOUD KOPPLUNG (SUNGROW, SOLAREDGE, FRONIUS) */}
-            <CloudInverterIntegrationCard primaryHome={primaryHome} />
-
-            {/* 4. SECTION: MQTT INTERFACE CARD */}
+            {/* 5. SECTION: MQTT INTERFACE CARD */}
             <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
                 <div className="p-5 bg-gradient-to-r from-slate-50 via-indigo-50/30 to-white border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
@@ -249,7 +262,7 @@ export default function InterfacesPage() {
                         </div>
                         <div>
                             <h2 className="text-base font-bold text-gray-900">
-                                4. MQTT Broker Schnittstelle (ioBroker, Node-RED, OTel)
+                                5. MQTT Broker Schnittstelle (ioBroker, Node-RED, OTel)
                             </h2>
 
                             <p className="text-xs text-gray-500">

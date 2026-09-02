@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { apiFetch } from "../../../api/client";
 
-export default function CloudInverterIntegrationCard({ primaryHome }) {
+export default function CloudInverterIntegrationCard({ primaryHome, filterVendor = null, sectionNumber = 3, cardTitle = null }) {
     const [profiles, setProfiles] = useState([]);
     const [selectedProfileId, setSelectedProfileId] = useState("sungrow_isolarcloud");
     const [credentials, setCredentials] = useState({
@@ -25,9 +25,15 @@ export default function CloudInverterIntegrationCard({ primaryHome }) {
         try {
             const data = await apiFetch("/api/devices/cloud-profiles/");
             if (data?.profiles) {
-                setProfiles(data.profiles);
-                if (data.profiles.length > 0) {
-                    setSelectedProfileId(data.profiles[0].id);
+                let list = data.profiles;
+                if (filterVendor === "sungrow") {
+                    list = list.filter((p) => p.vendor?.toLowerCase() === "sungrow" || p.id === "sungrow_isolarcloud");
+                } else if (filterVendor === "others") {
+                    list = list.filter((p) => p.vendor?.toLowerCase() !== "sungrow" && p.id !== "sungrow_isolarcloud");
+                }
+                setProfiles(list);
+                if (list.length > 0) {
+                    setSelectedProfileId(list[0].id);
                 }
             }
         } catch (err) {
@@ -119,22 +125,25 @@ export default function CloudInverterIntegrationCard({ primaryHome }) {
     return (
         <div className="bg-white border border-blue-200/80 rounded-2xl shadow-xs overflow-hidden ring-1 ring-blue-100">
             {/* Header */}
-            <div className="p-5 bg-gradient-to-r from-blue-50/80 via-indigo-50/30 to-white border-b border-blue-200/80 flex flex-wrap items-center justify-between gap-3">
+            <div className={`p-5 bg-gradient-to-r ${filterVendor === "sungrow" ? "from-orange-50/90 via-amber-50/40" : "from-blue-50/80 via-indigo-50/30"} to-white border-b ${filterVendor === "sungrow" ? "border-orange-200/80" : "border-blue-200/80"} flex flex-wrap items-center justify-between gap-3`}>
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center text-xl shadow-xs">
-                        ☁️
+                    <div className={`w-10 h-10 rounded-xl ${filterVendor === "sungrow" ? "bg-amber-600" : "bg-blue-600"} text-white flex items-center justify-center text-xl shadow-xs`}>
+                        {filterVendor === "sungrow" ? "☀️" : "☁️"}
                     </div>
                     <div>
                         <div className="flex items-center gap-2">
                             <h2 className="text-base font-bold text-gray-900">
-                                Hersteller Cloud-Kopplung (Sungrow iSolarCloud, SolarEdge, Fronius)
+                                {cardTitle || `${sectionNumber}. Hersteller Cloud-Kopplung (Sungrow, SolarEdge, Fronius)`}
                             </h2>
-                            <span className="text-[10px] font-bold px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full border border-blue-200">
-                                Task 5.7 YAML Profile
+                            <span className={`text-[10px] font-bold px-2 py-0.5 ${filterVendor === "sungrow" ? "bg-amber-100 text-amber-900 border border-amber-200" : "bg-blue-100 text-blue-800 border border-blue-200"} rounded-full`}>
+                                {filterVendor === "sungrow" ? "Zero-Hardware Direct" : "Cloud & Modbus"}
                             </span>
                         </div>
                         <p className="text-xs text-gray-500">
-                            Direkte Server-zu-Server Anbindung für Wechselrichter und Batteriespeicher ohne lokale Hardware vor Ort.
+                            {filterVendor === "sungrow" 
+                                ? "Direkte 1-Klick Schnittstelle für alle Sungrow Hybrid-Wechselrichter (SH-Serie) und SBR-Speicher."
+                                : "Server-zu-Server Anbindung für SolarEdge, Fronius, Kostal, Growatt und weitere Wechselrichter."
+                            }
                         </p>
                     </div>
                 </div>
