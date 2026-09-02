@@ -240,7 +240,7 @@ Under **Producers & Storage**, configure your solar panel arrays, generator stri
                 "summary_en": "From dynamic tariff tracking without PV to complex solar storage hybrids: What physical metrics are required for energy balance and sub-metering.",
                 "content_de": """# Welche Messwerte benötigt Sharegy? ⚡📊
 
-Sharegy ist vollständig **hersteller- und hardwareunabhängig**. Egal ob du Daten über Home Assistant, MQTT, ioBroker, Shelly, REST-Webhooks oder Matter einspeist: Sharegy verarbeitet die physikalischen Standardgrößen.
+Sharegy ist vollständig **hersteller- und hardwareunabhängig**. Egal ob du Daten über Home Assistant, MQTT, ioBroker, Shelly, REST-Webhooks oder Cloud-APIs (Sungrow, SolarEdge, Fronius) einspeist: Sharegy verarbeitet die physikalischen Standardgrößen.
 
 ---
 
@@ -283,7 +283,8 @@ In Sharegy wird hierfür **nur 1 virtueller Batteriespeicher** angelegt: In den 
 """,
                 "content_en": """# Telemetry Metrics & Universal Device Mapping ⚡📊
 
-Sharegy is completely **vendor- and hardware-agnostic**. Whether you stream data via Home Assistant, MQTT, ioBroker, Shelly, REST webhooks, or Matter: Sharegy processes standardized physical electrical units.
+Sharegy is completely **vendor- and hardware-agnostic**. Whether you stream data via Home Assistant, MQTT, ioBroker, Shelly, REST webhooks, or Cloud APIs (Sungrow, SolarEdge, Fronius): Sharegy processes standardized physical electrical units.
+
 
 ---
 

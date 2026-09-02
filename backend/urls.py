@@ -78,10 +78,9 @@ urlpatterns = [
                 path("public/", include("forecast.urls_public")),
                 path("track/", include("tracking.api_urls")),
                 path("help/", include("support_desk.api.urls_help")),
-
-                path("matter/", include("providers.matter.api.urls")),
                 path("grafana/", include("energy.api.urls_grafana")),
                 path("billing/", include("billing.urls")),
+
                 path("support/", include("support_desk.api.urls")),
                 path("status/", include("operations.urls")),
                 path("notifications/", include("notifications.api.urls")),

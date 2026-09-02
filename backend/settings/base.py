@@ -166,9 +166,8 @@ INSTALLED_APPS = [
     "support_desk",
     "notifications",
     "providers.opentelemetry",
-
-    "providers.matter",
 ]
+
 
 
 # =============================

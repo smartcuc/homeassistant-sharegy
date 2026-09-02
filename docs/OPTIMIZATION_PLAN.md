@@ -319,15 +319,6 @@
 
 ---
 
-### [x] 5.12 Matter 1.3 Energy Management Hub & Bridge Engine
-- **Dateien**: [`providers/matter/`](file:///c:/Users/Public/Dev/eswes/providers/matter/), [`MatterHubCard.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/matter/components/MatterHubCard.jsx), [`MatterPairingModal.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/matter/components/MatterPairingModal.jsx)
-- **Status**: ✅ **Erledigt**.
-  - Vollständige Implementierung des neuen **CSA Matter 1.3 Energy Management Standards**.
-  - Cluster `0x0090` (Electrical Power Measurement: W, V, A, PF), `0x0091` (Electrical Energy Measurement: kWh), `0x0006` (On/Off Relais), `0x0098` / `0x0099` (EVSE & Energy Management).
-  - Commissioning-Parser für Matter QR-Codes (`MT:...`), 11-/21-stellige Pairing-Codes und Setup-PINs.
-  - REST- und Webhook-APIs unter `/api/matter/*` & Pairing-UI in `InterfacesPage.jsx`.
-
----
 
 ### [x] 5.13 Solar-Prognosegüte & Ist-vs-Soll-Vergleich (%-Genauigkeit)
 - **Dateien**: [`forecast/services_accuracy.py`](file:///c:/Users/Public/Dev/eswes/forecast/services_accuracy.py), [`ForecastAccuracyCard.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/forecast/components/ForecastAccuracyCard.jsx)

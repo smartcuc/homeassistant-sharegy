@@ -41,9 +41,10 @@ PLANS_CONFIG = {
         "features": [
             "Live-Sankey Energiefluss & 24h-Historie",
             "Basis-Wetter- & Solarprognose (24h)",
-            "Home Assistant & Matter 1.3 Hub",
+            "Home Assistant & Cloud-Wechselrichter Integration",
             "Residual-Zähler & Grundlastmessung",
             "Standard-Web-Cockpit",
+
         ],
     },
     "pro_monthly": {
