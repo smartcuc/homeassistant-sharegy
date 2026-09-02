@@ -59,12 +59,18 @@ class ProfileRunnerTestCase(TestCase):
         self.assertIn("sungrow_isolarcloud", profile_ids)
         self.assertIn("solaredge_cloud", profile_ids)
         self.assertIn("fronius_solarweb", profile_ids)
+        self.assertIn("kostal_solar_portal", profile_ids)
 
         sungrow = next(p for p in profiles if p["id"] == "sungrow_isolarcloud")
         field_keys = [f["key"] for f in sungrow["fields"]]
         self.assertIn("appkey", field_keys)
         self.assertIn("user_account", field_keys)
         self.assertIn("ps_id", field_keys)
+
+        kostal = next(p for p in profiles if p["id"] == "kostal_solar_portal")
+        self.assertEqual(kostal["vendor"], "Kostal")
+        self.assertIn("api_key", [f["key"] for f in kostal["fields"]])
+
 
     def test_03_jsonpath_extractor(self):
         """Testet den JSONPath-Evaluator auf verschachtelten Daten."""
@@ -168,3 +174,20 @@ class ProfileRunnerTestCase(TestCase):
         self.assertEqual(resp_int.status_code, 200)
         self.assertEqual(resp_int.data["status"], "success")
         self.assertIn("device_id", resp_int.data)
+
+    def test_08_load_and_simulate_kostal_profile(self):
+        """Testet das Laden und die Testverbindung für Kostal Solar Portal."""
+        profile = load_profile("kostal_solar_portal")
+        self.assertEqual(profile["id"], "kostal_solar_portal")
+        self.assertEqual(profile["vendor"], "Kostal")
+        self.assertIn("metrics_mapping", profile)
+
+        # Test-Credentials Simulation
+        creds = {"api_key": "ksp_secret_123", "plant_id": "990011"}
+        res = test_cloud_credentials("kostal_solar_portal", creds)
+        self.assertEqual(res["status"], "success")
+        self.assertTrue(res["simulated"])
+        self.assertIn("live_metrics", res)
+        self.assertIn("pv_power_w", res["live_metrics"])
+        self.assertIn("battery_soc", res["live_metrics"])
+

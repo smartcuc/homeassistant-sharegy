@@ -1,0 +1,98 @@
+{
+  "id": "kostal_solar_portal",
+  "name": "Kostal Solar Portal",
+  "vendor": "Kostal",
+  "category": "inverter_hybrid",
+  "protocol": "http_cloud",
+  "description": "Cloud-Schnittstelle für Kostal PLENTICORE plus, PIKO IQ, PIKO MP plus und BYD/Kostal Batteriespeicher über das Kostal Solar Portal.",
+  "connection": {
+    "auth_type": "api_key",
+    "default_base_url": "https://www.kostal-solar-portal.com/api/v1",
+    "polling_interval_seconds": 60,
+    "fields": [
+      {
+        "key": "api_key",
+        "label": "Kostal API-Schlüssel / Token",
+        "type": "password",
+        "required": true,
+        "description": "Dein persönlicher API-Zugangsschlüssel aus dem Kostal Solar Portal (Einstellungen -> API).",
+        "placeholder": "z. B. ksp_live_98a76bc..."
+      },
+      {
+        "key": "plant_id",
+        "label": "Anlagen-ID (Plant ID)",
+        "type": "string",
+        "required": true,
+        "description": "Die eindeutige Anlagen-Nummer im Kostal Solar Portal.",
+        "placeholder": "z. B. 481920"
+      },
+      {
+        "key": "user_email",
+        "label": "Kostal Portal E-Mail (optional)",
+        "type": "string",
+        "required": false,
+        "placeholder": "deine-email@example.de"
+      }
+    ]
+  },
+  "requests": {
+    "telemetry": {
+      "method": "GET",
+      "endpoint": "/plants/{{plant_id}}/processdata",
+      "headers": {
+        "Authorization": "Bearer {{api_key}}",
+        "Accept": "application/json"
+      }
+    }
+  },
+  "metrics_mapping": {
+    "pv_power_w": {
+      "jsonpath": "$.processdata.pv_power",
+      "scale": 1.0,
+      "type": "float",
+      "min": 0.0,
+      "max": 100000.0,
+      "fallback": 0.0
+    },
+    "grid_power_w": {
+      "jsonpath": "$.processdata.grid_power",
+      "scale": 1.0,
+      "type": "float",
+      "min": -100000.0,
+      "max": 100000.0,
+      "fallback": 0.0
+    },
+    "load_power_w": {
+      "jsonpath": "$.processdata.home_power",
+      "scale": 1.0,
+      "type": "float",
+      "min": 0.0,
+      "max": 100000.0,
+      "fallback": 0.0
+    },
+    "battery_power_w": {
+      "jsonpath": "$.processdata.battery_power",
+      "scale": 1.0,
+      "type": "float",
+      "min": -50000.0,
+      "max": 50000.0,
+      "fallback": 0.0
+    },
+    "battery_soc": {
+      "jsonpath": "$.processdata.battery_soc",
+      "scale": 1.0,
+      "type": "float",
+      "unit": "%",
+      "min": 0.0,
+      "max": 100.0,
+      "fallback": null
+    },
+    "daily_generation_kwh": {
+      "jsonpath": "$.processdata.energy_day",
+      "scale": 0.001,
+      "type": "float",
+      "unit": "kWh",
+      "fallback": 0.0
+    }
+  }
+}
