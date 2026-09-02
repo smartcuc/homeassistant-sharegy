@@ -135,6 +135,24 @@ def sungrow_oauth_callback(request):
     if not token:
         token = f"sg_oauth_{code or 'demo_token_12345'}"
 
+    # Echte Anlagen-ID (ps_id) über getPowerStationList abfragen
+    plant_name = "Sungrow iSolarCloud Hybrid-Anlage"
+    try:
+        list_resp = requests.post(
+            f"{SUNGROW_GATEWAY_URL}/v1/powerStationService/getPowerStationList",
+            json={"appkey": SUNGROW_APPKEY, "curPage": 1, "size": 10},
+            headers={"Content-Type": "application/json", "sys_code": "901", "token": token},
+            timeout=10,
+        )
+        if list_resp.status_code == 200:
+            stations = list_resp.json().get("result_data", {}).get("pageList", [])
+            if stations:
+                ps_id = str(stations[0].get("ps_id"))
+                plant_name = stations[0].get("ps_name") or plant_name
+                logger.info("Found Sungrow station: %s (%s)", ps_id, plant_name)
+    except Exception as e:
+        logger.warning("Could not list power stations during OAuth callback: %s", e)
+
     # Gerät anlegen oder aktualisieren
     device_identifier = f"sungrow-oauth-{home.id if home else '0'}"
     device, _ = Device.objects.get_or_create(
@@ -146,7 +164,7 @@ def sungrow_oauth_callback(request):
         },
     )
     if hasattr(device, "config") and device.config:
-        device.config.name = "Sungrow iSolarCloud Hybrid-Anlage"
+        device.config.name = plant_name
         device.config.energy_source = "pv"
         device.config.save()
 
@@ -160,6 +178,7 @@ def sungrow_oauth_callback(request):
                 "user_account": user_account,
                 "token": token,
                 "ps_id": ps_id,
+                "ps_name": plant_name,
                 "auth_type": "oauth2",
             },
             "polling_interval_seconds": 60,
@@ -167,6 +186,7 @@ def sungrow_oauth_callback(request):
             "last_status": CloudDeviceIntegration.STATUS_OK,
         },
     )
+
 
     # Initialen Poll ausführen
     try:

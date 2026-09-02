@@ -296,13 +296,39 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
 
     # Echter HTTP-Aufruf
     if auth_type == "sungrow_token":
-        token_info = _execute_sungrow_login(
-            base_url=base_url,
-            appkey=credentials["appkey"],
-            account=credentials["user_account"],
-            password=credentials["user_password"],
-        )
-        context = {**credentials, "token": token_info["token"]}
+        appkey = credentials.get("appkey") or getattr(settings, "SUNGROW_APPKEY", "988713D7D057090474AEC9584CBA1AAD")
+        token = credentials.get("token")
+
+        if not token:
+            token_info = _execute_sungrow_login(
+                base_url=base_url,
+                appkey=appkey,
+                account=credentials.get("user_account"),
+                password=credentials.get("user_password"),
+            )
+            token = token_info["token"]
+
+        # Automatische Ermittlung der Anlagen-ID (ps_id) falls noch nicht gesetzt
+        ps_id = credentials.get("ps_id")
+        if not ps_id or ps_id in ("default_ps", "12345", ""):
+            try:
+                list_resp = requests.post(
+                    f"{base_url.rstrip('/')}/v1/powerStationService/getPowerStationList",
+                    json={"appkey": appkey, "curPage": 1, "size": 10},
+                    headers={"Content-Type": "application/json", "sys_code": "901", "token": token},
+                    timeout=10,
+                )
+                if list_resp.status_code == 200:
+                    stations = list_resp.json().get("result_data", {}).get("pageList", [])
+                    if stations:
+                        ps_id = str(stations[0].get("ps_id"))
+                        credentials["ps_id"] = ps_id
+                        credentials["ps_name"] = stations[0].get("ps_name", "Sungrow PV-Anlage")
+                        logger.info("Auto-discovered Sungrow power station ID: %s (%s)", ps_id, credentials.get("ps_name"))
+            except Exception as e:
+                logger.warning("Could not auto-fetch Sungrow ps_id: %s", e)
+
+        context = {**credentials, "token": token, "ps_id": ps_id, "appkey": appkey}
         req_cfg = profile["requests"]["telemetry"]
         url = f"{base_url.rstrip('/')}{_render_template(req_cfg['endpoint'], context)}"
         headers = _render_template(req_cfg.get("headers", {}), context)
@@ -311,6 +337,7 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
         resp = requests.post(url, json=body, headers=headers, timeout=12)
         resp.raise_for_status()
         raw_data = resp.json()
+
     else:
         # Standard GET/POST
         req_cfg = profile["requests"]["telemetry"]
