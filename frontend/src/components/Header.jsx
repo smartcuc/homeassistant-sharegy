@@ -18,7 +18,7 @@ export default function Header({ theme, user }) {
                 {/* LOGO -> Link zur Startseite */}
                 <Link
                     to="/"
-                    title="Sharegy Startseite"
+                    title="sharegy Startseite"
                     className="text-2xl font-bold flex items-center gap-1.5 hover:opacity-90 transition cursor-pointer"
                     style={{
                         background: `linear-gradient(to right, ${primary}, ${secondary})`,
@@ -27,7 +27,7 @@ export default function Header({ theme, user }) {
                     }}
                 >
                     <span>⚡</span>
-                    <span>Sharegy</span>
+                    <span className="font-mono tracking-tight lowercase">sharegy</span>
                 </Link>
 
                 {/* ✅ RECHTE SEITE */}

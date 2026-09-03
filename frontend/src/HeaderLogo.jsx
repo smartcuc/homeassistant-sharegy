@@ -22,7 +22,7 @@ export default function Header({ theme }) {
                             color: "transparent",
                         }}
                     >
-                        Sharegy
+                        sharegy
                     </div>
                 </Link>
 

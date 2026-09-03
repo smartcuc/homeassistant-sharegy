@@ -19,8 +19,8 @@ export default function Sidebar({ theme }) {
         >
 
             {/* Logo */}
-            <div className="p-6 text-2xl font-bold">
-                Sharegy
+            <div className="p-6 text-2xl font-bold tracking-tight lowercase">
+                sharegy
             </div>
 
             {/* Navigation */}

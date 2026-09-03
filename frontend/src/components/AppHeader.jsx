@@ -48,7 +48,7 @@ export default function AppHeader() {
                             color: "transparent",
                         }}
                     >
-                        Sharegy
+                        sharegy
                     </span>
                 </Link>
 
