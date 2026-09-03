@@ -299,14 +299,20 @@ def ingest_metric_payload(
     # 1.5 Batterie-Metriken bei Bedarf normalisieren (Sungrow, Modbus, MQTT Richtung)
     metrics = normalize_battery_metrics(metrics, state=state, meta=meta)
 
-    # 2. Metriken verarbeiten
+        # 2. Metriken verarbeiten
     for key, val in metrics.items():
         float_val = _to_float(val)
         if float_val is None:
             continue
 
-        metric_key = str(key).strip()
-        raw_unit = unit_map.get(metric_key, "")
+        raw_key = str(key).strip()
+        # Bei generischen Keys (value, val) auf die konfigurierte Lead-Metrik mappen
+        if configured_lead_key and raw_key.lower() in ["value", "val"]:
+            metric_key = configured_lead_key
+        else:
+            metric_key = raw_key
+
+        raw_unit = unit_map.get(raw_key, "")
         unit = _infer_canonical_unit(metric_key, raw_unit, config=config)
 
         # Lead-Metrik erkennen (inkl. Aliasse für Temperatur, Leistung etc.)

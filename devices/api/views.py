@@ -132,6 +132,7 @@ def device_list(request):
     ).select_related(
         "config",
         "config__role",
+        "config__metric_definition",
         "config__room",
         "config__floor",
     )
@@ -153,6 +154,7 @@ def unconfigured_devices(request):
     ).select_related(
         "config",
         "config__role",
+        "config__metric_definition",
         "config__room",
         "config__floor",
     )
@@ -197,6 +199,19 @@ def configure_device(request, device_id):
 
     # ✅ ✅ ✅ HIER IST DER FIX
     config.refresh_from_db()
+
+    # Wenn eine MetricDefinition neu gesetzt/geändert wurde:
+    if config.metric_definition:
+        new_key = config.metric_definition.key
+        new_unit = config.metric_definition.unit
+        # Aktualisiere DeviceLatestMetric Snapshots, damit die gewählte Einheit und der Key sofort aktiv sind
+        DeviceLatestMetric.objects.filter(
+            device=device,
+            metric_key__in=["value", "val", "power", "temperature", "temp", "bwwp_temp", new_key]
+        ).update(
+            metric_key=new_key,
+            unit=new_unit,
+        )
 
     #
     # Producer automatisch anlegen
