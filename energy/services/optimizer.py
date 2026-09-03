@@ -212,6 +212,24 @@ def get_optimizer_schedule(user, horizon_hours: int = 36) -> dict:
         price_diff_eur = max(0.0, (worst_window["avg_cost_ct"] - best_overall["avg_cost_ct"]) / 100.0)
         savings_eur = round(price_diff_eur * total_kwh, 2)
 
+        # Handlungsempfehlungen generieren
+        if best_overall["source"] == "pv_surplus":
+            best_text = f"☀️ 100% Solarenergie verfügbar. Ideal für {typical_devices[dur_key]['device_name']} – spart ca. {savings_eur:.2f} € gegenüber Spitzenzeiten."
+        else:
+            best_text = f"⚡ Niedrigster Börsenstrompreis des Tages ({best_overall['avg_cost_ct']:.1f} ct/kWh). Optimaler Zeitpunkt zum Netzbezug oder Akku-Laden."
+
+        if best_night:
+            night_text = f"🌙 Günstigster Nacht-Spotmarkt ({best_night['avg_cost_ct']:.1f} ct/kWh). Perfekt für verzögerte Gerätestarts oder E-Auto-Nachtladung."
+        else:
+            night_text = "🌙 Kein reines Nachtfenster im verbleibenden Prognosezeitraum verfügbar."
+
+        worst_text = f"⚠️ Teuerste Spitzenlast ({worst_window['avg_cost_ct']:.1f} ct/kWh). Flexible Verbraucher vermeiden und Energie aus dem Speicher nutzen."
+
+        best_overall["recommendation_text"] = best_text
+        if best_night:
+            best_night["recommendation_text"] = night_text
+        worst_window["recommendation_text"] = worst_text
+
         windows[dur_key] = {
             "duration_hours": dur_hours,
             "device_info": typical_devices[dur_key],

@@ -120,29 +120,35 @@ export default function EnergyOptimizerCard() {
                     <div className="absolute -right-4 -top-4 w-20 h-20 bg-emerald-500/10 rounded-full blur-xl pointer-events-none" />
 
                     <div className="space-y-3 relative z-10">
-                        <div className="flex flex-wrap items-center justify-between gap-1.5">
-                            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1 truncate">
-                                🏆 {t("energy.best_slot", "Beste Zeit")} ({duration})
+                        {/* Header Badge Row */}
+                        <div className="flex items-center justify-between gap-2 border-b border-emerald-500/20 pb-2">
+                            <span className="text-xs font-bold uppercase tracking-wider text-emerald-300 flex items-center gap-1.5">
+                                <span>🏆</span> {t("energy.best_slot", "Beste Zeit")} ({duration})
                             </span>
                             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500 text-slate-950 shrink-0">
                                 {best.source === "pv_surplus" ? t("optimizer.solar_100", "☀️ 100% Solar") : t("optimizer.market_low", "⚡ Börsentief")}
                             </span>
                         </div>
 
+                        {/* Uhrzeit & Preis */}
                         <div>
-                            <div className="text-xl sm:text-2xl lg:text-3xl font-black font-mono text-white tracking-tight break-words">
-                                {best.start_label} – {best.end_label}
+                            <div className="text-xl sm:text-2xl font-black font-mono text-white tracking-tight">
+                                {best.start_label} – {best.end_label} Uhr
                             </div>
-                            <div className="text-xs text-emerald-300 font-semibold mt-1">
-                                {best.effective_cost_ct > 0
-                                    ? `Effektive Stromkosten: ~${best.effective_cost_ct} ct/kWh`
-                                    : "0,00 ct/kWh (reiner Solar-Überschuss)"}
+                            <div className="mt-1.5 flex items-baseline gap-2">
+                                <span className="text-sm font-black font-mono text-emerald-400">
+                                    {Number(best.avg_cost_ct ?? best.effective_cost_ct ?? 0).toFixed(1)} ct/kWh
+                                </span>
+                                <span className="text-[11px] text-emerald-300/80 font-medium">
+                                    {best.source === "pv_surplus" ? "· Kostenloser Solar-Überschuss" : "· Günstigster Börsenpreis"}
+                                </span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="text-[11px] text-emerald-200/80 bg-emerald-900/40 border border-emerald-700/50 rounded-xl p-2.5 relative z-10">
-                        {best.recommendation_text}
+                    {/* Handlungsempfehlung Box */}
+                    <div className="text-[11px] text-emerald-200/90 bg-emerald-900/50 border border-emerald-700/60 rounded-xl p-3 relative z-10 leading-relaxed mt-2">
+                        {best.recommendation_text || `⚡ Ideal für energieintensive Geräte (${deviceInfo.device_name || "Haushaltsgeräte"}). Maximale Ersparnis durch Eigenstromnutzung.`}
                     </div>
                 </div>
 
@@ -151,29 +157,35 @@ export default function EnergyOptimizerCard() {
                     <div className="absolute -right-4 -top-4 w-20 h-20 bg-indigo-500/10 rounded-full blur-xl pointer-events-none" />
 
                     <div className="space-y-3 relative z-10">
-                        <div className="flex flex-wrap items-center justify-between gap-1.5">
-                            <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-300 flex items-center gap-1 truncate">
-                                🌙 {t("energy.best_night_slot", "Günstigstes Nachtfenster")}
+                        {/* Header Badge Row */}
+                        <div className="flex items-center justify-between gap-2 border-b border-indigo-500/20 pb-2">
+                            <span className="text-xs font-bold uppercase tracking-wider text-indigo-200 flex items-center gap-1.5">
+                                <span>🌙</span> {t("energy.best_night_slot", "Günstigstes Nachtfenster")}
                             </span>
                             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500 text-white shrink-0">
                                 {t("energy.market_spot", "Börsenpreis")}
                             </span>
                         </div>
 
+                        {/* Uhrzeit & Preis */}
                         <div>
-                            <div className="text-xl sm:text-2xl lg:text-3xl font-black font-mono text-white tracking-tight break-words">
-                                {bestNight.start_label} – {bestNight.end_label}
+                            <div className="text-xl sm:text-2xl font-black font-mono text-white tracking-tight">
+                                {bestNight ? `${bestNight.start_label} – ${bestNight.end_label} Uhr` : "Kein Nachtfenster"}
                             </div>
-                            <div className="text-xs text-indigo-300 font-semibold mt-1">
-                                {bestNight.effective_cost_ct > 0
-                                    ? `Effektive Stromkosten: ~${bestNight.effective_cost_ct} ct/kWh`
-                                    : "0,00 ct/kWh"}
+                            <div className="mt-1.5 flex items-baseline gap-2">
+                                <span className="text-sm font-black font-mono text-indigo-300">
+                                    {bestNight ? `${Number(bestNight.avg_cost_ct ?? bestNight.effective_cost_ct ?? 0).toFixed(1)} ct/kWh` : "-"}
+                                </span>
+                                <span className="text-[11px] text-indigo-200/80 font-medium">
+                                    · Niedrigster Spot-Tarif der Nacht
+                                </span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="text-[11px] text-indigo-200/80 bg-indigo-900/40 border border-indigo-700/50 rounded-xl p-2.5 relative z-10">
-                        {bestNight.recommendation_text}
+                    {/* Handlungsempfehlung Box */}
+                    <div className="text-[11px] text-indigo-200/90 bg-indigo-900/50 border border-indigo-700/60 rounded-xl p-3 relative z-10 leading-relaxed mt-2">
+                        {bestNight?.recommendation_text || "🌙 Niedrigste Strompreise der Nacht. Optimal für verzögerte Gerätestarts oder Netz-Nachladung des Speichers."}
                     </div>
                 </div>
 
@@ -182,27 +194,35 @@ export default function EnergyOptimizerCard() {
                     <div className="absolute -right-4 -top-4 w-20 h-20 bg-rose-500/10 rounded-full blur-xl pointer-events-none" />
 
                     <div className="space-y-3 relative z-10">
-                        <div className="flex flex-wrap items-center justify-between gap-1.5">
-                            <span className="text-[11px] font-bold uppercase tracking-wider text-rose-400 flex items-center gap-1 truncate">
-                                🚫 {t("energy.avoid_slot", "Verbrauchsspitze meiden")}
+                        {/* Header Badge Row */}
+                        <div className="flex items-center justify-between gap-2 border-b border-rose-500/20 pb-2">
+                            <span className="text-xs font-bold uppercase tracking-wider text-rose-300 flex items-center gap-1.5">
+                                <span>🚫</span> {t("energy.avoid_slot", "Verbrauchsspitze meiden")}
                             </span>
                             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500 text-white shrink-0">
                                 {t("energy.expensive_peak", "Teuer")}
                             </span>
                         </div>
 
+                        {/* Uhrzeit & Preis */}
                         <div>
-                            <div className="text-xl sm:text-2xl lg:text-3xl font-black font-mono text-white tracking-tight break-words">
-                                {worst.start_label} – {worst.end_label}
+                            <div className="text-xl sm:text-2xl font-black font-mono text-white tracking-tight">
+                                {worst ? `${worst.start_label} – ${worst.end_label} Uhr` : "-"}
                             </div>
-                            <div className="text-xs text-rose-300 font-semibold mt-1">
-                                Effektive Stromkosten: ~{worst.effective_cost_ct} ct/kWh
+                            <div className="mt-1.5 flex items-baseline gap-2">
+                                <span className="text-sm font-black font-mono text-rose-400">
+                                    {worst ? `${Number(worst.avg_cost_ct ?? worst.effective_cost_ct ?? 0).toFixed(1)} ct/kWh` : "-"}
+                                </span>
+                                <span className="text-[11px] text-rose-300/80 font-medium">
+                                    · Preishoch & Spitzenlast
+                                </span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="text-[11px] text-rose-200/80 bg-rose-900/40 border border-rose-700/50 rounded-xl p-2.5 relative z-10">
-                        {worst.recommendation_text}
+                    {/* Handlungsempfehlung Box */}
+                    <div className="text-[11px] text-rose-200/90 bg-rose-900/50 border border-rose-700/60 rounded-xl p-3 relative z-10 leading-relaxed mt-2">
+                        {worst?.recommendation_text || "⚠️ Hohe Netzbezugskosten. Schalte flexible Lasten ab und decke den Verbrauch bevorzugt aus dem Batteriespeicher."}
                     </div>
                 </div>
             </div>
@@ -211,60 +231,87 @@ export default function EnergyOptimizerCard() {
                 TIMELINE HOURLY COST BARS
             ========================================================= */}
             <div className="space-y-3 pt-2">
-                <div className="flex items-center justify-between text-xs text-indigo-200/80">
-                    <span className="font-bold flex items-center gap-1.5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-indigo-200/80">
+                    <span className="font-bold flex items-center gap-1.5 text-white">
                         <span>📊</span> {t("energy.timeline_title", "Effektive Kostenkurve & Zeitfenster der nächsten 24h")}
                     </span>
-                    <div className="flex items-center gap-3 text-[11px]">
+                    <div className="flex flex-wrap items-center gap-3 text-[11px]">
                         <span className="flex items-center gap-1">
-                            <span className="w-2.5 h-2.5 rounded-sm bg-emerald-400 inline-block" /> {t("energy.legend_free_pv", "0 ct (Solar)")}
+                            <span className="w-2.5 h-2.5 rounded-sm bg-emerald-400 inline-block" /> {t("energy.legend_free_pv", "0 ct (Solar-Überschuss)")}
                         </span>
                         <span className="flex items-center gap-1">
                             <span className="w-2.5 h-2.5 rounded-sm bg-indigo-400 inline-block" /> {t("energy.legend_market", "Günstiger Börsenstrom")}
                         </span>
                         <span className="flex items-center gap-1">
-                            <span className="w-2.5 h-2.5 rounded-sm bg-rose-400 inline-block" /> {t("energy.legend_peak", "Preishoch")}
+                            <span className="w-2.5 h-2.5 rounded-sm bg-rose-400 inline-block" /> {t("energy.legend_peak", "Spitzenpreis")}
                         </span>
                     </div>
                 </div>
 
                 {/* Timeline Grid */}
                 <div className="bg-slate-950/60 border border-indigo-900/50 rounded-2xl p-4 overflow-x-auto">
-                    <div className="min-w-[650px] flex items-end gap-1.5 h-28 pt-2">
+                    <div className="min-w-[650px] flex items-end gap-1.5 h-32 pt-4">
                         {timeline.map((pt, idx) => {
-                            const isInsideBest = pt.hour_idx >= best.start_hour && pt.hour_idx <= best.end_hour;
-                            const heightPct = Math.max(8, Math.round((pt.effective_cost_ct / maxTimelinePrice) * 100));
+                            const isInsideBest = (
+                                best.start_idx !== undefined &&
+                                idx >= best.start_idx &&
+                                idx < best.start_idx + currentWindow.duration_hours
+                            );
+                            const costVal = Number(pt.effective_cost_ct || 0);
+                            const isSurplus = Boolean(pt.is_surplus || pt.is_pv_available || costVal <= 8.2);
+                            const isPeak = pt.status === "red" || costVal >= 32.0;
+
+                            // Höhe: Minimum 12% für 0 ct Solar, Maximum 100%
+                            const heightPct = isSurplus
+                                ? 14
+                                : Math.min(100, Math.max(14, Math.round((costVal / Math.max(maxTimelinePrice, 35.0)) * 100)));
 
                             return (
                                 <div
                                     key={idx}
-                                    className={`flex-1 flex flex-col items-center justify-end h-full group relative ${isInsideBest ? "opacity-100" : "opacity-85 hover:opacity-100"
-                                        }`}
+                                    className={`flex-1 flex flex-col items-center justify-end h-full group relative ${
+                                        isInsideBest ? "opacity-100" : "opacity-80 hover:opacity-100"
+                                    }`}
                                 >
                                     {/* Tooltip Hover */}
-                                    <div className="absolute bottom-full mb-2 hidden group-hover:flex flex-col bg-slate-900 border border-indigo-500/50 rounded-xl p-2 shadow-2xl text-[11px] z-50 whitespace-nowrap pointer-events-none">
-                                        <span className="font-bold text-white">{pt.time_label} Uhr</span>
-                                        <span className="text-emerald-400">{pt.is_pv_available ? "☀️ Solarüberschuss aktiv" : "⚡ Netzbezug"}</span>
-                                        <span className="font-mono text-indigo-300 font-bold">{pt.effective_cost_ct} ct/kWh</span>
+                                    <div className="absolute bottom-full mb-2 hidden group-hover:flex flex-col bg-slate-900 border border-indigo-500/50 rounded-xl p-2.5 shadow-2xl text-[11px] z-50 whitespace-nowrap pointer-events-none">
+                                        <div className="font-bold text-white flex items-center justify-between gap-3">
+                                            <span>{pt.time_label} Uhr ({pt.date_label || "Heute"})</span>
+                                            <span className="font-mono text-emerald-400 font-bold">{costVal.toFixed(1)} ct/kWh</span>
+                                        </div>
+                                        <div className="text-[10px] text-slate-300 mt-0.5">
+                                            {isSurplus 
+                                                ? `☀️ Solarüberschuss (${Number(pt.pv_kw || 0).toFixed(1)} kW PV)` 
+                                                : `⚡ Netzbezug (${Number(pt.grid_price_ct || costVal).toFixed(1)} ct)`}
+                                        </div>
+                                        {isInsideBest && (
+                                            <div className="mt-1 text-[9px] font-bold text-emerald-300 uppercase tracking-wider">
+                                                ★ Empfohlenes Zeitfenster
+                                            </div>
+                                        )}
                                     </div>
 
                                     {/* Bar Element */}
                                     <div
-                                        className={`w-full rounded-t-sm transition-all duration-200 ${pt.effective_cost_ct === 0
-                                            ? "bg-emerald-400 shadow-sm shadow-emerald-400/50"
-                                            : pt.is_peak_price
-                                                ? "bg-rose-400"
-                                                : isInsideBest
-                                                    ? "bg-emerald-500 shadow-sm shadow-emerald-500/40"
-                                                    : "bg-indigo-500"
-                                            }`}
+                                        className={`w-full rounded-t-sm transition-all duration-300 ${
+                                            isSurplus
+                                                ? "bg-emerald-400 shadow-sm shadow-emerald-400/40"
+                                                : isPeak
+                                                    ? "bg-rose-400 shadow-sm shadow-rose-400/30"
+                                                    : isInsideBest
+                                                        ? "bg-emerald-500 ring-2 ring-emerald-400 shadow-md shadow-emerald-500/50"
+                                                        : "bg-indigo-500"
+                                        }`}
                                         style={{ height: `${heightPct}%` }}
                                     />
 
                                     {/* Time Label */}
                                     <span
-                                        className={`text-[10px] font-mono mt-1 whitespace-nowrap truncate w-full text-center ${isInsideBest ? "font-bold text-emerald-300" : "text-indigo-300/60"
-                                            }`}
+                                        className={`text-[10px] font-mono mt-1.5 whitespace-nowrap truncate w-full text-center ${
+                                            isInsideBest 
+                                                ? "font-bold text-emerald-300 scale-105" 
+                                                : "text-indigo-300/60"
+                                        }`}
                                     >
                                         {pt.time_label}
                                     </span>
@@ -273,12 +320,13 @@ export default function EnergyOptimizerCard() {
                         })}
                     </div>
 
-                    <div className="mt-2.5 flex items-center justify-between text-[11px] text-indigo-300/60 font-medium">
-                        <span>{t("energy.now", "Jetzt")} ({timeline[0]?.time_label || "00:00"})</span>
-                        <span className="text-emerald-300 font-semibold">
-                            {t("optimizer.recommended_window", { duration, start: best.start_label, end: best.end_label, defaultValue: `Empfohlenes ${duration}-Fenster: ${best.start_label} – ${best.end_label}` })}
+                    <div className="mt-3 pt-2.5 border-t border-indigo-900/40 flex flex-wrap items-center justify-between gap-2 text-[11px] text-indigo-300/70 font-medium">
+                        <span>{t("energy.now", "Jetzt")} ({timeline[0]?.time_label || "00:00"} Uhr)</span>
+                        <span className="text-emerald-300 font-semibold flex items-center gap-1">
+                            <span>★</span>
+                            <span>{t("optimizer.recommended_window", { duration, start: best.start_label, end: best.end_label, defaultValue: `Empfohlenes ${duration}-Fenster: ${best.start_label} – ${best.end_label} Uhr` })}</span>
                         </span>
-                        <span>{t("optimizer.in_24h", "In 24 Stunden")}</span>
+                        <span>{t("optimizer.in_24h", "24-Stunden Prognose")}</span>
                     </div>
                 </div>
             </div>
