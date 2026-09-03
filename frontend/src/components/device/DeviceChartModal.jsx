@@ -122,17 +122,17 @@ function DeviceChartModal({ device, onClose }) {
     const metricsQuery = useQuery({
         queryKey: ["device-metrics", device.id],
         queryFn: () => apiFetch(`/api/devices/${device.id}/metrics/`),
-        staleTime: 1000 * 60 * 30, // 30 Minuten
-        refetchOnWindowFocus: false,
+        staleTime: 1000 * 5, // 5 Sekunden
+        refetchOnWindowFocus: true,
     });
 
     const allMetrics = metricsQuery.data?.metrics || [];
     const availableMetrics = allMetrics.filter(m => !m.key.toLowerCase().startsWith("daily_"));
-    const primaryMetricKey = metricsQuery.data?.primary_metric || "power";
+    const primaryMetricKey = metricsQuery.data?.primary_metric || device.config?.metric_definition?.key || (device.unit === "°C" || device.config?.role?.key === "sensor" ? "temperature" : "power");
     const activeMetricKey = selectedMetric || primaryMetricKey;
     const activeMetricObj = availableMetrics.find(m => m.key === activeMetricKey) || availableMetrics[0];
 
-    /* ✅ DATA FETCHING (Ruhiggestellt für Stunden/Tage; nur bei Live alle 10s) */
+    /* ✅ DATA FETCHING */
     const query = useQuery({
         queryKey: ["timeseries", device.id, range, activeMetricKey, customDates.startDate, customDates.endDate],
         queryFn: () => {
@@ -142,16 +142,15 @@ function DeviceChartModal({ device, onClose }) {
             }
             return apiFetch(url);
         },
-        staleTime: live ? 0 : 1000 * 60 * 15, // 15 Minuten Cache für historische Stunden/Tageswerte
-        refetchInterval: live ? 10000 : false, // Nur bei aktivem Live-Modus alle 10 Sekunden
+        staleTime: live ? 0 : 1000 * 5, // 5 Sekunden
+        refetchInterval: live ? 5000 : false,
         refetchIntervalInBackground: false,
-        refetchOnWindowFocus: false,
-        refetchOnMount: false,
+        refetchOnWindowFocus: true,
     });
 
 
     const data = query.data;
-    const unit = data?.unit || activeMetricObj?.unit || device.unit || "";
+    const unit = data?.unit || activeMetricObj?.unit || device.unit || (activeMetricKey.toLowerCase().includes("temp") ? "°C" : "W");
     const isMultiDay = range === "5d" || range === "7d" || range === "30d" || range === "custom";
 
     /* ✅ DATA FORMATTING FOR ECHARTS */
@@ -182,7 +181,15 @@ function DeviceChartModal({ device, onClose }) {
     const liveStats = useMemo(() => {
         const values = chartData.seriesData;
         if (!values || values.length === 0) {
-            return { min: 0, max: 0, avg: 0 };
+            if (data?.stats) {
+                return {
+                    min: Number(data.stats.min ?? 0),
+                    max: Number(data.stats.max ?? 0),
+                    avg: Number(data.stats.avg ?? 0),
+                };
+            }
+            const fallbackVal = Number(device?.value ?? 0);
+            return { min: fallbackVal, max: fallbackVal, avg: fallbackVal };
         }
 
         // Berechne die echten Array-Grenzen anhand der Zoom-Prozentwerte
@@ -193,7 +200,7 @@ function DeviceChartModal({ device, onClose }) {
         const visibleValues = values.slice(startIndex, endIndex);
 
         if (visibleValues.length === 0) {
-            const fallback = values[values.length - 1] || 0;
+            const fallback = values[values.length - 1] ?? device?.value ?? 0;
             return { min: fallback, max: fallback, avg: fallback };
         }
 
@@ -202,7 +209,7 @@ function DeviceChartModal({ device, onClose }) {
         const avg = visibleValues.reduce((a, b) => a + b, 0) / visibleValues.length;
 
         return { min, max, avg };
-    }, [chartData, zoomRange]);
+    }, [chartData, zoomRange, data?.stats, device?.value]);
 
 
     /* ✅ ABSOLUT SICHERES ECHARTS ZOOM-EVENT */
