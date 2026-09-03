@@ -9,6 +9,10 @@ import { apiFetch } from "../../api/client";
 import EnergyOptimizerCard from "./components/EnergyOptimizerCard";
 import BatteryForecastCard from "./components/BatteryForecastCard";
 import BatteryArbitrageCard from "./components/BatteryArbitrageCard";
+import WallboxCard from "./components/WallboxCard";
+import AddWallboxModal from "../devices/components/AddWallboxModal";
+import CommunityShareModal from "../community/components/CommunityShareModal";
+import CommunityInviteCard from "../community/components/CommunityInviteCard";
 import SubmeterTrendModal from "./components/SubmeterTrendModal";
 import SubmeterStackedTrendChart from "./components/SubmeterStackedTrendChart";
 import DateRangePickerModal from "./components/DateRangePickerModal";
@@ -27,6 +31,8 @@ export default function EnergyDashboard() {
     const [selectedTrendMeter, setSelectedTrendMeter] = useState(null);
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
     const [proModalOpen, setProModalOpen] = useState(false);
+    const [shareModalOpen, setShareModalOpen] = useState(false);
+    const [addWallboxOpen, setAddWallboxOpen] = useState(false);
     const [proModalFeature, setProModalFeature] = useState({ name: "Pro Feature", desc: "" });
     const [customDates, setCustomDates] = useState({ startDate: null, endDate: null, label: null });
 
@@ -176,6 +182,17 @@ export default function EnergyDashboard() {
                         startDate={customDates.startDate}
                         endDate={customDates.endDate}
                     />
+
+                    {/* Community Social Share Button */}
+                    <button
+                        type="button"
+                        onClick={() => setShareModalOpen(true)}
+                        className="px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all shadow-xs flex items-center gap-1.5 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                        title="Erfolge & Autarkie mit Nachbarn und Social Media teilen"
+                    >
+                        <span>📢</span>
+                        <span>{t("community.share_stats", "Erfolge teilen")}</span>
+                    </button>
                 </div>
             </div>
 
@@ -323,6 +340,14 @@ export default function EnergyDashboard() {
                     </div>
                 </div>
             </div>
+
+            {/* =========================================================
+                COMMUNITY & ENERGY SHARING INVITE BANNER (TASK 2)
+            ========================================================= */}
+            <CommunityInviteCard
+                onOpenShareModal={() => setShareModalOpen(true)}
+                kpis={kpis}
+            />
 
             {/* =========================================================
                 INSIGHTS NOTIFICATION
@@ -657,12 +682,36 @@ export default function EnergyDashboard() {
             </div>
 
             {/* =========================================================
+                E-AUTO & WALLBOX SMART-CHARGING (OCPP 1.6-J)
+            ========================================================= */}
+            <div className="mb-6">
+                <WallboxCard onOpenAddModal={() => setAddWallboxOpen(true)} />
+            </div>
+
+            {/* =========================================================
                 BATTERY ARBITRAGE & GRID CO2 SIGNAL (TASK 5.16 & 5.17)
             ========================================================= */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <BatteryArbitrageCard />
                 <GridCo2Card />
             </div>
+
+            {/* =========================================================
+                COMMUNITY SOCIAL SHARE MODAL
+            ========================================================= */}
+            <CommunityShareModal
+                isOpen={shareModalOpen}
+                onClose={() => setShareModalOpen(false)}
+                kpis={kpis}
+            />
+
+            {/* =========================================================
+                WALLBOX VERBINDEN MODAL (OCPP 1.6-J)
+            ========================================================= */}
+            <AddWallboxModal
+                isOpen={addWallboxOpen}
+                onClose={() => setAddWallboxOpen(false)}
+            />
 
             {/* =========================================================
                 SUBMETER TREND & HISTORY MODAL (TASK 5.14)

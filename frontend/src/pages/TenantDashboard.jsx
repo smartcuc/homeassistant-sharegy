@@ -7,6 +7,7 @@ import { apiFetch } from "../api/client";
 import { texts } from "../i18n";
 import { useLang } from "../hooks/useLang";
 import MsbSmartMeterHub from "../features/community/components/MsbSmartMeterHub";
+import CommunityShareModal from "../features/community/components/CommunityShareModal";
 
 export default function TenantDashboard() {
     const [tenant, setTenant] = useState(null);
@@ -20,6 +21,7 @@ export default function TenantDashboard() {
     const [timeRange, setTimeRange] = useState("today"); // 'today' | 'month'
     const [activeTab, setActiveTab] = useState("cockpit"); // 'cockpit' | 'settlement' | 'members' | 'audit'
     const [loading, setLoading] = useState(true);
+    const [shareModalOpen, setShareModalOpen] = useState(false);
     const [settling, setSettling] = useState(false);
     const [downloadingId, setDownloadingId] = useState(null);
     const [exportingFormat, setExportingFormat] = useState(null);
@@ -259,6 +261,14 @@ export default function TenantDashboard() {
                         <span className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-500/20">
                             Community Aktiv
                         </span>
+                        <button
+                            type="button"
+                            onClick={() => setShareModalOpen(true)}
+                            className="ml-2 px-3 py-1 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all shadow-xs flex items-center gap-1.5 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                        >
+                            <span>📢</span>
+                            <span>Erfolge teilen</span>
+                        </button>
                     </div>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                         Eichrechtskonformes 15-Minuten Energy Sharing & Prädiktive KI-Steuerung
@@ -936,6 +946,16 @@ export default function TenantDashboard() {
                 </div>
             )}
 
+            {/* COMMUNITY SHARE MODAL */}
+            <CommunityShareModal
+                isOpen={shareModalOpen}
+                onClose={() => setShareModalOpen(false)}
+                kpis={{
+                    autarky_pct: cockpit?.autarky_pct || 88,
+                    community_shared_kwh: cockpit?.shared_kwh || 160,
+                    self_consumption_pct: cockpit?.self_consumption_pct || 94,
+                }}
+            />
         </div>
     );
 }

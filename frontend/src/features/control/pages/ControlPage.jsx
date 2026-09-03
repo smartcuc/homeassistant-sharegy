@@ -7,6 +7,8 @@ import ProBadge from "../../../components/common/ProBadge";
 import ProUpgradeModal from "../../../components/common/ProUpgradeModal";
 import BatteryArbitrageCard from "../../energy/components/BatteryArbitrageCard";
 import EnergyOptimizerCard from "../../energy/components/EnergyOptimizerCard";
+import WallboxCard from "../../energy/components/WallboxCard";
+import AddWallboxModal from "../../devices/components/AddWallboxModal";
 
 export default function ControlPage() {
     const { t } = useTranslation();
@@ -14,6 +16,7 @@ export default function ControlPage() {
     const queryClient = useQueryClient();
 
     const [proModalOpen, setProModalOpen] = useState(false);
+    const [addWallboxOpen, setAddWallboxOpen] = useState(false);
     const [submittingId, setSubmittingId] = useState(null);
     const [successMessage, setSuccessMessage] = useState(null);
     const [errorMessage, setErrorMessage] = useState(null);
@@ -402,12 +405,27 @@ export default function ControlPage() {
             </div>
 
             {/* =========================================================
-                SEKTION 2: DYNAMISCHE TARIF-ARBITRAGE & ZEITFENSTER-PLANER
+                SEKTION 2: E-AUTO & WALLBOX SMART-CHARGING (OCPP 1.6-J)
+            ========================================================= */}
+            <div>
+                <WallboxCard onOpenAddModal={() => setAddWallboxOpen(true)} />
+            </div>
+
+            {/* =========================================================
+                SEKTION 3: DYNAMISCHE TARIF-ARBITRAGE & ZEITFENSTER-PLANER
             ========================================================= */}
             <div className="space-y-6">
                 <BatteryArbitrageCard />
                 <EnergyOptimizerCard />
             </div>
+
+            {/* =========================================================
+                WALLBOX HINZUFÜGEN MODAL (OCPP 1.6-J)
+            ========================================================= */}
+            <AddWallboxModal
+                isOpen={addWallboxOpen}
+                onClose={() => setAddWallboxOpen(false)}
+            />
 
             {/* =========================================================
                 PARAMETER BEARBEITEN MODAL
