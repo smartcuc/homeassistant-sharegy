@@ -200,82 +200,104 @@ def configure_device(request, device_id):
     # ✅ ✅ ✅ HIER IST DER FIX
     config.refresh_from_db()
 
-    # Wenn eine MetricDefinition neu gesetzt/geändert wurde:
+    # ✅ Snapshot-Bereinigung & Aktualisierung ohne UniqueConstraint-Konflikt
     if config.metric_definition:
         new_key = config.metric_definition.key
         new_unit = config.metric_definition.unit
-        # Aktualisiere DeviceLatestMetric Snapshots, damit die gewählte Einheit und der Key sofort aktiv sind
-        DeviceLatestMetric.objects.filter(
-            device=device,
-            metric_key__in=["value", "val", "power", "temperature", "temp", "bwwp_temp", new_key]
-        ).update(
-            metric_key=new_key,
-            unit=new_unit,
-        )
+        try:
+            target_snapshot = DeviceLatestMetric.objects.filter(device=device, metric_key=new_key).first()
+            other_snapshots = list(
+                DeviceLatestMetric.objects.filter(
+                    device=device,
+                    metric_key__in=["value", "val", "power", "temperature", "temp", "bwwp_temp"]
+                ).exclude(metric_key=new_key)
+            )
+
+            if target_snapshot:
+                target_snapshot.unit = new_unit
+                target_snapshot.save(update_fields=["unit"])
+                # Lösche überflüssige generische Alt-Snapshots
+                for s in other_snapshots:
+                    s.delete()
+            elif other_snapshots:
+                # Nutze den ersten bestehenden Snapshot und benenne ihn um
+                primary_snap = other_snapshots[0]
+                primary_snap.metric_key = new_key
+                primary_snap.unit = new_unit
+                primary_snap.save(update_fields=["metric_key", "unit"])
+                # Alle weiteren Duplikate sicher löschen
+                for s in other_snapshots[1:]:
+                    s.delete()
+        except Exception as e:
+            logger.warning("[configure_device] Snapshot consolidation notice: %s", e)
 
     #
     # Producer automatisch anlegen
     #
-    if (
-        config.role
-        and config.role.key == "producer"
-        and config.generator_type
-    ):
-
-        GeneratorSystem.objects.get_or_create(
-            device=device,
-            defaults={
-                "home": device.home,
-                "name": config.display_name(),
-                "generator_type":
-                    config.generator_type,
-            },
-        )
+    try:
+        if (
+            config.role
+            and config.role.key == "producer"
+            and config.generator_type
+        ):
+            GeneratorSystem.objects.get_or_create(
+                device=device,
+                defaults={
+                    "home": device.home,
+                    "name": config.display_name(),
+                    "generator_type": config.generator_type,
+                },
+            )
+    except Exception as e:
+        logger.warning("[configure_device] GeneratorSystem auto-create notice: %s", e)
 
     #
     # Batteriespeicher (StorageSystem) automatisch anlegen
     #
-    if (
-        config.role
-        and config.role.key in ["battery", "storage", "akku"]
-    ) or (
-        config.energy_signal_type
-        and config.energy_signal_type.key in ["battery", "battery_storage"]
-    ):
-        from producer.models import StorageSystem
-        from django.db.models import Q
+    try:
+        if (
+            config.role
+            and config.role.key in ["battery", "storage", "akku"]
+        ) or (
+            config.energy_signal_type
+            and config.energy_signal_type.key in ["battery", "battery_storage"]
+        ):
+            from producer.models import StorageSystem
+            from django.db.models import Q
 
-        existing_storage = StorageSystem.objects.filter(
-            home=device.home
-        ).filter(
-            Q(primary_device=device) | Q(soc_device=device) | Q(power_device=device)
-        ).first()
+            existing_storage = StorageSystem.objects.filter(
+                home=device.home
+            ).filter(
+                Q(primary_device=device) | Q(soc_device=device) | Q(power_device=device)
+            ).first()
 
-        if not existing_storage:
-            dev_name = config.display_name() if config.display_name() else device.identifier
-            storage_name = dev_name if any(w in dev_name.lower() for w in ["speicher", "battery", "akku", "storage"]) else f"{dev_name} (Speicher)"
+            if not existing_storage:
+                dev_name = config.display_name() if config.display_name() else device.identifier
+                storage_name = dev_name if any(w in dev_name.lower() for w in ["speicher", "battery", "akku", "storage"]) else f"{dev_name} (Speicher)"
 
-            capacity_kwh = 10.0
-            if hasattr(device, "resource") and device.resource and device.resource.attributes:
-                cap = device.resource.attributes.get("capacity_kwh") or device.resource.attributes.get("battery_capacity_kwh")
-                if cap:
-                    try:
-                        capacity_kwh = float(cap)
-                    except (ValueError, TypeError):
-                        pass
+                capacity_kwh = 10.0
+                if hasattr(device, "resource") and device.resource and device.resource.attributes:
+                    cap = device.resource.attributes.get("capacity_kwh") or device.resource.attributes.get("battery_capacity_kwh")
+                    if cap:
+                        try:
+                            capacity_kwh = float(cap)
+                        except (ValueError, TypeError):
+                            pass
 
-            StorageSystem.objects.create(
-                home=device.home,
-                name=storage_name,
-                capacity_kwh=capacity_kwh,
-                primary_device=device,
-                soc_device=device,
-                soc_metric_key="soc",
-                power_device=device,
-                power_metric_key="power",
-                is_auto_detected=True,
-                active=True,
-            )
+                StorageSystem.objects.create(
+                    home=device.home,
+                    name=storage_name,
+                    capacity_kwh=capacity_kwh,
+                    primary_device=device,
+                    soc_device=device,
+                    soc_metric_key="soc",
+                    power_device=device,
+                    power_metric_key="power",
+                    is_auto_detected=True,
+                    active=True,
+                )
+    except Exception as e:
+        logger.warning("[configure_device] StorageSystem auto-create notice: %s", e)
 
     device.configured = config.is_classified()
     device.save(update_fields=["configured"])
