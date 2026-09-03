@@ -66,14 +66,14 @@ export default function EnergyOptimizerCard() {
             {/* =========================================================
                 HEADER & DURATION SELECTOR
             ========================================================= */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-indigo-800/40 pb-5">
-                <div>
-                    <div className="flex items-center gap-2">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-indigo-800/40 pb-5">
+                <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
                         <span className="text-2xl">🧠</span>
-                        <h2 className="text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
+                        <h2 className="text-lg sm:text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
                             {t("energy.optimizer_title", "Smart Energy Optimizer")}
                         </h2>
-                        <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                        <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0">
                             {t("energy.live_ai_plan", "Live KI-Fahrplan")}
                         </span>
                     </div>
@@ -83,20 +83,20 @@ export default function EnergyOptimizerCard() {
                 </div>
 
                 {/* Duration Pills */}
-                <div className="inline-flex bg-slate-800/80 p-1.5 rounded-2xl border border-indigo-700/50 shadow-inner self-start sm:self-auto gap-1">
+                <div className="flex flex-wrap items-center bg-slate-800/90 p-1 rounded-2xl border border-indigo-700/50 shadow-inner gap-1 shrink-0">
                     {durationTabs.map((tab) => (
                         <button
                             key={tab.key}
                             type="button"
                             onClick={() => handleDurationClick(tab)}
-                            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer ${duration === tab.key
+                            className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer shrink-0 ${duration === tab.key
                                 ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/40"
                                 : "text-indigo-200/70 hover:text-white hover:bg-slate-700/50"
                                 }`}
                         >
-                            <span>{tab.icon}</span>
+                            <span className="text-xs">{tab.icon}</span>
                             <span>{tab.label}</span>
-                            {tab.isProGated && !isPro && <ProBadge size="xs" />}
+                            {tab.isProGated && !isPro && <ProBadge size="xs" className="shrink-0" />}
                         </button>
                     ))}
                 </div>
@@ -107,86 +107,92 @@ export default function EnergyOptimizerCard() {
             ========================================================= */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* 1. Best Time Overall (Tag / PV-Spitze) */}
-                <div className="p-5 rounded-2xl bg-linear-to-br from-emerald-950/60 to-emerald-900/30 border border-emerald-500/40 space-y-3 relative overflow-hidden">
+                <div className="p-4 sm:p-5 rounded-2xl bg-linear-to-br from-emerald-950/60 to-emerald-900/30 border border-emerald-500/40 space-y-3 relative overflow-hidden flex flex-col justify-between">
                     <div className="absolute -right-4 -top-4 w-20 h-20 bg-emerald-500/10 rounded-full blur-xl pointer-events-none" />
 
-                    <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1">
-                            🏆 {t("energy.best_slot", "Beste Zeit")} ({duration})
-                        </span>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500 text-slate-950">
-                            {best.source === "pv_surplus" ? t("optimizer.solar_100", "☀️ 100% Solar") : t("optimizer.market_low", "⚡ Börsentief")}
-                        </span>
+                    <div className="space-y-3 relative z-10">
+                        <div className="flex flex-wrap items-center justify-between gap-1.5">
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1 truncate">
+                                🏆 {t("energy.best_slot", "Beste Zeit")} ({duration})
+                            </span>
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500 text-slate-950 shrink-0">
+                                {best.source === "pv_surplus" ? t("optimizer.solar_100", "☀️ 100% Solar") : t("optimizer.market_low", "⚡ Börsentief")}
+                            </span>
+                        </div>
+
+                        <div>
+                            <div className="text-xl sm:text-2xl lg:text-3xl font-black font-mono text-white tracking-tight break-words">
+                                {best.start_label} – {best.end_label}
+                            </div>
+                            <div className="text-xs text-emerald-300 font-semibold mt-1">
+                                {best.effective_cost_ct > 0
+                                    ? `Effektive Stromkosten: ~${best.effective_cost_ct} ct/kWh`
+                                    : "0,00 ct/kWh (reiner Solar-Überschuss)"}
+                            </div>
+                        </div>
                     </div>
 
-                    <div>
-                        <div className="text-2xl sm:text-3xl font-black font-mono text-white tracking-tight">
-                            {best.start_label} – {best.end_label}
-                        </div>
-                        <div className="text-xs text-emerald-300 font-semibold mt-1">
-                            {best.effective_cost_ct > 0
-                                ? `Effektive Stromkosten: ~${best.effective_cost_ct} ct/kWh`
-                                : "0,00 ct/kWh (reiner Solar-Überschuss)"}
-                        </div>
-                    </div>
-
-                    <div className="text-[11px] text-emerald-200/80 bg-emerald-900/40 border border-emerald-700/50 rounded-xl p-2.5">
+                    <div className="text-[11px] text-emerald-200/80 bg-emerald-900/40 border border-emerald-700/50 rounded-xl p-2.5 relative z-10">
                         {best.recommendation_text}
                     </div>
                 </div>
 
                 {/* 2. Best Time Night (Nachtfenster) */}
-                <div className="p-5 rounded-2xl bg-linear-to-br from-indigo-950/60 to-slate-900/40 border border-indigo-500/40 space-y-3 relative overflow-hidden">
+                <div className="p-4 sm:p-5 rounded-2xl bg-linear-to-br from-indigo-950/60 to-slate-900/40 border border-indigo-500/40 space-y-3 relative overflow-hidden flex flex-col justify-between">
                     <div className="absolute -right-4 -top-4 w-20 h-20 bg-indigo-500/10 rounded-full blur-xl pointer-events-none" />
 
-                    <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-300 flex items-center gap-1">
-                            🌙 {t("energy.best_night_slot", "Günstigstes Nachtfenster")}
-                        </span>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500 text-white">
-                            {t("energy.market_spot", "Börsenpreis")}
-                        </span>
+                    <div className="space-y-3 relative z-10">
+                        <div className="flex flex-wrap items-center justify-between gap-1.5">
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-300 flex items-center gap-1 truncate">
+                                🌙 {t("energy.best_night_slot", "Günstigstes Nachtfenster")}
+                            </span>
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500 text-white shrink-0">
+                                {t("energy.market_spot", "Börsenpreis")}
+                            </span>
+                        </div>
+
+                        <div>
+                            <div className="text-xl sm:text-2xl lg:text-3xl font-black font-mono text-white tracking-tight break-words">
+                                {bestNight.start_label} – {bestNight.end_label}
+                            </div>
+                            <div className="text-xs text-indigo-300 font-semibold mt-1">
+                                {bestNight.effective_cost_ct > 0
+                                    ? `Effektive Stromkosten: ~${bestNight.effective_cost_ct} ct/kWh`
+                                    : "0,00 ct/kWh"}
+                            </div>
+                        </div>
                     </div>
 
-                    <div>
-                        <div className="text-2xl sm:text-3xl font-black font-mono text-white tracking-tight">
-                            {bestNight.start_label} – {bestNight.end_label}
-                        </div>
-                        <div className="text-xs text-indigo-300 font-semibold mt-1">
-                            {bestNight.effective_cost_ct > 0
-                                ? `Effektive Stromkosten: ~${bestNight.effective_cost_ct} ct/kWh`
-                                : "0,00 ct/kWh"}
-                        </div>
-                    </div>
-
-                    <div className="text-[11px] text-indigo-200/80 bg-indigo-900/40 border border-indigo-700/50 rounded-xl p-2.5">
+                    <div className="text-[11px] text-indigo-200/80 bg-indigo-900/40 border border-indigo-700/50 rounded-xl p-2.5 relative z-10">
                         {bestNight.recommendation_text}
                     </div>
                 </div>
 
                 {/* 3. Worst Time (Spitzenlast & Teuerste Stunde) */}
-                <div className="p-5 rounded-2xl bg-linear-to-br from-rose-950/60 to-rose-900/30 border border-rose-500/40 space-y-3 relative overflow-hidden">
+                <div className="p-4 sm:p-5 rounded-2xl bg-linear-to-br from-rose-950/60 to-rose-900/30 border border-rose-500/40 space-y-3 relative overflow-hidden flex flex-col justify-between">
                     <div className="absolute -right-4 -top-4 w-20 h-20 bg-rose-500/10 rounded-full blur-xl pointer-events-none" />
 
-                    <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-rose-400 flex items-center gap-1">
-                            🚫 {t("energy.avoid_slot", "Verbrauchsspitze meiden")}
-                        </span>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500 text-white">
-                            {t("energy.expensive_peak", "Teuer")}
-                        </span>
+                    <div className="space-y-3 relative z-10">
+                        <div className="flex flex-wrap items-center justify-between gap-1.5">
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-rose-400 flex items-center gap-1 truncate">
+                                🚫 {t("energy.avoid_slot", "Verbrauchsspitze meiden")}
+                            </span>
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500 text-white shrink-0">
+                                {t("energy.expensive_peak", "Teuer")}
+                            </span>
+                        </div>
+
+                        <div>
+                            <div className="text-xl sm:text-2xl lg:text-3xl font-black font-mono text-white tracking-tight break-words">
+                                {worst.start_label} – {worst.end_label}
+                            </div>
+                            <div className="text-xs text-rose-300 font-semibold mt-1">
+                                Effektive Stromkosten: ~{worst.effective_cost_ct} ct/kWh
+                            </div>
+                        </div>
                     </div>
 
-                    <div>
-                        <div className="text-2xl sm:text-3xl font-black font-mono text-white tracking-tight">
-                            {worst.start_label} – {worst.end_label}
-                        </div>
-                        <div className="text-xs text-rose-300 font-semibold mt-1">
-                            Effektive Stromkosten: ~{worst.effective_cost_ct} ct/kWh
-                        </div>
-                    </div>
-
-                    <div className="text-[11px] text-rose-200/80 bg-rose-900/40 border border-rose-700/50 rounded-xl p-2.5">
+                    <div className="text-[11px] text-rose-200/80 bg-rose-900/40 border border-rose-700/50 rounded-xl p-2.5 relative z-10">
                         {worst.recommendation_text}
                     </div>
                 </div>
