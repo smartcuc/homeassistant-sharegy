@@ -3,7 +3,7 @@
 */
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, memo } from "react";
 import { apiFetch } from "../api/client";
 import KPISparklineECharts from "../components/ui/KPISparklineECharts";
 import DeviceChartModal from "../components/device/DeviceChartModal";
