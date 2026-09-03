@@ -43,17 +43,20 @@ def get_energy_data(user):
     grid = signals.get("grid", {})
     battery = signals.get("battery", {})
 
-    c_val = load.get("consumption")
-    if c_val is not None and float(c_val) > 0:
-        house_demand = float(c_val)
-    else:
-        house_demand = (
-            (pv.get("production") or 0)
-            + (battery.get("discharge") or 0)
-            + (grid.get("import") or 0)
-            - (battery.get("charge") or 0)
-            - (grid.get("export") or 0)
-        )
+    # 4. Reiner Hausbedarf (Bedarf) aus dem ausbalancierten Flow
+    house_demand = float(flow.get("total_consumption") or 0.0)
+    if house_demand <= 0:
+        c_val = load.get("consumption")
+        if c_val is not None and float(c_val) > 0:
+            house_demand = float(c_val)
+        else:
+            house_demand = (
+                (pv.get("production") or 0)
+                + (battery.get("discharge") or 0)
+                + (grid.get("import") or 0)
+                - (battery.get("charge") or 0)
+                - (grid.get("export") or 0)
+            )
     house_demand = max(0.0, float(house_demand or 0.0))
     today = get_today_consumption(user)
     from energy.services.system_health import check_home_system_status
