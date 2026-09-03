@@ -123,7 +123,7 @@ function getRoleColor(config) {
 /* =========================================================
    DEVICE CARD
 ========================================================= */
-function DeviceCard({ device, onSelect, onEdit, onDelete, onBaseline }) {
+const DeviceCard = memo(function DeviceCard({ device, onSelect, onEdit, onDelete, onBaseline }) {
 
 
     const { t } = useTranslation();
@@ -326,7 +326,7 @@ function DeviceCard({ device, onSelect, onEdit, onDelete, onBaseline }) {
             )}
         </div>
     );
-}
+});
 
 
 /* =========================================================
