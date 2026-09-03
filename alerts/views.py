@@ -35,20 +35,28 @@ def alerts_list(request):
             "history": [],
         })
 
+    from alerts.services import purge_old_alerts
+
+    # Alte Alarme (> 180 Tage / 6 Monate) automatisch bereinigen
+    try:
+        purge_old_alerts(retention_days=180)
+    except Exception:
+        pass
+
     # Führe Live-Regelauswertung aus
     evaluate_home_alerts(home)
 
-    # 1. Aktive Alarme (active / acknowledged, NICHT resolved)
+    # 1. Aktive Alarme (nur unquittierte, echt aktive Alarme)
     active_qs = AlertEvent.objects.filter(
         home=home,
-        status__in=[AlertEvent.STATUS_ACTIVE, AlertEvent.STATUS_ACKNOWLEDGED]
+        status=AlertEvent.STATUS_ACTIVE,
     ).order_by("-created_at")
 
-    # 2. Historische Alarme (bereits behoben / gelöst)
+    # 2. Historische Alarme (quittiert/gesehen ODER behoben/gelöst)
     history_qs = AlertEvent.objects.filter(
         home=home,
-        status=AlertEvent.STATUS_RESOLVED
-    ).order_by("-resolved_at", "-created_at")[:20]
+        status__in=[AlertEvent.STATUS_RESOLVED, AlertEvent.STATUS_ACKNOWLEDGED],
+    ).order_by("-created_at")[:50]
 
     critical_count = 0
     warning_count = 0

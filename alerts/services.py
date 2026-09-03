@@ -238,23 +238,26 @@ def evaluate_home_alerts(home) -> list[AlertEvent]:
 
 
 def _upsert_alert(home, alert_type, severity, title, message, action_hint="", action_type="", details=None, device=None):
-    event, created = AlertEvent.objects.get_or_create(
+    existing = AlertEvent.objects.filter(
         home=home,
         alert_type=alert_type,
         status__in=[AlertEvent.STATUS_ACTIVE, AlertEvent.STATUS_ACKNOWLEDGED],
-        defaults={
-            "device": device,
-            "severity": severity,
-            "title": title,
-            "message": message,
-            "action_hint": action_hint,
-            "action_type": action_type,
-            "details": details or {},
-            "status": AlertEvent.STATUS_ACTIVE,
-        },
-    )
+    ).first()
 
-    if created:
+    if not existing:
+        event = AlertEvent.objects.create(
+            home=home,
+            device=device,
+            alert_type=alert_type,
+            severity=severity,
+            title=title,
+            message=message,
+            action_hint=action_hint,
+            action_type=action_type,
+            details=details or {},
+            status=AlertEvent.STATUS_ACTIVE,
+        )
+
         try:
             from notifications.tasks import dispatch_alert_push_task
             dispatch_alert_push_task.delay(str(event.id))
@@ -266,14 +269,17 @@ def _upsert_alert(home, alert_type, severity, title, message, action_hint="", ac
             except Exception as ex:
                 import logging
                 logging.getLogger(__name__).warning("Fehler beim Push-Dispatch für Alert %s: %s", event.id, str(ex))
+        return event
     else:
-        event.severity = severity
-        event.title = title
-        event.message = message
-        event.action_hint = action_hint
-        event.action_type = action_type
-        event.details = details or {}
-        event.save(update_fields=["severity", "title", "message", "action_hint", "action_type", "details"])
+        # Bestehenden Alarm aktualisieren (Status bleibt unverändert, z. B. acknowledged bleibt in Historie)
+        existing.severity = severity
+        existing.title = title
+        existing.message = message
+        existing.action_hint = action_hint
+        existing.action_type = action_type
+        existing.details = details or {}
+        existing.save(update_fields=["severity", "title", "message", "action_hint", "action_type", "details"])
+        return existing
 
 
 def _auto_resolve_alert(home, alert_type):
@@ -285,4 +291,13 @@ def _auto_resolve_alert(home, alert_type):
         status=AlertEvent.STATUS_RESOLVED,
         resolved_at=timezone.now(),
     )
+
+
+def purge_old_alerts(retention_days: int = 180) -> int:
+    """
+    Bereinigt automatisch Alarme aus der Datenbank, die älter als retention_days (Standard: 180 Tage / 6 Monate) sind.
+    """
+    cutoff = timezone.now() - timedelta(days=retention_days)
+    deleted_count, _ = AlertEvent.objects.filter(created_at__lt=cutoff).delete()
+    return deleted_count
 

@@ -38,14 +38,15 @@ export default function AlertsPage() {
 
     const data = query.data || {};
     const summary = data.summary || { critical: 0, warning: 0, info: 0, active_total: 0 };
-    const allAlerts = data.alerts || [];
+    const activeAlerts = data.alerts || [];
+    const historyAlerts = data.history || [];
 
-    const filteredAlerts = allAlerts.filter((a) => {
-        if (filterSeverity === "all") return true;
-        if (filterSeverity === "resolved") return a.status === "resolved";
-        if (filterSeverity === "active") return a.status !== "resolved";
-        return a.severity === filterSeverity && a.status !== "resolved";
-    });
+    const filteredAlerts = filterSeverity === "resolved"
+        ? historyAlerts
+        : activeAlerts.filter((a) => {
+            if (filterSeverity === "all") return true;
+            return a.severity === filterSeverity;
+        });
 
     const getSeverityBadge = (sev) => {
         switch (sev) {
@@ -237,11 +238,11 @@ export default function AlertsPage() {
             <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-2.5 rounded-2xl border border-gray-200 shadow-xs">
                 <div className="flex flex-wrap gap-1 bg-gray-100 p-1 rounded-xl text-xs font-semibold">
                     {[
-                        { key: "all", label: `${t("common.all", "Alle")} (${allAlerts.length})` },
+                        { key: "all", label: `${t("common.all", "Alle")} (${activeAlerts.length})` },
                         { key: "critical", label: `🔴 ${t("alerts.critical", "Kritisch")} (${summary.critical})` },
                         { key: "warning", label: `🟡 ${t("alerts.warning", "Warnungen")} (${summary.warning})` },
                         { key: "info", label: `🟢 ${t("alerts.info", "Spar-Tipps")} (${summary.info})` },
-                        { key: "resolved", label: t("alerts.resolved_history", "Gelöst / Historie") },
+                        { key: "resolved", label: `${t("alerts.resolved_history", "Historie")} (${historyAlerts.length})` },
                     ].map((tab) => (
                         <button
                             key={tab.key}
@@ -270,9 +271,13 @@ export default function AlertsPage() {
                 ) : filteredAlerts.length === 0 ? (
                     <div className="bg-white rounded-3xl p-12 border border-gray-200 text-center space-y-3 shadow-xs">
                         <div className="text-5xl">✨</div>
-                        <div className="text-lg font-bold text-gray-900">{t("alerts.no_active", "Keine aktiven Alarme")}</div>
+                        <div className="text-lg font-bold text-gray-900">
+                            {filterSeverity === "resolved" ? t("alerts.empty_history", "Keine Einträge in der Historie") : t("alerts.no_active", "Keine aktiven Alarme")}
+                        </div>
                         <p className="text-xs text-gray-500 max-w-md mx-auto">
-                            {t("alerts.all_optimal", "Alle überwachten Geräte, Wechselrichter, Speicher und Zähler laufen einwandfrei im optimalen Betriebsbereich.")}
+                            {filterSeverity === "resolved"
+                                ? t("alerts.empty_history_desc", "Quittierte oder gelöste Alarme erscheinen hier.")
+                                : t("alerts.all_optimal", "Alle überwachten Geräte, Wechselrichter, Speicher und Zähler laufen einwandfrei im optimalen Betriebsbereich.")}
                         </p>
                     </div>
                 ) : (
@@ -280,18 +285,30 @@ export default function AlertsPage() {
                         <div
                             key={alert.id}
                             className={`p-5 rounded-2xl border transition-all ${alert.status === "resolved"
-                                ? "bg-gray-50/60 border-gray-200 opacity-60"
-                                : alert.severity === "critical"
-                                    ? "bg-rose-50/40 border-rose-200/80 shadow-xs"
-                                    : alert.severity === "warning"
-                                        ? "bg-amber-50/40 border-amber-200/80 shadow-xs"
-                                        : "bg-emerald-50/40 border-emerald-200/80 shadow-xs"
+                                ? "bg-gray-50/60 border-gray-200 opacity-70"
+                                : alert.status === "acknowledged"
+                                    ? "bg-slate-50/80 border-slate-200 opacity-80"
+                                    : alert.severity === "critical"
+                                        ? "bg-rose-50/40 border-rose-200/80 shadow-xs"
+                                        : alert.severity === "warning"
+                                            ? "bg-amber-50/40 border-amber-200/80 shadow-xs"
+                                            : "bg-emerald-50/40 border-emerald-200/80 shadow-xs"
                                 }`}
                         >
                             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                                 <div className="space-y-1.5 flex-1">
                                     <div className="flex flex-wrap items-center gap-2">
                                         {getSeverityBadge(alert.severity)}
+                                        {alert.status === "resolved" && (
+                                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-600 border border-gray-200">
+                                                ✓ Erledigt
+                                            </span>
+                                        )}
+                                        {alert.status === "acknowledged" && (
+                                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                                👁️ Quittiert
+                                            </span>
+                                        )}
                                         <h3 className="font-bold text-base text-gray-900">{alert.title}</h3>
                                         <span className="text-xs text-gray-400 font-mono">
                                             {new Date(alert.created_at).toLocaleString([], { dateStyle: "short", timeStyle: "short" })} Uhr
@@ -308,7 +325,7 @@ export default function AlertsPage() {
                                     )}
                                 </div>
 
-                                {alert.status !== "resolved" && (
+                                {alert.status === "active" && (
                                     <div className="flex sm:flex-col items-center sm:items-end gap-2 shrink-0">
                                         <button
                                             onClick={() => resolveMutation.mutate(alert.id)}
@@ -316,14 +333,12 @@ export default function AlertsPage() {
                                         >
                                             ✓ {t("alerts.mark_resolved", "Erledigt")}
                                         </button>
-                                        {alert.status === "active" && (
-                                            <button
-                                                onClick={() => ackMutation.mutate(alert.id)}
-                                                className="px-2.5 py-1 rounded-lg text-[11px] font-medium text-gray-400 hover:text-gray-700 cursor-pointer"
-                                            >
-                                                {t("alerts.mark_seen", "Gesehen")}
-                                            </button>
-                                        )}
+                                        <button
+                                            onClick={() => ackMutation.mutate(alert.id)}
+                                            className="px-2.5 py-1 rounded-lg text-[11px] font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-100 cursor-pointer"
+                                        >
+                                            {t("alerts.mark_seen", "Quittieren")}
+                                        </button>
                                     </div>
                                 )}
                             </div>

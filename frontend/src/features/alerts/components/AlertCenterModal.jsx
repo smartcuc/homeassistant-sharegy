@@ -33,8 +33,8 @@ export default function AlertCenterModal({ isOpen, onClose }) {
 
     const data = query.data || {};
     const summary = data.summary || { critical: 0, warning: 0, info: 0, active_total: 0 };
-    const activeAlerts = (data.alerts || []).filter(a => a.status !== "resolved");
-    const historyAlerts = data.history || (data.alerts || []).filter(a => a.status === "resolved");
+    const activeAlerts = data.alerts || [];
+    const historyAlerts = data.history || [];
 
     const filteredAlerts = filterSeverity === "resolved"
         ? historyAlerts
@@ -104,11 +104,11 @@ export default function AlertCenterModal({ isOpen, onClose }) {
                     <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
                         <div className="flex flex-wrap gap-1 bg-gray-100 p-1 rounded-xl text-xs font-semibold">
                             {[
-                                { key: "all", label: t("alerts.tab_all", "Alle aktiven") },
+                                { key: "all", label: `${t("alerts.tab_all", "Alle aktiven")} (${activeAlerts.length})` },
                                 { key: "critical", label: t("alerts.severity_critical", "Kritisch") },
                                 { key: "warning", label: t("alerts.severity_warning", "Warnungen") },
                                 { key: "info", label: t("alerts.severity_info", "Spar-Tipps") },
-                                { key: "resolved", label: t("alerts.tab_history", "Historie") },
+                                { key: "resolved", label: `${t("alerts.tab_history", "Historie")} (${historyAlerts.length})` },
                             ].map((tab) => (
                                 <button
                                     key={tab.key}
@@ -131,11 +131,11 @@ export default function AlertCenterModal({ isOpen, onClose }) {
                         <div className="py-12 text-center space-y-2">
                             <div className="text-4xl">✨</div>
                             <div className="text-base font-bold text-gray-800">
-                                {filterSeverity === "resolved" ? t("alerts.empty_history", "Keine gelösten Alarme in der Historie") : t("alerts.empty_active", "Keine aktiven Alarme")}
+                                {filterSeverity === "resolved" ? t("alerts.empty_history", "Keine Einträge in der Historie") : t("alerts.empty_active", "Keine aktiven Alarme")}
                             </div>
                             <p className="text-xs text-gray-500">
                                 {filterSeverity === "resolved"
-                                    ? t("alerts.empty_history_desc", "Es wurden bisher keine Alarme gelöst.")
+                                    ? t("alerts.empty_history_desc", "Quittierte oder gelöste Alarme erscheinen hier.")
                                     : t("alerts.empty_active_desc", "Alle überwachten Systeme, Speicher und Erzeugungsanlagen laufen optimal.")}
                             </p>
                         </div>
@@ -144,18 +144,30 @@ export default function AlertCenterModal({ isOpen, onClose }) {
                             <div
                                 key={alert.id}
                                 className={`p-4 rounded-2xl border transition-all ${alert.status === "resolved"
-                                    ? "bg-gray-50/60 border-gray-200 opacity-60"
-                                    : alert.severity === "critical"
-                                        ? "bg-rose-50/50 border-rose-200 shadow-xs"
-                                        : alert.severity === "warning"
-                                            ? "bg-amber-50/50 border-amber-200 shadow-xs"
-                                            : "bg-emerald-50/50 border-emerald-200 shadow-xs"
+                                    ? "bg-gray-50/60 border-gray-200 opacity-70"
+                                    : alert.status === "acknowledged"
+                                        ? "bg-slate-50/80 border-slate-200 opacity-80"
+                                        : alert.severity === "critical"
+                                            ? "bg-rose-50/50 border-rose-200 shadow-xs"
+                                            : alert.severity === "warning"
+                                                ? "bg-amber-50/50 border-amber-200 shadow-xs"
+                                                : "bg-emerald-50/50 border-emerald-200 shadow-xs"
                                     }`}
                             >
                                 <div className="flex items-start justify-between gap-3">
                                     <div className="space-y-1 flex-1">
                                         <div className="flex items-center gap-2">
                                             {getSeverityBadge(alert.severity)}
+                                            {alert.status === "resolved" && (
+                                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-600 border border-gray-200">
+                                                    ✓ Erledigt
+                                                </span>
+                                            )}
+                                            {alert.status === "acknowledged" && (
+                                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                                    👁️ Quittiert
+                                                </span>
+                                            )}
                                             <h3 className="font-bold text-sm text-gray-900">{alert.title}</h3>
                                             <span className="text-[10px] text-gray-400 font-mono">
                                                 {new Date(alert.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
@@ -173,7 +185,7 @@ export default function AlertCenterModal({ isOpen, onClose }) {
                                     </div>
 
                                     {/* Action Buttons */}
-                                    {alert.status !== "resolved" && (
+                                    {alert.status === "active" && (
                                         <div className="flex flex-col items-end gap-1.5 shrink-0">
                                             <button
                                                 onClick={() => resolveMutation.mutate(alert.id)}
@@ -181,14 +193,12 @@ export default function AlertCenterModal({ isOpen, onClose }) {
                                             >
                                                 {t("alerts.action_resolve", "✓ Erledigt")}
                                             </button>
-                                            {alert.status === "active" && (
-                                                <button
-                                                    onClick={() => ackMutation.mutate(alert.id)}
-                                                    className="px-2 py-0.5 rounded-md text-[10px] font-medium text-gray-400 hover:text-gray-600 cursor-pointer"
-                                                >
-                                                    {t("alerts.action_seen", "Gesehen")}
-                                                </button>
-                                            )}
+                                            <button
+                                                onClick={() => ackMutation.mutate(alert.id)}
+                                                className="px-2 py-0.5 rounded-md text-[10px] font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-100 cursor-pointer"
+                                            >
+                                                {t("alerts.action_seen", "Quittieren")}
+                                            </button>
                                         </div>
                                     )}
                                 </div>
