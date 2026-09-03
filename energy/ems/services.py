@@ -302,13 +302,15 @@ def build_device_signals(user):
         signals["grid"]["import"] = 0.0
         signals["grid"]["export"] = 0.0
 
+    has_explicit_grid_meter = bool(grid_device_ids)
+
     # 8. Gesamthausbedarf & Netz-Balancierung
     signals["load"]["tracked_consumption"] = load_power
 
     if measured_load is not None and measured_load > 0:
         signals["load"]["consumption"] = round(measured_load, 2)
-        # Falls Netzleistung nicht direkt übermittelt wurde, physikalische Netzeinspeisung/Netzbezug berechnen
-        if signals["grid"]["import"] == 0 and signals["grid"]["export"] == 0:
+        # Nur wenn KEIN Netzzähler existiert, physikalische Netzeinspeisung/Netzbezug schätzen
+        if not has_explicit_grid_meter and signals["grid"]["import"] == 0 and signals["grid"]["export"] == 0:
             surplus = (
                 signals["pv"]["production"]
                 + signals["battery"]["discharge"]
@@ -322,7 +324,7 @@ def build_device_signals(user):
     elif load_power > 0:
         # Direkte Messung durch Einzelmesswerte / Submeter
         signals["load"]["consumption"] = round(load_power, 2)
-        if signals["grid"]["import"] == 0 and signals["grid"]["export"] == 0:
+        if not has_explicit_grid_meter and signals["grid"]["import"] == 0 and signals["grid"]["export"] == 0:
             surplus = (
                 signals["pv"]["production"]
                 + signals["battery"]["discharge"]
