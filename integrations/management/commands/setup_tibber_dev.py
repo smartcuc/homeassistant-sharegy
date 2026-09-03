@@ -16,7 +16,7 @@ class Command(BaseCommand):
     help = "Setup minimal Tibber dev environment"
 
     def handle(self, *args, **kwargs):
-        self.stdout.write("🚀 Setting up Tibber dev environment...")
+        self.stdout.write("[INFO] Setting up Tibber dev environment...")
 
         # --- Token aus ENV ---
         tibber_token = os.getenv("TIBBER_TOKEN")
@@ -24,7 +24,7 @@ class Command(BaseCommand):
 
         if not tibber_token or not tibber_home_id:
             self.stdout.write(self.style.ERROR(
-                "❌ Missing TIBBER_TOKEN or TIBBER_HOME_ID in .env"
+                "[ERROR] Missing TIBBER_TOKEN or TIBBER_HOME_ID in .env"
             ))
             return
 
@@ -42,9 +42,9 @@ class Command(BaseCommand):
         user.save()
 
         if created:
-            self.stdout.write("✅ User created")
+            self.stdout.write("[OK] User created")
         else:
-            self.stdout.write("✅ User updated")
+            self.stdout.write("[OK] User updated")
 
         # --- Meter erstellen ---
         meter, created = Meter.objects.get_or_create(
@@ -59,15 +59,15 @@ class Command(BaseCommand):
         )
 
         if created:
-            self.stdout.write("✅ Meter created")
+            self.stdout.write("[OK] Meter created")
         else:
             # sicherstellen, dass Integration korrekt gesetzt ist
             meter.integration_type = "tibber"
             meter.owner_user = user
             meter.save()
-            self.stdout.write("✅ Meter updated")
+            self.stdout.write("[OK] Meter updated")
 
         self.stdout.write(self.style.SUCCESS(
-            "🎉 Tibber dev setup complete!"
+            "[OK] Tibber dev setup complete!"
         ))
 

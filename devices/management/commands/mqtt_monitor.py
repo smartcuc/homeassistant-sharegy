@@ -37,11 +37,11 @@ class Command(BaseCommand):
         self.stdout.write(f"Never seen: {never}")
 
         if stale > 0:
-            self.stdout.write("❌ Some devices are stale")
+            self.stdout.write("[ERROR] Some devices are stale")
 
         if offline > 0:
-            self.stdout.write("⚠️ Some devices recently offline")
+            self.stdout.write("[WARN] Some devices recently offline")
 
         if stale == 0 and offline == 0:
-            self.stdout.write("✅ All devices healthy")
+            self.stdout.write("[OK] All devices healthy")
                        

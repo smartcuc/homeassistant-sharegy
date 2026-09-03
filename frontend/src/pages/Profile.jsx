@@ -345,7 +345,7 @@ export default function Profile() {
                                 <span>{t("gdpr.cat_energy", "Energie- & Telemetriedaten")}</span>
                             </div>
                             <p className="text-gray-600 leading-relaxed">
-                                Verknüpfte Zähler, Wechselrichter, Batteriespeicher, OBIS-Messzeitreihen (1.8.0/2.8.0) und MQTT/Matter-Konfigurationen.
+                                Verknüpfte Zähler, Wechselrichter, Batteriespeicher, OBIS-Messzeitreihen (1.8.0/2.8.0) und MQTT/OCPP/WSS-Konfigurationen.
                             </p>
                             <span className="inline-block text-[10px] text-gray-400 font-semibold">Rechtsgrundlage: Art. 6 (1) lit. b DSGVO</span>
                         </div>

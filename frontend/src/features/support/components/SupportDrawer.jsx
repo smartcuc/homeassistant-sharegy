@@ -528,7 +528,7 @@ export default function SupportDrawer({ isOpen, onClose, defaultContext = {}, in
                                             <option value="forecast">Solar-Prognose</option>
                                             <option value="billing">Tarife & Abrechnung</option>
                                             <option value="community">Energy Community</option>
-                                            <option value="matter">Matter / Bridge</option>
+                                            <option value="wallbox">Wallbox & Smart Charging</option>
                                         </select>
                                     </div>
 

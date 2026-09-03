@@ -16,8 +16,8 @@ class Command(BaseCommand):
         self.stdout.write(f"Provisioning {homes.count()} missing homes...")
 
         for home in homes:
-            self.stdout.write(f"→ provisioning {home.mqtt_username}")
+            self.stdout.write(f"-> provisioning {home.mqtt_username}")
             provision_home.delay(home.id)
 
-        self.stdout.write("✅ Done")
+        self.stdout.write("[OK] Done")
 

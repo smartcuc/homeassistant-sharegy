@@ -56,7 +56,7 @@ export default function Agb({ onClose }) {
                     (2) Der Nutzer verpflichtet sich, wahrheitsgemäße Angaben zu machen und die ihm übermittelten Zugangslinks geheim zu halten. Bei Verdacht auf Missbrauch ist der Anbieter unverzüglich zu informieren.
                 </p>
                 <p>
-                    (3) Der Nutzer ist für die ordnungsgemäße und sichere Anbindung seiner IoT- und Messgeräte (z. B. Smart Meter, MQTT-Broker, Matter-Bridges) selbst verantwortlich.
+                    (3) Der Nutzer ist für die ordnungsgemäße und sichere Anbindung seiner IoT- und Messgeräte (z. B. Smart Meter Gateways, MQTT-Broker, OCPP-Wallboxen) selbst verantwortlich.
                 </p>
             </section>
 

@@ -59,7 +59,7 @@ class Command(BaseCommand):
                 topic = line.split(":")[2].split("(")[0].strip()
 
                 if topic:
-                    self.stdout.write(f"⚠️ removing wrong publish ACL: {topic}")
+                    self.stdout.write(f"[WARN] removing wrong publish ACL: {topic}")
 
                     self.run_cmd(
                         "dynsec", "removeRoleACL",
@@ -74,7 +74,7 @@ class Command(BaseCommand):
                 topic = line.split(":")[2].split("(")[0].strip()
 
                 if topic:
-                    self.stdout.write(f"⚠️ removing wrong subscribe ACL: {topic}")
+                    self.stdout.write(f"[WARN] removing wrong subscribe ACL: {topic}")
 
                     self.run_cmd(
                         "dynsec", "removeRoleACL",
@@ -85,7 +85,7 @@ class Command(BaseCommand):
                     )
 
     # ---------------------------------------------------------
-    # ✅ MAIN LOGIC
+    # MAIN LOGIC
     # ---------------------------------------------------------
     def handle(self, *args, **options):
 
@@ -106,7 +106,7 @@ class Command(BaseCommand):
             self.stdout.write(f"--- {username} ---")
 
             # =====================================================
-            # ✅ 1. CLIENT CHECK
+            # 1. CLIENT CHECK
             # =====================================================
             client_res = self.run_cmd(
                 "dynsec", "getClient", username,
@@ -114,17 +114,17 @@ class Command(BaseCommand):
             )
 
             if not client_res or client_res.returncode != 0:
-                self.stdout.write("❌ Client missing → reprovision")
+                self.stdout.write("[ERROR] Client missing -> reprovision")
 
                 if not dry_run:
                     provision_home.delay(home.id)
 
                 continue
 
-            self.stdout.write("✅ Client OK")
+            self.stdout.write("[OK] Client OK")
 
             # =====================================================
-            # ✅ 2. ROLE CHECK
+            # 2. ROLE CHECK
             # =====================================================
             role_res = self.run_cmd(
                 "dynsec", "getRole", username,
@@ -132,38 +132,38 @@ class Command(BaseCommand):
             )
 
             if not role_res or role_res.returncode != 0:
-                self.stdout.write("❌ Role missing → reprovision")
+                self.stdout.write("[ERROR] Role missing -> reprovision")
 
                 if not dry_run:
                     provision_home.delay(home.id)
 
                 continue
 
-            self.stdout.write("✅ Role OK")
+            self.stdout.write("[OK] Role OK")
 
             role_output = role_res.stdout
 
             # =====================================================
-            # ✅ 3. ROLE BINDING CHECK
+            # 3. ROLE BINDING CHECK
             # =====================================================
             if username not in client_res.stdout:
-                self.stdout.write("❌ Role not assigned → reprovision")
+                self.stdout.write("[ERROR] Role not assigned -> reprovision")
 
                 if not dry_run:
                     provision_home.delay(home.id)
 
                 continue
 
-            self.stdout.write("✅ Role binding OK")
+            self.stdout.write("[OK] Role binding OK")
 
             # =====================================================
-            # ✅ 4. EXPECTED ACLs
+            # 4. EXPECTED ACLs
             # =====================================================
             expected_publish = f"h/{token}/#"
             expected_subscribe = f"h/{token}/#"
 
             # =====================================================
-            # ✅ CLEANUP FALSCHER ACLs
+            # CLEANUP FALSCHER ACLs
             # =====================================================
             self.cleanup_wrong_acls(
                 username,
@@ -174,10 +174,10 @@ class Command(BaseCommand):
             )
 
             # =====================================================
-            # ✅ CHECK publish ACL
+            # CHECK publish ACL
             # =====================================================
             if expected_publish not in role_output:
-                self.stdout.write("❌ publish ACL missing → fixing")
+                self.stdout.write("[ERROR] publish ACL missing -> fixing")
 
                 self.run_cmd(
                     "dynsec", "addRoleACL",
@@ -188,13 +188,13 @@ class Command(BaseCommand):
                     dry_run=dry_run
                 )
             else:
-                self.stdout.write("✅ publish ACL OK")
+                self.stdout.write("[OK] publish ACL OK")
 
             # =====================================================
-            # ✅ CHECK subscribe ACL
+            # CHECK subscribe ACL
             # =====================================================
             if expected_subscribe not in role_output:
-                self.stdout.write("❌ subscribe ACL missing → fixing")
+                self.stdout.write("[ERROR] subscribe ACL missing -> fixing")
 
                 self.run_cmd(
                     "dynsec", "addRoleACL",
@@ -205,10 +205,8 @@ class Command(BaseCommand):
                     dry_run=dry_run
                 )
             else:
-                self.stdout.write("✅ subscribe ACL OK")
+                self.stdout.write("[OK] subscribe ACL OK")
 
-            self.stdout.write("✅ fully reconciled\n")
+            self.stdout.write("[OK] fully reconciled\n")
 
-        self.stdout.write("🎯 MQTT reconcile done")
-
-        
+        self.stdout.write("[OK] MQTT reconcile done")

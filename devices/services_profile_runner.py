@@ -297,8 +297,8 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
 
     # Echter HTTP-Aufruf
     if auth_type == "sungrow_token" or profile_id == "sungrow_isolarcloud":
-        appkey = credentials.get("appkey") or getattr(settings, "SUNGROW_APPKEY", None) or os.getenv("SUNGROW_APPKEY") or "988713D7D057090474AEC9584CBA1AAD"
-        app_secret = getattr(settings, "SUNGROW_APP_SECRET", None) or os.getenv("SUNGROW_APP_SECRET") or "chh8ptt9n6xkchjr0yez6hxadxh58vc9"
+        appkey = credentials.get("appkey") or getattr(settings, "SUNGROW_APPKEY", "") or os.getenv("SUNGROW_APPKEY", "")
+        app_secret = getattr(settings, "SUNGROW_APP_SECRET", "") or os.getenv("SUNGROW_APP_SECRET", "")
         token = credentials.get("token")
         is_oauth = credentials.get("auth_type") == "oauth2" or (token and not str(token).startswith("sg_oauth_"))
 

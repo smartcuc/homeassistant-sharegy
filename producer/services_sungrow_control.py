@@ -22,8 +22,8 @@ from devices.models import CloudDeviceIntegration
 
 logger = logging.getLogger("producer.sungrow_control")
 
-SUNGROW_APPKEY = getattr(settings, "SUNGROW_APPKEY", None) or os.getenv("SUNGROW_APPKEY") or "988713D7D057090474AEC9584CBA1AAD"
-SUNGROW_APP_SECRET = getattr(settings, "SUNGROW_APP_SECRET", None) or os.getenv("SUNGROW_APP_SECRET") or "chh8ptt9n6xkchjr0yez6hxadxh58vc9"
+SUNGROW_APPKEY = getattr(settings, "SUNGROW_APPKEY", "") or os.getenv("SUNGROW_APPKEY", "")
+SUNGROW_APP_SECRET = getattr(settings, "SUNGROW_APP_SECRET", "") or os.getenv("SUNGROW_APP_SECRET", "")
 SUNGROW_GATEWAY_URL = getattr(settings, "SUNGROW_GATEWAY_URL", "https://gateway.isolarcloud.eu")
 
 

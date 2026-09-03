@@ -58,7 +58,7 @@ export default function Datenschutz({ onClose }) {
                     <div>
                         <h3 className="text-base font-bold text-gray-800">b) Energie-, Mess- & Telemetriedaten (HEMS / EMS)</h3>
                         <p className="text-xs sm:text-sm text-gray-600">
-                            Kernfunktion von Sharegy ist das Erfassen und Visualisieren von Energieflüssen. Hierbei verarbeiten wir Messdaten von angeschlossenen Geräten (Smart Meter, Wechselrichter, Batteriespeicher, Wärmepumpen, schaltbare Steckdosen, Matter- und MQTT-Sensoren). Zu den verarbeiteten Werten gehören Wirkleistung (W), Zählerstände (kWh, OBIS 1.8.0 / 2.8.0), Batterieladezustand (SoC %), Netzspannung und Timestamp. Diese Daten werden zur Aggregation, Berechnung von Autarkiegraden, Erzeugungs- und Lastprognosen sowie zur Eigenverbrauchsoptimierung verwendet.
+                            Kernfunktion von Sharegy ist das Erfassen und Visualisieren von Energieflüssen. Hierbei verarbeiten wir Messdaten von angeschlossenen Geräten (Smart Meter, Wechselrichter, Batteriespeicher, Wärmepumpen, schaltbare Steckdosen, OCPP-Wallboxen, WSS- und MQTT-Sensoren). Zu den verarbeiteten Werten gehören Wirkleistung (W), Zählerstände (kWh, OBIS 1.8.0 / 2.8.0), Batterieladezustand (SoC %), Netzspannung und Timestamp. Diese Daten werden zur Aggregation, Berechnung von Autarkiegraden, Erzeugungs- und Lastprognosen sowie zur Eigenverbrauchsoptimierung verwendet.
                         </p>
                     </div>
 
