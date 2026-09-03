@@ -124,19 +124,31 @@ def get_energy_data(user):
         "today_source": today["source"] if today else None,
     }
 
+    all_dev_ids = [d.id for d in all_user_devices]
+
+    eff_grid_ids = list(grid_ids) if grid_ids else all_dev_ids
+    eff_pv_ids = list(pv_ids) if pv_ids else all_dev_ids
+    eff_battery_ids = list(battery_ids) if battery_ids else all_dev_ids
+    eff_load_ids = list(load_ids) if load_ids else all_dev_ids
+
     demand_chart = get_house_demand_chart(
-        list(pv_ids),
-        list(grid_ids),
-        list(battery_ids),
+        eff_pv_ids,
+        eff_grid_ids,
+        eff_battery_ids,
     )
     if not demand_chart and all_user_devices:
-        demand_chart = get_dashboard_chart([d.id for d in all_user_devices])
+        demand_chart = get_dashboard_chart(all_dev_ids, metric_keys=["load_power", "consumption", "power", "value"])
+
+    grid_sparkline = get_dashboard_chart(eff_grid_ids, metric_keys=["grid_power", "power_grid", "power", "value"])
+    battery_sparkline = get_dashboard_chart(eff_battery_ids, metric_keys=["battery_power", "power_battery", "power", "value"])
+    pv_sparkline = get_dashboard_chart(eff_pv_ids, metric_keys=["pv_power", "solar_power", "power", "value"])
+    load_sparkline = demand_chart or get_dashboard_chart(eff_load_ids, metric_keys=["load_power", "consumption", "power", "value"])
 
     charts = {
-        "load": demand_chart,
-        "pv": get_dashboard_chart(list(pv_ids)),
-        "grid": get_dashboard_chart(list(grid_ids)),
-        "battery": get_dashboard_chart(list(battery_ids)),
+        "load": load_sparkline,
+        "pv": pv_sparkline,
+        "grid": grid_sparkline,
+        "battery": battery_sparkline,
         "today": today["history"] if today else [],
     }
 

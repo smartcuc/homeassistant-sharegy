@@ -18,7 +18,7 @@ from devices.models import (
 )
 
 
-def get_dashboard_chart(device_ids):
+def get_dashboard_chart(device_ids, metric_keys=None):
     """
     Sparkline für Dashboard-Kacheln (letzte 24h).
     """
@@ -26,7 +26,10 @@ def get_dashboard_chart(device_ids):
         return []
 
     since = timezone.now() - timedelta(hours=24)
-    key_filter = Q(metric_key__in=["power", "value", "a_act_power", "apower", "load"]) | Q(metric_key__isnull=True)
+    if metric_keys:
+        key_filter = Q(metric_key__in=metric_keys)
+    else:
+        key_filter = Q(metric_key__in=["power", "value", "a_act_power", "apower", "load"]) | Q(metric_key__isnull=True)
 
     # 1. Versuch: 1h Aggregationen
     rows = list(
@@ -96,7 +99,7 @@ def get_house_demand_chart(
     """
     since = timezone.now() - timedelta(hours=24)
     data = defaultdict(float)
-    key_filter = Q(metric_key__in=["power", "value", "a_act_power", "apower", "load"]) | Q(metric_key__isnull=True)
+    key_filter = Q(metric_key__in=["power", "value", "a_act_power", "apower", "load", "load_power", "consumption"]) | Q(metric_key__isnull=True)
 
     for dev_ids in [pv_ids, battery_ids, grid_ids]:
         if not dev_ids:
@@ -151,8 +154,11 @@ def get_house_demand_chart(
 
 
 
-def _query_period_data(device_ids, primary_model, fallback_model, since, time_field="bucket", val_field="avg"):
-    key_filter = Q(metric_key__in=["power", "value"]) | Q(metric_key__isnull=True)
+def _query_period_data(device_ids, primary_model, fallback_model, since, time_field="bucket", val_field="avg", metric_keys=None):
+    if metric_keys:
+        key_filter = Q(metric_key__in=metric_keys)
+    else:
+        key_filter = Q(metric_key__in=["power", "value", "a_act_power", "apower"]) | Q(metric_key__isnull=True)
 
     rows = list(
         primary_model.objects.filter(
@@ -189,6 +195,7 @@ def get_chart_data(
     timezone_name="UTC",
     start_date=None,
     end_date=None,
+    metric_keys=None,
 ):
     """
     Modalchart für 1h, 6h, 24h, 5d, 7d, 30d, year und custom.
@@ -231,13 +238,13 @@ def get_chart_data(
 
             dur_days = (e_dt - s_dt).days
             if dur_days <= 1:
-                rows, time_field = _query_period_data(device_ids, DeviceMetric15m, DeviceMetric1h, s_dt)
+                rows, time_field = _query_period_data(device_ids, DeviceMetric15m, DeviceMetric1h, s_dt, metric_keys=metric_keys)
                 date_fmt = "%H:%M"
             elif dur_days <= 7:
-                rows, time_field = _query_period_data(device_ids, DeviceMetric1h, DeviceMetric15m, s_dt)
+                rows, time_field = _query_period_data(device_ids, DeviceMetric1h, DeviceMetric15m, s_dt, metric_keys=metric_keys)
                 date_fmt = "%d.%m %H:%M"
             else:
-                rows, time_field = _query_period_data(device_ids, DeviceMetric1h, None, s_dt)
+                rows, time_field = _query_period_data(device_ids, DeviceMetric1h, None, s_dt, metric_keys=metric_keys)
                 date_fmt = "%d.%m."
         except Exception:
             rows, time_field = [], "bucket"
@@ -246,33 +253,33 @@ def get_chart_data(
     # 1 Stunde (1m Aggregationen, Fallback Rohdaten)
     elif period == "1h":
         since = now - timedelta(hours=1)
-        rows, time_field = _query_period_data(device_ids, DeviceMetric1m, DeviceMetric, since)
+        rows, time_field = _query_period_data(device_ids, DeviceMetric1m, DeviceMetric, since, metric_keys=metric_keys)
         date_fmt = "%H:%M"
 
     # 6 Stunden (5m Aggregationen, Fallback 1m)
     elif period == "6h":
         since = now - timedelta(hours=6)
-        rows, time_field = _query_period_data(device_ids, DeviceMetric5m, DeviceMetric1m, since)
+        rows, time_field = _query_period_data(device_ids, DeviceMetric5m, DeviceMetric1m, since, metric_keys=metric_keys)
         date_fmt = "%H:%M"
 
     # 24 Stunden (15m Aggregationen, Fallback 1h oder 5m)
     elif period == "24h":
         since = now - timedelta(hours=24)
-        rows, time_field = _query_period_data(device_ids, DeviceMetric15m, DeviceMetric1h, since)
+        rows, time_field = _query_period_data(device_ids, DeviceMetric15m, DeviceMetric1h, since, metric_keys=metric_keys)
         if not rows:
-            rows, time_field = _query_period_data(device_ids, DeviceMetric5m, DeviceMetric1m, since)
+            rows, time_field = _query_period_data(device_ids, DeviceMetric5m, DeviceMetric1m, since, metric_keys=metric_keys)
         date_fmt = "%H:%M"
 
     # 5 Tage (1h Aggregationen, Fallback 15m)
     elif period == "5d":
         since = now - timedelta(days=5)
-        rows, time_field = _query_period_data(device_ids, DeviceMetric1h, DeviceMetric15m, since)
+        rows, time_field = _query_period_data(device_ids, DeviceMetric1h, DeviceMetric15m, since, metric_keys=metric_keys)
         date_fmt = "%d.%m %H:%M"
 
     elif period in ("7d", "30d"):
         days = 7 if period == "7d" else 30
         since = now - timedelta(days=days)
-        rows, time_field = _query_period_data(device_ids, DeviceMetric1h, DeviceMetric15m, since)
+        rows, time_field = _query_period_data(device_ids, DeviceMetric1h, DeviceMetric15m, since, metric_keys=metric_keys)
         date_fmt = "%d.%m."
 
     else:

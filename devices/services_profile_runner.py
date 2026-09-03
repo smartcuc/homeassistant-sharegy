@@ -356,6 +356,7 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
         appkey = credentials.get("appkey") or getattr(settings, "SUNGROW_APPKEY", "") or os.getenv("SUNGROW_APPKEY", "")
         app_secret = getattr(settings, "SUNGROW_APP_SECRET", "") or os.getenv("SUNGROW_APP_SECRET", "")
         token = credentials.get("token")
+        ps_id = credentials.get("ps_id") or credentials.get("ps_ids") or ""
         is_oauth = credentials.get("auth_type") == "oauth2" or (token and not str(token).startswith("sg_oauth_"))
 
         if is_oauth and token:
@@ -384,7 +385,6 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
                     logger.warning("Auto token exchange failed: %s", ex_err)
 
             # 1. OAuth2 OpenAPI Modus
-            ps_id = credentials.get("ps_id")
             if not ps_id or ps_id in ("default_ps", "12345", ""):
 
                 try:

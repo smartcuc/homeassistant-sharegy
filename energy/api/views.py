@@ -240,6 +240,15 @@ def chart_data(request):
     home = request.user.homes.first()
     timezone_name = home.timezone if home else "UTC"
 
+    metric_keys_map = {
+        "pv": ["pv_power", "solar_power", "power", "value"],
+        "grid": ["grid_power", "power_grid", "power", "value"],
+        "battery": ["battery_power", "power_battery", "power", "value"],
+        "load": ["load_power", "consumption", "house_power", "power", "value"],
+        "today": ["grid_power", "power_grid", "power", "value"],
+    }
+    metric_keys = metric_keys_map.get(metric)
+
     device_ids = list(
         EMSSignalSource.objects.filter(
             home__user=request.user,
@@ -249,10 +258,10 @@ def chart_data(request):
 
     if not device_ids and home:
         role_map = {
-            "pv": ["producer", "pv", "solar"],
-            "grid": ["grid"],
-            "battery": ["battery"],
-            "load": ["consumer", "load"],
+            "pv": ["producer", "pv", "solar", "both", "hybrid"],
+            "grid": ["grid", "meter", "smart_meter", "both", "producer", "hybrid"],
+            "battery": ["battery", "storage", "speicher", "both", "producer", "hybrid"],
+            "load": ["consumer", "load", "both", "producer", "hybrid"],
         }
         target_roles = role_map.get(signal_type, [signal_type])
         device_ids = list(
@@ -267,6 +276,14 @@ def chart_data(request):
             )
             .values_list("id", flat=True)
         )
+        if not device_ids:
+            device_ids = list(
+                Device.objects.filter(
+                    home=home,
+                    active=True,
+                    pending_delete=False,
+                ).values_list("id", flat=True)
+            )
 
     data = get_chart_data(
         device_ids,
@@ -274,6 +291,7 @@ def chart_data(request):
         timezone_name=timezone_name,
         start_date=start_date,
         end_date=end_date,
+        metric_keys=metric_keys,
     )
 
     return Response(data)
