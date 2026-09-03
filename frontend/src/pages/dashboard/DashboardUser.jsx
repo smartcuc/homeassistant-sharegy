@@ -194,7 +194,7 @@ export default function DashboardUser() {
                         }
                         value={
                             kpis.grid != null
-                                ? kpis.grid.toLocaleString(undefined, {
+                                ? Math.abs(kpis.grid).toLocaleString(undefined, {
                                     minimumFractionDigits: 2,
                                     maximumFractionDigits: 2,
                                 })

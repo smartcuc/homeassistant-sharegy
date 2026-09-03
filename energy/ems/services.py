@@ -185,7 +185,12 @@ def build_device_signals(user):
         for dev in all_devices:
             b_p = cache.get(f"device:{dev.id}:battery_power")
             if b_p is None:
-                m = DeviceLatestMetric.objects.filter(device=dev, metric_key="battery_power").first()
+                b_p = cache.get(f"device:{dev.id}:power_battery")
+            if b_p is None:
+                m = DeviceLatestMetric.objects.filter(
+                    device=dev,
+                    metric_key__in=["battery_power", "battery_power_w", "power_battery", "battery"]
+                ).first()
                 if m and m.value is not None:
                     b_p = float(m.value)
             if b_p is not None and abs(float(b_p)) > 0.01:
@@ -201,9 +206,11 @@ def build_device_signals(user):
 
     # SoC prüfen
     soc_val = None
+    has_storage_system = False
     try:
         from producer.models import StorageSystem
         for storage in StorageSystem.objects.filter(home__user=user, active=True):
+            has_storage_system = True
             s = storage.get_live_soc()
             if s is not None:
                 soc_val = float(s)
@@ -243,15 +250,22 @@ def build_device_signals(user):
             signals["battery"]["discharge"] = round(abs(bat_val), 2)
             signals["battery"]["charge"] = 0.0
     else:
-        # Fallback: Falls Inverter/Runner 0 W für den Speicher meldet, aber ein geladener Speicher (SoC > 5%)
-        # vorhanden ist und das Haus mehr Strom braucht als PV liefert:
-        deficit = max(0.0, eff_load_est - pv_power)
-        if soc_val is not None and soc_val > 5.0 and deficit > 30:
-            signals["battery"]["charge"] = 0.0
-            signals["battery"]["discharge"] = round(deficit, 2)
-        else:
-            signals["battery"]["charge"] = 0.0
+        # Fallback 1: Wenn ein Speicher konfiguriert ist, PV-Überschuss vorliegt und kein Netzexport gemessen wird:
+        # Fließt der PV-Überschuss in die Batterieladung!
+        if (has_storage_system or soc_val is not None or battery_device_ids) and pv_power > (eff_load_est + 50) and (soc_val is None or soc_val < 98.0):
+            excess = pv_power - eff_load_est
+            signals["battery"]["charge"] = round(excess, 2)
             signals["battery"]["discharge"] = 0.0
+        else:
+            # Fallback 2: Falls Inverter/Runner 0 W für den Speicher meldet, aber ein geladener Speicher (SoC > 5%)
+            # vorhanden ist und das Haus mehr Strom braucht als PV liefert:
+            deficit = max(0.0, eff_load_est - pv_power)
+            if soc_val is not None and soc_val > 5.0 and deficit > 30:
+                signals["battery"]["charge"] = 0.0
+                signals["battery"]["discharge"] = round(deficit, 2)
+            else:
+                signals["battery"]["charge"] = 0.0
+                signals["battery"]["discharge"] = 0.0
 
     # 7. Grid-Leistung (Import / Export)
     grid_power = sum(values.get(d_id, 0) for d_id in grid_device_ids if d_id not in pv_device_ids and d_id not in battery_device_ids)
