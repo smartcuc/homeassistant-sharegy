@@ -431,52 +431,6 @@ def device_dashboard_values(request):
     device_ids = [d.id for d in devices]
 
     values = get_latest_values(device_ids)
-
-    since = timezone.now() - timedelta(hours=1)
-
-    # 1. Sammle 1m Aggregationen der letzten Stunde
-    sparkline_rows = list(
-        DeviceMetric1m.objects.filter(
-            device_id__in=device_ids,
-            bucket__gte=since,
-        )
-        .filter(Q(metric_key__in=["power", "value"]) | Q(metric_key__isnull=True))
-        .values("device_id", "avg")
-        .order_by("device_id", "bucket")
-    )
-
-    sparkline_map = defaultdict(list)
-    for row in sparkline_rows:
-        sparkline_map[row["device_id"]].append(
-            round(float(row["avg"] or 0), 2)
-        )
-
-    # 2. Resilienter Fallback für Geräte mit wenigen / keinen Punkten in der letzten Stunde
-    for d in devices:
-        pts = sparkline_map.get(d.id, [])
-        if len(pts) < 3:
-            # Versuche jüngste 30 Punkte aus DeviceMetric1m
-            recent_1m = list(
-                DeviceMetric1m.objects.filter(device_id=d.id)
-                .filter(Q(metric_key__in=["power", "value"]) | Q(metric_key__isnull=True))
-                .order_by("-bucket")
-                .values_list("avg", flat=True)[:30]
-            )
-            if len(recent_1m) >= 2:
-                sparkline_map[d.id] = [round(float(v or 0), 2) for v in reversed(recent_1m)]
-            else:
-                # Versuche jüngste 30 Punkte aus Rohdaten (DeviceMetric)
-                recent_raw = list(
-                    DeviceMetric.objects.filter(device_id=d.id)
-                    .filter(Q(metric_key__in=["power", "value"]) | Q(metric_key__isnull=True))
-                    .order_by("-timestamp")
-                    .values_list("value", flat=True)[:30]
-                )
-                if recent_raw:
-                    sparkline_map[d.id] = [
-                        round(float(v), 2) for v in reversed(recent_raw) if v is not None
-                    ]
-
     from devices.services.ingest import _infer_canonical_unit
 
     device_cfg_map = {d.id: getattr(d, "config", None) for d in devices}
@@ -496,6 +450,9 @@ def device_dashboard_values(request):
             "timestamp": row["timestamp"].isoformat() if row["timestamp"] else None,
         }
 
+    since = timezone.now() - timedelta(hours=1)
+    POWER_KEYS = {"power", "value", "val", "apower", "active_power", "pv_power", "load_power", "grid_power", "battery_power"}
+
     result = []
 
     for d in devices:
@@ -506,17 +463,70 @@ def device_dashboard_values(request):
         lead_key = metric.key if metric else "power"
         top_unit = _infer_canonical_unit(lead_key, metric.unit if metric else "", config=config)
 
-        sparkline_pts = sparkline_map.get(d.id, [])
+        dev_metrics = device_metrics_map.get(d.id, {})
+
+        # Live-Wert ermitteln
+        lead_val = None
+        if lead_key in dev_metrics and dev_metrics[lead_key]["value"] is not None:
+            lead_val = dev_metrics[lead_key]["value"]
+        elif values.get(d.id) is not None:
+            lead_val = values.get(d.id)
+        elif dev_metrics:
+            first_m = next(iter(dev_metrics.values()), None)
+            if first_m:
+                lead_val = first_m.get("value")
+
+        # Sparkline-Punkte für die spezifische Metrik des Geräts laden
+        is_pwr = lead_key.lower() in POWER_KEYS
+        if is_pwr:
+            metric_filter = Q(metric_key__in=POWER_KEYS) | Q(metric_key__isnull=True)
+        else:
+            metric_filter = Q(metric_key=lead_key) | Q(metric_key__iexact=lead_key)
+
+        sparkline_pts = list(
+            DeviceMetric1m.objects.filter(
+                device_id=d.id,
+                bucket__gte=since,
+            )
+            .filter(metric_filter)
+            .order_by("bucket")
+            .values_list("avg", flat=True)
+        )
+        sparkline_pts = [round(float(v or 0), 2) for v in sparkline_pts if v is not None]
+
+        if len(sparkline_pts) < 3:
+            recent_1m = list(
+                DeviceMetric1m.objects.filter(device_id=d.id)
+                .filter(metric_filter)
+                .order_by("-bucket")
+                .values_list("avg", flat=True)[:30]
+            )
+            if len(recent_1m) >= 2:
+                sparkline_pts = [round(float(v or 0), 2) for v in reversed(recent_1m)]
+            else:
+                recent_raw = list(
+                    DeviceMetric.objects.filter(device_id=d.id)
+                    .filter(metric_filter)
+                    .order_by("-timestamp")
+                    .values_list("value", flat=True)[:30]
+                )
+                if recent_raw:
+                    sparkline_pts = [
+                        round(float(v), 2) for v in reversed(recent_raw) if v is not None
+                    ]
+
         if len(sparkline_pts) == 1:
             sparkline_pts = [sparkline_pts[0], sparkline_pts[0]]
+        elif not sparkline_pts and lead_val is not None:
+            sparkline_pts = [lead_val, lead_val]
 
         result.append(
             {
                 "device": d.id,
-                "value": values.get(d.id),
+                "value": lead_val,
                 "unit": top_unit,
                 "sparkline": sparkline_pts,
-                "metrics": device_metrics_map.get(d.id, {}),
+                "metrics": dev_metrics,
             }
         )
 

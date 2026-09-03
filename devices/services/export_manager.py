@@ -121,24 +121,20 @@ def get_device_timeseries_dataset(device, range_str="24h", requested_metric=None
     lead_key = (
         device.config.metric_definition.key
         if hasattr(device, "config") and device.config and device.config.metric_definition
-        else "power"
+        else None
     )
 
-    is_power_query = (
-        (not requested_metric)
-        or (requested_metric.lower() in POWER_KEYS)
-        or (requested_metric == lead_key)
-    )
+    effective_metric = requested_metric or lead_key or "power"
+    is_power_query = (effective_metric.lower() in POWER_KEYS)
 
     if is_power_query:
         possible_keys = list(POWER_KEYS)
-        if lead_key and lead_key not in possible_keys:
+        if lead_key and lead_key in POWER_KEYS and lead_key not in possible_keys:
             possible_keys.append(lead_key)
         metric_filter = Q(metric_key__in=possible_keys) | Q(metric_key__isnull=True)
-        effective_metric = lead_key or "power"
     else:
-        metric_filter = Q(metric_key=requested_metric)
-        effective_metric = requested_metric
+        # Exakter Filter für Nicht-Leistungs-Metriken (Temperatur, Spannung, Strom, SoC etc.)
+        metric_filter = Q(metric_key=effective_metric) | Q(metric_key__iexact=effective_metric)
 
     # Determine Metric Unit & Display Name
     unit = "W"
