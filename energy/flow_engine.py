@@ -98,14 +98,20 @@ def calculate_energy_flow(signals):
     else:
         flow["grid_to_load"] = 0.0
 
-    # 8. KPI Quoten berechnen
+    # 8. Reale Summe des Hausverbrauchs: Physikalische Summe aller zufließenden Pfade!
+    # (pv_to_load + battery_to_load + grid_to_load)
+    # Garantiert, dass der Bedarf niemals physisch ungedeckte Phantasiewerte annehmen kann.
+    actual_house_load = flow["pv_to_load"] + flow["battery_to_load"] + flow["grid_to_load"]
+    flow["total_consumption"] = round(actual_house_load, 2)
+
+    # 9. KPI Quoten berechnen
     self_consumption_watts = flow["pv_to_load"] + flow["pv_to_battery"]
     flow["self_consumption_rate"] = (
         round((self_consumption_watts / production * 100.0), 1) if production > 0 else 100.0
     )
     autarky_watts = flow["pv_to_load"] + flow["battery_to_load"]
     flow["autarky_rate"] = (
-        round((autarky_watts / consumption * 100.0), 1) if consumption > 0 else (100.0 if production > 0 else 0.0)
+        round((autarky_watts / flow["total_consumption"] * 100.0), 1) if flow["total_consumption"] > 0 else (100.0 if production > 0 else 0.0)
     )
 
     return flow
