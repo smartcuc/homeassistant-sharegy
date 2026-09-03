@@ -228,3 +228,44 @@ class MQTTProfileAdmin(admin.ModelAdmin):
         "name",
         "slug",
     )
+
+
+@admin.register(ChargingStation)
+class ChargingStationAdmin(admin.ModelAdmin):
+    list_display = (
+        "name",
+        "charge_point_id",
+        "home",
+        "status",
+        "smart_charging_mode",
+        "active_power_w",
+        "is_online",
+        "last_heartbeat",
+    )
+    list_filter = ("status", "smart_charging_mode", "is_online", "phases")
+    search_fields = ("name", "charge_point_id", "vendor", "model", "home__name")
+
+
+@admin.register(ChargingSession)
+class ChargingSessionAdmin(admin.ModelAdmin):
+    list_display = (
+        "transaction_id",
+        "station",
+        "id_tag",
+        "user",
+        "start_time",
+        "stop_time",
+        "total_energy_kwh",
+        "solar_coverage_pct",
+        "cost_eur",
+        "status",
+    )
+    list_filter = ("status", "station")
+    search_fields = ("id_tag", "station__name", "user__email")
+
+
+@admin.register(ChargingRfidTag)
+class ChargingRfidTagAdmin(admin.ModelAdmin):
+    list_display = ("name", "id_tag", "user", "home", "is_active", "created_at")
+    list_filter = ("is_active", "home")
+    search_fields = ("name", "id_tag", "user__email")

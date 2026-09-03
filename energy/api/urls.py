@@ -32,6 +32,12 @@ from .views_grid import (
     grid_dimming_clear_view,
     steuve_devices_config_view,
 )
+from .views_ocpp import (
+    WallboxListCreateView,
+    WallboxDetailView,
+    WallboxRemoteActionView,
+    WallboxSessionsView,
+)
 
 urlpatterns += [
     path("dashboard/me/", dashboard_me),
@@ -54,4 +60,9 @@ urlpatterns += [
     path("grid/steuve/", steuve_devices_config_view),
     # 🎯 Onboarding & System Readiness Check (Omi-Test)
     path("setup-status/", system_setup_status_view),
+    # 🚗 OCPP 1.6-J Wallbox & Smart-Charging Endpunkte
+    path("wallboxes/", WallboxListCreateView.as_view()),
+    path("wallboxes/<uuid:pk>/", WallboxDetailView.as_view()),
+    path("wallboxes/<uuid:pk>/<str:action>/", WallboxRemoteActionView.as_view()),
+    path("wallboxes/<uuid:pk>/sessions/", WallboxSessionsView.as_view()),
 ]

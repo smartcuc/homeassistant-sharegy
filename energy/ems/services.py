@@ -130,9 +130,15 @@ def build_device_signals(user):
     pv_power = sum(max(values.get(d_id, 0), 0) for d_id in pv_device_ids)
     if pv_power <= 0:
         for dev in all_devices:
-            p_val = cache.get(f"device:{dev.id}:pv_power") or cache.get(f"device:{dev.id}:latest_power")
+            if dev.id in battery_device_ids or dev.id in grid_device_ids or dev.id in load_device_ids:
+                continue
+            p_val = cache.get(f"device:{dev.id}:pv_power")
+            if p_val is None and dev.id in pv_device_ids:
+                p_val = cache.get(f"device:{dev.id}:latest_power")
             if p_val is None:
-                m = DeviceLatestMetric.objects.filter(device=dev, metric_key__in=["power", "pv_power"]).first()
+                m = DeviceLatestMetric.objects.filter(device=dev, metric_key="pv_power").first()
+                if not m and dev.id in pv_device_ids:
+                    m = DeviceLatestMetric.objects.filter(device=dev, metric_key="power").first()
                 if m and m.value is not None:
                     p_val = float(m.value)
             if p_val is not None and float(p_val) > 0:
@@ -219,18 +225,15 @@ def build_device_signals(user):
         else:
             signals["battery"]["discharge"] = 0.0
     elif abs(bat_val) > 0.01:
-        # Wenn PV-Erzeugung den Hausverbrauch deutlich übersteigt, lädt der Speicher (Überschussladung)
-        if pv_power > (eff_load_est + 150):
+        # 1. Explizites Vorzeichen: Negativ bedeutet physikalisch immer Laden (z. B. Grid-Charging / Sungrow / Modbus / MQTT)
+        if bat_val < 0:
             signals["battery"]["charge"] = round(abs(bat_val), 2)
             signals["battery"]["discharge"] = 0.0
-        # Nacht / keine PV-Erzeugung: Speicher liefert Energie an das Haus (Entladung)
-        elif pv_power < 50:
-            signals["battery"]["discharge"] = round(abs(bat_val), 2)
-            signals["battery"]["charge"] = 0.0
-        # Standard-Vorzeichen: negativ = Laden, positiv = Entladen
-        elif bat_val < 0:
+        # 2. Wenn PV-Erzeugung den Hausverbrauch deutlich übersteigt, lädt der Speicher (Überschussladung)
+        elif pv_power > (eff_load_est + 150):
             signals["battery"]["charge"] = round(abs(bat_val), 2)
             signals["battery"]["discharge"] = 0.0
+        # 3. Nacht / keine PV-Erzeugung oder positives Vorzeichen: Speicher liefert Energie an das Haus (Entladung)
         else:
             signals["battery"]["discharge"] = round(abs(bat_val), 2)
             signals["battery"]["charge"] = 0.0

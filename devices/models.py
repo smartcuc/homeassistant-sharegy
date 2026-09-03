@@ -854,3 +854,8 @@ class CloudDeviceIntegration(models.Model):
     def __str__(self):
         return f"Cloud-Integration ({self.profile_id}) für Device #{self.device_id}"
 
+
+# ============================================================
+# ✅ OCPP 1.6-J SMART CHARGING & WALLBOX MODELS
+# ============================================================
+from .models_ocpp import ChargingStation, ChargingSession, ChargingRfidTag

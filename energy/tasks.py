@@ -79,3 +79,14 @@ def run_battery_arbitrage_dispatch_task():
     from producer.services_dispatch import dispatch_all_storage_systems
     return dispatch_all_storage_systems()
 
+
+@shared_task
+def run_smart_charging_dispatch_task():
+    """
+    Zyklischer Celery-Task:
+    Passt dynamisch die Ladeleistung (SetChargingProfile) aller angebundenen
+    OCPP-Wallboxen an den aktuellen PV-Überschuss oder Börsenstrompreis an.
+    """
+    from energy.services.services_smart_charging import run_all_wallboxes_smart_charging_cycle
+    return run_all_wallboxes_smart_charging_cycle()
+
