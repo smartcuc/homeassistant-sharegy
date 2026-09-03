@@ -122,6 +122,11 @@ export default function BatteryArbitrageCard() {
                         </div>
                         <p className="text-xs text-gray-500 mt-0.5">
                             {t("arbitrage.subtitle", "Intelligentes Laden des Hausspeichers bei Tiefstpreisen und Entladen in Spitzenzeiten.")}
+                            {data.status_message && (
+                                <span className="block text-[11px] text-indigo-600/90 font-medium mt-0.5">
+                                    ℹ️ {data.status_message}
+                                </span>
+                            )}
                         </p>
                     </div>
                 </div>

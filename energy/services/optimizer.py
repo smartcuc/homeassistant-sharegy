@@ -40,7 +40,27 @@ def get_optimizer_schedule(user, horizon_hours: int = 36) -> dict:
     else:
         base_feed_in_ct = 8.2  # Standard 8,2 ct/kWh
 
-    # 2. PV-Forecast laden
+    # 2. Reale Verfügbarkeit der Börsenpreise (SpotPrice) prüfen
+    latest_spot = SpotPrice.objects.filter(
+        timestamp__gte=start_hour
+    ).order_by("-timestamp").first()
+
+    today_remaining_hours = max(1, 24 - start_hour.hour)
+
+    if latest_spot:
+        latest_spot_tz = latest_spot.timestamp.astimezone(tz).replace(minute=0, second=0, microsecond=0)
+        available_hours = max(1, int((latest_spot_tz - start_hour).total_seconds() / 3600) + 1)
+        has_tomorrow_prices = (latest_spot_tz.date() > today)
+        effective_horizon = min(horizon_hours, available_hours)
+    else:
+        has_tomorrow_prices = False
+        effective_horizon = min(horizon_hours, today_remaining_hours)
+
+    # Mindestens 4 Stunden garantieren für die 4h-Fensteranalyse
+    effective_horizon = max(effective_horizon, min(4, horizon_hours))
+    end_hour = start_hour + timedelta(hours=effective_horizon)
+
+    # 3. PV-Forecast laden
     pv_forecast_map = defaultdict(float)
     has_pv = False
 
@@ -63,7 +83,7 @@ def get_optimizer_schedule(user, horizon_hours: int = 36) -> dict:
                     ts_local = row["timestamp"].astimezone(tz).replace(minute=0, second=0, microsecond=0)
                     pv_forecast_map[ts_local] += float(row["forecast_kwh"] or 0)
 
-    # 3. Börsenpreise (SpotPrice) laden
+    # 4. Börsenpreise (SpotPrice) laden
     spot_prices_map = {}
     spot_qs = SpotPrice.objects.filter(
         timestamp__gte=start_hour - timedelta(hours=1),
@@ -74,11 +94,11 @@ def get_optimizer_schedule(user, horizon_hours: int = 36) -> dict:
         ts_local = sp["timestamp"].astimezone(tz).replace(minute=0, second=0, microsecond=0)
         spot_prices_map[ts_local] = float(sp["price_eur_per_kwh"] or 0.10) * 100.0
 
-    # 4. 36h Timeline zusammenstellen & Opportunitätskosten berechnen
+    # 5. Timeline zusammenstellen & Opportunitätskosten berechnen
     timeline = []
     costs_list = []
 
-    for i in range(horizon_hours):
+    for i in range(effective_horizon):
         slot_dt = start_hour + timedelta(hours=i)
         hour_val = slot_dt.hour
 
@@ -139,7 +159,7 @@ def get_optimizer_schedule(user, horizon_hours: int = 36) -> dict:
             item["status_label"] = "Teuer (Vermeiden)"
 
     # =========================================================================
-    # 5. Multi-Dauer Sliding Window Search für 1h, 2h und 4h
+    # 6. Multi-Dauer Sliding Window Search für 1h, 2h und 4h
     # =========================================================================
     typical_devices = {
         "1h": {
@@ -166,20 +186,25 @@ def get_optimizer_schedule(user, horizon_hours: int = 36) -> dict:
 
     for dur_key, dur_hours in [("1h", 1), ("2h", 2), ("4h", 4)]:
         evaluated_windows = []
+        eval_range = max(1, len(timeline) - dur_hours + 1)
 
-        for idx in range(len(timeline) - dur_hours + 1):
-            slice_items = timeline[idx : idx + dur_hours]
+        for idx in range(eval_range):
+            actual_end_idx = min(len(timeline), idx + dur_hours)
+            slice_items = timeline[idx : actual_end_idx]
+            if not slice_items:
+                continue
+
             slice_costs = [it["effective_cost_ct"] for it in slice_items]
-            avg_window_cost = sum(slice_costs) / dur_hours
+            avg_window_cost = sum(slice_costs) / len(slice_items)
             solar_slots = sum(1 for it in slice_items if it["is_surplus"])
-            avg_solar_share = sum(it["solar_share_pct"] for it in slice_items) / dur_hours
+            avg_solar_share = sum(it["solar_share_pct"] for it in slice_items) / len(slice_items)
 
             start_item = slice_items[0]
             end_slot = slice_items[-1]
-            end_time_label = (start_hour + timedelta(hours=idx + dur_hours)).strftime("%H:00")
+            end_time_label = (start_hour + timedelta(hours=actual_end_idx)).strftime("%H:00")
 
             is_night = all(it["hour"] <= 6 or it["hour"] >= 22 for it in slice_items)
-            is_solar = solar_slots >= (dur_hours // 2 + 1) or avg_solar_share >= 50.0
+            is_solar = solar_slots >= (len(slice_items) // 2 + 1) or avg_solar_share >= 50.0
 
             source = "pv_surplus" if is_solar else ("spot_trough" if is_night else "grid_mixed")
 
@@ -194,6 +219,20 @@ def get_optimizer_schedule(user, horizon_hours: int = 36) -> dict:
                 "source": source,
                 "is_night": is_night,
                 "is_solar": is_solar,
+            })
+
+        if not evaluated_windows and timeline:
+            evaluated_windows.append({
+                "start_idx": 0,
+                "start_timestamp": timeline[0]["timestamp"],
+                "start_label": timeline[0]["time_label"],
+                "date_label": timeline[0]["date_label"],
+                "end_label": timeline[-1]["time_label"],
+                "avg_cost_ct": round(avg_cost, 2),
+                "solar_share_pct": 0,
+                "source": "grid_mixed",
+                "is_night": False,
+                "is_solar": False,
             })
 
         # Sortieren nach Kosten
@@ -221,7 +260,7 @@ def get_optimizer_schedule(user, horizon_hours: int = 36) -> dict:
         if best_night:
             night_text = f"🌙 Günstigster Nacht-Spotmarkt ({best_night['avg_cost_ct']:.1f} ct/kWh). Perfekt für verzögerte Gerätestarts oder E-Auto-Nachtladung."
         else:
-            night_text = "🌙 Kein reines Nachtfenster im verbleibenden Prognosezeitraum verfügbar."
+            night_text = "🌙 Kein reines Nachtfenster im verbleibenden Tageszeitraum verfügbar."
 
         worst_text = f"⚠️ Teuerste Spitzenlast ({worst_window['avg_cost_ct']:.1f} ct/kWh). Flexible Verbraucher vermeiden und Energie aus dem Speicher nutzen."
 
@@ -241,8 +280,22 @@ def get_optimizer_schedule(user, horizon_hours: int = 36) -> dict:
             "all_ranked_top3": evaluated_windows[:3],
         }
 
+    available_until_label = (
+        "heute 24:00 Uhr" if not has_tomorrow_prices
+        else f"morgen {(start_hour + timedelta(hours=effective_horizon)).strftime('%H:00')} Uhr"
+    )
+    status_message = (
+        "Börsenpreise bis heute 24:00 Uhr verfügbar · Neue Spotpreise für morgen ab ca. 13:00 Uhr"
+        if not has_tomorrow_prices
+        else "Vollständige 24h+ Börsenpreise bis morgen aktiv"
+    )
+
     return {
-        "horizon_hours": horizon_hours,
+        "horizon_hours": effective_horizon,
+        "data_horizon_hours": effective_horizon,
+        "has_tomorrow_prices": has_tomorrow_prices,
+        "available_until_label": available_until_label,
+        "status_message": status_message,
         "has_pv": has_pv,
         "tariff_type": tariff_type,
         "base_feed_in_ct": base_feed_in_ct,

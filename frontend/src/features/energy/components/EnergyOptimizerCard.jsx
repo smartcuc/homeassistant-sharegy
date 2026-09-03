@@ -235,9 +235,18 @@ export default function EnergyOptimizerCard() {
             ========================================================= */}
             <div className="space-y-3 pt-2">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-indigo-200/80">
-                    <span className="font-bold flex items-center gap-1.5 text-white">
-                        <span>📊</span> {t("energy.timeline_title", "Effektive Kostenkurve & Zeitfenster der nächsten 24h")}
-                    </span>
+                    <div className="space-y-0.5">
+                        <div className="font-bold flex items-center gap-1.5 text-white">
+                            <span>📊</span> {data.has_tomorrow_prices 
+                                ? t("energy.timeline_title_extended", "Effektive Kostenkurve & Zeitfenster (heute + morgen)") 
+                                : t("energy.timeline_title_today", "Effektive Kostenkurve & Zeitfenster für heute")}
+                        </div>
+                        {data.status_message && (
+                            <div className="text-[10px] text-indigo-300/80 font-normal">
+                                ℹ️ {data.status_message}
+                            </div>
+                        )}
+                    </div>
                     <div className="flex flex-wrap items-center gap-3 text-[11px]">
                         <span className="flex items-center gap-1">
                             <span className="w-2.5 h-2.5 rounded-sm bg-emerald-400 inline-block" /> {t("energy.legend_free_pv", "0 ct (Solar-Überschuss)")}
@@ -336,7 +345,7 @@ export default function EnergyOptimizerCard() {
                             <span>★</span>
                             <span>{t("optimizer.recommended_window", { duration, start: best.start_label, end: best.end_label, defaultValue: `Empfohlenes ${duration}-Fenster: ${best.start_label} – ${best.end_label} Uhr` })}</span>
                         </span>
-                        <span>{t("optimizer.in_24h", "24-Stunden Prognose")}</span>
+                        <span>{data.has_tomorrow_prices ? `Bis morgen (${timeline[timeline.length - 1]?.time_label || "24:00"} Uhr)` : `Bis heute 24:00 Uhr (${timeline.length}h)`}</span>
                     </div>
                 </div>
             </div>

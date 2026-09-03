@@ -49,14 +49,32 @@ def calculate_battery_arbitrage(user, horizon_hours: int = 36) -> dict:
     current_energy_kwh = capacity_kwh * (current_soc_pct / 100.0)
     needed_to_full_kwh = max(0.0, (capacity_kwh * (max_soc_pct / 100.0)) - current_energy_kwh)
 
-    # 2. Tarif & Spot-Preise laden
+    # 2. Tarif & Reale Verfügbarkeit der Spot-Preise laden
     today = now.date()
     tariff = get_home_tariff(home, today) if home else None
     tariff_type = tariff.tariff_type if tariff else HomeTariff.TARIFF_DYNAMIC
 
+    latest_spot = SpotPrice.objects.filter(
+        timestamp__gte=start_hour
+    ).order_by("-timestamp").first()
+
+    today_remaining_hours = max(1, 24 - start_hour.hour)
+
+    if latest_spot:
+        latest_spot_tz = latest_spot.timestamp.astimezone(tz).replace(minute=0, second=0, microsecond=0)
+        available_hours = max(1, int((latest_spot_tz - start_hour).total_seconds() / 3600) + 1)
+        has_tomorrow_prices = (latest_spot_tz.date() > today)
+        effective_horizon = min(horizon_hours, available_hours)
+    else:
+        has_tomorrow_prices = False
+        effective_horizon = min(horizon_hours, today_remaining_hours)
+
+    effective_horizon = max(effective_horizon, min(4, horizon_hours))
+    end_hour = start_hour + timedelta(hours=effective_horizon)
+
     spot_prices_qs = SpotPrice.objects.filter(
-        timestamp__gte=start_hour,
-        timestamp__lte=end_hour,
+        timestamp__gte=start_hour - timedelta(hours=1),
+        timestamp__lte=end_hour + timedelta(hours=1),
     ).order_by("timestamp")
 
     spot_map = {}
@@ -83,7 +101,7 @@ def calculate_battery_arbitrage(user, horizon_hours: int = 36) -> dict:
     curr = start_hour
     hour_idx = 0
 
-    while curr < end_hour and hour_idx < horizon_hours:
+    while curr < end_hour and hour_idx < effective_horizon:
         base_spot_ct = spot_map.get(curr, 8.5 + (4.0 if 17 <= curr.hour <= 21 else (-3.0 if 1 <= curr.hour <= 5 else 0.0)))
         if tariff_type == HomeTariff.TARIFF_DYNAMIC:
             eff_ct = calculate_effective_price(home, curr, base_spot_ct) if home else (base_spot_ct + 17.59)
@@ -217,6 +235,16 @@ def calculate_battery_arbitrage(user, horizon_hours: int = 36) -> dict:
             "description": f"Höchster Bezugspreis um {discharge_window_label} ({avg_discharge_price_ct:.1f} ct/kWh). Decke Spitzenlasten aus dem PV-Ertrag oder Batteriespeicher.",
         })
 
+    available_until_label = (
+        "heute 24:00 Uhr" if not has_tomorrow_prices
+        else f"morgen {(start_hour + timedelta(hours=effective_horizon)).strftime('%H:00')} Uhr"
+    )
+    status_message = (
+        "Börsenpreise bis heute 24:00 Uhr verfügbar · Neue Spotpreise für morgen ab ca. 13:00 Uhr"
+        if not has_tomorrow_prices
+        else "Vollständige 24h+ Börsenpreise bis morgen aktiv"
+    )
+
     return {
         "has_battery": has_batt,
         "battery_name": batt_params.get("battery_name", "Hausspeicher"),
@@ -235,4 +263,8 @@ def calculate_battery_arbitrage(user, horizon_hours: int = 36) -> dict:
         "projected_yearly_savings_eur": projected_yearly_savings_eur,
         "advice": advice,
         "timeline": slots,
+        "has_tomorrow_prices": has_tomorrow_prices,
+        "available_until_label": available_until_label,
+        "status_message": status_message,
+        "data_horizon_hours": effective_horizon,
     }
