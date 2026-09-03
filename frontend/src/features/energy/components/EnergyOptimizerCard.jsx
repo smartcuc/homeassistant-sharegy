@@ -64,41 +64,50 @@ export default function EnergyOptimizerCard() {
     return (
         <div className="bg-linear-to-br from-slate-900 via-indigo-950 to-slate-900 border border-indigo-900/60 rounded-3xl p-6 shadow-xl text-white space-y-6">
             {/* =========================================================
-                HEADER & DURATION SELECTOR
+                HEADER & DURATION SELECTOR (ALIGNED WITH ARBITRAGE CARD)
             ========================================================= */}
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-indigo-800/40 pb-5">
-                <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-2xl">🧠</span>
-                        <h2 className="text-lg sm:text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
-                            {t("energy.optimizer_title", "Smart Energy Optimizer")}
-                        </h2>
-                        <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0">
-                            {t("energy.live_ai_plan", "Live KI-Fahrplan")}
-                        </span>
+            <div className="space-y-4 border-b border-indigo-800/40 pb-5">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-xl shadow-2xs shrink-0">
+                        🧠
                     </div>
-                    <p className="text-xs text-indigo-200/70 mt-1">
-                        {t("energy.optimizer_subtitle", "Optimale Lade- und Betriebszeiten berechnet aus PV-Erzeugungsprognose und Börsenstrompreisen.")}
-                    </p>
+                    <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                            <h2 className="text-base font-bold text-white whitespace-nowrap">
+                                {t("energy.optimizer_title", "Smart Energy Optimizer")}
+                            </h2>
+                            <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0">
+                                {t("energy.live_ai_plan", "Live KI-Fahrplan")}
+                            </span>
+                        </div>
+                        <p className="text-xs text-indigo-200/70 mt-0.5 line-clamp-2 sm:line-clamp-none">
+                            {t("energy.optimizer_subtitle", "Optimale Lade- und Betriebszeiten berechnet aus PV-Erzeugungsprognose und Börsenstrompreisen.")}
+                        </p>
+                    </div>
                 </div>
 
-                {/* Duration Pills */}
-                <div className="flex flex-wrap items-center bg-slate-800/90 p-1 rounded-2xl border border-indigo-700/50 shadow-inner gap-1 shrink-0">
-                    {durationTabs.map((tab) => (
-                        <button
-                            key={tab.key}
-                            type="button"
-                            onClick={() => handleDurationClick(tab)}
-                            className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer shrink-0 ${duration === tab.key
-                                ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/40"
-                                : "text-indigo-200/70 hover:text-white hover:bg-slate-700/50"
-                                }`}
-                        >
-                            <span className="text-xs">{tab.icon}</span>
-                            <span>{tab.label}</span>
-                            {tab.isProGated && !isPro && <ProBadge size="xs" className="shrink-0" />}
-                        </button>
-                    ))}
+                {/* Duration Pills Toolbar */}
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                    <span className="text-[11px] font-semibold text-indigo-200/70">
+                        Geplante Laufzeit:
+                    </span>
+                    <div className="flex flex-wrap items-center bg-slate-800/90 p-1 rounded-2xl border border-indigo-700/50 shadow-inner gap-1">
+                        {durationTabs.map((tab) => (
+                            <button
+                                key={tab.key}
+                                type="button"
+                                onClick={() => handleDurationClick(tab)}
+                                className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer shrink-0 ${duration === tab.key
+                                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/40"
+                                    : "text-indigo-200/70 hover:text-white hover:bg-slate-700/50"
+                                    }`}
+                            >
+                                <span className="text-xs">{tab.icon}</span>
+                                <span>{tab.label}</span>
+                                {tab.isProGated && !isPro && <ProBadge size="xs" className="shrink-0" />}
+                            </button>
+                        ))}
+                    </div>
                 </div>
             </div>
 
