@@ -309,11 +309,19 @@ def ingest_metric_payload(
         raw_unit = unit_map.get(metric_key, "")
         unit = _infer_canonical_unit(metric_key, raw_unit, config=config)
 
-        # Lead-Wirkleistung erkennen
-        is_lead = (
-            (configured_lead_key and metric_key == configured_lead_key)
-            or (not configured_lead_key and metric_key.lower() in LEAD_POWER_KEYS)
-        )
+        # Lead-Metrik erkennen (inkl. Aliasse für Temperatur, Leistung etc.)
+        is_lead = False
+        if configured_lead_key:
+            cfg_lower = configured_lead_key.lower()
+            m_lower = metric_key.lower()
+            if m_lower == cfg_lower or m_lower in ["value", "val"]:
+                is_lead = True
+            elif "temp" in cfg_lower and "temp" in m_lower:
+                is_lead = True
+            elif ("power" in cfg_lower or cfg_lower in LEAD_POWER_KEYS) and (m_lower in LEAD_POWER_KEYS or "power" in m_lower):
+                is_lead = True
+        else:
+            is_lead = (metric_key.lower() in LEAD_POWER_KEYS) or (metric_key.lower() in ["value", "val"])
 
         # Falls Lead-Metrik: Sofort in Redis Live-Cache spiegeln (Echtzeit UI)
         if is_lead:

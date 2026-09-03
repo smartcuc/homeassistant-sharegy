@@ -465,23 +465,48 @@ def device_dashboard_values(request):
 
         dev_metrics = device_metrics_map.get(d.id, {})
 
-        # Live-Wert ermitteln
+        # Live-Wert ermitteln mit intelligentem Alias-Matching
         lead_val = None
         if lead_key in dev_metrics and dev_metrics[lead_key]["value"] is not None:
             lead_val = dev_metrics[lead_key]["value"]
-        elif values.get(d.id) is not None:
-            lead_val = values.get(d.id)
-        elif dev_metrics:
-            first_m = next(iter(dev_metrics.values()), None)
-            if first_m:
-                lead_val = first_m.get("value")
+            top_unit = dev_metrics[lead_key]["unit"] or top_unit
+        else:
+            # Suche nach passenden Synonymen in dev_metrics
+            matched_entry = None
+            if "temp" in lead_key.lower():
+                matched_entry = next((m for k, m in dev_metrics.items() if "temp" in k.lower() and m["value"] is not None), None)
+            elif "power" in lead_key.lower() or lead_key in POWER_KEYS:
+                matched_entry = next((m for k, m in dev_metrics.items() if (k.lower() in POWER_KEYS or "power" in k.lower()) and m["value"] is not None), None)
+
+            if matched_entry:
+                lead_val = matched_entry["value"]
+                top_unit = matched_entry["unit"] or top_unit
+            elif values.get(d.id) is not None:
+                lead_val = values.get(d.id)
+            elif dev_metrics:
+                first_m = next((m for m in dev_metrics.values() if m.get("value") is not None), None)
+                if first_m:
+                    lead_val = first_m.get("value")
+                    top_unit = first_m.get("unit") or top_unit
 
         # Sparkline-Punkte für die spezifische Metrik des Geräts laden
         is_pwr = lead_key.lower() in POWER_KEYS
         if is_pwr:
             metric_filter = Q(metric_key__in=POWER_KEYS) | Q(metric_key__isnull=True)
         else:
-            metric_filter = Q(metric_key=lead_key) | Q(metric_key__iexact=lead_key)
+            alias_keys = [lead_key, lead_key.lower()]
+            if "temp" in lead_key.lower():
+                alias_keys.extend(["temperature", "temp", "device_temp", "bwwp_temp", "water_temp", "value", "val"])
+            elif "soc" in lead_key.lower():
+                alias_keys.extend(["soc", "battery_soc", "battery_level", "value", "val"])
+            elif "volt" in lead_key.lower():
+                alias_keys.extend(["voltage", "voltage_l1", "value", "val"])
+            elif "curr" in lead_key.lower():
+                alias_keys.extend(["current", "current_l1", "value", "val"])
+            else:
+                alias_keys.extend(["value", "val"])
+
+            metric_filter = Q(metric_key__in=alias_keys) | Q(metric_key__iexact=lead_key)
 
         sparkline_pts = list(
             DeviceMetric1m.objects.filter(

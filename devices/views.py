@@ -88,8 +88,9 @@ def device_metrics(request, device_id):
     data = [
         {
             "timestamp": m.timestamp,
-            "metric": m.metric,
+            "metric": m.metric_key,
             "value": m.value,
+            "unit": m.unit,
         }
         for m in metrics
     ]

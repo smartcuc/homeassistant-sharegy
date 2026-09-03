@@ -124,7 +124,18 @@ def get_device_timeseries_dataset(device, range_str="24h", requested_metric=None
         else None
     )
 
-    effective_metric = requested_metric or lead_key or "power"
+    # Vorhandene Metrik-Keys des Geräts ermitteln
+    existing_keys = set(
+        DeviceLatestMetric.objects.filter(device_id=device.id).values_list("metric_key", flat=True)
+    )
+
+    effective_metric = requested_metric or lead_key
+    if not effective_metric:
+        if existing_keys:
+            effective_metric = next(iter(existing_keys))
+        else:
+            effective_metric = "power"
+
     is_power_query = (effective_metric.lower() in POWER_KEYS)
 
     if is_power_query:
@@ -133,8 +144,24 @@ def get_device_timeseries_dataset(device, range_str="24h", requested_metric=None
             possible_keys.append(lead_key)
         metric_filter = Q(metric_key__in=possible_keys) | Q(metric_key__isnull=True)
     else:
-        # Exakter Filter für Nicht-Leistungs-Metriken (Temperatur, Spannung, Strom, SoC etc.)
-        metric_filter = Q(metric_key=effective_metric) | Q(metric_key__iexact=effective_metric)
+        # Flexible Alias-Suche: z.B. temperature <-> bwwp_temp <-> temp <-> value
+        alias_candidates = [effective_metric, effective_metric.lower()]
+        if "temp" in effective_metric.lower():
+            alias_candidates.extend(["temperature", "temp", "device_temp", "bwwp_temp", "water_temp", "sensor_temp", "value", "val"])
+        elif "soc" in effective_metric.lower():
+            alias_candidates.extend(["soc", "battery_soc", "battery_level", "value", "val"])
+        elif "volt" in effective_metric.lower():
+            alias_candidates.extend(["voltage", "voltage_l1", "value", "val"])
+        elif "curr" in effective_metric.lower() or "amper" in effective_metric.lower():
+            alias_candidates.extend(["current", "current_l1", "value", "val"])
+        else:
+            alias_candidates.extend(["value", "val"])
+
+        matched_keys = [k for k in alias_candidates if k in existing_keys or k == effective_metric]
+        if not matched_keys:
+            matched_keys = list(set(alias_candidates))
+
+        metric_filter = Q(metric_key__in=matched_keys) | Q(metric_key__iexact=effective_metric)
 
     # Determine Metric Unit & Display Name
     unit = "W"
@@ -146,9 +173,11 @@ def get_device_timeseries_dataset(device, range_str="24h", requested_metric=None
         if def_obj.unit:
             unit = def_obj.unit
 
-    latest_m = DeviceLatestMetric.objects.filter(device_id=device.id, metric_key=effective_metric).first()
+    latest_m = DeviceLatestMetric.objects.filter(device_id=device.id).filter(metric_filter).order_by("-timestamp").first()
     if latest_m and latest_m.unit:
         unit = latest_m.unit
+    elif "temp" in effective_metric.lower():
+        unit = "°C"
 
     # 3. Model Tier Selection based on Duration
     if delta <= timedelta(hours=3):
