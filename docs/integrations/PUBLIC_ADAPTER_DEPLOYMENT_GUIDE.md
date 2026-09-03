@@ -49,11 +49,11 @@ git subtree push --prefix integrations/iobroker.sharegy https://github.com/smart
 
 ---
 
-## 🏡 2. Home Assistant Integration (`ha-sharegy` / HACS)
+## 🏡 2. Home Assistant Integration (`homeassistant-sharegy` / HACS)
 
 ### Schritt 1: Leeres Public-Repo auf GitHub erstellen
 1. Auf GitHub ein neues Repository anlegen:
-   - **Repository Name**: `ha-sharegy` (oder `homeassistant-sharegy`)
+   - **Repository Name**: `homeassistant-sharegy`
    - **Sichtbarkeit**: `Public`
    - ⚠️ **Wichtig**: *Add a README*, *.gitignore* oder *license* **nicht** anhaken.
 
@@ -61,18 +61,18 @@ git subtree push --prefix integrations/iobroker.sharegy https://github.com/smart
 Führe im Projekt-Terminal folgenden Befehl aus:
 
 ```bash
-git subtree push --prefix integrations/homeassistant https://github.com/smartcuc/ha-sharegy.git main
+git subtree push --prefix integrations/homeassistant https://github.com/smartcuc/homeassistant-sharegy.git main
 ```
 
 ### Schritt 3: Spätere Updates synchronisieren
 ```bash
-git subtree push --prefix integrations/homeassistant https://github.com/smartcuc/ha-sharegy.git main
+git subtree push --prefix integrations/homeassistant https://github.com/smartcuc/homeassistant-sharegy.git main
 ```
 
 ### 📥 Installation durch Home Assistant-Nutzer (HACS):
 1. In Home Assistant zu **HACS** $\rightarrow$ **Integrationen** navigieren.
-2. Oben rechts auf das Drei-Punkte-Menü $\rightarrow$ **Benutzerdefiniertes Repository hinzufügen** klicken.
-3. Repository: `https://github.com/smartcuc/ha-sharegy` | Typ: `Integration`.
+2. Oben rechts auf das Drei-Punkte-Menü $\rightarrow$ **Benutzerdefinierte Repositories** klicken.
+3. Repository: `https://github.com/smartcuc/homeassistant-sharegy` | Typ: `Integration`.
 4. Auf **Herunterladen** klicken und Home Assistant neu starten.
 
 ---
@@ -83,7 +83,7 @@ Du kannst dir in deiner lokalen Git-Konfiguration kurze Aliase anlegen:
 
 ```bash
 git config alias.push-iob "subtree push --prefix integrations/iobroker.sharegy https://github.com/smartcuc/ioBroker.sharegy.git main"
-git config alias.push-ha "subtree push --prefix integrations/homeassistant https://github.com/smartcuc/ha-sharegy.git main"
+git config alias.push-ha "subtree push --prefix integrations/homeassistant https://github.com/smartcuc/homeassistant-sharegy.git main"
 ```
 
 Danach reicht zukünftig einfach:
