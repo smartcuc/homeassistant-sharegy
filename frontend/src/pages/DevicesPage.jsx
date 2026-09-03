@@ -447,6 +447,8 @@ export default function DevicesPage() {
     }
 
     const [filterText, setFilterText] = useState("");
+    const [selectedFloor, setSelectedFloor] = useState("all");
+    const [selectedRoom, setSelectedRoom] = useState("all");
 
     const devicesQuery = useQuery({
         queryKey: ["devices"],
@@ -583,6 +585,34 @@ export default function DevicesPage() {
 
     }, [merged]);
 
+    const availableFloorsList = useMemo(() => {
+        const map = new Map();
+        (structure?.floors || []).forEach(f => {
+            if (f.name) map.set(f.name, f);
+        });
+        merged.forEach(d => {
+            const f = d.config?.floor;
+            if (f?.name && !map.has(f.name)) {
+                map.set(f.name, f);
+            }
+        });
+        return Array.from(map.values()).sort((a, b) => (a.name || "").localeCompare(b.name || "", "de"));
+    }, [structure?.floors, merged]);
+
+    const availableRoomsList = useMemo(() => {
+        const map = new Map();
+        (structure?.rooms || []).forEach(r => {
+            if (r.name) map.set(r.name, r);
+        });
+        merged.forEach(d => {
+            const r = d.config?.room;
+            if (r?.name && !map.has(r.name)) {
+                map.set(r.name, r);
+            }
+        });
+        return Array.from(map.values()).sort((a, b) => (a.name || "").localeCompare(b.name || "", "de"));
+    }, [structure?.rooms, merged]);
+
     /* ✅ FILTER */
 
     const filtered = useMemo(() => {
@@ -614,6 +644,20 @@ export default function DevicesPage() {
             );
         }
 
+        if (selectedFloor !== "all") {
+            list = list.filter(d => {
+                const f = d.config?.floor;
+                return (f?.name || "Ohne Etage") === selectedFloor || String(f?.id || "") === selectedFloor;
+            });
+        }
+
+        if (selectedRoom !== "all") {
+            list = list.filter(d => {
+                const r = d.config?.room;
+                return (r?.name || "Ohne Raum") === selectedRoom || String(r?.id || "") === selectedRoom;
+            });
+        }
+
         list = list.filter(d => {
 
             if (d.config?.is_grid_source) {
@@ -634,6 +678,8 @@ export default function DevicesPage() {
         merged,
         filterText,
         statusFilter,
+        selectedFloor,
+        selectedRoom,
         activeRoles,
     ]);
 
@@ -841,16 +887,61 @@ export default function DevicesPage() {
             {/* SYSTEM READINESS & SETUP HEALTH (OMI-TEST) */}
             <SystemReadinessCard onOpenAddDevice={() => setAddOpen(true)} className="mb-6" />
 
-            {/* FILTER BAR */}
-            <div className="mb-3">
-
+            {/* SEARCH & STRUCTURE SELECT FILTERS */}
+            <div className="flex flex-wrap items-center gap-3 mb-3">
                 <input
                     placeholder={t("devices.search_placeholder", "🔍 Gerät suchen...")}
                     value={filterText}
                     onChange={(e) => setFilterText(e.target.value)}
-                    className="border px-3 py-2 rounded w-64"
+                    className="border border-gray-200 px-3.5 py-1.5 rounded-xl text-xs font-medium w-64 bg-white shadow-2xs focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
                 />
 
+                {/* Etagen-Filter */}
+                <div className="flex items-center gap-1.5 bg-white border border-gray-200 px-3 py-1.5 rounded-xl shadow-2xs">
+                    <span className="text-xs font-semibold text-gray-500">🏢 Etage:</span>
+                    <select
+                        value={selectedFloor}
+                        onChange={(e) => setSelectedFloor(e.target.value)}
+                        className="text-xs font-bold text-gray-800 bg-transparent border-none focus:outline-hidden cursor-pointer"
+                    >
+                        <option value="all">{t("devices.all_floors", "Alle Etagen")}</option>
+                        {availableFloorsList.map((f) => (
+                            <option key={f.id || f.name} value={f.name}>
+                                {f.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                {/* Räume-Filter */}
+                <div className="flex items-center gap-1.5 bg-white border border-gray-200 px-3 py-1.5 rounded-xl shadow-2xs">
+                    <span className="text-xs font-semibold text-gray-500">🚪 Raum:</span>
+                    <select
+                        value={selectedRoom}
+                        onChange={(e) => setSelectedRoom(e.target.value)}
+                        className="text-xs font-bold text-gray-800 bg-transparent border-none focus:outline-hidden cursor-pointer"
+                    >
+                        <option value="all">{t("devices.all_rooms", "Alle Räume")}</option>
+                        {availableRoomsList.map((r) => (
+                            <option key={r.id || r.name} value={r.name}>
+                                {r.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                {(selectedFloor !== "all" || selectedRoom !== "all" || filterText) && (
+                    <button
+                        onClick={() => {
+                            setSelectedFloor("all");
+                            setSelectedRoom("all");
+                            setFilterText("");
+                        }}
+                        className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition cursor-pointer px-2 py-1"
+                    >
+                        ✕ Filter zurücksetzen
+                    </button>
+                )}
             </div>
 
             <div className="flex flex-wrap gap-2 mb-6">
