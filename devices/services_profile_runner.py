@@ -259,6 +259,62 @@ def _generate_mock_payload(profile_id: str, credentials: dict) -> dict:
                 "STORAGE": {"currentPower": battery_kw, "chargeLevel": round(random.uniform(70.0, 90.0), 1)},
             }
         }
+    elif profile_id == "deye_solarman":
+        return {
+            "dataList": [
+                {"key": "APo_t1", "value": pv_kw * 1000},
+                {"key": "TotalGridPower", "value": grid_kw * 1000},
+                {"key": "TotalLoadPower", "value": load_kw * 1000},
+                {"key": "B_P1", "value": battery_kw * 1000},
+                {"key": "SOC", "value": round(random.uniform(70.0, 95.0), 1)},
+            ]
+        }
+    elif profile_id == "huawei_fusionsolar":
+        return {
+            "data": [
+                {
+                    "dataItemMap": {
+                        "inverter_power": pv_kw,
+                        "grid_power": grid_kw,
+                        "use_power": load_kw,
+                        "battery_power": battery_kw,
+                        "battery_soc": round(random.uniform(65.0, 92.0), 1),
+                    }
+                }
+            ]
+        }
+    elif profile_id == "goodwe_sems":
+        return {
+            "data": {
+                "kpi": {
+                    "pac": pv_kw * 1000,
+                    "grid_power": grid_kw * 1000,
+                    "load_power": load_kw * 1000,
+                    "battery_power": battery_kw * 1000,
+                    "soc": round(random.uniform(60.0, 90.0), 1),
+                }
+            }
+        }
+    elif profile_id == "solis_cloud":
+        return {
+            "data": {
+                "power": pv_kw,
+                "gridPurchasedPower": grid_kw,
+                "familyLoadPower": load_kw,
+                "batteryPower": battery_kw,
+                "batteryPercent": round(random.uniform(65.0, 95.0), 1),
+            }
+        }
+    elif profile_id == "victron_vrm":
+        return {
+            "records": {
+                "solar_yield": pv_kw * 1000,
+                "grid_power": grid_kw * 1000,
+                "consumption": load_kw * 1000,
+                "battery_power": battery_kw * 1000,
+                "soc": round(random.uniform(70.0, 95.0), 1),
+            }
+        }
     else:
         return {
             "pv_power": pv_kw * 1000,

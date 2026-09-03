@@ -1,0 +1,75 @@
+{
+  "id": "victron_vrm",
+  "name": "Victron Energy VRM Portal API",
+  "vendor": "Victron",
+  "category": "inverter_hybrid",
+  "protocol": "http_cloud",
+  "description": "Cloud-Schnittstelle für Victron MultiPlus-II, Quattro, Cerbo GX und SmartSolar via VRM Portal API.",
+  "help": {
+    "de": "1. Logge dich im Victron VRM Portal ein (vrm.victronenergy.com).\n2. Gehe zu 'Preferences' -> 'Personal access tokens' und generiere einen Token.\n3. Deine Installation-ID (Site ID) findest du in der URL deiner VRM-Anlage.",
+    "en": "1. Log into the Victron VRM Portal (vrm.victronenergy.com).\n2. Go to 'Preferences' -> 'Personal access tokens' and generate a token.\n3. Find your Installation ID (Site ID) in the URL of your VRM site."
+  },
+  "connection": {
+    "auth_type": "api_key_header",
+    "default_base_url": "https://vrmapi.victronenergy.com/v2",
+    "polling_interval_seconds": 60,
+    "fields": [
+      {
+        "key": "access_token",
+        "label": "VRM Personal Access Token",
+        "type": "password",
+        "required": true,
+        "placeholder": "z. B. vrm_pat_..."
+      },
+      {
+        "key": "site_id",
+        "label": "VRM Installation ID (Site ID)",
+        "type": "string",
+        "required": true,
+        "placeholder": "z. B. 123456"
+      }
+    ]
+  },
+  "requests": {
+    "telemetry": {
+      "method": "GET",
+      "endpoint": "/installations/{{site_id}}/stats",
+      "headers": {
+        "X-Authorization": "Token {{access_token}}"
+      }
+    }
+  },
+  "metrics_mapping": {
+    "pv_power_w": {
+      "jsonpath": "$.records.solar_yield",
+      "scale": 1.0,
+      "type": "float",
+      "fallback": 0.0
+    },
+    "grid_power_w": {
+      "jsonpath": "$.records.grid_power",
+      "scale": 1.0,
+      "type": "float",
+      "fallback": 0.0
+    },
+    "load_power_w": {
+      "jsonpath": "$.records.consumption",
+      "scale": 1.0,
+      "type": "float",
+      "fallback": 0.0
+    },
+    "battery_power_w": {
+      "jsonpath": "$.records.battery_power",
+      "scale": 1.0,
+      "type": "float",
+      "fallback": 0.0
+    },
+    "battery_soc": {
+      "jsonpath": "$.records.soc",
+      "scale": 1.0,
+      "type": "float",
+      "unit": "%",
+      "fallback": null
+    }
+  }
+}

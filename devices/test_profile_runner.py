@@ -214,4 +214,32 @@ class ProfileRunnerTestCase(TestCase):
         self.assertIn("pv_power_w", res["live_metrics"])
         self.assertIn("daily_generation_kwh", res["live_metrics"])
 
+    def test_10_load_and_simulate_new_manufacturer_profiles(self):
+        """Testet Deye, Huawei, GoodWe, Solis und Victron Profile."""
+        new_profiles = [
+            ("deye_solarman", "Deye", {"app_id": "test_app", "device_sn": "2305149812"}),
+            ("huawei_fusionsolar", "Huawei", {"system_code": "test_user", "plant_code": "NE=123"}),
+            ("goodwe_sems", "GoodWe", {"account": "test@goodwe.com", "power_station_id": "ps_123"}),
+            ("solis_cloud", "Solis", {"key_id": "solis_123", "station_id": "st_123"}),
+            ("victron_vrm", "Victron", {"access_token": "vrm_tok_123", "site_id": "12345"}),
+        ]
+
+        available = [p["id"] for p in list_available_profiles()]
+
+        for pid, vendor, creds in new_profiles:
+            self.assertIn(pid, available)
+            prof = load_profile(pid)
+            self.assertEqual(prof["id"], pid)
+            self.assertEqual(prof["vendor"], vendor)
+            self.assertIn("metrics_mapping", prof)
+            self.assertIn("pv_power_w", prof["metrics_mapping"])
+            self.assertIn("battery_soc", prof["metrics_mapping"])
+
+            res = test_cloud_credentials(pid, creds)
+            self.assertEqual(res["status"], "success")
+            self.assertTrue(res["simulated"])
+            self.assertIn("live_metrics", res)
+            self.assertIn("pv_power_w", res["live_metrics"])
+
+
 

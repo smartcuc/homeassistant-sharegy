@@ -1,0 +1,68 @@
+id: "solis_cloud"
+name: "SolisCloud OpenAPI"
+vendor: "Solis"
+category: "inverter_hybrid"
+protocol: "http_cloud"
+description: "Cloud-Schnittstelle für Solis RHI, S5, S6 Hybrid-Wechselrichter via SolisCloud OpenAPI v1."
+
+help:
+  de: "1. Registriere dich im SolisCloud Entwicklerportal (soliscloud.com).\n2. Erstelle unter 'API Management' eine Key-ID und ein Key-Secret.\n3. Trage deine Anlagen-ID (Station ID) oder Wechselrichter-SN ein."
+  en: "1. Register in the SolisCloud Developer Portal (soliscloud.com).\n2. Generate a Key ID and Key Secret under 'API Management'.\n3. Enter your Station ID or Inverter SN."
+
+connection:
+  auth_type: "api_key_header"
+  default_base_url: "https://api.soliscloud.com:13333"
+  polling_interval_seconds: 60
+  fields:
+    - key: "key_id"
+      label: "Solis Key ID"
+      type: "string"
+      required: true
+      placeholder: "z. B. 130024981023"
+    - key: "key_secret"
+      label: "Solis Key Secret"
+      type: "password"
+      required: true
+    - key: "station_id"
+      label: "SolisCloud Station ID"
+      type: "string"
+      required: true
+      placeholder: "z. B. 1234567890123"
+
+requests:
+  telemetry:
+    method: "POST"
+    endpoint: "/v1/api/stationDetail"
+    headers:
+      "Content-Type": "application/json"
+      "KeyId": "{{key_id}}"
+    body:
+      id: "{{station_id}}"
+
+metrics_mapping:
+  pv_power_w:
+    jsonpath: "$.data.power"
+    scale: 1000.0
+    type: "float"
+    fallback: 0.0
+  grid_power_w:
+    jsonpath: "$.data.gridPurchasedPower"
+    scale: 1000.0
+    type: "float"
+    fallback: 0.0
+  load_power_w:
+    jsonpath: "$.data.familyLoadPower"
+    scale: 1000.0
+    type: "float"
+    fallback: 0.0
+  battery_power_w:
+    jsonpath: "$.data.batteryPower"
+    scale: 1000.0
+    type: "float"
+    fallback: 0.0
+  battery_soc:
+    jsonpath: "$.data.batteryPercent"
+    scale: 1.0
+    type: "float"
+    unit: "%"
+    fallback: null

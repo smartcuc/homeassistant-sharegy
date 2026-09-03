@@ -609,6 +609,14 @@
     "avg_green_share": "🔋 Średni udział zielonej energii",
     "legend": "🟢 < 250g (Zielony) · 🟡 250-420g · 🔴 > 420g"
   },
+  "selftest": {
+    "title": "1-Kliknięcie Autodiagnostyka Urządzenia",
+    "step1": "Sprawdzenie połączenia i opóźnień",
+    "step2": "Pobieranie telemetrii na żywo",
+    "step3": "Dwukierunkowy kanał sterowania",
+    "retry": "Sprawdź ponownie",
+    "done": "Gotowe"
+  },
   "storage_system": {
     "nominal_capacity": "Pojemność nominalna (kWh)",
     "specs": "{{cap}} kWh Pojemność nominalna · maks. {{power}} kW",

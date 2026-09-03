@@ -46,6 +46,7 @@ from .views_profiles import (
     get_cloud_integration_status_view,
 )
 from .views_sungrow_oauth import sungrow_oauth_start
+from .views_self_test import device_self_test_view, device_self_test_simulate_view
 
 
 urlpatterns = [
@@ -77,6 +78,9 @@ urlpatterns = [
     path("sungrow/auth-url/", sungrow_oauth_start, name="sungrow_oauth_start"),
     path("<int:device_id>/cloud/poll-now/", poll_cloud_device_now_view, name="device_cloud_poll_now"),
     path("<int:device_id>/cloud/status/", get_cloud_integration_status_view, name="device_cloud_status"),
+    # 🧪 1-KLICK HARDWARE-SELBSTTEST & DIAGNOSE
+    path("<int:device_id>/self-test/", device_self_test_view, name="device_self_test"),
+    path("self-test/simulate/", device_self_test_simulate_view, name="device_self_test_simulate"),
 
     path("sankey/", sankey_data),
     path("homes/", list_homes),

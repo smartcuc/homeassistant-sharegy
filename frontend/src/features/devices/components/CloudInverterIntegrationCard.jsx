@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { apiFetch } from "../../../api/client";
+import DeviceSelfTestModal from "./DeviceSelfTestModal";
 
 export default function CloudInverterIntegrationCard({ primaryHome, filterVendor = null, sectionNumber = 3, cardTitle = null }) {
     const [profiles, setProfiles] = useState([]);
@@ -11,6 +12,7 @@ export default function CloudInverterIntegrationCard({ primaryHome, filterVendor
     const [testResult, setTestResult] = useState(null);
     const [saveSuccess, setSaveSuccess] = useState(null);
     const [errorMsg, setErrorMsg] = useState(null);
+    const [selfTestOpen, setSelfTestOpen] = useState(false);
 
     useEffect(() => {
         loadProfiles();
@@ -350,6 +352,14 @@ export default function CloudInverterIntegrationCard({ primaryHome, filterVendor
                                 <div className="flex flex-wrap items-center justify-end gap-3 pt-2">
                                     <button
                                         type="button"
+                                        onClick={() => setSelfTestOpen(true)}
+                                        className="px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold rounded-xl transition cursor-pointer flex items-center gap-1.5"
+                                    >
+                                        ⚡ 1-Klick Selbsttest
+                                    </button>
+
+                                    <button
+                                        type="button"
                                         onClick={handleTestConnection}
                                         disabled={isTesting}
                                         className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl transition cursor-pointer flex items-center gap-1.5"
@@ -371,6 +381,14 @@ export default function CloudInverterIntegrationCard({ primaryHome, filterVendor
                     </>
                 )}
             </div>
+
+            {/* 1-Klick Hardware-Selbsttest Modal */}
+            <DeviceSelfTestModal
+                open={selfTestOpen}
+                onClose={() => setSelfTestOpen(false)}
+                profileId={selectedProfileId}
+                deviceName={currentProfile?.name || deviceName || "Wechselrichter"}
+            />
         </div>
     );
 }

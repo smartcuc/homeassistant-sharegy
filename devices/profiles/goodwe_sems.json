@@ -1,0 +1,93 @@
+{
+  "id": "goodwe_sems",
+  "name": "GoodWe SEMS Portal API",
+  "vendor": "GoodWe",
+  "category": "inverter_hybrid",
+  "protocol": "http_cloud",
+  "description": "Cloud-Schnittstelle für GoodWe ET, EH, BH, ES Hybrid-Wechselrichter & Lynx Home Batterien via SEMS Portal.",
+  "help": {
+    "de": "1. Nutze deine regulären Zugangsdaten von semsportal.com.\n2. Deine PowerStation-ID findest du in der Web-URL deiner Anlage auf SEMS Portal.",
+    "en": "1. Use your regular semsportal.com login credentials.\n2. Find your PowerStation ID in the web URL of your plant on SEMS Portal."
+  },
+  "connection": {
+    "auth_type": "token_login",
+    "default_base_url": "https://www.semsportal.com/api",
+    "polling_interval_seconds": 60,
+    "fields": [
+      {
+        "key": "account",
+        "label": "SEMS Portal Account (E-Mail)",
+        "type": "string",
+        "required": true,
+        "placeholder": "name@example.com"
+      },
+      {
+        "key": "password",
+        "label": "SEMS Portal Passwort",
+        "type": "password",
+        "required": true
+      },
+      {
+        "key": "power_station_id",
+        "label": "Power Station ID",
+        "type": "string",
+        "required": true,
+        "placeholder": "z. B. a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+      }
+    ]
+  },
+  "requests": {
+    "login": {
+      "method": "POST",
+      "endpoint": "/v2/Common/CrossLogin",
+      "body": {
+        "account": "{{account}}",
+        "pwd": "{{password}}"
+      }
+    },
+    "telemetry": {
+      "method": "POST",
+      "endpoint": "/v2/PowerStation/GetMonitorDetailByPowerstationId",
+      "headers": {
+        "Content-Type": "application/json",
+        "Token": "{{token}}"
+      },
+      "body": {
+        "powerStationId": "{{power_station_id}}"
+      }
+    }
+  },
+  "metrics_mapping": {
+    "pv_power_w": {
+      "jsonpath": "$.data.kpi.pac",
+      "scale": 1.0,
+      "type": "float",
+      "fallback": 0.0
+    },
+    "grid_power_w": {
+      "jsonpath": "$.data.kpi.grid_power",
+      "scale": 1.0,
+      "type": "float",
+      "fallback": 0.0
+    },
+    "load_power_w": {
+      "jsonpath": "$.data.kpi.load_power",
+      "scale": 1.0,
+      "type": "float",
+      "fallback": 0.0
+    },
+    "battery_power_w": {
+      "jsonpath": "$.data.kpi.battery_power",
+      "scale": 1.0,
+      "type": "float",
+      "fallback": 0.0
+    },
+    "battery_soc": {
+      "jsonpath": "$.data.kpi.soc",
+      "scale": 1.0,
+      "type": "float",
+      "unit": "%",
+      "fallback": null
+    }
+  }
+}

@@ -639,6 +639,14 @@
     "avg_green_share": "🔋 Ø Green Share",
     "legend": "🟢 < 250g (Green) · 🟡 250-420g · 🔴 > 420g"
   },
+  "selftest": {
+    "title": "1-Click Hardware Self-Test",
+    "step1": "Connectivity & Latency Check",
+    "step2": "Live Telemetry Ingestion",
+    "step3": "Bidirectional Control Loop",
+    "retry": "Re-run Test",
+    "done": "Done"
+  },
   "storage_system": {
     "nominal_capacity": "Nominal Capacity (kWh)",
     "specs": "{{cap}} kWh Nominal Capacity · max. {{power}} kW",

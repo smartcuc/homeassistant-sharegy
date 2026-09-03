@@ -1,0 +1,77 @@
+id: "deye_solarman"
+name: "Deye / SolarMAN Smart API"
+vendor: "Deye"
+category: "inverter_hybrid"
+protocol: "http_cloud"
+description: "Cloud-Schnittstelle für Deye SUN Hybrid-Wechselrichter, Mikrowechselrichter und Speicher via SolarMAN OpenAPI."
+
+help:
+  de: "1. Registriere dich auf open.solarmanpv.com oder nutze deine SolarMAN Smart Zugangsdaten.\n2. Erstelle eine AppID und ein AppSecret im Entwicklerportal.\n3. Trage deine Wechselrichter-Seriennummer (Device SN) und Anlagen-ID ein."
+  en: "1. Register on open.solarmanpv.com or use your SolarMAN Smart credentials.\n2. Create an AppID and AppSecret in the developer portal.\n3. Enter your inverter serial number (Device SN) and Station ID."
+
+connection:
+  auth_type: "oauth2_bearer"
+  default_base_url: "https://api.solarmanpv.com"
+  polling_interval_seconds: 60
+  fields:
+    - key: "app_id"
+      label: "SolarMAN App ID"
+      type: "string"
+      required: true
+      placeholder: "z. B. 202409010001"
+    - key: "app_secret"
+      label: "SolarMAN App Secret"
+      type: "password"
+      required: true
+    - key: "email"
+      label: "SolarMAN Account (E-Mail / Benutzer)"
+      type: "string"
+      required: true
+      placeholder: "name@example.com"
+    - key: "password"
+      label: "Passwort"
+      type: "password"
+      required: true
+    - key: "device_sn"
+      label: "Deye Wechselrichter Seriennummer (SN)"
+      type: "string"
+      required: true
+      placeholder: "z. B. 2305149812"
+
+requests:
+  telemetry:
+    method: "POST"
+    endpoint: "/device/v1.0/currentData"
+    headers:
+      "Content-Type": "application/json"
+      "Authorization": "Bearer {{access_token}}"
+    body:
+      deviceSn: "{{device_sn}}"
+
+metrics_mapping:
+  pv_power_w:
+    jsonpath: "$.dataList[?(@.key=='APo_t1')].value"
+    scale: 1.0
+    type: "float"
+    fallback: 0.0
+  grid_power_w:
+    jsonpath: "$.dataList[?(@.key=='TotalGridPower')].value"
+    scale: 1.0
+    type: "float"
+    fallback: 0.0
+  load_power_w:
+    jsonpath: "$.dataList[?(@.key=='TotalLoadPower')].value"
+    scale: 1.0
+    type: "float"
+    fallback: 0.0
+  battery_power_w:
+    jsonpath: "$.dataList[?(@.key=='B_P1')].value"
+    scale: 1.0
+    type: "float"
+    fallback: 0.0
+  battery_soc:
+    jsonpath: "$.dataList[?(@.key=='SOC')].value"
+    scale: 1.0
+    type: "float"
+    unit: "%"
+    fallback: null

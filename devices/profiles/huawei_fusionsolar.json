@@ -1,0 +1,93 @@
+{
+  "id": "huawei_fusionsolar",
+  "name": "Huawei FusionSolar OpenAPI",
+  "vendor": "Huawei",
+  "category": "inverter_hybrid",
+  "protocol": "http_cloud",
+  "description": "Cloud-Schnittstelle für Huawei SUN2000 Wechselrichter und LUNA2000 Batteriespeicher via FusionSolar Northbound API.",
+  "help": {
+    "de": "1. Logge dich im Huawei FusionSolar Portal ein (eu5.fusionsolar.huawei.com).\n2. Gehe zu 'System' -> 'Unternehmensverwaltung' -> 'Northbound API'.\n3. Erstelle einen API-Account (SystemCode und SecretKey).\n4. Kopiere deinen Anlagencode (Plant Code).",
+    "en": "1. Log into the Huawei FusionSolar Portal (eu5.fusionsolar.huawei.com).\n2. Go to 'System' -> 'Company Management' -> 'Northbound API'.\n3. Create an API account (SystemCode and SecretKey).\n4. Copy your Plant Code."
+  },
+  "connection": {
+    "auth_type": "token_login",
+    "default_base_url": "https://eu5.fusionsolar.huawei.com",
+    "polling_interval_seconds": 60,
+    "fields": [
+      {
+        "key": "system_code",
+        "label": "Northbound SystemCode / Benutzer",
+        "type": "string",
+        "required": true,
+        "placeholder": "z. B. api_user_sharegy"
+      },
+      {
+        "key": "system_key",
+        "label": "System SecretKey / Passwort",
+        "type": "password",
+        "required": true
+      },
+      {
+        "key": "plant_code",
+        "label": "Anlagencode (Plant Code)",
+        "type": "string",
+        "required": true,
+        "placeholder": "NE=12345678"
+      }
+    ]
+  },
+  "requests": {
+    "login": {
+      "method": "POST",
+      "endpoint": "/thirdData/login",
+      "body": {
+        "userName": "{{system_code}}",
+        "systemCode": "{{system_key}}"
+      }
+    },
+    "telemetry": {
+      "method": "POST",
+      "endpoint": "/thirdData/getStationRealKpi",
+      "headers": {
+        "Content-Type": "application/json",
+        "XSRF-TOKEN": "{{token}}"
+      },
+      "body": {
+        "stationCodes": "{{plant_code}}"
+      }
+    }
+  },
+  "metrics_mapping": {
+    "pv_power_w": {
+      "jsonpath": "$.data[0].dataItemMap.inverter_power",
+      "scale": 1000.0,
+      "type": "float",
+      "fallback": 0.0
+    },
+    "grid_power_w": {
+      "jsonpath": "$.data[0].dataItemMap.grid_power",
+      "scale": 1000.0,
+      "type": "float",
+      "fallback": 0.0
+    },
+    "load_power_w": {
+      "jsonpath": "$.data[0].dataItemMap.use_power",
+      "scale": 1000.0,
+      "type": "float",
+      "fallback": 0.0
+    },
+    "battery_power_w": {
+      "jsonpath": "$.data[0].dataItemMap.battery_power",
+      "scale": 1000.0,
+      "type": "float",
+      "fallback": 0.0
+    },
+    "battery_soc": {
+      "jsonpath": "$.data[0].dataItemMap.battery_soc",
+      "scale": 1.0,
+      "type": "float",
+      "unit": "%",
+      "fallback": null
+    }
+  }
+}

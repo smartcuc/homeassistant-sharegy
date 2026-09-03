@@ -639,6 +639,14 @@
     "avg_green_share": "🔋 Ø Grünstromanteil",
     "legend": "🟢 < 250g (Grün) · 🟡 250-420g · 🔴 > 420g"
   },
+  "selftest": {
+    "title": "1-Klick Hardware-Selbsttest",
+    "step1": "Verbindung & Latenz-Prüfung",
+    "step2": "Live-Telemetrie Ingestion",
+    "step3": "Steuerungs-Rückkanal & Heartbeat",
+    "retry": "Erneut prüfen",
+    "done": "Fertig"
+  },
   "storage_system": {
     "nominal_capacity": "Nennkapazität (kWh)",
     "specs": "{{cap}} kWh Nennkapazität · max. {{power}} kW",
