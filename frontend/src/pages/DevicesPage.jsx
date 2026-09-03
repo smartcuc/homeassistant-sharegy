@@ -487,6 +487,21 @@ export default function DevicesPage() {
         [settings.statusFilter]
     );
 
+    const floorOrder = useMemo(
+        () => settings.floorOrder ?? [],
+        [settings.floorOrder]
+    );
+
+    const roomOrder = useMemo(
+        () => settings.roomOrder ?? [],
+        [settings.roomOrder]
+    );
+
+    const deviceOrder = useMemo(
+        () => settings.deviceOrder ?? [],
+        [settings.deviceOrder]
+    );
+
     const structureQuery = useStructure();
     const structure = structureQuery?.data;
 
