@@ -169,7 +169,26 @@ def check_home_system_status(user) -> Dict[str, Any]:
             if getattr(d, "config", None) and d.config.floor
         }
 
-        # 7. Readiness Score & Status-Ampel berechnen (0 .. 100%)
+        # 7. Aktive Alarme & Störungen (z. B. via Sungrow Webhook oder Modbus/MQTT)
+        active_alarms = []
+        for d in active_devices:
+            alarm_info = cache.get(f"device:{d.id}:sungrow_alarm")
+            if not alarm_info:
+                alarm_m = next((m for m in d.latest_metrics.all() if m.metric_key == "state.alarm" and m.value and float(m.value) > 0), None)
+                if alarm_m:
+                    alarm_data = alarm_m.data if isinstance(alarm_m.data, dict) else {}
+                    alarm_info = {
+                        "device_id": d.id,
+                        "device_name": d.name or d.identifier,
+                        "code": alarm_data.get("code") or int(alarm_m.value),
+                        "name": alarm_data.get("name") or "Gerätestörung",
+                        "level": alarm_data.get("level", "warning"),
+                        "timestamp": alarm_m.timestamp.isoformat() if alarm_m.timestamp else None,
+                    }
+            if alarm_info:
+                active_alarms.append(alarm_info)
+
+        # 8. Readiness Score & Status-Ampel berechnen (0 .. 100%)
         score = 0
         if has_pv:
             score += 35
@@ -178,7 +197,20 @@ def check_home_system_status(user) -> Dict[str, Any]:
         if can_calculate_load:
             score += 30
 
+        if active_alarms:
+            # Bei aktiven Hardware-Störungen Score anpassen
+            score = max(20, score - 30)
+
         recommendations: List[Dict[str, Any]] = []
+
+        for alarm in active_alarms:
+            recommendations.append({
+                "priority": "critical",
+                "pillar": "device_fault",
+                "title": f"🚨 Störung: {alarm.get('name')}",
+                "text": f"{alarm.get('device_name')} meldet eine Störung (Code {alarm.get('code')}). Bitte Anlage und Verbindung prüfen.",
+                "action": "check_device_fault",
+            })
 
         if not has_pv and not has_grid:
             recommendations.append({
@@ -214,19 +246,28 @@ def check_home_system_status(user) -> Dict[str, Any]:
                 "action": "add_submeter",
             })
 
+        # Pillar-Status anpassen bei Störungen
+        pv_status = "ok" if has_pv else "missing"
+        pv_status_text = "Aktiv und liefert Solarstrom" if has_pv else "Nicht verbunden"
+        for alarm in active_alarms:
+            if any(p.id == alarm.get("device_id") for p in pv_devices):
+                pv_status = "fault"
+                pv_status_text = f"🚨 Störung: {alarm.get('name')} (Code {alarm.get('code')})"
+
         return {
             "score": min(100, score),
-            "status": "ready" if score >= 70 else ("partial" if score > 0 else "empty"),
+            "status": "fault" if active_alarms else ("ready" if score >= 70 else ("partial" if score > 0 else "empty")),
+            "alarms": active_alarms,
             "home_name": home.name,
             "pillars": {
                 "pv": {
                     "installed": has_pv,
                     "configured": has_pv,
-                    "status": "ok" if has_pv else "missing",
+                    "status": pv_status,
                     "method": "direct" if has_pv else "none",
                     "label": "Solarerzeugung",
                     "device_name": pv_device_name,
-                    "status_text": "Aktiv und liefert Solarstrom" if has_pv else "Nicht verbunden",
+                    "status_text": pv_status_text,
                 },
                 "grid": {
                     "installed": has_grid,

@@ -66,6 +66,7 @@ urlpatterns = [
             [
                 path("", include("accounts.api.urls")),
                 path("", include("integrations.urls")),
+                path("integrations/", include("integrations.api_urls")),
                 path("", include("content.urls_public")),
                 path("", include("providers.opentelemetry.urls")),
                 path("energy/", include("energy.api.urls")),
