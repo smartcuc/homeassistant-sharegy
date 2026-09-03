@@ -667,7 +667,10 @@ def device_available_metrics(request, device_id):
         "percentage": {"name": "Prozentwert", "unit": "%", "icon": "📈"},
     }
 
+    from devices.services.ingest import _infer_canonical_unit
+
     def_map = {d.key: d for d in MetricDefinition.objects.all()}
+    cfg = getattr(device, "config", None)
 
     results = []
     seen_keys = set()
@@ -683,28 +686,43 @@ def device_available_metrics(request, device_id):
         meta = KEY_METADATA.get(k, {})
         d_obj = def_map.get(k)
 
-        name = d_obj.name if d_obj else meta.get("name", k.replace("_", " ").title())
-        unit = lm.unit or (d_obj.unit if d_obj else meta.get("unit", ""))
-        icon = meta.get("icon", "📈")
+        # Intelligente Namens- und Icon-Zuordnung
+        if d_obj and d_obj.name:
+            name = d_obj.name
+            icon = meta.get("icon", "🌡️" if "temp" in k.lower() else "📈")
+        elif "temp" in k.lower():
+            name = "Temperatur (" + k.replace("_", " ").title() + ")"
+            icon = "🌡️"
+        elif "power" in k.lower():
+            name = "Leistung (" + k.replace("_", " ").title() + ")"
+            icon = "⚡"
+        else:
+            name = meta.get("name", k.replace("_", " ").title())
+            icon = meta.get("icon", "📈")
 
-        is_primary = (k == primary_key) or (primary_key not in seen_keys and k in ["power", "value", "active_power"])
+        unit = lm.unit or (d_obj.unit if d_obj else None) or _infer_canonical_unit(k, "", config=cfg)
+
+        is_primary = (k == primary_key) or (primary_key not in seen_keys and k in ["power", "value", "active_power", "temperature", "bwwp_temp"])
 
         results.append({
             "key": k,
             "name": name,
             "unit": unit,
             "icon": icon,
-            "latest_value": lm.value,
+            "latest_value": round(float(lm.value), 2) if lm.value is not None else None,
             "timestamp": lm.timestamp.isoformat() if lm.timestamp else None,
             "is_primary": is_primary,
         })
 
     if not results:
+        inferred_u = _infer_canonical_unit(primary_key, "", config=cfg)
+        p_name = device.config.metric_definition.name if (cfg and cfg.metric_definition and cfg.metric_definition.name) else ("Temperatur" if "temp" in primary_key.lower() else "Leistung")
+        p_icon = "🌡️" if "temp" in primary_key.lower() else "⚡"
         results.append({
             "key": primary_key,
-            "name": "Leistung",
-            "unit": "W",
-            "icon": "⚡",
+            "name": p_name,
+            "unit": inferred_u,
+            "icon": p_icon,
             "latest_value": None,
             "timestamp": None,
             "is_primary": True,

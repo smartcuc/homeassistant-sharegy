@@ -163,15 +163,22 @@ def get_device_timeseries_dataset(device, range_str="24h", requested_metric=None
 
         metric_filter = Q(metric_key__in=matched_keys) | Q(metric_key__iexact=effective_metric)
 
+    from devices.services.ingest import _infer_canonical_unit
+
     # Determine Metric Unit & Display Name
-    unit = "W"
+    cfg = getattr(device, "config", None)
+    unit = _infer_canonical_unit(effective_metric, "", config=cfg)
     metric_display_name = effective_metric
+
     def_obj = MetricDefinition.objects.filter(key=effective_metric).first()
     if def_obj:
         if def_obj.name:
             metric_display_name = def_obj.name
         if def_obj.unit:
             unit = def_obj.unit
+    elif "temp" in effective_metric.lower():
+        metric_display_name = "Temperatur (" + effective_metric.replace("_", " ").title() + ")"
+        unit = "°C"
 
     latest_m = DeviceLatestMetric.objects.filter(device_id=device.id).filter(metric_filter).order_by("-timestamp").first()
     if latest_m and latest_m.unit:
@@ -219,6 +226,22 @@ def get_device_timeseries_dataset(device, range_str="24h", requested_metric=None
             qs = list(
                 fb_model.objects.filter(device_id=device.id)
                 .filter(metric_filter)
+                .filter(**{f"{fb_field}__gte": start, f"{fb_field}__lte": end})
+                .order_by(fb_field)
+            )
+            if qs:
+                field = fb_field
+                value_field = fb_val
+                break
+
+    # Letzter Fallback: Falls der Filter durch Key-Präfixe leer blieb, alle Punkte des Geräts laden
+    if not qs:
+        for fb_model, fb_field, fb_val in [
+            (DeviceMetric1m, "bucket", "avg"),
+            (DeviceMetric, "timestamp", "value"),
+        ]:
+            qs = list(
+                fb_model.objects.filter(device_id=device.id)
                 .filter(**{f"{fb_field}__gte": start, f"{fb_field}__lte": end})
                 .order_by(fb_field)
             )
