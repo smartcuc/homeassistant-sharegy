@@ -394,7 +394,7 @@ CELERY_BEAT_SCHEDULE = {
     # ☁️ Zyklisches Polling für Cloud-Wechselrichter (Sungrow, Kostal, SolarEdge, etc.)
     "poll-cloud-integrations": {
         "task": "devices.poll_cloud_integrations",
-        "schedule": 60.0,  # alle 60 Sekunden
+        "schedule": 30.0,  # alle 30 Sekunden
     },
 
     # 📊 1m Aggregation (analytics)
