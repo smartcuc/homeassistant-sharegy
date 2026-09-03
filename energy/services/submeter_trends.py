@@ -107,7 +107,7 @@ def get_submeter_trends(user, period: str = "30d", meter_id: str = None) -> dict
             device_id__in=all_device_ids,
             bucket__gte=start_dt,
             bucket__lte=end_dt,
-        ).values("device_id", "bucket", "energy_wh", "avg")
+        ).values("device_id", "bucket", "energy_wh", "avg", "metric_key")
     )
 
     if not metric_rows and all_device_ids:
@@ -116,7 +116,7 @@ def get_submeter_trends(user, period: str = "30d", meter_id: str = None) -> dict
                 device_id__in=all_device_ids,
                 bucket__gte=start_dt,
                 bucket__lte=end_dt,
-            ).values("device_id", "bucket", "energy_wh", "avg")
+            ).values("device_id", "bucket", "energy_wh", "avg", "metric_key")
         )
         if mid_rows:
             metric_rows = mid_rows
@@ -126,21 +126,22 @@ def get_submeter_trends(user, period: str = "30d", meter_id: str = None) -> dict
                     device_id__in=all_device_ids,
                     timestamp__gte=start_dt,
                     timestamp__lte=end_dt,
-                ).values("device_id", "timestamp", "value")
+                ).values("device_id", "timestamp", "value", "metric_key")
                 .order_by("timestamp")
             )
             if raw_metrics:
                 dev_hour_map = defaultdict(lambda: defaultdict(list))
                 for r in raw_metrics:
                     b_t = r["timestamp"].astimezone(tz).replace(minute=0, second=0, microsecond=0)
-                    dev_hour_map[r["device_id"]][b_t].append(float(r["value"] or 0))
+                    dev_hour_map[(r["device_id"], r.get("metric_key") or "power")][b_t].append(float(r["value"] or 0))
 
-                for dev_id, h_map in dev_hour_map.items():
+                for (dev_id, m_key), h_map in dev_hour_map.items():
                     for b_t, vals in h_map.items():
                         avg_w = sum(vals) / len(vals)
                         wh = avg_w * (len(vals) * 5 / 3600.0) if len(vals) < 720 else avg_w
                         metric_rows.append({
                             "device_id": dev_id,
+                            "metric_key": m_key,
                             "bucket": b_t,
                             "energy_wh": wh,
                             "avg": avg_w,
@@ -168,7 +169,6 @@ def get_submeter_trends(user, period: str = "30d", meter_id: str = None) -> dict
             spot_prices_map[ts_key] = float(sp["price_eur_per_kwh"] or 0.10) * 100.0
 
     # 4. Zeitreihen-Struktur aufbauen
-    # Key: bucket_str (z. B. "25.08." oder "14:00") -> Daten
     bucket_order = []
     bucket_data = defaultdict(lambda: {
         "pv_kwh": 0.0,
@@ -207,6 +207,7 @@ def get_submeter_trends(user, period: str = "30d", meter_id: str = None) -> dict
 
     for row in metric_rows:
         dev_id = row["device_id"]
+        m_k = (row.get("metric_key") or "").lower()
         wh = float(row["energy_wh"] or 0)
         avg_w = float(row.get("avg") or 0)
         if wh == 0 and avg_w > 0:
@@ -221,21 +222,35 @@ def get_submeter_trends(user, period: str = "30d", meter_id: str = None) -> dict
         entry = bucket_data[b_key]
         entry["tariff_price_eur"] = get_price_for_time(b_time)
 
-        if dev_id in pv_device_ids:
+        # Metrik-spezifische Unterscheidung für Hybrid-Wechselrichter
+        if m_k in ["load_power", "consumption", "load_power_w"]:
+            entry["total_load_kwh"] += kwh
+            if consumer_devices:
+                entry["consumers"][str(dev_id)] += kwh
+        elif m_k in ["battery_power", "battery_power_w", "power_battery"]:
+            if avg_w <= 0:
+                entry["battery_charge_kwh"] += abs(kwh)
+                entry["consumers"][f"{dev_id}_bat"] += abs(kwh)
+            else:
+                entry["battery_discharge_kwh"] += abs(kwh)
+        elif m_k in ["grid_power", "grid_power_w", "power_grid"]:
+            if avg_w >= 0:
+                entry["grid_import_kwh"] += kwh
+            else:
+                entry["grid_export_kwh"] += abs(kwh)
+        elif dev_id in pv_device_ids or m_k in ["pv_power", "pv_power_w", "power"]:
             entry["pv_kwh"] += kwh
         elif dev_id in battery_device_ids:
-            avg_w = float(row.get("avg") or 0)
-            if avg_w >= 0:
-                entry["battery_charge_kwh"] += kwh
-                entry["consumers"][str(dev_id)] += kwh
+            if avg_w <= 0:
+                entry["battery_charge_kwh"] += abs(kwh)
+                entry["consumers"][str(dev_id)] += abs(kwh)
             else:
-                entry["battery_discharge_kwh"] += kwh
+                entry["battery_discharge_kwh"] += abs(kwh)
         elif dev_id in grid_device_ids:
-            avg_w = float(row.get("avg") or 0)
             if avg_w > 0:
                 entry["grid_import_kwh"] += kwh
             else:
-                entry["grid_export_kwh"] += kwh
+                entry["grid_export_kwh"] += abs(kwh)
         elif any(c.id == dev_id for c in consumer_devices):
             entry["consumers"][str(dev_id)] += kwh
             entry["total_load_kwh"] += kwh
@@ -248,7 +263,7 @@ def get_submeter_trends(user, period: str = "30d", meter_id: str = None) -> dict
     # 5. Definition aller virtuellen Zähler (Metadaten)
     battery_devices = [d for d in devices if d.id in battery_device_ids]
     meters_meta = []
-    if consumer_devices or battery_devices:
+    if consumer_devices:
         for idx, dev in enumerate(consumer_devices):
             dev_name = get_device_name(dev)
             icon, category = get_consumer_icon_and_category(dev_name, "consumer")
@@ -262,25 +277,49 @@ def get_submeter_trends(user, period: str = "30d", meter_id: str = None) -> dict
                 "is_battery": False,
             })
 
-        for b_idx, b_dev in enumerate(battery_devices):
-            dev_name = get_device_name(b_dev)
-            meters_meta.append({
-                "id": str(b_dev.id),
-                "name": f"{dev_name} (Akkuladung)",
-                "icon": "🔋",
-                "category": "battery",
-                "color": "#8b5cf6",
-                "is_residual": False,
-                "is_battery": True,
-            })
+    for b_idx, b_dev in enumerate(battery_devices):
+        dev_name = get_device_name(b_dev)
+        meters_meta.append({
+            "id": str(b_dev.id),
+            "name": f"{dev_name} (Akkuladung)",
+            "icon": "🔋",
+            "category": "battery",
+            "color": "#8b5cf6",
+            "is_residual": False,
+            "is_battery": True,
+        })
 
-        # Residual-Zähler ergänzen
+    # Falls keine Einzelgeräte existieren, aber Batterie-Ladung über Wechselrichter erfasst wurde:
+    if not battery_devices and any(b_entry["battery_charge_kwh"] > 0 for b_entry in bucket_data.values()):
+        meters_meta.append({
+            "id": "battery_charge",
+            "name": "Batteriespeicher (Akkuladung)",
+            "icon": "🔋",
+            "category": "battery",
+            "color": "#8b5cf6",
+            "is_residual": False,
+            "is_battery": True,
+        })
+
+    # Residual- / Gesamt-Zähler ergänzen
+    if consumer_devices:
         meters_meta.append({
             "id": "residual",
             "name": "Restlicher Hausverbrauch (Grundlast)",
             "icon": "💡",
             "category": "residual",
             "color": "#94a3b8",
+            "is_residual": True,
+            "is_battery": False,
+        })
+    else:
+        # WR-Only / Keine Einzelstecker: Gesamter Hausverbrauch als Hauptkategorie
+        meters_meta.append({
+            "id": "residual",
+            "name": "Gesamter Hausverbrauch",
+            "icon": "⚡",
+            "category": "total_load",
+            "color": "#6366f1",
             "is_residual": True,
             "is_battery": False,
         })
@@ -317,6 +356,15 @@ def get_submeter_trends(user, period: str = "30d", meter_id: str = None) -> dict
             solar_available = pv_kwh + batt_discharge
             tot_load = b_entry["total_load_kwh"]
 
+            # Falls Hauslast nicht direkt gemessen wurde, physikalisch bilanzieren:
+            if tot_load <= 0 and (pv_kwh > 0 or b_entry["grid_import_kwh"] > 0 or batt_discharge > 0):
+                derived_load = (
+                    pv_kwh + b_entry["grid_import_kwh"] + batt_discharge
+                    - b_entry["grid_export_kwh"] - b_entry["battery_charge_kwh"]
+                )
+                tot_load = max(0.0, derived_load)
+                b_entry["total_load_kwh"] = tot_load
+
             # Solare Deckungsquote in diesem Bucket (0.0 bis 1.0)
             solar_coverage_ratio = min(1.0, solar_available / max(tot_load, 0.001)) if tot_load > 0 else 0.0
 
@@ -325,7 +373,10 @@ def get_submeter_trends(user, period: str = "30d", meter_id: str = None) -> dict
             for m in meters_meta:
                 m_id = m["id"]
                 if not m["is_residual"]:
-                    m_kwh = b_entry["consumers"][m_id]
+                    if m_id == "battery_charge":
+                        m_kwh = b_entry["battery_charge_kwh"]
+                    else:
+                        m_kwh = b_entry["consumers"].get(m_id, 0.0)
                     if not m.get("is_battery"):
                         measured_sub_sum += m_kwh
                 else:
