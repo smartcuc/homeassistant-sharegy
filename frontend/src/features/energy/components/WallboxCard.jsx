@@ -23,7 +23,9 @@ export default function WallboxCard({ onOpenAddModal }) {
         refetchInterval: 5000,
     });
 
-    const wallboxes = Array.isArray(wallboxesQuery.data) ? wallboxesQuery.data : [];
+    const wallboxes = Array.isArray(wallboxesQuery.data) 
+        ? wallboxesQuery.data 
+        : (wallboxesQuery.data?.wallboxes || []);
     const activeStation = wallboxes.find((w) => w.id === selectedStationId) || wallboxes[0] || null;
 
     // 2. Modus-Umschaltung

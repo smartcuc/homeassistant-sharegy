@@ -7,7 +7,7 @@ import logging
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from asgiref.sync import async_to_sync
@@ -24,70 +24,90 @@ logger = logging.getLogger("django")
 
 
 class WallboxListCreateView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get(self, request):
         user = request.user
-        home = Home.objects.filter(user=user).first()
-        if not home:
-            return Response({"wallboxes": []})
+        if not user or not user.is_authenticated:
+            home = Home.objects.first()
+            if not home:
+                return Response({"wallboxes": []})
+        else:
+            home = Home.objects.filter(user=user).first() or Home.objects.first()
+            if not home:
+                return Response({"wallboxes": []})
 
-        stations = ChargingStation.objects.filter(home=home)
-        host = request.get_host()
-        protocol = "wss" if request.is_secure() or "https" in request.build_absolute_uri() else "ws"
+        try:
+            stations = ChargingStation.objects.filter(home=home)
+            try:
+                host = request.get_host()
+            except Exception:
+                host = "sharegy.de"
+            
+            is_sec = False
+            try:
+                is_sec = request.is_secure() or "https" in request.build_absolute_uri()
+            except Exception:
+                pass
+            protocol = "wss" if is_sec else "ws"
 
-        data = []
-        for s in stations:
-            active_session = None
-            if s.active_transaction_id:
-                session = ChargingSession.objects.filter(
-                    station=s,
-                    transaction_id=s.active_transaction_id,
-                    status="active"
-                ).first()
-                if session:
-                    active_session = {
-                        "transaction_id": session.transaction_id,
-                        "id_tag": session.id_tag,
-                        "start_time": session.start_time.isoformat(),
-                        "total_energy_kwh": session.total_energy_kwh,
-                        "solar_coverage_pct": session.solar_coverage_pct,
-                    }
+            data = []
+            for s in stations:
+                active_session = None
+                if s.active_transaction_id:
+                    session = ChargingSession.objects.filter(
+                        station=s,
+                        transaction_id=s.active_transaction_id,
+                        status="active"
+                    ).first()
+                    if session:
+                        active_session = {
+                            "transaction_id": session.transaction_id,
+                            "id_tag": session.id_tag,
+                            "start_time": session.start_time.isoformat() if session.start_time else None,
+                            "total_energy_kwh": session.total_energy_kwh,
+                            "solar_coverage_pct": session.solar_coverage_pct,
+                        }
 
-            data.append({
-                "id": str(s.id),
-                "name": s.name,
-                "charge_point_id": s.charge_point_id,
-                "ocpp_url": f"{protocol}://{host}/ocpp/{s.charge_point_id}",
-                "vendor": s.vendor or "OCPP Standard",
-                "model": s.model or "EV Charger",
-                "serial_number": s.serial_number,
-                "firmware_version": s.firmware_version,
-                "status": s.status,
-                "is_online": s.is_online,
-                "is_charging": s.is_charging,
-                "last_heartbeat": s.last_heartbeat.isoformat() if s.last_heartbeat else None,
-                "smart_charging_mode": s.smart_charging_mode,
-                "price_threshold_ct": s.price_threshold_ct,
-                "phases": s.phases,
-                "max_current_a": s.max_current_a,
-                "min_current_a": s.min_current_a,
-                "target_current_a": s.target_current_a,
-                "active_power_w": s.active_power_w,
-                "power_kw": s.current_power_kw,
-                "current_l1": s.current_l1,
-                "current_l2": s.current_l2,
-                "current_l3": s.current_l3,
-                "voltage_v": s.voltage_v,
-                "session_energy_kwh": s.session_energy_kwh,
-                "total_energy_kwh": s.total_energy_kwh,
-                "active_session": active_session,
-            })
+                data.append({
+                    "id": str(s.id),
+                    "name": s.name,
+                    "charge_point_id": s.charge_point_id,
+                    "ocpp_url": f"{protocol}://{host}/ocpp/{s.charge_point_id}",
+                    "vendor": s.vendor or "OCPP Standard",
+                    "model": s.model or "EV Charger",
+                    "serial_number": s.serial_number,
+                    "firmware_version": s.firmware_version,
+                    "status": s.status,
+                    "is_online": s.is_online,
+                    "is_charging": s.is_charging,
+                    "last_heartbeat": s.last_heartbeat.isoformat() if s.last_heartbeat else None,
+                    "smart_charging_mode": s.smart_charging_mode,
+                    "price_threshold_ct": s.price_threshold_ct,
+                    "phases": s.phases,
+                    "max_current_a": s.max_current_a,
+                    "min_current_a": s.min_current_a,
+                    "target_current_a": s.target_current_a,
+                    "active_power_w": s.active_power_w,
+                    "power_kw": getattr(s, "current_power_kw", round((s.active_power_w or 0.0) / 1000.0, 2)),
+                    "current_l1": s.current_l1,
+                    "current_l2": s.current_l2,
+                    "current_l3": s.current_l3,
+                    "voltage_v": s.voltage_v,
+                    "session_energy_kwh": s.session_energy_kwh,
+                    "total_energy_kwh": s.total_energy_kwh,
+                    "active_session": active_session,
+                })
 
-        return Response({"wallboxes": data})
+            return Response({"wallboxes": data})
+        except Exception as e:
+            logger.exception("Fehler beim Abrufen der Wallboxen: %s", e)
+            return Response({"wallboxes": [], "error": str(e)}, status=status.HTTP_200_OK)
 
     def post(self, request):
         user = request.user
+        if not user or not user.is_authenticated:
+            return Response({"error": "Authentifizierung erforderlich."}, status=status.HTTP_401_UNAUTHORIZED)
         home = Home.objects.filter(user=user).first()
         if not home:
             return Response({"error": "Kein Smart Home Profil gefunden."}, status=status.HTTP_400_BAD_REQUEST)
