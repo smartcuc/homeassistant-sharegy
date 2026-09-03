@@ -485,24 +485,35 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
                             else:
                                 soc_val = round(soc_raw, 1)
 
-                        # Fallback / Plausibilisierung für Entladung bei gefülltem Speicher:
-                        # 1. Nachts (PV < 20 W): Speicher deckt die Grundlast ab
-                        if pv < 20 and abs(bat_pwr) < 0.1 and load > 20 and soc_val and soc_val > 5.0 and abs(grid) < 60:
-                            bat_pwr = load
-
-                        # 2. Tag/Dämmerung: Bedarf übersteigt Erzeugung (load > pv + 30 W),
-                        # Speicher hat noch Kapazität (> 5%), aber Inverter meldet bat_pwr = 0 oder fälschlich Netzbezug.
-                        deficit = max(0.0, round(load - pv, 1))
-                        if deficit > 30 and abs(bat_pwr) < 1.0 and soc_val and soc_val > 5.0:
-                            bat_pwr = deficit
-                            # Falls das SmartMeter fälschlicherweise den Fehlbetrag als Netzbezug gemeldet hat:
-                            if abs(grid - deficit) < 100 or abs(grid) < 60:
-                                grid = 0.0
-
-                        # Wenn Speicher VOLL ist (SoC >= 98%), kann physikalisch kein Strom mehr geladen werden
+                        # Batterie Lade-/Entladerichtung standardisieren (Sharegy-Konvention: Negativ = Laden, Positiv = Entladen):
+                        # 1. Wenn Speicher voll ist (>= 98%), kann physikalisch kein Strom mehr geladen werden
                         if soc_val is not None and soc_val >= 98.0:
                             if bat_pwr < 0:
                                 bat_pwr = 0.0
+                        # 2. PV-Überschuss vorhanden (PV > Load + 30 W) und Speicher nicht voll (SoC < 98%):
+                        # Wenn bat_pwr positiv gemeldet wurde oder der Inverter absolute Ladeleistung sendet,
+                        # ist dies physikalisch LADUNG (negatives Vorzeichen)
+                        elif pv > (load + 30) and (soc_val is None or soc_val < 98.0) and abs(bat_pwr) > 10:
+                            bat_pwr = -abs(bat_pwr)
+                        # 3. Nacht / keine PV (PV < 20 W) und Speicher hat Kapazität (> 5%):
+                        # Speicher entlädt zur Deckung der Last (positives Vorzeichen)
+                        elif pv < 20 and soc_val is not None and soc_val > 5.0 and load > 20:
+                            if abs(bat_pwr) < 0.1 and abs(grid) < 60:
+                                bat_pwr = load
+                            else:
+                                bat_pwr = abs(bat_pwr)
+
+                        # 4. Netzeinspeisung / Grid Plausibilisierung:
+                        # Wenn der Speicher lädt (bat_pwr < 0), fließt PV-Leistung in den Speicher.
+                        # Falls das SmartMeter/API versehentlich die Batterieladung als Netzeinspeisung meldet:
+                        if bat_pwr < 0:
+                            bat_charge = abs(bat_pwr)
+                            # Tatsächliche Netzeinspeisung ist maximal der Überschuss NACH Batterieladung und Hauslast
+                            true_excess = max(0.0, pv - load - bat_charge)
+                            if grid < 0 and abs(abs(grid) - bat_charge) < 200:
+                                grid = -true_excess
+                            elif grid < 0 and abs(grid) > (true_excess + 100):
+                                grid = -true_excess
 
                         raw_data["_direct_metrics"] = {
                             "pv_power_w": max(0.0, pv),

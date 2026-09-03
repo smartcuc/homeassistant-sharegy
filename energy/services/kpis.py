@@ -62,10 +62,15 @@ def get_today_consumption(user):
             "history": [],
         }
 
-    # Nur echte Verbraucher-Metriken (bei Hybrid-Invertern load_power, niemals das Erzeugungs-Power)
-    key_filter = Q(metric_key__in=["load_power", "load_power_w", "load", "a_act_power", "apower"]) | (
-        Q(metric_key__in=["power", "value"]) & ~Q(device__config__role__key__in=["producer", "both", "hybrid"])
-    )
+    # Nur echte Verbraucher-Metriken (bei Hybrid-Invertern load_power, niemals Erzeugung, Netzeinspeisung oder Batterieladung)
+    key_filter = (
+        Q(metric_key__in=["load_power", "load_power_w", "load", "consumption"])
+        | (
+            Q(metric_key__in=["power", "value", "a_act_power", "apower"])
+            & ~Q(device__config__role__key__in=["producer", "both", "hybrid", "battery", "storage", "speicher", "grid", "meter"])
+            & ~Q(device__config__energy_signal_type__key__in=["producer", "pv", "solar", "both", "hybrid", "battery", "storage", "speicher", "grid"])
+        )
+    ) & ~Q(metric_key__in=["battery_power", "battery_charge", "charge_power", "grid_power", "pv_power", "solar_power"])
 
     # 2. Versuch: DeviceMetric1h (Stunden-Aggregate)
     hourly_rows = list(

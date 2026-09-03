@@ -79,11 +79,13 @@ def build_device_signals(user):
             if gs.device_id and not _is_non_power_sensor(gs.device):
                 pv_device_ids.add(gs.device_id)
 
-        for ss in StorageSystem.objects.filter(home__user=user, active=True).select_related("power_device", "primary_device"):
+        for ss in StorageSystem.objects.filter(home__user=user, active=True).select_related("power_device", "primary_device", "soc_device"):
             if ss.power_device_id and not _is_non_power_sensor(ss.power_device):
                 battery_device_ids.add(ss.power_device_id)
-            elif ss.primary_device_id and not _is_non_power_sensor(ss.primary_device):
+            if ss.primary_device_id and not _is_non_power_sensor(ss.primary_device):
                 battery_device_ids.add(ss.primary_device_id)
+            if ss.soc_device_id and not _is_non_power_sensor(ss.soc_device):
+                battery_device_ids.add(ss.soc_device_id)
     except Exception:
         pass
 
@@ -99,32 +101,35 @@ def build_device_signals(user):
         role_key = cfg.role.key if cfg.role else None
 
         # Batterie (nur falls noch keine Batterie-Source definiert)
-        if not battery_device_ids and (
+        if (
             sig_key in ["battery", "storage", "speicher"]
             or role_key in ["battery", "storage", "speicher"]
         ):
             battery_device_ids.add(dev.id)
 
         # PV (nur falls noch keine PV-Source definiert)
-        if not pv_device_ids and (
+        elif (
             sig_key in ["pv", "solar", "producer"]
-            or (role_key in ["producer", "pv"])
+            or role_key in ["producer", "pv"]
         ):
             pv_device_ids.add(dev.id)
 
         # Netz (nur falls noch keine Grid-Source definiert)
-        if not grid_device_ids and (
+        elif (
             sig_key in ["grid", "grid_feed_in", "grid_import"]
-            or role_key == "grid"
+            or role_key in ["grid", "meter"]
         ):
             grid_device_ids.add(dev.id)
 
-        # Last (nur falls noch keine Load-Source definiert)
-        if not load_device_ids and (
+        # Last (nur reine Verbraucher, NIEMALS Speicher/Batterie/PV/Netz)
+        elif (
             sig_key in ["load", "consumer", "consumption"]
             or role_key == "consumer"
-        ):
+        ) and dev.id not in battery_device_ids and dev.id not in pv_device_ids and dev.id not in grid_device_ids:
             load_device_ids.add(dev.id)
+
+    # Bereinigung: Last darf niemals Batterie-, PV- oder Netzgeräte enthalten
+    load_device_ids = load_device_ids - battery_device_ids - pv_device_ids - grid_device_ids
 
     # 4. PV-Erzeugung berechnen
     pv_power = sum(max(values.get(d_id, 0), 0) for d_id in pv_device_ids)
@@ -229,11 +234,11 @@ def build_device_signals(user):
         if bat_val < 0:
             signals["battery"]["charge"] = round(abs(bat_val), 2)
             signals["battery"]["discharge"] = 0.0
-        # 2. Wenn PV-Erzeugung den Hausverbrauch deutlich übersteigt, lädt der Speicher (Überschussladung)
-        elif pv_power > (eff_load_est + 150):
+        # 2. Wenn PV-Erzeugung den Hausverbrauch übersteigt (oder PV aktiv ist und Speicher noch Kapazität hat), lädt der Speicher
+        elif pv_power > (eff_load_est + 50) or (pv_power > 100 and soc_val is not None and soc_val < 98.0 and bat_val > 0):
             signals["battery"]["charge"] = round(abs(bat_val), 2)
             signals["battery"]["discharge"] = 0.0
-        # 3. Nacht / keine PV-Erzeugung oder positives Vorzeichen: Speicher liefert Energie an das Haus (Entladung)
+        # 3. Nacht / keine PV-Erzeugung: Speicher liefert Energie an das Haus (Entladung)
         else:
             signals["battery"]["discharge"] = round(abs(bat_val), 2)
             signals["battery"]["charge"] = 0.0
@@ -249,9 +254,11 @@ def build_device_signals(user):
             signals["battery"]["discharge"] = 0.0
 
     # 7. Grid-Leistung (Import / Export)
-    grid_power = sum(values.get(d_id, 0) for d_id in grid_device_ids if d_id not in pv_device_ids)
+    grid_power = sum(values.get(d_id, 0) for d_id in grid_device_ids if d_id not in pv_device_ids and d_id not in battery_device_ids)
     if not grid_device_ids or abs(grid_power) < 0.01:
         for dev in all_devices:
+            if dev.id in battery_device_ids:
+                continue
             g_p = cache.get(f"device:{dev.id}:grid_power")
             if g_p is None:
                 m = DeviceLatestMetric.objects.filter(device=dev, metric_key="grid_power").first()
@@ -269,8 +276,14 @@ def build_device_signals(user):
             signals["grid"]["import"] = round(grid_power, 2)
             signals["grid"]["export"] = 0.0
         else:
+            raw_export = abs(grid_power)
+            # WICHTIG: Wenn der Speicher lädt, darf die Batterieladung nicht als Einspeisung gewertet werden
+            if signals["battery"]["charge"] > 0 and raw_export >= signals["battery"]["charge"] and (pv_power - signals["battery"]["charge"] - eff_load_est) < 50:
+                actual_export = max(0.0, pv_power - signals["battery"]["charge"] - eff_load_est)
+                signals["grid"]["export"] = round(actual_export, 2)
+            else:
+                signals["grid"]["export"] = round(raw_export, 2)
             signals["grid"]["import"] = 0.0
-            signals["grid"]["export"] = round(abs(grid_power), 2)
     else:
         signals["grid"]["import"] = 0.0
         signals["grid"]["export"] = 0.0
@@ -281,6 +294,20 @@ def build_device_signals(user):
     if measured_load is not None and measured_load > 0:
         signals["load"]["consumption"] = round(measured_load, 2)
         # Falls Netzleistung nicht direkt übermittelt wurde, physikalische Netzeinspeisung/Netzbezug berechnen
+        if signals["grid"]["import"] == 0 and signals["grid"]["export"] == 0:
+            surplus = (
+                signals["pv"]["production"]
+                + signals["battery"]["discharge"]
+                - signals["load"]["consumption"]
+                - signals["battery"]["charge"]
+            )
+            if surplus > 20:
+                signals["grid"]["export"] = round(surplus, 2)
+            elif surplus < -20:
+                signals["grid"]["import"] = round(abs(surplus), 2)
+    elif load_power > 0:
+        # Direkte Messung durch Einzelmesswerte / Submeter
+        signals["load"]["consumption"] = round(load_power, 2)
         if signals["grid"]["import"] == 0 and signals["grid"]["export"] == 0:
             surplus = (
                 signals["pv"]["production"]
@@ -304,8 +331,8 @@ def build_device_signals(user):
         if derived > 10:
             signals["load"]["consumption"] = round(derived, 2)
         else:
-            # Falls Grid-Export noch nicht gemessen wurde, ist der PV-Überschuss Einspeisung
-            if signals["grid"]["export"] == 0 and signals["pv"]["production"] > signals["battery"]["charge"]:
+            # Falls Grid-Export noch nicht gemessen wurde, ist der PV-Überschuss nach Batterieladung Einspeisung
+            if signals["grid"]["export"] == 0 and signals["pv"]["production"] > (signals["battery"]["charge"] + 50):
                 base_load = max(load_power, 250.0)
                 surplus = signals["pv"]["production"] - signals["battery"]["charge"] - base_load
                 if surplus > 0:
