@@ -121,11 +121,12 @@ export default function EnergyOptimizerCard() {
 
                     <div className="space-y-3 relative z-10">
                         {/* Header Badge Row */}
-                        <div className="flex items-center justify-between gap-2 border-b border-emerald-500/20 pb-2">
+                        <div className="flex flex-wrap items-center justify-between gap-1.5 border-b border-emerald-500/20 pb-2.5">
                             <span className="text-xs font-bold uppercase tracking-wider text-emerald-300 flex items-center gap-1.5">
-                                <span>🏆</span> {t("energy.best_slot", "Beste Zeit")} ({duration})
+                                <span>🏆</span>
+                                <span>{t("energy.best_slot", "Beste Zeit")} ({duration})</span>
                             </span>
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500 text-slate-950 shrink-0">
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500 text-slate-950 shrink-0 shadow-2xs">
                                 {best.source === "pv_surplus" ? t("optimizer.solar_100", "☀️ 100% Solar") : t("optimizer.market_low", "⚡ Börsentief")}
                             </span>
                         </div>
@@ -135,7 +136,7 @@ export default function EnergyOptimizerCard() {
                             <div className="text-xl sm:text-2xl font-black font-mono text-white tracking-tight">
                                 {best.start_label} – {best.end_label} Uhr
                             </div>
-                            <div className="mt-1.5 flex items-baseline gap-2">
+                            <div className="mt-1.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
                                 <span className="text-sm font-black font-mono text-emerald-400">
                                     {Number(best.avg_cost_ct ?? best.effective_cost_ct ?? 0).toFixed(1)} ct/kWh
                                 </span>
@@ -158,11 +159,12 @@ export default function EnergyOptimizerCard() {
 
                     <div className="space-y-3 relative z-10">
                         {/* Header Badge Row */}
-                        <div className="flex items-center justify-between gap-2 border-b border-indigo-500/20 pb-2">
+                        <div className="flex flex-wrap items-center justify-between gap-1.5 border-b border-indigo-500/20 pb-2.5">
                             <span className="text-xs font-bold uppercase tracking-wider text-indigo-200 flex items-center gap-1.5">
-                                <span>🌙</span> {t("energy.best_night_slot", "Günstigstes Nachtfenster")}
+                                <span>🌙</span>
+                                <span>{t("energy.best_night_slot", "Günstigstes Nachtfenster")}</span>
                             </span>
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500 text-white shrink-0">
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500 text-white shrink-0 shadow-2xs">
                                 {t("energy.market_spot", "Börsenpreis")}
                             </span>
                         </div>
@@ -172,7 +174,7 @@ export default function EnergyOptimizerCard() {
                             <div className="text-xl sm:text-2xl font-black font-mono text-white tracking-tight">
                                 {bestNight ? `${bestNight.start_label} – ${bestNight.end_label} Uhr` : "Kein Nachtfenster"}
                             </div>
-                            <div className="mt-1.5 flex items-baseline gap-2">
+                            <div className="mt-1.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
                                 <span className="text-sm font-black font-mono text-indigo-300">
                                     {bestNight ? `${Number(bestNight.avg_cost_ct ?? bestNight.effective_cost_ct ?? 0).toFixed(1)} ct/kWh` : "-"}
                                 </span>
@@ -195,11 +197,12 @@ export default function EnergyOptimizerCard() {
 
                     <div className="space-y-3 relative z-10">
                         {/* Header Badge Row */}
-                        <div className="flex items-center justify-between gap-2 border-b border-rose-500/20 pb-2">
+                        <div className="flex flex-wrap items-center justify-between gap-1.5 border-b border-rose-500/20 pb-2.5">
                             <span className="text-xs font-bold uppercase tracking-wider text-rose-300 flex items-center gap-1.5">
-                                <span>🚫</span> {t("energy.avoid_slot", "Verbrauchsspitze meiden")}
+                                <span>🚫</span>
+                                <span>{t("energy.avoid_slot", "Verbrauchsspitze meiden")}</span>
                             </span>
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500 text-white shrink-0">
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500 text-white shrink-0 shadow-2xs">
                                 {t("energy.expensive_peak", "Teuer")}
                             </span>
                         </div>
@@ -209,7 +212,7 @@ export default function EnergyOptimizerCard() {
                             <div className="text-xl sm:text-2xl font-black font-mono text-white tracking-tight">
                                 {worst ? `${worst.start_label} – ${worst.end_label} Uhr` : "-"}
                             </div>
-                            <div className="mt-1.5 flex items-baseline gap-2">
+                            <div className="mt-1.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
                                 <span className="text-sm font-black font-mono text-rose-400">
                                     {worst ? `${Number(worst.avg_cost_ct ?? worst.effective_cost_ct ?? 0).toFixed(1)} ct/kWh` : "-"}
                                 </span>
@@ -249,8 +252,8 @@ export default function EnergyOptimizerCard() {
                 </div>
 
                 {/* Timeline Grid */}
-                <div className="bg-slate-950/60 border border-indigo-900/50 rounded-2xl p-4 overflow-x-auto">
-                    <div className="min-w-[650px] flex items-end gap-1.5 h-32 pt-4">
+                <div className="bg-slate-950/60 border border-indigo-900/50 rounded-2xl p-4 overflow-visible">
+                    <div className="min-w-[650px] flex items-end gap-1.5 h-36 pt-8 pb-1 relative">
                         {timeline.map((pt, idx) => {
                             const isInsideBest = (
                                 best.start_idx !== undefined &&
@@ -261,10 +264,17 @@ export default function EnergyOptimizerCard() {
                             const isSurplus = Boolean(pt.is_surplus || pt.is_pv_available || costVal <= 8.2);
                             const isPeak = pt.status === "red" || costVal >= 32.0;
 
-                            // Höhe: Minimum 12% für 0 ct Solar, Maximum 100%
+                            // Höhe: Minimum 14% für 0 ct Solar, Maximum 100%
                             const heightPct = isSurplus
                                 ? 14
                                 : Math.min(100, Math.max(14, Math.round((costVal / Math.max(maxTimelinePrice, 35.0)) * 100)));
+
+                            // Dynamische Ausrichtung des Tooltips (linksbündig am Anfang, rechtsbündig am Ende, zentriert in der Mitte)
+                            const tooltipPosClass = idx < 3 
+                                ? "left-0 translate-x-0" 
+                                : idx > timeline.length - 4 
+                                    ? "right-0 translate-x-0" 
+                                    : "left-1/2 -translate-x-1/2";
 
                             return (
                                 <div
@@ -273,8 +283,8 @@ export default function EnergyOptimizerCard() {
                                         isInsideBest ? "opacity-100" : "opacity-80 hover:opacity-100"
                                     }`}
                                 >
-                                    {/* Tooltip Hover */}
-                                    <div className="absolute bottom-full mb-2 hidden group-hover:flex flex-col bg-slate-900 border border-indigo-500/50 rounded-xl p-2.5 shadow-2xl text-[11px] z-50 whitespace-nowrap pointer-events-none">
+                                    {/* Tooltip Hover mit sicherer Positionierung */}
+                                    <div className={`absolute bottom-full mb-2 hidden group-hover:flex flex-col bg-slate-900/95 backdrop-blur-md border border-indigo-500/60 rounded-xl p-2.5 shadow-2xl text-[11px] z-50 whitespace-nowrap pointer-events-none ${tooltipPosClass}`}>
                                         <div className="font-bold text-white flex items-center justify-between gap-3">
                                             <span>{pt.time_label} Uhr ({pt.date_label || "Heute"})</span>
                                             <span className="font-mono text-emerald-400 font-bold">{costVal.toFixed(1)} ct/kWh</span>
