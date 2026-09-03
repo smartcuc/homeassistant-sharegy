@@ -271,10 +271,12 @@ class SupportDeskEngineTest(TestCase):
 
         # 2. Pro User creates ticket with 'high'
         from billing.models import EMSSubscription
-        EMSSubscription.objects.create(
+        EMSSubscription.objects.update_or_create(
             user=self.customer,
-            plan=EMSSubscription.PLAN_PRO_MONTHLY,
-            status=EMSSubscription.STATUS_ACTIVE,
+            defaults={
+                "plan": EMSSubscription.PLAN_PRO_MONTHLY,
+                "status": EMSSubscription.STATUS_ACTIVE,
+            }
         )
         self.client.force_login(self.customer)
         pro_resp = self.client.post(
