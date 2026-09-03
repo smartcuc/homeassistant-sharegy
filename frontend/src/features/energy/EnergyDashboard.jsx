@@ -19,7 +19,6 @@ import DateRangePickerModal from "./components/DateRangePickerModal";
 import ExportDropdown from "./components/ExportDropdown";
 import AlertNotificationBanner from "../alerts/components/AlertNotificationBanner";
 import GridCo2Card from "../market/components/GridCo2Card";
-import SystemReadinessCard from "./components/SystemReadinessCard";
 import { useSubscription } from "../../hooks/useSubscription";
 import ProBadge from "../../components/common/ProBadge";
 import ProUpgradeModal from "../../components/common/ProUpgradeModal";
@@ -195,11 +194,6 @@ export default function EnergyDashboard() {
                     </button>
                 </div>
             </div>
-
-            {/* =========================================================
-                SYSTEM READINESS & ONBOARDING HEALTH (OMI-TEST)
-            ========================================================= */}
-            <SystemReadinessCard className="mb-4" />
 
             {/* =========================================================
                 KPI HIGHLIGHTS
