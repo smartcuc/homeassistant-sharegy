@@ -143,10 +143,14 @@ export default function BatteryArbitrageCard() {
                         {t("arbitrage.best_charge_price", "🌙 Günstigster Ladepreis")}
                     </div>
                     <div className="text-lg font-extrabold text-emerald-600 mt-0.5">
-                        {data.best_charge_window?.price_ct_per_kwh?.toFixed(1) || "--"} <span className="text-xs font-normal">ct/kWh</span>
+                        {data.best_charge_window?.price_ct_per_kwh !== undefined && data.best_charge_window?.price_ct_per_kwh !== null
+                            ? `${Number(data.best_charge_window.price_ct_per_kwh).toFixed(1)} ct/kWh`
+                            : data.avg_charge_price_ct !== undefined && data.avg_charge_price_ct !== null
+                                ? `${Number(data.avg_charge_price_ct).toFixed(1)} ct/kWh`
+                                : "--"}
                     </div>
-                    <div className="text-[11px] text-slate-400 font-medium mt-0.5">
-                        {data.best_charge_window?.start_time ? `um ${data.best_charge_window.start_time} Uhr` : "--"}
+                    <div className="text-[11px] text-slate-400 font-medium mt-0.5 truncate">
+                        {data.best_charge_window?.window_label || (typeof data.best_charge_window === "string" ? data.best_charge_window : (data.best_charge_window?.start_time ? `um ${data.best_charge_window.start_time} Uhr` : "--"))}
                     </div>
                 </div>
 
@@ -155,10 +159,14 @@ export default function BatteryArbitrageCard() {
                         {t("arbitrage.best_discharge_price", "⚡ Höchster Entladepreis")}
                     </div>
                     <div className="text-lg font-extrabold text-indigo-600 mt-0.5">
-                        {data.best_discharge_window?.price_ct_per_kwh?.toFixed(1) || "--"} <span className="text-xs font-normal">ct/kWh</span>
+                        {data.best_discharge_window?.price_ct_per_kwh !== undefined && data.best_discharge_window?.price_ct_per_kwh !== null
+                            ? `${Number(data.best_discharge_window.price_ct_per_kwh).toFixed(1)} ct/kWh`
+                            : data.avg_discharge_price_ct !== undefined && data.avg_discharge_price_ct !== null
+                                ? `${Number(data.avg_discharge_price_ct).toFixed(1)} ct/kWh`
+                                : "--"}
                     </div>
-                    <div className="text-[11px] text-slate-400 font-medium mt-0.5">
-                        {data.best_discharge_window?.start_time ? `um ${data.best_discharge_window.start_time} Uhr` : "--"}
+                    <div className="text-[11px] text-slate-400 font-medium mt-0.5 truncate">
+                        {data.best_discharge_window?.window_label || (typeof data.best_discharge_window === "string" ? data.best_discharge_window : (data.best_discharge_window?.start_time ? `um ${data.best_discharge_window.start_time} Uhr` : "--"))}
                     </div>
                 </div>
 
@@ -167,7 +175,7 @@ export default function BatteryArbitrageCard() {
                         {t("arbitrage.price_spread", "📊 Preis-Spread")}
                     </div>
                     <div className="text-lg font-extrabold text-slate-900 mt-0.5">
-                        {data.price_spread_ct_per_kwh?.toFixed(1) || "0.0"} <span className="text-xs font-normal">ct/kWh</span>
+                        {data.price_spread_ct_per_kwh !== undefined ? Number(data.price_spread_ct_per_kwh).toFixed(1) : "0.0"} <span className="text-xs font-normal">ct/kWh</span>
                     </div>
                     <div className="text-[11px] text-slate-400 font-medium mt-0.5">
                         {t("arbitrage.gross_spread", "Brutto-Differenz")}
@@ -179,7 +187,9 @@ export default function BatteryArbitrageCard() {
                         {t("arbitrage.cycle_loss", "🔌 Verlustbereinigt")}
                     </div>
                     <div className="text-lg font-extrabold text-emerald-700 mt-0.5">
-                        {data.is_arbitrage_profitable ? `+${(data.price_spread_ct_per_kwh * 0.88).toFixed(1)}` : "0.0"} <span className="text-xs font-normal">ct/kWh</span>
+                        {data.is_arbitrage_profitable && data.price_spread_ct_per_kwh > 0
+                            ? `+${(Number(data.price_spread_ct_per_kwh) * 0.88).toFixed(1)}`
+                            : "0.0"} <span className="text-xs font-normal">ct/kWh</span>
                     </div>
                     <div className="text-[11px] text-slate-400 font-medium mt-0.5">
                         {t("arbitrage.efficiency_note", "inkl. 88% Speichereffizienz")}
@@ -194,23 +204,31 @@ export default function BatteryArbitrageCard() {
                         {t("arbitrage.strategy_advice", "💡 Handlungsempfehlungen für deinen Speicher")}
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        {advice.map((item, idx) => (
-                            <div
-                                key={idx}
-                                className={`p-3 rounded-2xl border text-xs flex items-start gap-2.5 ${item.type === "charge"
-                                    ? "bg-emerald-50/60 border-emerald-200/80 text-emerald-900"
-                                    : item.type === "discharge"
-                                        ? "bg-indigo-50/60 border-indigo-200/80 text-indigo-900"
-                                        : "bg-slate-50 border-slate-200/80 text-slate-800"
-                                    }`}
-                            >
-                                <span className="text-base leading-none shrink-0">{item.icon || "ℹ️"}</span>
-                                <div className="space-y-0.5">
-                                    <div className="font-bold">{item.title}</div>
-                                    <div className="text-slate-600 leading-relaxed">{item.description}</div>
+                        {advice.map((item, idx) => {
+                            const isString = typeof item === "string";
+                            const type = isString ? "general" : item.type;
+                            const icon = isString ? "💡" : (item.icon || "ℹ️");
+                            const title = isString ? (item.split(":")[0] || "Empfehlung") : item.title;
+                            const description = isString ? (item.includes(":") ? item.split(":").slice(1).join(":") : item) : item.description;
+
+                            return (
+                                <div
+                                    key={idx}
+                                    className={`p-3 rounded-2xl border text-xs flex items-start gap-2.5 ${type === "charge"
+                                        ? "bg-emerald-50/60 border-emerald-200/80 text-emerald-900"
+                                        : type === "discharge"
+                                            ? "bg-indigo-50/60 border-indigo-200/80 text-indigo-900"
+                                            : "bg-slate-50 border-slate-200/80 text-slate-800"
+                                        }`}
+                                >
+                                    <span className="text-base leading-none shrink-0">{icon}</span>
+                                    <div className="space-y-0.5">
+                                        <div className="font-bold">{title}</div>
+                                        <div className="text-slate-600 leading-relaxed">{description}</div>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
             )}

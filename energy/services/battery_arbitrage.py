@@ -168,16 +168,54 @@ def calculate_battery_arbitrage(user, horizon_hours: int = 36) -> dict:
     projected_monthly_savings_eur = round(daily_profit_eur * 22.0, 2)
     projected_yearly_savings_eur = round(daily_profit_eur * 150.0, 2)
 
-    charge_window_label = f"{best_charge_slots[0]['time_label']} - {(datetime.fromisoformat(best_charge_slots[-1]['timestamp']) + timedelta(hours=1)).strftime('%H:00')}" if best_charge_slots else "Keine"
-    discharge_window_label = f"{best_discharge_slots[0]['time_label']} - {(datetime.fromisoformat(best_discharge_slots[-1]['timestamp']) + timedelta(hours=1)).strftime('%H:00')}" if best_discharge_slots else "Keine"
+    charge_window_label = f"{best_charge_slots[0]['time_label']} – {(datetime.fromisoformat(best_charge_slots[-1]['timestamp']) + timedelta(hours=1)).strftime('%H:00')} Uhr" if best_charge_slots else "Keine"
+    discharge_window_label = f"{best_discharge_slots[0]['time_label']} – {(datetime.fromisoformat(best_discharge_slots[-1]['timestamp']) + timedelta(hours=1)).strftime('%H:00')} Uhr" if best_discharge_slots else "Keine"
+
+    best_charge_dict = {
+        "price_ct_per_kwh": round(avg_charge_price_ct, 1),
+        "start_time": best_charge_slots[0]['time_label'] if best_charge_slots else None,
+        "window_label": charge_window_label,
+    } if best_charge_slots else None
+
+    best_discharge_dict = {
+        "price_ct_per_kwh": round(avg_discharge_price_ct, 1),
+        "start_time": best_discharge_slots[0]['time_label'] if best_discharge_slots else None,
+        "window_label": discharge_window_label,
+    } if best_discharge_slots else None
 
     advice = []
     if is_arbitrage_profitable:
-        advice.append(f"Günstiges Netzfenster: Lade den Speicher nachts von {charge_window_label} zu durchschnittlich {avg_charge_price_ct:.1f} ct/kWh.")
-        advice.append(f"Peak-Entlastung: Nutze den gespeicherten Strom während der Verbrauchsspitze ({discharge_window_label}, Preis {avg_discharge_price_ct:.1f} ct/kWh).")
-        advice.append(f"Ersparnis: Durch die Preisdifferenz von {spread_ct:.1f} ct/kWh sparst du ca. {daily_profit_eur:.2f} € pro Zyklus (~{projected_yearly_savings_eur:.0f} €/Jahr).")
+        advice.append({
+            "type": "charge",
+            "icon": "🌙",
+            "title": "Günstiges Nacht-Ladefenster",
+            "description": f"Lade den Speicher nachts von {charge_window_label} zu durchschnittlich {avg_charge_price_ct:.1f} ct/kWh aus dem Netz voll.",
+        })
+        advice.append({
+            "type": "discharge",
+            "icon": "⚡",
+            "title": "Verbrauchsspitzen & Entlastung",
+            "description": f"Nutze den gespeicherten Strom während der teuren Abendspitze ({discharge_window_label}, Börsenpreis {avg_discharge_price_ct:.1f} ct/kWh).",
+        })
+        advice.append({
+            "type": "general",
+            "icon": "💶",
+            "title": "Netto-Arbitragegewinn",
+            "description": f"Durch die Preisdifferenz von {spread_ct:.1f} ct/kWh sparst du ca. {daily_profit_eur:.2f} € pro Zyklus (~{projected_yearly_savings_eur:.0f} €/Jahr).",
+        })
     else:
-        advice.append("Aktuell ist die Preisspreizung an der Strombörse zu gering für Netzladen. Reguläre PV-Optimierung ist heute rentabler.")
+        advice.append({
+            "type": "charge",
+            "icon": "☀️",
+            "title": "PV-Eigenverbrauch Vorrang",
+            "description": f"Günstigstes Netzfenster liegt bei {avg_charge_price_ct:.1f} ct/kWh ({charge_window_label}). Die Preisdifferenz reicht aktuell nicht für profitable Netzladung.",
+        })
+        advice.append({
+            "type": "discharge",
+            "icon": "🔋",
+            "title": "Verbrauchsspitzen meiden",
+            "description": f"Höchster Bezugspreis um {discharge_window_label} ({avg_discharge_price_ct:.1f} ct/kWh). Decke Spitzenlasten aus dem PV-Ertrag oder Batteriespeicher.",
+        })
 
     return {
         "has_battery": has_batt,
@@ -190,8 +228,8 @@ def calculate_battery_arbitrage(user, horizon_hours: int = 36) -> dict:
         "price_spread_ct_per_kwh": round(spread_ct, 2),
         "avg_charge_price_ct": round(avg_charge_price_ct, 2),
         "avg_discharge_price_ct": round(avg_discharge_price_ct, 2),
-        "best_charge_window": charge_window_label,
-        "best_discharge_window": discharge_window_label,
+        "best_charge_window": best_charge_dict,
+        "best_discharge_window": best_discharge_dict,
         "daily_profit_eur": daily_profit_eur,
         "projected_monthly_savings_eur": projected_monthly_savings_eur,
         "projected_yearly_savings_eur": projected_yearly_savings_eur,
