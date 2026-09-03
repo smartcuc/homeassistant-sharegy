@@ -138,8 +138,13 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "" })
                     {/* 4 PILLARS STATUS CARDS */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                         {pillarConfigs.map((item) => {
-                            const isOk = item.pillar?.configured && item.pillar?.status === "ok";
+                            const isOk = Boolean(
+                                item.pillar?.installed ||
+                                (item.pillar?.configured && item.pillar?.status === "ok") ||
+                                item.pillar?.status === "ok"
+                            );
                             const deviceName = item.pillar?.device_name;
+                            const statusText = item.pillar?.status_text;
                             const isCalculated = item.pillar?.method === "calculated";
 
                             return (
@@ -174,7 +179,9 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "" })
                                             {deviceName
                                                 ? deviceName
                                                 : isCalculated
-                                                ? "Berechnet (PV - Netz)"
+                                                ? "Berechnet (PV + Netz)"
+                                                : statusText
+                                                ? statusText
                                                 : item.missingHint}
                                         </div>
                                     </div>
