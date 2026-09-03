@@ -110,7 +110,7 @@ export default function ControlPage() {
                                 <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
                                     {t("control.title", "Energiesteuerung & Smart-Charging")}
                                 </h1>
-                                <ProBadge size="sm" />
+                                {!isPro && <ProBadge size="sm" />}
                             </div>
                             <p className="text-xs text-gray-500 mt-0.5">
                                 {t("control.subtitle", "Intelligentes EMS-Management für Batteriespeicher, dynamische Börsenstromtarife und Lastmanagement.")}
@@ -164,7 +164,7 @@ export default function ControlPage() {
                                 <h2 className="text-base font-bold text-gray-900">
                                     {t("control.storage_title", "Hausspeicher-Betriebsmodi & Live-Regelung")}
                                 </h2>
-                                <ProBadge size="xs" />
+                                {!isPro && <ProBadge size="xs" />}
                             </div>
                             <p className="text-xs text-gray-500 mt-0.5">
                                 {t("control.storage_subtitle", "Wähle das Regelverhalten deines Heimspeichers (z. B. Sungrow SH-Serie, SBR-Speicher oder Modbus-Geräte).")}
@@ -508,7 +508,7 @@ export default function ControlPage() {
                 open={proModalOpen}
                 onClose={() => setProModalOpen(false)}
                 featureName="Energiesteuerung & Smart-Charging"
-                featureDesc="Nutze die automatische Preis-Arbitrage mit dynamischen Tarifen (Tibber/EPEX), automatische Zwangsladung bei Tiefstpreisen und aktive Steuerung deiner Hausspeicher."
+                featureDesc="Nutze die automatische Preis-Arbitrage mit dynamischen Tarifen (Börsenpreise), automatische Zwangsladung bei Tiefstpreisen und aktive Steuerung deiner Hausspeicher."
             />
         </div>
     );
