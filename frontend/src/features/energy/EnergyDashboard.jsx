@@ -15,6 +15,7 @@ import DateRangePickerModal from "./components/DateRangePickerModal";
 import ExportDropdown from "./components/ExportDropdown";
 import AlertNotificationBanner from "../alerts/components/AlertNotificationBanner";
 import GridCo2Card from "../market/components/GridCo2Card";
+import SystemReadinessCard from "./components/SystemReadinessCard";
 import { useSubscription } from "../../hooks/useSubscription";
 import ProBadge from "../../components/common/ProBadge";
 import ProUpgradeModal from "../../components/common/ProUpgradeModal";
@@ -179,30 +180,9 @@ export default function EnergyDashboard() {
             </div>
 
             {/* =========================================================
-                EMPTY STATE / ONBOARDING BANNER
+                SYSTEM READINESS & ONBOARDING HEALTH (OMI-TEST)
             ========================================================= */}
-            {(!data.has_data && !balanceQuery.isLoading) && (
-                <div className="bg-linear-to-r from-indigo-500/10 via-amber-500/10 to-blue-500/10 border border-indigo-200/80 rounded-2xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                    <div className="flex items-start gap-3.5">
-                        <span className="text-3xl p-2.5 bg-white rounded-xl shadow-2xs border border-indigo-100">⚡</span>
-                        <div>
-                            <h3 className="text-base font-bold text-gray-900">
-                                {t("energy.empty_title", "Noch keine Messdaten vorhanden")}
-                            </h3>
-                            <p className="text-sm text-gray-600 mt-1 max-w-2xl">
-                                {t("energy.empty_desc", "Verbinde deinen Smart Meter, Wechselrichter, Batteriespeicher oder Sensor-Steckdosen unter 'Geräte', um deine Energiebilanz, Autarkie und Sub-Metering-Diagramme live zu erfassen.")}
-                            </p>
-                        </div>
-                    </div>
-                    <a
-                        href="/app/devices"
-                        className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-xs transition whitespace-nowrap flex items-center gap-2 shrink-0"
-                    >
-                        <span>➕</span>
-                        <span>{t("energy.connect_devices", "Geräte einrichten")}</span>
-                    </a>
-                </div>
-            )}
+            <SystemReadinessCard className="mb-4" />
 
             {/* =========================================================
                 KPI HIGHLIGHTS

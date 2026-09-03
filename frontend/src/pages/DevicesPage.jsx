@@ -12,6 +12,7 @@ import DeviceBaselineModal from "../components/device/DeviceBaselineModal";
 import AddDeviceModal from "../components/device/AddDeviceModal";
 import RemoveDevicesModal from "../components/device/RemoveDevicesModal";
 import TrashBinModal from "../components/device/TrashBinModal";
+import SystemReadinessCard from "../features/energy/components/SystemReadinessCard";
 
 import { useTrashCount } from "../hooks/useTrashDevices";
 import useUserPreference from "../hooks/useUserPreference";
@@ -801,6 +802,9 @@ export default function DevicesPage() {
                     </button>
                 </div>
             </div>
+
+            {/* SYSTEM READINESS & SETUP HEALTH (OMI-TEST) */}
+            <SystemReadinessCard onOpenAddDevice={() => setAddOpen(true)} className="mb-6" />
 
             {/* FILTER BAR */}
             <div className="mb-3">

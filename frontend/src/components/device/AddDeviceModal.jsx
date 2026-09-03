@@ -434,6 +434,7 @@ function StepConnectionAndGuides({ device, preset, onClose }) {
     const isOnline = status?.status === "online" || status?.status === "stale" || simulatedValue !== null;
 
     const topic = `h/${device.mqtt_token}/${device.identifier}`;
+    const wsUrl = `wss://${window.location.host.includes("localhost") ? "sharegy.de" : window.location.host}/ws/energy/${device.mqtt_token}/`;
 
     // Test-Messwert Simulator
     async function handleSimulate(val = 450.0) {
@@ -461,7 +462,7 @@ function StepConnectionAndGuides({ device, preset, onClose }) {
                             {device.name || device.identifier} {t("common.edit", "verbinden")}
                         </h2>
                         <div className="text-xs text-gray-500">
-                            {t("device_add.target_topic", "MQTT Topic:")} <span className="font-mono text-indigo-600 font-semibold">{topic}</span>
+                            WSS & MQTT Interface bereit
                         </div>
                     </div>
                 </div>
@@ -479,6 +480,38 @@ function StepConnectionAndGuides({ device, preset, onClose }) {
                 )}
             </div>
 
+            {/* ⚡ PROMINENT WEBSOCKET (WSS) BANNER (SHELLY & MODERN DEVICES) */}
+            <div className="bg-gradient-to-r from-amber-50/90 via-orange-50/40 to-white border border-amber-200 rounded-2xl p-4 mb-4 shadow-2xs">
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                    <div className="flex items-center gap-2">
+                        <span className="text-base">⚡</span>
+                        <span className="text-xs font-bold text-amber-950 uppercase tracking-wider">
+                            Empfohlen für Shelly & Smart Plugs: Outbound-WebSocket (WSS)
+                        </span>
+                        <span className="text-[10px] font-extrabold bg-amber-200 text-amber-900 px-2 py-0.5 rounded-full">
+                            Port 443 · Zero-Config
+                        </span>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => safeCopy(wsUrl, setCopiedKey, "ws_url")}
+                        className="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-lg transition cursor-pointer shadow-2xs flex items-center gap-1"
+                    >
+                        {copiedKey === "ws_url" ? "✅ WSS-URL kopiert!" : "📋 WSS-URL kopieren"}
+                    </button>
+                </div>
+                <div className="flex items-center justify-between p-2.5 bg-white border border-amber-200/90 rounded-xl font-mono text-xs text-amber-950 font-semibold break-all">
+                    <span>{wsUrl}</span>
+                </div>
+                <div className="text-[11px] text-amber-900/80 mt-2 flex items-center gap-3">
+                    <span>🔒 TLS Verschlüsselt</span>
+                    <span>•</span>
+                    <span>🛡️ Funktioniert ohne Router-Portfreigaben</span>
+                    <span>•</span>
+                    <span>💡 Sofortige Relais-Schaltung</span>
+                </div>
+            </div>
+
             {/* TOP GRID: MQTT CREDENTIALS & QR */}
             <div className="grid md:grid-cols-[1fr_2fr] gap-3 mb-4">
                 {/* QR CODE CARD */}
@@ -489,22 +522,26 @@ function StepConnectionAndGuides({ device, preset, onClose }) {
                     >
                         <QRCodeSVG
                             value={JSON.stringify({
+                                wss_url: wsUrl,
                                 host: device.mqtt_host,
                                 port: device.mqtt_port,
                                 username: device.mqtt_username,
                                 password: device.mqtt_password,
                                 topic,
                             })}
-                            size={110}
+                            size={105}
                         />
                     </div>
-                    <span className="text-[11px] text-gray-400 mt-2">
+                    <span className="text-[10px] text-gray-400 mt-2">
                         {t("interfaces.qr_modal_desc", "QR-Code für Companion Apps")}
                     </span>
                 </div>
 
-                {/* CREDENTIALS TABLE */}
+                {/* CREDENTIALS TABLE (MQTT) */}
                 <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 flex flex-col justify-between">
+                    <div className="text-[10px] uppercase font-bold text-gray-500 mb-1.5 flex items-center justify-between">
+                        <span>📡 Klassische MQTT Zugangsdaten (ioBroker, OpenDTU, Tasmota)</span>
+                    </div>
                     <div className="grid grid-cols-2 gap-2 text-xs mb-3">
                         <div>
                             <span className="text-gray-400 block text-[10px] uppercase font-bold">{t("interfaces.broker_host", "Host")}</span>
@@ -526,10 +563,10 @@ function StepConnectionAndGuides({ device, preset, onClose }) {
 
                     <button
                         onClick={() => {
-                            const text = `Host: ${device.mqtt_host || "mqtt.sharegy.de"}\nPort: ${device.mqtt_port || 1883}\nUser: ${device.mqtt_username}\nPass: ${device.mqtt_password}\nTopic: ${topic}`;
+                            const text = `WSS-URL: ${wsUrl}\nMQTT-Host: ${device.mqtt_host || "mqtt.sharegy.de"}\nMQTT-Port: ${device.mqtt_port || 1883}\nUser: ${device.mqtt_username}\nPass: ${device.mqtt_password}\nTopic: ${topic}`;
                             safeCopy(text, setCopiedKey, "all");
                         }}
-                        className="w-full bg-white hover:bg-slate-100 border border-slate-300 text-gray-700 text-xs font-semibold py-2 px-3 rounded-lg transition flex items-center justify-center gap-1.5"
+                        className="w-full bg-white hover:bg-slate-100 border border-slate-300 text-gray-700 text-xs font-semibold py-2 px-3 rounded-lg transition flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                         {copiedKey === "all" ? `✅ ${t("common.copied", "Kopiert!")}` : t("interfaces.copy_all", "📋 Alle Zugangsdaten kopieren")}
                     </button>
@@ -540,15 +577,16 @@ function StepConnectionAndGuides({ device, preset, onClose }) {
             <div className="border border-slate-200 rounded-xl overflow-hidden mb-4 bg-white shadow-xs">
                 <div className="flex border-b border-slate-200 bg-slate-50 text-xs font-semibold overflow-x-auto">
                     {[
-                        { id: "iobroker", label: t("interfaces.tab_iobroker", "🔧 ioBroker"), icon: "🔧" },
-                        { id: "shelly", label: t("interfaces.tab_shelly", "⚡ Shelly"), icon: "⚡" },
+                        { id: "shelly", label: "⚡ Shelly (WSS - Empfohlen)", icon: "⚡" },
                         { id: "homeassistant", label: t("interfaces.tab_ha", "🏠 Home Assistant"), icon: "🏠" },
+                        { id: "iobroker", label: t("interfaces.tab_iobroker", "🔧 ioBroker"), icon: "🔧" },
+                        { id: "mqtt", label: "📡 Tasmota / OpenDTU", icon: "📡" },
                         { id: "otel", label: t("interfaces.tab_otel", "🔭 OpenTelemetry"), icon: "🔭" },
                     ].map((tab) => (
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
-                            className={`px-4 py-2.5 transition whitespace-nowrap ${activeTab === tab.id
+                            className={`px-4 py-2.5 transition whitespace-nowrap cursor-pointer ${activeTab === tab.id
                                     ? "bg-white text-indigo-600 border-b-2 border-indigo-600 font-bold"
                                     : "text-gray-500 hover:text-gray-800 hover:bg-slate-100"
                                 }`}
@@ -559,7 +597,50 @@ function StepConnectionAndGuides({ device, preset, onClose }) {
                 </div>
 
                 {/* TAB CONTENTS */}
-                <div className="p-4 text-xs text-gray-700 leading-relaxed max-h-48 overflow-y-auto">
+                <div className="p-4 text-xs text-gray-700 leading-relaxed max-h-52 overflow-y-auto">
+                    {/* SHELLY WSS GUIDE */}
+                    {activeTab === "shelly" && (
+                        <div className="space-y-2">
+                            <div className="font-bold text-gray-900 text-sm flex items-center gap-1.5">
+                                ⚡ Shelly Web-Interface (Settings $\rightarrow$ Outbound WebSocket)
+                            </div>
+                            <ol className="list-decimal list-inside space-y-1.5 text-gray-600 pl-1">
+                                <li>Öffne die IP deines Shelly im Browser (<code className="bg-slate-100 px-1 py-0.5 rounded font-mono">http://&lt;shelly-ip&gt;</code>).</li>
+                                <li>Navigiere zu <strong>Settings $\rightarrow$ Outbound WebSocket</strong> (bzw. <em>Advanced</em>).</li>
+                                <li>Setze das Häkchen bei <strong>Enable</strong> und trage die Server-URL ein:
+                                    <div className="mt-1 font-mono bg-slate-900 text-amber-300 p-2 rounded-lg break-all text-[11px]">
+                                        {wsUrl}
+                                    </div>
+                                </li>
+                                <li>Klicke auf <strong>Save Settings</strong>. Das Gerät verbindet sich sekundenschnell per WSS!</li>
+                            </ol>
+                        </div>
+                    )}
+
+                    {/* HOME ASSISTANT GUIDE */}
+                    {activeTab === "homeassistant" && (
+                        <div className="space-y-2">
+                            <div className="font-bold text-gray-900 text-sm">
+                                🏠 Home Assistant Integration
+                            </div>
+                            <p className="text-gray-600 text-[11px]">
+                                Nutze die offizielle <strong>Sharegy Cloud Bridge</strong> über HACS oder verbinde Entitäten per MQTT Automation:
+                            </p>
+                            <pre className="bg-slate-900 text-slate-100 p-2.5 rounded-lg font-mono text-[11px] overflow-x-auto">
+                                {`alias: "Sharegy Sync - ${device.name || device.identifier}"
+trigger:
+  - platform: state
+    entity_id: sensor.pv_leistung
+action:
+  - service: mqtt.publish
+    data:
+      topic: "${topic}"
+      payload: >
+        {"power": {{ states('sensor.pv_leistung') | float(0) }}}`}
+                            </pre>
+                        </div>
+                    )}
+
                     {/* IOBROKER GUIDE */}
                     {activeTab === "iobroker" && (
                         <div className="space-y-2">
@@ -578,37 +659,17 @@ function StepConnectionAndGuides({ device, preset, onClose }) {
                         </div>
                     )}
 
-                    {/* SHELLY GUIDE */}
-                    {activeTab === "shelly" && (
+                    {/* TASMOTA / OPENDTU GUIDE */}
+                    {activeTab === "mqtt" && (
                         <div className="space-y-2">
                             <div className="font-bold text-gray-900 text-sm">
-                                ⚡ Shelly Web-Interface (Settings $\rightarrow$ MQTT)
+                                📡 Tasmota, OpenDTU & AhoyDTU (MQTT)
                             </div>
                             <ol className="list-decimal list-inside space-y-1 text-gray-600 pl-1">
-                                <li>Server: <code className="bg-slate-100 px-1 py-0.5 rounded">{device.mqtt_host || "mqtt.sharegy.de"}:{device.mqtt_port || 1883}</code></li>
-                                <li>Topic Prefix: <code className="bg-slate-100 px-1 py-0.5 rounded font-mono">h/{device.mqtt_token}/{device.identifier}</code></li>
+                                <li>Host: <code className="bg-slate-100 px-1 py-0.5 rounded">{device.mqtt_host || "mqtt.sharegy.de"}</code>, Port: <code className="bg-slate-100 px-1 py-0.5 rounded">{device.mqtt_port || 1883}</code></li>
+                                <li>Publish Topic: <code className="bg-slate-100 px-1 py-0.5 rounded font-mono">{topic}</code></li>
+                                <li>Benutzer & Passwort aus der Tabelle oben eintragen.</li>
                             </ol>
-                        </div>
-                    )}
-
-                    {/* HOME ASSISTANT GUIDE */}
-                    {activeTab === "homeassistant" && (
-                        <div className="space-y-2">
-                            <div className="font-bold text-gray-900 text-sm">
-                                🏠 Home Assistant Automation YAML Snippet
-                            </div>
-                            <pre className="bg-slate-900 text-slate-100 p-2.5 rounded-lg font-mono text-[11px] overflow-x-auto">
-                                {`alias: "Sharegy Sync - ${device.name || device.identifier}"
-trigger:
-  - platform: state
-    entity_id: sensor.pv_leistung
-action:
-  - service: mqtt.publish
-    data:
-      topic: "${topic}"
-      payload: >
-        {"power": {{ states('sensor.pv_leistung') | float(0) }}}`}
-                            </pre>
                         </div>
                     )}
 
