@@ -197,13 +197,28 @@ def process_incoming_telemetry(token, payload_str, user):
                 elif key in ["energy", "energy_kwh", "total_energy"]:
                     total_energy += float(val)
                     has_energy = True
-                elif key in ["voltage", "current"]:
+                elif key in ["voltage", "current", "temperature", "temp", "soc", "frequency", "humidity"]:
                     metrics[key] = float(val)
 
-        if has_power:
+        # Spezifische Metrik-Direktzuordnung (ioBroker, Home Assistant, Tasmota, Custom Frames)
+        explicit_metric = data.get("metric") or container.get("metric")
+        if explicit_metric and ("val" in container or "value" in container or "v" in container):
+            raw_v = container.get("val") if "val" in container else (container.get("value") if "value" in container else container.get("v"))
+            try:
+                metrics[str(explicit_metric).strip()] = float(raw_v)
+                has_power = False # Überschreibe generisches Power falls spezifische Metrik vorliegt
+            except (ValueError, TypeError):
+                pass
+
+        if has_power and "power" not in metrics:
             metrics["power"] = round(total_power, 2)
-        if has_energy:
+        if has_energy and "energy" not in metrics:
             metrics["energy"] = round(total_energy, 4)
+
+        unit_map = {}
+        raw_u = data.get("unit") or container.get("unit")
+        if raw_u and explicit_metric:
+            unit_map[explicit_metric] = str(raw_u).strip()
 
         # 5. Zeitstempel & Relais-Zustand (output)
         ts = timezone.now()
@@ -239,8 +254,9 @@ def process_incoming_telemetry(token, payload_str, user):
                 ingest_metric_payload(
                     device=device,
                     metrics=metrics,
+                    unit_map=unit_map,
                     timestamp=ts,
-                    source="shelly_ws",
+                    source="websocket",
                     meta=meta,
                 )
             logger.info(
