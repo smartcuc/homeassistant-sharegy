@@ -158,7 +158,7 @@ export default function StorageSystemCard({ storage, onEdit, onDelete, onControl
                     <span className="text-sm">🎛️</span>
                     <span className="text-slate-300">
                         Steuerungsmodus: <strong className="text-white capitalize">{
-                            storage.control_mode === "price_optimized" ? "💶 Preisgeführt (Tibber/EPEX)" :
+                            storage.control_mode === "price_optimized" ? "💶 Preisgeführt (Börsenpreis)" :
                             storage.control_mode === "forced_charge" ? "⚡ Sofortladen" :
                             storage.control_mode === "forced_discharge" ? "🔋 Zwangsentladung" :
                             storage.control_mode === "idle" ? "💤 Standby" :

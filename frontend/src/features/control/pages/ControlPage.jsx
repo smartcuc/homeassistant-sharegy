@@ -280,7 +280,7 @@ export default function ControlPage() {
                                             </button>
                                         </div>
 
-                                        {/* Modus 2: Preisgeführt (Dynamischer Tarif) */}
+                                        {/* Modus 2: Preisgeführt (Dynamischer Börsenpreis) */}
                                         <div className={`p-4 sm:p-5 rounded-2xl border flex flex-col justify-between space-y-4 transition ${
                                             storage.control_mode === "price_optimized"
                                                 ? "bg-blue-950/50 border-blue-500 ring-2 ring-blue-400/40 shadow-lg shadow-blue-950/50"
@@ -290,15 +290,15 @@ export default function ControlPage() {
                                                 <div className="flex items-center justify-between font-bold text-sm">
                                                     <span className="flex items-center gap-1.5 text-white">
                                                         <span>💶</span>
-                                                        <span>Preisgeführt (Tibber/EPEX)</span>
+                                                        <span>Preisgeführt (Börsenpreis)</span>
                                                     </span>
                                                     {storage.control_mode === "price_optimized" ? (
                                                         <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-500 text-white">
                                                             Aktiv
                                                         </span>
-                                                    ) : (
+                                                    ) : !isPro ? (
                                                         <ProBadge size="xs" />
-                                                    )}
+                                                    ) : null}
                                                 </div>
                                                 <p className="text-xs text-slate-300 leading-relaxed">
                                                     Lädt bei niedrigen oder negativen Börsenstrompreisen automatisch voll (&le; {storage.price_threshold_ct || 15.0} ct/kWh).
