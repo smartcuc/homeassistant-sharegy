@@ -189,10 +189,11 @@ VAPID_ADMIN_EMAIL = os.getenv(
 
 
 # =============================
-# ☀️ Sungrow iSolarCloud OAuth 2.0
+# ☀️ Sungrow iSolarCloud OAuth 2.0 & Webhook
 # =============================
 SUNGROW_APPKEY = os.getenv("SUNGROW_APPKEY", "")
 SUNGROW_APP_SECRET = os.getenv("SUNGROW_APP_SECRET", "")
+SUNGROW_SEC_KEY = os.getenv("SUNGROW_SEC_KEY", os.getenv("SUNGROW_APP_SECRET", ""))
 SUNGROW_GATEWAY_URL = os.getenv("SUNGROW_GATEWAY_URL", "https://gateway.isolarcloud.eu")
 SUNGROW_REDIRECT_URL = os.getenv("SUNGROW_REDIRECT_URL", "https://sharegy.de/api/v1/integrations/sungrow/callback")
 SUNGROW_RSA_PUBLIC_KEY = os.getenv("SUNGROW_RSA_PUBLIC_KEY", "")
