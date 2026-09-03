@@ -13,11 +13,14 @@ class Command(BaseCommand):
         roles = {
             "consumer": "Verbraucher",
             "producer": "Erzeuger",
-            "both": "Beides"
+            "battery": "Speicher",
+            "grid": "Netzanschluss",
+            "sensor": "Sensor",
+            "both": "Beides",
         }
 
         for key, label in roles.items():
-            DeviceRole.objects.get_or_create(
+            DeviceRole.objects.update_or_create(
                 key=key,
                 defaults={"label": label}
             )

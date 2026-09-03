@@ -15,6 +15,7 @@ import TrashBinModal from "../components/device/TrashBinModal";
 import SystemReadinessCard from "../features/energy/components/SystemReadinessCard";
 
 import { useTrashCount } from "../hooks/useTrashDevices";
+import { useStructure } from "../hooks/useStructure";
 import useUserPreference from "../hooks/useUserPreference";
 import { useTranslation } from "react-i18next";
 
@@ -93,12 +94,28 @@ function getRoleColor(config) {
                 chart: "#8b5cf6",
             };
 
+        case "sensor":
+            return {
+                text: "text-teal-600",
+                bg: "bg-teal-50",
+                ring: "hover:ring-teal-200",
+                chart: "#0d9488",
+            };
+
+        case "both":
+            return {
+                text: "text-cyan-600",
+                bg: "bg-cyan-50",
+                ring: "hover:ring-cyan-200",
+                chart: "#0891b2",
+            };
+
         default:
             return {
-                text: "text-gray-500",
-                bg: "bg-white",
-                ring: "hover:ring-gray-200",
-                chart: "#64748b",
+                text: "text-indigo-600",
+                bg: "bg-indigo-50",
+                ring: "hover:ring-indigo-200",
+                chart: "#6366f1",
             };
     }
 }
@@ -363,6 +380,16 @@ export default function DevicesPage() {
             label: t("devices.role_grid", "Netz"),
             title: "Netzanschlüsse anzeigen",
         },
+        sensor: {
+            icon: "🌡️",
+            label: t("devices.role_sensor", "Sensor"),
+            title: "Sensoren & Messfühler anzeigen",
+        },
+        both: {
+            icon: "🔄",
+            label: t("devices.role_both", "Beides"),
+            title: "Erzeuger & Verbraucher anzeigen",
+        },
     }), [t]);
 
     const [chartDevice, setChartDevice] = useState(null);
@@ -460,31 +487,8 @@ export default function DevicesPage() {
         [settings.statusFilter]
     );
 
-    const activeRoles = useMemo(
-        () =>
-            settings.roles ?? [
-                "producer",
-                "consumer",
-                "battery",
-                "grid",
-            ],
-        [settings.roles]
-    );
-
-    const floorOrder = useMemo(
-        () => settings.floorOrder ?? [],
-        [settings.floorOrder]
-    );
-
-    const roomOrder = useMemo(
-        () => settings.roomOrder ?? [],
-        [settings.roomOrder]
-    );
-
-    const deviceOrder = useMemo(
-        () => settings.deviceOrder ?? [],
-        [settings.deviceOrder]
-    );
+    const structureQuery = useStructure();
+    const structure = structureQuery?.data;
 
     const devices = useMemo(
         () => devicesQuery.data ?? [],
@@ -508,6 +512,22 @@ export default function DevicesPage() {
             sparkline: valueMap[d.id]?.sparkline || [],
         }));
     }, [devices, statusMap, valueMap]);
+
+    const allKnownRoles = useMemo(() => {
+        const keys = new Set(["producer", "consumer", "battery", "grid", "sensor"]);
+        (structure?.roles || []).forEach(r => {
+            if (r.key) keys.add(r.key);
+        });
+        merged.forEach(d => {
+            if (d.config?.role?.key) keys.add(d.config.role.key);
+        });
+        return Array.from(keys);
+    }, [structure?.roles, merged]);
+
+    const activeRoles = useMemo(
+        () => settings.roles ?? allKnownRoles,
+        [settings.roles, allKnownRoles]
+    );
 
 
     const roleStats = useMemo(() => {
@@ -859,10 +879,14 @@ export default function DevicesPage() {
                 ))}
 
                 {/* ROLE CHIPS */}
-                {["producer", "consumer", "battery", "grid"].map(role => {
+                {allKnownRoles.filter(role => ["producer", "consumer", "battery", "grid", "sensor"].includes(role) || (roleStats[role] || 0) > 0).map(role => {
 
                     const active = activeRoles.includes(role);
-                    const config = roleOptions[role];
+                    const config = roleOptions[role] || {
+                        icon: "📟",
+                        label: role.charAt(0).toUpperCase() + role.slice(1),
+                        title: `${role} anzeigen`,
+                    };
 
                     return (
                         <button
@@ -887,10 +911,10 @@ export default function DevicesPage() {
                                 text-xs
                                 border
                                 flex items-center gap-1
-                                transition
+                                transition cursor-pointer
                                 ${active
-                                    ? "bg-indigo-600 text-white border-indigo-600"
-                                    : "bg-white hover:bg-gray-50 border-gray-200"}
+                                    ? "bg-indigo-600 text-white border-indigo-600 font-bold"
+                                    : "bg-white hover:bg-gray-50 border-gray-200 text-gray-700"}
                             `}
                         >
                             <span>{config.icon}</span>
