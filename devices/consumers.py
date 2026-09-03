@@ -229,24 +229,59 @@ def process_incoming_telemetry(token, payload_str, user):
             except Exception:
                 ts = timezone.now()
 
-        # Prüfe auf Relais-Schaltzustand (switch:0, switch:1, relay:0 etc.)
+        # Prüfe auf Relais-Schaltzustand (switch:0, switch:1, relay:0, flaches state/relay_state oder ioBroker Rückkanal)
         relay_state = None
-        for k, v in container.items():
-            if isinstance(v, dict) and ("output" in v or "state" in v or "ison" in v):
-                out_val = v.get("output") if "output" in v else (v.get("state") if "state" in v else v.get("ison"))
-                if isinstance(out_val, bool):
-                    relay_state = out_val
-                    break
-                elif isinstance(out_val, str) and out_val.lower() in ("on", "true", "1"):
-                    relay_state = True
-                    break
-                elif isinstance(out_val, str) and out_val.lower() in ("off", "false", "0"):
-                    relay_state = False
-                    break
+        if "relay_state" in container and container["relay_state"] is not None:
+            relay_state = bool(container["relay_state"])
+        elif "relay_state" in data and data["relay_state"] is not None:
+            relay_state = bool(data["relay_state"])
+        elif "state" in container and isinstance(container["state"], bool):
+            relay_state = container["state"]
+        elif "state" in data and isinstance(data["state"], bool):
+            relay_state = data["state"]
+        elif data.get("metric") in ["relay_state", "switch", "state"]:
+            raw_v = container.get("val") if "val" in container else data.get("val")
+            if raw_v is not None:
+                relay_state = (raw_v is True or raw_v == 1 or str(raw_v).lower() in ("true", "1", "on"))
+
+        if relay_state is None:
+            for k, v in container.items():
+                if isinstance(v, dict) and ("output" in v or "state" in v or "ison" in v):
+                    out_val = v.get("output") if "output" in v else (v.get("state") if "state" in v else v.get("ison"))
+                    if isinstance(out_val, bool):
+                        relay_state = out_val
+                        break
+                    elif isinstance(out_val, str) and out_val.lower() in ("on", "true", "1"):
+                        relay_state = True
+                        break
+                    elif isinstance(out_val, str) and out_val.lower() in ("off", "false", "0"):
+                        relay_state = False
+                        break
 
         if relay_state is not None:
-            cache.set(f"device_relay_state_{device.id}", relay_state, timeout=3600)
+            cache.set(f"device_relay_state_{device.id}", relay_state, timeout=86400)
             cache.set(f"device_switchable_{device.id}", True, timeout=86400)
+
+            # Live-Broadcast an geöffnete Web-Dashboards
+            try:
+                from channels.layers import get_channel_layer
+                from asgiref.sync import async_to_sync
+                channel_layer = get_channel_layer()
+                if channel_layer:
+                    async_to_sync(channel_layer.group_send)(
+                        "energy",
+                        {
+                            "type": "send_device_update",
+                            "data": {
+                                "type": "device_relay_update",
+                                "device_id": device.id,
+                                "identifier": identifier,
+                                "relay_state": relay_state,
+                            }
+                        }
+                    )
+            except Exception:
+                pass
 
         # 6. Ingest & Live-Broadcast an Dashboards
         if metrics or relay_state is not None:
