@@ -697,9 +697,14 @@ def device_available_metrics(request, device_id):
             "daily_generation_kwh", "daily_import_kwh"
         ]:
             continue
+
+        # Falls der Snapshot-Key generisch (value/val) ist, auf die konfigurierte MetricDefinition mappen
+        if k.lower() in ["value", "val"] and cfg and cfg.metric_definition:
+            k = cfg.metric_definition.key
+
         seen_keys.add(k)
         meta = KEY_METADATA.get(k, {})
-        d_obj = def_map.get(k)
+        d_obj = def_map.get(k) or (cfg.metric_definition if cfg and cfg.metric_definition and cfg.metric_definition.key == k else None)
 
         # Intelligente Namens- und Icon-Zuordnung
         if d_obj and d_obj.name:
@@ -715,7 +720,7 @@ def device_available_metrics(request, device_id):
             name = meta.get("name", k.replace("_", " ").title())
             icon = meta.get("icon", "📈")
 
-        unit = lm.unit or (d_obj.unit if d_obj else None) or _infer_canonical_unit(k, "", config=cfg)
+        unit = (d_obj.unit if d_obj else None) or lm.unit or _infer_canonical_unit(k, "", config=cfg)
 
         is_primary = (k == primary_key) or (primary_key not in seen_keys and k in ["power", "value", "active_power", "temperature", "bwwp_temp"])
 
@@ -730,7 +735,7 @@ def device_available_metrics(request, device_id):
         })
 
     if not results:
-        inferred_u = _infer_canonical_unit(primary_key, "", config=cfg)
+        inferred_u = (cfg.metric_definition.unit if (cfg and cfg.metric_definition and cfg.metric_definition.unit) else None) or _infer_canonical_unit(primary_key, "", config=cfg)
         p_name = device.config.metric_definition.name if (cfg and cfg.metric_definition and cfg.metric_definition.name) else ("Temperatur" if "temp" in primary_key.lower() else "Leistung")
         p_icon = "🌡️" if "temp" in primary_key.lower() else "⚡"
         results.append({

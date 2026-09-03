@@ -128,7 +128,7 @@ function DeviceChartModal({ device, onClose }) {
 
     const allMetrics = metricsQuery.data?.metrics || [];
     const availableMetrics = allMetrics.filter(m => !m.key.toLowerCase().startsWith("daily_"));
-    const primaryMetricKey = metricsQuery.data?.primary_metric || device.config?.metric_definition?.key || (device.unit === "°C" || device.config?.role?.key === "sensor" ? "temperature" : "power");
+    const primaryMetricKey = metricsQuery.data?.primary_metric || (availableMetrics.find(m => m.is_primary)?.key) || (availableMetrics.length > 0 ? availableMetrics[0].key : (device.config?.metric_definition?.key || (device.unit === "°C" || device.config?.role?.key === "sensor" ? "temperature" : "power")));
     const activeMetricKey = selectedMetric || primaryMetricKey;
     const activeMetricObj = availableMetrics.find(m => m.key === activeMetricKey) || availableMetrics[0];
 
@@ -150,7 +150,7 @@ function DeviceChartModal({ device, onClose }) {
 
 
     const data = query.data;
-    const unit = data?.unit || activeMetricObj?.unit || device.unit || (activeMetricKey.toLowerCase().includes("temp") ? "°C" : "W");
+    const unit = activeMetricObj?.unit || data?.unit || device.config?.metric_definition?.unit || device.unit || (activeMetricKey.toLowerCase().includes("temp") ? "°C" : "W");
     const isMultiDay = range === "5d" || range === "7d" || range === "30d" || range === "custom";
 
     /* ✅ DATA FORMATTING FOR ECHARTS */

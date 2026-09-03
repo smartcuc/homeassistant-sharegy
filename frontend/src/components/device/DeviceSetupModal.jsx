@@ -228,6 +228,8 @@ export default function DeviceSetupModal({
             queryClient.invalidateQueries({ queryKey: ["devices-status"] });
             queryClient.invalidateQueries({ queryKey: ["unconfigured-devices"] });
             queryClient.invalidateQueries({ queryKey: ["dashboard-devices"] });
+            queryClient.invalidateQueries({ queryKey: ["device-metrics"] });
+            queryClient.invalidateQueries({ queryKey: ["timeseries"] });
             queryClient.invalidateQueries({ queryKey: ["producers"] });
             queryClient.invalidateQueries({ queryKey: ["storages"] });
             queryClient.invalidateQueries({ queryKey: ["battery-soc-forecast"] });
