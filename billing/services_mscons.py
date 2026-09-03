@@ -268,3 +268,84 @@ def import_mscons_to_database(tenant: Tenant, edi_content: str) -> dict:
         "unknown_meters": list(unknown_meters),
         "message": f"{imported_count} Messwerte erfolgreich aus MSCONS-Datei importiert.",
     }
+
+
+def import_obis_json_readings(tenant: Tenant, readings: list) -> dict:
+    """
+    Importiert eine Liste von 15-Minuten-OBIS-Readings (JSON) von einem wMSB oder Smart Meter Gateway.
+    Unterstützt Standard-Formate von inexogy, Solandeo, Discovergy und Smart Meter Gateways.
+    """
+    if not isinstance(readings, list) or not readings:
+        return {
+            "success": False,
+            "imported_count": 0,
+            "message": "Keine Messwert-Liste übergeben.",
+        }
+
+    imported_count = 0
+    unknown_meters = set()
+    meters_cache = {}
+
+    for item in readings:
+        if not isinstance(item, dict):
+            continue
+
+        malo_id = str(item.get("meter_serial") or item.get("malo_id") or item.get("serial_number") or "").strip()
+        if not malo_id:
+            continue
+
+        ts_str = item.get("ts_start") or item.get("timestamp") or item.get("period_start")
+        if not ts_str:
+            continue
+
+        try:
+            if isinstance(ts_str, datetime):
+                period_start = ts_str
+            else:
+                period_start = datetime.fromisoformat(str(ts_str).replace("Z", "+00:00"))
+            if timezone.is_naive(period_start):
+                period_start = timezone.make_aware(period_start)
+        except Exception:
+            continue
+
+        obis = str(item.get("obis") or item.get("obis_code") or "1.8.0").strip()
+        try:
+            val = Decimal(str(item.get("value_kwh") if item.get("value_kwh") is not None else item.get("value", 0)))
+        except (InvalidOperation, TypeError):
+            continue
+
+        if malo_id not in meters_cache:
+            meter = Meter.objects.filter(
+                tenant=tenant,
+                serial_number__iexact=malo_id,
+            ).first()
+            if not meter:
+                meter = Meter.objects.filter(tenant=tenant).filter(
+                    serial_number__icontains=malo_id
+                ).first()
+            meters_cache[malo_id] = meter
+
+        meter = meters_cache[malo_id]
+        if not meter:
+            unknown_meters.add(malo_id)
+            continue
+
+        AggregatedReading.objects.update_or_create(
+            meter=meter,
+            period_start=period_start,
+            obis_code=obis,
+            defaults={
+                "tenant": tenant,
+                "value": val,
+                "unit": item.get("unit", "kWh"),
+            },
+        )
+        imported_count += 1
+
+    return {
+        "success": True,
+        "imported_count": imported_count,
+        "unknown_meters": list(unknown_meters),
+        "message": f"{imported_count} 15m-OBIS-Messwerte erfolgreich eingelesen.",
+    }
+

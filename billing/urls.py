@@ -27,6 +27,8 @@ from billing.api.views_community import (
     community_allocation_preview_view,
     community_mscons_export_view,
     community_mscons_import_view,
+    community_obis_ingest_view,
+    community_msb_meters_view,
 )
 
 from billing.api.views_stripe import (
@@ -58,8 +60,10 @@ urlpatterns = [
     path("community/shares/", community_member_shares_view, name="community_member_shares"),
     path("community/shares/bulk/", community_member_shares_bulk_view, name="community_member_shares_bulk"),
     path("community/allocation-preview/", community_allocation_preview_view, name="community_allocation_preview"),
+    path("community/msb-meters/", community_msb_meters_view, name="community_msb_meters"),
     path("community/mscons/export/", community_mscons_export_view, name="community_mscons_export"),
     path("community/mscons/import/", community_mscons_import_view, name="community_mscons_import"),
+    path("community/obis/ingest/", community_obis_ingest_view, name="community_obis_ingest"),
     path("community/statements/export/", statements_export_view, name="community_statements_export"),
     path("community/statements/generate/", generate_community_statements_view, name="community_statements_generate"),
     path("community/statements/<uuid:statement_id>/pdf/", statement_pdf_download_view, name="community_statement_pdf"),

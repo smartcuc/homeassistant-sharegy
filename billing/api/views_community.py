@@ -1159,5 +1159,98 @@ def community_mscons_import_view(request):
     return Response(result)
 
 
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def community_obis_ingest_view(request):
+    """
+    Importiert 15-Minuten-OBIS-Readings im JSON-Format (z. B. von wMSB Webhooks oder Smart Meter Gateways).
+    """
+    from billing.services_mscons import import_obis_json_readings
+
+    user = request.user
+    tenant_id = request.headers.get("X-Tenant-ID") or request.data.get("tenant_id") or request.GET.get("tenant_id")
+
+    if tenant_id:
+        membership = TenantMembership.objects.filter(user=user, tenant_id=tenant_id, is_active=True).first()
+        if not membership and not user.is_staff and not user.is_superuser:
+            return Response({"error": "Forbidden"}, status=403)
+        tenant = Tenant.objects.filter(id=tenant_id).first()
+    else:
+        membership = TenantMembership.objects.filter(user=user, is_active=True).first()
+        tenant = membership.tenant if membership else None
+
+    if not tenant:
+        return Response({"error": "No community found"}, status=404)
+
+    readings = request.data.get("readings")
+    if readings is None and isinstance(request.data, list):
+        readings = request.data
+
+    if not readings:
+        return Response({"error": "No readings array provided"}, status=400)
+
+    result = import_obis_json_readings(tenant, readings)
+    return Response(result)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def community_msb_meters_view(request):
+    """
+    Liefert alle Zähler und Smart Meter der Community inklusive Zählpunkt (MaLo-ID),
+    zugeordnetem Mitglied, Rolle und letztem Ingestion-Zeitstempel.
+    """
+    user = request.user
+    tenant_id = request.headers.get("X-Tenant-ID") or request.GET.get("tenant_id")
+
+    if tenant_id:
+        membership = TenantMembership.objects.filter(user=user, tenant_id=tenant_id, is_active=True).first()
+        if not membership and not user.is_staff and not user.is_superuser:
+            return Response({"error": "Forbidden"}, status=403)
+        tenant = Tenant.objects.filter(id=tenant_id).first()
+    else:
+        membership = TenantMembership.objects.filter(user=user, is_active=True).first()
+        tenant = membership.tenant if membership else None
+
+    if not tenant:
+        return Response({"error": "No community found"}, status=404)
+
+    meters = Meter.objects.filter(tenant=tenant, removed_at__isnull=True).select_related("owner_membership__user").order_by("serial_number")
+    
+    meter_list = []
+    for m in meters:
+        latest_reading = AggregatedReading.objects.filter(meter=m).order_by("-period_start").first()
+        total_readings = AggregatedReading.objects.filter(meter=m).count()
+
+        member_name = (
+            f"{m.owner_membership.user.first_name} {m.owner_membership.user.last_name}".strip()
+            or m.owner_membership.user.email
+            if m.owner_membership and m.owner_membership.user
+            else "Community Allgemein"
+        )
+        role = m.owner_membership.role if m.owner_membership else "member"
+
+        meter_list.append({
+            "id": str(m.id),
+            "serial_number": m.serial_number,
+            "meter_type": m.meter_type,
+            "member_name": member_name,
+            "member_role": role,
+            "total_15m_readings": total_readings,
+            "last_reading_time": latest_reading.period_start.isoformat() if latest_reading else None,
+            "last_reading_val": float(latest_reading.value) if latest_reading else None,
+            "last_reading_obis": latest_reading.obis_code if latest_reading else None,
+            "status": "active" if total_readings > 0 else "waiting_data",
+        })
+
+    return Response({
+        "tenant_id": str(tenant.id),
+        "tenant_name": tenant.name,
+        "meters_count": len(meter_list),
+        "meters": meter_list,
+    })
+
+
+
 
 

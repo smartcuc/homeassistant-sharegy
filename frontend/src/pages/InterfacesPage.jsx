@@ -467,6 +467,64 @@ exporters:
                 </div>
             </div>
 
+            {/* 6. SECTION: SMART METER GATEWAYS & WMSB INGEST (§ 42B ENWG) */}
+            <div className="bg-white border border-emerald-200/80 rounded-2xl shadow-xs overflow-hidden ring-1 ring-emerald-100">
+                <div className="p-5 bg-gradient-to-r from-emerald-50/80 via-teal-50/30 to-white border-b border-emerald-200/80 flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-xl shadow-xs">
+                            🏢
+                        </div>
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <h2 className="text-base font-bold text-gray-900">
+                                    6. Smart Meter Gateways, wMSB & Eichrechtliches Messwesen
+                                </h2>
+                                <span className="text-[10px] font-bold px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full border border-emerald-200">
+                                    § 42b EnWG & MsbG Konform
+                                </span>
+                            </div>
+                            <p className="text-xs text-gray-500">
+                                15-Minuten-Lastgänge von zertifizierten Smart Meter Gateways (wMSB / gMSB) für Energy Sharing & Mieterstrom.
+                            </p>
+                        </div>
+                    </div>
+
+                    <a
+                        href="/app/tenants"
+                        className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-2xs transition flex items-center gap-1.5"
+                    >
+                        <span>🏛️</span>
+                        <span>Zum Community & wMSB Cockpit</span>
+                    </a>
+                </div>
+
+                <div className="p-6 space-y-5">
+                    <div className="grid sm:grid-cols-3 gap-3 text-xs">
+                        <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-start gap-2.5">
+                            <span className="text-base">🏢</span>
+                            <div>
+                                <div className="font-bold text-gray-900">wMSB Cloud-Push</div>
+                                <div className="text-gray-500 text-[11px]">Direkter Push von inexogy, Solandeo, Discovergy per REST & MSCONS.</div>
+                            </div>
+                        </div>
+                        <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-start gap-2.5">
+                            <span className="text-base">⚡</span>
+                            <div>
+                                <div className="font-bold text-gray-900">gMSB HAN / BSI iMSys</div>
+                                <div className="text-gray-500 text-[11px]">BSI TR-03109-1 konforme Erfassung lokaler Smart Meter Gateways.</div>
+                            </div>
+                        </div>
+                        <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-start gap-2.5">
+                            <span className="text-base">🔌</span>
+                            <div>
+                                <div className="font-bold text-gray-900">MID-Submetering</div>
+                                <div className="text-gray-500 text-[11px]">Shelly Pro 3EM & Modbus für interne Liegenschaften & WEGs.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {/* QR FULLSCREEN MODAL */}
             {showQR && primaryHome && (
                 <div

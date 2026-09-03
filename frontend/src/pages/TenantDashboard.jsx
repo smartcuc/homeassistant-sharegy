@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { apiFetch } from "../api/client";
 import { texts } from "../i18n";
 import { useLang } from "../hooks/useLang";
+import MsbSmartMeterHub from "../features/community/components/MsbSmartMeterHub";
 
 export default function TenantDashboard() {
     const [tenant, setTenant] = useState(null);
@@ -295,6 +296,16 @@ export default function TenantDashboard() {
                         }`}
                     >
                         👥 Mitglieder ({members.length})
+                    </button>
+                    <button
+                        onClick={() => setActiveTab("msb")}
+                        className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
+                            activeTab === "msb"
+                                ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs font-bold"
+                                : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                        }`}
+                    >
+                        ⚡ Zähler & wMSB Hub
                     </button>
                     <button
                         onClick={() => setActiveTab("audit")}
@@ -880,7 +891,14 @@ export default function TenantDashboard() {
             )}
 
             {/* ======================================================== */}
-            {/* 4. AUDIT TAB */}
+            {/* 4. ZÄHLER & wMSB HUB TAB */}
+            {/* ======================================================== */}
+            {activeTab === "msb" && (
+                <MsbSmartMeterHub tenant={tenant} />
+            )}
+
+            {/* ======================================================== */}
+            {/* 5. AUDIT TAB */}
             {/* ======================================================== */}
             {activeTab === "audit" && (
                 <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs">
