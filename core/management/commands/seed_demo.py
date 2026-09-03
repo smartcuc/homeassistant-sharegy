@@ -23,7 +23,16 @@ class Command(BaseCommand):
 
         with transaction.atomic():
 
-            user = User.objects.get(username="testuser")
+            user, created = User.objects.get_or_create(
+                username="testuser",
+                defaults={
+                    "email": "test@sharegy.local",
+                    "is_active": True,
+                },
+            )
+            if created:
+                user.set_password("testpass123")
+                user.save()
 
             # ✅ Consumption Meter
             consumption_meter, _ = Meter.objects.get_or_create(
@@ -88,7 +97,7 @@ class Command(BaseCommand):
 
         self.stdout.write(
             self.style.SUCCESS(
-                "✅ Demo data created (consumption + production + pipeline)"
+                "[OK] Demo data created (consumption + production + pipeline)"
             )
         )
         

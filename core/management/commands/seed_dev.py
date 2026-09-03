@@ -87,7 +87,7 @@ class Command(BaseCommand):
 
         self.stdout.write(
             self.style.SUCCESS(
-                "✅ Seed done "
+                "[OK] Seed done "
                 "(User=testuser/testpass123, Meter=TEST-METER-001, "
                 "Pipeline executed)"
             )

@@ -20,12 +20,15 @@ from devices.models import (
     DeviceLatestMetric,
     DeviceMetric1h,
     DeviceMetric5m,
+    CloudDeviceIntegration,
 )
+from devices.models_ocpp import ChargingStation
 from producer.models import (
     GeneratorType,
     Orientation,
     GeneratorSystem,
     GeneratorString,
+    StorageSystem,
 )
 from energy.models import EMSSignalType
 from energy.ems.models import EMSSignalSource
@@ -170,12 +173,12 @@ def setup_demo_household(target_user=None):
     except Exception as e:
         logger.warning("Forecast-Initialisierung für Demo-Haus übersprungen: %s", e)
 
-    # B. Batteriespeicher (10 kWh)
+    # B. Batteriespeicher (10 kWh) & Sungrow Cloud Integration
     d_bat = Device.objects.create(home=demo_home, identifier="demo_battery_storage", configured=True, active=True)
     DeviceConfig.objects.create(
         device=d_bat,
         home=demo_home,
-        name="Heimspeicher 10 kWh",
+        name="Sungrow SBR100 Heimspeicher 10 kWh",
         role=role_battery,
         energy_signal_type=sig_bat,
         metric_definition=m_power,
@@ -184,12 +187,38 @@ def setup_demo_household(target_user=None):
     )
     devices["battery"] = d_bat
 
+    # StorageSystem für Batterie-Arbitrage & EMS
+    StorageSystem.objects.create(
+        home=demo_home,
+        primary_device=d_bat,
+        name="Sungrow SBR100 Batteriespeicher",
+        capacity_kwh=10.0,
+        max_charge_power_kw=5.0,
+        max_discharge_power_kw=5.0,
+        ems_control_enabled=True,
+        control_mode="price_optimized",
+        price_threshold_ct=16.5,
+        target_charge_power_kw=4.5,
+    )
+
+    # Sungrow iSolarCloud Integration
+    CloudDeviceIntegration.objects.create(
+        device=d_pv,
+        profile_id="sungrow_isolarcloud",
+        credentials={
+            "appkey": "988713D7D057090474AEC9584CBA1AAD",
+            "token": "sg_oauth_demo_123",
+            "ps_id": "demo_plant_01",
+        },
+        is_active=True,
+    )
+
     # C. Smart Meter / Netzzähler
     d_grid = Device.objects.create(home=demo_home, identifier="demo_smart_meter", configured=True, active=True)
     DeviceConfig.objects.create(
         device=d_grid,
         home=demo_home,
-        name="Hauptzähler (iMSys)",
+        name="Hauptzähler (Discovergy iMSys)",
         role=role_grid,
         energy_signal_type=sig_grid,
         metric_definition=m_power,
@@ -212,12 +241,12 @@ def setup_demo_household(target_user=None):
     )
     devices["heatpump"] = d_hp
 
-    # E. Wallbox (EV Charger)
+    # E. Wallbox (OCPP 1.6-J EV Charger)
     d_wb = Device.objects.create(home=demo_home, identifier="demo_wallbox_ev", configured=True, active=True)
     DeviceConfig.objects.create(
         device=d_wb,
         home=demo_home,
-        name="Wallbox 11 kW (Garage)",
+        name="Easee Charge Wallbox 11 kW",
         role=role_consumer,
         energy_signal_type=sig_load,
         metric_definition=m_power,
@@ -225,6 +254,28 @@ def setup_demo_household(target_user=None):
         room=room_garage,
     )
     devices["wallbox"] = d_wb
+
+    # OCPP ChargingStation Instanz
+    ChargingStation.objects.create(
+        home=demo_home,
+        charge_point_id="DEMO-WALLBOX-01",
+        name="Easee Charge (Garage)",
+        vendor="Easee",
+        model="Easee Charge 11kW",
+        serial_number="EAS-DEMO-98214",
+        firmware_version="v2.4.1",
+        status="Charging",
+        is_online=True,
+        last_heartbeat=timezone.now(),
+        connectors_count=1,
+        phases=3,
+        max_current_a=16.0,
+        min_current_a=6.0,
+        smart_charging_mode="pv_surplus",
+        active_power_w=4200.0,
+        target_current_a=10.0,
+        total_energy_kwh=1450.5,
+    )
 
     # F. Haushalt Grundlast / Wohnbereich
     d_house = Device.objects.create(home=demo_home, identifier="demo_household_load", configured=True, active=True)

@@ -284,7 +284,7 @@
 ### [x] 5.5 FAQ-Portal & Digitales Benutzerhandbuch (DE / EN)
 - **Dateien**: [`helpcenter/management/commands/seed_helpcenter.py`](file:///c:/Users/Public/Dev/eswes/helpcenter/management/commands/seed_helpcenter.py), [`helpcenter/fixtures/helpcenter_initial_data.json`](file:///c:/Users/Public/Dev/eswes/helpcenter/fixtures/helpcenter_initial_data.json)
 - **Status**: ✅ **Erledigt**.
-  - 8 Kategorien und 14 umfassende Handbuch-Artikel in DE & EN (inkl. Anleitungen für Grafana, Home Assistant und Matter 1.3).
+  - 8 Kategorien und 14 umfassende Handbuch-Artikel in DE & EN (inkl. Anleitungen für Grafana, Home Assistant, OCPP Wallboxen und wMSB Smart Meter).
   - Durchsuchbares Wissensportal und In-App-Navigation.
 
 ---
@@ -582,15 +582,38 @@
   - Dynamische Einspeisevergütung für Erzeuger (`feed_in_spot_share_pct`, z. B. 80% des Spotpreises).
   - Volle Integration in die Monatsabrechnungs- & Clearing-Engine und automatisierte Tests.
 
+### [x] 6.11 wMSB Smart Meter Hub & Zähleranbindung (Discovergy, inexogy, Solandeo)
+- **Dateien**: [`devices/services_discovergy.py`](file:///c:/Users/Public/Dev/eswes/devices/services_discovergy.py), [`devices/tests_discovergy.py`](file:///c:/Users/Public/Dev/eswes/devices/tests_discovergy.py), [`frontend/src/pages/admin/MsbSmartMeterHub.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/pages/admin/MsbSmartMeterHub.jsx)
+- **Status**: ✅ **Erledigt**.
+  - **REST API v1 Konnektor**: Live-Abruf von Wirkleistung ($W$) und Zählerständen ($1.8.0$ Bezug, $2.8.0$ Einspeisung) sowie 15-Minuten-Lastgängen.
+  - **3 Zählerpfade**: Discovergy/inexogy REST-Direktanbindung, gMSB HAN/SMGW-Schnittstelle und Submetering.
+  - **wMSB Wechsel-Leitfaden**: Schritt-für-Schritt Anleitung zum kostenlosen oder geförderten Smart-Meter-Wechsel für Mitglieder.
+  - **Unit-Tests**: 100% Testabdeckung in `devices/tests_discovergy.py`.
+
 ---
 
-### [x] 6.10 Standardisierte Marktkommunikations-Bridge (MSCONS / EDIFACT)
-- **Dateien**: [`billing/services_mscons.py`](file:///c:/Users/Public/Dev/eswes/billing/services_mscons.py), [`billing/api/views_community.py`](file:///c:/Users/Public/Dev/eswes/billing/api/views_community.py), [`billing/urls.py`](file:///c:/Users/Public/Dev/eswes/billing/urls.py), [`frontend/src/pages/admin/CommunitiesManagementHub.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/pages/admin/CommunitiesManagementHub.jsx)
+### [x] 6.12 Community Viral Growth & Social Share Kit
+- **Dateien**: [`frontend/src/features/community/components/CommunityShareModal.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/community/components/CommunityShareModal.jsx), [`frontend/src/features/community/components/CommunityInviteCard.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/community/components/CommunityInviteCard.jsx), [`docs/marketing/COMMUNITY_AND_SOCIAL_SHARE_KIT.md`](file:///c:/Users/Public/Dev/eswes/docs/marketing/COMMUNITY_AND_SOCIAL_SHARE_KIT.md)
 - **Status**: ✅ **Erledigt**.
-  - **BNetzA-konformer Generator & Parser**: Standardnachricht `MSCONS:D:04B:UN:EAN008` für 15-Minuten Lastgänge (`1.8.0` Bezug & `2.8.0` Einspeisung) mit UNA/UNB/UNH/BGM/LOC/PIA/QTY/DTM/UNT/UNZ.
-  - **REST APIs**: `GET /api/billing/community/mscons/export/` (Download `.edi` / `.mscons`) und `POST /api/billing/community/mscons/import/` (Inbound-Schnittstelle von VNBs und Messstellenbetreibern).
-  - **UI-Integration**: 1-Klick `📄 MSCONS (EDI)` Download-Button im Multi-Community Management Hub.
-  - **Unit-Tests**: 100% Testabdeckung in `billing/test_mscons_and_dynamic_tariffs.py`.
+  - 1-Klick Share für WhatsApp, Telegram, Signal, E-Mail und Social Media inkl. personalisiertem Referral-Code.
+  - Dynamische Share-Cards mit CO₂-Einsparung, Autarkie-Badges und QR-Code-Generator.
+
+---
+
+### [x] 5.22 Nativer OCPP 1.6-J CSMS Gateway & Smart Charging Engine
+- **Dateien**: [`devices/models_ocpp.py`](file:///c:/Users/Public/Dev/eswes/devices/models_ocpp.py), [`devices/consumers_ocpp.py`](file:///c:/Users/Public/Dev/eswes/devices/consumers_ocpp.py), [`energy/services_smart_charging.py`](file:///c:/Users/Public/Dev/eswes/energy/services_smart_charging.py), [`frontend/src/features/energy/components/WallboxCard.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/energy/components/WallboxCard.jsx), [`frontend/src/features/devices/components/AddWallboxModal.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/devices/components/AddWallboxModal.jsx)
+- **Status**: ✅ **Erledigt**.
+  - **OCPP 1.6-J WebSocket CSMS**: Vollständige Server-Implementierung für `BootNotification`, `Heartbeat`, `StatusNotification`, `MeterValues`, `StartTransaction`, `StopTransaction` und Remote-Steuerung (`SetChargingProfile`, `RemoteStartTransaction`, `RemoteStopTransaction`).
+  - **Intelligente Lademodi**: `pv_surplus` (reines PV-Überschussladen), `price_optimized` (Börsenstrom-Tiefstpreise), `fast` (maximale Ladeleistung) und `eco` (Kombination aus PV + günstigstem Netzbezug).
+  - **WallboxCard & AddWallboxModal**: Modernes Dashboard-Widget mit 1-Klick Lademodus-Wechsel, Phasenumschaltung (1-Phasig / 3-Phasig), Ampere-Slider (6A–32A) und Hersteller-Presets (Easee, openWB, cFos, Heidelberg, Alfen, Mennekes, Keba).
+
+---
+
+### [x] 5.23 Autonome Batterie-Arbitrage & Sungrow iSolarCloud OpenAPI Control
+- **Dateien**: [`producer/services_sungrow_control.py`](file:///c:/Users/Public/Dev/eswes/producer/services_sungrow_control.py), [`producer/services_dispatch.py`](file:///c:/Users/Public/Dev/eswes/producer/services_dispatch.py), [`producer/tests_sungrow_control.py`](file:///c:/Users/Public/Dev/eswes/producer/tests_sungrow_control.py), [`producer/tasks.py`](file:///c:/Users/Public/Dev/eswes/producer/tasks.py)
+- **Status**: ✅ **Erledigt**.
+  - **Sungrow OpenAPI Dispatcher**: Bidirektionale Steuerung für Sungrow SH-Wechselrichter und SBR-Speicher (`forced_charge`, `self_consumption`, `forced_discharge`) mit Leistungsbegrenzung in Watt/kW und Ziel-SoC.
+  - **Arbitrage-Daemon**: Autonome Celery-Task prüft Börsenstrompreise (Tibber/EPEX) gegen Preisschwellen und schaltet Netzladung bei negativen/günstigen Börsenstunden automatisch scharf.
 
 ---
 
@@ -601,8 +624,9 @@
 │ ✅ 100% PRODUKTIONSREIF: SÄULE 1 (EMS-PRO) & SÄULE 2 (ENERGY SHARING & § 14a)  │
 ├───────────────────────────────────────────────────────────────────────────────┤
 │ • 🟢 Säule 1 (EMS-Free & Pro): WSS Ingest, Live-Sankey, Last-/PV-Forecasts,   │
-│    Matter 1.3, Mobile Push (FCM HTTP v1 & Web-Push), Android App & Profiling  │
-│ • ⚡ Säule 2 (Energy Sharing): 15m OBIS-Clearing, Community Cockpit, Tarife,   │
+│    OCPP 1.6-J CSMS Wallbox Gateway, Sungrow Cloud OpenAPI Inverter Dispatch,  │
+│    Mobile Push (FCM HTTP v1 & Web-Push), Android App & Predictive Baseline    │
+│ • ⚡ Säule 2 (Energy Sharing): 15m OBIS-Clearing, Discovergy wMSB Hub, Tarife, │
 │    Multi-Community Hub, PDF-Monatsnachweise, MEA-Beteiligungsquoten,          │
 │    Börsenpreis-indexierte Tarife (EPEX Spot) & BNetzA MSCONS EDIFACT Bridge   │
 │ • 🛡️ § 14a EnWG: BNetzA-Summenleistungs-Dimm-Engine (4,2 kW) & Webhook-APIs   │

@@ -85,11 +85,24 @@ def dispatch_inverter_write_command(storage: StorageSystem, action: str, power_k
         except Exception as e:
             logger.debug("MQTT storage publish bypassed or failed: %s", e)
 
+    # 3. Sungrow Cloud OpenAPI Steuerung ausführen (falls angebunden)
+    sungrow_res = None
+    try:
+        from producer.services_sungrow_control import send_sungrow_cloud_control_command
+        sungrow_res = send_sungrow_cloud_control_command(storage, action, power_kw)
+    except Exception as e:
+        logger.warning("Sungrow cloud control dispatch failed: %s", e)
+
+    # TODO (Backlog): Lokale Home Assistant & ioBroker Outbound Modbus-Bridge anbinden
+    # Dieser Baustein wird separat umgesetzt.
+
     return {
-        "success": True,
+        "status": "dispatched",
+        "storage_id": str(storage.id),
         "action": action,
         "power_kw": float(power_kw),
         "payload": payload,
+        "sungrow_result": sungrow_res,
     }
 
 

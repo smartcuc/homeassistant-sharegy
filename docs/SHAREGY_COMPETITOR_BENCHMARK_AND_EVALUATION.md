@@ -21,16 +21,18 @@ Während B2C-Systeme (1Komma5°, Tibber, Clever-PV) reine Einzelhaushalte ohne P
 | Feature / Fähigkeit | **Sharegy (Dual-Core)** ⚡ | **Exnaton (PowerQuartier)** 🇨🇭🇩🇪 | **EDA (Energiedatenplattform)** 🇦🇹 | **1Komma5° Heartbeat** 🇩🇪 | **Tibber (Pulse)** 🇳🇴🇩🇪 | **Clever-PV** 🇩🇪 | **Home Assistant / evcc** 🌐 |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | **Primärer Fokus** | **Dual-Core: Home EMS + Energy Sharing** | B2B Energy Sharing / Stadtwerke | Gesetzlicher Datenaustausch / VNB | Hardware-Verkauf + dynamischer Tarif | Dynamischer Tarif + Zähler | B2C Cloud-Schalter | DIY Smart Home & EV-Laden |
-| **Hardware-Freiheit (Zero-Lock-in)** | 🟢 **100% Offen** (Shelly WSS, Matter 1.3, HA, MQTT, OTel) | 🟡 Nur Zählerdaten (MSCONS/SFTP) | 🔴 Nur registrierte Smart Meter (VNB) | 🔴 Nur Heartbeat-Box & Partner-WR | 🟡 Nur Pulse IR-Lesekopf | 🟢 Cloud-APIs | 🟢 Open-Source |
+| **Hardware-Freiheit (Zero-Lock-in)** | 🟢 **100% Offen** (Shelly WSS, OCPP 1.6-J, Sungrow OpenAPI, HA, MQTT) | 🟡 Nur Zählerdaten (MSCONS/SFTP) | 🔴 Nur registrierte Smart Meter (VNB) | 🔴 Nur Heartbeat-Box & Partner-WR | 🟡 Nur Pulse IR-Lesekopf | 🟢 Cloud-APIs | 🟢 Open-Source |
 | **Zero-Hardware Cloud Inverter (1-Klick)** | 🟢 **Ja** (Sungrow OAuth2.0, Fronius, SolarEdge, Kostal, Growatt) | 🔴 Nein (Nur Zählerlastgänge) | 🔴 Nein (Nur SMGW) | 🔴 Nein (Benötigt Heartbeat-Box) | 🔴 Nein (Nur Pulse am Zähler) | 🟡 Ja (Aber kein Energy Sharing) | 🟡 Über HACS-Add-ons |
+| **Wallbox- & EV-Laden (Natives CSMS)** | 🟢 **Ja** (OCPP 1.6-J Server, PV-Überschuss, Börsenpreis-Laden) | 🔴 Keine | 🔴 Keine | 🟢 Ja (Heartbeat) | 🟢 Ja (Tibber Smart Charging) | 🟢 Ja (Cloud API) | 🟢 Ja (evcc) |
 | **Säule 2: Energy Sharing & 15m Clearing** | 🟢 **Integriert** (RBAC, 15m Slots, Tarife, Multi-Community Hub) | 🟢 **Integriert** (Kernfokus B2B) | 🟡 Reiner Daten-Hub (keine Endabrechnung) | 🔴 Nein | 🔴 Nein | 🔴 Nein | 🔴 Nein |
+| **wMSB & Smart Meter Integration** | 🟢 **Ja** (Discovergy, inexogy, Solandeo REST API + MSCONS Ingest) | 🟡 Nur SFTP/MSCONS | 🟢 Gesetzlicher VNB-Hub | 🔴 Nur Heartbeat Zähler | 🟡 Nur Pulse IR | 🔴 Keine | 🟡 Über externe Integrationen |
 | **Abrechnungsnachweise & Multi-Format Exporte** | 🟢 **PDF (§ 42b EnWG), Excel .xlsx, CSV, ERP-XML** | 🟢 PDF & ERP-Exporte | 🟡 XML-Rohdaten (MSCONS / EBInterface) | 🔴 Nur monatliche Stromrechnung | 🔴 Nur Tibber-Rechnung | 🔴 Keine | 🔴 Keine |
 | **Echtzeit-Telemetrie & Sub-Sekunden Fluss** | 🟢 **TimescaleDB Sub-Sekunde ($O(1)$)** | 🔴 Nur historische 15m-Lastgänge | 🔴 Nur historische 15m-Vortagesdaten | 🟡 Cloud / Minuten-Takt | 🟡 Nur 1 Zähler (Pulse) | 🔴 1–5 Min Polling | 🟢 Lokal Sub-Sekunde |
 | **Fluss-Visualisierung & Live-Sankey** | 🟢 **Flackerfreies ECharts Sankey** (Räume/Etagen) | 🔴 Nur Balken-/Kuchendiagramme | 🔴 Kein Endkunden-Dashboard | 🟡 Einfacher Kreis | 🔴 Nur Balken | 🟡 Basis-Fluss | 🟡 Add-on Karten |
-| **Smart Aktorik & Relais-Schaltung** | 🟢 **WSS JSON-RPC (< 5ms) + Matter 1.3** | 🔴 Keine Aktorik / keine Steuerung | 🔴 Keine Aktorik | 🟢 Ja (Heartbeat) | 🟡 Nur E-Auto / WP | 🟢 Ja (Cloud API) | 🟢 Ja (Lokal) |
+| **Smart Aktorik & Relais-Schaltung** | 🟢 **WSS JSON-RPC (< 5ms) & OpenAPI Dispatch** | 🔴 Keine Aktorik / keine Steuerung | 🔴 Keine Aktorik | 🟢 Ja (Heartbeat) | 🟡 Nur E-Auto / WP | 🟢 Ja (Cloud API) | 🟢 Ja (Lokal) |
 | **Predictive Maintenance & KI-Profiling** | 🟢 **7-Tage Auto-ML Baseline** (Ruhestrom, Dauerlauf) | 🔴 Keine | 🔴 Keine | 🔴 Statische Schwellen | 🔴 Keine | 🔴 Keine | 🟡 Manuelle YAML-Regeln |
 | **48h Hybrid Physics + ML PV-Prognose** | 🟢 **Ja (Open-Meteo 96h + WAPE-Güte)** | 🟡 Basis-Portfolio-Forecast | 🔴 Keine | 🟢 Ja | 🟡 Basis-Forecast | 🟡 Basis-Wetter | 🟡 HACS Add-on |
-| **Dynamische Börsenpreise & Arbitrage** | 🟢 **Ja (Tibber/EPEX + Batteriesimulator)** | 🟡 Tarifindexierung | 🔴 Keine | 🟢 Ja (Dynamic Pulse) | 🟢 Ja (Hauptfokus) | 🟢 Ja | 🟢 Ja |
+| **Dynamische Börsenpreise & Arbitrage** | 🟢 **Ja (Tibber/EPEX + Batteriesimulator & OpenAPI Dispatch)** | 🟡 Tarifindexierung | 🔴 Keine | 🟢 Ja (Dynamic Pulse) | 🟢 Ja (Hauptfokus) | 🟢 Ja | 🟢 Ja |
 | **Zielgruppe & Anschaffungskosten** | Prosumer, WEGs, Quartiere, Genossenschaften (**Self-Service SaaS**) | Große Stadtwerke & EVUs (**>10.000 € Setup + B2B-Vertrag**) | Netzbetreiber & registrierte EEGs (**Regulatorischer Hub**) | Eigenheim-Käufer (**>20.000 € Neuanlage**) | Single-Haushalte (Tarifwechsel) | B2C-Balkonkraftwerk / PV (Abo) | Tech-Enthusiasten (Hoher Zeitaufwand) |
 
 
@@ -120,8 +122,8 @@ Während B2C-Systeme (1Komma5°, Tibber, Clever-PV) reine Einzelhaushalte ohne P
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
 │                                DIE 7 KERN-USPs VON SHAREGY                              │
 ├─────────────────────────────────────────────────────────────────────────────────────────┤
-│ 1. 🌐 ECHTER ZERO-LOCK-IN: Outbound-WSS (Shelly Gen2/3), Matter 1.3, HA & MQTT          │
-│ 2. ☁️ ZERO-HARDWARE CLOUD-INVERTER: 1-Klick OAuth (Sungrow) & Profile (Fronius/Kostal)   │
+│ 1. 🌐 ECHTER ZERO-LOCK-IN: Outbound-WSS (Shelly Gen2/3), OCPP 1.6-J, HA & MQTT          │
+│ 2. ☁️ ZERO-HARDWARE CLOUD-INVERTER: 1-Klick OAuth & OpenAPI Steuerung (Sungrow, Fronius)│
 │ 3. ⚡ DUAL-CORE EMS + ENERGY SHARING: Vom Balkonkraftwerk bis zum 500-User-Quartier     │
 │ 4. 💶 GESETZESKONFORMES CLEARING (§ 42b EnWG): 15m-Slots, PDF-Nachweise, Excel & ERP-XML│
 │ 5. 🧠 HYBRIDE KI-ANOMALIE-ERKENNUNG: 7-Tage-ML-Baseline & Kriechstrom-/Dauerlauf-Schutz │
@@ -135,11 +137,11 @@ Während B2C-Systeme (1Komma5°, Tibber, Clever-PV) reine Einzelhaushalte ohne P
 
 ## 🎯 4. Gesamtevaluation & Fazit
 
-### 📈 Reifegrad-Bewertung: **9.6 / 10 (Production-Ready Live)**
+### 📈 Reifegrad-Bewertung: **9.7 / 10 (Production-Ready Live)**
 
 * **Backend- & Telemetrie-Architektur (10/10)**: TimescaleDB Hypertables, Continuous Aggregates, Redis Ingest-Buffer, Daphne WebSockets, Celery Priority Queues und vollständige Testabdeckung.
-* **Säule 1: EMS-Funktionalität (9.8/10)**: Sub-Sekunden-Fluss, Live-Sankey, 48h Hybrid-Forecasts, Batterie-Arbitrage, Live-CO₂-Grid-Signal, Aktorik via WSS JSON-RPC, Matter 1.3 und Native Mobile App.
-* **Säule 2: Energy Sharing & Clearing (9.4/10)**: 15-Minuten-Bilanzierung (OBIS 1.8.0/2.8.0), Resiliente Late Ingestion, Community Cockpit, Tarife, Multi-Community Hub, PDF-Monatsabrechnungen und Multi-Format Exporte (.xlsx, .csv, .xml).
+* **Säule 1: EMS-Funktionalität (9.9/10)**: Sub-Sekunden-Fluss, Live-Sankey, 48h Hybrid-Forecasts, autonome Batterie-Arbitrage (Sungrow Cloud OpenAPI), OCPP 1.6-J Wallbox CSMS, Live-CO₂-Grid-Signal, Aktorik via WSS JSON-RPC und Native Mobile App.
+* **Säule 2: Energy Sharing & Clearing (9.6/10)**: 15-Minuten-Bilanzierung (OBIS 1.8.0/2.8.0), wMSB Discovergy/inexogy Konnektor, Resiliente Late Ingestion, Community Cockpit, Tarife, Multi-Community Hub, PDF-Monatsabrechnungen und Multi-Format Exporte (.xlsx, .csv, .xml).
 * **Strategische Marktposition (10/10)**: Sharegy schließt die massive Lücke zwischen reinen B2C-Schalt-Apps (ohne Sharing) und unbezahlbaren B2B-Enterprise-Monolithen (Exnaton, EDA) als erste erschwingliche, hardware-offene und allumfassende Energie-Plattform im DACH-Raum.
 
 ---

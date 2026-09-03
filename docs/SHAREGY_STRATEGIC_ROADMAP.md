@@ -135,9 +135,17 @@
 │          • Schlanke Sidebar mit neuer Sektion `⚙️ Systemeinstellungen` (ohne redundante Links)
 │          • Vollständig integrierter `🛟 Hilfe & Support`-Drawer in der Topbar (Tickets, Triage & FAQ)
 │          • `📖 Wissensportal & Handbuch` (`/app/help`) mit Staff Live-Editor (Markdown, DE/EN)
-  └── 2.24 ✅ **Operations & Celery-Prioritäts-Queues Härtung**:
-             • 5-Stufen Prioritäts-Architektur (`fiscal`, `realtime`, `analytics`, `background`, `celery`)
-             • Automatisches HealthState-Pruning veralteter Queues & exakter Device-Count für echte Geräte
+  ├── 2.24 ✅ **Operations & Celery-Prioritäts-Queues Härtung**:
+│          • 5-Stufen Prioritäts-Architektur (`fiscal`, `realtime`, `analytics`, `background`, `celery`)
+│          • Automatisches HealthState-Pruning veralteter Queues & exakter Device-Count für echte Geräte
+  ├── 2.25 ✅ **Nativer OCPP 1.6-J CSMS Gateway & Smart Charging Engine**:
+│          • WebSocket CSMS Server (`/ws/ocpp/<charge_point_id>/`) für Easee, openWB, cFos, Heidelberg, Mennekes, Alfen
+│          • 4 Intelligente Lademodi: PV-Überschuss, Börsenpreis-Tiefstpreise, Fast & Eco
+│          • `WallboxCard` Widget & `AddWallboxModal` mit Phasenumschaltung & Stromstärke-Slider
+  └── 2.26 ✅ **Autonome Batterie-Arbitrage & Sungrow iSolarCloud OpenAPI Control**:
+             • Bidirektionaler Inverter-Dispatch (`forced_charge`, `self_consumption`, `forced_discharge`)
+             • Dynamische Netzladung bei Negativ- und Tiefstpreisen (Tibber/EPEX) via automatischer Celery-Task
+             • Sub-Sekunden Statuscaching für Dashboard-Visualisierung
 
 ┌───────────────────────────────────────────────────────────────────────────────┐
 │ MEILENSTEIN 3: PAYMENT, MONETARISIERUNG & BILLING-ARCHITEKTUR (💳 EVALUIERUNG) │
@@ -198,9 +206,14 @@
   │          • 15-Minuten-scharfe Allokations-Engine in `billing/services_sharing_settlement.py`
   │          • Live 3-Modelle Vergleichs- & Simulations-Engine (`/api/billing/community/allocation-preview/`)
   │          • Integriert im Multi-Community Hub (`CommunitiesManagementHub.jsx`) & Mitglieder-Dashboard (`TenantDashboard.jsx`)
-  └── 4.11 ⏳ **§ 14a EnWG Steuerbox-Schnittstelle & Pflichtdimmung auf 4,2 kW (SteuVE)**:
-             • EEBUS / Modbus TCP / REST Steuerbox-Anbindung für Wärmepumpen & Wallboxen
-```
+  ├── 4.11 ✅ **wMSB Smart Meter Hub & API-Konnektor (Discovergy, inexogy, Solandeo)**:
+  │          • REST API Ingest für 15m-Zählerstände (1.8.0/2.8.0) & Live-Wirkleistung (W)
+  │          • Integriertes Smart-Meter-Verzeichnis mit 3 Zählerpfaden (wMSB REST, gMSB HAN, Submetering)
+  │          • Wechsel-Leitfaden für Mitglieder im Admin-Dashboard (`MsbSmartMeterHub.jsx`)
+  └── 4.12 ✅ **Community Viral Growth & Social Referral System**:
+             • `CommunityShareModal` & `CommunityInviteCard` mit 1-Klick WhatsApp-, Telegram- & E-Mail-Teilen
+             • Dynamische Share-Cards mit CO₂-Einsparung, Autarkie-Badges & QR-Code-Generator
+             • Umfassendes Social Share Kit [`docs/marketing/COMMUNITY_AND_SOCIAL_SHARE_KIT.md`](file:///c:/Users/Public/Dev/eswes/docs/marketing/COMMUNITY_AND_SOCIAL_SHARE_KIT.md)
 
 ---
 
