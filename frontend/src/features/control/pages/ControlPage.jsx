@@ -331,11 +331,13 @@ export default function ControlPage() {
                                                         <span>⚡</span>
                                                         <span>Sofortladen (Boost)</span>
                                                     </span>
-                                                    {storage.control_mode === "forced_charge" && (
+                                                    {storage.control_mode === "forced_charge" ? (
                                                         <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500 text-slate-950">
                                                             Lädt
                                                         </span>
-                                                    )}
+                                                    ) : !isPro ? (
+                                                        <ProBadge size="xs" />
+                                                    ) : null}
                                                 </div>
                                                 <p className="text-xs text-slate-400 leading-relaxed">
                                                     Zwangsladung jetzt sofort mit {storage.target_charge_power_kw || 3.0} kW Ladeleistung (z. B. vor Netzausfall oder Sturm).
