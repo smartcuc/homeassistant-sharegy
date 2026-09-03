@@ -67,3 +67,15 @@ def publish_pending_device_commands(self, batch_size: int = 25):
                 raise self.retry(exc=e)
 
     return {"published": sent}
+
+
+@shared_task
+def run_battery_arbitrage_dispatch_task():
+    """
+    Zyklischer Celery-Task:
+    Führt für alle aktiven Speicher im Modus 'price_optimized' die automatische
+    Arbitrage-Steuerung (Netzladung bei Tiefstpreisen / Rückstellung auf PV-Autarkie) durch.
+    """
+    from producer.services_dispatch import dispatch_all_storage_systems
+    return dispatch_all_storage_systems()
+

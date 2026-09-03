@@ -9,7 +9,7 @@ from producer.api.views import (
     string_create, string_update, string_delete,
     generator_type_list, orientation_list,
     storage_list, storage_create, storage_update, storage_delete, storage_detect,
-    storage_auto_setup, storage_control,
+    storage_auto_setup, storage_control, storage_dispatch_now_view,
 )
 
 
@@ -85,6 +85,11 @@ urlpatterns = [
         "storage/<uuid:storage_id>/control/",
         storage_control,
         name="storage-control",
+    ),
+    path(
+        "storage/<uuid:storage_id>/dispatch-now/",
+        storage_dispatch_now_view,
+        name="storage-dispatch-now",
     ),
     path(
         "storage/<uuid:storage_id>/delete/",

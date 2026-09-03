@@ -645,6 +645,30 @@ def storage_control(request, storage_id):
     })
 
 
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def storage_dispatch_now_view(request, storage_id):
+    """
+    Führt sofort eine On-Demand-Evaluation und Dispatch-Prüfung für das Speichersystem durch.
+    """
+    from producer.services_dispatch import evaluate_and_dispatch_storage_system
+
+    home = request.user.homes.first()
+    try:
+        storage = StorageSystem.objects.get(id=storage_id, home=home)
+    except StorageSystem.DoesNotExist:
+        return Response({"error": "Storage system not found"}, status=404)
+
+    dispatch_res = evaluate_and_dispatch_storage_system(storage)
+    storage.refresh_from_db()
+
+    return Response({
+        "status": "success",
+        "dispatch": dispatch_res,
+        "storage": serialize_storage_system(storage),
+    })
+
+
 @api_view(["DELETE"])
 @permission_classes([IsAuthenticated])
 def storage_delete(request, storage_id):

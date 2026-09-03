@@ -151,3 +151,62 @@ class StorageSystemTests(TestCase):
         self.assertEqual(json_data["storage"]["target_charge_power_kw"], 4.5)
         self.assertEqual(json_data["storage"]["price_threshold_ct"], 12.0)
         self.assertIn("power=4.5kW", json_data["storage"]["last_control_command"])
+
+    def test_storage_dispatch_price_optimized(self):
+        from producer.services_dispatch import evaluate_and_dispatch_storage_system
+        from django.core.cache import cache
+
+        # 1. Setup price_optimized storage
+        storage = StorageSystem.objects.create(
+            home=self.home,
+            name="Keller Speicher (BYD)",
+            capacity_kwh=12.8,
+            max_charge_power_kw=6.0,
+            max_discharge_power_kw=6.0,
+            min_soc_reserve_pct=10.0,
+            soc_device=self.bms_sensor,
+            soc_metric_key="soc",
+            power_device=self.inverter,
+            power_metric_key="battery_power",
+            ems_control_enabled=True,
+            control_mode="price_optimized",
+            target_charge_power_kw=5.0,
+            price_threshold_ct=20.0,
+        )
+
+        # Cache a low SoC
+        cache.set(f"storage:{storage.id}:latest_soc", 40.0)
+
+        # Dispatch execution
+        res = evaluate_and_dispatch_storage_system(storage)
+        self.assertTrue(res["dispatched"])
+        self.assertEqual(res["action"], "forced_charge")
+        self.assertEqual(res["power_kw"], 5.0)
+
+        storage.refresh_from_db()
+        self.assertIn("AUTO: Netzladung aktiv", storage.last_control_command)
+
+        # 2. Revert when SoC >= 95%
+        cache.set(f"storage:{storage.id}:latest_soc", 98.0)
+        res_full = evaluate_and_dispatch_storage_system(storage)
+        self.assertTrue(res_full["dispatched"])
+        self.assertEqual(res_full["action"], "self_consumption")
+
+    def test_storage_dispatch_now_api_endpoint(self):
+        storage = StorageSystem.objects.create(
+            home=self.home,
+            name="Keller Speicher (BYD)",
+            capacity_kwh=12.8,
+            max_charge_power_kw=6.0,
+            max_discharge_power_kw=6.0,
+            min_soc_reserve_pct=10.0,
+            ems_control_enabled=True,
+            control_mode="price_optimized",
+        )
+
+        resp = self.client.post(f"/api/producer/storage/{storage.id}/dispatch-now/")
+        self.assertEqual(resp.status_code, 200)
+        json_data = resp.json()
+        self.assertEqual(json_data["status"], "success")
+        self.assertIn("dispatch", json_data)
+
