@@ -102,9 +102,15 @@ def check_home_system_status(user) -> Dict[str, Any]:
 
             is_cloud_inverter = any(ci.device_id == d.id for ci in cloud_inverter_integrations)
             is_ems_pv = any(es.device_id == d.id for es in ems_pv_sources)
-            is_generator_dev = any(g.primary_device_id == d.id for g in generators)
+            is_generator_dev = any(getattr(g, "device_id", None) == d.id for g in generators)
             is_ems_grid = any(eg.device_id == d.id for eg in ems_grid_sources)
-            is_storage_dev = any(st.primary_device_id == d.id or st.soc_device_id == d.id or st.power_device_id == d.id for st in storages)
+            is_storage_dev = any(
+                getattr(st, "primary_device_id", None) == d.id
+                or getattr(st, "soc_device_id", None) == d.id
+                or getattr(st, "power_device_id", None) == d.id
+                or getattr(st, "device_id", None) == d.id
+                for st in storages
+            )
 
             # 1. Säule PV
             if role in ["producer", "pv", "hybrid", "both", "inverter", "generator"] or sig in ["pv", "solar", "producer", "generation"] or gen_type is not None:

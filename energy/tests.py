@@ -433,6 +433,27 @@ class GrafanaAndHomeAssistantPluginTest(TestCase):
         self.assertTrue(data["pillars"]["battery"]["installed"])
         self.assertTrue(data["pillars"]["load"]["installed"])
 
+    def test_system_setup_status_with_generator_and_storage_models(self):
+        """Testet, dass GeneratorSystem und StorageSystem Modelle ohne AttributeError ausgewertet werden."""
+        from producer.models import GeneratorSystem, StorageSystem
+        gen = GeneratorSystem.objects.create(
+            home=self.home,
+            name="Dach PV Anlage",
+            peak_power_kw=10.5,
+        )
+        storage = StorageSystem.objects.create(
+            home=self.home,
+            name="Heimspeicher 10kWh",
+            capacity_kwh=10.0,
+        )
+        self.client.force_login(self.user)
+        res = self.client.get("/api/energy/setup-status/")
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertTrue(data["pillars"]["pv"]["installed"])
+        self.assertTrue(data["pillars"]["battery"]["installed"])
+
+
 
 
 
