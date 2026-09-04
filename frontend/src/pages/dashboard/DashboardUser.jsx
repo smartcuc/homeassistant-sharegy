@@ -14,6 +14,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "../../api/client";
 import LiveEnergySankeyECharts from "../../features/energy/components/LiveEnergySankeyECharts";
 import { useTranslation } from "react-i18next";
+import SystemReadinessCard from "../../features/energy/components/SystemReadinessCard";
 
 export default function DashboardUser() {
 
@@ -50,24 +51,17 @@ export default function DashboardUser() {
     return (
         <DashboardLayout>
 
-            {/* Header */}
-
-            <div className="p-6">
-
-                {/* <UnconfiguredDevicesBanner /> */}
+            {/* 🚨 Alert Banners Stack (kompakt ohne Extra-Padding) */}
+            <div className="space-y-3">
                 <UnconfiguredDevicesBanner onOpen={() => setOpenSetup(true)} />
                 <DeviceSetupModal
                     open={openSetup}
                     onClose={() => setOpenSetup(false)}
                 />
 
-            </div>
-            <div className="p-6">
-
                 <TimezoneAlertBanner
                     timezone={userSettings?.timezone}
                     onAccept={async (timezone) => {
-
                         await apiFetch("/api/timezone/", {
                             method: "POST",
                             body: JSON.stringify({
@@ -79,26 +73,32 @@ export default function DashboardUser() {
                             queryKey: ["settings"],
                         });
                     }}
-
                     onSettings={() => {
                         navigate("/app/profile");
                     }}
                 />
-
             </div>
-            <div className="mb-6">
-                <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+
+            {/* 🏠 Dashboard Header */}
+            <div>
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
                     {t("dashboard.title", "Deine Energiezentrale ⚡")}
                 </h1>
                 <p className="mt-1 text-sm text-gray-500">
                     {t("dashboard.subtitle", "Alle wichtigen Energiedaten auf einen Blick.")}
                 </p>
             </div>
-            <div className="mb-3">
-                <h2 className="text-sm font-semibold tracking-wide text-gray-500">
-                    {t("dashboard.realtime_status", "Echtzeit-Status")}
-                </h2>
-            </div>
+
+            {/* 🩺 System-Check & Einrichtungsgrad (4-Säulen-Omi-Check) */}
+            <SystemReadinessCard onOpenAddDevice={() => setOpenSetup(true)} />
+
+            {/* ⚡ Echtzeit-Status & KPIs */}
+            <div>
+                <div className="mb-3">
+                    <h2 className="text-sm font-semibold tracking-wide text-gray-500">
+                        {t("dashboard.realtime_status", "Echtzeit-Status")}
+                    </h2>
+                </div>
 
             {/* KPIs */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -290,6 +290,7 @@ export default function DashboardUser() {
                 </div>
 
             </div>
+        </div>
 
             {/* Sankey Chart */}
             <div className="mt-6">
