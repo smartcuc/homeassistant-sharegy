@@ -399,11 +399,40 @@ class GrafanaAndHomeAssistantPluginTest(TestCase):
         self.assertIn("score", data)
         self.assertIn("pillars", data)
         self.assertIn("pv", data["pillars"])
+        self.assertIn("generation", data["pillars"])
         self.assertIn("grid", data["pillars"])
         self.assertIn("battery", data["pillars"])
         self.assertIn("load", data["pillars"])
         self.assertIn("recommendations", data)
         self.assertIn("submeters", data)
+
+    def test_system_setup_status_hybrid_inverter(self):
+        """Testet ein einzelnes Hybrid-Gerät (Sungrow / Growatt), das alle 4 Säulen meldet."""
+        from devices.models import DeviceLatestMetric
+        hybrid_dev = Device.objects.create(
+            home=self.home,
+            identifier="sungrow_hybrid_sh10rt",
+            configured=True,
+            active=True,
+        )
+        now = timezone.now()
+        DeviceLatestMetric.objects.create(device=hybrid_dev, metric_key="power", value=4790.0, timestamp=now)
+        DeviceLatestMetric.objects.create(device=hybrid_dev, metric_key="grid_power", value=-800.0, timestamp=now)
+        DeviceLatestMetric.objects.create(device=hybrid_dev, metric_key="battery_power", value=-1880.0, timestamp=now)
+        DeviceLatestMetric.objects.create(device=hybrid_dev, metric_key="battery_soc", value=78.6, timestamp=now)
+        DeviceLatestMetric.objects.create(device=hybrid_dev, metric_key="load_power", value=2110.0, timestamp=now)
+
+        self.client.force_login(self.user)
+        res = self.client.get("/api/energy/setup-status/")
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertEqual(data["score"], 100)
+        self.assertTrue(data["pillars"]["pv"]["installed"])
+        self.assertTrue(data["pillars"]["generation"]["installed"])
+        self.assertTrue(data["pillars"]["grid"]["installed"])
+        self.assertTrue(data["pillars"]["battery"]["installed"])
+        self.assertTrue(data["pillars"]["load"]["installed"])
+
 
 
 

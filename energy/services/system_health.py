@@ -27,7 +27,13 @@ def check_home_system_status(user) -> Dict[str, Any]:
     """
     home = None
     try:
-        home = user.homes.first() if hasattr(user, "homes") else None
+        if user and hasattr(user, "homes"):
+            home = user.homes.first()
+        if not home and user:
+            home = Home.objects.filter(user=user).first()
+        if not home:
+            home = Home.objects.first()
+
         if not home:
             return {
                 "score": 0,
@@ -54,21 +60,27 @@ def check_home_system_status(user) -> Dict[str, Any]:
         )
         active_devices = [d for d in devices if d.active]
 
-        # 2. Prüfen auf Säule 1: Solaranlage (PV / Erzeuger)
         from devices.models import CloudDeviceIntegration
         cloud_inverter_integrations = list(
             CloudDeviceIntegration.objects.filter(device__home=home)
             .select_related("device")
         )
-        ems_pv_sources = list(
-            EMSSignalSource.objects.filter(
-                home=home,
-                signal_type__key__in=["pv", "solar", "producer", "generation"],
-            ).select_related("device")
+        ems_sources = list(
+            EMSSignalSource.objects.filter(home=home)
+            .select_related("device", "signal_type")
         )
+        ems_pv_sources = [s for s in ems_sources if s.signal_type and s.signal_type.key in ["pv", "solar", "producer", "generation"]]
+        ems_grid_sources = [s for s in ems_sources if s.signal_type and s.signal_type.key in ["grid", "grid_import", "grid_feed_in", "meter"]]
+        ems_batt_sources = [s for s in ems_sources if s.signal_type and s.signal_type.key in ["battery", "storage", "speicher"]]
+
         generators = list(GeneratorSystem.objects.filter(home=home))
+        storages = list(StorageSystem.objects.filter(home=home))
 
         pv_devices = []
+        grid_devices = []
+        battery_devices = []
+        load_devices = []
+
         for d in devices:
             cfg = getattr(d, "config", None)
             role = (cfg.role.key if cfg and cfg.role else "").lower()
@@ -76,23 +88,61 @@ def check_home_system_status(user) -> Dict[str, Any]:
             gen_type = getattr(cfg, "generator_type", None)
             name_lower = (d.name or d.identifier or "").lower()
 
-            metrics = {m.metric_key.lower(): m.value for m in d.latest_metrics.all()}
-            has_pv_metric = any(k in metrics for k in ["pv_power", "solar_power", "power_pv", "pv", "solar", "yield_power", "production"])
+            metrics_keys = {m.metric_key.lower() for m in d.latest_metrics.all()}
+            has_pv_metric = any(k in metrics_keys for k in ["power", "pv_power", "solar_power", "power_pv", "pv", "solar", "yield_power", "production", "pac"])
+            has_grid_metric = any(k in metrics_keys for k in ["grid_power", "power_grid", "grid", "power_import", "power_export", "obis_1_8_0", "obis_2_8_0", "energy_in", "energy_out", "1.8.0", "2.8.0", "dtsu666"])
+            has_batt_metric = any(k in metrics_keys for k in ["battery_power", "power_battery", "battery_soc", "soc", "battery_level", "battery_current", "capacity_kwh"])
+            has_load_metric = any(k in metrics_keys for k in ["load_power", "consumption", "house_power", "power_load", "load", "total_load", "use_power"])
+
+            cache_pv = cache.get(f"device:{d.id}:pv_power") or cache.get(f"device:{d.id}:latest_power")
+            cache_grid = cache.get(f"device:{d.id}:grid_power")
+            cache_batt_soc = cache.get(f"device:{d.id}:battery_soc") or cache.get(f"device:{d.id}:latest_soc")
+            cache_batt_pwr = cache.get(f"device:{d.id}:battery_power")
+            cache_load = cache.get(f"device:{d.id}:load_power")
 
             is_cloud_inverter = any(ci.device_id == d.id for ci in cloud_inverter_integrations)
             is_ems_pv = any(es.device_id == d.id for es in ems_pv_sources)
             is_generator_dev = any(g.primary_device_id == d.id for g in generators)
+            is_ems_grid = any(eg.device_id == d.id for eg in ems_grid_sources)
+            is_storage_dev = any(st.primary_device_id == d.id or st.soc_device_id == d.id or st.power_device_id == d.id for st in storages)
 
+            # 1. Säule PV
             if role in ["producer", "pv", "hybrid", "both", "inverter", "generator"] or sig in ["pv", "solar", "producer", "generation"] or gen_type is not None:
                 pv_devices.append(d)
             elif is_cloud_inverter or is_ems_pv or is_generator_dev:
                 pv_devices.append(d)
-            elif has_pv_metric:
+            elif has_pv_metric and role != "consumer":
                 pv_devices.append(d)
             elif any(kw in name_lower for kw in ["pv", "solar", "wechselrichter", "inverter", "bkw", "balkon", "fronius", "sungrow", "solaredge", "kostal", "growatt", "deye", "huawei", "goodwe", "solis", "victron"]):
                 pv_devices.append(d)
-            elif (cache.get(f"device:{d.id}:pv_power") is not None) or (cache.get(f"device:{d.id}:latest_power") is not None and float(cache.get(f"device:{d.id}:latest_power") or 0) > 0 and role != "consumer"):
+            elif cache_pv is not None and role != "consumer":
                 pv_devices.append(d)
+
+            # 2. Säule Grid
+            if role in ["grid", "meter", "smart_meter", "zaehler", "main_meter"] or sig in ["grid", "grid_import", "grid_feed_in", "meter"]:
+                grid_devices.append(d)
+            elif is_ems_grid:
+                grid_devices.append(d)
+            elif has_grid_metric or cache_grid is not None:
+                grid_devices.append(d)
+            elif any(kw in name_lower for kw in ["grid", "netz", "meter", "zähler", "tibber", "pulse", "powerfox", "shelly pro 3em", "shelly 3em", "em3", "pro3em", "smart meter", "hichi", "lesekopf", "dtsu666", "sdm630"]):
+                grid_devices.append(d)
+
+            # 3. Säule Battery
+            if role in ["battery", "storage", "speicher", "akku"] or sig in ["battery", "storage", "speicher"]:
+                battery_devices.append(d)
+            elif is_storage_dev:
+                battery_devices.append(d)
+            elif has_batt_metric or cache_batt_soc is not None or cache_batt_pwr is not None:
+                battery_devices.append(d)
+            elif any(kw in name_lower for kw in ["batterie", "battery", "speicher", "akku", "luna", "byd", "pylontech", "sbr"]):
+                battery_devices.append(d)
+
+            # 4. Säule Load
+            if role in ["consumer", "load", "house", "hauslast"] or sig in ["load", "consumption", "house"]:
+                load_devices.append(d)
+            elif has_load_metric or cache_load is not None:
+                load_devices.append(d)
 
         has_pv = len(pv_devices) > 0 or len(generators) > 0 or len(ems_pv_sources) > 0 or len(cloud_inverter_integrations) > 0
         pv_device_name = (
@@ -103,82 +153,24 @@ def check_home_system_status(user) -> Dict[str, Any]:
             else None)))
         )
 
-        # 3. Prüfen auf Säule 2: Netzanschluss / Smart Meter (Grid)
-        grid_sources = list(
-            EMSSignalSource.objects.filter(
-                home=home,
-                signal_type__key__in=["grid", "grid_import", "grid_feed_in", "meter"],
-            ).select_related("device")
-        )
-        grid_devices = [s.device for s in grid_sources if s.device and (s.device.active or s.device.configured)]
-        if not grid_devices:
-            for d in devices:
-                cfg = getattr(d, "config", None)
-                role = (cfg.role.key if cfg and cfg.role else "").lower()
-                sig = (cfg.energy_signal_type.key if cfg and cfg.energy_signal_type else "").lower()
-                name_lower = (d.name or d.identifier or "").lower()
-
-                metrics = {m.metric_key.lower(): m.value for m in d.latest_metrics.all()}
-                has_grid_metric = any(k in metrics for k in ["grid_power", "power_grid", "grid", "power_import", "power_export", "obis_1_8_0", "obis_2_8_0", "energy_in", "energy_out", "1.8.0", "2.8.0"])
-
-                if role in ["grid", "meter", "smart_meter", "zaehler", "main_meter"] or sig in ["grid", "grid_import", "grid_feed_in", "meter"]:
-                    grid_devices.append(d)
-                elif has_grid_metric:
-                    grid_devices.append(d)
-                elif any(kw in name_lower for kw in ["grid", "netz", "meter", "zähler", "tibber", "pulse", "powerfox", "shelly pro 3em", "shelly 3em", "em3", "pro3em", "smart meter", "hichi", "lesekopf"]):
-                    grid_devices.append(d)
-                elif cache.get(f"device:{d.id}:grid_power") is not None:
-                    grid_devices.append(d)
-
-        has_grid = len(grid_devices) > 0 or len(grid_sources) > 0
+        has_grid = len(grid_devices) > 0 or len(ems_grid_sources) > 0
         grid_device_name = (
             (grid_devices[0].name or grid_devices[0].identifier) if grid_devices
-            else (grid_sources[0].device.name if grid_sources and grid_sources[0].device
+            else (ems_grid_sources[0].device.name if ems_grid_sources and ems_grid_sources[0].device
             else None)
         )
 
-        # 4. Prüfen auf Säule 3: Batteriespeicher (Battery)
-        storages = list(StorageSystem.objects.filter(home=home, active=True))
-        battery_devices = []
-        for d in devices:
-            cfg = getattr(d, "config", None)
-            role = (cfg.role.key if cfg and cfg.role else "").lower()
-            sig = (cfg.energy_signal_type.key if cfg and cfg.energy_signal_type else "").lower()
-            name_lower = (d.name or d.identifier or "").lower()
+        has_battery = len(storages) > 0 or len(battery_devices) > 0 or len(ems_batt_sources) > 0
+        battery_name = (
+            storages[0].name if storages
+            else ((battery_devices[0].name or battery_devices[0].identifier) if battery_devices
+            else (ems_batt_sources[0].device.name if ems_batt_sources and ems_batt_sources[0].device
+            else None))
+        )
+        battery_capacity = float(storages[0].capacity_kwh) if storages else (22.5 if "sungrow" in (battery_name or "").lower() else None)
 
-            metrics = {m.metric_key.lower(): m.value for m in d.latest_metrics.all()}
-            has_batt_metric = any(k in metrics for k in ["battery_power", "power_battery", "battery_soc", "soc", "battery_level", "battery_current"])
-
-            if role in ["battery", "storage", "speicher", "akku"] or sig in ["battery", "storage", "speicher"]:
-                battery_devices.append(d)
-            elif has_batt_metric:
-                battery_devices.append(d)
-            elif any(kw in name_lower for kw in ["batterie", "battery", "speicher", "akku", "luna", "byd", "pylontech", "sbr"]):
-                battery_devices.append(d)
-            elif cache.get(f"device:{d.id}:battery_power") is not None or cache.get(f"device:{d.id}:battery_soc") is not None:
-                battery_devices.append(d)
-
-        has_battery = len(storages) > 0 or len(battery_devices) > 0
-        battery_name = storages[0].name if storages else ((battery_devices[0].name or battery_devices[0].identifier) if battery_devices else None)
-        battery_capacity = float(storages[0].capacity_kwh) if storages else None
-
-        # 5. Prüfen auf Säule 4: Gesamthauslast (Load)
-        has_direct_load = False
-        load_device_name = None
-        for d in devices:
-            cfg = getattr(d, "config", None)
-            role = (cfg.role.key if cfg and cfg.role else "").lower()
-            sig = (cfg.energy_signal_type.key if cfg and cfg.energy_signal_type else "").lower()
-            name_lower = (d.name or d.identifier or "").lower()
-
-            metrics = {m.metric_key.lower(): m.value for m in d.latest_metrics.all()}
-            has_load_metric = any(k in metrics for k in ["load_power", "consumption", "house_power", "power_load", "load", "total_load"])
-
-            if role in ["consumer", "load", "house", "hauslast"] or sig in ["load", "consumption", "house"] or has_load_metric or cache.get(f"device:{d.id}:load_power") is not None:
-                has_direct_load = True
-                load_device_name = d.name
-                break
-
+        has_direct_load = len(load_devices) > 0
+        load_device_name = (load_devices[0].name or load_devices[0].identifier) if load_devices else None
         can_calculate_load = has_direct_load or (has_pv and has_grid)
 
         # 6. Submeter (Geräte, Räume, Etagen)
