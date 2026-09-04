@@ -89,7 +89,7 @@ def check_home_system_status(user) -> Dict[str, Any]:
             name_lower = (d.name or d.identifier or "").lower()
 
             metrics_keys = {m.metric_key.lower() for m in d.latest_metrics.all()}
-            has_pv_metric = any(k in metrics_keys for k in ["power", "pv_power", "solar_power", "power_pv", "pv", "solar", "yield_power", "production", "pac"])
+            has_pv_metric = any(k in metrics_keys for k in ["pv_power", "solar_power", "power_pv", "pv", "solar", "yield_power", "production", "pac", "power"])
             has_grid_metric = any(k in metrics_keys for k in ["grid_power", "power_grid", "grid", "power_import", "power_export", "obis_1_8_0", "obis_2_8_0", "energy_in", "energy_out", "1.8.0", "2.8.0", "dtsu666"])
             has_batt_metric = any(k in metrics_keys for k in ["battery_power", "power_battery", "battery_soc", "soc", "battery_level", "battery_current", "capacity_kwh"])
             has_load_metric = any(k in metrics_keys for k in ["load_power", "consumption", "house_power", "power_load", "load", "total_load", "use_power"])
@@ -112,52 +112,96 @@ def check_home_system_status(user) -> Dict[str, Any]:
                 for st in storages
             )
 
-            # 1. Säule PV
-            if role in ["producer", "pv", "hybrid", "both", "inverter", "generator"] or sig in ["pv", "solar", "producer", "generation"] or gen_type is not None:
-                pv_devices.append(d)
-            elif is_cloud_inverter or is_ems_pv or is_generator_dev:
-                pv_devices.append(d)
-            elif has_pv_metric and role != "consumer":
-                pv_devices.append(d)
-            elif any(kw in name_lower for kw in ["pv", "solar", "wechselrichter", "inverter", "bkw", "balkon", "fronius", "sungrow", "solaredge", "kostal", "growatt", "deye", "huawei", "goodwe", "solis", "victron"]):
-                pv_devices.append(d)
-            elif cache_pv is not None and role != "consumer":
+            is_pure_battery_device = (
+                role in ["battery", "storage", "speicher", "akku"]
+                or sig in ["battery", "storage", "speicher"]
+                or (("batterie" in name_lower or "battery" in name_lower or "soc" in name_lower) and not any(kw in name_lower for kw in ["hybrid", "sungrow", "growatt", "fronius", "inverter", "wechselrichter", "pv"]))
+            )
+
+            # 1. Säule PV (Solar / Erzeugung)
+            if not is_pure_battery_device and (
+                role in ["producer", "pv", "hybrid", "both", "inverter", "generator"]
+                or sig in ["pv", "solar", "producer", "generation"]
+                or gen_type is not None
+                or is_cloud_inverter
+                or is_ems_pv
+                or is_generator_dev
+                or any(kw in name_lower for kw in ["pv", "solar", "wechselrichter", "inverter", "bkw", "balkon", "fronius", "sungrow", "solaredge", "kostal", "growatt", "deye", "huawei", "goodwe", "solis", "victron", "hybrid"])
+                or (has_pv_metric and role not in ["consumer", "battery", "storage", "grid", "meter"])
+                or (cache_pv is not None and role not in ["consumer", "battery", "storage", "grid", "meter"])
+            ):
                 pv_devices.append(d)
 
-            # 2. Säule Grid
-            if role in ["grid", "meter", "smart_meter", "zaehler", "main_meter"] or sig in ["grid", "grid_import", "grid_feed_in", "meter"]:
-                grid_devices.append(d)
-            elif is_ems_grid:
-                grid_devices.append(d)
-            elif has_grid_metric or cache_grid is not None:
-                grid_devices.append(d)
-            elif any(kw in name_lower for kw in ["grid", "netz", "meter", "zähler", "tibber", "pulse", "powerfox", "shelly pro 3em", "shelly 3em", "em3", "pro3em", "smart meter", "hichi", "lesekopf", "dtsu666", "sdm630"]):
+            # 2. Säule Grid (Netz / SmartMeter)
+            if (
+                role in ["grid", "meter", "smart_meter", "zaehler", "main_meter"]
+                or sig in ["grid", "grid_import", "grid_feed_in", "meter"]
+                or is_ems_grid
+                or has_grid_metric
+                or cache_grid is not None
+                or any(kw in name_lower for kw in ["grid", "netz", "meter", "zähler", "tibber", "pulse", "powerfox", "shelly pro 3em", "shelly 3em", "em3", "pro3em", "smart meter", "hichi", "lesekopf", "dtsu666", "sdm630"])
+            ):
                 grid_devices.append(d)
 
-            # 3. Säule Battery
-            if role in ["battery", "storage", "speicher", "akku"] or sig in ["battery", "storage", "speicher"]:
-                battery_devices.append(d)
-            elif is_storage_dev:
-                battery_devices.append(d)
-            elif has_batt_metric or cache_batt_soc is not None or cache_batt_pwr is not None:
-                battery_devices.append(d)
-            elif any(kw in name_lower for kw in ["batterie", "battery", "speicher", "akku", "luna", "byd", "pylontech", "sbr"]):
+            # 3. Säule Battery (Speicher / SoC)
+            if (
+                role in ["battery", "storage", "speicher", "akku"]
+                or sig in ["battery", "storage", "speicher"]
+                or is_storage_dev
+                or has_batt_metric
+                or cache_batt_soc is not None
+                or cache_batt_pwr is not None
+                or any(kw in name_lower for kw in ["batterie", "battery", "speicher", "akku", "luna", "byd", "pylontech", "sbr", "soc"])
+            ):
                 battery_devices.append(d)
 
-            # 4. Säule Load
-            if role in ["consumer", "load", "house", "hauslast"] or sig in ["load", "consumption", "house"]:
+            # 4. Säule Load (Hausverbrauch)
+            if (
+                role in ["consumer", "load", "house", "hauslast"]
+                or sig in ["load", "consumption", "house"]
+                or has_load_metric
+                or cache_load is not None
+            ):
                 load_devices.append(d)
-            elif has_load_metric or cache_load is not None:
-                load_devices.append(d)
+
+        # Priorisiere echte PV-Geräte vor sekundären Multi-Funktions-Geräten
+        def _pv_priority_sort(dev):
+            n = (dev.name or dev.identifier or "").lower()
+            r = (dev.config.role.key if getattr(dev, "config", None) and dev.config.role else "").lower()
+            score = 0
+            if any(ci.device_id == dev.id for ci in cloud_inverter_integrations):
+                score += 50
+            if r in ["producer", "pv", "hybrid", "both", "inverter"]:
+                score += 40
+            if any(kw in n for kw in ["sungrow", "growatt", "fronius", "solaredge", "kostal", "wechselrichter", "inverter", "pv", "solar"]):
+                score += 30
+            if "batterie" in n or "soc" in n:
+                score -= 60
+            return score
+
+        pv_devices.sort(key=_pv_priority_sort, reverse=True)
 
         has_pv = len(pv_devices) > 0 or len(generators) > 0 or len(ems_pv_sources) > 0 or len(cloud_inverter_integrations) > 0
         pv_device_name = (
-            (pv_devices[0].name or pv_devices[0].identifier) if pv_devices
-            else (generators[0].name if generators
+            (generators[0].name if generators and generators[0].name
+            else ((pv_devices[0].name or pv_devices[0].identifier) if pv_devices
             else (cloud_inverter_integrations[0].profile_id if cloud_inverter_integrations
             else (ems_pv_sources[0].device.name if ems_pv_sources and ems_pv_sources[0].device
-            else None)))
+            else None))))
         )
+
+        # Priorisiere Zähler für Grid
+        def _grid_priority_sort(dev):
+            n = (dev.name or dev.identifier or "").lower()
+            r = (dev.config.role.key if getattr(dev, "config", None) and dev.config.role else "").lower()
+            score = 0
+            if r in ["grid", "meter", "smart_meter", "zaehler", "main_meter"]:
+                score += 50
+            if any(kw in n for kw in ["dtsu666", "sdm630", "shelly pro 3em", "tibber", "pulse", "powerfox", "meter", "zähler", "grid", "netz"]):
+                score += 30
+            return score
+
+        grid_devices.sort(key=_grid_priority_sort, reverse=True)
 
         has_grid = len(grid_devices) > 0 or len(ems_grid_sources) > 0
         grid_device_name = (
