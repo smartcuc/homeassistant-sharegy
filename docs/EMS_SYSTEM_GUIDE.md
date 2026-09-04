@@ -97,3 +97,63 @@ Im Chart-Modal ([`DeviceChartModal.jsx`](file:///c:/Users/Public/Dev/eswes/front
 Jeder Haushalt besitzt ein festes MQTT-Präfix:
 - **Topic-Format**: `h/<token>/<identifier>`
 - **Broker-Daten**: Unter [`/app/settings`](file:///c:/Users/Public/Dev/eswes/frontend/src/pages/Settings.jsx) einsehbar (Host, Port 1883, Benutzer, maskiertes Passwort, QR-Code & Passwort-Rotation).
+
+---
+
+## 🎛️ 7. Smart Load Management & Dispatch Hub (`/app/control`)
+
+Der **Dispatch Hub** steuert das dynamische Leistungsbudget des Haushalts in Echtzeit und verteilt solaren Überschuss sowie Tiefstpreis-Stunden auf alle steuerbaren Haushalts-Assets:
+
+```
+                  ┌─────────────────────────────────────────┐
+                  │          Live Power Budget Engine       │
+                  │   P_surplus = P_pv - P_base_load        │
+                  └────────────────────┬────────────────────┘
+                                       │
+                                       ▼
+                  ┌─────────────────────────────────────────┐
+                  │    Prioritäten-Kaskade (Merit-Order)    │
+                  │   [1. Speicher ➔ 2. BWWP ➔ 3. Wallbox]  │
+                  └────────────────────┬────────────────────┘
+                                       │
+                  ┌────────────────────┼────────────────────┐
+                  ▼                    ▼                    ▼
+        ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐
+        │  ♨️ BWWP SG-Ready │  │  🚗 Wallbox EV   │  │  🏊 Pool & Klima │
+        │  (Boost bis 60°C)│  │  (Min+PV / Solar)│  │  (Peak-Shaving)  │
+        └──────────────────┘  └──────────────────┘  └──────────────────┘
+```
+
+### Die 4 Master-Autopilot-Modi
+1. 🤖 **Smart Autopilot**: Maximiert Eigenverbrauch und optimiert Speicher/Lasten prädiktiv anhand von Solarprognose und EPEX-Spotpreisen.
+2. ☀️ **Nur PV-Überschuss**: Strikt autarkieorientiert; schaltet Verbraucher nur ein, wenn $P_\text{grid} < 0\,\text{W}$.
+3. 💰 **Preise-Optimiert**: Nutzt gezielt stündliche Negativpreis- und Tiefstpreisfenster an der Strombörse.
+4. 🛑 **Manuell**: Deaktiviert die automatische Zuteilung für manuelle Einzelschaltungen.
+
+---
+
+## ♨️ 8. Brauchwasserwärmepumpe (BWWP) & SG-Ready Integration
+
+Die BWWP wird als steuerbare thermische Batterie betrieben:
+- **Temperatur-Schwellenwerte**:
+  - $T_\text{min} = 45^\circ\text{C}$ (Komfort- & Legionellensicherung, erzwungener Normalbetrieb)
+  - $T_\text{soll} = 52^\circ\text{C}$ (Standard-Solltemperatur)
+  - $T_\text{boost} = 60^\circ\text{C}$ (SG-Ready State 3 bei Solarüberschuss $\ge 800\,\text{W}$)
+  - $T_\text{max} = 65^\circ\text{C}$ (Sicherheitsabschaltung & Überhitzungsschutz)
+- **Verdichter- & Taktschutz (Anti-Cycling)**:
+  - Mindestlaufzeit: $t_\text{run} \ge 20\,\text{min}$ (verhindert Abschalten bei kurzen PV-Einbrüchen)
+  - Mindestruhezeit: $t_\text{cool} \ge 15\,\text{min}$ (schont den Kältekreislauf vor schnellem Wiedereinschalten)
+- **Aktorik-Anbindung**:
+  - Outbound WebSocket (`/ws/outbound/`) an ioBroker-Adapter (`iobroker.sharegy`), Home Assistant oder Shelly Relais.
+
+---
+
+## 🟢 9. ioBroker Multi-Metric Adapter (`ioBroker.sharegy`)
+
+Der offizielle ioBroker-Adapter erlaubt das Bündeln mehrerer lokaler Datenpunkte zu einem logischen Sharegy-Gerät:
+- **BWWP-Bündel**:
+  - `power`: Wirkleistung des Verdichters (W)
+  - `temperature`: Speichertemperatur (°C)
+  - `sg_switch`: Relaiskontakt (SG-Ready State 2/3)
+- **Echtzeit-Rückkanal**: Closed-Loop Rückmeldung bei Schaltungen innerhalb von < 100 ms.
+

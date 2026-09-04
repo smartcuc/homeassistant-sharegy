@@ -702,6 +702,179 @@ Real-time lockscreen alerts for battery reserves, baseload leakages, and PV yiel
                 "is_featured": True,
                 "sort_order": 12,
             },
+
+            # ---------------------------------------------------------------------
+            # 13. SMART LOAD MANAGEMENT & DISPATCH HUB
+            # ---------------------------------------------------------------------
+            {
+                "category": cats["optimizer"],
+                "slug": "smart-load-management-und-dispatch-hub",
+                "context_key": "control",
+                "title_de": "Smart Load Management & Dispatch-Zentrale (/app/control) 🎛️⚡",
+                "title_en": "Smart Load Management & Dispatch Hub (/app/control) 🎛️⚡",
+                "summary_de": "Leitfaden für die Lastmanagement-Zentrale: Prioritäten-Kaskade (Merit-Order), Master-Modi (Autopilot, Nur Solar, Sparfuchs) und 24h-Fahrplan.",
+                "summary_en": "Comprehensive guide for the Load Management Hub: Priority Cascade (Merit-Order), Master Autopilot modes, and 24h schedule preview.",
+                "content_de": r"""# Smart Load Management & Dispatch Hub 🎛️⚡
+
+Der **Smart Load Management & Dispatch Hub** auf `/app/control` ist die zentrale Steuerungszentrale für alle flexiblen Verbraucher und Speicher deines Haushalts.
+
+---
+
+## 1. Die 4 Master-Autopilot-Modi
+
+Wähle in der Steuerungsleiste den gewünschten Betriebsmodus:
+* 🤖 **Smart Autopilot**: Maximiert vollautomatisch die Eigenverbrauchsquote und optimiert Speicher und flexible Lasten basierend auf Solarprognose und stündlichen dynamischen Strompreisen (EPEX Spot).
+* ☀️ **Nur PV-Überschuss**: Verbraucher und Heimspeicher werden ausschließlich aktiviert, wenn solarer Überschuss eingespeist werden würde ($P_\text{grid} < 0\,\text{W}$). Netzbezug für flexible Lasten wird strikt vermieden.
+* 💰 **Preise-Optimiert**: Nutzt gezielt günstige und negative Strompreis-Phasen an der Strombörse zur Aufladung von Speicher und thermischen Speichern.
+* 🛑 **Manuell**: Die automatische Zuteilung ist pausiert. Alle Verbraucher können direkt per Hand geschaltet werden.
+
+---
+
+## 2. Die Prioritäten-Kaskade (Merit-Order)
+
+Wenn die Sonne scheint, reicht der Überschuss nicht immer für alle Verbraucher gleichzeitig. Über die **Prioritäten-Kaskade** legst du per Klick die Zuteilungs-Reihenfolge fest:
+
+```
+[ 1. 🔋 Heimspeicher ] ➔ [ 2. ♨️ BWWP ] ➔ [ 3. 🚗 Wallbox ] ➔ [ 4. 🏊 Poolpumpe ] ➔ [ 5. ❄️ Klima ] ➔ [ 6. 🧺 Haushalt ]
+```
+
+* **Beispiel**: Zuerst wird der Heimspeicher bis zur Reserve (z. B. 80%) geladen. Danach fließt der Überschuss in die Brauchwasserwärmepumpe (Boost auf 60°C). Reicht der Strom weiterhin, starten Wallbox und Poolfilterung.
+
+---
+
+## 3. Die 7 modularen Verbraucher-Kategorien
+
+1. ♨️ **Brauchwasserwärmepumpe (BWWP) & Wärmepumpe**: SG-Ready Schaltung (State 2 / State 3 Boost bis 60°C) mit integriertem Verdichter- und Taktschutz.
+2. 🚗 **Wallbox & E-Auto**: Überschussladen (Min+PV), Börsenpreis-Laden und 1-Klick-Schnellladung.
+3. 🔋 **Heimspeicher**: Arbitrage & automatisches Grid-Charging bei negativen Strompreisen.
+4. 🏊 **Poolpumpen & Filter**: Garantiert tägliche Mindestlaufzeit (z. B. 5 Stunden) exakt in den Sonnenstunden (Peak-Shaving).
+5. ❄️ **Klimaanlagen (Pre-Cooling)**: Kühlt das Haus bei sommerlichen PV-Spitzenzeiten 1,5°C vor, um teuren Abendstrom einzusparen.
+6. 🧺 **Haushaltsgeräte (Smart Plugs)**: „Ready-to-Start“ Scharfschaltung für Waschmaschine und Geschirrspüler.
+7. ⚡ **Heizstäbe (Power-to-Heat)**: Stufenlose Pufferladung zur vollständigen Überschussverwertung vor der Netzeinspeisung.
+
+---
+
+## 4. Der 24h-Fahrplan (Dispatch-Timeline)
+
+Die horizontale Fahrplan-Vorschau visualisiert für jede Stunde des Tages:
+* Erwartete PV-Erzeugung (kW) und dynamischer Strompreis.
+* Welche Geräte voraussichtlich mit kostenlosem Solarstrom oder Tiefstpreisen betrieben werden.
+""",
+                "content_en": r"""# Smart Load Management & Dispatch Hub 🎛️⚡
+
+The **Smart Load Management & Dispatch Hub** on `/app/control` serves as the central orchestration engine for your home's flexible energy assets.
+
+## Key Features
+* 📊 **Live Power Budget & Master Autopilot Modes** (Autopilot, Solar Only, Price Saver, Manual)
+* 🥇 **Interactive Priority Cascade (Merit-Order)** for solar surplus allocation.
+* 📅 **24h Dispatch Schedule & Timeline** merging solar forecasts with dynamic spot prices.
+* 🎛️ **Modular Load Controllers** for Heat Pumps/DHW, EV Chargers, Home Batteries, Pool Pumps, AC Pre-Cooling, Smart Plugs, and Heating Rods.
+""",
+                "tags": ["lastmanagement", "dispatch", "prioritäten", "merit order", "bwwp", "wallbox", "pool", "klima", "autopilot"],
+                "is_featured": True,
+                "sort_order": 13,
+            },
+
+            # ---------------------------------------------------------------------
+            # 14. BWWP & SG-READY HEAT PUMP CONTROL
+            # ---------------------------------------------------------------------
+            {
+                "category": cats["optimizer"],
+                "slug": "brauchwasserwaermepumpe-bwwp-und-sg-ready",
+                "context_key": "bwwp",
+                "title_de": "BWWP & Wärmepumpen-Lastmanagement: SG-Ready & Verdichterschutz ♨️🛡️",
+                "title_en": "DHW Heat Pump (BWWP) Load Management: SG-Ready & Compressor Safety ♨️🛡️",
+                "summary_de": "Funktionsweise des BWWP-Lastmanagements mit SG-Ready Kontakt, Temperaturgrenzen, Solar-Boost und Verdichter-Schutzzeiten gegen Takten.",
+                "summary_en": "Domestic Hot Water Heat Pump control with SG-Ready relays, temperature thresholds, solar boost, and anti-cycling compressor protection.",
+                "content_de": r"""# BWWP & Wärmepumpen-Lastmanagement (SG-Ready) ♨️🛡️
+
+Brauchwasserwärmepumpen (**BWWP**) und Heizungs-Wärmepumpen bieten durch ihren Wasserspeicher eine hervorragende thermische Speicherkapazität. Sharegy steuert diese Geräte vollautomatisch über SG-Ready Kontakte (Relais / Shelly / ioBroker / Home Assistant).
+
+---
+
+## 1. Die SG-Ready Betriebszustände
+
+Sharegy bildet die genormten SG-Ready Stufen ab:
+* ⚪ **Zustand 1 (Sperre / Standby)**: EVU-Sperre oder absoluter Überhitzungsschutz ($T \ge 65^\circ\text{C}$).
+* 🟡 **Zustand 2 (Normalbetrieb)**: Standardbetrieb nach internem Thermostat der Wärmepumpe ($T_{soll} \approx 52^\circ\text{C}$).
+* 🟢 **Zustand 3 (SG-Ready Boost / Verstärkter Betrieb)**: Relais schließt bei PV-Überschuss ($\ge 800\,\text{W}$) oder Börsen-Tiefstpreisen. Die Wärmepumpe heizt den Speicher auf **$60^\circ\text{C}$ (Boost-Temperatur)** als thermische Batterie auf.
+* 🔥 **Zustand 4 (Zwangsanlauf / Komfort-Sicherung)**: Fällt die Wassertemperatur unter die Mindestgrenze ($T < 45^\circ\text{C}$), erzwingt Sharegy das Heizen zur Warmwasser- und Legionellengarantie.
+
+---
+
+## 2. Verdichter- & Taktschutz (Anti-Cycling)
+
+Zum Schutz des Wärmepumpen-Verdichters vor vorzeitigem Verschleiß erzwingt Sharegy zwei essenzielle Schutzzeiten:
+1. 🔒 **Mindestlaufzeit (Standard: 20 Minuten)**: Wurde die BWWP eingeschaltet, bleibt sie mindestens 20 Minuten aktiv – selbst wenn vorübergehend eine Wolke über die PV-Anlage zieht.
+2. ⏳ **Mindestruhezeit (Standard: 15 Minuten)**: Nach dem Abschalten bleibt das Relais mindestens 15 Minuten geöffnet, um schädliches Takten zu verhindern.
+
+---
+
+## 3. Anbindung über ioBroker & Home Assistant
+
+Verbinde dein BWWP-Schaltrelais (z. B. Shelly Plus 1 / Shelly Pro 1PM oder HomeMatic-Schaltaktor):
+* **ioBroker**: Wähle im Sharegy-Adapter das zusammengestellte BWWP-Gerät aus (Leistung, Temperatur und SG-Schaltkontakt).
+* **Home Assistant**: Nutze das integrierte **BWWP-Gerätebündel** im Setup Flow.
+* **Geschlossener Regelkreis**: Sobald Sharegy den Boost-Befehl sendet, schaltet das Relais in Millisekunden per Outbound-WebSocket.
+""",
+                "content_en": r"""# DHW Heat Pump (BWWP) & SG-Ready Load Management ♨️🛡️
+
+Domestic Hot Water (DHW) heat pumps represent ideal thermal batteries. Sharegy actuates SG-Ready relays via ioBroker, Home Assistant, and Shelly WSS.
+
+## Core Mechanisms
+* 🌡️ **Temperature Limits**: Min Comfort (45°C), Standard Target (52°C), Solar Boost (60°C), Safety Lock (65°C).
+* 🔒 **Compressor Protection**: Minimum 20-minute runtime and 15-minute cooldown between cycles to eliminate short-cycling.
+* 🔄 **Closed-Loop Actuation**: Real-time state synchronization over Outbound WebSockets.
+""",
+                "tags": ["bwwp", "wärmepumpe", "sg-ready", "verdichterschutz", "brauchwasser", "boost", "temperaturen"],
+                "is_featured": True,
+                "sort_order": 14,
+            },
+
+            # ---------------------------------------------------------------------
+            # 15. IOBROKER ADAPTER INTEGRATION
+            # ---------------------------------------------------------------------
+            {
+                "category": cats["devices-protocols"],
+                "slug": "iobroker-sharegy-adapter-guide",
+                "context_key": "interfaces",
+                "title_de": "Offizieller ioBroker Adapter für Sharegy Cloud (ioBroker.sharegy) 📡🟢",
+                "title_en": "Official ioBroker Adapter for Sharegy Cloud (ioBroker.sharegy) 📡🟢",
+                "summary_de": "Einrichtung des nativen ioBroker-Adapters mit verschlüsseltem WebSocket-Stream, Telemetrie-Mapping, BWWP-Bündelung und bidirektionaler Relais-Schaltung.",
+                "summary_en": "Step-by-step setup for ioBroker.sharegy with encrypted Outbound WebSocket streaming, multi-sensor bundling, and closed-loop relay control.",
+                "content_de": r"""# Offizieller ioBroker Adapter (ioBroker.sharegy) 📡🟢
+
+Der offizielle **ioBroker Adapter** verbindet deine lokale ioBroker-Installation verschlüsselt und in Echtzeit mit der Sharegy Cloud.
+
+---
+
+## 1. Installation & Konfiguration
+1. Installiere den Adapter `iobroker.sharegy` aus dem offiziellen Repository.
+2. Kopiere deine persönliche **WSS-Server-Adresse** aus Sharegy unter **⚙️ Einstellungen ➔ Schnittstellen**.
+3. Füge die URL im ioBroker-Instanz-Setup ein (Token wird automatisch erkannt).
+4. Speichern – der Adapter baut sofort eine sichere TLS-Verbindung über Port 443 auf.
+
+---
+
+## 2. Multi-Sensor Gerätebündelung (z. B. BWWP)
+Im ioBroker-Adapter kannst du verschiedene Datenpunkte einem logischen Gerät zuordnen:
+* **Leistungssensor**: Wirkleistung (W)
+* **Temperatursensor**: Wassertemperatur (°C)
+* **Schaltzustand & Aktorik**: SG-Ready Schalter / Shelly-Relais
+
+---
+
+## 3. Bidirektionaler Closed-Loop Rückkanal
+Sobald Sharegy einen Steuerbefehl (z. B. BWWP-Boost oder Lastabwurf) an ioBroker sendet, wird das lokale Relais betätigt und der bestätigte Schaltzustand sofort an das Sharegy Dashboard zurückgemeldet.
+""",
+                "content_en": r"""# Official ioBroker Adapter (ioBroker.sharegy) 📡🟢
+
+The official **ioBroker.sharegy** adapter streams local telemetry and accepts bidirectional actuation commands from Sharegy Cloud over secure WebSockets.
+""",
+                "tags": ["iobroker", "adapter", "websocket", "bwwp", "relais", "telemetrie"],
+                "is_featured": True,
+                "sort_order": 15,
+            },
         ]
 
         for adata in articles_data:
@@ -711,3 +884,4 @@ Real-time lockscreen alerts for battery reserves, baseload leakages, and PV yiel
             )
 
         self.stdout.write(self.style.SUCCESS(f"[OK] Erfolgreich {len(categories_data)} Kategorien und {len(articles_data)} Handbuch-Artikel in DE & EN initialisiert!"))
+
