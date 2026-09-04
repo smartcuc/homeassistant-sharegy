@@ -324,6 +324,189 @@ def _generate_mock_payload(profile_id: str, credentials: dict) -> dict:
         }
 
 
+def _growatt_hash_password(password: str) -> str:
+    """
+    MD5-Hash mit 'c'-Ersetzung an ungeraden Positionen für 0-Nibbles (Growatt-Standard).
+    Entspricht der Growatt Web/App Authentifizierung (PyPi_GrowattServer).
+    """
+    import hashlib
+    password_md5 = hashlib.md5(str(password).encode("utf-8")).hexdigest()
+    res = list(password_md5)
+    for i in range(0, len(res), 2):
+        if res[i] == "0":
+            res[i] = "c"
+    return "".join(res)
+
+
+def _execute_growatt_query(base_url: str, credentials: dict) -> dict:
+    """
+    Robustes Growatt Cloud & OpenAPI Ingestion Modul:
+    1. Pfad A: Token-basierter OpenAPI Zugriff (Growatt OpenAPI V1 / V4 via ShowDoc Spezifikation)
+    2. Pfad B: Username + Passwort Session Login (ShineServer / ShinePhone App via PyPi_GrowattServer)
+    """
+    token = credentials.get("token") or credentials.get("api_key")
+    plant_id = credentials.get("plant_id") or ""
+    device_sn = credentials.get("device_sn") or credentials.get("sn") or ""
+    username = credentials.get("user_account") or credentials.get("username") or credentials.get("userName")
+    password = credentials.get("user_password") or credentials.get("password")
+
+    raw_data = {"data": {}}
+    session = requests.Session()
+    session.headers.update({
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 12; Sharegy EMS GrowattConnector)",
+    })
+
+    # PFAD A: Offizielle Growatt OpenAPI (Token vorhanden)
+    if token and not str(token).startswith("test_") and not str(token).startswith("mock_"):
+        api_headers = {
+            "token": str(token).strip(),
+            "Content-Type": "application/x-www-form-urlencoded",
+        }
+        
+        # 1. Falls keine plant_id bekannt ist, automatisch via /v1/plant/list ermitteln
+        if not plant_id:
+            try:
+                plist_resp = session.get("https://openapi.growatt.com/v1/plant/list", headers={"token": token}, timeout=10)
+                if plist_resp.status_code == 200:
+                    p_json = plist_resp.json()
+                    plants = p_json.get("data", {}).get("plants", []) if isinstance(p_json.get("data"), dict) else []
+                    if plants and isinstance(plants, list):
+                        plant_id = str(plants[0].get("plant_id") or plants[0].get("id") or "")
+                        credentials["plant_id"] = plant_id
+            except Exception as e:
+                logger.warning("Growatt OpenAPI plant list discovery failed: %s", e)
+
+        # 2. V4 queryLastData versuchen (falls device_sn bekannt oder aus Inverter ermittelbar)
+        if device_sn:
+            for dev_type in ["inverter", "storage", "min", "sph", "noah", "tlx", "mix"]:
+                try:
+                    q_resp = session.post(
+                        "https://openapi.growatt.com/v4/new-api/queryLastData",
+                        headers=api_headers,
+                        data={"deviceType": dev_type, "deviceSn": device_sn},
+                        timeout=8,
+                    )
+                    if q_resp.status_code == 200:
+                        q_json = q_resp.json()
+                        dev_data = q_json.get("data", {}).get(dev_type) or q_json.get("data", {})
+                        if isinstance(dev_data, dict) and dev_data:
+                            raw_data["data"].update(dev_data)
+                            break
+                except Exception:
+                    pass
+
+        # 3. V1 Plant Data abfragen
+        if plant_id:
+            try:
+                p_resp = session.get(
+                    "https://openapi.growatt.com/v1/plant/data",
+                    headers={"token": token},
+                    params={"plant_id": plant_id},
+                    timeout=10,
+                )
+                if p_resp.status_code == 200 and p_resp.json().get("data"):
+                    raw_data["data"].update(p_resp.json()["data"])
+            except Exception as e:
+                logger.warning("Growatt plant/data failed: %s", e)
+
+            # Overview fallback
+            try:
+                ov_resp = session.post(
+                    "https://openapi.growatt.com/v1/plant/data/overview",
+                    headers={"token": token, "Content-Type": "application/json"},
+                    json={"plant_id": plant_id},
+                    timeout=10,
+                )
+                if ov_resp.status_code == 200 and ov_resp.json().get("data"):
+                    raw_data["data"].update(ov_resp.json()["data"])
+            except Exception:
+                pass
+
+        if raw_data.get("data"):
+            return raw_data
+
+    # PFAD B: ShineServer / ShinePhone Web Login (Username & Passwort via PyPi_GrowattServer)
+    if username and password:
+        hashed_pw = _growatt_hash_password(str(password))
+        server_hosts = [
+            "https://server.growatt.com",
+            "https://server-api.growatt.com",
+            "https://openapi.growatt.com",
+        ]
+        
+        logged_in = False
+        active_host = server_hosts[0]
+        user_id = None
+
+        for host in server_hosts:
+            login_url = f"{host}/newTwoLoginAPI.do"
+            try:
+                l_resp = session.post(login_url, data={"userName": username, "password": hashed_pw}, timeout=10)
+                if l_resp.status_code == 200:
+                    l_json = l_resp.json().get("back", {})
+                    if l_json.get("success"):
+                        logged_in = True
+                        active_host = host
+                        user_id = l_json.get("user", {}).get("id") or l_json.get("userId")
+                        credentials["user_id"] = user_id
+                        break
+            except Exception as e:
+                logger.debug("Growatt login attempt failed on host %s: %s", host, e)
+
+        if logged_in and user_id:
+            try:
+                # 1. Plant List
+                p_list_resp = session.get(f"{active_host}/PlantListAPI.do", params={"userId": user_id}, timeout=10)
+                if p_list_resp.status_code == 200:
+                    plants_info = p_list_resp.json().get("back", {})
+                    if plants_info.get("totalData"):
+                        raw_data["data"].update(plants_info["totalData"])
+                    plant_arr = plants_info.get("data", [])
+                    if plant_arr and isinstance(plant_arr, list):
+                        first_plant = plant_arr[0]
+                        if not plant_id:
+                            plant_id = str(first_plant.get("plantId") or first_plant.get("id") or "")
+                            credentials["plant_id"] = plant_id
+
+                # 2. Plant Detail / Overview
+                if plant_id:
+                    inv_resp = session.post(
+                        f"{active_host}/newTwoPlantAPI.do",
+                        params={"op": "getAllPlantListTwo"},
+                        data={"plantId": plant_id, "language": "1"},
+                        timeout=10,
+                    )
+                    if inv_resp.status_code == 200:
+                        inv_json = inv_resp.json()
+                        if isinstance(inv_json, dict):
+                            raw_data["data"].update(inv_json)
+
+                    # Storage / Battery Status (falls Hybrid oder Speicher)
+                    stor_resp = session.post(
+                        f"{active_host}/newStorageAPI.do",
+                        params={"op": "getStorageTotalData"},
+                        data={"plantId": plant_id},
+                        timeout=10,
+                    )
+                    if stor_resp.status_code == 200:
+                        stor_json = stor_resp.json()
+                        if isinstance(stor_json, dict):
+                            stor_data = stor_json.get("obj") or stor_json.get("back") or stor_json
+                            if isinstance(stor_data, dict):
+                                raw_data["data"].update(stor_data)
+
+                return raw_data
+            except Exception as e:
+                logger.warning("Growatt Web Login data retrieval error: %s", e)
+                if raw_data.get("data"):
+                    return raw_data
+                raise ValueError(f"Growatt Datenabfrage fehlgeschlagen: {e}")
+        elif not raw_data.get("data"):
+            raise ValueError("Growatt Login fehlgeschlagen: Bitte prüfe Benutzername und Passwort.")
+
+    return raw_data
+
+
 def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
     """
     Testet eingegebene Zugangsdaten gegen das Profil (Live oder Simulator).
@@ -337,7 +520,8 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
     is_mock = (
         credentials.get("appkey") in ("mock", "test", "demo", "")
         or "test" in str(credentials.get("user_account", "")).lower()
-        or getattr(settings, "STRIPE_SANDBOX_MODE", True) and not credentials.get("appkey")
+        or "test" in str(credentials.get("token", "")).lower()
+        or getattr(settings, "STRIPE_SANDBOX_MODE", True) and not credentials.get("appkey") and not credentials.get("token") and not credentials.get("user_account")
     )
 
     if is_mock:
@@ -386,7 +570,6 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
 
             # 1. OAuth2 OpenAPI Modus
             if not ps_id or ps_id in ("default_ps", "12345", ""):
-
                 try:
                     list_resp = requests.post(
                         f"{base_url.rstrip('/')}/openapi/platform/queryPowerStationList",
@@ -408,10 +591,6 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
                 except Exception as e:
                     logger.warning("Auto-fetch ps_id via OpenAPI failed: %s", e)
 
-            # 1. Realtime Measurement Points abfragen (Offizielle Sungrow OpenAPI)
-            # Nur echte, sekündliche Momentan-Leistungswerte (W) und SoC (%) abfragen.
-            # Kumulierte Tageszähler von Sungrow werden NICHT verwendet, da diese erst zeitverzögert
-            # oder am Folgetag von Sungrows Cloud aggregiert werden. Sharegy aggregiert die realen Messwerte selbst!
             MEASURE_POINTS = [
                 "83033", "83067", "83052", "83106", "83051", "83549",
                 "83129", "83252", "83238", "83104", "83111", "83112", "83326",
@@ -442,7 +621,6 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
                         logger.info("[SUNGROW_OPENAPI] Discovered Point Dictionary: %s", point_dict)
                     pts = rt_json.get("result_data", {}).get("device_point_list", [])
                     if pts:
-                        # Robustes Dict aufbauen: Keys mit und ohne 'p' Präfix
                         p_data = {}
                         for item in pts:
                             if isinstance(item, dict):
@@ -469,14 +647,9 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
 
                         pv = _get_pt("83033", "83067", "83329") or 0.0
                         load = _get_pt("83052", "83106", "83330") or 0.0
-
-                        # Netz-Kandidaten (83051 ist der offizielle Netzübergabepunkt DTSU666)
                         grid = _get_pt("83051", "83549", "83328") or 0.0
-
-                        # Batterie-Leistung Kandidaten
                         bat_pwr = _get_pt("83104", "83238", "83111", "83112", "83326") or 0.0
 
-                        # SoC Prozentwert ermitteln (0.348 -> 34.8 %)
                         soc_raw = _get_pt("83129", "83252", "83334")
                         soc_val = None
                         if soc_raw is not None:
@@ -485,30 +658,19 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
                             else:
                                 soc_val = round(soc_raw, 1)
 
-                        # Batterie Lade-/Entladerichtung standardisieren (Sharegy-Konvention: Negativ = Laden, Positiv = Entladen):
-                        # 1. Wenn Speicher voll ist (>= 98%), kann physikalisch kein Strom mehr geladen werden
                         if soc_val is not None and soc_val >= 98.0:
                             if bat_pwr < 0:
                                 bat_pwr = 0.0
-                        # 2. PV-Überschuss vorhanden (PV > Load + 30 W) und Speicher nicht voll (SoC < 98%):
-                        # Wenn bat_pwr positiv gemeldet wurde oder der Inverter absolute Ladeleistung sendet,
-                        # ist dies physikalisch LADUNG (negatives Vorzeichen)
                         elif pv > (load + 30) and (soc_val is None or soc_val < 98.0) and abs(bat_pwr) > 10:
                             bat_pwr = -abs(bat_pwr)
-                        # 3. Nacht / keine PV (PV < 20 W) und Speicher hat Kapazität (> 5%):
-                        # Speicher entlädt zur Deckung der Last (positives Vorzeichen)
                         elif pv < 20 and soc_val is not None and soc_val > 5.0 and load > 20:
                             if abs(bat_pwr) < 0.1 and abs(grid) < 60:
                                 bat_pwr = load
                             else:
                                 bat_pwr = abs(bat_pwr)
 
-                        # 4. Netzeinspeisung / Grid Plausibilisierung:
-                        # Wenn der Speicher lädt (bat_pwr < 0), fließt PV-Leistung in den Speicher.
-                        # Falls das SmartMeter/API versehentlich die Batterieladung als Netzeinspeisung meldet:
                         if bat_pwr < 0:
                             bat_charge = abs(bat_pwr)
-                            # Tatsächliche Netzeinspeisung ist maximal der Überschuss NACH Batterieladung und Hauslast
                             true_excess = max(0.0, pv - load - bat_charge)
                             if grid < 0 and abs(abs(grid) - bat_charge) < 200:
                                 grid = -true_excess
@@ -525,8 +687,6 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
             except Exception as e:
                 logger.warning("getPowerStationRealTimeData query failed: %s", e)
 
-
-
             # Details abfragen als Ergänzung
             try:
                 resp = requests.post(
@@ -541,7 +701,6 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
                 )
                 if resp.status_code == 200:
                     det_json = resp.json()
-                    # Falls Token abgelaufen ist, Refresh versuchen
                     if det_json.get("result_code") in ("2", "000") and credentials.get("refresh_token"):
                         try:
                             ref_resp = requests.post(
@@ -606,8 +765,8 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
             )
             raw_data = resp.json() if resp.status_code == 200 else {}
 
-
-
+    elif profile_id == "growatt_server":
+        raw_data = _execute_growatt_query(base_url, credentials)
 
     else:
         # Standard GET/POST
@@ -615,7 +774,18 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
         url = f"{base_url.rstrip('/')}{_render_template(req_cfg['endpoint'], credentials)}"
         headers = _render_template(req_cfg.get("headers", {}), credentials)
         params = _render_template(req_cfg.get("params", {}), credentials)
-        resp = requests.get(url, headers=headers, params=params, timeout=12)
+        body = _render_template(req_cfg.get("body", {}), credentials)
+        method = str(req_cfg.get("method", "GET")).upper()
+
+        if method == "POST":
+            content_type = str(headers.get("Content-Type", "")).lower()
+            if "application/json" in content_type:
+                resp = requests.post(url, headers=headers, json=body, timeout=12)
+            else:
+                resp = requests.post(url, headers=headers, data=body, timeout=12)
+        else:
+            resp = requests.get(url, headers=headers, params=params, timeout=12)
+
         resp.raise_for_status()
         raw_data = resp.json()
 
@@ -631,10 +801,16 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
 
 def _parse_metrics_from_payload(profile: dict, raw_payload: dict) -> dict:
     """
-    Wendet das metrics_mapping des Profils auf die Rohdaten an.
+    Wendet das metrics_mapping des Profils auf die Rohdaten an und ergänzt
+    intelligente Multi-Key Fallbacks (z. B. für Growatt und andere Hersteller).
     """
     mapping = profile.get("metrics_mapping", {})
     extracted = {}
+
+    # Fallback Lookup Pool aus data / root
+    data_dict = raw_payload.get("data") if isinstance(raw_payload.get("data"), dict) else {}
+    if not isinstance(data_dict, dict):
+        data_dict = {}
 
     for metric_name, rule in mapping.items():
         jsonpath = rule.get("jsonpath")
@@ -644,7 +820,62 @@ def _parse_metrics_from_payload(profile: dict, raw_payload: dict) -> dict:
         min_val = rule.get("min")
         max_val = rule.get("max")
 
-        raw_val = extract_jsonpath(raw_payload, jsonpath, fallback=fallback)
+        raw_val = extract_jsonpath(raw_payload, jsonpath, fallback=None)
+
+        # Intelligente Multi-Key Fallbacks falls JSONPath keinen Treffer liefert
+        if raw_val is None:
+            if metric_name == "pv_power_w":
+                for k in ["pac", "ppv", "pactouser", "power", "pacToUserTotal", "pv_power", "ppv1"]:
+                    if k in data_dict and data_dict[k] is not None:
+                        try:
+                            raw_val = float(data_dict[k])
+                            break
+                        except (ValueError, TypeError):
+                            pass
+            elif metric_name == "battery_soc":
+                for k in ["soc", "batterySoc", "battery_soc", "batteryPercent", "chargeLevel"]:
+                    if k in data_dict and data_dict[k] is not None:
+                        try:
+                            raw_val = float(data_dict[k])
+                            break
+                        except (ValueError, TypeError):
+                            pass
+            elif metric_name == "battery_power_w":
+                for k in ["pdisCharge", "pcharge", "pdisCharge1", "pcharge1", "battery_power"]:
+                    if k in data_dict and data_dict[k] is not None:
+                        try:
+                            raw_val = float(data_dict[k])
+                            break
+                        except (ValueError, TypeError):
+                            pass
+            elif metric_name == "grid_power_w":
+                for k in ["pgrid", "pactogrid", "grid_power", "gridPower"]:
+                    if k in data_dict and data_dict[k] is not None:
+                        try:
+                            raw_val = float(data_dict[k])
+                            break
+                        except (ValueError, TypeError):
+                            pass
+            elif metric_name == "load_power_w":
+                for k in ["pload", "use_power", "familyLoadPower", "load_power"]:
+                    if k in data_dict and data_dict[k] is not None:
+                        try:
+                            raw_val = float(data_dict[k])
+                            break
+                        except (ValueError, TypeError):
+                            pass
+            elif metric_name == "daily_generation_kwh":
+                for k in ["eToday", "etoday", "todayEnergy", "e_today", "eTodayTotal"]:
+                    if k in data_dict and data_dict[k] is not None:
+                        try:
+                            raw_val = float(data_dict[k])
+                            break
+                        except (ValueError, TypeError):
+                            pass
+
+        if raw_val is None:
+            raw_val = fallback
+
         if raw_val is not None:
             try:
                 val = float(raw_val) * scale

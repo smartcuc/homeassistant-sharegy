@@ -199,20 +199,28 @@ class ProfileRunnerTestCase(TestCase):
         self.assertIn("battery_soc", res["live_metrics"])
 
     def test_09_load_and_simulate_growatt_profile(self):
-        """Testet das Laden und die Testverbindung für Growatt ShineServer."""
+        """Testet das Laden und die Testverbindung für Growatt ShineServer (OpenAPI & Web Login)."""
         profile = load_profile("growatt_server")
         self.assertEqual(profile["id"], "growatt_server")
         self.assertEqual(profile["vendor"], "Growatt")
         self.assertIn("metrics_mapping", profile)
 
-        # Test-Credentials Simulation
-        creds = {"token": "growatt_openapi_secret_token", "plant_id": "194820"}
-        res = test_cloud_credentials("growatt_server", creds)
-        self.assertEqual(res["status"], "success")
-        self.assertTrue(res["simulated"])
-        self.assertIn("live_metrics", res)
-        self.assertIn("pv_power_w", res["live_metrics"])
-        self.assertIn("daily_generation_kwh", res["live_metrics"])
+        # 1. Test-Credentials Simulation (OpenAPI Token)
+        creds_token = {"token": "test_growatt_openapi_token", "plant_id": "194820"}
+        res_token = test_cloud_credentials("growatt_server", creds_token)
+        self.assertEqual(res_token["status"], "success")
+        self.assertTrue(res_token["simulated"])
+        self.assertIn("live_metrics", res_token)
+        self.assertIn("pv_power_w", res_token["live_metrics"])
+        self.assertIn("daily_generation_kwh", res_token["live_metrics"])
+
+        # 2. Test-Credentials Simulation (ShinePhone Web Login)
+        creds_web = {"user_account": "test_growatt_user", "user_password": "test_password"}
+        res_web = test_cloud_credentials("growatt_server", creds_web)
+        self.assertEqual(res_web["status"], "success")
+        self.assertTrue(res_web["simulated"])
+        self.assertIn("live_metrics", res_web)
+        self.assertIn("pv_power_w", res_web["live_metrics"])
 
     def test_10_load_and_simulate_new_manufacturer_profiles(self):
         """Testet Deye, Huawei, GoodWe, Solis und Victron Profile."""

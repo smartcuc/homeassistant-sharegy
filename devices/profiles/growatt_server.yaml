@@ -3,11 +3,11 @@ name: Growatt ShineServer
 vendor: Growatt
 category: inverter_hybrid
 protocol: http_cloud
-description: "Cloud-Schnittstelle für alle Growatt Wechselrichter (MIC, MIN, MOD, MID, SPH, SPA) und ARK-Batteriespeicher über das Growatt ShineServer OpenAPI Portal."
+description: "Cloud-Schnittstelle für alle Growatt Wechselrichter (MIC, MIN, MOD, MID, SPH, SPA, Noah) und ARK-Batteriespeicher über Growatt OpenAPI oder ShinePhone-App Login."
 
 help:
-  de: "1. Logge dich im Growatt ShineServer Portal (server.growatt.com oder openapi.growatt.com) ein.\n2. Gehe auf 'Benutzerzentrum' bzw. 'API Management' und generiere einen 'OpenAPI Token'.\n3. Notiere dir deine 'Anlagen-ID' (Plant ID) aus der Übersicht und die 'Seriennummer' (SN) deines Wechselrichters oder ShineWiFi-Sticks.\n4. Trage die Daten in die untenstehenden Felder ein."
-  en: "1. Log into the Growatt ShineServer portal (server.growatt.com or openapi.growatt.com).\n2. Navigate to 'User Center' / 'API Management' to generate an 'OpenAPI Token'.\n3. Note your 'Plant ID' from the dashboard and the 'Serial Number' (SN) of your inverter or ShineWiFi datalogger.\n4. Enter these credentials into the form below."
+  de: "Unterstützt 2 Verbindungsarten:\n\nOption A (Empfohlen - OpenAPI Token):\n1. Logge dich im Growatt Portal (server.growatt.com oder openapi.growatt.com) ein.\n2. Gehe auf 'Benutzerzentrum' bzw. 'API Management' und generiere einen 'OpenAPI Token'.\n3. Trage den Token und optional deine Plant-ID oder Wechselrichter-SN ein.\n\nOption B (Direkt-Login / ShinePhone App):\n1. Gib einfach deinen ShinePhone / ShineServer Benutzernamen und dein Passwort ein.\n2. Sharegy erkennt deine PV-Anlage und Wechselrichter automatisch."
+  en: "Supports 2 connection methods:\n\nOption A (Recommended - OpenAPI Token):\n1. Log into the Growatt portal (server.growatt.com or openapi.growatt.com).\n2. Navigate to 'User Center' / 'API Management' to generate an 'OpenAPI Token'.\n3. Enter your Token and optionally your Plant ID or Inverter SN.\n\nOption B (Direct Login / ShinePhone App):\n1. Enter your ShinePhone / ShineServer username and password.\n2. Sharegy will auto-discover your plants and inverters."
 
 connection:
   auth_type: api_key
@@ -15,19 +15,31 @@ connection:
   polling_interval_seconds: 60
   fields:
     - key: token
-      label: "Growatt OpenAPI Token"
+      label: "OpenAPI Token (Option A)"
       type: password
-      required: true
-      description: "Dein OpenAPI Token aus dem Growatt ShineServer Benutzerkonto."
+      required: false
+      description: "Dein OpenAPI Token aus dem Growatt ShineServer Benutzerkonto (für Option A)."
       placeholder: "z. B. 3f9a7812bc44e..."
-    - key: plant_id
-      label: "Anlagen-ID (Plant ID)"
+    - key: user_account
+      label: "ShinePhone Benutzername / E-Mail (Option B)"
       type: string
-      required: true
-      description: "Die ID deiner PV-Anlage im Growatt Portal."
+      required: false
+      description: "Dein Benutzername für die ShinePhone App / ShineServer (für Option B)."
+      placeholder: "z. B. max.mustermann"
+    - key: user_password
+      label: "ShinePhone Passwort (Option B)"
+      type: password
+      required: false
+      description: "Dein Passwort für die ShinePhone App / ShineServer (für Option B)."
+      placeholder: "••••••••"
+    - key: plant_id
+      label: "Anlagen-ID (Optional)"
+      type: string
+      required: false
+      description: "Wird bei Bedarf automatisch ermittelt. Falls bekannt, z. B. 194820."
       placeholder: "z. B. 194820"
     - key: device_sn
-      label: "Wechselrichter Seriennummer (SN)"
+      label: "Wechselrichter Seriennummer (Optional)"
       type: string
       required: false
       description: "Seriennummer des Wechselrichters oder Dataloggers (ShineWiFi)."
