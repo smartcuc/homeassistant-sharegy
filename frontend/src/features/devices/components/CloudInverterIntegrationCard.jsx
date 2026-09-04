@@ -388,6 +388,7 @@ export default function CloudInverterIntegrationCard({ primaryHome, filterVendor
                 onClose={() => setSelfTestOpen(false)}
                 profileId={selectedProfileId}
                 deviceName={currentProfile?.name || deviceName || "Wechselrichter"}
+                credentials={formData}
             />
         </div>
     );

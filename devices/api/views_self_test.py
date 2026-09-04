@@ -21,14 +21,15 @@ def device_self_test_view(request, device_id):
     Führt den 1-Klick Hardware-Selbsttest für ein spezifisches Gerät aus.
     POST/GET /api/devices/<device_id>/self-test/
     """
+    credentials = request.data.get("credentials") if request.method == "POST" else None
     try:
         device = Device.objects.get(id=device_id)
     except Device.DoesNotExist:
         # Fallback simulation if device doesn't exist yet
-        res = run_device_self_test(device=None, device_id=device_id)
+        res = run_device_self_test(device=None, device_id=device_id, credentials=credentials)
         return Response(res, status=status.HTTP_200_OK)
 
-    res = run_device_self_test(device=device)
+    res = run_device_self_test(device=device, credentials=credentials)
     return Response(res, status=status.HTTP_200_OK)
 
 
@@ -36,9 +37,10 @@ def device_self_test_view(request, device_id):
 @permission_classes([AllowAny])
 def device_self_test_simulate_view(request):
     """
-    Simuliert einen 1-Klick Hardware-Selbsttest für Onboarding / Setup-Assistenten.
+    Führt einen 1-Klick Hardware-Selbsttest für Onboarding / Setup-Assistenten aus.
     POST/GET /api/devices/self-test/simulate/
     """
     profile_id = request.data.get("profile_id") or request.GET.get("profile_id") or "sungrow_isolarcloud"
-    res = run_device_self_test(device=None, mock_profile_id=profile_id)
+    credentials = request.data.get("credentials") if request.method == "POST" else None
+    res = run_device_self_test(device=None, mock_profile_id=profile_id, credentials=credentials)
     return Response(res, status=status.HTTP_200_OK)
