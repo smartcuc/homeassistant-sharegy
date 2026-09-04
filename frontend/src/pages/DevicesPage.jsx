@@ -12,7 +12,6 @@ import DeviceBaselineModal from "../components/device/DeviceBaselineModal";
 import AddDeviceModal from "../components/device/AddDeviceModal";
 import RemoveDevicesModal from "../components/device/RemoveDevicesModal";
 import TrashBinModal from "../components/device/TrashBinModal";
-import SystemReadinessCard from "../features/energy/components/SystemReadinessCard";
 
 import { useTrashCount } from "../hooks/useTrashDevices";
 import { useStructure } from "../hooks/useStructure";
@@ -837,7 +836,7 @@ export default function DevicesPage() {
     }
 
     return (
-        <div className="p-6 max-w-6xl space-y-4">
+        <div className="max-w-7xl mx-auto space-y-6">
 
             {/* TOP ACTION HEADER */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
@@ -883,9 +882,6 @@ export default function DevicesPage() {
                     </button>
                 </div>
             </div>
-
-            {/* SYSTEM READINESS & SETUP HEALTH (OMI-TEST) */}
-            <SystemReadinessCard onOpenAddDevice={() => setAddOpen(true)} className="mb-6" />
 
             {/* SEARCH & STRUCTURE SELECT FILTERS */}
             <div className="flex flex-wrap items-center gap-3 mb-3">
