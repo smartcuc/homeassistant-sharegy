@@ -119,7 +119,7 @@ export default function ControlPage() {
     const heatingRodConsumers = consumers.filter((c) => c.category === "heating_rod");
 
     return (
-        <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+        <div className="p-6 max-w-7xl mx-auto space-y-6">
             {/* Action Feedback Banner */}
             {actionFeedback && (
                 <div className="fixed bottom-6 right-6 z-50 px-4 py-3 bg-slate-900 text-white text-xs font-bold rounded-2xl shadow-2xl border border-emerald-500/40 flex items-center gap-2.5 animate-bounce">
@@ -127,6 +127,16 @@ export default function ControlPage() {
                     <span>{actionFeedback}</span>
                 </div>
             )}
+
+            {/* PAGE HEADER */}
+            <div>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <span>🎛️</span> {t("control.title", "Energiesteuerung & Lastmanagement")}
+                </h1>
+                <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
+                    {t("control.subtitle", "Intelligente PV-Überschusssteuerung, Prioritäten-Kaskade und automatisierte Verbraucher-Fahrpläne.")}
+                </p>
+            </div>
 
             {/* 1. Live Power Budget & Master Autopilot Header */}
             <LivePowerBudgetHeader
