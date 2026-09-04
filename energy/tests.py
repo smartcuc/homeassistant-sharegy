@@ -453,6 +453,41 @@ class GrafanaAndHomeAssistantPluginTest(TestCase):
         self.assertTrue(data["pillars"]["pv"]["installed"])
         self.assertTrue(data["pillars"]["battery"]["installed"])
 
+    def test_sungrow_hybrid_nighttime_zero_pv_kpi(self):
+        """Testet, dass ein Sungrow Hybrid WR nachts bei 0W PV und Batterieentladung NICHT fälschlicherweise PV-Erzeugung anzeigt."""
+        from devices.models import DeviceLatestMetric
+        from energy.ems.services import build_device_signals
+        from energy.flow_engine import calculate_energy_flow
+
+        # Vorherige Geräte für diesen Test aufräumen
+        Device.objects.filter(home=self.home).delete()
+
+        hybrid_dev = Device.objects.create(
+            home=self.home,
+            identifier="sungrow_hybrid_sh10rt",
+            configured=True,
+            active=True,
+        )
+        now = timezone.now()
+        # Sungrow Zustand nachts: Inverter AC Power = 1260W, PV = 0W, Batterie entlädt 770W, Last = 2030W, Grid = 0W
+        DeviceLatestMetric.objects.create(device=hybrid_dev, metric_key="power", value=1260.0, timestamp=now)
+        DeviceLatestMetric.objects.create(device=hybrid_dev, metric_key="pv_power", value=0.0, timestamp=now)
+        DeviceLatestMetric.objects.create(device=hybrid_dev, metric_key="battery_power", value=770.0, timestamp=now)
+        DeviceLatestMetric.objects.create(device=hybrid_dev, metric_key="battery_soc", value=78.6, timestamp=now)
+        DeviceLatestMetric.objects.create(device=hybrid_dev, metric_key="load_power", value=2030.0, timestamp=now)
+        DeviceLatestMetric.objects.create(device=hybrid_dev, metric_key="grid_power", value=0.0, timestamp=now)
+
+        signals = build_device_signals(self.user)
+        self.assertEqual(signals["pv"]["production"], 0.0)
+        self.assertEqual(signals["battery"]["discharge"], 770.0)
+        self.assertEqual(signals["load"]["consumption"], 2030.0)
+
+        flow = calculate_energy_flow(signals)
+        self.assertEqual(flow["total_production"], 0.0)
+        self.assertEqual(flow["pv_to_load"], 0.0)
+        self.assertEqual(flow["battery_to_load"], 770.0)
+
+
 
 
 

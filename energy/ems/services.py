@@ -131,24 +131,55 @@ def build_device_signals(user):
     # Bereinigung: Last darf niemals Batterie-, PV- oder Netzgeräte enthalten
     load_device_ids = load_device_ids - battery_device_ids - pv_device_ids - grid_device_ids
 
-    # 4. PV-Erzeugung berechnen
-    pv_power = sum(max(values.get(d_id, 0), 0) for d_id in pv_device_ids)
-    if pv_power <= 0:
-        for dev in all_devices:
-            if dev.id in battery_device_ids or dev.id in grid_device_ids or dev.id in load_device_ids:
-                continue
-            p_val = cache.get(f"device:{dev.id}:pv_power")
-            if p_val is None and dev.id in pv_device_ids:
-                p_val = cache.get(f"device:{dev.id}:latest_power")
-            if p_val is None:
-                m = DeviceLatestMetric.objects.filter(device=dev, metric_key="pv_power").first()
-                if not m and dev.id in pv_device_ids:
-                    m = DeviceLatestMetric.objects.filter(device=dev, metric_key="power").first()
-                if m and m.value is not None:
-                    p_val = float(m.value)
-            if p_val is not None and float(p_val) > 0:
-                pv_power = float(p_val)
-                break
+    # 4. PV-Erzeugung berechnen (Physisch strikte Kanaltrennung für Hybrid-Wechselrichter)
+    pv_power = 0.0
+    processed_pv_devs = set()
+
+    # A) Dedizierte PV-Metriken abfragen (z. B. pv_power, solar_power, mppt_power)
+    for dev in all_devices:
+        if _is_non_power_sensor(dev):
+            continue
+
+        p_val = cache.get(f"device:{dev.id}:pv_power")
+        if p_val is None:
+            m = DeviceLatestMetric.objects.filter(
+                device=dev,
+                metric_key__in=["pv_power", "solar_power", "power_pv", "yield_power", "production", "mppt_power", "total_dc_power", "pv_power_w"]
+            ).first()
+            if m and m.value is not None:
+                p_val = float(m.value)
+
+        # Wenn dedizierter PV-Kanal existiert (auch bei 0.0 W nachts!), ist dieser Wert verbindlich!
+        if p_val is not None:
+            pv_power += max(float(p_val), 0.0)
+            processed_pv_devs.add(dev.id)
+
+    # B) Nur für reine Single-Channel PV-Geräte (z. B. Balkonkraftwerk/Hoymiles ohne Batterie/Grid/Load)
+    for d_id in pv_device_ids:
+        if d_id in processed_pv_devs:
+            continue
+        dev = next((d for d in all_devices if d.id == d_id), None)
+        if not dev or _is_non_power_sensor(dev):
+            continue
+
+        # Prüfen, ob das Gerät andere Sub-Kanäle (Batterie/Last/Netz) besitzt = Hybrid-Wechselrichter
+        has_sub_channels = (
+            dev.id in battery_device_ids
+            or dev.id in grid_device_ids
+            or dev.id in load_device_ids
+            or cache.get(f"device:{dev.id}:battery_power") is not None
+            or cache.get(f"device:{dev.id}:load_power") is not None
+            or cache.get(f"device:{dev.id}:grid_power") is not None
+            or DeviceLatestMetric.objects.filter(
+                device=dev,
+                metric_key__in=["battery_power", "load_power", "grid_power", "soc", "battery_soc"]
+            ).exists()
+        )
+        if not has_sub_channels:
+            # Reines Single-Channel PV-Gerät: 'power' bzw. 'latest_power' ist reine Solarerzeugung
+            val = values.get(dev.id, 0)
+            pv_power += max(float(val or 0.0), 0.0)
+
     signals["pv"]["production"] = max(0.0, round(pv_power, 2))
 
     # 5. Last (Direkte Messung aus Hybrid-Wechselrichter oder getrackten Einzelgeräten)
@@ -162,7 +193,10 @@ def build_device_signals(user):
     for dev in all_devices:
         l_p = cache.get(f"device:{dev.id}:load_power")
         if l_p is None:
-            m = DeviceLatestMetric.objects.filter(device=dev, metric_key="load_power").first()
+            m = DeviceLatestMetric.objects.filter(
+                device=dev,
+                metric_key__in=["load_power", "load_power_w", "house_power", "consumption"]
+            ).first()
             if m and m.value is not None:
                 l_p = float(m.value)
         if l_p is not None and float(l_p) > 0:
@@ -171,10 +205,25 @@ def build_device_signals(user):
 
     # 6. Batterie-Leistung (Discharge / Charge)
     battery_power = None
-    if battery_device_ids:
-        # Direkter Live-Messwert der konfigurierten Batterie-Geräte (z. B. via MQTT / Modbus)
+    for dev in all_devices:
+        b_p = cache.get(f"device:{dev.id}:battery_power")
+        if b_p is None:
+            b_p = cache.get(f"device:{dev.id}:power_battery")
+        if b_p is None:
+            m = DeviceLatestMetric.objects.filter(
+                device=dev,
+                metric_key__in=["battery_power", "battery_power_w", "power_battery", "battery"]
+            ).first()
+            if m and m.value is not None:
+                b_p = float(m.value)
+        if b_p is not None and abs(float(b_p)) > 0.01:
+            battery_power = float(b_p)
+            break
+
+    if battery_power is None and battery_device_ids:
         battery_power = sum(values.get(d_id, 0) for d_id in battery_device_ids if d_id not in pv_device_ids)
-    else:
+
+    if battery_power is None:
         try:
             from producer.models import StorageSystem
             for storage in StorageSystem.objects.filter(home__user=user, active=True):
@@ -184,22 +233,6 @@ def build_device_signals(user):
                     break
         except Exception:
             pass
-
-        if battery_power is None:
-            for dev in all_devices:
-                b_p = cache.get(f"device:{dev.id}:battery_power")
-                if b_p is None:
-                    b_p = cache.get(f"device:{dev.id}:power_battery")
-                if b_p is None:
-                    m = DeviceLatestMetric.objects.filter(
-                        device=dev,
-                        metric_key__in=["battery_power", "battery_power_w", "power_battery", "battery"]
-                    ).first()
-                    if m and m.value is not None:
-                        b_p = float(m.value)
-                if b_p is not None and abs(float(b_p)) > 0.01:
-                    battery_power = float(b_p)
-                    break
 
     # Lade- / Entladerichtung des Speichers physikalisch & vorzeichengenau bestimmen
     bat_val = float(battery_power or 0.0)
