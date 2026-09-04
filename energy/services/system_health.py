@@ -54,41 +54,65 @@ def check_home_system_status(user) -> Dict[str, Any]:
         )
         active_devices = [d for d in devices if d.active]
 
-        # 2. Prüfen auf Säule 1: Solaranlage (PV)
+        # 2. Prüfen auf Säule 1: Solaranlage (PV / Erzeuger)
+        from devices.models import CloudDeviceIntegration
+        cloud_inverter_integrations = list(
+            CloudDeviceIntegration.objects.filter(device__home=home)
+            .select_related("device")
+        )
+        ems_pv_sources = list(
+            EMSSignalSource.objects.filter(
+                home=home,
+                signal_type__key__in=["pv", "solar", "producer", "generation"],
+            ).select_related("device")
+        )
+        generators = list(GeneratorSystem.objects.filter(home=home))
+
         pv_devices = []
-        for d in active_devices:
+        for d in devices:
             cfg = getattr(d, "config", None)
             role = (cfg.role.key if cfg and cfg.role else "").lower()
             sig = (cfg.energy_signal_type.key if cfg and cfg.energy_signal_type else "").lower()
+            gen_type = getattr(cfg, "generator_type", None)
             name_lower = (d.name or d.identifier or "").lower()
 
             metrics = {m.metric_key.lower(): m.value for m in d.latest_metrics.all()}
             has_pv_metric = any(k in metrics for k in ["pv_power", "solar_power", "power_pv", "pv", "solar", "yield_power", "production"])
 
-            if role in ["producer", "pv", "hybrid", "both", "inverter", "generator"] or sig in ["pv", "solar", "producer"]:
+            is_cloud_inverter = any(ci.device_id == d.id for ci in cloud_inverter_integrations)
+            is_ems_pv = any(es.device_id == d.id for es in ems_pv_sources)
+            is_generator_dev = any(g.primary_device_id == d.id for g in generators)
+
+            if role in ["producer", "pv", "hybrid", "both", "inverter", "generator"] or sig in ["pv", "solar", "producer", "generation"] or gen_type is not None:
+                pv_devices.append(d)
+            elif is_cloud_inverter or is_ems_pv or is_generator_dev:
                 pv_devices.append(d)
             elif has_pv_metric:
                 pv_devices.append(d)
             elif any(kw in name_lower for kw in ["pv", "solar", "wechselrichter", "inverter", "bkw", "balkon", "fronius", "sungrow", "solaredge", "kostal", "growatt", "deye", "huawei", "goodwe", "solis", "victron"]):
                 pv_devices.append(d)
-            elif cache.get(f"device:{d.id}:latest_power") is not None and float(cache.get(f"device:{d.id}:latest_power") or 0) > 0:
-                if role != "consumer":
-                    pv_devices.append(d)
+            elif (cache.get(f"device:{d.id}:pv_power") is not None) or (cache.get(f"device:{d.id}:latest_power") is not None and float(cache.get(f"device:{d.id}:latest_power") or 0) > 0 and role != "consumer"):
+                pv_devices.append(d)
 
-        generators = list(GeneratorSystem.objects.filter(home=home))
-        has_pv = len(pv_devices) > 0 or len(generators) > 0
-        pv_device_name = pv_devices[0].name if pv_devices else (generators[0].name if generators else None)
+        has_pv = len(pv_devices) > 0 or len(generators) > 0 or len(ems_pv_sources) > 0 or len(cloud_inverter_integrations) > 0
+        pv_device_name = (
+            (pv_devices[0].name or pv_devices[0].identifier) if pv_devices
+            else (generators[0].name if generators
+            else (cloud_inverter_integrations[0].profile_id if cloud_inverter_integrations
+            else (ems_pv_sources[0].device.name if ems_pv_sources and ems_pv_sources[0].device
+            else None)))
+        )
 
         # 3. Prüfen auf Säule 2: Netzanschluss / Smart Meter (Grid)
         grid_sources = list(
             EMSSignalSource.objects.filter(
                 home=home,
-                signal_type__key__in=["grid", "grid_import", "grid_feed_in"],
+                signal_type__key__in=["grid", "grid_import", "grid_feed_in", "meter"],
             ).select_related("device")
         )
-        grid_devices = [s.device for s in grid_sources if s.device and s.device.active]
+        grid_devices = [s.device for s in grid_sources if s.device and (s.device.active or s.device.configured)]
         if not grid_devices:
-            for d in active_devices:
+            for d in devices:
                 cfg = getattr(d, "config", None)
                 role = (cfg.role.key if cfg and cfg.role else "").lower()
                 sig = (cfg.energy_signal_type.key if cfg and cfg.energy_signal_type else "").lower()
@@ -106,13 +130,17 @@ def check_home_system_status(user) -> Dict[str, Any]:
                 elif cache.get(f"device:{d.id}:grid_power") is not None:
                     grid_devices.append(d)
 
-        has_grid = len(grid_devices) > 0
-        grid_device_name = grid_devices[0].name if grid_devices else None
+        has_grid = len(grid_devices) > 0 or len(grid_sources) > 0
+        grid_device_name = (
+            (grid_devices[0].name or grid_devices[0].identifier) if grid_devices
+            else (grid_sources[0].device.name if grid_sources and grid_sources[0].device
+            else None)
+        )
 
         # 4. Prüfen auf Säule 3: Batteriespeicher (Battery)
         storages = list(StorageSystem.objects.filter(home=home, active=True))
         battery_devices = []
-        for d in active_devices:
+        for d in devices:
             cfg = getattr(d, "config", None)
             role = (cfg.role.key if cfg and cfg.role else "").lower()
             sig = (cfg.energy_signal_type.key if cfg and cfg.energy_signal_type else "").lower()
@@ -131,13 +159,13 @@ def check_home_system_status(user) -> Dict[str, Any]:
                 battery_devices.append(d)
 
         has_battery = len(storages) > 0 or len(battery_devices) > 0
-        battery_name = storages[0].name if storages else (battery_devices[0].name if battery_devices else None)
+        battery_name = storages[0].name if storages else ((battery_devices[0].name or battery_devices[0].identifier) if battery_devices else None)
         battery_capacity = float(storages[0].capacity_kwh) if storages else None
 
         # 5. Prüfen auf Säule 4: Gesamthauslast (Load)
         has_direct_load = False
         load_device_name = None
-        for d in active_devices:
+        for d in devices:
             cfg = getattr(d, "config", None)
             role = (cfg.role.key if cfg and cfg.role else "").lower()
             sig = (cfg.energy_signal_type.key if cfg and cfg.energy_signal_type else "").lower()
@@ -254,50 +282,63 @@ def check_home_system_status(user) -> Dict[str, Any]:
                 pv_status = "fault"
                 pv_status_text = f"🚨 Störung: {alarm.get('name')} (Code {alarm.get('code')})"
 
+        pv_pillar_data = {
+            "installed": has_pv,
+            "configured": has_pv,
+            "status": pv_status,
+            "method": "direct" if has_pv else "none",
+            "label": "Solarerzeugung",
+            "device_name": pv_device_name,
+            "status_text": pv_status_text,
+        }
+
+        grid_pillar_data = {
+            "installed": has_grid,
+            "configured": has_grid,
+            "status": "ok" if has_grid else "missing",
+            "method": "direct" if has_grid else "none",
+            "label": "Netzanschluss & Zähler",
+            "device_name": grid_device_name,
+            "status_text": "Zweirichtungszähler erfasst Bezug & Einspeisung" if has_grid else "Zähler fehlt noch",
+        }
+
+        battery_pillar_data = {
+            "installed": has_battery,
+            "configured": has_battery,
+            "status": "ok" if has_battery else "optional",
+            "method": "direct" if has_battery else "none",
+            "label": "Batteriespeicher",
+            "device_name": battery_name,
+            "capacity_kwh": battery_capacity,
+            "status_text": f"Speicher aktiv ({battery_capacity} kWh)" if has_battery and battery_capacity else ("Speicher aktiv" if has_battery else "Kein Speicher (Optional)"),
+        }
+
+        load_pillar_data = {
+            "installed": can_calculate_load,
+            "configured": can_calculate_load,
+            "status": "ok" if can_calculate_load else "missing",
+            "method": "direct" if has_direct_load else ("calculated" if can_calculate_load else "none"),
+            "label": "Hausverbrauch",
+            "device_name": load_device_name or ("Berechnet (PV + Netz ± Speicher)" if can_calculate_load else None),
+            "is_direct": has_direct_load,
+            "status_text": "Vollständig in Echtzeit erfasst" if has_direct_load else ("Wird aus PV & Netz berechnet" if can_calculate_load else "Nicht berechenbar"),
+        }
+
         return {
             "score": min(100, score),
             "status": "fault" if active_alarms else ("ready" if score >= 70 else ("partial" if score > 0 else "empty")),
             "alarms": active_alarms,
             "home_name": home.name,
             "pillars": {
-                "pv": {
-                    "installed": has_pv,
-                    "configured": has_pv,
-                    "status": pv_status,
-                    "method": "direct" if has_pv else "none",
-                    "label": "Solarerzeugung",
-                    "device_name": pv_device_name,
-                    "status_text": pv_status_text,
-                },
-                "grid": {
-                    "installed": has_grid,
-                    "configured": has_grid,
-                    "status": "ok" if has_grid else "missing",
-                    "method": "direct" if has_grid else "none",
-                    "label": "Netzanschluss & Zähler",
-                    "device_name": grid_device_name,
-                    "status_text": "Zweirichtungszähler erfasst Bezug & Einspeisung" if has_grid else "Zähler fehlt noch",
-                },
-                "battery": {
-                    "installed": has_battery,
-                    "configured": has_battery,
-                    "status": "ok" if has_battery else "optional",
-                    "method": "direct" if has_battery else "none",
-                    "label": "Batteriespeicher",
-                    "device_name": battery_name,
-                    "capacity_kwh": battery_capacity,
-                    "status_text": f"Speicher aktiv ({battery_capacity} kWh)" if has_battery and battery_capacity else ("Speicher aktiv" if has_battery else "Kein Speicher (Optional)"),
-                },
-                "load": {
-                    "installed": can_calculate_load,
-                    "configured": can_calculate_load,
-                    "status": "ok" if can_calculate_load else "missing",
-                    "method": "direct" if has_direct_load else ("calculated" if can_calculate_load else "none"),
-                    "label": "Hausverbrauch",
-                    "device_name": load_device_name or ("Berechnet (PV + Netz ± Speicher)" if can_calculate_load else None),
-                    "is_direct": has_direct_load,
-                    "status_text": "Vollständig in Echtzeit erfasst" if has_direct_load else ("Wird aus PV & Netz berechnet" if can_calculate_load else "Nicht berechenbar"),
-                },
+                "pv": pv_pillar_data,
+                "generation": pv_pillar_data,
+                "producer": pv_pillar_data,
+                "grid": grid_pillar_data,
+                "meter": grid_pillar_data,
+                "battery": battery_pillar_data,
+                "storage": battery_pillar_data,
+                "load": load_pillar_data,
+                "consumption": load_pillar_data,
             },
             "submeters": {
                 "count": len(submeter_devices),
