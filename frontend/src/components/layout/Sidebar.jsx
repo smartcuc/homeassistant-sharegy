@@ -92,7 +92,6 @@ export default function Sidebar() {
                 items: [
                     { name: t("energy.energy_balance", "Energiebilanz"), path: "/app/energy", icon: "⚡" },
                     { name: t("nav.solar_forecast", "Solar-Prognose"), path: "/app/solarforecast", icon: "☀️" },
-                    { name: t("nav.metrics", "Messwert-Explorer"), path: "/app/metrics", icon: "📈" },
                     {
                         name: t("nav.alerts", "Alarmzentrale"),
                         path: "/app/alerts",
@@ -101,10 +100,11 @@ export default function Sidebar() {
                         badge: isPro && alertCount > 0 ? alertCount : null,
                         badgeClass: alertBadgeClass,
                     },
+                    { name: t("nav.metrics", "Messwert-Explorer"), path: "/app/metrics", icon: "📈" },
                 ],
             },
             {
-                title: `🏡 ${t("nav.assets_group", "Anlagen & Gebäude")}`,
+                title: `🎛️ ${t("nav.assets_group", "Geräte & Steuerung")}`,
                 items: [
                     {
                         name: t("nav.all_devices", "Geräteübersicht"),
