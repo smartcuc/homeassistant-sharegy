@@ -156,93 +156,117 @@ export default function ControlPage() {
             {/* 3. 24h Dispatch Timeline & Schedule */}
             <DispatchTimelineCard schedule={dispatchSchedule} />
 
-            {/* 4. Filter Tabs for Controlled Consumers */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-1">
-                {[
-                    { key: "all", label: "Alle Verbraucher", icon: "🎛️", count: consumers.length },
-                    { key: "heat", label: "Wärme & BWWP", icon: "♨️" },
-                    { key: "mobility", label: "Wallbox", icon: "🚗" },
-                    { key: "storage", label: "Heimspeicher", icon: "🔋" },
-                    { key: "pool", label: "Pool & Garten", icon: "🏊" },
-                    { key: "ac", label: "Klima (Pre-Cool)", icon: "❄️" },
-                    { key: "appliances", label: "Haushalt (Plugs)", icon: "🧺" },
-                ].map((tab) => (
-                    <button
-                        key={tab.key}
-                        type="button"
-                        onClick={() => setActiveTab(tab.key)}
-                        className={`px-4 py-2 rounded-2xl text-xs font-bold transition flex items-center gap-2 shrink-0 cursor-pointer ${
-                            activeTab === tab.key
-                                ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20"
-                                : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800"
-                        }`}
-                    >
-                        <span>{tab.icon}</span>
-                        <span>{tab.label}</span>
-                    </button>
-                ))}
-            </div>
+            {/* 4. SECTION: STEUERBARE GROSSVERBRAUCHER & AKTOREN */}
+            <div className="space-y-4 pt-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xl shadow-2xs">
+                            ⚡
+                        </div>
+                        <div>
+                            <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                <span>Steuerbare Großverbraucher & Aktoren</span>
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                                    {consumers.length} Verbraucher
+                                </span>
+                            </h2>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                Direktsteuerung, Betriebsmodi und Sollwerte für alle angebundenen Relais, Wallboxen und Wärmepumpen.
+                            </p>
+                        </div>
+                    </div>
+                </div>
 
-            {/* 5. Consumer Cards Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* ♨️ BWWP & Wärmepumpen SG-Ready Lastmanagement */}
-                {(activeTab === "all" || activeTab === "heat") && (
-                    <BWWPLoadManagementCard />
-                )}
-
-                {/* 🚗 Wallbox / OCPP E-Auto Ladekarte */}
-                {(activeTab === "all" || activeTab === "mobility") && (
-                    <WallboxCard onOpenAddModal={() => setAddWallboxOpen(true)} />
-                )}
-
-                {/* 🔋 Heimspeicher / Battery Arbitrage */}
-                {(activeTab === "all" || activeTab === "storage") && (
-                    <BatteryArbitrageCard />
-                )}
-
-                {/* 🏊 Poolpumpen & Filteranlagen */}
-                {(activeTab === "all" || activeTab === "pool") &&
-                    poolConsumers.map((c) => (
-                        <PoolPumpCard
-                            key={c.id}
-                            consumer={c}
-                            onAction={handleQuickAction}
-                            isPending={actionMutation.isPending}
-                        />
+                {/* Filter Tabs matching Merit-Order names */}
+                <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                    {[
+                        { key: "all", label: "Alle Verbraucher", icon: "🎛️" },
+                        { key: "battery", label: "Heimspeicher", icon: "🔋" },
+                        { key: "bwwp", label: "BWWP (Warmwasser)", icon: "♨️" },
+                        { key: "wallbox", label: "Wallbox (E-Auto)", icon: "🚗" },
+                        { key: "heatpump", label: "Wärmepumpe", icon: "🔥" },
+                        { key: "pool", label: "Pool & Filter", icon: "🏊" },
+                        { key: "ac", label: "Klimaanlage (Pre-Cool)", icon: "❄️" },
+                        { key: "appliances", label: "Haushaltsgeräte", icon: "🧺" },
+                        { key: "heating_rod", label: "Heizstab (Puffer)", icon: "⚡" },
+                    ].map((tab) => (
+                        <button
+                            key={tab.key}
+                            type="button"
+                            onClick={() => setActiveTab(tab.key)}
+                            className={`px-3.5 py-2 rounded-2xl text-xs font-bold transition flex items-center gap-2 shrink-0 cursor-pointer ${
+                                activeTab === tab.key
+                                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20"
+                                    : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800"
+                            }`}
+                        >
+                            <span>{tab.icon}</span>
+                            <span>{tab.label}</span>
+                        </button>
                     ))}
+                </div>
 
-                {/* ❄️ Klimaanlagen (Pre-Cooling) */}
-                {(activeTab === "all" || activeTab === "ac") &&
-                    acConsumers.map((c) => (
-                        <AirConditioningCard
-                            key={c.id}
-                            consumer={c}
-                            onAction={handleQuickAction}
-                            isPending={actionMutation.isPending}
-                        />
-                    ))}
+                {/* Consumer Cards Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* ♨️ BWWP & Wärmepumpen SG-Ready Lastmanagement */}
+                    {(activeTab === "all" || activeTab === "bwwp" || activeTab === "heatpump") && (
+                        <BWWPLoadManagementCard />
+                    )}
 
-                {/* 🧺 Haushaltsgeräte / Ready-to-Start Smart Plugs */}
-                {(activeTab === "all" || activeTab === "appliances") &&
-                    applianceConsumers.map((c) => (
-                        <SmartApplianceCard
-                            key={c.id}
-                            consumer={c}
-                            onAction={handleQuickAction}
-                            isPending={actionMutation.isPending}
-                        />
-                    ))}
+                    {/* 🚗 Wallbox / OCPP E-Auto Ladekarte */}
+                    {(activeTab === "all" || activeTab === "wallbox") && (
+                        <WallboxCard onOpenAddModal={() => setAddWallboxOpen(true)} />
+                    )}
 
-                {/* ⚡ Heizstab / Power-to-Heat Puffer */}
-                {(activeTab === "all" || activeTab === "heat") &&
-                    heatingRodConsumers.map((c) => (
-                        <HeatingRodCard
-                            key={c.id}
-                            consumer={c}
-                            onAction={handleQuickAction}
-                            isPending={actionMutation.isPending}
-                        />
-                    ))}
+                    {/* 🔋 Heimspeicher / Battery Arbitrage */}
+                    {(activeTab === "all" || activeTab === "battery") && (
+                        <BatteryArbitrageCard />
+                    )}
+
+                    {/* 🏊 Poolpumpen & Filteranlagen */}
+                    {(activeTab === "all" || activeTab === "pool") &&
+                        poolConsumers.map((c) => (
+                            <PoolPumpCard
+                                key={c.id}
+                                consumer={c}
+                                onAction={handleQuickAction}
+                                isPending={actionMutation.isPending}
+                            />
+                        ))}
+
+                    {/* ❄️ Klimaanlagen (Pre-Cooling) */}
+                    {(activeTab === "all" || activeTab === "ac") &&
+                        acConsumers.map((c) => (
+                            <AirConditioningCard
+                                key={c.id}
+                                consumer={c}
+                                onAction={handleQuickAction}
+                                isPending={actionMutation.isPending}
+                            />
+                        ))}
+
+                    {/* 🧺 Haushaltsgeräte / Ready-to-Start Smart Plugs */}
+                    {(activeTab === "all" || activeTab === "appliances") &&
+                        applianceConsumers.map((c) => (
+                            <SmartApplianceCard
+                                key={c.id}
+                                consumer={c}
+                                onAction={handleQuickAction}
+                                isPending={actionMutation.isPending}
+                            />
+                        ))}
+
+                    {/* ⚡ Heizstab / Power-to-Heat Puffer */}
+                    {(activeTab === "all" || activeTab === "heating_rod") &&
+                        heatingRodConsumers.map((c) => (
+                            <HeatingRodCard
+                                key={c.id}
+                                consumer={c}
+                                onAction={handleQuickAction}
+                                isPending={actionMutation.isPending}
+                            />
+                        ))}
+                </div>
             </div>
 
             {/* Add Wallbox Modal */}
