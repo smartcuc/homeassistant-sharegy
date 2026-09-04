@@ -19,6 +19,8 @@ from devices.models import (
 )
 from energy.ems.models import EMSSignalSource
 
+from django.core.cache import cache
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -33,6 +35,11 @@ def get_today_consumption(user):
     - Einzelne Submeter & Smart Plugs (z. B. Shelly 1PM, Pro 3EM)
     - Timescale 1h/15m/5m/1m Continuous Aggregates sowie Roh-Telemetrie als Fallback.
     """
+    cache_key = f"today_kpi:{user.id}"
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
+
     home = user.homes.first() if hasattr(user, "homes") else None
     tz_str = (home.timezone if home and home.timezone else getattr(user, "timezone", "Europe/Berlin")) or "Europe/Berlin"
     try:
@@ -159,9 +166,11 @@ def get_today_consumption(user):
     if not history:
         history = [0.0]
 
-    return {
+    result = {
         "value": round(total_kwh, 2),
         "source": "grid_or_devices",
         "history": history,
     }
+    cache.set(cache_key, result, timeout=15)
+    return result
 

@@ -126,6 +126,7 @@ async def user_worker(
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json",
         "Accept": "application/json",
+        "Host": "sharegy.de",
     }
     devices = user_data.get("devices", [])
 

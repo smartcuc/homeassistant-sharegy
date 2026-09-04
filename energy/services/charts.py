@@ -8,6 +8,7 @@ from collections import defaultdict
 
 from django.utils import timezone
 from django.db.models import Sum, Q
+from django.core.cache import cache
 
 from devices.models import (
     DeviceMetric,
@@ -24,6 +25,11 @@ def get_dashboard_chart(device_ids, metric_keys=None):
     """
     if not device_ids:
         return []
+
+    cache_key = f"dash_chart:{','.join(map(str, sorted(device_ids)))}:{','.join(sorted(metric_keys or []))}"
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
 
     since = timezone.now() - timedelta(hours=24)
     if metric_keys:
@@ -86,7 +92,9 @@ def get_dashboard_chart(device_ids, metric_keys=None):
             step = len(rows) // 48
             rows = rows[::step]
 
-    return [round(row["value"] or 0, 1) for row in rows]
+    res = [round(row["value"] or 0, 1) for row in rows]
+    cache.set(cache_key, res, timeout=10)
+    return res
 
 
 def get_house_demand_chart(
@@ -97,6 +105,11 @@ def get_house_demand_chart(
     """
     Berechnet den Verlauf des Hausbedarfs (letzte 24h).
     """
+    cache_key = f"demand_chart:{','.join(map(str, sorted(pv_ids or [])))}:{','.join(map(str, sorted(grid_ids or [])))}:{','.join(map(str, sorted(battery_ids or [])))}"
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
+
     since = timezone.now() - timedelta(hours=24)
     data = defaultdict(float)
     key_filter = Q(metric_key__in=["power", "value", "a_act_power", "apower", "load", "load_power", "consumption"]) | Q(metric_key__isnull=True)
@@ -150,7 +163,14 @@ def get_house_demand_chart(
             for r in rows:
                 data[r["timestamp"]] += r["value"] or 0
 
-    return [round(value, 1) for _, value in sorted(data.items())]
+    if not data:
+        cache.set(cache_key, [], timeout=10)
+        return []
+
+    sorted_keys = sorted(data.keys())
+    res = [round(data[k], 1) for k in sorted_keys]
+    cache.set(cache_key, res, timeout=10)
+    return res
 
 
 
