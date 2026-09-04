@@ -566,16 +566,43 @@ def _execute_growatt_query(base_url: str, credentials: dict) -> dict:
                         if isinstance(inv_json, dict):
                             raw_data["data"].update(inv_json)
 
-                    # Plant Energy Detail
-                    det_resp = session.post(
-                        f"{active_host}/newPlantDetailAPI.do",
-                        data={"plantId": plant_id},
-                        timeout=10,
-                    )
-                    if det_resp.status_code == 200:
-                        det_json = det_resp.json()
-                        if isinstance(det_json, dict):
-                            raw_data["data"].update(det_json)
+                    # Inverter Detail APIs für alle erkannten Wechselrichter
+                    inverter_ids = []
+                    if device_sn:
+                        inverter_ids.append(device_sn)
+                    obj_list = raw_data["data"].get("obj") or raw_data["data"].get("deviceList") or []
+                    if isinstance(obj_list, list):
+                        for dev in obj_list:
+                            if isinstance(dev, dict):
+                                sn = dev.get("sn") or dev.get("deviceSn") or dev.get("inverterId") or dev.get("datalogSn")
+                                if sn and str(sn) not in inverter_ids:
+                                    inverter_ids.append(str(sn))
+
+                    today_str = datetime.date.today().strftime("%Y-%m-%d")
+                    for inv_id in inverter_ids:
+                        for inv_ep, params, data_payload in [
+                            (f"{active_host}/newInverterAPI.do", {"op": "getInverterDetailData", "inverterId": inv_id}, None),
+                            (f"{active_host}/newInverterAPI.do", {"op": "getInverterDetailData_two", "inverterId": inv_id}, None),
+                            (f"{active_host}/newInverterAPI.do", {"op": "getInverterData", "id": inv_id, "type": "1", "date": today_str}, None),
+                            (f"{active_host}/newTlxApi.do", {"op": "getEnergyOverview"}, {"plantId": plant_id, "id": inv_id}),
+                            (f"{active_host}/newTlxApi.do", {"op": "getSystemStatus_KW"}, {"plantId": plant_id, "id": inv_id}),
+                            (f"{active_host}/newMinApi.do", {"op": "getEnergyOverview"}, {"plantId": plant_id, "id": inv_id}),
+                            (f"{active_host}/newMixApi.do", {"op": "getEnergyOverview"}, {"plantId": plant_id, "id": inv_id}),
+                            (f"{active_host}/newSphApi.do", {"op": "getEnergyOverview"}, {"plantId": plant_id, "id": inv_id}),
+                        ]:
+                            try:
+                                if data_payload:
+                                    r = session.post(inv_ep, params=params, data=data_payload, timeout=8)
+                                else:
+                                    r = session.get(inv_ep, params=params, timeout=8)
+                                if r.status_code == 200:
+                                    j = r.json()
+                                    if isinstance(j, dict):
+                                        d = j.get("obj") or j.get("back") or j.get("data") or j
+                                        if isinstance(d, dict) and d:
+                                            raw_data["data"].update(d)
+                            except Exception:
+                                pass
 
                     # Storage / Battery Status (falls Hybrid oder Speicher)
                     stor_resp = session.post(
@@ -948,42 +975,46 @@ def _parse_metrics_from_payload(profile: dict, raw_payload: dict) -> dict:
         # Intelligente Multi-Key Fallbacks falls JSONPath keinen Treffer liefert
         if raw_val is None:
             if metric_name == "pv_power_w":
-                for k in ["currentPower", "current_power", "pac", "ppv", "pactouser", "nominalPower", "invPac", "power", "pacToUserTotal", "pv_power", "ppv1", "ppv2", "pPv1", "pPv2"]:
+                for k in [
+                    "currentPower", "current_power", "currentEnergy", "current_energy",
+                    "pac", "ppv", "ppv1", "ppv2", "pPv1", "pPv2", "pactouser", "pacToUserTotal",
+                    "nominalPower", "invPac", "power", "pv_power", "pvPower", "pAct", "pact", "pac1", "ppvTotal"
+                ]:
                     if k in data_dict and data_dict[k] is not None:
                         clean_v = _clean_numeric_value(data_dict[k], target_unit="W")
                         if clean_v is not None:
                             raw_val = clean_v
                             break
             elif metric_name == "battery_soc":
-                for k in ["soc", "batterySoc", "battery_soc", "batteryPercent", "chargeLevel", "capacity"]:
+                for k in ["soc", "batterySoc", "battery_soc", "batteryPercent", "chargeLevel", "capacity", "SOC", "storageSoc"]:
                     if k in data_dict and data_dict[k] is not None:
                         clean_v = _clean_numeric_value(data_dict[k], target_unit="%")
                         if clean_v is not None:
                             raw_val = clean_v
                             break
             elif metric_name == "battery_power_w":
-                for k in ["pdisCharge", "pcharge", "pdisCharge1", "pcharge1", "battery_power", "pactostorage", "pstorage"]:
+                for k in ["pdisCharge", "pcharge", "pdisCharge1", "pcharge1", "battery_power", "pactostorage", "pstorage", "pDisCharge", "pCharge"]:
                     if k in data_dict and data_dict[k] is not None:
                         clean_v = _clean_numeric_value(data_dict[k], target_unit="W")
                         if clean_v is not None:
                             raw_val = clean_v
                             break
             elif metric_name == "grid_power_w":
-                for k in ["pgrid", "pactogrid", "grid_power", "gridPower", "toGridPower"]:
+                for k in ["pgrid", "pactogrid", "grid_power", "gridPower", "toGridPower", "to_grid_power", "pGrid"]:
                     if k in data_dict and data_dict[k] is not None:
                         clean_v = _clean_numeric_value(data_dict[k], target_unit="W")
                         if clean_v is not None:
                             raw_val = clean_v
                             break
             elif metric_name == "load_power_w":
-                for k in ["pload", "use_power", "familyLoadPower", "load_power", "loadPower", "useEnergy"]:
+                for k in ["pload", "use_power", "useEnergy", "familyLoadPower", "load_power", "loadPower", "use_power_w", "pLocalLoad"]:
                     if k in data_dict and data_dict[k] is not None:
                         clean_v = _clean_numeric_value(data_dict[k], target_unit="W")
                         if clean_v is not None:
                             raw_val = clean_v
                             break
             elif metric_name == "daily_generation_kwh":
-                for k in ["eToday", "etoday", "todayEnergy", "e_today", "eTodayTotal", "eAcChargeToday"]:
+                for k in ["eToday", "etoday", "todayEnergy", "today_energy", "e_today", "eTodayTotal", "eAcChargeToday", "todayYield", "daily_generation"]:
                     if k in data_dict and data_dict[k] is not None:
                         clean_v = _clean_numeric_value(data_dict[k], target_unit="kWh")
                         if clean_v is not None:
