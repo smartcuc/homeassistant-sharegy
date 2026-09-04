@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../../api/client";
 
-export default function SystemReadinessCard({ onOpenAddDevice, className = "" }) {
+export default function SystemReadinessCard({ onOpenAddDevice, className = "", inModal = false }) {
     const { t } = useTranslation();
     const [collapsed, setCollapsed] = useState(false);
 
@@ -49,18 +49,18 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "" })
 
     const pillarConfigs = [
         {
-            key: "pv",
+            key: "generation",
             icon: "☀️",
-            label: t("system_health.pillar_pv", "Solar-Erzeugung"),
-            pillar: pillars.pv,
-            missingHint: "Keine Solaranlage / BKW eingerichtet",
+            label: t("system_health.pillar_pv", "PV-Erzeugung"),
+            pillar: pillars.generation,
+            missingHint: "Kein Wechselrichter / BKW angebunden",
         },
         {
             key: "grid",
             icon: "⚡",
-            label: t("system_health.pillar_grid", "Netzanschluss / Zähler"),
+            label: t("system_health.pillar_grid", "Netzzähler"),
             pillar: pillars.grid,
-            missingHint: "Kein Smart Meter / Netzbezug erfasst",
+            missingHint: "Kein Haupt- oder Zweirichtungszähler konfiguriert",
         },
         {
             key: "battery",
@@ -80,60 +80,64 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "" })
     ];
 
     return (
-        <div className={`bg-white border border-slate-200/90 rounded-3xl shadow-xs overflow-hidden transition-all ${className}`}>
-            {/* CARD HEADER */}
-            <div className="p-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-xl shadow-2xs shrink-0">
-                        🩺
-                    </div>
-                    <div>
-                        <div className="flex items-center gap-2">
-                            <h2 className="text-base font-bold text-gray-900">
-                                {t("system_health.title", "System-Check & Einrichtungsgrad (Omi-Check)")}
-                            </h2>
-                            <span className={`px-2.5 py-0.5 rounded-full text-xs font-black border ${scoreColor}`}>
-                                {score}% {score >= 90 ? "Optimal" : score >= 60 ? "Bereit" : "Unvollständig"}
-                            </span>
+        <div className={`bg-white ${inModal ? "" : "border border-slate-200/90 rounded-3xl shadow-xs"} overflow-hidden transition-all ${className}`}>
+            {/* CARD HEADER (Nur anzeigen, wenn nicht im Modal eingebunden) */}
+            {!inModal && (
+                <>
+                    <div className="p-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-xl shadow-2xs shrink-0">
+                                🩺
+                            </div>
+                            <div>
+                                <div className="flex items-center gap-2">
+                                    <h2 className="text-base font-bold text-gray-900">
+                                        {t("system_health.title", "System-Check & Einrichtungsgrad (Omi-Check)")}
+                                    </h2>
+                                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-black border ${scoreColor}`}>
+                                        {score}% {score >= 90 ? "Optimal" : score >= 60 ? "Bereit" : "Unvollständig"}
+                                    </span>
+                                </div>
+                                <p className="text-xs text-gray-500 mt-0.5">
+                                    {data.description || t("system_health.subtitle", "Automatische Prüfung der 4 Kernsäulen für ein fehlerfreies Energiemanagement.")}
+                                </p>
+                            </div>
                         </div>
-                        <p className="text-xs text-gray-500 mt-0.5">
-                            {data.description || t("system_health.subtitle", "Automatische Prüfung der 4 Kernsäulen für ein fehlerfreies Energiemanagement.")}
-                        </p>
+
+                        <div className="flex items-center gap-2 self-end sm:self-auto">
+                            {score < 100 && onOpenAddDevice && (
+                                <button
+                                    type="button"
+                                    onClick={onOpenAddDevice}
+                                    className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+                                >
+                                    <span>➕</span>
+                                    <span>Gerät hinzufügen</span>
+                                </button>
+                            )}
+                            <button
+                                type="button"
+                                onClick={() => setCollapsed(!collapsed)}
+                                className="p-1.5 hover:bg-slate-100 rounded-xl text-gray-400 hover:text-gray-700 transition text-xs font-semibold cursor-pointer"
+                                title={collapsed ? "Aufklappen" : "Einklappen"}
+                            >
+                                {collapsed ? "▼ Details" : "▲ Einklappen"}
+                            </button>
+                        </div>
                     </div>
-                </div>
 
-                <div className="flex items-center gap-2 self-end sm:self-auto">
-                    {score < 100 && onOpenAddDevice && (
-                        <button
-                            type="button"
-                            onClick={onOpenAddDevice}
-                            className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer"
-                        >
-                            <span>➕</span>
-                            <span>Gerät hinzufügen</span>
-                        </button>
-                    )}
-                    <button
-                        type="button"
-                        onClick={() => setCollapsed(!collapsed)}
-                        className="p-1.5 hover:bg-slate-100 rounded-xl text-gray-400 hover:text-gray-700 transition text-xs font-semibold cursor-pointer"
-                        title={collapsed ? "Aufklappen" : "Einklappen"}
-                    >
-                        {collapsed ? "▼ Details" : "▲ Schließen"}
-                    </button>
-                </div>
-            </div>
+                    {/* PROGRESS BAR */}
+                    <div className="w-full h-1.5 bg-slate-100 overflow-hidden">
+                        <div
+                            className={`h-full transition-all duration-700 ${scoreBarColor}`}
+                            style={{ width: `${Math.max(5, score)}%` }}
+                        />
+                    </div>
+                </>
+            )}
 
-            {/* PROGRESS BAR */}
-            <div className="w-full h-1.5 bg-slate-100 overflow-hidden">
-                <div
-                    className={`h-full transition-all duration-700 ${scoreBarColor}`}
-                    style={{ width: `${Math.max(5, score)}%` }}
-                />
-            </div>
-
-            {/* EXPANDABLE BODY */}
-            {!collapsed && (
+            {/* EXPANDABLE / MODAL BODY */}
+            {(!collapsed || inModal) && (
                 <div className="p-5 space-y-5 animate-fade-in">
                     {/* 4 PILLARS STATUS CARDS */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
