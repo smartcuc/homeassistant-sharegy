@@ -651,305 +651,18 @@ def _execute_growatt_query(base_url: str, credentials: dict) -> dict:
 
 def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
     """
-    Testet eingegebene Zugangsdaten gegen das Profil (Live oder Simulator).
+    Testet eingegebene Zugangsdaten über die modulare Adapter-Registry.
+    Vollständig entkoppelt und hersteller-isoliert.
     """
-    profile = load_profile(profile_id)
-    conn_cfg = profile.get("connection", {})
-    base_url = credentials.get("base_url") or conn_cfg.get("default_base_url", "")
-    auth_type = conn_cfg.get("auth_type", "none")
-
-    # Prüfe ob Dummy / Test-Credentials vorliegen -> Simulator verwenden
-    is_mock = (
-        credentials.get("appkey") in ("mock", "test", "demo", "")
-        or "test" in str(credentials.get("user_account", "")).lower()
-        or "test" in str(credentials.get("token", "")).lower()
-        or getattr(settings, "STRIPE_SANDBOX_MODE", True) and not credentials.get("appkey") and not credentials.get("token") and not credentials.get("user_account")
-    )
-
-    if is_mock:
-        raw_data = _generate_mock_payload(profile_id, credentials)
-        parsed = _parse_metrics_from_payload(profile, raw_data)
-        return {
-            "status": "success",
-            "message": f"Verbindung zu {profile.get('name')} erfolgreich (Simulator / Sandbox-Modus).",
-            "live_metrics": parsed,
-            "raw_sample": raw_data,
-            "simulated": True,
-        }
-
-    # Echter HTTP-Aufruf
-    if auth_type == "sungrow_token" or profile_id == "sungrow_isolarcloud":
-        appkey = credentials.get("appkey") or getattr(settings, "SUNGROW_APPKEY", "") or os.getenv("SUNGROW_APPKEY", "")
-        app_secret = getattr(settings, "SUNGROW_APP_SECRET", "") or os.getenv("SUNGROW_APP_SECRET", "")
-        token = credentials.get("token")
-        ps_id = credentials.get("ps_id") or credentials.get("ps_ids") or ""
-        is_oauth = credentials.get("auth_type") == "oauth2" or (token and not str(token).startswith("sg_oauth_"))
-
-        if is_oauth and token:
-            # Falls noch ungetauschter Code vorhanden
-            if str(token).startswith("sg_oauth_"):
-                auth_code = str(token).replace("sg_oauth_", "").strip()
-                try:
-                    redir_url = getattr(settings, "SUNGROW_REDIRECT_URL", None) or os.getenv("SUNGROW_REDIRECT_URL") or "https://sharegy.de/api/v1/integrations/sungrow/callback"
-                    t_resp = requests.post(
-                        f"{base_url.rstrip('/')}/openapi/apiManage/token",
-                        json={
-                            "appkey": appkey,
-                            "code": auth_code,
-                            "grant_type": "authorization_code",
-                            "redirect_uri": redir_url,
-                        },
-                        headers={"x-access-key": app_secret, "Content-Type": "application/json"},
-                        timeout=10,
-                    )
-                    if t_resp.status_code == 200 and t_resp.json().get("access_token"):
-                        token = t_resp.json()["access_token"]
-                        credentials["token"] = token
-                        if t_resp.json().get("refresh_token"):
-                            credentials["refresh_token"] = t_resp.json()["refresh_token"]
-                except Exception as ex_err:
-                    logger.warning("Auto token exchange failed: %s", ex_err)
-
-            # 1. OAuth2 OpenAPI Modus
-            if not ps_id or ps_id in ("default_ps", "12345", ""):
-                try:
-                    list_resp = requests.post(
-                        f"{base_url.rstrip('/')}/openapi/platform/queryPowerStationList",
-                        json={"appkey": appkey, "page": 1, "size": 20, "lang": "_de_DE"},
-                        headers={
-                            "x-access-key": app_secret,
-                            "Authorization": f"Bearer {token}",
-                            "Content-Type": "application/json",
-                        },
-                        timeout=12,
-                    )
-                    if list_resp.status_code == 200:
-                        list_data = list_resp.json().get("result_data", {})
-                        stations = list_data.get("pageList", []) if isinstance(list_data, dict) else []
-                        if stations:
-                            ps_id = str(stations[0].get("ps_id") or stations[0].get("id"))
-                            credentials["ps_id"] = ps_id
-                            credentials["ps_name"] = stations[0].get("ps_name", "Sungrow PV-Anlage")
-                except Exception as e:
-                    logger.warning("Auto-fetch ps_id via OpenAPI failed: %s", e)
-
-            MEASURE_POINTS = [
-                "83033", "83067", "83052", "83106", "83051", "83549",
-                "83129", "83252", "83238", "83104", "83111", "83112", "83326",
-                "83328", "83329", "83330", "83334"
-            ]
-            raw_data = {"result_code": "1", "result_data": {}}
-
-            try:
-                rt_resp = requests.post(
-                    f"{base_url.rstrip('/')}/openapi/platform/getPowerStationRealTimeData",
-                    json={
-                        "appkey": appkey,
-                        "ps_id_list": [str(ps_id or "")],
-                        "point_id_list": MEASURE_POINTS,
-                        "is_get_point_dict": "1",
-                    },
-                    headers={
-                        "x-access-key": app_secret,
-                        "Authorization": f"Bearer {token}",
-                        "Content-Type": "application/json",
-                    },
-                    timeout=12,
-                )
-                if rt_resp.status_code == 200:
-                    rt_json = rt_resp.json()
-                    point_dict = rt_json.get("result_data", {}).get("point_dict", {})
-                    if point_dict:
-                        logger.info("[SUNGROW_OPENAPI] Discovered Point Dictionary: %s", point_dict)
-                    pts = rt_json.get("result_data", {}).get("device_point_list", [])
-                    if pts:
-                        p_data = {}
-                        for item in pts:
-                            if isinstance(item, dict):
-                                if "point_id" in item and "point_value" in item:
-                                    pid = str(item["point_id"])
-                                    p_data[pid] = item["point_value"]
-                                    p_data[f"p{pid}"] = item["point_value"]
-                                else:
-                                    for k, v in item.items():
-                                        ks = str(k)
-                                        p_data[ks] = v
-                                        if not ks.startswith("p"):
-                                            p_data[f"p{ks}"] = v
-
-                        def _get_pt(*keys):
-                            for k in keys:
-                                for variant in [str(k), f"p{k}", f"P{k}"]:
-                                    if variant in p_data and p_data[variant] is not None:
-                                        try:
-                                            return float(p_data[variant])
-                                        except (ValueError, TypeError):
-                                            pass
-                            return None
-
-                        pv = _get_pt("83033", "83067", "83329") or 0.0
-                        load = _get_pt("83052", "83106", "83330") or 0.0
-                        grid = _get_pt("83051", "83549", "83328") or 0.0
-                        bat_pwr = _get_pt("83104", "83238", "83111", "83112", "83326") or 0.0
-
-                        soc_raw = _get_pt("83129", "83252", "83334")
-                        soc_val = None
-                        if soc_raw is not None:
-                            if 0.0 <= soc_raw <= 1.0:
-                                soc_val = round(soc_raw * 100.0, 1)
-                            else:
-                                soc_val = round(soc_raw, 1)
-
-                        if soc_val is not None and soc_val >= 98.0:
-                            if bat_pwr < 0:
-                                bat_pwr = 0.0
-                        elif pv > (load + 30) and (soc_val is None or soc_val < 98.0) and abs(bat_pwr) > 10:
-                            bat_pwr = -abs(bat_pwr)
-                        elif pv < 20 and soc_val is not None and soc_val > 5.0 and load > 20:
-                            if abs(bat_pwr) < 0.1 and abs(grid) < 60:
-                                bat_pwr = load
-                            else:
-                                bat_pwr = abs(bat_pwr)
-
-                        if bat_pwr < 0:
-                            bat_charge = abs(bat_pwr)
-                            true_excess = max(0.0, pv - load - bat_charge)
-                            if grid < 0 and abs(abs(grid) - bat_charge) < 200:
-                                grid = -true_excess
-                            elif grid < 0 and abs(grid) > (true_excess + 100):
-                                grid = -true_excess
-
-                        raw_data["_direct_metrics"] = {
-                            "pv_power_w": max(0.0, pv),
-                            "load_power_w": max(0.0, load),
-                            "grid_power_w": grid,
-                            "battery_power_w": bat_pwr,
-                            "battery_soc": soc_val,
-                        }
-            except Exception as e:
-                logger.warning("getPowerStationRealTimeData query failed: %s", e)
-
-            # Details abfragen als Ergänzung
-            try:
-                resp = requests.post(
-                    f"{base_url.rstrip('/')}/openapi/platform/getPowerStationDetail",
-                    json={"appkey": appkey, "ps_ids": str(ps_id or ""), "lang": "_de_DE"},
-                    headers={
-                        "x-access-key": app_secret,
-                        "Authorization": f"Bearer {token}",
-                        "Content-Type": "application/json",
-                    },
-                    timeout=12,
-                )
-                if resp.status_code == 200:
-                    det_json = resp.json()
-                    if det_json.get("result_code") in ("2", "000") and credentials.get("refresh_token"):
-                        try:
-                            ref_resp = requests.post(
-                                f"{base_url.rstrip('/')}/openapi/apiManage/refreshToken",
-                                json={"appkey": appkey, "refresh_token": credentials["refresh_token"]},
-                                headers={"x-access-key": app_secret, "Content-Type": "application/json"},
-                                timeout=10,
-                            )
-                            if ref_resp.status_code == 200 and ref_resp.json().get("access_token"):
-                                token = ref_resp.json()["access_token"]
-                                credentials["token"] = token
-                        except Exception as ref_err:
-                            logger.warning("Token refresh error: %s", ref_err)
-
-                    if det_json.get("result_data", {}).get("data_list"):
-                        d_list = det_json["result_data"]["data_list"]
-                        if isinstance(d_list, list) and d_list:
-                            raw_data["result_data"].update(d_list[0])
-            except Exception as e:
-                logger.warning("getPowerStationDetail query failed: %s", e)
-            
-            live_metrics = _parse_metrics_from_payload(profile, raw_data)
-            if raw_data.get("_direct_metrics"):
-                for k, v in raw_data["_direct_metrics"].items():
-                    if v is not None:
-                        live_metrics[k] = v
-
-            # Falls keine Live-Metriken empfangen werden konnten (z.B. Test-Token oder Sandbox/Offline)
-            has_valid_metric = any(v is not None and v != 0.0 for v in live_metrics.values())
-            if not has_valid_metric and (str(token).startswith("sg_oauth_") or getattr(settings, "STRIPE_SANDBOX_MODE", True)):
-                sim_data = _generate_mock_payload(profile_id, credentials)
-                live_metrics = _parse_metrics_from_payload(profile, sim_data)
-                raw_data = sim_data
-
-            return {
-                "status": "success",
-                "message": f"Live-Verbindung zu {profile.get('name')} erfolgreich!",
-                "live_metrics": live_metrics,
-                "raw_sample": raw_data,
-                "simulated": False if not str(token).startswith("sg_oauth_") else True,
-            }
-
-        else:
-            # 2. Legacy / Password Login Modus
-            if not token:
-                token_info = _execute_sungrow_login(
-                    base_url=base_url,
-                    appkey=appkey,
-                    account=credentials.get("user_account"),
-                    password=credentials.get("user_password"),
-                )
-                token = token_info["token"]
-                credentials["token"] = token
-                credentials["user_id"] = token_info["user_id"]
-
-            headers = {
-                "Content-Type": "application/json",
-                "sys_code": "901",
-                "token": token,
-            }
-            body = {
-                "appkey": appkey,
-                "ps_id": str(ps_id or ""),
-            }
-            resp = requests.post(
-                f"{base_url.rstrip('/')}/v1/powerStationService/getPowerStationDetail",
-                headers=headers,
-                json=body,
-                timeout=12,
-            )
-            raw_data = resp.json() if resp.status_code == 200 else {}
-            if raw_data.get("result_data", {}).get("data_list"):
-                d_list = raw_data["result_data"]["data_list"]
-                if isinstance(d_list, list) and d_list:
-                    raw_data["result_data"].update(d_list[0])
-
-    elif profile_id == "growatt_server":
-        raw_data = _execute_growatt_query(base_url, credentials)
-
-    else:
-        # Standard GET/POST
-        req_cfg = profile["requests"]["telemetry"]
-        url = f"{base_url.rstrip('/')}{_render_template(req_cfg['endpoint'], credentials)}"
-        headers = _render_template(req_cfg.get("headers", {}), credentials)
-        params = _render_template(req_cfg.get("params", {}), credentials)
-        body = _render_template(req_cfg.get("body", {}), credentials)
-        method = str(req_cfg.get("method", "GET")).upper()
-
-        if method == "POST":
-            content_type = str(headers.get("Content-Type", "")).lower()
-            if "application/json" in content_type:
-                resp = requests.post(url, headers=headers, json=body, timeout=12)
-            else:
-                resp = requests.post(url, headers=headers, data=body, timeout=12)
-        else:
-            resp = requests.get(url, headers=headers, params=params, timeout=12)
-
-        resp.raise_for_status()
-        raw_data = resp.json()
-
-    parsed = _parse_metrics_from_payload(profile, raw_data)
+    from devices.adapters.registry import get_adapter
+    adapter = get_adapter(profile_id)
+    res = adapter.test_connection(credentials)
     return {
-        "status": "success",
-        "message": f"Live-Verbindung zu {profile.get('name')} erfolgreich hergestellt!",
-        "live_metrics": parsed,
-        "raw_sample": raw_data,
-        "simulated": False,
+        "status": res.status,
+        "message": res.message,
+        "live_metrics": res.live_metrics,
+        "raw_sample": res.raw_sample,
+        "simulated": res.simulated,
     }
 
 
@@ -1147,190 +860,32 @@ def _parse_metrics_from_payload(profile: dict, raw_payload: dict) -> dict:
 def execute_cloud_poll(integration: CloudDeviceIntegration) -> dict:
     """
     Führt einen regulären Polling-Zyklus für ein CloudDeviceIntegration-Objekt durch.
-    Schreibt die extrahierten Metriken in DeviceMetric (TimescaleDB) und DeviceLatestMetric (Redis).
+    Nutzt den modularen Adapter und die Standard Canonical Ingest Pipeline.
     """
     profile_id = integration.profile_id
     credentials = integration.credentials or {}
     device = integration.device
 
     try:
-        res = test_cloud_credentials(profile_id, credentials)
-        metrics = res.get("live_metrics", {})
+        from devices.adapters.registry import get_adapter
+        from devices.adapters.ingest_core import process_canonical_telemetry
+
+        adapter = get_adapter(profile_id)
+        telemetry = adapter.fetch_telemetry(credentials)
+        metrics = process_canonical_telemetry(
+            device=device,
+            telemetry=telemetry,
+            source="cloud_poll",
+            device_name=credentials.get("ps_name"),
+            battery_capacity_kwh=credentials.get("battery_capacity_kwh"),
+        )
         now = timezone.now()
-
-        # Metriken in DB und Redis persistieren
-        # 1. PV Power
-        if "pv_power_w" in metrics and metrics["pv_power_w"] is not None:
-            val = float(metrics["pv_power_w"])
-            DeviceMetric.objects.create(
-                device=device,
-                metric_key="power",
-                unit="W",
-                value=val,
-                timestamp=now,
-            )
-            DeviceLatestMetric.objects.update_or_create(
-                device=device,
-                metric_key="power",
-                defaults={"value": val, "timestamp": now},
-            )
-            try:
-                cache.set(f"device:{device.id}:latest_power", val, timeout=3600)
-                cache.set(f"device:{device.id}:pv_power", val, timeout=3600)
-            except Exception as e:
-                logger.warning("Cache write failed for device %s: %s", device.id, e)
-
-        # 2. Battery SoC & Power
-        has_battery = False
-        if "battery_soc" in metrics and metrics["battery_soc"] is not None:
-            has_battery = True
-            soc_val = float(metrics["battery_soc"])
-            DeviceMetric.objects.create(
-                device=device,
-                metric_key="battery_soc",
-                unit="%",
-                value=soc_val,
-                timestamp=now,
-            )
-            DeviceLatestMetric.objects.update_or_create(
-                device=device,
-                metric_key="battery_soc",
-                defaults={"value": soc_val, "timestamp": now},
-            )
-            try:
-                cache.set(f"device:{device.id}:battery_soc", soc_val, timeout=3600)
-                cache.set(f"device:{device.id}:latest_soc", soc_val, timeout=3600)
-            except Exception as e:
-                logger.warning("Cache write failed for battery_soc: %s", e)
-
-        if "battery_power_w" in metrics and metrics["battery_power_w"] is not None:
-            has_battery = True
-            bat_pwr = float(metrics["battery_power_w"])
-            DeviceMetric.objects.create(
-                device=device,
-                metric_key="battery_power",
-                unit="W",
-                value=bat_pwr,
-                timestamp=now,
-            )
-            DeviceLatestMetric.objects.update_or_create(
-                device=device,
-                metric_key="battery_power",
-                defaults={"value": bat_pwr, "timestamp": now},
-            )
-            try:
-                cache.set(f"device:{device.id}:battery_power", bat_pwr, timeout=3600)
-            except Exception as e:
-                logger.warning("Cache write failed for battery_power: %s", e)
-
-        # Automatische Verknüpfung / Anlegen von DeviceConfig & StorageSystem
-        from devices.models import DeviceConfig, DeviceRole, MetricDefinition
-        try:
-            role_key = "both" if has_battery else "producer"
-            target_role = DeviceRole.objects.filter(key=role_key).first() or DeviceRole.objects.filter(key="producer").first()
-            p_metric = MetricDefinition.objects.filter(key="power").first()
-            dev_cfg, _ = DeviceConfig.objects.get_or_create(
-                device=device,
-                defaults={
-                    "home": device.home,
-                    "name": credentials.get("ps_name") or "Sungrow Hybrid-Anlage",
-                    "role": target_role,
-                    "metric_definition": p_metric,
-                }
-            )
-            if not dev_cfg.role:
-                dev_cfg.role = target_role
-                dev_cfg.save(update_fields=["role"])
-        except Exception as cfg_err:
-            logger.warning("Could not set DeviceConfig: %s", cfg_err)
-
-        if has_battery and device.home:
-            try:
-                from producer.models import StorageSystem
-                desired_cap = float(credentials.get("battery_capacity_kwh") or 22.5)
-                storages = list(StorageSystem.objects.filter(home=device.home))
-                if not storages:
-                    st = StorageSystem.objects.create(
-                        home=device.home,
-                        name=f"{credentials.get('ps_name') or 'Sungrow'} Speicher",
-                        primary_device=device,
-                        soc_device=device,
-                        power_device=device,
-                        soc_metric_key="battery_soc",
-                        power_metric_key="battery_power",
-                        capacity_kwh=desired_cap,
-                        max_charge_power_kw=10.0,
-                        max_discharge_power_kw=10.0,
-                        is_auto_detected=True,
-                    )
-                else:
-                    for st in storages:
-                        # Falls dieser Speicher noch kein Gerät hat oder bereits Sungrow zugeordnet ist
-                        if not st.soc_device or st.soc_device == device or "sungrow" in st.name.lower():
-                            st.primary_device = device
-                            st.soc_device = device
-                            st.power_device = device
-                            st.soc_metric_key = "battery_soc"
-                            st.power_metric_key = "battery_power"
-                            if float(st.capacity_kwh) in (9.6, 10.0):
-                                st.capacity_kwh = desired_cap
-                            st.save()
-            except Exception as st_err:
-                logger.warning("Could not auto-link StorageSystem: %s", st_err)
-
-
-
-        # 3. Load Power & Grid Power
-        if "load_power_w" in metrics and metrics["load_power_w"] is not None:
-            load_val = float(metrics["load_power_w"])
-            DeviceMetric.objects.create(
-                device=device,
-                metric_key="load_power",
-                unit="W",
-                value=load_val,
-                timestamp=now,
-            )
-            DeviceLatestMetric.objects.update_or_create(
-                device=device,
-                metric_key="load_power",
-                defaults={"value": load_val, "timestamp": now},
-            )
-            try:
-                cache.set(f"device:{device.id}:load_power", load_val, timeout=3600)
-            except Exception as e:
-                logger.warning("Cache write failed for load_power: %s", e)
-
-        if "grid_power_w" in metrics and metrics["grid_power_w"] is not None:
-            grid_val = float(metrics["grid_power_w"])
-            DeviceMetric.objects.create(
-                device=device,
-                metric_key="grid_power",
-                unit="W",
-                value=grid_val,
-                timestamp=now,
-            )
-            DeviceLatestMetric.objects.update_or_create(
-                device=device,
-                metric_key="grid_power",
-                defaults={"value": grid_val, "timestamp": now},
-            )
-            try:
-                cache.set(f"device:{device.id}:grid_power", grid_val, timeout=3600)
-            except Exception as e:
-                logger.warning("Cache write failed for grid_power: %s", e)
-
 
         # Status aktualisieren
         integration.last_polled_at = now
         integration.last_status = CloudDeviceIntegration.STATUS_OK
         integration.last_error_message = ""
         integration.save(update_fields=["last_polled_at", "last_status", "last_error_message", "updated_at"])
-
-        # Gerät als aktiv & online markieren (für device_health und UI-Status)
-        device.last_seen = now
-        device.active = True
-        device.save(update_fields=["last_seen", "active"])
-
 
         logger.info("Successfully polled cloud integration %s for device %s: %s", profile_id, device.id, metrics)
         return {
@@ -1350,3 +905,4 @@ def execute_cloud_poll(integration: CloudDeviceIntegration) -> dict:
             "error": str(e),
             "device_id": str(device.id),
         }
+
