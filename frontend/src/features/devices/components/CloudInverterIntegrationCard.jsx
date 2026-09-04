@@ -13,6 +13,11 @@ export default function CloudInverterIntegrationCard({ primaryHome, filterVendor
     const [saveSuccess, setSaveSuccess] = useState(null);
     const [errorMsg, setErrorMsg] = useState(null);
     const [selfTestOpen, setSelfTestOpen] = useState(false);
+    const [showFieldValues, setShowFieldValues] = useState({});
+
+    const toggleFieldVisibility = (key) => {
+        setShowFieldValues((prev) => ({ ...prev, [key]: !prev[key] }));
+    };
 
     useEffect(() => {
         loadProfiles();
@@ -274,23 +279,61 @@ export default function CloudInverterIntegrationCard({ primaryHome, filterVendor
                                     </div>
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        {(currentProfile.fields || []).map((field) => (
-                                            <div key={field.key}>
-                                                <label className="block text-xs font-medium text-gray-700 mb-1">
-                                                    {field.label} {field.required && <span className="text-red-500">*</span>}
-                                                </label>
-                                                <input
-                                                    type={field.type || "text"}
-                                                    value={credentials[field.key] || ""}
-                                                    onChange={(e) => handleFieldChange(field.key, e.target.value)}
-                                                    placeholder={field.placeholder || ""}
-                                                    className="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-hidden font-mono"
-                                                />
-                                                {field.description && (
-                                                    <p className="text-[11px] text-gray-400 mt-0.5">{field.description}</p>
-                                                )}
-                                            </div>
-                                        ))}
+                                        {(currentProfile.fields || []).map((field) => {
+                                            const isSecret = field.type === "password" || 
+                                                field.key.toLowerCase().includes("pass") || 
+                                                field.key.toLowerCase().includes("secret") || 
+                                                field.key.toLowerCase().includes("token") || 
+                                                field.key.toLowerCase().includes("key");
+                                            const isVisible = Boolean(showFieldValues[field.key]);
+
+                                            return (
+                                                <div key={field.key} className="space-y-1">
+                                                    <div className="flex items-center justify-between">
+                                                        <label className="block text-xs font-medium text-gray-700">
+                                                            {field.label} {field.required && <span className="text-red-500">*</span>}
+                                                        </label>
+                                                        {isSecret && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => toggleFieldVisibility(field.key)}
+                                                                className="text-[11px] text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1 cursor-pointer"
+                                                                title={isVisible ? "Wert verbergen" : "Wert anzeigen"}
+                                                            >
+                                                                <span>{isVisible ? "🙈" : "👁️"}</span>
+                                                                <span>{isVisible ? "Verbergen" : "Anzeigen"}</span>
+                                                            </button>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="relative">
+                                                        <input
+                                                            type={isSecret ? (isVisible ? "text" : "password") : (field.type || "text")}
+                                                            value={credentials[field.key] || ""}
+                                                            onChange={(e) => handleFieldChange(field.key, e.target.value)}
+                                                            placeholder={field.placeholder || ""}
+                                                            className={`w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-hidden font-mono ${
+                                                                isSecret ? "pr-10" : ""
+                                                            }`}
+                                                        />
+                                                        {isSecret && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => toggleFieldVisibility(field.key)}
+                                                                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 p-1 text-sm cursor-pointer"
+                                                                title={isVisible ? "Wert verbergen" : "Wert anzeigen"}
+                                                            >
+                                                                {isVisible ? "🙈" : "👁️"}
+                                                            </button>
+                                                        )}
+                                                    </div>
+
+                                                    {field.description && (
+                                                        <p className="text-[11px] text-gray-400 mt-0.5">{field.description}</p>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </div>
 

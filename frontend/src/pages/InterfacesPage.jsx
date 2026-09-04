@@ -7,6 +7,7 @@ import { useHomes } from "../hooks/useHomes";
 import { QRCodeSVG } from "qrcode.react";
 import { useTranslation } from "react-i18next";
 import CloudInverterIntegrationCard from "../features/devices/components/CloudInverterIntegrationCard";
+import ShellyCloudIntegrationCard from "../features/devices/components/ShellyCloudIntegrationCard";
 
 export default function InterfacesPage() {
     const { primaryHome, isLoading: homeLoading, regenerateMqttPassword, isRegenerating } = useHomes();
@@ -161,20 +162,23 @@ export default function InterfacesPage() {
                 </div>
             </div>
 
-            {/* 2. SECTION: SUNGROW DIREKT-KOPPLUNG (1-KLICK OAUTH & ISOLARCLOUD) */}
+            {/* 2. SECTION: SHELLY CLOUD 1-KLICK AUTO-DISCOVERY */}
+            <ShellyCloudIntegrationCard primaryHome={primaryHome} />
+
+            {/* 3. SECTION: SUNGROW DIREKT-KOPPLUNG (1-KLICK OAUTH & ISOLARCLOUD) */}
             <CloudInverterIntegrationCard 
                 primaryHome={primaryHome} 
                 filterVendor="sungrow" 
-                sectionNumber={2} 
-                cardTitle="2. Sungrow Wechselrichter & Batteriespeicher (SH-Serie)" 
+                sectionNumber={3} 
+                cardTitle="3. Sungrow Wechselrichter & Batteriespeicher (SH-Serie)" 
             />
 
-            {/* 3. SECTION: WEITERE WECHSELRICHTER & CLOUD-DIENSTE */}
+            {/* 4. SECTION: WEITERE WECHSELRICHTER & CLOUD-DIENSTE */}
             <CloudInverterIntegrationCard 
                 primaryHome={primaryHome} 
                 filterVendor="others" 
-                sectionNumber={3} 
-                cardTitle="3. Weitere Wechselrichter (SolarEdge, Fronius, Kostal, Growatt)" 
+                sectionNumber={4} 
+                cardTitle="4. Weitere Wechselrichter (SolarEdge, Fronius, Kostal, Growatt)" 
             />
 
             {/* 4. SECTION: NATIVE HOME ASSISTANT INTEGRATION (HACS / CUSTOM COMPONENT) */}

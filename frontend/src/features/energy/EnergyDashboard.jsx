@@ -11,6 +11,7 @@ import BatteryForecastCard from "./components/BatteryForecastCard";
 import BatteryArbitrageCard from "./components/BatteryArbitrageCard";
 import BWWPLoadManagementCard from "./components/BWWPLoadManagementCard";
 import WallboxCard from "./components/WallboxCard";
+import SimpleDashboardView from "./components/SimpleDashboardView";
 
 import AddWallboxModal from "../devices/components/AddWallboxModal";
 import CommunityShareModal from "../community/components/CommunityShareModal";
@@ -36,6 +37,22 @@ export default function EnergyDashboard() {
     const [addWallboxOpen, setAddWallboxOpen] = useState(false);
     const [proModalFeature, setProModalFeature] = useState({ name: "Pro Feature", desc: "" });
     const [customDates, setCustomDates] = useState({ startDate: null, endDate: null, label: null });
+    const [viewMode, setViewMode] = useState(() => {
+        try {
+            return localStorage.getItem("sharegy_dashboard_view_mode") || "simple";
+        } catch {
+            return "simple";
+        }
+    });
+
+    const handleSetViewMode = (mode) => {
+        setViewMode(mode);
+        try {
+            localStorage.setItem("sharegy_dashboard_view_mode", mode);
+        } catch (e) {
+            console.warn("Could not persist dashboard view mode:", e);
+        }
+    };
 
     // Fetch energy balance & submeters
     const balanceQuery = useQuery({
@@ -130,15 +147,43 @@ export default function EnergyDashboard() {
             <AlertNotificationBanner />
 
             {/* =========================================================
-                HEADER & TIMEFRAME SELECTOR + EXPORT (TASK 5.15)
+                HEADER & VIEW MODE SELECTOR + TIMEFRAME & EXPORT
             ========================================================= */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                        <span>⚡</span> {t("energy.title", "Energiebilanz & Analyse")}
-                    </h1>
+                    <div className="flex items-center gap-3">
+                        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                            <span>⚡</span> {t("energy.title", "Energiebilanz & Analyse")}
+                        </h1>
+                        <div className="inline-flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+                            <button
+                                type="button"
+                                onClick={() => handleSetViewMode("simple")}
+                                className={`px-2.5 py-1 text-xs font-bold rounded-lg transition cursor-pointer flex items-center gap-1.5 ${
+                                    viewMode === "simple" 
+                                        ? "bg-white text-emerald-700 shadow-xs" 
+                                        : "text-slate-600 hover:text-slate-900"
+                                }`}
+                            >
+                                <span>🟢</span> Einfach
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => handleSetViewMode("expert")}
+                                className={`px-2.5 py-1 text-xs font-bold rounded-lg transition cursor-pointer flex items-center gap-1.5 ${
+                                    viewMode === "expert" 
+                                        ? "bg-white text-indigo-700 shadow-xs" 
+                                        : "text-slate-600 hover:text-slate-900"
+                                }`}
+                            >
+                                <span>⚙️</span> Experten
+                            </button>
+                        </div>
+                    </div>
                     <p className="text-sm text-gray-500 mt-1">
-                        {t("energy.subtitle", "Detaillierte Mengen-, Verbrauchs- und Kostenanalyse nach Zeiträumen.")}
+                        {viewMode === "simple" 
+                            ? "Die 3 wichtigsten Energiekennzahlen auf einen Blick – einfach, klar und verständlich."
+                            : t("energy.subtitle", "Detaillierte Mengen-, Verbrauchs- und Kostenanalyse nach Zeiträumen.")}
                         {period === "custom" && customDates.label && (
                             <span className="ml-2 font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">
                                 📅 {customDates.label}
@@ -196,6 +241,16 @@ export default function EnergyDashboard() {
                     </button>
                 </div>
             </div>
+
+            {/* SIMPLE VIEW BRANCH */}
+            {viewMode === "simple" ? (
+                <SimpleDashboardView
+                    balanceData={data}
+                    onSwitchToExpert={() => handleSetViewMode("expert")}
+                    onOpenWallbox={() => setAddWallboxOpen(true)}
+                />
+            ) : (
+                <>
 
             {/* =========================================================
                 KPI HIGHLIGHTS
@@ -697,6 +752,8 @@ export default function EnergyDashboard() {
                 <BatteryArbitrageCard />
                 <GridCo2Card />
             </div>
+            </>
+            )}
 
             {/* =========================================================
                 COMMUNITY SOCIAL SHARE MODAL

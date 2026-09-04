@@ -47,6 +47,7 @@ from .views_profiles import (
 )
 from .views_sungrow_oauth import sungrow_oauth_start
 from .views_self_test import device_self_test_view, device_self_test_simulate_view
+from .views_shelly_cloud import ShellyCloudTestView, ShellyCloudImportView
 
 
 urlpatterns = [
@@ -81,6 +82,9 @@ urlpatterns = [
     # 🧪 1-KLICK HARDWARE-SELBSTTEST & DIAGNOSE
     path("<int:device_id>/self-test/", device_self_test_view, name="device_self_test"),
     path("self-test/simulate/", device_self_test_simulate_view, name="device_self_test_simulate"),
+    # ⚡ SHELLY CLOUD 1-KLICK AUTO-DISCOVERY
+    path("shelly-cloud/test/", ShellyCloudTestView.as_view(), name="shelly_cloud_test"),
+    path("shelly-cloud/import/", ShellyCloudImportView.as_view(), name="shelly_cloud_import"),
 
     path("sankey/", sankey_data),
     path("homes/", list_homes),

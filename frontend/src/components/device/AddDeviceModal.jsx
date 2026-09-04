@@ -116,6 +116,7 @@ export default function AddDeviceModal({ open, onClose }) {
     const [roomId, setRoomId] = useState("");
     const [floorId, setFloorId] = useState("");
     const [device, setDevice] = useState(null);
+    const [showMqttPassword, setShowMqttPassword] = useState(false);
 
     const { data: structure } = useStructure();
     const createDevice = useCreateDevice();
@@ -556,8 +557,20 @@ function StepConnectionAndGuides({ device, preset, onClose }) {
                             <span className="font-mono font-medium text-gray-800 break-all">{device.mqtt_username}</span>
                         </div>
                         <div>
-                            <span className="text-gray-400 block text-[10px] uppercase font-bold">{t("interfaces.password", "Passwort")}</span>
-                            <span className="font-mono font-medium text-gray-800 break-all">{device.mqtt_password}</span>
+                            <div className="flex items-center justify-between">
+                                <span className="text-gray-400 block text-[10px] uppercase font-bold">{t("interfaces.password", "Passwort")}</span>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowMqttPassword((v) => !v)}
+                                    className="text-[10px] text-indigo-600 hover:text-indigo-800 font-medium cursor-pointer"
+                                    title={showMqttPassword ? "Passwort verbergen" : "Passwort anzeigen"}
+                                >
+                                    {showMqttPassword ? "🙈" : "👁️"}
+                                </button>
+                            </div>
+                            <span className="font-mono font-medium text-gray-800 break-all">
+                                {showMqttPassword ? device.mqtt_password : "••••••••••••••••"}
+                            </span>
                         </div>
                     </div>
 

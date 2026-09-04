@@ -875,6 +875,57 @@ The official **ioBroker.sharegy** adapter streams local telemetry and accepts bi
                 "is_featured": True,
                 "sort_order": 15,
             },
+            # ---------------------------------------------------------------------
+            # 16. SHELLY NON-CLOUD & LOKALE ANBINDUNG
+            # ---------------------------------------------------------------------
+            {
+                "category": cats["devices-protocols"],
+                "slug": "shelly-local-non-cloud-guide",
+                "context_key": "interfaces",
+                "title_de": "Shelly ohne Cloud einrichten: 100% lokal, kostenlos & datensparsam 🔌🛡️",
+                "title_en": "Setup Shelly without Cloud: 100% local, free & privacy-first 🔌🛡️",
+                "summary_de": "Schritt-für-Schritt-Anleitung zur Anbindung von Shelly Plus 1PM, Pro 3EM, Plugs und Gen3 über Outbound-WebSocket (WSS) oder lokales RPC ohne kostenpflichtiges Cloud-Abo.",
+                "summary_en": "Step-by-step setup guide for connecting Shelly Gen2/Gen3/Pro devices via Outbound-WebSocket (WSS) or local RPC without any paid cloud subscription.",
+                "content_de": r"""# Shelly ohne Cloud einrichten: 100% lokal, kostenlos & sicher 🔌🛡️
+
+Du benötigst **kein kostenpflichtiges Shelly Cloud-Abo**. Sharegy unterstützt die direkte, verschlüsselte Outbound-WebSocket (WSS) Verbindung deiner Shelly-Geräte – **100% kostenlos und mit < 50 ms Live-Reaktionszeit**.
+
+---
+
+## 1. Vorteile der lokalen WSS-Verbindung
+* **0,00 € dauerhaft**: Kein Cloud-Abonnement erforderlich.
+* **Echtzeit-Telemetrie**: Live-Werte alle 1–2 Sekunden für exaktes Smart-Charging und SG-Ready Wärmepumpensteuerung.
+* **Keine Portweiterleitung (NAT)**: Der Shelly baut die Verbindung verschlüsselt von innen nach außen über Port 443 auf.
+
+---
+
+## 2. In 3 Schritten einrichten (Shelly Plus 1PM, Pro 3EM, Gen3, Plugs)
+1. **Shelly Weboberfläche öffnen**: Gib die IP-Adresse deines Shelly im Browser ein (z. B. `http://192.168.178.50`).
+2. **Outbound WebSocket aktivieren**: Navigiere zu **Settings ➔ Outbound WebSocket** (oder *Network & Connectivity*).
+3. **WSS-Server URL eintragen**:
+   * Setze das Häkchen bei **Enable**.
+   * Wähle **SSL/TLS (WSS)**.
+   * Trage deine persönliche Sharegy WSS-Adresse ein:
+     `wss://sharegy.de/ws/energy/<DEIN_HOME_TOKEN>/`
+   * Klicke auf **Save Settings**.
+
+---
+
+## 3. Fertig!
+Der Shelly verbindet sich sofort mit Sharegy und erscheint automatisch unter **Geräte** und im **Dashboard**.
+""",
+                "content_en": r"""# Setup Shelly without Cloud: 100% local, free & secure 🔌🛡️
+
+You do not need a paid Shelly Cloud subscription. Sharegy supports direct, encrypted Outbound-WebSocket (WSS) connections with sub-50ms latency.
+
+1. Open your Shelly device web interface by entering its IP address in your browser.
+2. Navigate to **Settings ➔ Outbound WebSocket**.
+3. Enable WebSocket, choose SSL/TLS, enter `wss://sharegy.de/ws/energy/<YOUR_TOKEN>/` and click Save.
+""",
+                "tags": ["shelly", "websocket", "local", "non-cloud", "pro3em", "plus1pm", "kostenlos"],
+                "is_featured": True,
+                "sort_order": 16,
+            },
         ]
 
         for adata in articles_data:

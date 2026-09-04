@@ -23,6 +23,7 @@ export default function TibberSettingsCard() {
     const [tibberHomes, setTibberHomes] = useState([]);
     const [fetchingHomes, setFetchingHomes] = useState(false);
     const [statusMsg, setStatusMsg] = useState(null);
+    const [showToken, setShowToken] = useState(false);
 
     const currentToken = token ?? (tariffData?.tibber_token || "");
     const currentHomeId = homeId ?? (tariffData?.tibber_home_id || "");
@@ -129,19 +130,29 @@ export default function TibberSettingsCard() {
                         </a>
                     </div>
                     <div className="flex gap-2">
-                        <input
-                            type="password"
-                            id="tibber_token"
-                            value={currentToken}
-                            onChange={(e) => setToken(e.target.value)}
-                            placeholder="z. B. 5KNB-abc123xyz..."
-                            className="flex-1 px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 font-mono"
-                        />
+                        <div className="relative flex-1">
+                            <input
+                                type={showToken ? "text" : "password"}
+                                id="tibber_token"
+                                value={currentToken}
+                                onChange={(e) => setToken(e.target.value)}
+                                placeholder="z. B. 5KNB-abc123xyz..."
+                                className="w-full px-3 py-2 pr-10 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 font-mono"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowToken(!showToken)}
+                                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 p-1 text-sm cursor-pointer"
+                                title={showToken ? "Token verbergen" : "Token anzeigen"}
+                            >
+                                {showToken ? "🙈" : "👁️"}
+                            </button>
+                        </div>
                         <button
                             type="button"
                             onClick={handleFetchHomes}
                             disabled={fetchingHomes || !currentToken}
-                            className="px-3 py-2 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg border border-gray-300 disabled:opacity-50 transition-colors whitespace-nowrap"
+                            className="px-3 py-2 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg border border-gray-300 disabled:opacity-50 transition-colors whitespace-nowrap cursor-pointer"
                         >
                             {fetchingHomes ? `⏳ ${t("common.loading", "Prüfe…")}` : `🔍 ${t("tariffs.load_homes", "Homes laden")}`}
                         </button>
