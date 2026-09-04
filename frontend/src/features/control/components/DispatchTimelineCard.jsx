@@ -1,97 +1,259 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 export default function DispatchTimelineCard({ schedule = [] }) {
     const { t } = useTranslation();
 
+    // Default selected slot: the current hour or first slot with scheduled devices
+    const [selectedSlotIndex, setSelectedSlotIndex] = useState(() => {
+        if (!schedule || schedule.length === 0) return 0;
+        const withDevices = schedule.findIndex((s) => s.scheduled_devices && s.scheduled_devices.length > 0);
+        return withDevices !== -1 ? withDevices : 12; // default to noon if none
+    });
+
     if (!schedule || schedule.length === 0) {
         return null;
     }
 
+    const maxPv = Math.max(...schedule.map((s) => s.pv_kw || 0), 4.0);
+    const selectedSlot = schedule[selectedSlotIndex] || schedule[0];
+
+    // Group scheduled devices into clear summary blocks (e.g. "Wallbox 11:00 - 15:00")
+    const deviceRuns = {};
+    schedule.forEach((slot) => {
+        (slot.scheduled_devices || []).forEach((dev) => {
+            if (!deviceRuns[dev.name]) {
+                deviceRuns[dev.name] = {
+                    name: dev.name,
+                    icon: dev.icon,
+                    category: dev.category,
+                    power_kw: dev.power_kw,
+                    reason: dev.reason,
+                    hours: [],
+                };
+            }
+            deviceRuns[dev.name].hours.push(slot.time_label);
+        });
+    });
+
+    const activeScheduleSummaries = Object.values(deviceRuns).map((run) => {
+        const start = run.hours[0];
+        const endHourNum = parseInt(run.hours[run.hours.length - 1].split(":")[0], 10) + 1;
+        const end = `${String(endHourNum).padStart(2, "0")}:00`;
+        return {
+            ...run,
+            timeRange: `${start} – ${end}`,
+            totalHours: run.hours.length,
+        };
+    });
+
     return (
-        <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200/90 dark:border-slate-800 shadow-xs space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200/90 dark:border-slate-800 shadow-xs space-y-5">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 dark:bg-indigo-400/15 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xl">
+                    <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xl shadow-2xs">
                         📅
                     </div>
                     <div>
-                        <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                            24h-Fahrplan & Dispatch-Timeline
+                        <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <span>24h-Fahrplan & Dispatch-Timeline</span>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                                24 Stunden Übersicht
+                            </span>
                         </h3>
                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                            Geplante Einschaltfenster basierend auf Solarprognose, dynamischen Spotpreisen & Prioritäten.
+                            Automatische Schaltungen basierend auf Solarprognose, Spotmarktpreisen und Prioritäten. Klicke auf eine Stunde für Details.
                         </p>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2 self-start sm:self-auto text-xs font-semibold text-slate-500">
-                    <span className="flex items-center gap-1">
-                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> ☀️ PV-Überschuss
+                <div className="flex flex-wrap items-center gap-3 text-xs font-semibold text-slate-500 dark:text-slate-400 self-start sm:self-auto">
+                    <span className="flex items-center gap-1.5">
+                        <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-2xs"></span> ☀️ PV-Ertrag
                     </span>
-                    <span className="flex items-center gap-1 ml-2">
-                        <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span> ⚡ Tiefstpreis
+                    <span className="flex items-center gap-1.5">
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-2xs"></span> ⚡ Tiefstpreis
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                        <span className="w-2.5 h-2.5 rounded-full bg-indigo-600 shadow-2xs"></span> 🎛️ Aktivität
                     </span>
                 </div>
             </div>
 
-            {/* Scrollable Timeline Horizontal Grid */}
-            <div className="overflow-x-auto pb-3 pt-1">
-                <div className="flex gap-2.5 min-w-[900px]">
-                    {schedule.map((slot, i) => {
+            {/* 24-Hour Continuous Visual Strip (100% Container Width, Zero Horizontal Scroll!) */}
+            <div className="space-y-1.5">
+                <div className="grid grid-cols-24 gap-0.5 sm:gap-1 w-full bg-slate-50 dark:bg-slate-950/60 p-2 sm:p-3 rounded-2xl border border-slate-200/80 dark:border-slate-800/80">
+                    {schedule.map((slot, idx) => {
                         const hasDevices = slot.scheduled_devices && slot.scheduled_devices.length > 0;
-                        const isDay = slot.hour >= 6 && slot.hour <= 20;
+                        const isSelected = selectedSlotIndex === idx;
+                        const pvHeightPct = Math.min(100, Math.round(((slot.pv_kw || 0) / maxPv) * 100));
+                        const isCheap = (slot.price_ct || 25) <= 20.0;
+                        const isHighPrice = (slot.price_ct || 25) >= 28.0;
 
                         return (
-                            <div
-                                key={slot.timestamp || i}
-                                className={`flex-1 min-w-[85px] rounded-2xl border p-2.5 flex flex-col justify-between transition ${
-                                    hasDevices
-                                        ? "bg-indigo-50/50 dark:bg-indigo-950/20 border-indigo-200 dark:border-indigo-800/80 shadow-2xs"
-                                        : "bg-slate-50/50 dark:bg-slate-800/30 border-slate-200/60 dark:border-slate-800"
+                            <button
+                                key={slot.timestamp || idx}
+                                type="button"
+                                onClick={() => setSelectedSlotIndex(idx)}
+                                className={`flex flex-col items-center justify-end rounded-xl p-1 transition-all cursor-pointer relative group h-24 ${
+                                    isSelected
+                                        ? "bg-indigo-600/15 dark:bg-indigo-500/25 ring-2 ring-indigo-600 shadow-sm"
+                                        : "hover:bg-slate-200/60 dark:hover:bg-slate-800/60"
                                 }`}
+                                title={`${slot.time_label}: PV ${slot.pv_kw} kW, Preis ${slot.price_ct.toFixed(1)} ct/kWh`}
                             >
-                                {/* Slot Time & Metrics */}
-                                <div className="space-y-1 text-center border-b border-slate-200/50 dark:border-slate-800 pb-1.5">
-                                    <div className="text-xs font-bold font-mono text-slate-800 dark:text-slate-200">
-                                        {slot.time_label}
+                                {/* Scheduled Device Indicator Indicator Dot / Icon */}
+                                {hasDevices ? (
+                                    <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[9px] sm:text-[10px] shadow-sm mb-1 animate-pulse">
+                                        {slot.scheduled_devices[0]?.icon || "⚡"}
                                     </div>
-                                    <div className="text-[10px] text-slate-400">
-                                        {isDay ? "☀️" : "🌙"} {slot.pv_kw > 0 ? `${slot.pv_kw} kW` : "0 kW"}
+                                ) : (
+                                    <div className="h-4 sm:h-5 mb-1 flex items-center justify-center">
+                                        <div className={`w-1.5 h-1.5 rounded-full ${
+                                            isCheap ? "bg-emerald-500" : isHighPrice ? "bg-rose-400" : "bg-slate-300 dark:bg-slate-700"
+                                        }`} />
                                     </div>
-                                    <div className={`text-[10px] font-mono font-semibold ${
-                                        slot.price_ct <= 20 ? "text-emerald-600 dark:text-emerald-400" : "text-slate-600 dark:text-slate-300"
-                                    }`}>
-                                        {slot.price_ct.toFixed(1)} ct
-                                    </div>
+                                )}
+
+                                {/* PV Production Bar */}
+                                <div className="w-full bg-slate-200 dark:bg-slate-800 rounded-md h-9 flex items-end overflow-hidden">
+                                    <div
+                                        style={{ height: `${pvHeightPct}%` }}
+                                        className={`w-full rounded-sm transition-all duration-300 ${
+                                            slot.pv_kw > 0
+                                                ? "bg-gradient-to-t from-amber-500 to-amber-400 dark:from-amber-600 dark:to-amber-400"
+                                                : "bg-transparent"
+                                        }`}
+                                    />
                                 </div>
 
-                                {/* Scheduled Device Badges */}
-                                <div className="mt-2 space-y-1 min-h-[44px] flex flex-col justify-start">
-                                    {hasDevices ? (
-                                        slot.scheduled_devices.map((dev, devIdx) => (
-                                            <div
-                                                key={devIdx}
-                                                className="px-1.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-indigo-100 dark:border-indigo-800/60 text-[10px] font-bold text-slate-800 dark:text-slate-200 flex items-center justify-between shadow-2xs"
-                                                title={`${dev.name} (${dev.power_kw} kW) - ${dev.reason}`}
-                                            >
-                                                <span className="truncate flex items-center gap-1">
-                                                    <span>{dev.icon}</span>
-                                                    <span className="truncate max-w-[45px]">{dev.name.split(" ")[0]}</span>
-                                                </span>
-                                                <span className="text-indigo-600 dark:text-indigo-400 font-mono text-[9px] shrink-0">
-                                                    {dev.power_kw}k
-                                                </span>
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <div className="text-[10px] text-slate-300 dark:text-slate-600 text-center my-auto">
-                                            –
-                                        </div>
-                                    )}
+                                {/* Hour Label (Key hours highlighted) */}
+                                <div className={`text-[9px] sm:text-[10px] font-mono mt-1 font-semibold ${
+                                    isSelected
+                                        ? "text-indigo-600 dark:text-indigo-400 font-bold"
+                                        : "text-slate-500 dark:text-slate-400"
+                                }`}>
+                                    {slot.hour % 3 === 0 || slot.hour === 23 ? `${slot.hour}h` : "·"}
                                 </div>
-                            </div>
+                            </button>
                         );
                     })}
+                </div>
+
+                {/* Legend Time Scale */}
+                <div className="flex justify-between px-2 text-[10px] font-mono text-slate-400">
+                    <span>00:00 (Nacht)</span>
+                    <span>06:00 (Morgen)</span>
+                    <span>12:00 (PV-Peak)</span>
+                    <span>18:00 (Abend)</span>
+                    <span>23:00 (Nacht)</span>
+                </div>
+            </div>
+
+            {/* Selected Slot Inspector & Action Summary Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* 1. Detail-Inspektor für die gewählte Stunde */}
+                <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 space-y-3">
+                    <div className="flex items-center justify-between border-b border-slate-200/60 dark:border-slate-700 pb-2">
+                        <div className="flex items-center gap-2">
+                            <span className="text-base">⏰</span>
+                            <span className="text-sm font-bold text-slate-900 dark:text-white">
+                                {selectedSlot.time_label} – {String((selectedSlot.hour + 1) % 24).padStart(2, "0")}:00 Uhr
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">
+                                ☀️ {selectedSlot.pv_kw.toFixed(1)} kW
+                            </span>
+                            <span className={`text-xs font-mono font-bold px-2 py-0.5 rounded-md ${
+                                selectedSlot.price_ct <= 20
+                                    ? "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300"
+                                    : "bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200"
+                            }`}>
+                                ⚡ {selectedSlot.price_ct.toFixed(1)} ct
+                            </span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                            Geplante Lasten in dieser Stunde:
+                        </div>
+                        {selectedSlot.scheduled_devices && selectedSlot.scheduled_devices.length > 0 ? (
+                            <div className="space-y-1.5">
+                                {selectedSlot.scheduled_devices.map((dev, devIdx) => (
+                                    <div
+                                        key={devIdx}
+                                        className="flex items-center justify-between p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs shadow-2xs"
+                                    >
+                                        <div className="flex items-center gap-2 font-bold text-slate-800 dark:text-slate-200">
+                                            <span className="text-base">{dev.icon}</span>
+                                            <span>{dev.name}</span>
+                                            <span className="text-[10px] font-normal px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                                                {dev.reason}
+                                            </span>
+                                        </div>
+                                        <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                                            {dev.power_kw} kW
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-xs text-slate-400 dark:text-slate-500 py-1">
+                                Keine Sonderzuschaltungen geplant · Standard Grundlast-Betrieb (~0,35 kW).
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* 2. Zusammenfassung: Heute geplante Schaltungen */}
+                <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 space-y-3">
+                    <div className="flex items-center justify-between border-b border-slate-200/60 dark:border-slate-700 pb-2">
+                        <div className="flex items-center gap-2">
+                            <span className="text-base">📋</span>
+                            <span className="text-sm font-bold text-slate-900 dark:text-white">
+                                Heute geplante Schaltungen
+                            </span>
+                        </div>
+                        <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">
+                            {activeScheduleSummaries.length} Aktionen
+                        </span>
+                    </div>
+
+                    {activeScheduleSummaries.length > 0 ? (
+                        <div className="space-y-1.5">
+                            {activeScheduleSummaries.map((summary, idx) => (
+                                <div
+                                    key={idx}
+                                    className="flex items-center justify-between p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs shadow-2xs"
+                                >
+                                    <div className="flex items-center gap-2 font-bold text-slate-800 dark:text-slate-200">
+                                        <span className="text-base">{summary.icon}</span>
+                                        <div>
+                                            <div>{summary.name}</div>
+                                            <div className="text-[10px] font-normal text-slate-500 dark:text-slate-400">
+                                                {summary.reason}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <div className="font-mono font-bold text-slate-900 dark:text-white">
+                                            {summary.timeRange}
+                                        </div>
+                                        <div className="text-[10px] text-slate-400">
+                                            {summary.totalHours}h ({summary.power_kw} kW)
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-xs text-slate-400 dark:text-slate-500 py-3 text-center">
+                            Für heute sind keine Sonder-Laufzeiten erforderlich.
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
