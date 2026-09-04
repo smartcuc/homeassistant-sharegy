@@ -127,7 +127,7 @@ export default function Profile() {
     const currentLang = (i18n.resolvedLanguage || i18n.language || "de").substring(0, 2);
 
     return (
-        <div className="max-w-4xl mx-auto p-6 space-y-6">
+        <div className="p-6 max-w-7xl mx-auto space-y-6">
 
             {/* HEADER */}
             <div>

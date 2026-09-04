@@ -345,7 +345,7 @@ export default function MetricsPage() {
     const activeSensors = new Set(channels.map((c) => c.deviceId)).size;
 
     return (
-        <div className="p-6 space-y-6 max-w-7xl">
+        <div className="p-6 max-w-7xl mx-auto space-y-6">
             {/* HEADER */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>

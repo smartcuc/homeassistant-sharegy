@@ -10,7 +10,7 @@ export default function TariffPage() {
     const { t } = useTranslation();
 
     return (
-        <div className="p-6 max-w-4xl space-y-8">
+        <div className="p-6 max-w-7xl mx-auto space-y-8">
             {/* HEADER */}
             <div>
                 <h1 className="text-2xl font-semibold text-gray-900">

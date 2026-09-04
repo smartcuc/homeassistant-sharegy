@@ -52,7 +52,7 @@ export default function InterfacesPage() {
     const wsUrl = `wss://${window.location.host || "sharegy.de"}/ws/energy/${primaryHome?.mqtt_token || "<TOKEN>"}/`;
 
     return (
-        <div className="p-6 max-w-4xl space-y-8">
+        <div className="p-6 max-w-7xl mx-auto space-y-8">
 
             {/* HEADER */}
             <div>

@@ -52,14 +52,14 @@ export default function BillingPage() {
 
     if (isLoading) {
         return (
-            <div className="max-w-5xl mx-auto p-6 text-gray-400 text-center py-20">
+            <div className="max-w-7xl mx-auto p-6 text-gray-400 text-center py-20">
                 {t("billing.loading", "Lade Abrechnungs- & Abonnement-Informationen...")}
             </div>
         );
     }
 
     return (
-        <div className="max-w-5xl mx-auto p-6 space-y-6">
+        <div className="p-6 max-w-7xl mx-auto space-y-6">
             {/* Success / Cancel Banner */}
             {statusBanner && (
                 <div

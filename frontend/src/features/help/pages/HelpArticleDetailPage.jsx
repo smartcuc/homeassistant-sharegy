@@ -36,7 +36,7 @@ export default function HelpArticleDetailPage() {
 
     if (query.isLoading) {
         return (
-            <div className="p-8 max-w-4xl mx-auto text-center text-gray-400 animate-pulse">
+            <div className="p-8 max-w-7xl mx-auto text-center text-gray-400 animate-pulse">
                 {t("common.loading", "Lade Artikel...")}
             </div>
         );
@@ -44,7 +44,7 @@ export default function HelpArticleDetailPage() {
 
     if (query.isError || !query.data) {
         return (
-            <div className="p-8 max-w-4xl mx-auto space-y-4">
+            <div className="p-8 max-w-7xl mx-auto space-y-4">
                 <div className="p-6 bg-red-50 border border-red-200 rounded-2xl text-red-700">
                     ⚠️ {t("help.article_not_found", "Der angeforderte Hilfe-Artikel wurde nicht gefunden.")}
                 </div>
@@ -62,7 +62,7 @@ export default function HelpArticleDetailPage() {
     const categoryTitle = isEnglish && article.category_title_en ? article.category_title_en : article.category_title_de;
 
     return (
-        <div className="p-6 max-w-4xl mx-auto space-y-6 animate-fade-in">
+        <div className="p-6 max-w-7xl mx-auto space-y-6 animate-fade-in">
             {/* Breadcrumb Navigation */}
             <div className="flex items-center justify-between">
                 <nav className="flex items-center gap-2 text-xs font-semibold text-gray-500">

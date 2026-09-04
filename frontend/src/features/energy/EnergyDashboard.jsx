@@ -139,7 +139,7 @@ export default function EnergyDashboard() {
     );
 
     return (
-        <div className="p-6 space-y-6 w-full max-w-full min-w-0">
+        <div className="p-6 max-w-7xl mx-auto space-y-6">
 
             {/* =========================================================
                 HEADER (MATCHING SOLAR-PROGNOSE STYLE)

@@ -123,7 +123,7 @@ export default function AgentSupportHubPage() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 lg:p-8">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-6">
             <div className="max-w-7xl mx-auto space-y-6">
                 {/* Header & Project Switcher */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">

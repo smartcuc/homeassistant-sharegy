@@ -49,7 +49,7 @@ export default function ForecastPage() {
     };
 
     return (
-        <div className="p-6 space-y-6 w-full max-w-full min-w-0">
+        <div className="p-6 max-w-7xl mx-auto space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">

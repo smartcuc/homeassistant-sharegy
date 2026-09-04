@@ -311,7 +311,7 @@ export default function CommunitiesManagementHub() {
     };
 
     return (
-        <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-8">
+        <div className="p-6 max-w-7xl mx-auto space-y-8">
 
             {/* TOP BAR / TITEL */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800">

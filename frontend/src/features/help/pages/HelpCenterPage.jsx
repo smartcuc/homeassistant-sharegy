@@ -35,7 +35,7 @@ export default function HelpCenterPage() {
     const featuredArticles = articles.filter((a) => a.is_featured);
 
     return (
-        <div className="p-6 max-w-6xl mx-auto space-y-8 animate-fade-in">
+        <div className="p-6 max-w-7xl mx-auto space-y-8 animate-fade-in">
             {/* Hero Header & Search */}
             <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 p-8 sm:p-12 text-white shadow-xl">
                 <div className="relative z-10 max-w-2xl space-y-4">
