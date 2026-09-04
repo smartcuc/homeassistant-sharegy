@@ -152,6 +152,54 @@ def extract_jsonpath(data: dict, path_expr: str, fallback=None):
     return current
 
 
+def _clean_numeric_value(raw_val, target_unit="W"):
+    """
+    Konvertiert Zahlen oder formatierte Strings mit Einheiten wie '677.3 W', '0.68 kW', '3.5 kWh', '85 %'
+    in saubere Floats mit automatischer Einheitenskalierung.
+    """
+    if raw_val is None:
+        return None
+    if isinstance(raw_val, (int, float)):
+        return float(raw_val)
+
+    s = str(raw_val).strip().replace(",", ".")
+    if not s or s in ("-", "--", "null", "None", "N/A", "n/a"):
+        return None
+
+    lower_s = s.lower()
+    factor = 1.0
+
+    if target_unit == "W":
+        if "kw" in lower_s:
+            factor = 1000.0
+            lower_s = lower_s.replace("kw", "").strip()
+        elif "mw" in lower_s:
+            factor = 1000000.0
+            lower_s = lower_s.replace("mw", "").strip()
+        elif "w" in lower_s:
+            lower_s = lower_s.replace("w", "").strip()
+    elif target_unit == "kWh":
+        if "mwh" in lower_s:
+            factor = 1000.0
+            lower_s = lower_s.replace("mwh", "").strip()
+        elif "wh" in lower_s and "kwh" not in lower_s:
+            factor = 0.001
+            lower_s = lower_s.replace("wh", "").strip()
+        elif "kwh" in lower_s:
+            lower_s = lower_s.replace("kwh", "").strip()
+    elif target_unit == "%":
+        lower_s = lower_s.replace("%", "").strip()
+
+    import re
+    match = re.search(r"[-+]?\d*\.?\d+", lower_s)
+    if match:
+        try:
+            return float(match.group(0)) * factor
+        except (ValueError, TypeError):
+            return None
+    return None
+
+
 def _render_template(template_val, context: dict):
     """
     Ersetzt {{variable}} Platzhalter in Strings, Dicts oder Listen.
@@ -802,15 +850,21 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
 def _parse_metrics_from_payload(profile: dict, raw_payload: dict) -> dict:
     """
     Wendet das metrics_mapping des Profils auf die Rohdaten an und ergänzt
-    intelligente Multi-Key Fallbacks (z. B. für Growatt und andere Hersteller).
+    intelligente Multi-Key Fallbacks mit automatischer Einheitenbereinigung (z. B. für Growatt, Sungrow etc.).
     """
     mapping = profile.get("metrics_mapping", {})
     extracted = {}
 
-    # Fallback Lookup Pool aus data / root
-    data_dict = raw_payload.get("data") if isinstance(raw_payload.get("data"), dict) else {}
-    if not isinstance(data_dict, dict):
-        data_dict = {}
+    # Fallback Lookup Pool aus data / root / obj
+    data_dict = {}
+    if isinstance(raw_payload, dict):
+        data_dict.update(raw_payload)
+        if isinstance(raw_payload.get("data"), dict):
+            data_dict.update(raw_payload["data"])
+        elif isinstance(raw_payload.get("obj"), dict):
+            data_dict.update(raw_payload["obj"])
+        elif isinstance(raw_payload.get("back"), dict):
+            data_dict.update(raw_payload["back"])
 
     for metric_name, rule in mapping.items():
         jsonpath = rule.get("jsonpath")
@@ -819,59 +873,56 @@ def _parse_metrics_from_payload(profile: dict, raw_payload: dict) -> dict:
         transform = rule.get("transform")
         min_val = rule.get("min")
         max_val = rule.get("max")
+        target_unit = "kWh" if "kwh" in metric_name else ("%" if "soc" in metric_name else "W")
 
         raw_val = extract_jsonpath(raw_payload, jsonpath, fallback=None)
+        if raw_val is not None:
+            raw_val = _clean_numeric_value(raw_val, target_unit=target_unit)
 
         # Intelligente Multi-Key Fallbacks falls JSONPath keinen Treffer liefert
         if raw_val is None:
             if metric_name == "pv_power_w":
-                for k in ["pac", "ppv", "pactouser", "power", "pacToUserTotal", "pv_power", "ppv1"]:
+                for k in ["currentPower", "current_power", "pac", "ppv", "pactouser", "nominalPower", "invPac", "power", "pacToUserTotal", "pv_power", "ppv1", "ppv2", "pPv1", "pPv2"]:
                     if k in data_dict and data_dict[k] is not None:
-                        try:
-                            raw_val = float(data_dict[k])
+                        clean_v = _clean_numeric_value(data_dict[k], target_unit="W")
+                        if clean_v is not None:
+                            raw_val = clean_v
                             break
-                        except (ValueError, TypeError):
-                            pass
             elif metric_name == "battery_soc":
-                for k in ["soc", "batterySoc", "battery_soc", "batteryPercent", "chargeLevel"]:
+                for k in ["soc", "batterySoc", "battery_soc", "batteryPercent", "chargeLevel", "capacity"]:
                     if k in data_dict and data_dict[k] is not None:
-                        try:
-                            raw_val = float(data_dict[k])
+                        clean_v = _clean_numeric_value(data_dict[k], target_unit="%")
+                        if clean_v is not None:
+                            raw_val = clean_v
                             break
-                        except (ValueError, TypeError):
-                            pass
             elif metric_name == "battery_power_w":
-                for k in ["pdisCharge", "pcharge", "pdisCharge1", "pcharge1", "battery_power"]:
+                for k in ["pdisCharge", "pcharge", "pdisCharge1", "pcharge1", "battery_power", "pactostorage", "pstorage"]:
                     if k in data_dict and data_dict[k] is not None:
-                        try:
-                            raw_val = float(data_dict[k])
+                        clean_v = _clean_numeric_value(data_dict[k], target_unit="W")
+                        if clean_v is not None:
+                            raw_val = clean_v
                             break
-                        except (ValueError, TypeError):
-                            pass
             elif metric_name == "grid_power_w":
-                for k in ["pgrid", "pactogrid", "grid_power", "gridPower"]:
+                for k in ["pgrid", "pactogrid", "grid_power", "gridPower", "toGridPower"]:
                     if k in data_dict and data_dict[k] is not None:
-                        try:
-                            raw_val = float(data_dict[k])
+                        clean_v = _clean_numeric_value(data_dict[k], target_unit="W")
+                        if clean_v is not None:
+                            raw_val = clean_v
                             break
-                        except (ValueError, TypeError):
-                            pass
             elif metric_name == "load_power_w":
-                for k in ["pload", "use_power", "familyLoadPower", "load_power"]:
+                for k in ["pload", "use_power", "familyLoadPower", "load_power", "loadPower", "useEnergy"]:
                     if k in data_dict and data_dict[k] is not None:
-                        try:
-                            raw_val = float(data_dict[k])
+                        clean_v = _clean_numeric_value(data_dict[k], target_unit="W")
+                        if clean_v is not None:
+                            raw_val = clean_v
                             break
-                        except (ValueError, TypeError):
-                            pass
             elif metric_name == "daily_generation_kwh":
-                for k in ["eToday", "etoday", "todayEnergy", "e_today", "eTodayTotal"]:
+                for k in ["eToday", "etoday", "todayEnergy", "e_today", "eTodayTotal", "eAcChargeToday"]:
                     if k in data_dict and data_dict[k] is not None:
-                        try:
-                            raw_val = float(data_dict[k])
+                        clean_v = _clean_numeric_value(data_dict[k], target_unit="kWh")
+                        if clean_v is not None:
+                            raw_val = clean_v
                             break
-                        except (ValueError, TypeError):
-                            pass
 
         if raw_val is None:
             raw_val = fallback
