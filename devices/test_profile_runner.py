@@ -15,6 +15,7 @@ from devices.services_profile_runner import (
     extract_jsonpath,
     test_cloud_credentials,
     execute_cloud_poll,
+    _parse_metrics_from_payload,
 )
 from devices.tasks import poll_cloud_integrations_task
 
@@ -76,8 +77,6 @@ class ProfileRunnerTestCase(TestCase):
         self.assertEqual(growatt["vendor"], "Growatt")
         self.assertIn("token", [f["key"] for f in growatt["fields"]])
         self.assertIn("de", growatt.get("help", {}))
-
-
 
     def test_03_jsonpath_extractor(self):
         """Testet den JSONPath-Evaluator auf verschachtelten Daten."""
@@ -248,6 +247,119 @@ class ProfileRunnerTestCase(TestCase):
             self.assertTrue(res["simulated"])
             self.assertIn("live_metrics", res)
             self.assertIn("pv_power_w", res["live_metrics"])
+
+    def test_11_sungrow_real_world_payload_variations(self):
+        """Testet verschiedene Sungrow iSolarCloud Live-Payload-Formate (kW, nested data_list, strings)."""
+        sungrow_profile = load_profile("sungrow_isolarcloud")
+
+        # 1. Standard iSolarCloud kW Float Payload
+        payload_1 = {
+            "result_code": "1",
+            "result_data": {
+                "curr_power": 6.78,
+                "grid_power": -2.50,
+                "load_power": 1.28,
+                "battery_power": -3.00,
+                "battery_soc": 88.5,
+            }
+        }
+        parsed_1 = _parse_metrics_from_payload(sungrow_profile, payload_1)
+        self.assertEqual(parsed_1["pv_power_w"], 6780.0)
+        self.assertEqual(parsed_1["grid_power_w"], -2500.0)
+        self.assertEqual(parsed_1["load_power_w"], 1280.0)
+        self.assertEqual(parsed_1["battery_power_w"], -3000.0)
+        self.assertEqual(parsed_1["battery_soc"], 88.5)
+
+        # 2. Nested data_list mit String-Einheiten ('6.78 kW', '88.5 %')
+        payload_2 = {
+            "result_code": "1",
+            "result_data": {
+                "data_list": [
+                    {
+                        "curr_power": "6.78 kW",
+                        "grid_power": "-2.5 kW",
+                        "load_power": "1.28 kW",
+                        "battery_power": "-3.0 kW",
+                        "battery_soc": "88.5 %",
+                    }
+                ]
+            }
+        }
+        parsed_2 = _parse_metrics_from_payload(sungrow_profile, payload_2)
+        self.assertEqual(parsed_2["pv_power_w"], 6780.0)
+        self.assertEqual(parsed_2["grid_power_w"], -2500.0)
+        self.assertEqual(parsed_2["load_power_w"], 1280.0)
+        self.assertEqual(parsed_2["battery_power_w"], -3000.0)
+        self.assertEqual(parsed_2["battery_soc"], 88.5)
+
+        # 3. Dezimal SoC (0.885 -> 88.5%)
+        payload_3 = {
+            "result_data": {
+                "curr_power": "3.5",
+                "battery_soc": 0.885,
+            }
+        }
+        parsed_3 = _parse_metrics_from_payload(sungrow_profile, payload_3)
+        self.assertEqual(parsed_3["pv_power_w"], 3500.0)
+        self.assertEqual(parsed_3["battery_soc"], 88.5)
+
+    def test_12_sungrow_fallback_key_resolutions(self):
+        """Testet, dass Sungrow-spezifische Fallback-Keys (curr_pac, curr_load_power etc.) korrekt greifen."""
+        sungrow_profile = load_profile("sungrow_isolarcloud")
+
+        payload_fallback = {
+            "result_data": {
+                "curr_pac": 5200,
+                "curr_grid_power": -1400,
+                "curr_load_power": 1800,
+                "curr_battery_power": -2000,
+                "curr_soc": 77.0,
+            }
+        }
+        parsed = _parse_metrics_from_payload(sungrow_profile, payload_fallback)
+        self.assertEqual(parsed["pv_power_w"], 5200.0)
+        self.assertEqual(parsed["grid_power_w"], -1400.0)
+        self.assertEqual(parsed["load_power_w"], 1800.0)
+        self.assertEqual(parsed["battery_power_w"], -2000.0)
+        self.assertEqual(parsed["battery_soc"], 77.0)
+
+    def test_13_no_cross_pollution_between_sungrow_and_growatt(self):
+        """Stellt sicher, dass Growatt-Payloads und Sungrow-Payloads absolut unabhängig sauber verarbeitet werden."""
+        sungrow_prof = load_profile("sungrow_isolarcloud")
+        growatt_prof = load_profile("growatt_server")
+
+        # Growatt Watt-Payload
+        growatt_payload = {
+            "data": {
+                "pac": 73.9,
+                "pactogrid": 15.0,
+                "pload": 58.9,
+                "soc": 65.0,
+                "eToday": 12.4,
+            }
+        }
+        parsed_gw = _parse_metrics_from_payload(growatt_prof, growatt_payload)
+        self.assertEqual(parsed_gw["pv_power_w"], 73.9)
+        self.assertEqual(parsed_gw["grid_power_w"], 15.0)
+        self.assertEqual(parsed_gw["load_power_w"], 58.9)
+        self.assertEqual(parsed_gw["battery_soc"], 65.0)
+        self.assertEqual(parsed_gw["daily_generation_kwh"], 12.4)
+
+        # Sungrow kW-Payload
+        sungrow_payload = {
+            "result_data": {
+                "curr_power": 7.39,
+                "grid_power": 1.50,
+                "load_power": 5.89,
+                "battery_soc": 65.0,
+            }
+        }
+        parsed_sg = _parse_metrics_from_payload(sungrow_prof, sungrow_payload)
+        self.assertEqual(parsed_sg["pv_power_w"], 7390.0)
+        self.assertEqual(parsed_sg["grid_power_w"], 1500.0)
+        self.assertEqual(parsed_sg["load_power_w"], 5890.0)
+        self.assertEqual(parsed_sg["battery_soc"], 65.0)
+
 
 
 
