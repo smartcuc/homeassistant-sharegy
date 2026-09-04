@@ -20,7 +20,6 @@ import SubmeterTrendModal from "./components/SubmeterTrendModal";
 import SubmeterStackedTrendChart from "./components/SubmeterStackedTrendChart";
 import DateRangePickerModal from "./components/DateRangePickerModal";
 import ExportDropdown from "./components/ExportDropdown";
-import AlertNotificationBanner from "../alerts/components/AlertNotificationBanner";
 import GridCo2Card from "../market/components/GridCo2Card";
 import { useSubscription } from "../../hooks/useSubscription";
 import ProBadge from "../../components/common/ProBadge";
@@ -140,69 +139,69 @@ export default function EnergyDashboard() {
     );
 
     return (
-        <div className="p-6 space-y-6 max-w-7xl">
-            {/* =========================================================
-                SYSTEM ALERTS & NOTIFICATIONS (TASK 5.6)
-            ========================================================= */}
-            <AlertNotificationBanner />
+        <div className="p-6 space-y-6 w-full max-w-full min-w-0">
 
             {/* =========================================================
-                HEADER & VIEW MODE SELECTOR + TIMEFRAME & EXPORT
+                HEADER (MATCHING SOLAR-PROGNOSE STYLE)
             ========================================================= */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                    <div className="flex items-center gap-3">
-                        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                            <span>⚡</span> {t("energy.title", "Energiebilanz & Analyse")}
-                        </h1>
-                        <div className="inline-flex bg-slate-100 p-1 rounded-xl border border-slate-200">
-                            <button
-                                type="button"
-                                onClick={() => handleSetViewMode("simple")}
-                                className={`px-2.5 py-1 text-xs font-bold rounded-lg transition cursor-pointer flex items-center gap-1.5 ${
-                                    viewMode === "simple" 
-                                        ? "bg-white text-emerald-700 shadow-xs" 
-                                        : "text-slate-600 hover:text-slate-900"
-                                }`}
-                            >
-                                <span>🟢</span> Einfach
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => handleSetViewMode("expert")}
-                                className={`px-2.5 py-1 text-xs font-bold rounded-lg transition cursor-pointer flex items-center gap-1.5 ${
-                                    viewMode === "expert" 
-                                        ? "bg-white text-indigo-700 shadow-xs" 
-                                        : "text-slate-600 hover:text-slate-900"
-                                }`}
-                            >
-                                <span>⚙️</span> Experten
-                            </button>
-                        </div>
+            <div>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <span>⚡</span> {t("energy.title", "Energiebilanz & Analyse")}
+                </h1>
+                <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
+                    {viewMode === "simple" 
+                        ? "Die 3 wichtigsten Energiekennzahlen auf einen Blick – einfach, klar und verständlich."
+                        : t("energy.subtitle", "Detaillierte Mengen-, Verbrauchs- und Kostenanalyse nach Zeiträumen.")}
+                    {period === "custom" && customDates.label && (
+                        <span className="ml-2 font-semibold text-indigo-600 bg-indigo-50 dark:bg-indigo-950 px-2 py-0.5 rounded-md">
+                            📅 {customDates.label}
+                        </span>
+                    )}
+                </p>
+            </div>
+
+            {/* =========================================================
+                BUTTONS & CONTROLS ROW DIRECTLY UNDER HEADER
+            ========================================================= */}
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+                <div className="flex flex-wrap items-center gap-2.5">
+                    {/* View Mode Toggle: Einfach / Experten */}
+                    <div className="inline-flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs">
+                        <button
+                            type="button"
+                            onClick={() => handleSetViewMode("simple")}
+                            className={`px-3 py-1.5 text-xs font-bold rounded-lg transition cursor-pointer flex items-center gap-1.5 ${
+                                viewMode === "simple" 
+                                    ? "bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-400 shadow-xs" 
+                                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                            }`}
+                        >
+                            <span>🟢</span> Einfach
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => handleSetViewMode("expert")}
+                            className={`px-3 py-1.5 text-xs font-bold rounded-lg transition cursor-pointer flex items-center gap-1.5 ${
+                                viewMode === "expert" 
+                                    ? "bg-white dark:bg-slate-900 text-indigo-700 dark:text-indigo-400 shadow-xs" 
+                                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                            }`}
+                        >
+                            <span>⚙️</span> Experten
+                        </button>
                     </div>
-                    <p className="text-sm text-gray-500 mt-1">
-                        {viewMode === "simple" 
-                            ? "Die 3 wichtigsten Energiekennzahlen auf einen Blick – einfach, klar und verständlich."
-                            : t("energy.subtitle", "Detaillierte Mengen-, Verbrauchs- und Kostenanalyse nach Zeiträumen.")}
-                        {period === "custom" && customDates.label && (
-                            <span className="ml-2 font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">
-                                📅 {customDates.label}
-                            </span>
-                        )}
-                    </p>
-                </div>
 
-                <div className="flex flex-wrap items-center gap-2.5 self-start sm:self-auto">
                     {/* Period Selector Tabs */}
-                    <div className="inline-flex bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-2xs">
+                    <div className="inline-flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs">
                         {periods.map((p) => (
                             <button
                                 key={p.key}
                                 onClick={() => handlePeriodClick(p)}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 ${period === p.key
-                                    ? "bg-white text-indigo-600 shadow-xs font-bold"
-                                    : "text-gray-600 hover:text-gray-900"
-                                    }`}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 ${
+                                    period === p.key
+                                        ? "bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs font-bold"
+                                        : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                                }`}
                             >
                                 <span>{p.label}</span>
                                 {p.isProGated && !isPro && <ProBadge size="xs" />}
@@ -210,10 +209,11 @@ export default function EnergyDashboard() {
                         ))}
                         <button
                             onClick={handleCustomDatePickerClick}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 ${period === "custom"
-                                ? "bg-indigo-600 text-white shadow-xs font-bold"
-                                : "text-gray-600 hover:text-gray-900"
-                                }`}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 ${
+                                period === "custom"
+                                    ? "bg-indigo-600 text-white shadow-xs font-bold"
+                                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                            }`}
                             title={t("energy.custom_period_tooltip", "Frei wählbaren Zeitraum einstellen")}
                         >
                             <span>📅</span>
@@ -221,7 +221,9 @@ export default function EnergyDashboard() {
                             {!isPro && <ProBadge size="xs" />}
                         </button>
                     </div>
+                </div>
 
+                <div className="flex flex-wrap items-center gap-2.5">
                     {/* Multi-Format Export Dropdown (Task 5.15) */}
                     <ExportDropdown
                         period={period}

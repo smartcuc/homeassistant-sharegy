@@ -30,6 +30,7 @@ import AdminDashboard from "../pages/admin/AdminDashboard";
 import TrackingDashboard from "../pages/admin/TrackingDashboard";
 import TenantDashboard from "../pages/TenantDashboard";
 import CommunitiesManagementHub from "../pages/admin/CommunitiesManagementHub";
+import BackToTopButton from "../components/common/BackToTopButton";
 import { useRef, useEffect } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 
@@ -118,6 +119,9 @@ export default function AppShell() {
 
                     </Routes>
                 </div>
+
+                {/* 🔝 GLOBAL BACK TO TOP BUTTON */}
+                <BackToTopButton scrollContainerRef={contentRef} threshold={160} />
 
             </div>
         </div>
