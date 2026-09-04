@@ -499,4 +499,121 @@ class BWWPLoadManagementConfig(models.Model):
 
     def __str__(self):
         mode_str = self.get_control_mode_display()
-        return f"BWWP Lastmanagement: {self.device.name} ({mode_str}) - {self.get_current_sg_state_display()}"
+        return f"BWWP Lastmanagement: {self.device.name} ({mode_str}) - {self.get_current_sg_state_display()}"
+
+
+# ---------------------------------------------------------------------
+# Smart Load Management: LoadPriorityConfig & LoadConsumerConfig
+# ---------------------------------------------------------------------
+def default_priority_order():
+    return ["battery", "bwwp", "wallbox", "heatpump", "pool", "ac", "appliances", "heating_rod"]
+
+
+class LoadPriorityConfig(models.Model):
+    """
+    Zentrale Prioritäten-Kaskade (Merit-Order) und Master-Modus für alle
+    steuerbaren Lasten eines Haushalts.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    home = models.OneToOneField(
+        "devices.Home", on_delete=models.CASCADE, related_name="load_priority_config"
+    )
+
+    MASTER_MODE_CHOICES = [
+        ("autopilot", "Autopilot (KI, PV-Überschuss & Börsenpreise)"),
+        ("pv_only", "Nur PV-Überschuss (Maximale Autarkie)"),
+        ("price_saver", "Sparfuchs (Börsen-Tiefstpreise & Spotmarkt)"),
+        ("manual", "Manuell / Urlaub (Automatik pausiert)"),
+    ]
+    master_mode = models.CharField(
+        max_length=20, choices=MASTER_MODE_CHOICES, default="autopilot"
+    )
+
+    priority_order = models.JSONField(
+        default=default_priority_order,
+        help_text="Reihenfolge der Lasten für die Zuteilung von PV-Überschuss und Schaltfenstern"
+    )
+
+    min_pv_headroom_w = models.DecimalField(
+        max_digits=6, decimal_places=1, default=Decimal("200.0"),
+        help_text="Sicherheits-Reserve (W) beim Schalten von Zusatzlasten"
+    )
+
+    auto_dispatch_enabled = models.BooleanField(
+        default=True,
+        help_text="Aktiviert die globale Dispatch-Engine für alle Verbraucher"
+    )
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Prioritäten-Kaskade ({self.home.name}): {self.get_master_mode_display()}"
+
+
+class LoadConsumerConfig(models.Model):
+    """
+    Konfiguration für flexible Großverbraucher (Poolpumpen, Klimaanlagen,
+    White Goods / Haushaltsgeräte, Heizstäbe).
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    home = models.ForeignKey(
+        "devices.Home", on_delete=models.CASCADE, related_name="load_consumers"
+    )
+
+    device = models.ForeignKey(
+        "devices.Device", on_delete=models.CASCADE, related_name="load_consumer_configs"
+    )
+
+    CATEGORY_CHOICES = [
+        ("pool", "Pool- & Filterpumpe"),
+        ("ac", "Klimaanlage / Raumkühlung"),
+        ("appliances", "Haushaltsgerät (Waschmaschine/Spüler)"),
+        ("heating_rod", "Heizstab / Power-to-Heat"),
+        ("bwwp", "Brauchwasserwärmepumpe"),
+        ("wallbox", "Wallbox / E-Auto"),
+        ("battery", "Heimspeicher"),
+        ("other", "Sonstiger flexibler Verbraucher"),
+    ]
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default="pool")
+
+    name = models.CharField(max_length=100, blank=True)
+
+    rated_power_w = models.DecimalField(
+        max_digits=7, decimal_places=1, default=Decimal("1000.0"),
+        help_text="Typische Nennleistung in Watt"
+    )
+
+    MODE_CHOICES = [
+        ("hybrid", "Hybrid (Solar & Börsenpreis)"),
+        ("pv_surplus", "Nur Solarüberschuss"),
+        ("spot_price", "Nur Börsenpreise"),
+        ("manual", "Manuell"),
+    ]
+    mode = models.CharField(max_length=20, choices=MODE_CHOICES, default="hybrid")
+
+    min_daily_runtime_minutes = models.PositiveIntegerField(
+        default=0,
+        help_text="Garantierte tägliche Mindestlaufzeit (z. B. 300 Min für 5h Poolfilterung)"
+    )
+    daily_runtime_completed_minutes = models.PositiveIntegerField(default=0)
+    last_run_reset_date = models.DateField(default=timezone.now)
+
+    custom_settings = models.JSONField(
+        default=dict, blank=True,
+        help_text="Kategoriespezifische Parameter (z.B. pre_cool_delta_c, ready_to_start)"
+    )
+
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["category", "name"]
+        indexes = [
+            models.Index(fields=["home", "category"]),
+        ]
+
+    def __str__(self):
+        return f"{self.name or self.device.name} ({self.get_category_display()})"

@@ -44,6 +44,11 @@ from .views_bwwp import (
     bwwp_config_view,
     bwwp_switch_view,
 )
+from .views_dispatch_hub import (
+    load_management_hub_view,
+    load_management_priorities_view,
+    load_management_action_view,
+)
 
 urlpatterns += [
     path("dashboard/me/", dashboard_me),
@@ -52,10 +57,15 @@ urlpatterns += [
     path("battery-arbitrage/", battery_arbitrage_view),
     path("submeters/trends/", submeter_trends_view),
     path("optimizer/", energy_optimizer),
+    # 🎛️ Zentraler Smart Load Management & Dispatch Hub
+    path("load-management/hub/", load_management_hub_view),
+    path("load-management/hub/priorities/", load_management_priorities_view),
+    path("load-management/hub/action/", load_management_action_view),
     # ♨️ BWWP & Wärmepumpen SG-Ready Lastmanagement
     path("bwwp/", bwwp_status_view),
     path("bwwp/config/", bwwp_config_view),
     path("bwwp/switch/", bwwp_switch_view),
+
     path("battery-forecast/", battery_forecast_view),
     path("seed-demo/", seed_demo_data),
     path("chart/", chart_data),
