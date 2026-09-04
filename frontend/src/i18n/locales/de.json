@@ -416,6 +416,8 @@
     "subtitle": "Strukturiere deine Gebäude und ordne Geräte Räumen zu.",
     "add_floor": "+ Etage hinzufügen",
     "add_room": "+ Raum hinzufügen",
+    "floor": "Etage",
+    "rooms": "Räume",
     "floors_count": "{{count}} Etagen",
     "rooms_count": "{{count}} Räume"
   },

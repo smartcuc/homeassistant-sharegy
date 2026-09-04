@@ -383,11 +383,13 @@
   },
   "structure": {
     "title": "Piętra i pokoje",
-    "subtitle": "Struktura budynków i przypisywanie urządzeń do pomieszczeń.",
+    "subtitle": "Strukturyzuj swoje budynki i przypisuj urządzenia do pokoi.",
     "add_floor": "+ Dodaj piętro",
     "add_room": "+ Dodaj pokój",
-    "floors_count": "{{count}} piętra",
-    "rooms_count": "{{count}} pokoje"
+    "floor": "Piętro",
+    "rooms": "Pokoje",
+    "floors_count": "{{count}} Piętra",
+    "rooms_count": "{{count}} Pokoje"
   },
   "roles": {
     "producer": "Producent",

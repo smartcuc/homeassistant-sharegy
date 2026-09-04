@@ -413,9 +413,11 @@
   },
   "structure": {
     "title": "Floors & Rooms",
-    "subtitle": "Structure your buildings and assign devices to rooms.",
+    "subtitle": "Structure your building and assign devices to rooms.",
     "add_floor": "+ Add Floor",
     "add_room": "+ Add Room",
+    "floor": "Floor",
+    "rooms": "Rooms",
     "floors_count": "{{count}} Floors",
     "rooms_count": "{{count}} Rooms"
   },

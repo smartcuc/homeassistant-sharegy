@@ -22,9 +22,9 @@ Die gesamte Web-Plattform wurde im Live-Betrieb automatisiert per Playwright Chr
 * **Echtzeit-Status Kacheln**:
   * *Befund*: Die Watt-Zahlenwerte (z. B. `1 731 00 W`, `1 953 00 W`) überlappen mit den Labels (`Bedarf`, `Erzeugung`, `Bezug`, `Laden`).
   * *Empfehlung*: Kachelhöhe und Zeilenabstände (Typography) anpassen, sodass Werte sauber unterhalb der Überschrift stehen.
-* **Button-Duplikat**:
-  * *Befund*: Am unteren rechten Rand werden zwei identische Buttons `[Etagen & Räume]` (lila und blau) nebeneinander gerendert.
-  * *Empfehlung*: Überflüssigen Button entfernen.
+* **Toggle-Buttons (Etage & Räume)**:
+  * *Befund*: Am unteren rechten Rand wurden beide Filter-Toggles fälschlicherweise als `[Etagen & Räume]` betitelt (da beide denselben Lokalisierungs-Key nutzten).
+  * *Lösung/Korrektur*: Präzise Einzeltitel zugeordnet: Der linke Button heißt `[🏢 Etage]` und der rechte Button heißt `[🚪 Räume]`.
 * **Sidebar Badge-Overflow**:
   * *Befund*: Der `Störung`-Badge beim Menüpunkt *Installations- & Systemstatus* ragt über die Seitenleiste hinaus.
   * *Empfehlung*: Badge-Positionierung flexibel / gekürzt einbinden (`inline-flex`, kompakte Größe).
@@ -32,9 +32,9 @@ Die gesamte Web-Plattform wurde im Live-Betrieb automatisiert per Playwright Chr
 ---
 
 ### 2.2. Geräteübersicht (`/app/devices`)
-* **Filterleiste**:
-  * *Befund*: Rechts neben den Status-Filter-Pills erscheinen zwei Buttons `[Etagen & Räume]` direkt nebeneinander.
-  * *Empfehlung*: Duplikat bereinigen und Verlinkung zur Strukturseite als einheitliche Action vorhalten.
+* **Filterleiste (Toggles für Etage & Räume)**:
+  * *Befund*: Rechts neben den Status-Filter-Pills wurden beide Toggles ebenfalls mit `[Etagen & Räume]` angezeigt.
+  * *Lösung/Korrektur*: Differenzierte Beschriftung: Linker Button `[🏢 Etage]`, rechter Button `[🚪 Räume]`.
 * **Header-Actionbar**:
   * *Befund*: Die Buttons `[Papierkorb]`, `[Gerät entfernen]` und `[+ Gerät hinzufügen]` stehen unstrukturiert nebeneinander.
   * *Empfehlung*: Primäraktion `[+ Gerät hinzufügen]` hervorheben, Destruktiv- und Verwaltungsaktionen in ein Menü oder sekundäre Button-Gruppe bündeln.
@@ -84,8 +84,8 @@ Die gesamte Web-Plattform wurde im Live-Betrieb automatisiert per Playwright Chr
 
 | Paket | Dringlichkeit | Modul / Bereich | Konkrete Maßnahmen |
 |:---|:---:|:---|:---|
-| **P1** | 🔴 Hoch | **Dashboard & Omi-Check** | • Score-Berechnung auf 100% bei 4 aktiven Kernsäulen anpassen<br>• Textüberlappungen in den 4 Echtzeit-Kacheln beheben<br>• `(Code None)` in Fehlertexten unterdrücken<br>• Doppelten `[Etagen & Räume]`-Button am Dashboard-Ende entfernen<br>• Sidebar-Störungsbadge layouttechnisch anpassen |
-| **P2** | 🟡 Mittel | **Geräteübersicht** | • Doppelten Filter-Button `[Etagen & Räume]` entfernen<br>• Header-Buttons (`Papierkorb`, `Entfernen`) gruppieren |
+| **P1** | 🔴 Hoch | **Dashboard & Omi-Check** | • Score-Berechnung auf 100% bei 4 aktiven Kernsäulen anpassen<br>• Textüberlappungen in den 4 Echtzeit-Kacheln beheben<br>• `(Code None)` in Fehlertexten unterdrücken<br>• Button-Labels auf `[🏢 Etage]` und `[🚪 Räume]` korrigieren (erledigt)<br>• Sidebar-Störungsbadge layouttechnisch anpassen |
+| **P2** | 🟡 Mittel | **Geräteübersicht** | • Button-Labels auf `[🏢 Etage]` und `[🚪 Räume]` korrigieren (erledigt)<br>• Header-Buttons (`Papierkorb`, `Entfernen`) gruppieren |
 | **P3** | 🟡 Mittel | **Energiebilanz** | • `[Erfolge teilen]`-Button in Toolbar ausrichten<br>• Kachel-Paddings für Live-Fluss optimieren |
 | **P4** | 🟢 Normal | **Empty States & Rollen-Guards** | • Onboarding-CTAs für Community- & Tenant-Leerelemente<br>• Staff-API-Calls clientseitig an Rollen binden zur Vermeidung von 403-Logs |
 

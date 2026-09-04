@@ -1051,7 +1051,7 @@ export default function DevicesPage() {
                             : "bg-white hover:bg-gray-50 border-gray-200"}
                     `}
                 >
-                    🏢 {t("nav.floors", "Etagen")}
+                    🏢 {t("structure.floor", "Etage")}
                 </button>
 
                 <button
@@ -1074,7 +1074,7 @@ export default function DevicesPage() {
                             : "bg-white hover:bg-gray-50 border-gray-200"}
                     `}
                 >
-                    🚪 {t("structure.title", "Räume")}
+                    🚪 {t("structure.rooms", "Räume")}
                 </button>
 
             </div>
