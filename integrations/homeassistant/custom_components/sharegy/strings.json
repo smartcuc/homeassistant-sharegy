@@ -2,24 +2,25 @@
   "config": {
     "step": {
       "user": {
-        "title": "Sharegy Cloud Authentication",
-        "description": "Connect your Home Assistant instance with the Sharegy Cloud Platform.",
+        "title": "Sharegy Platform Connection",
+        "description": "Connect your Home Assistant with the Sharegy Cloud Platform. Copy and paste your personal WebSocket URL from the Sharegy Web-App (Settings → Interfaces).",
         "data": {
-          "host": "Sharegy Cloud Host (e.g. https://sharegy.de)",
-          "home_token": "Your Home Token (UUID)",
+          "ws_url": "WebSocket URL (Copy & Paste from Sharegy Interfaces)",
+          "home_token": "Home Token (optional if included in URL)",
           "protocol": "Transmission Protocol"
         }
       },
       "entities": {
-        "title": "Assign Sensors & Entities",
-        "description": "Select which Home Assistant sensors should be streamed to Sharegy for live energy balance.",
+        "title": "Assign Sensors & Load Control",
+        "description": "Select which Home Assistant sensors should be streamed to Sharegy and choose controllable switches/relays.",
         "data": {
-          "grid_power_sensor": "Grid Import / Export (Watts)",
-          "pv_power_sensor": "Solar Generation / PV (Watts)",
-          "battery_power_sensor": "Battery Charge / Discharge (Watts)",
+          "grid_power_sensor": "Grid Power (W / kW)",
+          "pv_power_sensor": "Solar Generation / PV (W / kW)",
+          "battery_power_sensor": "Battery Power (W / kW)",
           "battery_soc_sensor": "Battery State of Charge (SoC %)",
-          "load_power_sensor": "Total House Demand (Watts)",
+          "load_power_sensor": "Total House Demand (W / kW)",
           "submeter_sensors": "Submeters / Smart Plugs (Multi-Select)",
+          "control_switches": "Bidirectional Control / Controllable Relays (SG-Ready)",
           "sync_interval": "Sync Interval (Seconds)"
         }
       }
@@ -36,14 +37,15 @@
     "step": {
       "init": {
         "title": "Edit Sharegy Sensors",
-        "description": "Update your sensor and submeter mappings live.",
+        "description": "Update your sensor and controllable device mappings live.",
         "data": {
-          "grid_power_sensor": "Grid Import / Export (Watts)",
-          "pv_power_sensor": "Solar Generation / PV (Watts)",
-          "battery_power_sensor": "Battery Charge / Discharge (Watts)",
+          "grid_power_sensor": "Grid Power (W / kW)",
+          "pv_power_sensor": "Solar Generation / PV (W / kW)",
+          "battery_power_sensor": "Battery Power (W / kW)",
           "battery_soc_sensor": "Battery State of Charge (SoC %)",
-          "load_power_sensor": "Total House Demand (Watts)",
+          "load_power_sensor": "Total House Demand (W / kW)",
           "submeter_sensors": "Submeters / Smart Plugs",
+          "control_switches": "Bidirectional Control / Controllable Relays",
           "sync_interval": "Sync Interval (Seconds)"
         }
       }
