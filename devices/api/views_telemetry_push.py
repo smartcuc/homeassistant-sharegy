@@ -2,21 +2,24 @@
 # devices/api/views_telemetry_push.py
 #######################################
 
-from datetime import datetime
+import logging
 from django.utils import timezone
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from devices.models import Device, DeviceLatestMetric, DeviceMetric1h, DeviceConfig, DeviceRole, MetricDefinition
+from devices.tasks import process_telemetry_push_async
+
+logger = logging.getLogger(__name__)
 
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def telemetry_push(request):
     """
-    Sicherer Batch-Telemetrie-Einspeisepunkt für Home Assistant und externe Smart-Home-Bridges.
+    Hochperformanter Telemetrie-Einspeisepunkt (asynchron via Celery / Redis).
     Akzeptiert einzelne oder gebündelte Messwerte (z. B. Shelly 3EM, Easee, Wärmepumpe).
+    Entkoppelt den HTTP-Endpunkt vollständig von DB-I/O für maximale Durchsatzraten.
     """
     data = request.data or {}
     home = request.user.homes.first() if hasattr(request.user, "homes") else None
@@ -35,111 +38,27 @@ def telemetry_push(request):
         return Response({"status": "error", "message": "Keine Gerätemesswerte übergeben."}, status=400)
 
     now = timezone.now()
-    saved_count = 0
-    updated_devices = []
+    now_iso = now.isoformat()
+    force_sync = str(request.query_params.get("sync", "")).lower() in ("true", "1", "yes")
 
-    # 1. Vorhandene Geräte des Haushalts in einem einzigen Query laden
-    existing_devs = {
-        dev.identifier: dev
-        for dev in Device.objects.filter(home=home).select_related("config")
-    }
-
-    latest_metrics_to_upsert = []
-    hourly_metrics_to_upsert = []
-    bucket_dt = now.replace(minute=0, second=0, microsecond=0)
-
-    for item in device_items:
-        identifier = str(item.get("identifier") or item.get("id") or "").strip()
-        if not identifier:
-            continue
-
-        name = item.get("name") or identifier
-        power_w = item.get("power_w") or item.get("power") or item.get("value")
-        energy_kwh = item.get("energy_kwh") or item.get("energy")
-        role_key = item.get("role") or "consumer"
-
-        # 1. Device aus Cache oder neu anlegen
-        dev = existing_devs.get(identifier)
-        if not dev:
-            dev, _ = Device.objects.get_or_create(
-                home=home,
-                identifier=identifier,
-                defaults={
-                    "configured": True,
-                    "active": True,
-                },
+    # 1. Asynchroner Pfad (Standard für maximale Geschwindigkeit & Skalierbarkeit)
+    if not force_sync:
+        try:
+            task_res = process_telemetry_push_async.apply_async(
+                args=[home.id, device_items, now_iso],
+                queue="realtime",
             )
-            existing_devs[identifier] = dev
+            return Response({
+                "status": "queued",
+                "task_id": task_res.id,
+                "devices_count": len(device_items),
+                "timestamp": now_iso,
+            })
+        except Exception as e:
+            logger.warning("Celery async dispatch failed for telemetry push, falling back to sync: %s", e)
 
-        # 2. Config falls nötig anlegen
-        if not getattr(dev, "config", None):
-            role_obj = DeviceRole.objects.filter(key=role_key).first() or DeviceRole.objects.filter(key="consumer").first()
-            DeviceConfig.objects.update_or_create(
-                device=dev,
-                defaults={
-                    "home": home,
-                    "name": name,
-                    "role": role_obj,
-                },
-            )
+    # 2. Synchroner Pfad (Fallback oder expliziter Sync-Modus ?sync=true)
+    result = process_telemetry_push_async(home.id, device_items, now_iso)
+    return Response(result)
 
-        # 3. Latest Metric (Live-Leistung)
-        if power_w is not None:
-            try:
-                val_float = float(power_w)
-                latest_metrics_to_upsert.append(
-                    DeviceLatestMetric(
-                        device=dev,
-                        metric_key="power",
-                        value=val_float,
-                        unit="W",
-                        timestamp=now,
-                    )
-                )
-                saved_count += 1
-            except (ValueError, TypeError):
-                pass
-
-        # 4. Stunden-Aggregat
-        if power_w is not None or energy_kwh is not None:
-            avg_w = float(power_w) if power_w is not None else 0.0
-            energy_wh = float(energy_kwh) * 1000.0 if energy_kwh is not None else (avg_w * 1.0)
-            hourly_metrics_to_upsert.append(
-                DeviceMetric1h(
-                    device=dev,
-                    metric_key="power",
-                    bucket=bucket_dt,
-                    avg=avg_w,
-                    min=avg_w,
-                    max=avg_w,
-                    count=1,
-                    energy_wh=energy_wh,
-                )
-            )
-
-        updated_devices.append(identifier)
-
-    # High-Performance Batch Upserts
-    if latest_metrics_to_upsert:
-        DeviceLatestMetric.objects.bulk_create(
-            latest_metrics_to_upsert,
-            update_conflicts=True,
-            unique_fields=["device", "metric_key"],
-            update_fields=["value", "unit", "timestamp"],
-        )
-
-    if hourly_metrics_to_upsert:
-        DeviceMetric1h.objects.bulk_create(
-            hourly_metrics_to_upsert,
-            update_conflicts=True,
-            unique_fields=["device", "metric_key", "bucket"],
-            update_fields=["avg", "min", "max", "energy_wh"],
-        )
-
-    return Response({
-        "status": "success",
-        "saved_metrics": saved_count,
-        "devices_updated": updated_devices,
-        "timestamp": now.isoformat(),
-    })
 

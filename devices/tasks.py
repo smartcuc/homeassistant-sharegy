@@ -261,3 +261,145 @@ def poll_cloud_integrations_task():
     return {"polled": count, "errors": errors, "total": active_integrations.count()}
 
 
+# ============================================================
+# ⚡ ASYNC HIGH-THROUGHPUT TELEMETRY INGEST TASK
+# ============================================================
+
+@shared_task(name="devices.tasks.process_telemetry_push_async", bind=True, max_retries=3)
+def process_telemetry_push_async(self, home_id, device_items, timestamp_str=None):
+    """
+    Asynchroner Celery-Worker für hochperformanten Batch-Ingest von Gerätemesswerten.
+    Entkoppelt den HTTP-Endpunkt vollständig von DB-Schreibzyklen.
+    """
+    from django.utils.dateparse import parse_datetime
+    from .models import Home, Device, DeviceConfig, DeviceRole, DeviceLatestMetric, DeviceMetric1h
+
+    try:
+        home = Home.objects.get(id=home_id)
+    except Home.DoesNotExist:
+        logger.warning("telemetry_push_async: Home %s does not exist.", home_id)
+        return {"status": "error", "message": "Home not found"}
+
+    now = parse_datetime(timestamp_str) if timestamp_str else timezone.now()
+    if not now:
+        now = timezone.now()
+    elif timezone.is_naive(now):
+        now = timezone.make_aware(now, timezone.utc)
+
+    # 1. Vorhandene Geräte des Haushalts in einem einzigen Query laden
+    existing_devs = {
+        dev.identifier: dev
+        for dev in Device.objects.filter(home=home).select_related("config")
+    }
+
+    latest_metrics_to_upsert = []
+    hourly_metrics_to_upsert = []
+    bucket_dt = now.replace(minute=0, second=0, microsecond=0)
+    saved_count = 0
+    updated_devices = []
+
+    for item in device_items:
+        identifier = str(item.get("identifier") or item.get("id") or "").strip()
+        if not identifier:
+            continue
+
+        name = item.get("name") or identifier
+        power_w = item.get("power_w") or item.get("power") or item.get("value")
+        energy_kwh = item.get("energy_kwh") or item.get("energy")
+        role_key = item.get("role") or "consumer"
+
+        # 1. Device aus Cache oder anlegen
+        dev = existing_devs.get(identifier)
+        if not dev:
+            dev, _ = Device.objects.get_or_create(
+                home=home,
+                identifier=identifier,
+                defaults={
+                    "configured": True,
+                    "active": True,
+                },
+            )
+            existing_devs[identifier] = dev
+
+        # 2. Config falls nötig anlegen
+        if not getattr(dev, "config", None):
+            role_obj = DeviceRole.objects.filter(key=role_key).first() or DeviceRole.objects.filter(key="consumer").first()
+            DeviceConfig.objects.update_or_create(
+                device=dev,
+                defaults={
+                    "home": home,
+                    "name": name,
+                    "role": role_obj,
+                },
+            )
+
+        # 3. Latest Metric (Live-Leistung)
+        if power_w is not None:
+            try:
+                val_float = float(power_w)
+                latest_metrics_to_upsert.append(
+                    DeviceLatestMetric(
+                        device=dev,
+                        metric_key="power",
+                        value=val_float,
+                        unit="W",
+                        timestamp=now,
+                    )
+                )
+                saved_count += 1
+            except (ValueError, TypeError):
+                pass
+
+        # 4. Stunden-Aggregat
+        if power_w is not None or energy_kwh is not None:
+            avg_w = float(power_w) if power_w is not None else 0.0
+            energy_wh = float(energy_kwh) * 1000.0 if energy_kwh is not None else (avg_w * 1.0)
+            hourly_metrics_to_upsert.append(
+                DeviceMetric1h(
+                    device=dev,
+                    metric_key="power",
+                    bucket=bucket_dt,
+                    avg=avg_w,
+                    min=avg_w,
+                    max=avg_w,
+                    count=1,
+                    energy_wh=energy_wh,
+                )
+            )
+
+        updated_devices.append(identifier)
+
+    # High-Performance Batch Upserts
+    if latest_metrics_to_upsert:
+        DeviceLatestMetric.objects.bulk_create(
+            latest_metrics_to_upsert,
+            update_conflicts=True,
+            unique_fields=["device", "metric_key"],
+            update_fields=["value", "unit", "timestamp"],
+        )
+
+    if hourly_metrics_to_upsert:
+        DeviceMetric1h.objects.bulk_create(
+            hourly_metrics_to_upsert,
+            update_conflicts=True,
+            unique_fields=["device", "metric_key", "bucket"],
+            update_fields=["avg", "min", "max", "energy_wh"],
+        )
+
+    logger.debug(
+        "telemetry_push_async.success: home=%s devices=%d metrics=%d",
+        home_id,
+        len(updated_devices),
+        saved_count,
+    )
+
+    return {
+        "status": "success",
+        "saved_metrics": saved_count,
+        "devices_updated": updated_devices,
+        "timestamp": now.isoformat(),
+    }
+
+
+
+

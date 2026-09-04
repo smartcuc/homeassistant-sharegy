@@ -345,6 +345,7 @@ CELERY_TASK_ROUTES = {
     "accounts.tasks.*": {"queue": "fiscal"},
 
     # ⚡ 2. EMS REALTIME & CONTROL (Prio 2 - Schnelle Reaktionszeit)
+    "devices.tasks.process_telemetry_push_async": {"queue": "realtime"},
     "integrations.tasks.flush_mqtt_buffer": {"queue": "realtime"},
     "integrations.tasks.process_inbound_webhook_event": {"queue": "realtime"},
     "energy.tasks.*": {"queue": "realtime"},
