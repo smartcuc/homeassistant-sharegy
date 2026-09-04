@@ -100,16 +100,11 @@ def process_incoming_telemetry(token, payload_str, user):
             logger.warning("[WS-Ingest] Kein Haushalt in der Datenbank gefunden.")
             return None
 
-        # 2. Device Identifier ermitteln
-        raw_src = (
-            data.get("src")
-            or data.get("device_id")
-            or data.get("identifier")
-            or data.get("id")
-            or data.get("mac")
-            or "shelly_device"
-        )
-        identifier = str(raw_src).strip()
+        # 2. Sensor-Adapter Ingestion Pipeline (Shelly, Waveshare, Tasmota, Generic)
+        from devices.adapters.sensors import SensorAdapterRegistry, process_canonical_sensor_reading
+
+        reading = SensorAdapterRegistry.detect_and_parse(data)
+        identifier = str(reading.device_identifier or data.get("src") or data.get("device_id") or data.get("id") or "sensor_device").strip()
 
         # 3. Device finden oder anlegen (und falls zuvor im falschen Test-Home angelegt, automatisch umhängen!)
         device = Device.objects.filter(identifier=identifier).first()
@@ -127,136 +122,9 @@ def process_incoming_telemetry(token, payload_str, user):
             )
             logger.info("[WS-Ingest] 🚀 Neues Gerät per WebSocket automatisch entdeckt: %s (Haushalt: %s)", identifier, home.name)
 
-
-        # 4. Metriken extrahieren (Unterstützt params, result oder flaches JSON)
-        metrics = {}
-        meta = {"from": "websocket", "src": identifier}
-
-        container = data.get("params") or data.get("result") or data
-
-        if not isinstance(container, dict):
-            return None
-
-        total_power = 0.0
-        has_power = False
-        total_energy = 0.0
-        has_energy = False
-
-        # Alle Unterstrukturen durchsuchen (em:0, em:1, switch:0, pm1:0, etc.)
-        for key, val in container.items():
-            if isinstance(val, dict):
-                # A) 3-Phasen Messung (Shelly 3EM / Pro 3EM)
-                if "total_act_power" in val and val["total_act_power"] is not None:
-                    total_power += float(val["total_act_power"])
-                    has_power = True
-                elif "a_act_power" in val:
-                    p = (
-                        float(val.get("a_act_power") or 0.0)
-                        + float(val.get("b_act_power") or 0.0)
-                        + float(val.get("c_act_power") or 0.0)
-                    )
-                    total_power += p
-                    has_power = True
-
-                # B) Einzelrelais / Smart Plugs (Shelly Plus 1PM, Shelly 1PM Gen3, PlugS)
-                if "apower" in val and val["apower"] is not None:
-                    total_power += float(val["apower"])
-                    has_power = True
-                if "power" in val and val["power"] is not None:
-                    total_power += float(val["power"])
-                    has_power = True
-
-                # Spannung & Strom
-                if "voltage" in val and val["voltage"] is not None:
-                    metrics["voltage"] = float(val["voltage"])
-                elif "a_voltage" in val and val["a_voltage"] is not None:
-                    metrics["voltage"] = float(val["a_voltage"])
-
-                if "current" in val and val["current"] is not None:
-                    metrics["current"] = float(val["current"])
-                elif "a_current" in val and val["a_current"] is not None:
-                    metrics["current"] = (
-                        float(val.get("a_current") or 0.0)
-                        + float(val.get("b_current") or 0.0)
-                        + float(val.get("c_current") or 0.0)
-                    )
-
-                # Energie
-                if "total_act_energy" in val and val["total_act_energy"] is not None:
-                    total_energy += float(val["total_act_energy"]) / 1000.0
-                    has_energy = True
-                elif "aenergy" in val and isinstance(val["aenergy"], dict):
-                    if "total" in val["aenergy"] and val["aenergy"]["total"] is not None:
-                        total_energy += float(val["aenergy"]["total"]) / 1000.0
-                        has_energy = True
-
-            elif isinstance(val, (int, float)):
-                if key in ["power", "apower", "power_w", "val", "value"]:
-                    total_power += float(val)
-                    has_power = True
-                elif key in ["energy", "energy_kwh", "total_energy"]:
-                    total_energy += float(val)
-                    has_energy = True
-                elif key in ["voltage", "current", "temperature", "temp", "soc", "frequency", "humidity"]:
-                    metrics[key] = float(val)
-
-        # Spezifische Metrik-Direktzuordnung (ioBroker, Home Assistant, Tasmota, Custom Frames)
-        explicit_metric = data.get("metric") or container.get("metric")
-        if explicit_metric and ("val" in container or "value" in container or "v" in container):
-            raw_v = container.get("val") if "val" in container else (container.get("value") if "value" in container else container.get("v"))
-            try:
-                metrics[str(explicit_metric).strip()] = float(raw_v)
-                has_power = False # Überschreibe generisches Power falls spezifische Metrik vorliegt
-            except (ValueError, TypeError):
-                pass
-
-        if has_power and "power" not in metrics:
-            metrics["power"] = round(total_power, 2)
-        if has_energy and "energy" not in metrics:
-            metrics["energy"] = round(total_energy, 4)
-
-        unit_map = {}
-        raw_u = data.get("unit") or container.get("unit")
-        if raw_u and explicit_metric:
-            unit_map[explicit_metric] = str(raw_u).strip()
-
-        # 5. Zeitstempel & Relais-Zustand (output)
-        ts = timezone.now()
-        raw_ts = container.get("ts") or data.get("ts")
-        if raw_ts:
-            try:
-                ts = timezone.datetime.fromtimestamp(float(raw_ts), tz=timezone.utc)
-            except Exception:
-                ts = timezone.now()
-
-        # Prüfe auf Relais-Schaltzustand (switch:0, switch:1, relay:0, flaches state/relay_state oder ioBroker Rückkanal)
-        relay_state = None
-        if "relay_state" in container and container["relay_state"] is not None:
-            relay_state = bool(container["relay_state"])
-        elif "relay_state" in data and data["relay_state"] is not None:
-            relay_state = bool(data["relay_state"])
-        elif "state" in container and isinstance(container["state"], bool):
-            relay_state = container["state"]
-        elif "state" in data and isinstance(data["state"], bool):
-            relay_state = data["state"]
-        elif data.get("metric") in ["relay_state", "switch", "state"]:
-            raw_v = container.get("val") if "val" in container else data.get("val")
-            if raw_v is not None:
-                relay_state = (raw_v is True or raw_v == 1 or str(raw_v).lower() in ("true", "1", "on"))
-
-        if relay_state is None:
-            for k, v in container.items():
-                if isinstance(v, dict) and ("output" in v or "state" in v or "ison" in v):
-                    out_val = v.get("output") if "output" in v else (v.get("state") if "state" in v else v.get("ison"))
-                    if isinstance(out_val, bool):
-                        relay_state = out_val
-                        break
-                    elif isinstance(out_val, str) and out_val.lower() in ("on", "true", "1"):
-                        relay_state = True
-                        break
-                    elif isinstance(out_val, str) and out_val.lower() in ("off", "false", "0"):
-                        relay_state = False
-                        break
+        # 4. Standard-Ingest über Canonical Sensor Pipeline
+        metrics = process_canonical_sensor_reading(device=device, reading=reading, source="websocket")
+        relay_state = reading.relay_state
 
         if relay_state is not None:
             cache.set(f"device_relay_state_{device.id}", relay_state, timeout=86400)
@@ -283,17 +151,18 @@ def process_incoming_telemetry(token, payload_str, user):
             except Exception:
                 pass
 
-        # 6. Ingest & Live-Broadcast an Dashboards
+        # 5. Ingest & Live-Broadcast an Dashboards
         if metrics or relay_state is not None:
-            if metrics:
-                ingest_metric_payload(
-                    device=device,
-                    metrics=metrics,
-                    unit_map=unit_map,
-                    timestamp=ts,
-                    source="websocket",
-                    meta=meta,
-                )
+            meta = {"from": "websocket", "src": identifier}
+            unit_map = {"power": "W", "energy": "kWh", "voltage": "V", "current": "A", "battery_soc": "%"}
+            ingest_metric_payload(
+                device=device,
+                metrics=metrics,
+                unit_map=unit_map,
+                timestamp=reading.timestamp,
+                source="websocket",
+                meta=meta,
+            )
             logger.info(
                 "[WS-Ingest] ✅ %s -> %s W (Relais: %s, Home: %s)",
                 identifier,

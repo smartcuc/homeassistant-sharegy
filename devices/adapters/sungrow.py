@@ -227,6 +227,50 @@ class SungrowAdapter(BaseInverterAdapter):
 
         if is_oauth and token:
             # OpenAPI Modus
+            if credentials.get("auth_code") and not token:
+                try:
+                    redir_url = credentials.get("redirect_uri") or getattr(settings, "SUNGROW_REDIRECT_URI", "")
+                    t_resp = requests.post(
+                        f"{base_url.rstrip('/')}/openapi/oauth/token",
+                        json={
+                            "appkey": appkey,
+                            "code": credentials["auth_code"],
+                            "grant_type": "authorization_code",
+                            "redirect_uri": redir_url,
+                        },
+                        headers={"x-access-key": app_secret, "Content-Type": "application/json"},
+                        timeout=10,
+                    )
+                    if t_resp.status_code == 200 and t_resp.json().get("access_token"):
+                        token = t_resp.json()["access_token"]
+                        credentials["token"] = token
+                        if t_resp.json().get("refresh_token"):
+                            credentials["refresh_token"] = t_resp.json()["refresh_token"]
+                except Exception as ex_err:
+                    logger.warning("Auto token exchange failed: %s", ex_err)
+
+            if not ps_id or ps_id in ("default_ps", "12345", ""):
+                try:
+                    list_resp = requests.post(
+                        f"{base_url.rstrip('/')}/openapi/platform/queryPowerStationList",
+                        json={"appkey": appkey, "page": 1, "size": 20, "lang": "_de_DE"},
+                        headers={
+                            "x-access-key": app_secret,
+                            "Authorization": f"Bearer {token}",
+                            "Content-Type": "application/json",
+                        },
+                        timeout=12,
+                    )
+                    if list_resp.status_code == 200:
+                        list_data = list_resp.json().get("result_data", {})
+                        stations = list_data.get("pageList", []) if isinstance(list_data, dict) else []
+                        if stations:
+                            ps_id = str(stations[0].get("ps_id") or stations[0].get("id"))
+                            credentials["ps_id"] = ps_id
+                            credentials["ps_name"] = stations[0].get("ps_name", "Sungrow PV-Anlage")
+                except Exception as e:
+                    logger.warning("Auto-fetch ps_id via OpenAPI failed: %s", e)
+
             raw_data: Dict[str, Any] = {"result_code": "1", "result_data": {}}
 
             try:
@@ -247,6 +291,9 @@ class SungrowAdapter(BaseInverterAdapter):
                 )
                 if rt_resp.status_code == 200:
                     rt_json = rt_resp.json()
+                    point_dict = rt_json.get("result_data", {}).get("point_dict", {})
+                    if point_dict:
+                        logger.info("[SUNGROW_OPENAPI] Discovered Point Dictionary: %s", point_dict)
                     pts = rt_json.get("result_data", {}).get("device_point_list", [])
                     if pts:
                         p_data = {}
@@ -256,6 +303,12 @@ class SungrowAdapter(BaseInverterAdapter):
                                     pid = str(item["point_id"])
                                     p_data[pid] = item["point_value"]
                                     p_data[f"p{pid}"] = item["point_value"]
+                                else:
+                                    for k, v in item.items():
+                                        ks = str(k)
+                                        p_data[ks] = v
+                                        if not ks.startswith("p"):
+                                            p_data[f"p{ks}"] = v
 
                         def _get_pt(*keys):
                             for k in keys:
@@ -273,17 +326,45 @@ class SungrowAdapter(BaseInverterAdapter):
                         bat_pwr = _get_pt("83104", "83238", "83111", "83112", "83326") or 0.0
                         soc_raw = _get_pt("83129", "83252", "83334")
 
+                        soc_val = None
+                        if soc_raw is not None:
+                            if 0.0 <= soc_raw <= 1.0:
+                                soc_val = round(soc_raw * 100.0, 1)
+                            else:
+                                soc_val = round(soc_raw, 1)
+
+                        # Batterie Lade-/Entladerichtung standardisieren (Sharegy-Konvention: Negativ = Laden, Positiv = Entladen)
+                        if soc_val is not None and soc_val >= 98.0:
+                            if bat_pwr < 0:
+                                bat_pwr = 0.0
+                        elif pv > (load + 30) and (soc_val is None or soc_val < 98.0) and abs(bat_pwr) > 10:
+                            bat_pwr = -abs(bat_pwr)
+                        elif pv < 20 and soc_val is not None and soc_val > 5.0 and load > 20:
+                            if abs(bat_pwr) < 0.1 and abs(grid) < 60:
+                                bat_pwr = load
+                            else:
+                                bat_pwr = abs(bat_pwr)
+
+                        # Netzeinspeisung / Grid Plausibilisierung
+                        if bat_pwr < 0:
+                            bat_charge = abs(bat_pwr)
+                            true_excess = max(0.0, pv - load - bat_charge)
+                            if grid < 0 and abs(abs(grid) - bat_charge) < 200:
+                                grid = -true_excess
+                            elif grid < 0 and abs(grid) > (true_excess + 100):
+                                grid = -true_excess
+
                         raw_data["_direct_metrics"] = {
                             "pv_power_w": max(0.0, pv),
                             "load_power_w": max(0.0, load),
                             "grid_power_w": grid,
                             "battery_power_w": bat_pwr,
-                            "battery_soc": soc_raw,
+                            "battery_soc": soc_val,
                         }
             except Exception as e:
                 logger.warning("getPowerStationRealTimeData query failed: %s", e)
 
-            # Details abfragen
+            # Details abfragen als Ergänzung
             try:
                 resp = requests.post(
                     f"{base_url.rstrip('/')}/openapi/platform/getPowerStationDetail",
@@ -297,6 +378,20 @@ class SungrowAdapter(BaseInverterAdapter):
                 )
                 if resp.status_code == 200:
                     det_json = resp.json()
+                    if det_json.get("result_code") in ("2", "000") and credentials.get("refresh_token"):
+                        try:
+                            ref_resp = requests.post(
+                                f"{base_url.rstrip('/')}/openapi/apiManage/refreshToken",
+                                json={"appkey": appkey, "refresh_token": credentials["refresh_token"]},
+                                headers={"x-access-key": app_secret, "Content-Type": "application/json"},
+                                timeout=10,
+                            )
+                            if ref_resp.status_code == 200 and ref_resp.json().get("access_token"):
+                                token = ref_resp.json()["access_token"]
+                                credentials["token"] = token
+                        except Exception as ref_err:
+                            logger.warning("Token refresh failed: %s", ref_err)
+
                     if det_json.get("result_data", {}).get("data_list"):
                         d_list = det_json["result_data"]["data_list"]
                         if isinstance(d_list, list) and d_list:
