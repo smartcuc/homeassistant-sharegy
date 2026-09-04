@@ -90,3 +90,26 @@ def run_smart_charging_dispatch_task():
     from energy.services.services_smart_charging import run_all_wallboxes_smart_charging_cycle
     return run_all_wallboxes_smart_charging_cycle()
 
+
+@shared_task
+def run_bwwp_load_management_dispatch_task():
+    """
+    Zyklischer Celery-Task:
+    Evaluierungs- und Schaltzyklus für alle aktiven Brauchwasserwärmepumpen & Wärmepumpen
+    (SG-Ready PV-Überschuss, Tiefstpreis & Verdichterschutz).
+    """
+    from energy.models import BWWPLoadManagementConfig
+    from energy.services.bwwp_manager import evaluate_bwwp_load_management
+
+    results = []
+    configs = BWWPLoadManagementConfig.objects.filter(active=True).select_related("home", "device")
+    for cfg in configs:
+        try:
+            res = evaluate_bwwp_load_management(cfg.home, config=cfg, force=False)
+            results.append({"device": cfg.device.identifier, "status": res.get("status"), "relay": res.get("relay_state")})
+        except Exception as e:
+            logger.exception("[BWWP-Task] Fehler bei Evaluierung für %s: %s", cfg.device.identifier, e)
+
+    return {"evaluated": len(results), "details": results}
+
+

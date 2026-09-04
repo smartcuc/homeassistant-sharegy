@@ -39,6 +39,12 @@ from .views_ocpp import (
     WallboxSessionsView,
 )
 
+from .views_bwwp import (
+    bwwp_status_view,
+    bwwp_config_view,
+    bwwp_switch_view,
+)
+
 urlpatterns += [
     path("dashboard/me/", dashboard_me),
     path("balance/", energy_balance),
@@ -46,6 +52,10 @@ urlpatterns += [
     path("battery-arbitrage/", battery_arbitrage_view),
     path("submeters/trends/", submeter_trends_view),
     path("optimizer/", energy_optimizer),
+    # ♨️ BWWP & Wärmepumpen SG-Ready Lastmanagement
+    path("bwwp/", bwwp_status_view),
+    path("bwwp/config/", bwwp_config_view),
+    path("bwwp/switch/", bwwp_switch_view),
     path("battery-forecast/", battery_forecast_view),
     path("seed-demo/", seed_demo_data),
     path("chart/", chart_data),
@@ -66,3 +76,4 @@ urlpatterns += [
     path("wallboxes/<uuid:pk>/<str:action>/", WallboxRemoteActionView.as_view()),
     path("wallboxes/<uuid:pk>/sessions/", WallboxSessionsView.as_view()),
 ]
+

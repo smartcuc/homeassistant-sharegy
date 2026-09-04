@@ -9,7 +9,9 @@ import { apiFetch } from "../../api/client";
 import EnergyOptimizerCard from "./components/EnergyOptimizerCard";
 import BatteryForecastCard from "./components/BatteryForecastCard";
 import BatteryArbitrageCard from "./components/BatteryArbitrageCard";
+import BWWPLoadManagementCard from "./components/BWWPLoadManagementCard";
 import WallboxCard from "./components/WallboxCard";
+
 import AddWallboxModal from "../devices/components/AddWallboxModal";
 import CommunityShareModal from "../community/components/CommunityShareModal";
 import CommunityInviteCard from "../community/components/CommunityInviteCard";
@@ -363,9 +365,15 @@ export default function EnergyDashboard() {
             <EnergyOptimizerCard />
 
             {/* =========================================================
+                BWWP & WÄRMEPUMPEN LASTMANAGEMENT (SG-READY)
+            ========================================================= */}
+            <BWWPLoadManagementCard />
+
+            {/* =========================================================
                 BATTERIE- & SOC-PROGNOSE (TASK 5.3)
             ========================================================= */}
             <BatteryForecastCard />
+
 
             {/* =========================================================
                 VIRTUELLE ZÄHLER & SUB-METERING

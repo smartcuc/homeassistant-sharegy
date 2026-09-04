@@ -394,4 +394,109 @@ class SteuVEDeviceConfig(models.Model):
 
     def __str__(self):
         dim_state = f"⚠️ Gedimmt auf {self.current_power_limit_kw} kW" if self.is_currently_dimmed else "🟢 Normalbetrieb"
-        return f"SteuVE: {self.device.name} ({self.get_steuve_type_display()}) - {dim_state}"
+        return f"SteuVE: {self.device.name} ({self.get_steuve_type_display()}) - {dim_state}"
+
+
+# ---------------------------------------------------------------------
+# SG-Ready / Lastmanagement: BWWPLoadManagementConfig
+# ---------------------------------------------------------------------
+class BWWPLoadManagementConfig(models.Model):
+    """
+    Konfiguration für intelligentes Lastmanagement von Brauchwasserwärmepumpen (BWWP)
+    und Wärmepumpen (SG-Ready State 2 / State 3, PV-Überschuss, dynamische Börsentarife,
+    Temperatur-Grenzwerte und Verdichterschutz).
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    home = models.ForeignKey(
+        "devices.Home", on_delete=models.CASCADE, related_name="bwwp_configs"
+    )
+
+    device = models.OneToOneField(
+        "devices.Device", on_delete=models.CASCADE, related_name="bwwp_config"
+    )
+
+    active = models.BooleanField(
+        default=True,
+        help_text="Aktiviert das automatische BWWP-Lastmanagement"
+    )
+
+    MODE_CHOICES = [
+        ("hybrid", "Hybrid (PV-Überschuss & Günstige Börsenstunden)"),
+        ("pv_surplus", "Nur PV-Überschuss"),
+        ("spot_price", "Nur Börsenstrompreis (Spotmarkt)"),
+        ("manual", "Manuell (Keine Automatik)"),
+    ]
+    control_mode = models.CharField(
+        max_length=20, choices=MODE_CHOICES, default="hybrid"
+    )
+
+    # Temperaturschwellen (°C)
+    min_temp_c = models.DecimalField(
+        max_digits=4, decimal_places=1, default=Decimal("45.0"),
+        help_text="Minimale Wohlfühltemperatur (°C) – darunter wird unabhängig vom Preis geheizt"
+    )
+    target_temp_c = models.DecimalField(
+        max_digits=4, decimal_places=1, default=Decimal("52.0"),
+        help_text="Standard-Solltemperatur (°C)"
+    )
+    boost_temp_c = models.DecimalField(
+        max_digits=4, decimal_places=1, default=Decimal("60.0"),
+        help_text="Erhöhte Solltemperatur für SG-Ready Boost (°C)"
+    )
+    max_safety_temp_c = models.DecimalField(
+        max_digits=4, decimal_places=1, default=Decimal("65.0"),
+        help_text="Absoluter Überhitzungsschutz (°C) – schaltet Relais sofort ab"
+    )
+
+    # PV & Preis Schwellenwerte
+    min_pv_surplus_w = models.DecimalField(
+        max_digits=6, decimal_places=1, default=Decimal("800.0"),
+        help_text="Mindest-PV-Überschuss (W) zur Aktivierung des SG-Ready Boost"
+    )
+    max_price_threshold_ct = models.DecimalField(
+        max_digits=5, decimal_places=2, default=Decimal("18.00"),
+        help_text="Maximaler Strompreis (ct/kWh) für preisgesteuertes Heizen"
+    )
+    battery_soc_reserve_pct = models.DecimalField(
+        max_digits=4, decimal_places=1, default=Decimal("50.0"),
+        help_text="Mindest-Akkustand (%), bevor PV-Überschuss in die BWWP fließt"
+    )
+
+    # Verdichter- und Taktschutz (Compressor Protection)
+    min_run_time_minutes = models.PositiveSmallIntegerField(
+        default=20,
+        help_text="Mindestlaufzeit (Minuten) nach dem Einschalten zum Verdichterschutz"
+    )
+    min_cooldown_minutes = models.PositiveSmallIntegerField(
+        default=15,
+        help_text="Mindestruhezeit (Minuten) nach dem Abschalten gegen Takten"
+    )
+
+    # Laufzeit-Zustand & Telemetrie
+    SG_STATE_CHOICES = [
+        ("1_lock", "Sperre / Standby"),
+        ("2_normal", "Normalbetrieb"),
+        ("3_boost", "SG-Ready Boost (Verstärkter Betrieb)"),
+        ("4_force", "Zwangsanlauf"),
+    ]
+    current_sg_state = models.CharField(
+        max_length=20, choices=SG_STATE_CHOICES, default="2_normal"
+    )
+
+    last_switched_at = models.DateTimeField(null=True, blank=True)
+    last_decision_reason = models.CharField(max_length=255, blank=True, default="")
+    manual_override_until = models.DateTimeField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["home", "active"]),
+        ]
+
+    def __str__(self):
+        mode_str = self.get_control_mode_display()
+        return f"BWWP Lastmanagement: {self.device.name} ({mode_str}) - {self.get_current_sg_state_display()}"

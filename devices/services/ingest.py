@@ -342,6 +342,12 @@ def ingest_metric_payload(
                 config.save(update_fields=["metric_definition"])
                 configured_lead_key = metric_key
 
+        # Temperatur-Metriken direkt im Redis-Cache ablegen
+        if any(t in metric_key.lower() for t in ["temp", "temperature", "temp_water", "water_temp", "grad"]):
+            cache.set(f"device:{device.id}:temperature", float_val, timeout=3600)
+            cache.set(f"device:{device.id}:temp_water", float_val, timeout=3600)
+
+
         # 3. Snapshot-Tabelle DeviceLatestMetric aktualisieren (O(1))
         DeviceLatestMetric.objects.update_or_create(
             device=device,
