@@ -2,24 +2,25 @@
   "config": {
     "step": {
       "user": {
-        "title": "Sharegy Cloud Authentifizierung",
-        "description": "Verbinde deinen Home Assistant mit der Sharegy Cloud Plattform. Gib deinen Host und dein persönliches Home Token ein.",
+        "title": "Sharegy Plattform-Verbindung",
+        "description": "Verbinde deinen Home Assistant mit der Sharegy Cloud-Plattform. Kopiere dazu einfach deine persönliche WebSocket-URL aus der Sharegy Web-App (unter Einstellungen → Schnittstellen).",
         "data": {
-          "host": "Sharegy Cloud Host (z. B. https://sharegy.de)",
-          "home_token": "Dein persönliches Home Token (UUID)",
-          "protocol": "Übertragungsprotokoll"
+          "ws_url": "WebSocket-URL (Copy & Paste aus Sharegy Schnittstellen)",
+          "home_token": "Home Token (optional, falls in URL enthalten)",
+          "protocol": "Verbindungsprotokoll"
         }
       },
       "entities": {
-        "title": "Sensoren & Entitäten zuordnen",
-        "description": "Wähle per Klick aus, welche Home Assistant Sensoren für das Energiemanagement an Sharegy übertragen werden sollen.",
+        "title": "Sensoren & Lastmanagement zuordnen",
+        "description": "Wähle deine Home Assistant Sensoren für das Energiemanagement sowie Schalter/Relais für die Laststeuerung aus.",
         "data": {
-          "grid_power_sensor": "Netzbezug / Einspeisung (Watt)",
-          "pv_power_sensor": "Solarerzeugung / PV (Watt)",
-          "battery_power_sensor": "Batteriespeicher Be-/Entladung (Watt)",
-          "battery_soc_sensor": "Batterie Ladestand (SoC %)",
-          "load_power_sensor": "Gesamter Hausverbrauch (Watt)",
-          "submeter_sensors": "Einzelverbraucher / Smarte Steckdosen (Multi-Select)",
+          "grid_power_sensor": "Netzleistung (W / kW)",
+          "pv_power_sensor": "PV-Erzeugung Leistung (W / kW)",
+          "battery_power_sensor": "Batteriespeicher Leistung (W / kW)",
+          "battery_soc_sensor": "Batterie Ladestand / SoC (%)",
+          "load_power_sensor": "Gesamter Hausverbrauch (W / kW, optional)",
+          "submeter_sensors": "Sonstige Geräte & Submeter (Multi-Select)",
+          "control_switches": "Rückkanal / Schaltbare Verbraucher (SG-Ready, Relais)",
           "sync_interval": "Übertragungsintervall (Sekunden)"
         }
       }
@@ -36,14 +37,15 @@
     "step": {
       "init": {
         "title": "Sharegy Sensoren bearbeiten",
-        "description": "Passe die Zuordnung deiner Sensoren und Einzelverbraucher live an.",
+        "description": "Passe die Zuordnung deiner Sensoren und steuerbaren Geräte live an.",
         "data": {
-          "grid_power_sensor": "Netzbezug / Einspeisung (Watt)",
-          "pv_power_sensor": "Solarerzeugung / PV (Watt)",
-          "battery_power_sensor": "Batteriespeicher Be-/Entladung (Watt)",
-          "battery_soc_sensor": "Batterie Ladestand (SoC %)",
-          "load_power_sensor": "Gesamter Hausverbrauch (Watt)",
-          "submeter_sensors": "Einzelverbraucher / Smarte Steckdosen",
+          "grid_power_sensor": "Netzleistung (W / kW)",
+          "pv_power_sensor": "PV-Erzeugung Leistung (W / kW)",
+          "battery_power_sensor": "Batteriespeicher Leistung (W / kW)",
+          "battery_soc_sensor": "Batterie Ladestand / SoC (%)",
+          "load_power_sensor": "Gesamter Hausverbrauch (W / kW)",
+          "submeter_sensors": "Sonstige Geräte & Submeter",
+          "control_switches": "Rückkanal / Schaltbare Verbraucher",
           "sync_interval": "Übertragungsintervall (Sekunden)"
         }
       }
