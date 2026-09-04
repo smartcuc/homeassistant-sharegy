@@ -424,8 +424,43 @@ def _execute_growatt_query(base_url: str, credentials: dict) -> dict:
             except Exception as e:
                 logger.warning("Growatt OpenAPI plant list discovery failed: %s", e)
 
-        # 2. V4 queryLastData versuchen (falls device_sn bekannt oder aus Inverter ermittelbar)
+        # 2. Geräte auflösen (falls device_sn noch nicht bekannt)
+        if plant_id and not device_sn:
+            try:
+                dlist_resp = session.get(
+                    "https://openapi.growatt.com/v1/device/list",
+                    headers={"token": token},
+                    params={"plant_id": plant_id},
+                    timeout=10,
+                )
+                if dlist_resp.status_code == 200:
+                    d_json = dlist_resp.json()
+                    devices = d_json.get("data", {}).get("devices", []) if isinstance(d_json.get("data"), dict) else []
+                    if devices and isinstance(devices, list):
+                        device_sn = str(devices[0].get("device_sn") or devices[0].get("sn") or "")
+                        credentials["device_sn"] = device_sn
+            except Exception as e:
+                logger.debug("Growatt device/list lookup failed: %s", e)
+
+        # 3. Spezifische Inverter / Storage Last Data Endpunkte abfragen
         if device_sn:
+            for endpoint in [
+                "https://openapi.growatt.com/v1/device/inverter/inverter_last_data",
+                "https://openapi.growatt.com/v1/device/tlx/tlx_last_data",
+                "https://openapi.growatt.com/v1/device/mix/mix_last_data",
+                "https://openapi.growatt.com/v1/device/storage/storage_last_data",
+                "https://openapi.growatt.com/v1/device/noah/noah_last_data",
+            ]:
+                try:
+                    dev_resp = session.get(endpoint, headers={"token": token}, params={"device_sn": device_sn, "inverter_sn": device_sn, "tlx_sn": device_sn, "mix_sn": device_sn, "storage_sn": device_sn}, timeout=8)
+                    if dev_resp.status_code == 200:
+                        d_json = dev_resp.json()
+                        d_data = d_json.get("data")
+                        if isinstance(d_data, dict) and d_data:
+                            raw_data["data"].update(d_data)
+                except Exception:
+                    pass
+
             for dev_type in ["inverter", "storage", "min", "sph", "noah", "tlx", "mix"]:
                 try:
                     q_resp = session.post(
@@ -443,7 +478,7 @@ def _execute_growatt_query(base_url: str, credentials: dict) -> dict:
                 except Exception:
                     pass
 
-        # 3. V1 Plant Data abfragen
+        # 4. V1 Plant Data & Overview abfragen
         if plant_id:
             try:
                 p_resp = session.get(
@@ -457,7 +492,6 @@ def _execute_growatt_query(base_url: str, credentials: dict) -> dict:
             except Exception as e:
                 logger.warning("Growatt plant/data failed: %s", e)
 
-            # Overview fallback
             try:
                 ov_resp = session.post(
                     "https://openapi.growatt.com/v1/plant/data/overview",
@@ -503,7 +537,7 @@ def _execute_growatt_query(base_url: str, credentials: dict) -> dict:
 
         if logged_in and user_id:
             try:
-                # 1. Plant List
+                # 1. Plant List & Übersicht
                 p_list_resp = session.get(f"{active_host}/PlantListAPI.do", params={"userId": user_id}, timeout=10)
                 if p_list_resp.status_code == 200:
                     plants_info = p_list_resp.json().get("back", {})
@@ -512,12 +546,15 @@ def _execute_growatt_query(base_url: str, credentials: dict) -> dict:
                     plant_arr = plants_info.get("data", [])
                     if plant_arr and isinstance(plant_arr, list):
                         first_plant = plant_arr[0]
+                        if isinstance(first_plant, dict):
+                            raw_data["data"].update(first_plant)
                         if not plant_id:
                             plant_id = str(first_plant.get("plantId") or first_plant.get("id") or "")
                             credentials["plant_id"] = plant_id
 
-                # 2. Plant Detail / Overview
+                # 2. Plant Detail / Overview / Inverter
                 if plant_id:
+                    # Inverter List
                     inv_resp = session.post(
                         f"{active_host}/newTwoPlantAPI.do",
                         params={"op": "getAllPlantListTwo"},
@@ -528,6 +565,17 @@ def _execute_growatt_query(base_url: str, credentials: dict) -> dict:
                         inv_json = inv_resp.json()
                         if isinstance(inv_json, dict):
                             raw_data["data"].update(inv_json)
+
+                    # Plant Energy Detail
+                    det_resp = session.post(
+                        f"{active_host}/newPlantDetailAPI.do",
+                        data={"plantId": plant_id},
+                        timeout=10,
+                    )
+                    if det_resp.status_code == 200:
+                        det_json = det_resp.json()
+                        if isinstance(det_json, dict):
+                            raw_data["data"].update(det_json)
 
                     # Storage / Battery Status (falls Hybrid oder Speicher)
                     stor_resp = session.post(
@@ -847,6 +895,32 @@ def test_cloud_credentials(profile_id: str, credentials: dict) -> dict:
     }
 
 
+def _flatten_payload_dict(payload) -> dict:
+    """
+    Sammelt alle Key-Value-Paare aus einem verschachtelten JSON-Objekt,
+    inklusive Listen von Geräten (z.B. obj, deviceList, data, plants, invList, storageList),
+    damit Metriken wie 'pac', 'currentPower', 'soc', 'eToday' immer gefunden werden.
+    """
+    flat = {}
+    if not isinstance(payload, (dict, list)):
+        return flat
+
+    def _walk(item):
+        if isinstance(item, dict):
+            for k, v in item.items():
+                if isinstance(v, (int, float, str, bool)) or v is None:
+                    if k not in flat or flat[k] in (None, 0, 0.0, "0", "0 W", "", "0.0"):
+                        flat[k] = v
+                elif isinstance(v, (dict, list)):
+                    _walk(v)
+        elif isinstance(item, list):
+            for elem in item:
+                _walk(elem)
+
+    _walk(payload)
+    return flat
+
+
 def _parse_metrics_from_payload(profile: dict, raw_payload: dict) -> dict:
     """
     Wendet das metrics_mapping des Profils auf die Rohdaten an und ergänzt
@@ -855,16 +929,8 @@ def _parse_metrics_from_payload(profile: dict, raw_payload: dict) -> dict:
     mapping = profile.get("metrics_mapping", {})
     extracted = {}
 
-    # Fallback Lookup Pool aus data / root / obj
-    data_dict = {}
-    if isinstance(raw_payload, dict):
-        data_dict.update(raw_payload)
-        if isinstance(raw_payload.get("data"), dict):
-            data_dict.update(raw_payload["data"])
-        elif isinstance(raw_payload.get("obj"), dict):
-            data_dict.update(raw_payload["obj"])
-        elif isinstance(raw_payload.get("back"), dict):
-            data_dict.update(raw_payload["back"])
+    # Vollständiger Fallback-Pool inklusive aller verschachtelten Listen & Dictionaries
+    data_dict = _flatten_payload_dict(raw_payload)
 
     for metric_name, rule in mapping.items():
         jsonpath = rule.get("jsonpath")
