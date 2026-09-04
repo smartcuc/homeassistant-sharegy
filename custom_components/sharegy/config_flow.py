@@ -143,14 +143,11 @@ class SharegyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         config_entry: config_entries.ConfigEntry,
     ) -> config_entries.OptionsFlow:
         """Get the options flow for this handler."""
-        return SharegyOptionsFlowHandler(config_entry)
+        return SharegyOptionsFlowHandler()
 
 
 class SharegyOptionsFlowHandler(config_entries.OptionsFlow):
     """Handle options for updating entity mapping live in HA."""
-
-    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
-        self.config_entry = config_entry
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
