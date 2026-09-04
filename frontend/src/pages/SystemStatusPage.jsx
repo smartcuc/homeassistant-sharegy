@@ -193,6 +193,118 @@ export default function SystemStatusPage() {
                 })}
             </div>
 
+            {/* 🖥️ HARDWARE- & KAPAZITÄTS-WÄCHTER (AUFRÜST-RADAR) */}
+            {healthData?.metrics?.server_hardware && (
+                <div className="p-6 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-3xl shadow-xs space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-gray-100 dark:border-slate-800">
+                        <div className="flex items-center gap-2.5">
+                            <span className="text-xl">🖥️</span>
+                            <div>
+                                <h2 className="text-sm font-bold text-gray-900 dark:text-white">
+                                    Server-Kapazität & Hardware-Auslastung
+                                </h2>
+                                <p className="text-xs text-gray-500">
+                                    Proaktiver Aufrüst-Wächter zur Erkennung von Performance-Engpässen.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
+                                healthData.metrics.server_hardware.upgrade_recommended
+                                    ? "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-300"
+                                    : "bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-300"
+                            }`}>
+                                <span>{healthData.metrics.server_hardware.upgrade_recommended ? "⚠️ Upgrade empfohlen" : "✅ Ausreichend Puffer"}</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* HARDWARE PROGRESS BARS */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-1">
+                        {/* CPU */}
+                        <div className="space-y-2">
+                            <div className="flex justify-between text-xs font-bold text-gray-700 dark:text-gray-300">
+                                <span>CPU-Auslastung ({healthData.metrics.server_hardware.cpu_count} vCPUs)</span>
+                                <span className="font-mono">{healthData.metrics.server_hardware.cpu_used_pct}%</span>
+                            </div>
+                            <div className="w-full h-2.5 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                <div
+                                    className={`h-full rounded-full transition-all duration-500 ${
+                                        healthData.metrics.server_hardware.cpu_used_pct > 80
+                                            ? "bg-rose-500"
+                                            : healthData.metrics.server_hardware.cpu_used_pct > 60
+                                            ? "bg-amber-500"
+                                            : "bg-indigo-600"
+                                    }`}
+                                    style={{ width: `${Math.min(100, healthData.metrics.server_hardware.cpu_used_pct)}%` }}
+                                ></div>
+                            </div>
+                            <div className="text-[11px] text-gray-400">
+                                Load Avg: <span className="font-mono">{healthData.metrics.server_hardware.load1}</span>
+                            </div>
+                        </div>
+
+                        {/* RAM */}
+                        <div className="space-y-2">
+                            <div className="flex justify-between text-xs font-bold text-gray-700 dark:text-gray-300">
+                                <span>RAM-Speicher ({Math.round(healthData.metrics.server_hardware.ram_total_mb / 1024)} GB)</span>
+                                <span className="font-mono">{healthData.metrics.server_hardware.ram_used_pct}%</span>
+                            </div>
+                            <div className="w-full h-2.5 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                <div
+                                    className={`h-full rounded-full transition-all duration-500 ${
+                                        healthData.metrics.server_hardware.ram_used_pct > 85
+                                            ? "bg-rose-500"
+                                            : healthData.metrics.server_hardware.ram_used_pct > 70
+                                            ? "bg-amber-500"
+                                            : "bg-emerald-500"
+                                    }`}
+                                    style={{ width: `${Math.min(100, healthData.metrics.server_hardware.ram_used_pct)}%` }}
+                                ></div>
+                            </div>
+                            <div className="text-[11px] text-gray-400">
+                                Frei: <span className="font-mono">{Math.round(healthData.metrics.server_hardware.ram_available_mb / 1024 * 10) / 10} GB</span>
+                            </div>
+                        </div>
+
+                        {/* DISK */}
+                        <div className="space-y-2">
+                            <div className="flex justify-between text-xs font-bold text-gray-700 dark:text-gray-300">
+                                <span>SSD-Speicher ({healthData.metrics.server_hardware.disk_total_gb} GB)</span>
+                                <span className="font-mono">{healthData.metrics.server_hardware.disk_used_pct}%</span>
+                            </div>
+                            <div className="w-full h-2.5 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                <div
+                                    className={`h-full rounded-full transition-all duration-500 ${
+                                        healthData.metrics.server_hardware.disk_used_pct > 85
+                                            ? "bg-rose-500"
+                                            : healthData.metrics.server_hardware.disk_used_pct > 75
+                                            ? "bg-amber-500"
+                                            : "bg-teal-500"
+                                    }`}
+                                    style={{ width: `${Math.min(100, healthData.metrics.server_hardware.disk_used_pct)}%` }}
+                                ></div>
+                            </div>
+                            <div className="text-[11px] text-gray-400">
+                                Frei: <span className="font-mono">{healthData.metrics.server_hardware.disk_free_gb} GB</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* ADVISOR BANNER */}
+                    <div className="p-3.5 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-gray-100 dark:border-slate-800 flex items-center justify-between text-xs text-gray-600 dark:text-gray-300">
+                        <div className="flex items-center gap-2">
+                            <span>💡</span>
+                            <span><strong>Empfehlung:</strong> {healthData.metrics.server_hardware.recommended_hardware}</span>
+                        </div>
+                        <span className="text-[11px] text-gray-400">
+                            Aktive DB-Verbindungen: <strong className="text-gray-700 dark:text-gray-200 font-mono">{healthData.metrics.server_hardware.db_active_connections}</strong>
+                        </span>
+                    </div>
+                </div>
+            )}
+
             {/* LIVE TELEMETRIE & PERFORMANCE KACHELN */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Card>

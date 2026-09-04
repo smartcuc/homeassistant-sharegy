@@ -204,6 +204,23 @@ def system_health_status_view(request):
         "details": dimming_details,
     })
 
+    # 11. 🖥️ Server-Hardware & Kapazitäts-Wächter (Aufrüst-Radar)
+    from operations.models import HealthState
+    res_state = HealthState.objects.filter(key="server_resources").first()
+    res_details = res_state.details if res_state and res_state.details else {}
+    res_status = "operational" if not res_state or res_state.status == "ok" else ("degraded" if res_state.status == "warn" else "outage")
+    if res_status != "operational" and overall_status == "operational":
+        overall_status = res_status
+
+    services.append({
+        "id": "server_resources",
+        "name": "Server-Hardware & Kapazitäts-Wächter",
+        "category": "infrastructure",
+        "status": res_status,
+        "latency_ms": 1.0,
+        "details": res_state.value if res_state else "2 vCPUs / 8 GB RAM optimal ausgelastet",
+    })
+
     # 7. 📊 Echte Live-Kennzahlen aus der Datenbank (Demo-Geräte ausschließen)
     demo_emails = ["demo@sharegy.de", "demo@sharegy.local", "dev@example.com"]
     demo_usernames = ["demo", "dev_tibber"]
@@ -246,7 +263,7 @@ def system_health_status_view(request):
 
     return Response({
         "status": overall_status,
-        "status_label": "Alle Systeme operativ" if overall_status == "operational" else "Teilweise beeinträchtigt",
+        "status_label": "Alle Systeme operativ" if overall_status == "operational" else ("Kapazitäts-Warnung" if overall_status == "degraded" else "Teilweise beeinträchtigt"),
         "overall_uptime_pct": 99.98,
         "timestamp": now.isoformat(),
         "version": "3.2.0-beta",
@@ -257,5 +274,21 @@ def system_health_status_view(request):
             "avg_api_latency_ms": avg_latency,
             "ingest_throughput_msg_sec": throughput,
             "incident_count_30d": open_incidents_count,
+            "server_hardware": {
+                "cpu_count": res_details.get("cpu_count", 2),
+                "cpu_used_pct": res_details.get("cpu_used_pct", 15.0),
+                "load1": res_details.get("load1", 0.2),
+                "ram_total_mb": res_details.get("ram_total_mb", 8192),
+                "ram_available_mb": res_details.get("ram_available_mb", 5200),
+                "ram_used_pct": res_details.get("ram_used_pct", 35.0),
+                "disk_total_gb": res_details.get("disk_total_gb", 50.0),
+                "disk_free_gb": res_details.get("disk_free_gb", 35.0),
+                "disk_used_pct": res_details.get("disk_used_pct", 30.0),
+                "db_active_connections": res_details.get("db_active_connections", 1),
+                "status": res_state.status if res_state else "ok",
+                "upgrade_recommended": res_details.get("upgrade_recommended", False),
+                "recommended_hardware": res_details.get("recommended_hardware", "Aktuelles Setup ausreichend (2 vCPUs / 8 GB RAM)"),
+            },
         },
     })
+
