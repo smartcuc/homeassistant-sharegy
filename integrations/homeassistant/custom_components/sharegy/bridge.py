@@ -142,7 +142,7 @@ class SharegyBridge:
         """Resolve full WebSocket URL."""
         if self.ws_url_config and self.ws_url_config.strip().startswith("wss://"):
             url = self.ws_url_config.strip()
-            return url if url.endsWith("/") else f"{url}/"
+            return url if url.endswith("/") else f"{url}/"
 
         return f"wss://sharegy.de/ws/energy/{self.token}/"
 
