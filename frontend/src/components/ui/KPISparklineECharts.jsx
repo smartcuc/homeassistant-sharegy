@@ -96,45 +96,25 @@ export default function KPISparklineECharts({
                             ],
                         }
                         : undefined,
+                silent: true,
             },
         ],
 
         tooltip: {
-            trigger: "axis",
-            backgroundColor: "rgba(255,255,255,0.96)",
-            borderColor: "#e5e7eb",
-            borderWidth: 1,
-
-            textStyle: {
-                color: color,
-            },
-
-            formatter: (params) => {
-                const p = params?.[0];
-
-                if (!p || p.value == null) {
-                    return "Keine Daten";
-                }
-
-                return `
-                    <div style="font-weight:600">
-                        ${Number(p.value).toFixed(2)} ${unit}
-                    </div>
-                `;
-            },
+            show: false,
         },
     };
 
     return (
-        <div className="h-14 mt-1">
+        <div className="h-14 mt-1 pointer-events-none">
             <ReactECharts
                 option={option}
                 style={{
                     height: "100%",
                     width: "100%",
                 }}
-                notMerge={true}
-                lazyUpdate={true}
+                notMerge={false}
+                lazyUpdate={false}
             />
         </div>
     );
