@@ -20,8 +20,18 @@ from .const import (
     CONF_BATTERY_POWER_SENSOR,
     CONF_BATTERY_SOC_SENSOR,
     CONF_LOAD_POWER_SENSOR,
+    CONF_BWWP_NAME,
+    CONF_BWWP_POWER,
+    CONF_BWWP_TEMP,
+    CONF_BWWP_SWITCH,
+    CONF_HEATPUMP_NAME,
+    CONF_HEATPUMP_POWER,
+    CONF_HEATPUMP_TEMP,
+    CONF_HEATPUMP_SWITCH,
+    CONF_WALLBOX_NAME,
+    CONF_WALLBOX_POWER,
+    CONF_WALLBOX_SWITCH,
     CONF_SUBMETER_SENSORS,
-    CONF_CONTROL_SWITCHES,
     CONF_SYNC_INTERVAL,
     DEFAULT_WS_URL,
     DEFAULT_SYNC_INTERVAL,
@@ -83,7 +93,7 @@ class SharegyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_entities(
         self, user_input: dict[str, Any] | None = None
     ) -> config_entries.FlowResult:
-        """Step 2: Interactive Entity Selection for EMS, Sensors, and Bidirectional Control."""
+        """Step 2: Interactive Entity Selection for EMS and Unified Device Bundles."""
         if user_input is not None:
             final_data = {**self._auth_data, **user_input}
             token_display = self._auth_data.get(CONF_HOME_TOKEN, "")[:8]
@@ -109,15 +119,46 @@ class SharegyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Optional(CONF_LOAD_POWER_SENSOR): selector.EntitySelector(
                     selector.EntitySelectorConfig(domain=["sensor"])
                 ),
+                # BWWP Bundle
+                vol.Optional(CONF_BWWP_NAME, default="Brauchwasser"): str,
+                vol.Optional(CONF_BWWP_POWER): selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain=["sensor"])
+                ),
+                vol.Optional(CONF_BWWP_TEMP): selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain=["sensor"])
+                ),
+                vol.Optional(CONF_BWWP_SWITCH): selector.EntitySelector(
+                    selector.EntitySelectorConfig(
+                        domain=["switch", "input_boolean", "light"]
+                    )
+                ),
+                # Heatpump Bundle
+                vol.Optional(CONF_HEATPUMP_NAME, default="Waermepumpe"): str,
+                vol.Optional(CONF_HEATPUMP_POWER): selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain=["sensor"])
+                ),
+                vol.Optional(CONF_HEATPUMP_TEMP): selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain=["sensor"])
+                ),
+                vol.Optional(CONF_HEATPUMP_SWITCH): selector.EntitySelector(
+                    selector.EntitySelectorConfig(
+                        domain=["switch", "input_boolean", "light"]
+                    )
+                ),
+                # Wallbox Bundle
+                vol.Optional(CONF_WALLBOX_NAME, default="Wallbox"): str,
+                vol.Optional(CONF_WALLBOX_POWER): selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain=["sensor"])
+                ),
+                vol.Optional(CONF_WALLBOX_SWITCH): selector.EntitySelector(
+                    selector.EntitySelectorConfig(
+                        domain=["switch", "input_boolean", "light"]
+                    )
+                ),
+                # Other Submeters & Interval
                 vol.Optional(CONF_SUBMETER_SENSORS): selector.EntitySelector(
                     selector.EntitySelectorConfig(
                         domain=["sensor"],
-                        multiple=True,
-                    )
-                ),
-                vol.Optional(CONF_CONTROL_SWITCHES): selector.EntitySelector(
-                    selector.EntitySelectorConfig(
-                        domain=["switch", "input_boolean", "light"],
                         multiple=True,
                     )
                 ),
@@ -163,6 +204,7 @@ class SharegyOptionsFlowHandler(config_entries.OptionsFlow):
         data = self.config_entry.data
 
         fields = {}
+        # Core EMS Sensors
         for key in [
             CONF_GRID_POWER_SENSOR,
             CONF_PV_POWER_SENSOR,
@@ -179,6 +221,69 @@ class SharegyOptionsFlowHandler(config_entries.OptionsFlow):
                     selector.EntitySelectorConfig(domain=["sensor"])
                 )
 
+        # BWWP Bundle
+        fields[vol.Optional(CONF_BWWP_NAME, default=data.get(CONF_BWWP_NAME, "Brauchwasser"))] = str
+        for key in [CONF_BWWP_POWER, CONF_BWWP_TEMP]:
+            if data.get(key):
+                fields[vol.Optional(key, default=data[key])] = selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain=["sensor"])
+                )
+            else:
+                fields[vol.Optional(key)] = selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain=["sensor"])
+                )
+
+        if data.get(CONF_BWWP_SWITCH):
+            fields[vol.Optional(CONF_BWWP_SWITCH, default=data[CONF_BWWP_SWITCH])] = selector.EntitySelector(
+                selector.EntitySelectorConfig(domain=["switch", "input_boolean", "light"])
+            )
+        else:
+            fields[vol.Optional(CONF_BWWP_SWITCH)] = selector.EntitySelector(
+                selector.EntitySelectorConfig(domain=["switch", "input_boolean", "light"])
+            )
+
+        # Heatpump Bundle
+        fields[vol.Optional(CONF_HEATPUMP_NAME, default=data.get(CONF_HEATPUMP_NAME, "Waermepumpe"))] = str
+        for key in [CONF_HEATPUMP_POWER, CONF_HEATPUMP_TEMP]:
+            if data.get(key):
+                fields[vol.Optional(key, default=data[key])] = selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain=["sensor"])
+                )
+            else:
+                fields[vol.Optional(key)] = selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain=["sensor"])
+                )
+
+        if data.get(CONF_HEATPUMP_SWITCH):
+            fields[vol.Optional(CONF_HEATPUMP_SWITCH, default=data[CONF_HEATPUMP_SWITCH])] = selector.EntitySelector(
+                selector.EntitySelectorConfig(domain=["switch", "input_boolean", "light"])
+            )
+        else:
+            fields[vol.Optional(CONF_HEATPUMP_SWITCH)] = selector.EntitySelector(
+                selector.EntitySelectorConfig(domain=["switch", "input_boolean", "light"])
+            )
+
+        # Wallbox Bundle
+        fields[vol.Optional(CONF_WALLBOX_NAME, default=data.get(CONF_WALLBOX_NAME, "Wallbox"))] = str
+        if data.get(CONF_WALLBOX_POWER):
+            fields[vol.Optional(CONF_WALLBOX_POWER, default=data[CONF_WALLBOX_POWER])] = selector.EntitySelector(
+                selector.EntitySelectorConfig(domain=["sensor"])
+            )
+        else:
+            fields[vol.Optional(CONF_WALLBOX_POWER)] = selector.EntitySelector(
+                selector.EntitySelectorConfig(domain=["sensor"])
+            )
+
+        if data.get(CONF_WALLBOX_SWITCH):
+            fields[vol.Optional(CONF_WALLBOX_SWITCH, default=data[CONF_WALLBOX_SWITCH])] = selector.EntitySelector(
+                selector.EntitySelectorConfig(domain=["switch", "input_boolean", "light"])
+            )
+        else:
+            fields[vol.Optional(CONF_WALLBOX_SWITCH)] = selector.EntitySelector(
+                selector.EntitySelectorConfig(domain=["switch", "input_boolean", "light"])
+            )
+
+        # Other Submeters & Interval
         if data.get(CONF_SUBMETER_SENSORS):
             fields[vol.Optional(CONF_SUBMETER_SENSORS, default=data[CONF_SUBMETER_SENSORS])] = (
                 selector.EntitySelector(
@@ -188,21 +293,6 @@ class SharegyOptionsFlowHandler(config_entries.OptionsFlow):
         else:
             fields[vol.Optional(CONF_SUBMETER_SENSORS)] = selector.EntitySelector(
                 selector.EntitySelectorConfig(domain=["sensor"], multiple=True)
-            )
-
-        if data.get(CONF_CONTROL_SWITCHES):
-            fields[vol.Optional(CONF_CONTROL_SWITCHES, default=data[CONF_CONTROL_SWITCHES])] = (
-                selector.EntitySelector(
-                    selector.EntitySelectorConfig(
-                        domain=["switch", "input_boolean", "light"], multiple=True
-                    )
-                )
-            )
-        else:
-            fields[vol.Optional(CONF_CONTROL_SWITCHES)] = selector.EntitySelector(
-                selector.EntitySelectorConfig(
-                    domain=["switch", "input_boolean", "light"], multiple=True
-                )
             )
 
         fields[vol.Optional(CONF_SYNC_INTERVAL, default=data.get(CONF_SYNC_INTERVAL, DEFAULT_SYNC_INTERVAL))] = (

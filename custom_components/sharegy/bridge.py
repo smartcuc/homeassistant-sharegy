@@ -21,8 +21,18 @@ from .const import (
     CONF_BATTERY_POWER_SENSOR,
     CONF_BATTERY_SOC_SENSOR,
     CONF_LOAD_POWER_SENSOR,
+    CONF_BWWP_NAME,
+    CONF_BWWP_POWER,
+    CONF_BWWP_TEMP,
+    CONF_BWWP_SWITCH,
+    CONF_HEATPUMP_NAME,
+    CONF_HEATPUMP_POWER,
+    CONF_HEATPUMP_TEMP,
+    CONF_HEATPUMP_SWITCH,
+    CONF_WALLBOX_NAME,
+    CONF_WALLBOX_POWER,
+    CONF_WALLBOX_SWITCH,
     CONF_SUBMETER_SENSORS,
-    CONF_CONTROL_SWITCHES,
     CONF_SYNC_INTERVAL,
 )
 
@@ -168,45 +178,44 @@ class SharegyBridge:
 
     def _setup_control_listeners(self):
         """Listen to state changes on control switches for closed-loop status feedback."""
-        switches = self.entry_data.get(CONF_CONTROL_SWITCHES, [])
-        if isinstance(switches, list):
-            for entity_id in switches:
-                if entity_id:
-                    unsub = async_track_state_change_event(
-                        self.hass, [entity_id], self._handle_switch_state_change
-                    )
-                    self._unsub_listeners.append(unsub)
+        tracked_switches = [
+            (self.entry_data.get(CONF_BWWP_SWITCH), self.entry_data.get(CONF_BWWP_NAME, "Brauchwasser")),
+            (self.entry_data.get(CONF_HEATPUMP_SWITCH), self.entry_data.get(CONF_HEATPUMP_NAME, "Waermepumpe")),
+            (self.entry_data.get(CONF_WALLBOX_SWITCH), self.entry_data.get(CONF_WALLBOX_NAME, "Wallbox")),
+        ]
 
-    @callback
-    def _handle_switch_state_change(self, event):
-        """Send live feedback frame when a switch state changes."""
-        new_state = event.data.get("new_state")
-        if not new_state:
-            return
+        for ent_id, identifier in tracked_switches:
+            if ent_id:
+                def make_handler(ident):
+                    @callback
+                    def _handler(event):
+                        new_state = event.data.get("new_state")
+                        if not new_state:
+                            return
+                        is_on = (new_state.state.lower() in ("on", "true", "1"))
+                        now_sec = int(time.time())
+                        payload = {
+                            "identifier": ident,
+                            "device": ident,
+                            "id": ident,
+                            "state": is_on,
+                            "relay_state": is_on,
+                            "val": is_on,
+                            "role": "consumer",
+                            "metric": "relay_state",
+                            "ts": now_sec,
+                            "source": "homeassistant_feedback",
+                        }
+                        if self.is_connected and self._ws and not self._ws.closed:
+                            asyncio.create_task(self._ws.send_str(json.dumps(payload)))
+                        else:
+                            self.buffer.push(payload)
+                    return _handler
 
-        entity_id = event.data.get("entity_id")
-        is_on = (new_state.state.lower() in ("on", "true", "1"))
-        now_sec = int(time.time())
-
-        # Clean identifier
-        identifier = entity_id.split(".")[-1]
-        payload = {
-            "identifier": identifier,
-            "device": identifier,
-            "id": identifier,
-            "state": is_on,
-            "relay_state": is_on,
-            "val": is_on,
-            "role": "consumer",
-            "metric": "relay_state",
-            "ts": now_sec,
-            "source": "homeassistant_feedback",
-        }
-
-        if self.is_connected and self._ws and not self._ws.closed:
-            asyncio.create_task(self._ws.send_str(json.dumps(payload)))
-        else:
-            self.buffer.push(payload)
+                unsub = async_track_state_change_event(
+                    self.hass, [ent_id], make_handler(identifier)
+                )
+                self._unsub_listeners.append(unsub)
 
     async def _main_loop(self):
         """Continuous connection & sync loop."""
@@ -277,31 +286,32 @@ class SharegyBridge:
         """Execute control command on matching HA entity."""
         _LOGGER.info("Received control command from Sharegy: %s", data)
 
-        # 1. Shelly RPC Format: {"method": "Switch.Set", "params": {"id": 0, "on": true}}
-        if data.get("method", "").startswith("Switch."):
-            on_val = data.get("params", {}).get("on")
-            if on_val is not None:
-                switches = self.entry_data.get(CONF_CONTROL_SWITCHES, [])
-                for ent_id in switches:
-                    service = "turn_on" if on_val else "turn_off"
-                    domain = ent_id.split(".")[0]
-                    await self.hass.services.async_call(
-                        domain, service, {"entity_id": ent_id}, blocking=True
-                    )
+        identifier = (data.get("identifier") or data.get("device") or data.get("src") or "").strip()
+        raw_val = data.get("val") if "val" in data else data.get("value")
 
-        # 2. Direct identifier command: {"identifier": "bwwp_sg_ready", "val": true}
-        identifier = data.get("identifier") or data.get("device") or data.get("src")
-        if identifier:
-            switches = self.entry_data.get(CONF_CONTROL_SWITCHES, [])
-            for ent_id in switches:
-                if identifier in ent_id:
-                    raw_val = data.get("val") if "val" in data else data.get("value")
-                    bool_val = (raw_val is True or raw_val == 1 or str(raw_val).lower() in ("true", "1", "on"))
-                    service = "turn_on" if bool_val else "turn_off"
-                    domain = ent_id.split(".")[0]
-                    await self.hass.services.async_call(
-                        domain, service, {"entity_id": ent_id}, blocking=True
-                    )
+        # Map identifier to HA Switch Entity
+        target_entity = None
+        if identifier == self.entry_data.get(CONF_BWWP_NAME, "Brauchwasser"):
+            target_entity = self.entry_data.get(CONF_BWWP_SWITCH)
+        elif identifier == self.entry_data.get(CONF_HEATPUMP_NAME, "Waermepumpe"):
+            target_entity = self.entry_data.get(CONF_HEATPUMP_SWITCH)
+        elif identifier == self.entry_data.get(CONF_WALLBOX_NAME, "Wallbox"):
+            target_entity = self.entry_data.get(CONF_WALLBOX_SWITCH)
+
+        # Fallback for Shelly RPC Switch.Set
+        if not target_entity and data.get("method", "").startswith("Switch."):
+            on_val = data.get("params", {}).get("on")
+            raw_val = on_val
+            target_entity = self.entry_data.get(CONF_BWWP_SWITCH) or self.entry_data.get(CONF_HEATPUMP_SWITCH)
+
+        if target_entity:
+            bool_val = (raw_val is True or raw_val == 1 or str(raw_val).lower() in ("true", "1", "on"))
+            service = "turn_on" if bool_val else "turn_off"
+            domain = target_entity.split(".")[0]
+            _LOGGER.info("Executing Sharegy Switch: %s.%s on %s", domain, service, target_entity)
+            await self.hass.services.async_call(
+                domain, service, {"entity_id": target_entity}, blocking=True
+            )
 
     async def _flush_buffer_ws(self, ws):
         """Transmit buffered backlog over WebSocket."""
@@ -401,7 +411,88 @@ class SharegyBridge:
                 "source": "homeassistant",
             })
 
-        # 2. Submeters & Individual Sensors
+        # 2. BWWP (Brauchwasser) Bundle
+        bwwp_name = self.entry_data.get(CONF_BWWP_NAME, "Brauchwasser").strip()
+        bwwp_p = _get_float_val(self.entry_data.get(CONF_BWWP_POWER))
+        if bwwp_p is not None:
+            packets.append({
+                "identifier": bwwp_name,
+                "device": bwwp_name,
+                "id": bwwp_name,
+                "metric": "power",
+                "unit": "W",
+                "role": "consumer",
+                "val": bwwp_p,
+                "value": bwwp_p,
+                "ts": now_sec,
+                "source": "homeassistant",
+            })
+
+        bwwp_t = _get_float_val(self.entry_data.get(CONF_BWWP_TEMP))
+        if bwwp_t is not None:
+            packets.append({
+                "identifier": bwwp_name,
+                "device": bwwp_name,
+                "id": bwwp_name,
+                "metric": "temperature",
+                "unit": "°C",
+                "role": "sensor",
+                "val": bwwp_t,
+                "value": bwwp_t,
+                "ts": now_sec,
+                "source": "homeassistant",
+            })
+
+        # 3. Heatpump Bundle
+        hp_name = self.entry_data.get(CONF_HEATPUMP_NAME, "Waermepumpe").strip()
+        hp_p = _get_float_val(self.entry_data.get(CONF_HEATPUMP_POWER))
+        if hp_p is not None:
+            packets.append({
+                "identifier": hp_name,
+                "device": hp_name,
+                "id": hp_name,
+                "metric": "power",
+                "unit": "W",
+                "role": "consumer",
+                "val": hp_p,
+                "value": hp_p,
+                "ts": now_sec,
+                "source": "homeassistant",
+            })
+
+        hp_t = _get_float_val(self.entry_data.get(CONF_HEATPUMP_TEMP))
+        if hp_t is not None:
+            packets.append({
+                "identifier": hp_name,
+                "device": hp_name,
+                "id": hp_name,
+                "metric": "temperature",
+                "unit": "°C",
+                "role": "sensor",
+                "val": hp_t,
+                "value": hp_t,
+                "ts": now_sec,
+                "source": "homeassistant",
+            })
+
+        # 4. Wallbox Bundle
+        wb_name = self.entry_data.get(CONF_WALLBOX_NAME, "Wallbox").strip()
+        wb_p = _get_float_val(self.entry_data.get(CONF_WALLBOX_POWER))
+        if wb_p is not None:
+            packets.append({
+                "identifier": wb_name,
+                "device": wb_name,
+                "id": wb_name,
+                "metric": "power",
+                "unit": "W",
+                "role": "consumer",
+                "val": wb_p,
+                "value": wb_p,
+                "ts": now_sec,
+                "source": "homeassistant",
+            })
+
+        # 5. Other Submeters & Individual Sensors
         submeters = self.entry_data.get(CONF_SUBMETER_SENSORS, [])
         if isinstance(submeters, list):
             for ent_id in submeters:
@@ -414,6 +505,8 @@ class SharegyBridge:
 
                     packets.append({
                         "identifier": ident,
+                        "device": ident,
+                        "id": ident,
                         "metric": metric,
                         "unit": unit,
                         "role": "sensor" if metric == "temperature" else "consumer",

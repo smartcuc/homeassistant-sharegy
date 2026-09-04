@@ -11,17 +11,27 @@
         }
       },
       "entities": {
-        "title": "Assign Sensors & Load Control",
-        "description": "Select which Home Assistant sensors should be streamed to Sharegy and choose controllable switches/relays.",
+        "title": "EMS Core Metrics & Device Bundles",
+        "description": "Map your Home Assistant sensors and switches to unified Sharegy device cards (e.g. BWWP power + temperature + SG-Ready switch).",
         "data": {
-          "grid_power_sensor": "Grid Power (W / kW)",
-          "pv_power_sensor": "Solar Generation / PV (W / kW)",
-          "battery_power_sensor": "Battery Power (W / kW)",
-          "battery_soc_sensor": "Battery State of Charge (SoC %)",
-          "load_power_sensor": "Total House Demand (W / kW)",
-          "submeter_sensors": "Submeters / Smart Plugs (Multi-Select)",
-          "control_switches": "Bidirectional Control / Controllable Relays (SG-Ready)",
-          "sync_interval": "Sync Interval (Seconds)"
+          "grid_power_sensor": "⚡ Grid Power (W / kW)",
+          "pv_power_sensor": "☀️ Solar Generation / PV (W / kW)",
+          "battery_power_sensor": "🔋 Battery Power (W / kW)",
+          "battery_soc_sensor": "🔋 Battery State of Charge (SoC %)",
+          "load_power_sensor": "🏠 Total House Demand (W / kW)",
+          "bwwp_name": "♨️ BWWP Device Identifier",
+          "bwwp_power": "♨️ BWWP Power Sensor (W)",
+          "bwwp_temp": "♨️ BWWP Temperature Sensor (°C)",
+          "bwwp_switch": "♨️ BWWP SG-Ready Switch / Relay",
+          "heatpump_name": "🔥 Heat Pump Device Identifier",
+          "heatpump_power": "🔥 Heat Pump Power Sensor (W)",
+          "heatpump_temp": "🔥 Heat Pump Temperature Sensor (°C)",
+          "heatpump_switch": "🔥 Heat Pump SG-Ready Switch",
+          "wallbox_name": "🚗 Wallbox Device Identifier",
+          "wallbox_power": "🚗 Wallbox Power Sensor (W)",
+          "wallbox_switch": "🚗 Wallbox Charge Enable Switch",
+          "submeter_sensors": "📊 Other Submeters / Sensors (Multi-Select)",
+          "sync_interval": "⏱️ Sync Interval (Seconds)"
         }
       }
     },
@@ -36,17 +46,27 @@
   "options": {
     "step": {
       "init": {
-        "title": "Edit Sharegy Sensors",
-        "description": "Update your sensor and controllable device mappings live.",
+        "title": "Edit Sharegy Sensors & Devices",
+        "description": "Update your sensor and device bundle mappings live.",
         "data": {
-          "grid_power_sensor": "Grid Power (W / kW)",
-          "pv_power_sensor": "Solar Generation / PV (W / kW)",
-          "battery_power_sensor": "Battery Power (W / kW)",
-          "battery_soc_sensor": "Battery State of Charge (SoC %)",
-          "load_power_sensor": "Total House Demand (W / kW)",
-          "submeter_sensors": "Submeters / Smart Plugs",
-          "control_switches": "Bidirectional Control / Controllable Relays",
-          "sync_interval": "Sync Interval (Seconds)"
+          "grid_power_sensor": "⚡ Grid Power (W / kW)",
+          "pv_power_sensor": "☀️ Solar Generation / PV (W / kW)",
+          "battery_power_sensor": "🔋 Battery Power (W / kW)",
+          "battery_soc_sensor": "🔋 Battery State of Charge (SoC %)",
+          "load_power_sensor": "🏠 Total House Demand (W / kW)",
+          "bwwp_name": "♨️ BWWP Device Identifier",
+          "bwwp_power": "♨️ BWWP Power Sensor (W)",
+          "bwwp_temp": "♨️ BWWP Temperature Sensor (°C)",
+          "bwwp_switch": "♨️ BWWP SG-Ready Switch / Relay",
+          "heatpump_name": "🔥 Heat Pump Device Identifier",
+          "heatpump_power": "🔥 Heat Pump Power Sensor (W)",
+          "heatpump_temp": "🔥 Heat Pump Temperature Sensor (°C)",
+          "heatpump_switch": "🔥 Heat Pump SG-Ready Switch",
+          "wallbox_name": "🚗 Wallbox Device Identifier",
+          "wallbox_power": "🚗 Wallbox Power Sensor (W)",
+          "wallbox_switch": "🚗 Wallbox Charge Enable Switch",
+          "submeter_sensors": "📊 Other Submeters / Sensors",
+          "sync_interval": "⏱️ Sync Interval (Seconds)"
         }
       }
     }

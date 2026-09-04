@@ -11,17 +11,27 @@
         }
       },
       "entities": {
-        "title": "Sensoren & Lastmanagement zuordnen",
-        "description": "Wähle deine Home Assistant Sensoren für das Energiemanagement sowie Schalter/Relais für die Laststeuerung aus.",
+        "title": "EMS Kern-Zähler & Geräte-Bündel",
+        "description": "Ordne deine Home Assistant Sensoren und Schalter den Sharegy Geräten zu. Mehrere Sensoren (Leistung, Temperatur, Schalter) werden unter demselben Gerätenamen zu einer intelligenten Kachel gebündelt.",
         "data": {
-          "grid_power_sensor": "Netzleistung (W / kW)",
-          "pv_power_sensor": "PV-Erzeugung Leistung (W / kW)",
-          "battery_power_sensor": "Batteriespeicher Leistung (W / kW)",
-          "battery_soc_sensor": "Batterie Ladestand / SoC (%)",
-          "load_power_sensor": "Gesamter Hausverbrauch (W / kW, optional)",
-          "submeter_sensors": "Sonstige Geräte & Submeter (Multi-Select)",
-          "control_switches": "Rückkanal / Schaltbare Verbraucher (SG-Ready, Relais)",
-          "sync_interval": "Übertragungsintervall (Sekunden)"
+          "grid_power_sensor": "⚡ Netzleistung (W / kW)",
+          "pv_power_sensor": "☀️ PV-Erzeugung Leistung (W / kW)",
+          "battery_power_sensor": "🔋 Batteriespeicher Leistung (W / kW)",
+          "battery_soc_sensor": "🔋 Batterie Ladestand / SoC (%)",
+          "load_power_sensor": "🏠 Gesamter Hausverbrauch (W / kW, optional)",
+          "bwwp_name": "♨️ BWWP Gerätekennung",
+          "bwwp_power": "♨️ BWWP Leistungssensor (W)",
+          "bwwp_temp": "♨️ BWWP Temperatursensor (°C)",
+          "bwwp_switch": "♨️ BWWP SG-Ready Schalter / Relais",
+          "heatpump_name": "🔥 Wärmepumpe Gerätekennung",
+          "heatpump_power": "🔥 Wärmepumpe Leistungssensor (W)",
+          "heatpump_temp": "🔥 Wärmepumpe Temperatursensor (°C)",
+          "heatpump_switch": "🔥 Wärmepumpe SG-Ready Schalter",
+          "wallbox_name": "🚗 Wallbox Gerätekennung",
+          "wallbox_power": "🚗 Wallbox Leistungssensor (W)",
+          "wallbox_switch": "🚗 Wallbox Ladefreigabe Schalter",
+          "submeter_sensors": "📊 Sonstige Einzelsensoren / Submeter (Multi-Select)",
+          "sync_interval": "⏱️ Übertragungsintervall (Sekunden)"
         }
       }
     },
@@ -36,17 +46,27 @@
   "options": {
     "step": {
       "init": {
-        "title": "Sharegy Sensoren bearbeiten",
-        "description": "Passe die Zuordnung deiner Sensoren und steuerbaren Geräte live an.",
+        "title": "Sharegy Sensoren & Geräte anpassen",
+        "description": "Passe die Zuordnung deiner Zähler, Wärmepumpen, BWWP und Wallbox live an.",
         "data": {
-          "grid_power_sensor": "Netzleistung (W / kW)",
-          "pv_power_sensor": "PV-Erzeugung Leistung (W / kW)",
-          "battery_power_sensor": "Batteriespeicher Leistung (W / kW)",
-          "battery_soc_sensor": "Batterie Ladestand / SoC (%)",
-          "load_power_sensor": "Gesamter Hausverbrauch (W / kW)",
-          "submeter_sensors": "Sonstige Geräte & Submeter",
-          "control_switches": "Rückkanal / Schaltbare Verbraucher",
-          "sync_interval": "Übertragungsintervall (Sekunden)"
+          "grid_power_sensor": "⚡ Netzleistung (W / kW)",
+          "pv_power_sensor": "☀️ PV-Erzeugung Leistung (W / kW)",
+          "battery_power_sensor": "🔋 Batteriespeicher Leistung (W / kW)",
+          "battery_soc_sensor": "🔋 Batterie Ladestand / SoC (%)",
+          "load_power_sensor": "🏠 Gesamter Hausverbrauch (W / kW)",
+          "bwwp_name": "♨️ BWWP Gerätekennung",
+          "bwwp_power": "♨️ BWWP Leistungssensor (W)",
+          "bwwp_temp": "♨️ BWWP Temperatursensor (°C)",
+          "bwwp_switch": "♨️ BWWP SG-Ready Schalter / Relais",
+          "heatpump_name": "🔥 Wärmepumpe Gerätekennung",
+          "heatpump_power": "🔥 Wärmepumpe Leistungssensor (W)",
+          "heatpump_temp": "🔥 Wärmepumpe Temperatursensor (°C)",
+          "heatpump_switch": "🔥 Wärmepumpe SG-Ready Schalter",
+          "wallbox_name": "🚗 Wallbox Gerätekennung",
+          "wallbox_power": "🚗 Wallbox Leistungssensor (W)",
+          "wallbox_switch": "🚗 Wallbox Ladefreigabe Schalter",
+          "submeter_sensors": "📊 Sonstige Einzelsensoren",
+          "sync_interval": "⏱️ Übertragungsintervall (Sekunden)"
         }
       }
     }

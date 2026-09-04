@@ -6,21 +6,34 @@ DOMAIN = "sharegy"
 CONF_HOST = "host"
 CONF_WS_URL = "ws_url"
 CONF_HOME_TOKEN = "home_token"
-CONF_PROTOCOL = "protocol"  # "websocket" or "rest"
+CONF_PROTOCOL = "protocol"
 
-# Entity Role Selectors (EMS)
+# EMS Core Selectors
 CONF_GRID_POWER_SENSOR = "grid_power_sensor"
-CONF_GRID_ENERGY_SENSOR = "grid_energy_sensor"
 CONF_PV_POWER_SENSOR = "pv_power_sensor"
-CONF_PV_ENERGY_SENSOR = "pv_energy_sensor"
 CONF_BATTERY_POWER_SENSOR = "battery_power_sensor"
 CONF_BATTERY_SOC_SENSOR = "battery_soc_sensor"
 CONF_LOAD_POWER_SENSOR = "load_power_sensor"
-CONF_SUBMETER_SENSORS = "submeter_sensors"
 
-# Bidirectional Control (Rückkanal)
-CONF_CONTROL_SWITCHES = "control_switches"
-CONF_CONTROL_NUMBERS = "control_numbers"
+# 1. BWWP (Brauchwasserwärmepumpe) Device Bundle
+CONF_BWWP_NAME = "bwwp_name"
+CONF_BWWP_POWER = "bwwp_power"
+CONF_BWWP_TEMP = "bwwp_temp"
+CONF_BWWP_SWITCH = "bwwp_switch"
+
+# 2. Heatpump (Wärmepumpe) Device Bundle
+CONF_HEATPUMP_NAME = "heatpump_name"
+CONF_HEATPUMP_POWER = "heatpump_power"
+CONF_HEATPUMP_TEMP = "heatpump_temp"
+CONF_HEATPUMP_SWITCH = "heatpump_switch"
+
+# 3. Wallbox (EV Charger) Device Bundle
+CONF_WALLBOX_NAME = "wallbox_name"
+CONF_WALLBOX_POWER = "wallbox_power"
+CONF_WALLBOX_SWITCH = "wallbox_switch"
+
+# 4. Other Submeters / Sensors
+CONF_SUBMETER_SENSORS = "submeter_sensors"
 
 # Buffer & Sync Options
 CONF_SYNC_INTERVAL = "sync_interval"
@@ -30,4 +43,4 @@ DEFAULT_HOST = "https://sharegy.de"
 DEFAULT_WS_URL = "wss://sharegy.de/ws/energy/"
 DEFAULT_PROTOCOL = "websocket"
 DEFAULT_SYNC_INTERVAL = 5  # Seconds
-DEFAULT_OFFLINE_BUFFER_MAX_HOURS = 48  # 48 hours local store & forward
+DEFAULT_OFFLINE_BUFFER_MAX_HOURS = 48
