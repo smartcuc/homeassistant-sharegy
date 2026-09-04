@@ -13,47 +13,35 @@ from homeassistant.helpers import selector
 
 from .const import (
     DOMAIN,
-    CONF_HOST,
     CONF_WS_URL,
     CONF_HOME_TOKEN,
-    CONF_PROTOCOL,
     CONF_GRID_POWER_SENSOR,
-    CONF_GRID_ENERGY_SENSOR,
     CONF_PV_POWER_SENSOR,
-    CONF_PV_ENERGY_SENSOR,
     CONF_BATTERY_POWER_SENSOR,
     CONF_BATTERY_SOC_SENSOR,
     CONF_LOAD_POWER_SENSOR,
     CONF_SUBMETER_SENSORS,
     CONF_CONTROL_SWITCHES,
-    CONF_CONTROL_NUMBERS,
     CONF_SYNC_INTERVAL,
-    DEFAULT_HOST,
     DEFAULT_WS_URL,
-    DEFAULT_PROTOCOL,
     DEFAULT_SYNC_INTERVAL,
 )
 
 _LOGGER = logging.getLogger(__name__)
 
 
-def extract_token_from_input(user_input: dict[str, Any]) -> str:
+def extract_token(user_input: dict[str, Any]) -> str:
     """Extract clean token from either URL or token input field."""
     ws_url = (user_input.get(CONF_WS_URL) or "").strip()
     token_input = (user_input.get(CONF_HOME_TOKEN) or "").strip()
 
-    if ws_url:
-        match = re.search(r"/ws/energy/([a-zA-Z0-9_-]+)", ws_url)
-        if match:
-            return match.group(1).strip()
+    for candidate in [ws_url, token_input]:
+        if candidate:
+            match = re.search(r"/ws/energy/([a-zA-Z0-9_-]+)", candidate)
+            if match:
+                return match.group(1).strip()
 
-    if token_input:
-        match = re.search(r"/ws/energy/([a-zA-Z0-9_-]+)", token_input)
-        if match:
-            return match.group(1).strip()
-        return token_input
-
-    return ""
+    return token_input
 
 
 class SharegyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -71,7 +59,7 @@ class SharegyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
 
         if user_input is not None:
-            token = extract_token_from_input(user_input)
+            token = extract_token(user_input)
             if not token:
                 errors["base"] = "invalid_auth"
             else:
@@ -81,21 +69,8 @@ class SharegyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         data_schema = vol.Schema(
             {
-                vol.Optional(
-                    CONF_WS_URL,
-                    default=DEFAULT_WS_URL,
-                    description={"suggested_value": DEFAULT_WS_URL},
-                ): str,
+                vol.Required(CONF_WS_URL, default=DEFAULT_WS_URL): str,
                 vol.Optional(CONF_HOME_TOKEN, default=""): str,
-                vol.Optional(CONF_PROTOCOL, default=DEFAULT_PROTOCOL): selector.SelectSelector(
-                    selector.SelectSelectorConfig(
-                        options=[
-                            {"value": "websocket", "label": "🔒 WebSocket (WSS via Port 443 - Empfohlen)"},
-                            {"value": "rest", "label": "🌐 REST API (HTTP Ingest)"},
-                        ],
-                        mode=selector.SelectSelectorMode.DROPDOWN,
-                    )
-                ),
             }
         )
 
@@ -103,7 +78,6 @@ class SharegyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="user",
             data_schema=data_schema,
             errors=errors,
-            description_placeholders={"docs_url": "https://sharegy.de/docs"},
         )
 
     async def async_step_entities(
@@ -118,33 +92,22 @@ class SharegyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 data=final_data,
             )
 
-        # Build schema with unrestricted Entity Selectors so any sensor/switch can be selected
         entity_schema = vol.Schema(
             {
                 vol.Optional(CONF_GRID_POWER_SENSOR): selector.EntitySelector(
-                    selector.EntitySelectorConfig(
-                        domain=["sensor"],
-                    )
+                    selector.EntitySelectorConfig(domain=["sensor"])
                 ),
                 vol.Optional(CONF_PV_POWER_SENSOR): selector.EntitySelector(
-                    selector.EntitySelectorConfig(
-                        domain=["sensor"],
-                    )
+                    selector.EntitySelectorConfig(domain=["sensor"])
                 ),
                 vol.Optional(CONF_BATTERY_POWER_SENSOR): selector.EntitySelector(
-                    selector.EntitySelectorConfig(
-                        domain=["sensor"],
-                    )
+                    selector.EntitySelectorConfig(domain=["sensor"])
                 ),
                 vol.Optional(CONF_BATTERY_SOC_SENSOR): selector.EntitySelector(
-                    selector.EntitySelectorConfig(
-                        domain=["sensor"],
-                    )
+                    selector.EntitySelectorConfig(domain=["sensor"])
                 ),
                 vol.Optional(CONF_LOAD_POWER_SENSOR): selector.EntitySelector(
-                    selector.EntitySelectorConfig(
-                        domain=["sensor"],
-                    )
+                    selector.EntitySelectorConfig(domain=["sensor"])
                 ),
                 vol.Optional(CONF_SUBMETER_SENSORS): selector.EntitySelector(
                     selector.EntitySelectorConfig(
@@ -202,71 +165,61 @@ class SharegyOptionsFlowHandler(config_entries.OptionsFlow):
 
         data = self.config_entry.data
 
-        options_schema = vol.Schema(
-            {
-                vol.Optional(
-                    CONF_GRID_POWER_SENSOR,
-                    default=data.get(CONF_GRID_POWER_SENSOR),
-                ): selector.EntitySelector(
+        fields = {}
+        for key in [
+            CONF_GRID_POWER_SENSOR,
+            CONF_PV_POWER_SENSOR,
+            CONF_BATTERY_POWER_SENSOR,
+            CONF_BATTERY_SOC_SENSOR,
+            CONF_LOAD_POWER_SENSOR,
+        ]:
+            if data.get(key):
+                fields[vol.Optional(key, default=data[key])] = selector.EntitySelector(
                     selector.EntitySelectorConfig(domain=["sensor"])
-                ),
-                vol.Optional(
-                    CONF_PV_POWER_SENSOR,
-                    default=data.get(CONF_PV_POWER_SENSOR),
-                ): selector.EntitySelector(
+                )
+            else:
+                fields[vol.Optional(key)] = selector.EntitySelector(
                     selector.EntitySelectorConfig(domain=["sensor"])
-                ),
-                vol.Optional(
-                    CONF_BATTERY_POWER_SENSOR,
-                    default=data.get(CONF_BATTERY_POWER_SENSOR),
-                ): selector.EntitySelector(
-                    selector.EntitySelectorConfig(domain=["sensor"])
-                ),
-                vol.Optional(
-                    CONF_BATTERY_SOC_SENSOR,
-                    default=data.get(CONF_BATTERY_SOC_SENSOR),
-                ): selector.EntitySelector(
-                    selector.EntitySelectorConfig(domain=["sensor"])
-                ),
-                vol.Optional(
-                    CONF_LOAD_POWER_SENSOR,
-                    default=data.get(CONF_LOAD_POWER_SENSOR),
-                ): selector.EntitySelector(
-                    selector.EntitySelectorConfig(domain=["sensor"])
-                ),
-                vol.Optional(
-                    CONF_SUBMETER_SENSORS,
-                    default=data.get(CONF_SUBMETER_SENSORS, []),
-                ): selector.EntitySelector(
+                )
+
+        if data.get(CONF_SUBMETER_SENSORS):
+            fields[vol.Optional(CONF_SUBMETER_SENSORS, default=data[CONF_SUBMETER_SENSORS])] = (
+                selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain=["sensor"], multiple=True)
+                )
+            )
+        else:
+            fields[vol.Optional(CONF_SUBMETER_SENSORS)] = selector.EntitySelector(
+                selector.EntitySelectorConfig(domain=["sensor"], multiple=True)
+            )
+
+        if data.get(CONF_CONTROL_SWITCHES):
+            fields[vol.Optional(CONF_CONTROL_SWITCHES, default=data[CONF_CONTROL_SWITCHES])] = (
+                selector.EntitySelector(
                     selector.EntitySelectorConfig(
-                        domain=["sensor"],
-                        multiple=True,
+                        domain=["switch", "input_boolean", "light"], multiple=True
                     )
-                ),
-                vol.Optional(
-                    CONF_CONTROL_SWITCHES,
-                    default=data.get(CONF_CONTROL_SWITCHES, []),
-                ): selector.EntitySelector(
-                    selector.EntitySelectorConfig(
-                        domain=["switch", "input_boolean", "light"],
-                        multiple=True,
-                    )
-                ),
-                vol.Optional(
-                    CONF_SYNC_INTERVAL,
-                    default=data.get(CONF_SYNC_INTERVAL, DEFAULT_SYNC_INTERVAL),
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(
-                        min=1,
-                        max=60,
-                        unit_of_measurement="s",
-                        mode=selector.NumberSelectorMode.SLIDER,
-                    )
-                ),
-            }
+                )
+            )
+        else:
+            fields[vol.Optional(CONF_CONTROL_SWITCHES)] = selector.EntitySelector(
+                selector.EntitySelectorConfig(
+                    domain=["switch", "input_boolean", "light"], multiple=True
+                )
+            )
+
+        fields[vol.Optional(CONF_SYNC_INTERVAL, default=data.get(CONF_SYNC_INTERVAL, DEFAULT_SYNC_INTERVAL))] = (
+            selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=1,
+                    max=60,
+                    unit_of_measurement="s",
+                    mode=selector.NumberSelectorMode.SLIDER,
+                )
+            )
         )
 
         return self.async_show_form(
             step_id="init",
-            data_schema=options_schema,
+            data_schema=vol.Schema(fields),
         )
