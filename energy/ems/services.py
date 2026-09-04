@@ -341,9 +341,18 @@ def build_device_signals(user):
     # 8. Gesamthausbedarf & Netz-Balancierung
     signals["load"]["tracked_consumption"] = load_power
 
+    # Physikalische Energiebilanz über alle Messstellen (PV + Batterie + Netz - Einspeisung - Ladung):
+    derived_balance = (
+        signals["pv"]["production"]
+        + signals["battery"]["discharge"]
+        + signals["grid"]["import"]
+        - signals["battery"]["charge"]
+        - signals["grid"]["export"]
+    )
+
     if measured_load is not None and measured_load > 0:
+        # Ganzer Hauszähler / WR-Load-Kanal vorhanden
         signals["load"]["consumption"] = round(measured_load, 2)
-        # Nur wenn KEIN Netzzähler existiert, physikalische Netzeinspeisung/Netzbezug schätzen
         if not has_explicit_grid_meter and signals["grid"]["import"] == 0 and signals["grid"]["export"] == 0:
             surplus = (
                 signals["pv"]["production"]
@@ -355,8 +364,12 @@ def build_device_signals(user):
                 signals["grid"]["export"] = round(surplus, 2)
             elif surplus < -20:
                 signals["grid"]["import"] = round(abs(surplus), 2)
+    elif derived_balance > 0 and (has_explicit_grid_meter or signals["grid"]["export"] > 0 or signals["grid"]["import"] > 0 or signals["battery"]["discharge"] > 0 or signals["pv"]["production"] > 0):
+        # Wenn physikalische Messstellen (PV, Batterie, Netzzähler) aktiv sind,
+        # entspricht der echte Gesamthausbedarf der physikalischen Energiebilanz:
+        signals["load"]["consumption"] = round(max(derived_balance, load_power), 2)
     elif load_power > 0:
-        # Direkte Messung durch Einzelmesswerte / Submeter
+        # Nur Submeter / Einzelsteckdosen vorhanden
         signals["load"]["consumption"] = round(load_power, 2)
         if not has_explicit_grid_meter and signals["grid"]["import"] == 0 and signals["grid"]["export"] == 0:
             surplus = (
@@ -370,27 +383,6 @@ def build_device_signals(user):
             elif surplus < -20:
                 signals["grid"]["import"] = round(abs(surplus), 2)
     else:
-        # Physikalische Bilanz: Bedarf = PV + Bat_Discharge + Grid_Import - Bat_Charge - Grid_Export
-        derived = (
-            signals["pv"]["production"]
-            + signals["battery"]["discharge"]
-            + signals["grid"]["import"]
-            - signals["battery"]["charge"]
-            - signals["grid"]["export"]
-        )
-        if derived > 10:
-            signals["load"]["consumption"] = round(derived, 2)
-        else:
-            # Falls Grid-Export noch nicht gemessen wurde, ist der PV-Überschuss nach Batterieladung Einspeisung
-            if signals["grid"]["export"] == 0 and signals["pv"]["production"] > (signals["battery"]["charge"] + 50):
-                base_load = max(load_power, 250.0)
-                surplus = signals["pv"]["production"] - signals["battery"]["charge"] - base_load
-                if surplus > 0:
-                    signals["grid"]["export"] = round(surplus, 2)
-                    signals["load"]["consumption"] = round(base_load, 2)
-                else:
-                    signals["load"]["consumption"] = max(round(derived, 2), load_power, 0.0)
-            else:
-                signals["load"]["consumption"] = max(round(derived, 2), load_power, 0.0)
+        signals["load"]["consumption"] = max(round(derived_balance, 2), load_power, 0.0)
 
     return signals

@@ -47,12 +47,12 @@ def calculate_energy_flow(signals):
     remaining_grid_import = max(0.0, grid_import - grid_to_battery)
 
     # 2. Reinen Hausverbrauch (Bedarf) berechnen / bereinigen:
-    # Der Hausverbrauch darf NIEMALS Batterieladung oder Netzeinspeisung enthalten!
-    if consumption <= 0 or (consumption >= (battery_charge + 10) and abs(consumption - (grid_import + production)) < 50):
-        # Bilanz: Bedarf = PV_nach_Ladung + Bat_Discharge + Grid_Import_nach_Ladung - Grid_Export
-        derived_consumption = (
-            remaining_pv + battery_discharge + remaining_grid_import - grid_export
-        )
+    # Physikalische Bilanz: Wenn mehr Energie aus PV/Speicher/Netz ins Haus fließt als Submeter einzeln erfassen,
+    # ist der Gesamthausbedarf die physikalische Summe aller zufließenden Quellen abzüglich Netzeinspeisung:
+    derived_consumption = (
+        remaining_pv + battery_discharge + remaining_grid_import - grid_export
+    )
+    if consumption <= 0 or (derived_consumption > 0 and derived_consumption > consumption):
         consumption = max(0.0, derived_consumption)
     else:
         # Falls die übergebene consumption fälschlicherweise die Batterieladung enthielt:
