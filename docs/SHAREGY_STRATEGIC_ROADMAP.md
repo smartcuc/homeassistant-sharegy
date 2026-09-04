@@ -142,13 +142,28 @@
 │          • WebSocket CSMS Server (`/ws/ocpp/<charge_point_id>/`) für Easee, openWB, cFos, Heidelberg, Mennekes, Alfen
 │          • 4 Intelligente Lademodi: PV-Überschuss, Börsenpreis-Tiefstpreise, Fast & Eco
 │          • `WallboxCard` Widget & `AddWallboxModal` mit Phasenumschaltung & Stromstärke-Slider
-  └── 2.26 ✅ **Autonome Batterie-Arbitrage & Sungrow iSolarCloud OpenAPI Control**:
-             • Bidirektionaler Inverter-Dispatch (`forced_charge`, `self_consumption`, `forced_discharge`)
-             • Dynamische Netzladung bei Negativ- und Tiefstpreisen (Tibber/EPEX) via automatischer Celery-Task
-             • Sub-Sekunden Statuscaching für Dashboard-Visualisierung
+  ├── 2.26 ✅ **Autonome Batterie-Arbitrage & Sungrow iSolarCloud OpenAPI Control**:
+│          • Bidirektionaler Inverter-Dispatch (`forced_charge`, `self_consumption`, `forced_discharge`)
+│          • Dynamische Netzladung bei Negativ- und Tiefstpreisen (Tibber/EPEX) via automatischer Celery-Task
+│          • Sub-Sekunden Statuscaching für Dashboard-Visualisierung
+  ├── 2.27 ✅ **Smart Load Management & Dispatch Hub (`/app/control`)**:
+│          • Live Power Budget Header ($P_\text{surplus} = P_\text{pv} - P_\text{load}$, SoC, Spotpreis, Schaltlast)
+│          • 4 Master-Autopilot-Modi (Smart Autopilot, Nur PV-Überschuss, Sparfuchs, Manuell)
+│          • Interaktive Prioritäten-Kaskade (Merit-Order) für solare Überschussverteilung
+│          • 24h-Fahrplan (Dispatch-Timeline) mit stündlicher Solar- & Preisallokation
+  ├── 2.28 ✅ **BWWP & Wärmepumpen SG-Ready Steuerung & Verdichterschutz**:
+│          • 4 SG-Ready Betriebszustände mit Wassertemperatur-Schwellen ($T_\text{min}=45^\circ\text{C}$, $T_\text{soll}=52^\circ\text{C}$, $T_\text{boost}=60^\circ\text{C}$, $T_\text{max}=65^\circ\text{C}$)
+│          • Integrierter Verdichter- & Taktschutz ($t_\text{run} \ge 20\,\text{min}$, $t_\text{cool} \ge 15\,\text{min}$)
+│          • Closed-Loop Aktorik über Outbound-WebSocket in Echtzeit
+  ├── 2.29 ✅ **Offizieller ioBroker Adapter (`ioBroker.sharegy`)**:
+│          • Multi-Sensor-Bündelung von Wirkleistung (W), Temperatur (°C) und Schaltrelais
+│          • WSS-Kopplung über TLS Port 443 mit Sub-100ms Reaktionszeit
+  └── 2.30 ✅ **Digitales Benutzerhandbuch & Wissensportal (15 Artikel DE/EN)**:
+             • 15 Handbuch-Artikel in 9 Kategorien im integrierten Support-Desk
+             • Dynamische FAQ-Deflection und Live-Editor
 
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ MEILENSTEIN 3: PAYMENT, MONETARISIERUNG & BILLING-ARCHITEKTUR (💳 EVALUIERUNG) │
+│ MEILENSTEIN 3: PAYMENT, MONETARISIERUNG & BILLING-ARCHITEKTUR (💳 OFFEN)      │
 └───────────────────────────────────────────────────────────────────────────────┘
   ├── 3.1 ⏳ **Tarif- & Plan-Modellierung**:
   │          • Free vs. Pro (Monatlich 4,99 € / Jährlich 49,99 €) & Vermieter-/Quartiers-Pakete
@@ -156,7 +171,6 @@
   ├── 3.2 ⏳ **Stripe / Payment Gateway Checkout & Customer Portal Flow**:
   │          • Reibungsloser Checkout ohne Medienbruch (SEPA-Lastschrift, Kreditkarte, Apple/Google Pay)
   │          • Self-Service Customer Portal für Abo-Kündigung, Zahlungsmittel-Update & Rechnungsdownload
-  │          • *(Hinweis: Zurückgestellt zur finalen Evaluierung der Zahlungsanbieter)*
   ├── 3.3 ⏳ **Automatische Rechnungsstellung & Fiskal-Sicherheit**:
   │          • PDF-Rechnungserstellung (ReportLab mit USt-Ausweis, fortlaufender Rechnungsnummer & Anschrift)
   │          • E-Mail-Versand mit PDF-Anhang bei erfolgreicher Abbuchung (`fiscal` Queue Prio 1)
@@ -165,67 +179,32 @@
              • SMTP/E-Mail-Server Erreichbarkeits-Überwachung für transaktionale Mails
 
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ MEILENSTEIN 4: ENERGY SHARING COMMUNITIES & CLEARING (Säule 2 - ✅ 95% LIVE)  │
+│ MEILENSTEIN 4: ENERGY SHARING COMMUNITIES & CLEARING (Säule 2 - ✅ 100% LIVE) │
 └───────────────────────────────────────────────────────────────────────────────┘
   ├── 4.1 ✅ Multi-Tenant RBAC & Rollenhierarchie (`admin`, `user_admin`, `helpdesk`, `auditor`, `member`)
   ├── 4.2 ✅ Revisionssicheres Audit-Log für Tenant-Events (`accounts.AuditLog`)
   ├── 4.3 ✅ Tenant-Dashboard, Einladungslinks & Onboarding-Flow (`/app/tenant`)
-  ├── 4.4 ✅ **15-Minuten Community-Bilanzierung & Resiliente Ingestion (OBIS 1.8.0 / 2.8.0)**:
-  │          • Eichrechtskonforme 15m-Slot-Aggregation in `BalanceSlot`
-  │          • Automatische Plausibilitätsprüfung & Ausreißer-Erkennung (`validate_obis_reading`)
-  │          • Asynchrone Nachberechnung bei verzögerten Zählerständen (`recalculate_late_slot`)
-  │          • Wöchentlicher 30-Tage Reconciliation-Cron (`reconcile_balance_last_30d`)
-  │          • Strikte Tenant-Isolation und Rollenprüfung für Zähler
-  ├── 4.5 ✅ **Energy Sharing Community Cockpit (Frontend & Backend API)**:
-  │          • Aggregations-API (`GET /api/billing/community/cockpit/`)
-  │          • 5 Hero-KPIs: Produziert (2.8.0), Verbraucht (1.8.0), Geteilt (Autarkie %), Zugekauft (Reststrom) & Ersparnis (€)
-  │          • 15-Minuten Lastgang-Timeline der letzten 24 Stunden
-  │          • 48-Stunden KI-Erzeugungsprognose mit Hervorhebung günstiger Ladefenster (*Peak Windows*)
-  │          • Tab-Navigation (`⚡ Energy Cockpit`, `💰 Tarife & Abrechnungen`, `👥 Mitglieder & Zähler`, `📜 Audit`)
-  ├── 4.6 ✅ **Sharing-Tarife & Automatische Monatsabrechnungs-Engine (Clearing)**:
-  │          • `CommunityTariff`: Bezugspreis (Ct/kWh), Einspeisevergütung (Ct/kWh), Community-Umlage, Netzentgelt-Rabatt (§ 42b EnWG)
-  │          • `CommunityMonthlyStatement`: Cent-genaue Verrechnung von Gutschriften & Forderungen mit Netto-Saldo (€)
-  │          • 1-Klick Abrechnungs-Trigger im Frontend & Django Admin Integration
-  ├── 4.7 ✅ **Zentrales Multi-Community Management Hub & Portfolio-Dashboard**:
-  │          • Portfolio-Übersicht (`/admin/communities`) mit Portfolio-Gesamterzeugung, Autarkie & Ersparnis
-  │          • Detaillierte Drilldown-Ansicht für jede Energiegemeinschaft (Teilnehmer, Zähler, Tarife, Einstellungen)
-  │          • Community-Rundschreiben & Broadcast-Mitteilungen (`CommunityAnnouncement`)
-  ├── 4.8 ✅ **Gesetzlicher Ingestion- & Reststrom-Leitfaden (MsbG & MaKo / MSCONS)**:
-  │          • Publikationsreifer Guide [`docs/ENERGY_SHARING_METER_INGEST_GUIDE.md`](file:///c:/Users/Public/Dev/eswes/docs/ENERGY_SHARING_METER_INGEST_GUIDE.md)
-  │          • 3 Zählerpfade (wMSB REST/SFTP, gMSB HAN-Schnittstelle, Submetering)
-  │          • VNB-Marktkommunikation & Vermeidung von Doppelabrechnungen beim Reststromversorger
-  ├── 4.9 ✅ **PDF-Monatsabrechnungsnachweise & Multi-Format Exporte (Excel, CSV, XML / ERP)**:
-  │          • Druckfähiges ReportLab PDF gem. § 42b EnWG mit Abrechnungsnummer, Mengenbilanz & Saldobox
-  │          • Excel-Export (`.xlsx`) mit Spaltenformatierung, Währungsformaten & automatischen Summenformeln
-  │          • CSV-Export mit UTF-8 BOM und Semikolon für direkte DATEV-/Excel-Kompatibilität
-  │          • Standardisierter XML-Export (`<EnergySharingSettlementExport>`) für Hausverwaltungs- & ERP-Schnittstellen
-  │          • Integriert im Tenant-Dashboard (`TenantDashboard.jsx`) & Multi-Community Hub (`CommunitiesManagementHub.jsx`)
-  ├── 4.10 ✅ **Erweiterte Allokationsmodelle & Beteiligungsquoten (§ 42b / § 42a EnWG)**:
-  │          • 3 Allokationsmodelle: Dynamisch (15m Lastgang), Statisch (MEA-Quoten / Miteigentumsanteile), Hybrid (Vorrang + Überlauf)
-  │          • `CommunityMemberShare` Modell mit MEA-Zähler/Nenner, kWp-Zuweisung, automatischer %-Berechnung & 100%-Normierung
-  │          • 15-Minuten-scharfe Allokations-Engine in `billing/services_sharing_settlement.py`
-  │          • Live 3-Modelle Vergleichs- & Simulations-Engine (`/api/billing/community/allocation-preview/`)
-  │          • Integriert im Multi-Community Hub (`CommunitiesManagementHub.jsx`) & Mitglieder-Dashboard (`TenantDashboard.jsx`)
-  ├── 4.11 ✅ **wMSB Smart Meter Hub & API-Konnektor (Discovergy, inexogy, Solandeo)**:
-  │          • REST API Ingest für 15m-Zählerstände (1.8.0/2.8.0) & Live-Wirkleistung (W)
-  │          • Integriertes Smart-Meter-Verzeichnis mit 3 Zählerpfaden (wMSB REST, gMSB HAN, Submetering)
-  │          • Wechsel-Leitfaden für Mitglieder im Admin-Dashboard (`MsbSmartMeterHub.jsx`)
-  └── 4.12 ✅ **Community Viral Growth & Social Referral System**:
-             • `CommunityShareModal` & `CommunityInviteCard` mit 1-Klick WhatsApp-, Telegram- & E-Mail-Teilen
-             • Dynamische Share-Cards mit CO₂-Einsparung, Autarkie-Badges & QR-Code-Generator
-             • Umfassendes Social Share Kit [`docs/marketing/COMMUNITY_AND_SOCIAL_SHARE_KIT.md`](file:///c:/Users/Public/Dev/eswes/docs/marketing/COMMUNITY_AND_SOCIAL_SHARE_KIT.md)
+  ├── 4.4 ✅ 15-Minuten Community-Bilanzierung & Resiliente Ingestion (OBIS 1.8.0 / 2.8.0)
+  ├── 4.5 ✅ Energy Sharing Community Cockpit (Frontend & Backend API)
+  ├── 4.6 ✅ Sharing-Tarife & Automatische Monatsabrechnungs-Engine (Clearing)
+  ├── 4.7 ✅ Zentrales Multi-Community Management Hub & Portfolio-Dashboard
+  ├── 4.8 ✅ Gesetzlicher Ingestion- & Reststrom-Leitfaden (MsbG & MaKo / MSCONS)
+  ├── 4.9 ✅ PDF-Monatsabrechnungsnachweise & Multi-Format Exporte (Excel, CSV, XML / ERP)
+  ├── 4.10 ✅ Erweiterte Allokationsmodelle & Beteiligungsquoten (§ 42b / § 42a EnWG - Statisch, Dynamisch, Hybrid)
+  ├── 4.11 ✅ wMSB Smart Meter Hub & API-Konnektor (Discovergy, inexogy, Solandeo)
+  └── 4.12 ✅ Community Viral Growth & Social Referral System
 
 ---
 
-## 📋 4. Konkreter Action-Plan für die nächsten Schritte (Prioritätenmatrix)
+## 📋 4. Konkreter Action-Plan (Ausschließlich offene Aufgaben)
 
-| Schritt | Modul | Maßnahme | Status / Prio | Ziel & Nächste Entscheidung |
+| Schritt | Modul | Maßnahme | Status / Prio | Ziel & Umsetzung |
 |---|---|---|:---:|---|
-| **Step 1** | `billing/sharing/` | **Beteiligungsquoten & Allokationsmodelle**: Unterstützung von festen Beteiligungs-% an Gemeinschaftsanlagen (statische Quoten vs. dynamische Allokation vs. Hybrid) | ✅ **100% Live** | Flexible Allokation bei gemeinsamen Dachanlagen / Mieterstrom |
-| **Step 2** | `grid/enwg/` | **§ 14a EnWG Steuerbox & Dimmung**: Dynamische Leistungsbegrenzung auf 4,2 kW für SteuVE (WP, Wallbox, Speicher) via REST/Modbus | ⚡ **P1 (Nächster Schritt)** | Gesetzliche Netzbetreiber-Konformität in Deutschland |
-| **Step 3** | `billing/tariffs/` | **Dynamische & Börsenpreis-gekoppelte Tarife**: Indexierte Sharing-Tarife (Day-Ahead Spotpreis + Formelaufschlag) | ⚡ **P2** | Dynamische Preissignale innerhalb der Community |
-| **Step 4** | `billing/payment/` | **Payment- & Provider-Evaluierung**: Klärung von Zahlungsdienstleistern (Stripe, SEPA, GoCardless) für automatischen Beitragseinzug | 💳 **P2 (Nach Evaluierung)** | Vorbereitung des automatischen Einzugs von Mitgliedsbeiträgen |
-| **Step 5** | `billing/edifact/` | **Standardisierte Marktkommunikations-Bridge**: Export-Mapping auf MSCONS / EDIFACT zur VNB-Abstimmung | ⚡ **P3** | Nahtloser Austausch mit Netzbetreibern und Aggregatoren |
+| **Prio 1** | `grid/enwg/` | **§ 14a EnWG Steuerbox & Dimmung**: Dynamische Leistungsbegrenzung auf 4,2 kW für SteuVE (WP, Wallbox, Speicher) via REST/Modbus/EEBUS | ⚡ **P1 (Nächster Fokus)** | Gesetzliche Netzbetreiber-Konformität & Abregelungs-Protokollierung |
+| **Prio 2** | `billing/payment/` | **Stripe & SEPA Checkout Integration**: Anbindung von Stripe Subscription Billing für Free vs. Pro (4,99 €/Monat) inkl. Webhooks | 💳 **P2** | Automatisierte Monetarisierung & Self-Service Portal |
+| **Prio 3** | `billing/tariffs/` | **Dynamische Börsenpreis-Sharingtarife**: Indexierte Community-Tarife mit Formelaufschlag auf EPEX-Spotpreise | ⚡ **P3** | Marktnahe Bepreisung innerhalb von Bürgerenergie-Quartieren |
+| **Prio 4** | `billing/edifact/` | **Standardisierte Marktkommunikations-Bridge**: Automatischer Export von MSCONS / EDIFACT-Datensätzen zur VNB-Abstimmung | ⚡ **P4** | Direkter Datenaustausch mit Verteilnetzbetreibern |
+
 
 
 

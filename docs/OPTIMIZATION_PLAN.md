@@ -617,27 +617,61 @@
 
 ---
 
+### [x] 5.24 Smart Load Management & Dispatch Hub (`/app/control`)
+- **Dateien**: [`energy/services/dispatch_hub.py`](file:///c:/Users/Public/Dev/eswes/energy/services/dispatch_hub.py), [`energy/views_dispatch_hub.py`](file:///c:/Users/Public/Dev/eswes/energy/views_dispatch_hub.py), [`frontend/src/features/control/pages/ControlPage.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/control/pages/ControlPage.jsx), [`frontend/src/features/control/components/`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/control/components/)
+- **Status**: ✅ **Erledigt**.
+  - **Live Power Budget Engine**: Echtzeit-Verfügbarkeit von Solarüberschuss ($P_\text{surplus} = P_\text{pv} - P_\text{load}$), Speicherladung und dynamischen Strompreisen.
+  - **4 Master-Betriebsmodi**: `autopilot` (Smart Autopilot mit Solarprognose & Börsenpreisen), `pv_only` (Strikt 100% Autarkie), `price_saver` (Tiefstpreis-Optimierung) und `manual`.
+  - **Interaktive Prioritäten-Kaskade (Merit-Order)**: Drag-and-Drop Priorisierung der Großverbraucher.
+  - **24h-Fahrplan (Dispatch-Timeline)**: Stündliche Vorschau der geplanten Geräteschaltungen.
+  - **7 Modulare Verbraucher-Karten**: BWWP, Wallbox, Heimspeicher, Poolpumpe, Klima Pre-Cooling, Smart Plugs und Heizstab.
+
+---
+
+### [x] 5.25 BWWP & Wärmepumpen SG-Ready Steuerung & Verdichterschutz
+- **Dateien**: [`energy/models.py`](file:///c:/Users/Public/Dev/eswes/energy/models.py), [`energy/services/bwwp_manager.py`](file:///c:/Users/Public/Dev/eswes/energy/services/bwwp_manager.py), [`energy/views_bwwp.py`](file:///c:/Users/Public/Dev/eswes/energy/views_bwwp.py), [`frontend/src/features/control/components/BWWPLoadManagementCard.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/control/components/BWWPLoadManagementCard.jsx)
+- **Status**: ✅ **Erledigt**.
+  - **SG-Ready Zustandskontrolle**: Vollständige Abbildung von State 1 (Sperre), State 2 (Normalbetrieb), State 3 (Solar-Boost bis 60°C) und State 4 (Komfort-Zwangsanlauf).
+  - **Verdichter- & Taktschutz**: $t_\text{run} \ge 20\,\text{min}$ Mindestlaufzeit und $t_\text{cool} \ge 15\,\text{min}$ Mindestruhezeit.
+  - **Closed-Loop Aktorik**: Schnelle Relais-Schaltung via Outbound-WebSocket.
+
+---
+
+### [x] 5.26 Offizieller ioBroker Adapter (`ioBroker.sharegy`)
+- **Status**: ✅ **Erledigt**.
+  - Multi-Sensor-Bündelung von Wirkleistung (W), Wassertemperatur (°C) und SG-Schaltkontakt in einem logischen Gerät.
+  - WSS-Streaming über Port 443 mit bidirektionaler Steuerung und Bestätigungs-Rückkanal.
+
+---
+
+### [x] 5.27 Digitales Benutzerhandbuch & Wissensportal (15 Artikel DE/EN)
+- **Dateien**: [`support_desk/management/commands/seed_helpcenter.py`](file:///c:/Users/Public/Dev/eswes/support_desk/management/commands/seed_helpcenter.py), [`docs/EMS_SYSTEM_GUIDE.md`](file:///c:/Users/Public/Dev/eswes/docs/EMS_SYSTEM_GUIDE.md)
+- **Status**: ✅ **Erledigt**.
+  - 15 vollständige Artikel in 9 Kategorien in Deutsch und Englisch, inklusive FAQ-Deflection und Live-Editor.
+
+---
+
 ## 🎯 7. Verbindliche Prioritätenliste & Ausstehende Roadmap
 
 ```
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ ✅ 100% PRODUKTIONSREIF: SÄULE 1 (EMS-PRO) & SÄULE 2 (ENERGY SHARING & § 14a)  │
+│ ✅ 100% PRODUKTIONSREIF: SÄULE 1 (EMS-PRO) & SÄULE 2 (ENERGY SHARING)         │
 ├───────────────────────────────────────────────────────────────────────────────┤
-│ • 🟢 Säule 1 (EMS-Free & Pro): WSS Ingest, Live-Sankey, Last-/PV-Forecasts,   │
-│    OCPP 1.6-J CSMS Wallbox Gateway, Sungrow Cloud OpenAPI Inverter Dispatch,  │
-│    Mobile Push (FCM HTTP v1 & Web-Push), Android App & Predictive Baseline    │
-│ • ⚡ Säule 2 (Energy Sharing): 15m OBIS-Clearing, Discovergy wMSB Hub, Tarife, │
-│    Multi-Community Hub, PDF-Monatsnachweise, MEA-Beteiligungsquoten,          │
-│    Börsenpreis-indexierte Tarife (EPEX Spot) & BNetzA MSCONS EDIFACT Bridge   │
-│ • 🛡️ § 14a EnWG: BNetzA-Summenleistungs-Dimm-Engine (4,2 kW) & Webhook-APIs   │
+│ • 🟢 Säule 1: Live-Sankey, Last-/PV-Forecasts, Smart Load Management Hub,     │
+│    BWWP SG-Ready Steuerung, OCPP 1.6-J CSMS Wallbox Gateway, Sungrow OpenAPI,  │
+│    ioBroker & Home Assistant Adapter, Mobile Push & 15 Handbuch-Artikel.       │
+│ • ⚡ Säule 2: 15m OBIS-Clearing, Discovergy wMSB Hub, 3 Allokationsmodelle,    │
+│    Sharing-Tarife, Multi-Community Hub, PDF/Excel/XML-Exporte & Viral Sharing. │
 └───────────────────────────────────────────────────────────────────────────────┘
                                        │
                                        ▼
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ ⏳ AUSSTEHENDE AUFGABEN (NEXT STEPS)                                          │
+│ ⏳ AUSSTEHENDE AUFGABEN (OFFENE PUNKTE)                                       │
 ├───────────────────────────────────────────────────────────────────────────────┤
-│ 1. ⚙️ Task 5.7: Deklaratives Device-Profile Addon-System (YAML Inverter-Maps) │
-│ 2. 💳 Task 3.1: Stripe SEPA-Lastschriften / Auszahlungs-Bridge für Quartiere   │
+│ 1. 🛡️ § 14a EnWG Hardware-Steuerbox Dimmung (4,2 kW Begrenzung via Modbus/EEBUS)│
+│ 2. 💳 Stripe & SEPA-Lastschriften Checkout für Free vs. Pro (4,99 €/Monat)     │
+│ 3. ⚡ Dynamische Börsenpreis-Sharingtarife (EPEX Spot Kopplung)                │
+│ 4. 📜 VNB Marktkommunikations-Bridge (EDIFACT / MSCONS Export)                │
 └───────────────────────────────────────────────────────────────────────────────┘
 ```
 
