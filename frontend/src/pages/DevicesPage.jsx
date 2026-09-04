@@ -836,15 +836,15 @@ export default function DevicesPage() {
     }
 
     return (
-        <div className="max-w-7xl mx-auto space-y-6">
+        <div className="p-6 max-w-7xl mx-auto space-y-6">
 
             {/* TOP ACTION HEADER */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                         <span>📟</span> {t("devices.title", "Geräteübersicht")}
                     </h1>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                         {t("devices.subtitle", "Verwalte und überwache alle angeschlossenen Sensoren und Aktoren.")}
                     </p>
                 </div>
