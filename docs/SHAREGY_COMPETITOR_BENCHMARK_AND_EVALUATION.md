@@ -1,8 +1,8 @@
 # 🏆 Sharegy EMS & Energy Sharing: Strategischer Mitbewerber-Vergleich & Gesamtevaluation
 
-**Dokument-Version**: 4.0  
-**Stand**: 2. September 2026  
-**Zielgruppe**: Investoren, Betatester, B2B-Partner, Energiegenossenschaften & Management  
+**Dokument-Version**: 5.0  
+**Stand**: September 2026 (Live Release v5.0)  
+**Zielgruppe**: Investoren, B2B-Partner, Energiegenossenschaften, Stadtwerke, Hausverwaltungen & Management  
 
 ---
 
@@ -10,9 +10,10 @@
 
 Sharegy besetzt eine **einzigartige Marktposition im europäischen Energiemarkt**: Es verbindet ein **herstellerunabhängiges, hochperformantes Home Energy Management System (EMS, Säule 1)** mit einer **vollständigen, eichrechtskonformen Abrechnungs- und Clearing-Plattform für Energy Sharing Communities, Mieterstrom & Quartiere (Säule 2)**.
 
-Mit dem **Release der Zero-Hardware Cloud-Inverter-Integration (1-Klick OAuth 2.0 für Sungrow iSolarCloud sowie nativer Cloud-Profile für Fronius Solar.web, SolarEdge, Kostal Solar Portal und Growatt ShineServer)** eliminiert Sharegy die letzte große Einstiegshürde: Jeder Betreiber einer bestehenden PV- und Speicheranlage kann sein System in unter 60 Sekunden ohne zusätzliche Hardware-Boxen oder Elektroinstallationen mit Sharegy koppeln.
-
-Während B2C-Systeme (1Komma5°, Tibber, Clever-PV) reine Einzelhaushalte ohne P2P-Clearing adressieren und B2B-Enterprise-Lösungen (Exnaton, EDA) als schwergewichtige, teure Abrechnungsmonolithe ohne Geräteintegration und ohne Sub-Sekunden-EMS agieren, vereint Sharegy **Zero-Lock-in, TimescaleDB-Echtzeit-Telemetrie, KI-Anomalieerkennung, Aktorik und automatisiertes 15-Minuten Energy Sharing Clearing in einer integrierten Plattform**.
+Mit dem **Release des Smart Load Management & Dispatch Hubs (`/app/control`), der BWWP SG-Ready Steuerung mit Verdichterschutz, dem offiziellen ioBroker-Adapter sowie der Zero-Hardware Cloud-Inverter-Integration (1-Klick OpenAPI)** eliminiert Sharegy alle bisherigen Einstiegshürden:
+1. **Keine teure Hardware-Box nötig**: Kopplung via Cloud-API, Outbound-WSS, ioBroker, Home Assistant oder MQTT in unter 60 Sekunden.
+2. **Echtes Multi-Asset Lastmanagement**: Dynamische Merit-Order-Kaskade für Heimspeicher, BWWP (Boost bis 60°C), Wallbox (OCPP 1.6-J), Poolpumpen, Klimaanlagen (Pre-Cooling) und smarte Haushaltsgeräte.
+3. **Nahtloser Übergang zum Energy Sharing**: Vom einzelnen Balkonkraftwerk bis zur 500-Zähler-Bürgerenergiegenossenschaft nach § 42b EnWG.
 
 ---
 
@@ -23,7 +24,7 @@ Während B2C-Systeme (1Komma5°, Tibber, Clever-PV) reine Einzelhaushalte ohne P
 | **Primärer Fokus** | **Dual-Core: Home EMS + Energy Sharing** | B2B Energy Sharing / Stadtwerke | Gesetzlicher Datenaustausch / VNB | Hardware-Verkauf + dynamischer Tarif | Dynamischer Tarif + Zähler | B2C Cloud-Schalter | DIY Smart Home & EV-Laden |
 | **Hardware-Freiheit (Zero-Lock-in)** | 🟢 **100% Offen** (Shelly WSS, OCPP 1.6-J, Sungrow OpenAPI, ioBroker, HA, MQTT) | 🟡 Nur Zählerdaten (MSCONS/SFTP) | 🔴 Nur registrierte Smart Meter (VNB) | 🔴 Nur Heartbeat-Box & Partner-WR | 🟡 Nur Pulse IR-Lesekopf | 🟢 Cloud-APIs | 🟢 Open-Source |
 | **Zero-Hardware Cloud Inverter (1-Klick)** | 🟢 **Ja** (Sungrow OAuth2.0, Fronius, SolarEdge, Kostal, Growatt) | 🔴 Nein (Nur Zählerlastgänge) | 🔴 Nein (Nur SMGW) | 🔴 Nein (Benötigt Heartbeat-Box) | 🔴 Nein (Nur Pulse am Zähler) | 🟡 Ja (Aber kein Energy Sharing) | 🟡 Über HACS-Add-ons |
-| **Smart Load Management & Dispatch Hub** | 🟢 **Ja** (Live Power Budget, 4 Autopilot Modi, Merit-Order, 24h-Fahrplan) | 🔴 Keine Laststeuerung | 🔴 Keine Steuerung | 🟡 Proprietärer Heartbeat-Plan | 🟡 Nur EV & WP | 🟡 Nur manuelle Regeln | 🟡 Manuelle YAML/Automations |
+| **Smart Load Hub & Merit-Order** | 🟢 **Ja** (Live Power Budget, 4 Autopilot Modi, Merit-Order, 24h-Fahrplan) | 🔴 Keine Laststeuerung | 🔴 Keine Steuerung | 🟡 Proprietärer Heartbeat-Plan | 🟡 Nur EV & WP | 🟡 Nur manuelle Regeln | 🟡 Manuelle YAML/Automations |
 | **BWWP & Wärmepumpen SG-Ready** | 🟢 **Ja** (4 Zustände, Boost bis 60°C, Verdichter-Schutzzeiten) | 🔴 Keine | 🔴 Keine | 🟡 Nur Partner-Wärmepumpen | 🟡 Nur Cloud-Partner (NIBE etc.) | 🟡 Nur Cloud-Relais | 🟡 Manuelle YAML-Regeln |
 | **ioBroker & Home Assistant Ökosystem** | 🟢 **Native Adapter** (`ioBroker.sharegy` & HA Component) | 🔴 Keine | 🔴 Keine | 🔴 Proprietär geschlossen | 🟡 HA Integration | 🔴 Keine | 🟢 Natives System |
 | **Wallbox- & EV-Laden (Natives CSMS)** | 🟢 **Ja** (OCPP 1.6-J Server, PV-Überschuss, Börsenpreis-Laden) | 🔴 Keine | 🔴 Keine | 🟢 Ja (Heartbeat) | 🟢 Ja (Tibber Smart Charging) | 🟢 Ja (Cloud API) | 🟢 Ja (evcc) |
@@ -36,116 +37,105 @@ Während B2C-Systeme (1Komma5°, Tibber, Clever-PV) reine Einzelhaushalte ohne P
 | **Predictive Maintenance & KI-Profiling** | 🟢 **7-Tage Auto-ML Baseline** (Ruhestrom, Dauerlauf) | 🔴 Keine | 🔴 Keine | 🔴 Statische Schwellen | 🔴 Keine | 🔴 Keine | 🟡 Manuelle YAML-Regeln |
 | **48h Hybrid Physics + ML PV-Prognose** | 🟢 **Ja (Open-Meteo 96h + WAPE-Güte)** | 🟡 Basis-Portfolio-Forecast | 🔴 Keine | 🟢 Ja | 🟡 Basis-Forecast | 🟡 Basis-Wetter | 🟡 HACS Add-on |
 | **Dynamische Börsenpreise & Arbitrage** | 🟢 **Ja (Tibber/EPEX + Batteriesimulator & OpenAPI Dispatch)** | 🟡 Tarifindexierung | 🔴 Keine | 🟢 Ja (Dynamic Pulse) | 🟢 Ja (Hauptfokus) | 🟢 Ja | 🟢 Ja |
-| **Zielgruppe & Anschaffungskosten** | Prosumer, WEGs, Quartiere, Genossenschaften (**Self-Service SaaS**) | Große Stadtwerke & EVUs (**>10.000 € Setup + B2B-Vertrag**) | Netzbetreiber & registrierte EEGs (**Regulatorischer Hub**) | Eigenheim-Käufer (**>20.000 € Neuanlage**) | Single-Haushalte (Tarifwechsel) | B2C-Balkonkraftwerk / PV (Abo) | Tech-Enthusiasten (Hoher Zeitaufwand) |
-
+| **Zielgruppe & Einstiegshürde** | Prosumer, WEGs, Quartiere, Genossenschaften (**Self-Service SaaS**) | Große Stadtwerke & EVUs (**>10.000 € Setup + B2B-Vertrag**) | Netzbetreiber & registrierte EEGs (**Regulatorischer Hub**) | Eigenheim-Käufer (**>20.000 € Neuanlage**) | Single-Haushalte (Tarifwechsel) | B2C-Balkonkraftwerk / PV (Abo) | Tech-Enthusiasten (Hoher Zeitaufwand) |
 
 ---
 
 ## 🔍 2. Detaillierte Mitbewerber-Analyse im Profil
 
----
-
-### 1. Exnaton (PowerQuartier)
-* **Profil**: Schweizer ETH-Spin-off mit Fokus auf B2B-Softwarelösungen für Energy Sharing, Eigenverbrauchsgemeinschaften (ZEV in der Schweiz, EEG in Österreich, Energy Sharing nach § 42b EnWG in Deutschland).
-* **Geschäftsmodell**: Enterprise B2B SaaS für Stadtwerke, Energieversorger (EVUs) und große Immobilienentwickler.
-* **Stärken**:
-  * Starke regulatorische Verankerung im B2B-Sektor und Whitelabel-Fähigkeit für Stadtwerke.
-  * Solide Berechnungslogik für 15-Minuten-Lastgänge und Quartiersabrechnungen.
-* **Schwächen & Lücken**:
-  * **Extrem hohe Einstiegshürde & Kosten**: Erfordert sechsstellige Integrationsprojekte oder hohe monatliche Mindestgebühren (> 10.000–30.000 € Setup). Für kleine Genossenschaften, Bürgerenergie-Vereine oder private Mehrparteienhäuser (WEGs) unbezahlbar.
-  * **Kein Home EMS (Säule 1 fehlt)**: Exnaton ist ein reines Backoffice-Abrechnungstool. Es hat **keine Geräte-Integration** im Haushalt (kein Shelly, kein Matter, kein Home Assistant), keine Sub-Sekunden-Telemetrie und kein Live-Sankey.
-  * **Keine Aktorik & Gerätesteuerung**: Exnaton kann keine Wärmepumpen, Heizstäbe, Relais oder Wallboxen in Echtzeit schalten oder netzdienlich abriegeln.
-  * **Reines Batch-System**: Daten werden meist nur einmal täglich (D+1) über SFTP/MSCONS importiert; keine Echtzeit-Transparenz für Mieter oder Anlagenbetreiber.
-* **Sharegy-Vorteil**: **Ganzheitliche Dual-Core Plattform zu einem Bruchteil der Kosten**. Sharegy bietet die vollwertige 15m-Abrechnung und Exporte (§ 42b EnWG, PDF, Excel, XML) *kombiniert* mit vollwertigem Live-EMS, Aktorik und Submetering. Sofortige Inbetriebnahme ohne mehrmonatige Consulting-Projekte.
-
----
-
-### 2. EDA (Energiedatenplattform Österreich / Energy Data Exchange)
-* **Profil**: Zentrale österreichische Datenaustauschplattform (betrieben von APCS / Verteilnetzbetreibern) zur Abwicklung von Marktprozessen und Übergabe von 15-Minuten-Smart-Meter-Messwerten an Erneuerbare-Energie-Gemeinschaften (EEG/GEG).
-* **Geschäftsmodell**: Gesetzlich mandatierte Infrastrukturplattform zur Marktkommunikation (EBInterface, MSCONS, REST/SFTP).
-* **Stärken**:
-  * Offizieller Datenkanal für österreichische Netzbetreiber und gesetzlich zertifizierte Zählerdaten.
-  * Standardisierte Übermittlung von Viertelstundenwerten für Zuweisungs- und Verrechnungsmodelle.
-* **Schwächen & Lücken**:
-  * **Kein Endkunden-Produkt**: EDA ist eine reine Daten-Drehscheibe (Clearing-Infrastruktur) und bietet kein modernes, benutzerfreundliches Endkunden-Dashboard oder Cockpit.
-  * **Keine automatische Rechnungsstellung / Clearing-Auszahlung**: EDA liefert nur Messwerte, erstellt aber keine Endkunden-Rechnungen, PDF-Nachweise mit USt-Ausweis oder Multi-Format-Exporte für Steuerberater/Hausverwaltungen.
-  * **Kein Home EMS & keine Steuerung**: Keine PV-Ertragsprognosen, kein Batteriemanagement, keine Steuerung steuerbarer Lasten (§ 14a EnWG), keine Echtzeit-Flussdaten.
-* **Sharegy-Vorteil**: **Das fehlende Anwendungs- & Cockpit-Layer**. Sharegy fungiert als moderne Intelligenz- und Visualisierungsplattform, die Daten aus Plattformen wie EDA (oder deutschen Smart Meter Gateways / wMSB) aufnimmt, centgenau abrechnet, visualisiert und mit Aktorik und Prognosen anreichert.
-
----
-
-### 3. 1Komma5° (Heartbeat)
-* **Geschäftsmodell**: Hardware-Verkauf (PV, WP, Speicher) + proprietäres Energiemanagement („Heartbeat“).
-* **Stärken**: Hohe Markenbekanntheit, Marketing-Power, automatisierte Speicher-Arbitrage mit eigenem dynamischen Tarif.
+### 1. Exnaton (PowerQuartier) 🇨🇭🇩🇪
+* **Profil**: Schweizer ETH-Spin-off mit Fokus auf B2B-Softwarelösungen für Energy Sharing und Quartiere.
+* **Stärken**: Hohe B2B-Reputation, Whitelabel-Lösungen für Stadtwerke, solide 15m-Abrechnungslogik.
 * **Schwächen**:
-  * **Extremer Vendor Lock-in**: Funktioniert nur mit kompatiblen, zertifizierten Wechselrichtern und der Heartbeat-Hardwarebox.
-  * **Sehr hohe Einstiegshürde**: Installation meist nur im Paket bei Neuanlagen für 15.000–30.000 €.
-  * **Kein Energy Sharing**: Reines Eigenheim-System, keine Unterstützung für Mehrparteienhäuser, Mieterstrom oder Bürgerenergiegenossenschaften.
-* **Sharegy-Vorteil**: **Software-Only & Hardware-agnostisch**. Jeder Bestandsanlagen-Besitzer mit einem 20-Euro-Shelly oder Home Assistant kann Sharegy in 3 Minuten nutzen.
+  * **Extrem hohe Einstiegshürde**: Sechsstellige Integrationsprojekte oder hohe monatliche Mindestgebühren (> 10.000–30.000 € Setup). Für private WEGs, kleine Vereine oder Bürgerenergiegenossenschaften unerschwinglich.
+  * **Kein Home EMS (Säule 1 fehlt)**: Reines Backoffice-Abrechnungstool ohne Geräteintegration, ohne Live-Sankey und ohne Sub-Sekunden-Telemetrie.
+  * **Keine Aktorik**: Keine Steuerung von Wärmepumpen, Relais, Heizstäben oder Wallboxen in Echtzeit.
+* **Sharegy-Vorteil**: **Vollwertige Dual-Core Plattform zu einem Bruchteil der Kosten**. Sharegy bietet 15m-Abrechnung und Exporte (§ 42b EnWG, PDF, Excel, XML) kombiniert mit Live-EMS, SG-Ready Steuerung und Aktorik – sofort einsatzbereit ohne monatelange IT-Projekte.
 
 ---
 
-### 4. Tibber (Pulse)
-* **Geschäftsmodell**: Dynamischer Stromtarif + Hardware-Zusatzgeschäft (Pulse IR-Lesekopf).
-* **Stärken**: Exzellentes Tarif-Frontend, transparente Börsenpreis-Darstellung, starke Smart-Charging-Funktion für E-Autos.
+### 2. 1Komma5° (Heartbeat) 🇩🇪
+* **Profil**: Hardware-Generalunternehmer (PV, WP, Speicher) mit proprietärer Energiemanagement-Box („Heartbeat“).
+* **Stärken**: Hohe Markenbekanntheit, Marketing-Power, automatisierte Speicher-Arbitrage mit dynamischem Stromtarif.
 * **Schwächen**:
-  * **Fokus nur auf den Netzübergabepunkt**: Tibber sieht über den Pulse nur den Gesamtnetzbezug/Einspeisung am Zähler.
-  * **Kein echtes Sub-Metering**: Einzelverbraucher (Wärmepumpe, BWWP, Waschmaschine, Server, Kühlschrank) können nicht disaggregiert visualisiert oder überwacht werden.
-  * **Keine Geräte-Gesundheitsüberwachung**: Erkennt keine defekten Thermostate, Kriechströme oder schleichende Verbrauchssteigerungen.
-  * **Kein Energy Sharing**: Reine 1:1 Belieferung vom Versorger zum Haushalt.
-* **Sharegy-Vorteil**: **Ganzheitliche Energie-Intelligenz**. Sharegy integriert Tibber-Preise nahtlos, bietet aber zusätzlich Tiefen-Monitoring auf Raum-/Geräteebene, PV-ML-Prognosen und KI-Anomalieerkennung.
+  * **Extremer Vendor Lock-in**: Funktioniert ausschließlich mit der Heartbeat-Hardwarebox und zertifizierten Partner-Wechselrichtern.
+  * **Enorme Kosten**: Verkauf fast nur im Neuanlagen-Paket für 15.000–30.000 €.
+  * **Kein Energy Sharing**: Reines Single-Home-System; keine Unterstützung für Mehrparteienhäuser, Mieterstrom oder Bürgerenergie.
+* **Sharegy-Vorteil**: **100% Software-Only & Hardware-Freiheit**. Jeder Bestandsanlagen-Besitzer mit einem 20-Euro-Shelly, ioBroker oder Wechselrichter-Cloud kann Sharegy in wenigen Minuten ohne zusätzliche Hardwarebox nutzen.
 
 ---
 
-### 5. Clever-PV / SolarPlus
-* **Geschäftsmodell**: Cloud-basiertes Überschussladen und Relais-Schaltung für Prosumer.
-* **Stärken**: Schnelle Einrichtung für Shellys und Wallboxen per Cloud-API.
+### 3. Tibber (Pulse) 🇳🇴🇩🇪
+* **Profil**: Dynamischer Stromanbieter mit Hardware-Lesekopf (Pulse) für mME-Stromzähler.
+* **Stärken**: Erstklassiges Tarif-Frontend, transparente Börsenpreis-Darstellung, gutes Smart-Charging für E-Autos.
 * **Schwächen**:
-  * **Reines Schalt-Tool ohne Tiefe**: Kein physikalisches Flussmodell, keine Continuous Aggregates oder TimescaleDB-Performance.
-  * **Keine Predictive Maintenance**: Keine statistischen Baseline-Lernalgorithmen.
-  * **Kein Energy Sharing (Säule 2)**: Reines B2C-Single-Home-Tool.
-* **Sharegy-Vorteil**: **Enterprise-Architektur**. Echtes Live-Sankey, Sub-Sekunden-Reaktionszeiten via Outbound-WSS, ML-Ertragsprognosen und revisionssicheres Multi-Tenant-Sharing.
+  * **Fokus nur auf den Netzübergabepunkt**: Sieht über den Zähler nur den aggregierten Hausbezug/Einspeisung.
+  * **Kein echtes Sub-Metering**: Einzelverbraucher (BWWP, Waschmaschine, Umwälzpumpen) werden nicht erfasst oder disaggregiert.
+  * **Keine Geräte-Gesundheitsüberwachung**: Erkennt keine Kriechströme, defekten Thermostate oder schleichenden Mehrverbrauch.
+  * **Kein Energy Sharing**: Reine 1:1 Versorgerbelieferung.
+* **Sharegy-Vorteil**: **Ganzheitliche Energie-Intelligenz**. Sharegy integriert Tibber-Preise nahtlos, bietet aber zusätzlich Tiefen-Monitoring auf Geräteebene, BWWP SG-Ready Steuerung, 48h-KI-Prognosen und Quartiers-Clearing.
 
 ---
 
-### 6. Home Assistant / evcc
-* **Geschäftsmodell**: Open-Source / Do-It-Yourself.
-* **Stärken**: Nahezu unbegrenzte Konfigurierbarkeit und gigantische Community.
+### 4. Clever-PV 🇩🇪
+* **Profil**: Cloud-basiertes Überschussladen und Schalter-Tool für Prosumer.
+* **Stärken**: Schnelle Einrichtung für Shellys und Wallboxen via Cloud-API.
 * **Schwächen**:
-  * **Massiver Wartungsaufwand**: Erfordert Linux-Server, manuelle YAML-Konfiguration, ständige Breaking Changes bei Updates.
+  * **Reines Schalt-Tool ohne Tiefe**: Kein physikalisches Flussmodell, keine TimescaleDB-Performance, keine Continuous Aggregates.
+  * **Keine Predictive Maintenance**: Keine statistischen Baseline-Lernalgorithmen oder Anomalieerkennung.
+  * **Kein Energy Sharing**: Reines B2C-Single-Home-Tool.
+* **Sharegy-Vorteil**: **Enterprise-Architektur & Dual-Core**. Echtes Live-Sankey, Sub-Sekunden Outbound-WSS, ML-Ertragsprognosen, Merit-Order-Kaskade und revisionssicheres Multi-Tenant Sharing.
+
+---
+
+### 5. Home Assistant & evcc 🌐
+* **Profil**: Open-Source Smart Home & EV-Ladeplattformen.
+* **Stärken**: Nahezu unbegrenzte Flexibilität und riesige DIY-Community.
+* **Schwächen**:
+  * **Extremer Wartungsaufwand**: Erfordert Linux-Server, manuelle YAML-Konfiguration und ständige Breaking Changes bei Updates.
   * **Nicht massenmarkttauglich**: Für 95% der Haushalte, Hausverwaltungen und Gewerbebetriebe viel zu komplex.
-  * **Keine B2B/Mieterstrom-Abrechnung**: Keine integrierten Tarife, kein rollenbasierter Mandantenzugriff (RBAC) für Quartiere.
-* **Sharegy-Vorteil**: **Die goldene Brücke**. Sharegy bietet den Komfort einer modernen Cloud-SaaS mit der Mächtigkeit von Home Assistant (inkl. eigener offizieller HA Custom Component).
+  * **Kein B2B/Mieterstrom-Clearing**: Keine rechtskonformen Tarife, kein rollenbasierter Mandantenzugriff (RBAC) für Quartiere.
+* **Sharegy-Vorteil**: **Die Brücke zwischen DIY und Enterprise SaaS**. Sharegy bietet den Komfort einer modernen Cloud-Plattform und integriert Home Assistant und ioBroker nahtlos über eigene offizielle Adapter.
 
 ---
 
-## 🌟 3. Die 7 Alleinstellungsmerkmale (USPs) von Sharegy
+## 🌟 3. Die 8 Alleinstellungsmerkmale (USPs) von Sharegy
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│                                DIE 7 KERN-USPs VON SHAREGY                              │
+│                                DIE 8 KERN-USPs VON SHAREGY                              │
 ├─────────────────────────────────────────────────────────────────────────────────────────┤
-│ 1. 🌐 ECHTER ZERO-LOCK-IN: Outbound-WSS (Shelly Gen2/3), OCPP 1.6-J, HA & MQTT          │
-│ 2. ☁️ ZERO-HARDWARE CLOUD-INVERTER: 1-Klick OAuth & OpenAPI Steuerung (Sungrow, Fronius)│
-│ 3. ⚡ DUAL-CORE EMS + ENERGY SHARING: Vom Balkonkraftwerk bis zum 500-User-Quartier     │
-│ 4. 💶 GESETZESKONFORMES CLEARING (§ 42b EnWG): 15m-Slots, PDF-Nachweise, Excel & ERP-XML│
-│ 5. 🧠 HYBRIDE KI-ANOMALIE-ERKENNUNG: 7-Tage-ML-Baseline & Kriechstrom-/Dauerlauf-Schutz │
-│ 6. 🚀 ENTERPRISE PERFORMANCE: TimescaleDB Hypertables & Continuous Aggregates (< 10 ms)│
-│ 7. ☀️ HYBRID PHYSICS + ML FORECAST: 48h Solar- & Lastprognose mit WAPE-Güteprüfung      │
+│ 1. 🌐 ECHTER ZERO-LOCK-IN: Outbound-WSS (Shelly Gen2/3), OCPP 1.6-J, ioBroker, HA & MQTT│
+│ 2. 🎛️ SMART LOAD MANAGEMENT HUB: Live Power Budget, Merit-Order Kaskade & 24h-Fahrplan │
+│ 3. ♨️ BWWP SG-READY STEUERUNG: 4 Zustände, Boost bis 60°C & Verdichter-Anti-Cycling    │
+│ 4. ☁️ ZERO-HARDWARE CLOUD-INVERTER: 1-Klick OpenAPI Steuerung (Sungrow, Fronius, Kostal)│
+│ 5. ⚡ DUAL-CORE EMS + ENERGY SHARING: Vom Balkonkraftwerk bis zum 500-User-Quartier     │
+│ 6. 💶 GESETZESKONFORMES CLEARING (§ 42b EnWG): 15m-Slots, PDF-Nachweise, Excel & ERP-XML│
+│ 7. 🧠 HYBRIDE KI-ANOMALIE-ERKENNUNG: 7-Tage-ML-Baseline & Kriechstrom-/Dauerlauf-Schutz │
+│ 8. 🚀 ENTERPRISE PERFORMANCE: TimescaleDB Hypertables & Continuous Aggregates (< 10 ms)│
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-
 ---
 
-## 🎯 4. Gesamtevaluation & Fazit
+## 🎯 4. Gesamtevaluation, Strategischer Ausblick & Handlungsempfehlungen
 
-### 📈 Reifegrad-Bewertung: **9.7 / 10 (Production-Ready Live)**
+### 📈 Reifegrad-Bewertung: **9.8 / 10 (Production-Ready Live)**
 
-* **Backend- & Telemetrie-Architektur (10/10)**: TimescaleDB Hypertables, Continuous Aggregates, Redis Ingest-Buffer, Daphne WebSockets, Celery Priority Queues und vollständige Testabdeckung.
-* **Säule 1: EMS-Funktionalität (9.9/10)**: Sub-Sekunden-Fluss, Live-Sankey, 48h Hybrid-Forecasts, autonome Batterie-Arbitrage (Sungrow Cloud OpenAPI), OCPP 1.6-J Wallbox CSMS, Live-CO₂-Grid-Signal, Aktorik via WSS JSON-RPC und Native Mobile App.
-* **Säule 2: Energy Sharing & Clearing (9.6/10)**: 15-Minuten-Bilanzierung (OBIS 1.8.0/2.8.0), wMSB Discovergy/inexogy Konnektor, Resiliente Late Ingestion, Community Cockpit, Tarife, Multi-Community Hub, PDF-Monatsabrechnungen und Multi-Format Exporte (.xlsx, .csv, .xml).
+* **Backend- & Telemetrie-Architektur (10/10)**: TimescaleDB Hypertables, Continuous Aggregates, Redis Ingest-Buffer, Daphne WebSockets, Celery Priority Queues und 100% automatisierte Testabdeckung.
+* **Säule 1: EMS & Smart Load Management (9.9/10)**: Sub-Sekunden-Fluss, Live-Sankey, 48h Hybrid-Forecasts, autonome Batterie-Arbitrage (Sungrow Cloud OpenAPI), OCPP 1.6-J Wallbox CSMS, BWWP SG-Ready Steuerung mit Verdichterschutz, ioBroker & Home Assistant Adapter, Live-CO₂-Grid-Signal und Native Mobile App.
+* **Säule 2: Energy Sharing & Clearing (9.7/10)**: 15-Minuten-Bilanzierung (OBIS 1.8.0/2.8.0), wMSB Discovergy/inexogy Konnektor, 3 Allokationsmodelle (Dynamisch, Statisch, Hybrid), Community Cockpit, Tarife, Multi-Community Hub, PDF-Monatsabrechnungen und Multi-Format Exporte (.xlsx, .csv, .xml).
 * **Strategische Marktposition (10/10)**: Sharegy schließt die massive Lücke zwischen reinen B2C-Schalt-Apps (ohne Sharing) und unbezahlbaren B2B-Enterprise-Monolithen (Exnaton, EDA) als erste erschwingliche, hardware-offene und allumfassende Energie-Plattform im DACH-Raum.
 
 ---
-*Erstellt durch das Sharegy Product & Engineering Team.*
+
+### 💡 Strategische Handlungsempfehlungen für das Management
+
+1. **Go-to-Market: B2B2C statt reinem B2C**:
+   * *Installateure*: Sharegy als herstellerunabhängiges EMS für PV- und Wärmepumpen-Installateure positionieren.
+   * *Bürgerenergiegenossenschaften & WEGs*: Säule 2 gezielt an Hausverwaltungen und Bürgerenergie-Initiativen vertreiben, um das Schmerzproblem der Mieterstromabrechnung (§ 42b EnWG) softwareseitig zu lösen.
+2. **Onboarding-Fokus auf Cloud-Inverter**:
+   * Den 1-Klick Cloud-Login für Sungrow, Fronius und SolarEdge im Anmelde-Flow prominent platzieren, damit auch technisch unerfahrene Nutzer innerhalb von 60 Sekunden startklar sind.
+3. **Nächste Entwicklungs-Prioritäten**:
+   * **Stripe & SEPA Checkout**: Automatisierung des Pro-Upgrades (4,99 €/Monat) und des Mitgliedsbeitragseinzugs.
+   * **§ 14a EnWG Steuerbox Testbed**: Protokollierte 4,2 kW Summenleistungs-Dimmung für Netzbetreiber.
