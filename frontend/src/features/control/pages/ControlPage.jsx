@@ -10,7 +10,7 @@ import LivePowerBudgetHeader from "../components/LivePowerBudgetHeader";
 import PriorityCascadeBar from "../components/PriorityCascadeBar";
 import DispatchTimelineCard from "../components/DispatchTimelineCard";
 import BWWPLoadManagementCard from "../../energy/components/BWWPLoadManagementCard";
-import BatteryArbitrageCard from "../../energy/components/BatteryArbitrageCard";
+import BatteryStorageControlCard from "../components/BatteryStorageControlCard";
 import WallboxCard from "../../energy/components/WallboxCard";
 import PoolPumpCard from "../components/PoolPumpCard";
 import AirConditioningCard from "../components/AirConditioningCard";
@@ -218,9 +218,9 @@ export default function ControlPage() {
                         <WallboxCard onOpenAddModal={() => setAddWallboxOpen(true)} />
                     )}
 
-                    {/* 🔋 Heimspeicher / Battery Arbitrage */}
+                    {/* 🔋 Heimspeicher / Battery Storage Control */}
                     {(activeTab === "all" || activeTab === "battery") && (
-                        <BatteryArbitrageCard />
+                        <BatteryStorageControlCard />
                     )}
 
                     {/* 🏊 Poolpumpen & Filteranlagen */}

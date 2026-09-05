@@ -9,8 +9,6 @@ import { apiFetch } from "../../api/client";
 import EnergyOptimizerCard from "./components/EnergyOptimizerCard";
 import BatteryForecastCard from "./components/BatteryForecastCard";
 import BatteryArbitrageCard from "./components/BatteryArbitrageCard";
-import BWWPLoadManagementCard from "./components/BWWPLoadManagementCard";
-import WallboxCard from "./components/WallboxCard";
 import SimpleDashboardView from "./components/SimpleDashboardView";
 
 import AddWallboxModal from "../devices/components/AddWallboxModal";
@@ -417,19 +415,12 @@ export default function EnergyDashboard() {
             )}
 
             {/* =========================================================
-                SMART ENERGY OPTIMIZER (1H, 2H, 4H BESTE LADEZEITEN)
+                SMART ENERGY OPTIMIZER & BATTERIE- & SOC-PROGNOSE
             ========================================================= */}
-            <EnergyOptimizerCard />
-
-            {/* =========================================================
-                BWWP & WÄRMEPUMPEN LASTMANAGEMENT (SG-READY)
-            ========================================================= */}
-            <BWWPLoadManagementCard />
-
-            {/* =========================================================
-                BATTERIE- & SOC-PROGNOSE (TASK 5.3)
-            ========================================================= */}
-            <BatteryForecastCard />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <EnergyOptimizerCard />
+                <BatteryForecastCard />
+            </div>
 
 
             {/* =========================================================
@@ -741,14 +732,7 @@ export default function EnergyDashboard() {
             </div>
 
             {/* =========================================================
-                E-AUTO & WALLBOX SMART-CHARGING (OCPP 1.6-J)
-            ========================================================= */}
-            <div className="mb-6">
-                <WallboxCard onOpenAddModal={() => setAddWallboxOpen(true)} />
-            </div>
-
-            {/* =========================================================
-                BATTERY ARBITRAGE & GRID CO2 SIGNAL (TASK 5.16 & 5.17)
+                BATTERY ARBITRAGE SIMULATOR & GRID CO2 SIGNAL
             ========================================================= */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <BatteryArbitrageCard />
