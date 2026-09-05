@@ -22,7 +22,7 @@ export default function InterfacesPage() {
         if (navigator.clipboard) {
             navigator.clipboard.writeText(text);
             setCopiedKey(key);
-            setTimeout(() => setCopiedKey(null), 1500);
+            setTimeout(() => setCopiedKey(null), 2000);
         } else {
             alert(t("interfaces.copy_not_supported", "Kopieren nicht unterstützt"));
         }
@@ -52,11 +52,18 @@ export default function InterfacesPage() {
     const wsUrl = `wss://${window.location.host || "sharegy.de"}/ws/energy/${primaryHome?.mqtt_token || "<TOKEN>"}/`;
 
     return (
-        <div className="p-6 max-w-7xl mx-auto space-y-8">
+        <div className="p-6 max-w-7xl mx-auto space-y-8 relative">
+            {/* Centered Floating Checkmark Tooltip / Toast */}
+            {copiedKey && (
+                <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 bg-slate-900/95 text-white text-xs font-bold rounded-2xl shadow-2xl border border-emerald-500/50 flex items-center gap-2.5 backdrop-blur-md animate-in fade-in zoom-in-95 duration-200">
+                    <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center justify-center text-xs">✓</span>
+                    <span>{t("common.copied", "In Zwischenablage kopiert!")}</span>
+                </div>
+            )}
 
             {/* HEADER */}
             <div>
-                <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                     <span>📡</span> {t("interfaces.title", "Schnittstellen")}
                 </h1>
                 <p className="text-sm text-gray-500 mt-1">
@@ -311,7 +318,11 @@ export default function InterfacesPage() {
                                         <span>{mqttHost}</span>
                                         <button
                                             onClick={() => safeCopy(mqttHost, "host")}
-                                            className="text-gray-400 hover:text-indigo-600 text-xs ml-1 cursor-pointer"
+                                            className={`p-1 rounded-md text-xs transition cursor-pointer flex items-center justify-center ${
+                                                copiedKey === "host"
+                                                    ? "bg-emerald-100 text-emerald-700 font-bold scale-110"
+                                                    : "text-gray-400 hover:text-indigo-600 hover:bg-slate-200/60"
+                                            }`}
                                             title={t("common.copy", "Kopieren")}
                                         >
                                             {copiedKey === "host" ? "✓" : "📋"}
@@ -339,7 +350,11 @@ export default function InterfacesPage() {
                                         <span className="truncate">{mqttUser}</span>
                                         <button
                                             onClick={() => safeCopy(mqttUser, "user")}
-                                            className="text-gray-400 hover:text-indigo-600 text-xs ml-1 cursor-pointer"
+                                            className={`p-1 rounded-md text-xs transition cursor-pointer flex items-center justify-center ${
+                                                copiedKey === "user"
+                                                    ? "bg-emerald-100 text-emerald-700 font-bold scale-110"
+                                                    : "text-gray-400 hover:text-indigo-600 hover:bg-slate-200/60"
+                                            }`}
                                             title={t("common.copy", "Kopieren")}
                                         >
                                             {copiedKey === "user" ? "✓" : "📋"}
@@ -358,14 +373,18 @@ export default function InterfacesPage() {
                                         <div className="flex items-center gap-1.5 ml-1">
                                             <button
                                                 onClick={() => setShowPassword((v) => !v)}
-                                                className="text-gray-400 hover:text-indigo-600 text-xs cursor-pointer"
+                                                className="p-1 rounded-md text-gray-400 hover:text-indigo-600 hover:bg-slate-200/60 text-xs cursor-pointer"
                                                 title={showPassword ? "Verstecken" : "Anzeigen"}
                                             >
                                                 {showPassword ? "🙈" : "👁️"}
                                             </button>
                                             <button
                                                 onClick={() => safeCopy(mqttPass, "pass")}
-                                                className="text-gray-400 hover:text-indigo-600 text-xs cursor-pointer"
+                                                className={`p-1 rounded-md text-xs transition cursor-pointer flex items-center justify-center ${
+                                                    copiedKey === "pass"
+                                                        ? "bg-emerald-100 text-emerald-700 font-bold scale-110"
+                                                        : "text-gray-400 hover:text-indigo-600 hover:bg-slate-200/60"
+                                                }`}
                                                 title={t("common.copy", "Kopieren")}
                                             >
                                                 {copiedKey === "pass" ? "✓" : "📋"}
