@@ -7,9 +7,21 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../../api/client";
 
-export default function HouseholdLoadForecastCard() {
+export default function HouseholdLoadForecastCard({
+    horizon: controlledHorizon,
+    onHorizonChange,
+}) {
     const { t } = useTranslation();
-    const [horizon, setHorizon] = useState(24);
+    const [localHorizon, setLocalHorizon] = useState(24);
+    const horizon = controlledHorizon !== undefined ? controlledHorizon : localHorizon;
+
+    const handleHorizonChange = (h) => {
+        if (onHorizonChange) {
+            onHorizonChange(h);
+        } else {
+            setLocalHorizon(h);
+        }
+    };
 
     const query = useQuery({
         queryKey: ["household-load-forecast", horizon],
@@ -64,7 +76,7 @@ export default function HouseholdLoadForecastCard() {
                     ].map((btn) => (
                         <button
                             key={btn.val}
-                            onClick={() => setHorizon(btn.val)}
+                            onClick={() => handleHorizonChange(btn.val)}
                             className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${horizon === btn.val
                                 ? "bg-white text-gray-900 shadow-xs"
                                 : "text-gray-500 hover:text-gray-900"

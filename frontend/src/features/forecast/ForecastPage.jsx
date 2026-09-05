@@ -200,8 +200,11 @@ export default function ForecastPage() {
             )}
 
             {/* Haushalt-Lastprognose & Treffgenauigkeit */}
-            <HouseholdLoadForecastCard />
-            <SolarForecastAccuracyCard />
+            <HouseholdLoadForecastCard
+                horizon={horizonHours}
+                onHorizonChange={handleHorizonChange}
+            />
+            <SolarForecastAccuracyCard stringId={selectedString} />
 
             {/* Pro Upgrade Modal */}
             <ProUpgradeModal
