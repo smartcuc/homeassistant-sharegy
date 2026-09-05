@@ -135,15 +135,13 @@ def get_bwwp_telemetry(device: Device) -> dict:
 def find_or_create_bwwp_config(home) -> BWWPLoadManagementConfig | None:
     """
     Findet eine bestehende BWWP-Konfiguration für das Home oder sucht
-    automatisch nach einem passenden Gerät (BWWP / Wärmepumpe).
+    automatisch nach einem passenden Gerät (BWWP / Wärmepumpe / Warmwasserspeicher).
     """
     from django.db.models import Q
     cfg = BWWPLoadManagementConfig.objects.filter(home=home).select_related("device").first()
-    if cfg:
-        return cfg
-
-    # Auto-Discovery: Suche nach Geräten mit passendem Identifier oder Config-Rolle
-    bwwp_device = Device.objects.filter(
+    
+    # Auto-Discovery Query für Warmwasser- & Wärmepumpen-Geräte
+    bwwp_devices_query = Device.objects.filter(
         home=home,
         active=True,
         pending_delete=False,
@@ -153,11 +151,30 @@ def find_or_create_bwwp_config(home) -> BWWPLoadManagementConfig | None:
         | Q(identifier__icontains="warmwasser")
         | Q(identifier__icontains="waermepumpe")
         | Q(identifier__icontains="heatpump")
+        | Q(identifier__icontains="heating_rod")
+        | Q(identifier__icontains="heizstab")
         | Q(config__name__icontains="bwwp")
         | Q(config__name__icontains="brauchwasser")
+        | Q(config__name__icontains="warmwasser")
         | Q(config__name__icontains="wärmepumpe")
-        | Q(config__role__key__in=["heatpump", "bwwp", "heating", "consumer"])
-    ).first()
+        | Q(config__role__key__in=["heatpump", "bwwp", "heating"])
+    ).exclude(
+        Q(identifier__icontains="aircon")
+        | Q(identifier__icontains="ac_")
+        | Q(identifier__icontains="klima")
+        | Q(config__name__icontains="klima")
+    )
+
+    if cfg:
+        # Falls versehentlich ein Klimagerät verknüpft war, auf passendes Warmwassergerät umstellen
+        if cfg.device and any(x in (cfg.device.identifier or "").lower() for x in ["aircon", "ac_", "klima"]):
+            better_device = bwwp_devices_query.first()
+            if better_device:
+                cfg.device = better_device
+                cfg.save(update_fields=["device"])
+        return cfg
+
+    bwwp_device = bwwp_devices_query.first()
 
     if bwwp_device:
         cfg = BWWPLoadManagementConfig.objects.create(
@@ -338,12 +355,22 @@ def evaluate_bwwp_load_management(home, config: BWWPLoadManagementConfig = None,
     config.last_decision_reason = reason
     config.save(update_fields=["current_sg_state", "last_decision_reason", "last_switched_at", "updated_at"])
 
+    # Berechne sauberen Anzeigenamen
+    device_display_name = "Warmwasser (BWWP)"
+    if device:
+        if hasattr(device, "config") and device.config and device.config.name and not any(x in device.config.name.lower() for x in ["aircon", "klima", "ac_"]):
+            device_display_name = device.config.name
+        elif device.name and not any(x in device.name.lower() for x in ["aircon", "klima", "ac_"]):
+            device_display_name = device.name
+        elif device.identifier and not any(x in device.identifier.lower() for x in ["aircon", "klima", "ac_"]):
+            device_display_name = device.identifier
+
     # 6. Status-Dictionary für Frontend & API
     result_data = {
         "status": "active" if config.active else "disabled",
         "home_id": home.id,
         "device_id": device.id,
-        "device_name": device.name,
+        "device_name": device_display_name,
         "identifier": device.identifier,
         "control_mode": config.control_mode,
         "control_mode_display": config.get_control_mode_display(),

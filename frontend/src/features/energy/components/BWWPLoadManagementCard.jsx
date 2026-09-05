@@ -9,10 +9,18 @@ export default function BWWPLoadManagementCard() {
     const [settingsOpen, setSettingsOpen] = useState(false);
     const [formConfig, setFormConfig] = useState(null);
 
+    // 1. Live BWWP Status & Configuration from Backend
     const bwwpQuery = useQuery({
         queryKey: ["bwwp-load-mgmt"],
         queryFn: () => apiFetch("/api/energy/bwwp/"),
-        refetchInterval: 12000,
+        refetchInterval: 5000,
+    });
+
+    // 2. Devices for optional device binding selection in settings
+    const devicesQuery = useQuery({
+        queryKey: ["devices"],
+        queryFn: () => apiFetch("/api/devices/"),
+        enabled: settingsOpen,
     });
 
     const switchMutation = useMutation({
@@ -45,12 +53,15 @@ export default function BWWPLoadManagementCard() {
     const metrics = data.metrics || {};
     const thresholds = data.thresholds || {};
 
+    const rawName = data.device_name || "";
+    const cleanTitle = (rawName && !rawName.toLowerCase().includes("aircon") && !rawName.toLowerCase().includes("ac_"))
+        ? rawName
+        : "Warmwasser (BWWP)";
+
     const tempC = telemetry.temperature_c ?? metrics.water_temperature_c ?? 48.0;
     const powerW = telemetry.power_w ?? metrics.power_w ?? 0.0;
     const relayState = data.relay_state ?? telemetry.relay_state ?? false;
     const sgState = data.current_sg_state || "2_normal";
-    const decisionReason = data.decision_reason || "System im Regelbetrieb.";
-    const isProtectionActive = data.protection_active || false;
     const controlMode = data.control_mode || "hybrid";
 
     const tMin = thresholds.min_temp_c ?? 45.0;
@@ -58,19 +69,10 @@ export default function BWWPLoadManagementCard() {
     const tBoost = thresholds.boost_temp_c ?? 60.0;
     const tMax = thresholds.max_safety_temp_c ?? 65.0;
     const minSurplusW = thresholds.min_pv_surplus_w ?? 800.0;
-    const availableSurplusW = metrics.available_surplus_w ?? 0.0;
-    const gridPriceCt = metrics.grid_price_ct ?? 24.5;
-
-    // Relative Position für Temperatur-Balken (30°C bis 70°C Skala)
-    const scaleMin = 30;
-    const scaleMax = 70;
-    const tempPct = Math.min(100, Math.max(0, ((tempC - scaleMin) / (scaleMax - scaleMin)) * 100));
-    const tMinPct = ((tMin - scaleMin) / (scaleMax - scaleMin)) * 100;
-    const tTargetPct = ((tTarget - scaleMin) / (scaleMax - scaleMin)) * 100;
-    const tBoostPct = ((tBoost - scaleMin) / (scaleMax - scaleMin)) * 100;
 
     const handleOpenSettings = () => {
         setFormConfig({
+            device_id: data.device_id || "",
             min_temp_c: tMin,
             target_temp_c: tTarget,
             boost_temp_c: tBoost,
@@ -93,9 +95,47 @@ export default function BWWPLoadManagementCard() {
         );
     }
 
+    // Unconfigured state
     if (data.status === "unconfigured") {
-        return null;
+        return (
+            <div className="bg-gradient-to-br from-white via-slate-50/70 to-blue-50/30 dark:from-slate-900 dark:via-slate-900/90 dark:to-blue-950/20 rounded-3xl p-6 border border-slate-200/90 dark:border-slate-800 shadow-sm relative overflow-hidden flex flex-col justify-between">
+                <div className="space-y-4 relative z-10">
+                    <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center text-2xl shadow-xs">
+                                ♨️
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-base text-slate-900 dark:text-white">
+                                    Warmwasser (BWWP)
+                                </h3>
+                                <p className="text-xs text-slate-400 mt-0.5">
+                                    Keine Brauchwasserwärmepumpe angebunden
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="p-4 bg-white/70 dark:bg-slate-800/50 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 text-xs text-slate-500 dark:text-slate-400 text-center">
+                        Binde deine Brauchwasserwärmepumpe oder SG-Ready Relais ein, um Wassertemperatur und PV-Überschuss-Boost zu steuern.
+                    </div>
+                </div>
+
+                <div className="pt-4 mt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-end relative z-10">
+                    <button
+                        type="button"
+                        onClick={handleOpenSettings}
+                        className="px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs cursor-pointer bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/20 flex items-center gap-1.5"
+                    >
+                        <span>➕</span>
+                        <span>Warmwasser einrichten</span>
+                    </button>
+                </div>
+            </div>
+        );
     }
+
+    const availableDevices = Array.isArray(devicesQuery.data) ? devicesQuery.data : (devicesQuery.data?.devices || []);
 
     return (
         <div className="bg-gradient-to-br from-white via-slate-50/70 to-blue-50/30 dark:from-slate-900 dark:via-slate-900/90 dark:to-blue-950/20 rounded-3xl p-6 border border-slate-200/90 dark:border-slate-800 shadow-sm relative overflow-hidden flex flex-col justify-between">
@@ -112,7 +152,7 @@ export default function BWWPLoadManagementCard() {
                         <div>
                             <div className="flex items-center gap-2">
                                 <h3 className="font-bold text-base text-slate-900 dark:text-white">
-                                    {data.device_name || "Warmwasser (BWWP)"}
+                                    {cleanTitle}
                                 </h3>
                                 <span className={`px-2 py-0.5 text-[11px] font-bold rounded-full border ${
                                     sgState === "3_boost"
@@ -200,8 +240,8 @@ export default function BWWPLoadManagementCard() {
             {/* Settings Modal */}
             {settingsOpen && formConfig && (
                 <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 max-w-lg w-full shadow-2xl space-y-4">
-                        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 max-w-lg w-full shadow-2xl space-y-4 max-h-[90vh] flex flex-col overflow-hidden">
+                        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 shrink-0">
                             <div>
                                 <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                                     <span>⚙️</span>
@@ -220,7 +260,28 @@ export default function BWWPLoadManagementCard() {
                             </button>
                         </div>
 
-                        <div className="space-y-3.5 max-h-[70vh] overflow-y-auto pr-1">
+                        <div className="space-y-3.5 overflow-y-auto pr-1 flex-1">
+                            {/* Gerät / Aktor Zuordnung */}
+                            {availableDevices.length > 0 && (
+                                <div>
+                                    <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                        Verknüpftes Gerät / Aktor
+                                    </label>
+                                    <select
+                                        value={formConfig.device_id || ""}
+                                        onChange={(e) => setFormConfig({ ...formConfig, device_id: e.target.value })}
+                                        className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-900 dark:text-white"
+                                    >
+                                        <option value="">-- Standardgerät --</option>
+                                        {availableDevices.map((d) => (
+                                            <option key={d.id} value={d.id}>
+                                                {d.name || d.identifier}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+
                             {/* Modus */}
                             <div>
                                 <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
@@ -229,7 +290,7 @@ export default function BWWPLoadManagementCard() {
                                 <select
                                     value={formConfig.control_mode}
                                     onChange={(e) => setFormConfig({ ...formConfig, control_mode: e.target.value })}
-                                    className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-medium"
+                                    className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-900 dark:text-white"
                                 >
                                     <option value="hybrid">🔄 Hybrid (PV-Überschuss + Günstige Börsenstunden)</option>
                                     <option value="pv_surplus">☀️ Nur PV-Überschuss</option>
@@ -249,7 +310,7 @@ export default function BWWPLoadManagementCard() {
                                         step="0.5"
                                         value={formConfig.min_temp_c}
                                         onChange={(e) => setFormConfig({ ...formConfig, min_temp_c: parseFloat(e.target.value) })}
-                                        className="w-full p-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-mono"
+                                        className="w-full p-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-900 dark:text-white"
                                     />
                                     <span className="text-[10px] text-slate-400">Komfortgrenze (Zwangsheizung)</span>
                                 </div>
@@ -263,7 +324,7 @@ export default function BWWPLoadManagementCard() {
                                         step="0.5"
                                         value={formConfig.target_temp_c}
                                         onChange={(e) => setFormConfig({ ...formConfig, target_temp_c: parseFloat(e.target.value) })}
-                                        className="w-full p-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-mono"
+                                        className="w-full p-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-900 dark:text-white"
                                     />
                                     <span className="text-[10px] text-slate-400">Wohlfühltemperatur</span>
                                 </div>
@@ -277,7 +338,7 @@ export default function BWWPLoadManagementCard() {
                                         step="0.5"
                                         value={formConfig.boost_temp_c}
                                         onChange={(e) => setFormConfig({ ...formConfig, boost_temp_c: parseFloat(e.target.value) })}
-                                        className="w-full p-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-mono"
+                                        className="w-full p-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-900 dark:text-white"
                                     />
                                     <span className="text-[10px] text-slate-400">Thermisches Speichern</span>
                                 </div>
@@ -291,7 +352,7 @@ export default function BWWPLoadManagementCard() {
                                         step="0.5"
                                         value={formConfig.max_safety_temp_c}
                                         onChange={(e) => setFormConfig({ ...formConfig, max_safety_temp_c: parseFloat(e.target.value) })}
-                                        className="w-full p-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-mono"
+                                        className="w-full p-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-900 dark:text-white"
                                     />
                                     <span className="text-[10px] text-slate-400">Absoluter Abschaltschutz</span>
                                 </div>
@@ -308,7 +369,7 @@ export default function BWWPLoadManagementCard() {
                                         step="50"
                                         value={formConfig.min_pv_surplus_w}
                                         onChange={(e) => setFormConfig({ ...formConfig, min_pv_surplus_w: parseFloat(e.target.value) })}
-                                        className="w-full p-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-mono"
+                                        className="w-full p-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-900 dark:text-white"
                                     />
                                 </div>
 
@@ -321,14 +382,14 @@ export default function BWWPLoadManagementCard() {
                                         step="0.5"
                                         value={formConfig.max_price_threshold_ct}
                                         onChange={(e) => setFormConfig({ ...formConfig, max_price_threshold_ct: parseFloat(e.target.value) })}
-                                        className="w-full p-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-mono"
+                                        className="w-full p-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-900 dark:text-white"
                                     />
                                 </div>
                             </div>
                         </div>
 
                         {/* Modal Footer */}
-                        <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                        <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800 shrink-0">
                             <button
                                 type="button"
                                 onClick={() => setSettingsOpen(false)}
