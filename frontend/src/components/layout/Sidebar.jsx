@@ -80,7 +80,7 @@ export default function Sidebar() {
                 ],
             },
             {
-                title: `📊 ${t("nav.analytics", "Analysen & Historie")}`,
+                title: `📊 ${t("nav.analytics", "Analysen & Monitoring")}`,
                 items: [
                     { name: t("energy.energy_balance", "Energiebilanz"), path: "/app/energy", icon: "⚡" },
                     { name: t("nav.solar_forecast", "Solar-Prognose"), path: "/app/solarforecast", icon: "☀️" },
@@ -96,8 +96,14 @@ export default function Sidebar() {
                 ],
             },
             {
-                title: `🎛️ ${t("nav.assets_group", "Geräte & Steuerung")}`,
+                title: `🎛️ ${t("nav.assets_group", "Steuerung & Geräte")}`,
                 items: [
+                    {
+                        name: t("nav.energy_control", "Energiesteuerung"),
+                        path: "/app/control",
+                        icon: "🎛️",
+                        isProGated: true,
+                    },
                     {
                         name: t("nav.all_devices", "Geräteübersicht"),
                         path: "/app/devices",
@@ -105,13 +111,7 @@ export default function Sidebar() {
                         badge: count > 0 ? count : null,
                         isDeviceSetupBadge: true,
                     },
-                    { name: t("nav.producers", "Erzeuger & Speicher"), path: "/app/producers", icon: "☀️" },
-                    {
-                        name: t("nav.energy_control", "Energiesteuerung"),
-                        path: "/app/control",
-                        icon: "🎛️",
-                        isProGated: true,
-                    },
+                    { name: t("nav.producers", "Erzeuger & Speicher"), path: "/app/producers", icon: "🔋" },
                     ...(hasTenantAccess && !isStaffOrAdmin
                         ? [{ name: t("nav.tenant_management", "Community & Mieter"), path: "/app/tenant", icon: "👥" }]
                         : []),
