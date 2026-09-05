@@ -57,63 +57,68 @@ function isIncomplete(config) {
 
 
 function getRoleColor(config) {
-
     if (config?.is_grid_source) {
         return {
-            text: "text-emerald-600",
-            bg: "bg-emerald-50",
-            ring: "hover:ring-emerald-200",
+            text: "text-emerald-700",
+            bg: "bg-white",
+            badgeBg: "bg-emerald-50 border-emerald-200/80 text-emerald-700",
+            ring: "hover:border-emerald-300",
             chart: "#10b981",
         };
     }
 
     switch (config?.role?.key) {
-
         case "producer":
             return {
-                text: "text-amber-500",
-                bg: "bg-amber-50",
-                ring: "hover:ring-amber-200",
+                text: "text-amber-700",
+                bg: "bg-white",
+                badgeBg: "bg-amber-50 border-amber-200/80 text-amber-800",
+                ring: "hover:border-amber-300",
                 chart: "#f59e0b",
             };
 
         case "consumer":
             return {
-                text: "text-blue-600",
-                bg: "bg-blue-50",
-                ring: "hover:ring-blue-200",
+                text: "text-blue-700",
+                bg: "bg-white",
+                badgeBg: "bg-blue-50 border-blue-200/80 text-blue-700",
+                ring: "hover:border-blue-300",
                 chart: "#2563eb",
             };
 
         case "battery":
             return {
-                text: "text-purple-600",
-                bg: "bg-purple-50",
-                ring: "hover:ring-purple-200",
+                text: "text-purple-700",
+                bg: "bg-white",
+                badgeBg: "bg-purple-50 border-purple-200/80 text-purple-700",
+                ring: "hover:border-purple-300",
                 chart: "#8b5cf6",
             };
 
         case "sensor":
             return {
-                text: "text-teal-600",
-                bg: "bg-teal-50",
-                ring: "hover:ring-teal-200",
+                text: "text-teal-700",
+                bg: "bg-white",
+                badgeBg: "bg-teal-50 border-teal-200/80 text-teal-700",
+                ring: "hover:border-teal-300",
                 chart: "#0d9488",
             };
 
         case "both":
             return {
-                text: "text-cyan-600",
-                bg: "bg-cyan-50",
-                ring: "hover:ring-cyan-200",
+                text: "text-cyan-700",
+                bg: "bg-white",
+                badgeBg: "bg-cyan-50 border-cyan-200/80 text-cyan-700",
+                ring: "hover:border-cyan-300",
                 chart: "#0891b2",
             };
 
         default:
             return {
-                text: "text-indigo-600",
-                bg: "bg-indigo-50",
-                ring: "hover:ring-indigo-200",
+                text: "text-indigo-700",
+                bg: "bg-white",
+                badgeBg: "bg-slate-100 border-slate-200 text-slate-700",
+                ring: "hover:border-slate-300",
                 chart: "#6366f1",
             };
     }
@@ -123,8 +128,6 @@ function getRoleColor(config) {
    DEVICE CARD
 ========================================================= */
 const DeviceCard = memo(function DeviceCard({ device, onSelect, onEdit, onDelete, onBaseline }) {
-
-
     const { t } = useTranslation();
     const config = device.config || {};
     const isOnline = device.status === "online";
@@ -164,24 +167,13 @@ const DeviceCard = memo(function DeviceCard({ device, onSelect, onEdit, onDelete
     const roleStyle = getRoleColor(config);
 
     function getIcon(config) {
-
-        if (config?.is_grid_source) {
-            return "🔌";
-        }
-
+        if (config?.is_grid_source) return "🔌";
         switch (config?.role?.key) {
-
-            case "producer":
-                return "☀️";
-
-            case "consumer":
-                return "⚡";
-
-            case "battery":
-                return "🔋";
-
-            default:
-                return "🔧";
+            case "producer": return "☀️";
+            case "consumer": return "⚡";
+            case "battery": return "🔋";
+            case "sensor": return "🌡️";
+            default: return "📟";
         }
     }
 
@@ -190,139 +182,162 @@ const DeviceCard = memo(function DeviceCard({ device, onSelect, onEdit, onDelete
             onClick={() => onSelect(device)}
             className={`
                 cursor-pointer
-                border
-                rounded-xl
-                p-4
-                shadow-sm
-                transition
-                hover:shadow-md
-                hover:ring-2
+                border rounded-2xl
+                p-4 sm:p-5
+                shadow-2xs hover:shadow-md
+                transition-all duration-200
+                flex flex-col justify-between
+                relative
                 ${roleStyle.ring}
                 ${missing
-                    ? "border-yellow-300 bg-yellow-50"
-                    : `border-gray-200 ${roleStyle.bg}`
+                    ? "border-amber-300/80 bg-amber-50/40"
+                    : `border-gray-200/80 bg-white hover:border-gray-300`
                 }
             `}
         >
-            <div className="flex justify-between mb-2 items-start">
-
-                <div>
-                    <div className={`font-semibold flex items-center gap-2 ${roleStyle.text}`}>
-                        {getIcon(config)}
-                        {device.display_name}
-                        {missing && <span className="text-yellow-600 text-sm">⚠</span>}
+            <div>
+                {/* Top Row: Info & Action Toolbar */}
+                <div className="flex justify-between items-start gap-2 mb-2">
+                    <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                            <span className="text-lg shrink-0">{getIcon(config)}</span>
+                            <span className="font-bold text-gray-900 truncate text-sm sm:text-base" title={device.display_name}>
+                                {device.display_name}
+                            </span>
+                            {missing && (
+                                <span className="text-amber-600 text-xs shrink-0" title={t("devices.incomplete_badge", "Unvollständig konfiguriert")}>
+                                    ⚠
+                                </span>
+                            )}
+                        </div>
+                        <div className="text-[11px] font-mono text-gray-400 truncate mt-0.5">
+                            {device.identifier}
+                        </div>
                     </div>
 
-                    <div className="text-xs text-gray-400">
-                        {device.identifier}
+                    {/* Action Buttons & Status Dot */}
+                    <div className="flex items-center gap-0.5 shrink-0 bg-slate-50 border border-slate-100 rounded-xl p-0.5">
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onBaseline?.(device);
+                            }}
+                            className="text-gray-400 hover:text-indigo-600 p-1.5 rounded-lg hover:bg-white transition cursor-pointer"
+                            title={t("devices.baseline_title", "Geräteprofil & Baseline-Überwachung")}
+                        >
+                            🧠
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onEdit(device);
+                            }}
+                            className="text-gray-400 hover:text-gray-700 p-1.5 rounded-lg hover:bg-white transition cursor-pointer"
+                            title={t("devices.setup_title", "Konfigurieren")}
+                        >
+                            ⚙️
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onDelete(device);
+                            }}
+                            className="text-gray-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-white transition cursor-pointer"
+                            title={t("nav.remove_device", "In den Papierkorb verschieben")}
+                        >
+                            🗑️
+                        </button>
+
+                        <span
+                            className={`w-2 h-2 rounded-full mx-1 ${isOnline ? "bg-emerald-500 shadow-xs shadow-emerald-500/80" : "bg-gray-300"}`}
+                            title={isOnline ? "Online" : "Offline"}
+                        />
                     </div>
                 </div>
 
-                <div className="flex items-center gap-1.5">
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onBaseline?.(device);
-                        }}
-                        className="text-gray-400 hover:text-indigo-600 p-1 rounded hover:bg-indigo-50 cursor-pointer"
-                        title={t("devices.baseline_title", "Geräteprofil & Baseline-Überwachung")}
-                    >
-                        🧠
-                    </button>
-
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onEdit(device);
-                        }}
-                        className="text-gray-400 hover:text-gray-600 p-1 rounded hover:bg-gray-100 cursor-pointer"
-                        title={t("devices.setup_title", "Konfigurieren")}
-                    >
-                        ⚙️
-                    </button>
-
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onDelete(device);
-                        }}
-                        className="text-gray-400 hover:text-rose-600 p-1 rounded hover:bg-gray-100 cursor-pointer"
-                        title={t("nav.remove_device", "In den Papierkorb verschieben")}
-                    >
-                        🗑️
-                    </button>
-
-                    <div className={`w-2.5 h-2.5 rounded-full ml-1 ${isOnline ? "bg-green-500" : "bg-gray-300"}`} />
+                {/* Role Badge & Location */}
+                <div className="flex items-center gap-2 mb-3">
+                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border ${roleStyle.badgeBg}`}>
+                        {config.is_grid_source ? t("devices.role_grid", "Netz") : (config.role?.label || "–")}
+                    </span>
+                    {(config.floor?.name || config.room?.name) && (
+                        <span className="text-[11px] text-gray-500 truncate">
+                            {[config.floor?.name, config.room?.name].filter(Boolean).join(" · ")}
+                        </span>
+                    )}
                 </div>
 
+                {/* Primary Metric Value */}
+                <div className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight font-mono">
+                    {device.value != null ? (
+                        <>
+                            {device.value} <span className="text-xs font-semibold text-gray-500 uppercase">{device.unit || ""}</span>
+                        </>
+                    ) : device.status === "stale" ? (
+                        <span className="text-xs font-medium text-gray-400">
+                            {t("common.no_recent_data", "Keine aktuellen Daten")}
+                        </span>
+                    ) : device.status === "offline" ? (
+                        <span className="text-xs font-medium text-gray-400">
+                            {t("common.offline", "Offline")}
+                        </span>
+                    ) : (
+                        <span className="text-xs font-medium text-gray-400">
+                            {t("common.no_data", "Keine Daten")}
+                        </span>
+                    )}
+                </div>
             </div>
 
-            <div className={`text-sm mb-2 ${roleStyle.text}`}>
-                {
-                    config.is_grid_source
-                        ? t("devices.role_grid", "Netz")
-                        : (config.role?.label || "–")
-                }
-            </div>
+            {/* Sparkline Chart & Relay Switch */}
+            <div className="mt-3">
+                {device.sparkline?.length > 0 && (
+                    <div className="mb-2">
+                        <KPISparklineECharts
+                            values={device.sparkline}
+                            color={roleStyle.chart}
+                            unit={device.unit}
+                        />
+                    </div>
+                )}
 
-            <div className={`text-xl font-bold ${roleStyle.text}`}>
-                {device.value != null ? (
-                    `${device.value} ${device.unit || ""}`
-                ) : device.status === "stale" ? (
-                    <span className="text-gray-400">
-                        {t("common.no_recent_data", "Keine aktuellen Daten")}
-                    </span>
-                ) : device.status === "offline" ? (
-                    <span className="text-gray-400">
-                        {t("common.offline", "Offline")}
-                    </span>
-                ) : (
-                    <span className="text-gray-400">
-                        {t("common.no_data", "Keine Daten")}
-                    </span>
+                {/* ⚡ INTERAKTIVER RELAIS-SCHALTER (AKTORIK) */}
+                {device.is_switchable && (
+                    <div className="pt-2.5 border-t border-gray-100 flex items-center justify-between">
+                        <span className="text-xs font-semibold text-gray-700 flex items-center gap-1.5">
+                            <span className="text-amber-500 font-bold">⚡</span>
+                            <span>{relayState ? t("devices.relay_on", "Relais AN") : t("devices.relay_off", "Relais AUS")}</span>
+                        </span>
+                        <button
+                            type="button"
+                            onClick={handleToggleRelay}
+                            disabled={isSwitching}
+                            className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
+                                relayState ? "bg-emerald-500" : "bg-gray-300"
+                            } ${isSwitching ? "opacity-60 cursor-wait" : ""}`}
+                            title={relayState ? t("devices.relay_turn_off", "Relais ausschalten") : t("devices.relay_turn_on", "Relais einschalten")}
+                        >
+                            <span
+                                className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                                    relayState ? "translate-x-5" : "translate-x-0"
+                                }`}
+                            />
+                        </button>
+                    </div>
+                )}
+
+                {missing && (
+                    <div className="text-[11px] font-semibold text-amber-700 mt-2 bg-amber-100/60 rounded-lg px-2.5 py-1 flex items-center gap-1.5">
+                        <span>⚠</span>
+                        <span>{t("devices.incomplete_badge", "Unvollständig konfiguriert")}</span>
+                    </div>
                 )}
             </div>
-
-            {device.sparkline?.length > 0 && (
-                <div className="mt-1">
-                    <KPISparklineECharts
-                        values={device.sparkline}
-                        color={roleStyle.chart}
-                        unit={device.unit}
-                    />
-                </div>
-            )}
-
-            {/* ⚡ INTERAKTIVER RELAIS-SCHALTER (AKTORIK) */}
-            {device.is_switchable && (
-                <div className="mt-3 pt-2.5 border-t border-gray-200/60 flex items-center justify-between">
-                    <span className="text-xs font-semibold text-gray-700 flex items-center gap-1">
-                        <span>⚡</span>
-                        <span>{relayState ? t("devices.relay_on", "Relais AN") : t("devices.relay_off", "Relais AUS")}</span>
-                    </span>
-                    <button
-                        type="button"
-                        onClick={handleToggleRelay}
-                        disabled={isSwitching}
-                        className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
-                            relayState ? "bg-emerald-500" : "bg-gray-300"
-                        } ${isSwitching ? "opacity-60 cursor-wait" : ""}`}
-                        title={relayState ? t("devices.relay_turn_off", "Relais ausschalten") : t("devices.relay_turn_on", "Relais einschalten")}
-                    >
-                        <span
-                            className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
-                                relayState ? "translate-x-5" : "translate-x-0"
-                            }`}
-                        />
-                    </button>
-                </div>
-            )}
-
-            {missing && (
-                <div className="text-xs text-yellow-700 mt-2">
-                    {t("devices.incomplete_badge", "⚠ Unvollständig konfiguriert")}
-                </div>
-            )}
         </div>
     );
 });
@@ -832,50 +847,77 @@ export default function DevicesPage() {
         valuesQuery.isLoading ||
         settingsLoading
     ) {
-        return <div className="p-6">{t("common.loading", "Lade Geräte…")}</div>;
+        return (
+            <div className="p-6 max-w-7xl mx-auto space-y-6 animate-pulse">
+                <div className="flex justify-between items-center">
+                    <div className="space-y-2">
+                        <div className="h-7 w-48 bg-slate-200 rounded-lg" />
+                        <div className="h-4 w-72 bg-slate-100 rounded-md" />
+                    </div>
+                    <div className="h-10 w-36 bg-slate-200 rounded-xl" />
+                </div>
+                <div className="h-10 w-full bg-slate-100 rounded-xl" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                        <div key={i} className="h-44 bg-slate-100 rounded-2xl border border-slate-200/60 p-4 space-y-3">
+                            <div className="h-4 w-32 bg-slate-200 rounded-md" />
+                            <div className="h-6 w-20 bg-slate-300 rounded-md" />
+                            <div className="h-16 w-full bg-slate-200/50 rounded-xl" />
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
     }
 
     return (
         <div className="p-6 max-w-7xl mx-auto space-y-6">
 
             {/* TOP ACTION HEADER */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
                         <span>📟</span> {t("devices.title", "Geräteübersicht")}
                     </h1>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    <p className="text-sm text-gray-500 mt-1">
                         {t("devices.subtitle", "Verwalte und überwache alle angeschlossenen Sensoren und Aktoren.")}
                     </p>
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0">
-                    <button
-                        onClick={() => setOpenTrashBin(true)}
-                        className="px-3.5 py-2 rounded-xl border border-gray-200 hover:bg-gray-50 text-sm font-medium text-gray-700 flex items-center gap-1.5 transition"
-                        title={t("nav.trash_bin", "Papierkorb")}
-                    >
-                        <span>♻️</span>
-                        <span>{t("nav.trash_bin", "Papierkorb")}</span>
-                        {trashCount > 0 && (
-                            <span className="px-1.5 py-0.5 rounded-full bg-rose-100 text-rose-700 text-xs font-bold">
-                                {trashCount}
-                            </span>
-                        )}
-                    </button>
+                <div className="flex items-center gap-2.5 shrink-0">
+                    {/* Secondary Actions Group */}
+                    <div className="inline-flex bg-white border border-gray-200 rounded-xl shadow-2xs divide-x divide-gray-100">
+                        <button
+                            type="button"
+                            onClick={() => setOpenTrashBin(true)}
+                            className="px-3.5 py-2 hover:bg-gray-50 text-xs font-semibold text-gray-700 flex items-center gap-1.5 transition rounded-l-xl cursor-pointer"
+                            title={t("nav.trash_bin", "Papierkorb")}
+                        >
+                            <span>♻️</span>
+                            <span>{t("nav.trash_bin", "Papierkorb")}</span>
+                            {trashCount > 0 && (
+                                <span className="px-1.5 py-0.2 rounded-full bg-rose-100 text-rose-700 text-[10px] font-bold">
+                                    {trashCount}
+                                </span>
+                            )}
+                        </button>
 
-                    <button
-                        onClick={() => setOpenRemoveDevice(true)}
-                        className="px-3.5 py-2 rounded-xl border border-gray-200 hover:bg-rose-50 hover:border-rose-200 text-sm font-medium text-gray-700 hover:text-rose-600 flex items-center gap-1.5 transition"
-                        title={t("nav.remove_device", "Geräte entfernen")}
-                    >
-                        <span>🗑️</span>
-                        <span>{t("nav.remove_device", "Gerät entfernen")}</span>
-                    </button>
+                        <button
+                            type="button"
+                            onClick={() => setOpenRemoveDevice(true)}
+                            className="px-3.5 py-2 hover:bg-rose-50 text-xs font-semibold text-gray-700 hover:text-rose-600 flex items-center gap-1.5 transition rounded-r-xl cursor-pointer"
+                            title={t("nav.remove_device", "Geräte entfernen")}
+                        >
+                            <span>🗑️</span>
+                            <span>{t("nav.remove_device", "Gerät entfernen")}</span>
+                        </button>
+                    </div>
 
+                    {/* Primary Add Button */}
                     <button
+                        type="button"
                         onClick={() => setOpenAddDevice(true)}
-                        className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold shadow-xs flex items-center gap-1.5 transition"
+                        className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs hover:shadow-sm flex items-center gap-1.5 transition cursor-pointer"
                     >
                         <span>➕</span>
                         <span>{t("nav.add_device", "Neues Gerät")}</span>
@@ -884,13 +926,24 @@ export default function DevicesPage() {
             </div>
 
             {/* SEARCH & STRUCTURE SELECT FILTERS */}
-            <div className="flex flex-wrap items-center gap-3 mb-3">
-                <input
-                    placeholder={t("devices.search_placeholder", "🔍 Gerät suchen...")}
-                    value={filterText}
-                    onChange={(e) => setFilterText(e.target.value)}
-                    className="border border-gray-200 px-3.5 py-1.5 rounded-xl text-xs font-medium w-64 bg-white shadow-2xs focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
-                />
+            <div className="flex flex-wrap items-center gap-2.5">
+                <div className="relative">
+                    <input
+                        placeholder={t("devices.search_placeholder", "🔍 Gerät suchen...")}
+                        value={filterText}
+                        onChange={(e) => setFilterText(e.target.value)}
+                        className="border border-gray-200 px-3.5 py-1.5 rounded-xl text-xs font-medium w-64 bg-white shadow-2xs focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                    />
+                    {filterText && (
+                        <button
+                            type="button"
+                            onClick={() => setFilterText("")}
+                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs"
+                        >
+                            ✕
+                        </button>
+                    )}
+                </div>
 
                 {/* Etagen-Filter */}
                 <div className="flex items-center gap-1.5 bg-white border border-gray-200 px-3 py-1.5 rounded-xl shadow-2xs">
@@ -928,154 +981,160 @@ export default function DevicesPage() {
 
                 {(selectedFloor !== "all" || selectedRoom !== "all" || filterText) && (
                     <button
+                        type="button"
                         onClick={() => {
                             setSelectedFloor("all");
                             setSelectedRoom("all");
                             setFilterText("");
                         }}
-                        className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition cursor-pointer px-2 py-1"
+                        className="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition cursor-pointer px-2 py-1 bg-indigo-50/60 rounded-lg hover:bg-indigo-100"
                     >
                         ✕ Filter zurücksetzen
                     </button>
                 )}
             </div>
 
-            <div className="flex flex-wrap gap-2 mb-6">
+            {/* SEGMENTED FILTER CHIPS BAR */}
+            <div className="flex flex-wrap items-center gap-2 p-2 bg-slate-50 border border-slate-200/70 rounded-2xl">
 
-                {/* STATUS */}
-                {statusOptions.map(option => (
+                {/* Status Filter Group */}
+                <div className="flex flex-wrap items-center gap-1.5">
+                    {statusOptions.map((option) => (
+                        <button
+                            key={option.key}
+                            title={option.title}
+                            type="button"
+                            onClick={() =>
+                                saveSettings({
+                                    ...settings,
+                                    statusFilter: statusFilter === option.key ? null : option.key,
+                                })
+                            }
+                            className={`
+                                px-2.5 py-1
+                                rounded-xl
+                                text-xs font-semibold
+                                border
+                                flex items-center gap-1.5
+                                transition cursor-pointer
+                                ${statusFilter === option.key
+                                    ? "bg-indigo-600 text-white border-indigo-600 shadow-2xs"
+                                    : "bg-white hover:bg-slate-100/80 border-gray-200 text-gray-700"}
+                            `}
+                        >
+                            <span>{option.icon}</span>
+                            <span>{option.label}</span>
+                            <span className="opacity-70 font-mono text-[10px]">
+                                ({statusStats[option.key] || 0})
+                            </span>
+                        </button>
+                    ))}
+                </div>
 
+                {/* Subtle Divider */}
+                <div className="h-4 w-px bg-slate-300 mx-1 hidden sm:block" />
+
+                {/* Role Filter Group */}
+                <div className="flex flex-wrap items-center gap-1.5">
+                    {allKnownRoles
+                        .filter((role) => ["producer", "consumer", "battery", "grid", "sensor"].includes(role) || (roleStats[role] || 0) > 0)
+                        .map((role) => {
+                            const active = activeRoles.includes(role);
+                            const config = roleOptions[role] || {
+                                icon: "📟",
+                                label: role.charAt(0).toUpperCase() + role.slice(1),
+                                title: `${role} anzeigen`,
+                            };
+
+                            return (
+                                <button
+                                    key={role}
+                                    type="button"
+                                    title={config.title}
+                                    onClick={() => {
+                                        const nextRoles = active
+                                            ? activeRoles.filter((r) => r !== role)
+                                            : [...activeRoles, role];
+                                        saveSettings({
+                                            ...settings,
+                                            roles: nextRoles,
+                                        });
+                                    }}
+                                    className={`
+                                        px-2.5 py-1
+                                        rounded-xl
+                                        text-xs font-semibold
+                                        border
+                                        flex items-center gap-1.5
+                                        transition cursor-pointer
+                                        ${active
+                                            ? "bg-slate-800 text-white border-slate-800 shadow-2xs"
+                                            : "bg-white hover:bg-slate-100/80 border-gray-200 text-gray-700"}
+                                    `}
+                                >
+                                    <span>{config.icon}</span>
+                                    <span>{config.label}</span>
+                                    <span className="opacity-70 font-mono text-[10px]">
+                                        ({roleStats[role] || 0})
+                                    </span>
+                                </button>
+                            );
+                        })}
+                </div>
+
+                {/* Subtle Divider */}
+                <div className="h-4 w-px bg-slate-300 mx-1 hidden sm:block" />
+
+                {/* Structure View Toggles */}
+                <div className="flex items-center gap-1.5 ml-auto">
                     <button
-                        key={option.key}
-                        title={option.title}
+                        type="button"
+                        title={t("devices.group_by_floors", "Geräte nach Etagen gruppieren")}
                         onClick={() =>
                             saveSettings({
                                 ...settings,
-                                statusFilter:
-                                    statusFilter === option.key
-                                        ? null
-                                        : option.key,
+                                showFloors: !showFloors,
                             })
                         }
-
                         className={`
                             px-2.5 py-1
-                            rounded-full
-                            text-xs
+                            rounded-xl
+                            text-xs font-semibold
                             border
-                            flex items-center gap-1
-                            transition
-                            ${statusFilter === option.key
-                                ? "bg-indigo-600 text-white border-indigo-600"
-                                : "bg-white hover:bg-gray-50 border-gray-200"}
+                            flex items-center gap-1.5
+                            transition cursor-pointer
+                            ${showFloors
+                                ? "bg-indigo-600 text-white border-indigo-600 shadow-2xs"
+                                : "bg-white hover:bg-slate-100/80 border-gray-200 text-gray-700"}
                         `}
                     >
-                        <span>{option.icon}</span>
-                        <span>{option.label}</span>
-                        <span className="opacity-70">
-                            ({statusStats[option.key] || 0})
-                        </span>
-
+                        🏢 {t("structure.floor", "Etage")}
                     </button>
 
-                ))}
-
-                {/* ROLE CHIPS */}
-                {allKnownRoles.filter(role => ["producer", "consumer", "battery", "grid", "sensor"].includes(role) || (roleStats[role] || 0) > 0).map(role => {
-
-                    const active = activeRoles.includes(role);
-                    const config = roleOptions[role] || {
-                        icon: "📟",
-                        label: role.charAt(0).toUpperCase() + role.slice(1),
-                        title: `${role} anzeigen`,
-                    };
-
-                    return (
-                        <button
-                            key={role}
-                            title={config.title}
-                            onClick={() => {
-
-                                const nextRoles =
-                                    active
-                                        ? activeRoles.filter(r => r !== role)
-                                        : [...activeRoles, role];
-
-                                saveSettings({
-                                    ...settings,
-                                    roles: nextRoles,
-                                });
-
-                            }}
-                            className={`
-                                px-2.5 py-1
-                                rounded-full
-                                text-xs
-                                border
-                                flex items-center gap-1
-                                transition cursor-pointer
-                                ${active
-                                    ? "bg-indigo-600 text-white border-indigo-600 font-bold"
-                                    : "bg-white hover:bg-gray-50 border-gray-200 text-gray-700"}
-                            `}
-                        >
-                            <span>{config.icon}</span>
-                            <span>{config.label}</span>
-                            <span className="opacity-70">
-                                ({roleStats[role] || 0})
-                            </span>
-                        </button>
-                    );
-
-                })}
-
-                {/* STRUCTURE TOGGLES */}
-
-                <button
-                    title={t("devices.group_by_floors", "Geräte nach Etagen gruppieren")}
-                    onClick={() =>
-                        saveSettings({
-                            ...settings,
-                            showFloors: !showFloors,
-                        })
-                    }
-                    className={`
-                        px-2.5 py-1
-                        rounded-full
-                        text-xs
-                        border
-                        flex items-center gap-1
-                        transition
-                        ${showFloors
-                            ? "bg-indigo-600 text-white border-indigo-600"
-                            : "bg-white hover:bg-gray-50 border-gray-200"}
-                    `}
-                >
-                    🏢 {t("structure.floor", "Etage")}
-                </button>
-
-                <button
-                    title={t("devices.group_by_rooms", "Geräte nach Räumen gruppieren")}
-                    onClick={() =>
-                        saveSettings({
-                            ...settings,
-                            showRooms: !showRooms,
-                        })
-                    }
-                    className={`
-                        px-2.5 py-1
-                        rounded-full
-                        text-xs
-                        border
-                        flex items-center gap-1
-                        transition
-                        ${showRooms
-                            ? "bg-indigo-600 text-white border-indigo-600"
-                            : "bg-white hover:bg-gray-50 border-gray-200"}
-                    `}
-                >
-                    🚪 {t("structure.rooms", "Räume")}
-                </button>
+                    <button
+                        type="button"
+                        title={t("devices.group_by_rooms", "Geräte nach Räumen gruppieren")}
+                        onClick={() =>
+                            saveSettings({
+                                ...settings,
+                                showRooms: !showRooms,
+                            })
+                        }
+                        className={`
+                            px-2.5 py-1
+                            rounded-xl
+                            text-xs font-semibold
+                            border
+                            flex items-center gap-1.5
+                            transition cursor-pointer
+                            ${showRooms
+                                ? "bg-indigo-600 text-white border-indigo-600 shadow-2xs"
+                                : "bg-white hover:bg-slate-100/80 border-gray-200 text-gray-700"}
+                        `}
+                    >
+                        🚪 {t("structure.rooms", "Räume")}
+                    </button>
+                </div>
 
             </div>
 
@@ -1086,39 +1145,73 @@ export default function DevicesPage() {
                         setModalMode("bulk");
                         setEditingDevice(null);
                     }}
-                    className="mb-6 p-4 rounded-lg border border-yellow-300 bg-yellow-50 flex items-center justify-between cursor-pointer hover:bg-yellow-100"
+                    className="p-4 rounded-2xl border border-amber-300 bg-amber-50 flex items-center justify-between cursor-pointer hover:bg-amber-100/80 transition shadow-2xs"
                 >
-                    <div className="text-yellow-800 text-sm">
-                        ⚠ {t("devices.unconfigured_banner", { count: unconfiguredDevices.length, defaultValue: `${unconfiguredDevices.length} Gerät(e) nicht vollständig konfiguriert` })}
+                    <div className="text-amber-900 text-xs sm:text-sm font-semibold flex items-center gap-2">
+                        <span>⚠</span>
+                        <span>{t("devices.unconfigured_banner", { count: unconfiguredDevices.length, defaultValue: `${unconfiguredDevices.length} Gerät(e) nicht vollständig konfiguriert` })}</span>
                     </div>
 
-                    <span className="text-sm text-white bg-yellow-500 px-3 py-1 rounded">
+                    <span className="text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 px-3.5 py-1.5 rounded-xl shadow-2xs transition">
                         {t("devices.configure_now", "Jetzt konfigurieren")}
                     </span>
                 </div>
             )}
 
+            {/* EMPTY FILTER STATE */}
+            {filtered.length === 0 && (
+                <div className="bg-white border border-dashed border-gray-200 rounded-3xl p-10 text-center space-y-3">
+                    <span className="text-3xl p-3 bg-slate-50 rounded-2xl inline-block border border-slate-100">🔍</span>
+                    <h3 className="text-base font-bold text-gray-800">
+                        {t("devices.no_matches_title", "Keine passenden Geräte gefunden")}
+                    </h3>
+                    <p className="text-xs text-gray-500 max-w-md mx-auto">
+                        {t("devices.no_matches_desc", "Für die aktuelle Filterkombination oder Suche liegen keine Geräte vor.")}
+                    </p>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setSelectedFloor("all");
+                            setSelectedRoom("all");
+                            setFilterText("");
+                            saveSettings({
+                                ...settings,
+                                statusFilter: null,
+                                roles: allKnownRoles,
+                            });
+                        }}
+                        className="px-4 py-2 bg-indigo-50 text-indigo-700 font-bold text-xs rounded-xl hover:bg-indigo-100 transition cursor-pointer"
+                    >
+                        ✕ Filter zurücksetzen
+                    </button>
+                </div>
+            )}
+
             {/* GRID */}
-            {Object.entries(grouped)
+            {filtered.length > 0 && Object.entries(grouped)
                 .sort(([a], [b]) => a.localeCompare(b, "de"))
                 .map(([floor, rooms]) => (
 
-                    <div key={floor} className="mb-6">
+                    <div key={floor} className="space-y-3">
 
                         {showFloors && (
-                            <h2 className="text-sm text-gray-500 mb-2">{floor}</h2>
+                            <h2 className="text-xs font-bold uppercase tracking-wider text-gray-500 flex items-center gap-1.5">
+                                <span>🏢</span> {floor}
+                            </h2>
                         )}
 
                         {Object.entries(rooms)
                             .sort(([a], [b]) => a.localeCompare(b, "de"))
                             .map(([room, devices]) => (
-                                <div key={room} className="mb-4">
+                                <div key={room} className="space-y-2">
 
                                     {showRooms && room !== "__ALL__" && (
-                                        <h3 className="text-xs text-gray-400 mb-2">{room}</h3>
+                                        <h3 className="text-xs font-semibold text-gray-400 flex items-center gap-1.5 pl-2">
+                                            <span>🚪</span> {room}
+                                        </h3>
                                     )}
 
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5">
                                         {[...devices]
                                             .sort((a, b) =>
                                                 (a.display_name || "").localeCompare(
@@ -1126,7 +1219,7 @@ export default function DevicesPage() {
                                                     "de"
                                                 )
                                             )
-                                            .map(d => (
+                                            .map((d) => (
                                                 <DeviceCard
                                                     key={d.id}
                                                     device={d}
