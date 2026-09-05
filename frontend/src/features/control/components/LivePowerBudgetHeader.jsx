@@ -26,9 +26,9 @@ export default function LivePowerBudgetHeader({ budget = {}, masterMode, onMaste
                         </div>
                         <div>
                             <div className="flex items-center gap-2">
-                                <h1 className="text-xl font-black tracking-tight text-white">
-                                    Smart Load Management & Dispatch Hub
-                                </h1>
+                                <h2 className="text-xl font-black tracking-tight text-white">
+                                    {t("control.hub_title", "Smart Load Management & Dispatch Hub")}
+                                </h2>
                                 <span className="px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                                     ● Live Regelung
                                 </span>

@@ -184,10 +184,10 @@ export default function SimpleDashboardView({
                         <span className="text-[11px] font-bold uppercase tracking-wider text-amber-900 dark:text-amber-300">
                             Photovoltaik
                         </span>
-                        <span className="text-2xl font-extrabold text-amber-950 dark:text-amber-100 mt-1">
-                            {(solarPowerW / 1000).toFixed(2)} <span className="text-sm font-semibold">kW</span>
+                        <span className="text-xl sm:text-2xl font-extrabold text-amber-950 dark:text-amber-100 mt-1 tracking-tight truncate max-w-full">
+                            {(solarPowerW / 1000).toFixed(2)} <span className="text-xs sm:text-sm font-semibold">kW</span>
                         </span>
-                        <span className="text-[10px] text-amber-700 dark:text-amber-400 mt-0.5">
+                        <span className="text-[10px] text-amber-700 dark:text-amber-400 mt-0.5 truncate max-w-full">
                             {solarPowerW > 0 ? "Erzeugt Strom" : "Ruhend"}
                         </span>
                     </div>
@@ -200,10 +200,10 @@ export default function SimpleDashboardView({
                         <span className="text-[11px] font-bold uppercase tracking-wider text-rose-900 dark:text-rose-300">
                             Hausverbrauch
                         </span>
-                        <span className="text-2xl font-extrabold text-rose-950 dark:text-rose-100 mt-1">
-                            {(homePowerW / 1000).toFixed(2)} <span className="text-sm font-semibold">kW</span>
+                        <span className="text-xl sm:text-2xl font-extrabold text-rose-950 dark:text-rose-100 mt-1 tracking-tight truncate max-w-full">
+                            {(homePowerW / 1000).toFixed(2)} <span className="text-xs sm:text-sm font-semibold">kW</span>
                         </span>
-                        <span className="text-[10px] text-rose-700 dark:text-rose-400 mt-0.5">
+                        <span className="text-[10px] text-rose-700 dark:text-rose-400 mt-0.5 truncate max-w-full">
                             Aktuelle Gesamtsumme
                         </span>
                     </div>
@@ -216,10 +216,10 @@ export default function SimpleDashboardView({
                         <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-900 dark:text-emerald-300">
                             Batterie ({batterySocPct}%)
                         </span>
-                        <span className="text-2xl font-extrabold text-emerald-950 dark:text-emerald-100 mt-1">
-                            {(Math.abs(batteryPowerW) / 1000).toFixed(2)} <span className="text-sm font-semibold">kW</span>
+                        <span className="text-xl sm:text-2xl font-extrabold text-emerald-950 dark:text-emerald-100 mt-1 tracking-tight truncate max-w-full">
+                            {(Math.abs(batteryPowerW) / 1000).toFixed(2)} <span className="text-xs sm:text-sm font-semibold">kW</span>
                         </span>
-                        <span className="text-[10px] text-emerald-700 dark:text-emerald-400 mt-0.5">
+                        <span className="text-[10px] text-emerald-700 dark:text-emerald-400 mt-0.5 truncate max-w-full">
                             {batteryPowerW > 100 ? "Lädt auf ⚡" : batteryPowerW < -100 ? "Entlädt ins Haus 🏠" : "Standby"}
                         </span>
                     </div>
@@ -232,10 +232,10 @@ export default function SimpleDashboardView({
                         <span className="text-[11px] font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
                             {gridPowerW <= 0 ? "Netzeinspeisung" : "Netzbezug"}
                         </span>
-                        <span className="text-2xl font-extrabold text-slate-900 dark:text-white mt-1">
-                            {(Math.abs(gridPowerW) / 1000).toFixed(2)} <span className="text-sm font-semibold">kW</span>
+                        <span className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white mt-1 tracking-tight truncate max-w-full">
+                            {(Math.abs(gridPowerW) / 1000).toFixed(2)} <span className="text-xs sm:text-sm font-semibold">kW</span>
                         </span>
-                        <span className={`text-[10px] mt-0.5 ${gridPowerW <= 0 ? "text-sky-700 dark:text-sky-400" : "text-purple-700 dark:text-purple-400"}`}>
+                        <span className={`text-[10px] mt-0.5 truncate max-w-full ${gridPowerW <= 0 ? "text-sky-700 dark:text-sky-400" : "text-purple-700 dark:text-purple-400"}`}>
                             {gridPowerW <= 0 ? "Verkauf ins Netz" : "Zukauf aus dem Netz"}
                         </span>
                     </div>
