@@ -202,13 +202,13 @@ export default function WallboxCard({ onOpenAddModal }) {
     return (
         <div className="bg-gradient-to-br from-white via-slate-50/70 to-emerald-50/30 dark:from-slate-900 dark:via-slate-900/90 dark:to-emerald-950/20 rounded-3xl p-6 border border-slate-200/90 dark:border-slate-800 shadow-sm relative overflow-hidden flex flex-col justify-between">
             {/* Ambient Background Glow */}
-            <div className="absolute top-0 right-0 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
 
-            <div className="space-y-5 relative z-10">
+            <div className="space-y-4 relative z-10">
                 {/* Header mit Wallbox-Auswahl & Status */}
-                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
+                <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-2xl shadow-2xs">
+                        <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-2xl shadow-xs">
                             🚗
                         </div>
                         <div>
@@ -218,10 +218,8 @@ export default function WallboxCard({ onOpenAddModal }) {
                                 </h3>
                                 {getStatusBadge(activeStation.status, activeStation.is_online)}
                             </div>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mt-0.5">
-                                <span>{activeStation.vendor || "OCPP"} {activeStation.model || "Wallbox"}</span>
-                                <span>•</span>
-                                <span className="font-mono text-slate-400">{activeStation.charge_point_id}</span>
+                            <p className="text-xs text-slate-400 mt-0.5">
+                                {activeStation.vendor || "OCPP"} · {activeStation.phases || 3}-phasig ({targetAmpere} A)
                             </p>
                         </div>
                     </div>
@@ -231,11 +229,11 @@ export default function WallboxCard({ onOpenAddModal }) {
                             <select
                                 value={activeStation.id}
                                 onChange={(e) => setSelectedStationId(e.target.value)}
-                                className="bg-white dark:bg-slate-950/80 border border-slate-200 dark:border-slate-700/80 text-xs font-semibold text-slate-800 dark:text-slate-200 rounded-xl px-3 py-2 cursor-pointer shadow-2xs outline-none"
+                                className="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-bold cursor-pointer outline-none shadow-2xs"
                             >
                                 {wallboxes.map((wb) => (
                                     <option key={wb.id} value={wb.id}>
-                                        {wb.name} ({wb.charge_point_id})
+                                        {wb.name}
                                     </option>
                                 ))}
                             </select>
@@ -245,10 +243,9 @@ export default function WallboxCard({ onOpenAddModal }) {
                             type="button"
                             onClick={onOpenAddModal}
                             title="Weitere Wallbox hinzufügen"
-                            className="px-3 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                            className="p-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition cursor-pointer shadow-2xs"
                         >
-                            <span>＋</span>
-                            <span>Neu</span>
+                            ➕
                         </button>
                     </div>
                 </div>
@@ -256,7 +253,7 @@ export default function WallboxCard({ onOpenAddModal }) {
                 {/* Feedback Alert */}
                 {feedback.text && (
                     <div
-                        className={`p-3 rounded-2xl text-xs font-bold flex items-center gap-2 border transition-all ${
+                        className={`p-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 border transition-all ${
                             feedback.type === "success"
                                 ? "bg-emerald-50 dark:bg-emerald-950/60 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300"
                                 : "bg-red-50 dark:bg-red-950/60 border-red-200 dark:border-red-800 text-red-800 dark:text-red-300"
@@ -267,168 +264,61 @@ export default function WallboxCard({ onOpenAddModal }) {
                     </div>
                 )}
 
-                {/* Live-Ladeleistung & Phasen-Cockpit */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    {/* Ladeleistung */}
-                    <div className="p-3.5 bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-700/60 shadow-2xs flex flex-col justify-between">
-                        <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
-                            Ladeleistung (Live)
-                        </div>
-                        <div className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1 flex items-baseline gap-1">
-                            <span>{activePowerKw}</span>
-                            <span className="text-xs font-normal text-slate-500">kW</span>
-                        </div>
-                        <div className="text-[10px] text-slate-400 mt-0.5 flex items-center gap-1">
-                            <span>Soll:</span>
-                            <span className="font-mono text-slate-700 dark:text-slate-300 font-bold">{targetAmpere} A</span>
-                            <span className="text-slate-400">({activeStation.phases || 3}-phasig)</span>
+                {/* Metrics */}
+                <div className="grid grid-cols-2 gap-3">
+                    <div className="p-3 bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-700/60">
+                        <div className="text-[11px] text-slate-500">Ladeleistung (Live)</div>
+                        <div className="text-lg font-bold font-mono text-slate-900 dark:text-white mt-0.5 flex items-baseline justify-between">
+                            <span>{activePowerKw} kW</span>
+                            <span className="text-xs font-normal text-slate-400 font-sans">{activeStation.phases || 3}P · {targetAmpere}A</span>
                         </div>
                     </div>
 
-                    {/* Phasenströme L1 / L2 / L3 */}
-                    <div className="p-3.5 bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-700/60 shadow-2xs flex flex-col justify-between">
-                        <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-1">
-                            Phasenströme (L1 / L2 / L3)
-                        </div>
-                        <div className="grid grid-cols-3 gap-1.5 text-center my-auto">
-                            <div className="bg-slate-50 dark:bg-slate-900/80 border border-slate-200/60 dark:border-slate-700/60 rounded-xl py-1 px-1">
-                                <div className="text-[9px] text-slate-400 font-bold">L1</div>
-                                <div className="text-xs font-mono font-bold text-slate-800 dark:text-slate-200">
-                                    {Number(activeStation.current_l1 || 0).toFixed(1)} A
-                                </div>
-                            </div>
-                            <div className="bg-slate-50 dark:bg-slate-900/80 border border-slate-200/60 dark:border-slate-700/60 rounded-xl py-1 px-1">
-                                <div className="text-[9px] text-slate-400 font-bold">L2</div>
-                                <div className="text-xs font-mono font-bold text-slate-800 dark:text-slate-200">
-                                    {Number(activeStation.current_l2 || 0).toFixed(1)} A
-                                </div>
-                            </div>
-                            <div className="bg-slate-50 dark:bg-slate-900/80 border border-slate-200/60 dark:border-slate-700/60 rounded-xl py-1 px-1">
-                                <div className="text-[9px] text-slate-400 font-bold">L3</div>
-                                <div className="text-xs font-mono font-bold text-slate-800 dark:text-slate-200">
-                                    {Number(activeStation.current_l3 || 0).toFixed(1)} A
-                                </div>
-                            </div>
-                        </div>
-                        <div className="text-[10px] text-slate-400 mt-1 flex justify-between">
-                            <span>~{Math.round(activeStation.voltage_v || 230)} V</span>
-                            <span>{activeStation.connector_status || "Kabel gesteckt"}</span>
-                        </div>
-                    </div>
-
-                    {/* Session-Statistik */}
-                    <div className="p-3.5 bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-700/60 shadow-2xs flex flex-col justify-between">
-                        <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
-                            Geladene Energie
-                        </div>
-                        <div className="text-xl font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-1 flex items-baseline gap-1">
-                            <span>{sessionKwh}</span>
-                            <span className="text-xs font-normal text-slate-500">kWh</span>
-                        </div>
-                        <div className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5 flex items-center justify-between">
-                            <span>☀️ PV-Quote: {currentMode === "pv_surplus" ? "100%" : "85%"}</span>
-                            <span className="text-slate-400 font-mono">#{activeStation.active_transaction_id || "–"}</span>
+                    <div className="p-3 bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-700/60">
+                        <div className="text-[11px] text-slate-500">Geladene Energie</div>
+                        <div className="text-lg font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-0.5 flex items-baseline justify-between">
+                            <span>{sessionKwh} kWh</span>
+                            <span className="text-xs font-normal text-emerald-600 dark:text-emerald-400 font-sans">☀️ {currentMode === "pv_surplus" ? "100%" : "85%"} PV</span>
                         </div>
                     </div>
                 </div>
 
-                {/* Smart-Charging Modus-Umschalter */}
-                <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                            <span>🧭</span>
-                            <span>Smart-Charging Lademodus:</span>
+                {/* Smart-Charging Modus-Umschalter Strip */}
+                <div className="p-3 bg-white/70 dark:bg-slate-800/50 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 flex items-center justify-between gap-3 text-xs">
+                    <div className="min-w-0">
+                        <div className="font-bold text-slate-800 dark:text-slate-200 truncate flex items-center gap-1.5">
+                            <span>⚡ Smart-Charging Modus</span>
                             {!isPro && <ProBadge size="xs" />}
-                        </label>
+                        </div>
+                        <div className="text-[11px] text-slate-400 truncate">
+                            {currentMode === "pv_surplus" ? "Nur echter Solarüberschuss" : currentMode === "min_pv" ? "Min. Basisleistung + Solarboost" : currentMode === "spot_price" ? "Günstigste Börsenstunden" : currentMode === "instant" ? "Maximale Ladeleistung" : "Ladevorgang pausiert"}
+                        </div>
                     </div>
-
-                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                        {/* 1. PV Überschuss */}
-                        <button
-                            type="button"
-                            onClick={() => handleModeClick("pv_surplus")}
-                            className={`p-2.5 rounded-2xl border text-left transition-all cursor-pointer ${
-                                currentMode === "pv_surplus"
-                                    ? "bg-amber-50 dark:bg-amber-950/40 border-amber-500 ring-2 ring-amber-500/20 shadow-xs"
-                                    : "bg-white dark:bg-slate-800/50 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800"
-                            }`}
-                        >
-                            <div className="text-base mb-0.5">☀️</div>
-                            <div className="text-xs font-bold text-slate-900 dark:text-white">Nur Solar</div>
-                            <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate">100% Überschuss</div>
-                        </button>
-
-                        {/* 2. Min + PV */}
-                        <button
-                            type="button"
-                            onClick={() => handleModeClick("min_pv")}
-                            className={`p-2.5 rounded-2xl border text-left transition-all cursor-pointer ${
-                                currentMode === "min_pv"
-                                    ? "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 ring-2 ring-emerald-500/20 shadow-xs"
-                                    : "bg-white dark:bg-slate-800/50 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800"
-                            }`}
-                        >
-                            <div className="text-base mb-0.5">⛅</div>
-                            <div className="text-xs font-bold text-slate-900 dark:text-white">Min + PV</div>
-                            <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate">Basis + Solar-Boost</div>
-                        </button>
-
-                        {/* 3. Börsenpreisgeführt */}
-                        <button
-                            type="button"
-                            onClick={() => handleModeClick("spot_price")}
-                            className={`p-2.5 rounded-2xl border text-left transition-all cursor-pointer ${
-                                currentMode === "spot_price"
-                                    ? "bg-blue-50 dark:bg-blue-950/40 border-blue-500 ring-2 ring-blue-500/20 shadow-xs"
-                                    : "bg-white dark:bg-slate-800/50 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800"
-                            }`}
-                        >
-                            <div className="text-base mb-0.5">💶</div>
-                            <div className="text-xs font-bold text-slate-900 dark:text-white">Börsenpreis</div>
-                            <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate">≤ {activeStation.price_threshold_ct || 15} ct/kWh</div>
-                        </button>
-
-                        {/* 4. Sofort / Boost */}
-                        <button
-                            type="button"
-                            onClick={() => handleModeClick("instant")}
-                            className={`p-2.5 rounded-2xl border text-left transition-all cursor-pointer ${
-                                currentMode === "instant"
-                                    ? "bg-purple-50 dark:bg-purple-950/40 border-purple-500 ring-2 ring-purple-500/20 shadow-xs"
-                                    : "bg-white dark:bg-slate-800/50 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800"
-                            }`}
-                        >
-                            <div className="text-base mb-0.5">⚡</div>
-                            <div className="text-xs font-bold text-slate-900 dark:text-white">Sofortladen</div>
-                            <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate">Max. 11/22 kW</div>
-                        </button>
-
-                        {/* 5. Stop / Pause */}
-                        <button
-                            type="button"
-                            onClick={() => handleModeClick("off")}
-                            className={`p-2.5 rounded-2xl border text-left transition-all col-span-2 sm:col-span-1 cursor-pointer ${
-                                currentMode === "off"
-                                    ? "bg-rose-50 dark:bg-rose-950/40 border-rose-500 ring-2 ring-rose-500/20 shadow-xs"
-                                    : "bg-white dark:bg-slate-800/50 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800"
-                            }`}
-                        >
-                            <div className="text-base mb-0.5">🛑</div>
-                            <div className="text-xs font-bold text-slate-900 dark:text-white">Gesperrt</div>
-                            <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate">Laden pausiert</div>
-                        </button>
-                    </div>
+                    <select
+                        value={currentMode}
+                        onChange={(e) => handleModeClick(e.target.value)}
+                        className="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-bold cursor-pointer outline-none shrink-0"
+                    >
+                        <option value="pv_surplus">☀️ Nur Solar</option>
+                        <option value="min_pv">⛅ Min + PV</option>
+                        <option value="spot_price">💶 Börsenpreis</option>
+                        <option value="instant">⚡ Sofortladen</option>
+                        <option value="off">🛑 Gesperrt</option>
+                    </select>
                 </div>
             </div>
 
-            {/* Schnell-Aktionsleiste (Start / Stop / Unlock) */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-4 mt-4 border-t border-slate-100 dark:border-slate-800 relative z-10">
+            {/* Actions Footer */}
+            <div className="pt-4 mt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-3 relative z-10">
+                <span className="text-xs text-slate-400">
+                    Kabel: <strong className="text-emerald-600 dark:text-emerald-400">{activeStation.connector_status || "Gesteckt"}</strong>
+                </span>
                 <div className="flex items-center gap-2">
                     <button
                         type="button"
                         disabled={actionPending !== null}
                         onClick={() => handleRemoteAction("remote-start")}
-                        className="px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-all flex items-center gap-1.5 disabled:opacity-50 cursor-pointer shadow-xs"
+                        className="px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-all disabled:opacity-50 cursor-pointer shadow-xs"
                     >
                         {actionPending === "remote-start" ? "..." : "▶️ Start"}
                     </button>
@@ -437,7 +327,7 @@ export default function WallboxCard({ onOpenAddModal }) {
                         type="button"
                         disabled={actionPending !== null}
                         onClick={() => handleRemoteAction("remote-stop")}
-                        className="px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white transition-all flex items-center gap-1.5 disabled:opacity-50 cursor-pointer shadow-xs"
+                        className="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition-all disabled:opacity-50 cursor-pointer"
                     >
                         {actionPending === "remote-stop" ? "..." : "⏹️ Stop"}
                     </button>
@@ -446,14 +336,11 @@ export default function WallboxCard({ onOpenAddModal }) {
                         type="button"
                         disabled={actionPending !== null}
                         onClick={() => handleRemoteAction("unlock")}
-                        className="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition-all flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+                        className="px-2.5 py-2 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 transition-all disabled:opacity-50 cursor-pointer"
+                        title="Ladekabel entriegeln"
                     >
-                        {actionPending === "unlock" ? "..." : "🔓 Entriegeln"}
+                        🔓
                     </button>
-                </div>
-
-                <div className="text-[11px] text-slate-400 flex items-center gap-1 font-mono">
-                    <span>OCPP 1.6-J (JSON/WSS)</span>
                 </div>
             </div>
 

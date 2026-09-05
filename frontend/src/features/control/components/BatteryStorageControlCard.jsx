@@ -19,7 +19,7 @@ export default function BatteryStorageControlCard() {
     const storages = data.storages || [];
     const storage = storages[0] || null; // Primary storage system
 
-    // Fallback/Demo live data if not connected yet
+    // Live data
     const liveSoc = storage?.live_data?.soc_pct ?? data?.battery_soc_pct ?? 74;
     const livePowerW = storage?.live_data?.power_w ?? data?.battery_power_w ?? 1200; // positive = charge, negative = discharge
     const capacityKwh = storage?.usable_capacity_kwh ?? 10.0;
@@ -31,7 +31,7 @@ export default function BatteryStorageControlCard() {
     const [maxSoc, setMaxSoc] = useState(storage?.max_soc_pct ?? 95);
     const [controlMode, setControlMode] = useState(storage?.control_mode ?? "self_consumption");
 
-    // 2. Mutation for updating storage config (min_soc, max_soc, control_mode)
+    // 2. Mutation for updating storage config
     const updateMutation = useMutation({
         mutationFn: (payload) => {
             if (storage?.id) {
@@ -50,7 +50,7 @@ export default function BatteryStorageControlCard() {
         },
     });
 
-    // 3. Quick Action Mutation (e.g. forced grid charge, backup hold)
+    // 3. Quick Action Mutation
     const actionMutation = useMutation({
         mutationFn: (actionPayload) =>
             apiFetch("/api/energy/load-management/hub/action/", {
@@ -61,7 +61,7 @@ export default function BatteryStorageControlCard() {
         onSuccess: (res) => {
             queryClient.invalidateQueries({ queryKey: ["producer-systems"] });
             queryClient.invalidateQueries({ queryKey: ["load-management-hub"] });
-            showFeedback(res?.message || "Steuerbefehl erfolgreich an Wechselrichter gesendet.");
+            showFeedback(res?.message || "Steuerbefehl erfolgreich gesendet.");
         },
     });
 
@@ -90,226 +90,90 @@ export default function BatteryStorageControlCard() {
     };
 
     return (
-        <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200/90 dark:border-slate-800 shadow-xs space-y-5">
-            {/* Feedback Banner */}
-            {actionFeedback && (
-                <div className="p-3 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 rounded-2xl text-xs font-bold flex items-center gap-2 animate-in fade-in">
-                    <span>✓</span>
-                    <span>{actionFeedback}</span>
-                </div>
-            )}
+        <div className="bg-gradient-to-br from-white via-slate-50/70 to-indigo-50/30 dark:from-slate-900 dark:via-slate-900/90 dark:to-indigo-950/20 rounded-3xl p-6 border border-slate-200/90 dark:border-slate-800 shadow-sm relative overflow-hidden flex flex-col justify-between">
+            {/* Ambient Glow */}
+            <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none" />
 
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
-                <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-2xl shadow-2xs">
-                        🔋
-                    </div>
-                    <div>
-                        <div className="flex items-center gap-2">
-                            <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                                {storage?.name || "Heimspeicher & Betriebsstrategie"}
-                            </h3>
-                            <span className={`px-2.5 py-0.5 text-[10px] font-bold rounded-full border ${
-                                isCharging
-                                    ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800"
-                                    : isDischarging
-                                    ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800"
-                                    : "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700"
-                            }`}>
-                                {isCharging ? "⚡ Lädt (PV/Netz)" : isDischarging ? "🔋 Entlädt (Haus)" : "⏸️ Standby"}
-                            </span>
+            <div className="space-y-4 relative z-10">
+                {/* Header */}
+                <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-2xl shadow-xs text-indigo-600 dark:text-indigo-400">
+                            🔋
                         </div>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                            {storage?.manufacturer ? `${storage.manufacturer} · ` : ""}
-                            Kapazität: {capacityKwh} kWh · Automatische Entlade- und Ladeschutz-Regelung.
-                        </p>
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <h3 className="font-bold text-base text-slate-900 dark:text-white">
+                                    {storage?.name || "Heimspeicher"}
+                                </h3>
+                                <span className={`px-2 py-0.5 text-[11px] font-bold rounded-full border ${
+                                    isCharging
+                                        ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 animate-pulse"
+                                        : isDischarging
+                                        ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30"
+                                        : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 border-slate-200"
+                                }`}>
+                                    {isCharging ? "⚡ Lädt (PV)" : isDischarging ? "🔋 Entlädt (Haus)" : "⚪ Standby"}
+                                </span>
+                            </div>
+                            <p className="text-xs text-slate-400 mt-0.5">
+                                {capacityKwh} kWh Kapazität · Automatische Entlade- & Ladeschutz-Regelung
+                            </p>
+                        </div>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2 self-start sm:self-auto">
-                    <button
-                        type="button"
-                        onClick={() => handleTriggerQuickAction("charge_now")}
-                        disabled={actionMutation.isPending}
-                        className="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/80 dark:text-indigo-300 text-xs font-bold rounded-xl border border-indigo-200 dark:border-indigo-800 transition cursor-pointer flex items-center gap-1.5"
-                        title="Speicher forciert für 60 Minuten aus PV/Netz laden"
+                {/* Metrics */}
+                <div className="grid grid-cols-2 gap-3">
+                    <div className="p-3 bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-700/60">
+                        <div className="text-[11px] text-slate-500">Ladestand (SoC)</div>
+                        <div className="text-lg font-bold font-mono text-slate-900 dark:text-white mt-0.5 flex items-baseline justify-between">
+                            <span>{liveSoc}%</span>
+                            <span className="text-xs font-normal text-slate-400 font-sans">{((liveSoc / 100) * capacityKwh).toFixed(1)} kWh</span>
+                        </div>
+                    </div>
+
+                    <div className="p-3 bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-700/60">
+                        <div className="text-[11px] text-slate-500">Ladeleistung (Live)</div>
+                        <div className="text-lg font-bold font-mono text-indigo-600 dark:text-indigo-400 mt-0.5">
+                            {Math.abs(livePowerW) > 20 ? `${Math.abs(livePowerW).toLocaleString("de-DE")} W` : "0 W"}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Strategy & Reserve Settings Strip */}
+                <div className="p-3 bg-white/70 dark:bg-slate-800/50 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 flex items-center justify-between gap-3 text-xs">
+                    <div className="min-w-0">
+                        <div className="font-bold text-slate-800 dark:text-slate-200 truncate">🧭 Betriebsstrategie</div>
+                        <div className="text-[11px] text-slate-400 truncate">
+                            {controlMode === "price_optimized" ? "Spotmarkt-Arbitrage (Tiefstpreise)" : controlMode === "backup_only" ? "Notstrom-Reserve (100% Prio)" : "PV-Vorrang (Eigenverbrauch)"}
+                        </div>
+                    </div>
+                    <select
+                        value={controlMode}
+                        onChange={(e) => handleSaveConfig(minSoc, maxSoc, e.target.value)}
+                        className="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-bold cursor-pointer outline-none shrink-0"
                     >
-                        <span>🚀</span>
-                        <span>Schnellladung (1h)</span>
-                    </button>
+                        <option value="self_consumption">☀️ PV-Vorrang</option>
+                        <option value="price_optimized">⚡ Spot-Arbitrage</option>
+                        <option value="backup_only">🛡️ Notstrom</option>
+                    </select>
                 </div>
             </div>
 
-            {/* Live SoC & Power Flow Gauges */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 bg-slate-50 dark:bg-slate-950/60 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800/80">
-                {/* 1. SoC % Gauge */}
-                <div className="space-y-1.5">
-                    <div className="flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-slate-400">
-                        <span>Aktueller Ladestand</span>
-                        <span className="font-mono font-bold text-slate-900 dark:text-white">{liveSoc}%</span>
-                    </div>
-                    <div className="w-full bg-slate-200 dark:bg-slate-800 h-3.5 rounded-full overflow-hidden p-0.5 flex">
-                        <div
-                            style={{ width: `${Math.min(100, Math.max(0, liveSoc))}%` }}
-                            className={`h-full rounded-full transition-all duration-500 ${
-                                liveSoc >= 40
-                                    ? "bg-gradient-to-r from-emerald-500 to-emerald-400"
-                                    : liveSoc >= 20
-                                    ? "bg-gradient-to-r from-amber-500 to-amber-400"
-                                    : "bg-gradient-to-r from-rose-500 to-rose-400"
-                            }`}
-                        />
-                    </div>
-                    <div className="text-[10px] text-slate-400 flex justify-between">
-                        <span>Min: {minSoc}%</span>
-                        <span>Max: {maxSoc}%</span>
-                    </div>
-                </div>
-
-                {/* 2. Live Power (W) */}
-                <div className="space-y-1">
-                    <div className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                        Lade- / Entladeleistung
-                    </div>
-                    <div className="text-xl font-black font-mono text-slate-900 dark:text-white flex items-baseline gap-1">
-                        <span>{Math.abs(livePowerW).toLocaleString("de-DE")}</span>
-                        <span className="text-xs font-normal text-slate-500">W</span>
-                    </div>
-                    <div className="text-[10px] text-slate-400">
-                        {isCharging ? "Überschuss wird gespeichert" : isDischarging ? "Versorgt Haushalt" : "Ausgeglichen"}
-                    </div>
-                </div>
-
-                {/* 3. Stored Energy (kWh) */}
-                <div className="space-y-1">
-                    <div className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                        Gespeicherte Energie
-                    </div>
-                    <div className="text-xl font-black font-mono text-indigo-600 dark:text-indigo-400 flex items-baseline gap-1">
-                        <span>{((liveSoc / 100) * capacityKwh).toFixed(1)}</span>
-                        <span className="text-xs font-normal text-slate-500">/ {capacityKwh} kWh</span>
-                    </div>
-                    <div className="text-[10px] text-slate-400">
-                        ca. {Math.round((liveSoc / 100) * 12)} h Haushalts-Autarkie
-                    </div>
-                </div>
-            </div>
-
-            {/* Betriebsstrategie Selector */}
-            <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                    <span>🧭</span>
-                    <span>Betriebsstrategie & Optimierungsmodus:</span>
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                    {[
-                        {
-                            key: "self_consumption",
-                            icon: "☀️",
-                            title: "PV-Vorrang (Autarkie)",
-                            desc: "Überschuss speichern, abends entladen",
-                        },
-                        {
-                            key: "price_optimized",
-                            icon: "⚡",
-                            title: "Spotmarkt-Arbitrage",
-                            desc: "Netzladung bei Börsen-Tiefstpreisen",
-                        },
-                        {
-                            key: "backup_only",
-                            icon: "🛡️",
-                            title: "Notstrom-Priorität",
-                            desc: "Speicher immer auf 100% halten",
-                        },
-                    ].map((mode) => (
-                        <button
-                            key={mode.key}
-                            type="button"
-                            onClick={() => handleSaveConfig(minSoc, maxSoc, mode.key)}
-                            className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
-                                controlMode === mode.key
-                                    ? "bg-indigo-50/70 dark:bg-indigo-950/40 border-indigo-500 ring-2 ring-indigo-500/20 shadow-xs"
-                                    : "bg-slate-50/50 dark:bg-slate-800/30 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800"
-                            }`}
-                        >
-                            <div className="flex items-center gap-2 font-bold text-xs text-slate-900 dark:text-white">
-                                <span>{mode.icon}</span>
-                                <span>{mode.title}</span>
-                            </div>
-                            <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
-                                {mode.desc}
-                            </div>
-                        </button>
-                    ))}
-                </div>
-            </div>
-
-            {/* Sicherheits- & Schutzparameter (Min / Max SoC) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
-                {/* Min-SoC / Notstrom-Reserve */}
-                <div className="bg-slate-50 dark:bg-slate-950/40 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 space-y-2.5">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1.5 font-bold text-xs text-slate-900 dark:text-white">
-                            <span>🛡️</span>
-                            <span>Notstrom-Reserve (Min-SoC):</span>
-                        </div>
-                        <span className="font-mono font-bold text-xs px-2 py-0.5 bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white">
-                            {minSoc}%
-                        </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        {[5, 10, 15, 20, 30].map((val) => (
-                            <button
-                                key={val}
-                                type="button"
-                                onClick={() => handleSaveConfig(val, maxSoc, controlMode)}
-                                className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
-                                    minSoc === val
-                                        ? "bg-indigo-600 text-white shadow-2xs"
-                                        : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100"
-                                }`}
-                            >
-                                {val}%
-                            </button>
-                        ))}
-                    </div>
-                    <p className="text-[10px] text-slate-400">
-                        Speicher entlädt maximal bis {minSoc}%, um Notstrom für Netzausfälle zu sichern und Tiefentladung zu verhindern.
-                    </p>
-                </div>
-
-                {/* Max-SoC / Zellschonung */}
-                <div className="bg-slate-50 dark:bg-slate-950/40 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 space-y-2.5">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1.5 font-bold text-xs text-slate-900 dark:text-white">
-                            <span>🔋</span>
-                            <span>Zellschonung (Max-SoC):</span>
-                        </div>
-                        <span className="font-mono font-bold text-xs px-2 py-0.5 bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white">
-                            {maxSoc}%
-                        </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        {[80, 85, 90, 95, 100].map((val) => (
-                            <button
-                                key={val}
-                                type="button"
-                                onClick={() => handleSaveConfig(minSoc, val, controlMode)}
-                                className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
-                                    maxSoc === val
-                                        ? "bg-indigo-600 text-white shadow-2xs"
-                                        : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100"
-                                }`}
-                            >
-                                {val}%
-                            </button>
-                        ))}
-                    </div>
-                    <p className="text-[10px] text-slate-400">
-                        Begrenzung auf {maxSoc}% schützt die Batteriezellen vor kalendarischer Alterung bei sommerlichen Dauer-Vollzuständen.
-                    </p>
-                </div>
+            {/* Actions */}
+            <div className="pt-4 mt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-3 relative z-10">
+                <span className="text-xs text-slate-400">
+                    Schutz: <strong className="text-indigo-600 dark:text-indigo-400">{minSoc}% Min · {maxSoc}% Max</strong>
+                </span>
+                <button
+                    type="button"
+                    onClick={() => handleTriggerQuickAction("charge_now")}
+                    disabled={actionMutation.isPending}
+                    className="px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-600/20"
+                >
+                    🚀 Schnellladung (1h)
+                </button>
             </div>
         </div>
     );

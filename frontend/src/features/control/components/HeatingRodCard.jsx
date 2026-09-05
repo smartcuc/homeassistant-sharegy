@@ -55,9 +55,15 @@ export default function HeatingRodCard({ consumer, onAction, isPending }) {
                     </div>
                 </div>
 
-                {/* Info Note */}
-                <div className="p-3 bg-white/70 dark:bg-slate-800/50 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 text-xs text-slate-500">
-                    Nimmt überschüssigen Solarstrom auf, sobald Heimspeicher und BWWP voll sind (Verhinderung von Netzeinspeisung).
+                {/* Mode / Strategy Strip */}
+                <div className="p-3 bg-white/70 dark:bg-slate-800/50 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 flex items-center justify-between gap-3 text-xs">
+                    <div className="min-w-0">
+                        <div className="font-bold text-slate-800 dark:text-slate-200 truncate">⚡ Überschuss-Verwertung</div>
+                        <div className="text-[11px] text-slate-400 truncate">Heizt Puffer bei vollem Speicher vor Netzeinspeisung</div>
+                    </div>
+                    <span className="font-mono text-xs font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-2.5 py-1 rounded-xl border border-amber-200 dark:border-amber-800 shrink-0">
+                        ab 1.500 W PV
+                    </span>
                 </div>
             </div>
 
