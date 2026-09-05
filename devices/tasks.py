@@ -333,22 +333,31 @@ def process_telemetry_push_async(self, home_id, device_items, timestamp_str=None
                 },
             )
 
-        # 3. Latest Metric (Live-Leistung)
-        if power_w is not None:
+        # 3. Metriken sammeln & Ingestion Pipeline nutzen
+        metrics_dict = {}
+        if isinstance(item.get("metrics"), dict):
+            metrics_dict.update(item["metrics"])
+        if isinstance(item.get("data"), dict):
+            metrics_dict.update(item["data"])
+
+        for k, v in item.items():
+            if k in ["identifier", "id", "name", "role", "metrics", "data", "source"]:
+                continue
+            if v is not None and k not in metrics_dict:
+                metrics_dict[k] = v
+
+        if metrics_dict:
             try:
-                val_float = float(power_w)
-                latest_metrics_to_upsert.append(
-                    DeviceLatestMetric(
-                        device=dev,
-                        metric_key="power",
-                        value=val_float,
-                        unit="W",
-                        timestamp=now,
-                    )
+                from devices.services.ingest import ingest_metric_payload
+                ingest_metric_payload(
+                    device=dev,
+                    metrics=metrics_dict,
+                    timestamp=now,
+                    source="telemetry_push",
                 )
-                saved_count += 1
-            except (ValueError, TypeError):
-                pass
+                saved_count += len(metrics_dict)
+            except Exception as ing_err:
+                logger.warning("Error ingesting metric payload for %s: %s", identifier, ing_err)
 
         # 4. Stunden-Aggregat
         if power_w is not None or energy_kwh is not None:
