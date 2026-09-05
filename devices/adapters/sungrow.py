@@ -59,10 +59,11 @@ class SungrowAdapter(BaseInverterAdapter):
             resp.raise_for_status()
             res_json = resp.json()
 
-            if res_json.get("result_code") == "1" or res_json.get("result_data", {}).get("token"):
+            res_data = res_json.get("result_data") or {}
+            if res_json.get("result_code") == "1" and res_data.get("token"):
                 token_data = {
-                    "token": res_json["result_data"]["token"],
-                    "user_id": res_json["result_data"].get("user_id"),
+                    "token": res_data["token"],
+                    "user_id": res_data.get("user_id"),
                 }
                 cache.set(cache_key, token_data, timeout=7000)
                 return token_data
@@ -207,9 +208,12 @@ class SungrowAdapter(BaseInverterAdapter):
         # Sandbox-Modus prüfen
         is_mock = (
             bool(credentials.get("is_mock"))
-            or str(appkey).lower() in ("mock", "fake")
+            or str(appkey).lower() in ("mock", "fake", "demo", "test")
             or not credentials
             or (not appkey and not token and not credentials.get("user_account"))
+            or str(credentials.get("user_account", "")).lower() in ("tester@sharegy.de", "demo@sharegy.de", "sungrow@sharegy.de")
+            or str(credentials.get("token", "")).lower() in ("demo", "test", "mock")
+            or str(credentials.get("token", "")).startswith("sg_oauth_demo")
         )
 
         if is_mock:
@@ -306,48 +310,56 @@ class SungrowAdapter(BaseInverterAdapter):
                     if ref_resp.status_code == 200 and ref_resp.json().get("result_data", {}).get("token"):
                         token = ref_resp.json()["result_data"]["token"]
                         credentials["token"] = token
+                        if ref_resp.json().get("result_data", {}).get("refresh_token"):
+                            credentials["refresh_token"] = ref_resp.json()["result_data"]["refresh_token"]
                         logger.info("Successfully refreshed Sungrow OpenAPI token via apiManage.")
                         return True
                 except Exception as e:
                     logger.warning("Auto token refresh failed: %s", e)
                 return False
 
+            def _post_with_auth(endpoint: str, json_data: dict) -> Optional[requests.Response]:
+                nonlocal token
+                url = f"{base_url.rstrip('/')}/{endpoint.lstrip('/')}"
+                headers = {
+                    "x-access-key": app_secret,
+                    "Authorization": f"Bearer {token}",
+                    "Content-Type": "application/json",
+                }
+                try:
+                    resp = requests.post(url, json=json_data, headers=headers, timeout=12)
+                    is_auth_err = resp.status_code == 401
+                    if resp.status_code == 200:
+                        try:
+                            body = resp.json()
+                            code_str = str(body.get("result_code", ""))
+                            msg_str = str(body.get("result_msg", "")).lower()
+                            if code_str in ("2", "000", "0000", "401") or ("token" in msg_str and ("invalid" in msg_str or "expired" in msg_str)):
+                                is_auth_err = True
+                        except Exception:
+                            pass
+
+                    if is_auth_err and _refresh_openapi_token():
+                        headers["Authorization"] = f"Bearer {token}"
+                        resp = requests.post(url, json=json_data, headers=headers, timeout=12)
+                    return resp
+                except Exception as req_err:
+                    logger.warning("Sungrow OpenAPI request to %s failed: %s", endpoint, req_err)
+                    return None
+
             raw_data: Dict[str, Any] = {"result_code": "1", "result_data": {}}
 
             try:
-                rt_resp = requests.post(
-                    f"{base_url.rstrip('/')}/openapi/platform/getPowerStationRealTimeData",
-                    json={
+                rt_resp = _post_with_auth(
+                    "openapi/platform/getPowerStationRealTimeData",
+                    {
                         "appkey": appkey,
                         "ps_id_list": [str(ps_id or "")],
                         "point_id_list": self.MEASURE_POINTS,
                         "is_get_point_dict": "1",
                     },
-                    headers={
-                        "x-access-key": app_secret,
-                        "Authorization": f"Bearer {token}",
-                        "Content-Type": "application/json",
-                    },
-                    timeout=12,
                 )
-                if rt_resp.status_code == 401 and _refresh_openapi_token():
-                    rt_resp = requests.post(
-                        f"{base_url.rstrip('/')}/openapi/platform/getPowerStationRealTimeData",
-                        json={
-                            "appkey": appkey,
-                            "ps_id_list": [str(ps_id or "")],
-                            "point_id_list": self.MEASURE_POINTS,
-                            "is_get_point_dict": "1",
-                        },
-                        headers={
-                            "x-access-key": app_secret,
-                            "Authorization": f"Bearer {token}",
-                            "Content-Type": "application/json",
-                        },
-                        timeout=12,
-                    )
-
-                if rt_resp.status_code == 200:
+                if rt_resp and rt_resp.status_code == 200:
                     rt_json = rt_resp.json()
                     point_dict = rt_json.get("result_data", {}).get("point_dict", {})
                     if point_dict:
@@ -424,29 +436,11 @@ class SungrowAdapter(BaseInverterAdapter):
 
             # Details abfragen als Ergänzung
             try:
-                resp = requests.post(
-                    f"{base_url.rstrip('/')}/openapi/platform/getPowerStationDetail",
-                    json={"appkey": appkey, "ps_ids": str(ps_id or ""), "lang": "_de_DE"},
-                    headers={
-                        "x-access-key": app_secret,
-                        "Authorization": f"Bearer {token}",
-                        "Content-Type": "application/json",
-                    },
-                    timeout=12,
+                resp = _post_with_auth(
+                    "openapi/platform/getPowerStationDetail",
+                    {"appkey": appkey, "ps_ids": str(ps_id or ""), "lang": "_de_DE"},
                 )
-                if resp.status_code == 401 and _refresh_openapi_token():
-                    resp = requests.post(
-                        f"{base_url.rstrip('/')}/openapi/platform/getPowerStationDetail",
-                        json={"appkey": appkey, "ps_ids": str(ps_id or ""), "lang": "_de_DE"},
-                        headers={
-                            "x-access-key": app_secret,
-                            "Authorization": f"Bearer {token}",
-                            "Content-Type": "application/json",
-                        },
-                        timeout=12,
-                    )
-
-                if resp.status_code == 200:
+                if resp and resp.status_code == 200:
                     det_json = resp.json()
                     if det_json.get("result_data", {}).get("data_list"):
                         d_list = det_json["result_data"]["data_list"]

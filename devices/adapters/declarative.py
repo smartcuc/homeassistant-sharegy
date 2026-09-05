@@ -72,7 +72,7 @@ class DeclarativeProfileAdapter(BaseInverterAdapter):
             bool(credentials.get("is_mock"))
             or not credentials
             or all(not str(v).strip() for v in credentials.values())
-            or any(str(v).lower().startswith("mock") for v in credentials.values())
+            or any(any(m in str(v).lower() for m in ("mock", "fake", "demo", "test", "_123", "dummy")) for v in credentials.values())
         )
 
         if is_mock or not credentials:

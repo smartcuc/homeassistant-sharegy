@@ -881,11 +881,12 @@ def execute_cloud_poll(integration: CloudDeviceIntegration) -> dict:
         )
         now = timezone.now()
 
-        # Status aktualisieren
+        # Status und ggf. aktualisierte Tokens (OAuth refresh) persistieren
+        integration.credentials = credentials
         integration.last_polled_at = now
         integration.last_status = CloudDeviceIntegration.STATUS_OK
         integration.last_error_message = ""
-        integration.save(update_fields=["last_polled_at", "last_status", "last_error_message", "updated_at"])
+        integration.save(update_fields=["credentials", "last_polled_at", "last_status", "last_error_message", "updated_at"])
 
         logger.info("Successfully polled cloud integration %s for device %s: %s", profile_id, device.id, metrics)
         return {
@@ -896,10 +897,11 @@ def execute_cloud_poll(integration: CloudDeviceIntegration) -> dict:
         }
     except Exception as e:
         logger.exception("Error polling cloud integration %s for device %s: %s", profile_id, device.id, e)
+        integration.credentials = credentials
         integration.last_polled_at = timezone.now()
         integration.last_status = CloudDeviceIntegration.STATUS_ERROR
         integration.last_error_message = str(e)
-        integration.save(update_fields=["last_polled_at", "last_status", "last_error_message", "updated_at"])
+        integration.save(update_fields=["credentials", "last_polled_at", "last_status", "last_error_message", "updated_at"])
         return {
             "status": "error",
             "error": str(e),
