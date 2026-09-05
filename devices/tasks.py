@@ -244,10 +244,18 @@ def poll_cloud_integrations_task():
         device__active=True,
     ).select_related("device", "device__home")
 
+    from django.utils import timezone
+    now = timezone.now()
     count = 0
     errors = 0
 
     for integration in active_integrations:
+        interval_secs = integration.polling_interval_seconds or 60
+        if integration.last_polled_at:
+            elapsed = (now - integration.last_polled_at).total_seconds()
+            if elapsed < (interval_secs - 2):  # 2s Toleranz gegen Jitter
+                continue
+
         try:
             res = execute_cloud_poll(integration)
             if res.get("status") == "success":

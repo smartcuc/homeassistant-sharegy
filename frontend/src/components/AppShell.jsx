@@ -4,36 +4,48 @@
 
 import { useUser } from "../hooks/useUser";
 import AppTopbar from "../components/layout/Topbar";
-import Profile from "../pages/Profile";
 import Sidebar from "../components/layout/Sidebar";
-
 import Dashboard from "../pages/dashboard/Dashboard";
-import OverviewPage from "../pages/dashboard/overview/OverviewPage";
-import InterfacesPage from "../pages/InterfacesPage";
-import EnergyDashboard from "../features/energy/EnergyDashboard";
-import ProducerPage from "../features/producer/pages/ProducerPage";
-import ControlPage from "../features/control/pages/ControlPage";
-import TariffPage from "../features/market/pages/TariffPage";
-
-import DevicesPage from "../pages/DevicesPage";
-import ForecastPage from "../features/forecast/ForecastPage";
-import MetricsPage from "../pages/MetricsPage";
-import StructurePage from "../pages/StructurePage";
-import AlertsPage from "../features/alerts/pages/AlertsPage";
-import HelpCenterPage from "../features/help/pages/HelpCenterPage";
-import HelpArticleDetailPage from "../features/help/pages/HelpArticleDetailPage";
-import BillingPage from "../features/billing/pages/BillingPage";
-import SystemStatusPage from "../pages/SystemStatusPage";
-
-import AgentSupportHubPage from "../features/support/pages/AgentSupportHubPage";
-import AdminDashboard from "../pages/admin/AdminDashboard";
-import TrackingDashboard from "../pages/admin/TrackingDashboard";
-import TenantDashboard from "../pages/TenantDashboard";
-import CommunitiesManagementHub from "../pages/admin/CommunitiesManagementHub";
 import BackToTopButton from "../components/common/BackToTopButton";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, lazy, Suspense } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 
+// ⚡ LAZY LOADED ROUTE MODULES
+const OverviewPage = lazy(() => import("../pages/dashboard/overview/OverviewPage"));
+const InterfacesPage = lazy(() => import("../pages/InterfacesPage"));
+const EnergyDashboard = lazy(() => import("../features/energy/EnergyDashboard"));
+const ProducerPage = lazy(() => import("../features/producer/pages/ProducerPage"));
+const ControlPage = lazy(() => import("../features/control/pages/ControlPage"));
+const TariffPage = lazy(() => import("../features/market/pages/TariffPage"));
+const DevicesPage = lazy(() => import("../pages/DevicesPage"));
+const ForecastPage = lazy(() => import("../features/forecast/ForecastPage"));
+const MetricsPage = lazy(() => import("../pages/MetricsPage"));
+const StructurePage = lazy(() => import("../pages/StructurePage"));
+const AlertsPage = lazy(() => import("../features/alerts/pages/AlertsPage"));
+const HelpCenterPage = lazy(() => import("../features/help/pages/HelpCenterPage"));
+const HelpArticleDetailPage = lazy(() => import("../features/help/pages/HelpArticleDetailPage"));
+const BillingPage = lazy(() => import("../features/billing/pages/BillingPage"));
+const SystemStatusPage = lazy(() => import("../pages/SystemStatusPage"));
+const Profile = lazy(() => import("../pages/Profile"));
+const AgentSupportHubPage = lazy(() => import("../features/support/pages/AgentSupportHubPage"));
+const AdminDashboard = lazy(() => import("../pages/admin/AdminDashboard"));
+const TrackingDashboard = lazy(() => import("../pages/admin/TrackingDashboard"));
+const TenantDashboard = lazy(() => import("../pages/TenantDashboard"));
+const CommunitiesManagementHub = lazy(() => import("../pages/admin/CommunitiesManagementHub"));
+
+function PageSuspenseLoader() {
+    return (
+        <div className="p-8 max-w-7xl mx-auto space-y-6 animate-pulse">
+            <div className="h-8 bg-gray-200/80 dark:bg-slate-800 rounded-xl w-1/3"></div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="h-32 bg-gray-100 dark:bg-slate-850 rounded-2xl"></div>
+                <div className="h-32 bg-gray-100 dark:bg-slate-850 rounded-2xl"></div>
+                <div className="h-32 bg-gray-100 dark:bg-slate-850 rounded-2xl"></div>
+            </div>
+            <div className="h-96 bg-gray-100 dark:bg-slate-850 rounded-2xl"></div>
+        </div>
+    );
+}
 
 export default function AppShell() {
 
@@ -69,73 +81,75 @@ export default function AppShell() {
 
                 {/* ✅ CONTENT */}
                 <div ref={contentRef} className="flex-1 overflow-auto">
-                    <Routes>
+                    <Suspense fallback={<PageSuspenseLoader />}>
+                        <Routes>
 
 
-                        {/* ✅ DEFAULT */}
-                        <Route index element={<Navigate to="/app/dashboard" replace />} />
+                            {/* ✅ DEFAULT */}
+                            <Route index element={<Navigate to="/app/dashboard" replace />} />
 
-                        <Route path="dashboard" element={<Dashboard user={user} />} />
-                        <Route path="profile" element={<Profile />} />
-                        <Route path="billing" element={<BillingPage />} />
+                            <Route path="dashboard" element={<Dashboard user={user} />} />
+                            <Route path="profile" element={<Profile />} />
+                            <Route path="billing" element={<BillingPage />} />
 
-                        <Route path="overview" element={<OverviewPage />} />
-                        <Route path="energy" element={<EnergyDashboard />} />
-                        <Route path="devices" element={<DevicesPage />} />
-                        <Route path="producers" element={<ProducerPage />} />
-                        <Route path="control" element={<ControlPage />} />
-                        <Route path="tariff" element={<TariffPage />} />
-                        <Route path="interfaces" element={<InterfacesPage />} />
-                        <Route path="status" element={<SystemStatusPage />} />
-                        <Route path="settings" element={<Navigate to="/app/status" replace />} />
-
-
-                        <Route path="solarforecast" element={<ForecastPage />} />
-                        <Route path="metrics" element={<MetricsPage />} />
-                        <Route path="structure" element={<StructurePage />} />
-                        <Route path="alerts" element={<AlertsPage />} />
-
-                        {/* 📚 HELP CENTER & KNOWLEDGE BASE */}
-                        <Route path="help" element={<HelpCenterPage />} />
-                        <Route path="help/:slug" element={<HelpArticleDetailPage />} />
-
-                        {/* 🛟 SUPPORT & INCIDENT HUB (STAFF ONLY) */}
-                        <Route 
-                            path="support" 
-                            element={isStaffOrAdmin ? <AgentSupportHubPage /> : <Navigate to="/app/dashboard" replace />} 
-                        />
-                        <Route 
-                            path="support-hub" 
-                            element={isStaffOrAdmin ? <AgentSupportHubPage /> : <Navigate to="/app/dashboard" replace />} 
-                        />
-
-                        {/* 🛡️ ADMIN & TENANT MANAGEMENT */}
-                        <Route path="admin" element={<Navigate to="/app/admin/dashboard" replace />} />
-                        <Route 
-                            path="admin/dashboard" 
-                            element={isStaffOrAdmin ? <AdminDashboard /> : <Navigate to="/app/dashboard" replace />} 
-                        />
-                        <Route 
-                            path="admin/tracking" 
-                            element={isStaffOrAdmin ? <TrackingDashboard /> : <Navigate to="/app/dashboard" replace />} 
-                        />
-                        <Route 
-                            path="admin/communities" 
-                            element={isStaffOrAdmin ? <CommunitiesManagementHub /> : <Navigate to="/app/dashboard" replace />} 
-                        />
-                        <Route 
-                            path="communities" 
-                            element={isStaffOrAdmin ? <CommunitiesManagementHub /> : <Navigate to="/app/dashboard" replace />} 
-                        />
-                        <Route path="tenant" element={<TenantDashboard />} />
-                        <Route path="tenant-management" element={<TenantDashboard />} />
-                        <Route path="community" element={<TenantDashboard />} />
+                            <Route path="overview" element={<OverviewPage />} />
+                            <Route path="energy" element={<EnergyDashboard />} />
+                            <Route path="devices" element={<DevicesPage />} />
+                            <Route path="producers" element={<ProducerPage />} />
+                            <Route path="control" element={<ControlPage />} />
+                            <Route path="tariff" element={<TariffPage />} />
+                            <Route path="interfaces" element={<InterfacesPage />} />
+                            <Route path="status" element={<SystemStatusPage />} />
+                            <Route path="settings" element={<Navigate to="/app/status" replace />} />
 
 
-                        {/* ✅ FALLBACK IMMER UNTEN */}
-                        <Route path="*" element={<Navigate to="/app/dashboard" replace />} />
+                            <Route path="solarforecast" element={<ForecastPage />} />
+                            <Route path="metrics" element={<MetricsPage />} />
+                            <Route path="structure" element={<StructurePage />} />
+                            <Route path="alerts" element={<AlertsPage />} />
 
-                    </Routes>
+                            {/* 📚 HELP CENTER & KNOWLEDGE BASE */}
+                            <Route path="help" element={<HelpCenterPage />} />
+                            <Route path="help/:slug" element={<HelpArticleDetailPage />} />
+
+                            {/* 🛟 SUPPORT & INCIDENT HUB (STAFF ONLY) */}
+                            <Route 
+                                path="support" 
+                                element={isStaffOrAdmin ? <AgentSupportHubPage /> : <Navigate to="/app/dashboard" replace />} 
+                            />
+                            <Route 
+                                path="support-hub" 
+                                element={isStaffOrAdmin ? <AgentSupportHubPage /> : <Navigate to="/app/dashboard" replace />} 
+                            />
+
+                            {/* 🛡️ ADMIN & TENANT MANAGEMENT */}
+                            <Route path="admin" element={<Navigate to="/app/admin/dashboard" replace />} />
+                            <Route 
+                                path="admin/dashboard" 
+                                element={isStaffOrAdmin ? <AdminDashboard /> : <Navigate to="/app/dashboard" replace />} 
+                            />
+                            <Route 
+                                path="admin/tracking" 
+                                element={isStaffOrAdmin ? <TrackingDashboard /> : <Navigate to="/app/dashboard" replace />} 
+                            />
+                            <Route 
+                                path="admin/communities" 
+                                element={isStaffOrAdmin ? <CommunitiesManagementHub /> : <Navigate to="/app/dashboard" replace />} 
+                            />
+                            <Route 
+                                path="communities" 
+                                element={isStaffOrAdmin ? <CommunitiesManagementHub /> : <Navigate to="/app/dashboard" replace />} 
+                            />
+                            <Route path="tenant" element={<TenantDashboard />} />
+                            <Route path="tenant-management" element={<TenantDashboard />} />
+                            <Route path="community" element={<TenantDashboard />} />
+
+
+                            {/* ✅ FALLBACK IMMER UNTEN */}
+                            <Route path="*" element={<Navigate to="/app/dashboard" replace />} />
+
+                        </Routes>
+                    </Suspense>
                 </div>
 
                 {/* 🔝 GLOBAL BACK TO TOP BUTTON */}

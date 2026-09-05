@@ -7,6 +7,7 @@ export default function CloudInverterIntegrationCard({ primaryHome, filterVendor
     const [selectedProfileId, setSelectedProfileId] = useState(filterVendor === "sungrow" ? "sungrow_isolarcloud" : null);
     const [credentials, setCredentials] = useState({});
     const [deviceName, setDeviceName] = useState("");
+    const [pollingInterval, setPollingInterval] = useState(60);
     const [isTesting, setIsTesting] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [testResult, setTestResult] = useState(null);
@@ -98,7 +99,7 @@ export default function CloudInverterIntegrationCard({ primaryHome, filterVendor
                     name: deviceName,
                     profile_id: selectedProfileId,
                     credentials: credentials,
-                    polling_interval: 60,
+                    polling_interval: pollingInterval,
                 }),
             });
             setSaveSuccess(data);
@@ -334,6 +335,42 @@ export default function CloudInverterIntegrationCard({ primaryHome, filterVendor
                                                 </div>
                                             );
                                         })}
+                                    </div>
+
+                                    {/* Abfrage-Intervall (Polling Rate) */}
+                                    <div className="pt-2 border-t border-gray-100 space-y-1.5">
+                                        <div className="flex items-center justify-between">
+                                            <label className="block text-xs font-medium text-gray-700">
+                                                ⏱️ Abfrage-Intervall (Cloud Polling)
+                                            </label>
+                                            <span className="text-[11px] font-mono text-gray-500">
+                                                {pollingInterval >= 60 ? `${pollingInterval / 60} Min.` : `${pollingInterval} Sek.`}
+                                            </span>
+                                        </div>
+                                        <div className="grid grid-cols-4 gap-2">
+                                            {[
+                                                { label: "30s (Ultra-Live)", value: 30 },
+                                                { label: "60s (Standard)", value: 60 },
+                                                { label: "2 Min.", value: 120 },
+                                                { label: "5 Min. (Schonend)", value: 300 },
+                                            ].map((opt) => (
+                                                <button
+                                                    key={opt.value}
+                                                    type="button"
+                                                    onClick={() => setPollingInterval(opt.value)}
+                                                    className={`py-1.5 px-2 rounded-lg text-xs font-semibold border transition text-center cursor-pointer ${
+                                                        pollingInterval === opt.value
+                                                            ? "bg-blue-600 text-white border-blue-600 shadow-xs"
+                                                            : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
+                                                    }`}
+                                                >
+                                                    {opt.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <p className="text-[11px] text-gray-400">
+                                            Steuert, wie häufig Sharegy Messdaten direkt vom Hersteller-Server abfragt.
+                                        </p>
                                     </div>
                                 </div>
 
