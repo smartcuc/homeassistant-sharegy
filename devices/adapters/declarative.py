@@ -69,9 +69,10 @@ class DeclarativeProfileAdapter(BaseInverterAdapter):
         base_url = credentials.get("base_url") or conn_cfg.get("default_base_url", "")
 
         is_mock = (
-            any(any(kw in str(v).lower() for kw in ("test", "demo", "mock", "secret", "sample", "fake", "123", "solis")) for v in credentials.values())
-            or getattr(settings, "STRIPE_SANDBOX_MODE", True)
+            bool(credentials.get("is_mock"))
             or not credentials
+            or all(not str(v).strip() for v in credentials.values())
+            or any(str(v).lower().startswith("mock") for v in credentials.values())
         )
 
         if is_mock or not credentials:

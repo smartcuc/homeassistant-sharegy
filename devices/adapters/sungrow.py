@@ -206,10 +206,10 @@ class SungrowAdapter(BaseInverterAdapter):
 
         # Sandbox-Modus prüfen
         is_mock = (
-            str(appkey).lower() in ("mock", "test", "demo", "")
-            or "test" in str(credentials.get("user_account", "")).lower()
-            or "test" in str(token).lower()
-            or (getattr(settings, "STRIPE_SANDBOX_MODE", True) and not appkey and not token and not credentials.get("user_account"))
+            bool(credentials.get("is_mock"))
+            or str(appkey).lower() in ("mock", "fake")
+            or not credentials
+            or (not appkey and not token and not credentials.get("user_account"))
         )
 
         if is_mock:
@@ -223,7 +223,7 @@ class SungrowAdapter(BaseInverterAdapter):
                 simulated=True,
             )
 
-        is_oauth = credentials.get("auth_type") == "oauth2" or (token and not str(token).startswith("sg_oauth_"))
+        is_oauth = credentials.get("auth_type") == "oauth2" or bool(token and not credentials.get("user_password"))
 
         if is_oauth and token:
             # OpenAPI Modus
@@ -402,7 +402,7 @@ class SungrowAdapter(BaseInverterAdapter):
             telemetry = self.parse_payload(raw_data)
             has_valid = any(v is not None and v != 0.0 for v in telemetry.to_metrics_dict().values())
 
-            if not has_valid and (str(token).startswith("sg_oauth_") or getattr(settings, "STRIPE_SANDBOX_MODE", True)):
+            if not has_valid and bool(credentials.get("is_mock")):
                 sim_data = self.generate_mock_payload()
                 telemetry = self.parse_payload(sim_data)
                 raw_data = sim_data
@@ -412,7 +412,7 @@ class SungrowAdapter(BaseInverterAdapter):
                 message=f"Live-Verbindung zu {self.name} erfolgreich!",
                 live_metrics=telemetry.to_metrics_dict(),
                 raw_sample=raw_data,
-                simulated=False if not str(token).startswith("sg_oauth_") else True,
+                simulated=bool(credentials.get("is_mock")),
             )
 
         else:
