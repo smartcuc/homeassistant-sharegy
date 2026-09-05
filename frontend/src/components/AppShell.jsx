@@ -56,6 +56,8 @@ export default function AppShell() {
         return <Navigate to="/" replace />;
     }
 
+    const isStaffOrAdmin = Boolean(user?.is_staff || user?.is_superuser || user?.is_platform_admin);
+
     return (
         <div className="flex h-screen">
 
@@ -99,16 +101,34 @@ export default function AppShell() {
                         <Route path="help" element={<HelpCenterPage />} />
                         <Route path="help/:slug" element={<HelpArticleDetailPage />} />
 
-                        {/* 🛟 SUPPORT & INCIDENT HUB */}
-                        <Route path="support" element={<AgentSupportHubPage />} />
-                        <Route path="support-hub" element={<AgentSupportHubPage />} />
+                        {/* 🛟 SUPPORT & INCIDENT HUB (STAFF ONLY) */}
+                        <Route 
+                            path="support" 
+                            element={isStaffOrAdmin ? <AgentSupportHubPage /> : <Navigate to="/app/dashboard" replace />} 
+                        />
+                        <Route 
+                            path="support-hub" 
+                            element={isStaffOrAdmin ? <AgentSupportHubPage /> : <Navigate to="/app/dashboard" replace />} 
+                        />
 
                         {/* 🛡️ ADMIN & TENANT MANAGEMENT */}
                         <Route path="admin" element={<Navigate to="/app/admin/dashboard" replace />} />
-                        <Route path="admin/dashboard" element={<AdminDashboard />} />
-                        <Route path="admin/tracking" element={<TrackingDashboard />} />
-                        <Route path="admin/communities" element={<CommunitiesManagementHub />} />
-                        <Route path="communities" element={<CommunitiesManagementHub />} />
+                        <Route 
+                            path="admin/dashboard" 
+                            element={isStaffOrAdmin ? <AdminDashboard /> : <Navigate to="/app/dashboard" replace />} 
+                        />
+                        <Route 
+                            path="admin/tracking" 
+                            element={isStaffOrAdmin ? <TrackingDashboard /> : <Navigate to="/app/dashboard" replace />} 
+                        />
+                        <Route 
+                            path="admin/communities" 
+                            element={isStaffOrAdmin ? <CommunitiesManagementHub /> : <Navigate to="/app/dashboard" replace />} 
+                        />
+                        <Route 
+                            path="communities" 
+                            element={isStaffOrAdmin ? <CommunitiesManagementHub /> : <Navigate to="/app/dashboard" replace />} 
+                        />
                         <Route path="tenant" element={<TenantDashboard />} />
                         <Route path="tenant-management" element={<TenantDashboard />} />
                         <Route path="community" element={<TenantDashboard />} />

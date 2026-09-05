@@ -200,13 +200,13 @@ export default function Sidebar() {
                                             href={item.path}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition"
+                                            className="flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition gap-2"
                                         >
-                                            <div className="flex items-center gap-2.5 truncate">
-                                                <span className="text-base">{item.icon}</span>
+                                            <div className="flex items-center gap-2.5 min-w-0 flex-1 truncate">
+                                                <span className="text-base shrink-0">{item.icon}</span>
                                                 <span className="truncate">{item.name}</span>
                                             </div>
-                                            <span className="text-xs text-gray-400">↗</span>
+                                            <span className="text-xs text-gray-400 shrink-0">↗</span>
                                         </a>
                                     );
                                 }
@@ -217,15 +217,15 @@ export default function Sidebar() {
                                             key={item.name || itemIdx}
                                             onClick={item.onClick}
                                             type="button"
-                                            className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition text-left cursor-pointer"
+                                            className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition text-left cursor-pointer gap-2"
                                         >
-                                            <div className="flex items-center gap-2.5 truncate">
-                                                <span className="text-base">{item.icon}</span>
+                                            <div className="flex items-center gap-2.5 min-w-0 flex-1 truncate">
+                                                <span className="text-base shrink-0">{item.icon}</span>
                                                 <span className="truncate">{item.name}</span>
                                             </div>
                                             {item.badge && (
                                                 <span
-                                                    className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${item.badgeClass || "bg-indigo-100 text-indigo-800 border-indigo-200"}`}
+                                                    className={`text-[11px] font-bold px-2 py-0.5 rounded-full border shrink-0 max-w-[85px] truncate ${item.badgeClass || "bg-indigo-100 text-indigo-800 border-indigo-200"}`}
                                                 >
                                                     {item.badge}
                                                 </span>
@@ -239,14 +239,14 @@ export default function Sidebar() {
                                         key={item.path}
                                         to={item.path}
                                         className={({ isActive }) =>
-                                            `flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium transition ${isActive
+                                            `flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium transition gap-2 ${isActive
                                                 ? "bg-indigo-50 text-indigo-700 font-semibold shadow-2xs"
                                                 : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                                             }`
                                         }
                                     >
-                                        <div className="flex items-center gap-2.5 truncate">
-                                            <span className="text-base">{item.icon}</span>
+                                        <div className="flex items-center gap-2.5 min-w-0 flex-1 truncate">
+                                            <span className="text-base shrink-0">{item.icon}</span>
                                             <span className="truncate">{item.name}</span>
                                             {item.isProGated && !isPro && <ProBadge size="xs" />}
                                         </div>
@@ -261,13 +261,13 @@ export default function Sidebar() {
                                                         setOpenSetup(true);
                                                     }}
                                                     title="Unkonfigurierte Geräte einrichten"
-                                                    className="text-[11px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full hover:bg-amber-200 transition"
+                                                    className="text-[11px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full hover:bg-amber-200 transition shrink-0"
                                                 >
                                                     {item.badge}
                                                 </button>
                                             ) : (
                                                 <span
-                                                    className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${item.badgeClass || "bg-indigo-100 text-indigo-800 border-indigo-200"}`}
+                                                    className={`text-[11px] font-bold px-2 py-0.5 rounded-full border shrink-0 max-w-[85px] truncate ${item.badgeClass || "bg-indigo-100 text-indigo-800 border-indigo-200"}`}
                                                 >
                                                     {item.badge}
                                                 </span>
