@@ -265,20 +265,56 @@ export default function AlertsPage() {
             {/* Alerts List */}
             <div className="space-y-3">
                 {query.isLoading ? (
-                    <div className="bg-white rounded-2xl p-8 border border-gray-200 animate-pulse text-gray-400 text-center">
-                        {t("common.loading", "Lade Alarme…")}
+                    <div className="bg-white rounded-3xl p-12 border border-gray-200 animate-pulse text-gray-400 text-center space-y-3">
+                        <div className="text-3xl">⏳</div>
+                        <div className="text-sm font-semibold">{t("common.loading", "Lade Alarme…")}</div>
                     </div>
                 ) : filteredAlerts.length === 0 ? (
-                    <div className="bg-white rounded-3xl p-12 border border-gray-200 text-center space-y-3 shadow-xs">
-                        <div className="text-5xl">✨</div>
-                        <div className="text-lg font-bold text-gray-900">
-                            {filterSeverity === "resolved" ? t("alerts.empty_history", "Keine Einträge in der Historie") : t("alerts.no_active", "Keine aktiven Alarme")}
+                    <div className="bg-gradient-to-b from-white to-slate-50/50 rounded-3xl p-10 sm:p-14 border border-slate-200 text-center space-y-6 shadow-sm relative overflow-hidden">
+                        <div className="absolute top-0 right-1/2 translate-x-1/2 w-80 h-32 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+                        
+                        <div className="relative z-10 w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center justify-center text-3xl mx-auto shadow-sm">
+                            <span>🛡️</span>
                         </div>
-                        <p className="text-xs text-gray-500 max-w-md mx-auto">
-                            {filterSeverity === "resolved"
-                                ? t("alerts.empty_history_desc", "Quittierte oder gelöste Alarme erscheinen hier.")
-                                : t("alerts.all_optimal", "Alle überwachten Geräte, Wechselrichter, Speicher und Zähler laufen einwandfrei im optimalen Betriebsbereich.")}
-                        </p>
+
+                        <div className="relative z-10 space-y-2 max-w-lg mx-auto">
+                            <h3 className="text-xl font-black text-slate-900 tracking-tight">
+                                {filterSeverity === "resolved" 
+                                    ? t("alerts.empty_history", "Keine erledigten Alarme") 
+                                    : t("alerts.all_optimal_title", "Alles im grünen Bereich – Keine aktiven Alarme")}
+                            </h3>
+                            <p className="text-xs text-slate-500 leading-relaxed">
+                                {filterSeverity === "resolved"
+                                    ? t("alerts.empty_history_desc", "Quittierte oder automatisch gelöste Alarme werden in der Historie archiviert.")
+                                    : t("alerts.all_optimal", "Alle überwachten PV-Generatoren, Batteriespeicher, Wechselrichter und Haushaltsverbraucher laufen einwandfrei im optimalen Betriebsbereich.")}
+                            </p>
+                        </div>
+
+                        {filterSeverity !== "resolved" && (
+                            <div className="relative z-10 grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-xl mx-auto pt-2">
+                                <div className="p-3 bg-white border border-slate-200 rounded-2xl flex items-center gap-2.5 shadow-2xs">
+                                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
+                                    <div className="text-left text-xs">
+                                        <div className="font-bold text-slate-800">Solar & Ertrag</div>
+                                        <div className="text-[10px] text-slate-400">Normalbetrieb</div>
+                                    </div>
+                                </div>
+                                <div className="p-3 bg-white border border-slate-200 rounded-2xl flex items-center gap-2.5 shadow-2xs">
+                                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
+                                    <div className="text-left text-xs">
+                                        <div className="font-bold text-slate-800">Speicher & Notstrom</div>
+                                        <div className="text-[10px] text-slate-400">Geschützt</div>
+                                    </div>
+                                </div>
+                                <div className="p-3 bg-white border border-slate-200 rounded-2xl flex items-center gap-2.5 shadow-2xs">
+                                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
+                                    <div className="text-left text-xs">
+                                        <div className="font-bold text-slate-800">Sensoren & Zähler</div>
+                                        <div className="text-[10px] text-slate-400">Online</div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 ) : (
                     filteredAlerts.map((alert) => (

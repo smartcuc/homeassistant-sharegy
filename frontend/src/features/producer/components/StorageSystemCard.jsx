@@ -110,44 +110,86 @@ export default function StorageSystemCard({ storage, onEdit, onDelete, onControl
             </div>
 
             {/* KPI Highlights: Live SoC & Live Power */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* 1. Ladestand SoC */}
-                <div className="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/60 space-y-2">
+                <div className="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/60 space-y-2.5">
                     <div className="flex items-center justify-between text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                        <span>⚡ {t("storage_system.live_soc", "Live-Ladestand")}</span>
-                        <span className="font-mono text-emerald-400">{storedKwh} / {capacity} kWh</span>
+                        <span className="flex items-center gap-1.5">
+                            <span className="text-sm">🔋</span>
+                            <span>{t("storage_system.live_soc", "Live-Ladestand")}</span>
+                        </span>
+                        <span className="font-mono text-emerald-400 font-bold">{storedKwh} / {capacity} kWh</span>
                     </div>
 
                     <div className="flex items-baseline gap-2">
-                        <span className="text-3xl font-black text-white font-mono">
+                        <span className="text-3xl font-black text-white font-mono tracking-tight">
                             {soc !== null ? soc : "-"}
                         </span>
                         <span className="text-sm font-semibold text-slate-400">%</span>
+                        {status === "charging" && (
+                            <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-2 py-0.5 rounded-full animate-pulse">
+                                + Lädt
+                            </span>
+                        )}
+                        {status === "discharging" && (
+                            <span className="text-[10px] font-bold text-amber-400 bg-amber-950/60 border border-amber-800/60 px-2 py-0.5 rounded-full animate-pulse">
+                                - Entlädt
+                            </span>
+                        )}
                     </div>
 
-                    {/* Progress Bar */}
-                    <div className="w-full h-2.5 bg-slate-700/60 rounded-full overflow-hidden p-0.5 border border-slate-600/40">
-                        <div
-                            className={`h-full rounded-full transition-all duration-500 ${socColor}`}
-                            style={{ width: `${Math.min(100, Math.max(soc || 0, 3))}%` }}
-                        />
+                    {/* Enhanced Progress Bar with Reserve Marker */}
+                    <div className="space-y-1">
+                        <div className="relative w-full h-3 bg-slate-950/80 rounded-full overflow-hidden p-0.5 border border-slate-700/80">
+                            {/* Min Reserve Marker Line */}
+                            {storage.min_soc_reserve_pct > 0 && (
+                                <div 
+                                    className="absolute top-0 bottom-0 w-0.5 bg-rose-500/80 z-10" 
+                                    style={{ left: `${Math.min(98, Math.max(2, storage.min_soc_reserve_pct))}%` }}
+                                    title={`Notstromreserve: ${storage.min_soc_reserve_pct}%`}
+                                />
+                            )}
+                            <div
+                                className={`h-full rounded-full transition-all duration-700 shadow-sm ${
+                                    soc === null
+                                        ? "bg-slate-600"
+                                        : soc <= storage.min_soc_reserve_pct
+                                            ? "bg-gradient-to-r from-rose-600 to-rose-500 shadow-rose-500/30"
+                                            : soc <= 40
+                                                ? "bg-gradient-to-r from-amber-500 to-amber-400 shadow-amber-400/30"
+                                                : "bg-gradient-to-r from-emerald-600 to-emerald-400 shadow-emerald-400/30"
+                                }`}
+                                style={{ width: `${Math.min(100, Math.max(soc || 0, 3))}%` }}
+                            />
+                        </div>
+                        <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono">
+                            <span>0%</span>
+                            {storage.min_soc_reserve_pct > 0 && (
+                                <span className="text-rose-400/90 font-medium">Reserve: {storage.min_soc_reserve_pct}%</span>
+                            )}
+                            <span>100%</span>
+                        </div>
                     </div>
                 </div>
 
                 {/* 2. Aktuelle Leistung */}
-                <div className="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/60 space-y-2">
-                    <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                        ⚡ {t("storage_system.charge_flow", "Lade- / Entladefluss")}
+                <div className="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/60 space-y-2.5 flex flex-col justify-between">
+                    <div>
+                        <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <span className="text-sm">⚡</span>
+                            <span>{t("storage_system.charge_flow", "Lade- / Entladefluss")}</span>
+                        </div>
+
+                        <div className="flex items-baseline gap-2 mt-2">
+                            <span className={`text-3xl font-black font-mono tracking-tight ${statusConfig.powerColor}`}>
+                                {statusConfig.powerText}
+                            </span>
+                        </div>
                     </div>
 
-                    <div className="flex items-baseline gap-2">
-                        <span className={`text-3xl font-black font-mono ${statusConfig.powerColor}`}>
-                            {statusConfig.powerText}
-                        </span>
-                    </div>
-
-                    <div className="text-[10px] text-slate-400 truncate">
-                        {t("storage_system.eff_reserve", { eff: storage.charge_efficiency_pct, res: storage.min_soc_reserve_pct, defaultValue: `Effizienz: ${storage.charge_efficiency_pct}% · Reserve: ${storage.min_soc_reserve_pct}%` })}
+                    <div className="pt-2 border-t border-slate-700/50 flex items-center justify-between text-[11px] text-slate-400">
+                        <span>Wirkungsgrad: <strong className="text-slate-200">{storage.charge_efficiency_pct}%</strong></span>
+                        <span>Max: <strong className="text-slate-200">{storage.max_charge_power_kw} kW</strong></span>
                     </div>
                 </div>
             </div>
