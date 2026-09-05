@@ -123,11 +123,17 @@ export default function ControlPage() {
 
     return (
         <div className="p-6 max-w-7xl mx-auto space-y-6">
-            {/* Action Feedback Banner */}
+            {/* Action Feedback Banner (Floating Toast) */}
             {actionFeedback && (
-                <div className="fixed bottom-6 right-6 z-50 px-4 py-3 bg-slate-900 text-white text-xs font-bold rounded-2xl shadow-2xl border border-emerald-500/40 flex items-center gap-2.5 animate-bounce">
-                    <span className="text-emerald-400 text-base">✓</span>
+                <div className="fixed bottom-6 right-6 z-50 px-4 py-3 bg-slate-900/95 text-white text-xs font-bold rounded-2xl shadow-2xl border border-emerald-500/50 flex items-center gap-2.5 backdrop-blur-md animate-in fade-in slide-in-from-bottom-4 duration-300">
+                    <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center justify-center text-xs">✓</span>
                     <span>{actionFeedback}</span>
+                    <button 
+                        onClick={() => setActionFeedback(null)}
+                        className="ml-2 text-slate-400 hover:text-white transition cursor-pointer text-xs"
+                    >
+                        ✕
+                    </button>
                 </div>
             )}
 
@@ -228,47 +234,87 @@ export default function ControlPage() {
 
                     {/* 🏊 Poolpumpen & Filteranlagen */}
                     {(activeTab === "all" || activeTab === "pool") &&
-                        poolConsumers.map((c) => (
-                            <PoolPumpCard
-                                key={c.id}
-                                consumer={c}
-                                onAction={handleQuickAction}
-                                isPending={actionMutation.isPending}
-                            />
-                        ))}
+                        (poolConsumers.length > 0 ? (
+                            poolConsumers.map((c) => (
+                                <PoolPumpCard
+                                    key={c.id}
+                                    consumer={c}
+                                    onAction={handleQuickAction}
+                                    isPending={actionMutation.isPending}
+                                />
+                            ))
+                        ) : activeTab === "pool" ? (
+                            <div className="col-span-full bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 text-center space-y-3">
+                                <div className="text-3xl">🏊</div>
+                                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Keine Poolpumpe verknüpft</h3>
+                                <p className="text-xs text-slate-500 max-w-md mx-auto">
+                                    Weise einem Shelly- oder MQTT-Relais die Rolle »Poolpumpe« zu, um die Filterzeiten automatisch über PV-Überschuss zu steuern.
+                                </p>
+                            </div>
+                        ) : null)}
 
                     {/* ❄️ Klimaanlagen (Pre-Cooling) */}
                     {(activeTab === "all" || activeTab === "ac") &&
-                        acConsumers.map((c) => (
-                            <AirConditioningCard
-                                key={c.id}
-                                consumer={c}
-                                onAction={handleQuickAction}
-                                isPending={actionMutation.isPending}
-                            />
-                        ))}
+                        (acConsumers.length > 0 ? (
+                            acConsumers.map((c) => (
+                                <AirConditioningCard
+                                    key={c.id}
+                                    consumer={c}
+                                    onAction={handleQuickAction}
+                                    isPending={actionMutation.isPending}
+                                />
+                            ))
+                        ) : activeTab === "ac" ? (
+                            <div className="col-span-full bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 text-center space-y-3">
+                                <div className="text-3xl">❄️</div>
+                                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Keine Klimaanlage verknüpft</h3>
+                                <p className="text-xs text-slate-500 max-w-md mx-auto">
+                                    Nutze smartere Vor-Kühlung (Pre-Cooling) bei Solar-Peaks oder extrem günstigen Börsenpreisen.
+                                </p>
+                            </div>
+                        ) : null)}
 
                     {/* 🧺 Haushaltsgeräte / Ready-to-Start Smart Plugs */}
                     {(activeTab === "all" || activeTab === "appliances") &&
-                        applianceConsumers.map((c) => (
-                            <SmartApplianceCard
-                                key={c.id}
-                                consumer={c}
-                                onAction={handleQuickAction}
-                                isPending={actionMutation.isPending}
-                            />
-                        ))}
+                        (applianceConsumers.length > 0 ? (
+                            applianceConsumers.map((c) => (
+                                <SmartApplianceCard
+                                    key={c.id}
+                                    consumer={c}
+                                    onAction={handleQuickAction}
+                                    isPending={actionMutation.isPending}
+                                />
+                            ))
+                        ) : activeTab === "appliances" ? (
+                            <div className="col-span-full bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 text-center space-y-3">
+                                <div className="text-3xl">🧺</div>
+                                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Keine smarten Zwischenstecker verknüpft</h3>
+                                <p className="text-xs text-slate-500 max-w-md mx-auto">
+                                    Verbinde Zwischenstecker für Waschmaschine, Trockner oder Spülmaschine für automatischen Solar-Start.
+                                </p>
+                            </div>
+                        ) : null)}
 
                     {/* ⚡ Heizstab / Power-to-Heat Puffer */}
                     {(activeTab === "all" || activeTab === "heating_rod") &&
-                        heatingRodConsumers.map((c) => (
-                            <HeatingRodCard
-                                key={c.id}
-                                consumer={c}
-                                onAction={handleQuickAction}
-                                isPending={actionMutation.isPending}
-                            />
-                        ))}
+                        (heatingRodConsumers.length > 0 ? (
+                            heatingRodConsumers.map((c) => (
+                                <HeatingRodCard
+                                    key={c.id}
+                                    consumer={c}
+                                    onAction={handleQuickAction}
+                                    isPending={actionMutation.isPending}
+                                />
+                            ))
+                        ) : activeTab === "heating_rod" ? (
+                            <div className="col-span-full bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 text-center space-y-3">
+                                <div className="text-3xl">⚡</div>
+                                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Kein Heizstab verknüpft</h3>
+                                <p className="text-xs text-slate-500 max-w-md mx-auto">
+                                    Verwandle überschüssigen Solarstrom in Warmwasser-Pufferenergie über stufenlose Thyristor- oder Relais-Heizstäbe.
+                                </p>
+                            </div>
+                        ) : null)}
                 </div>
             </div>
 
