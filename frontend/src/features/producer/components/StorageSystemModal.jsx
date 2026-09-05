@@ -3,6 +3,7 @@
 */
 
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../../api/client";
 
@@ -10,6 +11,18 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
     const { t } = useTranslation();
     const isEdit = Boolean(storage);
 
+    // Auto-Discovery und Geräteliste laden
+    const detectQuery = useQuery({
+        queryKey: ["storage-detect"],
+        queryFn: () => apiFetch("/api/producer/storage/detect/"),
+        enabled: isOpen,
+    });
+
+    const devices = detectQuery.data?.devices || [];
+    const candidates = detectQuery.data?.candidates || [];
+
+    // Mode: "all_in_one" vs "separated"
+    const [mode, setMode] = useState("all_in_one");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMsg, setErrorMsg] = useState("");
 
@@ -34,10 +47,6 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
         discharge_energy_device_id: "",
         discharge_energy_metric_key: "energy_out",
         active: true,
-        ems_control_enabled: true,
-        control_mode: "self_consumption",
-        target_charge_power_kw: 3.0,
-        price_threshold_ct: 15.0,
     });
 
     useEffect(() => {
@@ -63,24 +72,73 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
                 discharge_energy_device_id: storage.discharge_energy_device?.id || "",
                 discharge_energy_metric_key: storage.discharge_energy_device?.metric_key || "energy_out",
                 active: storage.active ?? true,
-                ems_control_enabled: storage.ems_control_enabled ?? true,
+                ems_control_enabled: storage.ems_control_enabled ?? false,
                 control_mode: storage.control_mode || "self_consumption",
                 target_charge_power_kw: storage.target_charge_power_kw ?? 3.0,
                 price_threshold_ct: storage.price_threshold_ct ?? 15.0,
             });
+
+            if (!storage.primary_device?.id && (storage.soc_device?.id || storage.power_device?.id || storage.current_device?.id)) {
+                setMode("separated");
+            } else {
+                setMode("all_in_one");
+            }
+        } else {
+            // Reset for Add
+            setFormData({
+                name: "Hausspeicher",
+                capacity_kwh: 10.0,
+                max_charge_power_kw: 5.0,
+                max_discharge_power_kw: 5.0,
+                min_soc_reserve_pct: 10.0,
+                max_soc_pct: 100.0,
+                charge_efficiency_pct: 95.0,
+                discharge_efficiency_pct: 95.0,
+                primary_device_id: "",
+                soc_device_id: "",
+                soc_metric_key: "soc",
+                power_device_id: "",
+                power_metric_key: "power",
+                current_device_id: "",
+                current_metric_key: "battery_current",
+                charge_energy_device_id: "",
+                charge_energy_metric_key: "energy_in",
+                discharge_energy_device_id: "",
+                discharge_energy_metric_key: "energy_out",
+                active: true,
+                ems_control_enabled: false,
+                control_mode: "self_consumption",
+                target_charge_power_kw: 3.0,
+                price_threshold_ct: 15.0,
+            });
+            setMode("all_in_one");
         }
     }, [storage, isOpen]);
 
     if (!isOpen) return null;
 
+    const handleApplyCandidate = (candidate) => {
+        setFormData((prev) => ({
+            ...prev,
+            name: candidate.suggested_name || prev.name,
+            primary_device_id: candidate.device.id,
+            soc_device_id: candidate.device.id,
+            soc_metric_key: candidate.suggested_soc_metric || "soc",
+            power_device_id: candidate.device.id,
+            power_metric_key: candidate.suggested_power_metric || "power",
+            current_device_id: candidate.device.id,
+            current_metric_key: candidate.suggested_current_metric || "battery_current",
+        }));
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setIsSubmitting(true);
         setErrorMsg("");
+        setIsSubmitting(true);
 
         try {
             const payload = {
-                name: formData.name,
+                ...formData,
                 capacity_kwh: parseFloat(formData.capacity_kwh),
                 max_charge_power_kw: parseFloat(formData.max_charge_power_kw),
                 max_discharge_power_kw: parseFloat(formData.max_discharge_power_kw),
@@ -88,24 +146,19 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
                 max_soc_pct: parseFloat(formData.max_soc_pct),
                 charge_efficiency_pct: parseFloat(formData.charge_efficiency_pct),
                 discharge_efficiency_pct: parseFloat(formData.discharge_efficiency_pct),
-                active: formData.active,
-                ems_control_enabled: formData.ems_control_enabled,
-                control_mode: formData.control_mode,
-                target_charge_power_kw: parseFloat(formData.target_charge_power_kw),
-                price_threshold_ct: parseFloat(formData.price_threshold_ct),
-                // Preserve device bindings if already configured
-                primary_device_id: formData.primary_device_id || null,
-                soc_device_id: formData.soc_device_id || null,
-                soc_metric_key: formData.soc_metric_key || "soc",
-                power_device_id: formData.power_device_id || null,
-                power_metric_key: formData.power_metric_key || "power",
-                current_device_id: formData.current_device_id || null,
-                current_metric_key: formData.current_metric_key || "battery_current",
-                charge_energy_device_id: formData.charge_energy_device_id || null,
-                charge_energy_metric_key: formData.charge_energy_metric_key || "energy_in",
-                discharge_energy_device_id: formData.discharge_energy_device_id || null,
-                discharge_energy_metric_key: formData.discharge_energy_metric_key || "energy_out",
+                target_charge_power_kw: parseFloat(formData.target_charge_power_kw || 3.0),
+                price_threshold_ct: parseFloat(formData.price_threshold_ct || 15.0),
+                ems_control_enabled: Boolean(formData.ems_control_enabled),
+                control_mode: formData.control_mode || "self_consumption",
             };
+
+            // Im All-in-One Modus werden die Einzelzuordnungen auf das primary_device gesetzt
+            if (mode === "all_in_one" && formData.primary_device_id) {
+                payload.soc_device_id = formData.primary_device_id;
+                payload.power_device_id = formData.primary_device_id;
+            } else if (mode === "separated") {
+                payload.primary_device_id = null;
+            }
 
             if (isEdit) {
                 await apiFetch(`/api/producer/storage/${storage.id}/`, {
@@ -113,7 +166,7 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
                     body: JSON.stringify(payload),
                 });
             } else {
-                await apiFetch("/api/producer/storage/", {
+                await apiFetch("/api/producer/storage/create/", {
                     method: "POST",
                     body: JSON.stringify(payload),
                 });
@@ -129,60 +182,85 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-fade-in">
-            <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 max-w-lg w-full shadow-2xl space-y-4 max-h-[90vh] flex flex-col overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
+            <div className="bg-white rounded-3xl shadow-2xl border border-gray-200 w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden">
                 {/* Header */}
-                <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 shrink-0">
-                    <div>
-                        <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                            <span>⚙️</span>
-                            <span>{isEdit ? t("storage.edit_title", "Batteriespeicher bearbeiten") : t("storage.add_title", "Neuen Batteriespeicher anlegen")}</span>
-                        </h3>
-                        <p className="text-xs text-slate-400 mt-0.5">
-                            {t("storage.modal_subtitle", "Definiere Kapazität, Ladelimits und Betriebsstrategie.")}
-                        </p>
+                <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-slate-50">
+                    <div className="flex items-center gap-3">
+                        <span className="text-2xl p-2 bg-emerald-50 text-emerald-600 rounded-xl border border-emerald-100">🔋</span>
+                        <div>
+                            <h2 className="text-lg font-bold text-gray-900">
+                                {isEdit ? t("storage.edit_title", "Batteriespeicher bearbeiten") : t("storage.add_title", "Neuen Batteriespeicher anlegen")}
+                            </h2>
+                            <p className="text-xs text-gray-500">
+                                {t("storage.modal_subtitle", "Definiere Kapazität, Ladelimits und ordne Messpunkte flexibel zu.")}
+                            </p>
+                        </div>
                     </div>
 
                     <button
-                        type="button"
                         onClick={onClose}
-                        className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg cursor-pointer"
+                        className="w-8 h-8 rounded-full bg-white border border-gray-200 text-gray-400 hover:text-gray-700 flex items-center justify-center text-sm font-bold transition cursor-pointer"
                     >
                         ✕
                     </button>
                 </div>
 
                 {/* Form Body */}
-                <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto space-y-4 pr-1">
+                <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6">
                     {errorMsg && (
-                        <div className="p-3 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-xs font-semibold rounded-xl">
+                        <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs font-semibold rounded-xl">
                             ⚠️ {errorMsg}
                         </div>
                     )}
 
-                    {/* Section 1: Basic Info & Capacity */}
-                    <div className="space-y-3">
-                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                            1. Allgemeine Angaben & Kapazität
-                        </h4>
+                    {/* Auto-Discovery Suggestion Banner */}
+                    {!isEdit && candidates.length > 0 && (
+                        <div className="p-4 bg-emerald-50/80 border border-emerald-200 rounded-2xl space-y-2">
+                            <div className="flex items-center justify-between">
+                                <span className="text-xs font-bold text-emerald-900 flex items-center gap-1.5">
+                                    <span>💡</span> {t("storage_system.detected_storage", "Erkannter Speicher aus Plugin / Wechselrichter")}
+                                </span>
+                                <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-emerald-200/60 text-emerald-800">
+                                    {t("storage_system.auto_discovery", "Auto-Discovery")}
+                                </span>
+                            </div>
+                            <p className="text-xs text-emerald-800/80">
+                                {t("storage_system.detected_desc", { name: candidates[0].device.name, defaultValue: `Es wurde ein Gerät mit Speicher-Metriken (SoC/Leistung) gefunden: ${candidates[0].device.name}.` })}
+                            </p>
+                            <button
+                                type="button"
+                                onClick={() => handleApplyCandidate(candidates[0])}
+                                className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
+                            >
+                                {t("storage_system.apply_suggestion", "✨ Vorschlag mit 1-Klick übernehmen")}
+                            </button>
+                        </div>
+                    )}
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {/* Basic Info */}
+                    <div className="space-y-4">
+                        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                            {t("storage_system.section_general", "1. Allgemeine Angaben & Kapazität")}
+                        </h3>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                    Bezeichnung *
+                                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                                    {t("common.name", "Bezeichnung")} *
                                 </label>
                                 <input
                                     type="text"
                                     required
                                     value={formData.name}
                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 transition"
+                                    className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium focus:bg-white focus:ring-2 focus:ring-emerald-500 transition"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                    Nennkapazität (kWh) *
+                                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                                    {t("storage_system.nominal_capacity", "Nennkapazität (kWh)")} *
                                 </label>
                                 <input
                                     type="number"
@@ -192,41 +270,41 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
                                     required
                                     value={formData.capacity_kwh}
                                     onChange={(e) => setFormData({ ...formData, capacity_kwh: e.target.value })}
-                                    className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-mono font-medium text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 transition"
+                                    className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium focus:bg-white focus:ring-2 focus:ring-emerald-500 transition"
                                 />
                             </div>
                         </div>
 
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                             <div>
-                                <label className="block text-[11px] font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                    Max. Laden (kW)
+                                <label className="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">
+                                    {t("storage_system.max_charge_power", "Max. Laden (kW)")}
                                 </label>
                                 <input
                                     type="number"
                                     step="0.1"
                                     value={formData.max_charge_power_kw}
                                     onChange={(e) => setFormData({ ...formData, max_charge_power_kw: e.target.value })}
-                                    className="w-full p-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-900 dark:text-white"
+                                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium focus:bg-white focus:ring-2 focus:ring-emerald-500 transition"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-[11px] font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                    Max. Entladen (kW)
+                                <label className="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">
+                                    {t("storage_system.max_discharge_power", "Max. Entladen (kW)")}
                                 </label>
                                 <input
                                     type="number"
                                     step="0.1"
                                     value={formData.max_discharge_power_kw}
                                     onChange={(e) => setFormData({ ...formData, max_discharge_power_kw: e.target.value })}
-                                    className="w-full p-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-900 dark:text-white"
+                                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium focus:bg-white focus:ring-2 focus:ring-emerald-500 transition"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-[11px] font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                    Notstromreserve (%)
+                                <label className="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">
+                                    {t("storage_system.backup_reserve", "Notstromreserve (%)")}
                                 </label>
                                 <input
                                     type="number"
@@ -235,13 +313,13 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
                                     max="50"
                                     value={formData.min_soc_reserve_pct}
                                     onChange={(e) => setFormData({ ...formData, min_soc_reserve_pct: e.target.value })}
-                                    className="w-full p-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-900 dark:text-white"
+                                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium focus:bg-white focus:ring-2 focus:ring-emerald-500 transition"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-[11px] font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                    Wirkungsgrad (%)
+                                <label className="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">
+                                    {t("storage_system.efficiency", "Wirkungsgrad (%)")}
                                 </label>
                                 <input
                                     type="number"
@@ -254,52 +332,52 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
                                         charge_efficiency_pct: e.target.value,
                                         discharge_efficiency_pct: e.target.value,
                                     })}
-                                    className="w-full p-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-900 dark:text-white"
+                                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium focus:bg-white focus:ring-2 focus:ring-emerald-500 transition"
                                 />
                             </div>
                         </div>
                     </div>
 
-                    {/* Section 2: Active EMS & Smart Charging Control */}
-                    <div className="space-y-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                    {/* ⚡ Active EMS & Smart Charging Control Section */}
+                    <div className="space-y-4 pt-4 border-t border-gray-100">
                         <div className="flex items-center justify-between">
-                            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                                <span>⚡</span> 2. Aktive EMS-Steuerung & Smart-Charging
-                            </h4>
+                            <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
+                                <span>⚡</span> {t("storage_system.section_control", "2. Aktive EMS-Steuerung & Smart-Charging")}
+                            </h3>
                             <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold">
                                 <input
                                     type="checkbox"
                                     checked={formData.ems_control_enabled}
                                     onChange={(e) => setFormData({ ...formData, ems_control_enabled: e.target.checked })}
-                                    className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer"
+                                    className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 w-4 h-4"
                                 />
-                                <span className={formData.ems_control_enabled ? "text-indigo-600 dark:text-indigo-400 font-bold" : "text-slate-400"}>
+                                <span className={formData.ems_control_enabled ? "text-emerald-700 font-bold" : "text-gray-500"}>
                                     Steuerung aktiv
                                 </span>
                             </label>
                         </div>
 
                         {formData.ems_control_enabled && (
-                            <div className="p-3.5 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/40 border border-indigo-200/60 dark:border-indigo-800/50 space-y-3">
-                                <div>
-                                    <label className="block text-[11px] font-bold text-indigo-900 dark:text-indigo-300 uppercase tracking-wider mb-1">
-                                        Betriebsmodus
-                                    </label>
-                                    <select
-                                        value={formData.control_mode}
-                                        onChange={(e) => setFormData({ ...formData, control_mode: e.target.value })}
-                                        className="w-full p-2.5 bg-white dark:bg-slate-800 border border-indigo-200 dark:border-indigo-800 rounded-xl text-xs font-medium text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 transition"
-                                    >
-                                        <option value="self_consumption">☀️ PV-Vorrang (Autarkie & Eigenverbrauch)</option>
-                                        <option value="price_optimized">💶 Spotmarkt-Arbitrage (Preisgeführt)</option>
-                                        <option value="forced_charge">🚀 Manuelle Zwangsladung</option>
-                                        <option value="idle">💤 Standby / Ladesperre</option>
-                                    </select>
-                                </div>
-
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div className="p-4 rounded-2xl bg-blue-50/70 border border-blue-200/70 space-y-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                     <div>
-                                        <label className="block text-[11px] font-bold text-indigo-900 dark:text-indigo-300 uppercase tracking-wider mb-1">
+                                        <label className="block text-[11px] font-bold text-blue-900 uppercase tracking-wider mb-1">
+                                            Betriebsmodus
+                                        </label>
+                                        <select
+                                            value={formData.control_mode}
+                                            onChange={(e) => setFormData({ ...formData, control_mode: e.target.value })}
+                                            className="w-full px-3 py-2 bg-white border border-blue-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-blue-500 transition"
+                                        >
+                                            <option value="self_consumption">☀️ PV-Autarkie (Autonom)</option>
+                                            <option value="price_optimized">💶 Preisgeführt (EPEX Spot / Tibber)</option>
+                                            <option value="forced_charge">⚡ Manuelle Zwangsladung</option>
+                                            <option value="idle">💤 Standby / Ladesperre</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-[11px] font-bold text-blue-900 uppercase tracking-wider mb-1">
                                             Soll-Ladeleistung (kW)
                                         </label>
                                         <input
@@ -309,12 +387,12 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
                                             max={formData.max_charge_power_kw || 15}
                                             value={formData.target_charge_power_kw}
                                             onChange={(e) => setFormData({ ...formData, target_charge_power_kw: e.target.value })}
-                                            className="w-full p-2 bg-white dark:bg-slate-800 border border-indigo-200 dark:border-indigo-800 rounded-xl text-xs font-mono text-slate-900 dark:text-white"
+                                            className="w-full px-3 py-2 bg-white border border-blue-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-blue-500 transition"
                                         />
                                     </div>
 
                                     <div>
-                                        <label className="block text-[11px] font-bold text-indigo-900 dark:text-indigo-300 uppercase tracking-wider mb-1">
+                                        <label className="block text-[11px] font-bold text-blue-900 uppercase tracking-wider mb-1">
                                             Preisschwelle (ct/kWh)
                                         </label>
                                         <input
@@ -322,24 +400,174 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
                                             step="0.5"
                                             value={formData.price_threshold_ct}
                                             onChange={(e) => setFormData({ ...formData, price_threshold_ct: e.target.value })}
-                                            className="w-full p-2 bg-white dark:bg-slate-800 border border-indigo-200 dark:border-indigo-800 rounded-xl text-xs font-mono text-slate-900 dark:text-white"
+                                            className="w-full px-3 py-2 bg-white border border-blue-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-blue-500 transition"
                                         />
                                     </div>
                                 </div>
-
-                                <p className="text-[11px] text-indigo-700 dark:text-indigo-300/80 leading-relaxed">
-                                    Bei <strong>Spotmarkt-Arbitrage</strong> lädt Sharegy den Batteriespeicher bei dynamischen Tarifen automatisch aus dem Netz auf, sobald der Börsenstrompreis unter die Preisschwelle fällt.
+                                <p className="text-[11px] text-blue-700 leading-relaxed">
+                                    Bei <strong>Preisgeführt</strong> lädt Sharegy den Batteriespeicher bei dynamischen Tarifen (z. B. Tibber) automatisch aus dem Netz auf, sobald der Börsenstrompreis unter die Preisschwelle fällt.
                                 </p>
                             </div>
                         )}
                     </div>
 
+                    {/* Signal & Measurement Point Routing */}
+                    <div className="space-y-4 pt-4 border-t border-gray-100">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                                {t("storage_system.section_sensors", "3. Messpunkt- & Sensor-Zuordnung")}
+                            </h3>
+
+                            {/* Mode Toggle */}
+                            <div className="inline-flex bg-gray-100 p-1 rounded-xl text-xs font-semibold">
+                                <button
+                                    type="button"
+                                    onClick={() => setMode("all_in_one")}
+                                    className={`px-3 py-1 rounded-lg transition ${mode === "all_in_one" ? "bg-white text-gray-900 shadow-xs font-bold" : "text-gray-500"}`}
+                                >
+                                    {t("storage_system.mode_all_in_one", "🎯 All-in-One (Ein Gerät)")}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setMode("separated")}
+                                    className={`px-3 py-1 rounded-lg transition ${mode === "separated" ? "bg-white text-gray-900 shadow-xs font-bold" : "text-gray-500"}`}
+                                >
+                                    {t("storage_system.mode_separated", "🔀 Getrennte Messpunkte")}
+                                </button>
+                            </div>
+                        </div>
+
+                        {mode === "all_in_one" ? (
+                            <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200 space-y-3">
+                                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                    {t("storage_system.select_primary_device", "Hauptgerät auswählen (z. B. Hybrid-Wechselrichter oder All-in-One Speicher)")}
+                                </label>
+                                <select
+                                    value={formData.primary_device_id}
+                                    onChange={(e) => setFormData({ ...formData, primary_device_id: e.target.value })}
+                                    className="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-emerald-500 transition"
+                                >
+                                    <option value="">{t("storage_system.no_device_manual", "-- Kein Gerät verknüpft (Manuell) --")}</option>
+                                    {devices.map((d) => (
+                                        <option key={d.id} value={d.id}>
+                                            {d.name} {d.has_soc ? t("storage_system.with_soc_sensor", "(mit SoC-Sensor)") : ""}
+                                        </option>
+                                    ))}
+                                </select>
+                                <p className="text-[11px] text-gray-500">
+                                    {t("storage_system.all_in_one_hint", "Das ausgewählte Gerät liefert sowohl den aktuellen Ladestand (SoC %) als auch die Lade- und Entladeleistung.")}
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200 space-y-4">
+                                {/* SoC Device */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                                            🔋 {t("storage_system.soc_device_label", "Gerät für Ladestand (SoC %)")}
+                                        </label>
+                                        <select
+                                            value={formData.soc_device_id}
+                                            onChange={(e) => setFormData({ ...formData, soc_device_id: e.target.value })}
+                                            className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500 transition"
+                                        >
+                                            <option value="">{t("common.none", "-- Kein Gerät --")}</option>
+                                            {devices.map((d) => (
+                                                <option key={d.id} value={d.id}>
+                                                    {d.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                                            {t("storage_system.metric_key_label", "Datenpunkt / Metrikschlüssel")}
+                                        </label>
+                                        <input
+                                            type="text"
+                                            placeholder="z. B. soc, battery_soc"
+                                            value={formData.soc_metric_key}
+                                            onChange={(e) => setFormData({ ...formData, soc_metric_key: e.target.value })}
+                                            className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs font-mono font-medium focus:ring-2 focus:ring-emerald-500 transition"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Power Device */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                                            ⚡ {t("storage_system.power_device_label", "Gerät für Ladeleistung (W)")}
+                                        </label>
+                                        <select
+                                            value={formData.power_device_id}
+                                            onChange={(e) => setFormData({ ...formData, power_device_id: e.target.value })}
+                                            className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500 transition"
+                                        >
+                                            <option value="">{t("common.none", "-- Kein Gerät --")}</option>
+                                            {devices.map((d) => (
+                                                <option key={d.id} value={d.id}>
+                                                    {d.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                                            {t("storage_system.metric_key_label", "Datenpunkt / Metrikschlüssel")}
+                                        </label>
+                                        <input
+                                            type="text"
+                                            placeholder="z. B. power, battery_power"
+                                            value={formData.power_metric_key}
+                                            onChange={(e) => setFormData({ ...formData, power_metric_key: e.target.value })}
+                                            className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs font-mono font-medium focus:ring-2 focus:ring-emerald-500 transition"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Current Device (Optional for signed direction) */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-gray-200/60">
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1 truncate" title="Batteriestrom für Richtung (+ Entladen, - Laden)">
+                                            🔌 {t("storage_system.current_device_label", "Batteriestrom für Richtung (A) (Opt.)")}
+                                        </label>
+                                        <select
+                                            value={formData.current_device_id}
+                                            onChange={(e) => setFormData({ ...formData, current_device_id: e.target.value })}
+                                            className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500 transition"
+                                        >
+                                            <option value="">{t("common.none", "-- Optional (Kein Sensor) --")}</option>
+                                            {devices.map((d) => (
+                                                <option key={d.id} value={d.id}>
+                                                    {d.name} {d.has_current ? "(mit Strom-Sensor)" : ""}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1 truncate">
+                                            {t("storage_system.current_metric_key_label", "Strom-Datenpunkt (A)")}
+                                        </label>
+                                        <input
+                                            type="text"
+                                            placeholder="z. B. battery_current, current"
+                                            value={formData.current_metric_key}
+                                            onChange={(e) => setFormData({ ...formData, current_metric_key: e.target.value })}
+                                            className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs font-mono font-medium focus:ring-2 focus:ring-emerald-500 transition"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
                     {/* Footer Actions */}
-                    <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2 shrink-0">
+                    <div className="pt-4 border-t border-gray-100 flex items-center justify-end gap-3">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-4 py-2 text-xs font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition cursor-pointer"
+                            className="px-4 py-2 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition cursor-pointer"
                         >
                             {t("common.cancel", "Abbrechen")}
                         </button>
@@ -347,7 +575,7 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="px-5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-xs transition cursor-pointer disabled:opacity-50"
+                            className="px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-xs transition cursor-pointer disabled:opacity-50"
                         >
                             {isSubmitting ? t("common.saving", "Speichere...") : isEdit ? t("storage.save_changes", "Änderungen speichern") : t("storage.create", "Speicher anlegen")}
                         </button>
@@ -357,3 +585,4 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
         </div>
     );
 }
+
