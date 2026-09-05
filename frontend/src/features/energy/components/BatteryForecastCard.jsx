@@ -244,28 +244,6 @@ export default function BatteryForecastCard() {
                         type: "dashed",
                     },
                 },
-                {
-                    name: "Ladung (kW)",
-                    type: "bar",
-                    yAxisIndex: 1,
-                    data: chargeValues,
-                    z: 3,
-                    itemStyle: {
-                        color: "rgba(52, 211, 153, 0.55)",
-                        borderRadius: [3, 3, 0, 0],
-                    },
-                },
-                {
-                    name: "Entladung (kW)",
-                    type: "bar",
-                    yAxisIndex: 1,
-                    data: dischargeValues,
-                    z: 3,
-                    itemStyle: {
-                        color: "rgba(56, 189, 248, 0.55)",
-                        borderRadius: [3, 3, 0, 0],
-                    },
-                },
             ],
         };
     }, [timeline, horizon, params]);
@@ -406,16 +384,13 @@ export default function BatteryForecastCard() {
                             <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block shadow-xs shadow-emerald-400/50" /> {t("battery_forecast.legend_soc", "SoC %")}
                         </span>
                         <span className="flex items-center gap-1">
-                            <span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block" /> {t("battery_forecast.legend_solar", "Solar")}
+                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block" /> {t("battery_forecast.legend_soc", "SoC (%)")}
                         </span>
                         <span className="flex items-center gap-1">
-                            <span className="w-2.5 h-2.5 rounded-full bg-blue-400 inline-block" /> {t("battery_forecast.legend_load", "Hauslast")}
+                            <span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block" /> {t("battery_forecast.legend_solar", "Solar (kW)")}
                         </span>
                         <span className="flex items-center gap-1">
-                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-300 inline-block" /> {t("battery_forecast.legend_charge", "Ladung")}
-                        </span>
-                        <span className="flex items-center gap-1">
-                            <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 inline-block" /> {t("battery_forecast.legend_discharge", "Entladung")}
+                            <span className="w-2.5 h-2.5 rounded-full bg-blue-400 inline-block" /> {t("battery_forecast.legend_load", "Hauslast (kW)")}
                         </span>
                     </div>
                 </div>
@@ -424,9 +399,10 @@ export default function BatteryForecastCard() {
                 <div className="bg-slate-950/80 border border-emerald-900/50 rounded-2xl p-2 pt-3 shadow-inner">
                     <ReactECharts
                         option={chartOption}
-                        style={{ height: 260, width: "100%" }}
+                        style={{ height: "280px", width: "100%" }}
                         notMerge={true}
-                        lazyUpdate={true}
+                        lazyUpdate={false}
+                        opts={{ renderer: "canvas" }}
                     />
 
                     {/* Timeline footer dates */}

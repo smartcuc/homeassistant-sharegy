@@ -182,12 +182,13 @@ export default function SubmeterStackedTrendChart({ period = "30d", onSelectMete
             </div>
 
             {/* Chart Area */}
-            <div className="h-72 w-full pt-2">
+            <div className="w-full pt-2">
                 <ReactECharts
                     option={chartOption}
-                    style={{ height: "100%", width: "100%" }}
+                    style={{ height: "300px", width: "100%" }}
                     notMerge={true}
-                    lazyUpdate={true}
+                    lazyUpdate={false}
+                    opts={{ renderer: "canvas" }}
                     onEvents={{ click: onChartClick }}
                 />
             </div>

@@ -417,21 +417,13 @@ export default function EnergyDashboard() {
             </div>
 
             {/* =========================================================
-                COMMUNITY & ENERGY SHARING INVITE BANNER (TASK 2)
-            ========================================================= */}
-            <CommunityInviteCard
-                onOpenShareModal={() => setShareModalOpen(true)}
-                kpis={kpis}
-            />
-
-            {/* =========================================================
                 INSIGHTS NOTIFICATION
             ========================================================= */}
             {insights.length > 0 && (
-                <div className="p-4 bg-linear-to-r from-indigo-50/80 to-purple-50/80 border border-indigo-100 rounded-2xl text-xs text-indigo-950 space-y-1.5 shadow-2xs">
+                <div className="p-4 bg-linear-to-r from-indigo-50/80 to-purple-50/80 dark:from-indigo-950/40 dark:to-purple-950/40 border border-indigo-100 dark:border-indigo-900/50 rounded-2xl text-xs text-indigo-950 dark:text-indigo-200 space-y-1.5 shadow-2xs">
                     {insights.map((text, i) => (
                         <div key={i} className="flex items-center gap-2">
-                            <span className="text-indigo-600 text-sm">💡</span>
+                            <span className="text-indigo-600 dark:text-indigo-400 text-sm">💡</span>
                             <span className="font-medium">{text}</span>
                         </div>
                     ))}
@@ -439,12 +431,14 @@ export default function EnergyDashboard() {
             )}
 
             {/* =========================================================
-                SMART ENERGY OPTIMIZER & BATTERIE- & SOC-PROGNOSE
+                SMART ENERGY OPTIMIZER
             ========================================================= */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <EnergyOptimizerCard />
-                <BatteryForecastCard />
-            </div>
+            <EnergyOptimizerCard />
+
+            {/* =========================================================
+                BATTERIE- & SOC-PROGNOSE
+            ========================================================= */}
+            <BatteryForecastCard />
 
 
             {/* =========================================================
@@ -558,7 +552,7 @@ export default function EnergyDashboard() {
                                 </div>
 
                                 {/* Footer Link / Action Prompt */}
-                                <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-indigo-600 dark:text-indigo-400 font-semibold opacity-0 group-hover:opacity-100 transition">
+                                <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-indigo-600 dark:text-indigo-400 font-semibold group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition">
                                     <span>📈 Trends & Historie anzeigen</span>
                                     <span className="group-hover:translate-x-1 transition">→</span>
                                 </div>
@@ -764,6 +758,14 @@ export default function EnergyDashboard() {
                 <BatteryArbitrageCard />
                 <GridCo2Card />
             </div>
+
+            {/* =========================================================
+                COMMUNITY & ENERGY SHARING INVITE BANNER (AT BOTTOM)
+            ========================================================= */}
+            <CommunityInviteCard
+                onOpenShareModal={() => setShareModalOpen(true)}
+                kpis={kpis}
+            />
             </>
             )}
 
