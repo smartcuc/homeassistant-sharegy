@@ -27,21 +27,53 @@ export function initSentry() {
                     release: "sharegy-frontend@3.2.0",
                     tracesSampleRate: 0.1,
                     sendDefaultPii: false,
+                    ignoreErrors: [
+                        "TypeError: NetworkError when attempting to fetch resource.",
+                        "NetworkError when attempting to fetch resource.",
+                        "Failed to fetch",
+                        "Network request failed",
+                        "AbortError",
+                        "The operation was aborted",
+                        "Load failed",
+                        "ResizeObserver loop completed with undelivered notifications",
+                        "ResizeObserver loop limit exceeded",
+                        "Non-Error promise rejection captured",
+                    ],
+                    beforeSend(event, hint) {
+                        const error = hint?.originalException;
+                        const msg = (error?.message || event?.message || "").toLowerCase();
+                        // Transiente Browser-Netzwerkabbrüche (Page Unload, Offline, DNS, Timeout) ignorieren
+                        if (
+                            msg.includes("networkerror") ||
+                            msg.includes("failed to fetch") ||
+                            msg.includes("network request failed") ||
+                            msg.includes("abort") ||
+                            error?.name === "AbortError"
+                        ) {
+                            return null;
+                        }
+                        return event;
+                    },
                 });
                 isSentryInitialized = true;
                 console.log("[Sharegy:Sentry] 🛡️ Sentry Frontend Crash-Reporting aktiviert");
             }
         };
 
-        // Fallback falls Script blockiert wird: Global Error Listener
+        // Fallback falls Script blockiert wird: Global Error Listener mit Filter
+        const isNetworkError = (err) => {
+            const str = String(err?.message || err || "").toLowerCase();
+            return str.includes("networkerror") || str.includes("failed to fetch") || str.includes("abort");
+        };
+
         window.addEventListener("error", (event) => {
-            if (window.Sentry) {
+            if (window.Sentry && !isNetworkError(event.error || event.message)) {
                 window.Sentry.captureException(event.error || event.message);
             }
         });
 
         window.addEventListener("unhandledrejection", (event) => {
-            if (window.Sentry) {
+            if (window.Sentry && !isNetworkError(event.reason)) {
                 window.Sentry.captureException(event.reason);
             }
         });
