@@ -467,6 +467,8 @@ export default function DevicesPage() {
     const devicesQuery = useQuery({
         queryKey: ["devices"],
         queryFn: () => apiFetch("/api/devices/"),
+        staleTime: 30000,
+        placeholderData: (prev) => prev,
     });
 
     const statusQuery = useQuery({
@@ -842,10 +844,7 @@ export default function DevicesPage() {
         saveSettings,
     ]);
 
-    if (
-        devicesQuery.isLoading ||
-        settingsLoading
-    ) {
+    if (devicesQuery.isLoading && !devicesQuery.data) {
         return (
             <div className="p-6 max-w-7xl mx-auto space-y-6 animate-pulse">
                 <div className="flex justify-between items-center">
