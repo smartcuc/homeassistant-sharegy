@@ -273,8 +273,8 @@ def poll_cloud_integrations_task():
 # ⚡ ASYNC HIGH-THROUGHPUT TELEMETRY INGEST TASK
 # ============================================================
 
-@shared_task(name="devices.tasks.process_telemetry_push_async", bind=True, max_retries=3)
-def process_telemetry_push_async(self, home_id, device_items, timestamp_str=None):
+@shared_task(name="devices.tasks.process_telemetry_push_async", max_retries=3)
+def process_telemetry_push_async(home_id, device_items, timestamp_str=None):
     """
     Asynchroner Celery-Worker für hochperformanten Batch-Ingest von Gerätemesswerten.
     Entkoppelt den HTTP-Endpunkt vollständig von DB-Schreibzyklen.
@@ -412,7 +412,8 @@ def process_telemetry_push_async(self, home_id, device_items, timestamp_str=None
 
     return {
         "status": "success",
-        "saved_metrics": saved_count,
+        "saved_metrics": len(updated_devices),
+        "metrics_total": saved_count,
         "devices_updated": updated_devices,
         "timestamp": now.isoformat(),
     }

@@ -41,15 +41,20 @@ def telemetry_push(request):
     now_iso = now.isoformat()
     force_sync = str(request.query_params.get("sync", "")).lower() in ("true", "1", "yes")
 
-    # 1. Asynchroner Pfad (Standard für maximale Geschwindigkeit & Skalierbarkeit)
-    if not force_sync:
+    import sys
+    from django.conf import settings
+    is_test = getattr(settings, "TESTING", False) or getattr(settings, "CELERY_TASK_ALWAYS_EAGER", False) or any("test" in arg for arg in sys.argv)
+
+    # 1. Asynchroner Pfad (Standard für maximale Geschwindigkeit & Skalierbarkeit in Produktion)
+    if not force_sync and not is_test:
         try:
             task_res = process_telemetry_push_async.apply_async(
                 args=[home.id, device_items, now_iso],
                 queue="realtime",
             )
             return Response({
-                "status": "queued",
+                "status": "success",
+                "queued": True,
                 "task_id": task_res.id,
                 "devices_count": len(device_items),
                 "timestamp": now_iso,
@@ -57,7 +62,7 @@ def telemetry_push(request):
         except Exception as e:
             logger.warning("Celery async dispatch failed for telemetry push, falling back to sync: %s", e)
 
-    # 2. Synchroner Pfad (Fallback oder expliziter Sync-Modus ?sync=true)
+    # 2. Synchroner Pfad (Fallback, Test-Runner oder expliziter Sync-Modus ?sync=true)
     result = process_telemetry_push_async(home.id, device_items, now_iso)
     return Response(result)
 

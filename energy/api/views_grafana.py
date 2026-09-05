@@ -5,16 +5,41 @@
 from datetime import datetime, timedelta, timezone as dt_timezone
 from zoneinfo import ZoneInfo
 from django.utils import timezone
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import BaseAuthentication, SessionAuthentication
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.response import Response
 
-from devices.models import Device, DeviceMetric1h, DeviceLatestMetric
+from devices.models import Home, Device, DeviceMetric1h, DeviceLatestMetric
 from market.models import SpotPrice
 from alerts.models import AlertEvent
 
 
+class HomeTokenAuthentication(BaseAuthentication):
+    """
+    Authentifiziert Grafana Datasources via Bearer Token (MQTT Token / Home Key) oder X-API-KEY.
+    """
+    def authenticate(self, request):
+        auth = request.META.get("HTTP_AUTHORIZATION", "")
+        token = ""
+        if auth.startswith("Bearer "):
+            token = auth.split(" ", 1)[1].strip()
+        elif "HTTP_X_API_KEY" in request.META:
+            token = request.META["HTTP_X_API_KEY"].strip()
+
+        if token:
+            home = Home.objects.filter(mqtt_token=token).select_related("user").first()
+            if home and home.user:
+                return (home.user, token)
+        return None
+
+
+GRAFANA_AUTH_CLASSES = [HomeTokenAuthentication, JWTAuthentication, SessionAuthentication]
+
+
 @api_view(["GET", "POST"])
+@authentication_classes(GRAFANA_AUTH_CLASSES)
 @permission_classes([IsAuthenticated])
 def grafana_root(request):
     """
@@ -31,6 +56,7 @@ def grafana_root(request):
 
 
 @api_view(["POST", "GET"])
+@authentication_classes(GRAFANA_AUTH_CLASSES)
 @permission_classes([IsAuthenticated])
 def grafana_search(request):
     """

@@ -60,28 +60,24 @@ def normalize_battery_metrics(metrics, state=None, meta=None):
 
     # A) Vorzeichenbehafteter Batteriestrom (z. B. Sungrow Register 5630/5631 oder 13020/13021)
     # Negativ (< 0 A): Batterie lädt | Positiv (> 0 A): Batterie entlädt
-    current_val = res.get("battery_current") if "battery_current" in res else (res.get("current") if "current" in res else None)
+    current_val = res.get("battery_current") or res.get("bat_current") or res.get("i_battery") or res.get("battery_i")
     if current_val is not None:
         try:
             float_curr = float(current_val)
-            power_key = next((k for k in ["power", "battery_power", "active_power", "val", "value"] if k in res and res[k] is not None), None)
+            power_key = next((k for k in ["battery_power", "bat_power", "power_battery", "battery_w"] if k in res and res[k] is not None), None)
             if power_key:
                 raw_p = abs(float(res[power_key]))
                 if float_curr < 0:
                     res[power_key] = -raw_p
-                    res["power"] = -raw_p
                 elif float_curr > 0:
                     res[power_key] = raw_p
-                    res["power"] = raw_p
                 else:
                     res[power_key] = 0.0
-                    res["power"] = 0.0
                 return res
-            elif "battery_voltage" in res or "voltage" in res:
-                volt = float(res.get("battery_voltage") or res.get("voltage") or 0)
+            elif "battery_voltage" in res or "bat_voltage" in res:
+                volt = float(res.get("battery_voltage") or res.get("bat_voltage") or 0)
                 if volt > 0:
                     calc_p = round(volt * float_curr, 2)
-                    res["power"] = calc_p
                     res["battery_power"] = calc_p
                     return res
         except (ValueError, TypeError):

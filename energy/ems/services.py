@@ -271,18 +271,19 @@ def build_device_signals(user):
         else:
             signals["battery"]["discharge"] = 0.0
     elif abs(bat_val) > 0.01:
-        # 1. Explizites Vorzeichen: Negativ bedeutet physikalisch immer Laden (z. B. Grid-Charging / Sungrow / Modbus / MQTT)
+        # 1. Negativer Wert: Batterie lädt (physikalische Last / Aufnahme)
         if bat_val < 0:
             signals["battery"]["charge"] = round(abs(bat_val), 2)
             signals["battery"]["discharge"] = 0.0
-        # 2. Wenn PV-Erzeugung den Hausverbrauch übersteigt (oder PV aktiv ist und Speicher noch Kapazität hat), lädt der Speicher
-        elif pv_power > (eff_load_est + 50) or (pv_power > 100 and soc_val is not None and soc_val < 98.0 and bat_val > 0):
-            signals["battery"]["charge"] = round(abs(bat_val), 2)
-            signals["battery"]["discharge"] = 0.0
-        # 3. Nacht / keine PV-Erzeugung: Speicher liefert Energie an das Haus (Entladung)
-        else:
-            signals["battery"]["discharge"] = round(abs(bat_val), 2)
-            signals["battery"]["charge"] = 0.0
+        # 2. Positiver Wert: Batterie entlädt (Lieferung an Haus/Netz)
+        elif bat_val > 0:
+            # Falls ein ungerichteter Sensor vorliegt und echter PV-Überschuss den Hausbedarf deutlich übersteigt
+            if pv_power > (eff_load_est + 50) and (soc_val is None or soc_val < 98.0):
+                signals["battery"]["charge"] = round(bat_val, 2)
+                signals["battery"]["discharge"] = 0.0
+            else:
+                signals["battery"]["discharge"] = round(bat_val, 2)
+                signals["battery"]["charge"] = 0.0
     else:
         # Fallback: Wenn PV-Überschuss vorliegt und kein Netzexport gemessen wird, fließt Überschuss in Batterie
         if not grid_device_ids and (has_storage_system or soc_val is not None or battery_device_ids) and pv_power > (eff_load_est + 50) and (soc_val is None or soc_val < 98.0):
