@@ -101,7 +101,14 @@ def article_detail(request, slug):
         return Response({"error": "Article not found"}, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == "PATCH":
-        if not request.user.is_authenticated or not request.user.is_staff:
+        is_admin_user = bool(
+            request.user.is_authenticated and (
+                request.user.is_staff or 
+                request.user.is_superuser or 
+                getattr(request.user, "is_platform_admin", False)
+            )
+        )
+        if not is_admin_user:
             return Response({"error": "Admin privileges required for editing."}, status=status.HTTP_403_FORBIDDEN)
 
         serializer = HelpArticleUpdateSerializer(article, data=request.data, partial=True)

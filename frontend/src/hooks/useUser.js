@@ -38,12 +38,33 @@ export function useUser() {
         refetchOnWindowFocus: false,
     });
 
+    const user = query.data ?? null;
+
+    const isStaffOrAdmin = Boolean(user?.is_staff || user?.is_superuser || user?.is_platform_admin);
+    const isHelpdesk = Boolean(isStaffOrAdmin || user?.is_platform_helpdesk);
+    const isFinanceAdmin = Boolean(user?.is_superuser || user?.is_platform_admin || user?.is_finance_admin);
+    const isGlobalUserAdmin = Boolean(user?.is_superuser || user?.is_platform_admin || user?.is_global_user_admin);
+    const hasCommunityAdminAccess = Boolean(
+        isStaffOrAdmin ||
+        isGlobalUserAdmin ||
+        user?.memberships?.some((m) => ["admin", "user_admin"].includes(m.role)) ||
+        user?.usage_mode === "hybrid" ||
+        user?.usage_mode === "landlord"
+    );
+
     return {
-        user: query.data ?? null,
+        user,
         loading: query.isLoading,
         isRefreshing: query.isFetching,
 
         // ✅ Ersatz für dein refreshUser
         refreshUser: query.refetch,
+
+        // 🛡️ Berechtigungs-Helfer
+        isStaffOrAdmin,
+        isHelpdesk,
+        isFinanceAdmin,
+        isGlobalUserAdmin,
+        hasCommunityAdminAccess,
     };
 }

@@ -37,7 +37,7 @@ import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 
 export default function AppShell() {
 
-    const { user, loading } = useUser();
+    const { user, loading, isStaffOrAdmin, hasCommunityAdminAccess } = useUser();
     const location = useLocation();
     const contentRef = useRef(null);
 
@@ -55,8 +55,6 @@ export default function AppShell() {
     if (!user) {
         return <Navigate to="/" replace />;
     }
-
-    const isStaffOrAdmin = Boolean(user?.is_staff || user?.is_superuser || user?.is_platform_admin);
 
     return (
         <div className="flex h-screen">

@@ -17,8 +17,9 @@ import ProBadge from "../common/ProBadge";
 export default function Sidebar() {
     const { t } = useTranslation();
     const { isPro } = useSubscription();
+    const { user, isStaffOrAdmin, hasCommunityAdminAccess } = useUser();
+    const hasTenantAccess = hasCommunityAdminAccess;
     const query = useUnconfiguredDevices();
-    const { user } = useUser();
 
     const isLoaded = query?.isSuccess;
     const count = query?.data?.count ?? 0;
@@ -69,15 +70,6 @@ export default function Sidebar() {
     const setupBadgeClass = hasHardwareFaults || setupScore < 60
         ? "bg-rose-100 text-rose-700 border-rose-200"
         : "bg-amber-100 text-amber-800 border-amber-200";
-
-    const isStaffOrAdmin = Boolean(user?.is_staff || user?.is_superuser || user?.is_platform_admin);
-    const isLandlordMode = user?.usage_mode === "hybrid" || user?.usage_mode === "landlord";
-    const hasTenantAccess = Boolean(
-        isStaffOrAdmin ||
-        user?.is_global_user_admin ||
-        user?.memberships?.some((m) => ["admin", "user_admin"].includes(m.role)) ||
-        isLandlordMode
-    );
 
     const sections = useMemo(() => {
         const sec = [

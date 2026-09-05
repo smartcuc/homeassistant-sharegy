@@ -107,3 +107,27 @@ def verify_support_jwt(token: str) -> Tuple[bool, Optional[Dict[str, Any]], Opti
 
     return True, payload, None
 
+
+from rest_framework.authentication import BaseAuthentication
+from django.contrib.auth.models import AnonymousUser
+
+
+class SupportJWTAuthentication(BaseAuthentication):
+    """
+    DRF Authentication backend that validates external partner JWTs (Factofy / IoT gateways)
+    before standard DRF user authentication.
+    """
+    def authenticate(self, request):
+        auth_header = request.headers.get("Authorization", "") or request.META.get("HTTP_AUTHORIZATION", "")
+        if not auth_header.startswith("Bearer "):
+            return None
+
+        token = auth_header[7:].strip()
+        is_valid, payload, err = verify_support_jwt(token)
+        if is_valid and payload:
+            user = AnonymousUser()
+            user.support_jwt_payload = payload
+            return (user, token)
+
+        return None
+

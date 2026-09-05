@@ -4,13 +4,16 @@
 
 import json
 from rest_framework import status, permissions
-from rest_framework.decorators import api_view, permission_classes, parser_classes
+from rest_framework.decorators import api_view, permission_classes, parser_classes, authentication_classes
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.response import Response
+from rest_framework.authentication import SessionAuthentication
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from django.utils import timezone
 
+from accounts.auth import CsrfExemptSessionAuthentication
 from support_desk.models import (
     SupportProjectConfig,
     Ticket,
@@ -33,7 +36,7 @@ from support_desk.services.ticket_engine import (
     assign_ticket,
     search_deflection_articles,
 )
-from support_desk.services.auth_jwt import verify_support_jwt
+from support_desk.services.auth_jwt import verify_support_jwt, SupportJWTAuthentication
 
 
 def _resolve_requester(request):
@@ -88,6 +91,22 @@ def _resolve_requester(request):
     )
 
 
+def _is_staff_or_helpdesk(user) -> bool:
+    if not user or not user.is_authenticated:
+        return False
+    return bool(
+        user.is_staff or 
+        user.is_superuser or 
+        getattr(user, "is_platform_admin", False) or 
+        getattr(user, "is_platform_helpdesk", False)
+    )
+
+
+class IsStaffOrPlatformHelpdesk(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return _is_staff_or_helpdesk(request.user)
+
+
 def _can_set_custom_priority(user, ext_id=None) -> bool:
     """
     ITIL-Priority Rules:
@@ -103,10 +122,7 @@ def _can_set_custom_priority(user, ext_id=None) -> bool:
     if not user or not user.is_authenticated:
         return False
 
-    if user.is_staff or user.is_superuser:
-        return True
-
-    if getattr(user, "is_platform_admin", False) or getattr(user, "is_platform_helpdesk", False):
+    if _is_staff_or_helpdesk(user):
         return True
 
     # EnergySharing / Tenant Admins, User Admins, Helpdesk
@@ -128,6 +144,7 @@ def _can_set_custom_priority(user, ext_id=None) -> bool:
 
 
 @api_view(["GET", "POST"])
+@authentication_classes([SupportJWTAuthentication, CsrfExemptSessionAuthentication, SessionAuthentication, JWTAuthentication])
 @permission_classes([permissions.AllowAny])
 @parser_classes([JSONParser, MultiPartParser, FormParser])
 def tickets_list_create(request):
@@ -143,7 +160,7 @@ def tickets_list_create(request):
 
         qs = Ticket.objects.all().order_by("-created_at")
 
-        if user and user.is_staff:
+        if _is_staff_or_helpdesk(user):
             if request.query_params.get("scope") != "all":
                 qs = qs.filter(Q(user=user) | Q(assigned_agent=user))
         elif user:
@@ -223,6 +240,7 @@ def tickets_list_create(request):
 
 
 @api_view(["GET", "PATCH"])
+@authentication_classes([SupportJWTAuthentication, CsrfExemptSessionAuthentication, SessionAuthentication, JWTAuthentication])
 @permission_classes([permissions.AllowAny])
 def ticket_detail(request, ticket_id):
     """
@@ -233,7 +251,7 @@ def ticket_detail(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
 
     is_authorized = (
-        (user and user.is_staff)
+        _is_staff_or_helpdesk(user)
         or (user and ticket.user_id == user.id)
         or (ext_id and ticket.external_user_id == ext_id and ticket.project_key == project_key)
     )
@@ -258,6 +276,7 @@ def ticket_detail(request, ticket_id):
 
 
 @api_view(["POST"])
+@authentication_classes([SupportJWTAuthentication, CsrfExemptSessionAuthentication, SessionAuthentication, JWTAuthentication])
 @permission_classes([permissions.AllowAny])
 @parser_classes([JSONParser, MultiPartParser, FormParser])
 def ticket_add_message(request, ticket_id):
@@ -267,7 +286,7 @@ def ticket_add_message(request, ticket_id):
     user, ext_id, name, email, project_key = _resolve_requester(request)
     ticket = get_object_or_404(Ticket, id=ticket_id)
 
-    is_staff = bool(user and user.is_staff)
+    is_staff = _is_staff_or_helpdesk(user)
     is_authorized = (
         is_staff
         or (user and ticket.user_id == user.id)
@@ -310,10 +329,11 @@ def deflection_suggest(request):
 
 
 @api_view(["GET", "PATCH", "POST"])
-@permission_classes([permissions.IsAdminUser])
+@authentication_classes([SupportJWTAuthentication, CsrfExemptSessionAuthentication, SessionAuthentication, JWTAuthentication])
+@permission_classes([IsStaffOrPlatformHelpdesk])
 def agent_ticket_management(request, ticket_id=None):
     """
-    Agent Support Hub management endpoints (staff only):
+    Agent Support Hub management endpoints (staff & platform helpdesk):
     GET: List / filter all tickets across projects (sharegy & factofy) with KPI summary.
     PATCH <id>: Reassign agent or change status / priority.
     POST <id>/note: Add internal note.
@@ -393,7 +413,8 @@ def agent_ticket_management(request, ticket_id=None):
 
 
 @api_view(["GET", "POST"])
-@permission_classes([permissions.IsAdminUser])
+@authentication_classes([SupportJWTAuthentication, CsrfExemptSessionAuthentication, SessionAuthentication, JWTAuthentication])
+@permission_classes([IsStaffOrPlatformHelpdesk])
 def canned_responses_list(request):
     """
     List or create quick response templates for agents.

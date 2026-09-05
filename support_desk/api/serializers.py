@@ -247,7 +247,15 @@ class TicketDetailSerializer(serializers.ModelSerializer):
 
     def get_messages(self, obj):
         request = self.context.get("request")
-        is_staff = request.user.is_staff if request and request.user and request.user.is_authenticated else False
+        user = request.user if request and request.user and request.user.is_authenticated else None
+        is_staff = bool(
+            user and (
+                user.is_staff or 
+                user.is_superuser or 
+                getattr(user, "is_platform_admin", False) or 
+                getattr(user, "is_platform_helpdesk", False)
+            )
+        )
         
         # Non-staff users do not see internal notes
         if is_staff:
