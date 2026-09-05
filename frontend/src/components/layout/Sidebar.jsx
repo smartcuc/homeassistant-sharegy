@@ -156,7 +156,7 @@ export default function Sidebar() {
         }
 
         return sec;
-    }, [t, count, alertCount, alertBadgeClass, setupIcon, setupBadge, setupBadgeClass, isStaffOrAdmin, isLandlordMode, isPro]);
+    }, [t, count, alertCount, alertBadgeClass, setupIcon, setupBadge, setupBadgeClass, isStaffOrAdmin, hasTenantAccess, isPro]);
 
     return (
         <div className="w-64 bg-white border-r flex flex-col shrink-0">
