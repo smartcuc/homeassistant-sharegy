@@ -949,5 +949,26 @@
   "settings": {
     "account": "Benutzerkonto & Einstellungen",
     "language": "Sprache"
+  },
+  "control": {
+    "title": "Energiesteuerung & Lastmanagement",
+    "subtitle": "Intelligente PV-Überschusssteuerung, Prioritäten-Kaskade und automatisierte Verbraucher-Fahrpläne.",
+    "warmwasser": "Warmwasser",
+    "bwwp": "Warmwasser",
+    "battery": "Heimspeicher",
+    "wallbox": "Wallbox",
+    "pool": "Pool",
+    "aircon": "Klimaanlage",
+    "appliances": "Haushaltsgeräte",
+    "heating_rod": "Heizstab"
+  },
+  "consumers": {
+    "warmwasser": "Warmwasser",
+    "battery": "Heimspeicher",
+    "wallbox": "Wallbox",
+    "pool": "Pool",
+    "klimaanlage": "Klimaanlage",
+    "appliances": "Haushaltsgeräte",
+    "heating_rod": "Heizstab"
   }
 }

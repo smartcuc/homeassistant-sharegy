@@ -75,18 +75,28 @@ def get_all_load_consumers(home) -> list:
     except Exception as e:
         logger.debug("[Dispatch-Hub] Speicher laden: %s", e)
 
-    # 2. ♨️ BWWP & Wärmepumpe
+    # 2. ♨️ Warmwasser (BWWP / Wärmepumpe)
     bwwp_cfg = find_or_create_bwwp_config(home)
     if bwwp_cfg and bwwp_cfg.device:
         bwwp_eval = evaluate_bwwp_load_management(home, config=bwwp_cfg, force=False)
         telemetry = bwwp_eval.get("telemetry", {})
         sg_state = bwwp_eval.get("current_sg_state", "2_normal")
+        
+        clean_bwwp_name = "Warmwasser"
+        if bwwp_cfg.device:
+            if hasattr(bwwp_cfg.device, "config") and bwwp_cfg.device.config and bwwp_cfg.device.config.name and not any(x in bwwp_cfg.device.config.name.lower() for x in ["aircon", "klima", "ac_"]):
+                clean_bwwp_name = bwwp_cfg.device.config.name
+            elif bwwp_cfg.device.name and not any(x in bwwp_cfg.device.name.lower() for x in ["aircon", "klima", "ac_"]):
+                clean_bwwp_name = bwwp_cfg.device.name
+            elif bwwp_cfg.device.identifier and not any(x in bwwp_cfg.device.identifier.lower() for x in ["aircon", "klima", "ac_"]):
+                clean_bwwp_name = bwwp_cfg.device.identifier
+
         consumers.append({
             "id": f"bwwp_{bwwp_cfg.device.id}",
             "device_id": bwwp_cfg.device.id,
             "category": "bwwp",
-            "category_label": "Brauchwasserwärmepumpe",
-            "name": bwwp_cfg.device.name,
+            "category_label": "Warmwasser",
+            "name": clean_bwwp_name,
             "icon": "♨️",
             "power_w": float(telemetry.get("power_w", 0.0)),
             "is_active": bwwp_cfg.active,
@@ -305,9 +315,15 @@ def compute_24h_dispatch_schedule(home, consumers: list, priority_order: list) -
                     run_reason = "⚡ Börsen-Tiefstpreis"
 
                 if should_run:
+                    dev_name = dev.get("name", "")
+                    if cat == "bwwp" or (any(x in dev_name.lower() for x in ["aircon", "klima", "bwwp", "brauchwasser"]) and cat != "ac"):
+                        dev_name = "Warmwasser"
+                    elif cat == "ac" and ("aircon" in dev_name.lower() or "ac" in dev_name.lower()):
+                        dev_name = "Klimaanlage"
+
                     scheduled_devices.append({
                         "device_id": dev["id"],
-                        "name": dev["name"],
+                        "name": dev_name,
                         "category": cat,
                         "icon": dev["icon"],
                         "power_kw": round(req_kw, 2),

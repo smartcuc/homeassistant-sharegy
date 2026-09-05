@@ -900,5 +900,26 @@
   "settings": {
     "account": "Konto użytkownika i ustawienia",
     "language": "Język"
+  },
+  "control": {
+    "title": "Sterowanie energią i zarządzanie obciążeniem",
+    "subtitle": "Inteligentne zarządzanie nadwyżkami PV, kaskada priorytetów i harmonogramy odbiorników.",
+    "warmwasser": "Ciepła woda",
+    "bwwp": "Ciepła woda",
+    "battery": "Magazyn domowy",
+    "wallbox": "Wallbox",
+    "pool": "Basen",
+    "aircon": "Klimatyzacja",
+    "appliances": "Sprzęt AGD",
+    "heating_rod": "Grzałka"
+  },
+  "consumers": {
+    "warmwasser": "Ciepła woda",
+    "battery": "Magazyn domowy",
+    "wallbox": "Wallbox",
+    "pool": "Basen",
+    "klimaanlage": "Klimatyzacja",
+    "appliances": "Sprzęt AGD",
+    "heating_rod": "Grzałka"
   }
 }

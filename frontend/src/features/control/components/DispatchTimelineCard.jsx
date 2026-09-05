@@ -4,6 +4,19 @@ import { useTranslation } from "react-i18next";
 export default function DispatchTimelineCard({ schedule = [] }) {
     const { t } = useTranslation();
 
+    // Helper to sanitize device names from legacy identifiers
+    const getCleanDeviceName = (name, category) => {
+        if (!name) return category === "bwwp" ? t("control.warmwasser", "Warmwasser") : "";
+        const lower = name.toLowerCase();
+        if (category === "bwwp" || lower.includes("bwwp") || lower.includes("brauchwasser")) {
+            return t("control.warmwasser", "Warmwasser");
+        }
+        if (lower.includes("aircon_power") || lower === "aircon") {
+            return category === "ac" ? t("control.aircon", "Klimaanlage") : t("control.warmwasser", "Warmwasser");
+        }
+        return name;
+    };
+
     // Default selected slot: the current hour or first slot with scheduled devices
     const [selectedSlotIndex, setSelectedSlotIndex] = useState(() => {
         if (!schedule || schedule.length === 0) return 0;
@@ -22,9 +35,10 @@ export default function DispatchTimelineCard({ schedule = [] }) {
     const deviceRuns = {};
     schedule.forEach((slot) => {
         (slot.scheduled_devices || []).forEach((dev) => {
-            if (!deviceRuns[dev.name]) {
-                deviceRuns[dev.name] = {
-                    name: dev.name,
+            const cleanName = getCleanDeviceName(dev.name, dev.category);
+            if (!deviceRuns[cleanName]) {
+                deviceRuns[cleanName] = {
+                    name: cleanName,
                     icon: dev.icon,
                     category: dev.category,
                     power_kw: dev.power_kw,
@@ -32,7 +46,7 @@ export default function DispatchTimelineCard({ schedule = [] }) {
                     hours: [],
                 };
             }
-            deviceRuns[dev.name].hours.push(slot.time_label);
+            deviceRuns[cleanName].hours.push(slot.time_label);
         });
     });
 
@@ -182,23 +196,26 @@ export default function DispatchTimelineCard({ schedule = [] }) {
                         </div>
                         {selectedSlot.scheduled_devices && selectedSlot.scheduled_devices.length > 0 ? (
                             <div className="space-y-1.5">
-                                {selectedSlot.scheduled_devices.map((dev, devIdx) => (
-                                    <div
-                                        key={devIdx}
-                                        className="flex items-center justify-between p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs shadow-2xs"
-                                    >
-                                        <div className="flex items-center gap-2 font-bold text-slate-800 dark:text-slate-200">
-                                            <span className="text-base">{dev.icon}</span>
-                                            <span>{dev.name}</span>
-                                            <span className="text-[10px] font-normal px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-                                                {dev.reason}
+                                {selectedSlot.scheduled_devices.map((dev, devIdx) => {
+                                    const cleanName = getCleanDeviceName(dev.name, dev.category);
+                                    return (
+                                        <div
+                                            key={devIdx}
+                                            className="flex items-center justify-between p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs shadow-2xs"
+                                        >
+                                            <div className="flex items-center gap-2 font-bold text-slate-800 dark:text-slate-200">
+                                                <span className="text-base">{dev.icon}</span>
+                                                <span>{cleanName}</span>
+                                                <span className="text-[10px] font-normal px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                                                    {dev.reason}
+                                                </span>
+                                            </div>
+                                            <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                                                {dev.power_kw} kW
                                             </span>
                                         </div>
-                                        <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">
-                                            {dev.power_kw} kW
-                                        </span>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         ) : (
                             <div className="text-xs text-slate-400 dark:text-slate-500 py-1">

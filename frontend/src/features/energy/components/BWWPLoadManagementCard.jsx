@@ -54,9 +54,9 @@ export default function BWWPLoadManagementCard() {
     const thresholds = data.thresholds || {};
 
     const rawName = data.device_name || "";
-    const cleanTitle = (rawName && !rawName.toLowerCase().includes("aircon") && !rawName.toLowerCase().includes("ac_"))
+    const cleanTitle = (rawName && !rawName.toLowerCase().includes("aircon") && !rawName.toLowerCase().includes("ac_") && !rawName.toLowerCase().includes("bwwp"))
         ? rawName
-        : "Warmwasser (BWWP)";
+        : t("control.warmwasser", "Warmwasser");
 
     const tempC = telemetry.temperature_c ?? metrics.water_temperature_c ?? 48.0;
     const powerW = telemetry.power_w ?? metrics.power_w ?? 0.0;
@@ -107,17 +107,17 @@ export default function BWWPLoadManagementCard() {
                             </div>
                             <div>
                                 <h3 className="font-bold text-base text-slate-900 dark:text-white">
-                                    Warmwasser (BWWP)
+                                    {t("control.warmwasser", "Warmwasser")}
                                 </h3>
                                 <p className="text-xs text-slate-400 mt-0.5">
-                                    Keine Brauchwasserwärmepumpe angebunden
+                                    Keine Warmwasser-Anlage angebunden
                                 </p>
                             </div>
                         </div>
                     </div>
 
                     <div className="p-4 bg-white/70 dark:bg-slate-800/50 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 text-xs text-slate-500 dark:text-slate-400 text-center">
-                        Binde deine Brauchwasserwärmepumpe oder SG-Ready Relais ein, um Wassertemperatur und PV-Überschuss-Boost zu steuern.
+                        Binde deine Warmwasser-Wärmepumpe oder SG-Ready Relais ein, um Wassertemperatur und PV-Überschuss-Boost zu steuern.
                     </div>
                 </div>
 
@@ -169,7 +169,7 @@ export default function BWWPLoadManagementCard() {
                                 </span>
                             </div>
                             <p className="text-xs text-slate-400 mt-0.5">
-                                Intelligente SG-Ready Wärmepumpensteuerung & Speicher-Boost
+                                Intelligente SG-Ready Warmwasser-Steuerung & Speicher-Boost
                             </p>
                         </div>
                     </div>

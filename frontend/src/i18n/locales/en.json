@@ -949,5 +949,26 @@
   "settings": {
     "account": "User Account & Settings",
     "language": "Language"
+  },
+  "control": {
+    "title": "Energy Control & Load Management",
+    "subtitle": "Intelligent PV surplus control, priority cascade, and automated consumer schedules.",
+    "warmwasser": "Hot Water",
+    "bwwp": "Hot Water",
+    "battery": "Home Storage",
+    "wallbox": "Wallbox",
+    "pool": "Pool",
+    "aircon": "Air Conditioning",
+    "appliances": "Home Appliances",
+    "heating_rod": "Heating Rod"
+  },
+  "consumers": {
+    "warmwasser": "Hot Water",
+    "battery": "Home Storage",
+    "wallbox": "Wallbox",
+    "pool": "Pool",
+    "klimaanlage": "Air Conditioning",
+    "appliances": "Home Appliances",
+    "heating_rod": "Heating Rod"
   }
 }
