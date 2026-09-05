@@ -185,13 +185,13 @@ export default function ControlPage() {
                     {[
                         { key: "all", label: "Alle Verbraucher", icon: "🎛️" },
                         { key: "battery", label: "Heimspeicher", icon: "🔋" },
-                        { key: "bwwp", label: "BWWP (Warmwasser)", icon: "♨️" },
-                        { key: "wallbox", label: "Wallbox (E-Auto)", icon: "🚗" },
+                        { key: "bwwp", label: "Warmwasser", icon: "♨️" },
+                        { key: "wallbox", label: "Wallbox", icon: "🚗" },
                         { key: "heatpump", label: "Wärmepumpe", icon: "🔥" },
-                        { key: "pool", label: "Pool & Filter", icon: "🏊" },
-                        { key: "ac", label: "Klimaanlage (Pre-Cool)", icon: "❄️" },
+                        { key: "pool", label: "Pool", icon: "🏊" },
+                        { key: "ac", label: "Klimaanlage", icon: "❄️" },
                         { key: "appliances", label: "Haushaltsgeräte", icon: "🧺" },
-                        { key: "heating_rod", label: "Heizstab (Puffer)", icon: "⚡" },
+                        { key: "heating_rod", label: "Heizstab", icon: "⚡" },
                     ].map((tab) => (
                         <button
                             key={tab.key}
