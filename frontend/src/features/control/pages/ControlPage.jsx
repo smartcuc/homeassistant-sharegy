@@ -17,6 +17,8 @@ import AirConditioningCard from "../components/AirConditioningCard";
 import SmartApplianceCard from "../components/SmartApplianceCard";
 import HeatingRodCard from "../components/HeatingRodCard";
 import AddWallboxModal from "../../devices/components/AddWallboxModal";
+import CommunityInviteCard from "../../community/components/CommunityInviteCard";
+import CommunityShareModal from "../../community/components/CommunityShareModal";
 
 export default function ControlPage() {
     const { t } = useTranslation();
@@ -25,6 +27,7 @@ export default function ControlPage() {
 
     const [activeTab, setActiveTab] = useState("all");
     const [proModalOpen, setProModalOpen] = useState(false);
+    const [shareModalOpen, setShareModalOpen] = useState(false);
     const [addWallboxOpen, setAddWallboxOpen] = useState(false);
     const [actionFeedback, setActionFeedback] = useState(null);
 
@@ -269,8 +272,30 @@ export default function ControlPage() {
                 </div>
             </div>
 
+            {/* Quartiers-Energy Sharing (§ 42b EnWG) Banner at bottom */}
+            <CommunityInviteCard
+                onOpenShareModal={() => setShareModalOpen(true)}
+                kpis={{
+                    autarky_pct: liveBudget.battery_soc_pct || 86,
+                    self_consumption_pct: 92,
+                    community_shared_kwh: 148,
+                }}
+            />
+
+            {/* Community Social Share Modal */}
+            <CommunityShareModal
+                isOpen={shareModalOpen}
+                onClose={() => setShareModalOpen(false)}
+                kpis={{
+                    autarky_pct: liveBudget.battery_soc_pct || 86,
+                    self_consumption_pct: 92,
+                    community_shared_kwh: 148,
+                }}
+            />
+
             {/* Add Wallbox Modal */}
             <AddWallboxModal
+                isOpen={addWallboxOpen}
                 open={addWallboxOpen}
                 onClose={() => setAddWallboxOpen(false)}
             />
