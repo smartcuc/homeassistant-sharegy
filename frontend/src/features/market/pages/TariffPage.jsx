@@ -13,10 +13,10 @@ export default function TariffPage() {
         <div className="p-6 max-w-7xl mx-auto space-y-8">
             {/* HEADER */}
             <div>
-                <h1 className="text-2xl font-semibold text-gray-900">
-                    💶 {t("tariffs.title", "Strompreise & Tarife")}
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <span>💶</span> {t("tariffs.title", "Strompreise & Tarife")}
                 </h1>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
                     {t("tariffs.subtitle", "Konfiguriere deinen Stromvertrag (Börsenstromtarif vs. Festpreis) und verknüpfe deinen Tibber-Account für automatische Abrechnung und Smart-Charging.")}
                 </p>
             </div>
