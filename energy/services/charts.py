@@ -35,7 +35,7 @@ def get_dashboard_chart(device_ids, metric_keys=None):
     if metric_keys:
         key_filter = Q(metric_key__in=metric_keys)
     else:
-        key_filter = Q(metric_key__in=["power", "value", "a_act_power", "apower", "load"]) | Q(metric_key__isnull=True)
+        key_filter = Q(metric_key__in=["power", "value", "a_act_power", "apower", "load", "pv_power", "grid_power", "battery_power", "load_power"]) | Q(metric_key__isnull=True)
 
     # 1. Versuch: 1h Aggregationen
     rows = list(
