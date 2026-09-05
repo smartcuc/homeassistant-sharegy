@@ -2,6 +2,8 @@
 # energy/ems/services.py
 ########################
 
+from datetime import timedelta
+from django.utils import timezone
 from django.core.cache import cache
 from devices.models import Device, DeviceLatestMetric
 from devices.services.metrics import get_latest_values
@@ -15,6 +17,7 @@ def build_device_signals(user):
         "pv": {"production": 0},
         "battery": {"charge": 0, "discharge": 0},
     }
+    metric_cutoff = timezone.now() - timedelta(minutes=10)
 
     # 1. Holt alle konfigurierten Geräte des Benutzers (1 Query)
     all_devices = list(
@@ -150,7 +153,10 @@ def build_device_signals(user):
                 metric_key__in=["pv_power", "solar_power", "power_pv", "yield_power", "production", "mppt_power", "total_dc_power", "pv_power_w"]
             ).first()
             if m and m.value is not None:
-                p_val = float(m.value)
+                if m.timestamp and m.timestamp < metric_cutoff:
+                    p_val = 0.0
+                else:
+                    p_val = float(m.value)
 
         # Wenn dedizierter PV-Kanal existiert (auch bei 0.0 W nachts!), ist dieser Wert verbindlich!
         if p_val is not None:
@@ -206,7 +212,10 @@ def build_device_signals(user):
                 metric_key__in=["load_power", "load_power_w", "house_power", "consumption"]
             ).first()
             if m and m.value is not None:
-                l_p = float(m.value)
+                if m.timestamp and m.timestamp < metric_cutoff:
+                    l_p = 0.0
+                else:
+                    l_p = float(m.value)
         if l_p is not None and float(l_p) > 0:
             measured_load = float(l_p)
             break
@@ -228,7 +237,10 @@ def build_device_signals(user):
                 metric_key__in=["battery_power", "battery_power_w", "power_battery", "battery"]
             ).first()
             if m and m.value is not None:
-                b_p = float(m.value)
+                if m.timestamp and m.timestamp < metric_cutoff:
+                    b_p = 0.0
+                else:
+                    b_p = float(m.value)
         if b_p is not None and abs(float(b_p)) > 0.01:
             battery_power = float(b_p)
             break
@@ -325,7 +337,10 @@ def build_device_signals(user):
             if g_p is None:
                 m = DeviceLatestMetric.objects.filter(device=dev, metric_key="grid_power").first()
                 if m and m.value is not None:
-                    g_p = float(m.value)
+                    if m.timestamp and m.timestamp < metric_cutoff:
+                        g_p = 0.0
+                    else:
+                        g_p = float(m.value)
             if g_p is not None and abs(float(g_p)) > 0.01:
                 grid_power = float(g_p)
                 break

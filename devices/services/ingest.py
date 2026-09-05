@@ -350,17 +350,17 @@ def ingest_metric_payload(
         # ⚡ Sub-Kanäle (PV, Load, Batterie, Grid, SoC) direkt im Redis-Cache spiegeln (O(1))
         m_low = metric_key.lower()
         if m_low in ["pv_power", "solar_power", "power_pv", "yield_power", "production", "mppt_power", "pv_power_w", "pv"]:
-            cache.set(f"device:{device.id}:pv_power", float_val, timeout=3600)
+            cache.set(f"device:{device.id}:pv_power", float_val, timeout=300)
         elif m_low in ["load_power", "house_power", "home_power", "consumption", "load_power_w", "load", "use_power"]:
-            cache.set(f"device:{device.id}:load_power", float_val, timeout=3600)
+            cache.set(f"device:{device.id}:load_power", float_val, timeout=300)
         elif m_low in ["battery_power", "power_battery", "bat_power", "battery_power_w", "battery"]:
-            cache.set(f"device:{device.id}:battery_power", float_val, timeout=3600)
+            cache.set(f"device:{device.id}:battery_power", float_val, timeout=300)
         elif m_low in ["grid_power", "meter_power", "grid_power_w", "grid"]:
-            cache.set(f"device:{device.id}:grid_power", float_val, timeout=3600)
+            cache.set(f"device:{device.id}:grid_power", float_val, timeout=300)
 
         if any(s in m_low for s in ["soc", "battery_soc", "battery_level"]):
-            cache.set(f"device:{device.id}:battery_soc", float_val, timeout=3600)
-            cache.set(f"device:{device.id}:latest_soc", float_val, timeout=3600)
+            cache.set(f"device:{device.id}:battery_soc", float_val, timeout=300)
+            cache.set(f"device:{device.id}:latest_soc", float_val, timeout=300)
 
 
         # 3. Snapshot-Tabelle DeviceLatestMetric aktualisieren (O(1))
