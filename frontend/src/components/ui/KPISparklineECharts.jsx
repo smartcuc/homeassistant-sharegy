@@ -2,121 +2,89 @@
 # src/components/ui/KPISparklineECharts.jsx
 */
 
-import ReactECharts from "echarts-for-react";
+import { memo, useMemo } from "react";
 
-export default function KPISparklineECharts({
+function KPISparklineECharts({
     values = [],
     color = "#2563eb",
-    chartType = "line",
     unit = "N/A",
 }) {
     const rawValues = Array.isArray(values) ? values : [];
-    const validNumbers = rawValues
-        .map((v) => (typeof v === "number" ? v : parseFloat(v)))
-        .filter((v) => !isNaN(v));
+    const validNumbers = useMemo(() => {
+        return rawValues
+            .map((v) => (typeof v === "number" ? v : parseFloat(v)))
+            .filter((v) => !isNaN(v));
+    }, [rawValues]);
 
-    if (validNumbers.length === 0) {
+    const chartValues = useMemo(() => {
+        if (validNumbers.length === 0) return [];
+        if (validNumbers.length === 1) return [validNumbers[0], validNumbers[0]];
+        return validNumbers;
+    }, [validNumbers]);
+
+    if (chartValues.length === 0) {
         return (
-            <div className="h-14 mt-1 flex items-center justify-center text-xs text-slate-400 dark:text-slate-500">
+            <div className="h-10 mt-1 flex items-center justify-center text-xs text-slate-300">
                 —
             </div>
         );
     }
 
-    const chartValues =
-        validNumbers.length === 1
-            ? [validNumbers[0], validNumbers[0]]
-            : validNumbers;
+    const min = Math.min(...chartValues);
+    const max = Math.max(...chartValues);
+    const range = max - min || 1;
 
-    const option = {
-        animation: false,
+    const width = 240;
+    const height = 44;
+    const padding = 3;
 
-        grid: {
-            top: 2,
-            bottom: 2,
-            left: 2,
-            right: 2,
-        },
+    const points = chartValues.map((val, idx) => {
+        const x = padding + (idx / (chartValues.length - 1)) * (width - 2 * padding);
+        const y = height - padding - ((val - min) / range) * (height - 2 * padding);
+        return [x, y];
+    });
 
-        xAxis: {
-            type: "category",
-            show: false,
-            data: chartValues.map((_, i) => i),
-        },
+    // Erzeuge glatte Bezier-Kurve
+    const pathD = points.reduce((acc, [x, y], idx, arr) => {
+        if (idx === 0) return `M ${x} ${y}`;
+        const [prevX, prevY] = arr[idx - 1];
+        const midX = (prevX + x) / 2;
+        return `${acc} C ${midX} ${prevY}, ${midX} ${y}, ${x} ${y}`;
+    }, "");
 
-        yAxis: {
-            type: "value",
-            show: false,
-            scale: true,
-        },
+    const lastX = points[points.length - 1][0];
+    const firstX = points[0][0];
+    const areaD = `${pathD} L ${lastX} ${height} L ${firstX} ${height} Z`;
 
-        series: [
-            {
-                data: chartValues,
-                type: chartType,
-
-                smooth: chartType === "line",
-
-                showSymbol: false,
-
-                lineStyle: {
-                    width: 2.5,
-                    color,
-                },
-
-                areaStyle:
-                    chartType === "line"
-                        ? {
-                            opacity: 0.15,
-                            color,
-                        }
-                        : undefined,
-
-                itemStyle: {
-                    color,
-                    borderRadius: [2, 2, 0, 0],
-                },
-
-                markLine:
-                    chartType === "line"
-                        ? {
-                            silent: true,
-                            symbol: "none",
-
-                            lineStyle: {
-                                color: "#e5e7eb",
-                                width: 1,
-                                type: "dashed",
-                            },
-
-                            data: [
-                                {
-                                    yAxis: 0,
-                                },
-                            ],
-                        }
-                        : undefined,
-                silent: true,
-            },
-        ],
-
-        tooltip: {
-            show: false,
-        },
-    };
+    const gradientId = `spark-grad-${color.replace("#", "")}`;
 
     return (
-        <div className="h-14 mt-1 pointer-events-none">
-            <ReactECharts
-                option={option}
-                style={{
-                    height: "100%",
-                    width: "100%",
-                }}
-                notMerge={false}
-                lazyUpdate={false}
-            />
+        <div className="h-11 mt-1 w-full overflow-hidden">
+            <svg
+                viewBox={`0 0 ${width} ${height}`}
+                className="w-full h-full"
+                preserveAspectRatio="none"
+            >
+                <defs>
+                    <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor={color} stopOpacity="0.28" />
+                        <stop offset="90%" stopColor={color} stopOpacity="0.02" />
+                        <stop offset="100%" stopColor={color} stopOpacity="0.0" />
+                    </linearGradient>
+                </defs>
+                <path d={areaD} fill={`url(#${gradientId})`} />
+                <path
+                    d={pathD}
+                    fill="none"
+                    stroke={color}
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                />
+            </svg>
         </div>
     );
 }
+
+export default memo(KPISparklineECharts);
 

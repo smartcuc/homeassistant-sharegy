@@ -478,7 +478,7 @@ export default function DevicesPage() {
     const valuesQuery = useQuery({
         queryKey: ["devices-values"],
         queryFn: () => apiFetch("/api/devices/dashboard/"),
-        refetchInterval: 3000,
+        refetchInterval: 10000,
         retry: false,
     });
 
@@ -844,7 +844,6 @@ export default function DevicesPage() {
 
     if (
         devicesQuery.isLoading ||
-        valuesQuery.isLoading ||
         settingsLoading
     ) {
         return (

@@ -450,9 +450,15 @@ def latest_device_values(request):
 # ============================================================
 
 
+from django.core.cache import cache
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def device_dashboard_values(request):
+    cache_key = f"dev_dash_vals_{request.user.id}"
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return Response(cached)
 
     devices = list(
         Device.objects.filter(
@@ -501,10 +507,25 @@ def device_dashboard_values(request):
     )
 
     sparkline_1m_by_device = defaultdict(lambda: defaultdict(list))
-    for row in all_1m_rows:
-        if row["avg"] is not None:
-            m_k = (row["metric_key"] or "").lower()
-            sparkline_1m_by_device[row["device_id"]][m_k].append(round(float(row["avg"]), 2))
+    if all_1m_rows:
+        for row in all_1m_rows:
+            if row["avg"] is not None:
+                m_k = (row["metric_key"] or "").lower()
+                sparkline_1m_by_device[row["device_id"]][m_k].append(round(float(row["avg"]), 2))
+    else:
+        # Fallback auf DeviceMetric falls Rollups noch nicht aggregiert sind
+        all_raw_rows = list(
+            DeviceMetric.objects.filter(
+                device_id__in=device_ids,
+                timestamp__gte=since,
+            )
+            .values("device_id", "metric_key", "value", "timestamp")
+            .order_by("device_id", "timestamp")
+        )
+        for row in all_raw_rows:
+            if row["value"] is not None:
+                m_k = (row["metric_key"] or "").lower()
+                sparkline_1m_by_device[row["device_id"]][m_k].append(round(float(row["value"]), 2))
 
     result = []
 
@@ -593,6 +614,7 @@ def device_dashboard_values(request):
             }
         )
 
+    cache.set(cache_key, result, timeout=5)
     return Response(result)
 
 
