@@ -127,7 +127,7 @@ export default function SubmeterStackedTrendChart({ period = "30d", onSelectMete
 
     if (trendQuery.isLoading) {
         return (
-            <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-xs animate-pulse text-center text-xs text-gray-400">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 shadow-xs animate-pulse text-center text-xs text-slate-400">
                 Lade historische Zählertrends...
             </div>
         );
@@ -138,19 +138,19 @@ export default function SubmeterStackedTrendChart({ period = "30d", onSelectMete
     }
 
     return (
-        <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-xs space-y-4">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 shadow-xs space-y-4">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
-                    <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                    <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                         <span>📊</span> {t("energy.submeter_trends_title", "Historische Trendanalyse aller Verbraucher")}
                     </h3>
-                    <p className="text-xs text-gray-500 mt-0.5">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                         {t("energy.submeter_trends_subtitle", "Gestapelter Zeitverlauf der Lasten im gewählten Zeitraum. Klicke auf einen Zähler für Detailanalysen.")}
                     </p>
                 </div>
 
-                <span className="text-xs font-semibold px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-xl self-start sm:self-auto">
+                <span className="text-xs font-semibold px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-800/50 rounded-xl self-start sm:self-auto">
                     {data?.period_label || period}
                 </span>
             </div>
@@ -165,15 +165,15 @@ export default function SubmeterStackedTrendChart({ period = "30d", onSelectMete
                             onClick={() => toggleMeter(m.id)}
                             onDoubleClick={() => onSelectMeter && onSelectMeter(m)}
                             className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-2 border transition cursor-pointer ${isHidden
-                                ? "bg-gray-100 border-gray-200 text-gray-400 opacity-60 line-through"
-                                : "bg-white border-gray-200 text-gray-800 hover:border-indigo-300 shadow-2xs"
+                                ? "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400 opacity-60 line-through"
+                                : "bg-white dark:bg-slate-850 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 hover:border-indigo-300 dark:hover:border-indigo-500 shadow-2xs"
                                 }`}
                             title="Klick: Ein-/Ausblenden · Doppelklick: Detailanalyse"
                         >
                             <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: m.color }} />
                             <span>{m.icon}</span>
                             <span>{m.name}</span>
-                            <span className="text-[10px] text-gray-400 font-mono">
+                            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
                                 ({Number(m.total_kwh).toFixed(1)} kWh)
                             </span>
                         </button>

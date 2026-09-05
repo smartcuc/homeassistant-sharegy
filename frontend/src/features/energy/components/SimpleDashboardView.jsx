@@ -63,31 +63,31 @@ export default function SimpleDashboardView({
             {/* 3 HERO CARDS */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* 1. AUTARKIE HEUTE */}
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs relative overflow-hidden flex flex-col justify-between">
+                <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-xs relative overflow-hidden flex flex-col justify-between">
                     <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                             Autarkie heute
                         </span>
-                        <span className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-sm font-bold">
+                        <span className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 flex items-center justify-center text-sm font-bold">
                             ☀️
                         </span>
                     </div>
 
                     <div className="my-4">
                         <div className="flex items-baseline gap-2">
-                            <span className="text-4xl sm:text-5xl font-extrabold text-slate-900 tracking-tight">
+                            <span className="text-4xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                                 {autarkyPct}%
                             </span>
-                            <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800/50">
                                 {autarkyPct >= 80 ? "Hervorragend" : autarkyPct >= 50 ? "Sehr gut" : "Normal"}
                             </span>
                         </div>
-                        <p className="text-xs text-slate-500 mt-1">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                             Anteil deines Verbrauchs, der direkt vor Ort erzeugt wurde.
                         </p>
                     </div>
 
-                    <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                    <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
                         <div 
                             className="bg-emerald-500 h-full rounded-full transition-all duration-500" 
                             style={{ width: `${Math.min(100, autarkyPct)}%` }}
@@ -96,39 +96,39 @@ export default function SimpleDashboardView({
                 </div>
 
                 {/* 2. ERSPARNIS DIESEN MONAT */}
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs relative overflow-hidden flex flex-col justify-between">
+                <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-xs relative overflow-hidden flex flex-col justify-between">
                     <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                             Ersparnis diesen Monat
                         </span>
-                        <span className="w-8 h-8 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-sm font-bold">
+                        <span className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 flex items-center justify-center text-sm font-bold">
                             💶
                         </span>
                     </div>
 
                     <div className="my-4">
                         <div className="flex items-baseline gap-2">
-                            <span className="text-4xl sm:text-5xl font-extrabold text-slate-900 tracking-tight">
+                            <span className="text-4xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                                 {savingsMonthEur} €
                             </span>
-                            <span className="text-xs font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                            <span className="text-xs font-semibold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-800/50">
                                 Eingespart
                             </span>
                         </div>
-                        <p className="text-xs text-slate-500 mt-1">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                             Vermiedene Stromkosten durch Solar, Speicher & Smart-Tarif.
                         </p>
                     </div>
 
-                    <div className="text-[11px] text-slate-400 font-medium flex items-center gap-1">
+                    <div className="text-[11px] text-slate-400 dark:text-slate-500 font-medium flex items-center gap-1">
                         <span>🌱</span> CO₂-Einsparung: ca. {Math.round(autarkyPct * 1.8)} kg
                     </div>
                 </div>
 
                 {/* 3. AKTUELLER KLARTEXT STATUS */}
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs relative overflow-hidden flex flex-col justify-between">
+                <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-xs relative overflow-hidden flex flex-col justify-between">
                     <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                             Aktueller Status
                         </span>
                         <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${statusText.badgeClass}`}>
@@ -137,29 +137,29 @@ export default function SimpleDashboardView({
                     </div>
 
                     <div className="my-3 space-y-1">
-                        <h3 className="text-sm font-bold text-slate-900 leading-snug">
+                        <h3 className="text-sm font-bold text-slate-900 dark:text-white leading-snug">
                             {statusText.headline}
                         </h3>
-                        <p className="text-xs text-slate-500 leading-relaxed">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
                             {statusText.subline}
                         </p>
                     </div>
 
-                    <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
-                        <span>Eigenverbrauch: <strong>{selfConsumptionPct}%</strong></span>
-                        <span>Speicher: <strong>{batterySocPct}%</strong></span>
+                    <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-600 dark:text-slate-400">
+                        <span>Eigenverbrauch: <strong className="text-slate-900 dark:text-white">{selfConsumptionPct}%</strong></span>
+                        <span>Speicher: <strong className="text-slate-900 dark:text-white">{batterySocPct}%</strong></span>
                     </div>
                 </div>
             </div>
 
             {/* MINIMAL LIVE ENERGY FLOW DIAGRAM */}
-            <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-6">
-                <div className="flex items-center justify-between">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-6">
+                <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                        <h2 className="text-base font-bold text-slate-900">
+                        <h2 className="text-base font-bold text-slate-900 dark:text-white">
                             ⚡ Aktueller Energiefluss auf einen Blick
                         </h2>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-slate-500 dark:text-slate-400">
                             Live-Werte deiner Energiezentrale in Echtzeit.
                         </p>
                     </div>
@@ -167,7 +167,7 @@ export default function SimpleDashboardView({
                     <button
                         type="button"
                         onClick={onSwitchToExpert}
-                        className="text-xs font-semibold text-sky-600 hover:text-sky-800 bg-sky-50 hover:bg-sky-100 px-3 py-1.5 rounded-xl border border-sky-200 transition cursor-pointer flex items-center gap-1.5"
+                        className="text-xs font-semibold text-sky-600 dark:text-sky-400 hover:text-sky-800 dark:hover:text-sky-300 bg-sky-50 dark:bg-sky-950/50 hover:bg-sky-100 dark:hover:bg-sky-900/50 px-3 py-1.5 rounded-xl border border-sky-200 dark:border-sky-800 transition cursor-pointer flex items-center gap-1.5"
                     >
                         <span>⚙️</span>
                         Experten-Ansicht öffnen
@@ -177,75 +177,75 @@ export default function SimpleDashboardView({
                 {/* VISUAL FLOW CARDS */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
                     {/* PV ERZEUGUNG */}
-                    <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200/70 flex flex-col items-center text-center">
+                    <div className="p-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/70 dark:border-amber-800/50 flex flex-col items-center text-center">
                         <div className="w-10 h-10 rounded-full bg-amber-400 text-white flex items-center justify-center text-xl shadow-xs mb-2">
                             ☀️
                         </div>
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-amber-900">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-amber-900 dark:text-amber-300">
                             Photovoltaik
                         </span>
-                        <span className="text-2xl font-extrabold text-amber-950 mt-1">
+                        <span className="text-2xl font-extrabold text-amber-950 dark:text-amber-100 mt-1">
                             {(solarPowerW / 1000).toFixed(2)} <span className="text-sm font-semibold">kW</span>
                         </span>
-                        <span className="text-[10px] text-amber-700 mt-0.5">
+                        <span className="text-[10px] text-amber-700 dark:text-amber-400 mt-0.5">
                             {solarPowerW > 0 ? "Erzeugt Strom" : "Ruhend"}
                         </span>
                     </div>
 
                     {/* HAUSVERBRAUCH */}
-                    <div className="p-4 rounded-2xl bg-rose-50/70 border border-rose-200/70 flex flex-col items-center text-center">
+                    <div className="p-4 rounded-2xl bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200/70 dark:border-rose-800/50 flex flex-col items-center text-center">
                         <div className="w-10 h-10 rounded-full bg-rose-500 text-white flex items-center justify-center text-xl shadow-xs mb-2">
                             🏠
                         </div>
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-rose-900">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-rose-900 dark:text-rose-300">
                             Hausverbrauch
                         </span>
-                        <span className="text-2xl font-extrabold text-rose-950 mt-1">
+                        <span className="text-2xl font-extrabold text-rose-950 dark:text-rose-100 mt-1">
                             {(homePowerW / 1000).toFixed(2)} <span className="text-sm font-semibold">kW</span>
                         </span>
-                        <span className="text-[10px] text-rose-700 mt-0.5">
+                        <span className="text-[10px] text-rose-700 dark:text-rose-400 mt-0.5">
                             Aktuelle Gesamtsumme
                         </span>
                     </div>
 
                     {/* BATTERIESPEICHER */}
-                    <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200/70 flex flex-col items-center text-center">
+                    <div className="p-4 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/70 dark:border-emerald-800/50 flex flex-col items-center text-center">
                         <div className="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xl shadow-xs mb-2">
                             🔋
                         </div>
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-900">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-900 dark:text-emerald-300">
                             Batterie ({batterySocPct}%)
                         </span>
-                        <span className="text-2xl font-extrabold text-emerald-950 mt-1">
+                        <span className="text-2xl font-extrabold text-emerald-950 dark:text-emerald-100 mt-1">
                             {(Math.abs(batteryPowerW) / 1000).toFixed(2)} <span className="text-sm font-semibold">kW</span>
                         </span>
-                        <span className="text-[10px] text-emerald-700 mt-0.5">
+                        <span className="text-[10px] text-emerald-700 dark:text-emerald-400 mt-0.5">
                             {batteryPowerW > 100 ? "Lädt auf ⚡" : batteryPowerW < -100 ? "Entlädt ins Haus 🏠" : "Standby"}
                         </span>
                     </div>
 
                     {/* NETZ / STROMNETZ */}
-                    <div className={`p-4 rounded-2xl border flex flex-col items-center text-center ${gridPowerW <= 0 ? "bg-sky-50/70 border-sky-200/70" : "bg-purple-50/70 border-purple-200/70"}`}>
+                    <div className={`p-4 rounded-2xl border flex flex-col items-center text-center ${gridPowerW <= 0 ? "bg-sky-50/70 dark:bg-sky-950/30 border-sky-200/70 dark:border-sky-800/50" : "bg-purple-50/70 dark:bg-purple-950/30 border-purple-200/70 dark:border-purple-800/50"}`}>
                         <div className={`w-10 h-10 rounded-full text-white flex items-center justify-center text-xl shadow-xs mb-2 ${gridPowerW <= 0 ? "bg-sky-500" : "bg-purple-600"}`}>
                             ⚡
                         </div>
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-800">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
                             {gridPowerW <= 0 ? "Netzeinspeisung" : "Netzbezug"}
                         </span>
-                        <span className="text-2xl font-extrabold text-slate-900 mt-1">
+                        <span className="text-2xl font-extrabold text-slate-900 dark:text-white mt-1">
                             {(Math.abs(gridPowerW) / 1000).toFixed(2)} <span className="text-sm font-semibold">kW</span>
                         </span>
-                        <span className={`text-[10px] mt-0.5 ${gridPowerW <= 0 ? "text-sky-700" : "text-purple-700"}`}>
+                        <span className={`text-[10px] mt-0.5 ${gridPowerW <= 0 ? "text-sky-700 dark:text-sky-400" : "text-purple-700 dark:text-purple-400"}`}>
                             {gridPowerW <= 0 ? "Verkauf ins Netz" : "Zukauf aus dem Netz"}
                         </span>
                     </div>
                 </div>
 
                 {/* QUICK ACTIONS BANNER */}
-                <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs">
+                <div className="p-4 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs">
                     <div className="flex items-center gap-3">
                         <span className="text-lg">💡</span>
-                        <span className="text-slate-700 font-medium">
+                        <span className="text-slate-700 dark:text-slate-300 font-medium">
                             Möchtest du detaillierte Phasenströme (L1/L2/L3), Sankey-Diagramme, SG-Ready Wärmepumpen oder Börsenpreis-Arbitrage steuern?
                         </span>
                     </div>
@@ -253,7 +253,7 @@ export default function SimpleDashboardView({
                     <button
                         type="button"
                         onClick={onSwitchToExpert}
-                        className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl shadow-xs transition cursor-pointer"
+                        className="px-4 py-2 bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-100 text-white dark:text-slate-900 font-bold rounded-xl shadow-xs transition cursor-pointer"
                     >
                         Zu den Experten-Tools &rarr;
                     </button>
