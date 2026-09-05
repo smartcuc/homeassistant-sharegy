@@ -69,8 +69,8 @@ export default function GridCo2Card() {
                 </div>
             </div>
 
-            {/* KPI Row */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
+            {/* KPI Row (2 rows of 2 boxes) */}
+            <div className="grid grid-cols-2 gap-3 mt-4">
                 <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
                     <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                         {t("co2_grid.live_intensity", "⚡ Live CO₂-Intensität")}

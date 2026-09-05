@@ -128,11 +128,6 @@ export default function BatteryArbitrageCard() {
                                 {t("arbitrage.pv_priority", "⚪ PV-Priorität")}
                             </span>
                         )}
-                        {data.status_message && (
-                            <span className="text-[11px] text-indigo-600 dark:text-indigo-400 font-medium">
-                                ℹ️ {data.status_message}
-                            </span>
-                        )}
                     </div>
 
                     <div className="flex items-center gap-2 bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100/80 dark:border-indigo-800/60 px-3 py-1.5 rounded-xl">
@@ -146,8 +141,8 @@ export default function BatteryArbitrageCard() {
                 </div>
             </div>
 
-            {/* KPI Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
+            {/* KPI Grid (2 rows of 2 boxes) */}
+            <div className="grid grid-cols-2 gap-3 mt-4">
                 <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
                     <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                         {t("arbitrage.best_charge_price", "🌙 Günstigster Ladepreis")}
@@ -240,6 +235,14 @@ export default function BatteryArbitrageCard() {
                             );
                         })}
                     </div>
+                </div>
+            )}
+
+            {/* Full-width status message at the bottom */}
+            {data.status_message && (
+                <div className="mt-4 p-3 bg-indigo-50/60 dark:bg-indigo-950/30 rounded-2xl border border-indigo-100 dark:border-indigo-900/40 text-xs text-indigo-900 dark:text-indigo-200 flex items-center gap-2">
+                    <span className="text-indigo-600 dark:text-indigo-400 font-bold shrink-0">ℹ️</span>
+                    <span>{data.status_message}</span>
                 </div>
             )}
         </div>
