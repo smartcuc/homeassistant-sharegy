@@ -196,3 +196,25 @@ def get_cloud_integration_status_view(request, device_id):
         "last_error_message": integration.last_error_message,
         "polling_interval_seconds": integration.polling_interval_seconds,
     })
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def update_cloud_polling_interval_view(request):
+    """
+    Aktualisiert das Abfrage-Intervall (30s, 60s, 120s, 300s) für Cloud-Integrationen des Benutzers.
+    """
+    profile_id = request.data.get("profile_id")
+    interval = int(request.data.get("polling_interval") or request.data.get("interval") or 60)
+
+    qs = CloudDeviceIntegration.objects.filter(device__home__user=request.user)
+    if profile_id:
+        qs = qs.filter(profile_id=profile_id)
+
+    updated_count = qs.update(polling_interval_seconds=interval)
+    return Response({
+        "status": "success",
+        "polling_interval_seconds": interval,
+        "updated_integrations": updated_count,
+    })
+

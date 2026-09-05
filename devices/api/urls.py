@@ -44,6 +44,7 @@ from .views_profiles import (
     integrate_cloud_device_view,
     poll_cloud_device_now_view,
     get_cloud_integration_status_view,
+    update_cloud_polling_interval_view,
 )
 from .views_sungrow_oauth import sungrow_oauth_start
 from .views_self_test import device_self_test_view, device_self_test_simulate_view
@@ -76,6 +77,7 @@ urlpatterns = [
     path("cloud-profiles/", list_cloud_profiles_view, name="device_cloud_profiles_list"),
     path("cloud-profiles/test/", test_cloud_connection_view, name="device_cloud_profiles_test"),
     path("cloud-profiles/integrate/", integrate_cloud_device_view, name="device_cloud_profiles_integrate"),
+    path("cloud-profiles/polling-interval/", update_cloud_polling_interval_view, name="device_cloud_polling_interval"),
     path("sungrow/auth-url/", sungrow_oauth_start, name="sungrow_oauth_start"),
     path("<int:device_id>/cloud/poll-now/", poll_cloud_device_now_view, name="device_cloud_poll_now"),
     path("<int:device_id>/cloud/status/", get_cloud_integration_status_view, name="device_cloud_status"),
