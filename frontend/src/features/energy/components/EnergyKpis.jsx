@@ -26,7 +26,7 @@ function Card({ title, value, color }) {
     return (
         <div className="bg-slate-900 p-5 rounded-xl shadow">
             <div className={`text-sm ${color}`}>{title}</div>
-            <div className="text-2xl text-white font-bold">
+            <div className="text-xl sm:text-2xl text-white font-bold truncate max-w-full">
                 {value.toFixed(0)} W
             </div>
         </div>
