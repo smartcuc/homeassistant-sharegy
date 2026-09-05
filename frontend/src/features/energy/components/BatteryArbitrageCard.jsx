@@ -98,105 +98,110 @@ export default function BatteryArbitrageCard() {
     }
 
     return (
-        <div className="p-6 bg-white rounded-3xl border border-slate-200/80 shadow-xs hover:border-slate-300 transition-all">
+        <div className="p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all">
             {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div className="border-b border-slate-100 dark:border-slate-800 pb-4 space-y-2">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-xl shadow-2xs">
+                    <div className="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-100 dark:border-indigo-800/60 flex items-center justify-center text-xl shadow-2xs shrink-0">
                         🔋
                     </div>
-                    <div>
-                        <div className="flex items-center gap-2">
-                            <h2 className="text-base font-bold text-gray-900">
-                                {t("arbitrage.title", "Grid-Charging Arbitrage & Speicher-Simulator")}
-                            </h2>
-                            {data.is_arbitrage_profitable ? (
-                                <span className="px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                    🟢 {t("arbitrage.profitable", "Rentabel")} (+{data.price_spread_ct_per_kwh} ct/kWh)
-                                </span>
-                            ) : (
-                                <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-600">
-                                    {t("arbitrage.pv_priority", "⚪ PV-Priorität")}
-                                </span>
-                            )}
-                        </div>
-                        <p className="text-xs text-gray-500 mt-0.5">
-                            {t("arbitrage.subtitle", "Intelligentes Laden des Hausspeichers bei Tiefstpreisen und Entladen in Spitzenzeiten.")}
-                            {data.status_message && (
-                                <span className="block text-[11px] text-indigo-600/90 font-medium mt-0.5">
-                                    ℹ️ {data.status_message}
-                                </span>
-                            )}
-                        </p>
+                    <div className="min-w-0">
+                        <h2 className="text-base font-bold text-slate-900 dark:text-white">
+                            {t("arbitrage.title", "Grid-Charging Arbitrage & Speicher-Simulator")}
+                        </h2>
                     </div>
                 </div>
 
-                <div className="text-right self-start sm:self-auto bg-indigo-50/70 border border-indigo-100/80 px-3.5 py-1.5 rounded-xl">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-indigo-700">
-                        {t("arbitrage.savings_projected", "Zusatzerlös / Ersparnis")}
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                    {t("arbitrage.subtitle", "Intelligentes Laden des Hausspeichers bei Tiefstpreisen und Entladen in Spitzenzeiten.")}
+                </p>
+
+                {/* Subtitle Details: Rentabel & Zusatzerlös */}
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                    <div className="flex items-center gap-2">
+                        {data.is_arbitrage_profitable ? (
+                            <span className="px-2.5 py-1 rounded-xl text-xs font-extrabold bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60">
+                                🟢 {t("arbitrage.profitable", "Rentabel")} (+{data.price_spread_ct_per_kwh} ct/kWh)
+                            </span>
+                        ) : (
+                            <span className="px-2.5 py-1 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                                {t("arbitrage.pv_priority", "⚪ PV-Priorität")}
+                            </span>
+                        )}
+                        {data.status_message && (
+                            <span className="text-[11px] text-indigo-600 dark:text-indigo-400 font-medium">
+                                ℹ️ {data.status_message}
+                            </span>
+                        )}
                     </div>
-                    <div className="text-lg font-black text-indigo-900">
-                        ~{data.projected_yearly_savings_eur?.toFixed(0) || "0"} € <span className="text-xs font-semibold text-indigo-600">{t("arbitrage.per_year", "/ Jahr")}</span>
+
+                    <div className="flex items-center gap-2 bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100/80 dark:border-indigo-800/60 px-3 py-1.5 rounded-xl">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-400">
+                            {t("arbitrage.savings_projected", "Zusatzerlös / Ersparnis")}:
+                        </span>
+                        <span className="text-sm font-black text-indigo-900 dark:text-indigo-200 font-mono">
+                            ~{data.projected_yearly_savings_eur?.toFixed(0) || "0"} € <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">{t("arbitrage.per_year", "/ Jahr")}</span>
+                        </span>
                     </div>
                 </div>
             </div>
 
             {/* KPI Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
-                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
-                    <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
+                    <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                         {t("arbitrage.best_charge_price", "🌙 Günstigster Ladepreis")}
                     </div>
-                    <div className="text-lg font-extrabold text-emerald-600 mt-0.5">
+                    <div className="text-lg font-extrabold text-emerald-600 dark:text-emerald-400 mt-0.5 font-mono">
                         {data.best_charge_window?.price_ct_per_kwh !== undefined && data.best_charge_window?.price_ct_per_kwh !== null
                             ? `${Number(data.best_charge_window.price_ct_per_kwh).toFixed(1)} ct/kWh`
                             : data.avg_charge_price_ct !== undefined && data.avg_charge_price_ct !== null
                                 ? `${Number(data.avg_charge_price_ct).toFixed(1)} ct/kWh`
                                 : "--"}
                     </div>
-                    <div className="text-[11px] text-slate-400 font-medium mt-0.5 truncate">
+                    <div className="text-[11px] text-slate-400 dark:text-slate-500 font-medium mt-0.5 truncate">
                         {data.best_charge_window?.window_label || (typeof data.best_charge_window === "string" ? data.best_charge_window : (data.best_charge_window?.start_time ? `um ${data.best_charge_window.start_time} Uhr` : "--"))}
                     </div>
                 </div>
 
-                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
-                    <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
+                    <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                         {t("arbitrage.best_discharge_price", "⚡ Höchster Entladepreis")}
                     </div>
-                    <div className="text-lg font-extrabold text-indigo-600 mt-0.5">
+                    <div className="text-lg font-extrabold text-indigo-600 dark:text-indigo-400 mt-0.5 font-mono">
                         {data.best_discharge_window?.price_ct_per_kwh !== undefined && data.best_discharge_window?.price_ct_per_kwh !== null
                             ? `${Number(data.best_discharge_window.price_ct_per_kwh).toFixed(1)} ct/kWh`
                             : data.avg_discharge_price_ct !== undefined && data.avg_discharge_price_ct !== null
                                 ? `${Number(data.avg_discharge_price_ct).toFixed(1)} ct/kWh`
                                 : "--"}
                     </div>
-                    <div className="text-[11px] text-slate-400 font-medium mt-0.5 truncate">
+                    <div className="text-[11px] text-slate-400 dark:text-slate-500 font-medium mt-0.5 truncate">
                         {data.best_discharge_window?.window_label || (typeof data.best_discharge_window === "string" ? data.best_discharge_window : (data.best_discharge_window?.start_time ? `um ${data.best_discharge_window.start_time} Uhr` : "--"))}
                     </div>
                 </div>
 
-                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
-                    <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
+                    <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                         {t("arbitrage.price_spread", "📊 Preis-Spread")}
                     </div>
-                    <div className="text-lg font-extrabold text-slate-900 mt-0.5">
-                        {data.price_spread_ct_per_kwh !== undefined ? Number(data.price_spread_ct_per_kwh).toFixed(1) : "0.0"} <span className="text-xs font-normal">ct/kWh</span>
+                    <div className="text-lg font-extrabold text-slate-900 dark:text-white mt-0.5 font-mono">
+                        {data.price_spread_ct_per_kwh !== undefined ? Number(data.price_spread_ct_per_kwh).toFixed(1) : "0.0"} <span className="text-xs font-normal text-slate-400">ct/kWh</span>
                     </div>
-                    <div className="text-[11px] text-slate-400 font-medium mt-0.5">
+                    <div className="text-[11px] text-slate-400 dark:text-slate-500 font-medium mt-0.5">
                         {t("arbitrage.gross_spread", "Brutto-Differenz")}
                     </div>
                 </div>
 
-                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
-                    <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
+                    <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                         {t("arbitrage.cycle_loss", "🔌 Verlustbereinigt")}
                     </div>
-                    <div className="text-lg font-extrabold text-emerald-700 mt-0.5">
+                    <div className="text-lg font-extrabold text-emerald-700 dark:text-emerald-400 mt-0.5 font-mono">
                         {data.is_arbitrage_profitable && data.price_spread_ct_per_kwh > 0
                             ? `+${(Number(data.price_spread_ct_per_kwh) * 0.88).toFixed(1)}`
-                            : "0.0"} <span className="text-xs font-normal">ct/kWh</span>
+                            : "0.0"} <span className="text-xs font-normal text-slate-400">ct/kWh</span>
                     </div>
-                    <div className="text-[11px] text-slate-400 font-medium mt-0.5">
+                    <div className="text-[11px] text-slate-400 dark:text-slate-500 font-medium mt-0.5">
                         {t("arbitrage.efficiency_note", "inkl. 88% Speichereffizienz")}
                     </div>
                 </div>
@@ -205,7 +210,7 @@ export default function BatteryArbitrageCard() {
             {/* Recommendations / Advice List */}
             {advice.length > 0 && (
                 <div className="mt-4 space-y-2">
-                    <div className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+                    <div className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                         {t("arbitrage.strategy_advice", "💡 Handlungsempfehlungen für deinen Speicher")}
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -220,16 +225,16 @@ export default function BatteryArbitrageCard() {
                                 <div
                                     key={idx}
                                     className={`p-3 rounded-2xl border text-xs flex items-start gap-2.5 ${type === "charge"
-                                        ? "bg-emerald-50/60 border-emerald-200/80 text-emerald-900"
+                                        ? "bg-emerald-50/60 dark:bg-emerald-950/30 border-emerald-200/80 dark:border-emerald-800/50 text-emerald-900 dark:text-emerald-200"
                                         : type === "discharge"
-                                            ? "bg-indigo-50/60 border-indigo-200/80 text-indigo-900"
-                                            : "bg-slate-50 border-slate-200/80 text-slate-800"
+                                            ? "bg-indigo-50/60 dark:bg-indigo-950/30 border-indigo-200/80 dark:border-indigo-800/50 text-indigo-900 dark:text-indigo-200"
+                                            : "bg-slate-50 dark:bg-slate-800/40 border-slate-200/80 dark:border-slate-700/50 text-slate-800 dark:text-slate-200"
                                         }`}
                                 >
                                     <span className="text-base leading-none shrink-0">{icon}</span>
                                     <div className="space-y-0.5">
                                         <div className="font-bold">{title}</div>
-                                        <div className="text-slate-600 leading-relaxed">{description}</div>
+                                        <div className="text-slate-600 dark:text-slate-400 leading-relaxed">{description}</div>
                                     </div>
                                 </div>
                             );

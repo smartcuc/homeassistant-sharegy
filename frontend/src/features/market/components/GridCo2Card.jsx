@@ -34,32 +34,37 @@ export default function GridCo2Card() {
     return (
         <div className="p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all">
             {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
+            <div className="border-b border-slate-100 dark:border-slate-800 pb-4 space-y-2">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-teal-50 dark:bg-teal-950/40 border border-teal-100 dark:border-teal-800/60 flex items-center justify-center text-xl shadow-2xs">
+                    <div className="w-10 h-10 rounded-2xl bg-teal-50 dark:bg-teal-950/40 border border-teal-100 dark:border-teal-800/60 flex items-center justify-center text-xl shadow-2xs shrink-0">
                         🌿
                     </div>
-                    <div>
-                        <div className="flex items-center gap-2">
-                            <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                                {t("co2.title", "Live CO₂-Grid-Signal & Grünstrom-Index")}
-                            </h2>
-                            <span className={`px-2 py-0.5 rounded-full text-[11px] font-extrabold border ${levelBadgeColor}`}>
-                                {data.current_level_label}
-                            </span>
-                        </div>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                            {t("co2.subtitle", "Echtzeit-Emissionsintensität des deutschen Stromnetzes für umweltoptimiertes Laden.")}
-                        </p>
+                    <div className="min-w-0">
+                        <h2 className="text-base font-bold text-slate-900 dark:text-white">
+                            {t("co2.title", "Live CO₂-Grid-Signal & Grünstrom-Index")}
+                        </h2>
                     </div>
                 </div>
 
-                <div className="text-right self-start sm:self-auto bg-teal-50/70 dark:bg-teal-950/40 border border-teal-100/80 dark:border-teal-800/60 px-3.5 py-1.5 rounded-2xl">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-teal-700 dark:text-teal-400">
-                        {t("co2.renewable_share", "Erneuerbaren-Anteil")}
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                    {t("co2.subtitle", "Echtzeit-Emissionsintensität des deutschen Stromnetzes für umweltoptimiertes Laden.")}
+                </p>
+
+                {/* Subtitle Details: Level Badge & Erneuerbaren-Anteil */}
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                    <div className="flex items-center gap-2">
+                        <span className={`px-2.5 py-1 rounded-xl text-xs font-extrabold border ${levelBadgeColor}`}>
+                            {data.current_level_label}
+                        </span>
                     </div>
-                    <div className="text-lg font-black text-teal-900 dark:text-teal-200">
-                        {data.current_renewable_share_pct || "65.0"} <span className="text-xs font-semibold text-teal-600 dark:text-teal-400">{t("co2_grid.green_share", "% Grünstrom")}</span>
+
+                    <div className="flex items-center gap-2 bg-teal-50/70 dark:bg-teal-950/40 border border-teal-100/80 dark:border-teal-800/60 px-3 py-1.5 rounded-xl">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-teal-700 dark:text-teal-400">
+                            {t("co2.renewable_share", "Erneuerbaren-Anteil")}:
+                        </span>
+                        <span className="text-sm font-black text-teal-900 dark:text-teal-200 font-mono">
+                            {data.current_renewable_share_pct || "65.0"} <span className="text-xs font-semibold text-teal-600 dark:text-teal-400">{t("co2_grid.green_share", "% Grünstrom")}</span>
+                        </span>
                     </div>
                 </div>
             </div>

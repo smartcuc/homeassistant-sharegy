@@ -57,6 +57,8 @@ export default function SubmeterStackedTrendChart({ period = "30d", onSelectMete
         }));
 
         return {
+            animation: true,
+            animationDuration: 300,
             tooltip: {
                 trigger: "axis",
                 axisPointer: {
@@ -184,11 +186,15 @@ export default function SubmeterStackedTrendChart({ period = "30d", onSelectMete
             {/* Chart Area */}
             <div className="w-full pt-2">
                 <ReactECharts
+                    key={`${period}-${hiddenMeters.size}-${rawTimeseries.length}`}
                     option={chartOption}
                     style={{ height: "300px", width: "100%" }}
                     notMerge={true}
                     lazyUpdate={false}
                     opts={{ renderer: "canvas" }}
+                    onChartReady={(chartInstance) => {
+                        setTimeout(() => chartInstance?.resize(), 50);
+                    }}
                     onEvents={{ click: onChartClick }}
                 />
             </div>
