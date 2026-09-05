@@ -139,6 +139,9 @@ def build_device_signals(user):
     for dev in all_devices:
         if _is_non_power_sensor(dev):
             continue
+        # Reine Verbraucher-, Netz- oder Batteriegeräte niemals für PV scannen
+        if (dev.id in load_device_ids or dev.id in grid_device_ids or dev.id in battery_device_ids) and dev.id not in pv_device_ids:
+            continue
 
         p_val = cache.get(f"device:{dev.id}:pv_power")
         if p_val is None:
@@ -191,6 +194,11 @@ def build_device_signals(user):
 
     measured_load = None
     for dev in all_devices:
+        if _is_non_power_sensor(dev):
+            continue
+        if (dev.id in pv_device_ids or dev.id in grid_device_ids or dev.id in battery_device_ids) and dev.id not in load_device_ids:
+            continue
+
         l_p = cache.get(f"device:{dev.id}:load_power")
         if l_p is None:
             m = DeviceLatestMetric.objects.filter(
@@ -206,6 +214,11 @@ def build_device_signals(user):
     # 6. Batterie-Leistung (Discharge / Charge)
     battery_power = None
     for dev in all_devices:
+        if _is_non_power_sensor(dev):
+            continue
+        if (dev.id in load_device_ids or dev.id in grid_device_ids or dev.id in pv_device_ids) and dev.id not in battery_device_ids:
+            continue
+
         b_p = cache.get(f"device:{dev.id}:battery_power")
         if b_p is None:
             b_p = cache.get(f"device:{dev.id}:power_battery")
@@ -306,7 +319,7 @@ def build_device_signals(user):
     else:
         grid_power = 0.0
         for dev in all_devices:
-            if dev.id in battery_device_ids or dev.id in pv_device_ids:
+            if dev.id in battery_device_ids or dev.id in pv_device_ids or (dev.id in load_device_ids and dev.id not in grid_device_ids):
                 continue
             g_p = cache.get(f"device:{dev.id}:grid_power")
             if g_p is None:
@@ -363,7 +376,7 @@ def build_device_signals(user):
             )
             if surplus > 20:
                 signals["grid"]["export"] = round(surplus, 2)
-            elif surplus < -20:
+            elif surplus < -20 and (signals["pv"]["production"] > 0 or signals["battery"]["discharge"] > 0):
                 signals["grid"]["import"] = round(abs(surplus), 2)
     elif derived_balance > 0 and (has_explicit_grid_meter or signals["grid"]["export"] > 0 or signals["grid"]["import"] > 0 or signals["battery"]["discharge"] > 0 or signals["pv"]["production"] > 0):
         # Wenn physikalische Messstellen (PV, Batterie, Netzzähler) aktiv sind,
@@ -381,7 +394,7 @@ def build_device_signals(user):
             )
             if surplus > 20:
                 signals["grid"]["export"] = round(surplus, 2)
-            elif surplus < -20:
+            elif surplus < -20 and (signals["pv"]["production"] > 0 or signals["battery"]["discharge"] > 0):
                 signals["grid"]["import"] = round(abs(surplus), 2)
     else:
         signals["load"]["consumption"] = max(round(derived_balance, 2), load_power, 0.0)
