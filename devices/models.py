@@ -828,8 +828,8 @@ class CloudDeviceIntegration(models.Model):
         help_text="Konfigurations- und Zugangsdaten (z. B. appkey, user_account, password, site_id)",
     )
     polling_interval_seconds = models.IntegerField(
-        default=60,
-        help_text="Abfrageintervall in Sekunden (Standard: 60s)",
+        default=15,
+        help_text="Abfrageintervall in Sekunden (Standard: 15s)",
     )
     is_active = models.BooleanField(
         default=True,

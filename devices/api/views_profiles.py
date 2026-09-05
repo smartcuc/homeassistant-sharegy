@@ -6,7 +6,7 @@ REST-API Endpoints für deklarative Hersteller-Cloud-Profile (Sungrow iSolarClou
 
 import logging
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -199,15 +199,15 @@ def get_cloud_integration_status_view(request, device_id):
 
 
 @api_view(["POST"])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminUser])
 def update_cloud_polling_interval_view(request):
     """
-    Aktualisiert das Abfrage-Intervall (30s, 60s, 120s, 300s) für Cloud-Integrationen des Benutzers.
+    Admin-Endpoint: Aktualisiert das Abfrage-Intervall (z. B. 15s) für Cloud-Integrationen (EMS-System Parameter).
     """
     profile_id = request.data.get("profile_id")
-    interval = int(request.data.get("polling_interval") or request.data.get("interval") or 60)
+    interval = int(request.data.get("polling_interval") or request.data.get("interval") or 15)
 
-    qs = CloudDeviceIntegration.objects.filter(device__home__user=request.user)
+    qs = CloudDeviceIntegration.objects.all()
     if profile_id:
         qs = qs.filter(profile_id=profile_id)
 

@@ -223,7 +223,7 @@ def sungrow_oauth_callback(request):
         defaults={
             "profile_id": "sungrow_isolarcloud",
             "credentials": new_credentials,
-            "polling_interval_seconds": 60,
+            "polling_interval_seconds": 15,
             "is_active": True,
             "last_status": CloudDeviceIntegration.STATUS_OK,
         },

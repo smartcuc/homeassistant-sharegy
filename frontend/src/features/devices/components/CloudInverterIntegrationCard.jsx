@@ -186,56 +186,6 @@ export default function CloudInverterIntegrationCard({ primaryHome, filterVendor
                                 <li>Nach der Freigabe erfolgt die Rückleitung zu Sharegy — dein Wechselrichter und Batteriespeicher werden vollautomatisch angelegt und synchronisiert.</li>
                             </ol>
                         </div>
-
-                        {/* Abfrage-Intervall (Polling Rate für Sungrow) */}
-                        <div className="p-4 rounded-xl bg-amber-50/50 border border-amber-200/50 space-y-2">
-                            <div className="flex items-center justify-between">
-                                <label className="block text-xs font-bold text-amber-950 flex items-center gap-1.5">
-                                    <span>⏱️</span>
-                                    <span>Sungrow Abfrage-Intervall (Live Polling Rate)</span>
-                                </label>
-                                <span className="text-[11px] font-mono font-semibold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-md">
-                                    {pollingInterval >= 60 ? `${pollingInterval / 60} Min.` : `${pollingInterval} Sek.`}
-                                </span>
-                            </div>
-                            <div className="grid grid-cols-4 gap-2">
-                                {[
-                                    { label: "30s (Ultra-Live)", value: 30 },
-                                    { label: "60s (Standard)", value: 60 },
-                                    { label: "2 Min.", value: 120 },
-                                    { label: "5 Min. (Schonend)", value: 300 },
-                                ].map((opt) => (
-                                    <button
-                                        key={opt.value}
-                                        type="button"
-                                        onClick={async () => {
-                                            setPollingInterval(opt.value);
-                                            try {
-                                                await apiFetch("/api/devices/cloud-profiles/polling-interval/", {
-                                                    method: "POST",
-                                                    body: JSON.stringify({
-                                                        profile_id: "sungrow_isolarcloud",
-                                                        polling_interval: opt.value,
-                                                    }),
-                                                });
-                                            } catch (e) {
-                                                console.warn("Could not save polling interval:", e);
-                                            }
-                                        }}
-                                        className={`py-1.5 px-2 rounded-lg text-xs font-semibold border transition text-center cursor-pointer ${
-                                            pollingInterval === opt.value
-                                                ? "bg-amber-600 text-white border-amber-600 shadow-xs"
-                                                : "bg-white text-gray-700 border-amber-200 hover:bg-amber-100/50"
-                                        }`}
-                                    >
-                                        {opt.label}
-                                    </button>
-                                ))}
-                            </div>
-                            <p className="text-[11px] text-amber-900/70">
-                                Bestimmt, wie häufig die Sungrow OpenAPI neue Live-Werte (Erzeugung, Batterie, Bedarf) abruft.
-                            </p>
-                        </div>
                     </div>
                 ) : (
                     /* -----------------------------------------------------------------

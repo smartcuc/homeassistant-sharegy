@@ -13,7 +13,7 @@
 
     "auth_type": "sungrow_token",
     "default_base_url": "https://gateway.isolarcloud.eu",
-    "polling_interval_seconds": 60,
+    "polling_interval_seconds": 15,
     "fields": [
       {
         "key": "appkey",
