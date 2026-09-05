@@ -93,7 +93,7 @@ def get_dashboard_chart(device_ids, metric_keys=None):
             rows = rows[::step]
 
     res = [round(row["value"] or 0, 1) for row in rows]
-    cache.set(cache_key, res, timeout=10)
+    cache.set(cache_key, res, timeout=60)
     return res
 
 
@@ -164,12 +164,12 @@ def get_house_demand_chart(
                 data[r["timestamp"]] += r["value"] or 0
 
     if not data:
-        cache.set(cache_key, [], timeout=10)
+        cache.set(cache_key, [], timeout=60)
         return []
 
     sorted_keys = sorted(data.keys())
     res = [round(data[k], 1) for k in sorted_keys]
-    cache.set(cache_key, res, timeout=10)
+    cache.set(cache_key, res, timeout=60)
     return res
 
 
