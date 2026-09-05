@@ -271,6 +271,47 @@ class SungrowAdapter(BaseInverterAdapter):
                 except Exception as e:
                     logger.warning("Auto-fetch ps_id via OpenAPI failed: %s", e)
 
+            def _refresh_openapi_token() -> bool:
+                nonlocal token
+                r_token = credentials.get("refresh_token")
+                if not r_token:
+                    return False
+                try:
+                    redir_url = credentials.get("redirect_uri") or getattr(settings, "SUNGROW_REDIRECT_URI", "")
+                    t_resp = requests.post(
+                        f"{base_url.rstrip('/')}/openapi/oauth/token",
+                        json={
+                            "appkey": appkey,
+                            "grant_type": "refresh_token",
+                            "refresh_token": r_token,
+                            "redirect_uri": redir_url,
+                        },
+                        headers={"x-access-key": app_secret, "Content-Type": "application/json"},
+                        timeout=10,
+                    )
+                    if t_resp.status_code == 200 and t_resp.json().get("access_token"):
+                        token = t_resp.json()["access_token"]
+                        credentials["token"] = token
+                        if t_resp.json().get("refresh_token"):
+                            credentials["refresh_token"] = t_resp.json()["refresh_token"]
+                        logger.info("Successfully refreshed Sungrow OpenAPI access_token via OAuth.")
+                        return True
+
+                    ref_resp = requests.post(
+                        f"{base_url.rstrip('/')}/openapi/apiManage/refreshToken",
+                        json={"appkey": appkey, "refresh_token": r_token},
+                        headers={"x-access-key": app_secret, "Content-Type": "application/json"},
+                        timeout=10,
+                    )
+                    if ref_resp.status_code == 200 and ref_resp.json().get("result_data", {}).get("token"):
+                        token = ref_resp.json()["result_data"]["token"]
+                        credentials["token"] = token
+                        logger.info("Successfully refreshed Sungrow OpenAPI token via apiManage.")
+                        return True
+                except Exception as e:
+                    logger.warning("Auto token refresh failed: %s", e)
+                return False
+
             raw_data: Dict[str, Any] = {"result_code": "1", "result_data": {}}
 
             try:
@@ -289,6 +330,23 @@ class SungrowAdapter(BaseInverterAdapter):
                     },
                     timeout=12,
                 )
+                if rt_resp.status_code == 401 and _refresh_openapi_token():
+                    rt_resp = requests.post(
+                        f"{base_url.rstrip('/')}/openapi/platform/getPowerStationRealTimeData",
+                        json={
+                            "appkey": appkey,
+                            "ps_id_list": [str(ps_id or "")],
+                            "point_id_list": self.MEASURE_POINTS,
+                            "is_get_point_dict": "1",
+                        },
+                        headers={
+                            "x-access-key": app_secret,
+                            "Authorization": f"Bearer {token}",
+                            "Content-Type": "application/json",
+                        },
+                        timeout=12,
+                    )
+
                 if rt_resp.status_code == 200:
                     rt_json = rt_resp.json()
                     point_dict = rt_json.get("result_data", {}).get("point_dict", {})
@@ -376,22 +434,20 @@ class SungrowAdapter(BaseInverterAdapter):
                     },
                     timeout=12,
                 )
+                if resp.status_code == 401 and _refresh_openapi_token():
+                    resp = requests.post(
+                        f"{base_url.rstrip('/')}/openapi/platform/getPowerStationDetail",
+                        json={"appkey": appkey, "ps_ids": str(ps_id or ""), "lang": "_de_DE"},
+                        headers={
+                            "x-access-key": app_secret,
+                            "Authorization": f"Bearer {token}",
+                            "Content-Type": "application/json",
+                        },
+                        timeout=12,
+                    )
+
                 if resp.status_code == 200:
                     det_json = resp.json()
-                    if det_json.get("result_code") in ("2", "000") and credentials.get("refresh_token"):
-                        try:
-                            ref_resp = requests.post(
-                                f"{base_url.rstrip('/')}/openapi/apiManage/refreshToken",
-                                json={"appkey": appkey, "refresh_token": credentials["refresh_token"]},
-                                headers={"x-access-key": app_secret, "Content-Type": "application/json"},
-                                timeout=10,
-                            )
-                            if ref_resp.status_code == 200 and ref_resp.json().get("access_token"):
-                                token = ref_resp.json()["access_token"]
-                                credentials["token"] = token
-                        except Exception as ref_err:
-                            logger.warning("Token refresh failed: %s", ref_err)
-
                     if det_json.get("result_data", {}).get("data_list"):
                         d_list = det_json["result_data"]["data_list"]
                         if isinstance(d_list, list) and d_list:
@@ -402,17 +458,36 @@ class SungrowAdapter(BaseInverterAdapter):
             telemetry = self.parse_payload(raw_data)
             has_valid = any(v is not None and v != 0.0 for v in telemetry.to_metrics_dict().values())
 
-            if not has_valid and bool(credentials.get("is_mock")):
-                sim_data = self.generate_mock_payload()
-                telemetry = self.parse_payload(sim_data)
-                raw_data = sim_data
+            if not has_valid:
+                if bool(credentials.get("is_mock")):
+                    sim_data = self.generate_mock_payload()
+                    telemetry = self.parse_payload(sim_data)
+                    raw_data = sim_data
+                    return AdapterTestResult(
+                        status="success",
+                        message=f"Verbindung zu {self.name} erfolgreich (Simulator).",
+                        live_metrics=telemetry.to_metrics_dict(),
+                        raw_sample=raw_data,
+                        simulated=True,
+                    )
+                else:
+                    err_msg = "Sungrow OpenAPI lieferte keine Daten (HTTP 401 / Token ungültig). Bitte Autorisierung unter Schnittstellen erneuern."
+                    logger.warning(err_msg)
+                    return AdapterTestResult(
+                        status="error",
+                        error=err_msg,
+                        message=err_msg,
+                        live_metrics=telemetry.to_metrics_dict(),
+                        raw_sample=raw_data,
+                        simulated=False,
+                    )
 
             return AdapterTestResult(
                 status="success",
                 message=f"Live-Verbindung zu {self.name} erfolgreich!",
                 live_metrics=telemetry.to_metrics_dict(),
                 raw_sample=raw_data,
-                simulated=bool(credentials.get("is_mock")),
+                simulated=False,
             )
 
         else:
