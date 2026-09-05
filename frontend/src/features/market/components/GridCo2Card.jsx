@@ -123,29 +123,29 @@ export default function GridCo2Card() {
 
             {/* Timeline */}
             {timeline.length > 0 && (
-                <div className="mt-5">
-                    <div className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2 flex items-center justify-between">
+                <div className="mt-5 space-y-2">
+                    <div className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex flex-wrap items-center justify-between gap-1.5">
                         <span>{t("co2.timeline_title", "24h CO₂-Emissions-Timeline (g CO₂ / kWh)")}</span>
                         <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
-                            {t("co2_grid.legend", "🟢 < 250g (Grün) · 🟡 250-420g · 🔴 > 420g")}
+                            {t("co2_grid.legend", "🟢 < 250g · 🟡 250-420g · 🔴 > 420g")}
                         </span>
                     </div>
 
-                    <div className="grid grid-cols-6 sm:grid-cols-12 gap-1.5 bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-2xl border border-slate-100 dark:border-slate-800">
+                    <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-2xl border border-slate-100 dark:border-slate-800">
                         {timeline.slice(0, 12).map((slot, idx) => (
                             <div
                                 key={idx}
-                                className={`p-2 rounded-xl text-center border transition-all ${slot.level === "green"
+                                className={`p-2.5 rounded-xl text-center border transition-all space-y-0.5 ${slot.level === "green"
                                         ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/50"
                                         : slot.level === "red"
                                             ? "bg-rose-50 dark:bg-rose-950/40 text-rose-900 dark:text-rose-300 border-rose-200 dark:border-rose-800/50"
                                             : "bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-300 border-amber-200 dark:border-amber-800/50"
                                     }`}
                             >
-                                <div className="text-[10px] font-bold opacity-80">{slot.time_label}</div>
-                                <div className="text-xs font-black mt-0.5">{slot.co2_intensity_g_per_kwh}g</div>
-                                <div className="text-[9px] truncate font-semibold mt-0.5 opacity-90">
-                                    {slot.renewable_share_pct}%
+                                <div className="text-[11px] font-bold opacity-80">{slot.time_label}</div>
+                                <div className="text-xs font-black font-mono">{slot.co2_intensity_g_per_kwh} g</div>
+                                <div className="text-[10px] font-semibold opacity-90">
+                                    {slot.renewable_share_pct}% EE
                                 </div>
                             </div>
                         ))}
