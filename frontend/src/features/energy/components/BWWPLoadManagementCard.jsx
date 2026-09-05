@@ -202,14 +202,19 @@ export default function BWWPLoadManagementCard() {
                 <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
                     <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 max-w-lg w-full shadow-2xl space-y-4">
                         <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-                            <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                                <span>⚙️</span>
-                                <span>BWWP Lastmanagement Einstellungen</span>
-                            </h3>
+                            <div>
+                                <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                    <span>⚙️</span>
+                                    <span>BWWP Lastmanagement Einstellungen</span>
+                                </h3>
+                                <p className="text-xs text-slate-400 mt-0.5">
+                                    Definiere Solltemperaturen, PV-Schwellen und Betriebsmodi.
+                                </p>
+                            </div>
                             <button
                                 type="button"
                                 onClick={() => setSettingsOpen(false)}
-                                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg"
+                                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg cursor-pointer"
                             >
                                 ✕
                             </button>
