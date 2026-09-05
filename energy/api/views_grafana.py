@@ -87,6 +87,7 @@ def grafana_search(request):
 
 
 @api_view(["POST"])
+@authentication_classes(GRAFANA_AUTH_CLASSES)
 @permission_classes([IsAuthenticated])
 def grafana_query(request):
     """
@@ -266,6 +267,7 @@ def grafana_query(request):
 
 
 @api_view(["POST", "GET"])
+@authentication_classes(GRAFANA_AUTH_CLASSES)
 @permission_classes([IsAuthenticated])
 def grafana_annotations(request):
     """
