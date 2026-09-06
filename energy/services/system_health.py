@@ -360,30 +360,26 @@ def check_home_system_status(user) -> Dict[str, Any]:
             if alarm_info:
                 active_alarms.append(alarm_info)
 
-        # Prüfen, ob unkonfigurierte Geräte vorliegen
-        unconfigured_devices = [
-            d for d in active_devices
-            if not getattr(d, "config", None) or not getattr(d.config, "role", None) or d.config.role.key in ["unknown", "unassigned", "default"]
-        ]
-
         # Prüfen, ob Zeitzone konfiguriert ist
         user_settings = getattr(user, "settings", None) if user else None
-        has_timezone = bool(user_settings and getattr(user_settings, "timezone", None))
+        tz_val = user_settings.timezone if (user_settings and getattr(user_settings, "timezone", None)) else None
+        has_timezone = bool(tz_val)
 
-        # 8. Readiness Score & Status-Ampel berechnen (0 .. 100%)
+        # 8. Readiness Score & Status-Ampel berechnen (5 Kernsäulen, 0 .. 100%)
         score = 0
         if has_pv:
-            score += 35
-        if has_grid:
-            score += 35
-        if can_calculate_load:
             score += 30
+        if has_grid:
+            score += 30
+        if can_calculate_load:
+            score += 25
+        if has_timezone:
+            score += 15
+        if has_battery:
+            score += 5  # Bonus für aktiven Speicher
 
         if unconfigured_devices:
             score = max(0, score - min(25, len(unconfigured_devices) * 10))
-
-        if not has_timezone:
-            score = max(0, score - 5)
 
         if active_alarms:
             # Bei aktiven Hardware-Störungen Score anpassen
@@ -502,6 +498,16 @@ def check_home_system_status(user) -> Dict[str, Any]:
             "status_text": "Vollständig in Echtzeit erfasst" if has_direct_load else ("Wird aus PV & Netz berechnet" if can_calculate_load else "Nicht berechenbar"),
         }
 
+        timezone_pillar_data = {
+            "installed": has_timezone,
+            "configured": has_timezone,
+            "status": "ok" if has_timezone else "missing",
+            "method": "direct" if has_timezone else "none",
+            "label": "Zeitzone",
+            "device_name": tz_val if tz_val else "Nicht festgelegt",
+            "status_text": f"Aktiv ({tz_val})" if tz_val else "Zeitzone fehlt",
+        }
+
         return {
             "score": min(100, score),
             "status": "fault" if active_alarms else ("ready" if score >= 70 else ("partial" if score > 0 else "empty")),
@@ -517,6 +523,9 @@ def check_home_system_status(user) -> Dict[str, Any]:
                 "storage": battery_pillar_data,
                 "load": load_pillar_data,
                 "consumption": load_pillar_data,
+                "timezone": timezone_pillar_data,
+                "location": timezone_pillar_data,
+                "settings": timezone_pillar_data,
             },
             "submeters": {
                 "count": len(submeter_devices),

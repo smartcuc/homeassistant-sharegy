@@ -102,6 +102,13 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "", i
             pillar: pillars.load || pillars.consumption,
             missingHint: "Last wird berechnet",
         },
+        {
+            key: "timezone",
+            icon: "🌐",
+            label: t("system_health.pillar_timezone", "Zeitzone"),
+            pillar: pillars.timezone || pillars.location || pillars.settings,
+            missingHint: "Zeitzone nicht gesetzt",
+        },
     ];
 
     return (
@@ -109,7 +116,7 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "", i
             {/* COMPACT SUMMARY STRIP (Nur auf Dashboard / wenn nicht im Modal) */}
             {!inModal && (
                 <div className="px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs">
-                    {/* Left: Omi-Check Badge & 4 Mini Status Chips */}
+                    {/* Left: Omi-Check Badge & 5 Mini Status Chips */}
                     <div className="flex flex-wrap items-center gap-2.5 min-w-0">
                         <div className="flex items-center gap-1.5 shrink-0 font-bold text-slate-900 dark:text-white">
                             <span className="text-base">🩺</span>
@@ -119,7 +126,7 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "", i
                             </span>
                         </div>
 
-                        {/* 4 Mini Pillar Badges */}
+                        {/* 5 Mini Pillar Badges */}
                         <div className="flex items-center gap-1.5 overflow-x-auto py-0.5">
                             {pillarConfigs.map((item) => {
                                 const isOk = Boolean(
@@ -185,8 +192,8 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "", i
             {/* EXPANDABLE / MODAL BODY */}
             {(!collapsed || inModal) && (
                 <div className="p-5 space-y-5 animate-fade-in border-t border-slate-100 dark:border-slate-800">
-                    {/* 4 PILLARS STATUS CARDS */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    {/* 5 PILLARS STATUS CARDS */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                         {pillarConfigs.map((item) => {
                             const isOk = Boolean(
                                 item.pillar?.installed ||
