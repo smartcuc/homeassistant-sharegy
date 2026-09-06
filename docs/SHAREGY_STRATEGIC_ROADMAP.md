@@ -158,9 +158,21 @@
   ├── 2.29 ✅ **Offizieller ioBroker Adapter (`ioBroker.sharegy`)**:
 │          • Multi-Sensor-Bündelung von Wirkleistung (W), Temperatur (°C) und Schaltrelais
 │          • WSS-Kopplung über TLS Port 443 mit Sub-100ms Reaktionszeit
-  └── 2.30 ✅ **Digitales Benutzerhandbuch & Wissensportal (15 Artikel DE/EN)**:
-             • 15 Handbuch-Artikel in 9 Kategorien im integrierten Support-Desk
-             • Dynamische FAQ-Deflection und Live-Editor
+  ├── 2.30 ✅ **Digitales Benutzerhandbuch & Wissensportal (15 Artikel DE/EN)**:
+│          • 15 Handbuch-Artikel in 9 Kategorien im integrierten Support-Desk
+│          • Dynamische FAQ-Deflection und Live-Editor
+  ├── 2.31 ✅ **Topbar Live-Pulse Ticker, Sidenav Streamlining & Dark Theme**:
+│          • Sub-Sekunden Leistungsfluss in der Topbar (Solar, Haus, Netz, Akku)
+│          • Bereinigung redundanter Badges und nahtloser Liegenschafts-Switcher
+│          • Dark- & Light-Mode mit nativer ThemeContext-Persistenz
+  ├── 2.32 ✅ **Multistring & AC-Kopplung (BKW-Erkennung) mit physikalischer Entkopplung**:
+│          • Automatische Gutschrift negativer Hauslasten als Solarerzeugung
+│          • Strikte Trennung von Speicherladung und Haushaltsverbrauch
+│          • Smart-Meter Zero-Grid Schutz vor rechnerischen Verfälschungen
+  └── 2.33 ✅ **1-Klick Quick-Boost Override Bar & Smarte EPEX-Ladefenster**:
+             • 1-Klick Aktionen (11 kW Wallbox-Boost, 100% Notstromreserve, Max. PV-Eigenverbrauch)
+             • Live-Countdown & 1-Klick Reset zur nahtlosen Autopilot-Rückkehr
+             • Automatische Ermittlung von Best-Price Ladefenstern & Peak-Shaving im EPEX-Modal
 
 ┌───────────────────────────────────────────────────────────────────────────────┐
 │ MEILENSTEIN 3: PAYMENT, MONETARISIERUNG & BILLING-ARCHITEKTUR (💳 OFFEN)      │

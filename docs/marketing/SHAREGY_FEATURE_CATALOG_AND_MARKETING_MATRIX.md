@@ -28,22 +28,26 @@ Sharegy ist die **erste ganzheitliche Energie-Plattform**, die hochperformantes 
 
 ## 📦 Vollständige Feature-Übersicht nach Modulen
 
-### 1. ⚡ Live-EMS & Energiefluss-Visualisierung
+### 1. ⚡ Live-EMS, Topbar-Pulse & Energiefluss-Visualisierung
+* **Live Energy-Pulse Ticker (Topbar)**: Sub-Sekunden Echtzeit-Leistungsfluss direkt im Header (☀️ Solarerzeugung, 🏠 Hauslast, ⚡ Netzbezug/Einspeisung mit dynamischen Richtungsindikatoren, 🔋 Speicher-SoC).
 * **Flackerfreies Live-Sankey-Diagramm**: Echtzeit-Darstellung aller Energieflüsse (Erzeugung $\rightarrow$ Hausverbrauch $\rightarrow$ Batteriespeicher $\rightarrow$ Netzaustausch) mit automatischer Etagen- und Raumgruppierung.
+* **Multistring & AC-Kopplung (BKW-Erkennung)**: Automatische Erkennung und physikalische Gutschrift von sekundären AC-Wechselrichtern und Balkonkraftwerken (negative Hauslasten werden präzise als Ertrag bilanziert).
 * **Sub-Sekunden Status ($O(1)$)**: Snapshot-Architektur über Redis und TimescaleDB für verzögerungsfreie Dashboard-Ladezeiten (< 20 ms).
 * **Physikalisches Flussmodell**: Saubere Trennung von Speicherladung, Netzexport und Haushaltslast in `flow_engine.py` zur Vermeidung doppelter Zählungen.
 * **Virtuelle Zähler & Sub-Metering**: Automatische Restlast-Disaggregation ($E_\text{Rest} = E_\text{Gesamt} - \sum E_\text{Submeter}$) zur Erkennung versteckter Verbraucher.
-* **Historische Langzeit-Analysen**: Interaktive Zoom-Diagramme über Tage, Wochen, Monate und Jahre mit Continuous Aggregates.
+* **Dark & Light Mode**: Nahtloser Umschalter mit nativer Theme-Persistenz im Browser.
 
 ---
 
 ### 2. 🎛️ Smart Load Management & Dispatch Hub (`/app/control`)
 * **Live Power Budget Header**: Visualisierung von verfügbarem Solarüberschuss ($P_\text{surplus} = P_\text{pv} - P_\text{load}$), Batterie-Ladestand, dynamischem Strompreis und geschalteter Last.
+* **1-Klick Quick-Boost & Overrides**: Sofortschaltung für 11 kW Wallbox-Schnellladung, 100% Heimspeicher-Notstromreserve und maximalen PV-Eigenverbrauch mit Countdown-Badge und 1-Klick Reset.
 * **4 Master-Autopilot-Modi**:
   * 🤖 *Smart Autopilot*: Vollautomatische Optimierung nach Solarprognose & Börsenpreisen.
   * ☀️ *Nur PV-Überschuss*: Strikt 100% Autarkie-Betrieb ohne zusätzlichen Netzbezug.
   * 💰 *Preise-Optimiert (Sparfuchs)*: Gezielte Aktivierung bei negativen und minimalen Spotmarkt-Preisen.
   * 🛑 *Manuell*: Pausierung der Automatik für manuelle Steuerung.
+* **Smarte EPEX-Ladefenster**: Automatische Erkennung der günstigsten Ladezeiten (Top 3 Stunden) und Empfehlungen zur Vermeidung von Abend-Lastspitzen.
 * **Interaktive Prioritäten-Kaskade (Merit-Order)**: Zuteilungsreihenfolge flexibler Großverbraucher (z. B. 1. Heimspeicher $\rightarrow$ 2. BWWP $\rightarrow$ 3. Wallbox $\rightarrow$ 4. Pool $\rightarrow$ 5. Klima $\rightarrow$ 6. Haushaltsgeräte).
 * **24h-Fahrplan (Dispatch-Timeline)**: Stündliche Vorschau der geplanten Geräteschaltungen basierend auf 48h-Wetterprognose und Day-Ahead EPEX-Spotpreisen.
 * **7 Modulare Verbraucher-Karten**:

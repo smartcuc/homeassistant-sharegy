@@ -651,6 +651,34 @@
 
 ---
 
+### [x] 5.28 Topbar & Sidenav Streamlining, Live-Pulse Ticker & Dark/Light Theme
+- **Dateien**: [`frontend/src/components/layout/Topbar.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/components/layout/Topbar.jsx), [`frontend/src/components/layout/Sidebar.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/components/layout/Sidebar.jsx), [`frontend/src/theme/ThemeContext.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/theme/ThemeContext.jsx)
+- **Status**: ✅ **Erledigt**.
+  - **Live Energy-Pulse Ticker**: Echtzeit-Leistungsfluss in der Topbar (☀️ Solar, 🏠 Haus, ⚡ Netzbezug/Einspeisung mit Richtungsindikatoren, 🔋 Akku-SoC).
+  - **Entschlackung & Redundanz-Bereinigung**: Entfernung des trägen 21/21-Badges und Bereinigung der Sidenav von unpassenden Modal-Triggern.
+  - **Gebäude- & Home-Switcher**: Dynamische Umschaltung bei mehreren Liegenschaften und statisches Kontext-Badge bei Einzelliegenschaften.
+  - **Dark/Light Mode**: Nahtloser Umschalter mit nativer Theme-Persistenz im `localStorage`.
+
+---
+
+### [x] 5.29 Multistring & AC-Coupled Inverter / BKW Detection Engine
+- **Dateien**: [`energy/services/balance.py`](file:///c:/Users/Public/Dev/eswes/energy/services/balance.py), [`energy/tests/test_balance_advanced.py`](file:///c:/Users/Public/Dev/eswes/energy/tests/test_balance_advanced.py), [`frontend/src/features/producer/pages/ProducerPage.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/producer/pages/ProducerPage.jsx)
+- **Status**: ✅ **Erledigt**.
+  - **Physikalische AC-Ertragserfassung**: Negative Hauslasten (durch ungebundene sekundäre PV-Wechselrichter / Balkonkraftwerke) werden physikalisch präzise als Solarerzeugung gutgeschrieben statt als Hausverbrauch fehlinterpretiert.
+  - **Strikte Speicherladungs-Isolation**: Akku-Ladung wird exklusiv im Speicherkanal erfasst und bläht den Hausverbrauch nicht auf.
+  - **Zero-Grid Schutz**: Zertifizierte Smart-Meter-Null-Werte werden niemals durch theoretische Restbedarfe überschrieben.
+
+---
+
+### [x] 5.30 1-Klick Quick-Boost & Smarte EPEX-Ladefenster Empfehlungen
+- **Dateien**: [`frontend/src/features/control/components/LivePowerBudgetHeader.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/control/components/LivePowerBudgetHeader.jsx), [`frontend/src/features/control/pages/ControlPage.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/control/pages/ControlPage.jsx), [`frontend/src/features/market/components/SpotPriceModal.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/market/components/SpotPriceModal.jsx), [`frontend/src/features/energy/EnergyDashboard.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/energy/EnergyDashboard.jsx)
+- **Status**: ✅ **Erledigt**.
+  - **1-Klick Quick Actions**: Sofort-Boost für Wallbox (11 kW), 100% Heimspeicher-Notstromreserve und maximaler PV-Eigenverbrauch mit Countdown-Badge und 1-Klick Reset.
+  - **Smarte EPEX-Ladefenster**: Automatische Erkennung und Ausweisung der günstigsten Ladezeiten (z. B. 13:00–16:00 Uhr) und teuersten Abendspitzen im Spotpreis-Modal.
+  - **Mobile Touch-Optimierung**: Horizontale, swipe-fähige Filterleisten und Tabs auf kleinen Displays.
+
+---
+
 ## 🎯 7. Verbindliche Prioritätenliste & Ausstehende Roadmap
 
 ```
@@ -658,8 +686,9 @@
 │ ✅ 100% PRODUKTIONSREIF: SÄULE 1 (EMS-PRO) & SÄULE 2 (ENERGY SHARING)         │
 ├───────────────────────────────────────────────────────────────────────────────┤
 │ • 🟢 Säule 1: Live-Sankey, Last-/PV-Forecasts, Smart Load Management Hub,     │
-│    BWWP SG-Ready Steuerung, OCPP 1.6-J CSMS Wallbox Gateway, Sungrow OpenAPI,  │
-│    ioBroker & Home Assistant Adapter, Mobile Push & 15 Handbuch-Artikel.       │
+│    1-Klick Quick Boost, BWWP SG-Ready Steuerung, OCPP 1.6-J CSMS Wallbox,      │
+│    Sungrow OpenAPI, ioBroker & HA Adapter, Multistring AC-Kopplung,           │
+│    Live-Pulse Topbar, Dark-Mode & 15 Handbuch-Artikel.                        │
 │ • ⚡ Säule 2: 15m OBIS-Clearing, Discovergy wMSB Hub, 3 Allokationsmodelle,    │
 │    Sharing-Tarife, Multi-Community Hub, PDF/Excel/XML-Exporte & Viral Sharing. │
 └───────────────────────────────────────────────────────────────────────────────┘
