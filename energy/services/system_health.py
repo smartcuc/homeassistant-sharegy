@@ -365,6 +365,12 @@ def check_home_system_status(user) -> Dict[str, Any]:
         tz_val = user_settings.timezone if (user_settings and getattr(user_settings, "timezone", None)) else None
         has_timezone = bool(tz_val)
 
+        # Prüfen, ob unkonfigurierte Geräte vorliegen
+        unconfigured_devices = [
+            d for d in active_devices
+            if not getattr(d, "config", None) or not getattr(d.config, "role", None) or d.config.role.key in ["unknown", "unassigned", "default"]
+        ]
+
         # 8. Readiness Score & Status-Ampel berechnen (5 Kernsäulen, 0 .. 100%)
         score = 0
         if has_pv:
