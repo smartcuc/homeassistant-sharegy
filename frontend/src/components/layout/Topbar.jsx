@@ -193,20 +193,20 @@ export default function AppTopbar() {
                 )}
             </div>
 
-            {/* CENTER: ⚡ Live Energy-Pulse / Kompakt-Ticker (Desktop & Tablet) */}
-            <div className="hidden md:flex items-center gap-2">
+            {/* CENTER: ⚡ Live Energy-Pulse / Kompakt-Ticker (Auf allen Screens sichtbar & adaptiv) */}
+            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
                 <Link
                     to="/app/energy"
                     title={t("dashboard.live_energy_ticker_title", "Live-Energiefluss & Autarkie öffnen")}
-                    className="flex items-center gap-2.5 px-3 py-1 bg-slate-50 dark:bg-slate-800/80 hover:bg-indigo-50/60 dark:hover:bg-slate-700/80 border border-slate-200/90 dark:border-slate-700 hover:border-indigo-200 dark:hover:border-indigo-500 rounded-xl transition cursor-pointer shadow-2xs group"
+                    className="flex items-center gap-1.5 sm:gap-2.5 px-2 sm:px-3 py-1 bg-slate-50 dark:bg-slate-800/80 hover:bg-indigo-50/60 dark:hover:bg-slate-700/80 border border-slate-200/90 dark:border-slate-700 hover:border-indigo-200 dark:hover:border-indigo-500 rounded-xl transition cursor-pointer shadow-2xs group shrink-0"
                 >
                     {/* Pulsierender LIVE Dot */}
-                    <div className="flex items-center gap-1.5">
-                        <span className="relative flex h-2 w-2">
+                    <div className="flex items-center gap-1">
+                        <span className="relative flex h-2 w-2 shrink-0">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                             <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                         </span>
-                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 hidden xs:inline">
                             LIVE
                         </span>
                     </div>
@@ -215,7 +215,7 @@ export default function AppTopbar() {
 
                     {/* Netzzustand */}
                     <div className="flex items-center gap-1 text-xs font-mono font-bold">
-                        <span className="text-slate-400 dark:text-slate-500 text-[11px]">Netz:</span>
+                        <span className="text-slate-400 dark:text-slate-500 text-[11px] hidden sm:inline">Netz:</span>
                         <span className={gridPower !== null ? (gridPower < -5 ? "text-emerald-600 dark:text-emerald-400" : gridPower > 5 ? "text-amber-600 dark:text-amber-400" : "text-slate-700 dark:text-slate-300") : "text-slate-500"}>
                             {gridPower !== null ? (gridPower < -5 ? `+${formatPower(Math.abs(gridPower))} 📤` : gridPower > 5 ? `${formatPower(gridPower)} 📥` : "0 W") : "--"}
                         </span>
@@ -224,8 +224,8 @@ export default function AppTopbar() {
                     {/* PV Ertrag falls vorhanden */}
                     {pvPower !== null && pvPower > 10 && (
                         <>
-                            <div className="h-3 w-px bg-slate-200 dark:bg-slate-700" />
-                            <div className="flex items-center gap-1 text-xs font-mono font-bold text-amber-600 dark:text-amber-400">
+                            <div className="h-3 w-px bg-slate-200 dark:bg-slate-700 hidden sm:block" />
+                            <div className="hidden sm:flex items-center gap-1 text-xs font-mono font-bold text-amber-600 dark:text-amber-400">
                                 <span>☀️</span>
                                 <span>{formatPower(pvPower)}</span>
                             </div>
@@ -235,8 +235,8 @@ export default function AppTopbar() {
                     {/* Autarkiegrad */}
                     {autarky !== null && (
                         <>
-                            <div className="h-3 w-px bg-slate-200 dark:bg-slate-700" />
-                            <div className="flex items-center gap-1 text-xs font-semibold text-indigo-700 dark:text-indigo-300 bg-indigo-50/80 dark:bg-indigo-950/60 px-1.5 py-0.5 rounded-md border border-indigo-100 dark:border-indigo-900/50">
+                            <div className="h-3 w-px bg-slate-200 dark:bg-slate-700 hidden md:block" />
+                            <div className="hidden md:flex items-center gap-1 text-xs font-semibold text-indigo-700 dark:text-indigo-300 bg-indigo-50/80 dark:bg-indigo-950/60 px-1.5 py-0.5 rounded-md border border-indigo-100 dark:border-indigo-900/50">
                                 <span>🛡️</span>
                                 <span>{autarky}%</span>
                             </div>

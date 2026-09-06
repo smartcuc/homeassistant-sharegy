@@ -205,8 +205,39 @@ export default function UserMenu() {
 
 
                     {/* SPRACH- & THEME-UMSCHALTER */}
-                    <div className="px-4 py-2.5 bg-slate-50/80 dark:bg-slate-800/40 border-t border-gray-100 dark:border-slate-800">
-                        <div className="flex items-center justify-between mb-2">
+                    <div className="px-4 py-2.5 bg-slate-50/80 dark:bg-slate-800/40 border-t border-gray-100 dark:border-slate-800 space-y-2.5">
+                        {/* Theme */}
+                        <div className="flex items-center justify-between">
+                            <span className="text-[10px] uppercase tracking-wider font-bold text-gray-400">
+                                {t("settings.appearance", "Design")}
+                            </span>
+                            <div className="grid grid-cols-3 gap-1">
+                                {[
+                                    { id: "light", label: "☀️ Hell" },
+                                    { id: "dark", label: "🌙 Dunkel" },
+                                    { id: "system", label: "💻 Auto" },
+                                ].map((thm) => {
+                                    const isActive = (theme?.mode || "light") === thm.id;
+                                    return (
+                                        <button
+                                            key={thm.id}
+                                            type="button"
+                                            onClick={() => theme?.setThemeMode?.(thm.id)}
+                                            className={`py-1 px-1.5 text-[10px] font-bold rounded-md border transition cursor-pointer ${
+                                                isActive
+                                                    ? "bg-indigo-600 text-white border-indigo-600 shadow-2xs"
+                                                    : "bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-slate-700 hover:bg-gray-100"
+                                            }`}
+                                        >
+                                            {thm.label}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* Sprache */}
+                        <div className="flex items-center justify-between">
                             <span className="text-[10px] uppercase tracking-wider font-bold text-gray-400">
                                 {t("settings.language", "Sprache")}
                             </span>
