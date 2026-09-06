@@ -449,7 +449,12 @@
     "percent_direct": "{{percent}}% bezpośrednio",
     "no_measurements_period": "Brak danych pomiarowych dla tego okresu. Połącz swoje urządzenia w zakładce 'Urządzenia', aby rejestrować przepływy energii na żywo.",
     "expert_banner_prompt": "Chcesz monitorować szczegółowe prądy fazowe (L1/L2/L3), przepływy Sankey, pompy ciepła SG-Ready lub kontrolować arbitraż cenowy?",
-    "expert_banner_cta": "Do narzędzi eksperckich →"
+    "expert_banner_cta": "Do narzędzi eksperckich →",
+    "insight_autarky_excellent": "Doskonała autarkia: {{rate}}% Twojego zapotrzebowania na prąd pochodziło w tym okresie z własnej energii słonecznej.",
+    "insight_autarky_good": "Dobra samowystarczalność: {{rate}}% stopnia pokrycia słonecznego w wybranym okresie.",
+    "insight_autarky_low": "Wysoki pobór z sieci: Tylko {{rate}}% zapotrzebowania zostało pokryte z fotowoltaiki/magazynu.",
+    "insight_top_consumer": "Największy odbiorca: {{name}} z {{share}}% całkowitej energii ({{solar}}% udziału PV).",
+    "insight_financial_benefit": "Korzyść finansowa: Dzięki autokonsumpcji i oddawaniu do sieci uzyskano netto {{amount}} €."
   },
   "interfaces": {
     "title": "Interfejsy",
@@ -661,7 +666,9 @@
     "actual": "Ist (Gemessen)",
     "forecast": "Soll (Prognose)",
     "insights_title": "Analyse & Erkenntnisse",
-    "learning_loop_title": "Selbstlernendes Korrektur-Modell"
+    "learning_loop_title": "Selbstlernendes Korrektur-Modell",
+    "no_measurements_pv": "Brak danych pomiarowych. Gdy tylko instalacja fotowoltaiczna wyprodukuje energię, jakość prognozy zostanie tutaj przeanalizowana.",
+    "no_anomalies": "Brak specyficznych nieprawidłowości w wybranym okresie."
   },
   "metrics": {
     "title": "Pomiary i kanały",
@@ -1609,11 +1616,7 @@
   "magic_login_attempt": "magic_login_attempt",
   "magic_login_success": "magic_login_success",
   "magic_login_failed": "magic_login_failed",
-  "status": {
-    "title": "Systemstatus & Live-Infrastruktur",
-    "subtitle": "Echtzeit-Überwachung aller Dienste, Datenbanken, Ingest-Pipelines und APIs.",
-    "report_incident": "Störung melden"
-  },
+  "status": "status",
   "deviceName": "deviceName",
   "metricName": "metricName",
   "room": "room",

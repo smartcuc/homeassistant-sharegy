@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import ReactECharts from "echarts-for-react";
 import { useSolarForecastAccuracy } from "../hooks/useSolarForecastAccuracy";
 import { formatNumber } from "../../../utils/format";
+import { translateInsight } from "../../../utils/translateInsight";
 
 export default function SolarForecastAccuracyCard({ stringId = "all" }) {
     const { t } = useTranslation();
@@ -339,11 +340,11 @@ export default function SolarForecastAccuracyCard({ stringId = "all" }) {
                                     {insights.map((ins, i) => (
                                         <li key={i} className="flex items-start gap-2">
                                             <span className="text-amber-500 font-bold">•</span>
-                                            <span>{ins}</span>
+                                            <span>{translateInsight(ins, t)}</span>
                                         </li>
                                     ))}
                                     {insights.length === 0 && (
-                                        <li className="text-gray-400">Keine spezifischen Auffälligkeiten im gewählten Zeitraum.</li>
+                                        <li className="text-gray-400">{t("forecast.no_anomalies", "Keine spezifischen Auffälligkeiten im gewählten Zeitraum.")}</li>
                                     )}
                                 </ul>
                             </div>

@@ -23,6 +23,7 @@ import GridCo2Card from "../market/components/GridCo2Card";
 import { useSubscription } from "../../hooks/useSubscription";
 import ProBadge from "../../components/common/ProBadge";
 import ProUpgradeModal from "../../components/common/ProUpgradeModal";
+import { translateInsight } from "../../utils/translateInsight";
 
 export default function EnergyDashboard() {
     const { t } = useTranslation();
@@ -442,7 +443,7 @@ export default function EnergyDashboard() {
                     {insights.map((text, i) => (
                         <div key={i} className="flex items-center gap-2">
                             <span className="text-indigo-600 dark:text-indigo-400 text-sm">💡</span>
-                            <span className="font-medium">{text}</span>
+                            <span className="font-medium">{translateInsight(text, t)}</span>
                         </div>
                     ))}
                 </div>

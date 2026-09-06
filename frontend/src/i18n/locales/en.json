@@ -449,7 +449,12 @@
     "percent_direct": "{{percent}}% direct",
     "no_measurements_period": "No measurement data available for this period yet. Connect your devices under 'Devices' to track your energy flows live.",
     "expert_banner_prompt": "Would you like to monitor detailed phase currents (L1/L2/L3), Sankey energy flows, SG-Ready heat pumps, or control spot market arbitrage?",
-    "expert_banner_cta": "To Expert Tools →"
+    "expert_banner_cta": "To Expert Tools →",
+    "insight_autarky_excellent": "Excellent autarky: {{rate}}% of your electricity demand came from self-generated solar energy during this period.",
+    "insight_autarky_good": "Good self-sufficiency: {{rate}}% solar coverage rate in the selected period.",
+    "insight_autarky_low": "High grid reliance: Only {{rate}}% of your electricity demand was covered by solar/storage.",
+    "insight_top_consumer": "Top consumer: {{name}} with {{share}}% of total electricity ({{solar}}% solar share).",
+    "insight_financial_benefit": "Financial benefit: Self-consumption and grid feed-in generated a net benefit of {{amount}} €."
   },
   "interfaces": {
     "title": "Interfaces",
@@ -701,7 +706,9 @@
     "actual": "Ist (Gemessen)",
     "forecast": "Soll (Prognose)",
     "insights_title": "Analyse & Erkenntnisse",
-    "learning_loop_title": "Selbstlernendes Korrektur-Modell"
+    "learning_loop_title": "Selbstlernendes Korrektur-Modell",
+    "no_measurements_pv": "No measurement data available yet. As soon as your solar array generates power, forecast accuracy will be analyzed here.",
+    "no_anomalies": "No specific anomalies in the selected period."
   },
   "metrics": {
     "title": "Metrics & Channels",
@@ -1609,11 +1616,7 @@
   "magic_login_attempt": "magic_login_attempt",
   "magic_login_success": "magic_login_success",
   "magic_login_failed": "magic_login_failed",
-  "status": {
-    "title": "Systemstatus & Live-Infrastruktur",
-    "subtitle": "Echtzeit-Überwachung aller Dienste, Datenbanken, Ingest-Pipelines und APIs.",
-    "report_incident": "Störung melden"
-  },
+  "status": "status",
   "deviceName": "deviceName",
   "metricName": "metricName",
   "room": "room",

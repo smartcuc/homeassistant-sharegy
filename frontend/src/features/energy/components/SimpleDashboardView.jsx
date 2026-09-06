@@ -21,6 +21,7 @@ import {
     Car, 
     Sliders 
 } from "lucide-react";
+import { translateInsight } from "../../../utils/translateInsight";
 
 export default function SimpleDashboardView({ 
     balanceData = {}, 
@@ -509,7 +510,7 @@ export default function SimpleDashboardView({
                         {insights.length > 0 && (
                             <div className="mt-3 pt-3 border-t border-slate-200/80 dark:border-slate-700/60 flex items-start gap-2 text-xs text-indigo-950 dark:text-indigo-200">
                                 <Sparkles className="w-4 h-4 text-indigo-500 shrink-0 mt-0.5" />
-                                <span className="font-medium line-clamp-2">{insights[0]}</span>
+                                <span className="font-medium line-clamp-2">{translateInsight(insights[0], t)}</span>
                             </div>
                         )}
                     </div>

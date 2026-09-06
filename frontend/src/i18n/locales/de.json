@@ -447,9 +447,14 @@
     "solar_short": "Solar",
     "show_trends_history": "Trends & Historie anzeigen",
     "feedin_short": "Einspeisung",
-    "no_measurements_period": "No measurement data available for this period yet. Connect your devices under 'Devices' to track your energy flows live.",
+    "no_measurements_period": "Noch keine Messdaten für diesen Zeitraum vorhanden. Verbinde deine Geräte unter 'Geräte', um deine Energieflüsse live zu erfassen.",
     "expert_banner_cta": "To Expert Tools →",
-    "expert_banner_prompt": "Would you like to monitor detailed phase currents (L1/L2/L3), Sankey energy flows, SG-Ready heat pumps, or control spot market arbitrage?"
+    "expert_banner_prompt": "Would you like to monitor detailed phase currents (L1/L2/L3), Sankey energy flows, SG-Ready heat pumps, or control spot market arbitrage?",
+    "insight_autarky_excellent": "Exzellente Autarkie: {{rate}} % deines Strombedarfs stammten im Zeitraum aus eigener Solarenergie.",
+    "insight_autarky_good": "Gute Eigenversorgung: {{rate}} % solarer Deckungsgrad im gewählten Zeitraum.",
+    "insight_autarky_low": "Hoher Netzbezug: Nur {{rate}} % deines Strombedarfs wurden durch PV/Speicher gedeckt.",
+    "insight_top_consumer": "Größter Verbraucher: {{name}} mit {{share}} % des Gesamtstroms ({{solar}}% Solaranteil).",
+    "insight_financial_benefit": "Finanzieller Vorteil: Durch Eigenverbrauch und Einspeisung wurden netto {{amount}} € erzielt."
   },
   "interfaces": {
     "title": "Schnittstellen",
@@ -701,7 +706,9 @@
     "actual": "Ist (Gemessen)",
     "forecast": "Soll (Prognose)",
     "insights_title": "Analyse & Erkenntnisse",
-    "learning_loop_title": "Selbstlernendes Korrektur-Modell"
+    "learning_loop_title": "Selbstlernendes Korrektur-Modell",
+    "no_measurements_pv": "Noch keine Messdaten vorhanden. Sobald deine PV-Anlage Strom erzeugt, wird hier die Prognosegüte analysiert.",
+    "no_anomalies": "Keine spezifischen Auffälligkeiten im gewählten Zeitraum."
   },
   "metrics": {
     "title": "Messwerte & Kanäle",
@@ -1609,11 +1616,7 @@
   "magic_login_attempt": "magic_login_attempt",
   "magic_login_success": "magic_login_success",
   "magic_login_failed": "magic_login_failed",
-  "status": {
-    "title": "Systemstatus & Live-Infrastruktur",
-    "subtitle": "Echtzeit-Überwachung aller Dienste, Datenbanken, Ingest-Pipelines und APIs.",
-    "report_incident": "Störung melden"
-  },
+  "status": "status",
   "deviceName": "deviceName",
   "metricName": "metricName",
   "room": "room",
