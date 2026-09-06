@@ -1,0 +1,196 @@
+Total occurrences: 194
+
+frontend/src\LandingPage.jsx:136: <li>✅ Live-Verbrauch</li>
+frontend/src\components\common\ProUpgradeModal.jsx:78: desc: "Multi-Dauer Ladestrategien & dynamischer Strompreis-Optimierer",
+frontend/src\components\common\ProUpgradeModal.jsx:99: Monatlich kündbar · Sofortige Freischaltung
+frontend/src\components\device\DeviceBaselineModal.jsx:66: setStatusMsg({ type: "error", text: `Fehler beim Speichern: ${err.message}` });
+frontend/src\components\device\DeviceBaselineModal.jsx:264: <span>Baseline-Überwachung aktiv</span>
+frontend/src\components\device\HomeSetupStatusModal.jsx:23: Automatische Prüfung der 4 Kernsäulen (PV, Netz, Speicher, Last) für ein fehlerfreies Energiemanagement.
+frontend/src\components\layout\Sidebar.jsx:192: title="Unkonfigurierte Geräte einrichten"
+frontend/src\components\legal\CookieConsentBanner.jsx:259: "Ermöglicht das Speichern deiner Sprachauswahl (Deutsch/Englisch/Polnisch), Zeitfenster-Filter und Dashboard-Präferenzen über Sitzungen hinweg."
+frontend/src\features\alerts\components\PushNotificationSettings.jsx:270: title="Sendet sofort eine Test-Push-Nachricht an deine registrierten Geräte"
+frontend/src\features\alerts\components\PushNotificationSettings.jsx:523: featureDesc="Erhalte sofortige Push-Alarme bei Ausfällen, Netztrennungen und Speicher-Tiefentladungen direkt auf dein Smartphone mit Sharegy Pro."
+frontend/src\features\alerts\pages\AlertsPage.jsx:96: Verpasse nie wieder Wechselrichterausfälle, Speicher-Tiefentladungen oder extreme Börsenstrom-Preistiefs. Werde sofort mobil auf deinem Smartphone benachrichtigt.
+frontend/src\features\alerts\pages\AlertsPage.jsx:305: <div className="font-bold text-slate-800">Speicher & Notstrom</div>
+frontend/src\features\alerts\pages\AlertsPage.jsx:312: <div className="font-bold text-slate-800">Sensoren & Zähler</div>
+frontend/src\features\billing\components\SubscriptionPlanCard.jsx:281: defaultValue: `Dein Zugang bleibt bis zum ${currentPeriodEnd ? new Date(currentPeriodEnd).toLocaleDateString() : "Ende der Laufzeit"} vollständig aktiv.`
+frontend/src\features\billing\components\SubscriptionPlanCard.jsx:344: Code <span className="font-mono font-bold text-white">{validatedCoupon.code}</span> schaltet deinen Tarif sofort frei.
+frontend/src\features\community\components\CommunityShareModal.jsx:25: linkedin: `🚀 Die dezentrale Energiewende in der Praxis: Mit @Sharegy habe ich diesen Monat eine Autarkiequote von ${autarkyPct}% und ${sharedKwh} kWh Energy Sharing im Quartier erzielt.\n\nKeine teuren Hardware-Boxen, sondern 100% smarte Cloud-Steuerung für PV, Speicher & Wallbox.\n\n👉 Mehr erfahren: ${shareUrl} #EnergySharing #Photovoltaik #SmartGrid #Cleantech`,
+frontend/src\features\community\components\CommunityShareModal.jsx:26: twitter: `☀️ ${autarkyPct}% Autarkie & ${sharedKwh} kWh Solarstrom mit Nachbarn geteilt! Danke an @sharegy_de für das sub-sekunden EMS & intelligentes Wallbox-Laden 🚗⚡\n\n${shareUrl}`,
+frontend/src\features\community\components\CommunityShareModal.jsx:121: <div className="text-[10px] text-slate-400 uppercase font-semibold">CO₂ Ersparnis</div>
+frontend/src\features\community\components\MsbSmartMeterHub.jsx:140: 3 Zählerpfade Aktiv
+frontend/src\features\community\components\MsbSmartMeterHub.jsx:144: Zähler-Flexibilität & wMSB Smart Meter Hub ⚡
+frontend/src\features\community\components\MsbSmartMeterHub.jsx:323: {meters.length} Zähler registriert
+frontend/src\features\community\components\MsbSmartMeterHub.jsx:374: {m.status === "active" ? "🟢 Aktiv" : "⏳ Warte auf Daten"}
+frontend/src\features\community\components\MsbSmartMeterHub.jsx:384: Noch keine Zähler in dieser Community angelegt. Lade Mitglieder ein oder importiere eine MSCONS-Datei.
+frontend/src\features\community\components\MsbSmartMeterHub.jsx:401: Standardformat der BNetzA für Zähler-Lastgänge.
+frontend/src\features\community\components\MsbSmartMeterHub.jsx:480: ⚠️ Unbekannte Zähler in der Datei (nicht zugeordnet): {importResult.unknown_meters.join(", ")}
+frontend/src\features\community\components\MsbSmartMeterHub.jsx:514: <div className="font-bold text-slate-900 dark:text-white">Zähler-Installation</div>
+frontend/src\features\control\components\AirConditioningCard.jsx:34: {isRunning ? "❄️ Kühlen aktiv" : "⚪ Standby"}
+frontend/src\features\control\components\BatteryStorageControlCard.jsx:82: showFeedback(res?.message || "Steuerbefehl erfolgreich an Speicher gesendet.");
+frontend/src\features\control\components\BatteryStorageControlCard.jsx:128: Binde deinen Hybrid-Wechselrichter oder Hausspeicher ein, um Notstrom-Reserve, Zellschonung und Spotmarkt-Laden zu steuern.
+frontend/src\features\control\components\BatteryStorageControlCard.jsx:139: <span>Speicher anlegen</span>
+frontend/src\features\control\components\BatteryStorageControlCard.jsx:181: {capacityKwh.toFixed(1)} kWh Kapazität · max. {storage?.max_charge_power_kw || 5.0} kW Laden
+frontend/src\features\control\components\BatteryStorageControlCard.jsx:190: title="Speicher-Parameter bearbeiten"
+frontend/src\features\control\components\BatteryStorageControlCard.jsx:227: {controlMode === "price_optimized" ? `Spot-Arbitrage (≤ ${storage?.price_threshold_ct || 15} ct/kWh)` : controlMode === "backup_only" ? "Notstrom-Reserve (100% Prio)" : controlMode === "forced_charge" ? "Zwangsladung aktiv" : "PV-Vorrang (Eigenverbrauch)"}
+frontend/src\features\control\components\BatteryStorageSettingsModal.jsx:87: setErrorMsg(err.message || "Fehler beim Speichern der Speichereinstellungen.");
+frontend/src\features\control\components\BatteryStorageSettingsModal.jsx:101: <span>{isEdit ? "Batteriespeicher bearbeiten" : "Neuen Batteriespeicher anlegen"}</span>
+frontend/src\features\control\components\BatteryStorageSettingsModal.jsx:165: Max. Laden (kW)
+frontend/src\features\control\components\BatteryStorageSettingsModal.jsx:239: Steuerung aktiv
+frontend/src\features\control\components\HeatingRodCard.jsx:31: {isRunning ? "⚡ Heizen aktiv" : "⚪ Standby"}
+frontend/src\features\control\components\HeatingRodCard.jsx:61: <div className="font-bold text-slate-800 dark:text-slate-200 truncate">⚡ Überschuss-Verwertung</div>
+frontend/src\features\control\components\HeatingRodCard.jsx:62: <div className="text-[11px] text-slate-400 truncate">Heizt Puffer bei vollem Speicher vor Netzeinspeisung</div>
+frontend/src\features\control\components\HeatingRodCard.jsx:73: Modus: <strong className="text-amber-600">Überschuss-Verwertung</strong>
+frontend/src\features\control\components\LivePowerBudgetHeader.jsx:61: Intelligente Verteilung von Solarüberschuss & Börsentarifen auf BWWP, Wallbox, Speicher, Pool & Großverbraucher.
+frontend/src\features\control\components\LivePowerBudgetHeader.jsx:78: <option value="pv_only">☀️ Nur PV-Überschuss</option>
+frontend/src\features\control\components\LivePowerBudgetHeader.jsx:95: <span>{activeBoost.label} aktiv</span>
+frontend/src\features\control\components\LivePowerBudgetHeader.jsx:107: Schnellschaltung für Sofort-Laden oder Notstrom-Reserve
+frontend/src\features\control\components\LivePowerBudgetHeader.jsx:130: <span>Speicher-Schutz</span>
+frontend/src\features\control\components\LivePowerBudgetHeader.jsx:148: title="Zurück zum Autopilot"
+frontend/src\features\control\components\LivePowerBudgetHeader.jsx:162: <span>Verfügbarer Überschuss</span>
+frontend/src\features\control\components\LivePowerBudgetHeader.jsx:185: {soc >= 80 ? "Prio 1 gedeckt ➔ Überschuss frei" : "Prio 1 lädt mit Vorrang"}
+frontend/src\features\control\components\LivePowerBudgetHeader.jsx:200: Spotmarkt Day-Ahead aktiv
+frontend/src\features\control\components\PriorityCascadeBar.jsx:53: {isSaving ? "⏳ Speichern..." : "✓ Automatisch aktiv"}
+frontend/src\features\control\components\PriorityCascadeBar.jsx:123: <strong>Merit-Order Prinzip:</strong> Rang 1 (z. B. Heimspeicher) erhält erzeugten Solarüberschuss vorrangig. Sobald die Leistung ausreicht oder der Speicher voll ist, wird der Überschuss kaskadierend an die nachfolgenden Ränge weitergereicht.
+frontend/src\features\control\components\SmartApplianceCard.jsx:35: {isRunning ? "● Läuft aktiv" : readyToStart ? "⏳ Ready-to-Start" : "⚪ Aus"}
+frontend/src\features\control\components\SmartApplianceCard.jsx:80: Status: <strong className="text-purple-600">{readyToStart ? "Wartet auf Solarpeak" : "Inaktiv"}</strong>
+frontend/src\features\control\pages\ControlPage.jsx:264: Weise einem Shelly- oder MQTT-Relais die Rolle »Poolpumpe« zu, um die Filterzeiten automatisch über PV-Überschuss zu steuern.
+frontend/src\features\devices\components\AddWallboxModal.jsx:12: hint: "In der go-e App unter 'Einstellungen' > 'OCPP' die Server-URL eintragen und aktivieren.",
+frontend/src\features\devices\components\AddWallboxModal.jsx:40: hint: "Im Mennekes Web-Manager unter 'Backend / OCPP' die WebSocket-Verbindung hinterlegen.",
+frontend/src\features\devices\components\AddWallboxModal.jsx:61: hint: "In den openWB Einstellungen unter 'Lademodus / OCPP Client' die Verbindung aktivieren.",
+frontend/src\features\devices\components\AddWallboxModal.jsx:287: <option value="pv_surplus">☀️ Nur PV-Überschuss (100% Solar)</option>
+frontend/src\features\devices\components\AddWallboxModal.jsx:288: <option value="min_pv">⛅ Min + PV-Überschuss (Basis 6A)</option>
+frontend/src\features\devices\components\AddWallboxModal.jsx:302: Abbrechen
+frontend/src\features\devices\components\CloudInverterIntegrationCard.jsx:134: ? "Direkte 1-Klick Schnittstelle für alle Sungrow Hybrid-Wechselrichter (SH-Serie) und SBR-Speicher."
+frontend/src\features\devices\components\CloudInverterIntegrationCard.jsx:135: : "Server-zu-Server Anbindung für SolarEdge, Fronius, Kostal, Growatt und weitere Wechselrichter."
+frontend/src\features\devices\components\CloudInverterIntegrationCard.jsx:159: Verbinde deinen Sungrow Hybrid-Wechselrichter (SH-Serie) und SBR-Speicher direkt und sicher über die offizielle iSolarCloud Schnittstelle — ganz ohne manuelle Passworteingabe oder AppKey-Konfiguration.
+frontend/src\features\devices\components\CloudInverterIntegrationCard.jsx:186: <li>Nach der Freigabe erfolgt die Rückleitung zu Sharegy — dein Wechselrichter und Batteriespeicher werden vollautomatisch angelegt und synchronisiert.</li>
+frontend/src\features\devices\components\CloudInverterIntegrationCard.jsx:192: WEITERE WECHSELRICHTER: MANUELLE HERSTELLERAUSWAHL OHNE VORAUSWAHL
+frontend/src\features\devices\components\CloudInverterIntegrationCard.jsx:198: 1. Wähle deinen Wechselrichter-Hersteller / Cloud-Dienst
+frontend/src\features\devices\components\CloudInverterIntegrationCard.jsx:232: Bitte wähle oben einen Hersteller aus, um die zugehörigen Einstellungen und Zugangsdaten anzuzeigen.
+frontend/src\features\devices\components\CloudInverterIntegrationCard.jsx:397: <div className="text-gray-500 text-[10px]">Netzbezug/Einspeisung</div>
+frontend/src\features\devices\components\CloudInverterIntegrationCard.jsx:447: {isTesting ? "⏳ Teste Verbindung..." : "🔌 Verbindung testen"}
+frontend/src\features\devices\components\CloudInverterIntegrationCard.jsx:470: deviceName={currentProfile?.name || deviceName || "Wechselrichter"}
+frontend/src\features\devices\components\ShellyCloudIntegrationCard.jsx:42: setErrorMsg(err.message || "Verbindung zur Shelly Cloud fehlgeschlagen. Bitte prüfe deinen Auth-Key.");
+frontend/src\features\devices\components\ShellyCloudIntegrationCard.jsx:69: setErrorMsg(err.message || "Fehler beim Importieren der Shelly-Geräte.");
+frontend/src\features\devices\components\ShellyCloudIntegrationCard.jsx:93: Importiert alle Geräte aus deinem Shelly-Cloud-Konto auf Knopfdruck als Hauptzähler, Balkonkraftwerk oder Steckdose.
+frontend/src\features\devices\components\ShellyCloudIntegrationCard.jsx:113: <li>Gehe unten rechts auf <strong>Benutzer-Einstellungen</strong> (Profil / Zahnrad).</li>
+frontend/src\features\devices\components\ShellyCloudIntegrationCard.jsx:185: Suche Shelly Geräte...
+frontend/src\features\devices\components\ShellyCloudIntegrationCard.jsx:190: Shelly-Geräte suchen (Discovery)
+frontend/src\features\devices\components\ShellyCloudIntegrationCard.jsx:205: Importiere Geräte...
+frontend/src\features\devices\components\ShellyCloudIntegrationCard.jsx:210: Alle {discoveryResult.device_count} Geräte in Sharegy importieren
+frontend/src\features\devices\components\ShellyCloudIntegrationCard.jsx:270: Die Geräte sind jetzt im System registriert und können im Dashboard und im Energiemanagement genutzt werden.
+frontend/src\features\energy\EnergyDashboard.jsx:308: <span>Netzbezug:</span>
+frontend/src\features\energy\EnergyDashboard.jsx:360: <span>Ersparnis:</span>
+frontend/src\features\energy\EnergyDashboard.jsx:463: VIRTUELLE ZÄHLER & SUB-METERING
+frontend/src\features\energy\EnergyDashboard.jsx:708: <span className="text-amber-600 dark:text-amber-400">+{Number(kpis.feed_in_revenue_eur || 0).toFixed(2)} € Einspeisung</span>
+frontend/src\features\energy\EnergyDashboard.jsx:716: TIMELINE BARS: ERZEUGUNG VS. VERBRAUCH
+frontend/src\features\energy\components\BatteryArbitrageCard.jsx:57: <span>📈 Mögliche Netto-Ersparnis:</span>
+frontend/src\features\energy\components\BatteryForecastCard.jsx:96: <span>⚡ Speicher-Ladung:</span>
+frontend/src\features\energy\components\BatteryForecastCard.jsx:104: <span>🔄 Speicher-Entladung:</span>
+frontend/src\features\energy\components\BatteryForecastCard.jsx:330: {kpis.start_stored_kwh} kWh im Speicher
+frontend/src\features\energy\components\BatteryForecastCard.jsx:412: 🔋 {params.battery_name || "Speicher"} · {kpis.night_autarky_pct || 0}% Nachtautarkie
+frontend/src\features\energy\components\BatteryForecastCard.jsx:442: featureName="48-Stunden Speicher- & SoC-Simulation"
+frontend/src\features\energy\components\BWWPLoadManagementCard.jsx:120: Binde deine Warmwasser-Wärmepumpe oder SG-Ready Relais ein, um Wassertemperatur und PV-Überschuss-Boost zu steuern.
+frontend/src\features\energy\components\BWWPLoadManagementCard.jsx:167: ? "● Läuft aktiv"
+frontend/src\features\energy\components\BWWPLoadManagementCard.jsx:172: Intelligente SG-Ready Warmwasser-Steuerung & Speicher-Boost
+frontend/src\features\energy\components\BWWPLoadManagementCard.jsx:210: {controlMode === "pv_surplus" ? "Nur PV-Überschuss" : controlMode === "spot_price" ? "Spotmarkt-Preisführung" : "Hybrid (PV + Günstige Börsenpreise)"}
+frontend/src\features\energy\components\BWWPLoadManagementCard.jsx:222: Status: <strong className="text-blue-600 dark:text-blue-400">{sgState === "3_boost" ? "SG-Boost aktiv" : relayState ? "Heizt normal" : "Standby"}</strong>
+frontend/src\features\energy\components\BWWPLoadManagementCard.jsx:248: <span>BWWP Lastmanagement Einstellungen</span>
+frontend/src\features\energy\components\BWWPLoadManagementCard.jsx:295: <option value="hybrid">🔄 Hybrid (PV-Überschuss + Günstige Börsenstunden)</option>
+frontend/src\features\energy\components\BWWPLoadManagementCard.jsx:296: <option value="pv_surplus">☀️ Nur PV-Überschuss</option>
+frontend/src\features\energy\components\BWWPLoadManagementCard.jsx:343: <span className="text-[10px] text-slate-400">Thermisches Speichern</span>
+frontend/src\features\energy\components\BWWPLoadManagementCard.jsx:365: Mindest-PV-Überschuss (W)
+frontend/src\features\energy\components\BWWPLoadManagementCard.jsx:398: Abbrechen
+frontend/src\features\energy\components\BWWPLoadManagementCard.jsx:406: {configMutation.isPending ? "Speichern..." : "Einstellungen speichern"}
+frontend/src\features\energy\components\EnergyKpis.jsx:20: <Card title="Verbrauch" value={consumption} color="text-red-400" />
+frontend/src\features\energy\components\EnergyOptimizerCard.jsx:33: { key: "4h", label: t("optimizer.duration_4h", "4 Stunden"), icon: "🚗", desc: t("optimizer.duration_4h_desc", "Wallbox (E-Auto), Speicher"), isProGated: true },
+frontend/src\features\energy\components\EnergyOptimizerCard.jsx:144: {best.source === "pv_surplus" ? "· Kostenloser Solar-Überschuss" : "· Günstigster Börsenpreis"}
+frontend/src\features\energy\components\EnergyOptimizerCard.jsx:152: {best.recommendation_text || `⚡ Ideal für energieintensive Geräte (${deviceInfo.device_name || "Haushaltsgeräte"}). Maximale Ersparnis durch Eigenstromnutzung.`}
+frontend/src\features\energy\components\EnergyOptimizerCard.jsx:182: · Niedrigster Spot-Tarif der Nacht
+frontend/src\features\energy\components\EnergyOptimizerCard.jsx:228: {worst?.recommendation_text || "⚠️ Hohe Netzbezugskosten. Schalte flexible Lasten ab und decke den Verbrauch bevorzugt aus dem Batteriespeicher."}
+frontend/src\features\energy\components\EnergyOptimizerCard.jsx:304: : `⚡ Netzbezug (${Number(pt.grid_price_ct || costVal).toFixed(1)} ct)`}
+frontend/src\features\energy\components\EnergyOptimizerCard.jsx:367: {t("optimizer.savings_add", { val: Number(currentWindow.savings_eur || 0).toFixed(2), defaultValue: `+${Number(currentWindow.savings_eur || 0).toFixed(2)} € Ersparnis` })}
+frontend/src\features\energy\components\SimpleDashboardView.jsx:158: {autarkyRate}% deines Strombedarfs stammten direkt aus deiner eigenen Solaranlage & Speicher.
+frontend/src\features\energy\components\SystemReadinessCard.jsx:81: missingHint: "Kein Wechselrichter / BKW",
+frontend/src\features\energy\components\SystemReadinessCard.jsx:147: title={`${item.label}: ${isOk ? "Aktiv" : item.optional ? "Optional (nicht angebunden)" : item.missingHint}`}
+frontend/src\features\energy\components\SystemReadinessCard.jsx:229: {isOk ? "Aktiv ✓" : item.optional ? "Optional" : "Fehlt"}
+frontend/src\features\energy\components\SystemReadinessCard.jsx:262: <span>Geräte & Räume verwalten</span>
+frontend/src\features\energy\components\SystemReadinessCard.jsx:307: <span>Geräte zuweisen →</span>
+frontend/src\features\forecast\components\HouseholdLoadForecastCard.jsx:146: {t("load_forecast.grid_import_kwh", { val: Number(kpis.total_grid_import_kwh || 0).toFixed(1), defaultValue: `Netzbezug: ${Number(kpis.total_grid_import_kwh || 0).toFixed(1)} kWh` })}
+frontend/src\features\help\components\HelpArticleEditorModal.jsx:48: setErrorMsg(err.message || "Fehler beim Speichern des Hilfeartikels.");
+frontend/src\features\market\components\HomeTariffSettingsCard.jsx:510: SECTION 3: TARIF-HISTORIE & GEPLANTE WECHSEL
+frontend/src\features\market\components\SpotPriceModal.jsx:533: Netzbezug vermeiden · Speicherentladung priorisieren
+frontend/src\features\producer\components\StorageSystemCard.jsx:215: {storage.ems_control_enabled ? "Aktiv" : "Standby"}
+frontend/src\features\producer\components\StorageSystemModal.jsx:178: setErrorMsg(err.message || "Fehler beim Speichern des Speichersystems.");
+frontend/src\features\producer\components\StorageSystemModal.jsx:355: Steuerung aktiv
+frontend/src\features\producer\components\StorageSystemModal.jsx:532: <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1 truncate" title="Batteriestrom für Richtung (+ Entladen, - Laden)">
+frontend/src\features\producer\pages\ProducerPage.jsx:160: Automatische Erkennung sekundärer AC-Erzeuger (2. Wechselrichter / BKW)
+frontend/src\features\producer\pages\ProducerPage.jsx:163: ● Automatisch aktiv
+frontend/src\features\producer\pages\ProducerPage.jsx:167: Strom von ungebundenen AC-Wechselrichtern oder Balkonkraftwerken im Hausnetz wird in der Energiebilanz physikalisch als Solarerzeugung bilanziert und nicht als Hausverbrauch fehlinterpretiert.
+frontend/src\features\producer\pages\ProducerPage.jsx:332: {t("storage.empty_desc", "Lege deinen Hausspeicher an und ordne flexibel zu, welches Gerät den Ladestand (SoC %) und die Ladeleistung liefert (All-in-One Wechselrichter oder getrennte Sensoren).")}
+frontend/src\features\support\api.js:40: if (!res.ok) throw new Error("Fehler beim Laden der Support-Tickets");
+frontend/src\features\support\components\SupportDrawer.jsx:394: title="Staff: Artikel bearbeiten"
+frontend/src\features\support\components\SupportDrawer.jsx:498: placeholder="z.B. Wechselrichter meldet Kommunikationsfehler"
+frontend/src\features\support\components\SupportDrawer.jsx:539: <option value="devices">Hardware & Zähler</option>
+frontend/src\pages\Agb.jsx:33: (1) Der Anbieter stellt dem Nutzer eine SaaS-Plattform (Software-as-a-Service) zur Verfügung, die Werkzeuge zur Erfassung, Visualisierung, Steuerung und Optimierung von Energieflüssen (Erzeugung, Speicher, Verbrauch, Netzeinspeisung) sowie zur Analyse von Strommarkttarifen bereitstellt.
+frontend/src\pages\Agb.jsx:36: (2) Der genaue Funktionsumfang richtet sich nach dem jeweils gebuchten Tarif:
+frontend/src\pages\Agb.jsx:40: <li><strong>Sharegy Pro:</strong> Erweiterte Analytics, Multi-Tarif-Arbitrage, historische Zeitreihenanalysen, erweiterte Exporte und priorisierter Support.</li>
+frontend/src\pages\Agb.jsx:72: (2) Entgelte sind jeweils im Voraus für den vereinbarten Abrechnungszeitraum (monatlich oder jährlich) fällig.
+frontend/src\pages\Datenschutz.jsx:38: <li><strong>Vertragserfüllung & vorvertragliche Maßnahmen (Art. 6 Abs. 1 lit. b DSGVO):</strong> Zur Bereitstellung des Energiemanagement-Systems (HEMS/EMS), Verarbeitung von Zähler- und Erzeugungsdaten, Tarifeinstellungen, Rechnungsstellung und Nutzerverwaltung.</li>
+frontend/src\pages\Datenschutz.jsx:61: Kernfunktion von Sharegy ist das Erfassen und Visualisieren von Energieflüssen. Hierbei verarbeiten wir Messdaten von angeschlossenen Geräten (Smart Meter, Wechselrichter, Batteriespeicher, Wärmepumpen, schaltbare Steckdosen, OCPP-Wallboxen, WSS- und MQTT-Sensoren). Zu den verarbeiteten Werten gehören Wirkleistung (W), Zählerstände (kWh, OBIS 1.8.0 / 2.8.0), Batterieladezustand (SoC %), Netzspannung und Timestamp. Diese Daten werden zur Aggregation, Berechnung von Autarkiegraden, Erzeugungs- und Lastprognosen sowie zur Eigenverbrauchsoptimierung verwendet.
+frontend/src\pages\Datenschutz.jsx:109: <li><strong>Tibber API (optional):</strong> Nur bei vom Nutzer aktiv hinterlegtem API-Token zur Abfrage individueller Verbrauchs- und Preisdaten.</li>
+frontend/src\pages\InterfacesPage.jsx:34: "Möchtest du wirklich ein neues MQTT-Passwort generieren? Bestehende Geräte müssen anschließend mit dem neuen Passwort aktualisiert werden."
+frontend/src\pages\InterfacesPage.jsx:70: {t("interfaces.subtitle", "Verbinde deine Geräte und Zentralen direkt über Outbound-WebSocket (Shelly), Sungrow Direkt-Kopplung, Cloud-Wechselrichter, das Home Assistant Plugin oder MQTT mit Sharegy.")}
+frontend/src\pages\InterfacesPage.jsx:91: Voll verschlüsselte Live-Verbindung über Port 443 (WSS) für Shelly 1PM Gen3, Pro 3EM, Plus 1PM uvm.
+frontend/src\pages\InterfacesPage.jsx:127: <div className="text-gray-500 text-[11px]">Sichere WSS-Verbindung über Standard HTTPS (Port 443).</div>
+frontend/src\pages\InterfacesPage.jsx:165: <strong>Fertig!</strong> Der Shelly verbindet sich automatisch mit Sharegy. Das Gerät wird sofort erkannt und taucht unter <strong>Geräte</strong> und im <strong>Dashboard</strong> auf.
+frontend/src\pages\InterfacesPage.jsx:180: cardTitle="3. Sungrow Wechselrichter & Batteriespeicher (SH-Serie)"
+frontend/src\pages\InterfacesPage.jsx:188: cardTitle="4. Weitere Wechselrichter (SolarEdge, Fronius, Kostal, Growatt)"
+frontend/src\pages\InterfacesPage.jsx:257: Starte Home Assistant neu und öffne <strong>Einstellungen</strong> $\rightarrow$ <strong>Geräte & Dienste</strong> $\rightarrow$ <strong>Integration hinzufügen</strong>.
+frontend/src\pages\MetricsPage.jsx:447: title="Live-Telemetrie aktiv (Klicken für sofortigen Refetch)"
+frontend/src\pages\MetricsPage.jsx:530: <option value="all">Alle Geräte ({deviceOptions.length})</option>
+frontend/src\pages\MetricsPage.jsx:782: ‹ Zurück
+frontend/src\pages\Profile.jsx:348: Verknüpfte Zähler, Wechselrichter, Batteriespeicher, OBIS-Messzeitreihen (1.8.0/2.8.0) und MQTT/OCPP/WSS-Konfigurationen.
+frontend/src\pages\Profile.jsx:370: Aktiver Tarif (<span className="font-semibold">{subscriptionQuery.data?.plan === "pro" ? "Sharegy Pro" : "Sharegy Free"}</span>), Rechnungsbelege und steuerliche Nachweise.
+frontend/src\pages\Profile.jsx:441: "Wenn du fortfährst, werden dein Benutzerkonto, alle konfigurierten Zähler, Wechselrichter, historische Diagramme und Benachrichtigungen sofort gelöscht."
+frontend/src\pages\Profile.jsx:446: {t("gdpr.modal_delete_prompt", "Zur Bestätigung gib bitte deine E-Mail-Adresse")} (<strong>{user?.email}</strong>) {t("gdpr.modal_delete_or", "oder")} <strong>LÖSCHEN</strong> {t("gdpr.modal_delete_in_field", "ein:")}
+frontend/src\pages\Profile.jsx:453: placeholder={user?.email || "LÖSCHEN"}
+frontend/src\pages\Profile.jsx:483: deleteConfirmation.trim().toUpperCase() !== "LÖSCHEN" &&
+frontend/src\pages\StructurePage.jsx:182: {assignedDevicesCount} <span className="text-xs text-gray-400 dark:text-slate-500 font-normal">/ {devices.length} Geräte</span>
+frontend/src\pages\StructurePage.jsx:201: {searchQuery ? "Keine passenden Geräte oder Etagen gefunden" : "Noch keine Geräte auf Etagen zugeordnet"}
+frontend/src\pages\StructurePage.jsx:205: ? "Passe deinen Suchbegriff an oder setze die Suche zurück."
+frontend/src\pages\StructurePage.jsx:206: : "Ordne deine Smart-Plugs, Zähler und Wechselrichter unter 'Geräte' Räumen und Etagen zu, um sie hier übersichtlich zu gruppieren."}
+frontend/src\pages\StructurePage.jsx:245: defaultValue: `${totalFloorDevices} ${totalFloorDevices === 1 ? "Gerät" : "Geräte"}`,
+frontend/src\pages\StructurePage.jsx:266: defaultValue: `${room.devices.length} ${room.devices.length === 1 ? "Gerät" : "Geräte"}`,
+frontend/src\pages\SystemStatusPage.jsx:149: <div className="text-[10px] uppercase font-bold tracking-wider opacity-70">Aktive Geräte</div>
+frontend/src\pages\SystemStatusPage.jsx:251: <span>RAM-Speicher ({Math.round(healthData.metrics.server_hardware.ram_total_mb / 1024)} GB)</span>
+frontend/src\pages\SystemStatusPage.jsx:274: <span>SSD-Speicher ({healthData.metrics.server_hardware.disk_total_gb} GB)</span>
+frontend/src\pages\SystemStatusPage.jsx:407: <option value="inverter_bridge">Wechselrichter / Home Assistant Bridge</option>
+frontend/src\pages\SystemStatusPage.jsx:461: Abbrechen
+frontend/src\pages\TenantDashboard.jsx:235: Zurück zum Dashboard
+frontend/src\pages\TenantDashboard.jsx:258: Community Aktiv
+frontend/src\pages\TenantDashboard.jsx:314: ⚡ Zähler & wMSB Hub
+frontend/src\pages\TenantDashboard.jsx:443: Ersparnis
+frontend/src\pages\TenantDashboard.jsx:535: <span className="w-2.5 h-2.5 rounded-sm bg-sky-500"></span> Verbrauch
+frontend/src\pages\TenantDashboard.jsx:592: Aktiv
+frontend/src\pages\TenantDashboard.jsx:640: <div className="text-[11px] text-indigo-300 font-semibold uppercase">Ersparnis vs. Netz</div>
+frontend/src\pages\admin\CommunitiesManagementHub.jsx:372: <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Zähler (iMSys)</span>
+frontend/src\pages\admin\CommunitiesManagementHub.jsx:393: <span className="text-[11px] font-bold text-cyan-600 dark:text-cyan-400 uppercase tracking-wider">Ersparnis</span>
+frontend/src\pages\admin\CommunitiesManagementHub.jsx:432: Aktiv
+frontend/src\pages\admin\CommunitiesManagementHub.jsx:465: <span className="text-slate-400 text-[10px]">Mitglieder & Zähler</span>
+frontend/src\pages\admin\CommunitiesManagementHub.jsx:471: <span className="text-slate-400 text-[10px]">Aktiver Tarif</span>
+frontend/src\pages\admin\CommunitiesManagementHub.jsx:579: ⚙️ Einstellungen
+frontend/src\pages\admin\CommunitiesManagementHub.jsx:601: Zähler: {m.meters.length > 0 ? m.meters.map((mtr) => mtr.serial_number).join(", ") : "Kein Zähler zugewiesen"}
+frontend/src\pages\admin\CommunitiesManagementHub.jsx:654: {savingModel ? "Speichere..." : "Modell im Tarif aktivieren"}
+frontend/src\pages\admin\CommunitiesManagementHub.jsx:678: Solarstrom wird proportional zum zeitgleichen Echtzeit-Verbrauch im 15-Minuten-Raster aufgeteilt.
+frontend/src\pages\admin\CommunitiesManagementHub.jsx:724: Stufe 1: Vorrangige Quote. Stufe 2: Ungenutzte Überschüsse werden dynamisch auf Restbedarf verteilt.
+frontend/src\pages\admin\CommunitiesManagementHub.jsx:761: {savingShares ? "Speichere..." : "Quoten speichern"}
+frontend/src\pages\admin\CommunitiesManagementHub.jsx:872: <span className="bg-indigo-500 text-[9px] font-black px-1.5 py-0.5 rounded">AKTIV</span>
+frontend/src\pages\admin\CommunitiesManagementHub.jsx:1042: {savingSettings ? "Speichere..." : "Einstellungen übernehmen"}
+frontend/src\pages\admin\CommunitiesManagementHub.jsx:1093: <option value="tariff">💰 Tarif & Abrechnung</option>
+frontend/src\pages\admin\CommunitiesManagementHub.jsx:1094: <option value="maintenance">🔧 Wartung & Zähler</option>
+frontend/src\pages\admin\CommunitiesManagementHub.jsx:1119: Abbrechen
+frontend/src\pages\dashboard\DashboardHybrid.jsx:29: <KPI label="Verbrauch" value="12" unit="kWh" icon="⚡" />
+frontend/src\pages\dashboard\DashboardHybrid.jsx:42: <KPI label="Ersparnis" value="120" unit="€" icon="💰" />
+frontend/src\pages\dashboard\DashboardTenant.jsx:28: <KPI label="Ersparnis" value="120" unit="€" icon="💰" />

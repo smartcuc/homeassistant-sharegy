@@ -1,0 +1,60 @@
+frontend/src\api\client.js:36: [Omi] -> //        return new Promise(() => { });
+frontend/src\components\device\AddDeviceModal.jsx:116: [Omi] -> const [roomId, setRoomId] = useState("");
+frontend/src\components\device\AddDeviceModal.jsx:129: [Omi] -> setRoomId("");
+frontend/src\components\device\AddDeviceModal.jsx:185: [Omi] -> roomId={roomId}
+frontend/src\components\device\AddDeviceModal.jsx:186: [Omi] -> setRoomId={setRoomId}
+frontend/src\components\device\AddDeviceModal.jsx:212: [Omi] -> room_id: roomId ? Number(roomId) : null,
+frontend/src\components\device\AddDeviceModal.jsx:306: [Omi] -> roomId,
+frontend/src\components\device\AddDeviceModal.jsx:307: [Omi] -> setRoomId,
+frontend/src\components\device\AddDeviceModal.jsx:376: [Omi] -> value={roomId}
+frontend/src\components\device\AddDeviceModal.jsx:377: [Omi] -> onChange={(e) => setRoomId(e.target.value)}
+frontend/src\components\device\AddDeviceModal.jsx:484: [Omi] -> {/* ⚡ PROMINENT WEBSOCKET (WSS) BANNER (SHELLY & MODERN DEVICES) */}
+frontend/src\components\device\DeviceSetupModal.jsx:136: [Omi] -> const roomId =
+frontend/src\components\device\DeviceSetupModal.jsx:495: [Omi] -> value={roomId}
+frontend/src\components\device\HomeSetupStatusModal.jsx:14: [Omi] -> {/* Header mit Omi-Check im Text */}
+frontend/src\components\device\HomeSetupStatusModal.jsx:20: [Omi] -> System-Check & Einrichtungsgrad (Omi-Check)
+frontend/src\components\device\RemoveDevicesModal.jsx:154: [Omi] -> await Promise.all([
+frontend/src\components\device\TrashBinModal.jsx:124: [Omi] -> await Promise.all([
+frontend/src\components\device\TrashBinModal.jsx:173: [Omi] -> await Promise.all([
+frontend/src\components\legal\CookieConsentBanner.jsx:166: [Omi] -> {t("cookies.customize", "Anpassen")}
+frontend/src\features\billing\components\SubscriptionPlanCard.jsx:212: [Basis] -> badge: t("billing.plan_free_badge", "Basis"),
+frontend/src\features\billing\components\SubscriptionPlanCard.jsx:220: [Basis] -> t("billing.f_weather", "Basis-Wetter- & Solarprognose (24h)"),
+frontend/src\features\control\components\BatteryStorageControlCard.jsx:38: [Omi] -> if (!storage?.id) return Promise.resolve();
+frontend/src\features\devices\components\AddWallboxModal.jsx:288: [Basis] -> <option value="min_pv">⛅ Min + PV-Überschuss (Basis 6A)</option>
+frontend/src\features\energy\EnergyDashboard.jsx:176: [Experten] -> {/* View Mode Toggle: Einfach / Experten */}
+frontend/src\features\energy\EnergyDashboard.jsx:198: [Experten] -> <span>⚙️</span> Experten
+frontend/src\features\energy\components\SimpleDashboardView.jsx:135: [Autarkie (] -> Autarkie ({periodLabel})
+frontend/src\features\energy\components\SimpleDashboardView.jsx:154: [Basis] -> {autarkyRate >= 75 ? "Exzellent" : autarkyRate >= 40 ? "Gut" : "Basis"}
+frontend/src\features\energy\components\SimpleDashboardView.jsx:175: [Finanzvorteil (] -> Finanzvorteil ({periodLabel})
+frontend/src\features\energy\components\SimpleDashboardView.jsx:188: [Eingespart] -> Eingespart
+frontend/src\features\energy\components\SimpleDashboardView.jsx:265: [Experten] -> {t("simple_dashboard.open_expert_view", "Experten-Ansicht öffnen")}
+frontend/src\features\energy\components\SimpleDashboardView.jsx:532: [Experten] -> Zu den Experten-Tools &rarr;
+frontend/src\features\energy\components\SubmeterTrendModal.jsx:396: [Basis] -> {t("submeters.data_basis", "Datenbasis: Aggregierte Stundenmessungen & stichtagsgenaue Tarife")}
+frontend/src\features\energy\components\SystemReadinessCard.jsx:119: [Omi] -> {/* Left: Omi-Check Badge & 5 Mini Status Chips */}
+frontend/src\features\energy\components\SystemReadinessCard.jsx:123: [Omi] -> <span>{t("system_health.title_short", "Omi-Check")}:</span>
+frontend/src\features\energy\components\WallboxCard.jsx:338: [Basis] -> {currentMode === "pv_surplus" ? t("wallbox.mode_desc_pv", "Nur echter Solarüberschuss") : currentMode === "min_pv" ? t("wallbox.mode_desc_min_pv", "Min. Basisleistung + Solarboost") : currentMode === "spot_price" ? t("wallbox.mode_desc_spot", "Günstigste Börsenstunden") : currentMode === "instant" ? t("wallbox.mode_desc_instant", "Maximale Ladeleistung") : t("wallbox.mode_desc_paused", "Ladevorgang pausiert")}
+frontend/src\features\producer\components\StorageSystemModal.jsx:263: [Omi] -> {t("storage_system.nominal_capacity", "Nennkapazität (kWh)")} *
+frontend/src\features\producer\components\StorageSystemModal.jsx:372: [Autarkie (] -> <option value="self_consumption">☀️ PV-Autarkie (Autonom)</option>
+frontend/src\features\support\components\SupportDrawer.jsx:433: [Experten] -> <p className="text-[11px] text-slate-500 dark:text-slate-400">Öffne ein Ticket direkt bei unseren Experten.</p>
+frontend/src\pages\Datenschutz.jsx:148: [Basis] -> <strong>Art. 21 DSGVO:</strong> Recht auf Widerspruch gegen Verarbeitungen auf Basis berechtigter Interessen.
+frontend/src\pages\DevicesPage.jsx:452: [Omi] -> await Promise.all([
+frontend/src\pages\DevicesPage.jsx:765: [Omi] -> const allRoomIds = useMemo(() => {
+frontend/src\pages\DevicesPage.jsx:812: [Omi] -> allRoomIds.map(id => ({ id })),
+frontend/src\pages\DevicesPage.jsx:843: [Omi] -> allRoomIds,
+frontend/src\pages\InterfacesPage.jsx:400: [Basis] -> <span className="text-gray-500 font-medium">{t("interfaces.base_topic", "Dein persönliches Basis-Topic:")} </span>
+frontend/src\pages\InterfacesPage.jsx:483: [Basis] -> <p>{t("interfaces.nodered_step_3", "3. Sende JSON-Nutzdaten an dein Basis-Topic.")}</p>
+frontend/src\pages\MagicLogin.jsx:46: [Omi] -> await new Promise(r => setTimeout(r, 250));
+frontend/src\pages\StructurePage.jsx:76: [Omi] -> const roomId = config.room?.id || "unassigned";
+frontend/src\pages\StructurePage.jsx:90: [Omi] -> if (roomId === "unassigned") {
+frontend/src\pages\StructurePage.jsx:93: [Omi] -> if (!currentFloor.rooms[roomId]) {
+frontend/src\pages\StructurePage.jsx:94: [Omi] -> currentFloor.rooms[roomId] = {
+frontend/src\pages\StructurePage.jsx:95: [Omi] -> id: roomId,
+frontend/src\pages\StructurePage.jsx:100: [Omi] -> currentFloor.rooms[roomId].devices.push(dev);
+frontend/src\pages\TenantDashboard.jsx:38: [Omi] -> const [logData, cockpitData, tariffsRes, statementsRes, sharesRes] = await Promise.all([
+frontend/src\pages\TenantDashboard.jsx:469: [Basis] -> Prädiktive Lastoptimierung auf Basis von Wettermodellen & historischen Community-Mustern
+frontend/src\pages\admin\CommunitiesManagementHub.jsx:85: [Omi] -> mea_denominator: s.mea_denominator || 1000,
+frontend/src\pages\admin\CommunitiesManagementHub.jsx:105: [Omi] -> const den = parseFloat(updated[index].mea_denominator || 1000);
+frontend/src\pages\admin\CommunitiesManagementHub.jsx:126: [Omi] -> mea_denominator: parseInt(s.mea_denominator) || 1000,
+frontend/src\pages\dashboard\DashboardUser.jsx:62: [Omi] -> {/* 🩺 System-Check & Einrichtungsgrad (4-Säulen-Omi-Check) */}
+frontend/src\tracking\sentry.js:3: [Omi] -> * Dynamically loads official Sentry Browser SDK and catches unhandled exceptions & promise rejections.
+frontend/src\tracking\sentry.js:40: [Omi] -> "Non-Error promise rejection captured",
