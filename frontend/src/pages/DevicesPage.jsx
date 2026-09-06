@@ -475,12 +475,14 @@ export default function DevicesPage() {
         queryKey: ["devices-status"],
         queryFn: () => apiFetch("/api/devices/status/"),
         refetchInterval: 5000,
+        refetchIntervalInBackground: true,
     });
 
     const valuesQuery = useQuery({
         queryKey: ["devices-values"],
         queryFn: () => apiFetch("/api/devices/dashboard/"),
-        refetchInterval: 10000,
+        refetchInterval: 3000,
+        refetchIntervalInBackground: true,
         retry: false,
     });
 

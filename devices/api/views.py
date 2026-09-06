@@ -646,7 +646,7 @@ def device_dashboard_values(request):
             }
         )
 
-    cache.set(cache_key, result, timeout=5)
+    cache.set(cache_key, result, timeout=2)
     return Response(result)
 
 
