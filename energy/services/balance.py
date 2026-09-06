@@ -283,6 +283,11 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
     pv_kwh_total = 0.0
     load_kwh_total = 0.0
 
+    # Geräte-spezifische Metric-Keys für Deduplizierung sammeln
+    device_present_metrics = defaultdict(set)
+    for row in metric_rows:
+        device_present_metrics[row["device_id"]].add((row.get("metric_key") or "").strip().lower())
+
     for row in metric_rows:
         dev_id = row["device_id"]
         m_k = (row.get("metric_key") or "").strip().lower()
@@ -296,17 +301,12 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
         b_time = row["bucket"].astimezone(tz)
         b_key = b_time.strftime(bucket_format)
 
-        # 1. PV Erzeugung
-        if m_k in ["power", "pv_power", "pv_power_w", "pv"] or (
-            dev_id in pv_device_ids and m_k not in ["load_power", "grid_power", "battery_power"]
-        ):
+        # 1. Spezifische Metric-Keys (Höchste Priorität)
+        if m_k in ["pv_power", "pv_power_w", "solar_power", "pv", "production"]:
             bucket_map[b_key]["pv"] += kwh
             pv_kwh_total += kwh
 
-        # 2. Netzleistung (Import / Export)
-        elif m_k in ["grid_power", "grid_power_w", "grid"] or (
-            dev_id in grid_device_ids and m_k not in ["power", "load_power", "battery_power"]
-        ):
+        elif m_k in ["grid_power", "grid_power_w", "grid", "meter_power"]:
             if avg_w >= 0:
                 bucket_map[b_key]["grid_import"] += kwh
                 grid_import_kwh_total += kwh
@@ -314,10 +314,15 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
                 bucket_map[b_key]["grid_export"] += kwh
                 grid_export_kwh_total += kwh
 
-        # 3. Speicherleistung (Discharge / Charge)
-        elif m_k in ["battery_power", "battery_power_w", "battery"] or (
-            dev_id in battery_device_ids and m_k not in ["power", "load_power", "grid_power"]
-        ):
+        elif m_k in ["grid_import", "grid_import_power", "grid_import_w", "import_power"]:
+            bucket_map[b_key]["grid_import"] += kwh
+            grid_import_kwh_total += kwh
+
+        elif m_k in ["grid_export", "grid_export_power", "grid_export_w", "export_power", "feed_in_power", "feed_in"]:
+            bucket_map[b_key]["grid_export"] += kwh
+            grid_export_kwh_total += kwh
+
+        elif m_k in ["battery_power", "battery_power_w", "battery", "storage_power"]:
             if avg_w < 0:
                 bucket_map[b_key]["battery_charge"] += kwh
                 battery_charge_map[dev_id] += kwh
@@ -325,10 +330,42 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
                 bucket_map[b_key]["battery_discharge"] += kwh
                 battery_discharge_map[dev_id] += kwh
 
-        # 4. Hausverbrauch / Consumer
-        elif m_k in ["load_power", "load_power_w", "load", "consumer"]:
+        elif m_k in ["battery_charge", "charge_power", "battery_charge_power"]:
+            bucket_map[b_key]["battery_charge"] += kwh
+            battery_charge_map[dev_id] += kwh
+
+        elif m_k in ["battery_discharge", "discharge_power", "battery_discharge_power"]:
+            bucket_map[b_key]["battery_discharge"] += kwh
+            battery_discharge_map[dev_id] += kwh
+
+        elif m_k in ["load_power", "load_power_w", "load", "consumption", "consumer_power"]:
             bucket_map[b_key]["load"] += kwh
             load_kwh_total += kwh
+
+        # 2. Generischer Metric-Key "power" / "value" (Deduplizierung: nur wenn kein spezifischer Key vorhanden ist)
+        elif m_k in ["power", "value"]:
+            present = device_present_metrics[dev_id]
+            # Falls dieses Gerät bereits spezifischere Kanäle hat, ignoriere das redundante "power"
+            if dev_id in pv_device_ids and not present.intersection({"pv_power", "pv_power_w", "solar_power", "pv"}):
+                bucket_map[b_key]["pv"] += kwh
+                pv_kwh_total += kwh
+            elif dev_id in grid_device_ids and not present.intersection({"grid_power", "grid_power_w", "grid", "grid_import", "grid_export"}):
+                if avg_w >= 0:
+                    bucket_map[b_key]["grid_import"] += kwh
+                    grid_import_kwh_total += kwh
+                else:
+                    bucket_map[b_key]["grid_export"] += kwh
+                    grid_export_kwh_total += kwh
+            elif dev_id in battery_device_ids and not present.intersection({"battery_power", "battery_power_w", "battery"}):
+                if avg_w < 0:
+                    bucket_map[b_key]["battery_charge"] += kwh
+                    battery_charge_map[dev_id] += kwh
+                else:
+                    bucket_map[b_key]["battery_discharge"] += kwh
+                    battery_discharge_map[dev_id] += kwh
+            elif not present.intersection({"load_power", "load_power_w", "load", "consumption"}):
+                bucket_map[b_key]["load"] += kwh
+                load_kwh_total += kwh
 
         else:
             bucket_map[b_key]["load"] += kwh
@@ -368,55 +405,42 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
         autarky_rate = 0.0
         self_consumption_rate = 0.0
     else:
-        # Falls kein Netzzähler existiert, Überschusseinspeisung rechnerisch ermitteln
-        if not grid_device_ids:
-            total_grid_export_kwh = round(max(0.0, total_pv_kwh - total_battery_charge_kwh - total_measured_consumer_kwh), 2)
-            total_grid_import_kwh = 0.0
-
-        # Physische Bilanz:
         # 1. Direkter PV-Verbrauch im Haus = PV - Einspeisung - Batterieladung
-        direct_consumption_kwh = round(max(0.0, total_pv_kwh - total_grid_export_kwh - total_battery_charge_kwh), 2)
+        available_for_home = max(0.0, total_pv_kwh - total_battery_charge_kwh - total_grid_export_kwh)
         
-        # 2. Gesamt-Hausverbrauch = Direkter PV-Verbrauch + Batterie-Entladung + Netzbezug
-        total_house_consumption_kwh = round(direct_consumption_kwh + total_battery_discharge_kwh + total_grid_import_kwh, 2)
-        if total_house_consumption_kwh < total_measured_consumer_kwh:
+        # 2. Gesamt-Hausverbrauch
+        if total_measured_consumer_kwh > 0:
             total_house_consumption_kwh = total_measured_consumer_kwh
+        else:
+            total_house_consumption_kwh = round(available_for_home + total_battery_discharge_kwh + total_grid_import_kwh, 2)
 
-        # 3. Bucket-by-Bucket Solardeckung berechnen
-        sum_solar_supplied = 0.0
-        sum_house_consumption = 0.0
-        for b_data in bucket_map.values():
-            b_pv = b_data.get("pv", 0.0)
-            b_bat_chg = b_data.get("battery_charge", 0.0)
-            b_bat_dis = b_data.get("battery_discharge", 0.0)
-            b_grid_imp = b_data.get("grid_import", 0.0)
-            b_grid_exp = b_data.get("grid_export", 0.0)
-            b_load = b_data.get("load", 0.0)
+        direct_consumption_kwh = round(min(total_house_consumption_kwh, available_for_home), 2)
 
-            b_solar_avail = max(0.0, b_pv - b_bat_chg - b_grid_exp) if grid_device_ids else max(0.0, b_pv - b_bat_chg)
-            b_house_load = max(b_load, b_solar_avail + b_bat_dis + b_grid_imp)
-            b_solar_supplied = min(b_house_load, b_solar_avail + b_bat_dis) if b_house_load > 0 else 0.0
+        # 3. Physische Bilanz-Vervollständigung (Energieerhaltung):
+        # Falls Netzbezug/Einspeisung rechnerisch nötig sind (z. B. wenn kein separater Netzzähler existiert oder ungemessen):
+        uncovered_demand = round(max(0.0, total_house_consumption_kwh - direct_consumption_kwh - total_battery_discharge_kwh), 2)
+        if total_grid_import_kwh == 0 and uncovered_demand > 0:
+            total_grid_import_kwh = uncovered_demand
+        elif total_grid_import_kwh < uncovered_demand:
+            total_grid_import_kwh = uncovered_demand
 
-            sum_solar_supplied += b_solar_supplied
-            sum_house_consumption += b_house_load
+        surplus_pv = round(max(0.0, total_pv_kwh - direct_consumption_kwh - total_battery_charge_kwh), 2)
+        if total_grid_export_kwh == 0 and surplus_pv > 0:
+            total_grid_export_kwh = surplus_pv
 
-        if total_grid_import_kwh == 0 and total_house_consumption_kwh > 0:
-            autarky_rate = 100.0
-            solar_supplied_kwh = total_house_consumption_kwh
-        elif total_house_consumption_kwh > 0:
-            autarky_rate = round(max(0.0, min(100.0, (1.0 - (total_grid_import_kwh / total_house_consumption_kwh)) * 100.0)), 1)
-            solar_supplied_kwh = round(max(0.0, total_house_consumption_kwh - total_grid_import_kwh), 2)
+        # 4. Solare Deckung und Autarkiegrad:
+        solar_supplied_kwh = round(max(0.0, total_house_consumption_kwh - total_grid_import_kwh), 2)
+        if total_house_consumption_kwh > 0:
+            autarky_rate = round(max(0.0, min(100.0, (solar_supplied_kwh / total_house_consumption_kwh) * 100.0)), 1)
         else:
             autarky_rate = 0.0
-            solar_supplied_kwh = 0.0
 
-        autarky_rate = min(100.0, max(0.0, autarky_rate))
-
-
-        # 4. Eigenverbrauchsquote (Wie viel % der PV-Erzeugung wurden direkt verbraucht oder im Speicher geladen?):
+        # 5. Eigenverbrauchsquote:
         self_consumption_kwh = round(direct_consumption_kwh + total_battery_charge_kwh, 2)
-        self_consumption_rate = round((self_consumption_kwh / total_pv_kwh * 100.0), 1) if total_pv_kwh > 0 else 0.0
-        self_consumption_rate = min(100.0, max(0.0, self_consumption_rate))
+        if total_pv_kwh > 0:
+            self_consumption_rate = round(max(0.0, min(100.0, (self_consumption_kwh / total_pv_kwh) * 100.0)), 1)
+        else:
+            self_consumption_rate = 0.0
 
     # =========================================================================
     # 2.5 Tarif-, Börsenpreis- und Einspeisevergütungs-Berechnung (Zeitgenau nach Datum)
