@@ -483,11 +483,43 @@ def device_dashboard_values(request):
             "device_id", "metric_key", "value", "unit", "timestamp"
         )
     )
+    # Erkennung von Multi-Source-Invertern je Gerät
+    dev_keys_map = defaultdict(set)
+    for row in all_latest:
+        dev_keys_map[row["device_id"]].add(row["metric_key"].lower())
+
     device_metrics_map = defaultdict(dict)
     for row in all_latest:
-        cfg = device_cfg_map.get(row["device_id"])
-        inferred_u = _infer_canonical_unit(row["metric_key"], row["unit"] or "", config=cfg)
-        device_metrics_map[row["device_id"]][row["metric_key"]] = {
+        dev_id = row["device_id"]
+        cfg = device_cfg_map.get(dev_id)
+        configured_lead_key = cfg.metric_definition.key if (cfg and cfg.metric_definition) else None
+        m_k = row["metric_key"]
+        raw_keys = dev_keys_map[dev_id]
+        is_multi_source = any(k in raw_keys for k in ["pv_power", "grid_power", "battery_power", "load_power"])
+
+        # 1. soc -> battery_soc
+        if m_k.lower() in ["soc", "battery_level"]:
+            m_k = "battery_soc"
+
+        # 2. Generische Keys (value, val) auf konfigurierte Lead-Metrik mappen
+        if m_k.lower() in ["value", "val"] and configured_lead_key:
+            m_k = configured_lead_key
+
+        # 3. Single-Channel Submeter / Verbraucher: generische 'power'/'temperature' mit konfigurierter Lead-Metrik zusammenführen
+        if not is_multi_source and configured_lead_key:
+            cfg_lower = configured_lead_key.lower()
+            k_lower = m_k.lower()
+            if ("power" in cfg_lower or cfg_lower in ["aircon_power", "heatpump_power", "bwwp_power", "wallbox_power"]) and k_lower in ["power", "active_power", "p_total", "w", "watt", "value", "val"]:
+                m_k = configured_lead_key
+            elif "temp" in cfg_lower and k_lower in ["temperature", "temp", "device_temp", "value", "val"]:
+                m_k = configured_lead_key
+
+        # 4. Multi-Source Inverter: generisches 'power' ignorieren, wenn dedizierte Kanäle (pv_power/load_power) vorliegen
+        if is_multi_source and m_k.lower() in ["power", "value", "val"] and "pv_power" in raw_keys:
+            continue
+
+        inferred_u = _infer_canonical_unit(m_k, row["unit"] or "", config=cfg)
+        device_metrics_map[dev_id][m_k] = {
             "value": round(float(row["value"]), 2) if row["value"] is not None else None,
             "unit": inferred_u,
             "timestamp": row["timestamp"].isoformat() if row["timestamp"] else None,
@@ -733,6 +765,11 @@ def device_available_metrics(request, device_id):
 
     results = []
     seen_keys = set()
+    configured_lead_key = cfg.metric_definition.key if (cfg and cfg.metric_definition) else None
+
+    # Prüfen, ob das Gerät ein Multi-Source-Inverter ist (pv/battery/grid)
+    all_raw_keys = {lm.metric_key.lower() for lm in latest_metrics}
+    is_multi_source = any(k in all_raw_keys for k in ["pv_power", "grid_power", "battery_power", "load_power"])
 
     for lm in latest_metrics:
         k = lm.metric_key
@@ -742,11 +779,32 @@ def device_available_metrics(request, device_id):
         ]:
             continue
 
-        # Falls der Snapshot-Key generisch (value/val) ist, auf die konfigurierte MetricDefinition mappen
-        if k.lower() in ["value", "val"] and cfg and cfg.metric_definition:
-            k = cfg.metric_definition.key
+        # 1. Alias-Normalisierung: soc -> battery_soc
+        if k.lower() in ["soc", "battery_level"]:
+            k = "battery_soc"
 
+        # 2. Generische Keys (value, val) auf konfigurierte Lead-Metrik mappen
+        if k.lower() in ["value", "val"] and configured_lead_key:
+            k = configured_lead_key
+
+        # 3. Single-Channel Submeter / Verbraucher: generische 'power'/'temperature' Keys mit konfigurierter Lead-Metrik zusammenführen
+        if not is_multi_source and configured_lead_key:
+            cfg_lower = configured_lead_key.lower()
+            k_lower = k.lower()
+            if ("power" in cfg_lower or cfg_lower in ["aircon_power", "heatpump_power", "bwwp_power", "wallbox_power"]) and k_lower in ["power", "active_power", "p_total", "w", "watt", "value", "val"]:
+                k = configured_lead_key
+            elif "temp" in cfg_lower and k_lower in ["temperature", "temp", "device_temp", "value", "val"]:
+                k = configured_lead_key
+
+        # 4. Multi-Source Inverter: generisches 'power' ignorieren, wenn dedizierte Kanäle (pv_power/load_power) vorliegen
+        if is_multi_source and k.lower() in ["power", "value", "val"] and "pv_power" in all_raw_keys:
+            continue
+
+        # 5. Strikte Deduplizierung: Bereits erfasste Kanäle überspringen
+        if k in seen_keys:
+            continue
         seen_keys.add(k)
+
         meta = KEY_METADATA.get(k, {})
         d_obj = def_map.get(k) or (cfg.metric_definition if cfg and cfg.metric_definition and cfg.metric_definition.key == k else None)
 
@@ -766,7 +824,7 @@ def device_available_metrics(request, device_id):
 
         unit = (d_obj.unit if d_obj else None) or lm.unit or _infer_canonical_unit(k, "", config=cfg)
 
-        is_primary = (k == primary_key) or (primary_key not in seen_keys and k in ["power", "value", "active_power", "temperature", "bwwp_temp"])
+        is_primary = (k == primary_key) or (primary_key not in seen_keys and k in ["power", "value", "active_power", "temperature", "bwwp_temp", configured_lead_key])
 
         results.append({
             "key": k,

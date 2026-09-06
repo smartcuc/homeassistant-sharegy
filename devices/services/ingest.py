@@ -306,9 +306,23 @@ def ingest_metric_payload(
             continue
 
         raw_key = str(key).strip()
-        # Bei generischen Keys (value, val) auf die konfigurierte Lead-Metrik mappen
-        if configured_lead_key and raw_key.lower() in ["value", "val"]:
+        raw_lower = raw_key.lower()
+
+        # 1. Alias-Normalisierung: soc / battery_level -> battery_soc
+        if raw_lower in ["soc", "battery_level"]:
+            metric_key = "battery_soc"
+        # 2. Generische Keys (value, val) auf konfigurierte Lead-Metrik mappen
+        elif configured_lead_key and raw_lower in ["value", "val"]:
             metric_key = configured_lead_key
+        # 3. Single-Channel Submeter/Verbraucher: generische 'power'/'temp' auf konfigurierte Lead-Metrik mappen
+        elif configured_lead_key:
+            cfg_lower = configured_lead_key.lower()
+            if ("power" in cfg_lower or cfg_lower in ["aircon_power", "heatpump_power", "bwwp_power", "wallbox_power"]) and raw_lower in LEAD_POWER_KEYS:
+                metric_key = configured_lead_key
+            elif "temp" in cfg_lower and raw_lower in ["temperature", "temp", "device_temp"]:
+                metric_key = configured_lead_key
+            else:
+                metric_key = raw_key
         else:
             metric_key = raw_key
 
@@ -362,7 +376,6 @@ def ingest_metric_payload(
             cache.set(f"device:{device.id}:battery_soc", float_val, timeout=300)
             cache.set(f"device:{device.id}:latest_soc", float_val, timeout=300)
 
-
         # 3. Snapshot-Tabelle DeviceLatestMetric aktualisieren (O(1))
         DeviceLatestMetric.objects.update_or_create(
             device=device,
@@ -374,6 +387,12 @@ def ingest_metric_payload(
                 "timestamp": ts,
             },
         )
+
+        # Veraltete Alias-Rows in DeviceLatestMetric aufräumen
+        if metric_key != raw_key and raw_key.lower() in ["power", "value", "val", "soc"]:
+            DeviceLatestMetric.objects.filter(device=device, metric_key=raw_key).delete()
+        if metric_key == "battery_soc":
+            DeviceLatestMetric.objects.filter(device=device, metric_key="soc").delete()
 
         # 4. Zeitreihe mit Deadband- und Heartbeat-Deduplizierung schreiben
         if should_record_metric(device.id, metric_key, float_val, ts):

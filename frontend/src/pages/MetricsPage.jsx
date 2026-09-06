@@ -263,7 +263,12 @@ export default function MetricsPage() {
 
             const metricKeys = Object.keys(metricsObj);
             if (metricKeys.length > 0) {
+                const seenMetricKeys = new Set();
                 metricKeys.forEach((mKey) => {
+                    const normalizedKey = (mKey === "soc" || mKey === "battery_level") ? "battery_soc" : mKey;
+                    if (seenMetricKeys.has(normalizedKey)) return;
+                    seenMetricKeys.add(normalizedKey);
+
                     const mData = metricsObj[mKey] || {};
                     const meta = getMetricMeta(mKey, mData.unit, config, t);
 

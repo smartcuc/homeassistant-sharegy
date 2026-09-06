@@ -127,7 +127,14 @@ function DeviceChartModal({ device, onClose }) {
     });
 
     const allMetrics = metricsQuery.data?.metrics || [];
-    const availableMetrics = allMetrics.filter(m => !m.key.toLowerCase().startsWith("daily_"));
+    const seenMetricKeys = new Set();
+    const availableMetrics = allMetrics.filter(m => {
+        if (!m.key || m.key.toLowerCase().startsWith("daily_")) return false;
+        const normalizedKey = (m.key === "soc" || m.key === "battery_level") ? "battery_soc" : m.key.toLowerCase();
+        if (seenMetricKeys.has(normalizedKey)) return false;
+        seenMetricKeys.add(normalizedKey);
+        return true;
+    });
     const primaryMetricKey = metricsQuery.data?.primary_metric || (availableMetrics.find(m => m.is_primary)?.key) || (availableMetrics.length > 0 ? availableMetrics[0].key : (device.config?.metric_definition?.key || (device.unit === "°C" || device.config?.role?.key === "sensor" ? "temperature" : "power")));
     const activeMetricKey = selectedMetric || primaryMetricKey;
     const activeMetricObj = availableMetrics.find(m => m.key === activeMetricKey) || availableMetrics[0];
