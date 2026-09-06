@@ -8,6 +8,7 @@ import ProUpgradeModal from "../../../components/common/ProUpgradeModal";
 
 import LivePowerBudgetHeader from "../components/LivePowerBudgetHeader";
 import PriorityCascadeBar from "../components/PriorityCascadeBar";
+import LiveSurplusWaterfallCard from "../components/LiveSurplusWaterfallCard";
 import DispatchTimelineCard from "../components/DispatchTimelineCard";
 import BWWPLoadManagementCard from "../../energy/components/BWWPLoadManagementCard";
 import BatteryStorageControlCard from "../components/BatteryStorageControlCard";
@@ -171,7 +172,10 @@ export default function ControlPage() {
                 isSaving={priorityMutation.isPending}
             />
 
-            {/* 3. 24h Dispatch Timeline & Schedule */}
+            {/* 3. Live Surplus Waterfall Flow Card */}
+            <LiveSurplusWaterfallCard budget={liveBudget} />
+
+            {/* 4. 24h Dispatch Timeline & Schedule */}
             <DispatchTimelineCard schedule={dispatchSchedule} />
 
             {/* 4. SECTION: STEUERBARE GROSSVERBRAUCHER & AKTOREN */}

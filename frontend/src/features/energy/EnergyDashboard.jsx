@@ -10,6 +10,7 @@ import EnergyOptimizerCard from "./components/EnergyOptimizerCard";
 import BatteryForecastCard from "./components/BatteryForecastCard";
 import BatteryArbitrageCard from "./components/BatteryArbitrageCard";
 import SimpleDashboardView from "./components/SimpleDashboardView";
+import MonthlySavingsRecapCard from "./components/MonthlySavingsRecapCard";
 
 import AddWallboxModal from "../devices/components/AddWallboxModal";
 import CommunityShareModal from "../community/components/CommunityShareModal";
@@ -263,6 +264,11 @@ export default function EnergyDashboard() {
                 />
             ) : (
                 <>
+            {/* 💰 Ersparnis- & ROI-Recap Card */}
+            <MonthlySavingsRecapCard
+                kpis={kpis}
+                period={period}
+            />
 
             {/* =========================================================
                 KPI HIGHLIGHTS (PREMIUM MODERN CARDS)

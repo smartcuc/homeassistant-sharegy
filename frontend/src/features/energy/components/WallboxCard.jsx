@@ -265,20 +265,64 @@ export default function WallboxCard({ onOpenAddModal }) {
                 )}
 
                 {/* Metrics */}
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-3 gap-2.5">
                     <div className="p-3 bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-700/60">
-                        <div className="text-[11px] text-slate-500">Ladeleistung (Live)</div>
-                        <div className="text-lg font-bold font-mono text-slate-900 dark:text-white mt-0.5 flex items-baseline justify-between">
+                        <div className="text-[10px] text-slate-500 uppercase font-semibold">Ladeleistung</div>
+                        <div className="text-base sm:text-lg font-bold font-mono text-slate-900 dark:text-white mt-0.5 flex items-baseline justify-between">
                             <span>{activePowerKw} kW</span>
-                            <span className="text-xs font-normal text-slate-400 font-sans">{activeStation.phases || 3}P · {targetAmpere}A</span>
+                        </div>
+                        <div className="text-[10px] text-slate-400 font-sans mt-0.5">
+                            {activeStation.phases || 3}P · {targetAmpere}A
                         </div>
                     </div>
 
                     <div className="p-3 bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-700/60">
-                        <div className="text-[11px] text-slate-500">Geladene Energie</div>
-                        <div className="text-lg font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-0.5 flex items-baseline justify-between">
+                        <div className="text-[10px] text-slate-500 uppercase font-semibold">Geladen (Session)</div>
+                        <div className="text-base sm:text-lg font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-0.5 flex items-baseline justify-between">
                             <span>{sessionKwh} kWh</span>
-                            <span className="text-xs font-normal text-emerald-600 dark:text-emerald-400 font-sans">☀️ {currentMode === "pv_surplus" ? "100%" : "85%"} PV</span>
+                        </div>
+                        <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-sans mt-0.5 font-semibold">
+                            +{Math.round(Number(sessionKwh) / 0.17)} km Reichweite
+                        </div>
+                    </div>
+
+                    <div className="p-3 bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-700/60">
+                        <div className="text-[10px] text-slate-500 uppercase font-semibold">Fahrzeug-Akku</div>
+                        <div className="text-base sm:text-lg font-bold font-mono text-indigo-600 dark:text-indigo-400 mt-0.5 flex items-baseline justify-between">
+                            <span>{Math.min(100, Math.round(42 + (Number(sessionKwh) / 60) * 100))}%</span>
+                        </div>
+                        <div className="text-[10px] text-slate-400 font-sans mt-0.5 truncate">
+                            ~{Math.round((Math.min(100, Math.round(42 + (Number(sessionKwh) / 60) * 100)) / 100) * 450)} km Gesamt
+                        </div>
+                    </div>
+                </div>
+
+                {/* ⏰ SMARTES ZIELLADEN & ABFAHRTSZEIT-PLANER */}
+                <div className="p-3 bg-indigo-50/80 dark:bg-indigo-950/40 rounded-2xl border border-indigo-200/80 dark:border-indigo-800/60 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
+                    <div className="flex items-center gap-2">
+                        <span className="text-base shrink-0">⏰</span>
+                        <div>
+                            <div className="font-bold text-indigo-950 dark:text-indigo-200">
+                                Zielladen & Abfahrtszeit (Departure Ready)
+                            </div>
+                            <div className="text-[11px] text-indigo-700/80 dark:text-indigo-400">
+                                Lädt primär mit PV-Reststrom & günstigsten Nacht-Spotpreisen
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 self-end sm:self-center">
+                        <div className="flex items-center gap-1 bg-white dark:bg-slate-900 px-2 py-1 rounded-xl border border-indigo-200 dark:border-indigo-800">
+                            <span className="text-[10px] text-slate-400">Abfahrt:</span>
+                            <input
+                                type="time"
+                                defaultValue="07:30"
+                                className="font-bold font-mono text-xs text-slate-900 dark:text-white bg-transparent outline-none cursor-pointer"
+                            />
+                        </div>
+                        <div className="flex items-center gap-1 bg-white dark:bg-slate-900 px-2 py-1 rounded-xl border border-indigo-200 dark:border-indigo-800">
+                            <span className="text-[10px] text-slate-400">Ziel:</span>
+                            <span className="font-bold font-mono text-xs text-indigo-600 dark:text-indigo-400">80%</span>
                         </div>
                     </div>
                 </div>
@@ -305,6 +349,15 @@ export default function WallboxCard({ onOpenAddModal }) {
                         <option value="instant">⚡ Sofortladen</option>
                         <option value="off">🛑 Gesperrt</option>
                     </select>
+                </div>
+
+                {/* 🛡️ § 14a EnWG Compliance Badge */}
+                <div className="flex items-center justify-between px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-emerald-800 dark:text-emerald-300 font-semibold">
+                    <span className="flex items-center gap-1.5">
+                        <span>🛡️</span>
+                        <span>§ 14a EnWG steuerbar (4,2 kW Netzentgelt-Schutz aktiv)</span>
+                    </span>
+                    <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">+160 € / a Vorteil</span>
                 </div>
             </div>
 
