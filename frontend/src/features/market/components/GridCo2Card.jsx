@@ -54,7 +54,7 @@ export default function GridCo2Card() {
                 <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
                     <div className="flex items-center gap-2">
                         <span className={`px-2.5 py-1 rounded-xl text-xs font-extrabold border ${levelBadgeColor}`}>
-                            {data.current_level_label}
+                            {t(`co2_grid.level_${data.current_level}`, data.current_level_label || "Normaler Netzmix")}
                         </span>
                     </div>
 
@@ -116,7 +116,7 @@ export default function GridCo2Card() {
                         {data.avg_renewable_share_pct || 62.5} %
                     </div>
                     <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-                        Wind + PV + Wasser
+                        {t("co2.sources_summary", "Wind + PV + Wasser")}
                     </div>
                 </div>
             </div>
@@ -145,7 +145,7 @@ export default function GridCo2Card() {
                                 <div className="text-[11px] font-bold opacity-80">{slot.time_label}</div>
                                 <div className="text-xs font-black font-mono">{slot.co2_intensity_g_per_kwh} g</div>
                                 <div className="text-[10px] font-semibold opacity-90">
-                                    {slot.renewable_share_pct}% EE
+                                    {slot.renewable_share_pct}% {t("co2_grid.ee_short", "EE")}
                                 </div>
                             </div>
                         ))}
@@ -159,7 +159,14 @@ export default function GridCo2Card() {
                     {insights.map((ins, i) => (
                         <div key={i} className="flex items-start gap-2">
                             <span className="text-teal-600 dark:text-teal-400 font-bold">🌿</span>
-                            <span>{ins}</span>
+                            <span>
+                                {data.current_level === "green"
+                                    ? t("co2_grid.insight_green", { co2: data.current_co2_intensity_g_per_kwh, defaultValue: ins })
+                                    : data.current_level === "red"
+                                        ? t("co2_grid.insight_red", { co2: data.current_co2_intensity_g_per_kwh, window: data.best_eco_window, defaultValue: ins })
+                                        : t("co2_grid.insight_amber", { share: Math.round(Number(data.current_renewable_share_pct || 65)), window: data.best_eco_window, defaultValue: ins })
+                                }
+                            </span>
                         </div>
                     ))}
                 </div>

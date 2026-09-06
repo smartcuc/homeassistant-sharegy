@@ -89,7 +89,7 @@ export default function EnergyOptimizerCard() {
                 {/* Duration Pills Toolbar */}
                 <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
                     <span className="text-[11px] font-semibold text-indigo-200/70">
-                        Geplante Laufzeit:
+                        {t("optimizer.planned_runtime", "Geplante Laufzeit:")}
                     </span>
                     <div className="flex flex-wrap items-center bg-slate-800/90 p-1 rounded-2xl border border-indigo-700/50 shadow-inner gap-1">
                         {durationTabs.map((tab) => (
@@ -134,14 +134,14 @@ export default function EnergyOptimizerCard() {
                         {/* Uhrzeit & Preis */}
                         <div>
                             <div className="text-xl sm:text-2xl font-black font-mono text-white tracking-tight">
-                                {best.start_label} – {best.end_label} Uhr
+                                {best.start_label} – {best.end_label} {t("common.o_clock", "Uhr")}
                             </div>
                             <div className="mt-1.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
                                 <span className="text-sm font-black font-mono text-emerald-400">
                                     {Number(best.avg_cost_ct ?? best.effective_cost_ct ?? 0).toFixed(1)} ct/kWh
                                 </span>
                                 <span className="text-[11px] text-emerald-300/80 font-medium">
-                                    {best.source === "pv_surplus" ? "· Kostenloser Solar-Überschuss" : "· Günstigster Börsenpreis"}
+                                    {best.source === "pv_surplus" ? t("optimizer.free_solar_surplus", "· Kostenloser Solar-Überschuss") : t("optimizer.cheapest_spot_price", "· Günstigster Börsenpreis")}
                                 </span>
                             </div>
                         </div>
@@ -149,7 +149,10 @@ export default function EnergyOptimizerCard() {
 
                     {/* Handlungsempfehlung Box */}
                     <div className="text-[11px] text-emerald-200/90 bg-emerald-900/50 border border-emerald-700/60 rounded-xl p-3 relative z-10 leading-relaxed mt-2">
-                        {best.recommendation_text || `⚡ Ideal für energieintensive Geräte (${deviceInfo.device_name || "Haushaltsgeräte"}). Maximale Ersparnis durch Eigenstromnutzung.`}
+                        {best.source === "pv_surplus"
+                            ? t("optimizer.rec_solar_surplus", { device: t(`optimizer.device_${duration}`, deviceInfo.device_name || "Haushaltsgeräte"), savings: Number(currentWindow.savings_eur || 0).toFixed(2), defaultValue: best.recommendation_text })
+                            : t("optimizer.rec_market_low", { price: Number(best.avg_cost_ct ?? best.effective_cost_ct ?? 0).toFixed(1), defaultValue: best.recommendation_text })
+                        }
                     </div>
                 </div>
 
@@ -172,14 +175,14 @@ export default function EnergyOptimizerCard() {
                         {/* Uhrzeit & Preis */}
                         <div>
                             <div className="text-xl sm:text-2xl font-black font-mono text-white tracking-tight">
-                                {bestNight ? `${bestNight.start_label} – ${bestNight.end_label} Uhr` : "Kein Nachtfenster"}
+                                {bestNight ? `${bestNight.start_label} – ${bestNight.end_label} ${t("common.o_clock", "Uhr")}` : t("optimizer.no_night_slot", "Kein Nachtfenster")}
                             </div>
                             <div className="mt-1.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
                                 <span className="text-sm font-black font-mono text-indigo-300">
                                     {bestNight ? `${Number(bestNight.avg_cost_ct ?? bestNight.effective_cost_ct ?? 0).toFixed(1)} ct/kWh` : "-"}
                                 </span>
                                 <span className="text-[11px] text-indigo-200/80 font-medium">
-                                    · Niedrigster Spot-Tarif der Nacht
+                                    {t("optimizer.lowest_spot_night", "· Niedrigster Spot-Tarif der Nacht")}
                                 </span>
                             </div>
                         </div>
@@ -187,7 +190,10 @@ export default function EnergyOptimizerCard() {
 
                     {/* Handlungsempfehlung Box */}
                     <div className="text-[11px] text-indigo-200/90 bg-indigo-900/50 border border-indigo-700/60 rounded-xl p-3 relative z-10 leading-relaxed mt-2">
-                        {bestNight?.recommendation_text || "🌙 Niedrigste Strompreise der Nacht. Optimal für verzögerte Gerätestarts oder Netz-Nachladung des Speichers."}
+                        {bestNight
+                            ? t("optimizer.rec_best_night", { price: Number(bestNight.avg_cost_ct ?? bestNight.effective_cost_ct ?? 0).toFixed(1), defaultValue: bestNight.recommendation_text })
+                            : t("optimizer.rec_no_night_slot", "🌙 Kein reines Nachtfenster im verbleibenden Tageszeitraum verfügbar.")
+                        }
                     </div>
                 </div>
 
@@ -210,14 +216,14 @@ export default function EnergyOptimizerCard() {
                         {/* Uhrzeit & Preis */}
                         <div>
                             <div className="text-xl sm:text-2xl font-black font-mono text-white tracking-tight">
-                                {worst ? `${worst.start_label} – ${worst.end_label} Uhr` : "-"}
+                                {worst ? `${worst.start_label} – ${worst.end_label} ${t("common.o_clock", "Uhr")}` : "-"}
                             </div>
                             <div className="mt-1.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
                                 <span className="text-sm font-black font-mono text-rose-400">
                                     {worst ? `${Number(worst.avg_cost_ct ?? worst.effective_cost_ct ?? 0).toFixed(1)} ct/kWh` : "-"}
                                 </span>
                                 <span className="text-[11px] text-rose-300/80 font-medium">
-                                    · Preishoch & Spitzenlast
+                                    {t("optimizer.price_high_peak", "· Preishoch & Spitzenlast")}
                                 </span>
                             </div>
                         </div>
@@ -225,7 +231,10 @@ export default function EnergyOptimizerCard() {
 
                     {/* Handlungsempfehlung Box */}
                     <div className="text-[11px] text-rose-200/90 bg-rose-900/50 border border-rose-700/60 rounded-xl p-3 relative z-10 leading-relaxed mt-2">
-                        {worst?.recommendation_text || "⚠️ Hohe Netzbezugskosten. Schalte flexible Lasten ab und decke den Verbrauch bevorzugt aus dem Batteriespeicher."}
+                        {worst
+                            ? t("optimizer.rec_worst_peak", { price: Number(worst.avg_cost_ct ?? worst.effective_cost_ct ?? 0).toFixed(1), defaultValue: worst.recommendation_text })
+                            : t("optimizer.rec_no_worst_slot", "⚠️ Hohe Netzbezugskosten. Schalte flexible Lasten ab und decke den Verbrauch bevorzugt aus dem Batteriespeicher.")
+                        }
                     </div>
                 </div>
             </div>
@@ -243,7 +252,7 @@ export default function EnergyOptimizerCard() {
                         </div>
                         {data.status_message && (
                             <div className="text-[10px] text-indigo-300/80 font-normal">
-                                ℹ️ {data.status_message}
+                                ℹ️ {data.has_tomorrow_prices ? t("optimizer.status_prices_tomorrow", "Vollständige 24h+ Börsenpreise bis morgen aktiv") : t("optimizer.status_prices_today_only", "Nur heutige Börsenpreise aktiv (Morgige Preise ab ca. 13:00 Uhr)")}
                             </div>
                         )}
                     </div>
@@ -278,12 +287,14 @@ export default function EnergyOptimizerCard() {
                                 ? 14
                                 : Math.min(100, Math.max(14, Math.round((costVal / Math.max(maxTimelinePrice, 35.0)) * 100)));
 
-                            // Dynamische Ausrichtung des Tooltips (linksbündig am Anfang, rechtsbündig am Ende, zentriert in der Mitte)
+                            // Dynamische Ausrichtung des Tooltips
                             const tooltipPosClass = idx < 3 
                                 ? "left-0 translate-x-0" 
                                 : idx > timeline.length - 4 
                                     ? "right-0 translate-x-0" 
                                     : "left-1/2 -translate-x-1/2";
+
+                            const dateLabel = pt.date_label ? (pt.date_label === "Heute" ? t("common.today", "Heute") : (pt.date_label === "Morgen" ? t("common.tomorrow", "Morgen") : pt.date_label)) : t("common.today", "Heute");
 
                             return (
                                 <div
@@ -295,17 +306,17 @@ export default function EnergyOptimizerCard() {
                                     {/* Tooltip Hover mit sicherer Positionierung */}
                                     <div className={`absolute bottom-full mb-2 hidden group-hover:flex flex-col bg-slate-900/95 backdrop-blur-md border border-indigo-500/60 rounded-xl p-2.5 shadow-2xl text-[11px] z-50 whitespace-nowrap pointer-events-none ${tooltipPosClass}`}>
                                         <div className="font-bold text-white flex items-center justify-between gap-3">
-                                            <span>{pt.time_label} Uhr ({pt.date_label || "Heute"})</span>
+                                            <span>{pt.time_label} {t("common.o_clock", "Uhr")} ({dateLabel})</span>
                                             <span className="font-mono text-emerald-400 font-bold">{costVal.toFixed(1)} ct/kWh</span>
                                         </div>
                                         <div className="text-[10px] text-slate-300 mt-0.5">
                                             {isSurplus 
-                                                ? `☀️ Solarüberschuss (${Number(pt.pv_kw || 0).toFixed(1)} kW PV)` 
-                                                : `⚡ Netzbezug (${Number(pt.grid_price_ct || costVal).toFixed(1)} ct)`}
+                                                ? t("optimizer.tooltip_surplus", { pv: Number(pt.pv_kw || 0).toFixed(1), defaultValue: `☀️ Solarüberschuss (${Number(pt.pv_kw || 0).toFixed(1)} kW PV)` }) 
+                                                : t("optimizer.tooltip_grid", { price: Number(pt.grid_price_ct || costVal).toFixed(1), defaultValue: `⚡ Netzbezug (${Number(pt.grid_price_ct || costVal).toFixed(1)} ct)` })}
                                         </div>
                                         {isInsideBest && (
                                             <div className="mt-1 text-[9px] font-bold text-emerald-300 uppercase tracking-wider">
-                                                ★ Empfohlenes Zeitfenster
+                                                ★ {t("optimizer.recommended_slot_badge", "Empfohlenes Zeitfenster")}
                                             </div>
                                         )}
                                     </div>
@@ -340,12 +351,12 @@ export default function EnergyOptimizerCard() {
                     </div>
 
                     <div className="mt-3 pt-2.5 border-t border-indigo-900/40 flex flex-wrap items-center justify-between gap-2 text-[11px] text-indigo-300/70 font-medium">
-                        <span>{t("energy.now", "Jetzt")} ({timeline[0]?.time_label || "00:00"} Uhr)</span>
+                        <span>{t("energy.now", "Jetzt")} ({timeline[0]?.time_label || "00:00"} {t("common.o_clock", "Uhr")})</span>
                         <span className="text-emerald-300 font-semibold flex items-center gap-1">
                             <span>★</span>
                             <span>{t("optimizer.recommended_window", { duration, start: best.start_label, end: best.end_label, defaultValue: `Empfohlenes ${duration}-Fenster: ${best.start_label} – ${best.end_label} Uhr` })}</span>
                         </span>
-                        <span>{data.has_tomorrow_prices ? `Bis morgen (${timeline[timeline.length - 1]?.time_label || "24:00"} Uhr)` : `Bis heute 24:00 Uhr (${timeline.length}h)`}</span>
+                        <span>{data.has_tomorrow_prices ? t("optimizer.until_tomorrow", { time: timeline[timeline.length - 1]?.time_label || "24:00", defaultValue: `Bis morgen (${timeline[timeline.length - 1]?.time_label || "24:00"} Uhr)` }) : t("optimizer.until_today_midnight", { hours: timeline.length, defaultValue: `Bis heute 24:00 Uhr (${timeline.length}h)` })}</span>
                     </div>
                 </div>
             </div>
@@ -358,7 +369,7 @@ export default function EnergyOptimizerCard() {
                     <span className="text-2xl p-2 bg-indigo-800/50 rounded-xl">{deviceInfo.icon}</span>
                     <div>
                         <div className="font-bold text-white">{t("optimizer.recommended_for", { duration, defaultValue: `Empfohlenes Einsatzszenario für ${duration}:` })}</div>
-                        <div className="text-indigo-200/80">{deviceInfo.device_name} ({t("optimizer.approx_demand", { kwh: currentWindow.total_kwh_typical, defaultValue: `ca. ${currentWindow.total_kwh_typical} kWh Energiebedarf` })})</div>
+                        <div className="text-indigo-200/80">{t(`optimizer.device_${duration}`, deviceInfo.device_name)} ({t("optimizer.approx_demand", { kwh: currentWindow.total_kwh_typical, defaultValue: `ca. ${currentWindow.total_kwh_typical} kWh Energiebedarf` })})</div>
                     </div>
                 </div>
 

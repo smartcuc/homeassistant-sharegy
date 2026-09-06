@@ -31,14 +31,14 @@ export default function CommunityInviteCard({ onOpenShareModal, kpis = {} }) {
                 <div>
                     <div className="flex items-center gap-2">
                         <h4 className="text-sm font-bold text-white tracking-tight">
-                            Quartiers-Energy Sharing (§ 42b EnWG)
+                            {t("community.sharing_title", "Quartiers-Energy Sharing (§ 42b EnWG)")}
                         </h4>
                         <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                            Community
+                            {t("community.badge", "Community")}
                         </span>
                     </div>
                     <p className="text-xs text-slate-300 mt-1 leading-relaxed">
-                        Teile deinen überschüssigen Solarstrom mit Nachbarn oder Mietern und spare gemeinsam teure Netzgebühren durch automatisiertes 15-Minuten-Clearing.
+                        {t("community.sharing_desc", "Teile deinen überschüssigen Solarstrom mit Nachbarn oder Mietern und spare gemeinsam teure Netzgebühren durch automatisiertes 15-Minuten-Clearing.")}
                     </p>
                 </div>
             </div>
@@ -50,7 +50,7 @@ export default function CommunityInviteCard({ onOpenShareModal, kpis = {} }) {
                     className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-800/90 hover:bg-slate-750 text-slate-200 border border-slate-700 transition-all flex items-center gap-1.5"
                 >
                     <span>{copied ? "✓" : "📋"}</span>
-                    <span>{copied ? "Link kopiert" : "Invite-Link"}</span>
+                    <span>{copied ? t("common.copied", "Link kopiert") : t("community.invite_link", "Invite-Link")}</span>
                 </button>
 
                 <button
@@ -59,7 +59,7 @@ export default function CommunityInviteCard({ onOpenShareModal, kpis = {} }) {
                     className="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all shadow-lg shadow-emerald-500/25 flex items-center gap-1.5 hover:scale-[1.02] active:scale-[0.98]"
                 >
                     <span>📢</span>
-                    <span>Erfolge teilen & einladen</span>
+                    <span>{t("community.share_and_invite", "Erfolge teilen & einladen")}</span>
                 </button>
             </div>
         </div>

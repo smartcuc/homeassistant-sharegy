@@ -50,23 +50,23 @@ export default function BatteryArbitrageCard() {
 
                     <div className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-xs space-y-2.5">
                         <div className="flex items-center justify-between text-xs text-indigo-200">
-                            <span>⚡ Durchschnittlicher Preis-Spread:</span>
+                            <span>⚡ {t("arbitrage.avg_price_spread", "Durchschnittlicher Preis-Spread:")}</span>
                             <span className="font-bold text-emerald-400 font-mono">+14,8 ct / kWh</span>
                         </div>
                         <div className="flex items-center justify-between text-xs text-indigo-200">
-                            <span>📈 Mögliche Netto-Ersparnis:</span>
-                            <span className="font-bold text-amber-300 font-mono">bis zu 350 € / Jahr</span>
+                            <span>📈 {t("arbitrage.potential_net_savings", "Mögliche Netto-Ersparnis:")}</span>
+                            <span className="font-bold text-amber-300 font-mono">{t("arbitrage.up_to_yearly", "bis zu 350 € / Jahr")}</span>
                         </div>
                         <div className="flex items-center justify-between text-xs text-indigo-200">
-                            <span>🔄 Dynamische Börsenpreis-Steuerung:</span>
-                            <span className="font-bold text-indigo-300">Automatischer Ladefahrplan</span>
+                            <span>🔄 {t("arbitrage.dynamic_spot_control", "Dynamische Börsenpreis-Steuerung:")}</span>
+                            <span className="font-bold text-indigo-300">{t("arbitrage.auto_charge_plan", "Automatischer Ladefahrplan")}</span>
                         </div>
                     </div>
                 </div>
 
                 <div className="pt-5 mt-4 border-t border-indigo-800/40 relative z-10 flex items-center justify-between gap-4">
                     <span className="text-xs text-indigo-200/60 hidden sm:inline">
-                        Exklusiv für Pro-Abonnenten verfügbar
+                        {t("arbitrage.exclusive_pro", "Exklusiv für Pro-Abonnenten verfügbar")}
                     </span>
                     <button
                         type="button"

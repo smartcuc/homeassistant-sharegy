@@ -70,7 +70,8 @@
     "show_details": "Details anzeigen",
     "collapse": "Einklappen",
     "details_btn": "▼ Details",
-    "close_btn": "▲ Schließen"
+    "close_btn": "▲ Schließen",
+    "o_clock": "Uhr"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -915,7 +916,13 @@
     "gross_spread": "Brutto-Differenz",
     "cycle_loss": "🔌 Verlustbereinigt",
     "efficiency_note": "inkl. 88% Speichereffizienz",
-    "strategy_advice": "💡 Handlungsempfehlungen für deinen Speicher"
+    "strategy_advice": "💡 Handlungsempfehlungen für deinen Speicher",
+    "avg_price_spread": "Durchschnittlicher Preis-Spread:",
+    "potential_net_savings": "Mögliche Netto-Ersparnis:",
+    "up_to_yearly": "bis zu 350 € / Jahr",
+    "dynamic_spot_control": "Dynamische Börsenpreis-Steuerung:",
+    "auto_charge_plan": "Automatischer Ladefahrplan",
+    "exclusive_pro": "Exklusiv für Pro-Abonnenten verfügbar"
   },
   "energy_kpis": {
     "grid_import_kwh": "Netzbezug: {{val}} kWh",
@@ -973,9 +980,31 @@
     "in_24h": "In 24 Stunden",
     "recommended_for": "Empfohlenes Einsatzszenario für {{duration}}:",
     "savings_add": "+{{val}} € Ersparnis",
-    "recommended_window": "optimizer.recommended_window",
-    "approx_demand": "optimizer.approx_demand",
-    "per_run": "pro Durchlauf / Ladezyklus"
+    "recommended_window": "Empfohlenes {{duration}}-Fenster: {{start}} – {{end}} Uhr",
+    "approx_demand": "ca. {{kwh}} kWh Energiebedarf",
+    "per_run": "pro Durchlauf / Ladezyklus",
+    "planned_runtime": "Geplante Laufzeit:",
+    "free_solar_surplus": "· Kostenloser Solar-Überschuss",
+    "cheapest_spot_price": "· Günstigster Börsenpreis",
+    "rec_solar_surplus": "☀️ 100% Solarenergie verfügbar. Ideal für {{device}} – spart ca. {{savings}} € gegenüber Spitzenzeiten.",
+    "rec_market_low": "⚡ Niedrigster Börsenstrompreis des Tages ({{price}} ct/kWh). Optimaler Zeitpunkt zum Netzbezug oder Akku-Laden.",
+    "no_night_slot": "Kein Nachtfenster",
+    "lowest_spot_night": "· Niedrigster Spot-Tarif der Nacht",
+    "rec_best_night": "🌙 Günstigster Nacht-Spotmarkt ({{price}} ct/kWh). Perfekt für verzögerte Gerätestarts oder E-Auto-Nachtladung.",
+    "rec_no_night_slot": "🌙 Kein reines Nachtfenster im verbleibenden Tageszeitraum verfügbar.",
+    "price_high_peak": "· Preishoch & Spitzenlast",
+    "rec_worst_peak": "⚠️ Teuerste Spitzenlast ({{price}} ct/kWh). Flexible Verbraucher vermeiden und Energie aus dem Speicher nutzen.",
+    "rec_no_worst_slot": "⚠️ Hohe Netzbezugskosten. Schalte flexible Lasten ab und decke den Verbrauch bevorzugt aus dem Batteriespeicher.",
+    "status_prices_tomorrow": "Vollständige 24h+ Börsenpreise bis morgen aktiv",
+    "status_prices_today_only": "Nur heutige Börsenpreise aktiv (Morgige Preise ab ca. 13:00 Uhr)",
+    "tooltip_surplus": "☀️ Solarüberschuss ({{pv}} kW PV)",
+    "tooltip_grid": "⚡ Netzbezug ({{price}} ct)",
+    "recommended_slot_badge": "Empfohlenes Zeitfenster",
+    "until_tomorrow": "Bis morgen ({{time}} Uhr)",
+    "until_today_midnight": "Bis heute 24:00 Uhr ({{hours}}h)",
+    "device_1h": "Waschmaschine / Geschirrspüler",
+    "device_2h": "Wärmepumpe / Warmwasser",
+    "device_4h": "Wallbox / E-Auto (Laden)"
   },
   "load_forecast": {
     "title": "Haushalts- & Verbrauchs-Prognose",
@@ -1005,7 +1034,14 @@
     "live_intensity": "⚡ Live CO₂-Intensität",
     "best_eco_window": "🌱 Bestes Öko-Fenster",
     "avg_green_share": "🔋 Ø Grünstromanteil",
-    "legend": "🟢 < 250g (Grün) · 🟡 250-420g · 🔴 > 420g"
+    "legend": "🟢 < 250g (Grün) · 🟡 250-420g · 🔴 > 420g",
+    "level_green": "Grün (Hoher Erneuerbaren-Anteil)",
+    "level_amber": "Mittel (Normaler Netzmix)",
+    "level_red": "Rot (Hohe fossile Emissionen)",
+    "ee_short": "EE",
+    "insight_green": "Optimaler Zeitpunkt: Aktuell speisen Wind- und Solaranlagen viel Strom ins Netz ein ({{co2}} g CO₂/kWh). Ideal für E-Auto & Waschmaschine!",
+    "insight_red": "Hohe Netz-Emissionen: Derzeit decken fossile Kraftwerke die Lastspitze ({{co2}} g CO₂/kWh). Verschiebe Großverbraucher auf {{window}}.",
+    "insight_amber": "Ausgeglichener Netzmix: Grünstromanteil von {{share}}%. Nächstes grünes Ladefenster: {{window}}."
   },
   "selftest": {
     "title": "1-Klick Hardware-Selbsttest",
@@ -1430,7 +1466,11 @@
   "community": {
     "share_stats": "Erfolge teilen",
     "invite_link": "Einladungslink",
-    "share_stats_title": "Share achievements & autarky with neighbors and social media"
+    "share_stats_title": "Share achievements & autarky with neighbors and social media",
+    "sharing_title": "Quartiers-Energy Sharing (§ 42b EnWG)",
+    "badge": "Community",
+    "sharing_desc": "Teile deinen überschüssigen Solarstrom mit Nachbarn oder Mietern und spare gemeinsam teure Netzgebühren durch automatisiertes 15-Minuten-Clearing.",
+    "share_and_invite": "Erfolge teilen & einladen"
   },
   "battery_forecast": {
     "start_soc": "Start-Ladestand",
@@ -1559,7 +1599,8 @@
     "min_emissions": "Minimale Emissionen",
     "avg_24h": "24h-Durchschnitt",
     "daily_forecast": "Tagesprognose",
-    "timeline_title": "24h CO₂-Emissions-Timeline (g CO₂ / kWh)"
+    "timeline_title": "24h CO₂-Emissions-Timeline (g CO₂ / kWh)",
+    "sources_summary": "Wind + PV + Wasser"
   },
   "all": "all",
   "sharegy": "sharegy",
@@ -1568,7 +1609,11 @@
   "magic_login_attempt": "magic_login_attempt",
   "magic_login_success": "magic_login_success",
   "magic_login_failed": "magic_login_failed",
-  "status": "status",
+  "status": {
+    "title": "Systemstatus & Live-Infrastruktur",
+    "subtitle": "Echtzeit-Überwachung aller Dienste, Datenbanken, Ingest-Pipelines und APIs.",
+    "report_incident": "Störung melden"
+  },
   "deviceName": "deviceName",
   "metricName": "metricName",
   "room": "room",
