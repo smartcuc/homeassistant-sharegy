@@ -108,6 +108,45 @@ PLANS_CONFIG = {
 }
 
 
+def get_dynamic_plans_config():
+    """
+    Liefert die aktuelle Pläne-Konfiguration mit dynamischen Preisen aus den EMS-Globaleinstellungen.
+    """
+    import copy
+    plans = copy.deepcopy(PLANS_CONFIG)
+    try:
+        from energy.services.ems_settings import get_ems_global_settings
+        settings = get_ems_global_settings()
+        if settings:
+            pro_m = settings.pro_monthly_price_eur
+            pro_y = settings.pro_yearly_price_eur
+            landlord_m = settings.landlord_monthly_price_eur
+            landlord_y = settings.landlord_yearly_price_eur
+
+            plans["pro_monthly"]["price_gross_eur"] = Decimal(str(pro_m))
+            plans["pro_yearly"]["price_gross_eur"] = Decimal(str(pro_y))
+            plans["pro_yearly"]["price_monthly_equivalent"] = round(Decimal(str(pro_y)) / Decimal("12"), 2)
+
+            plans["landlord_monthly"]["price_gross_eur"] = Decimal(str(landlord_m))
+            plans["landlord_yearly"]["price_gross_eur"] = Decimal(str(landlord_y))
+            plans["landlord_yearly"]["price_monthly_equivalent"] = round(Decimal(str(landlord_y)) / Decimal("12"), 2)
+
+            # Rabatt % dynamisch berechnen
+            monthly_yearly_sum = Decimal(str(pro_m)) * Decimal("12")
+            if monthly_yearly_sum > 0:
+                discount_pct = int(round((1 - (Decimal(str(pro_y)) / monthly_yearly_sum)) * 100))
+                plans["pro_yearly"]["discount_pct"] = max(0, discount_pct)
+
+            monthly_yearly_landlord = Decimal(str(landlord_m)) * Decimal("12")
+            if monthly_yearly_landlord > 0:
+                discount_landlord = int(round((1 - (Decimal(str(landlord_y)) / monthly_yearly_landlord)) * 100))
+                plans["landlord_yearly"]["discount_pct"] = max(0, discount_landlord)
+    except Exception as e:
+        logger.warning("Konnte dynamische Pläne aus EMSGlobalSettings nicht laden: %s", e)
+
+    return plans
+
+
 def get_or_create_subscription(user):
     """
     Holt das Abonnement des Benutzers oder initialisiert den Free-Plan.
@@ -163,7 +202,8 @@ def get_subscription_overview(user):
             )
         )
 
-    current_plan_config = PLANS_CONFIG.get(sub.plan, PLANS_CONFIG["free"])
+    dynamic_plans = get_dynamic_plans_config()
+    current_plan_config = dynamic_plans.get(sub.plan, dynamic_plans["free"])
 
     return {
         "subscription": {
@@ -195,7 +235,7 @@ def get_subscription_overview(user):
             "country": profile.country or "DE",
             "email": user.email or "",
         },
-        "available_plans": PLANS_CONFIG,
+        "available_plans": dynamic_plans,
         "invoices": invoices,
     }
 

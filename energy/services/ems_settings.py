@@ -142,6 +142,11 @@ def get_ems_global_settings():
             special_grid_levy_ct_kwh=Decimal("0.6430"),
             offshore_levy_ct_kwh=Decimal("0.6560"),
             vat_percent=Decimal("19.00"),
+            pro_monthly_price_eur=Decimal("4.99"),
+            pro_yearly_price_eur=Decimal("49.99"),
+            landlord_monthly_price_eur=Decimal("14.99"),
+            landlord_yearly_price_eur=Decimal("149.99"),
+            trial_days=14,
         )
 
     cache.set(cache_key, settings_obj, timeout=CACHE_TIMEOUT_SETTINGS)

@@ -298,6 +298,17 @@ class EMSGlobalSettingsAdmin(admin.ModelAdmin):
             },
         ),
         (
+            "💎 5. SaaS-Abonnements & Pro-Lizenzgebühren (Endnutzer-Pläne)",
+            {
+                "fields": (
+                    ("saas_pricing_valid_from", "trial_days"),
+                    ("pro_monthly_price_eur", "pro_yearly_price_eur"),
+                    ("landlord_monthly_price_eur", "landlord_yearly_price_eur"),
+                ),
+                "description": "Zentrale Preissteuerung für Software-Lizenzen (Sharegy Pro & Vermieter-Quartiere) inkl. Gültigkeitsdatum und Testphase.",
+            },
+        ),
+        (
             "⏱️ Metadaten",
             {
                 "fields": ("created_at", "updated_at"),

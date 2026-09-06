@@ -205,6 +205,21 @@ export default function SubscriptionPlanCard({ subscriptionData, onRefresh }) {
         }
     };
 
+    const availablePlans = subscriptionData?.available_plans;
+    const formatPrice = (val, fallback) => {
+        if (val == null || val === "") return fallback;
+        const num = Number(val);
+        return isNaN(num) ? fallback : `${num.toFixed(2).replace(".", ",")} €`;
+    };
+
+    const proMonthlyPrice = formatPrice(availablePlans?.pro_monthly?.price_gross_eur, "4,99 €");
+    const proYearlyPrice = formatPrice(availablePlans?.pro_yearly?.price_gross_eur, "49,99 €");
+    const proMonthlyEquiv = formatPrice(availablePlans?.pro_yearly?.price_monthly_equivalent, "4,17 €");
+
+    const landlordMonthlyPrice = formatPrice(availablePlans?.landlord_monthly?.price_gross_eur, "14,99 €");
+    const landlordYearlyPrice = formatPrice(availablePlans?.landlord_yearly?.price_gross_eur, "149,99 €");
+    const landlordMonthlyEquiv = formatPrice(availablePlans?.landlord_yearly?.price_monthly_equivalent, "12,50 €");
+
     const plans = [
         {
             id: "free",
@@ -230,9 +245,9 @@ export default function SubscriptionPlanCard({ subscriptionData, onRefresh }) {
             badge: t("billing.plan_pro_badge", "⭐ Beliebteste Wahl"),
             badgeColor: "bg-emerald-100 text-emerald-800 border-emerald-300",
             iconEmoji: "⚡",
-            priceMonthly: "4,99 €",
-            priceYearly: "49,99 €",
-            priceSub: interval === "year" ? t("billing.year_equiv_pro", "entspricht 4,17 € / Monat") : t("billing.monthly_cancelable", "monatlich kündbar"),
+            priceMonthly: proMonthlyPrice,
+            priceYearly: proYearlyPrice,
+            priceSub: interval === "year" ? t("billing.year_equiv_pro", `entspricht ${proMonthlyEquiv} / Monat`, { equiv: proMonthlyEquiv }) : t("billing.monthly_cancelable", "monatlich kündbar"),
             desc: t("billing.plan_pro_desc", "Volle KI-Power, Speicher-Arbitrage und automatische Börsenpreis-Optimierung."),
             highlight: true,
             features: [
@@ -252,9 +267,9 @@ export default function SubscriptionPlanCard({ subscriptionData, onRefresh }) {
             badge: t("billing.plan_landlord_badge", "Multi-Unit"),
             badgeColor: "bg-indigo-100 text-indigo-800 border-indigo-300",
             iconEmoji: "🏢",
-            priceMonthly: "14,99 €",
-            priceYearly: "149,99 €",
-            priceSub: interval === "year" ? t("billing.year_equiv_landlord", "entspricht 12,50 € / Monat") : t("billing.monthly_cancelable", "monatlich kündbar"),
+            priceMonthly: landlordMonthlyPrice,
+            priceYearly: landlordYearlyPrice,
+            priceSub: interval === "year" ? t("billing.year_equiv_landlord", `entspricht ${landlordMonthlyEquiv} / Monat`, { equiv: landlordMonthlyEquiv }) : t("billing.monthly_cancelable", "monatlich kündbar"),
             desc: t("billing.plan_landlord_desc", "Für Mehrfamilienhäuser, Vermieter und Mieterstrom-Gemeinschaften."),
             features: [
                 t("billing.f_landlord_pro", "Alle Pro-Funktionen inklusive"),

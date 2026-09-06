@@ -5,6 +5,7 @@
 import uuid
 from decimal import Decimal
 from django.db import models
+from django.utils import timezone
 from django.core.exceptions import ValidationError
 
 
@@ -161,6 +162,53 @@ class EMSGlobalSettings(models.Model):
         default=Decimal("19.00"),
         verbose_name="Mehrwertsteuer (%)",
         help_text="Umsatzsteuer / MwSt in Prozent (z. B. 19.00 %)",
+    )
+
+    # =========================================================================
+    # 💎 5. SAAS-ABONNEMENTS & PRO-LIZENZPREISE (SÄULE 1)
+    # =========================================================================
+    saas_pricing_valid_from = models.DateField(
+        default=timezone.now,
+        verbose_name="SaaS-Preise gültig ab",
+        help_text="Datum, ab dem die konfigurierten Software-Lizenzpreise für Neukunden und Verlängerungen gelten",
+    )
+
+    trial_days = models.PositiveIntegerField(
+        default=14,
+        verbose_name="Kostenlose Testphase (Tage)",
+        help_text="Dauer der kostenlosen Testphase für Sharegy Pro bei Neuanmeldung",
+    )
+
+    pro_monthly_price_eur = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        default=Decimal("4.99"),
+        verbose_name="Sharegy Pro (Monatlich - € brutto)",
+        help_text="Monatlicher Endkundenpreis für das Sharegy Pro SaaS-Abo inkl. MwSt.",
+    )
+
+    pro_yearly_price_eur = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        default=Decimal("49.99"),
+        verbose_name="Sharegy Pro (Jährlich - € brutto)",
+        help_text="Jährlicher Endkundenpreis für das Sharegy Pro Jahresabonnement inkl. MwSt.",
+    )
+
+    landlord_monthly_price_eur = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        default=Decimal("14.99"),
+        verbose_name="Vermieter & Quartiere (Monatlich - € brutto)",
+        help_text="Monatlicher Preis für Vermieter & Mehrparteien-Gebäude inkl. MwSt.",
+    )
+
+    landlord_yearly_price_eur = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        default=Decimal("149.99"),
+        verbose_name="Vermieter & Quartiere (Jährlich - € brutto)",
+        help_text="Jährlicher Preis für Vermieter & Mehrparteien-Gebäude inkl. MwSt.",
     )
 
     # =========================================================================
