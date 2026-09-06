@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
@@ -7,21 +7,49 @@ import { apiFetch } from "../../api/client";
 import { useUser } from "../../hooks/useUser";
 import { useHomes } from "../../hooks/useHomes";
 import { useDeviceStatus } from "../../hooks/useDevices";
+import { useTheme } from "../../theme/ThemeContext";
 import UserMenu from "../UserMenu";
 import SpotPriceModal from "../../features/market/components/SpotPriceModal";
 import SupportDrawer from "../../features/support/components/SupportDrawer";
 import AlertCenterModal from "../../features/alerts/components/AlertCenterModal";
-import { LifeBuoy, Bell, Zap } from "lucide-react";
+import { LifeBuoy, Bell, Sun, Moon, Check, ChevronDown, Building2, Home } from "lucide-react";
 
 export default function AppTopbar() {
     const { t } = useTranslation();
     const { user } = useUser();
     const navigate = useNavigate();
     const { homes = [], primaryHome } = useHomes();
+    const { isDark, toggleTheme } = useTheme();
 
     const [spotModalOpen, setSpotModalOpen] = useState(false);
     const [supportOpen, setSupportOpen] = useState(false);
     const [alertsModalOpen, setAlertsModalOpen] = useState(false);
+    const [homeDropdownOpen, setHomeDropdownOpen] = useState(false);
+    const homeDropdownRef = useRef(null);
+
+    // Aktive Liegenschaft (Default ist primaryHome)
+    const [selectedHomeId, setSelectedHomeId] = useState(() => {
+        return localStorage.getItem("sharegy_active_home_id") || primaryHome?.id;
+    });
+
+    const activeHome = homes.find((h) => String(h.id) === String(selectedHomeId)) || primaryHome || homes[0];
+
+    // Outside-Click Listener für Home-Dropdown
+    useEffect(() => {
+        function handleClickOutside(e) {
+            if (homeDropdownRef.current && !homeDropdownRef.current.contains(e.target)) {
+                setHomeDropdownOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    const handleSelectHome = (homeId) => {
+        setSelectedHomeId(homeId);
+        localStorage.setItem("sharegy_active_home_id", String(homeId));
+        setHomeDropdownOpen(false);
+    };
 
     // 📶 Live Geräte-Status aus dem Backend
     const { data: devices = [], isLoading: isDeviceLoading } = useDeviceStatus();
@@ -39,10 +67,10 @@ export default function AppTopbar() {
     const spotPrice = spotPriceQuery.data;
     const spotColor =
         spotPrice?.status === "good"
-            ? "text-emerald-600 bg-emerald-50 border-emerald-200"
+            ? "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800/60"
             : spotPrice?.status === "warning"
-                ? "text-amber-600 bg-amber-50 border-amber-200"
-                : "text-rose-600 bg-rose-50 border-rose-200";
+                ? "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800/60"
+                : "text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800/60";
 
     // ⚡ Live Energy Pulse (Echtzeit-Ticker für Netz & Autarkie)
     const energyQuery = useQuery({
@@ -71,7 +99,7 @@ export default function AppTopbar() {
     const statusDotClass = isDeviceLoading
         ? "bg-slate-400 animate-pulse"
         : total === 0
-            ? "bg-slate-300"
+            ? "bg-slate-300 dark:bg-slate-600"
             : online === total
                 ? "bg-emerald-500 shadow-xs shadow-emerald-500/50"
                 : online > 0
@@ -88,42 +116,80 @@ export default function AppTopbar() {
     };
 
     return (
-        <header className="h-14 bg-white/90 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-30 flex items-center justify-between px-3 sm:px-4 transition-all">
+        <header className="h-14 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 sticky top-0 z-30 flex items-center justify-between px-3 sm:px-4 transition-colors">
             {/* LEFT: 🏡 Gebäude- / Liegenschafts-Kontext */}
             <div className="flex items-center gap-2 sm:gap-3 min-w-0 shrink-0">
                 {homes.length > 1 ? (
-                    <div className="flex items-center gap-1.5">
-                        <span className="text-sm shrink-0">🏡</span>
-                        <select
-                            className="
-                                border border-slate-200
-                                rounded-xl
-                                px-2 sm:px-2.5
-                                py-1
-                                text-xs
-                                font-semibold
-                                text-slate-700
-                                bg-slate-50
-                                hover:border-indigo-400
-                                focus:outline-none focus:ring-2 focus:ring-indigo-500/20
-                                transition
-                                cursor-pointer
-                                max-w-[120px] sm:max-w-[180px] truncate
-                            "
-                            defaultValue={primaryHome?.id}
+                    /* 🏢 Mehrere Liegenschaften -> Moderner Switcher */
+                    <div className="relative" ref={homeDropdownRef}>
+                        <button
+                            type="button"
+                            onClick={() => setHomeDropdownOpen(!homeDropdownOpen)}
+                            className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100/90 dark:bg-slate-800/90 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200/90 dark:border-slate-700 px-2.5 sm:px-3 py-1 rounded-xl shadow-2xs transition cursor-pointer group max-w-[140px] sm:max-w-[200px]"
+                            title={t("homes.switcher_title", "Liegenschaft wechseln")}
                         >
-                            {homes.map((h) => (
-                                <option key={h.id} value={h.id}>
-                                    {h.name || "Mein Zuhause"}
-                                </option>
-                            ))}
-                        </select>
+                            <span className="text-sm shrink-0">🏡</span>
+                            <span className="truncate">{activeHome?.name || t("common.my_home", "Mein Zuhause")}</span>
+                            <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 shrink-0 ${homeDropdownOpen ? "rotate-180" : ""}`} />
+                        </button>
+
+                        {homeDropdownOpen && (
+                            <div className="absolute left-0 mt-2 w-64 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                                <div className="px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 border-b border-slate-100 dark:border-slate-800 mb-1 flex items-center justify-between">
+                                    <span>{t("homes.select_property", "Liegenschaft wählen")}</span>
+                                    <span className="font-mono text-slate-500 dark:text-slate-400">({homes.length})</span>
+                                </div>
+                                <div className="max-h-60 overflow-y-auto space-y-0.5 px-1.5">
+                                    {homes.map((h) => {
+                                        const isSelected = String(h.id) === String(activeHome?.id);
+                                        return (
+                                            <button
+                                                key={h.id}
+                                                type="button"
+                                                onClick={() => handleSelectHome(h.id)}
+                                                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-left transition cursor-pointer ${
+                                                    isSelected
+                                                        ? "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-bold border border-indigo-100 dark:border-indigo-900/50"
+                                                        : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                                                }`}
+                                            >
+                                                <div className="flex items-center gap-2 min-w-0 flex-1">
+                                                    <span className="text-base shrink-0">🏡</span>
+                                                    <div className="truncate">
+                                                        <div className="truncate">{h.name || "Mein Zuhause"}</div>
+                                                        {h.city && <div className="text-[10px] text-slate-400 font-normal truncate">{h.city}</div>}
+                                                    </div>
+                                                </div>
+                                                {isSelected && <Check className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 ml-1.5" />}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                                <div className="pt-1 mt-1 border-t border-slate-100 dark:border-slate-800 px-2">
+                                    <Link
+                                        to="/app/structure"
+                                        onClick={() => setHomeDropdownOpen(false)}
+                                        className="flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 rounded-lg transition"
+                                    >
+                                        <span>⚙️</span>
+                                        <span>{t("homes.manage_structures", "Liegenschaften verwalten")}</span>
+                                    </Link>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 ) : (
-                    <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 bg-slate-100/80 border border-slate-200/90 px-2.5 sm:px-3 py-1 rounded-xl shadow-2xs truncate max-w-[130px] sm:max-w-[200px]">
+                    /* 🏡 Nur 1 Liegenschaft -> Schickes Kontext-Badge mit Link zur Struktur */
+                    <Link
+                        to="/app/structure"
+                        title={t("homes.single_badge_title", "Gebäude- & Raumstruktur verwalten")}
+                        className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100/90 dark:bg-slate-800/90 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200/90 dark:border-slate-700 px-2.5 sm:px-3 py-1 rounded-xl shadow-2xs truncate max-w-[140px] sm:max-w-[200px] transition group cursor-pointer"
+                    >
                         <span className="text-sm shrink-0">🏡</span>
-                        <span className="truncate">{primaryHome?.name || t("common.my_home", "Mein Zuhause")}</span>
-                    </div>
+                        <span className="truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                            {primaryHome?.name || t("common.my_home", "Mein Zuhause")}
+                        </span>
+                    </Link>
                 )}
             </div>
 
@@ -132,7 +198,7 @@ export default function AppTopbar() {
                 <Link
                     to="/app/energy"
                     title={t("dashboard.live_energy_ticker_title", "Live-Energiefluss & Autarkie öffnen")}
-                    className="flex items-center gap-2.5 px-3 py-1 bg-slate-50 hover:bg-indigo-50/60 border border-slate-200/90 hover:border-indigo-200 rounded-xl transition cursor-pointer shadow-2xs group"
+                    className="flex items-center gap-2.5 px-3 py-1 bg-slate-50 dark:bg-slate-800/80 hover:bg-indigo-50/60 dark:hover:bg-slate-700/80 border border-slate-200/90 dark:border-slate-700 hover:border-indigo-200 dark:hover:border-indigo-500 rounded-xl transition cursor-pointer shadow-2xs group"
                 >
                     {/* Pulsierender LIVE Dot */}
                     <div className="flex items-center gap-1.5">
@@ -140,17 +206,17 @@ export default function AppTopbar() {
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                             <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                         </span>
-                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 group-hover:text-indigo-600">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
                             LIVE
                         </span>
                     </div>
 
-                    <div className="h-3 w-px bg-slate-200" />
+                    <div className="h-3 w-px bg-slate-200 dark:bg-slate-700" />
 
                     {/* Netzzustand */}
                     <div className="flex items-center gap-1 text-xs font-mono font-bold">
-                        <span className="text-slate-400 text-[11px]">Netz:</span>
-                        <span className={gridPower !== null ? (gridPower < -5 ? "text-emerald-600" : gridPower > 5 ? "text-amber-600" : "text-slate-700") : "text-slate-500"}>
+                        <span className="text-slate-400 dark:text-slate-500 text-[11px]">Netz:</span>
+                        <span className={gridPower !== null ? (gridPower < -5 ? "text-emerald-600 dark:text-emerald-400" : gridPower > 5 ? "text-amber-600 dark:text-amber-400" : "text-slate-700 dark:text-slate-300") : "text-slate-500"}>
                             {gridPower !== null ? (gridPower < -5 ? `+${formatPower(Math.abs(gridPower))} 📤` : gridPower > 5 ? `${formatPower(gridPower)} 📥` : "0 W") : "--"}
                         </span>
                     </div>
@@ -158,8 +224,8 @@ export default function AppTopbar() {
                     {/* PV Ertrag falls vorhanden */}
                     {pvPower !== null && pvPower > 10 && (
                         <>
-                            <div className="h-3 w-px bg-slate-200" />
-                            <div className="flex items-center gap-1 text-xs font-mono font-bold text-amber-600">
+                            <div className="h-3 w-px bg-slate-200 dark:bg-slate-700" />
+                            <div className="flex items-center gap-1 text-xs font-mono font-bold text-amber-600 dark:text-amber-400">
                                 <span>☀️</span>
                                 <span>{formatPower(pvPower)}</span>
                             </div>
@@ -169,8 +235,8 @@ export default function AppTopbar() {
                     {/* Autarkiegrad */}
                     {autarky !== null && (
                         <>
-                            <div className="h-3 w-px bg-slate-200" />
-                            <div className="flex items-center gap-1 text-xs font-semibold text-indigo-700 bg-indigo-50/80 px-1.5 py-0.5 rounded-md">
+                            <div className="h-3 w-px bg-slate-200 dark:bg-slate-700" />
+                            <div className="flex items-center gap-1 text-xs font-semibold text-indigo-700 dark:text-indigo-300 bg-indigo-50/80 dark:bg-indigo-950/60 px-1.5 py-0.5 rounded-md border border-indigo-100 dark:border-indigo-900/50">
                                 <span>🛡️</span>
                                 <span>{autarky}%</span>
                             </div>
@@ -180,7 +246,7 @@ export default function AppTopbar() {
             </div>
 
             {/* RIGHT: Actions & User Menu */}
-            <div className="flex items-center gap-1.5 sm:gap-3">
+            <div className="flex items-center gap-1.5 sm:gap-2.5">
                 {/* 📶 Live Geräte Status */}
                 <Link
                     to="/app/devices"
@@ -190,13 +256,13 @@ export default function AppTopbar() {
                         items-center
                         gap-1.5
                         text-xs sm:text-sm
-                        text-gray-600
-                        hover:text-indigo-600
+                        text-gray-600 dark:text-gray-300
+                        hover:text-indigo-600 dark:hover:text-indigo-400
                         px-2 sm:px-2.5
                         py-1
                         rounded-xl
-                        hover:bg-slate-50
-                        border border-transparent hover:border-slate-200
+                        hover:bg-slate-50 dark:hover:bg-slate-800
+                        border border-transparent hover:border-slate-200 dark:hover:border-slate-700
                         transition
                     "
                 >
@@ -256,7 +322,7 @@ export default function AppTopbar() {
                     type="button"
                     onClick={() => setAlertsModalOpen(true)}
                     title={t("alerts.open_notifications_title", "Alarm- & Notifikationszentrale öffnen")}
-                    className="relative p-2 text-slate-600 hover:text-indigo-600 hover:bg-slate-100 rounded-xl transition cursor-pointer border border-transparent hover:border-slate-200"
+                    className="relative p-2 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
                 >
                     <Bell className="w-4 h-4" />
                     {activeAlertsCount > 0 && (
@@ -268,14 +334,28 @@ export default function AppTopbar() {
                     )}
                 </button>
 
+                {/* 🌙 / ☀️ Dark/Light-Mode Toggle */}
+                <button
+                    type="button"
+                    onClick={toggleTheme}
+                    title={isDark ? t("theme.light_mode", "Zu hellem Design wechseln") : t("theme.dark_mode", "Zu dunklem Design wechseln")}
+                    className="p-2 text-slate-600 dark:text-slate-300 hover:text-amber-500 dark:hover:text-amber-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
+                >
+                    {isDark ? (
+                        <Sun className="w-4 h-4 text-amber-400 hover:rotate-45 transition-transform" />
+                    ) : (
+                        <Moon className="w-4 h-4 text-slate-600 dark:text-slate-300 hover:-rotate-12 transition-transform" />
+                    )}
+                </button>
+
                 {/* 🛟 Hilfe & Support Trigger */}
                 <button
                     type="button"
                     onClick={() => setSupportOpen(true)}
                     title={t("support.open_drawer_title", "Hilfe, Wissensportal & Support-Tickets")}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl transition cursor-pointer shadow-2xs"
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl transition cursor-pointer shadow-2xs"
                 >
-                    <LifeBuoy className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                    <LifeBuoy className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
                     <span className="hidden lg:inline">{t("support.btn_unified_label", "Hilfe & Support")}</span>
                 </button>
 

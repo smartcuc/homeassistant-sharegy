@@ -159,9 +159,9 @@ export default function Sidebar() {
     }, [t, count, alertCount, alertBadgeClass, setupIcon, setupBadge, setupBadgeClass, isStaffOrAdmin, hasTenantAccess, isPro]);
 
     return (
-        <div className="w-64 bg-white border-r flex flex-col shrink-0">
+        <div className="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col shrink-0 transition-colors">
             {/* ✅ Logo -> Link zur Homepage */}
-            <div className="h-14 flex items-center px-4 border-b">
+            <div className="h-14 flex items-center px-4 border-b border-slate-200 dark:border-slate-800">
                 <NavLink
                     to="/"
                     title="Zur sharegy Startseite & Info"
@@ -177,7 +177,7 @@ export default function Sidebar() {
                     <div key={idx}>
                         {/* Section Title */}
                         {section.title && (
-                            <div className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider px-2.5 mb-1.5">
+                            <div className="text-[11px] font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wider px-2.5 mb-1.5">
                                 {section.title}
                             </div>
                         )}
@@ -192,13 +192,13 @@ export default function Sidebar() {
                                             href={item.path}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition gap-2"
+                                            className="flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white transition gap-2"
                                         >
                                             <div className="flex items-center gap-2.5 min-w-0 flex-1 truncate">
                                                 <span className="text-base shrink-0">{item.icon}</span>
                                                 <span className="truncate">{item.name}</span>
                                             </div>
-                                            <span className="text-xs text-gray-400 shrink-0">↗</span>
+                                            <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">↗</span>
                                         </a>
                                     );
                                 }
@@ -209,7 +209,7 @@ export default function Sidebar() {
                                             key={item.name || itemIdx}
                                             onClick={item.onClick}
                                             type="button"
-                                            className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition text-left cursor-pointer gap-2"
+                                            className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white transition text-left cursor-pointer gap-2"
                                         >
                                             <div className="flex items-center gap-2.5 min-w-0 flex-1 truncate">
                                                 <span className="text-base shrink-0">{item.icon}</span>
@@ -232,8 +232,8 @@ export default function Sidebar() {
                                         to={item.path}
                                         className={({ isActive }) =>
                                             `flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium transition gap-2 ${isActive
-                                                ? "bg-indigo-50 text-indigo-700 font-semibold shadow-2xs"
-                                                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                                                ? "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-semibold shadow-2xs border border-indigo-100 dark:border-indigo-900/50"
+                                                : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white"
                                             }`
                                         }
                                     >

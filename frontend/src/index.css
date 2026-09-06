@@ -4,8 +4,17 @@
 
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
 
-/* ---------------- FLOW LINE ANIMATION ---------------- */
+/* ---------------- GLOBAL THEME BASE ---------------- */
+html.dark {
+    color-scheme: dark;
+}
+
+html.dark body {
+    background-color: #0f172a;
+    color: #f8fafc;
+}
 
 @keyframes flow-line {
     from {

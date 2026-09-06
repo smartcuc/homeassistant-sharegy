@@ -2,10 +2,9 @@
 # src/theme/ThemeContext.jsx
 */
 
-import React, { createContext, useContext } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 
 const ThemeContext = createContext(null);
-
 
 // ✅ DEFAULT THEME
 export const defaultTheme = {
@@ -34,37 +33,111 @@ export const defaultTheme = {
     },
 };
 
-
 // ✅ PROVIDER
 export function ThemeProvider({ theme = {}, children }) {
+    // Mode can be: "light" | "dark" | "system"
+    const [mode, setMode] = useState(() => {
+        const stored = localStorage.getItem("sharegy_theme_mode");
+        if (stored === "dark" || stored === "light" || stored === "system") {
+            return stored;
+        }
+        return "light";
+    });
+
+    const [resolvedDark, setResolvedDark] = useState(() => {
+        if (mode === "dark") return true;
+        if (mode === "light") return false;
+        return typeof window !== "undefined" && window.matchMedia?.("(prefers-color-scheme: dark)").matches;
+    });
+
+    useEffect(() => {
+        const root = document.documentElement;
+        let isDark = false;
+
+        if (mode === "dark") {
+            isDark = true;
+        } else if (mode === "light") {
+            isDark = false;
+        } else {
+            isDark = typeof window !== "undefined" && window.matchMedia?.("(prefers-color-scheme: dark)").matches;
+        }
+
+        setResolvedDark(isDark);
+        if (isDark) {
+            root.classList.add("dark");
+        } else {
+            root.classList.remove("dark");
+        }
+
+        localStorage.setItem("sharegy_theme_mode", mode);
+    }, [mode]);
+
+    // Listen to system theme changes when mode === "system"
+    useEffect(() => {
+        if (mode !== "system" || typeof window === "undefined" || !window.matchMedia) return;
+        const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+        const handleChange = (e) => {
+            const isDark = e.matches;
+            setResolvedDark(isDark);
+            if (isDark) {
+                document.documentElement.classList.add("dark");
+            } else {
+                document.documentElement.classList.remove("dark");
+            }
+        };
+
+        mediaQuery.addEventListener("change", handleChange);
+        return () => mediaQuery.removeEventListener("change", handleChange);
+    }, [mode]);
+
+    const toggleTheme = () => {
+        setMode((prev) => (prev === "dark" ? "light" : "dark"));
+    };
+
+    const setThemeMode = (newMode) => {
+        setMode(newMode);
+    };
+
+    const value = {
+        ...defaultTheme,
+        ...theme,
+        mode,
+        isDark: resolvedDark,
+        toggleTheme,
+        setThemeMode,
+        colors: {
+            ...defaultTheme.colors,
+            ...theme?.colors,
+        },
+        radius: {
+            ...defaultTheme.radius,
+            ...theme?.radius,
+        },
+        spacing: {
+            ...defaultTheme.spacing,
+            ...theme?.spacing,
+        },
+    };
+
     return (
-        <ThemeContext.Provider value={theme}>
+        <ThemeContext.Provider value={value}>
             {children}
         </ThemeContext.Provider>
     );
 }
 
-
 // ✅ HOOK
 export function useTheme() {
     const context = useContext(ThemeContext);
-
-    // ✅ SAFE MERGE (entscheidend!)
-    return {
-        ...defaultTheme,
-        ...context,
-        colors: {
-            ...defaultTheme.colors,
-            ...context?.colors,
-        },
-        radius: {
-            ...defaultTheme.radius,
-            ...context?.radius,
-        },
-        spacing: {
-            ...defaultTheme.spacing,
-            ...context?.spacing,
-        },
-    };
+    if (!context) {
+        return {
+            ...defaultTheme,
+            mode: "light",
+            isDark: false,
+            toggleTheme: () => {},
+            setThemeMode: () => {},
+        };
+    }
+    return context;
 }
 
