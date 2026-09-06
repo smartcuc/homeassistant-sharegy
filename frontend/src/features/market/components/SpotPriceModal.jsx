@@ -2,16 +2,19 @@
 # src/features/market/components/SpotPriceModal.jsx
 */
 import { useState, useEffect, useMemo, useRef, useCallback, memo } from "react";
+import { createPortal } from "react-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import ReactECharts from "echarts-for-react";
 import { apiFetch } from "../../../api/client";
+import { useTheme } from "../../../theme/ThemeContext";
 
 function SpotPriceModal({
     open,
     onClose,
 }) {
     const { t } = useTranslation();
+    const { isDark } = useTheme();
     const [range, setRange] = useState("2d");
     const [zoomRange, setZoomRange] = useState({ start: 0, end: 100 });
     const [isZoomed, setIsZoomed] = useState(false);
@@ -111,9 +114,20 @@ function SpotPriceModal({
     const echartsOption = useMemo(() => {
         if (!data) return null;
 
+        const axisColor = isDark ? "#64748b" : "#94a3b8";
+        const splitLineColor = isDark ? "#1e293b" : "#f1f5f9";
+        const textColor = isDark ? "#94a3b8" : "#64748b";
+        const tooltipBg = isDark ? "#0f172a" : "#ffffff";
+        const tooltipBorder = isDark ? "#334155" : "#e2e8f0";
+
         return {
             tooltip: {
                 trigger: "axis",
+                backgroundColor: tooltipBg,
+                borderColor: tooltipBorder,
+                textStyle: {
+                    color: isDark ? "#f1f5f9" : "#1e293b",
+                },
                 formatter: (params) => {
                     const endpreis = params[0];
                     const spotpreis = params[1];
@@ -122,10 +136,10 @@ function SpotPriceModal({
 
                     return `
                         <div>
-                            <div style="font-size:12px;color:#64748b;margin-bottom:6px;">
+                            <div style="font-size:12px;color:${textColor};margin-bottom:6px;">
                                 ${endpreis.name}
                             </div>
-                            <div style="color:#dc2626;font-weight:600;">
+                            <div style="color:#ef4444;font-weight:600;">
                                 Endpreis: ${Number(endpreis.value).toLocaleString("de-DE", {
                                     minimumFractionDigits: 2,
                                     maximumFractionDigits: 2,
@@ -156,11 +170,11 @@ function SpotPriceModal({
                 boundaryGap: false,
                 axisLine: {
                     lineStyle: {
-                        color: "#cbd5e1",
+                        color: axisColor,
                     },
                 },
                 axisLabel: {
-                    color: "#64748b",
+                    color: textColor,
                     interval: range === "5d" ? 95 : 15,
                     formatter: (value) => {
                         const [date, time] = value.split(" ");
@@ -179,11 +193,11 @@ function SpotPriceModal({
                 },
                 splitLine: {
                     lineStyle: {
-                        color: "#f1f5f9",
+                        color: splitLineColor,
                     },
                 },
                 axisLabel: {
-                    color: "#64748b",
+                    color: textColor,
                     formatter: "{value} ct",
                 },
             },
@@ -195,7 +209,7 @@ function SpotPriceModal({
                     showSymbol: false,
                     data: data.effective_values,
                     lineStyle: {
-                        color: "#dc2626",
+                        color: "#ef4444",
                         width: 3,
                     },
                     areaStyle: {
@@ -208,11 +222,11 @@ function SpotPriceModal({
                             colorStops: [
                                 {
                                     offset: 0,
-                                    color: "rgba(220,38,38,0.18)",
+                                    color: "rgba(239,68,68,0.22)",
                                 },
                                 {
                                     offset: 1,
-                                    color: "rgba(220,38,38,0.00)",
+                                    color: "rgba(239,68,68,0.00)",
                                 },
                             ],
                         },
@@ -226,9 +240,10 @@ function SpotPriceModal({
                                 label: {
                                     formatter: "Jetzt",
                                     position: "end",
+                                    color: "#ef4444",
                                 },
                                 lineStyle: {
-                                    color: "#dc2626",
+                                    color: "#ef4444",
                                     width: 2,
                                     type: "dashed",
                                 },
@@ -238,9 +253,10 @@ function SpotPriceModal({
                                 label: {
                                     formatter: "Morgen",
                                     position: "end",
+                                    color: textColor,
                                 },
                                 lineStyle: {
-                                    color: "#64748b",
+                                    color: axisColor,
                                     width: 2,
                                 },
                             }] : []),
@@ -248,9 +264,10 @@ function SpotPriceModal({
                                 yAxis: liveStats.min,
                                 label: {
                                     formatter: `Min ${liveStats.min.toFixed(2)} ct`,
+                                    color: "#10b981",
                                 },
                                 lineStyle: {
-                                    color: "#16a34a",
+                                    color: "#10b981",
                                     width: 1,
                                 },
                             },
@@ -258,9 +275,10 @@ function SpotPriceModal({
                                 yAxis: liveStats.max,
                                 label: {
                                     formatter: `Max ${liveStats.max.toFixed(2)} ct`,
+                                    color: "#ef4444",
                                 },
                                 lineStyle: {
-                                    color: "#dc2626",
+                                    color: "#ef4444",
                                     width: 1,
                                 },
                             },
@@ -268,9 +286,10 @@ function SpotPriceModal({
                                 yAxis: liveStats.avg,
                                 label: {
                                     formatter: `Ø ${liveStats.avg.toFixed(2)} ct`,
+                                    color: textColor,
                                 },
                                 lineStyle: {
-                                    color: "#64748b",
+                                    color: axisColor,
                                     width: 1,
                                     type: "dashed",
                                 },
@@ -301,50 +320,47 @@ function SpotPriceModal({
                     start: zoomRange.start,
                     end: zoomRange.end,
                     foregroundColor: "#f59e0b",
-                    borderColor: "#f1f5f9",
+                    borderColor: isDark ? "#334155" : "#e2e8f0",
                     textStyle: {
-                        color: "#64748b",
+                        color: textColor,
                     },
                 },
             ],
         };
-    }, [data, chartData, range, liveStats, zoomRange]);
+    }, [data, chartData, range, liveStats, zoomRange, isDark]);
 
     if (!open) {
         return null;
     }
 
-    return (
+    return createPortal(
         <div
-            className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 animate-in fade-in duration-200"
+            className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-200"
             onClick={onClose}
         >
             <div
-                className="bg-white rounded-2xl shadow-xl w-full max-w-5xl h-[80vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200"
+                className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-5xl h-[85vh] max-h-[850px] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* HEADER */}
                 <div
-                    className="p-4 border-b shrink-0"
-                    style={{
-                        background: `linear-gradient(135deg, rgba(245,158,11,.20), rgba(245,158,11,.05))`
-                    }}
+                    className="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800 shrink-0 bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent dark:from-amber-500/20 dark:via-amber-500/5 dark:to-transparent"
                 >
-                    <div className="flex justify-between items-center">
+                    <div className="flex flex-wrap gap-2 justify-between items-center">
                         <div>
-                            <div className="text-xs text-gray-500">
+                            <div className="text-xs font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400">
                                 {t("spot_price.analyze_title", "Spotmarkt analysieren")}
                             </div>
-                            <h3 className="font-semibold text-lg text-gray-900">
-                                💰 {t("spot_price.epex_title", "EPEX Spotpreise DE-LU")}
+                            <h3 className="font-bold text-lg sm:text-xl text-slate-900 dark:text-white flex items-center gap-2">
+                                <span>💰</span> {t("spot_price.epex_title", "EPEX Spotpreise DE-LU")}
                             </h3>
-                            <div className="text-xs text-gray-500">
+                            <div className="text-xs text-slate-500 dark:text-slate-400">
                                 {t("spot_price.data_source", "Datenquelle: Energy Charts")}
                             </div>
                         </div>
 
                         <div className="flex items-center gap-2">
-                            <div className="flex rounded-lg overflow-hidden border shadow-sm bg-white">
+                            <div className="flex rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-2xs bg-white dark:bg-slate-800 p-0.5">
                                 {[
                                     ["2d", t("spot_price.range_2d", "Heute + Morgen")],
                                     ["today", t("spot_price.range_today", "Heute")],
@@ -353,11 +369,12 @@ function SpotPriceModal({
                                 ].map(([value, label]) => (
                                     <button
                                         key={value}
+                                        type="button"
                                         onClick={() => setRange(value)}
-                                        className={`px-3 py-1 text-xs font-semibold transition cursor-pointer ${
+                                        className={`px-2.5 sm:px-3 py-1 text-xs font-bold rounded-lg transition cursor-pointer ${
                                             range === value
                                                 ? "bg-amber-500 text-white shadow-xs"
-                                                : "text-slate-600 hover:bg-slate-50"
+                                                : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
                                         }`}
                                     >
                                         {label}
@@ -367,16 +384,19 @@ function SpotPriceModal({
 
                             {isZoomed && (
                                 <button
+                                    type="button"
                                     onClick={handleResetZoom}
-                                    className="px-3 py-1 text-sm bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 rounded-lg font-medium transition-colors cursor-pointer"
+                                    className="px-3 py-1 text-xs bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 rounded-xl font-bold transition cursor-pointer"
                                 >
                                     {t("common.reset", "Reset")}
                                 </button>
                             )}
 
                             <button
+                                type="button"
                                 onClick={onClose}
-                                className="text-gray-400 hover:text-gray-600 text-lg p-1 transition-colors cursor-pointer"
+                                className="w-8 h-8 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-sm font-bold transition cursor-pointer shadow-2xs ml-1"
+                                title="Schließen"
                             >
                                 ✕
                             </button>
@@ -385,45 +405,49 @@ function SpotPriceModal({
 
                     {/* STATISTIK-KACHELN */}
                     {data && (
-                        <div className="mt-4 flex justify-center">
-                            <div className="grid grid-cols-5 gap-3 w-[70%] min-w-[700px]">
-                                <div className="bg-white/70 rounded-lg p-3 min-h-[64px] flex flex-col justify-center shadow-sm">
-                                    <div className="text-xs text-gray-500">
-                                        {t("spot_price.spot_price", "Spotpreis")}
-                                    </div>
-                                    <div className="font-semibold text-amber-600">
-                                        {(data.current_spot ?? 0).toFixed(2)} ct
-                                    </div>
+                        <div className="mt-3.5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-3">
+                            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xs border border-slate-200/80 dark:border-slate-700/80 rounded-xl p-2.5 flex flex-col justify-center shadow-2xs">
+                                <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                                    {t("spot_price.spot_price", "Spotpreis")}
                                 </div>
-
-                                <div className="bg-white/70 rounded-lg p-3 min-h-[64px] flex flex-col justify-center shadow-sm">
-                                    <div className="text-xs text-gray-500">
-                                        {t("spot_price.effective_price", "Endpreis")}
-                                    </div>
-                                    <div className="font-semibold text-red-600">
-                                        {(data.current_effective ?? 0).toFixed(2)} ct
-                                    </div>
+                                <div className="text-base sm:text-lg font-bold font-mono text-amber-600 dark:text-amber-400">
+                                    {(data.current_spot ?? 0).toFixed(2)} ct
                                 </div>
+                            </div>
 
-                                <div className="bg-white/70 rounded-lg p-3 min-h-[64px] flex flex-col justify-center shadow-sm">
-                                    <div className="text-xs text-gray-500">{t("spot_price.minimum", "Minimum")}</div>
-                                    <div className="font-semibold text-green-600">
-                                        {liveStats.min.toFixed(2)} ct
-                                    </div>
+                            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xs border border-slate-200/80 dark:border-slate-700/80 rounded-xl p-2.5 flex flex-col justify-center shadow-2xs">
+                                <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                                    {t("spot_price.effective_price", "Endpreis")}
                                 </div>
-
-                                <div className="bg-white/70 rounded-lg p-3 min-h-[64px] flex flex-col justify-center shadow-sm">
-                                    <div className="text-xs text-gray-500">{t("spot_price.maximum", "Maximum")}</div>
-                                    <div className="font-semibold text-red-600">
-                                        {liveStats.max.toFixed(2)} ct
-                                    </div>
+                                <div className="text-base sm:text-lg font-bold font-mono text-rose-600 dark:text-rose-400">
+                                    {(data.current_effective ?? 0).toFixed(2)} ct
                                 </div>
+                            </div>
 
-                                <div className="bg-white/70 rounded-lg p-3 min-h-[64px] flex flex-col justify-center shadow-sm">
-                                    <div className="text-xs text-gray-500">{t("spot_price.average", "Durchschnitt")}</div>
-                                    <div className="font-semibold text-gray-700">
-                                        {liveStats.avg.toFixed(2)} ct
-                                    </div>
+                            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xs border border-slate-200/80 dark:border-slate-700/80 rounded-xl p-2.5 flex flex-col justify-center shadow-2xs">
+                                <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                                    {t("spot_price.minimum", "Minimum")}
+                                </div>
+                                <div className="text-base sm:text-lg font-bold font-mono text-emerald-600 dark:text-emerald-400">
+                                    {liveStats.min.toFixed(2)} ct
+                                </div>
+                            </div>
+
+                            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xs border border-slate-200/80 dark:border-slate-700/80 rounded-xl p-2.5 flex flex-col justify-center shadow-2xs">
+                                <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                                    {t("spot_price.maximum", "Maximum")}
+                                </div>
+                                <div className="text-base sm:text-lg font-bold font-mono text-rose-600 dark:text-rose-400">
+                                    {liveStats.max.toFixed(2)} ct
+                                </div>
+                            </div>
+
+                            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xs border border-slate-200/80 dark:border-slate-700/80 rounded-xl p-2.5 flex flex-col justify-center shadow-2xs col-span-2 sm:col-span-1">
+                                <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                                    {t("spot_price.average", "Durchschnitt")}
+                                </div>
+                                <div className="text-base sm:text-lg font-bold font-mono text-slate-700 dark:text-slate-300">
+                                    {liveStats.avg.toFixed(2)} ct
                                 </div>
                             </div>
                         </div>
@@ -431,7 +455,7 @@ function SpotPriceModal({
                 </div>
 
                 {/* CHART CONTAINER */}
-                <div className="flex-1 p-4 relative min-h-0">
+                <div className="flex-1 p-3 sm:p-4 relative min-h-0 bg-slate-50/50 dark:bg-slate-900/50">
                     {echartsOption && (
                         <ReactECharts
                             ref={chartRef}
@@ -444,7 +468,8 @@ function SpotPriceModal({
                     )}
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }
 

@@ -4,6 +4,7 @@
 */
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
@@ -192,17 +193,29 @@ export default function SupportDrawer({ isOpen, onClose, defaultContext = {}, in
         }
     };
 
+    /* ESC schließen */
+    useEffect(() => {
+        if (!isOpen) return;
+        function handleKey(e) {
+            if (e.key === "Escape") onClose();
+        }
+        window.addEventListener("keydown", handleKey);
+        return () => window.removeEventListener("keydown", handleKey);
+    }, [isOpen, onClose]);
+
     const handleArticleClick = (slug) => {
         onClose();
         navigate(`/app/help/${slug}`);
     };
 
-    return (
+    if (!isOpen) return null;
+
+    return createPortal(
         <>
             {/* Backdrop */}
             <div
                 onClick={onClose}
-                className="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-xs transition-opacity animate-in fade-in"
+                className="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-xs transition-opacity animate-in fade-in cursor-pointer"
             />
 
             {/* Slide-over Drawer */}
@@ -728,6 +741,7 @@ export default function SupportDrawer({ isOpen, onClose, defaultContext = {}, in
                     }}
                 />
             )}
-        </>
+        </>,
+        document.body
     );
 }

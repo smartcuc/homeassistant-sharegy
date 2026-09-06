@@ -116,8 +116,9 @@ export default function AppTopbar() {
     };
 
     return (
-        <header className="h-14 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 sticky top-0 z-30 flex items-center justify-between px-3 sm:px-4 transition-colors">
-            {/* LEFT: 🏡 Gebäude- / Liegenschafts-Kontext */}
+        <>
+            <header className="h-14 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 sticky top-0 z-30 flex items-center justify-between px-3 sm:px-4 transition-colors">
+                {/* LEFT: 🏡 Gebäude- / Liegenschafts-Kontext */}
             <div className="flex items-center gap-2 sm:gap-3 min-w-0 shrink-0">
                 {homes.length > 1 ? (
                     /* 🏢 Mehrere Liegenschaften -> Moderner Switcher */
@@ -360,27 +361,28 @@ export default function AppTopbar() {
                 </button>
 
                 <UserMenu user={user} />
-
-                {/* MODALS */}
-                {spotModalOpen && (
-                    <SpotPriceModal
-                        open={spotModalOpen}
-                        onClose={() => setSpotModalOpen(false)}
-                    />
-                )}
-                {supportOpen && (
-                    <SupportDrawer
-                        isOpen={supportOpen}
-                        onClose={() => setSupportOpen(false)}
-                    />
-                )}
-                {alertsModalOpen && (
-                    <AlertCenterModal
-                        isOpen={alertsModalOpen}
-                        onClose={() => setAlertsModalOpen(false)}
-                    />
-                )}
             </div>
         </header>
+
+        {/* MODALS */}
+        {spotModalOpen && (
+            <SpotPriceModal
+                open={spotModalOpen}
+                onClose={() => setSpotModalOpen(false)}
+            />
+        )}
+        {supportOpen && (
+            <SupportDrawer
+                isOpen={supportOpen}
+                onClose={() => setSupportOpen(false)}
+            />
+        )}
+        {alertsModalOpen && (
+            <AlertCenterModal
+                isOpen={alertsModalOpen}
+                onClose={() => setAlertsModalOpen(false)}
+            />
+        )}
+    </>
     );
 }
