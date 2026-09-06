@@ -72,17 +72,22 @@ export default function AppTopbar() {
                 ? "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800/60"
                 : "text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800/60";
 
-    // ⚡ Live Energy Pulse (Echtzeit-Ticker für Netz & Autarkie)
+    // ⚡ Live Energy Pulse (Echtzeit-Ticker für Solar, Haus, Netz & Speicher)
     const energyQuery = useQuery({
         queryKey: ["energy-dashboard"],
         queryFn: () => apiFetch("/api/energy/dashboard/me/"),
         refetchInterval: 3000,
         refetchIntervalInBackground: true,
     });
-    const kpis = energyQuery.data?.kpis || {};
-    const gridPower = kpis.grid?.power !== undefined ? Number(kpis.grid.power) : null;
-    const pvPower = kpis.solar?.power !== undefined ? Number(kpis.solar.power) : null;
-    const autarky = kpis.autarky?.value !== undefined ? Math.round(Number(kpis.autarky.value)) : null;
+    const liveData = energyQuery.data || {};
+    const kpis = liveData.kpis || {};
+    const gridPower = liveData.grid_power_w !== undefined ? Number(liveData.grid_power_w) : (kpis.grid_power_w !== undefined ? Number(kpis.grid_power_w) : null);
+    const pvPower = liveData.pv_power_w !== undefined ? Number(liveData.pv_power_w) : (kpis.pv_power_w !== undefined ? Number(kpis.pv_power_w) : null);
+    const loadPower = liveData.load_power_w !== undefined ? Number(liveData.load_power_w) : (kpis.load_power_w !== undefined ? Number(kpis.load_power_w) : null);
+    const batteryPower = liveData.battery_power_w !== undefined ? Number(liveData.battery_power_w) : (kpis.battery_power_w !== undefined ? Number(kpis.battery_power_w) : null);
+    const batterySoc = liveData.battery_soc_pct !== undefined && liveData.battery_soc_pct !== null
+        ? Math.round(Number(liveData.battery_soc_pct))
+        : (kpis.battery_soc_pct !== undefined ? Math.round(Number(kpis.battery_soc_pct)) : null);
 
     // 🔔 Live Alerts & Benachrichtigungen
     const alertsQuery = useQuery({
@@ -95,17 +100,6 @@ export default function AppTopbar() {
     const activeAlertsCount = alertsData.summary?.active_total ?? (Array.isArray(alertsData.alerts) ? alertsData.alerts.length : 0);
     const hasCriticalAlert = (alertsData.summary?.critical || 0) > 0;
 
-    // Status-Punkt Farbe für Geräte
-    const statusDotClass = isDeviceLoading
-        ? "bg-slate-400 animate-pulse"
-        : total === 0
-            ? "bg-slate-300 dark:bg-slate-600"
-            : online === total
-                ? "bg-emerald-500 shadow-xs shadow-emerald-500/50"
-                : online > 0
-                    ? "bg-amber-500 shadow-xs shadow-amber-500/50"
-                    : "bg-rose-500 shadow-xs shadow-rose-500/50";
-
     const formatPower = (val) => {
         if (val === null || val === undefined) return "--";
         const absVal = Math.abs(val);
@@ -115,174 +109,166 @@ export default function AppTopbar() {
         return `${Math.round(val)} W`;
     };
 
+    const hasAnyLiveMetric = gridPower !== null || pvPower !== null || loadPower !== null || batterySoc !== null;
+
     return (
         <>
             <header className="h-14 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 sticky top-0 z-30 flex items-center justify-between px-3 sm:px-4 transition-colors">
                 {/* LEFT: 🏡 Gebäude- / Liegenschafts-Kontext */}
-            <div className="flex items-center gap-2 sm:gap-3 min-w-0 shrink-0">
-                {homes.length > 1 ? (
-                    /* 🏢 Mehrere Liegenschaften -> Moderner Switcher */
-                    <div className="relative" ref={homeDropdownRef}>
-                        <button
-                            type="button"
-                            onClick={() => setHomeDropdownOpen(!homeDropdownOpen)}
-                            className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100/90 dark:bg-slate-800/90 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200/90 dark:border-slate-700 px-2.5 sm:px-3 py-1 rounded-xl shadow-2xs transition cursor-pointer group max-w-[140px] sm:max-w-[200px]"
-                            title={t("homes.switcher_title", "Liegenschaft wechseln")}
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0 shrink-0">
+                    {homes.length > 1 ? (
+                        /* 🏢 Mehrere Liegenschaften -> Moderner Switcher */
+                        <div className="relative" ref={homeDropdownRef}>
+                            <button
+                                type="button"
+                                onClick={() => setHomeDropdownOpen(!homeDropdownOpen)}
+                                className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100/90 dark:bg-slate-800/90 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200/90 dark:border-slate-700 px-2.5 sm:px-3 py-1 rounded-xl shadow-2xs transition cursor-pointer group max-w-[140px] sm:max-w-[200px]"
+                                title={t("homes.switcher_title", "Liegenschaft wechseln")}
+                            >
+                                <span className="text-sm shrink-0">🏡</span>
+                                <span className="truncate">{activeHome?.name || t("common.my_home", "Mein Zuhause")}</span>
+                                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 shrink-0 ${homeDropdownOpen ? "rotate-180" : ""}`} />
+                            </button>
+
+                            {homeDropdownOpen && (
+                                <div className="absolute left-0 mt-2 w-64 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                                    <div className="px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 border-b border-slate-100 dark:border-slate-800 mb-1 flex items-center justify-between">
+                                        <span>{t("homes.select_property", "Liegenschaft wählen")}</span>
+                                        <span className="font-mono text-slate-500 dark:text-slate-400">({homes.length})</span>
+                                    </div>
+                                    <div className="max-h-60 overflow-y-auto space-y-0.5 px-1.5">
+                                        {homes.map((h) => {
+                                            const isSelected = String(h.id) === String(activeHome?.id);
+                                            return (
+                                                <button
+                                                    key={h.id}
+                                                    type="button"
+                                                    onClick={() => handleSelectHome(h.id)}
+                                                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-left transition cursor-pointer ${
+                                                        isSelected
+                                                            ? "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-bold border border-indigo-100 dark:border-indigo-900/50"
+                                                            : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                                                    }`}
+                                                >
+                                                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                                                        <span className="text-base shrink-0">🏡</span>
+                                                        <div className="truncate">
+                                                            <div className="truncate">{h.name || "Mein Zuhause"}</div>
+                                                            {h.city && <div className="text-[10px] text-slate-400 font-normal truncate">{h.city}</div>}
+                                                        </div>
+                                                    </div>
+                                                    {isSelected && <Check className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 ml-1.5" />}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                    <div className="pt-1 mt-1 border-t border-slate-100 dark:border-slate-800 px-2">
+                                        <Link
+                                            to="/app/structure"
+                                            onClick={() => setHomeDropdownOpen(false)}
+                                            className="flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 rounded-lg transition"
+                                        >
+                                            <span>⚙️</span>
+                                            <span>{t("homes.manage_structures", "Liegenschaften verwalten")}</span>
+                                        </Link>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        /* 🏡 Nur 1 Liegenschaft -> Schickes Kontext-Badge mit Link zur Struktur */
+                        <Link
+                            to="/app/structure"
+                            title={t("homes.single_badge_title", "Gebäude- & Raumstruktur verwalten")}
+                            className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100/90 dark:bg-slate-800/90 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200/90 dark:border-slate-700 px-2.5 sm:px-3 py-1 rounded-xl shadow-2xs truncate max-w-[140px] sm:max-w-[200px] transition group cursor-pointer"
                         >
                             <span className="text-sm shrink-0">🏡</span>
-                            <span className="truncate">{activeHome?.name || t("common.my_home", "Mein Zuhause")}</span>
-                            <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 shrink-0 ${homeDropdownOpen ? "rotate-180" : ""}`} />
-                        </button>
+                            <span className="truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                {primaryHome?.name || t("common.my_home", "Mein Zuhause")}
+                            </span>
+                        </Link>
+                    )}
+                </div>
 
-                        {homeDropdownOpen && (
-                            <div className="absolute left-0 mt-2 w-64 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
-                                <div className="px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 border-b border-slate-100 dark:border-slate-800 mb-1 flex items-center justify-between">
-                                    <span>{t("homes.select_property", "Liegenschaft wählen")}</span>
-                                    <span className="font-mono text-slate-500 dark:text-slate-400">({homes.length})</span>
-                                </div>
-                                <div className="max-h-60 overflow-y-auto space-y-0.5 px-1.5">
-                                    {homes.map((h) => {
-                                        const isSelected = String(h.id) === String(activeHome?.id);
-                                        return (
-                                            <button
-                                                key={h.id}
-                                                type="button"
-                                                onClick={() => handleSelectHome(h.id)}
-                                                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-left transition cursor-pointer ${
-                                                    isSelected
-                                                        ? "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-bold border border-indigo-100 dark:border-indigo-900/50"
-                                                        : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
-                                                }`}
-                                            >
-                                                <div className="flex items-center gap-2 min-w-0 flex-1">
-                                                    <span className="text-base shrink-0">🏡</span>
-                                                    <div className="truncate">
-                                                        <div className="truncate">{h.name || "Mein Zuhause"}</div>
-                                                        {h.city && <div className="text-[10px] text-slate-400 font-normal truncate">{h.city}</div>}
-                                                    </div>
-                                                </div>
-                                                {isSelected && <Check className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 ml-1.5" />}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                                <div className="pt-1 mt-1 border-t border-slate-100 dark:border-slate-800 px-2">
-                                    <Link
-                                        to="/app/structure"
-                                        onClick={() => setHomeDropdownOpen(false)}
-                                        className="flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 rounded-lg transition"
-                                    >
-                                        <span>⚙️</span>
-                                        <span>{t("homes.manage_structures", "Liegenschaften verwalten")}</span>
-                                    </Link>
-                                </div>
+                {/* CENTER: ⚡ Live Energy-Pulse / Kompakt-Ticker (Echte Echtzeit-Leistung aller Komponenten) */}
+                {hasAnyLiveMetric && (
+                    <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                        <Link
+                            to="/app/energy"
+                            title={t("dashboard.live_energy_ticker_title", "Live-Energiefluss & Dashboard öffnen")}
+                            className="flex items-center gap-1.5 sm:gap-2.5 px-2 sm:px-3 py-1 bg-slate-50 dark:bg-slate-800/80 hover:bg-indigo-50/60 dark:hover:bg-slate-700/80 border border-slate-200/90 dark:border-slate-700 hover:border-indigo-200 dark:hover:border-indigo-500 rounded-xl transition cursor-pointer shadow-2xs group shrink-0"
+                        >
+                            {/* Pulsierender LIVE Dot */}
+                            <div className="flex items-center gap-1">
+                                <span className="relative flex h-2 w-2 shrink-0">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                </span>
+                                <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 hidden xs:inline">
+                                    LIVE
+                                </span>
                             </div>
-                        )}
+
+                            {/* ☀️ Solar Erzeugung */}
+                            {pvPower !== null && pvPower > 10 && (
+                                <>
+                                    <div className="h-3 w-px bg-slate-200 dark:bg-slate-700" />
+                                    <div className="flex items-center gap-1 text-xs font-mono font-bold text-amber-600 dark:text-amber-400">
+                                        <span>☀️</span>
+                                        <span>{formatPower(pvPower)}</span>
+                                    </div>
+                                </>
+                            )}
+
+                            {/* 🏠 Hausverbrauch */}
+                            {loadPower !== null && loadPower > 10 && (
+                                <>
+                                    <div className="h-3 w-px bg-slate-200 dark:bg-slate-700 hidden sm:block" />
+                                    <div className="hidden sm:flex items-center gap-1 text-xs font-mono font-bold text-rose-600 dark:text-rose-400">
+                                        <span>🏠</span>
+                                        <span>{formatPower(loadPower)}</span>
+                                    </div>
+                                </>
+                            )}
+
+                            {/* ⚡ Netz Einspeisung / Bezug */}
+                            {gridPower !== null && (
+                                <>
+                                    <div className="h-3 w-px bg-slate-200 dark:bg-slate-700" />
+                                    <div className="flex items-center gap-1 text-xs font-mono font-bold">
+                                        {gridPower < -20 ? (
+                                            <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5">
+                                                <span>⚡</span>
+                                                <span>+{formatPower(Math.abs(gridPower))} 📤</span>
+                                            </span>
+                                        ) : gridPower > 20 ? (
+                                            <span className="text-amber-600 dark:text-amber-400 flex items-center gap-0.5">
+                                                <span>⚡</span>
+                                                <span>{formatPower(gridPower)} 📥</span>
+                                            </span>
+                                        ) : (
+                                            <span className="text-slate-600 dark:text-slate-400">⚡ 0 W</span>
+                                        )}
+                                    </div>
+                                </>
+                            )}
+
+                            {/* 🔋 Batteriespeicher SoC */}
+                            {batterySoc !== null && (
+                                <>
+                                    <div className="h-3 w-px bg-slate-200 dark:bg-slate-700 hidden md:block" />
+                                    <div className="hidden md:flex items-center gap-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50/80 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded-md border border-emerald-100 dark:border-emerald-900/50">
+                                        <span>🔋</span>
+                                        <span>{batterySoc}%</span>
+                                    </div>
+                                </>
+                            )}
+                        </Link>
                     </div>
-                ) : (
-                    /* 🏡 Nur 1 Liegenschaft -> Schickes Kontext-Badge mit Link zur Struktur */
-                    <Link
-                        to="/app/structure"
-                        title={t("homes.single_badge_title", "Gebäude- & Raumstruktur verwalten")}
-                        className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100/90 dark:bg-slate-800/90 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200/90 dark:border-slate-700 px-2.5 sm:px-3 py-1 rounded-xl shadow-2xs truncate max-w-[140px] sm:max-w-[200px] transition group cursor-pointer"
-                    >
-                        <span className="text-sm shrink-0">🏡</span>
-                        <span className="truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                            {primaryHome?.name || t("common.my_home", "Mein Zuhause")}
-                        </span>
-                    </Link>
                 )}
-            </div>
 
-            {/* CENTER: ⚡ Live Energy-Pulse / Kompakt-Ticker (Auf allen Screens sichtbar & adaptiv) */}
-            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                <Link
-                    to="/app/energy"
-                    title={t("dashboard.live_energy_ticker_title", "Live-Energiefluss & Autarkie öffnen")}
-                    className="flex items-center gap-1.5 sm:gap-2.5 px-2 sm:px-3 py-1 bg-slate-50 dark:bg-slate-800/80 hover:bg-indigo-50/60 dark:hover:bg-slate-700/80 border border-slate-200/90 dark:border-slate-700 hover:border-indigo-200 dark:hover:border-indigo-500 rounded-xl transition cursor-pointer shadow-2xs group shrink-0"
-                >
-                    {/* Pulsierender LIVE Dot */}
-                    <div className="flex items-center gap-1">
-                        <span className="relative flex h-2 w-2 shrink-0">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                        </span>
-                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 hidden xs:inline">
-                            LIVE
-                        </span>
-                    </div>
-
-                    <div className="h-3 w-px bg-slate-200 dark:bg-slate-700" />
-
-                    {/* Netzzustand */}
-                    <div className="flex items-center gap-1 text-xs font-mono font-bold">
-                        <span className="text-slate-400 dark:text-slate-500 text-[11px] hidden sm:inline">Netz:</span>
-                        <span className={gridPower !== null ? (gridPower < -5 ? "text-emerald-600 dark:text-emerald-400" : gridPower > 5 ? "text-amber-600 dark:text-amber-400" : "text-slate-700 dark:text-slate-300") : "text-slate-500"}>
-                            {gridPower !== null ? (gridPower < -5 ? `+${formatPower(Math.abs(gridPower))} 📤` : gridPower > 5 ? `${formatPower(gridPower)} 📥` : "0 W") : "--"}
-                        </span>
-                    </div>
-
-                    {/* PV Ertrag falls vorhanden */}
-                    {pvPower !== null && pvPower > 10 && (
-                        <>
-                            <div className="h-3 w-px bg-slate-200 dark:bg-slate-700 hidden sm:block" />
-                            <div className="hidden sm:flex items-center gap-1 text-xs font-mono font-bold text-amber-600 dark:text-amber-400">
-                                <span>☀️</span>
-                                <span>{formatPower(pvPower)}</span>
-                            </div>
-                        </>
-                    )}
-
-                    {/* Autarkiegrad */}
-                    {autarky !== null && (
-                        <>
-                            <div className="h-3 w-px bg-slate-200 dark:bg-slate-700 hidden md:block" />
-                            <div className="hidden md:flex items-center gap-1 text-xs font-semibold text-indigo-700 dark:text-indigo-300 bg-indigo-50/80 dark:bg-indigo-950/60 px-1.5 py-0.5 rounded-md border border-indigo-100 dark:border-indigo-900/50">
-                                <span>🛡️</span>
-                                <span>{autarky}%</span>
-                            </div>
-                        </>
-                    )}
-                </Link>
-            </div>
-
-            {/* RIGHT: Actions & User Menu */}
-            <div className="flex items-center gap-1.5 sm:gap-2.5">
-                {/* 📶 Live Geräte Status */}
-                <Link
-                    to="/app/devices"
-                    title={t("devices.title", "Geräteübersicht öffnen")}
-                    className="
-                        flex
-                        items-center
-                        gap-1.5
-                        text-xs sm:text-sm
-                        text-gray-600 dark:text-gray-300
-                        hover:text-indigo-600 dark:hover:text-indigo-400
-                        px-2 sm:px-2.5
-                        py-1
-                        rounded-xl
-                        hover:bg-slate-50 dark:hover:bg-slate-800
-                        border border-transparent hover:border-slate-200 dark:hover:border-slate-700
-                        transition
-                    "
-                >
-                    <span className={`w-2 h-2 rounded-full shrink-0 ${statusDotClass}`}></span>
-                    <span className="font-medium text-xs hidden lg:inline">
-                        {isDeviceLoading
-                            ? t("common.loading", "Lädt...")
-                            : total === 0
-                                ? t("devices.no_devices", "Keine Geräte")
-                                : t("devices.online_summary", {
-                                    online,
-                                    total,
-                                    defaultValue: `${online}/${total} Geräte online`,
-                                })}
-                    </span>
-                    <span className="font-semibold text-xs inline lg:hidden font-mono">
-                        {online}/{total}
-                    </span>
-                </Link>
+                {/* RIGHT: Actions & User Menu */}
+                <div className="flex items-center gap-1.5 sm:gap-2.5">
 
                 {/* 💰 Börsenstrompreis Spot-Preis */}
                 {spotPrice && (
