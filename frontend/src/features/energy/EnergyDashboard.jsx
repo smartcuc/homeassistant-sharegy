@@ -64,7 +64,16 @@ export default function EnergyDashboard() {
         refetchInterval: 10000,
     });
 
+    // Fetch real-time live power metrics
+    const liveQuery = useQuery({
+        queryKey: ["energy-live-dashboard"],
+        queryFn: () => apiFetch("/api/energy/dashboard/me/"),
+        refetchInterval: 3000,
+        refetchIntervalInBackground: true,
+    });
+
     const data = balanceQuery.data || {};
+    const liveData = liveQuery.data || {};
     const kpis = data.kpis || {};
     const submeters = data.submeters || [];
     const charts = data.charts || {};
@@ -246,6 +255,9 @@ export default function EnergyDashboard() {
             {viewMode === "simple" ? (
                 <SimpleDashboardView
                     balanceData={data}
+                    liveData={liveData}
+                    period={period}
+                    periodLabel={data.period_label || periods.find(p => p.key === period)?.label || "Heute"}
                     onSwitchToExpert={() => handleSetViewMode("expert")}
                     onOpenWallbox={() => setAddWallboxOpen(true)}
                 />
