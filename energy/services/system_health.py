@@ -171,10 +171,16 @@ def check_home_system_status(user) -> Dict[str, Any]:
             if is_battery_profile or any(k in metrics_keys for k in ["battery_power", "power_battery", "battery_soc", "soc", "battery_level", "capacity_kwh"]):
                 battery_devices.append(d)
 
-            # 4. Säule Load (Hausverbrauch direkt)
-            if (
-                (role in ["consumer", "load", "house", "hauslast"] and sig in ["load", "consumption", "house"])
-                or any(k in metrics_keys for k in ["load_power", "house_power", "total_load"])
+            # 4. Säule Load (Gesamt-Hausverbrauch direkt)
+            # Ausschluss von Einzelverbrauchern / Zwischensteckern (Submetern)
+            is_submeter_or_appliance = any(kw in name_lower for kw in [
+                "plug", "steckdose", "klima", "aircon", "waschmaschine", "geschirr", "trockner",
+                "tv", "kühlschrank", "fridge", "wallbox", "charger", "wärmepumpe", "heatpump", "submeter"
+            ])
+            if not is_submeter_or_appliance and (
+                role in ["house", "hauslast", "total_load", "main_load"]
+                or (role in ["consumer", "load"] and sig in ["house", "total_load", "main_load"])
+                or any(k in metrics_keys for k in ["house_power", "total_load"])
             ):
                 load_devices.append(d)
 
@@ -354,6 +360,16 @@ def check_home_system_status(user) -> Dict[str, Any]:
             if alarm_info:
                 active_alarms.append(alarm_info)
 
+        # Prüfen, ob unkonfigurierte Geräte vorliegen
+        unconfigured_devices = [
+            d for d in active_devices
+            if not getattr(d, "config", None) or not getattr(d.config, "role", None) or d.config.role.key in ["unknown", "unassigned", "default"]
+        ]
+
+        # Prüfen, ob Zeitzone konfiguriert ist
+        user_settings = getattr(user, "settings", None) if user else None
+        has_timezone = bool(user_settings and getattr(user_settings, "timezone", None))
+
         # 8. Readiness Score & Status-Ampel berechnen (0 .. 100%)
         score = 0
         if has_pv:
@@ -362,6 +378,12 @@ def check_home_system_status(user) -> Dict[str, Any]:
             score += 35
         if can_calculate_load:
             score += 30
+
+        if unconfigured_devices:
+            score = max(0, score - min(25, len(unconfigured_devices) * 10))
+
+        if not has_timezone:
+            score = max(0, score - 5)
 
         if active_alarms:
             # Bei aktiven Hardware-Störungen Score anpassen
@@ -412,11 +434,6 @@ def check_home_system_status(user) -> Dict[str, Any]:
                 "action": "add_submeter",
             })
 
-        # Prüfen, ob unkonfigurierte Geräte vorliegen
-        unconfigured_devices = [
-            d for d in active_devices
-            if not getattr(d, "config", None) or not getattr(d.config, "role", None) or d.config.role.key in ["unknown", "unassigned", "default"]
-        ]
         if unconfigured_devices:
             cnt = len(unconfigured_devices)
             recommendations.append({
@@ -428,9 +445,7 @@ def check_home_system_status(user) -> Dict[str, Any]:
                 "count": cnt,
             })
 
-        # Prüfen, ob Zeitzone konfiguriert ist
-        user_settings = getattr(user, "settings", None) if user else None
-        if not user_settings or not getattr(user_settings, "timezone", None):
+        if not has_timezone:
             recommendations.append({
                 "priority": "medium",
                 "pillar": "settings",
