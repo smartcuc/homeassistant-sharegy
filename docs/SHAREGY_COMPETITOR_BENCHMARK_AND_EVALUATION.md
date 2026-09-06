@@ -124,7 +124,7 @@ Mit dem **Release des Smart Load Management & Dispatch Hubs (`/app/control`), de
 
 ### 📈 Reifegrad-Bewertung: **9.8 / 10 (Production-Ready Live)**
 
-* **Backend- & Telemetrie-Architektur (10/10)**: TimescaleDB Hypertables, Continuous Aggregates, Redis Ingest-Buffer, Daphne WebSockets, Celery Priority Queues und 100% automatisierte Testabdeckung.
+* **Backend- & Telemetrie-Architektur (10/10)**: TimescaleDB Hypertables, Continuous Aggregates, Redis Ingest-Buffer, Daphne WebSockets, Celery Priority Queues und 100% automatisierte Testabdeckung (144 Unit- & Integrationstests).
 * **Säule 1: EMS & Smart Load Management (9.9/10)**: Sub-Sekunden-Fluss, Live-Sankey, 48h Hybrid-Forecasts, autonome Batterie-Arbitrage (Sungrow Cloud OpenAPI), OCPP 1.6-J Wallbox CSMS, BWWP SG-Ready Steuerung mit Verdichterschutz, ioBroker & Home Assistant Adapter, Live-CO₂-Grid-Signal und Native Mobile App.
 * **Säule 2: Energy Sharing & Clearing (9.7/10)**: 15-Minuten-Bilanzierung (OBIS 1.8.0/2.8.0), wMSB Discovergy/inexogy Konnektor, 3 Allokationsmodelle (Dynamisch, Statisch, Hybrid), Community Cockpit, Tarife, Multi-Community Hub, PDF-Monatsabrechnungen und Multi-Format Exporte (.xlsx, .csv, .xml).
 * **Strategische Marktposition (10/10)**: Sharegy schließt die massive Lücke zwischen reinen B2C-Schalt-Apps (ohne Sharing) und unbezahlbaren B2B-Enterprise-Monolithen (Exnaton, EDA) als erste erschwingliche, hardware-offene und allumfassende Energie-Plattform im DACH-Raum.
