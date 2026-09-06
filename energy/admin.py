@@ -3,6 +3,7 @@
 #################
 
 from django.contrib import admin
+from django.utils.html import format_html, mark_safe
 from energy.models import (
     Location,
     EnergyAsset,
@@ -318,9 +319,10 @@ class EMSGlobalSettingsAdmin(admin.ModelAdmin):
         if not obj:
             return "-"
         total = obj.total_statutory_levies_ct_kwh()
+        formatted_total = f"{total:,.4f}"
         return format_html(
-            '<strong style="color: #2563eb; font-size: 13px;">{0:,.4f} ct/kWh (netto)</strong>',
-            total,
+            '<strong style="color: #2563eb; font-size: 13px;">{} ct/kWh (netto)</strong>',
+            formatted_total,
         )
     total_statutory_levies_display.short_description = "Gesamte feste Abgaben (Summe netto)"
 

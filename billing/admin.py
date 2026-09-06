@@ -33,7 +33,8 @@ class CommunityMemberShareAdmin(admin.ModelAdmin):
     raw_id_fields = ("tenant", "membership", "user")
 
     def share_percent_display(self, obj):
-        return format_html("<b>{:.4f} %</b>", float(obj.share_percent))
+        val = f"{float(obj.share_percent):.4f}"
+        return format_html("<b>{} %</b>", val)
     share_percent_display.short_description = "Quote (%)"
 
     def mea_display(self, obj):
