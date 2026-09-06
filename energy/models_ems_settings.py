@@ -167,12 +167,12 @@ class EMSGlobalSettings(models.Model):
     def total_statutory_levies_ct_kwh(self) -> Decimal:
         """Summe aller festen gesetzlichen Nebenkosten/Umlagen (netto)."""
         return (
-            self.grid_fee_ct_kwh
-            + self.electricity_tax_ct_kwh
-            + self.concession_fee_ct_kwh
-            + self.kwk_levy_ct_kwh
-            + self.special_grid_levy_ct_kwh
-            + self.offshore_levy_ct_kwh
+            (self.grid_fee_ct_kwh or Decimal("0"))
+            + (self.electricity_tax_ct_kwh or Decimal("0"))
+            + (self.concession_fee_ct_kwh or Decimal("0"))
+            + (self.kwk_levy_ct_kwh or Decimal("0"))
+            + (self.special_grid_levy_ct_kwh or Decimal("0"))
+            + (self.offshore_levy_ct_kwh or Decimal("0"))
         )
 
     def __str__(self):

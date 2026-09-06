@@ -294,7 +294,25 @@ class EMSGlobalSettingsAdmin(admin.ModelAdmin):
         ),
     )
 
+    list_display = (
+        "__str__",
+        "sharegy_platform_fee_ct_kwh",
+        "pro_monthly_price_eur",
+        "pro_yearly_price_eur",
+        "updated_at",
+    )
     readonly_fields = ("created_at", "updated_at", "total_statutory_levies_display")
+
+    def changelist_view(self, request, extra_context=None):
+        """
+        Singleton-Komfort: Leitet direkt zum Bearbeitungsformular der globalen Einstellungen weiter.
+        """
+        from django.shortcuts import redirect
+        from django.urls import reverse
+        from energy.services.ems_settings import get_ems_global_settings
+
+        settings_obj = get_ems_global_settings()
+        return redirect(reverse("admin:energy_emsglobalsettings_change", args=[settings_obj.pk]))
 
     def total_statutory_levies_display(self, obj):
         if not obj:
