@@ -188,8 +188,18 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
             pv_device_ids.add(d.id)
         elif role_key in ["battery", "storage", "speicher", "batterie"] or sig_key in ["battery", "storage"] or any(k in dev_name for k in ["speicher", "batterie", "battery"]):
             battery_device_ids.add(d.id)
+        elif role_key in ["both", "hybrid", "inverter"] or any(k in dev_name for k in ["sungrow", "growatt", "fronius", "solaredge", "kostal", "deye", "huawei"]):
+            pv_device_ids.add(d.id)
+            battery_device_ids.add(d.id)
+            grid_device_ids.add(d.id)
         else:
             consumer_devices.append(d)
+
+    consumer_devices = [
+        d for d in consumer_devices
+        if d.id not in pv_device_ids and d.id not in battery_device_ids and d.id not in grid_device_ids
+    ]
+    consumer_device_ids = {d.id for d in consumer_devices}
 
     try:
         from producer.models import GeneratorSystem, StorageSystem
@@ -199,6 +209,7 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
                 grid_device_ids.discard(gs.device_id)
                 battery_device_ids.discard(gs.device_id)
                 consumer_devices = [d for d in consumer_devices if d.id != gs.device_id]
+                consumer_device_ids.discard(gs.device_id)
 
         for ss in StorageSystem.objects.filter(home__user=user, active=True).select_related(
             "power_device__config__metric_definition", "primary_device__config__metric_definition"
@@ -215,6 +226,7 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
                     grid_device_ids.discard(b_id)
                     pv_device_ids.discard(b_id)
                     consumer_devices = [d for d in consumer_devices if d.id != b_id]
+                    consumer_device_ids.discard(b_id)
 
             if ss.power_device_id and not _is_non_power_sensor(ss.power_device):
                 battery_device_ids.add(ss.power_device_id)
@@ -356,10 +368,10 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
             bucket_map[b_key]["battery_discharge"] += kwh
             battery_discharge_map[dev_id] += kwh
 
-        elif m_k in ["load_power", "load_power_w", "load", "consumption", "consumer_power"]:
+        elif m_k in ["load_power", "load_power_w", "load", "consumption", "consumer_power", "house_power", "total_load", "main_load"]:
             # WICHTIG: Wenn Last negativ ist (z. B. wegen eines 2. Wechselrichters oder Balkonkraftwerks im Hausnetz),
             # darf der negative Wert NIEMALS als Verbrauch aufaddiert werden!
-            # Der positive Teil ist echter Hausverbrauch.
+            # Der positive Teil ist echter Hausverbrauch (ohne Batterieladung).
             # Der negative Teil ist extern erzeugter Solarstrom (vom 2. WR / BKW) und erhöht die PV-Erzeugung.
             pos_kwh = max(0.0, wh) / 1000.0
             ext_gen_kwh = max(0.0, -wh) / 1000.0
@@ -371,7 +383,7 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
                 pv_kwh_total += ext_gen_kwh
 
         # 2. Generischer Metric-Key "power" / "value" (Deduplizierung: nur wenn kein spezifischer Key vorhanden ist)
-        elif m_k in ["power", "value"]:
+        elif m_k in ["power", "value", "a_act_power", "apower"]:
             present = device_present_metrics[dev_id]
             # Falls dieses Gerät bereits spezifischere Kanäle hat, ignoriere das redundante "power"
             if dev_id in pv_device_ids and not present.intersection({"pv_power", "pv_power_w", "solar_power", "pv"}):
@@ -397,21 +409,11 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
                 else:
                     bucket_map[b_key]["battery_discharge"] += kwh
                     battery_discharge_map[dev_id] += kwh
-            elif not present.intersection({"load_power", "load_power_w", "load", "consumption"}):
+            elif dev_id in consumer_device_ids and not present.intersection({"load_power", "load_power_w", "load", "consumption", "house_power"}):
                 pos_kwh = max(0.0, wh) / 1000.0
-                ext_gen_kwh = max(0.0, -wh) / 1000.0
                 device_energy_sum[dev_id] += pos_kwh
                 bucket_map[b_key]["load"] += pos_kwh
                 load_kwh_total += pos_kwh
-                if ext_gen_kwh > 0:
-                    bucket_map[b_key]["pv"] += ext_gen_kwh
-                    pv_kwh_total += ext_gen_kwh
-
-        else:
-            pos_kwh = max(0.0, wh) / 1000.0
-            device_energy_sum[dev_id] += pos_kwh
-            bucket_map[b_key]["load"] += pos_kwh
-            load_kwh_total += pos_kwh
 
     total_pv_kwh = round(pv_kwh_total, 2)
     battery_devices = [d for d in devices if d.id in battery_device_ids]
