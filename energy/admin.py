@@ -157,6 +157,7 @@ class EMSSignalTypeAdmin(admin.ModelAdmin):
 # § 14a EnWG Admin Registrierungen
 # ---------------------------------------------------------------------
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from energy.models import GridDimmingSignal, SteuVEDeviceConfig
 
 
@@ -187,7 +188,7 @@ class GridDimmingSignalAdmin(admin.ModelAdmin):
                 '<span style="background-color: #ef4444; color: white; padding: 3px 8px; border-radius: 6px; font-weight: bold; font-size: 11px;">🔴 GEDIMMT ({0} kW)</span>',
                 obj.target_max_grid_kw,
             )
-        return format_html(
+        return mark_safe(
             '<span style="background-color: #10b981; color: white; padding: 3px 8px; border-radius: 6px; font-weight: bold; font-size: 11px;">🟢 NORMALBETRIEB</span>'
         )
     status_badge.short_description = "§ 14a Status"
@@ -219,7 +220,9 @@ class SteuVEDeviceConfigAdmin(admin.ModelAdmin):
         colors = {1: "#10b981", 2: "#3b82f6", 3: "#f59e0b", 4: "#64748b"}
         color = colors.get(obj.priority, "#64748b")
         return format_html(
-            f'<span style="background-color: {color}; color: white; padding: 2px 7px; border-radius: 4px; font-weight: bold; font-size: 11px;">Prio {obj.priority}</span>'
+            '<span style="background-color: {0}; color: white; padding: 2px 7px; border-radius: 4px; font-weight: bold; font-size: 11px;">Prio {1}</span>',
+            color,
+            obj.priority,
         )
     priority_badge.short_description = "Priorität"
 
@@ -229,7 +232,7 @@ class SteuVEDeviceConfigAdmin(admin.ModelAdmin):
                 '<span style="background-color: #f97316; color: white; padding: 2px 7px; border-radius: 4px; font-weight: bold; font-size: 11px;">⚠️ Gedrosselt ({0} kW)</span>',
                 obj.current_power_limit_kw or 0.0,
             )
-        return format_html(
+        return mark_safe(
             '<span style="background-color: #10b981; color: white; padding: 2px 7px; border-radius: 4px; font-weight: bold; font-size: 11px;">🟢 Aktiv (100%)</span>'
         )
     dimming_state_badge.short_description = "Aktorik Status"
@@ -359,8 +362,8 @@ class InverterManufacturerPollingConfigAdmin(admin.ModelAdmin):
 
     def is_active_badge(self, obj):
         if obj.is_active:
-            return format_html('<span style="color: #10b981; font-weight: 600;">🟢 Aktiv</span>')
-        return format_html('<span style="color: #ef4444; font-weight: 600;">🔴 Pausiert</span>')
+            return mark_safe('<span style="color: #10b981; font-weight: 600;">🟢 Aktiv</span>')
+        return mark_safe('<span style="color: #ef4444; font-weight: 600;">🔴 Pausiert</span>')
     is_active_badge.short_description = "Status"
 
     @admin.action(description="🟢 Ausgewählte Hersteller-Zyklen aktivieren")

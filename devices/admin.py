@@ -7,6 +7,7 @@ from .models import *
 
 
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from django.utils import timezone
 from datetime import timedelta
 
@@ -85,10 +86,10 @@ class DeviceAdmin(admin.ModelAdmin):
     @admin.display(description="Status")
     def online_status(self, obj):
         if not obj.last_seen:
-            return format_html('<span style="color: #9CA3AF;">⚪ Nie gesehen</span>')
+            return mark_safe('<span style="color: #9CA3AF;">⚪ Nie gesehen</span>')
         age = timezone.now() - obj.last_seen
         if age < timedelta(minutes=15):
-            return format_html('<span style="color: #10B981; font-weight: bold;">🟢 Online</span>')
+            return mark_safe('<span style="color: #10B981; font-weight: bold;">🟢 Online</span>')
         elif age < timedelta(hours=24):
             return format_html('<span style="color: #F59E0B;">🟡 Vor {} Min.</span>', int(age.total_seconds() // 60))
         else:
@@ -293,7 +294,9 @@ class CloudDeviceIntegrationAdmin(admin.ModelAdmin):
         colors = {"ok": "#10b981", "error": "#ef4444", "pending": "#f59e0b"}
         color = colors.get(obj.last_status, "#64748b")
         return format_html(
-            f'<span style="background-color: {color}; color: white; padding: 2px 7px; border-radius: 4px; font-weight: bold; font-size: 11px;">{obj.get_last_status_display()}</span>'
+            '<span style="background-color: {0}; color: white; padding: 2px 7px; border-radius: 4px; font-weight: bold; font-size: 11px;">{1}</span>',
+            color,
+            obj.get_last_status_display(),
         )
     last_status_badge.short_description = "Status"
 
