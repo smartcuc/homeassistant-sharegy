@@ -157,3 +157,36 @@ Der offizielle ioBroker-Adapter erlaubt das Bündeln mehrerer lokaler Datenpunkt
   - `sg_switch`: Relaiskontakt (SG-Ready State 2/3)
 - **Echtzeit-Rückkanal**: Closed-Loop Rückmeldung bei Schaltungen innerhalb von < 100 ms.
 
+---
+
+## 🚗 10. Smart EV Charging & Departure Ready Planner
+
+Die Wallbox-Steuerung bietet einen intelligenten Abfahrtszeit-Planer:
+- **km-Reichweiten-Zuwachs**: Umrechnung der Ladeenergie in Reichweite ($\text{km} = E_\text{geladen} / 17\,\text{kWh} \times 100$).
+- **Fahrzeug-SoC-Schätzung**: Prozentuale Ladezustandsanzeige.
+- **Nacht-Spotpreis-Kopplung**: Automatischer Ladefenster-Abgleich mit den günstigsten Day-Ahead-Stunden bis zur gewünschten Abfahrtszeit (z. B. `07:30 Uhr`).
+- **1-Klick Quick-Boost**: 1h Vollladung ohne Menüschachteln.
+
+---
+
+## 🌊 11. Live Surplus-Waterfall Kaskade
+
+Echtzeit-Visualisierung der Merit-Order-Energieverteilung ($P_\text{PV} \rightarrow \text{Last} \rightarrow \text{Speicher} \rightarrow \text{BWWP} \rightarrow \text{Wallbox} \rightarrow \text{Netz}$) mit Live-Leistungsbalken und prozentualem Deckungsstatus direkt auf dem Dispatch Hub.
+
+---
+
+## 📊 12. Monatlicher Finanz- & ROI-Recap
+
+Monatliche Gegenüberstellung des wirtschaftlichen Mehrwerts:
+- **Netto-Sparvorteil in €** gegenüber dem Grundversorgertarif ($32\,\text{ct/kWh}$).
+- **Autarkie- und Eigenverbrauchsgrad**.
+- **Vermiedene CO₂-Emissionen** und Baum-Äquivalent.
+- **§ 14a EnWG Netzentgelt-Bonus** (+160 €/Jahr Pauschalvorteil).
+- **1-Klick Share-Modal** zum Teilen der Energiebilanz.
+
+---
+
+## 📖 Detaillierte Anwenderdokumentation
+
+Das vollständige Anwenderhandbuch mit Schritt-für-Schritt-Anleitungen zu allen Schnittstellen (1–7) und EMS-Funktionen ist in [`docs/SHAREGY_USER_MANUAL_EMS_EXTENSIONS.md`](file:///c:/Users/Public/Dev/eswes/docs/SHAREGY_USER_MANUAL_EMS_EXTENSIONS.md) verfügbar.
+

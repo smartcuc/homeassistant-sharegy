@@ -188,7 +188,7 @@ export default function InterfacesPage() {
                 cardTitle="4. Weitere Wechselrichter (SolarEdge, Fronius, Kostal, Growatt)" 
             />
 
-            {/* 4. SECTION: NATIVE HOME ASSISTANT INTEGRATION (HACS / CUSTOM COMPONENT) */}
+            {/* 5. SECTION: NATIVE HOME ASSISTANT INTEGRATION (HACS / CUSTOM COMPONENT) */}
             <div className="bg-white border border-cyan-200/80 rounded-2xl shadow-xs overflow-hidden ring-1 ring-cyan-100">
                 <div className="p-5 bg-gradient-to-r from-cyan-50/80 via-blue-50/30 to-white border-b border-cyan-200/80 flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
@@ -198,7 +198,7 @@ export default function InterfacesPage() {
                         <div>
                             <div className="flex items-center gap-2">
                                 <h2 className="text-base font-bold text-gray-900">
-                                    4. Natives Home Assistant Plugin (HACS / Custom Component)
+                                    5. Natives Home Assistant Plugin (HACS / Custom Component)
                                 </h2>
                                 <span className="text-[10px] font-bold px-2 py-0.5 bg-cyan-100 text-cyan-800 rounded-full border border-cyan-200">
                                     Neu & Store-and-Forward
@@ -264,7 +264,7 @@ export default function InterfacesPage() {
                 </div>
             </div>
 
-            {/* 5. SECTION: MQTT INTERFACE CARD */}
+            {/* 6. SECTION: MQTT INTERFACE CARD */}
             <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
                 <div className="p-5 bg-gradient-to-r from-slate-50 via-indigo-50/30 to-white border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
@@ -273,7 +273,7 @@ export default function InterfacesPage() {
                         </div>
                         <div>
                             <h2 className="text-base font-bold text-gray-900">
-                                5. MQTT Broker Schnittstelle (ioBroker, Node-RED, OTel)
+                                6. MQTT Broker Schnittstelle (ioBroker, Node-RED, OTel)
                             </h2>
 
                             <p className="text-xs text-gray-500">
@@ -490,7 +490,7 @@ exporters:
                 </div>
             </div>
 
-            {/* 6. SECTION: SMART METER GATEWAYS & WMSB INGEST (§ 42B ENWG) */}
+            {/* 7. SECTION: SMART METER GATEWAYS & WMSB INGEST (§ 42B ENWG) */}
             <div className="bg-white border border-emerald-200/80 rounded-2xl shadow-xs overflow-hidden ring-1 ring-emerald-100">
                 <div className="p-5 bg-gradient-to-r from-emerald-50/80 via-teal-50/30 to-white border-b border-emerald-200/80 flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
@@ -500,7 +500,7 @@ exporters:
                         <div>
                             <div className="flex items-center gap-2">
                                 <h2 className="text-base font-bold text-gray-900">
-                                    6. Smart Meter Gateways, wMSB & Eichrechtliches Messwesen
+                                    7. Smart Meter Gateways, wMSB & Eichrechtliches Messwesen
                                 </h2>
                                 <span className="text-[10px] font-bold px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full border border-emerald-200">
                                     § 42b EnWG & MsbG Konform

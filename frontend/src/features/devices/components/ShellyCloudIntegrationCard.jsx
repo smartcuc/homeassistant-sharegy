@@ -83,7 +83,7 @@ export default function ShellyCloudIntegrationCard({ primaryHome, onImportComple
                     <div>
                         <div className="flex items-center gap-2">
                             <h2 className="text-base font-bold text-gray-900">
-                                Shelly Cloud 1-Klick Auto-Discovery
+                                2. Shelly Cloud 1-Klick Auto-Discovery
                             </h2>
                             <span className="text-[10px] font-bold px-2 py-0.5 bg-sky-100 text-sky-800 rounded-full border border-sky-200">
                                 Neu & Automatisch
