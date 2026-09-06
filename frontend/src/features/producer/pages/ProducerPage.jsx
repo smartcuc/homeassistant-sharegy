@@ -148,11 +148,40 @@ export default function ProducerPage() {
             ========================================================= */}
             {activeTab === "generators" && (
                 <div className="space-y-4">
+                    {/* 📡 AC-Coupling & 2nd Inverter Smart Recognition Card */}
+                    <div className="bg-linear-to-r from-amber-500/10 via-amber-500/5 to-transparent dark:from-amber-500/15 dark:via-amber-500/5 dark:to-transparent border border-amber-200 dark:border-amber-800/60 rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-2xs">
+                        <div className="flex items-start gap-3.5">
+                            <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xl shrink-0">
+                                📡
+                            </div>
+                            <div>
+                                <div className="flex items-center gap-2">
+                                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                                        Automatische Erkennung sekundärer AC-Erzeuger (2. Wechselrichter / BKW)
+                                    </h3>
+                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/50">
+                                        ● Automatisch aktiv
+                                    </span>
+                                </div>
+                                <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 max-w-2xl">
+                                    Strom von ungebundenen AC-Wechselrichtern oder Balkonkraftwerken im Hausnetz wird in der Energiebilanz physikalisch als Solarerzeugung bilanziert und nicht als Hausverbrauch fehlinterpretiert.
+                                </p>
+                            </div>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setOpenAdd(true)}
+                            className="px-3.5 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-700 text-xs font-bold transition cursor-pointer shrink-0 self-start md:self-center"
+                        >
+                            + 2. Anlage benennen
+                        </button>
+                    </div>
+
                     {producers.length === 0 && (
-                        <div className="bg-white border border-gray-200 rounded-3xl p-12 text-center text-gray-500 space-y-3">
+                        <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-3xl p-12 text-center text-gray-500 dark:text-slate-400 space-y-3">
                             <div className="text-4xl">☀️</div>
-                            <div className="font-bold text-gray-900">{t("producers.empty", "Noch keine Erzeugersysteme vorhanden.")}</div>
-                            <p className="text-xs text-gray-400 max-w-sm mx-auto">
+                            <div className="font-bold text-gray-900 dark:text-white">{t("producers.empty", "Noch keine Erzeugersysteme vorhanden.")}</div>
+                            <p className="text-xs text-gray-400 dark:text-slate-500 max-w-sm mx-auto">
                                 {t("producers.empty_desc", "Lege deine PV-Anlage oder BHKW an, um Strings, Modulausrichtungen und Neigungen zu erfassen.")}
                             </p>
                         </div>

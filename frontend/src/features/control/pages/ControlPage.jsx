@@ -152,6 +152,15 @@ export default function ControlPage() {
                 budget={liveBudget}
                 masterMode={masterMode}
                 onMasterModeChange={handleMasterModeChange}
+                onQuickBoost={(type, durationHours) => {
+                    if (type === "wallbox_boost") {
+                        handleQuickAction("wallbox", "boost", null, { power_kw: 11, duration_hours: durationHours });
+                    } else if (type === "battery_reserve") {
+                        handleQuickAction("battery", "reserve_100", null, { duration_hours: durationHours });
+                    } else if (type === "max_pv") {
+                        handleMasterModeChange("pv_only");
+                    }
+                }}
                 isSaving={priorityMutation.isPending}
             />
 

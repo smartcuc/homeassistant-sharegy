@@ -170,10 +170,10 @@ export default function EnergyDashboard() {
             {/* =========================================================
                 BUTTONS & CONTROLS ROW DIRECTLY UNDER HEADER
             ========================================================= */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
-                <div className="flex flex-wrap items-center gap-2.5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+                <div className="flex items-center gap-2.5 overflow-x-auto whitespace-nowrap scrollbar-none pb-1 sm:pb-0">
                     {/* View Mode Toggle: Einfach / Experten */}
-                    <div className="inline-flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs">
+                    <div className="inline-flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs shrink-0">
                         <button
                             type="button"
                             onClick={() => handleSetViewMode("simple")}
@@ -199,7 +199,7 @@ export default function EnergyDashboard() {
                     </div>
 
                     {/* Period Selector Tabs */}
-                    <div className="inline-flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs">
+                    <div className="inline-flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs shrink-0">
                         {periods.map((p) => (
                             <button
                                 key={p.key}
@@ -230,7 +230,7 @@ export default function EnergyDashboard() {
                     </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2.5">
+                <div className="flex items-center gap-2.5 shrink-0">
                     {/* Multi-Format Export Dropdown (Task 5.15) */}
                     <ExportDropdown
                         period={period}
