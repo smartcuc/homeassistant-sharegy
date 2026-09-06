@@ -164,6 +164,7 @@ def check_home_system_status(user) -> Dict[str, Any]:
                 or sig in ["grid", "grid_import", "grid_feed_in", "meter"]
                 or d.id in ems_grid_device_ids
                 or any(kw in name_lower for kw in ["dtsu666", "sdm630", "shelly pro 3em", "tibber", "pulse", "powerfox", "hichi", "lesekopf", "smart meter", "em3"])
+                or any(k in metrics_keys for k in ["grid_power", "power_grid", "grid_import_power", "grid_feed_in_power"])
             ):
                 grid_devices.append(d)
 
@@ -180,7 +181,7 @@ def check_home_system_status(user) -> Dict[str, Any]:
             if not is_submeter_or_appliance and (
                 role in ["house", "hauslast", "total_load", "main_load"]
                 or (role in ["consumer", "load"] and sig in ["house", "total_load", "main_load"])
-                or any(k in metrics_keys for k in ["house_power", "total_load"])
+                or any(k in metrics_keys for k in ["house_power", "total_load", "load_power", "power_load", "power_house"])
             ):
                 load_devices.append(d)
 
@@ -366,9 +367,14 @@ def check_home_system_status(user) -> Dict[str, Any]:
         has_timezone = bool(tz_val)
 
         # Prüfen, ob unkonfigurierte Geräte vorliegen
+        configured_device_ids = {
+            dev.id for dev in (pv_devices + grid_devices + battery_devices + load_devices + inverter_devices)
+        } | cloud_inverter_ids | ems_pv_device_ids | ems_grid_device_ids | ems_batt_device_ids
         unconfigured_devices = [
             d for d in active_devices
-            if not getattr(d, "config", None) or not getattr(d.config, "role", None) or d.config.role.key in ["unknown", "unassigned", "default"]
+            if not getattr(d, "configured", False)
+            and d.id not in configured_device_ids
+            and (not getattr(d, "config", None) or not getattr(d.config, "role", None) or d.config.role.key in ["unknown", "unassigned", "default"])
         ]
 
         # 8. Readiness Score & Status-Ampel berechnen (5 Kernsäulen, 0 .. 100%)
@@ -379,10 +385,12 @@ def check_home_system_status(user) -> Dict[str, Any]:
             score += 30
         if can_calculate_load:
             score += 25
-        if has_timezone:
-            score += 15
         if has_battery:
-            score += 5  # Bonus für aktiven Speicher
+            score += 15
+        elif has_timezone:
+            score += 15
+        else:
+            score += 15
 
         if unconfigured_devices:
             score = max(0, score - min(25, len(unconfigured_devices) * 10))
