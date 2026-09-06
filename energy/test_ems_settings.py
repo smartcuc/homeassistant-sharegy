@@ -26,10 +26,12 @@ class EMSSettingsTests(TestCase):
     def test_ems_global_settings_creation_and_defaults(self):
         settings = get_ems_global_settings()
         self.assertIsNotNone(settings)
-        self.assertEqual(settings.default_grid_price_ct_kwh, Decimal("32.00"))
-        self.assertEqual(settings.default_feed_in_tariff_ct_kwh, Decimal("8.20"))
-        self.assertEqual(settings.default_spot_markup_ct_kwh, Decimal("1.50"))
-        self.assertEqual(settings.battery_arbitrage_min_spread_ct_kwh, Decimal("8.00"))
+        self.assertEqual(settings.sharegy_platform_fee_ct_kwh, Decimal("2.00"))
+        self.assertEqual(settings.pro_monthly_price_eur, Decimal("4.99"))
+        self.assertEqual(settings.pro_yearly_price_eur, Decimal("49.99"))
+        self.assertEqual(settings.landlord_monthly_price_eur, Decimal("14.99"))
+        self.assertEqual(settings.landlord_yearly_price_eur, Decimal("149.99"))
+        self.assertEqual(settings.trial_days, 14)
         self.assertEqual(settings.vat_percent, Decimal("19.00"))
 
         # Test statutory total
@@ -46,7 +48,7 @@ class EMSSettingsTests(TestCase):
     def test_ems_global_settings_singleton_enforcement(self):
         get_ems_global_settings()
         # Trying to create a second instance should raise ValidationError
-        second_instance = EMSGlobalSettings(default_grid_price_ct_kwh=Decimal("35.00"))
+        second_instance = EMSGlobalSettings(sharegy_platform_fee_ct_kwh=Decimal("2.50"))
         with self.assertRaises(ValidationError):
             second_instance.save()
 

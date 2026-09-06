@@ -253,39 +253,16 @@ class EMSGlobalSettingsAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (
-            "⚡ 1. Strombezug & Einspeisung (Standard-Preise)",
+            "💶 1. Sharegy Plattform-Umlage / Abrechnungsgebühr (Säule 2)",
             {
                 "fields": (
-                    "default_grid_price_ct_kwh",
-                    "default_feed_in_tariff_ct_kwh",
+                    "sharegy_platform_fee_ct_kwh",
                 ),
-                "description": "Systemweite Standardpreise für den normalen Strombezug und die gesetzliche EEG-Einspeisevergütung.",
+                "description": "Betriebsgebühr / Plattform-Umlage pro geteilter kWh für automatisierte Zählererfassung, Clearing und Monatsabrechnungen gem. § 42b EnWG.",
             },
         ),
         (
-            "📈 2. Dynamische Tarife, Börsenpreise & Batterie-Arbitrage",
-            {
-                "fields": (
-                    "default_spot_markup_ct_kwh",
-                    ("spot_floor_price_ct_kwh", "spot_cap_price_ct_kwh"),
-                    "battery_arbitrage_min_spread_ct_kwh",
-                ),
-                "description": "Aufschläge auf EPEX-Spotmarktpreise sowie Schwellenwerte für KI-Ladefahrpläne und Arbitrage.",
-            },
-        ),
-        (
-            "🤝 3. Energy Sharing & Quartiere (Säule 2)",
-            {
-                "fields": (
-                    "community_sharing_price_ct_kwh",
-                    "community_producer_payout_ct_kwh",
-                    "community_platform_fee_ct_kwh",
-                ),
-                "description": "Interne Verrechnungspreise und Plattform-Umlagen für lokales Energy Sharing gem. § 42b EnWG.",
-            },
-        ),
-        (
-            "🏛️ 4. Gesetzliche Abgaben, Netzentgelte & Steuern (Deutschland)",
+            "🏛️ 2. Gesetzliche Abgaben, Netzentgelte & Steuern (Deutschland)",
             {
                 "fields": (
                     ("grid_fee_ct_kwh", "electricity_tax_ct_kwh"),
@@ -294,11 +271,11 @@ class EMSGlobalSettingsAdmin(admin.ModelAdmin):
                     "vat_percent",
                     "total_statutory_levies_display",
                 ),
-                "description": "Feste Preisbestandteile gem. EnWG, StromStG und KWKG für transparente dynamische Tarifaufschlüsselung.",
+                "description": "Offizielle bundesweite Referenzwerte zur transparenten und rechtssicheren Aufschlüsselung dynamischer Börsentarife.",
             },
         ),
         (
-            "💎 5. SaaS-Abonnements & Pro-Lizenzgebühren (Endnutzer-Pläne)",
+            "💎 3. SaaS-Abonnements & Pro-Lizenzgebühren (Säule 1)",
             {
                 "fields": (
                     ("saas_pricing_valid_from", "trial_days"),

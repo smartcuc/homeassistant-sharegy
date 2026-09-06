@@ -128,13 +128,7 @@ def get_ems_global_settings():
     settings_obj = EMSGlobalSettings.objects.first()
     if not settings_obj:
         settings_obj = EMSGlobalSettings.objects.create(
-            default_grid_price_ct_kwh=Decimal("32.00"),
-            default_feed_in_tariff_ct_kwh=Decimal("8.20"),
-            default_spot_markup_ct_kwh=Decimal("1.50"),
-            battery_arbitrage_min_spread_ct_kwh=Decimal("8.00"),
-            community_sharing_price_ct_kwh=Decimal("12.00"),
-            community_producer_payout_ct_kwh=Decimal("10.00"),
-            community_platform_fee_ct_kwh=Decimal("2.00"),
+            sharegy_platform_fee_ct_kwh=Decimal("2.00"),
             grid_fee_ct_kwh=Decimal("9.5000"),
             electricity_tax_ct_kwh=Decimal("2.0500"),
             concession_fee_ct_kwh=Decimal("1.6600"),

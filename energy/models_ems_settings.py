@@ -11,9 +11,11 @@ from django.core.exceptions import ValidationError
 
 class EMSGlobalSettings(models.Model):
     """
-    Zentrale, globale EMS-Systemeinstellungen (Singleton).
-    Definiert Standard-Preise, Margen, Arbitrage-Schwellen, gesetzliche Abgaben
-    sowie Standardtarife für das gesamte EMS und Energy Sharing.
+    Zentrale, globale Plattform- und EMS-Einstellungen (Singleton).
+    Definiert:
+    1. Sharegy Plattform-Umlage (Transaktions- & Clearing-Gebühr pro geteilter Sharing-kWh)
+    2. Gesetzliche Steuern, Netzentgelte & Umlagen (Referenzwerte Deutschland)
+    3. SaaS-Lizenzpreise für Software-Abonnements (Sharegy Pro & Vermieter-Quartiere)
     """
 
     id = models.UUIDField(
@@ -23,90 +25,18 @@ class EMSGlobalSettings(models.Model):
     )
 
     # =========================================================================
-    # ⚡ 1. STROMBEZUG & EINSPEISUNG (STANDARD-PREISE)
+    # 💶 1. SHAREGY PLATTFORM-UMLAGE / ABRECHNUNGSGEBÜHR (SÄULE 2)
     # =========================================================================
-    default_grid_price_ct_kwh = models.DecimalField(
-        max_digits=6,
-        decimal_places=2,
-        default=Decimal("32.00"),
-        verbose_name="Standard-Arbeitspreis Netzbezug (ct/kWh)",
-        help_text="Allgemeiner Standard-Stromarbeitspreis in ct/kWh (brutto) bei Festpreisen",
-    )
-
-    default_feed_in_tariff_ct_kwh = models.DecimalField(
-        max_digits=6,
-        decimal_places=2,
-        default=Decimal("8.20"),
-        verbose_name="Standard-EEG-Einspeisevergütung (ct/kWh)",
-        help_text="Standardmäßige Vergütung für eingespeisten PV-Strom gem. EEG (z. B. 8,20 ct/kWh)",
-    )
-
-    # =========================================================================
-    # 📈 2. DYNAMISCHE TARIFE, BÖRSENPREISE & ARBITRAGE
-    # =========================================================================
-    default_spot_markup_ct_kwh = models.DecimalField(
-        max_digits=6,
-        decimal_places=2,
-        default=Decimal("1.50"),
-        verbose_name="Spotmarkt-Aufschlag / Marge (ct/kWh)",
-        help_text="Anbieter-Aufschlag auf den EPEX Spotpreis in ct/kWh",
-    )
-
-    spot_floor_price_ct_kwh = models.DecimalField(
-        max_digits=6,
-        decimal_places=2,
-        null=True,
-        blank=True,
-        verbose_name="Spotmarkt-Mindestpreis / Floor (ct/kWh)",
-        help_text="Optional: Untergrenze für dynamischen Strompreis in ct/kWh",
-    )
-
-    spot_cap_price_ct_kwh = models.DecimalField(
-        max_digits=6,
-        decimal_places=2,
-        null=True,
-        blank=True,
-        verbose_name="Spotmarkt-Maximalpreis / Cap (ct/kWh)",
-        help_text="Optional: Preisbremse / Obergrenze in ct/kWh",
-    )
-
-    battery_arbitrage_min_spread_ct_kwh = models.DecimalField(
-        max_digits=6,
-        decimal_places=2,
-        default=Decimal("8.00"),
-        verbose_name="Batterie-Arbitrage Mindest-Spread (ct/kWh)",
-        help_text="Erforderliche Preisdifferenz zwischen Lade- und Entladefenster, ab der Arbitrage wirtschaftlich ist",
-    )
-
-    # =========================================================================
-    # 🤝 3. ENERGY SHARING & QUARTIERE (SÄULE 2)
-    # =========================================================================
-    community_sharing_price_ct_kwh = models.DecimalField(
-        max_digits=6,
-        decimal_places=2,
-        default=Decimal("12.00"),
-        verbose_name="Community-Sharing Bezugspreis (ct/kWh)",
-        help_text="Standard-Bezugspreis für geteilten Solarstrom innerhalb der Gemeinschaft",
-    )
-
-    community_producer_payout_ct_kwh = models.DecimalField(
-        max_digits=6,
-        decimal_places=2,
-        default=Decimal("10.00"),
-        verbose_name="Community Einspeiser-Vergütung (ct/kWh)",
-        help_text="Standard-Auszahlung an Erzeuger für geteilten Solarstrom",
-    )
-
-    community_platform_fee_ct_kwh = models.DecimalField(
+    sharegy_platform_fee_ct_kwh = models.DecimalField(
         max_digits=6,
         decimal_places=2,
         default=Decimal("2.00"),
-        verbose_name="Community Plattform- & Betriebsumlage (ct/kWh)",
-        help_text="Betriebsgebühr / Plattform-Umlage pro geteilter kWh",
+        verbose_name="Sharegy Plattform-Umlage (ct/kWh)",
+        help_text="Betriebsgebühr / Plattform-Umlage pro geteilter kWh für automatisierte Messdatenerfassung, Clearing und Monatsabrechnungen gem. § 42b EnWG",
     )
 
     # =========================================================================
-    # 🏛️ 4. GESETZLICHE ABGABEN, NETZENTGELTE & STEUERN (DEUTSCHLAND)
+    # 🏛️ 2. GESETZLICHE ABGABEN, NETZENTGELTE & STEUERN (DEUTSCHLAND)
     # =========================================================================
     grid_fee_ct_kwh = models.DecimalField(
         max_digits=8,
@@ -165,7 +95,7 @@ class EMSGlobalSettings(models.Model):
     )
 
     # =========================================================================
-    # 💎 5. SAAS-ABONNEMENTS & PRO-LIZENZPREISE (SÄULE 1)
+    # 💎 3. SAAS-ABONNEMENTS & PRO-LIZENZPREISE (SÄULE 1)
     # =========================================================================
     saas_pricing_valid_from = models.DateField(
         default=timezone.now,
@@ -220,7 +150,7 @@ class EMSGlobalSettings(models.Model):
     class Meta:
         db_table = "energy_ems_global_settings"
         verbose_name = "EMS-Globaleinstellung"
-        verbose_name_plural = "EMS-Globaleinstellungen (Preise & Tarife)"
+        verbose_name_plural = "EMS-Globaleinstellungen (Plattform-Preise & Abgaben)"
 
     def clean(self):
         # Singleton-Pattern: Verhindert das Anlegen mehrerer Instanzen
@@ -246,7 +176,7 @@ class EMSGlobalSettings(models.Model):
         )
 
     def __str__(self):
-        return f"Globale EMS-Preiseinstellungen (Stand: {self.updated_at.strftime('%Y-%m-%d %H:%M') if self.updated_at else 'Initial'})"
+        return f"Globale Plattform-Einstellungen (Stand: {self.updated_at.strftime('%Y-%m-%d %H:%M') if self.updated_at else 'Initial'})"
 
 
 class InverterManufacturerPollingConfig(models.Model):
