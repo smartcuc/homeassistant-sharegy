@@ -334,6 +334,8 @@ class GridDimmingSignal(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        verbose_name = "§ 14a Netz-Dimmsignal"
+        verbose_name_plural = "§ 14a Netz-Dimmsignale (Netzbetreiber-Drosselung)"
         ordering = ["-started_at"]
         indexes = [
             models.Index(fields=["is_active", "started_at"]),
@@ -391,6 +393,8 @@ class SteuVEDeviceConfig(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        verbose_name = "§ 14a SteuVE-Konfiguration"
+        verbose_name_plural = "§ 14a SteuVE-Geräte (Steuerbare Verbrauchseinrichtungen)"
         ordering = ["priority", "-rated_power_kw"]
 
     def __str__(self):
