@@ -10,7 +10,6 @@ import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "../../api/client";
 import DeviceSetupModal from "../device/DeviceSetupModal";
-import HomeSetupStatusModal from "../device/HomeSetupStatusModal";
 import { useSubscription } from "../../hooks/useSubscription";
 import ProBadge from "../common/ProBadge";
 
@@ -24,7 +23,6 @@ export default function Sidebar() {
     const isLoaded = query?.isSuccess;
     const count = query?.data?.count ?? 0;
     const [openSetup, setOpenSetup] = useState(false);
-    const [openReadinessModal, setOpenReadinessModal] = useState(false);
 
     // 🚨 Aktive Haushalts-Alarme (Alarmzentrale)
     const alertsQuery = useQuery({
@@ -40,36 +38,6 @@ export default function Sidebar() {
         : alertSummary.warning > 0
             ? "bg-amber-100 text-amber-800 border-amber-200"
             : "bg-emerald-100 text-emerald-800 border-emerald-200";
-
-    // 🩺 Installations- & Haushaltsstatus (Omi-Check / 4 Säulen & Hardware-Alarme)
-    const setupStatusQuery = useQuery({
-        queryKey: ["system-setup-status"],
-        queryFn: () => apiFetch("/api/energy/setup-status/"),
-        refetchInterval: 30000,
-    });
-
-    const setupData = setupStatusQuery?.data;
-    const setupScore = setupData?.score ?? 100;
-    const setupStatus = setupData?.status;
-    const hasHardwareFaults = (setupData?.alarms || []).length > 0;
-
-    const setupIcon = hasHardwareFaults || setupStatus === "fault"
-        ? "🔴"
-        : setupScore >= 90
-            ? "🟢"
-            : setupScore >= 60
-                ? "🟡"
-                : "🔴";
-
-    const setupBadge = hasHardwareFaults
-        ? "🚨 Störung"
-        : setupScore < 100
-            ? `${setupScore}%`
-            : null;
-
-    const setupBadgeClass = hasHardwareFaults || setupScore < 60
-        ? "bg-rose-100 text-rose-700 border-rose-200"
-        : "bg-amber-100 text-amber-800 border-amber-200";
 
     const sections = useMemo(() => {
         const sec = [
@@ -122,14 +90,6 @@ export default function Sidebar() {
                 items: [
                     { name: t("nav.tariffs", "Strompreise & Tarife"), path: "/app/tariff", icon: "💶" },
                     { name: t("nav.mqtt_interfaces", "Schnittstellen"), path: "/app/interfaces", icon: "📡" },
-                    {
-                        name: t("nav.setup_readiness", "Installations- & Haushaltsstatus"),
-                        icon: setupIcon,
-                        badge: setupBadge,
-                        badgeClass: setupBadgeClass,
-                        isModalAction: true,
-                        onClick: () => setOpenReadinessModal(true),
-                    },
                     { name: t("nav.system_status", "Systemstatus (Server)"), path: "/app/status", icon: "🌐" },
                 ],
             },
@@ -156,7 +116,7 @@ export default function Sidebar() {
         }
 
         return sec;
-    }, [t, count, alertCount, alertBadgeClass, setupIcon, setupBadge, setupBadgeClass, isStaffOrAdmin, hasTenantAccess, isPro]);
+    }, [t, count, alertCount, alertBadgeClass, isStaffOrAdmin, hasTenantAccess, isPro]);
 
     return (
         <div className="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col shrink-0 transition-colors">
@@ -200,29 +160,6 @@ export default function Sidebar() {
                                             </div>
                                             <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">↗</span>
                                         </a>
-                                    );
-                                }
-
-                                if (item.isModalAction) {
-                                    return (
-                                        <button
-                                            key={item.name || itemIdx}
-                                            onClick={item.onClick}
-                                            type="button"
-                                            className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white transition text-left cursor-pointer gap-2"
-                                        >
-                                            <div className="flex items-center gap-2.5 min-w-0 flex-1 truncate">
-                                                <span className="text-base shrink-0">{item.icon}</span>
-                                                <span className="truncate">{item.name}</span>
-                                            </div>
-                                            {item.badge && (
-                                                <span
-                                                    className={`text-[11px] font-bold px-2 py-0.5 rounded-full border shrink-0 max-w-[85px] truncate ${item.badgeClass || "bg-indigo-100 text-indigo-800 border-indigo-200"}`}
-                                                >
-                                                    {item.badge}
-                                                </span>
-                                            )}
-                                        </button>
                                     );
                                 }
 
@@ -277,13 +214,6 @@ export default function Sidebar() {
             <DeviceSetupModal
                 open={openSetup}
                 onClose={() => setOpenSetup(false)}
-            />
-
-            {/* ✅ MODAL FOR HOME SETUP STATUS (OMI-CHECK & 4 PILLARS) */}
-            <HomeSetupStatusModal
-                open={openReadinessModal}
-                onClose={() => setOpenReadinessModal(false)}
-                onOpenAddDevice={() => setOpenSetup(true)}
             />
         </div>
     );
