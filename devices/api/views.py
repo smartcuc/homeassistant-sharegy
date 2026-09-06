@@ -540,7 +540,7 @@ def device_dashboard_values(request):
     since = timezone.now() - timedelta(hours=1)
     POWER_KEYS = {"power", "value", "val", "apower", "active_power", "pv_power", "load_power", "grid_power", "battery_power"}
 
-    # 1. Schnelle Batch-Abfrage für ALLE 1m Sparkline-Punkte aller Geräte (O(1) Query statt N-Queries)
+    # 1. 1m Sparkline-Rollups laden
     all_1m_rows = list(
         DeviceMetric1m.objects.filter(
             device_id__in=device_ids,
@@ -551,25 +551,42 @@ def device_dashboard_values(request):
     )
 
     sparkline_1m_by_device = defaultdict(lambda: defaultdict(list))
-    if all_1m_rows:
-        for row in all_1m_rows:
-            if row["avg"] is not None:
-                m_k = (row["metric_key"] or "").lower()
-                sparkline_1m_by_device[row["device_id"]][m_k].append(round(float(row["avg"]), 2))
-    else:
-        # Fallback auf DeviceMetric falls Rollups noch nicht aggregiert sind
-        all_raw_rows = list(
-            DeviceMetric.objects.filter(
-                device_id__in=device_ids,
-                timestamp__gte=since,
-            )
-            .values("device_id", "metric_key", "value", "timestamp")
-            .order_by("device_id", "timestamp")
+    for row in all_1m_rows:
+        if row["avg"] is not None:
+            m_k = (row["metric_key"] or "").lower()
+            sparkline_1m_by_device[row["device_id"]][m_k].append(round(float(row["avg"]), 2))
+
+    # 2. Die absolut echten, jüngsten Live-Messwerte aus DeviceMetric laden (exakt dieselbe Quelle wie DeviceChartModal)
+    recent_raw_rows = list(
+        DeviceMetric.objects.filter(
+            device_id__in=device_ids,
+            timestamp__gte=since,
         )
-        for row in all_raw_rows:
-            if row["value"] is not None:
-                m_k = (row["metric_key"] or "").lower()
-                sparkline_1m_by_device[row["device_id"]][m_k].append(round(float(row["value"]), 2))
+        .values("device_id", "metric_key", "value", "unit", "timestamp")
+        .order_by("device_id", "timestamp")
+    )
+
+    for row in recent_raw_rows:
+        dev_id = row["device_id"]
+        raw_k = (row["metric_key"] or "").lower()
+        cfg = device_cfg_map.get(dev_id)
+        raw_keys = dev_keys_map[dev_id]
+        is_multi_source = any(k in raw_keys for k in ["pv_power", "grid_power", "battery_power", "load_power"])
+
+        if is_multi_source and raw_k in ["power", "value", "val"]:
+            continue
+
+        if row["value"] is not None:
+            val = round(float(row["value"]), 2)
+            sparkline_1m_by_device[dev_id][raw_k].append(val)
+            inferred_u = _infer_canonical_unit(raw_k, row["unit"] or "", config=cfg)
+            if dev_id not in device_metrics_map:
+                device_metrics_map[dev_id] = {}
+            device_metrics_map[dev_id][raw_k] = {
+                "value": val,
+                "unit": inferred_u,
+                "timestamp": row["timestamp"].isoformat() if row["timestamp"] else None,
+            }
 
     result = []
 
@@ -608,47 +625,17 @@ def device_dashboard_values(request):
         if configured_lead and configured_lead not in candidate_keys:
             candidate_keys.append(configured_lead)
 
-        lead_val = None
-        top_unit = _infer_canonical_unit(configured_lead or "power", metric.unit if metric else "", config=config)
-
-        # 1. Präziser Match über Candidate Keys in DeviceLatestMetric
-        for c_k in candidate_keys:
-            if c_k in dev_metrics and dev_metrics[c_k]["value"] is not None:
-                lead_val = dev_metrics[c_k]["value"]
-                top_unit = dev_metrics[c_k]["unit"] or top_unit
-                break
-
-        # 2. Redis-Live-Cache Check
-        if lead_val is None:
-            for c_k in candidate_keys:
-                cached_v = cache.get(f"device:{d.id}:{c_k}")
-                if cached_v is not None:
-                    try:
-                        lead_val = round(float(cached_v), 2)
-                        break
-                    except (ValueError, TypeError):
-                        pass
-
-        # 3. Fallback auf get_latest_values
-        if lead_val is None and values.get(d.id) is not None:
-            lead_val = values.get(d.id)
-
-        # 4. Fallback auf erste verfügbare Metrik
-        if lead_val is None and dev_metrics:
-            first_m = next((m for m in dev_metrics.values() if m.get("value") is not None), None)
-            if first_m:
-                lead_val = first_m.get("value")
-                top_unit = first_m.get("unit") or top_unit
-
         # Sparkline-Punkte blitzschnell aus dem In-Memory Mapping extrahieren
         is_pwr = (configured_lead or "").lower() in POWER_KEYS or is_grid or role_key in ["producer", "consumer", "grid"]
         dev_sparklines = sparkline_1m_by_device.get(d.id, {})
         sparkline_pts = []
+        matched_key = None
 
         if is_pwr:
             for p_k in candidate_keys + list(POWER_KEYS):
                 if p_k.lower() in dev_sparklines and dev_sparklines[p_k.lower()]:
                     sparkline_pts = dev_sparklines[p_k.lower()]
+                    matched_key = p_k.lower()
                     break
             if not sparkline_pts and "" in dev_sparklines:
                 sparkline_pts = dev_sparklines[""]
@@ -669,13 +656,52 @@ def device_dashboard_values(request):
             for a_k in alias_keys:
                 if a_k in dev_sparklines and dev_sparklines[a_k]:
                     sparkline_pts = dev_sparklines[a_k]
+                    matched_key = a_k
                     break
 
         # Fallback falls keine aggregierten Punkte vorhanden
         if not sparkline_pts and dev_sparklines:
-            first_pts = next(iter(dev_sparklines.values()), [])
+            first_key, first_pts = next(iter(dev_sparklines.items()), (None, []))
             if first_pts:
                 sparkline_pts = first_pts
+                matched_key = first_key
+
+        lead_val = None
+        top_unit = _infer_canonical_unit(matched_key or configured_lead or "power", metric.unit if metric else "", config=config)
+
+        # 1. Höchste Priorität: Letzter Punkt aus der echten Live-Zeitreihe (exakt wie DeviceChartModal)
+        if sparkline_pts:
+            lead_val = sparkline_pts[-1]
+
+        # 2. Redis-Live-Cache Check
+        if lead_val is None:
+            for c_k in candidate_keys:
+                cached_v = cache.get(f"device:{d.id}:{c_k}")
+                if cached_v is not None:
+                    try:
+                        lead_val = round(float(cached_v), 2)
+                        break
+                    except (ValueError, TypeError):
+                        pass
+
+        # 3. Match über Candidate Keys in dev_metrics
+        if lead_val is None:
+            for c_k in candidate_keys:
+                if c_k in dev_metrics and dev_metrics[c_k]["value"] is not None:
+                    lead_val = dev_metrics[c_k]["value"]
+                    top_unit = dev_metrics[c_k]["unit"] or top_unit
+                    break
+
+        # 4. Fallback auf get_latest_values
+        if lead_val is None and values.get(d.id) is not None:
+            lead_val = values.get(d.id)
+
+        # 5. Fallback auf erste verfügbare Metrik
+        if lead_val is None and dev_metrics:
+            first_m = next((m for m in dev_metrics.values() if m.get("value") is not None), None)
+            if first_m:
+                lead_val = first_m.get("value")
+                top_unit = first_m.get("unit") or top_unit
 
         if len(sparkline_pts) == 1:
             sparkline_pts = [sparkline_pts[0], sparkline_pts[0]]
