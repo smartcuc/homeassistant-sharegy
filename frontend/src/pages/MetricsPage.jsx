@@ -222,13 +222,15 @@ export default function MetricsPage() {
     const valuesQuery = useQuery({
         queryKey: ["device-dashboard-values"],
         queryFn: () => apiFetch("/api/devices/dashboard/"),
-        refetchInterval: 10000,
+        refetchInterval: 3000,
+        refetchIntervalInBackground: true,
     });
 
     const statusQuery = useQuery({
         queryKey: ["devices-status"],
         queryFn: () => apiFetch("/api/devices/status/"),
         refetchInterval: 5000,
+        refetchIntervalInBackground: true,
     });
 
     const devices = useMemo(() => devicesQuery.data || [], [devicesQuery.data]);

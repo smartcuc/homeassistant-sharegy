@@ -516,8 +516,16 @@ def device_dashboard_values(request):
             continue
 
         inferred_u = _infer_canonical_unit(m_k, row["unit"] or "", config=cfg)
+        val = round(float(row["value"]), 2) if row["value"] is not None else None
+        cached_val = cache.get(f"device:{dev_id}:{m_k}") or cache.get(f"device:{dev_id}:{row['metric_key']}")
+        if cached_val is not None:
+            try:
+                val = round(float(cached_val), 2)
+            except (ValueError, TypeError):
+                pass
+
         device_metrics_map[dev_id][m_k] = {
-            "value": round(float(row["value"]), 2) if row["value"] is not None else None,
+            "value": val,
             "unit": inferred_u,
             "timestamp": row["timestamp"].isoformat() if row["timestamp"] else None,
         }
