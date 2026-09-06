@@ -110,14 +110,14 @@ export default function BWWPLoadManagementCard() {
                                     {t("control.warmwasser", "Warmwasser")}
                                 </h3>
                                 <p className="text-xs text-slate-400 mt-0.5">
-                                    Keine Warmwasser-Anlage angebunden
+                                    {t("bwwp.no_plant_connected", "Keine Warmwasser-Anlage angebunden")}
                                 </p>
                             </div>
                         </div>
                     </div>
 
                     <div className="p-4 bg-white/70 dark:bg-slate-800/50 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 text-xs text-slate-500 dark:text-slate-400 text-center">
-                        Binde deine Warmwasser-Wärmepumpe oder SG-Ready Relais ein, um Wassertemperatur und PV-Überschuss-Boost zu steuern.
+                        {t("bwwp.unconfigured_desc", "Binde deine Warmwasser-Wärmepumpe oder SG-Ready Relais ein, um Wassertemperatur und PV-Überschuss-Boost zu steuern.")}
                     </div>
                 </div>
 
@@ -128,7 +128,7 @@ export default function BWWPLoadManagementCard() {
                         className="px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs cursor-pointer bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/20 flex items-center gap-1.5"
                     >
                         <span>➕</span>
-                        <span>Warmwasser einrichten</span>
+                        <span>{t("bwwp.setup_btn", "Warmwasser einrichten")}</span>
                     </button>
                 </div>
             </div>
@@ -162,14 +162,14 @@ export default function BWWPLoadManagementCard() {
                                         : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 border-slate-200"
                                 }`}>
                                     {sgState === "3_boost"
-                                        ? "☀️ SG-Ready Boost"
+                                        ? `☀️ ${t("bwwp.sg_ready_boost", "SG-Ready Boost")}`
                                         : relayState
-                                        ? "● Läuft aktiv"
-                                        : "⚪ Standby"}
+                                        ? `● ${t("common.running", "Läuft aktiv")}`
+                                        : `⚪ ${t("common.standby", "Standby")}`}
                                 </span>
                             </div>
                             <p className="text-xs text-slate-400 mt-0.5">
-                                Intelligente SG-Ready Warmwasser-Steuerung & Speicher-Boost
+                                {t("bwwp.subtitle", "Intelligente SG-Ready Warmwasser-Steuerung & Speicher-Boost")}
                             </p>
                         </div>
                     </div>
@@ -178,7 +178,7 @@ export default function BWWPLoadManagementCard() {
                         type="button"
                         onClick={handleOpenSettings}
                         className="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition cursor-pointer border border-slate-200/80 dark:border-slate-700 shadow-2xs"
-                        title="Schwellwerte & Solltemperaturen anpassen"
+                        title={t("bwwp.settings_tooltip", "Schwellwerte & Solltemperaturen anpassen")}
                     >
                         ⚙️
                     </button>
@@ -187,15 +187,15 @@ export default function BWWPLoadManagementCard() {
                 {/* Metrics */}
                 <div className="grid grid-cols-2 gap-3">
                     <div className="p-3 bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-700/60">
-                        <div className="text-[11px] text-slate-500">Wassertemperatur</div>
+                        <div className="text-[11px] text-slate-500">{t("bwwp.water_temp", "Wassertemperatur")}</div>
                         <div className="text-lg font-bold font-mono text-slate-900 dark:text-white mt-0.5 flex items-baseline justify-between">
                             <span>{tempC.toFixed(1)} °C</span>
-                            <span className="text-xs font-normal text-slate-400 font-sans">Soll: {tTarget}°C</span>
+                            <span className="text-xs font-normal text-slate-400 font-sans">{t("bwwp.target_short", "Soll")}: {tTarget}°C</span>
                         </div>
                     </div>
 
                     <div className="p-3 bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-700/60">
-                        <div className="text-[11px] text-slate-500">Heizleistung (Live)</div>
+                        <div className="text-[11px] text-slate-500">{t("bwwp.heating_power", "Heizleistung (Live)")}</div>
                         <div className="text-lg font-bold font-mono text-blue-600 dark:text-blue-400 mt-0.5">
                             {powerW > 0 ? `${powerW.toFixed(0)} W` : relayState ? "650 W" : "0 W"}
                         </div>
@@ -205,13 +205,13 @@ export default function BWWPLoadManagementCard() {
                 {/* Mode / Strategy Strip */}
                 <div className="p-3 bg-white/70 dark:bg-slate-800/50 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 flex items-center justify-between gap-3 text-xs">
                     <div className="min-w-0">
-                        <div className="font-bold text-slate-800 dark:text-slate-200 truncate">🔄 Regelungsmodus</div>
+                        <div className="font-bold text-slate-800 dark:text-slate-200 truncate">🔄 {t("bwwp.control_mode_title", "Regelungsmodus")}</div>
                         <div className="text-[11px] text-slate-400 truncate">
-                            {controlMode === "pv_surplus" ? "Nur PV-Überschuss" : controlMode === "spot_price" ? "Spotmarkt-Preisführung" : "Hybrid (PV + Günstige Börsenpreise)"}
+                            {controlMode === "pv_surplus" ? t("control.pv_only", "Nur PV-Überschuss") : controlMode === "spot_price" ? t("bwwp.mode_spot_price", "Spotmarkt-Preisführung") : t("bwwp.mode_hybrid", "Hybrid (PV + Günstige Börsenpreise)")}
                         </div>
                     </div>
                     <span className="font-mono text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2.5 py-1 rounded-xl border border-blue-200 dark:border-blue-800 shrink-0">
-                        ab {minSurplusW} W PV
+                        {t("bwwp.from_pv_threshold", { val: minSurplusW, defaultValue: `ab ${minSurplusW} W PV` })}
                     </span>
                 </div>
             </div>
@@ -219,7 +219,7 @@ export default function BWWPLoadManagementCard() {
             {/* Actions */}
             <div className="pt-4 mt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-3 relative z-10">
                 <span className="text-xs text-slate-400">
-                    Status: <strong className="text-blue-600 dark:text-blue-400">{sgState === "3_boost" ? "SG-Boost aktiv" : relayState ? "Heizt normal" : "Standby"}</strong>
+                    {t("common.status", "Status")}: <strong className="text-blue-600 dark:text-blue-400">{sgState === "3_boost" ? t("bwwp.status_boost_active", "SG-Boost aktiv") : relayState ? t("bwwp.status_heating_normal", "Heizt normal") : t("common.standby", "Standby")}</strong>
                 </span>
                 <div className="flex items-center gap-2">
                     <button
@@ -232,7 +232,7 @@ export default function BWWPLoadManagementCard() {
                                 : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/20"
                         }`}
                     >
-                        {sgState === "3_boost" ? "⏹️ Boost beenden" : "🚀 SG-Ready Boost (1h)"}
+                        {sgState === "3_boost" ? `⏹️ ${t("bwwp.end_boost_btn", "Boost beenden")}` : `🚀 ${t("bwwp.start_boost_btn", "SG-Ready Boost (1h)")}`}
                     </button>
                 </div>
             </div>
@@ -245,10 +245,10 @@ export default function BWWPLoadManagementCard() {
                             <div>
                                 <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                                     <span>⚙️</span>
-                                    <span>BWWP Lastmanagement Einstellungen</span>
+                                    <span>{t("bwwp.modal_title", "BWWP Lastmanagement Einstellungen")}</span>
                                 </h3>
                                 <p className="text-xs text-slate-400 mt-0.5">
-                                    Definiere Solltemperaturen, PV-Schwellen und Betriebsmodi.
+                                    {t("bwwp.modal_subtitle", "Definiere Solltemperaturen, PV-Schwellen und Betriebsmodi.")}
                                 </p>
                             </div>
                             <button
@@ -265,14 +265,14 @@ export default function BWWPLoadManagementCard() {
                             {availableDevices.length > 0 && (
                                 <div>
                                     <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                        Verknüpftes Gerät / Aktor
+                                        {t("bwwp.linked_device_label", "Verknüpftes Gerät / Aktor")}
                                     </label>
                                     <select
                                         value={formConfig.device_id || ""}
                                         onChange={(e) => setFormConfig({ ...formConfig, device_id: e.target.value })}
                                         className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-900 dark:text-white"
                                     >
-                                        <option value="">-- Standardgerät --</option>
+                                        <option value="">{t("bwwp.default_device", "-- Standardgerät --")}</option>
                                         {availableDevices.map((d) => (
                                             <option key={d.id} value={d.id}>
                                                 {d.name || d.identifier}
@@ -285,17 +285,17 @@ export default function BWWPLoadManagementCard() {
                             {/* Modus */}
                             <div>
                                 <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                    Betriebsmodus
+                                    {t("bwwp.operating_mode_label", "Betriebsmodus")}
                                 </label>
                                 <select
                                     value={formConfig.control_mode}
                                     onChange={(e) => setFormConfig({ ...formConfig, control_mode: e.target.value })}
                                     className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-900 dark:text-white"
                                 >
-                                    <option value="hybrid">🔄 Hybrid (PV-Überschuss + Günstige Börsenstunden)</option>
-                                    <option value="pv_surplus">☀️ Nur PV-Überschuss</option>
-                                    <option value="spot_price">⚡ Nur Börsenstrompreis (Spotmarkt)</option>
-                                    <option value="manual">✋ Manuell (Keine Automatik)</option>
+                                    <option value="hybrid">🔄 {t("bwwp.opt_hybrid", "Hybrid (PV-Überschuss + Günstige Börsenstunden)")}</option>
+                                    <option value="pv_surplus">☀️ {t("bwwp.opt_pv_only", "Nur PV-Überschuss")}</option>
+                                    <option value="spot_price">⚡ {t("bwwp.opt_spot_price", "Nur Börsenstrompreis (Spotmarkt)")}</option>
+                                    <option value="manual">✋ {t("bwwp.opt_manual", "Manuell (Keine Automatik)")}</option>
                                 </select>
                             </div>
 
@@ -303,7 +303,7 @@ export default function BWWPLoadManagementCard() {
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                        Mindesttemperatur (°C)
+                                        {t("bwwp.min_temp_label", "Mindesttemperatur (°C)")}
                                     </label>
                                     <input
                                         type="number"
@@ -312,12 +312,12 @@ export default function BWWPLoadManagementCard() {
                                         onChange={(e) => setFormConfig({ ...formConfig, min_temp_c: parseFloat(e.target.value) })}
                                         className="w-full p-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-900 dark:text-white"
                                     />
-                                    <span className="text-[10px] text-slate-400">Komfortgrenze (Zwangsheizung)</span>
+                                    <span className="text-[10px] text-slate-400">{t("bwwp.comfort_limit", "Komfortgrenze (Zwangsheizung)")}</span>
                                 </div>
 
                                 <div>
                                     <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                        Standard-Solltemp. (°C)
+                                        {t("bwwp.standard_target_temp_label", "Standard-Solltemp. (°C)")}
                                     </label>
                                     <input
                                         type="number"
@@ -326,12 +326,12 @@ export default function BWWPLoadManagementCard() {
                                         onChange={(e) => setFormConfig({ ...formConfig, target_temp_c: parseFloat(e.target.value) })}
                                         className="w-full p-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-900 dark:text-white"
                                     />
-                                    <span className="text-[10px] text-slate-400">Wohlfühltemperatur</span>
+                                    <span className="text-[10px] text-slate-400">{t("bwwp.target_feel_good", "Wohlfühltemperatur")}</span>
                                 </div>
 
                                 <div>
                                     <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                        SG-Ready Boost (°C)
+                                        {t("bwwp.boost_temp_label", "SG-Ready Boost (°C)")}
                                     </label>
                                     <input
                                         type="number"
@@ -340,12 +340,12 @@ export default function BWWPLoadManagementCard() {
                                         onChange={(e) => setFormConfig({ ...formConfig, boost_temp_c: parseFloat(e.target.value) })}
                                         className="w-full p-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-900 dark:text-white"
                                     />
-                                    <span className="text-[10px] text-slate-400">Thermisches Speichern</span>
+                                    <span className="text-[10px] text-slate-400">{t("bwwp.thermal_storage", "Thermisches Speichern")}</span>
                                 </div>
 
                                 <div>
                                     <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                        Überhitzungsschutz (°C)
+                                        {t("bwwp.max_safety_temp_label", "Überhitzungsschutz (°C)")}
                                     </label>
                                     <input
                                         type="number"
@@ -354,7 +354,7 @@ export default function BWWPLoadManagementCard() {
                                         onChange={(e) => setFormConfig({ ...formConfig, max_safety_temp_c: parseFloat(e.target.value) })}
                                         className="w-full p-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-900 dark:text-white"
                                     />
-                                    <span className="text-[10px] text-slate-400">Absoluter Abschaltschutz</span>
+                                    <span className="text-[10px] text-slate-400">{t("bwwp.absolute_cutoff", "Absoluter Abschaltschutz")}</span>
                                 </div>
                             </div>
 
@@ -362,7 +362,7 @@ export default function BWWPLoadManagementCard() {
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                        Mindest-PV-Überschuss (W)
+                                        {t("bwwp.min_pv_surplus_label", "Mindest-PV-Überschuss (W)")}
                                     </label>
                                     <input
                                         type="number"
@@ -375,7 +375,7 @@ export default function BWWPLoadManagementCard() {
 
                                 <div>
                                     <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                        Max. Preisgrenze (ct/kWh)
+                                        {t("bwwp.max_price_threshold_label", "Max. Preisgrenze (ct/kWh)")}
                                     </label>
                                     <input
                                         type="number"
@@ -395,7 +395,7 @@ export default function BWWPLoadManagementCard() {
                                 onClick={() => setSettingsOpen(false)}
                                 className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition cursor-pointer"
                             >
-                                Abbrechen
+                                {t("common.cancel", "Abbrechen")}
                             </button>
                             <button
                                 type="button"
@@ -403,7 +403,7 @@ export default function BWWPLoadManagementCard() {
                                 disabled={configMutation.isPending}
                                 className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-md transition cursor-pointer"
                             >
-                                {configMutation.isPending ? "Speichern..." : "Einstellungen speichern"}
+                                {configMutation.isPending ? t("common.saving", "Speichern...") : t("common.save_settings", "Einstellungen speichern")}
                             </button>
                         </div>
                     </div>

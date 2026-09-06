@@ -34,13 +34,13 @@ export default function LiveSurplusWaterfallCard({ budget = {} }) {
                     </div>
                     <div>
                         <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                            <span>Live-Leistungsverteiler (Überschuss-Wasserfall)</span>
+                            <span>{t("waterfall.title", "Live-Leistungsverteiler (Überschuss-Wasserfall)")}</span>
                             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                                ● Echtzeit
+                                ● {t("common.realtime", "Echtzeit")}
                             </span>
                         </h3>
                         <p className="text-xs text-slate-500 dark:text-slate-400">
-                            Dynamische Merit-Order Aufteilung des Solarstroms auf alle Verbraucherstufen.
+                            {t("waterfall.subtitle", "Dynamische Merit-Order Aufteilung des Solarstroms auf alle Verbraucherstufen.")}
                         </p>
                     </div>
                 </div>
@@ -61,8 +61,8 @@ export default function LiveSurplusWaterfallCard({ budget = {} }) {
                             <Sun className="w-4 h-4" />
                         </div>
                         <div>
-                            <div className="text-xs font-bold text-slate-900 dark:text-white">1. Solare Gesamterzeugung</div>
-                            <div className="text-[11px] text-slate-500 dark:text-slate-400">Verfügbare Bruttoleistung vom Dach</div>
+                            <div className="text-xs font-bold text-slate-900 dark:text-white">{t("waterfall.pv_gen", "1. Solare Gesamterzeugung")}</div>
+                            <div className="text-[11px] text-slate-500 dark:text-slate-400">{t("waterfall.pv_desc", "Verfügbare Bruttoleistung vom Dach")}</div>
                         </div>
                     </div>
                     <div className="text-sm font-black font-mono text-amber-600 dark:text-amber-400">
@@ -82,15 +82,15 @@ export default function LiveSurplusWaterfallCard({ budget = {} }) {
                             <Home className="w-4 h-4" />
                         </div>
                         <div>
-                            <div className="text-xs font-bold text-slate-900 dark:text-white">2. Haus-Grundlast (Priorität 0)</div>
-                            <div className="text-[11px] text-slate-500 dark:text-slate-400">Direktdeckung aller Haushaltsverbraucher</div>
+                            <div className="text-xs font-bold text-slate-900 dark:text-white">{t("waterfall.load_title", "2. Haus-Grundlast (Priorität 0)")}</div>
+                            <div className="text-[11px] text-slate-500 dark:text-slate-400">{t("waterfall.load_desc", "Direktdeckung aller Haushaltsverbraucher")}</div>
                         </div>
                     </div>
                     <div className="text-right">
                         <div className="text-sm font-black font-mono text-blue-600 dark:text-blue-400">
                             -{formatW(loadW)}
                         </div>
-                        <div className="text-[10px] text-slate-400">Rest: {formatW(surplusW)}</div>
+                        <div className="text-[10px] text-slate-400">{t("waterfall.remaining", "Rest")}: {formatW(surplusW)}</div>
                     </div>
                 </div>
 
@@ -107,17 +107,17 @@ export default function LiveSurplusWaterfallCard({ budget = {} }) {
                         </div>
                         <div>
                             <div className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                                <span>3. Heimspeicher (Priorität 1)</span>
+                                <span>{t("waterfall.storage_title", "3. Heimspeicher (Priorität 1)")}</span>
                                 <span className="text-[10px] font-mono px-1.5 py-0.2 bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 rounded font-bold">{soc}% SoC</span>
                             </div>
-                            <div className="text-[11px] text-slate-500 dark:text-slate-400">Batterieladung zur Nachtabdeckung</div>
+                            <div className="text-[11px] text-slate-500 dark:text-slate-400">{t("waterfall.storage_desc", "Batterieladung zur Nachtabdeckung")}</div>
                         </div>
                     </div>
                     <div className="text-right">
                         <div className="text-sm font-black font-mono text-indigo-600 dark:text-indigo-400">
                             -{formatW(batteryPrioW)}
                         </div>
-                        <div className="text-[10px] text-slate-400">Rest: {formatW(afterBatteryW)}</div>
+                        <div className="text-[10px] text-slate-400">{t("waterfall.remaining", "Rest")}: {formatW(afterBatteryW)}</div>
                     </div>
                 </div>
 
@@ -133,15 +133,15 @@ export default function LiveSurplusWaterfallCard({ budget = {} }) {
                             <Droplets className="w-4 h-4" />
                         </div>
                         <div>
-                            <div className="text-xs font-bold text-slate-900 dark:text-white">4. Warmwasser / BWWP (Priorität 2)</div>
-                            <div className="text-[11px] text-slate-500 dark:text-slate-400">SG-Ready thermischer Solar-Boost bis 60°C</div>
+                            <div className="text-xs font-bold text-slate-900 dark:text-white">{t("waterfall.bwwp_title", "4. Warmwasser / BWWP (Priorität 2)")}</div>
+                            <div className="text-[11px] text-slate-500 dark:text-slate-400">{t("waterfall.bwwp_desc", "SG-Ready thermischer Solar-Boost bis 60°C")}</div>
                         </div>
                     </div>
                     <div className="text-right">
                         <div className="text-sm font-black font-mono text-orange-600 dark:text-orange-400">
-                            {bwwpPrioW > 0 ? `-${formatW(bwwpPrioW)}` : "Bereit (0 W)"}
+                            {bwwpPrioW > 0 ? `-${formatW(bwwpPrioW)}` : t("waterfall.ready_0w", "Bereit (0 W)")}
                         </div>
-                        <div className="text-[10px] text-slate-400">Rest: {formatW(afterBwwpW)}</div>
+                        <div className="text-[10px] text-slate-400">{t("waterfall.remaining", "Rest")}: {formatW(afterBwwpW)}</div>
                     </div>
                 </div>
 
@@ -157,15 +157,15 @@ export default function LiveSurplusWaterfallCard({ budget = {} }) {
                             <Car className="w-4 h-4" />
                         </div>
                         <div>
-                            <div className="text-xs font-bold text-slate-900 dark:text-white">5. Wallbox / E-Auto (Priorität 3)</div>
-                            <div className="text-[11px] text-slate-500 dark:text-slate-400">OCPP 1.6-J dynamisches PV-Überschussladen</div>
+                            <div className="text-xs font-bold text-slate-900 dark:text-white">{t("waterfall.wallbox_title", "5. Wallbox / E-Auto (Priorität 3)")}</div>
+                            <div className="text-[11px] text-slate-500 dark:text-slate-400">{t("waterfall.wallbox_desc", "OCPP 1.6-J dynamisches PV-Überschussladen")}</div>
                         </div>
                     </div>
                     <div className="text-right">
                         <div className="text-sm font-black font-mono text-emerald-600 dark:text-emerald-400">
-                            {wallboxPrioW > 0 ? `-${formatW(wallboxPrioW)}` : "Warte auf Solarstrom"}
+                            {wallboxPrioW > 0 ? `-${formatW(wallboxPrioW)}` : t("wallbox.waiting_for_solar", "Warte auf Solarstrom")}
                         </div>
-                        <div className="text-[10px] text-slate-400">Netzexport: {formatW(gridExportW)}</div>
+                        <div className="text-[10px] text-slate-400">{t("waterfall.grid_export", "Netzexport")}: {formatW(gridExportW)}</div>
                     </div>
                 </div>
             </div>

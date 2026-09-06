@@ -78,47 +78,47 @@ export default function SimpleDashboardView({
         if (solarPowerW > 200 && gridPowerW <= 20) {
             const surplusW = Math.abs(Math.min(0, gridPowerW));
             return {
-                badge: "🟢 100% Sonnenstrom",
+                badge: t("simple_dashboard.badge_solar", "🟢 100% Sonnenstrom"),
                 badgeClass: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200 dark:border-emerald-900/50",
-                headline: "Dein Haushalt läuft aktuell autark über die Solaranlage.",
+                headline: t("simple_dashboard.headline_solar", "Dein Haushalt läuft aktuell autark über die Solaranlage."),
                 subline: surplusW > 50 
-                    ? `Die PV erzeugt ${formatPower(solarPowerW)}. Überschuss von ${formatPower(surplusW)} fließt ins Netz bzw. in den Speicher.`
-                    : `Die Solaranlage deckt deinen aktuellen Hausverbrauch von ${formatPower(homePowerW)} ab.`,
+                    ? t("simple_dashboard.subline_solar_surplus", "Die PV erzeugt {{pv}}. Überschuss von {{surplus}} fließt ins Netz bzw. in den Speicher.", { pv: formatPower(solarPowerW), surplus: formatPower(surplusW) })
+                    : t("simple_dashboard.subline_solar_covered", "Die Solaranlage deckt deinen aktuellen Hausverbrauch von {{load}} ab.", { load: formatPower(homePowerW) }),
             };
         }
         if (batteryPowerW < -100 && solarPowerW <= 200) {
             return {
-                badge: "🔋 Speicher-Versorgung",
+                badge: t("simple_dashboard.badge_battery", "🔋 Speicher-Versorgung"),
                 badgeClass: "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border-amber-200 dark:border-amber-900/50",
-                headline: "Dein Haushalt wird aus dem Batteriespeicher versorgt.",
+                headline: t("simple_dashboard.headline_battery", "Dein Haushalt wird aus dem Batteriespeicher versorgt."),
                 subline: batterySocPct !== null 
-                    ? `Akkustand liegt bei ${batterySocPct}%. Entladeleistung: ${formatPower(Math.abs(batteryPowerW))}.`
-                    : `Aktuelle Entladeleistung: ${formatPower(Math.abs(batteryPowerW))}.`,
+                    ? t("simple_dashboard.subline_battery_soc", "Akkustand liegt bei {{soc}}%. Entladeleistung: {{power}}.", { soc: batterySocPct, power: formatPower(Math.abs(batteryPowerW)) })
+                    : t("simple_dashboard.subline_battery_power", "Aktuelle Entladeleistung: {{power}}.", { power: formatPower(Math.abs(batteryPowerW)) }),
             };
         }
         if (gridPowerW > 100) {
             return {
-                badge: "⚡ Netzbezug aktiv",
+                badge: t("simple_dashboard.badge_grid_import", "⚡ Netzbezug aktiv"),
                 badgeClass: "bg-sky-100 text-sky-800 dark:bg-sky-950/60 dark:text-sky-300 border-sky-200 dark:border-sky-900/50",
-                headline: "Aktuell wird Strom aus dem öffentlichen Netz bezogen.",
-                subline: `Netzbezug: ${formatPower(gridPowerW)} · Optimiertes Lastmanagement aktiv.`,
+                headline: t("simple_dashboard.headline_grid_import", "Aktuell wird Strom aus dem öffentlichen Netz bezogen."),
+                subline: t("simple_dashboard.subline_grid_import", "Netzbezug: {{power}} · Optimiertes Lastmanagement aktiv.", { power: formatPower(gridPowerW) }),
             };
         }
         if (gridPowerW < -100) {
             return {
-                badge: "📤 Netzeinspeisung",
+                badge: t("simple_dashboard.badge_grid_export", "📤 Netzeinspeisung"),
                 badgeClass: "bg-teal-100 text-teal-800 dark:bg-teal-950/60 dark:text-teal-300 border-teal-200 dark:border-teal-900/50",
-                headline: "Solarüberschuss wird ins Stromnetz eingespeist.",
-                subline: `Einspeisung: ${formatPower(Math.abs(gridPowerW))} zu deinem garantierten Vergütungstarif.`,
+                headline: t("simple_dashboard.headline_grid_export", "Solarüberschuss wird ins Stromnetz eingespeist."),
+                subline: t("simple_dashboard.subline_grid_export", "Einspeisung: {{power}} zu deinem garantierten Vergütungstarif.", { power: formatPower(Math.abs(gridPowerW)) }),
             };
         }
         return {
-            badge: "✨ Ausgeglichener Betrieb",
+            badge: t("simple_dashboard.badge_balanced", "✨ Ausgeglichener Betrieb"),
             badgeClass: "bg-indigo-100 text-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-300 border-indigo-200 dark:border-indigo-900/50",
-            headline: "Energiemanagement läuft im optimalen Gleichgewicht.",
-            subline: "Erzeugung, Speichernutzung und Hausverbrauch sind optimal austariert.",
+            headline: t("simple_dashboard.headline_balanced", "Energiemanagement läuft im optimalen Gleichgewicht."),
+            subline: t("simple_dashboard.subline_balanced", "Erzeugung, Speichernutzung und Hausverbrauch sind optimal austariert."),
         };
-    }, [solarPowerW, homePowerW, gridPowerW, batteryPowerW, batterySocPct]);
+    }, [solarPowerW, homePowerW, gridPowerW, batteryPowerW, batterySocPct, t]);
 
     return (
         <div className="space-y-6">
@@ -249,10 +249,10 @@ export default function SimpleDashboardView({
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                             </span>
-                            Live Energiefluss deiner Anlage
+                            Live {t("simple_dashboard.live_flow_title", "Live-Energiefluss deiner Anlage")}
                         </h2>
                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                            Echtzeit-Messwerte aller Hauptkomponenten im aktuellen Moment.
+                            {t("simple_dashboard.live_flow_desc", "Echtzeit-Messwerte aller Hauptkomponenten im aktuellen Moment.")}
                         </p>
                     </div>
 
@@ -262,7 +262,7 @@ export default function SimpleDashboardView({
                         className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 px-3.5 py-2 rounded-xl border border-indigo-200 dark:border-indigo-900/50 transition cursor-pointer flex items-center gap-1.5 shadow-2xs"
                     >
                         <Sliders className="w-3.5 h-3.5" />
-                        Experten-Ansicht öffnen
+                        {t("simple_dashboard.open_expert_view", "Experten-Ansicht öffnen")}
                     </button>
                 </div>
 
@@ -276,7 +276,7 @@ export default function SimpleDashboardView({
                                 ☀️
                             </div>
                             <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300 bg-amber-100/80 dark:bg-amber-900/50 px-2 py-0.5 rounded-md">
-                                Erzeugung
+                                {t("energy.generation", "Erzeugung")}
                             </span>
                         </div>
                         <div>
@@ -284,9 +284,9 @@ export default function SimpleDashboardView({
                                 {formatPower(solarPowerW)}
                             </span>
                             <div className="text-xs text-amber-800 dark:text-amber-300 font-semibold mt-1 flex items-center justify-between">
-                                <span>{solarPowerW > 20 ? "Aktiv" : "Ruhend"}</span>
+                                <span>{solarPowerW > 20 ? t("common.active", "Aktiv") : t("common.idle", "Ruhend")}</span>
                                 <span className="text-slate-500 dark:text-slate-400 font-normal">
-                                    Gesamt: {formatKwh(pvGenerationKwh)} kWh
+                                    {t("energy.total_with_kwh", "Gesamt: {{val}} kWh", { val: formatKwh(pvGenerationKwh) })}
                                 </span>
                             </div>
                         </div>
@@ -299,7 +299,7 @@ export default function SimpleDashboardView({
                                 🏠
                             </div>
                             <span className="text-[10px] font-bold uppercase tracking-wider text-rose-800 dark:text-rose-300 bg-rose-100/80 dark:bg-rose-900/50 px-2 py-0.5 rounded-md">
-                                Haushalt
+                                {t("energy.household", "Haushalt")}
                             </span>
                         </div>
                         <div>
@@ -307,9 +307,9 @@ export default function SimpleDashboardView({
                                 {formatPower(homePowerW)}
                             </span>
                             <div className="text-xs text-rose-800 dark:text-rose-300 font-semibold mt-1 flex items-center justify-between">
-                                <span>Bedarf</span>
+                                <span>{t("energy.demand", "Bedarf")}</span>
                                 <span className="text-slate-500 dark:text-slate-400 font-normal">
-                                    Gesamt: {formatKwh(houseConsumptionKwh)} kWh
+                                    {t("energy.total_with_kwh", "Gesamt: {{val}} kWh", { val: formatKwh(houseConsumptionKwh) })}
                                 </span>
                             </div>
                         </div>
@@ -322,7 +322,7 @@ export default function SimpleDashboardView({
                                 🔋
                             </div>
                             <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300 bg-emerald-100/80 dark:bg-emerald-900/50 px-2 py-0.5 rounded-md font-mono">
-                                {batterySocPct !== null ? `${batterySocPct}% SoC` : "Speicher"}
+                                {batterySocPct !== null ? `${batterySocPct}% SoC` : t("energy.battery_storage", "Speicher")}
                             </span>
                         </div>
                         <div>
@@ -330,9 +330,9 @@ export default function SimpleDashboardView({
                                 {formatPower(Math.abs(batteryPowerW))}
                             </span>
                             <div className="text-xs text-emerald-800 dark:text-emerald-300 font-semibold mt-1 flex items-center justify-between">
-                                <span>{batteryPowerW > 100 ? "⚡ Lädt" : batteryPowerW < -100 ? "🏠 Entlädt" : "Standby"}</span>
+                                <span>{batteryPowerW > 100 ? t("energy.battery_charging", "⚡ Lädt") : batteryPowerW < -100 ? t("energy.battery_discharging", "🏠 Entlädt") : t("common.standby", "Standby")}</span>
                                 <span className="text-slate-500 dark:text-slate-400 font-normal">
-                                    Ladung: {formatKwh(batteryChargeKwh)} kWh
+                                    {t("energy.charge_with_kwh", "Ladung: {{val}} kWh", { val: formatKwh(batteryChargeKwh) })}
                                 </span>
                             </div>
                         </div>
@@ -355,7 +355,7 @@ export default function SimpleDashboardView({
                                     ? "bg-sky-100/80 dark:bg-sky-900/50 text-sky-800 dark:text-sky-300" 
                                     : "bg-purple-100/80 dark:bg-purple-900/50 text-purple-800 dark:text-purple-300"
                             }`}>
-                                {gridPowerW <= 0 ? "Einspeisung" : "Netzbezug"}
+                                {gridPowerW <= 0 ? t("energy.feedin", "Einspeisung") : t("energy.grid_import", "Netzbezug")}
                             </span>
                         </div>
                         <div>
@@ -364,7 +364,7 @@ export default function SimpleDashboardView({
                             </span>
                             <div className="text-xs font-semibold mt-1 flex items-center justify-between">
                                 <span className={gridPowerW <= 0 ? "text-sky-700 dark:text-sky-300" : "text-purple-700 dark:text-purple-300"}>
-                                    {gridPowerW <= 0 ? "📤 Einspeisen" : "📥 Bezug"}
+                                    {gridPowerW <= 0 ? t("energy.export_action", "📤 Einspeisen") : t("energy.import_action", "📥 Bezug")}
                                 </span>
                                 <span className="text-slate-500 dark:text-slate-400 font-normal">
                                     {gridPowerW <= 0 ? `${formatKwh(gridExportKwh)} kWh` : `${formatKwh(gridImportKwh)} kWh`}
@@ -383,10 +383,10 @@ export default function SimpleDashboardView({
                     <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-800 space-y-4">
                         <div className="flex items-center justify-between">
                             <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                                <span>📊</span> Gesamtenergie im Zeitraum ({periodLabel})
+                                <span>📊</span> {t("simple_dashboard.total_energy_period", "Gesamtenergie im Zeitraum ({{period}})", { period: periodLabel })}
                             </h3>
                             <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 font-mono">
-                                kWh-Bilanz
+                                {t("energy.kwh_balance", "kWh-Bilanz")}
                             </span>
                         </div>
 
@@ -395,7 +395,7 @@ export default function SimpleDashboardView({
                             <div className="flex items-center justify-between text-xs">
                                 <span className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
                                     <span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block" />
-                                    Solarerzeugung gesamt
+                                    {t("energy.solar_generation_total", "Solarerzeugung gesamt")}
                                 </span>
                                 <span className="font-bold font-mono text-slate-900 dark:text-white">
                                     {formatKwh(pvGenerationKwh)} kWh
@@ -406,7 +406,7 @@ export default function SimpleDashboardView({
                             <div className="flex items-center justify-between text-xs">
                                 <span className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
                                     <span className="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block" />
-                                    Gesamter Hausverbrauch
+                                    {t("energy.house_consumption_total", "Gesamter Hausverbrauch")}
                                 </span>
                                 <span className="font-bold font-mono text-slate-900 dark:text-white">
                                     {formatKwh(houseConsumptionKwh)} kWh
@@ -417,7 +417,7 @@ export default function SimpleDashboardView({
                             <div className="flex items-center justify-between text-xs">
                                 <span className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
                                     <span className="w-2.5 h-2.5 rounded-full bg-purple-500 inline-block" />
-                                    Netzstrom bezogen
+                                    {t("energy.grid_import_total", "Netzstrom bezogen")}
                                 </span>
                                 <span className="font-bold font-mono text-slate-900 dark:text-white">
                                     {formatKwh(gridImportKwh)} kWh
@@ -428,7 +428,7 @@ export default function SimpleDashboardView({
                             <div className="flex items-center justify-between text-xs">
                                 <span className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
                                     <span className="w-2.5 h-2.5 rounded-full bg-sky-500 inline-block" />
-                                    Solarstrom eingespeist
+                                    {t("energy.solar_export_total", "Solarstrom eingespeist")}
                                 </span>
                                 <span className="font-bold font-mono text-slate-900 dark:text-white">
                                     {formatKwh(gridExportKwh)} kWh
@@ -440,8 +440,8 @@ export default function SimpleDashboardView({
                         {houseConsumptionKwh > 0 && (
                             <div className="pt-2 border-t border-slate-200/80 dark:border-slate-700/60">
                                 <div className="flex justify-between text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">
-                                    <span>Deckung des Verbrauchs:</span>
-                                    <span>{autarkyRate}% Solar & Akku · {Math.max(0, 100 - autarkyRate)}% Netz</span>
+                                    <span>{t("energy.demand_coverage", "Deckung des Verbrauchs:")}</span>
+                                    <span>{autarkyRate}% {t("energy.solar_battery", "Solar & Akku")} · {Math.max(0, 100 - autarkyRate)}% {t("energy.grid", "Netz")}</span>
                                 </div>
                                 <div className="w-full h-3 rounded-full bg-slate-200 dark:bg-slate-700 flex overflow-hidden">
                                     <div 
@@ -464,13 +464,13 @@ export default function SimpleDashboardView({
                         <div>
                             <div className="flex items-center justify-between mb-3">
                                 <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                                    <span>🔌</span> Größte Stromverbraucher
+                                    <span>🔌</span> {t("simple_dashboard.top_consumers", "Größte Stromverbraucher")}
                                 </h3>
                                 <Link 
                                     to="/app/devices" 
                                     className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
                                 >
-                                    Geräte verwalten &rarr;
+                                    {t("simple_dashboard.manage_devices", "Geräte verwalten →")}
                                 </Link>
                             </div>
 

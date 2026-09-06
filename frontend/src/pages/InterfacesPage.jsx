@@ -81,14 +81,14 @@ export default function InterfacesPage() {
                         <div>
                             <div className="flex items-center gap-2">
                                 <h2 className="text-base font-bold text-gray-900">
-                                    1. Outbound-WebSocket Schnittstelle (Shelly Gen2 / Gen3 / Pro)
+                                    {t("interfaces.wss_title", "1. Outbound-WebSocket Schnittstelle (Shelly Gen2 / Gen3 / Pro)")}
                                 </h2>
                                 <span className="text-[10px] font-bold px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full border border-amber-200">
-                                    Empfohlen & DAU-sicher
+                                    {t("interfaces.wss_badge", "Empfohlen & DAU-sicher")}
                                 </span>
                             </div>
                             <p className="text-xs text-gray-500">
-                                Voll verschlüsselte Live-Verbindung über Port 443 (WSS) für Shelly 1PM Gen3, Pro 3EM, Plus 1PM uvm.
+                                {t("interfaces.wss_desc", "Voll verschlüsselte Live-Verbindung über Port 443 (WSS) für Shelly 1PM Gen3, Pro 3EM, Plus 1PM uvm.")}
                             </p>
                         </div>
                     </div>
@@ -97,7 +97,7 @@ export default function InterfacesPage() {
                         onClick={() => safeCopy(wsUrl, "ws_url")}
                         className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold rounded-lg shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
                     >
-                        {copiedKey === "ws_url" ? "✅ WSS-URL kopiert!" : "📋 WSS-URL kopieren"}
+                        {copiedKey === "ws_url" ? `✅ ${t("common.copied", "Kopiert!")}` : `📋 ${t("interfaces.copy_wss_url", "WSS-URL kopieren")}`}
                     </button>
                 </div>
 
@@ -105,7 +105,7 @@ export default function InterfacesPage() {
                     {/* WSS URL DISPLAY */}
                     <div>
                         <div className="text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5">
-                            Deine persönliche WebSocket Server-URL
+                            {t("interfaces.personal_wss_url", "Deine persönliche WebSocket Server-URL")}
                         </div>
                         <div className="flex items-center justify-between p-3.5 bg-amber-50/50 border border-amber-200 rounded-xl font-mono text-xs text-amber-900 font-semibold break-all gap-2">
                             <span>{wsUrl}</span>
@@ -113,7 +113,7 @@ export default function InterfacesPage() {
                                 onClick={() => safeCopy(wsUrl, "ws_url")}
                                 className="px-2.5 py-1 bg-white hover:bg-amber-100 border border-amber-300 text-amber-900 rounded-lg text-xs font-bold shrink-0 transition cursor-pointer"
                             >
-                                {copiedKey === "ws_url" ? "✓ Kopiert" : "Kopieren"}
+                                {copiedKey === "ws_url" ? `✓ ${t("common.copied", "Kopiert")}` : t("common.copy", "Kopieren")}
                             </button>
                         </div>
                     </div>
@@ -123,22 +123,22 @@ export default function InterfacesPage() {
                         <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-start gap-2.5">
                             <span className="text-base">🔒</span>
                             <div>
-                                <div className="font-bold text-gray-900">TLS Verschlüsselt</div>
-                                <div className="text-gray-500 text-[11px]">Sichere WSS-Verbindung über Standard HTTPS (Port 443).</div>
+                                <div className="font-bold text-gray-900">{t("interfaces.tls_encrypted", "TLS Verschlüsselt")}</div>
+                                <div className="text-gray-500 text-[11px]">{t("interfaces.tls_desc", "Sichere WSS-Verbindung über Standard HTTPS (Port 443).")}</div>
                             </div>
                         </div>
                         <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-start gap-2.5">
                             <span className="text-base">🛡️</span>
                             <div>
-                                <div className="font-bold text-gray-900">Keine Portweiterleitung</div>
-                                <div className="text-gray-500 text-[11px]">Funktioniert hinter jeder Fritz!Box & Router ohne Freigaben.</div>
+                                <div className="font-bold text-gray-900">{t("interfaces.no_port_forwarding", "Keine Portweiterleitung")}</div>
+                                <div className="text-gray-500 text-[11px]">{t("interfaces.no_port_desc", "Funktioniert hinter jeder Fritz!Box & Router ohne Freigaben.")}</div>
                             </div>
                         </div>
                         <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-start gap-2.5">
                             <span className="text-base">⚡</span>
                             <div>
-                                <div className="font-bold text-gray-900">Bidirektional & Aktorik</div>
-                                <div className="text-gray-500 text-[11px]">Live-Leistungsmessung & Relais-Schaltung in 5 ms.</div>
+                                <div className="font-bold text-gray-900">{t("interfaces.bidirectional", "Bidirektional & Aktorik")}</div>
+                                <div className="text-gray-500 text-[11px]">{t("interfaces.bidirectional_desc", "Live-Leistungsmessung & Relais-Schaltung in 5 ms.")}</div>
                             </div>
                         </div>
                     </div>
@@ -146,23 +146,23 @@ export default function InterfacesPage() {
                     {/* 3-STEP INSTRUCTIONS */}
                     <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl text-xs space-y-3">
                         <div className="font-bold text-gray-900 text-sm flex items-center gap-1.5">
-                            <span>📖</span> 3-Schritte Einrichtung im Shelly Web-Interface:
+                            <span>📖</span> {t("interfaces.shelly_setup_title", "3-Schritte Einrichtung im Shelly Web-Interface:")}
                         </div>
                         <ol className="list-decimal list-inside space-y-2 text-gray-700 leading-relaxed">
                             <li>
-                                Öffne die Weboberfläche deines Shelly im Browser (<code className="bg-white px-1.5 py-0.5 rounded border border-slate-300 font-mono">http://&lt;shelly-ip&gt;</code>).
+                                {t("interfaces.shelly_step_1", "Öffne die Weboberfläche deines Shelly im Browser")} (<code className="bg-white px-1.5 py-0.5 rounded border border-slate-300 font-mono">http://&lt;shelly-ip&gt;</code>).
                             </li>
                             <li>
-                                Klicke im Menü links auf <strong>Settings</strong> $\rightarrow$ <strong>Outbound WebSocket</strong>.
+                                {t("interfaces.shelly_step_2", "Klicke im Menü links auf Settings → Outbound WebSocket.")}
                             </li>
                             <li>
-                                Setze ein Häkchen bei <strong>Enable</strong>, wähle TLS/SSL und füge oben stehende <strong>Server-URL</strong> ein $\rightarrow$ Klicke auf <strong>Save Settings</strong>.
+                                {t("interfaces.shelly_step_3", "Setze ein Häkchen bei Enable, wähle TLS/SSL und füge oben stehende Server-URL ein → Klicke auf Save Settings.")}
                             </li>
                         </ol>
                         <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-800 text-[11px] font-medium flex items-center gap-2">
                             <span>🚀</span>
                             <span>
-                                <strong>Fertig!</strong> Der Shelly verbindet sich automatisch mit Sharegy. Das Gerät wird sofort erkannt und taucht unter <strong>Geräte</strong> und im <strong>Dashboard</strong> auf.
+                                <strong>{t("interfaces.done", "Fertig!")}</strong> {t("interfaces.shelly_done_desc", "Der Shelly verbindet sich automatisch mit Sharegy. Das Gerät wird sofort erkannt und taucht unter Geräte und im Dashboard auf.")}
                             </span>
                         </div>
                     </div>
@@ -198,14 +198,14 @@ export default function InterfacesPage() {
                         <div>
                             <div className="flex items-center gap-2">
                                 <h2 className="text-base font-bold text-gray-900">
-                                    5. Natives Home Assistant Plugin (HACS / Custom Component)
+                                    {t("interfaces.ha_title", "5. Natives Home Assistant Plugin (HACS / Custom Component)")}
                                 </h2>
                                 <span className="text-[10px] font-bold px-2 py-0.5 bg-cyan-100 text-cyan-800 rounded-full border border-cyan-200">
-                                    Neu & Store-and-Forward
+                                    {t("interfaces.ha_badge", "Neu & Store-and-Forward")}
                                 </span>
                             </div>
                             <p className="text-xs text-gray-500">
-                                Wähle deine Home Assistant Entitäten per Klick aus — inklusive lokalem 48h-Offline-Puffer bei Netzausfall.
+                                {t("interfaces.ha_desc", "Wähle deine Home Assistant Entitäten per Klick aus — inklusive lokalem 48h-Offline-Puffer bei Netzausfall.")}
                             </p>
                         </div>
                     </div>
@@ -214,7 +214,7 @@ export default function InterfacesPage() {
                         onClick={() => safeCopy(primaryHome?.mqtt_token || "", "ha_token")}
                         className="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-semibold rounded-lg shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
                     >
-                        {copiedKey === "ha_token" ? "✅ Token kopiert!" : "📋 Home Token kopieren"}
+                        {copiedKey === "ha_token" ? `✅ ${t("common.copied", "Kopiert!")}` : `📋 ${t("interfaces.copy_home_token", "Home Token kopieren")}`}
                     </button>
                 </div>
 
@@ -224,22 +224,22 @@ export default function InterfacesPage() {
                         <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-start gap-2.5">
                             <span className="text-base">🎯</span>
                             <div>
-                                <div className="font-bold text-gray-900">1-Klick Entity Picker</div>
-                                <div className="text-gray-500 text-[11px]">Bequeme Auswahl aller Sensoren direkt in der Home Assistant UI.</div>
+                                <div className="font-bold text-gray-900">{t("interfaces.ha_picker", "1-Klick Entity Picker")}</div>
+                                <div className="text-gray-500 text-[11px]">{t("interfaces.ha_picker_desc", "Bequeme Auswahl aller Sensoren direkt in der Home Assistant UI.")}</div>
                             </div>
                         </div>
                         <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-start gap-2.5">
                             <span className="text-base">💾</span>
                             <div>
-                                <div className="font-bold text-gray-900">48h Offline-Puffer</div>
-                                <div className="text-gray-500 text-[11px]">Speichert Daten bei Internetausfall lokal und sendet sie lückenlos nach.</div>
+                                <div className="font-bold text-gray-900">{t("interfaces.ha_buffer", "48h Offline-Puffer")}</div>
+                                <div className="text-gray-500 text-[11px]">{t("interfaces.ha_buffer_desc", "Speichert Daten bei Internetausfall lokal und sendet sie lückenlos nach.")}</div>
                             </div>
                         </div>
                         <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-start gap-2.5">
                             <span className="text-base">⚡</span>
                             <div>
-                                <div className="font-bold text-gray-900">Live WebSocket Stream</div>
-                                <div className="text-gray-500 text-[11px]">Echtzeit-Übertragung über verschlüsseltes WSS (Port 443).</div>
+                                <div className="font-bold text-gray-900">{t("interfaces.ha_stream", "Live WebSocket Stream")}</div>
+                                <div className="text-gray-500 text-[11px]">{t("interfaces.ha_stream_desc", "Echtzeit-Übertragung über verschlüsseltes WSS (Port 443).")}</div>
                             </div>
                         </div>
                     </div>
@@ -247,17 +247,17 @@ export default function InterfacesPage() {
                     {/* SETUP STEPS */}
                     <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl text-xs space-y-3">
                         <div className="font-bold text-gray-900 text-sm flex items-center gap-1.5">
-                            <span>📦</span> Installation in Home Assistant:
+                            <span>📦</span> {t("interfaces.ha_install_title", "Installation in Home Assistant:")}
                         </div>
                         <ol className="list-decimal list-inside space-y-2 text-gray-700 leading-relaxed">
                             <li>
-                                Kopiere den Ordner <code className="bg-white px-1.5 py-0.5 rounded border border-slate-300 font-mono text-cyan-700">custom_components/sharegy</code> in deinen Home Assistant Ordner <code className="bg-white px-1.5 py-0.5 rounded border border-slate-300 font-mono">config/custom_components/</code> (oder füge das Repository in HACS hinzu).
+                                {t("interfaces.ha_step_1", "Kopiere den Ordner custom_components/sharegy in deinen Home Assistant Ordner config/custom_components/ (oder füge das Repository in HACS hinzu).")}
                             </li>
                             <li>
-                                Starte Home Assistant neu und öffne <strong>Einstellungen</strong> $\rightarrow$ <strong>Geräte & Dienste</strong> $\rightarrow$ <strong>Integration hinzufügen</strong>.
+                                {t("interfaces.ha_step_2", "Starte Home Assistant neu und öffne Einstellungen → Geräte & Dienste → Integration hinzufügen.")}
                             </li>
                             <li>
-                                Wähle <strong>Sharegy Cloud Energy Bridge</strong>, füge dein persönliches <strong>Home Token</strong> (<code className="bg-white px-1 py-0.5 rounded font-mono text-cyan-800">{primaryHome?.mqtt_token || "<TOKEN>"}</code>) ein und wähle deine Sensoren per Dropdown aus.
+                                {t("interfaces.ha_step_3", "Wähle Sharegy Cloud Energy Bridge, füge dein persönliches Home Token ein und wähle deine Sensoren per Dropdown aus.")}
                             </li>
                         </ol>
                     </div>
@@ -273,11 +273,11 @@ export default function InterfacesPage() {
                         </div>
                         <div>
                             <h2 className="text-base font-bold text-gray-900">
-                                6. MQTT Broker Schnittstelle (ioBroker, Node-RED, OTel)
+                                {t("interfaces.mqtt_title", "6. MQTT Broker Schnittstelle (ioBroker, Node-RED, OTel)")}
                             </h2>
 
                             <p className="text-xs text-gray-500">
-                                Standard-IoT-Protokoll zur universellen Anbindung von Smart-Home-Servern und OpenTelemetry
+                                {t("interfaces.mqtt_desc", "Standard-IoT-Protokoll zur universellen Anbindung von Smart-Home-Servern und OpenTelemetry")}
                             </p>
                         </div>
                     </div>
@@ -374,7 +374,7 @@ export default function InterfacesPage() {
                                             <button
                                                 onClick={() => setShowPassword((v) => !v)}
                                                 className="p-1 rounded-md text-gray-400 hover:text-indigo-600 hover:bg-slate-200/60 text-xs cursor-pointer"
-                                                title={showPassword ? "Verstecken" : "Anzeigen"}
+                                                title={showPassword ? t("common.hide", "Verstecken") : t("common.show", "Anzeigen")}
                                             >
                                                 {showPassword ? "🙈" : "👁️"}
                                             </button>
@@ -436,9 +436,9 @@ export default function InterfacesPage() {
                                     {guideTab === "iobroker" && (
                                         <div className="space-y-2">
                                             <p className="text-gray-600">
-                                                1. Installiere den <strong>MQTT Client Adapter</strong> (<code className="bg-slate-100 px-1 rounded">mqtt-client</code>).<br />
-                                                2. Wähle Typ <strong>Client / Abonnent</strong>, trage URL <code className="bg-slate-100 px-1 rounded">{mqttHost}</code>, Port <code className="bg-slate-100 px-1 rounded">{mqttPort}</code> sowie Benutzer & Kennwort ein.<br />
-                                                3. Sende Messwerte an <code className="font-mono bg-slate-100 px-1 text-indigo-600">h/{primaryHome?.mqtt_token || "<TOKEN>"}/&lt;geraet_id&gt;</code>:
+                                                {t("interfaces.iobroker_step_1", "1. Installiere den MQTT Client Adapter (mqtt-client).")}<br />
+                                                {t("interfaces.iobroker_step_2", "2. Wähle Typ Client / Abonnent, trage URL, Port sowie Benutzer & Kennwort ein.")}<br />
+                                                {t("interfaces.iobroker_step_3", "3. Sende Messwerte an dein Topic:")}
                                             </p>
                                             <pre className="bg-slate-900 text-green-400 p-2.5 rounded-lg font-mono text-[11px] overflow-x-auto">
                                                 {`sendTo('mqtt-client.0', 'sendMessage', {
@@ -452,11 +452,11 @@ export default function InterfacesPage() {
                                     {guideTab === "otel" && (
                                         <div className="space-y-2">
                                             <div className="font-bold text-gray-900 text-sm flex items-center justify-between">
-                                                <span>🔭 OpenTelemetry (OTLP/HTTP) Ingestion</span>
+                                                <span>🔭 {t("interfaces.otel_title", "OpenTelemetry (OTLP/HTTP) Ingestion")}</span>
                                                 <span className="text-[10px] text-indigo-600 font-mono">Endpoint: /api/v1/metrics</span>
                                             </div>
                                             <p className="text-gray-600">
-                                                Sende Telemetrie direkt via OpenTelemetry Collector oder Python SDK mit dem Resource Attribute:
+                                                {t("interfaces.otel_desc", "Sende Telemetrie direkt via OpenTelemetry Collector oder Python SDK mit dem Resource Attribute:")}
                                             </p>
                                             <div className="bg-slate-100 p-2 rounded-lg font-mono text-[11px]">
                                                 home.token: <strong>{primaryHome?.mqtt_token || "<TOKEN>"}</strong>
@@ -478,9 +478,9 @@ exporters:
 
                                     {guideTab === "nodered" && (
                                         <div className="space-y-1.5 text-gray-600">
-                                            <p>1. Verwende in Node-RED oder Tasmota einen standardmäßigen <strong>MQTT Out Node</strong>.</p>
-                                            <p>2. Konfiguriere den Broker auf <code className="bg-slate-100 px-1 rounded font-mono">{mqttHost}:{mqttPort}</code> mit deinen Zugangsdaten.</p>
-                                            <p>3. Sende JSON-Nutzdaten wie <code className="bg-slate-100 px-1 rounded font-mono">{'{"power": 1250.5, "energy": 45.2}'}</code> an <code className="bg-slate-100 px-1 rounded font-mono text-indigo-600">h/{primaryHome?.mqtt_token || "<TOKEN>"}/&lt;geraet_name&gt;</code>.</p>
+                                            <p>{t("interfaces.nodered_step_1", "1. Verwende in Node-RED oder Tasmota einen standardmäßigen MQTT Out Node.")}</p>
+                                            <p>{t("interfaces.nodered_step_2", "2. Konfiguriere den Broker mit deinen Zugangsdaten.")}</p>
+                                            <p>{t("interfaces.nodered_step_3", "3. Sende JSON-Nutzdaten an dein Basis-Topic.")}</p>
                                         </div>
                                     )}
                                 </div>
@@ -500,14 +500,14 @@ exporters:
                         <div>
                             <div className="flex items-center gap-2">
                                 <h2 className="text-base font-bold text-gray-900">
-                                    7. Smart Meter Gateways, wMSB & Eichrechtliches Messwesen
+                                    {t("interfaces.wmsb_title", "7. Smart Meter Gateways, wMSB & Eichrechtliches Messwesen")}
                                 </h2>
                                 <span className="text-[10px] font-bold px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full border border-emerald-200">
-                                    § 42b EnWG & MsbG Konform
+                                    {t("interfaces.wmsb_badge", "§ 42b EnWG & MsbG Konform")}
                                 </span>
                             </div>
                             <p className="text-xs text-gray-500">
-                                15-Minuten-Lastgänge von zertifizierten Smart Meter Gateways (wMSB / gMSB) für Energy Sharing & Mieterstrom.
+                                {t("interfaces.wmsb_desc", "15-Minuten-Lastgänge von zertifizierten Smart Meter Gateways (wMSB / gMSB) für Energy Sharing & Mieterstrom.")}
                             </p>
                         </div>
                     </div>
@@ -517,7 +517,7 @@ exporters:
                         className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-2xs transition flex items-center gap-1.5"
                     >
                         <span>🏛️</span>
-                        <span>Zum Community & wMSB Cockpit</span>
+                        <span>{t("interfaces.to_wmsb_cockpit", "Zum Community & wMSB Cockpit")}</span>
                     </a>
                 </div>
 
@@ -526,22 +526,22 @@ exporters:
                         <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-start gap-2.5">
                             <span className="text-base">🏢</span>
                             <div>
-                                <div className="font-bold text-gray-900">wMSB Cloud-Push</div>
-                                <div className="text-gray-500 text-[11px]">Direkter Push von inexogy, Solandeo, Discovergy per REST & MSCONS.</div>
+                                <div className="font-bold text-gray-900">{t("interfaces.wmsb_cloud_push", "wMSB Cloud-Push")}</div>
+                                <div className="text-gray-500 text-[11px]">{t("interfaces.wmsb_cloud_push_desc", "Direkter Push von inexogy, Solandeo, Discovergy per REST & MSCONS.")}</div>
                             </div>
                         </div>
                         <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-start gap-2.5">
                             <span className="text-base">⚡</span>
                             <div>
-                                <div className="font-bold text-gray-900">gMSB HAN / BSI iMSys</div>
-                                <div className="text-gray-500 text-[11px]">BSI TR-03109-1 konforme Erfassung lokaler Smart Meter Gateways.</div>
+                                <div className="font-bold text-gray-900">{t("interfaces.gmsb_han", "gMSB HAN / BSI iMSys")}</div>
+                                <div className="text-gray-500 text-[11px]">{t("interfaces.gmsb_han_desc", "BSI TR-03109-1 konforme Erfassung lokaler Smart Meter Gateways.")}</div>
                             </div>
                         </div>
                         <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-start gap-2.5">
                             <span className="text-base">🔌</span>
                             <div>
-                                <div className="font-bold text-gray-900">MID-Submetering</div>
-                                <div className="text-gray-500 text-[11px]">Shelly Pro 3EM & Modbus für interne Liegenschaften & WEGs.</div>
+                                <div className="font-bold text-gray-900">{t("interfaces.mid_submetering", "MID-Submetering")}</div>
+                                <div className="text-gray-500 text-[11px]">{t("interfaces.mid_submetering_desc", "Shelly Pro 3EM & Modbus für interne Liegenschaften & WEGs.")}</div>
                             </div>
                         </div>
                     </div>
@@ -556,10 +556,10 @@ exporters:
                 >
                     <div className="bg-white p-6 rounded-2xl text-center shadow-2xl max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
                         <h3 className="font-bold text-gray-900 text-base mb-1">
-                            MQTT & IoT Zugangsdaten Scan
+                            {t("interfaces.qr_modal_title", "MQTT & IoT Zugangsdaten Scan")}
                         </h3>
                         <p className="text-xs text-gray-500 mb-4">
-                            Für automatisierte Konfiguration in Companion Apps & Gateways
+                            {t("interfaces.qr_modal_desc", "Für automatisierte Konfiguration in Companion Apps & Gateways")}
                         </p>
                         <div className="flex justify-center mb-4">
                             <QRCodeSVG

@@ -20,7 +20,7 @@ export default function ShellyCloudIntegrationCard({ primaryHome, onImportComple
 
     async function handleTestDiscovery() {
         if (!authKey.trim()) {
-            setErrorMsg("Bitte gib deinen Shelly Cloud Auth-Key / Token ein.");
+            setErrorMsg(t("shelly_cloud.error_no_key", "Bitte gib deinen Shelly Cloud Auth-Key / Token ein."));
             return;
         }
 
@@ -39,7 +39,7 @@ export default function ShellyCloudIntegrationCard({ primaryHome, onImportComple
             });
             setDiscoveryResult(data);
         } catch (err) {
-            setErrorMsg(err.message || "Verbindung zur Shelly Cloud fehlgeschlagen. Bitte prüfe deinen Auth-Key.");
+            setErrorMsg(err.message || t("shelly_cloud.error_conn_failed", "Verbindung zur Shelly Cloud fehlgeschlagen. Bitte prüfe deinen Auth-Key."));
         } finally {
             setIsLoading(false);
         }
@@ -66,7 +66,7 @@ export default function ShellyCloudIntegrationCard({ primaryHome, onImportComple
                 onImportComplete(data);
             }
         } catch (err) {
-            setErrorMsg(err.message || "Fehler beim Importieren der Shelly-Geräte.");
+            setErrorMsg(err.message || t("shelly_cloud.error_import_failed", "Fehler beim Importieren der Shelly-Geräte."));
         } finally {
             setIsImporting(false);
         }
@@ -83,14 +83,14 @@ export default function ShellyCloudIntegrationCard({ primaryHome, onImportComple
                     <div>
                         <div className="flex items-center gap-2">
                             <h2 className="text-base font-bold text-gray-900">
-                                2. Shelly Cloud 1-Klick Auto-Discovery
+                                {t("shelly_cloud.title", "2. Shelly Cloud 1-Klick Auto-Discovery")}
                             </h2>
                             <span className="text-[10px] font-bold px-2 py-0.5 bg-sky-100 text-sky-800 rounded-full border border-sky-200">
-                                Neu & Automatisch
+                                {t("shelly_cloud.badge", "Neu & Automatisch")}
                             </span>
                         </div>
                         <p className="text-xs text-gray-500">
-                            Importiert alle Geräte aus deinem Shelly-Cloud-Konto auf Knopfdruck als Hauptzähler, Balkonkraftwerk oder Steckdose.
+                            {t("shelly_cloud.subtitle", "Importiert alle Geräte aus deinem Shelly-Cloud-Konto auf Knopfdruck als Hauptzähler, Balkonkraftwerk oder Steckdose.")}
                         </p>
                     </div>
                 </div>
@@ -100,22 +100,22 @@ export default function ShellyCloudIntegrationCard({ primaryHome, onImportComple
                     onClick={() => setShowKeyHelp(!showKeyHelp)}
                     className="text-xs text-sky-700 hover:text-sky-900 font-medium underline flex items-center gap-1 cursor-pointer"
                 >
-                    ℹ️ Wo finde ich den Auth-Key?
+                    ℹ️ {t("shelly_cloud.where_is_key", "Wo finde ich den Auth-Key?")}
                 </button>
             </div>
 
             {/* EXPANDABLE TOKEN INSTRUCTIONS */}
             {showKeyHelp && (
                 <div className="p-4 bg-sky-50/60 border-b border-sky-200/60 text-xs text-slate-700 space-y-2">
-                    <div className="font-semibold text-sky-900">So findest du deinen Shelly Cloud Auth-Key:</div>
+                    <div className="font-semibold text-sky-900">{t("shelly_cloud.help_title", "So findest du deinen Shelly Cloud Auth-Key:")}</div>
                     <ol className="list-decimal list-inside space-y-1 text-slate-600 pl-1">
-                        <li>Öffne die <strong>Shelly Smart Control App</strong> oder <a href="https://control.shelly.cloud" target="_blank" rel="noreferrer" className="text-sky-700 underline font-medium">control.shelly.cloud</a>.</li>
-                        <li>Gehe unten rechts auf <strong>Benutzer-Einstellungen</strong> (Profil / Zahnrad).</li>
-                        <li>Klicke auf <strong>Autorisierungs-Cloud-Schlüssel</strong> &gt; <em>Schlüssel anfordern / anzeigen</em>.</li>
-                        <li>Kopiere den angezeigten langen Token und füge ihn unten ein.</li>
+                        <li>{t("shelly_cloud.help_step_1", "Öffne die Shelly Smart Control App oder control.shelly.cloud.")}</li>
+                        <li>{t("shelly_cloud.help_step_2", "Gehe unten rechts auf Benutzer-Einstellungen (Profil / Zahnrad).")}</li>
+                        <li>{t("shelly_cloud.help_step_3", "Klicke auf Autorisierungs-Cloud-Schlüssel > Schlüssel anfordern / anzeigen.")}</li>
+                        <li>{t("shelly_cloud.help_step_4", "Kopiere den angezeigten langen Token und füge ihn unten ein.")}</li>
                     </ol>
                     <div className="text-[11px] text-emerald-800 bg-emerald-50 p-2 rounded-lg border border-emerald-200 mt-2">
-                        💡 <strong>Tipp:</strong> Wenn du gar keine Cloud nutzen möchtest (kostenlos & datensparsam), nutze einfach die oben beschriebene <strong>Outbound-WebSocket (WSS)</strong> Methode direkt auf dem Gerät!
+                        💡 <strong>{t("common.tip", "Tipp")}:</strong> {t("shelly_cloud.help_tip", "Wenn du gar keine Cloud nutzen möchtest (kostenlos & datensparsam), nutze einfach die oben beschriebene Outbound-WebSocket (WSS) Methode direkt auf dem Gerät!")}
                     </div>
                 </div>
             )}
@@ -126,16 +126,16 @@ export default function ShellyCloudIntegrationCard({ primaryHome, onImportComple
                     <div className="md:col-span-2 space-y-1.5">
                         <div className="flex items-center justify-between">
                             <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                Shelly Cloud Auth-Key (API-Token) *
+                                {t("shelly_cloud.auth_key_label", "Shelly Cloud Auth-Key (API-Token) *")}
                             </label>
                             <button
                                 type="button"
                                 onClick={() => setShowAuthKey(!showAuthKey)}
                                 className="text-xs text-sky-700 hover:text-sky-900 font-medium flex items-center gap-1 cursor-pointer"
-                                title={showAuthKey ? "Schlüssel verbergen" : "Schlüssel anzeigen"}
+                                title={showAuthKey ? t("common.hide", "Verbergen") : t("common.show", "Anzeigen")}
                             >
                                 <span>{showAuthKey ? "🙈" : "👁️"}</span>
-                                <span>{showAuthKey ? "Verbergen" : "Anzeigen"}</span>
+                                <span>{showAuthKey ? t("common.hide", "Verbergen") : t("common.show", "Anzeigen")}</span>
                             </button>
                         </div>
                         <div className="relative">
@@ -150,7 +150,7 @@ export default function ShellyCloudIntegrationCard({ primaryHome, onImportComple
                                 type="button"
                                 onClick={() => setShowAuthKey(!showAuthKey)}
                                 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 p-1 text-sm cursor-pointer"
-                                title={showAuthKey ? "Schlüssel verbergen" : "Schlüssel anzeigen"}
+                                title={showAuthKey ? t("common.hide", "Verbergen") : t("common.show", "Anzeigen")}
                             >
                                 {showAuthKey ? "🙈" : "👁️"}
                             </button>
@@ -159,7 +159,7 @@ export default function ShellyCloudIntegrationCard({ primaryHome, onImportComple
 
                     <div className="space-y-1.5">
                         <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">
-                            Shelly Cloud Server URL
+                            {t("shelly_cloud.server_url_label", "Shelly Cloud Server URL")}
                         </label>
                         <input
                             type="text"
@@ -182,12 +182,12 @@ export default function ShellyCloudIntegrationCard({ primaryHome, onImportComple
                         {isLoading ? (
                             <>
                                 <span className="animate-spin text-sm">⏳</span>
-                                Suche Shelly Geräte...
+                                {t("shelly_cloud.discovering", "Suche Shelly Geräte...")}
                             </>
                         ) : (
                             <>
                                 <span>🔍</span>
-                                Shelly-Geräte suchen (Discovery)
+                                {t("shelly_cloud.discover_btn", "Shelly-Geräte suchen (Discovery)")}
                             </>
                         )}
                     </button>
@@ -202,12 +202,12 @@ export default function ShellyCloudIntegrationCard({ primaryHome, onImportComple
                             {isImporting ? (
                                 <>
                                     <span className="animate-spin text-sm">⏳</span>
-                                    Importiere Geräte...
+                                    {t("shelly_cloud.importing", "Importiere Geräte...")}
                                 </>
                             ) : (
                                 <>
                                     <span>📥</span>
-                                    Alle {discoveryResult.device_count} Geräte in Sharegy importieren
+                                    {t("shelly_cloud.import_all_btn", { count: discoveryResult.device_count, defaultValue: `Alle ${discoveryResult.device_count} Geräte in Sharegy importieren` })}
                                 </>
                             )}
                         </button>
@@ -246,7 +246,7 @@ export default function ShellyCloudIntegrationCard({ primaryHome, onImportComple
                                     </div>
                                     <div className="text-right">
                                         <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-sm ${dev.online ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-600"}`}>
-                                            {dev.online ? "Online" : "Offline"}
+                                            {dev.online ? t("common.online", "Online") : t("common.offline", "Offline")}
                                         </span>
                                         {dev.power_w !== undefined && (
                                             <div className="text-[10px] font-mono font-medium text-slate-600 mt-0.5">
@@ -267,7 +267,7 @@ export default function ShellyCloudIntegrationCard({ primaryHome, onImportComple
                             <span>✅</span> {importResult.message}
                         </div>
                         <p className="text-emerald-700">
-                            Die Geräte sind jetzt im System registriert und können im Dashboard und im Energiemanagement genutzt werden.
+                            {t("shelly_cloud.import_success_desc", "Die Geräte sind jetzt im System registriert und können im Dashboard und im Energiemanagement genutzt werden.")}
                         </p>
                     </div>
                 )}

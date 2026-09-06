@@ -35,7 +35,13 @@ export default function MonthlySavingsRecapCard({
     const co2AvoidedKg = Math.round(solarGenKwh * 0.42); // ~420g CO2 pro kWh deutscher Strommix
     const treesEquivalent = Math.max(1, Math.round(co2AvoidedKg / 20)); // ~20kg CO2 Bindung pro Baum/Jahr
 
-    const periodLabel = period === "today" ? "Heute" : period === "7d" ? "Letzte 7 Tage" : period === "year" ? "Dieses Jahr" : "Letzte 30 Tage";
+    const periodLabel = period === "today" 
+        ? t("energy.period_today", "Heute") 
+        : period === "7d" 
+            ? t("energy.period_7d", "Letzte 7 Tage") 
+            : period === "year" 
+                ? t("energy.period_year", "Dieses Jahr") 
+                : t("energy.period_30d", "Letzte 30 Tage");
 
     return (
         <>
@@ -54,14 +60,14 @@ export default function MonthlySavingsRecapCard({
                             <div>
                                 <div className="flex items-center gap-2">
                                     <h3 className="text-base sm:text-lg font-black tracking-tight text-white flex items-center gap-2">
-                                        <span>Ersparnis- & ROI-Recap</span>
+                                        <span>{t("recap.title", "Ersparnis- & ROI-Recap")}</span>
                                         <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                                             {periodLabel}
                                         </span>
                                     </h3>
                                 </div>
                                 <p className="text-xs text-indigo-200/70 mt-0.5">
-                                    Reale Netzkosten-Ersparnis gegenüber dem Standard-Grundversorgertarif.
+                                    {t("recap.subtitle", "Reale Netzkosten-Ersparnis gegenüber dem Standard-Grundversorgertarif.")}
                                 </p>
                             </div>
                         </div>
@@ -72,7 +78,7 @@ export default function MonthlySavingsRecapCard({
                             className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-200 hover:text-white border border-indigo-400/30 text-xs font-bold transition cursor-pointer self-start sm:self-center shadow-xs"
                         >
                             <Share2 className="w-3.5 h-3.5" />
-                            <span>Erfolge teilen</span>
+                            <span>{t("recap.share_btn", "Erfolge teilen")}</span>
                         </button>
                     </div>
 
@@ -81,7 +87,7 @@ export default function MonthlySavingsRecapCard({
                         {/* 1. Netto-Ersparnis */}
                         <div className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-xs">
                             <div className="text-xs font-medium text-indigo-200/80 flex items-center justify-between">
-                                <span>Kostenersparnis</span>
+                                <span>{t("recap.cost_savings", "Kostenersparnis")}</span>
                                 <TrendingUp className="w-4 h-4 text-emerald-400" />
                             </div>
                             <div className="text-2xl sm:text-3xl font-black font-mono text-emerald-400 mt-1 flex items-baseline gap-1">
@@ -89,14 +95,14 @@ export default function MonthlySavingsRecapCard({
                                 <span className="text-xs font-normal text-indigo-200/70">€</span>
                             </div>
                             <div className="text-[11px] text-emerald-300/80 mt-1 font-semibold">
-                                ✓ Gegenüber {gridPriceCt.toFixed(1)} ct/kWh Netz
+                                {t("recap.vs_grid", "✓ Gegenüber {{price}} ct/kWh Netz", { price: gridPriceCt.toFixed(1) })}
                             </div>
                         </div>
 
                         {/* 2. Autarkiegrad */}
                         <div className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-xs">
                             <div className="text-xs font-medium text-indigo-200/80 flex items-center justify-between">
-                                <span>Autarkiegrad</span>
+                                <span>{t("energy.autarky_rate", "Autarkiegrad")}</span>
                                 <Award className="w-4 h-4 text-amber-400" />
                             </div>
                             <div className="text-2xl sm:text-3xl font-black font-mono text-amber-300 mt-1 flex items-baseline gap-1">
@@ -104,14 +110,14 @@ export default function MonthlySavingsRecapCard({
                                 <span className="text-xs font-normal text-indigo-200/70">%</span>
                             </div>
                             <div className="text-[11px] text-indigo-200/60 mt-1">
-                                Eigenstrom aus PV & Speicher
+                                {t("recap.own_power", "Eigenstrom aus PV & Speicher")}
                             </div>
                         </div>
 
                         {/* 3. CO2-Vermeidung */}
                         <div className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-xs">
                             <div className="text-xs font-medium text-indigo-200/80 flex items-center justify-between">
-                                <span>CO₂-Vermeidung</span>
+                                <span>{t("energy.co2_saved", "CO₂-Vermeidung")}</span>
                                 <Trees className="w-4 h-4 text-teal-400" />
                             </div>
                             <div className="text-2xl sm:text-3xl font-black font-mono text-teal-300 mt-1 flex items-baseline gap-1">
@@ -119,14 +125,14 @@ export default function MonthlySavingsRecapCard({
                                 <span className="text-xs font-normal text-indigo-200/70">kg</span>
                             </div>
                             <div className="text-[11px] text-teal-200/80 mt-1 font-semibold">
-                                🌳 Äquivalent zu ~{treesEquivalent} Bäumen
+                                {t("recap.trees_equiv", "🌳 Äquivalent zu ~{{trees}} Bäumen", { trees: treesEquivalent })}
                             </div>
                         </div>
 
                         {/* 4. § 14a EnWG Netzentgelt-Vorteil */}
                         <div className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-xs">
                             <div className="text-xs font-medium text-indigo-200/80 flex items-center justify-between">
-                                <span>§ 14a Netzentgelt</span>
+                                <span>{t("recap.grid_fee_bonus", "§ 14a Netzentgelt")}</span>
                                 <ShieldCheck className="w-4 h-4 text-indigo-400" />
                             </div>
                             <div className="text-2xl sm:text-3xl font-black font-mono text-indigo-300 mt-1 flex items-baseline gap-1">
@@ -134,7 +140,7 @@ export default function MonthlySavingsRecapCard({
                                 <span className="text-xs font-normal text-indigo-200/70">€/a</span>
                             </div>
                             <div className="text-[11px] text-indigo-300/80 mt-1 font-semibold">
-                                🛡️ Modul 1 Pauschale aktiv
+                                {t("recap.modul1_badge", "🛡️ Modul 1 Pauschale aktiv")}
                             </div>
                         </div>
                     </div>

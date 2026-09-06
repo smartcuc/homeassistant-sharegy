@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { apiFetch } from "../../../api/client";
+import { useTranslation } from "react-i18next";
 import DeviceSelfTestModal from "./DeviceSelfTestModal";
 
 export default function CloudInverterIntegrationCard({ primaryHome, filterVendor = null, sectionNumber = 3, cardTitle = null }) {
+    const { t } = useTranslation();
     const [profiles, setProfiles] = useState([]);
     const [selectedProfileId, setSelectedProfileId] = useState(filterVendor === "sungrow" ? "sungrow_isolarcloud" : null);
     const [credentials, setCredentials] = useState({});
@@ -65,7 +67,7 @@ export default function CloudInverterIntegrationCard({ primaryHome, filterVendor
             });
             setTestResult(data);
         } catch (err) {
-            setErrorMsg(err.message || "Verbindungstest fehlgeschlagen.");
+            setErrorMsg(err.message || t("cloud_inverter.error_test_failed", "Verbindungstest fehlgeschlagen."));
         } finally {
             setIsTesting(false);
         }
@@ -104,7 +106,7 @@ export default function CloudInverterIntegrationCard({ primaryHome, filterVendor
             });
             setSaveSuccess(data);
         } catch (err) {
-            setErrorMsg(err.message || "Kopplung fehlgeschlagen.");
+            setErrorMsg(err.message || t("cloud_inverter.error_integration_failed", "Kopplung fehlgeschlagen."));
         } finally {
             setIsSaving(false);
         }
@@ -123,7 +125,7 @@ export default function CloudInverterIntegrationCard({ primaryHome, filterVendor
                     <div>
                         <div className="flex items-center gap-2">
                             <h2 className="text-base font-bold text-gray-900">
-                                {cardTitle || `${sectionNumber}. Hersteller Cloud-Kopplung (Sungrow, SolarEdge, Fronius)`}
+                                {cardTitle || `${sectionNumber}. ${t("cloud_inverter.default_card_title", "Hersteller Cloud-Kopplung (Sungrow, SolarEdge, Fronius)")}`}
                             </h2>
                             <span className={`text-[10px] font-bold px-2 py-0.5 ${filterVendor === "sungrow" ? "bg-amber-100 text-amber-900 border border-amber-200" : "bg-blue-100 text-blue-800 border border-blue-200"} rounded-full`}>
                                 {filterVendor === "sungrow" ? "Zero-Hardware Direct" : "Cloud & Modbus"}
@@ -131,8 +133,8 @@ export default function CloudInverterIntegrationCard({ primaryHome, filterVendor
                         </div>
                         <p className="text-xs text-gray-500">
                             {filterVendor === "sungrow" 
-                                ? "Direkte 1-Klick Schnittstelle für alle Sungrow Hybrid-Wechselrichter (SH-Serie) und SBR-Speicher."
-                                : "Server-zu-Server Anbindung für SolarEdge, Fronius, Kostal, Growatt und weitere Wechselrichter."
+                                ? t("cloud_inverter.sungrow_desc", "Direkte 1-Klick Schnittstelle für alle Sungrow Hybrid-Wechselrichter (SH-Serie) und SBR-Speicher.")
+                                : t("cloud_inverter.others_desc", "Server-zu-Server Anbindung für SolarEdge, Fronius, Kostal, Growatt und weitere Wechselrichter.")
                             }
                         </p>
                     </div>
@@ -152,11 +154,11 @@ export default function CloudInverterIntegrationCard({ primaryHome, filterVendor
                                 <div className="flex items-center gap-2">
                                     <span className="text-xl">⚡</span>
                                     <span className="font-bold text-base text-white">
-                                        Offizielle 1-Klick Sungrow Autorisierung (OAuth 2.0)
+                                        {t("cloud_inverter.sungrow_oauth_title", "Offizielle 1-Klick Sungrow Autorisierung (OAuth 2.0)")}
                                     </span>
                                 </div>
                                 <p className="text-xs text-amber-100 leading-relaxed">
-                                    Verbinde deinen Sungrow Hybrid-Wechselrichter (SH-Serie) und SBR-Speicher direkt und sicher über die offizielle iSolarCloud Schnittstelle — ganz ohne manuelle Passworteingabe oder AppKey-Konfiguration.
+                                    {t("cloud_inverter.sungrow_oauth_sub", "Verbinde deinen Sungrow Hybrid-Wechselrichter (SH-Serie) und SBR-Speicher direkt und sicher über die offizielle iSolarCloud Schnittstelle — ganz ohne manuelle Passworteingabe oder AppKey-Konfiguration.")}
                                 </p>
                             </div>
                             <button
@@ -165,7 +167,7 @@ export default function CloudInverterIntegrationCard({ primaryHome, filterVendor
                                 className="px-5 py-3 bg-white text-amber-800 hover:bg-amber-50 font-bold text-xs rounded-xl shadow-md transition cursor-pointer flex items-center gap-2"
                             >
                                 <span>🔑</span>
-                                <span>Jetzt bei Sungrow anmelden & freigeben</span>
+                                <span>{t("cloud_inverter.sungrow_login_btn", "Jetzt bei Sungrow anmelden & freigeben")}</span>
                             </button>
                         </div>
 
@@ -174,16 +176,16 @@ export default function CloudInverterIntegrationCard({ primaryHome, filterVendor
                             <div className="flex items-center justify-between font-bold text-amber-950">
                                 <span className="flex items-center gap-1.5">
                                     <span>💡</span>
-                                    <span>So funktioniert die automatische Anbindung</span>
+                                    <span>{t("cloud_inverter.sungrow_how_it_works", "So funktioniert die automatische Anbindung")}</span>
                                 </span>
                                 <span className="text-[10px] text-amber-800 bg-amber-200/60 px-2 py-0.5 rounded-md font-mono">
                                     Sungrow OpenAPI & OAuth 2.0
                                 </span>
                             </div>
                             <ol className="list-decimal list-inside space-y-1 text-[12px] leading-relaxed text-amber-900 bg-white/70 p-3 rounded-lg border border-amber-200/60">
-                                <li>Klicke auf <strong>Jetzt bei Sungrow anmelden & freigeben</strong>.</li>
-                                <li>Du wirst sicher zu Sungrow iSolarCloud weitergeleitet, um Sharegy für deine Anlage freizuschalten.</li>
-                                <li>Nach der Freigabe erfolgt die Rückleitung zu Sharegy — dein Wechselrichter und Batteriespeicher werden vollautomatisch angelegt und synchronisiert.</li>
+                                <li>{t("cloud_inverter.sungrow_step_1", "Klicke auf Jetzt bei Sungrow anmelden & freigeben.")}</li>
+                                <li>{t("cloud_inverter.sungrow_step_2", "Du wirst sicher zu Sungrow iSolarCloud weitergeleitet, um Sharegy für deine Anlage freizuschalten.")}</li>
+                                <li>{t("cloud_inverter.sungrow_step_3", "Nach der Freigabe erfolgt die Rückleitung zu Sharegy — dein Wechselrichter und Batteriespeicher werden vollautomatisch angelegt und synchronisiert.")}</li>
                             </ol>
                         </div>
                     </div>
@@ -195,7 +197,7 @@ export default function CloudInverterIntegrationCard({ primaryHome, filterVendor
                         {/* 1. Hersteller-Auswahl */}
                         <div>
                             <label className="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-2">
-                                1. Wähle deinen Wechselrichter-Hersteller / Cloud-Dienst
+                                {t("cloud_inverter.choose_vendor_title", "1. Wähle deinen Wechselrichter-Hersteller / Cloud-Dienst")}
                             </label>
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                 {profiles.map((p) => {
@@ -219,7 +221,7 @@ export default function CloudInverterIntegrationCard({ primaryHome, filterVendor
                                         >
                                             <div className="flex items-center justify-between">
                                                 <span className="font-bold text-sm text-gray-900">{p.vendor}</span>
-                                                {isSelected && <span className="text-blue-600 text-xs">✓ Ausgewählt</span>}
+                                                {isSelected && <span className="text-blue-600 text-xs">✓ {t("common.selected", "Ausgewählt")}</span>}
                                             </div>
                                             <span className="text-xs text-gray-500 mt-1">{p.name}</span>
                                         </button>
@@ -229,7 +231,7 @@ export default function CloudInverterIntegrationCard({ primaryHome, filterVendor
 
                             {!currentProfile && (
                                 <p className="text-xs text-gray-400 mt-3 italic">
-                                    Bitte wähle oben einen Hersteller aus, um die zugehörigen Einstellungen und Zugangsdaten anzuzeigen.
+                                    {t("cloud_inverter.no_vendor_selected", "Bitte wähle oben einen Hersteller aus, um die zugehörigen Einstellungen und Zugangsdaten anzuzeigen.")}
                                 </p>
                             )}
 
@@ -243,7 +245,7 @@ export default function CloudInverterIntegrationCard({ primaryHome, filterVendor
                                             <div className="flex items-center justify-between font-bold text-blue-950">
                                                 <span className="flex items-center gap-1.5">
                                                     <span>💡</span>
-                                                    <span>Anleitung zur Einrichtung ({currentProfile.name})</span>
+                                                    <span>{t("cloud_inverter.setup_instructions", { vendor: currentProfile.name, defaultValue: `Anleitung zur Einrichtung (${currentProfile.name})` })}</span>
                                                 </span>
                                                 <span className="text-[10px] text-blue-600 bg-blue-100 px-2 py-0.5 rounded-md font-mono">
                                                     {currentProfile.vendor} API
@@ -263,12 +265,12 @@ export default function CloudInverterIntegrationCard({ primaryHome, filterVendor
                             <>
                                 <div className="space-y-4 pt-2 border-t border-gray-100">
                                     <label className="block text-xs font-bold uppercase tracking-wider text-gray-600">
-                                        2. Zugangsdaten & Konfiguration
+                                        {t("cloud_inverter.credentials_title", "2. Zugangsdaten & Konfiguration")}
                                     </label>
 
                                     <div>
                                         <label className="block text-xs font-medium text-gray-700 mb-1">
-                                            Anzeigename in Sharegy
+                                            {t("cloud_inverter.display_name_label", "Anzeigename in Sharegy")}
                                         </label>
                                         <input
                                             type="text"
@@ -299,10 +301,10 @@ export default function CloudInverterIntegrationCard({ primaryHome, filterVendor
                                                                 type="button"
                                                                 onClick={() => toggleFieldVisibility(field.key)}
                                                                 className="text-[11px] text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1 cursor-pointer"
-                                                                title={isVisible ? "Wert verbergen" : "Wert anzeigen"}
+                                                                title={isVisible ? t("common.hide", "Verbergen") : t("common.show", "Anzeigen")}
                                                             >
                                                                 <span>{isVisible ? "🙈" : "👁️"}</span>
-                                                                <span>{isVisible ? "Verbergen" : "Anzeigen"}</span>
+                                                                <span>{isVisible ? t("common.hide", "Verbergen") : t("common.show", "Anzeigen")}</span>
                                                             </button>
                                                         )}
                                                     </div>
@@ -322,7 +324,7 @@ export default function CloudInverterIntegrationCard({ primaryHome, filterVendor
                                                                 type="button"
                                                                 onClick={() => toggleFieldVisibility(field.key)}
                                                                 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 p-1 text-sm cursor-pointer"
-                                                                title={isVisible ? "Wert verbergen" : "Wert anzeigen"}
+                                                                title={isVisible ? t("common.hide", "Verbergen") : t("common.show", "Anzeigen")}
                                                             >
                                                                 {isVisible ? "🙈" : "👁️"}
                                                             </button>
@@ -341,7 +343,7 @@ export default function CloudInverterIntegrationCard({ primaryHome, filterVendor
                                     <div className="pt-2 border-t border-gray-100 space-y-1.5">
                                         <div className="flex items-center justify-between">
                                             <label className="block text-xs font-medium text-gray-700">
-                                                ⏱️ Abfrage-Intervall (Cloud Polling)
+                                                ⏱️ {t("cloud_inverter.polling_interval_label", "Abfrage-Intervall (Cloud Polling)")}
                                             </label>
                                             <span className="text-[11px] font-mono text-gray-500">
                                                 {pollingInterval >= 60 ? `${pollingInterval / 60} Min.` : `${pollingInterval} Sek.`}
@@ -369,7 +371,7 @@ export default function CloudInverterIntegrationCard({ primaryHome, filterVendor
                                             ))}
                                         </div>
                                         <p className="text-[11px] text-gray-400">
-                                            Steuert, wie häufig Sharegy Messdaten direkt vom Hersteller-Server abfragt.
+                                            {t("cloud_inverter.polling_hint", "Steuert, wie häufig Sharegy Messdaten direkt vom Hersteller-Server abfragt.")}
                                         </p>
                                     </div>
                                 </div>
@@ -381,32 +383,32 @@ export default function CloudInverterIntegrationCard({ primaryHome, filterVendor
                                             <span>✅</span> {testResult.message}
                                             {testResult.simulated && (
                                                 <span className="px-2 py-0.5 bg-emerald-200 text-emerald-900 rounded-md text-[10px]">
-                                                    Sandbox / Simulator
+                                                    {t("cloud_inverter.sandbox_badge", "Sandbox / Simulator")}
                                                 </span>
                                             )}
                                         </div>
                                         {testResult.live_metrics && (
                                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-emerald-200/60">
                                                 <div className="bg-white/80 p-2 rounded-lg border border-emerald-100">
-                                                    <div className="text-gray-500 text-[10px]">PV-Leistung</div>
+                                                    <div className="text-gray-500 text-[10px]">{t("energy.pv_power", "PV-Leistung")}</div>
                                                     <div className="text-sm font-bold text-emerald-700">
                                                         {testResult.live_metrics.pv_power_w ?? 0} W
                                                     </div>
                                                 </div>
                                                 <div className="bg-white/80 p-2 rounded-lg border border-emerald-100">
-                                                    <div className="text-gray-500 text-[10px]">Netzbezug/Einspeisung</div>
+                                                    <div className="text-gray-500 text-[10px]">{t("energy.grid_power", "Netzbezug/Einspeisung")}</div>
                                                     <div className="text-sm font-bold text-emerald-700">
                                                         {testResult.live_metrics.grid_power_w ?? 0} W
                                                     </div>
                                                 </div>
                                                 <div className="bg-white/80 p-2 rounded-lg border border-emerald-100">
-                                                    <div className="text-gray-500 text-[10px]">Hausverbrauch</div>
+                                                    <div className="text-gray-500 text-[10px]">{t("energy.load_power", "Hausverbrauch")}</div>
                                                     <div className="text-sm font-bold text-emerald-700">
                                                         {testResult.live_metrics.load_power_w ?? 0} W
                                                     </div>
                                                 </div>
                                                 <div className="bg-white/80 p-2 rounded-lg border border-emerald-100">
-                                                    <div className="text-gray-500 text-[10px]">Batterie-SoC</div>
+                                                    <div className="text-gray-500 text-[10px]">{t("energy.battery_soc", "Batterie-SoC")}</div>
                                                     <div className="text-sm font-bold text-emerald-700">
                                                         {testResult.live_metrics.battery_soc ?? "-"} %
                                                     </div>
@@ -435,7 +437,7 @@ export default function CloudInverterIntegrationCard({ primaryHome, filterVendor
                                         onClick={() => setSelfTestOpen(true)}
                                         className="px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold rounded-xl transition cursor-pointer flex items-center gap-1.5"
                                     >
-                                        ⚡ 1-Klick Selbsttest
+                                        ⚡ {t("cloud_inverter.self_test_btn", "1-Klick Selbsttest")}
                                     </button>
 
                                     <button
@@ -444,7 +446,7 @@ export default function CloudInverterIntegrationCard({ primaryHome, filterVendor
                                         disabled={isTesting}
                                         className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl transition cursor-pointer flex items-center gap-1.5"
                                     >
-                                        {isTesting ? "⏳ Teste Verbindung..." : "🔌 Verbindung testen"}
+                                        {isTesting ? `⏳ ${t("cloud_inverter.testing", "Teste Verbindung...")}` : `🔌 ${t("cloud_inverter.test_btn", "Verbindung testen")}`}
                                     </button>
 
                                     <button
@@ -453,7 +455,7 @@ export default function CloudInverterIntegrationCard({ primaryHome, filterVendor
                                         disabled={isSaving}
                                         className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-xs transition cursor-pointer flex items-center gap-1.5"
                                     >
-                                        {isSaving ? "⏳ Speichere..." : "🚀 Jetzt mit Sharegy verbinden"}
+                                        {isSaving ? `⏳ ${t("common.saving", "Speichere...")}` : `🚀 ${t("cloud_inverter.connect_btn", "Jetzt mit Sharegy verbinden")}`}
                                     </button>
                                 </div>
                             </>
@@ -467,7 +469,7 @@ export default function CloudInverterIntegrationCard({ primaryHome, filterVendor
                 open={selfTestOpen}
                 onClose={() => setSelfTestOpen(false)}
                 profileId={selectedProfileId}
-                deviceName={currentProfile?.name || deviceName || "Wechselrichter"}
+                deviceName={currentProfile?.name || deviceName || t("devices.inverter", "Wechselrichter")}
                 credentials={credentials}
             />
         </div>

@@ -4,12 +4,12 @@
 
 import { useEffect, useState } from "react";
 import { apiFetch } from "../api/client";
-import { texts } from "../i18n";
-import { useLang } from "../hooks/useLang";
+import { useTranslation } from "react-i18next";
 import MsbSmartMeterHub from "../features/community/components/MsbSmartMeterHub";
 import CommunityShareModal from "../features/community/components/CommunityShareModal";
 
 export default function TenantDashboard() {
+    const { t } = useTranslation();
     const [tenant, setTenant] = useState(null);
     const [members, setMembers] = useState([]);
     const [invites, setInvites] = useState([]);
@@ -25,10 +25,6 @@ export default function TenantDashboard() {
     const [settling, setSettling] = useState(false);
     const [downloadingId, setDownloadingId] = useState(null);
     const [exportingFormat, setExportingFormat] = useState(null);
-
-
-    const { lang } = useLang();
-    const t = texts[lang] || texts["de"] || {};
 
     // ✅ Daten laden
     async function loadData() {
@@ -96,7 +92,7 @@ export default function TenantDashboard() {
             }),
         });
         await loadData();
-        alert(`${t.invite_link || "Einladungslink"}:\n${window.location.origin}${data.link}`);
+        alert(`${t("community.invite_link", "Einladungslink")}:\n${window.location.origin}${data.link}`);
     }
 
     // ✅ PDF STATEMENT DOWNLOAD

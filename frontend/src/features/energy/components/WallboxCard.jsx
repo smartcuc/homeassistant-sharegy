@@ -81,15 +81,15 @@ export default function WallboxCard({ onOpenAddModal }) {
     function getModeLabel(mode) {
         switch (mode) {
             case "pv_surplus":
-                return "☀️ Nur Solarüberschuss";
+                return t("wallbox.mode_pv_surplus", "☀️ Nur Solarüberschuss");
             case "min_pv":
-                return "⛅ Min + PV-Überschuss";
+                return t("wallbox.mode_min_pv", "⛅ Min + PV-Überschuss");
             case "spot_price":
-                return "💶 Börsenpreisgeführt";
+                return t("wallbox.mode_spot_price", "💶 Börsenpreisgeführt");
             case "instant":
-                return "⚡ Sofortladen (Max. Power)";
+                return t("wallbox.mode_instant", "⚡ Sofortladen (Max. Power)");
             case "off":
-                return "🛑 Gesperrt / Pausiert";
+                return t("wallbox.mode_off", "🛑 Gesperrt / Pausiert");
             default:
                 return mode;
         }
@@ -100,7 +100,7 @@ export default function WallboxCard({ onOpenAddModal }) {
             return (
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
                     <span className="w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-500"></span>
-                    Offline
+                    {t("common.offline", "Offline")}
                 </span>
             );
         }
@@ -109,14 +109,14 @@ export default function WallboxCard({ onOpenAddModal }) {
                 return (
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 animate-pulse">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                        Lädt aktiv
+                        {t("wallbox.status_charging", "Lädt aktiv")}
                     </span>
                 );
             case "Preparing":
                 return (
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30">
                         <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                        Fahrzeug verbunden
+                        {t("wallbox.status_preparing", "Fahrzeug verbunden")}
                     </span>
                 );
             case "SuspendedEVSE":
@@ -124,14 +124,14 @@ export default function WallboxCard({ onOpenAddModal }) {
                 return (
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-cyan-500/15 text-cyan-700 dark:text-cyan-400 border border-cyan-500/30">
                         <span className="w-1.5 h-1.5 rounded-full bg-cyan-500"></span>
-                        Warte auf Solarstrom
+                        {t("wallbox.waiting_for_solar", "Warte auf Solarstrom")}
                     </span>
                 );
             default:
                 return (
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-500/15 text-blue-700 dark:text-blue-400 border border-blue-500/30">
                         <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                        Bereit
+                        {t("wallbox.status_ready", "Bereit")}
                     </span>
                 );
         }
@@ -142,7 +142,7 @@ export default function WallboxCard({ onOpenAddModal }) {
             <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-3xl p-6 shadow-sm animate-pulse min-h-[260px] flex items-center justify-center text-slate-400">
                 <div className="flex items-center gap-3">
                     <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-                    <span>Lade Wallbox- & Smart-Charging-Daten...</span>
+                    <span>{t("wallbox.loading_data", "Lade Wallbox- & Smart-Charging-Daten...")}</span>
                 </div>
             </div>
         );
@@ -161,13 +161,13 @@ export default function WallboxCard({ onOpenAddModal }) {
                         </div>
                         <div>
                             <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                                E-Auto & Wallbox Smart-Charging
+                                {t("wallbox.empty_title", "E-Auto & Wallbox Smart-Charging")}
                                 <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
                                     OCPP 1.6-J
                                 </span>
                             </h3>
                             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                                Hardwarefreies PV-Überschuss- und Börsenstrom-Laden für jede gängige Wallbox.
+                                {t("wallbox.empty_subtitle", "Hardwarefreies PV-Überschuss- und Börsenstrom-Laden für jede gängige Wallbox.")}
                             </p>
                         </div>
                     </div>
@@ -177,9 +177,9 @@ export default function WallboxCard({ onOpenAddModal }) {
                     <div className="w-12 h-12 rounded-full bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 flex items-center justify-center mx-auto mb-3 text-slate-400 shadow-2xs">
                         <span className="text-xl">🔌</span>
                     </div>
-                    <h4 className="text-sm font-bold text-slate-900 dark:text-slate-200 mb-1">Keine Wallbox angebunden</h4>
+                    <h4 className="text-sm font-bold text-slate-900 dark:text-slate-200 mb-1">{t("wallbox.empty_no_wallbox", "Keine Wallbox angebunden")}</h4>
                     <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-4">
-                        Verbinde deine Easee, go-eCharger, Keba, Alfen, Mennekes, Zaptec oder OpenWB in unter 60 Sekunden via Cloud-WebSocket.
+                        {t("wallbox.empty_connect_desc", "Verbinde deine Easee, go-eCharger, Keba, Alfen, Mennekes, Zaptec oder OpenWB in unter 60 Sekunden via Cloud-WebSocket.")}
                     </p>
                     <button
                         type="button"
@@ -187,7 +187,7 @@ export default function WallboxCard({ onOpenAddModal }) {
                         className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition-all shadow-md shadow-emerald-600/20 cursor-pointer"
                     >
                         <span>＋</span>
-                        <span>Wallbox jetzt verbinden</span>
+                        <span>{t("wallbox.connect_btn", "Wallbox jetzt verbinden")}</span>
                     </button>
                 </div>
             </div>
@@ -267,7 +267,7 @@ export default function WallboxCard({ onOpenAddModal }) {
                 {/* Metrics */}
                 <div className="grid grid-cols-3 gap-2.5">
                     <div className="p-3 bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-700/60">
-                        <div className="text-[10px] text-slate-500 uppercase font-semibold">Ladeleistung</div>
+                        <div className="text-[10px] text-slate-500 uppercase font-semibold">{t("wallbox.charging_power", "Ladeleistung")}</div>
                         <div className="text-base sm:text-lg font-bold font-mono text-slate-900 dark:text-white mt-0.5 flex items-baseline justify-between">
                             <span>{activePowerKw} kW</span>
                         </div>
@@ -277,22 +277,22 @@ export default function WallboxCard({ onOpenAddModal }) {
                     </div>
 
                     <div className="p-3 bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-700/60">
-                        <div className="text-[10px] text-slate-500 uppercase font-semibold">Geladen (Session)</div>
+                        <div className="text-[10px] text-slate-500 uppercase font-semibold">{t("wallbox.charged_session", "Geladen (Session)")}</div>
                         <div className="text-base sm:text-lg font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-0.5 flex items-baseline justify-between">
                             <span>{sessionKwh} kWh</span>
                         </div>
                         <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-sans mt-0.5 font-semibold">
-                            +{Math.round(Number(sessionKwh) / 0.17)} km Reichweite
+                            +{Math.round(Number(sessionKwh) / 0.17)} {t("wallbox.km_range", "km Reichweite")}
                         </div>
                     </div>
 
                     <div className="p-3 bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-700/60">
-                        <div className="text-[10px] text-slate-500 uppercase font-semibold">Fahrzeug-Akku</div>
+                        <div className="text-[10px] text-slate-500 uppercase font-semibold">{t("wallbox.ev_battery", "Fahrzeug-Akku")}</div>
                         <div className="text-base sm:text-lg font-bold font-mono text-indigo-600 dark:text-indigo-400 mt-0.5 flex items-baseline justify-between">
                             <span>{Math.min(100, Math.round(42 + (Number(sessionKwh) / 60) * 100))}%</span>
                         </div>
                         <div className="text-[10px] text-slate-400 font-sans mt-0.5 truncate">
-                            ~{Math.round((Math.min(100, Math.round(42 + (Number(sessionKwh) / 60) * 100)) / 100) * 450)} km Gesamt
+                            ~{Math.round((Math.min(100, Math.round(42 + (Number(sessionKwh) / 60) * 100)) / 100) * 450)} {t("wallbox.km_total", "km Gesamt")}
                         </div>
                     </div>
                 </div>
@@ -303,17 +303,17 @@ export default function WallboxCard({ onOpenAddModal }) {
                         <span className="text-base shrink-0">⏰</span>
                         <div>
                             <div className="font-bold text-indigo-950 dark:text-indigo-200">
-                                Zielladen & Abfahrtszeit (Departure Ready)
+                                {t("wallbox.departure_title", "Zielladen & Abfahrtszeit (Departure Ready)")}
                             </div>
                             <div className="text-[11px] text-indigo-700/80 dark:text-indigo-400">
-                                Lädt primär mit PV-Reststrom & günstigsten Nacht-Spotpreisen
+                                {t("wallbox.departure_subtitle", "Lädt primär mit PV-Reststrom & günstigsten Nacht-Spotpreisen")}
                             </div>
                         </div>
                     </div>
 
                     <div className="flex items-center gap-2 self-end sm:self-center">
                         <div className="flex items-center gap-1 bg-white dark:bg-slate-900 px-2 py-1 rounded-xl border border-indigo-200 dark:border-indigo-800">
-                            <span className="text-[10px] text-slate-400">Abfahrt:</span>
+                            <span className="text-[10px] text-slate-400">{t("wallbox.departure_time", "Abfahrt:")}</span>
                             <input
                                 type="time"
                                 defaultValue="07:30"
@@ -321,7 +321,7 @@ export default function WallboxCard({ onOpenAddModal }) {
                             />
                         </div>
                         <div className="flex items-center gap-1 bg-white dark:bg-slate-900 px-2 py-1 rounded-xl border border-indigo-200 dark:border-indigo-800">
-                            <span className="text-[10px] text-slate-400">Ziel:</span>
+                            <span className="text-[10px] text-slate-400">{t("wallbox.target_soc", "Ziel:")}</span>
                             <span className="font-bold font-mono text-xs text-indigo-600 dark:text-indigo-400">80%</span>
                         </div>
                     </div>
@@ -331,11 +331,11 @@ export default function WallboxCard({ onOpenAddModal }) {
                 <div className="p-3 bg-white/70 dark:bg-slate-800/50 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 flex items-center justify-between gap-3 text-xs">
                     <div className="min-w-0">
                         <div className="font-bold text-slate-800 dark:text-slate-200 truncate flex items-center gap-1.5">
-                            <span>⚡ Smart-Charging Modus</span>
+                            <span>⚡ {t("wallbox.smart_charging_mode", "Smart-Charging Modus")}</span>
                             {!isPro && <ProBadge size="xs" />}
                         </div>
                         <div className="text-[11px] text-slate-400 truncate">
-                            {currentMode === "pv_surplus" ? "Nur echter Solarüberschuss" : currentMode === "min_pv" ? "Min. Basisleistung + Solarboost" : currentMode === "spot_price" ? "Günstigste Börsenstunden" : currentMode === "instant" ? "Maximale Ladeleistung" : "Ladevorgang pausiert"}
+                            {currentMode === "pv_surplus" ? t("wallbox.mode_desc_pv", "Nur echter Solarüberschuss") : currentMode === "min_pv" ? t("wallbox.mode_desc_min_pv", "Min. Basisleistung + Solarboost") : currentMode === "spot_price" ? t("wallbox.mode_desc_spot", "Günstigste Börsenstunden") : currentMode === "instant" ? t("wallbox.mode_desc_instant", "Maximale Ladeleistung") : t("wallbox.mode_desc_paused", "Ladevorgang pausiert")}
                         </div>
                     </div>
                     <select
@@ -343,11 +343,11 @@ export default function WallboxCard({ onOpenAddModal }) {
                         onChange={(e) => handleModeClick(e.target.value)}
                         className="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-bold cursor-pointer outline-none shrink-0"
                     >
-                        <option value="pv_surplus">☀️ Nur Solar</option>
-                        <option value="min_pv">⛅ Min + PV</option>
-                        <option value="spot_price">💶 Börsenpreis</option>
-                        <option value="instant">⚡ Sofortladen</option>
-                        <option value="off">🛑 Gesperrt</option>
+                        <option value="pv_surplus">{t("wallbox.opt_pv_surplus", "☀️ Nur Solar")}</option>
+                        <option value="min_pv">{t("wallbox.opt_min_pv", "⛅ Min + PV")}</option>
+                        <option value="spot_price">{t("wallbox.opt_spot_price", "💶 Börsenpreis")}</option>
+                        <option value="instant">{t("wallbox.opt_instant", "⚡ Sofortladen")}</option>
+                        <option value="off">{t("wallbox.opt_off", "🛑 Gesperrt")}</option>
                     </select>
                 </div>
 
@@ -355,16 +355,16 @@ export default function WallboxCard({ onOpenAddModal }) {
                 <div className="flex items-center justify-between px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-emerald-800 dark:text-emerald-300 font-semibold">
                     <span className="flex items-center gap-1.5">
                         <span>🛡️</span>
-                        <span>§ 14a EnWG steuerbar (4,2 kW Netzentgelt-Schutz aktiv)</span>
+                        <span>{t("wallbox.enwg_badge", "§ 14a EnWG steuerbar (4,2 kW Netzentgelt-Schutz aktiv)")}</span>
                     </span>
-                    <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">+160 € / a Vorteil</span>
+                    <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">{t("wallbox.enwg_bonus", "+160 € / a Vorteil")}</span>
                 </div>
             </div>
 
             {/* Actions Footer */}
             <div className="pt-4 mt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-3 relative z-10">
                 <span className="text-xs text-slate-400">
-                    Kabel: <strong className="text-emerald-600 dark:text-emerald-400">{activeStation.connector_status || "Gesteckt"}</strong>
+                    {t("wallbox.cable", "Kabel:")} <strong className="text-emerald-600 dark:text-emerald-400">{activeStation.connector_status || t("wallbox.connected", "Gesteckt")}</strong>
                 </span>
                 <div className="flex items-center gap-2">
                     <button
@@ -373,7 +373,7 @@ export default function WallboxCard({ onOpenAddModal }) {
                         onClick={() => handleRemoteAction("remote-start")}
                         className="px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-all disabled:opacity-50 cursor-pointer shadow-xs"
                     >
-                        {actionPending === "remote-start" ? "..." : "▶️ Start"}
+                        {actionPending === "remote-start" ? "..." : t("wallbox.start_btn", "▶️ Start")}
                     </button>
 
                     <button
@@ -382,7 +382,7 @@ export default function WallboxCard({ onOpenAddModal }) {
                         onClick={() => handleRemoteAction("remote-stop")}
                         className="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition-all disabled:opacity-50 cursor-pointer"
                     >
-                        {actionPending === "remote-stop" ? "..." : "⏹️ Stop"}
+                        {actionPending === "remote-stop" ? "..." : t("wallbox.stop_btn", "⏹️ Stop")}
                     </button>
 
                     <button
@@ -390,7 +390,7 @@ export default function WallboxCard({ onOpenAddModal }) {
                         disabled={actionPending !== null}
                         onClick={() => handleRemoteAction("unlock")}
                         className="px-2.5 py-2 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 transition-all disabled:opacity-50 cursor-pointer"
-                        title="Ladekabel entriegeln"
+                        title={t("wallbox.unlock_cable_title", "Ladekabel entriegeln")}
                     >
                         🔓
                     </button>
@@ -401,8 +401,8 @@ export default function WallboxCard({ onOpenAddModal }) {
                 <ProUpgradeModal
                     open={proModalOpen}
                     onClose={() => setProModalOpen(false)}
-                    featureName="Intelligentes Wallbox Smart-Charging"
-                    featureDesc="Automatische PV-Überschussregelung und dynamische Börsenstrompreis-Ladung für dein Elektroauto."
+                    featureName={t("wallbox.pro_modal_title", "Intelligentes Wallbox Smart-Charging")}
+                    featureDesc={t("wallbox.pro_modal_desc", "Automatische PV-Überschussregelung und dynamische Börsenstrompreis-Ladung für dein Elektroauto.")}
                 />
             )}
         </div>
