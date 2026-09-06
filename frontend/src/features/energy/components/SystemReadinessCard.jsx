@@ -2,14 +2,39 @@
 # src/features/energy/components/SystemReadinessCard.jsx
 */
 
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../../api/client";
 
 export default function SystemReadinessCard({ onOpenAddDevice, className = "", inModal = false }) {
     const { t } = useTranslation();
+    const navigate = useNavigate();
+    const queryClient = useQueryClient();
     const [collapsed, setCollapsed] = useState(!inModal);
+    const [isSubmittingTz, setIsSubmittingTz] = useState(false);
+
+    const detectedTimezone = useMemo(
+        () => Intl.DateTimeFormat().resolvedOptions().timeZone,
+        []
+    );
+
+    const handleAcceptTimezone = async () => {
+        setIsSubmittingTz(true);
+        try {
+            await apiFetch("/api/timezone/", {
+                method: "POST",
+                body: JSON.stringify({ timezone: detectedTimezone }),
+            });
+            await queryClient.invalidateQueries({ queryKey: ["system-setup-status"] });
+            await queryClient.invalidateQueries({ queryKey: ["settings"] });
+        } catch (e) {
+            console.error("Failed to set timezone:", e);
+        } finally {
+            setIsSubmittingTz(false);
+        }
+    };
 
     const { data, isLoading } = useQuery({
         queryKey: ["system-setup-status"],
@@ -242,12 +267,49 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "", i
                                 {recommendations.map((rec, idx) => (
                                     <div
                                         key={idx}
-                                        className="p-3 rounded-xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 text-xs flex items-start gap-2.5 text-amber-950 dark:text-amber-200"
+                                        className="p-3 rounded-xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 text-xs flex flex-col justify-between gap-2 text-amber-950 dark:text-amber-200"
                                     >
-                                        <span className="text-base leading-none">⚠️</span>
-                                        <div className="space-y-0.5">
-                                            <div className="font-bold">{rec.title}</div>
-                                            <div className="text-amber-900/80 dark:text-amber-300/80 leading-relaxed text-[11px]">{rec.text}</div>
+                                        <div className="flex items-start gap-2.5">
+                                            <span className="text-base leading-none">⚠️</span>
+                                            <div className="space-y-0.5">
+                                                <div className="font-bold">{rec.title}</div>
+                                                <div className="text-amber-900/80 dark:text-amber-300/80 leading-relaxed text-[11px]">{rec.text}</div>
+                                            </div>
+                                        </div>
+
+                                        {/* Action Buttons for specific recommendations */}
+                                        <div className="flex items-center justify-end gap-2 pt-1">
+                                            {rec.action === "set_timezone" && (
+                                                <button
+                                                    type="button"
+                                                    disabled={isSubmittingTz}
+                                                    onClick={handleAcceptTimezone}
+                                                    className="px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] rounded-lg shadow-2xs transition cursor-pointer flex items-center gap-1"
+                                                >
+                                                    <span>🌐</span>
+                                                    <span>{detectedTimezone} übernehmen</span>
+                                                </button>
+                                            )}
+                                            {rec.action === "configure_devices" && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => navigate("/app/devices")}
+                                                    className="px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] rounded-lg shadow-2xs transition cursor-pointer flex items-center gap-1"
+                                                >
+                                                    <span>📟</span>
+                                                    <span>Geräte zuweisen →</span>
+                                                </button>
+                                            )}
+                                            {["connect_inverter_or_meter", "connect_grid_meter", "connect_pv", "add_submeter"].includes(rec.action) && onOpenAddDevice && (
+                                                <button
+                                                    type="button"
+                                                    onClick={onOpenAddDevice}
+                                                    className="px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] rounded-lg shadow-2xs transition cursor-pointer flex items-center gap-1"
+                                                >
+                                                    <span>➕</span>
+                                                    <span>Gerät anbinden</span>
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 ))}

@@ -2,8 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSettings } from "../../hooks/useSettings";
 import DashboardLayout from "../../components/dashboard/DashboardLayout";
-import UnconfiguredDevicesBanner from "../../components/dashboard/UnconfiguredDevicesBanner";
-import TimezoneAlertBanner from "../../components/dashboard/TimezoneAlertBanner";
 import DeviceSetupModal from "../../components/device/DeviceSetupModal";
 import EnergyChartModal from "../../features/energy/components/EnergyChartModal";
 import KPI from "../../components/ui/KPI";
@@ -51,34 +49,6 @@ export default function DashboardUser() {
     return (
         <DashboardLayout>
 
-            {/* 🚨 Alert Banners Stack (kompakt ohne Extra-Padding) */}
-            <div className="space-y-3">
-                <UnconfiguredDevicesBanner onOpen={() => setOpenSetup(true)} />
-                <DeviceSetupModal
-                    open={openSetup}
-                    onClose={() => setOpenSetup(false)}
-                />
-
-                <TimezoneAlertBanner
-                    timezone={userSettings?.timezone}
-                    onAccept={async (timezone) => {
-                        await apiFetch("/api/timezone/", {
-                            method: "POST",
-                            body: JSON.stringify({
-                                timezone,
-                            }),
-                        });
-
-                        await queryClient.invalidateQueries({
-                            queryKey: ["settings"],
-                        });
-                    }}
-                    onSettings={() => {
-                        navigate("/app/profile");
-                    }}
-                />
-            </div>
-
             {/* 🏠 Dashboard Header */}
             <div>
                 <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
@@ -91,6 +61,12 @@ export default function DashboardUser() {
 
             {/* 🩺 System-Check & Einrichtungsgrad (4-Säulen-Omi-Check) */}
             <SystemReadinessCard onOpenAddDevice={() => setOpenSetup(true)} />
+
+            {/* Modal für Geräteanbindung */}
+            <DeviceSetupModal
+                open={openSetup}
+                onClose={() => setOpenSetup(false)}
+            />
 
             {/* ⚡ Echtzeit-Status & KPIs */}
             <div>

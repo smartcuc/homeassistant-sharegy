@@ -5,7 +5,7 @@ export default function DashboardLayout({ children }) {
 
     return (
         <div className={`w-full ${theme?.colors?.bg || ""}`}>
-            <div className="p-6 max-w-7xl mx-auto space-y-6">
+            <div className="px-4 sm:px-6 pt-4 pb-8 max-w-7xl mx-auto space-y-5">
                 {children}
             </div>
         </div>

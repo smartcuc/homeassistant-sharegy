@@ -412,6 +412,33 @@ def check_home_system_status(user) -> Dict[str, Any]:
                 "action": "add_submeter",
             })
 
+        # Prüfen, ob unkonfigurierte Geräte vorliegen
+        unconfigured_devices = [
+            d for d in active_devices
+            if not getattr(d, "config", None) or not getattr(d.config, "role", None) or d.config.role.key in ["unknown", "unassigned", "default"]
+        ]
+        if unconfigured_devices:
+            cnt = len(unconfigured_devices)
+            recommendations.append({
+                "priority": "high",
+                "pillar": "devices",
+                "title": f"{cnt} Gerät{'e' if cnt > 1 else ''} konfigurieren",
+                "text": f"{cnt} neue{'s' if cnt == 1 else ''} Gerät{'e' if cnt > 1 else ''} erkannt. Bitte weise Gerätetyp und Raum zu, damit alle Energieflüsse präzise berechnet werden.",
+                "action": "configure_devices",
+                "count": cnt,
+            })
+
+        # Prüfen, ob Zeitzone konfiguriert ist
+        user_settings = getattr(user, "settings", None) if user else None
+        if not user_settings or not getattr(user_settings, "timezone", None):
+            recommendations.append({
+                "priority": "medium",
+                "pillar": "settings",
+                "title": "Zeitzone einstellen",
+                "text": "Für minutengenaue Auswertungen, Solarprognosen und dynamische Strompreise sollte deine lokale Zeitzone eingestellt sein.",
+                "action": "set_timezone",
+            })
+
         # Pillar-Status anpassen bei Störungen
         for alarm in active_alarms:
             if any(p.id == alarm.get("device_id") for p in pv_devices):
