@@ -158,7 +158,7 @@ export default function EnergyDashboard() {
                 </h1>
                 <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
                     {viewMode === "simple" 
-                        ? "Die 3 wichtigsten Energiekennzahlen auf einen Blick – einfach, klar und verständlich."
+                        ? t("energy.simple_subtitle", "Die 3 wichtigsten Energiekennzahlen auf einen Blick – einfach, klar und verständlich.")
                         : t("energy.subtitle", "Detaillierte Mengen-, Verbrauchs- und Kostenanalyse nach Zeiträumen.")}
                     {period === "custom" && customDates.label && (
                         <span className="ml-2 font-semibold text-indigo-600 bg-indigo-50 dark:bg-indigo-950 px-2 py-0.5 rounded-md">
@@ -184,7 +184,7 @@ export default function EnergyDashboard() {
                                     : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                             }`}
                         >
-                            <span>🟢</span> Einfach
+                            <span>🟢</span> {t("energy.view_simple", "Einfach")}
                         </button>
                         <button
                             type="button"
@@ -195,7 +195,7 @@ export default function EnergyDashboard() {
                                     : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                             }`}
                         >
-                            <span>⚙️</span> Experten
+                            <span>⚙️</span> {t("energy.view_expert", "Experten")}
                         </button>
                     </div>
 
@@ -287,7 +287,7 @@ export default function EnergyDashboard() {
                         </div>
                     </div>
                     <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                        <span>Direkt:</span>
+                        <span>{t("energy.direct_label", "Direkt:")}</span>
                         <span className="font-mono font-bold text-amber-600 dark:text-amber-400">{Number(kpis.direct_consumption_kwh || 0).toFixed(1)} kWh</span>
                     </div>
                 </div>
@@ -305,7 +305,7 @@ export default function EnergyDashboard() {
                         </div>
                     </div>
                     <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                        <span>Netzbezug:</span>
+                        <span>{t("energy.grid_import_label", "Netzbezug:")}</span>
                         <span className="font-mono font-bold text-blue-600 dark:text-blue-400">{Number(kpis.grid_import_kwh || 0).toFixed(1)} kWh</span>
                     </div>
                 </div>
@@ -322,7 +322,7 @@ export default function EnergyDashboard() {
                         </div>
                     </div>
                     <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                        <span>Status:</span>
+                        <span>{t("common.status", "Status")}:</span>
                         <span className="font-bold text-emerald-600 dark:text-emerald-400">{t("energy_kpis.grid_independent", "Netzunabhängig")}</span>
                     </div>
                 </div>
@@ -339,8 +339,8 @@ export default function EnergyDashboard() {
                         </div>
                     </div>
                     <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                        <span>PV-Nutzung:</span>
-                        <span className="font-bold text-purple-600 dark:text-purple-400">{Number(kpis.self_consumption_rate || 0).toFixed(0)}% direkt</span>
+                        <span>{t("energy.pv_usage_label", "PV-Nutzung:")}</span>
+                        <span className="font-bold text-purple-600 dark:text-purple-400">{t("energy.percent_direct", { percent: Number(kpis.self_consumption_rate || 0).toFixed(0), defaultValue: `${Number(kpis.self_consumption_rate || 0).toFixed(0)}% direkt` })}</span>
                     </div>
                 </div>
 
@@ -357,7 +357,7 @@ export default function EnergyDashboard() {
                         </div>
                     </div>
                     <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                        <span>Ersparnis:</span>
+                        <span>{t("energy.savings_label", "Ersparnis:")}</span>
                         <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">{Number(kpis.savings_eur || 0).toFixed(2)} €</span>
                     </div>
                 </div>
@@ -375,7 +375,7 @@ export default function EnergyDashboard() {
                         </div>
                     </div>
                     <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                        <span>Ökobilanz:</span>
+                        <span>{t("energy.eco_balance_label", "Ökobilanz:")}</span>
                         <span className="font-bold text-teal-600 dark:text-teal-400">{t("energy_kpis.eco_balance", "Aktiv geschützt")}</span>
                     </div>
                 </div>
@@ -474,7 +474,7 @@ export default function EnergyDashboard() {
                     </div>
                     <div className="flex items-center gap-2">
                         <span className="text-xs font-semibold px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl border border-slate-200 dark:border-slate-700">
-                            {submeters.length} {submeters.length === 1 ? "Verbraucher" : "Verbraucher"}
+                            {t("energy.consumers_count", { count: submeters.length, defaultValue: `${submeters.length} Verbraucher` })}
                         </span>
                     </div>
                 </div>
@@ -537,7 +537,7 @@ export default function EnergyDashboard() {
                                             {Number(meter.cost_eur || 0).toFixed(2)} €
                                         </div>
                                         <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium font-mono">
-                                            -{Number(meter.savings_eur || 0).toFixed(2)} € Solar
+                                            -{Number(meter.savings_eur || 0).toFixed(2)} € {t("energy.solar_short", "Solar")}
                                         </div>
                                     </div>
                                 </div>
@@ -571,7 +571,7 @@ export default function EnergyDashboard() {
 
                                 {/* Footer Link / Action Prompt */}
                                 <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-indigo-600 dark:text-indigo-400 font-semibold group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition">
-                                    <span>📈 Trends & Historie anzeigen</span>
+                                    <span>📈 {t("energy.show_trends_history", "Trends & Historie anzeigen")}</span>
                                     <span className="group-hover:translate-x-1 transition">→</span>
                                 </div>
                             </div>
@@ -705,7 +705,7 @@ export default function EnergyDashboard() {
                         <span className="text-slate-600 dark:text-slate-400 font-medium">{t("energy.cost_summary_period", "Kostenbilanz im Zeitraum:")}</span>
                         <div className="flex flex-wrap items-center gap-3 font-mono font-semibold">
                             <span className="text-emerald-600 dark:text-emerald-400">+{Number(kpis.savings_eur || 0).toFixed(2)} € {t("energy.savings_short", "Ersparnis")}</span>
-                            <span className="text-amber-600 dark:text-amber-400">+{Number(kpis.feed_in_revenue_eur || 0).toFixed(2)} € Einspeisung</span>
+                            <span className="text-amber-600 dark:text-amber-400">+{Number(kpis.feed_in_revenue_eur || 0).toFixed(2)} € {t("energy.feedin_short", "Einspeisung")}</span>
                             <span className="text-rose-600 dark:text-rose-400">-{Number(kpis.grid_costs_eur || 0).toFixed(2)} € {t("energy.grid_costs_short", "Netzkosten")}</span>
                         </div>
                     </div>

@@ -354,8 +354,8 @@ export default function DashboardUser() {
                     ) : (
 
                         <div className="h-40 flex flex-col items-center justify-center text-center text-gray-400 space-y-1">
-                            <p className="text-gray-500 font-medium">Willkommen bei Sharegy 👋</p>
-                            <p>📈 Dein Energiechart kommt, sobald wir uns besser kennengelernt haben.</p>
+                            <p className="text-gray-500 font-medium">{t("dashboard.welcome_sharegy", "Willkommen bei Sharegy 👋")}</p>
+                            <p>{t("dashboard.chart_coming_soon", "📈 Dein Energiechart kommt, sobald wir uns besser kennengelernt haben.")}</p>
                         </div>
 
                     )}

@@ -3,9 +3,11 @@
 */
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import SystemReadinessCard from "../../features/energy/components/SystemReadinessCard";
 
 export default function HomeSetupStatusModal({ open, onClose, onOpenAddDevice }) {
+    const { t } = useTranslation();
     if (!open) return null;
 
     return (
@@ -17,17 +19,17 @@ export default function HomeSetupStatusModal({ open, onClose, onOpenAddDevice })
                         <span className="text-3xl p-2.5 bg-white rounded-2xl shadow-xs border border-slate-200">🩺</span>
                         <div>
                             <h2 className="text-xl font-black text-gray-900 tracking-tight">
-                                System-Check & Einrichtungsgrad (Omi-Check)
+                                {t("system_health.modal_title", "System-Check & Einrichtungsgrad (Omi-Check)")}
                             </h2>
                             <p className="text-xs text-gray-500 mt-0.5">
-                                Automatische Prüfung der 4 Kernsäulen (PV, Netz, Speicher, Last) für ein fehlerfreies Energiemanagement.
+                                {t("system_health.modal_desc", "Automatische Prüfung der 4 Kernsäulen (PV, Netz, Speicher, Last) für ein fehlerfreies Energiemanagement.")}
                             </p>
                         </div>
                     </div>
                     <button
                         onClick={onClose}
                         className="w-9 h-9 rounded-full bg-white border border-slate-200 text-gray-400 hover:text-gray-700 hover:bg-gray-100 flex items-center justify-center text-lg font-bold transition cursor-pointer"
-                        title="Schließen"
+                        title={t("common.close", "Schließen")}
                     >
                         ✕
                     </button>

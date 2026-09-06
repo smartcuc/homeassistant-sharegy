@@ -64,7 +64,13 @@
     "show": "Anzeigen",
     "tip": "Tipp",
     "running": "Läuft aktiv",
-    "save_settings": "Einstellungen speichern"
+    "save_settings": "Einstellungen speichern",
+    "optional": "Optional",
+    "connect": "Anbinden",
+    "show_details": "Details anzeigen",
+    "collapse": "Einklappen",
+    "details_btn": "▼ Details",
+    "close_btn": "▲ Schließen"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -126,7 +132,9 @@
     "week": "Woche",
     "month": "Monat",
     "year": "Jahr",
-    "live_energy_ticker_title": "Live-Energiefluss & Dashboard öffnen"
+    "live_energy_ticker_title": "Live-Energiefluss & Dashboard öffnen",
+    "welcome_sharegy": "Willkommen bei Sharegy 👋",
+    "chart_coming_soon": "📈 Dein Energiechart kommt, sobald wir uns besser kennengelernt haben."
   },
   "devices": {
     "title": "Geräteübersicht",
@@ -422,7 +430,25 @@
     "pv_power": "PV-Leistung",
     "grid_power": "Netzbezug/Einspeisung",
     "load_power": "Hausverbrauch",
-    "battery_soc": "Batterie-SoC"
+    "battery_soc": "Batterie-SoC",
+    "simple_subtitle": "Die 3 wichtigsten Energiekennzahlen auf einen Blick – einfach, klar und verständlich.",
+    "view_simple": "Einfach",
+    "view_expert": "Experten",
+    "co2_saved_colon": "CO₂ vermieden:",
+    "self_consumption_colon": "Eigenverbrauch:",
+    "direct_label": "Direkt:",
+    "grid_import_label": "Netzbezug:",
+    "pv_usage_label": "PV-Nutzung:",
+    "percent_direct": "energy.percent_direct",
+    "savings_label": "Ersparnis:",
+    "eco_balance_label": "Ökobilanz:",
+    "consumers_count": "energy.consumers_count",
+    "solar_short": "Solar",
+    "show_trends_history": "Trends & Historie anzeigen",
+    "feedin_short": "Einspeisung",
+    "no_measurements_period": "No measurement data available for this period yet. Connect your devices under 'Devices' to track your energy flows live.",
+    "expert_banner_cta": "To Expert Tools →",
+    "expert_banner_prompt": "Would you like to monitor detailed phase currents (L1/L2/L3), Sankey energy flows, SG-Ready heat pumps, or control spot market arbitrage?"
   },
   "interfaces": {
     "title": "Schnittstellen",
@@ -1403,7 +1429,8 @@
   },
   "community": {
     "share_stats": "Erfolge teilen",
-    "invite_link": "Einladungslink"
+    "invite_link": "Einladungslink",
+    "share_stats_title": "Share achievements & autarky with neighbors and social media"
   },
   "battery_forecast": {
     "start_soc": "Start-Ladestand",
@@ -1459,7 +1486,19 @@
     "open_expert_view": "Experten-Ansicht öffnen",
     "total_energy_period": "Gesamtenergie im Zeitraum ({{period}})",
     "top_consumers": "Größte Stromverbraucher",
-    "manage_devices": "Geräte verwalten →"
+    "manage_devices": "Geräte verwalten →",
+    "autarky_period": "simple_dashboard.autarky_period",
+    "level_excellent": "Exzellent",
+    "level_good": "Gut",
+    "level_basic": "Basis",
+    "autarky_summary": "simple_dashboard.autarky_summary",
+    "net_benefit_period": "simple_dashboard.net_benefit_period",
+    "saved_label": "Eingespart",
+    "net_benefit_desc": "Vermiedene Stromkosten durch Eigenverbrauch zzgl. Einspeisevergütung.",
+    "realtime_state": "Echtzeit-Zustand",
+    "no_submeters_hint": "Noch keine Einzelgeräte erfasst. Verbinde deine Wallbox, Wärmepumpe oder Schaltsteckdosen.",
+    "expert_banner_text": "Möchtest du detaillierte Phasenströme (L1/L2/L3), Sankey-Energieflüsse, SG-Ready Wärmepumpen oder Börsenpreis-Arbitrage steuern?",
+    "to_expert_tools": "Zu den Experten-Tools →"
   },
   "system_health": {
     "pillar_pv": "PV",
@@ -1467,7 +1506,44 @@
     "pillar_battery": "Speicher",
     "pillar_load": "Last",
     "pillar_timezone": "Zeitzone",
-    "title_short": "Omi-Check"
+    "title_short": "Omi-Check",
+    "modal_title": "System-Check & Einrichtungsgrad (Omi-Check)",
+    "modal_desc": "Automatische Prüfung der 4 Kernsäulen (PV, Netz, Speicher, Last) für ein fehlerfreies Energiemanagement.",
+    "missing_pv": "Kein Wechselrichter / BKW",
+    "missing_grid": "Kein Haupt-/Zweirichtungszähler",
+    "missing_battery": "Kein Heimspeicher",
+    "calc_load": "Last wird berechnet",
+    "missing_tz": "Zeitzone nicht gesetzt",
+    "optimal": "Optimal",
+    "ready": "Bereit",
+    "incomplete": "Unvollständig",
+    "active_check": "Aktiv ✓",
+    "missing": "Fehlt",
+    "calculated_load": "Berechnet (PV + Netz)",
+    "submeter_summary": "system_health.submeter_summary",
+    "manage_devices_rooms": "Geräte & Räume verwalten",
+    "recommendations_title": "💡 Handlungsempfehlungen:",
+    "accept_timezone": "system_health.accept_timezone",
+    "assign_devices": "Geräte zuweisen →",
+    "connect_device": "Gerät anbinden",
+    "rec_connect_inverter_or_meter_title": "Verbinde deine erste Energiequelle",
+    "rec_connect_inverter_or_meter_text": "Verknüpfe deinen Wechselrichter (z. B. Sungrow, Fronius, SMA) oder deinen digitalen Stromzähler (z. B. Tibber Pulse, Shelly 3EM).",
+    "rec_connect_grid_meter_title": "Netzzähler fehlt für Autarkie-Berechnung",
+    "rec_connect_grid_meter_text": "Deine Solaranlage ist verbunden! Damit wir deinen Netzbezug, Einspeisevergütung und echte Autarkie berechnen können, verknüpfe deinen Netzstromzähler (z. B. Tibber Pulse, Shelly Pro 3EM oder Powerfox).",
+    "rec_connect_pv_title": "Solaranlage hinzufügen",
+    "rec_connect_pv_text": "Dein Netzstromzähler ist aktiv. Wenn du eine Solaranlage oder ein Balkonkraftwerk besitzt, kannst du sie jetzt verbinden, um deine Einsparungen live zu sehen.",
+    "rec_add_submeter_title": "Räume & Einzelgeräte aufschlüsseln (Optional)",
+    "rec_add_submeter_text": "Möchtest du sehen, wie viel Strom deine Wärmepumpe, Wallbox oder Waschmaschine verbraucht? Füge einfach smarte Zwischenstecker (z. B. Shelly Plug) hinzu.",
+    "rec_configure_devices_title": "Geräte konfigurieren",
+    "rec_configure_devices_text": "{{count}} neue(s) Gerät(e) erkannt. Bitte weise Gerätetyp und Raum zu, damit alle Energieflüsse präzise berechnet werden.",
+    "rec_set_timezone_title": "Zeitzone einstellen",
+    "rec_set_timezone_text": "Für minutengenaue Auswertungen, Solarprognosen und dynamische Strompreise sollte deine lokale Zeitzone eingestellt sein.",
+    "score_badge_critical": "Setup Incomplete",
+    "omi_check_title": "System Check & Setup Grade (Omi-Check)",
+    "score_badge_good": "Well Prepared",
+    "score_badge_basic": "Basic Setup",
+    "optional": "Optional",
+    "score_badge_excellent": "Excellent"
   },
   "string_id": "string_id",
   "hours": "hours",
@@ -1588,5 +1664,9 @@
     "absolute_cutoff": "Absoluter Abschaltschutz",
     "min_pv_surplus_label": "Mindest-PV-Überschuss (W)",
     "max_price_threshold_label": "Max. Preisgrenze (ct/kWh)"
+  },
+  "home_setup": {
+    "modal_title": "Home Setup & Omi-Check",
+    "modal_subtitle": "Overview of connected system components and configuration status."
   }
 }

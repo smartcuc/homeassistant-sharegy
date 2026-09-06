@@ -132,7 +132,7 @@ export default function SimpleDashboardView({
                     <div className="flex items-center justify-between">
                         <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                             <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                            Autarkie ({periodLabel})
+                            {t("simple_dashboard.autarky_period", { period: periodLabel, defaultValue: `Autarkie (${periodLabel})` })}
                         </span>
                         <span className="w-8 h-8 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-sm font-bold border border-emerald-200 dark:border-emerald-900/50">
                             🛡️
@@ -151,11 +151,11 @@ export default function SimpleDashboardView({
                                         ? "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800" 
                                         : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700"
                             }`}>
-                                {autarkyRate >= 75 ? "Exzellent" : autarkyRate >= 40 ? "Gut" : "Basis"}
+                                {autarkyRate >= 75 ? t("simple_dashboard.level_excellent", "Exzellent") : autarkyRate >= 40 ? t("simple_dashboard.level_good", "Gut") : t("simple_dashboard.level_basic", "Basis")}
                             </span>
                         </div>
                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
-                            {autarkyRate}% deines Strombedarfs stammten direkt aus deiner eigenen Solaranlage & Speicher.
+                            {t("simple_dashboard.autarky_summary", { rate: autarkyRate, defaultValue: `${autarkyRate}% deines Strombedarfs stammten direkt aus deiner eigenen Solaranlage & Speicher.` })}
                         </p>
                     </div>
 
@@ -172,7 +172,7 @@ export default function SimpleDashboardView({
                     <div className="flex items-center justify-between">
                         <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                             <TrendingUp className="w-4 h-4 text-amber-500" />
-                            Finanzvorteil ({periodLabel})
+                            {t("simple_dashboard.net_benefit_period", { period: periodLabel, defaultValue: `Finanzvorteil (${periodLabel})` })}
                         </span>
                         <span className="w-8 h-8 rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center text-sm font-bold border border-amber-200 dark:border-amber-900/50">
                             💶
@@ -185,21 +185,21 @@ export default function SimpleDashboardView({
                                 {netBenefitEur >= 0 ? "+" : ""}{netBenefitEur.toFixed(2)} €
                             </span>
                             <span className="text-xs font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-900/50">
-                                Eingespart
+                                {t("simple_dashboard.saved_label", "Eingespart")}
                             </span>
                         </div>
                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
-                            Vermiedene Stromkosten durch Eigenverbrauch zzgl. Einspeisevergütung.
+                            {t("simple_dashboard.net_benefit_desc", "Vermiedene Stromkosten durch Eigenverbrauch zzgl. Einspeisevergütung.")}
                         </p>
                     </div>
 
                     <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium flex items-center justify-between pt-1 border-t border-slate-100 dark:border-slate-800">
                         <span className="flex items-center gap-1">
                             <Leaf className="w-3.5 h-3.5 text-emerald-500" />
-                            CO₂ vermieden: <strong className="text-slate-700 dark:text-slate-300">{formatKwh(co2SavedKg)} kg</strong>
+                            {t("energy.co2_saved_colon", "CO₂ vermieden:")} <strong className="text-slate-700 dark:text-slate-300">{formatKwh(co2SavedKg)} kg</strong>
                         </span>
                         <span>
-                            Eigenverbrauch: <strong className="text-slate-700 dark:text-slate-300">{selfConsumptionRate}%</strong>
+                            {t("energy.self_consumption_colon", "Eigenverbrauch:")} <strong className="text-slate-700 dark:text-slate-300">{selfConsumptionRate}%</strong>
                         </span>
                     </div>
                 </div>
@@ -209,7 +209,7 @@ export default function SimpleDashboardView({
                     <div className="flex items-center justify-between">
                         <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                             <Zap className="w-4 h-4 text-indigo-500" />
-                            Echtzeit-Zustand
+                            {t("simple_dashboard.realtime_state", "Echtzeit-Zustand")}
                         </span>
                         <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${statusText.badgeClass}`}>
                             {statusText.badge}
@@ -500,7 +500,7 @@ export default function SimpleDashboardView({
                                 </div>
                             ) : (
                                 <div className="py-6 text-center text-xs text-slate-500 dark:text-slate-400">
-                                    Noch keine Einzelgeräte erfasst. Verbinde deine Wallbox, Wärmepumpe oder Schaltsteckdosen.
+                                    {t("simple_dashboard.no_submeters_hint", "Noch keine Einzelgeräte erfasst. Verbinde deine Wallbox, Wärmepumpe oder Schaltsteckdosen.")}
                                 </div>
                             )}
                         </div>
@@ -520,7 +520,7 @@ export default function SimpleDashboardView({
                     <div className="flex items-center gap-3">
                         <span className="text-xl">💡</span>
                         <span className="text-slate-700 dark:text-slate-300 font-medium">
-                            Möchtest du detaillierte Phasenströme (L1/L2/L3), Sankey-Energieflüsse, SG-Ready Wärmepumpen oder Börsenpreis-Arbitrage steuern?
+                            {t("simple_dashboard.expert_banner_text", "Möchtest du detaillierte Phasenströme (L1/L2/L3), Sankey-Energieflüsse, SG-Ready Wärmepumpen oder Börsenpreis-Arbitrage steuern?")}
                         </span>
                     </div>
 
@@ -529,7 +529,7 @@ export default function SimpleDashboardView({
                         onClick={onSwitchToExpert}
                         className="px-4 py-2 bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-100 text-white dark:text-slate-900 font-bold rounded-xl shadow-xs transition cursor-pointer shrink-0"
                     >
-                        Zu den Experten-Tools &rarr;
+                        {t("simple_dashboard.to_expert_tools", "Zu den Experten-Tools →")}
                     </button>
                 </div>
             </div>

@@ -78,21 +78,21 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "", i
             icon: "☀️",
             label: t("system_health.pillar_pv", "PV"),
             pillar: pillars.generation || pillars.pv || pillars.producer,
-            missingHint: "Kein Wechselrichter / BKW",
+            missingHint: t("system_health.missing_pv", "Kein Wechselrichter / BKW"),
         },
         {
             key: "grid",
             icon: "⚡",
             label: t("system_health.pillar_grid", "Netz"),
             pillar: pillars.grid || pillars.meter,
-            missingHint: "Kein Haupt-/Zweirichtungszähler",
+            missingHint: t("system_health.missing_grid", "Kein Haupt-/Zweirichtungszähler"),
         },
         {
             key: "battery",
             icon: "🔋",
             label: t("system_health.pillar_battery", "Speicher"),
             pillar: pillars.battery || pillars.storage,
-            missingHint: "Kein Heimspeicher",
+            missingHint: t("system_health.missing_battery", "Kein Heimspeicher"),
             optional: true,
         },
         {
@@ -100,14 +100,14 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "", i
             icon: "🏠",
             label: t("system_health.pillar_load", "Last"),
             pillar: pillars.load || pillars.consumption,
-            missingHint: "Last wird berechnet",
+            missingHint: t("system_health.calc_load", "Last wird berechnet"),
         },
         {
             key: "timezone",
             icon: "🌐",
             label: t("system_health.pillar_timezone", "Zeitzone"),
             pillar: pillars.timezone || pillars.location || pillars.settings,
-            missingHint: "Zeitzone nicht gesetzt",
+            missingHint: t("system_health.missing_tz", "Zeitzone nicht gesetzt"),
         },
     ];
 
@@ -122,7 +122,7 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "", i
                             <span className="text-base">🩺</span>
                             <span>{t("system_health.title_short", "Omi-Check")}:</span>
                             <span className={`px-2 py-0.5 rounded-full text-[11px] font-extrabold border ${scoreColor}`}>
-                                {score}% {score >= 90 ? "Optimal" : score >= 60 ? "Bereit" : "Unvollständig"}
+                                {score}% {score >= 90 ? t("system_health.optimal", "Optimal") : score >= 60 ? t("system_health.ready", "Bereit") : t("system_health.incomplete", "Unvollständig")}
                             </span>
                         </div>
 
@@ -144,7 +144,7 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "", i
                                                 ? "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700"
                                                 : "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800"
                                         }`}
-                                        title={`${item.label}: ${isOk ? "Aktiv" : item.optional ? "Optional (nicht angebunden)" : item.missingHint}`}
+                                        title={`${item.label}: ${isOk ? t("common.active", "Aktiv") : item.optional ? t("common.optional", "Optional") : item.missingHint}`}
                                     >
                                         <span>{item.icon}</span>
                                         <span className="hidden sm:inline">{item.label}</span>
@@ -164,16 +164,16 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "", i
                                 className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-bold rounded-lg shadow-2xs transition flex items-center gap-1 cursor-pointer"
                             >
                                 <span>➕</span>
-                                <span className="hidden sm:inline">Anbinden</span>
+                                <span className="hidden sm:inline">{t("common.connect", "Anbinden")}</span>
                             </button>
                         )}
                         <button
                             type="button"
                             onClick={() => setCollapsed(!collapsed)}
                             className="px-2.5 py-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-300 transition text-[11px] font-semibold border border-slate-200 dark:border-slate-700 cursor-pointer flex items-center gap-1"
-                            title={collapsed ? "Details anzeigen" : "Einklappen"}
+                            title={collapsed ? t("common.show_details", "Details anzeigen") : t("common.collapse", "Einklappen")}
                         >
-                            <span>{collapsed ? "▼ Details" : "▲ Schließen"}</span>
+                            <span>{collapsed ? t("common.details_btn", "▼ Details") : t("common.close_btn", "▲ Schließen")}</span>
                         </button>
                     </div>
                 </div>
@@ -226,7 +226,7 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "", i
                                                     : "bg-amber-500 text-white"
                                             }`}
                                         >
-                                            {isOk ? "Aktiv ✓" : item.optional ? "Optional" : "Fehlt"}
+                                            {isOk ? t("system_health.active_check", "Aktiv ✓") : item.optional ? t("common.optional", "Optional") : t("system_health.missing", "Fehlt")}
                                         </span>
                                     </div>
 
@@ -236,7 +236,7 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "", i
                                             {deviceName
                                                 ? deviceName
                                                 : isCalculated
-                                                ? "Berechnet (PV + Netz)"
+                                                ? t("system_health.calculated_load", "Berechnet (PV + Netz)")
                                                 : statusText
                                                 ? statusText
                                                 : item.missingHint}
@@ -252,14 +252,14 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "", i
                         <div className="flex items-center gap-2">
                             <span className="text-base">🔌</span>
                             <span>
-                                <strong>{submeters.count || 0} Einzelgeräte</strong> ({submeters.rooms_count || 0} Räume, {submeters.floors_count || 0} Etagen) im Sub-Metering angebunden.
+                                {t("system_health.submeter_summary", { count: submeters.count || 0, rooms: submeters.rooms_count || 0, floors: submeters.floors_count || 0, defaultValue: `${submeters.count || 0} Einzelgeräte (${submeters.rooms_count || 0} Räume, ${submeters.floors_count || 0} Etagen) im Sub-Metering angebunden.` })}
                             </span>
                         </div>
                         <a
                             href="/app/devices"
                             className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition flex items-center gap-1"
                         >
-                            <span>Geräte & Räume verwalten</span>
+                            <span>{t("system_health.manage_devices_rooms", "Geräte & Räume verwalten")}</span>
                             <span>→</span>
                         </a>
                     </div>
@@ -268,7 +268,7 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "", i
                     {recommendations.length > 0 && (
                         <div className="space-y-2 pt-1 border-t border-slate-100 dark:border-slate-800">
                             <div className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-slate-400">
-                                💡 Handlungsempfehlungen:
+                                {t("system_health.recommendations_title", "💡 Handlungsempfehlungen:")}
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
                                 {recommendations.map((rec, idx) => (
@@ -279,8 +279,13 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "", i
                                         <div className="flex items-start gap-2.5">
                                             <span className="text-base leading-none">⚠️</span>
                                             <div className="space-y-0.5">
-                                                <div className="font-bold">{rec.title}</div>
-                                                <div className="text-amber-900/80 dark:text-amber-300/80 leading-relaxed text-[11px]">{rec.text}</div>
+                                                <div className="font-bold">{t(`system_health.rec_${rec.action}_title`, rec.title)}</div>
+                                                <div className="text-amber-900/80 dark:text-amber-300/80 leading-relaxed text-[11px]">
+                                                    {rec.action === "configure_devices"
+                                                        ? t("system_health.rec_configure_devices_text", { count: rec.count || 1, defaultValue: rec.text })
+                                                        : t(`system_health.rec_${rec.action}_text`, rec.text)
+                                                    }
+                                                </div>
                                             </div>
                                         </div>
 
@@ -294,7 +299,7 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "", i
                                                     className="px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] rounded-lg shadow-2xs transition cursor-pointer flex items-center gap-1"
                                                 >
                                                     <span>🌐</span>
-                                                    <span>{detectedTimezone} übernehmen</span>
+                                                    <span>{t("system_health.accept_timezone", { tz: detectedTimezone, defaultValue: `${detectedTimezone} übernehmen` })}</span>
                                                 </button>
                                             )}
                                             {rec.action === "configure_devices" && (
@@ -304,7 +309,7 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "", i
                                                     className="px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] rounded-lg shadow-2xs transition cursor-pointer flex items-center gap-1"
                                                 >
                                                     <span>📟</span>
-                                                    <span>Geräte zuweisen →</span>
+                                                    <span>{t("system_health.assign_devices", "Geräte zuweisen →")}</span>
                                                 </button>
                                             )}
                                             {["connect_inverter_or_meter", "connect_grid_meter", "connect_pv", "add_submeter"].includes(rec.action) && onOpenAddDevice && (
@@ -314,7 +319,7 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "", i
                                                     className="px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] rounded-lg shadow-2xs transition cursor-pointer flex items-center gap-1"
                                                 >
                                                     <span>➕</span>
-                                                    <span>Gerät anbinden</span>
+                                                    <span>{t("system_health.connect_device", "Gerät anbinden")}</span>
                                                 </button>
                                             )}
                                         </div>
