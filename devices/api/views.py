@@ -455,11 +455,6 @@ from django.core.cache import cache
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def device_dashboard_values(request):
-    cache_key = f"dev_dash_vals_{request.user.id}"
-    cached = cache.get(cache_key)
-    if cached is not None:
-        return Response(cached)
-
     devices = list(
         Device.objects.filter(
             home__user=request.user,
@@ -467,7 +462,9 @@ def device_dashboard_values(request):
             pending_delete=False,
         ).select_related(
             "config",
+            "config__role",
             "config__metric_definition",
+            "config__energy_signal_type",
         )
     )
 
@@ -566,56 +563,94 @@ def device_dashboard_values(request):
         metric = (
             config.metric_definition if config and config.metric_definition else None
         )
-        lead_key = metric.key if metric else "power"
-        top_unit = _infer_canonical_unit(lead_key, metric.unit if metric else "", config=config)
+        role_key = (config.role.key if config and config.role else "").lower()
+        sig_key = (config.energy_signal_type.key if config and config.energy_signal_type else "").lower()
+        is_grid = getattr(config, "is_grid_source", False) or role_key in ["grid", "meter", "smart_meter", "zaehler"] or sig_key in ["grid", "meter", "grid_import", "grid_feed_in"]
+        configured_lead = metric.key if metric else None
 
         dev_metrics = device_metrics_map.get(d.id, {})
 
-        # Live-Wert ermitteln mit intelligentem Alias-Matching
-        lead_val = None
-        if lead_key in dev_metrics and dev_metrics[lead_key]["value"] is not None:
-            lead_val = dev_metrics[lead_key]["value"]
-            top_unit = dev_metrics[lead_key]["unit"] or top_unit
+        # Kandidaten-Reihenfolge zur präzisen Bestimmung des Haupt-Messwerts:
+        candidate_keys = []
+        if configured_lead:
+            candidate_keys.append(configured_lead)
+            if configured_lead.lower() in ["power", "value", "val"]:
+                if is_grid:
+                    candidate_keys.extend(["grid_power", "power_grid", "active_power", "p_total"])
+                elif role_key in ["producer", "pv", "solar"] or sig_key in ["pv", "solar", "producer"]:
+                    candidate_keys.extend(["pv_power", "solar_power", "yield_power"])
+                elif role_key in ["battery", "storage"] or sig_key in ["battery", "storage"]:
+                    candidate_keys.extend(["battery_soc", "battery_power", "soc"])
+                elif role_key in ["consumer", "load"] or sig_key in ["load", "consumer"]:
+                    candidate_keys.extend(["load_power", "power"])
         else:
-            matched_entry = None
-            if "temp" in lead_key.lower():
-                matched_entry = next((m for k, m in dev_metrics.items() if "temp" in k.lower() and m["value"] is not None), None)
-            elif "power" in lead_key.lower() or lead_key in POWER_KEYS:
-                matched_entry = next((m for k, m in dev_metrics.items() if (k.lower() in POWER_KEYS or "power" in k.lower()) and m["value"] is not None), None)
+            if is_grid:
+                candidate_keys.extend(["grid_power", "power_grid", "active_power", "p_total", "power"])
+            elif role_key in ["producer", "pv", "solar"] or sig_key in ["pv", "solar", "producer"]:
+                candidate_keys.extend(["pv_power", "solar_power", "yield_power", "power"])
+            elif role_key in ["battery", "storage"] or sig_key in ["battery", "storage"]:
+                candidate_keys.extend(["battery_soc", "soc", "battery_power", "power"])
+            elif role_key in ["consumer", "load"] or sig_key in ["load", "consumer"]:
+                candidate_keys.extend(["load_power", "power", "active_power"])
+            elif role_key == "sensor":
+                candidate_keys.extend(["temperature", "temp", "humidity", "pressure", "value"])
+            else:
+                candidate_keys.extend(["power", "value", "val"])
 
-            if matched_entry:
-                lead_val = matched_entry["value"]
-                top_unit = matched_entry["unit"] or top_unit
-            elif values.get(d.id) is not None:
-                lead_val = values.get(d.id)
-            elif dev_metrics:
-                first_m = next((m for m in dev_metrics.values() if m.get("value") is not None), None)
-                if first_m:
-                    lead_val = first_m.get("value")
-                    top_unit = first_m.get("unit") or top_unit
+        lead_val = None
+        top_unit = _infer_canonical_unit(configured_lead or "power", metric.unit if metric else "", config=config)
+
+        # 1. Präziser Match über Candidate Keys in DeviceLatestMetric
+        for c_k in candidate_keys:
+            if c_k in dev_metrics and dev_metrics[c_k]["value"] is not None:
+                lead_val = dev_metrics[c_k]["value"]
+                top_unit = dev_metrics[c_k]["unit"] or top_unit
+                break
+
+        # 2. Redis-Live-Cache Check
+        if lead_val is None:
+            for c_k in candidate_keys:
+                cached_v = cache.get(f"device:{d.id}:{c_k}")
+                if cached_v is not None:
+                    try:
+                        lead_val = round(float(cached_v), 2)
+                        break
+                    except (ValueError, TypeError):
+                        pass
+
+        # 3. Fallback auf get_latest_values
+        if lead_val is None and values.get(d.id) is not None:
+            lead_val = values.get(d.id)
+
+        # 4. Fallback auf erste verfügbare Metrik
+        if lead_val is None and dev_metrics:
+            first_m = next((m for m in dev_metrics.values() if m.get("value") is not None), None)
+            if first_m:
+                lead_val = first_m.get("value")
+                top_unit = first_m.get("unit") or top_unit
 
         # Sparkline-Punkte blitzschnell aus dem In-Memory Mapping extrahieren
-        is_pwr = lead_key.lower() in POWER_KEYS
+        is_pwr = (configured_lead or "").lower() in POWER_KEYS or is_grid or role_key in ["producer", "consumer", "grid"]
         dev_sparklines = sparkline_1m_by_device.get(d.id, {})
         sparkline_pts = []
 
         if is_pwr:
-            for p_k in POWER_KEYS:
-                if p_k in dev_sparklines and dev_sparklines[p_k]:
-                    sparkline_pts = dev_sparklines[p_k]
+            for p_k in candidate_keys + list(POWER_KEYS):
+                if p_k.lower() in dev_sparklines and dev_sparklines[p_k.lower()]:
+                    sparkline_pts = dev_sparklines[p_k.lower()]
                     break
             if not sparkline_pts and "" in dev_sparklines:
                 sparkline_pts = dev_sparklines[""]
         else:
             # Spezifische oder Alias-Metrik suchen
-            alias_keys = [lead_key.lower()]
-            if "temp" in lead_key.lower():
+            alias_keys = [c.lower() for c in candidate_keys]
+            if "temp" in (configured_lead or "").lower():
                 alias_keys.extend(["temperature", "temp", "device_temp", "bwwp_temp", "water_temp", "sensor_temp", "value", "val"])
-            elif "soc" in lead_key.lower():
+            elif "soc" in (configured_lead or "").lower():
                 alias_keys.extend(["soc", "battery_soc", "battery_level", "value", "val"])
-            elif "volt" in lead_key.lower():
+            elif "volt" in (configured_lead or "").lower():
                 alias_keys.extend(["voltage", "voltage_l1", "value", "val"])
-            elif "curr" in lead_key.lower():
+            elif "curr" in (configured_lead or "").lower():
                 alias_keys.extend(["current", "current_l1", "value", "val"])
             else:
                 alias_keys.extend(["value", "val"])
@@ -646,7 +681,6 @@ def device_dashboard_values(request):
             }
         )
 
-    cache.set(cache_key, result, timeout=2)
     return Response(result)
 
 
