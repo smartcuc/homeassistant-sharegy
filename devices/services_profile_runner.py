@@ -68,14 +68,26 @@ def list_available_profiles() -> list:
     if not PROFILES_DIR.exists():
         return []
 
+    try:
+        from energy.services.ems_settings import get_manufacturer_polling_interval
+    except Exception:
+        get_manufacturer_polling_interval = None
+
     # 1. Alle JSON-Dateien laden
     for json_file in sorted(PROFILES_DIR.glob("*.json")):
         try:
             with open(json_file, "r", encoding="utf-8") as f:
                 data = json.load(f)
                 if isinstance(data, dict) and "id" in data:
-                    profiles[data["id"]] = {
-                        "id": data.get("id"),
+                    prof_id = data["id"]
+                    yaml_interval = data.get("connection", {}).get("polling_interval_seconds", 60)
+                    default_int = (
+                        get_manufacturer_polling_interval(prof_id, default=yaml_interval)
+                        if get_manufacturer_polling_interval
+                        else yaml_interval
+                    )
+                    profiles[prof_id] = {
+                        "id": prof_id,
                         "name": data.get("name"),
                         "vendor": data.get("vendor"),
                         "category": data.get("category", "inverter_hybrid"),
@@ -83,7 +95,7 @@ def list_available_profiles() -> list:
                         "description": data.get("description", ""),
                         "help": data.get("help", {}),
                         "fields": data.get("connection", {}).get("fields", []),
-                        "default_interval": data.get("connection", {}).get("polling_interval_seconds", 60),
+                        "default_interval": default_int,
                     }
         except Exception as e:
             logger.warning("Fehler beim Laden von JSON-Profil %s: %s", json_file, e)
@@ -95,8 +107,15 @@ def list_available_profiles() -> list:
                 with open(yaml_file, "r", encoding="utf-8") as f:
                     data = yaml.safe_load(f)
                     if isinstance(data, dict) and "id" in data and data["id"] not in profiles:
-                        profiles[data["id"]] = {
-                            "id": data.get("id"),
+                        prof_id = data["id"]
+                        yaml_interval = data.get("connection", {}).get("polling_interval_seconds", 60)
+                        default_int = (
+                            get_manufacturer_polling_interval(prof_id, default=yaml_interval)
+                            if get_manufacturer_polling_interval
+                            else yaml_interval
+                        )
+                        profiles[prof_id] = {
+                            "id": prof_id,
                             "name": data.get("name"),
                             "vendor": data.get("vendor"),
                             "category": data.get("category", "inverter_hybrid"),
@@ -104,11 +123,10 @@ def list_available_profiles() -> list:
                             "description": data.get("description", ""),
                             "help": data.get("help", {}),
                             "fields": data.get("connection", {}).get("fields", []),
-                            "default_interval": data.get("connection", {}).get("polling_interval_seconds", 60),
+                            "default_interval": default_int,
                         }
             except Exception as e:
                 logger.warning("Fehler beim Laden von YAML-Profil %s: %s", yaml_file, e)
-
 
     return list(profiles.values())
 

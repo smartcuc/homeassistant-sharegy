@@ -234,3 +234,155 @@ class SteuVEDeviceConfigAdmin(admin.ModelAdmin):
         )
     dimming_state_badge.short_description = "Aktorik Status"
 
+
+# ---------------------------------------------------------------------
+# ⚙️ EMS-SETTINGS: PREISE, TARIFE & WR-LESEZYKLEN
+# ---------------------------------------------------------------------
+from energy.models import EMSGlobalSettings, InverterManufacturerPollingConfig
+
+
+@admin.register(EMSGlobalSettings)
+class EMSGlobalSettingsAdmin(admin.ModelAdmin):
+    """
+    Zentrale Admin-Steuerung für alle globalen Preise, Tarife,
+    Arbitrage-Schwellen und gesetzlichen Umlagen im EMS.
+    """
+
+    fieldsets = (
+        (
+            "⚡ 1. Strombezug & Einspeisung (Standard-Preise)",
+            {
+                "fields": (
+                    "default_grid_price_ct_kwh",
+                    "default_feed_in_tariff_ct_kwh",
+                ),
+                "description": "Systemweite Standardpreise für den normalen Strombezug und die gesetzliche EEG-Einspeisevergütung.",
+            },
+        ),
+        (
+            "📈 2. Dynamische Tarife, Börsenpreise & Batterie-Arbitrage",
+            {
+                "fields": (
+                    "default_spot_markup_ct_kwh",
+                    ("spot_floor_price_ct_kwh", "spot_cap_price_ct_kwh"),
+                    "battery_arbitrage_min_spread_ct_kwh",
+                ),
+                "description": "Aufschläge auf EPEX-Spotmarktpreise sowie Schwellenwerte für KI-Ladefahrpläne und Arbitrage.",
+            },
+        ),
+        (
+            "🤝 3. Energy Sharing & Quartiere (Säule 2)",
+            {
+                "fields": (
+                    "community_sharing_price_ct_kwh",
+                    "community_producer_payout_ct_kwh",
+                    "community_platform_fee_ct_kwh",
+                ),
+                "description": "Interne Verrechnungspreise und Plattform-Umlagen für lokales Energy Sharing gem. § 42b EnWG.",
+            },
+        ),
+        (
+            "🏛️ 4. Gesetzliche Abgaben, Netzentgelte & Steuern (Deutschland)",
+            {
+                "fields": (
+                    ("grid_fee_ct_kwh", "electricity_tax_ct_kwh"),
+                    ("concession_fee_ct_kwh", "kwk_levy_ct_kwh"),
+                    ("special_grid_levy_ct_kwh", "offshore_levy_ct_kwh"),
+                    "vat_percent",
+                    "total_statutory_levies_display",
+                ),
+                "description": "Feste Preisbestandteile gem. EnWG, StromStG und KWKG für transparente dynamische Tarifaufschlüsselung.",
+            },
+        ),
+        (
+            "⏱️ Metadaten",
+            {
+                "fields": ("created_at", "updated_at"),
+                "classes": ("collapse",),
+            },
+        ),
+    )
+
+    readonly_fields = ("created_at", "updated_at", "total_statutory_levies_display")
+
+    def total_statutory_levies_display(self, obj):
+        if not obj:
+            return "-"
+        total = obj.total_statutory_levies_ct_kwh()
+        return format_html(
+            '<strong style="color: #2563eb; font-size: 13px;">{0:,.4f} ct/kWh (netto)</strong>',
+            total,
+        )
+    total_statutory_levies_display.short_description = "Gesamte feste Abgaben (Summe netto)"
+
+    def has_add_permission(self, request):
+        # Singleton: Nur Hinzufügen erlauben, wenn noch kein Eintrag existiert
+        if EMSGlobalSettings.objects.exists():
+            return False
+        return super().has_add_permission(request)
+
+    def has_delete_permission(self, request, obj=None):
+        # Löschen verhindern, um Systemkonsistenz zu wahren
+        return False
+
+
+@admin.register(InverterManufacturerPollingConfig)
+class InverterManufacturerPollingConfigAdmin(admin.ModelAdmin):
+    """
+    Admin-Verwaltung für die API-Lesezyklen (Polling-Intervalle)
+    je Wechselrichter- und Cloud-Hersteller.
+    """
+
+    list_display = (
+        "manufacturer_name",
+        "manufacturer_key",
+        "polling_interval_badge",
+        "min_allowed_interval_seconds",
+        "is_active_badge",
+        "rate_limit_notes",
+        "updated_at",
+    )
+
+    list_filter = ("is_active",)
+    search_fields = ("manufacturer_name", "manufacturer_key", "rate_limit_notes")
+    ordering = ["manufacturer_name"]
+    actions = ["activate_configs", "deactivate_configs", "set_to_fast_polling", "set_to_standard_polling"]
+
+    def polling_interval_badge(self, obj):
+        color = "#10b981" if obj.polling_interval_seconds <= 15 else "#3b82f6" if obj.polling_interval_seconds <= 30 else "#64748b"
+        return format_html(
+            '<span style="background-color: {0}; color: white; padding: 3px 9px; border-radius: 6px; font-weight: bold; font-size: 12px;">⏱️ {1}s</span>',
+            color,
+            obj.polling_interval_seconds,
+        )
+    polling_interval_badge.short_description = "Lesezyklus"
+
+    def is_active_badge(self, obj):
+        if obj.is_active:
+            return format_html('<span style="color: #10b981; font-weight: 600;">🟢 Aktiv</span>')
+        return format_html('<span style="color: #ef4444; font-weight: 600;">🔴 Pausiert</span>')
+    is_active_badge.short_description = "Status"
+
+    @admin.action(description="🟢 Ausgewählte Hersteller-Zyklen aktivieren")
+    def activate_configs(self, request, queryset):
+        count = queryset.update(is_active=True)
+        self.message_user(request, f"{count} Hersteller-Polling-Konfigurationen aktiviert.")
+
+    @admin.action(description="🔴 Ausgewählte Hersteller-Zyklen pausieren")
+    def deactivate_configs(self, request, queryset):
+        count = queryset.update(is_active=False)
+        self.message_user(request, f"{count} Hersteller-Polling-Konfigurationen pausiert.")
+
+    @admin.action(description="⚡ Auf schnellen Zyklus (15s) setzen")
+    def set_to_fast_polling(self, request, queryset):
+        for obj in queryset:
+            interval = max(15, obj.min_allowed_interval_seconds)
+            obj.polling_interval_seconds = interval
+            obj.save()
+        self.message_user(request, "Ausgewählte Hersteller auf schnellen Zyklus aktualisiert.")
+
+    @admin.action(description="⏱️ Auf Standard-Zyklus (60s) setzen")
+    def set_to_standard_polling(self, request, queryset):
+        count = queryset.update(polling_interval_seconds=60)
+        self.message_user(request, f"{count} Hersteller auf 60s Standard-Zyklus gesetzt.")
+

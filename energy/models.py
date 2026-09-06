@@ -10,6 +10,7 @@ from django.utils import timezone
 
 from .ems.models import EMSSignalSource
 from .ems.models_signal_type import EMSSignalType
+from .models_ems_settings import EMSGlobalSettings, InverterManufacturerPollingConfig
 
 
 

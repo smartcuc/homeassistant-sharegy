@@ -238,6 +238,7 @@ def poll_cloud_integrations_task():
     """
     from devices.models import CloudDeviceIntegration
     from devices.services_profile_runner import execute_cloud_poll
+    from energy.services.ems_settings import get_manufacturer_polling_interval
 
     active_integrations = CloudDeviceIntegration.objects.filter(
         is_active=True,
@@ -250,7 +251,8 @@ def poll_cloud_integrations_task():
     errors = 0
 
     for integration in active_integrations:
-        interval_secs = integration.polling_interval_seconds or 60
+        mfg_interval = get_manufacturer_polling_interval(integration.profile_id, default=60)
+        interval_secs = integration.polling_interval_seconds or mfg_interval
         if integration.last_polled_at:
             elapsed = (now - integration.last_polled_at).total_seconds()
             if elapsed < (interval_secs - 2):  # 2s Toleranz gegen Jitter

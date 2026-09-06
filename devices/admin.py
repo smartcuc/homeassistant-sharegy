@@ -269,3 +269,46 @@ class ChargingRfidTagAdmin(admin.ModelAdmin):
     list_display = ("name", "id_tag", "user", "home", "is_active", "created_at")
     list_filter = ("is_active", "home")
     search_fields = ("name", "id_tag", "user__email")
+
+
+@admin.register(CloudDeviceIntegration)
+class CloudDeviceIntegrationAdmin(admin.ModelAdmin):
+    list_display = (
+        "device",
+        "profile_id",
+        "polling_interval_display",
+        "last_status_badge",
+        "last_polled_at",
+        "is_active",
+    )
+    list_filter = ("profile_id", "last_status", "is_active")
+    search_fields = ("device__identifier", "device__config__name", "profile_id")
+    raw_id_fields = ("device",)
+
+    def polling_interval_display(self, obj):
+        return f"{obj.polling_interval_seconds}s"
+    polling_interval_display.short_description = "Lesezyklus"
+
+    def last_status_badge(self, obj):
+        colors = {"ok": "#10b981", "error": "#ef4444", "pending": "#f59e0b"}
+        color = colors.get(obj.last_status, "#64748b")
+        return format_html(
+            f'<span style="background-color: {color}; color: white; padding: 2px 7px; border-radius: 4px; font-weight: bold; font-size: 11px;">{obj.get_last_status_display()}</span>'
+        )
+    last_status_badge.short_description = "Status"
+
+
+@admin.register(DeviceBaselineProfile)
+class DeviceBaselineProfileAdmin(admin.ModelAdmin):
+    list_display = (
+        "device",
+        "appliance_type",
+        "standby_power_w",
+        "operating_power_min_w",
+        "operating_power_max_w",
+        "current_health_status",
+        "is_active",
+    )
+    list_filter = ("appliance_type", "current_health_status", "is_active")
+    search_fields = ("device__identifier", "device__config__name")
+    raw_id_fields = ("device",)
