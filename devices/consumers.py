@@ -304,6 +304,15 @@ class EnergyConsumer(AsyncWebsocketConsumer):
         if not payload:
             return
 
+        # Schnelle Beantwortung von Ping / Keep-Alive Frames
+        clean_p = payload.strip()
+        if clean_p in ('{"method":"ping"}', '{"method": "ping"}', '{"type":"ping"}', '{"type": "ping"}', 'ping'):
+            try:
+                await self.send(text_data=json.dumps({"type": "pong", "status": "ok"}))
+            except Exception:
+                pass
+            return
+
         user = self.scope.get("user")
         res = await process_incoming_telemetry(self.token, payload, user)
 
