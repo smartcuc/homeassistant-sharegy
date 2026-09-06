@@ -389,6 +389,8 @@ def ingest_metric_payload(
         )
 
         # Veraltete Alias-Rows in DeviceLatestMetric aufräumen
+        if metric_key.lower() in ["grid_power", "pv_power", "battery_power", "load_power", "battery_soc"] or (configured_lead_key and metric_key.lower() == configured_lead_key.lower()):
+            DeviceLatestMetric.objects.filter(device=device, metric_key__in=["power", "value", "val"]).delete()
         if metric_key != raw_key and raw_key.lower() in ["power", "value", "val", "soc"]:
             DeviceLatestMetric.objects.filter(device=device, metric_key=raw_key).delete()
         if metric_key == "battery_soc":

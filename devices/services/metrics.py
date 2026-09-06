@@ -168,10 +168,14 @@ def get_latest_values(device_ids):
             "active_power", "p_total", "p", "w", "watt", "load", "val", "energy"
         ]
 
-        latest_rows = DeviceLatestMetric.objects.filter(
-            device_id__in=missing_ids,
-            metric_key__in=POWER_METRIC_KEYS,
-        ).values_list("device_id", "value", "timestamp")
+        latest_rows = list(
+            DeviceLatestMetric.objects.filter(
+                device_id__in=missing_ids,
+                metric_key__in=POWER_METRIC_KEYS,
+            )
+            .order_by("device_id", "-timestamp")
+            .values_list("device_id", "metric_key", "value", "timestamp")
+        )
 
         # Prüfe auf separate Richtungs- und Strom-Metriken (battery_current / running_state / battery_direction)
         dir_rows = dict(
@@ -192,7 +196,9 @@ def get_latest_values(device_ids):
         )
 
         found_ids = set()
-        for d_id, val, ts in latest_rows:
+        for d_id, m_k, val, ts in latest_rows:
+            if d_id in result:
+                continue
             found_ids.add(d_id)
             if val is not None:
                 # Staleness-Check: Wenn Wechselrichter nachts abschaltet (>10min kein Signal), ist Erzeugung 0.0 W!
@@ -225,8 +231,6 @@ def get_latest_values(device_ids):
                 result[d_id] = float_val
                 try:
                     cache.set(f"device:{d_id}:latest_power", float_val, timeout=300)
-                except Exception:
-                    pass
                 except Exception:
                     pass
 

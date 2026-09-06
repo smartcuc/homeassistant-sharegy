@@ -485,6 +485,13 @@ def device_dashboard_values(request):
     for row in all_latest:
         dev_keys_map[row["device_id"]].add(row["metric_key"].lower())
 
+    # Automatische Bereinigung redundanter veralteter 'power'/'value'/'val' Rows in DeviceLatestMetric
+    for dev_id, raw_keys in dev_keys_map.items():
+        if any(k in raw_keys for k in ["pv_power", "grid_power", "battery_power", "load_power"]):
+            DeviceLatestMetric.objects.filter(device_id=dev_id, metric_key__in=["power", "value", "val"]).delete()
+        if "battery_soc" in raw_keys:
+            DeviceLatestMetric.objects.filter(device_id=dev_id, metric_key="soc").delete()
+
     device_metrics_map = defaultdict(dict)
     for row in all_latest:
         dev_id = row["device_id"]
@@ -498,11 +505,15 @@ def device_dashboard_values(request):
         if m_k.lower() in ["soc", "battery_level"]:
             m_k = "battery_soc"
 
-        # 2. Generische Keys (value, val) auf konfigurierte Lead-Metrik mappen
+        # 2. Multi-Source Inverter/Meter: generisches 'power'/'value'/'val' vollständig ignorieren
+        if is_multi_source and m_k.lower() in ["power", "value", "val"]:
+            continue
+
+        # 3. Generische Keys (value, val) auf konfigurierte Lead-Metrik mappen
         if m_k.lower() in ["value", "val"] and configured_lead_key:
             m_k = configured_lead_key
 
-        # 3. Single-Channel Submeter / Verbraucher: generische 'power'/'temperature' mit konfigurierter Lead-Metrik zusammenführen
+        # 4. Single-Channel Submeter / Verbraucher: generische 'power'/'temperature' mit konfigurierter Lead-Metrik zusammenführen
         if not is_multi_source and configured_lead_key:
             cfg_lower = configured_lead_key.lower()
             k_lower = m_k.lower()
@@ -510,10 +521,6 @@ def device_dashboard_values(request):
                 m_k = configured_lead_key
             elif "temp" in cfg_lower and k_lower in ["temperature", "temp", "device_temp", "value", "val"]:
                 m_k = configured_lead_key
-
-        # 4. Multi-Source Inverter: generisches 'power' ignorieren, wenn dedizierte Kanäle (pv_power/load_power) vorliegen
-        if is_multi_source and m_k.lower() in ["power", "value", "val"] and "pv_power" in raw_keys:
-            continue
 
         inferred_u = _infer_canonical_unit(m_k, row["unit"] or "", config=cfg)
         val = round(float(row["value"]), 2) if row["value"] is not None else None
@@ -580,30 +587,26 @@ def device_dashboard_values(request):
 
         # Kandidaten-Reihenfolge zur präzisen Bestimmung des Haupt-Messwerts:
         candidate_keys = []
-        if configured_lead:
+        is_generic_lead = not configured_lead or configured_lead.lower() in ["power", "value", "val", "main"]
+
+        if not is_generic_lead:
             candidate_keys.append(configured_lead)
-            if configured_lead.lower() in ["power", "value", "val"]:
-                if is_grid:
-                    candidate_keys.extend(["grid_power", "power_grid", "active_power", "p_total"])
-                elif role_key in ["producer", "pv", "solar"] or sig_key in ["pv", "solar", "producer"]:
-                    candidate_keys.extend(["pv_power", "solar_power", "yield_power"])
-                elif role_key in ["battery", "storage"] or sig_key in ["battery", "storage"]:
-                    candidate_keys.extend(["battery_soc", "battery_power", "soc"])
-                elif role_key in ["consumer", "load"] or sig_key in ["load", "consumer"]:
-                    candidate_keys.extend(["load_power", "power"])
+
+        if is_grid:
+            candidate_keys.extend(["grid_power", "power_grid", "active_power", "p_total", "power"])
+        elif role_key in ["producer", "pv", "solar"] or sig_key in ["pv", "solar", "producer"]:
+            candidate_keys.extend(["pv_power", "solar_power", "yield_power", "power"])
+        elif role_key in ["battery", "storage"] or sig_key in ["battery", "storage"]:
+            candidate_keys.extend(["battery_soc", "soc", "battery_power", "power"])
+        elif role_key in ["consumer", "load"] or sig_key in ["load", "consumer"]:
+            candidate_keys.extend(["load_power", "aircon_power", "heatpump_power", "bwwp_power", "wallbox_power", "power", "active_power"])
+        elif role_key == "sensor":
+            candidate_keys.extend(["temperature", "temp", "humidity", "pressure", "value"])
         else:
-            if is_grid:
-                candidate_keys.extend(["grid_power", "power_grid", "active_power", "p_total", "power"])
-            elif role_key in ["producer", "pv", "solar"] or sig_key in ["pv", "solar", "producer"]:
-                candidate_keys.extend(["pv_power", "solar_power", "yield_power", "power"])
-            elif role_key in ["battery", "storage"] or sig_key in ["battery", "storage"]:
-                candidate_keys.extend(["battery_soc", "soc", "battery_power", "power"])
-            elif role_key in ["consumer", "load"] or sig_key in ["load", "consumer"]:
-                candidate_keys.extend(["load_power", "power", "active_power"])
-            elif role_key == "sensor":
-                candidate_keys.extend(["temperature", "temp", "humidity", "pressure", "value"])
-            else:
-                candidate_keys.extend(["power", "value", "val"])
+            candidate_keys.extend(["power", "value", "val"])
+
+        if configured_lead and configured_lead not in candidate_keys:
+            candidate_keys.append(configured_lead)
 
         lead_val = None
         top_unit = _infer_canonical_unit(configured_lead or "power", metric.unit if metric else "", config=config)
