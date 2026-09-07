@@ -16,6 +16,8 @@ const InterfacesPage = lazy(() => import("../pages/InterfacesPage"));
 const EnergyDashboard = lazy(() => import("../features/energy/EnergyDashboard"));
 const ProducerPage = lazy(() => import("../features/producer/pages/ProducerPage"));
 const ControlPage = lazy(() => import("../features/control/pages/ControlPage"));
+const MobilityPage = lazy(() => import("../features/mobility/pages/MobilityPage"));
+const HeatingPage = lazy(() => import("../features/heating/pages/HeatingPage"));
 const TariffPage = lazy(() => import("../features/market/pages/TariffPage"));
 const DevicesPage = lazy(() => import("../pages/DevicesPage"));
 const ForecastPage = lazy(() => import("../features/forecast/ForecastPage"));
@@ -97,6 +99,8 @@ export default function AppShell() {
                             <Route path="devices" element={<DevicesPage />} />
                             <Route path="producers" element={<ProducerPage />} />
                             <Route path="control" element={<ControlPage />} />
+                            <Route path="mobility" element={<MobilityPage />} />
+                            <Route path="heating" element={<HeatingPage />} />
                             <Route path="tariff" element={<TariffPage />} />
                             <Route path="interfaces" element={<InterfacesPage />} />
                             <Route path="status" element={<SystemStatusPage />} />

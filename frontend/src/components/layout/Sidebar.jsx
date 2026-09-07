@@ -67,10 +67,20 @@ export default function Sidebar() {
                 title: `🎛️ ${t("nav.assets_group", "Steuerung & Geräte")}`,
                 items: [
                     {
-                        name: t("nav.energy_control", "Energiesteuerung"),
+                        name: t("nav.energy_control", "Energiesteuerung (HEMS)"),
                         path: "/app/control",
                         icon: "🎛️",
                         isProGated: true,
+                    },
+                    {
+                        name: t("nav.mobility", "E-Mobilität & Fuhrpark"),
+                        path: "/app/mobility",
+                        icon: "🚗",
+                    },
+                    {
+                        name: t("nav.heating_climate", "Wärme & Raumklima"),
+                        path: "/app/heating",
+                        icon: "🌡️",
                     },
                     {
                         name: t("nav.all_devices", "Geräteübersicht"),

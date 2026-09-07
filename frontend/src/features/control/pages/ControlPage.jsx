@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../../api/client";
@@ -370,16 +371,66 @@ export default function ControlPage() {
                         ))}
                     </div>
 
+                    {/* Dedicated Sub-Hub Banners for Mobility & Heating in All View */}
+                    {activeTab === "all" && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <Link
+                                to="/app/mobility"
+                                className="p-5 rounded-3xl bg-gradient-to-br from-sky-500/10 via-indigo-500/5 to-transparent border border-sky-500/20 hover:border-sky-500/40 transition group flex items-center justify-between shadow-sm cursor-pointer"
+                            >
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-2xl bg-sky-500/20 text-sky-600 dark:text-sky-400 flex items-center justify-center text-2xl group-hover:scale-110 transition shrink-0">
+                                        🚗
+                                    </div>
+                                    <div>
+                                        <div className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                            <span>E-Mobilität & Spritpreis-Radar</span>
+                                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 font-mono">
+                                                Hub öffnen →
+                                            </span>
+                                        </div>
+                                        <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                            Wallbox-Steuerung (1,4–11 kW) & MTS-K Live-Spritpreisvergleich.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="text-slate-400 group-hover:translate-x-1 transition text-lg font-bold pr-2">
+                                    ➔
+                                </div>
+                            </Link>
+
+                            <Link
+                                to="/app/heating"
+                                className="p-5 rounded-3xl bg-gradient-to-br from-rose-500/10 via-amber-500/5 to-transparent border border-rose-500/20 hover:border-rose-500/40 transition group flex items-center justify-between shadow-sm cursor-pointer"
+                            >
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-2xl bg-rose-500/20 text-rose-600 dark:text-rose-400 flex items-center justify-center text-2xl group-hover:scale-110 transition shrink-0">
+                                        🌡️
+                                    </div>
+                                    <div>
+                                        <div className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                            <span>Wärme & Thermische Speicher</span>
+                                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 font-mono">
+                                                Hub öffnen →
+                                            </span>
+                                        </div>
+                                        <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                            Wettergeführte FBH (MPC Estrich-Vorladung) & BWWP Wärmepumpe.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="text-slate-400 group-hover:translate-x-1 transition text-lg font-bold pr-2">
+                                    ➔
+                                </div>
+                            </Link>
+                        </div>
+                    )}
+
                     {/* Consumer Cards Grid */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {/* 🌡️ Fußbodenheizung & Thermische Estrich-Vorladung */}
-                        {(activeTab === "all" || activeTab === "floor_heating" || activeTab === "heatpump") && (
-                            <FloorHeatingLoadCard />
-                        )}
-
-                        {/* ♨️ BWWP & Wärmepumpen SG-Ready Lastmanagement */}
-                        {(activeTab === "all" || activeTab === "bwwp" || activeTab === "heatpump") && (
-                            <BWWPLoadManagementCard />
+                        {/* 🔋 Heimspeicher / Battery Storage Control */}
+                        {(activeTab === "all" || activeTab === "battery") && (
+                            <BatteryStorageControlCard />
                         )}
 
                         {/* 🚗 Wallbox / OCPP E-Auto Ladekarte */}
@@ -387,14 +438,19 @@ export default function ControlPage() {
                             <WallboxCard onOpenAddModal={() => setAddWallboxOpen(true)} />
                         )}
 
-                        {/* ⛽ Mobilitäts- & Spritpreis-Radar (MTS-K / Tankerkönig) */}
-                        {(activeTab === "all" || activeTab === "wallbox" || activeTab === "mobility") && (
-                            <FuelRadarCard />
+                        {/* ♨️ BWWP & Wärmepumpen SG-Ready Lastmanagement */}
+                        {(activeTab === "all" || activeTab === "bwwp" || activeTab === "heatpump") && (
+                            <BWWPLoadManagementCard />
                         )}
 
-                        {/* 🔋 Heimspeicher / Battery Storage Control */}
-                        {(activeTab === "all" || activeTab === "battery") && (
-                            <BatteryStorageControlCard />
+                        {/* 🌡️ Fußbodenheizung & Thermische Estrich-Vorladung */}
+                        {(activeTab === "floor_heating" || activeTab === "heatpump") && (
+                            <FloorHeatingLoadCard />
+                        )}
+
+                        {/* ⛽ Mobilitäts- & Spritpreis-Radar (MTS-K / Tankerkönig) */}
+                        {(activeTab === "mobility") && (
+                            <FuelRadarCard />
                         )}
 
                         {/* 🏊 Poolpumpen & Filteranlagen */}
