@@ -1693,7 +1693,7 @@
     "control_mode_title": "Regelungsmodus",
     "mode_spot_price": "Spotmarkt-Preisführung",
     "mode_hybrid": "Hybrid (PV + Günstige Börsenpreise)",
-    "from_pv_threshold": "bwwp.from_pv_threshold",
+    "from_pv_threshold": "ab {{val}} W PV-Überschuss",
     "status_boost_active": "SG-Boost aktiv",
     "status_heating_normal": "Heizt normal",
     "end_boost_btn": "Boost beenden",

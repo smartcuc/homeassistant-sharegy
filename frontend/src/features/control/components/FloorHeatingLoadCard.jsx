@@ -354,21 +354,22 @@ export default function FloorHeatingLoadCard() {
 
             {/* Settings Modal */}
             {settingsOpen && formConfig && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
-                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 w-full max-w-lg shadow-2xl animate-scale-in">
-                        <div className="flex items-center justify-between mb-5">
-                            <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-xs overflow-y-auto">
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-6 w-full max-w-lg shadow-2xl animate-scale-in max-h-[88vh] flex flex-col my-auto">
+                        <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-200 dark:border-slate-800 shrink-0">
+                            <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                                 <span>⚙️</span> {t("control.floor_heating_settings", "Fußbodenheizung & MPC-Parameter")}
                             </h3>
                             <button
+                                type="button"
                                 onClick={() => setSettingsOpen(false)}
-                                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xl font-bold"
+                                className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 text-lg font-bold transition cursor-pointer"
                             >
                                 ✕
                             </button>
                         </div>
 
-                        <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
+                        <div className="space-y-4 overflow-y-auto pr-1.5 flex-1">
                             {/* Control Mode */}
                             <div>
                                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
@@ -453,7 +454,7 @@ export default function FloorHeatingLoadCard() {
                                         type="checkbox"
                                         checked={formConfig.predictive_mpc_enabled}
                                         onChange={(e) => setFormConfig({ ...formConfig, predictive_mpc_enabled: e.target.checked })}
-                                        className="rounded text-amber-500 focus:ring-amber-400"
+                                        className="rounded text-amber-500 focus:ring-amber-400 cursor-pointer"
                                     />
                                     <span>🧠 Prädiktive KI-Wetter-Optimierung (MPC) aktivieren</span>
                                 </label>
@@ -462,7 +463,7 @@ export default function FloorHeatingLoadCard() {
                                         type="checkbox"
                                         checked={formConfig.solar_gain_compensation}
                                         onChange={(e) => setFormConfig({ ...formConfig, solar_gain_compensation: e.target.checked })}
-                                        className="rounded text-amber-500 focus:ring-amber-400"
+                                        className="rounded text-amber-500 focus:ring-amber-400 cursor-pointer"
                                     />
                                     <span>☀️ Solares Absenken bei prognostizierter Sonneneinstrahlung</span>
                                 </label>
@@ -534,17 +535,19 @@ export default function FloorHeatingLoadCard() {
                             </div>
                         </div>
 
-                        <div className="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-slate-200 dark:border-slate-800">
+                        <div className="flex items-center justify-end gap-3 pt-3 mt-3 border-t border-slate-200 dark:border-slate-800 shrink-0">
                             <button
+                                type="button"
                                 onClick={() => setSettingsOpen(false)}
-                                className="px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                                className="px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
                             >
                                 {t("common.cancel", "Abbrechen")}
                             </button>
                             <button
+                                type="button"
                                 onClick={() => configMutation.mutate(formConfig)}
                                 disabled={configMutation.isPending}
-                                className="px-5 py-2 rounded-xl text-sm font-bold bg-amber-500 hover:bg-amber-600 text-white shadow-xs"
+                                className="px-5 py-2 rounded-xl text-sm font-bold bg-amber-500 hover:bg-amber-600 text-white shadow-xs cursor-pointer"
                             >
                                 {configMutation.isPending ? t("common.saving", "Speichern...") : t("common.save", "Speichern")}
                             </button>
