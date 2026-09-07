@@ -341,25 +341,20 @@ export default function ControlPage() {
                         </div>
                     </div>
 
-                    {/* Filter Tabs matching Merit-Order names */}
-                    <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                    {/* Filter Tabs - Grouped into 5 streamlined domains */}
+                    <div className="flex flex-wrap items-center gap-2 pb-1">
                         {[
                             { key: "all", label: "Alle Verbraucher", icon: "🎛️" },
-                            { key: "mobility", label: "Mobilität & Sprit", icon: "🚗" },
+                            { key: "mobility", label: "Mobilität & Wallbox", icon: "🚗" },
+                            { key: "heat", label: "Wärme & Klima", icon: "🔥" },
                             { key: "battery", label: "Heimspeicher", icon: "🔋" },
-                            { key: "floor_heating", label: "Fußbodenheizung", icon: "🌡️" },
-                            { key: "bwwp", label: "Warmwasser", icon: "♨️" },
-                            { key: "heatpump", label: "Wärmepumpe", icon: "🔥" },
-                            { key: "pool", label: "Pool", icon: "🏊" },
-                            { key: "ac", label: "Klimaanlage", icon: "❄️" },
-                            { key: "appliances", label: "Haushaltsgeräte", icon: "🧺" },
-                            { key: "heating_rod", label: "Heizstab", icon: "⚡" },
+                            { key: "comfort", label: "Komfort & Haushalt", icon: "🧺" },
                         ].map((tab) => (
                             <button
                                 key={tab.key}
                                 type="button"
                                 onClick={() => setActiveTab(tab.key)}
-                                className={`px-3.5 py-2 rounded-2xl text-xs font-bold transition flex items-center gap-2 shrink-0 cursor-pointer ${
+                                className={`px-4 py-2 rounded-2xl text-xs sm:text-sm font-bold transition flex items-center gap-2 cursor-pointer ${
                                     activeTab === tab.key
                                         ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20"
                                         : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800"
@@ -434,17 +429,17 @@ export default function ControlPage() {
                         )}
 
                         {/* 🚗 Wallbox / OCPP E-Auto Ladekarte */}
-                        {(activeTab === "all" || activeTab === "wallbox" || activeTab === "mobility") && (
+                        {(activeTab === "all" || activeTab === "mobility") && (
                             <WallboxCard onOpenAddModal={() => setAddWallboxOpen(true)} />
                         )}
 
                         {/* ♨️ BWWP & Wärmepumpen SG-Ready Lastmanagement */}
-                        {(activeTab === "all" || activeTab === "bwwp" || activeTab === "heatpump") && (
+                        {(activeTab === "all" || activeTab === "heat") && (
                             <BWWPLoadManagementCard />
                         )}
 
                         {/* 🌡️ Fußbodenheizung & Thermische Estrich-Vorladung */}
-                        {(activeTab === "floor_heating" || activeTab === "heatpump") && (
+                        {(activeTab === "all" || activeTab === "heat") && (
                             <FloorHeatingLoadCard />
                         )}
 
@@ -454,7 +449,7 @@ export default function ControlPage() {
                         )}
 
                         {/* 🏊 Poolpumpen & Filteranlagen */}
-                        {(activeTab === "all" || activeTab === "pool") &&
+                        {(activeTab === "all" || activeTab === "comfort") &&
                             (poolConsumers.length > 0 ? (
                                 poolConsumers.map((c) => (
                                     <PoolPumpCard
@@ -464,7 +459,7 @@ export default function ControlPage() {
                                         isPending={actionMutation.isPending}
                                     />
                                 ))
-                            ) : activeTab === "pool" ? (
+                            ) : activeTab === "comfort" ? (
                                 <div className="col-span-full bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 text-center space-y-3">
                                     <div className="text-3xl">🏊</div>
                                     <h3 className="text-sm font-bold text-slate-900 dark:text-white">Keine Poolpumpe verknüpft</h3>
@@ -475,7 +470,7 @@ export default function ControlPage() {
                             ) : null)}
 
                         {/* ❄️ Klimaanlagen (Pre-Cooling) */}
-                        {(activeTab === "all" || activeTab === "ac") &&
+                        {(activeTab === "all" || activeTab === "heat") &&
                             (acConsumers.length > 0 ? (
                                 acConsumers.map((c) => (
                                     <AirConditioningCard
@@ -485,7 +480,7 @@ export default function ControlPage() {
                                         isPending={actionMutation.isPending}
                                     />
                                 ))
-                            ) : activeTab === "ac" ? (
+                            ) : activeTab === "heat" && heatingRodConsumers.length === 0 ? (
                                 <div className="col-span-full bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 text-center space-y-3">
                                     <div className="text-3xl">❄️</div>
                                     <h3 className="text-sm font-bold text-slate-900 dark:text-white">Keine Klimaanlage verknüpft</h3>
@@ -496,7 +491,7 @@ export default function ControlPage() {
                             ) : null)}
 
                         {/* 🧺 Haushaltsgeräte / Ready-to-Start Smart Plugs */}
-                        {(activeTab === "all" || activeTab === "appliances") &&
+                        {(activeTab === "all" || activeTab === "comfort") &&
                             (applianceConsumers.length > 0 ? (
                                 applianceConsumers.map((c) => (
                                     <SmartApplianceCard
@@ -506,7 +501,7 @@ export default function ControlPage() {
                                         isPending={actionMutation.isPending}
                                     />
                                 ))
-                            ) : activeTab === "appliances" ? (
+                            ) : activeTab === "comfort" && poolConsumers.length === 0 ? (
                                 <div className="col-span-full bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 text-center space-y-3">
                                     <div className="text-3xl">🧺</div>
                                     <h3 className="text-sm font-bold text-slate-900 dark:text-white">Keine smarten Zwischenstecker verknüpft</h3>
@@ -517,7 +512,7 @@ export default function ControlPage() {
                             ) : null)}
 
                         {/* ⚡ Heizstab / Power-to-Heat Puffer */}
-                        {(activeTab === "all" || activeTab === "heating_rod") &&
+                        {(activeTab === "all" || activeTab === "heat") &&
                             (heatingRodConsumers.length > 0 ? (
                                 heatingRodConsumers.map((c) => (
                                     <HeatingRodCard
@@ -527,14 +522,6 @@ export default function ControlPage() {
                                         isPending={actionMutation.isPending}
                                     />
                                 ))
-                            ) : activeTab === "heating_rod" ? (
-                                <div className="col-span-full bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 text-center space-y-3">
-                                    <div className="text-3xl">⚡</div>
-                                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">Kein Heizstab verknüpft</h3>
-                                    <p className="text-xs text-slate-500 max-w-md mx-auto">
-                                        Verwandle überschüssigen Solarstrom in Warmwasser-Pufferenergie über stufenlose Thyristor- oder Relais-Heizstäbe.
-                                    </p>
-                                </div>
                             ) : null)}
                     </div>
                 </div>
