@@ -720,6 +720,29 @@ class LogoutView(APIView):
         return Response({"status": "logged_out"})
 
 
+@method_decorator(csrf_exempt, name='dispatch')
+class RevokeMagicLinksView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        from django.contrib.auth import logout
+
+        user = request.user
+        deleted_count, _ = MagicLoginToken.objects.filter(user=user).delete()
+        logger.info("Revoked %d magic login tokens for user %s (ID: %s)", deleted_count, user.email, user.id)
+
+        # Invalidate current session & logout
+        logout(request)
+        request.session.flush()
+
+        return Response({
+            "status": "revoked",
+            "deleted_count": deleted_count,
+            "message": "Alle Magic-Links wurden erfolgreich gelöscht und du wurdest abgemeldet."
+        })
+
+
+
 def track_magic_click(request, token):
     obj = MagicLoginToken.objects.filter(token=token).first()
 

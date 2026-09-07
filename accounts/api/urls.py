@@ -21,7 +21,7 @@ from .views import DemoLoginView, DemoSharingAdminLoginView, DemoSharingUserLogi
 ##from .views import TrackEventView
 from rest_framework_simplejwt.views import TokenRefreshView
 
-from .views import MeView, LogoutView
+from .views import MeView, LogoutView, RevokeMagicLinksView
 from .views import GDPRExportView, GDPRDeleteAccountView
 
 
@@ -96,6 +96,8 @@ urlpatterns += [
     path("auth/refresh/", TokenRefreshView.as_view()),
     path("auth/token/refresh/", TokenRefreshView.as_view()),
     path("auth/logout/", LogoutView.as_view()),
+    path("auth/revoke-magic-links/", RevokeMagicLinksView.as_view(), name="revoke-magic-links"),
+    path("revoke-magic-links/", RevokeMagicLinksView.as_view(), name="revoke-magic-links-legacy"),
     # Current user
     path("auth/me/", MeView.as_view()),
 ]

@@ -146,6 +146,28 @@ export default function Profile() {
     const [requestingEmailChange, setRequestingEmailChange] = useState(false);
     const [emailChangeSuccess, setEmailChangeSuccess] = useState(false);
 
+    // --- REVOKE MAGIC LINKS & LOGOUT WORKFLOW ---
+    const [showRevokeModal, setShowRevokeModal] = useState(false);
+    const [revokingLinks, setRevokingLinks] = useState(false);
+
+    const handleRevokeMagicLinks = async () => {
+        setRevokingLinks(true);
+        try {
+            await apiFetch("/api/auth/revoke-magic-links/", {
+                method: "POST",
+            });
+            showSuccess(t("profile.revoke_success", "Alle Magic-Links wurden erfolgreich gelöscht. Du wirst nun abgemeldet."));
+            setShowRevokeModal(false);
+            queryClient.clear();
+            setTimeout(() => {
+                window.location.href = "/login?revoked=true";
+            }, 1000);
+        } catch (err) {
+            showError(err?.data?.error || err?.message || t("profile.revoke_error", "Fehler beim Löschen der Magic-Links."));
+            setRevokingLinks(false);
+        }
+    };
+
     const handleRequestEmailChange = async (e) => {
         if (e) e.preventDefault();
         const trimmed = newEmailInput.trim().toLowerCase();
@@ -913,13 +935,25 @@ export default function Profile() {
 
                         <div className="space-y-4 text-xs">
                             <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
-                                <div className="font-bold text-gray-900 dark:text-white mb-1">Passwortlose Authentifizierung (Magic Link)</div>
-                                <p className="text-gray-500 dark:text-gray-400 mb-3 text-[11px]">
-                                    Du meldest dich sicher über kryptografisch signierte Einmal-Links per E-Mail an. Es ist kein klassisches Passwort erforderlich.
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2.5">
+                                    <div>
+                                        <div className="font-bold text-gray-900 dark:text-white text-sm">Passwortlose Authentifizierung (Magic Link)</div>
+                                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800 mt-1">
+                                            ✓ Magic Link Aktiv
+                                        </span>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowRevokeModal(true)}
+                                        className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/60 dark:hover:bg-rose-900/80 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 rounded-xl text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 self-start sm:self-center shrink-0 shadow-2xs"
+                                    >
+                                        <span>🚨</span>
+                                        <span>{t("profile.revoke_links_btn", "Alle Links löschen & abmelden")}</span>
+                                    </button>
+                                </div>
+                                <p className="text-gray-500 dark:text-gray-400 text-[11px] leading-relaxed">
+                                    Du meldest dich sicher über kryptografisch signierte Einmal-Links per E-Mail an. Es ist kein klassisches Passwort erforderlich. Bei Sicherheitsbedenken kannst du alle offenen Links sofort entwerten und dich automatisch abmelden.
                                 </p>
-                                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2.5 py-1 rounded-md border border-indigo-200 dark:border-indigo-800">
-                                    ✓ Magic Link Aktiv
-                                </span>
                             </div>
 
                             <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
@@ -1267,6 +1301,70 @@ export default function Profile() {
                                 </div>
                             </form>
                         )}
+                    </div>
+                </div>
+            )}
+
+            {/* REVOKE MAGIC LINKS & LOGOUT MODAL */}
+            {showRevokeModal && (
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in duration-150">
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-rose-200 dark:border-rose-900 w-full max-w-lg overflow-hidden flex flex-col">
+                        <div className="p-6 bg-rose-50 dark:bg-rose-950/50 border-b border-rose-100 dark:border-rose-900 flex items-center gap-3">
+                            <span className="text-3xl p-2 bg-rose-100 dark:bg-rose-900/40 text-rose-600 rounded-2xl">🚨</span>
+                            <div>
+                                <h3 className="text-base font-bold text-rose-950 dark:text-rose-200">
+                                    {t("profile.revoke_modal_title", "Alle Magic-Links löschen & Sitzung beenden?")}
+                                </h3>
+                                <p className="text-xs text-rose-700 dark:text-rose-400">
+                                    {t("profile.revoke_modal_sub", "Sicherheitsaktion zur sofortigen Entwertung offener Login-Links")}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="p-6 space-y-3.5 text-xs sm:text-sm text-gray-700 dark:text-gray-300">
+                            <p className="leading-relaxed">
+                                {t(
+                                    "profile.revoke_modal_text",
+                                    "Möchtest du wirklich alle für deinen Account ausgestellten Magic-Links unwiderruflich entwerten?"
+                                )}
+                            </p>
+
+                            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-2 text-xs">
+                                <div className="flex items-start gap-2 text-rose-700 dark:text-rose-400 font-semibold">
+                                    <span>•</span>
+                                    <span>{t("profile.revoke_point_1", "Alle bisher per E-Mail versendeten Zugangslinks werden sofort ungültig.")}</span>
+                                </div>
+                                <div className="flex items-start gap-2 text-amber-700 dark:text-amber-400 font-semibold">
+                                    <span>•</span>
+                                    <span>{t("profile.revoke_point_2", "Deine aktive Sitzung wird zum Schutz deines Accounts sofort beendet (Auto-Logout).")}</span>
+                                </div>
+                                <div className="flex items-start gap-2 text-slate-600 dark:text-slate-400">
+                                    <span>•</span>
+                                    <span>{t("profile.revoke_point_3", "Du kannst jederzeit auf der Login-Seite einen neuen, frischen Magic-Link anfordern.")}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="p-4 bg-slate-50 dark:bg-slate-800/60 border-t border-gray-100 dark:border-slate-800 flex items-center justify-end gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setShowRevokeModal(false)}
+                                disabled={revokingLinks}
+                                className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 hover:bg-gray-100 transition cursor-pointer"
+                            >
+                                {t("common.cancel", "Abbrechen")}
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={handleRevokeMagicLinks}
+                                disabled={revokingLinks}
+                                className="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white text-xs font-bold shadow-xs transition cursor-pointer flex items-center gap-1.5"
+                            >
+                                <span>🚨</span>
+                                <span>{revokingLinks ? t("profile.revoking", "Lösche & melde ab...") : t("profile.confirm_revoke", "Jetzt löschen & abmelden")}</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

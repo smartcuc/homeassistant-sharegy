@@ -292,4 +292,26 @@ class EnterpriseRBACTest(TestCase):
         self.assertIn("Security Alert", alert_mail.subject)
         self.assertEqual(alert_mail.to, ["member@quartier-sonne.de"])
 
+    def test_revoke_magic_links_and_auto_logout(self):
+        from accounts.models import MagicLoginToken
+
+        # 1. Create a couple of magic tokens for the user
+        MagicLoginToken.objects.create(user=self.community_member)
+        MagicLoginToken.objects.create(user=self.community_member)
+        self.assertEqual(MagicLoginToken.objects.filter(user=self.community_member).count(), 2)
+
+        # 2. Login user and call revoke endpoint
+        self.client.force_login(self.community_member)
+        resp = self.client.post("/api/auth/revoke-magic-links/")
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json()["status"], "revoked")
+        self.assertEqual(resp.json()["deleted_count"], 2)
+
+        # 3. Verify all magic tokens for the user are deleted
+        self.assertEqual(MagicLoginToken.objects.filter(user=self.community_member).count(), 0)
+
+        # 4. Verify session is flushed / user logged out
+        self.assertIsNone(self.client.session.get("_auth_user_id"))
+
+
 
