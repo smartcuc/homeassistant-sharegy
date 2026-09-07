@@ -517,15 +517,24 @@ export default function Profile() {
                                     {/* AVATAR PREVIEW IN FORM */}
                                     <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-3">
                                         <div className="flex items-center gap-3 min-w-0">
-                                            {currentAvatarConfig ? (
-                                                <div className={`w-11 h-11 rounded-xl bg-gradient-to-tr ${currentAvatarConfig.bg} flex items-center justify-center text-2xl shadow-xs shrink-0`}>
-                                                    <span>{currentAvatarConfig.emoji}</span>
+                                            <div
+                                                className="relative group cursor-pointer shrink-0"
+                                                onClick={() => setShowAvatarModal(true)}
+                                                title="Avatar oder Initialen ändern"
+                                            >
+                                                {currentAvatarConfig ? (
+                                                    <div className={`w-11 h-11 rounded-xl bg-gradient-to-tr ${currentAvatarConfig.bg} flex items-center justify-center text-2xl shadow-xs shrink-0 transition-transform group-hover:scale-105`}>
+                                                        <span>{currentAvatarConfig.emoji}</span>
+                                                    </div>
+                                                ) : (
+                                                    <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-indigo-500 to-cyan-500 flex items-center justify-center text-sm font-black text-white shadow-xs shrink-0 transition-transform group-hover:scale-105">
+                                                        {initials}
+                                                    </div>
+                                                )}
+                                                <div className="absolute inset-0 bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 flex items-center justify-center text-[10px] font-bold text-white transition-opacity backdrop-blur-2xs">
+                                                    ✏️ Ändern
                                                 </div>
-                                            ) : (
-                                                <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-indigo-500 to-cyan-500 flex items-center justify-center text-sm font-black text-white shadow-xs shrink-0">
-                                                    {initials}
-                                                </div>
-                                            )}
+                                            </div>
                                             <div className="min-w-0">
                                                 <div className="text-xs font-bold text-gray-900 dark:text-white truncate">
                                                     {currentAvatarConfig ? currentAvatarConfig.label : "Namensinitialen"}
