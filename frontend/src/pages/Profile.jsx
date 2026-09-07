@@ -529,14 +529,14 @@ export default function Profile() {
                                     {t("profile.language_desc", "Wähle deine bevorzugte Sprache für Benutzeroberfläche, Berichte und E-Mails.")}
                                 </p>
 
-                                <div className="grid grid-cols-3 gap-2">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                                     {[
                                         { id: "de", label: "Deutsch", flag: "🇩🇪", sub: "Standard" },
-                                        { id: "en", label: "English", flag: "🇬🇧", sub: "Global" },
+                                        { id: "en", label: "English", flag: "🇬🇧", sub: "International" },
                                         { id: "pl", label: "Polski", flag: "🇵🇱", sub: "Regional" },
-                                        { id: "fr", label: "Français", flag: "🇫🇷", sub: "BETA" },
-                                        { id: "nl", label: "Nederlands", flag: "🇳🇱", sub: "BETA" },
-                                        { id: "es", label: "Español", flag: "🇪🇸", sub: "BETA" },
+                                        { id: "tr", label: "Türkçe", flag: "🇹🇷", sub: "Regional" },
+                                        { id: "ru", label: "Русский", flag: "🇷🇺", sub: "Regional" },
+                                        { id: "ro", label: "Română", flag: "🇷🇴", sub: "Regional" },
                                     ].map((lang) => {
                                         const isSelected = currentLang === lang.id;
                                         return (
@@ -703,18 +703,10 @@ export default function Profile() {
                                         <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase mb-1">
                                             {t("profile.country", "Land")}
                                         </label>
-                                        <select
-                                            value={formData.country || "DE"}
-                                            onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                                            className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3 py-2 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                                        >
-                                            <option value="DE">🇩🇪 DE</option>
-                                            <option value="AT">🇦🇹 AT</option>
-                                            <option value="CH">🇨🇭 CH</option>
-                                            <option value="PL">🇵🇱 PL</option>
-                                            <option value="NL">🇳🇱 NL</option>
-                                            <option value="FR">🇫🇷 FR</option>
-                                        </select>
+                                        <div className="w-full border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/60 rounded-xl px-3 py-2 text-sm text-gray-800 dark:text-gray-200 font-medium flex items-center gap-2">
+                                            <span>🇩🇪</span>
+                                            <span>Deutschland</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -902,18 +894,10 @@ export default function Profile() {
                                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-1">
                                         {t("profile.country", "Land")}
                                     </label>
-                                    <select
-                                        value={formData.country || "DE"}
-                                        onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                                        className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                                    >
-                                        <option value="DE">🇩🇪 Deutschland</option>
-                                        <option value="AT">🇦🇹 Österreich</option>
-                                        <option value="CH">🇨🇭 Schweiz</option>
-                                        <option value="PL">🇵🇱 Polen</option>
-                                        <option value="NL">🇳🇱 Niederlande</option>
-                                        <option value="FR">🇫🇷 Frankreich</option>
-                                    </select>
+                                    <div className="w-full border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/60 rounded-xl px-3.5 py-2.5 text-sm text-gray-800 dark:text-gray-200 font-medium flex items-center gap-2">
+                                        <span>🇩🇪</span>
+                                        <span>Deutschland</span>
+                                    </div>
                                 </div>
                             </div>
 
