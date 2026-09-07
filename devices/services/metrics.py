@@ -133,6 +133,109 @@ def normalize_battery_metrics(metrics, state=None, meta=None):
     return res
 
 
+def resolve_grid_direction(direction_val):
+    """
+    Ermittelt die physikalische Richtung des Netzzählers (SmartMeter / Inverter / MQTT):
+    Rückgabe:
+      1: Import (Netzbezug, physikalisch positive Wirkleistung am Netzverknüpfungspunkt)
+     -1: Export / Feed-in (Netzeinspeisung / Überschuss, physikalisch negative Wirkleistung)
+      0: Zero / Balance (0 W)
+      None: Unbekannt
+    """
+    if direction_val is None:
+        return None
+
+    if isinstance(direction_val, (int, float)):
+        if direction_val == 1:
+            return 1  # Import
+        elif direction_val == 2 or direction_val == -1:
+            return -1  # Export
+        elif direction_val == 0:
+            return 0
+
+    str_val = str(direction_val).strip().lower()
+    if str_val in ["import", "bezug", "netzbezug", "in", "inflow", "from_grid", "consume", "consumption", "1"]:
+        return 1
+    elif str_val in ["export", "feed_in", "feedin", "einspeisung", "netzeinspeisung", "out", "outflow", "to_grid", "surplus", "2", "-1"]:
+        return -1
+    elif str_val in ["idle", "standby", "off", "zero", "0"]:
+        return 0
+
+    return None
+
+
+def normalize_grid_metrics(metrics, state=None, meta=None):
+    """
+    Prüft, ob in den eingehenden Daten (z. B. Shelly 3EM, Modbus, MQTT, Tasmota, OpenDTU, Huawei, Sungrow)
+    separate Import-/Export-Leistungen, Feed-in-Metriken oder Richtungs-Parameter vorliegen
+    und stellt das Standard-Vorzeichen sicher:
+    - Netzbezug (Import): POSITIV (> 0 W)
+    - Netzeinspeisung (Export/Feed-in): NEGATIV (< 0 W)
+    """
+    if not isinstance(metrics, dict):
+        return metrics
+
+    res = dict(metrics)
+
+    # A) Separate Import- und Export-Leistungen (z. B. Home Assistant, Shelly, OpenDTU)
+    import_keys = ["grid_import", "grid_import_power", "grid_import_w", "import_power", "p_import", "power_import"]
+    export_keys = ["grid_export", "grid_export_power", "grid_export_w", "export_power", "grid_feed_in", "grid_feedin", "feed_in_power", "feedin_power", "p_export", "p_feedin", "power_export", "power_feed_in", "power_out", "p_out"]
+
+    import_val = next((res[k] for k in import_keys if k in res and res[k] is not None), None)
+    export_val = next((res[k] for k in export_keys if k in res and res[k] is not None), None)
+
+    if import_val is not None or export_val is not None:
+        imp_p = max(0.0, float(import_val or 0.0))
+        exp_p = max(0.0, float(export_val or 0.0))
+        if exp_p > 0 and imp_p == 0:
+            res["grid_power"] = -exp_p
+            res["power"] = -exp_p
+            return res
+        elif imp_p > 0 and exp_p == 0:
+            res["grid_power"] = imp_p
+            res["power"] = imp_p
+            return res
+        elif imp_p > 0 or exp_p > 0:
+            net_p = imp_p - exp_p
+            res["grid_power"] = net_p
+            res["power"] = net_p
+            return res
+
+    # B) Richtungs-Parameter prüfen
+    all_dicts = [res, state or {}, meta or {}]
+    direction_keys = [
+        "grid_direction", "grid_power_direction", "power_direction", "direction",
+        "grid_state", "grid_status", "meter_direction", "energy_direction"
+    ]
+
+    dir_val = None
+    for d in all_dicts:
+        if isinstance(d, dict):
+            for k in direction_keys:
+                if k in d and d[k] is not None:
+                    dir_val = d[k]
+                    break
+            if dir_val is not None:
+                break
+
+    resolved_dir = resolve_grid_direction(dir_val)
+    if resolved_dir is not None:
+        power_key = next((k for k in ["grid_power", "power", "meter_power", "active_power", "val", "value"] if k in res and res[k] is not None), None)
+        if power_key:
+            raw_p = abs(float(res[power_key]))
+            if resolved_dir == -1:  # Export
+                res[power_key] = -raw_p
+                res["power"] = -raw_p
+            elif resolved_dir == 1:  # Import
+                res[power_key] = raw_p
+                res["power"] = raw_p
+            elif resolved_dir == 0:
+                res[power_key] = 0.0
+                res["power"] = 0.0
+
+    return res
+
+
 def get_latest_values(device_ids):
     if not device_ids:
         return {}

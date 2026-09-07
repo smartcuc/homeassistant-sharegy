@@ -17,7 +17,7 @@ from devices.models import (
     DeviceLatestMetric,
     MetricDefinition,
 )
-from devices.services.metrics import should_record_metric, should_record_state, normalize_battery_metrics
+from devices.services.metrics import should_record_metric, should_record_state, normalize_battery_metrics, normalize_grid_metrics
 
 logger = logging.getLogger(__name__)
 
@@ -296,8 +296,9 @@ def ingest_metric_payload(
     raw_meta = meta or {}
     unit_map = unit_map or {}
 
-    # 1.5 Batterie-Metriken bei Bedarf normalisieren (Sungrow, Modbus, MQTT Richtung)
+    # 1.5 Batterie- & Grid-Metriken bei Bedarf normalisieren (Sungrow, Modbus, MQTT Richtung)
     metrics = normalize_battery_metrics(metrics, state=state, meta=meta)
+    metrics = normalize_grid_metrics(metrics, state=state, meta=meta)
 
         # 2. Metriken verarbeiten
     for key, val in metrics.items():

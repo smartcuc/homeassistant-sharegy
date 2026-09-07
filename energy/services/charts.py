@@ -103,7 +103,7 @@ def get_house_demand_chart(
     battery_ids,
 ):
     """
-    Berechnet den Verlauf des Hausbedarfs (letzte 24h).
+    Berechnet den Verlauf des physikalischen Hausbedarfs (letzte 24h).
     """
     cache_key = f"demand_chart:{','.join(map(str, sorted(pv_ids or [])))}:{','.join(map(str, sorted(grid_ids or [])))}:{','.join(map(str, sorted(battery_ids or [])))}"
     cached = cache.get(cache_key)
@@ -111,64 +111,75 @@ def get_house_demand_chart(
         return cached
 
     since = timezone.now() - timedelta(hours=24)
-    data = defaultdict(float)
-    key_filter = Q(metric_key__in=["power", "value", "a_act_power", "apower", "load", "load_power", "consumption"]) | Q(metric_key__isnull=True)
+    pv_data = defaultdict(float)
+    grid_data = defaultdict(float)
+    battery_data = defaultdict(float)
 
-    for dev_ids in [pv_ids, battery_ids, grid_ids]:
-        if not dev_ids:
-            continue
+    # 1. PV
+    if pv_ids:
         rows = (
             DeviceMetric1h.objects.filter(
-                device_id__in=dev_ids,
+                device_id__in=pv_ids,
+                metric_key__in=["pv_power", "pv_power_w", "solar_power", "pv", "production", "power", "value", "a_act_power", "apower"]
             )
-            .filter(key_filter)
             .filter(bucket__gte=since)
             .values("bucket")
             .annotate(value=Sum("avg"))
         )
         for r in rows:
-            data[r["bucket"]] += r["value"] or 0
+            pv_data[r["bucket"]] += max(0.0, r["value"] or 0.0)
 
-    if not data:
-        # Fallback 15m
-        for dev_ids in [pv_ids, battery_ids, grid_ids]:
-            if not dev_ids:
-                continue
-            rows = (
-                DeviceMetric15m.objects.filter(
-                    device_id__in=dev_ids,
-                )
-                .filter(key_filter)
-                .filter(bucket__gte=since)
-                .values("bucket")
-                .annotate(value=Sum("avg"))
+    # 2. Grid
+    if grid_ids:
+        rows = (
+            DeviceMetric1h.objects.filter(
+                device_id__in=grid_ids,
+                metric_key__in=["grid_power", "grid_power_w", "meter_power", "power_grid", "power", "value", "a_act_power", "apower"]
             )
-            for r in rows:
-                data[r["bucket"]] += r["value"] or 0
+            .filter(bucket__gte=since)
+            .values("bucket")
+            .annotate(value=Sum("avg"))
+        )
+        for r in rows:
+            grid_data[r["bucket"]] += r["value"] or 0.0
 
-    if not data:
-        # Fallback Raw DeviceMetric
-        for dev_ids in [pv_ids, battery_ids, grid_ids]:
-            if not dev_ids:
-                continue
-            rows = (
-                DeviceMetric.objects.filter(
-                    device_id__in=dev_ids,
-                )
-                .filter(key_filter)
-                .filter(timestamp__gte=since)
-                .values("timestamp")
-                .annotate(value=Sum("value"))
+    # 3. Battery
+    if battery_ids:
+        rows = (
+            DeviceMetric1h.objects.filter(
+                device_id__in=battery_ids,
+                metric_key__in=["battery_power", "battery_power_w", "power_battery", "power", "value", "a_act_power", "apower"]
             )
-            for r in rows:
-                data[r["timestamp"]] += r["value"] or 0
+            .filter(bucket__gte=since)
+            .values("bucket")
+            .annotate(value=Sum("avg"))
+        )
+        for r in rows:
+            battery_data[r["bucket"]] += r["value"] or 0.0
 
-    if not data:
+    all_buckets = sorted(set(pv_data.keys()) | set(grid_data.keys()) | set(battery_data.keys()))
+    if not all_buckets:
         cache.set(cache_key, [], timeout=60)
         return []
 
-    sorted_keys = sorted(data.keys())
-    res = [round(data[k], 1) for k in sorted_keys]
+    res = []
+    for b in all_buckets:
+        pv_val = max(0.0, pv_data.get(b, 0.0))
+        grid_val = grid_data.get(b, 0.0)  # > 0 import, < 0 export
+        bat_val = battery_data.get(b, 0.0)  # > 0 discharge, < 0 charge
+
+        imp_val = max(0.0, grid_val)
+        exp_val = max(0.0, -grid_val)
+        dis_val = max(0.0, bat_val)
+        chg_val = max(0.0, -bat_val)
+
+        # Unmeasured generation guardrail (z.B. 2. WR / BKW)
+        if exp_val > (pv_val + dis_val):
+            pv_val += (exp_val - (pv_val + dis_val))
+
+        derived = pv_val + dis_val + imp_val - chg_val - exp_val
+        res.append(round(max(0.0, derived), 1))
+
     cache.set(cache_key, res, timeout=60)
     return res
 

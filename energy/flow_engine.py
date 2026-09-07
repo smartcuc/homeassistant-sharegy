@@ -46,6 +46,12 @@ def calculate_energy_flow(signals):
     remaining_pv = max(0.0, production - pv_to_battery)
     remaining_grid_import = max(0.0, grid_import - grid_to_battery)
 
+    # Ungemessene PV-Erzeugung (z.B. 2. Wechselrichter / Balkonkraftwerk) erkennen & berücksichtigen
+    if grid_export > (remaining_pv + battery_discharge):
+        unmeasured_pv = (grid_export - (remaining_pv + battery_discharge)) + consumption
+        production = round(production + unmeasured_pv, 2)
+        remaining_pv = round(remaining_pv + unmeasured_pv, 2)
+
     # 2. Reinen Hausverbrauch (Bedarf) berechnen / bereinigen:
     # Physikalische Bilanz: Wenn mehr Energie aus PV/Speicher/Netz ins Haus fließt als Submeter einzeln erfassen,
     # ist der Gesamthausbedarf die physikalische Summe aller zufließenden Quellen abzüglich Netzeinspeisung:

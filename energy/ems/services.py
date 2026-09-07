@@ -326,8 +326,19 @@ def build_device_signals(user):
 
     # 7. Grid-Leistung (Import / Export)
     if grid_device_ids:
-        # Direkter Messwert der konfigurierten Netz-Geräte (z. B. SmartMeter / Shelly 3EM via MQTT)
-        grid_power = sum(values.get(d_id, 0) for d_id in grid_device_ids if d_id not in pv_device_ids and d_id not in battery_device_ids)
+        grid_power = 0.0
+        for d_id in grid_device_ids:
+            if d_id in pv_device_ids or d_id in battery_device_ids:
+                continue
+            cfg = getattr(next((d for d in all_devices if d.id == d_id), None), "config", None)
+            sig_k = cfg.energy_signal_type.key if (cfg and cfg.energy_signal_type) else None
+            val = float(values.get(d_id, 0) or 0.0)
+            if sig_k in ["grid_feed_in", "grid_export", "feed_in"]:
+                grid_power -= abs(val)
+            elif sig_k in ["grid_import", "import"]:
+                grid_power += abs(val)
+            else:
+                grid_power += val
     else:
         grid_power = 0.0
         for dev in all_devices:
@@ -335,12 +346,35 @@ def build_device_signals(user):
                 continue
             g_p = cache.get(f"device:{dev.id}:grid_power")
             if g_p is None:
-                m = DeviceLatestMetric.objects.filter(device=dev, metric_key="grid_power").first()
+                exp_p = cache.get(f"device:{dev.id}:grid_export") or cache.get(f"device:{dev.id}:feed_in_power")
+                imp_p = cache.get(f"device:{dev.id}:grid_import") or cache.get(f"device:{dev.id}:import_power")
+                if exp_p is not None or imp_p is not None:
+                    g_p = float(imp_p or 0.0) - float(exp_p or 0.0)
+
+            if g_p is None:
+                m = DeviceLatestMetric.objects.filter(
+                    device=dev,
+                    metric_key__in=["grid_power", "grid_power_w", "meter_power", "power_grid"]
+                ).first()
                 if m and m.value is not None:
                     if m.timestamp and m.timestamp < metric_cutoff:
                         g_p = 0.0
                     else:
                         g_p = float(m.value)
+                else:
+                    m_exp = DeviceLatestMetric.objects.filter(
+                        device=dev,
+                        metric_key__in=["grid_export", "grid_feed_in", "feed_in_power", "export_power", "p_out"]
+                    ).first()
+                    m_imp = DeviceLatestMetric.objects.filter(
+                        device=dev,
+                        metric_key__in=["grid_import", "import_power", "p_import"]
+                    ).first()
+                    if m_exp or m_imp:
+                        e_val = float(m_exp.value) if (m_exp and m_exp.value and (not m_exp.timestamp or m_exp.timestamp >= metric_cutoff)) else 0.0
+                        i_val = float(m_imp.value) if (m_imp and m_imp.value and (not m_imp.timestamp or m_imp.timestamp >= metric_cutoff)) else 0.0
+                        g_p = i_val - e_val
+
             if g_p is not None and abs(float(g_p)) > 0.01:
                 grid_power = float(g_p)
                 break
@@ -367,7 +401,16 @@ def build_device_signals(user):
 
     has_explicit_grid_meter = bool(grid_device_ids)
 
-    # 8. Gesamthausbedarf & Netz-Balancierung
+    # 8. Unbekannte / ungemessene PV-Erzeugung (z. B. 2. Wechselrichter / Balkonkraftwerk) erkennen:
+    # Wenn Netzeinspeisung vorliegt, die höher ist als die gemessene Erzeugung + Batterie-Entladung:
+    known_generation = signals["pv"]["production"] + signals["battery"]["discharge"]
+    if signals["grid"]["export"] > known_generation:
+        unmeasured_surplus = signals["grid"]["export"] - known_generation
+        unmeasured_pv = round(unmeasured_surplus + load_power, 2)
+        signals["pv"]["unmeasured_production"] = unmeasured_pv
+        signals["pv"]["production"] = round(signals["pv"]["production"] + unmeasured_pv, 2)
+
+    # 9. Gesamthausbedarf & Netz-Balancierung
     signals["load"]["tracked_consumption"] = load_power
 
     # Physikalische Energiebilanz über alle Messstellen (PV + Batterie + Netz - Einspeisung - Ladung):
@@ -396,7 +439,7 @@ def build_device_signals(user):
     elif derived_balance > 0 and (has_explicit_grid_meter or signals["grid"]["export"] > 0 or signals["grid"]["import"] > 0 or signals["battery"]["discharge"] > 0 or signals["pv"]["production"] > 0):
         # Wenn physikalische Messstellen (PV, Batterie, Netzzähler) aktiv sind,
         # entspricht der echte Gesamthausbedarf der physikalischen Energiebilanz:
-        signals["load"]["consumption"] = round(max(derived_balance, load_power), 2)
+        signals["load"]["consumption"] = round(max(derived_balance, load_power, 0.0), 2)
     elif load_power > 0:
         # Nur Submeter / Einzelsteckdosen vorhanden
         signals["load"]["consumption"] = round(load_power, 2)
@@ -413,5 +456,8 @@ def build_device_signals(user):
                 signals["grid"]["import"] = round(abs(surplus), 2)
     else:
         signals["load"]["consumption"] = max(round(derived_balance, 2), load_power, 0.0)
+
+    # Niemals negativer Hausverbrauch
+    signals["load"]["consumption"] = max(0.0, float(signals["load"]["consumption"] or 0.0))
 
     return signals

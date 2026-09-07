@@ -340,7 +340,7 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
             bucket_map[b_key]["grid_import"] += kwh
             grid_import_kwh_total += kwh
 
-        elif m_k in ["grid_export", "grid_export_power", "grid_export_w", "export_power", "feed_in_power", "feed_in"]:
+        elif m_k in ["grid_export", "grid_export_power", "grid_export_w", "export_power", "feed_in_power", "feed_in", "feedin_power", "grid_feed_in", "grid_feedin", "p_out"]:
             kwh = max(0.0, wh) / 1000.0
             device_energy_sum[dev_id] += kwh
             bucket_map[b_key]["grid_export"] += kwh
@@ -450,6 +450,11 @@ def get_energy_balance(user, period="today", start_date=None, end_date=None) -> 
         self_consumption_rate = 0.0
     else:
         # 1. Direkter PV-Verbrauch im Haus = PV - Einspeisung - Batterieladung
+        # Falls Netzeinspeisung die gemessene PV übersteigt (z.B. wegen eines ungemessenen 2. WR / BKW):
+        if total_grid_export_kwh > (total_pv_kwh + total_battery_discharge_kwh):
+            unmeasured_pv_kwh = round(total_grid_export_kwh - (total_pv_kwh + total_battery_discharge_kwh), 2)
+            total_pv_kwh = round(total_pv_kwh + unmeasured_pv_kwh, 2)
+
         available_for_home = max(0.0, total_pv_kwh - total_battery_charge_kwh - total_grid_export_kwh)
         
         # 2. Gesamt-Hausverbrauch
