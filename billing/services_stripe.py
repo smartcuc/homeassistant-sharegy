@@ -36,21 +36,42 @@ def is_stripe_configured() -> bool:
     return bool(key and (key.startswith("sk_test_") or key.startswith("sk_live_") or key.startswith("rk_")))
 
 
-def get_or_create_stripe_customer(user):
+def get_or_create_stripe_customer(user, force_recreate=False):
     """
     Sucht oder erstellt einen Stripe Customer für den gegebenen Benutzer.
+    Validiert bei konfiguriertem Stripe, ob die gespeicherte ID im aktuellen Stripe-Konto existiert.
     Speichert die stripe_customer_id in der EMSSubscription.
     """
     sub, _ = EMSSubscription.objects.get_or_create(user=user)
-    if sub.stripe_customer_id:
-        return sub.stripe_customer_id
+
+    if not force_recreate and sub.stripe_customer_id:
+        if is_stripe_configured():
+            if sub.stripe_customer_id.startswith("cus_sandbox_"):
+                # Lokale Sandbox-ID, aber jetzt ist echter Stripe API-Key aktiv
+                sub.stripe_customer_id = None
+            else:
+                try:
+                    cust = stripe.Customer.retrieve(sub.stripe_customer_id)
+                    if getattr(cust, "deleted", False):
+                        sub.stripe_customer_id = None
+                    else:
+                        return sub.stripe_customer_id
+                except stripe.error.InvalidRequestError:
+                    # Customer existiert nicht im aktuellen Stripe-Konto (z. B. Wechsel von Live zu Test)
+                    logger.warning("Stripe customer %s not found in active Stripe account. Recreating...", sub.stripe_customer_id)
+                    sub.stripe_customer_id = None
+                except Exception as e:
+                    logger.warning("Could not verify Stripe customer %s: %s", sub.stripe_customer_id, e)
+                    return sub.stripe_customer_id
+        else:
+            return sub.stripe_customer_id
 
     email = (user.email or "").strip().lower()
     name = f"{user.first_name} {user.last_name}".strip() or email
 
     if is_stripe_configured():
         try:
-            # Existierenden Customer per E-Mail suchen
+            # Existierenden Customer per E-Mail im aktiven Stripe-Konto suchen
             customers = stripe.Customer.list(email=email, limit=1)
             if customers and customers.data:
                 customer_id = customers.data[0].id
@@ -209,6 +230,7 @@ def create_checkout_session(user, plan_id, success_url=None, cancel_url=None, te
 def create_customer_portal_session(user, return_url=None):
     """
     Erstellt eine Session für das Stripe Customer Portal.
+    Validiert den Kunden im aktiven Stripe-Konto und fängt fehlende Portal-Konfigurationen ab.
     """
     frontend_base = getattr(settings, "FRONTEND_URL", "https://sharegy.de").rstrip("/")
     return_url = return_url or f"{frontend_base}/app/billing"
@@ -228,10 +250,29 @@ def create_customer_portal_session(user, return_url=None):
                 locale=user_lang,
             )
             return {"portal_url": portal_session.url, "sandbox": getattr(settings, "STRIPE_SANDBOX_MODE", True)}
+        except stripe.error.InvalidRequestError as req_err:
+            err_msg = str(req_err).lower()
+            if "no such customer" in err_msg:
+                # Customer existiert nicht im aktuellen Stripe-Konto -> Neu erstellen & einmalig wiederholen
+                logger.warning("Recreating invalid customer %s for user %s and retrying portal session", customer_id, user.id)
+                new_customer_id = get_or_create_stripe_customer(user, force_recreate=True)
+                try:
+                    portal_session = stripe.billing_portal.Session.create(
+                        customer=new_customer_id,
+                        return_url=return_url,
+                        locale=user_lang,
+                    )
+                    return {"portal_url": portal_session.url, "sandbox": getattr(settings, "STRIPE_SANDBOX_MODE", True)}
+                except Exception as retry_err:
+                    logger.warning("Retry of Customer Portal creation failed: %s", retry_err)
+                    return {"portal_url": return_url, "sandbox": getattr(settings, "STRIPE_SANDBOX_MODE", True), "fallback": True}
+            else:
+                # Z. B. Kundenportal im Stripe-Dashboard noch nicht konfiguriert
+                logger.warning("Stripe Customer Portal creation failed (portal not configured or active): %s", req_err)
+                return {"portal_url": return_url, "sandbox": getattr(settings, "STRIPE_SANDBOX_MODE", True), "fallback": True}
         except Exception as e:
             logger.exception("Stripe Customer Portal creation failed: %s", e)
-            if not getattr(settings, "STRIPE_SANDBOX_MODE", True):
-                raise
+            return {"portal_url": return_url, "sandbox": getattr(settings, "STRIPE_SANDBOX_MODE", True), "fallback": True}
 
     # Sandbox-Fallback: Zurück zur Billing-Übersicht
     return {"portal_url": return_url, "sandbox": True, "simulated": True}
