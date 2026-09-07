@@ -339,87 +339,46 @@ export default function Profile() {
 
     const currentAvatarConfig = getAvatarConfig(formData.avatar || user?.avatar || user?.profile?.avatar);
 
-    // Clean Tabs Definition (Position 3: Invoices & Billing)
+    // Clean Tabs Definition
     const tabs = [
-        { id: "profile", label: t("profile.tab_personal", "Persönliche Angaben"), icon: "👤", badge: null },
-        { id: "company", label: t("profile.tab_company", "Unternehmensdaten & B2B"), icon: "🏢", badge: formData.company_name?.trim() ? "B2B" : null },
+        { id: "profile", label: t("profile.tab_personal", "Persönliche Daten"), icon: "👤", badge: null },
+        { id: "company", label: t("profile.tab_company", "Firmendaten"), icon: "🏢", badge: formData.company_name?.trim() ? "Firma" : null },
         { id: "invoices", label: t("profile.tab_invoices", "Rechnungen & Belege"), icon: "📄", badge: invoices?.length > 0 ? invoices.length : null },
         { id: "notifications", label: t("profile.tab_notifications", "Benachrichtigungen"), icon: "🔔", badge: null },
         { id: "security", label: t("profile.tab_security", "Sicherheit & Sitzung"), icon: "🔐", badge: null },
-        { id: "privacy", label: t("profile.tab_privacy", "Datenschutz & DSGVO"), icon: "🛡️", badge: null },
+        { id: "privacy", label: t("profile.tab_privacy", "Datenschutz & Export"), icon: "🛡️", badge: null },
     ];
 
     return (
         <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6">
 
-            {/* ENTERPRISE USER HERO HEADER */}
-            <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-6 text-white shadow-xl border border-slate-800/80 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
-                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <div className="flex items-center gap-4">
-                        {/* AVATAR HERO CONTAINER WITH QUICK-EDIT BUTTON */}
-                        <div className="relative group cursor-pointer" onClick={() => setShowAvatarModal(true)}>
-                            {currentAvatarConfig ? (
-                                <div className={`w-16 h-16 rounded-2xl bg-gradient-to-tr ${currentAvatarConfig.bg} text-white font-black text-3xl flex items-center justify-center shadow-lg ring-4 ring-white/10 shrink-0 transition-transform group-hover:scale-105`}>
-                                    <span>{currentAvatarConfig.emoji}</span>
-                                </div>
-                            ) : (
-                                <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-500 to-cyan-400 text-white font-black text-2xl flex items-center justify-center shadow-lg ring-4 ring-white/10 shrink-0 transition-transform group-hover:scale-105">
-                                    {initials}
-                                </div>
-                            )}
-                            <div className="absolute inset-0 bg-black/40 rounded-2xl opacity-0 group-hover:opacity-100 flex items-center justify-center text-xs font-bold text-white transition-opacity backdrop-blur-2xs">
-                                ✏️ Ändern
-                            </div>
-                        </div>
+            {/* SLIM PAGE HEADER */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center gap-2.5">
+                        <span>👤</span>
+                        <span>{t("profile.header_title", "Mein Benutzerkonto")}</span>
+                    </h1>
+                    <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        {t("profile.header_desc", "Verwalte deine persönlichen Stammdaten, Firmendaten, Rechnungen und Benachrichtigungen.")}
+                    </p>
+                </div>
 
-                        <div>
-                            <div className="flex flex-wrap items-center gap-2 mb-1">
-                                <h1 className="text-2xl font-bold tracking-tight text-white">
-                                    {displayName}
-                                </h1>
-                                <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${
-                                    isLandlord
-                                        ? "bg-indigo-500/20 text-indigo-300 border-indigo-400/40"
-                                        : isPro
-                                            ? "bg-emerald-500/20 text-emerald-300 border-emerald-400/40"
-                                            : "bg-slate-700/50 text-slate-300 border-slate-600"
-                                }`}>
-                                    {isLandlord ? "🏢 Vermieter & Quartiere" : isPro ? "⚡ Sharegy Pro" : "🌱 Sharegy Free"}
-                                </span>
-                                {user?.is_staff && (
-                                    <span className="text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-400/40 px-2 py-0.5 rounded-full">
-                                        Admin
-                                    </span>
-                                )}
-                            </div>
-                            <p className="text-xs text-slate-400 flex items-center gap-2">
-                                <span>📧 {user?.email}</span>
-                                <span className="inline-flex items-center gap-1 text-emerald-400 font-medium">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                                    {t("profile.verified_email", "Verifiziert")}
-                                </span>
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                        <button
-                            type="button"
-                            onClick={() => setShowAvatarModal(true)}
-                            className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition border border-white/10 flex items-center gap-2 backdrop-blur-xs shadow-xs cursor-pointer"
-                        >
-                            <span>🎨</span>
-                            <span>{t("profile.choose_avatar", "Avatar wählen")}</span>
-                        </button>
-                        <Link
-                            to="/app/billing"
-                            className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition shadow-md flex items-center gap-2"
-                        >
-                            <span>💳</span>
-                            <span>{t("profile.manage_subscription", "Abonnement verwalten")}</span>
-                        </Link>
-                    </div>
+                <div className="flex items-center gap-2 self-start sm:self-auto">
+                    <span className={`text-[11px] font-bold px-3 py-1 rounded-full border ${
+                        isLandlord
+                            ? "bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-300 dark:border-indigo-800"
+                            : isPro
+                                ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800"
+                                : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700"
+                    }`}>
+                        {isLandlord ? "🏢 Vermieter & Quartiere" : isPro ? "⚡ Sharegy Pro" : "🌱 Sharegy Free"}
+                    </span>
+                    {user?.is_staff && (
+                        <span className="text-[10px] font-bold bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700 px-2.5 py-1 rounded-full">
+                            Admin
+                        </span>
+                    )}
                 </div>
             </div>
 
@@ -435,7 +394,7 @@ export default function Profile() {
                 </div>
             )}
 
-            {/* ENTERPRISE TAB NAVIGATION (5 CLEAN TABS) */}
+            {/* ENTERPRISE TAB NAVIGATION (6 CLEAN TABS) */}
             <div className="flex overflow-x-auto no-scrollbar gap-1.5 p-1.5 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl">
                 {tabs.map((tab) => {
                     const isActive = activeTab === tab.id;
@@ -453,7 +412,11 @@ export default function Profile() {
                             <span>{tab.icon}</span>
                             <span>{tab.label}</span>
                             {tab.badge && (
-                                <span className="text-[10px] px-1.5 py-0.2 rounded-md bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-mono">
+                                <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
+                                    isActive
+                                        ? "bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300"
+                                        : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300"
+                                }`}>
                                     {tab.badge}
                                 </span>
                             )}
@@ -795,157 +758,162 @@ export default function Profile() {
             )}
 
             {/* ========================================================= */}
-            {/* TAB 2: UNTERNEHMEN & B2B FIRMENDATEN */}
+            {/* TAB 2: FIRMENDATEN (2-SPALTEN-LAYOUT) */}
             {/* ========================================================= */}
             {activeTab === "company" && (
-                <div className="space-y-6 animate-in fade-in duration-200">
+                <form onSubmit={handleSaveProfile} className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start animate-in fade-in duration-200">
+                    {/* LINKE SPALTE: UNTERNEHMENSDATEN & UST-IDNR */}
                     <Card>
-                        <div className="border-b border-gray-100 dark:border-slate-800 pb-4 mb-5">
-                            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+                        <div className="border-b border-gray-100 dark:border-slate-800 pb-4 mb-4 space-y-1.5">
+                            <h2 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
                                 <span>🏢</span> {t("profile.company_details_title", "Unternehmensdaten & USt-IdNr.")}
                             </h2>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                                {t("profile.company_details_desc", "Optional für Firmenkunden: Hinterlege deinen offiziellen Firmennamen und deine USt-IdNr. für Vorsteuerabzug und korrekte B2B-Rechnungsbelege.")}
+                            <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                                {t("profile.company_details_desc", "Hinterlege deinen offiziellen Firmennamen und deine USt-IdNr. für Vorsteuerabzug und korrekte Rechnungsbelege.")}
                             </p>
                         </div>
 
-                        <form onSubmit={handleSaveProfile} className="space-y-5">
-                            {/* FIRMENDATEN FELDER */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-1">
-                                        {t("profile.company_name", "Offizieller Firmenname")}
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={formData.company_name}
-                                        onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
-                                        placeholder="Muster Energie GmbH"
-                                        className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-1">
-                                        {t("profile.vat_id", "Umsatzsteuer-Identifikationsnummer (USt-IdNr.)")}
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={formData.vat_id}
-                                        onChange={(e) => setFormData({ ...formData, vat_id: e.target.value })}
-                                        placeholder="DE123456789"
-                                        className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm font-mono text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-1">
-                                        {t("profile.billing_name", "Rechnungsempfänger / Abteilungszusatz")}
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={formData.billing_name}
-                                        onChange={(e) => setFormData({ ...formData, billing_name: e.target.value })}
-                                        placeholder="z.B. Buchhaltung / Kostenstelle 4020 / WEG Sonnenweg 12"
-                                        className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                                    />
-                                </div>
-
-                                <div>
-                                    <div className="flex items-center justify-between mb-1">
-                                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">
-                                            {t("profile.billing_email", "Rechnungs-E-Mail (Abweichend)")}
-                                        </label>
-                                        <span className="text-[10px] text-gray-400">Optional</span>
-                                    </div>
-                                    <input
-                                        type="email"
-                                        value={formData.billing_email}
-                                        onChange={(e) => setFormData({ ...formData, billing_email: e.target.value })}
-                                        placeholder="buchhaltung@firma.de"
-                                        className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                                    />
-                                    <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">
-                                        {t("profile.billing_email_hint", "Rechnungen & Belege werden an dieses Postfach gesendet. Wenn leer, wird deine Login-E-Mail genutzt.")}
-                                    </p>
-                                </div>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-1">
+                                    {t("profile.company_name", "Offizieller Firmenname")}
+                                </label>
+                                <input
+                                    type="text"
+                                    value={formData.company_name}
+                                    onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
+                                    placeholder="Muster Energie GmbH"
+                                    className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                />
                             </div>
 
-                            {/* RECHNUNGS- / FIRMENADRESSE */}
-                            <div className="border-t border-gray-100 dark:border-slate-800 pt-5">
-                                <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                                    <span>📍</span> {t("profile.company_address_title", "Firmen- & Rechnungsanschrift")}
-                                </h3>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-1">
+                                    {t("profile.vat_id", "Umsatzsteuer-Identifikationsnummer (USt-IdNr.)")}
+                                </label>
+                                <input
+                                    type="text"
+                                    value={formData.vat_id}
+                                    onChange={(e) => setFormData({ ...formData, vat_id: e.target.value })}
+                                    placeholder="DE123456789"
+                                    className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm font-mono text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                />
+                            </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                    <div className="md:col-span-3">
-                                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-1">
-                                            {t("profile.street", "Straße")}
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={formData.street}
-                                            onChange={(e) => setFormData({ ...formData, street: e.target.value })}
-                                            placeholder="Sonnenallee"
-                                            className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-1">
-                                            {t("profile.house_number", "Hausnummer")}
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={formData.house_number}
-                                            onChange={(e) => setFormData({ ...formData, house_number: e.target.value })}
-                                            placeholder="42a"
-                                            className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                                        />
-                                    </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-1">
+                                    {t("profile.billing_name", "Rechnungsempfänger / Abteilungszusatz")}
+                                </label>
+                                <input
+                                    type="text"
+                                    value={formData.billing_name}
+                                    onChange={(e) => setFormData({ ...formData, billing_name: e.target.value })}
+                                    placeholder="z.B. Buchhaltung / Kostenstelle 4020 / WEG Sonnenweg 12"
+                                    className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                />
+                            </div>
 
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-1">
-                                            {t("profile.postal_code", "Postleitzahl")}
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={formData.postal_code}
-                                            onChange={(e) => setFormData({ ...formData, postal_code: e.target.value })}
-                                            placeholder="10115"
-                                            className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                                        />
-                                    </div>
+                            <div>
+                                <div className="flex items-center justify-between mb-1">
+                                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">
+                                        {t("profile.billing_email", "Rechnungs-E-Mail (Abweichend)")}
+                                    </label>
+                                    <span className="text-[10px] text-gray-400">Optional</span>
+                                </div>
+                                <input
+                                    type="email"
+                                    value={formData.billing_email}
+                                    onChange={(e) => setFormData({ ...formData, billing_email: e.target.value })}
+                                    placeholder="buchhaltung@firma.de"
+                                    className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                />
+                                <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">
+                                    {t("profile.billing_email_hint", "Rechnungen & Belege werden an dieses Postfach gesendet. Wenn leer, wird deine Login-E-Mail genutzt.")}
+                                </p>
+                            </div>
+                        </div>
+                    </Card>
 
-                                    <div className="md:col-span-2">
-                                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-1">
-                                            {t("profile.city", "Stadt / Ort")}
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={formData.city}
-                                            onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                                            placeholder="Berlin"
-                                            className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                                        />
-                                    </div>
+                    {/* RECHTE SPALTE: FIRMEN- & RECHNUNGSANSCHRIFT */}
+                    <Card>
+                        <div className="border-b border-gray-100 dark:border-slate-800 pb-4 mb-4 space-y-1.5">
+                            <h2 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                <span>📍</span> {t("profile.company_address_title", "Firmen- & Rechnungsanschrift")}
+                            </h2>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                                {t("profile.company_address_desc", "Offizielle Anschrift des Unternehmens für die Belegausstellung.")}
+                            </p>
+                        </div>
 
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-1">
-                                            {t("profile.country", "Land")}
-                                        </label>
-                                        <select
-                                            value={formData.country || "DE"}
-                                            onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                                            className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                                        >
-                                            <option value="DE">🇩🇪 Deutschland</option>
-                                            <option value="AT">🇦🇹 Österreich</option>
-                                            <option value="CH">🇨🇭 Schweiz</option>
-                                            <option value="PL">🇵🇱 Polen</option>
-                                            <option value="NL">🇳🇱 Niederlande</option>
-                                            <option value="FR">🇫🇷 Frankreich</option>
-                                        </select>
-                                    </div>
+                        <div className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                                <div className="md:col-span-3">
+                                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-1">
+                                        {t("profile.street", "Straße")}
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={formData.street}
+                                        onChange={(e) => setFormData({ ...formData, street: e.target.value })}
+                                        placeholder="Sonnenallee"
+                                        className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-1">
+                                        {t("profile.house_number", "Hausnummer")}
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={formData.house_number}
+                                        onChange={(e) => setFormData({ ...formData, house_number: e.target.value })}
+                                        placeholder="42a"
+                                        className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-1">
+                                        {t("profile.postal_code", "Postleitzahl")}
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={formData.postal_code}
+                                        onChange={(e) => setFormData({ ...formData, postal_code: e.target.value })}
+                                        placeholder="10115"
+                                        className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                    />
+                                </div>
+
+                                <div className="md:col-span-2">
+                                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-1">
+                                        {t("profile.city", "Stadt / Ort")}
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={formData.city}
+                                        onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                                        placeholder="Berlin"
+                                        className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-1">
+                                        {t("profile.country", "Land")}
+                                    </label>
+                                    <select
+                                        value={formData.country || "DE"}
+                                        onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                                        className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                    >
+                                        <option value="DE">🇩🇪 Deutschland</option>
+                                        <option value="AT">🇦🇹 Österreich</option>
+                                        <option value="CH">🇨🇭 Schweiz</option>
+                                        <option value="PL">🇵🇱 Polen</option>
+                                        <option value="NL">🇳🇱 Niederlande</option>
+                                        <option value="FR">🇫🇷 Frankreich</option>
+                                    </select>
                                 </div>
                             </div>
 
@@ -959,9 +927,9 @@ export default function Profile() {
                                     <span>{savingProfile ? t("common.saving", "Speichere...") : t("profile.save_company", "Firmendaten speichern")}</span>
                                 </button>
                             </div>
-                        </form>
+                        </div>
                     </Card>
-                </div>
+                </form>
             )}
 
             {/* ========================================================= */}
@@ -1283,115 +1251,111 @@ export default function Profile() {
             )}
 
             {/* ========================================================= */}
-            {/* TAB 5: DATENSCHUTZ, COMPLIANCE & DSGVO */}
+            {/* TAB 6: DATENSCHUTZ & EXPORT (2-SPALTEN-LAYOUT) */}
             {/* ========================================================= */}
             {activeTab === "privacy" && (
-                <div className="space-y-6 animate-in fade-in duration-200">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start animate-in fade-in duration-200">
+                    {/* LINKE SPALTE: DATENEXPORT & TRANSPARENZ */}
                     <Card>
-                        <div className="border-b border-gray-100 dark:border-slate-800 pb-4 mb-5">
-                            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-                                <span>🛡️</span> {t("gdpr.title", "Deine Daten & Privatsphäre")}
+                        <div className="border-b border-gray-100 dark:border-slate-800 pb-4 mb-4 space-y-1.5">
+                            <h2 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                <span>📦</span> {t("gdpr.export_title", "Personenbezogener Datenexport (Art. 15 & 20 DSGVO)")}
                             </h2>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                                {t("gdpr.subtitle", "Transparenz über alle gespeicherten Datenkategorien, Datenexport und Kontolöschung gem. Art. 15, 17 und 20 DSGVO.")}
+                            <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                                {t("gdpr.export_desc", "Transparenz über alle gespeicherten Datenkategorien und DSGVO-Auskunft als maschinenlesbare JSON-Datei.")}
                             </p>
                         </div>
 
                         {/* STORED DATA CATEGORIES */}
-                        <div className="space-y-3 mb-6">
-                            <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                <span>📋</span>
-                                <span>{t("gdpr.stored_data_title", "Übersicht gespeicherter Datenkategorien (Art. 15 DSGVO)")}</span>
-                            </h3>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-xs space-y-1.5">
+                        <div className="space-y-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-xs space-y-1">
                                     <div className="font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
                                         <span>👤</span>
                                         <span>{t("gdpr.cat_profile", "Benutzer- & Stammdaten")}</span>
                                     </div>
-                                    <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                                        E-Mail-Adresse (<code className="font-mono text-indigo-600 dark:text-indigo-400">{user?.email}</code>), Name, hinterlegte Sprache & Zeitzone.
+                                    <p className="text-gray-600 dark:text-gray-400 text-[11px] leading-relaxed">
+                                        E-Mail (<code className="font-mono text-indigo-600 dark:text-indigo-400">{user?.email}</code>), Name, Sprache & Zeitzone.
                                     </p>
-                                    <span className="inline-block text-[10px] text-gray-400 font-semibold">Rechtsgrundlage: Art. 6 (1) lit. b DSGVO</span>
                                 </div>
 
-                                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-xs space-y-1.5">
+                                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-xs space-y-1">
                                     <div className="font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
                                         <span>⚡</span>
-                                        <span>{t("gdpr.cat_energy", "Energie- & Telemetriedaten")}</span>
+                                        <span>{t("gdpr.cat_energy", "Energie & Telemetrie")}</span>
                                     </div>
-                                    <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                                        Verknüpfte Zähler, Wechselrichter, Speicher-SoC, OBIS-Messzeitreihen (1.8.0/2.8.0) und WSS-Aktorik.
+                                    <p className="text-gray-600 dark:text-gray-400 text-[11px] leading-relaxed">
+                                        Zähler, Wechselrichter, Speicher-SoC, OBIS-Messwerte und EMS-Aktorik.
                                     </p>
-                                    <span className="inline-block text-[10px] text-gray-400 font-semibold">Rechtsgrundlage: Art. 6 (1) lit. b DSGVO</span>
                                 </div>
 
-                                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-xs space-y-1.5">
+                                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-xs space-y-1">
                                     <div className="font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
                                         <span>🏢</span>
-                                        <span>{t("gdpr.cat_b2b", "B2B & Vermieter-Daten")}</span>
+                                        <span>{t("gdpr.cat_b2b", "Firmendaten & Belege")}</span>
                                     </div>
-                                    <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                                        Firmenname, USt-IdNr., Mieterstrom-Clearing-Protokolle und steuerliche Nachweisbelege.
+                                    <p className="text-gray-600 dark:text-gray-400 text-[11px] leading-relaxed">
+                                        Firmenname, USt-IdNr., Mieterstrom-Clearing und Rechnungsnachbereitung.
                                     </p>
-                                    <span className="inline-block text-[10px] text-gray-400 font-semibold">Rechtsgrundlage: Art. 6 (1) lit. c DSGVO (§ 147 AO)</span>
                                 </div>
 
-                                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-xs space-y-1.5">
+                                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-xs space-y-1">
                                     <div className="font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
                                         <span>💳</span>
                                         <span>{t("gdpr.cat_billing", "Abrechnung & Stripe")}</span>
                                     </div>
-                                    <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                                        Aktiver Tarif ({planName}), Rechnungs-PDFs und Stripe Customer Identifikatoren.
+                                    <p className="text-gray-600 dark:text-gray-400 text-[11px] leading-relaxed">
+                                        Aktiver Tarif ({planName}), Rechnungs-PDFs und Kundennummern.
                                     </p>
-                                    <span className="inline-block text-[10px] text-gray-400 font-semibold">Rechtsgrundlage: Art. 6 (1) lit. b & c DSGVO</span>
                                 </div>
                             </div>
-                        </div>
 
-                        {/* DATA EXPORT */}
-                        <div className="border-t border-gray-100 dark:border-slate-800 pt-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                            <div>
-                                <h3 className="text-sm font-bold text-gray-900 dark:text-white">
-                                    {t("gdpr.export_title", "Datenübertragbarkeit (Art. 20 DSGVO)")}
-                                </h3>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                    {t("gdpr.export_desc", "Lade alle über dich gespeicherten Daten in einem maschinenlesbaren JSON-Format herunter.")}
-                                </p>
+                            <div className="pt-3 border-t border-gray-100 dark:border-slate-800 flex justify-end">
+                                <button
+                                    type="button"
+                                    onClick={handleExportData}
+                                    disabled={exporting}
+                                    className="px-5 py-2.5 rounded-xl border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-800 dark:text-gray-200 text-xs font-bold shadow-xs hover:bg-gray-50 dark:hover:bg-slate-700 transition cursor-pointer flex items-center gap-2"
+                                >
+                                    <span>📥</span>
+                                    <span>{exporting ? t("gdpr.exporting", "Exportiere...") : t("gdpr.export_button", "Daten exportieren (JSON)")}</span>
+                                </button>
                             </div>
+                        </div>
+                    </Card>
 
-                            <button
-                                type="button"
-                                onClick={handleExportData}
-                                disabled={exporting}
-                                className="px-4 py-2.5 rounded-xl border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-800 dark:text-gray-200 text-xs font-bold shadow-xs hover:bg-gray-50 dark:hover:bg-slate-700 transition cursor-pointer flex items-center gap-2 shrink-0"
-                            >
-                                <span>📥</span>
-                                <span>{exporting ? t("gdpr.exporting", "Exportiere...") : t("gdpr.export_button", "Daten exportieren (JSON)")}</span>
-                            </button>
+                    {/* RECHTE SPALTE: BENUTZERKONTO LÖSCHEN */}
+                    <Card>
+                        <div className="border-b border-gray-100 dark:border-slate-800 pb-4 mb-4 space-y-1.5">
+                            <h2 className="text-base font-bold text-rose-700 dark:text-rose-400 flex items-center gap-2">
+                                <span>⚠️</span> {t("gdpr.delete_title", "Benutzerkonto löschen (Art. 17 DSGVO)")}
+                            </h2>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                                {t("gdpr.delete_desc", "Recht auf Vergessenwerden und endgültige Kontoschließung.")}
+                            </p>
                         </div>
 
-                        {/* DANGER ZONE: ACCOUNT DELETION */}
-                        <div className="border-t border-rose-100 dark:border-rose-950 bg-rose-50/50 dark:bg-rose-950/20 -mx-6 -mb-6 p-6 mt-6 rounded-b-3xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                            <div>
-                                <h3 className="text-sm font-bold text-rose-900 dark:text-rose-300 flex items-center gap-1.5">
+                        <div className="p-4 rounded-2xl bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/60 space-y-3 text-xs">
+                            <div className="font-bold text-rose-900 dark:text-rose-200">
+                                Unwiderrufliche Löschung aller Daten
+                            </div>
+                            <p className="text-rose-800/90 dark:text-rose-300/90 leading-relaxed text-[11px]">
+                                Durch das Löschen deines Kontos werden alle deine Anmeldedaten, Geräteverknüpfungen, historischen Energiedaten und Benachrichtigungseinstellungen dauerhaft aus dem System entfernt.
+                            </p>
+                            <p className="text-[10px] text-rose-700/70 dark:text-rose-400/70">
+                                Gesetzliche Aufbewahrungsfristen für bereits ausgestellte Rechnungsbelege (§ 147 AO) bleiben hiervon unberührt.
+                            </p>
+
+                            <div className="pt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowDeleteModal(true)}
+                                    className="w-full py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-md transition cursor-pointer flex items-center justify-center gap-2"
+                                >
                                     <span>⚠️</span>
-                                    <span>{t("gdpr.delete_title", "Konto & alle Daten löschen (Art. 17 DSGVO)")}</span>
-                                </h3>
-                                <p className="text-xs text-rose-700/80 dark:text-rose-400/80 mt-0.5">
-                                    {t("gdpr.delete_desc", "Löscht dein Benutzerkonto, alle Geräteverknüpfungen, Verlaufsdaten und Einstellungen unwiderruflich.")}
-                                </p>
+                                    <span>{t("gdpr.delete_button", "Konto unwiderruflich löschen")}</span>
+                                </button>
                             </div>
-
-                            <button
-                                type="button"
-                                onClick={() => setShowDeleteModal(true)}
-                                className="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-xs transition cursor-pointer shrink-0"
-                            >
-                                {t("gdpr.delete_button", "Konto unwiderruflich löschen")}
-                            </button>
                         </div>
                     </Card>
                 </div>
