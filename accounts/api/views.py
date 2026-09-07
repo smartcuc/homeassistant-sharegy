@@ -619,7 +619,7 @@ class ChangeEmailRequestView(APIView):
         if User.objects.filter(email__iexact=new_email).exclude(id=request.user.id).exists():
             return Response({"error": "Diese E-Mail-Adresse wird bereits von einem anderen Konto verwendet."}, status=400)
 
-        # Token erzeugen mit 24h Gültigkeit
+        # Token erzeugen mit 30 Minuten Gültigkeit
         token = signing.dumps(
             {"user_id": request.user.id, "new_email": new_email},
             salt="sharegy-change-email-v1",
@@ -637,7 +637,7 @@ class ChangeEmailRequestView(APIView):
                 f"du hast eine Änderung deiner E-Mail-Adresse für deinen Sharegy-Account angefordert.\n\n"
                 f"Klicke auf folgenden Link, um deine neue E-Mail-Adresse ({new_email}) zu bestätigen:\n"
                 f"{confirm_link}\n\n"
-                f"Der Link ist 24 Stunden gültig.\n\n"
+                f"Der Link ist aus Sicherheitsgründen 30 Minuten gültig.\n\n"
                 f"Dein Sharegy Team"
             )
             msg = EmailMultiAlternatives(subject, text_body, from_email, [new_email])
@@ -675,11 +675,11 @@ class ConfirmEmailChangeView(APIView):
             return Response({"error": "Token fehlt."}, status=400)
 
         try:
-            data = signing.loads(token, salt="sharegy-change-email-v1", max_age=86400)
+            data = signing.loads(token, salt="sharegy-change-email-v1", max_age=1800)
             user_id = data.get("user_id")
             new_email = data.get("new_email")
         except signing.SignatureExpired:
-            return Response({"error": "Der Bestätigungslink ist abgelaufen (Gültigkeit 24h). Bitte fordere einen neuen an."}, status=400)
+            return Response({"error": "Der Bestätigungslink ist abgelaufen (Gültigkeit: 30 Minuten). Bitte fordere einen neuen an."}, status=400)
         except Exception:
             return Response({"error": "Ungültiger oder beschädigter Bestätigungslink."}, status=400)
 

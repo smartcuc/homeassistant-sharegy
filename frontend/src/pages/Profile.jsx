@@ -1070,7 +1070,7 @@ export default function Profile() {
                                 </div>
                                 <h4 className="font-bold text-gray-900 dark:text-white text-sm">Bestätigungslink gesendet!</h4>
                                 <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
-                                    Wir haben eine Verifizierungs-E-Mail an <strong className="font-mono text-indigo-600 dark:text-indigo-400">{newEmailInput}</strong> gesendet. Bitte klicke auf den Link in der E-Mail (gültig für 24 Stunden), um die Änderung abzuschließen.
+                                    Wir haben eine Verifizierungs-E-Mail an <strong className="font-mono text-indigo-600 dark:text-indigo-400">{newEmailInput}</strong> gesendet. Bitte klicke auf den Link in der E-Mail (gültig für 30 Minuten), um die Änderung abzuschließen.
                                 </p>
                                 <div className="pt-2">
                                     <button
