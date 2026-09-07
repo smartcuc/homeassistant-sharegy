@@ -269,6 +269,29 @@ def _upsert_alert(home, alert_type, severity, title, message, action_hint="", ac
             except Exception as ex:
                 import logging
                 logging.getLogger(__name__).warning("Fehler beim Push-Dispatch für Alert %s: %s", event.id, str(ex))
+
+        # Sofortige E-Mail-Warnung bei kritischen Alarmen (sofern vom Nutzer aktiviert)
+        if severity == AlertEvent.SEVERITY_CRITICAL and home and getattr(home, "user", None):
+            user = home.user
+            user_settings = getattr(user, "settings", None)
+            if user_settings is None or getattr(user_settings, "notify_critical_alerts", True):
+                try:
+                    from django.conf import settings
+                    from accounts.services.email_service import send_critical_alert_email
+                    send_critical_alert_email(
+                        user=user,
+                        alert_data={
+                            "title": title,
+                            "message": message,
+                            "device_name": device.name if device else "",
+                            "action_hint": action_hint,
+                            "action_url": getattr(settings, "FRONTEND_URL", "https://sharegy.de") + "/alerts",
+                        }
+                    )
+                except Exception as ex_mail:
+                    import logging
+                    logging.getLogger(__name__).warning("Fehler beim E-Mail-Dispatch für kritischen Alert %s: %s", event.id, str(ex_mail))
+
         return event
     else:
         # Bestehenden Alarm aktualisieren (Status bleibt unverändert, z. B. acknowledged bleibt in Historie)

@@ -214,3 +214,178 @@ def send_email_change_alert_email(user, new_email, language=None):
     msg.attach_alternative(html_body, "text/html")
     msg.send(fail_silently=True)
     logger.info("Sent email change security alert to %s (Language: %s)", user.email, lang)
+
+
+def send_weekly_report_email(user, report_data=None, language=None):
+    """
+    Sendet den wöchentlichen mehrsprachigen Energie- und Autarkie-Report an den Benutzer.
+    """
+    lang = get_user_language(user, language)
+    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "Sharegy <invite@sharegy.cloud>")
+    user_name = user.first_name or ""
+
+    if report_data is None:
+        report_data = {}
+
+    pv_generated_kwh = report_data.get("pv_generated_kwh", 0.0)
+    self_consumed_kwh = report_data.get("self_consumed_kwh", 0.0)
+    autarky_pct = report_data.get("autarky_pct", 0)
+    saved_eur = report_data.get("saved_eur", 0.00)
+    grid_feedin_kwh = report_data.get("grid_feedin_kwh", 0.0)
+    grid_purchased_kwh = report_data.get("grid_purchased_kwh", 0.0)
+    period_str = report_data.get("period_str", "Letzte 7 Tage")
+    dashboard_url = report_data.get(
+        "dashboard_url",
+        getattr(settings, "FRONTEND_URL", "https://sharegy.de") + "/dashboard",
+    )
+
+    I18N = {
+        "de": {
+            "subject": "Dein wöchentlicher Energie- & Autarkie-Report ⚡",
+            "headline": "Dein wöchentlicher Energie- & Autarkie-Report",
+            "greeting": "Hallo",
+            "intro_text": "hier ist deine persönliche Energie-Bilanz der vergangenen Woche im Überblick:",
+            "period_label": "Zeitraum",
+            "pv_generated_label": "PV-Erzeugung",
+            "self_consumption_label": "Eigenverbrauch",
+            "autarky_label": "Autarkiegrad",
+            "savings_label": "Erzielte Ersparnis",
+            "grid_feedin_label": "Netzeinspeisung",
+            "grid_purchased_label": "Netzbezug",
+            "button_text": "📊 Zum Live-Dashboard",
+            "settings_hint": "Du erhältst diese E-Mail, da du den wöchentlichen Energie-Report in deinem Profil aktiviert hast.",
+        },
+        "en": {
+            "subject": "Your weekly energy & autarky report ⚡",
+            "headline": "Your Weekly Energy & Autarky Report",
+            "greeting": "Hello",
+            "intro_text": "here is your personal energy summary for the past week at a glance:",
+            "period_label": "Period",
+            "pv_generated_label": "Solar Generation",
+            "self_consumption_label": "Self-Consumption",
+            "autarky_label": "Autarky Rate",
+            "savings_label": "Estimated Savings",
+            "grid_feedin_label": "Grid Feed-In",
+            "grid_purchased_label": "Grid Purchased",
+            "button_text": "📊 Open Live Dashboard",
+            "settings_hint": "You are receiving this email because the weekly energy report is enabled in your profile.",
+        },
+        "pl": {
+            "subject": "Twój tygodniowy raport energii i autarkii ⚡",
+            "headline": "Twój cotygodniowy raport energii i autarkii",
+            "greeting": "Cześć",
+            "intro_text": "oto Twoje osobiste podsumowanie bilansu energetycznego z minionego tygodnia:",
+            "period_label": "Okres",
+            "pv_generated_label": "Produkcja solarna",
+            "self_consumption_label": "Autokonsumpcja",
+            "autarky_label": "Wskaźnik autarkii",
+            "savings_label": "Oszczędności",
+            "grid_feedin_label": "Oddanie do sieci",
+            "grid_purchased_label": "Pobór z sieci",
+            "button_text": "📊 Otwórz panel na żywo",
+            "settings_hint": "Otrzymujesz tę wiadomość, ponieważ w profilu włączono cotygodniowy raport energii.",
+        },
+    }
+
+    t = I18N.get(lang, I18N["de"])
+
+    context = {
+        "user_name": user_name,
+        "pv_generated_kwh": f"{pv_generated_kwh:.1f}" if isinstance(pv_generated_kwh, (int, float)) else str(pv_generated_kwh),
+        "self_consumed_kwh": f"{self_consumed_kwh:.1f}" if isinstance(self_consumed_kwh, (int, float)) else str(self_consumed_kwh),
+        "autarky_pct": int(autarky_pct) if isinstance(autarky_pct, (int, float)) else str(autarky_pct),
+        "saved_eur": f"{saved_eur:.2f}" if isinstance(saved_eur, (int, float)) else str(saved_eur),
+        "grid_feedin_kwh": f"{grid_feedin_kwh:.1f}" if isinstance(grid_feedin_kwh, (int, float)) else str(grid_feedin_kwh),
+        "grid_purchased_kwh": f"{grid_purchased_kwh:.1f}" if isinstance(grid_purchased_kwh, (int, float)) else str(grid_purchased_kwh),
+        "period_str": period_str,
+        "dashboard_url": dashboard_url,
+        **t,
+    }
+
+    text_body = render_to_string("emails/weekly_report.txt", context)
+    html_body = render_to_string("emails/weekly_report.html", context)
+
+    msg = EmailMultiAlternatives(t["subject"], text_body, from_email, [user.email])
+    msg.attach_alternative(html_body, "text/html")
+    msg.send(fail_silently=False)
+    logger.info("Sent weekly energy report to %s (Language: %s)", user.email, lang)
+    return True
+
+
+def send_critical_alert_email(user, alert_data, language=None):
+    """
+    Sendet eine sofortige mehrsprachige E-Mail-Warnung bei kritischen Hardware-Störungen.
+    """
+    lang = get_user_language(user, language)
+    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "Sharegy <invite@sharegy.cloud>")
+    user_name = user.first_name or ""
+
+    alert_title = alert_data.get("title", "Kritische Störung")
+    alert_message = alert_data.get("message", "")
+    device_name = alert_data.get("device_name", "")
+    action_hint = alert_data.get("action_hint", "")
+    action_url = alert_data.get(
+        "action_url",
+        getattr(settings, "FRONTEND_URL", "https://sharegy.de") + "/alerts",
+    )
+
+    I18N = {
+        "de": {
+            "subject_prefix": "🚨 Kritische Warnung",
+            "headline": "Kritischer Hardware-Alarm",
+            "greeting": "Hallo",
+            "intro_text": "unser Überwachungssystem hat soeben eine kritische Störung bei deiner Hardware festgestellt:",
+            "severity_badge": "KRITISCHE HARDWARE-WARNUNG",
+            "device_label": "Betroffenes Gerät / System",
+            "message_label": "Meldung",
+            "action_label": "Empfohlene Sofortmaßnahme",
+            "button_text": "🛠️ Alarm im System prüfen",
+            "settings_hint": "Du erhältst diese Warnung per E-Mail, da kritische Hardware-Alarme in deinem Profil aktiviert sind.",
+        },
+        "en": {
+            "subject_prefix": "🚨 Critical Alert",
+            "headline": "Critical Hardware Alert",
+            "greeting": "Hello",
+            "intro_text": "our monitoring system has detected a critical issue with your energy equipment:",
+            "severity_badge": "CRITICAL HARDWARE ALERT",
+            "device_label": "Affected Device / System",
+            "message_label": "Issue Details",
+            "action_label": "Recommended Action",
+            "button_text": "🛠️ Check Issue in System",
+            "settings_hint": "You are receiving this alert by email because critical hardware alerts are enabled in your profile.",
+        },
+        "pl": {
+            "subject_prefix": "🚨 Alert krytyczny",
+            "headline": "Krytyczny alert sprzętowy",
+            "greeting": "Cześć",
+            "intro_text": "nasz system monitoringu wykrył krytyczną usterkę w Twoim sprzęcie energetycznym:",
+            "severity_badge": "KRYTYCZNY ALERT SPRZĘTOWY",
+            "device_label": "Urządzenie / System",
+            "message_label": "Szczegóły",
+            "action_label": "Zalecane działanie",
+            "button_text": "🛠️ Sprawdź alert w systemie",
+            "settings_hint": "Otrzymujesz to ostrzeżenie e-mailem, ponieważ krytyczne alerty sprzętowe są włączone w Twoim profilu.",
+        },
+    }
+
+    t = I18N.get(lang, I18N["de"])
+    subject = f"{t['subject_prefix']}: {alert_title} – Sharegy"
+
+    context = {
+        "user_name": user_name,
+        "alert_title": alert_title,
+        "alert_message": alert_message,
+        "device_name": device_name,
+        "action_hint": action_hint,
+        "action_url": action_url,
+        **t,
+    }
+
+    text_body = render_to_string("emails/critical_alert.txt", context)
+    html_body = render_to_string("emails/critical_alert.html", context)
+
+    msg = EmailMultiAlternatives(subject, text_body, from_email, [user.email])
+    msg.attach_alternative(html_body, "text/html")
+    msg.send(fail_silently=False)
+    logger.info("Sent critical alert email to %s (Language: %s): %s", user.email, lang, alert_title)
+    return True

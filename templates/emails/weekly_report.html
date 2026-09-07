@@ -1,0 +1,99 @@
+{% extends "emails/base.html" %}
+
+{% block content %}
+<h2 style="font-size:22px; font-weight:700; color:#111827; margin-top:0; margin-bottom:8px;">
+  {{ headline|default:"Dein wöchentlicher Energie- & Autarkie-Report" }} ⚡
+</h2>
+
+<p style="color:#6b7280; font-size:13px; margin-top:0; margin-bottom:16px;">
+  📅 {{ period_label|default:"Zeitraum" }}: <strong>{{ period_str|default:"Letzte 7 Tage" }}</strong>
+</p>
+
+<p style="color:#4b5563; line-height:1.6; font-size:14px; margin-bottom:20px;">
+  {{ greeting|default:"Hallo" }}{% if user_name %} {{ user_name }}{% endif %},<br>
+  {{ intro_text|default:"hier ist deine persönliche Energie-Bilanz der vergangenen Woche im Überblick:" }}
+</p>
+
+<!-- KPI GRID -->
+<table width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0;">
+  <tr>
+    <td width="48%" style="padding:12px; background:#f0fdf4; border-radius:12px; border:1px solid #bbf7d0; vertical-align:top;">
+      <div style="font-size:11px; font-weight:700; text-transform:uppercase; color:#166534; letter-spacing:0.5px;">
+        ☀️ {{ pv_generated_label|default:"PV-Erzeugung" }}
+      </div>
+      <div style="font-size:20px; font-weight:800; color:#15803d; margin-top:4px;">
+        {{ pv_generated_kwh|default:"0.0" }} <span style="font-size:13px; font-weight:600;">kWh</span>
+      </div>
+    </td>
+    <td width="4%"></td>
+    <td width="48%" style="padding:12px; background:#eff6ff; border-radius:12px; border:1px solid #bfdbfe; vertical-align:top;">
+      <div style="font-size:11px; font-weight:700; text-transform:uppercase; color:#1e40af; letter-spacing:0.5px;">
+        🔄 {{ self_consumption_label|default:"Eigenverbrauch" }}
+      </div>
+      <div style="font-size:20px; font-weight:800; color:#1d4ed8; margin-top:4px;">
+        {{ self_consumed_kwh|default:"0.0" }} <span style="font-size:13px; font-weight:600;">kWh</span>
+      </div>
+    </td>
+  </tr>
+  <tr><td height="12" colspan="3"></td></tr>
+  <tr>
+    <td width="48%" style="padding:12px; background:#faf5ff; border-radius:12px; border:1px solid #e9d5ff; vertical-align:top;">
+      <div style="font-size:11px; font-weight:700; text-transform:uppercase; color:#6b21a8; letter-spacing:0.5px;">
+        🛡️ {{ autarky_label|default:"Autarkiegrad" }}
+      </div>
+      <div style="font-size:20px; font-weight:800; color:#7e22ce; margin-top:4px;">
+        {{ autarky_pct|default:"0" }} <span style="font-size:13px; font-weight:600;">%</span>
+      </div>
+    </td>
+    <td width="4%"></td>
+    <td width="48%" style="padding:12px; background:#fefce8; border-radius:12px; border:1px solid #fef08a; vertical-align:top;">
+      <div style="font-size:11px; font-weight:700; text-transform:uppercase; color:#854d0e; letter-spacing:0.5px;">
+        💰 {{ savings_label|default:"Erzielte Ersparnis" }}
+      </div>
+      <div style="font-size:20px; font-weight:800; color:#a16207; margin-top:4px;">
+        {{ saved_eur|default:"0.00" }} <span style="font-size:13px; font-weight:600;">€</span>
+      </div>
+    </td>
+  </tr>
+</table>
+
+<!-- FEEDIN / CONSUMPTION DETAILS -->
+<div style="background:#f8fafc; border-radius:12px; padding:14px 16px; margin:18px 0; border:1px solid #e2e8f0; font-size:13px; color:#475569;">
+  <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+    <span>⚡ {{ grid_feedin_label|default:"Netzeinspeisung" }}:</span>
+    <strong style="color:#0f172a; float:right;">{{ grid_feedin_kwh|default:"0.0" }} kWh</strong>
+  </div>
+  <div style="clear:both;"></div>
+  <div style="display:flex; justify-content:space-between; margin-top:6px;">
+    <span>🔌 {{ grid_purchased_label|default:"Netzbezug" }}:</span>
+    <strong style="color:#0f172a; float:right;">{{ grid_purchased_kwh|default:"0.0" }} kWh</strong>
+  </div>
+  <div style="clear:both;"></div>
+</div>
+
+<!-- CTA BUTTON -->
+<table align="center" role="presentation" cellspacing="0" cellpadding="0" style="margin:26px auto 16px;">
+  <tr>
+    <td align="center">
+      <a href="{{ dashboard_url|default:'https://sharegy.de/dashboard' }}"
+         style="
+          display:inline-block;
+          padding:13px 26px;
+          border-radius:12px;
+          text-decoration:none;
+          font-weight:700;
+          font-size:14px;
+          color:#ffffff;
+          background: linear-gradient(135deg, #059669, #0284c7);
+          box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+         ">
+        {{ button_text|default:"📊 Zum Live-Dashboard" }}
+      </a>
+    </td>
+  </tr>
+</table>
+
+<p style="font-size:11px; color:#9ca3af; text-align:center; margin-top:16px;">
+  {{ settings_hint|default:"Du erhältst diese E-Mail, da du den wöchentlichen Energie-Report in deinem Profil aktiviert hast. Einstellungen können jederzeit unter Profil > Benachrichtigungen geändert werden." }}
+</p>
+{% endblock %}

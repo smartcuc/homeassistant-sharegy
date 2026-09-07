@@ -168,6 +168,10 @@ class UserSettings(models.Model):
         default="welcome",
     )
 
+    # --- E-Mail Benachrichtigungen & Reports ---
+    notify_weekly_report = models.BooleanField(default=True)
+    notify_critical_alerts = models.BooleanField(default=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     @property

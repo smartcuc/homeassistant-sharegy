@@ -1,0 +1,20 @@
+{{ headline|default:"Dein wöchentlicher Energie- & Autarkie-Report" }} ⚡
+==================================================
+
+{{ period_label|default:"Zeitraum" }}: {{ period_str|default:"Letzte 7 Tage" }}
+
+{{ greeting|default:"Hallo" }}{% if user_name %} {{ user_name }}{% endif %},
+
+{{ intro_text|default:"hier ist deine persönliche Energie-Bilanz der vergangenen Woche im Überblick:" }}
+
+- {{ pv_generated_label|default:"PV-Erzeugung" }}: {{ pv_generated_kwh|default:"0.0" }} kWh
+- {{ self_consumption_label|default:"Eigenverbrauch" }}: {{ self_consumed_kwh|default:"0.0" }} kWh
+- {{ autarky_label|default:"Autarkiegrad" }}: {{ autarky_pct|default:"0" }} %
+- {{ savings_label|default:"Erzielte Ersparnis" }}: {{ saved_eur|default:"0.00" }} €
+- {{ grid_feedin_label|default:"Netzeinspeisung" }}: {{ grid_feedin_kwh|default:"0.0" }} kWh
+- {{ grid_purchased_label|default:"Netzbezug" }}: {{ grid_purchased_kwh|default:"0.0" }} kWh
+
+Live-Dashboard: {{ dashboard_url|default:"https://sharegy.de/dashboard" }}
+
+--
+Sharegy ⚡ Intelligentes Energiemanagement

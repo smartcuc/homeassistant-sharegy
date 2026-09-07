@@ -1,0 +1,78 @@
+{% extends "emails/base.html" %}
+
+{% block content %}
+<div style="background:#fef2f2; border-left:4px solid #ef4444; border-radius:8px; padding:12px 16px; margin-bottom:20px;">
+  <span style="font-size:12px; font-weight:800; text-transform:uppercase; color:#b91c1c; letter-spacing:0.5px;">
+    ⚠️ {{ severity_badge|default:"KRITISCHE HARDWARE-WARNUNG" }}
+  </span>
+</div>
+
+<h2 style="font-size:20px; font-weight:700; color:#111827; margin-top:0; margin-bottom:12px;">
+  {{ headline|default:"Kritischer Hardware-Alarm" }}: {{ alert_title }}
+</h2>
+
+<p style="color:#4b5563; line-height:1.6; font-size:14px;">
+  {{ greeting|default:"Hallo" }}{% if user_name %} {{ user_name }}{% endif %},<br>
+  {{ intro_text|default:"unser Überwachungssystem hat soeben eine kritische Störung bei deiner Hardware festgestellt:" }}
+</p>
+
+<!-- ALERT DETAILS BOX -->
+<div style="background:#f8fafc; border-radius:12px; padding:16px; margin:20px 0; border:1px solid #e2e8f0;">
+  {% if device_name %}
+  <div style="margin-bottom:10px;">
+    <span style="font-size:11px; font-weight:700; text-transform:uppercase; color:#64748b;">
+      {{ device_label|default:"Betroffenes Gerät / System" }}:
+    </span>
+    <div style="font-size:14px; font-weight:700; color:#0f172a; margin-top:2px;">
+      🔌 {{ device_name }}
+    </div>
+  </div>
+  {% endif %}
+
+  <div style="margin-bottom:10px;">
+    <span style="font-size:11px; font-weight:700; text-transform:uppercase; color:#64748b;">
+      {{ message_label|default:"Meldung" }}:
+    </span>
+    <div style="font-size:13px; color:#334155; line-height:1.5; margin-top:2px;">
+      {{ alert_message }}
+    </div>
+  </div>
+
+  {% if action_hint %}
+  <div style="margin-top:12px; padding-top:12px; border-top:1px dashed #cbd5e1;">
+    <span style="font-size:11px; font-weight:700; text-transform:uppercase; color:#b91c1c;">
+      🛠️ {{ action_label|default:"Empfohlene Sofortmaßnahme" }}:
+    </span>
+    <div style="font-size:13px; font-weight:600; color:#991b1b; margin-top:2px;">
+      {{ action_hint }}
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- CTA BUTTON -->
+<table align="center" role="presentation" cellspacing="0" cellpadding="0" style="margin:26px auto 16px;">
+  <tr>
+    <td align="center">
+      <a href="{{ action_url|default:'https://sharegy.de/alerts' }}"
+         style="
+          display:inline-block;
+          padding:13px 26px;
+          border-radius:12px;
+          text-decoration:none;
+          font-weight:700;
+          font-size:14px;
+          color:#ffffff;
+          background: linear-gradient(135deg, #dc2626, #ea580c);
+          box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
+         ">
+        {{ button_text|default:"🛠️ Alarm im System prüfen" }}
+      </a>
+    </td>
+  </tr>
+</table>
+
+<p style="font-size:11px; color:#9ca3af; text-align:center; margin-top:16px;">
+  {{ settings_hint|default:"Du erhältst diese Warnung per E-Mail, da kritische Hardware-Alarme in deinem Profil aktiviert sind." }}
+</p>
+{% endblock %}

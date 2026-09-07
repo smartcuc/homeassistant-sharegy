@@ -1,0 +1,21 @@
+KRITISCHE HARDWARE-WARNUNG 🚨
+=============================
+
+{{ alert_title }}
+
+{{ greeting|default:"Hallo" }}{% if user_name %} {{ user_name }}{% endif %},
+
+{{ intro_text|default:"unser Überwachungssystem hat soeben eine kritische Störung bei deiner Hardware festgestellt:" }}
+
+{% if device_name %}
+- {{ device_label|default:"Gerät" }}: {{ device_name }}
+{% endif %}
+- {{ message_label|default:"Meldung" }}: {{ alert_message }}
+{% if action_hint %}
+- {{ action_label|default:"Empfohlene Sofortmaßnahme" }}: {{ action_hint }}
+{% endif %}
+
+Prüfen im System: {{ action_url|default:"https://sharegy.de/alerts" }}
+
+--
+Sharegy ⚡ Intelligentes Energiemanagement

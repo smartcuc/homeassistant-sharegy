@@ -313,5 +313,105 @@ class EnterpriseRBACTest(TestCase):
         # 4. Verify session is flushed / user logged out
         self.assertIsNone(self.client.session.get("_auth_user_id"))
 
+    def test_user_settings_notifications_get_and_post(self):
+        self.client.force_login(self.community_member)
+
+        # GET settings
+        resp_get = self.client.get("/api/settings/")
+        self.assertEqual(resp_get.status_code, 200)
+        self.assertTrue(resp_get.json()["notify_weekly_report"])
+        self.assertTrue(resp_get.json()["notify_critical_alerts"])
+
+        # POST update settings (disable weekly, keep critical, change lang to pl)
+        resp_post = self.client.post(
+            "/api/settings/",
+            data={
+                "notify_weekly_report": False,
+                "notify_critical_alerts": True,
+                "language": "pl",
+            },
+            format="json",
+        )
+        self.assertEqual(resp_post.status_code, 200)
+        self.assertFalse(resp_post.json()["notify_weekly_report"])
+        self.assertTrue(resp_post.json()["notify_critical_alerts"])
+        self.assertEqual(resp_post.json()["language"], "pl")
+
+        # Verify persisted in DB
+        self.community_member.settings.refresh_from_db()
+        self.assertFalse(self.community_member.settings.notify_weekly_report)
+        self.assertTrue(self.community_member.settings.notify_critical_alerts)
+        self.assertEqual(self.community_member.settings.language, "pl")
+
+    def test_multilingual_weekly_report_email_dispatch(self):
+        from django.core import mail
+        from accounts.services.email_service import send_weekly_report_email
+
+        mail.outbox = []
+        report_data = {
+            "pv_generated_kwh": 128.4,
+            "self_consumed_kwh": 92.1,
+            "autarky_pct": 74,
+            "saved_eur": 38.50,
+            "grid_feedin_kwh": 36.3,
+            "grid_purchased_kwh": 32.0,
+            "period_str": "01.09.2026 – 07.09.2026",
+        }
+
+        # 1. German
+        send_weekly_report_email(self.community_member, report_data, language="de")
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("Dein wöchentlicher Energie- & Autarkie-Report", mail.outbox[0].subject)
+        self.assertIn("128.4 kWh", mail.outbox[0].body)
+        self.assertIn("38.50 €", mail.outbox[0].body)
+
+        # 2. English
+        mail.outbox = []
+        send_weekly_report_email(self.community_member, report_data, language="en")
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("Your weekly energy & autarky report", mail.outbox[0].subject)
+        self.assertIn("Solar Generation", mail.outbox[0].body)
+
+        # 3. Polish
+        mail.outbox = []
+        send_weekly_report_email(self.community_member, report_data, language="pl")
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("Twój tygodniowy raport energii i autarkii", mail.outbox[0].subject)
+        self.assertIn("Produkcja solarna", mail.outbox[0].body)
+
+    def test_multilingual_critical_alert_email_dispatch(self):
+        from django.core import mail
+        from accounts.services.email_service import send_critical_alert_email
+
+        mail.outbox = []
+        alert_data = {
+            "title": "Wechselrichter Offline (Kommunikationsabbruch)",
+            "message": "Seit 15 Minuten werden keine Telemetriedaten mehr empfangen.",
+            "device_name": "Fronius Symo 10.0-3-M",
+            "action_hint": "LAN/WLAN-Verbindung und Sicherungsautomat F14 prüfen.",
+        }
+
+        # 1. German
+        send_critical_alert_email(self.community_member, alert_data, language="de")
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("🚨 Kritische Warnung", mail.outbox[0].subject)
+        self.assertIn("Wechselrichter Offline", mail.outbox[0].body)
+        self.assertIn("Fronius Symo", mail.outbox[0].body)
+
+        # 2. English
+        mail.outbox = []
+        send_critical_alert_email(self.community_member, alert_data, language="en")
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("🚨 Critical Alert", mail.outbox[0].subject)
+        self.assertIn("Recommended Action", mail.outbox[0].body)
+
+        # 3. Polish
+        mail.outbox = []
+        send_critical_alert_email(self.community_member, alert_data, language="pl")
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("🚨 Alert krytyczny", mail.outbox[0].subject)
+        self.assertIn("Zalecane działanie", mail.outbox[0].body)
+
+
 
 

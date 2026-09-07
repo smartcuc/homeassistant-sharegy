@@ -146,6 +146,46 @@ export default function Profile() {
     const [requestingEmailChange, setRequestingEmailChange] = useState(false);
     const [emailChangeSuccess, setEmailChangeSuccess] = useState(false);
 
+    // --- EMAIL NOTIFICATION PREFERENCES ---
+    const [notifyWeekly, setNotifyWeekly] = useState(true);
+    const [notifyCritical, setNotifyCritical] = useState(true);
+    const [isSavingNotification, setIsSavingNotification] = useState(false);
+
+    useEffect(() => {
+        if (settings) {
+            if (settings.notify_weekly_report !== undefined) {
+                setNotifyWeekly(Boolean(settings.notify_weekly_report));
+            }
+            if (settings.notify_critical_alerts !== undefined) {
+                setNotifyCritical(Boolean(settings.notify_critical_alerts));
+            }
+        }
+    }, [settings]);
+
+    const handleToggleNotification = async (key, val) => {
+        const nextWeekly = key === "notify_weekly_report" ? val : notifyWeekly;
+        const nextCritical = key === "notify_critical_alerts" ? val : notifyCritical;
+        if (key === "notify_weekly_report") setNotifyWeekly(val);
+        if (key === "notify_critical_alerts") setNotifyCritical(val);
+
+        setIsSavingNotification(true);
+        try {
+            await apiFetch("/api/settings/", {
+                method: "POST",
+                body: JSON.stringify({
+                    notify_weekly_report: nextWeekly,
+                    notify_critical_alerts: nextCritical,
+                }),
+            });
+            await queryClient.invalidateQueries({ queryKey: ["settings"] });
+            showSuccess(t("profile.notification_saved", "E-Mail-Einstellungen gespeichert!"));
+        } catch (err) {
+            showError(t("profile.notification_save_error", "Fehler beim Speichern der Benachrichtigungseinstellungen."));
+        } finally {
+            setIsSavingNotification(false);
+        }
+    };
+
     // --- REVOKE MAGIC LINKS & LOGOUT WORKFLOW ---
     const [showRevokeModal, setShowRevokeModal] = useState(false);
     const [revokingLinks, setRevokingLinks] = useState(false);
@@ -900,19 +940,45 @@ export default function Profile() {
                         </p>
 
                         <div className="space-y-3 text-xs">
-                            <label className="flex items-start gap-3 p-3.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/40 cursor-pointer">
-                                <input type="checkbox" defaultChecked className="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500" />
-                                <div>
-                                    <div className="font-bold text-gray-900 dark:text-white">{t("profile.notify_weekly", "Wöchentlicher Energie- & Autarkie-Report")}</div>
-                                    <div className="text-gray-500 dark:text-gray-400 text-[11px]">{t("profile.notify_weekly_sub", "Jeden Montag um 08:00 Uhr: PV-Erzeugung, Eigenverbrauch, Netzeinspeisung und Ersparnis.")}</div>
+                            <label className="flex items-start gap-3 p-3.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/40 cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/70 transition">
+                                <input
+                                    type="checkbox"
+                                    checked={notifyWeekly}
+                                    onChange={(e) => handleToggleNotification("notify_weekly_report", e.target.checked)}
+                                    disabled={isSavingNotification}
+                                    className="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                                />
+                                <div className="flex-1">
+                                    <div className="flex items-center justify-between">
+                                        <span className="font-bold text-gray-900 dark:text-white">{t("profile.notify_weekly", "Wöchentlicher Energie- & Autarkie-Report")}</span>
+                                        {notifyWeekly && (
+                                            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
+                                                Aktiv (Mo 08:00)
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="text-gray-500 dark:text-gray-400 text-[11px] mt-0.5">{t("profile.notify_weekly_sub", "Jeden Montag um 08:00 Uhr: PV-Erzeugung, Eigenverbrauch, Netzeinspeisung und Ersparnis in deiner Sprache.")}</div>
                                 </div>
                             </label>
 
-                            <label className="flex items-start gap-3 p-3.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/40 cursor-pointer">
-                                <input type="checkbox" defaultChecked className="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500" />
-                                <div>
-                                    <div className="font-bold text-gray-900 dark:text-white">{t("profile.notify_critical", "Kritische Hardware-Warnungen (Sofort)")}</div>
-                                    <div className="text-gray-500 dark:text-gray-400 text-[11px]">{t("profile.notify_critical_sub", "Sofortige E-Mail bei Wechselrichter-Offline, Batterie-Tiefentladung oder Kommunikationsausfall.")}</div>
+                            <label className="flex items-start gap-3 p-3.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/40 cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/70 transition">
+                                <input
+                                    type="checkbox"
+                                    checked={notifyCritical}
+                                    onChange={(e) => handleToggleNotification("notify_critical_alerts", e.target.checked)}
+                                    disabled={isSavingNotification}
+                                    className="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                                />
+                                <div className="flex-1">
+                                    <div className="flex items-center justify-between">
+                                        <span className="font-bold text-gray-900 dark:text-white">{t("profile.notify_critical", "Kritische Hardware-Warnungen (Sofort)")}</span>
+                                        {notifyCritical && (
+                                            <span className="text-[10px] font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/60 px-2 py-0.5 rounded border border-rose-200 dark:border-rose-800">
+                                                Aktiv (Echtzeit)
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="text-gray-500 dark:text-gray-400 text-[11px] mt-0.5">{t("profile.notify_critical_sub", "Sofortige E-Mail bei Wechselrichter-Offline, Batterie-Tiefentladung oder Kommunikationsausfall.")}</div>
                                 </div>
                             </label>
                         </div>

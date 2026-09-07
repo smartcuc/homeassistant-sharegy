@@ -61,6 +61,37 @@ class UserSettingsView(APIView):
                 "usage_mode": settings_obj.usage_mode,
                 "language": settings_obj.language,
                 "timezone": settings_obj.timezone,
+                "notify_weekly_report": settings_obj.notify_weekly_report,
+                "notify_critical_alerts": settings_obj.notify_critical_alerts,
+            }
+        )
+
+    def post(self, request):
+        settings_obj, _ = UserSettings.objects.get_or_create(user=request.user)
+        data = request.data
+
+        if "notify_weekly_report" in data:
+            settings_obj.notify_weekly_report = bool(data.get("notify_weekly_report"))
+        if "notify_critical_alerts" in data:
+            settings_obj.notify_critical_alerts = bool(data.get("notify_critical_alerts"))
+        if "language" in data:
+            lang = str(data.get("language", "")).strip().lower()
+            if lang in ["de", "en", "pl"]:
+                settings_obj.language = lang
+        if "timezone" in data:
+            settings_obj.timezone = str(data.get("timezone", "")).strip()
+
+        settings_obj.save()
+
+        return Response(
+            {
+                "status": "saved",
+                "onboarding_step": settings_obj.onboarding_step,
+                "usage_mode": settings_obj.usage_mode,
+                "language": settings_obj.language,
+                "timezone": settings_obj.timezone,
+                "notify_weekly_report": settings_obj.notify_weekly_report,
+                "notify_critical_alerts": settings_obj.notify_critical_alerts,
             }
         )
 
