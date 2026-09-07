@@ -121,6 +121,34 @@ export default function Profile() {
     const [selectedTimezone, setSelectedTimezone] = useState(null);
     const [savingTimezone, setSavingTimezone] = useState(false);
 
+    // --- EMAIL CHANGE WORKFLOW ---
+    const [showEmailModal, setShowEmailModal] = useState(false);
+    const [newEmailInput, setNewEmailInput] = useState("");
+    const [requestingEmailChange, setRequestingEmailChange] = useState(false);
+    const [emailChangeSuccess, setEmailChangeSuccess] = useState(false);
+
+    const handleRequestEmailChange = async (e) => {
+        if (e) e.preventDefault();
+        const trimmed = newEmailInput.trim().toLowerCase();
+        if (!trimmed || !trimmed.includes("@") || !trimmed.includes(".")) {
+            showError("Bitte gib eine gültige E-Mail-Adresse ein.");
+            return;
+        }
+        setRequestingEmailChange(true);
+        try {
+            await apiFetch("/api/change-email/", {
+                method: "POST",
+                body: JSON.stringify({ new_email: trimmed }),
+            });
+            setEmailChangeSuccess(true);
+            showSuccess(`Bestätigungslink an ${trimmed} gesendet!`);
+        } catch (err) {
+            showError(err?.data?.error || err?.message || "Fehler beim Anfordern der E-Mail-Änderung.");
+        } finally {
+            setRequestingEmailChange(false);
+        }
+    };
+
     const timezoneQuery = useQuery({
         queryKey: ["timezones"],
         queryFn: () => apiFetch("/api/timezones/"),
@@ -238,7 +266,7 @@ export default function Profile() {
 
     // Tabs Definition
     const tabs = [
-        { id: "profile", label: t("profile.tab_personal", "Stammdaten & Person"), icon: "👤", badge: null },
+        { id: "profile", label: t("profile.tab_personal", "Persönliche Angaben"), icon: "👤", badge: null },
         { id: "company", label: t("profile.tab_company", "Unternehmen & B2B"), icon: "🏢", badge: formData.customer_type === "business" ? "B2B" : null },
         { id: "notifications", label: t("profile.tab_notifications", "Benachrichtigungen"), icon: "🔔", badge: null },
         { id: "api", label: t("profile.tab_api", "API & Entwickler"), icon: "⚡", badge: "REST" },
@@ -287,20 +315,13 @@ export default function Profile() {
                         </div>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex items-center gap-3">
                         <Link
                             to="/app/billing"
-                            className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition border border-white/10 flex items-center gap-2 backdrop-blur-xs"
+                            className="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition border border-white/10 flex items-center gap-2 backdrop-blur-xs shadow-xs"
                         >
                             <span>💳</span>
                             <span>{t("profile.manage_subscription", "Abonnement verwalten")}</span>
-                        </Link>
-                        <Link
-                            to="/app/help"
-                            className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition shadow-md flex items-center gap-1.5"
-                        >
-                            <span>❓</span>
-                            <span>{t("profile.help_center", "Hilfe & Support")}</span>
                         </Link>
                     </div>
                 </div>
@@ -346,7 +367,7 @@ export default function Profile() {
             </div>
 
             {/* ========================================================= */}
-            {/* TAB 1: STAMMDATEN & PERSON */}
+            {/* TAB 1: PERSÖNLICHE ANGABEN */}
             {/* ========================================================= */}
             {activeTab === "profile" && (
                 <div className="grid gap-6 md:grid-cols-2 animate-in fade-in duration-200">
@@ -354,25 +375,42 @@ export default function Profile() {
                     <Card>
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                <span>👤</span> {t("profile.personal_info", "Persönliche Stammdaten")}
+                                <span>👤</span> {t("profile.personal_info", "Persönliche Angaben & Kontakt")}
                             </h2>
                             <span className="text-xs text-gray-400">ID: #{user?.id || "–"}</span>
                         </div>
 
                         <form onSubmit={handleSaveProfile} className="space-y-4">
+                            {/* EMAIL WITH CHANGE WORKFLOW */}
                             <div>
-                                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-1">
-                                    {t("profile.email", "E-Mail-Adresse (Login)")}
-                                </label>
-                                <input
-                                    type="email"
-                                    disabled
-                                    value={user?.email || ""}
-                                    className="w-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-slate-500 cursor-not-allowed font-medium"
-                                />
-                                <span className="text-[11px] text-gray-400 mt-1 block">
-                                    {t("profile.email_change_hint", "Zur Änderung der Login-Adresse wende dich bitte an den Support.")}
-                                </span>
+                                <div className="flex items-center justify-between mb-1">
+                                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">
+                                        {t("profile.email", "E-Mail-Adresse (Login)")}
+                                    </label>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setShowEmailModal(true);
+                                            setEmailChangeSuccess(false);
+                                            setNewEmailInput("");
+                                        }}
+                                        className="text-xs font-bold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 cursor-pointer flex items-center gap-1"
+                                    >
+                                        <span>✏️</span>
+                                        <span>{t("profile.change_email_btn", "E-Mail ändern")}</span>
+                                    </button>
+                                </div>
+                                <div className="relative">
+                                    <input
+                                        type="email"
+                                        disabled
+                                        value={user?.email || ""}
+                                        className="w-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-slate-600 dark:text-slate-300 cursor-not-allowed font-medium pr-24"
+                                    />
+                                    <span className="absolute right-3 top-2.5 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800">
+                                        ✓ Verifiziert
+                                    </span>
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-3">
@@ -425,7 +463,7 @@ export default function Profile() {
                                     className="w-full sm:w-auto px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-xs transition cursor-pointer flex items-center justify-center gap-2"
                                 >
                                     <span>💾</span>
-                                    <span>{savingProfile ? t("common.saving", "Speichere...") : t("profile.save_personal", "Stammdaten speichern")}</span>
+                                    <span>{savingProfile ? t("common.saving", "Speichere...") : t("profile.save_personal", "Angaben speichern")}</span>
                                 </button>
                             </div>
                         </form>
@@ -433,44 +471,51 @@ export default function Profile() {
 
                     {/* LANGUAGE & REGION */}
                     <div className="space-y-6">
-                        {/* UI LANGUAGE */}
+                        {/* COMPACT UI LANGUAGE GRID */}
                         <Card>
                             <h2 className="text-base font-bold text-gray-900 dark:text-white mb-1 flex items-center gap-2">
                                 <span>🌐</span> {t("profile.ui_language", "Sprache der Benutzeroberfläche")}
                             </h2>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
-                                {t("profile.ui_language_desc", "Wähle deine bevorzugte Sprache. Die Änderung wird sofort aktiv.")}
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                                {t("profile.ui_language_desc", "Wähle deine Sprache. Die Änderung wird sofort aktiv.")}
                             </p>
 
-                            <div className="flex flex-col gap-2">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                                 {[
-                                    { id: "de", label: "🇩🇪 Deutsch", desc: "Standard (Deutschland, Österreich, Schweiz)" },
-                                    { id: "en", label: "🇬🇧 English", desc: "International English" },
-                                    { id: "pl", label: "🇵🇱 Polski", desc: "Język polski" },
+                                    { id: "de", label: "Deutsch", flag: "🇩🇪" },
+                                    { id: "en", label: "English", flag: "🇬🇧" },
+                                    { id: "pl", label: "Polski", flag: "🇵🇱" },
+                                    { id: "fr", label: "Français", flag: "🇫🇷", disabled: true, tag: "In Kürze" },
+                                    { id: "nl", label: "Nederlands", flag: "🇳🇱", disabled: true, tag: "In Kürze" },
+                                    { id: "es", label: "Español", flag: "🇪🇸", disabled: true, tag: "In Kürze" },
                                 ].map((lang) => {
                                     const isActive = currentLang === lang.id;
                                     return (
                                         <button
                                             key={lang.id}
                                             type="button"
-                                            onClick={() => handleLanguageChange(lang.id)}
-                                            className={`p-3 rounded-xl border text-left transition flex items-center justify-between cursor-pointer ${
+                                            disabled={lang.disabled}
+                                            onClick={() => !lang.disabled && handleLanguageChange(lang.id)}
+                                            className={`p-2.5 rounded-xl border text-left transition flex items-center justify-between cursor-pointer ${
                                                 isActive
                                                     ? "border-indigo-600 bg-indigo-50/80 dark:bg-indigo-950/40 dark:border-indigo-500 ring-2 ring-indigo-500/20 shadow-xs"
-                                                    : "border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-gray-300 dark:hover:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700/50"
+                                                    : lang.disabled
+                                                        ? "border-dashed border-gray-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 opacity-60 cursor-not-allowed"
+                                                        : "border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-gray-300 dark:hover:border-slate-600 hover:bg-gray-50"
                                             }`}
                                         >
-                                            <div>
-                                                <div className="font-semibold text-sm text-gray-900 dark:text-white">
-                                                    {lang.label}
-                                                </div>
-                                                <div className="text-[11px] text-gray-500 dark:text-gray-400">
-                                                    {lang.desc}
-                                                </div>
+                                            <div className="flex items-center gap-2 truncate">
+                                                <span className="text-base">{lang.flag}</span>
+                                                <span className="font-semibold text-xs text-gray-900 dark:text-white truncate">{lang.label}</span>
                                             </div>
                                             {isActive && (
-                                                <span className="text-xs font-bold text-indigo-700 dark:text-indigo-300 bg-white dark:bg-slate-900 px-2 py-0.5 rounded-full border border-indigo-200 dark:border-indigo-800">
-                                                    {t("common.active", "Aktiv")}
+                                                <span className="text-[10px] font-bold text-indigo-700 dark:text-indigo-300 bg-white dark:bg-slate-900 px-1.5 py-0.2 rounded border border-indigo-200 dark:border-indigo-800">
+                                                    ✓
+                                                </span>
+                                            )}
+                                            {lang.tag && (
+                                                <span className="text-[9px] font-medium text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-slate-800 px-1.5 py-0.2 rounded">
+                                                    {lang.tag}
                                                 </span>
                                             )}
                                         </button>
@@ -999,6 +1044,94 @@ export default function Profile() {
                             </button>
                         </div>
                     </Card>
+                </div>
+            )}
+
+            {/* CHANGE EMAIL MODAL */}
+            {showEmailModal && (
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in duration-150">
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-gray-200 dark:border-slate-800 w-full max-w-md overflow-hidden flex flex-col">
+                        <div className="p-6 bg-slate-50 dark:bg-slate-800/80 border-b border-gray-100 dark:border-slate-800 flex items-center gap-3">
+                            <span className="text-2xl p-2 bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 rounded-2xl">✉️</span>
+                            <div>
+                                <h3 className="text-base font-bold text-gray-900 dark:text-white">
+                                    E-Mail-Adresse ändern
+                                </h3>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                    Sicherheitsbestätigung via E-Mail-Link
+                                </p>
+                            </div>
+                        </div>
+
+                        {emailChangeSuccess ? (
+                            <div className="p-6 space-y-4 text-center">
+                                <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center text-2xl mx-auto border border-emerald-200 dark:border-emerald-800">
+                                    ✅
+                                </div>
+                                <h4 className="font-bold text-gray-900 dark:text-white text-sm">Bestätigungslink gesendet!</h4>
+                                <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                                    Wir haben eine Verifizierungs-E-Mail an <strong className="font-mono text-indigo-600 dark:text-indigo-400">{newEmailInput}</strong> gesendet. Bitte klicke auf den Link in der E-Mail (gültig für 24 Stunden), um die Änderung abzuschließen.
+                                </p>
+                                <div className="pt-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setShowEmailModal(false);
+                                            setEmailChangeSuccess(false);
+                                            setNewEmailInput("");
+                                        }}
+                                        className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
+                                    >
+                                        Verstanden & Schließen
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <form onSubmit={handleRequestEmailChange}>
+                                <div className="p-6 space-y-4 text-xs sm:text-sm text-gray-700 dark:text-gray-300">
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                                        Aus Sicherheitsgründen senden wir einen Bestätigungslink an deine neue Adresse. Deine aktuelle Adresse bleibt aktiv, bis du den Link bestätigt hast.
+                                    </p>
+
+                                    <div className="space-y-1.5">
+                                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">
+                                            Neue E-Mail-Adresse
+                                        </label>
+                                        <input
+                                            type="email"
+                                            required
+                                            value={newEmailInput}
+                                            onChange={(e) => setNewEmailInput(e.target.value)}
+                                            placeholder="neue.adresse@beispiel.de"
+                                            className="w-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none text-gray-900 dark:text-white"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="p-4 bg-slate-50 dark:bg-slate-800/60 border-t border-gray-100 dark:border-slate-800 flex items-center justify-end gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setShowEmailModal(false);
+                                            setNewEmailInput("");
+                                        }}
+                                        className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 hover:bg-gray-100 transition cursor-pointer"
+                                    >
+                                        Abbrechen
+                                    </button>
+
+                                    <button
+                                        type="submit"
+                                        disabled={requestingEmailChange || !newEmailInput.trim()}
+                                        className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-bold shadow-xs transition cursor-pointer flex items-center gap-1.5"
+                                    >
+                                        <span>✉️</span>
+                                        <span>{requestingEmailChange ? "Sende Link..." : "Bestätigungslink senden"}</span>
+                                    </button>
+                                </div>
+                            </form>
+                        )}
+                    </div>
                 </div>
             )}
 

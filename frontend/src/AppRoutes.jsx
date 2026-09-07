@@ -8,6 +8,7 @@ import TenantPageWrapper from "./TenantPageWrapper";
 import LandingPage from "./LandingPage";
 import Login from "./pages/Login";
 import MagicLogin from "./pages/MagicLogin";
+import ConfirmEmailChangePage from "./pages/ConfirmEmailChangePage";
 import Join from "./pages/Join";
 import EnergyPage from "./pages/EnergyPage";
 import Impressum from "./pages/Impressum";
@@ -25,6 +26,7 @@ export default function AppRoutes() {
             <Route path="/t/:token" element={<MagicLogin />} />
             <Route path="/magic-login" element={<MagicLogin />} />
             <Route path="/auth/magic/:token" element={<MagicLogin />} />
+            <Route path="/confirm-email-change" element={<ConfirmEmailChangePage />} />
 
             <Route path="/impressum" element={<Impressum />} />
             <Route path="/datenschutz" element={<Datenschutz />} />

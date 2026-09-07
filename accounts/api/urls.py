@@ -4,7 +4,7 @@
 
 from django.urls import path
 from .views import UserSettingsView, UpdateOnboardingStepView
-from .views import UserProfileView
+from .views import UserProfileView, ChangeEmailRequestView, ConfirmEmailChangeView
 from .views import UserUsageModeView
 from .views import UserLanguageView, UserTimezoneView, TimezoneListView
 from .views import UseInviteView
@@ -32,6 +32,8 @@ urlpatterns = [
 
 urlpatterns += [
     path("profile/", UserProfileView.as_view()),
+    path("change-email/", ChangeEmailRequestView.as_view()),
+    path("confirm-email-change/", ConfirmEmailChangeView.as_view()),
 ]
 
 urlpatterns += [

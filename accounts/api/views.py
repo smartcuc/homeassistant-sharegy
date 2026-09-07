@@ -597,6 +597,114 @@ class MagicLoginView(APIView):
         return Response({"status": "ok"})
 
 
+# ---------------- EMAIL CHANGE (ENTERPRISE VERIFICATION) ---------------- #
+
+class ChangeEmailRequestView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        from django.core import signing
+        from django.core.mail import EmailMultiAlternatives
+
+        new_email = request.data.get("new_email", "")
+        if isinstance(new_email, str):
+            new_email = new_email.strip().lower()
+
+        if not new_email or "@" not in new_email or "." not in new_email:
+            return Response({"error": "Bitte eine gültige E-Mail-Adresse eingeben."}, status=400)
+
+        if new_email == request.user.email.lower():
+            return Response({"error": "Die neue E-Mail-Adresse entspricht bereits der aktuellen Adresse."}, status=400)
+
+        if User.objects.filter(email__iexact=new_email).exclude(id=request.user.id).exists():
+            return Response({"error": "Diese E-Mail-Adresse wird bereits von einem anderen Konto verwendet."}, status=400)
+
+        # Token erzeugen mit 24h Gültigkeit
+        token = signing.dumps(
+            {"user_id": request.user.id, "new_email": new_email},
+            salt="sharegy-change-email-v1",
+        )
+
+        frontend_url = getattr(settings, "FRONTEND_URL", "https://sharegy.de").rstrip("/")
+        confirm_link = f"{frontend_url}/confirm-email-change?token={token}"
+        from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "Sharegy <invite@sharegy.cloud>")
+
+        # 1. Bestätigungs-Mail an NEUE Adresse
+        try:
+            subject = "Bestätige deine neue E-Mail-Adresse für Sharegy"
+            text_body = (
+                f"Hallo {request.user.first_name or 'dort'},\n\n"
+                f"du hast eine Änderung deiner E-Mail-Adresse für deinen Sharegy-Account angefordert.\n\n"
+                f"Klicke auf folgenden Link, um deine neue E-Mail-Adresse ({new_email}) zu bestätigen:\n"
+                f"{confirm_link}\n\n"
+                f"Der Link ist 24 Stunden gültig.\n\n"
+                f"Dein Sharegy Team"
+            )
+            msg = EmailMultiAlternatives(subject, text_body, from_email, [new_email])
+            msg.send(fail_silently=False)
+        except Exception as exc:
+            logger.exception("Failed to send email change verification to %s: %s", new_email, exc)
+            return Response({"error": f"Mailversand an die neue Adresse fehlgeschlagen: {str(exc)}"}, status=400)
+
+        # 2. Sicherheits-Benachrichtigung an ALTE Adresse
+        try:
+            subj_old = "Sicherheitshinweis: E-Mail-Änderung für deinen Sharegy-Account angefordert"
+            text_old = (
+                f"Hallo {request.user.first_name or 'dort'},\n\n"
+                f"für deinen Sharegy-Account ({request.user.email}) wurde eine Änderung der E-Mail-Adresse auf {new_email} angefordert.\n\n"
+                f"Falls du dies nicht selbst veranlasst hast, kontaktiere bitte umgehend den Support.\n\n"
+                f"Dein Sharegy Team"
+            )
+            msg_old = EmailMultiAlternatives(subj_old, text_old, from_email, [request.user.email])
+            msg_old.send(fail_silently=True)
+        except Exception:
+            pass
+
+        return Response({"status": "sent", "new_email": new_email})
+
+
+class ConfirmEmailChangeView(APIView):
+    authentication_classes = []
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        from django.core import signing
+
+        token = request.data.get("token") or request.GET.get("token")
+        if not token:
+            return Response({"error": "Token fehlt."}, status=400)
+
+        try:
+            data = signing.loads(token, salt="sharegy-change-email-v1", max_age=86400)
+            user_id = data.get("user_id")
+            new_email = data.get("new_email")
+        except signing.SignatureExpired:
+            return Response({"error": "Der Bestätigungslink ist abgelaufen (Gültigkeit 24h). Bitte fordere einen neuen an."}, status=400)
+        except Exception:
+            return Response({"error": "Ungültiger oder beschädigter Bestätigungslink."}, status=400)
+
+        user = User.objects.filter(id=user_id).first()
+        if not user:
+            return Response({"error": "Benutzerkonto nicht gefunden."}, status=404)
+
+        if User.objects.filter(email__iexact=new_email).exclude(id=user.id).exists():
+            return Response({"error": "Diese E-Mail-Adresse ist inzwischen bereits vergeben."}, status=400)
+
+        old_email = user.email
+        user.email = new_email
+        user.username = new_email
+        user.save()
+
+        # Invalidate existing unconsumed magic tokens for security
+        MagicLoginToken.objects.filter(user=user, is_used=False).delete()
+
+        return Response({
+            "status": "confirmed",
+            "message": f"E-Mail-Adresse erfolgreich von {old_email} auf {new_email} geändert.",
+            "email": new_email,
+        })
+
+
 # ---------------- AUTH ---------------- #
 
 @method_decorator(csrf_exempt, name='dispatch')
