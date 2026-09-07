@@ -677,6 +677,29 @@
   - **Smarte EPEX-Ladefenster**: Automatische Erkennung und Ausweisung der günstigsten Ladezeiten (z. B. 13:00–16:00 Uhr) und teuersten Abendspitzen im Spotpreis-Modal.
   - **Mobile Touch-Optimierung**: Horizontale, swipe-fähige Filterleisten und Tabs auf kleinen Displays.
 
+### [x] 5.31 Netzeinspeisungs-Normalisierung & Schutz gegen ungemessene Erzeuger
+- **Dateien**: [`energy/ems/services.py`](file:///c:/Users/Public/Dev/eswes/energy/ems/services.py), [`energy/flow_engine.py`](file:///c:/Users/Public/Dev/eswes/energy/flow_engine.py), [`devices/services/metrics.py`](file:///c:/Users/Public/Dev/eswes/devices/services/metrics.py), [`energy/services/charts.py`](file:///c:/Users/Public/Dev/eswes/energy/services/charts.py), [`energy/services/balance.py`](file:///c:/Users/Public/Dev/eswes/energy/services/balance.py)
+- **Status**: ✅ **Erledigt**.
+  - **Einspeise-Normalisierung**: Automatische Vorzeichen-Auflösung für Smart-Meter/Inverter-Metriken (`grid_feed_in`, `feed_in_power`, `grid_export`, `export_power` etc.) als Netzeinspeisung.
+  - **Ungemessene Erzeuger-Erkennung**: Erkennt ungemessene 2. Wechselrichter / Balkonkraftwerke automatisch und verhindert negativen Hausverbrauch in Live-Flows, Charts und Bilanzen.
+
+---
+
+### [ ] 5.32 🌡️ Intelligente Fußbodenheizungs- & Heizkreis-Regelung (Thermischer Speicher)
+- **Fokus**: HEMS Dispatch-Hub Integration für Fußbodenheizungen und thermische Bauteilaktivierung.
+- **Konzept**:
+  - Nutzung des Estrichs als riesige, kostenlose thermische Batterie (Pre-Heating bei PV-Überschuss oder negativen dynamischen Börsenstrompreisen um +0,5°C bis +1,5°C).
+  - Passive Wärmeabgabe während teurer Abendstunden ohne zusätzlichen Netzbezug.
+  - Anbindung über Relais / Stellantriebe (z. B. Shelly Pro 4PM / 1PM an Heizkreisverteilern), Zigbee/Matter-Thermostate und SG-Ready/Modbus-Wärmepumpenmodulation.
+
+---
+
+### [ ] 5.33 ⛽ Mobilitäts- & Spritpreis-Radar (Günstigste Tankstellen im Umkreis)
+- **Fokus**: Alltags-Mehrwert & Abrundung des Mobilitäts-Bereichs für gemischte Haushalte (EV + Verbrenner/Hybrid).
+- **Konzept**:
+  - Live-Abfrage der 3 günstigsten Tankstellen im Umkreis von $X\,\text{km}$ (z. B. $5\,\text{km}$, $10\,\text{km}$, $25\,\text{km}$) via Tankerkönig-API / MTS-K des Bundeskartellamts.
+  - Anzeige für Diesel, Super E5 und Super E10 mit Preis, Distanz und Öffnungsstatus im Dashboard-/Mobilitäts-Widget.
+
 ---
 
 ## 🎯 7. Verbindliche Prioritätenliste & Ausstehende Roadmap
@@ -688,7 +711,7 @@
 │ • 🟢 Säule 1: Live-Sankey, Last-/PV-Forecasts, Smart Load Management Hub,     │
 │    1-Klick Quick Boost, BWWP SG-Ready Steuerung, OCPP 1.6-J CSMS Wallbox,      │
 │    Sungrow OpenAPI, ioBroker & HA Adapter, Multistring AC-Kopplung,           │
-│    Live-Pulse Topbar, Dark-Mode & 15 Handbuch-Artikel.                        │
+│    Live-Pulse Topbar, Dark-Mode, 15 Handbuch-Artikel & Unmeasured PV Guard.   │
 │ • ⚡ Säule 2: 15m OBIS-Clearing, Discovergy wMSB Hub, 3 Allokationsmodelle,    │
 │    Sharing-Tarife, Multi-Community Hub, PDF/Excel/XML-Exporte & Viral Sharing. │
 └───────────────────────────────────────────────────────────────────────────────┘
@@ -697,10 +720,13 @@
 ┌───────────────────────────────────────────────────────────────────────────────┐
 │ ⏳ AUSSTEHENDE AUFGABEN (OFFENE PUNKTE)                                       │
 ├───────────────────────────────────────────────────────────────────────────────┤
-│ 1. 🛡️ § 14a EnWG Hardware-Steuerbox Dimmung (4,2 kW Begrenzung via Modbus/EEBUS)│
-│ 2. 💳 Stripe & SEPA-Lastschriften Checkout für Free vs. Pro (4,99 €/Monat)     │
-│ 3. ⚡ Dynamische Börsenpreis-Sharingtarife (EPEX Spot Kopplung)                │
-│ 4. 📜 VNB Marktkommunikations-Bridge (EDIFACT / MSCONS Export)                │
+│ 1. 👤 Userprofil-Seiten (Company, Privacy, Security, Magic Link Auto-Logout)  │
+│ 2. 🌡️ Fußbodenheizungs-Steuerung & thermische Estrich-Vorladung               │
+│ 3. ⛽ Mobilitäts- & Spritpreis-Radar (Tankerkönig-API Widget)                  │
+│ 4. 🛡️ § 14a EnWG Hardware-Steuerbox Dimmung (4,2 kW Begrenzung via Modbus/EEBUS)│
+│ 5. 💳 Stripe & SEPA-Lastschriften Checkout für Free vs. Pro (4,99 €/Monat)     │
+│ 6. ⚡ Dynamische Börsenpreis-Sharingtarife (EPEX Spot Kopplung)                │
+│ 7. 📜 VNB Marktkommunikations-Bridge (EDIFACT / MSCONS Export)                │
 └───────────────────────────────────────────────────────────────────────────────┘
 ```
 
