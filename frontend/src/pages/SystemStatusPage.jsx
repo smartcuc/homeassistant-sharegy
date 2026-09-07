@@ -75,6 +75,15 @@ export default function SystemStatusPage() {
 
     const isAllOperational = healthData?.status === "operational";
 
+    // Berechtigungs-Prüfung: Nur HEMS-Admins und Sharegy-Sysadmins
+    const isSysAdmin = Boolean(user?.is_staff || user?.is_superuser || user?.is_platform_admin || user?.platform_role === "system_admin");
+    const isHemsAdmin = Boolean(isSysAdmin || user?.memberships?.some((m) => ["admin", "user_admin", "owner"].includes(m.role)) || user?.is_admin || user?.usage_mode === "landlord");
+    const canViewServerHardware = isSysAdmin || isHemsAdmin;
+
+    const visibleServices = (healthData?.services || []).filter(
+        (srv) => srv.id !== "server_resources" || canViewServerHardware
+    );
+
     return (
         <div className="p-6 max-w-7xl mx-auto space-y-6">
             {/* TOP HEADER */}
@@ -157,7 +166,7 @@ export default function SystemStatusPage() {
 
             {/* SERVICES GRID */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {healthData?.services?.map((srv) => {
+                {visibleServices.map((srv) => {
                     const isSrvOk = srv.status === "operational";
                     return (
                         <div
@@ -194,7 +203,7 @@ export default function SystemStatusPage() {
             </div>
 
             {/* 🖥️ HARDWARE- & KAPAZITÄTS-WÄCHTER (AUFRÜST-RADAR) */}
-            {healthData?.metrics?.server_hardware && (
+            {canViewServerHardware && healthData?.metrics?.server_hardware && (
                 <div className="p-6 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-3xl shadow-xs space-y-4">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-gray-100 dark:border-slate-800">
                         <div className="flex items-center gap-2.5">
