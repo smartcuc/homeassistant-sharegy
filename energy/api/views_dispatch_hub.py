@@ -10,6 +10,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from billing.services_subscription import get_or_create_subscription
 from energy.services.dispatch_hub import (
     get_load_management_hub_data,
     get_or_create_priority_config,
@@ -30,7 +31,11 @@ def load_management_hub_view(request):
     if not home:
         return Response({"error": "Kein Home für den aktuellen Benutzer gefunden."}, status=404)
 
+    sub = get_or_create_subscription(request.user)
+    is_pro = bool(sub and sub.is_pro_active)
+
     data = get_load_management_hub_data(home)
+    data["is_pro"] = is_pro
     return Response(data)
 
 
@@ -38,7 +43,7 @@ def load_management_hub_view(request):
 @permission_classes([IsAuthenticated])
 def load_management_priorities_view(request):
     """
-    Aktualisiert die Prioritäten-Kaskade (Merit-Order) und den Master-Modus.
+    Aktualisiert die Prioritäten-Kaskade (Merit-Order) und den Master-Modus (Pro Feature).
     Body:
     {
         "priority_order": ["battery", "bwwp", "wallbox", "pool", "ac", ...],
@@ -49,6 +54,17 @@ def load_management_priorities_view(request):
     home = request.user.homes.first()
     if not home:
         return Response({"error": "Kein Home für den aktuellen Benutzer gefunden."}, status=404)
+
+    sub = get_or_create_subscription(request.user)
+    if not (sub and sub.is_pro_active):
+        return Response(
+            {
+                "status": "error",
+                "code": "pro_required",
+                "message": "Die automatisierte Laststeuerung und Prioritäten-Kaskade erfordern ein aktives Sharegy Pro Abonnement.",
+            },
+            status=403,
+        )
 
     prio_cfg = get_or_create_priority_config(home)
 
@@ -68,6 +84,7 @@ def load_management_priorities_view(request):
 
     # Aktualisierte Daten zurückgeben
     updated_data = get_load_management_hub_data(home)
+    updated_data["is_pro"] = True
     return Response(updated_data)
 
 
@@ -75,7 +92,7 @@ def load_management_priorities_view(request):
 @permission_classes([IsAuthenticated])
 def load_management_action_view(request):
     """
-    Führt Sofort-Schaltungen und Aktions-Trigger für einzelne Lasten aus.
+    Führt Sofort-Schaltungen und Aktions-Trigger für einzelne Lasten aus (Pro Feature).
     Body:
     {
         "category": "bwwp" | "pool" | "ac" | "wallbox" | "battery" | "appliances",
@@ -87,6 +104,17 @@ def load_management_action_view(request):
     home = request.user.homes.first()
     if not home:
         return Response({"error": "Kein Home für den aktuellen Benutzer gefunden."}, status=404)
+
+    sub = get_or_create_subscription(request.user)
+    if not (sub and sub.is_pro_active):
+        return Response(
+            {
+                "status": "error",
+                "code": "pro_required",
+                "message": "Direktschaltungen und Last-Overrides erfordern ein aktives Sharegy Pro Abonnement.",
+            },
+            status=403,
+        )
 
     category = request.data.get("category", "")
     action = request.data.get("action", "")

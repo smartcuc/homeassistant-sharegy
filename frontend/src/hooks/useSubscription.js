@@ -16,6 +16,18 @@ export function useSubscription() {
     const isPro = Boolean(sub?.is_pro);
     const isLandlord = Boolean(sub?.is_landlord);
     const plan = sub?.plan || "free";
+    const availablePlans = query.data?.available_plans || {};
+
+    const proYearlyMonthlyEquiv = availablePlans?.pro_yearly?.price_monthly_equivalent
+        ? Number(availablePlans.pro_yearly.price_monthly_equivalent).toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+        : "4,17";
+    const proMonthlyPrice = availablePlans?.pro_monthly?.price_gross_eur
+        ? Number(availablePlans.pro_monthly.price_gross_eur).toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+        : "4,99";
+    const landlordMonthlyPrice = availablePlans?.landlord_monthly?.price_gross_eur
+        ? Number(availablePlans.landlord_monthly.price_gross_eur).toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+        : "14,99";
+
     const entitlements = sub?.entitlements || {
         unlimited_history: isPro,
         forecast_trio: isPro,
@@ -36,7 +48,10 @@ export function useSubscription() {
         status: sub?.status || "active",
         subscription: sub,
         entitlements,
-        availablePlans: query.data?.available_plans || {},
+        availablePlans,
+        proYearlyMonthlyEquiv,
+        proMonthlyPrice,
+        landlordMonthlyPrice,
         invoices: query.data?.invoices || [],
         isLoading: query.isLoading,
         isError: query.isError,

@@ -11,6 +11,7 @@ from django.core.cache import cache
 from rest_framework.test import APIClient
 
 from accounts.models import User
+from billing.models import EMSSubscription
 from devices.models import Home, Device, DeviceRole, DeviceConfig
 from energy.models import LoadPriorityConfig, LoadConsumerConfig, BWWPLoadManagementConfig
 from energy.services.dispatch_hub import get_load_management_hub_data
@@ -21,6 +22,13 @@ class DispatchHubTestCase(TestCase):
         cache.clear()
         self.client = APIClient()
         self.user = User.objects.create_user(username="hub_user@sharegy.de", email="hub_user@sharegy.de", password="pw")
+        self.sub, _ = EMSSubscription.objects.get_or_create(
+            user=self.user,
+            defaults={"plan": "pro_monthly", "status": "active"},
+        )
+        self.sub.plan = "pro_monthly"
+        self.sub.status = "active"
+        self.sub.save()
         self.home = Home.objects.create(name="Dispatch Test Home", user=self.user)
         self.client.force_authenticate(user=self.user)
 
@@ -100,3 +108,26 @@ class DispatchHubTestCase(TestCase):
         }, format="json")
         self.assertEqual(res_bwwp.status_code, 200)
         self.assertTrue(cache.get(f"device_relay_state_{self.dev_bwwp.id}"))
+
+    def test_free_user_pro_permission_blocked(self):
+        """Prüft, dass Free-User 403 Forbidden erhalten, wenn sie Aktionen oder Prioritäten ändern."""
+        self.sub.plan = "free"
+        self.sub.save()
+
+        res_hub = self.client.get("/api/energy/load-management/hub/")
+        self.assertEqual(res_hub.status_code, 200)
+        self.assertFalse(res_hub.data["is_pro"])
+
+        res_prio = self.client.post("/api/energy/load-management/hub/priorities/", {
+            "priority_order": ["pool", "battery"],
+        }, format="json")
+        self.assertEqual(res_prio.status_code, 403)
+        self.assertEqual(res_prio.data.get("code"), "pro_required")
+
+        res_action = self.client.post("/api/energy/load-management/hub/action/", {
+            "category": "pool",
+            "action": "start",
+        }, format="json")
+        self.assertEqual(res_action.status_code, 403)
+        self.assertEqual(res_action.data.get("code"), "pro_required")
+

@@ -13,7 +13,7 @@ import ProUpgradeModal from "../../../components/common/ProUpgradeModal";
 
 export default function AlertsPage() {
     const { t } = useTranslation();
-    const { isPro } = useSubscription();
+    const { isPro, proYearlyMonthlyEquiv } = useSubscription();
     const queryClient = useQueryClient();
     const [filterSeverity, setFilterSeverity] = useState("all");
     const [showPushSettings, setShowPushSettings] = useState(false);
@@ -151,7 +151,7 @@ export default function AlertsPage() {
                     {/* CTA Actions */}
                     <div className="pt-4 border-t border-indigo-800/40 relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div className="text-xs text-indigo-200/70 text-center sm:text-left">
-                            Bereits ab <strong className="text-white font-mono">4,17 €</strong> / Monat (jährliche Zahlweise) · Jederzeit kündbar
+                            Bereits ab <strong className="text-white font-mono">{proYearlyMonthlyEquiv} €</strong> / Monat (jährliche Zahlweise) · Jederzeit kündbar
                         </div>
                         <div className="flex items-center gap-3 w-full sm:w-auto">
                             <button

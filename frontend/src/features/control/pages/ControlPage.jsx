@@ -23,7 +23,7 @@ import CommunityShareModal from "../../community/components/CommunityShareModal"
 
 export default function ControlPage() {
     const { t } = useTranslation();
-    const { isPro } = useSubscription();
+    const { isPro, proYearlyMonthlyEquiv } = useSubscription();
     const queryClient = useQueryClient();
 
     const [activeTab, setActiveTab] = useState("all");
@@ -36,7 +36,7 @@ export default function ControlPage() {
     const hubQuery = useQuery({
         queryKey: ["load-management-hub"],
         queryFn: () => apiFetch("/api/energy/load-management/hub/"),
-        refetchInterval: 10000,
+        refetchInterval: isPro ? 10000 : 30000,
     });
 
     // 2. Prioritäten Mutation
@@ -83,6 +83,10 @@ export default function ControlPage() {
     const masterMode = hubData.master_mode || "autopilot";
 
     const handlePriorityOrderChange = (newOrder) => {
+        if (!isPro) {
+            setProModalOpen(true);
+            return;
+        }
         priorityMutation.mutate({
             priority_order: newOrder,
             master_mode: masterMode,
@@ -90,6 +94,10 @@ export default function ControlPage() {
     };
 
     const handleMasterModeChange = (newMode) => {
+        if (!isPro) {
+            setProModalOpen(true);
+            return;
+        }
         priorityMutation.mutate({
             priority_order: priorityOrder,
             master_mode: newMode,
@@ -97,6 +105,10 @@ export default function ControlPage() {
     };
 
     const handleQuickAction = (category, action, deviceId = null, params = {}) => {
+        if (!isPro) {
+            setProModalOpen(true);
+            return;
+        }
         actionMutation.mutate({
             category,
             action,
@@ -139,207 +151,333 @@ export default function ControlPage() {
             )}
 
             {/* PAGE HEADER */}
-            <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                    <span>🎛️</span> {t("control.title", "Energiesteuerung & Lastmanagement")}
-                </h1>
-                <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
-                    {t("control.subtitle", "Intelligente PV-Überschusssteuerung, Prioritäten-Kaskade und automatisierte Verbraucher-Fahrpläne.")}
-                </p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        <span>🎛️</span> {t("control.title", "Energiesteuerung & Lastmanagement")}
+                        {!isPro && <ProBadge size="sm" />}
+                    </h1>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
+                        {t("control.subtitle", "Intelligente PV-Überschusssteuerung, Prioritäten-Kaskade und automatisierte Verbraucher-Fahrpläne.")}
+                    </p>
+                </div>
+                {!isPro && (
+                    <button
+                        type="button"
+                        onClick={() => setProModalOpen(true)}
+                        className="self-start sm:self-auto px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 text-xs font-black rounded-xl shadow-md shadow-amber-500/20 transition cursor-pointer flex items-center gap-1.5"
+                    >
+                        <span>⭐</span>
+                        <span>Auf Pro upgraden (ab {proYearlyMonthlyEquiv} €/M)</span>
+                    </button>
+                )}
             </div>
 
-            {/* 1. Live Power Budget & Master Autopilot Header */}
-            <LivePowerBudgetHeader
-                budget={liveBudget}
-                masterMode={masterMode}
-                onMasterModeChange={handleMasterModeChange}
-                onQuickBoost={(type, durationHours) => {
-                    if (type === "wallbox_boost") {
-                        handleQuickAction("wallbox", "boost", null, { power_kw: 11, duration_hours: durationHours });
-                    } else if (type === "battery_reserve") {
-                        handleQuickAction("battery", "reserve_100", null, { duration_hours: durationHours });
-                    } else if (type === "max_pv") {
-                        handleMasterModeChange("pv_only");
-                    }
-                }}
-                isSaving={priorityMutation.isPending}
-            />
+            {/* 👑 PRO PAYWALL HERO BANNER FOR FREE USERS */}
+            {!isPro && (
+                <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 border border-indigo-500/40 rounded-3xl p-8 sm:p-10 shadow-2xl text-white relative overflow-hidden space-y-8 animate-in fade-in duration-300">
+                    {/* Background glow */}
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none" />
+                    <div className="absolute bottom-0 left-0 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
-            {/* 2. Priority Cascade Bar (Merit-Order) */}
-            <PriorityCascadeBar
-                priorityOrder={priorityOrder}
-                onOrderChange={handlePriorityOrderChange}
-                isSaving={priorityMutation.isPending}
-            />
-
-            {/* 3. Live Surplus Waterfall Flow Card */}
-            <LiveSurplusWaterfallCard budget={liveBudget} />
-
-            {/* 4. 24h Dispatch Timeline & Schedule */}
-            <DispatchTimelineCard schedule={dispatchSchedule} />
-
-            {/* 4. SECTION: STEUERBARE GROSSVERBRAUCHER & AKTOREN */}
-            <div className="space-y-4 pt-2">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xl shadow-2xs">
-                            ⚡
+                    <div className="relative z-10 max-w-3xl space-y-4">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 text-xs font-bold uppercase tracking-wider">
+                            <span>⭐</span>
+                            <span>Sharegy Pro Exklusiv</span>
                         </div>
-                        <div>
-                            <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                                <span>Steuerbare Großverbraucher & Aktoren</span>
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
-                                    {consumers.length} Verbraucher
-                                </span>
-                            </h2>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                                Direktsteuerung, Betriebsmodi und Sollwerte für alle angebundenen Relais, Wallboxen und Wärmepumpen.
+                        <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight">
+                            Automatisiere dein Zuhause mit intelligenter Laststeuerung & PV-Überschuss-Kaskade
+                        </h2>
+                        <p className="text-indigo-200/80 text-sm sm:text-base leading-relaxed">
+                            Verteile deinen Solarstrom in Echtzeit auf Heimspeicher, Wärmepumpe, Wallbox und Klimaanlage. Schütze dein Netz mit gesetzeskonformer § 14a EnWG Drosselung und profitiere von dynamischen Börsenpreisen.
+                        </p>
+                    </div>
+
+                    {/* Features Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 relative z-10">
+                        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
+                            <div className="text-2xl">⚡</div>
+                            <h3 className="text-sm font-bold text-white">Merit-Order Kaskade</h3>
+                            <p className="text-xs text-indigo-200/70 leading-relaxed">
+                                Bestimme per Drag & Drop, welcher Verbraucher bei Solarüberschuss priorisiert versorgt wird.
+                            </p>
+                        </div>
+
+                        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
+                            <div className="text-2xl">🤖</div>
+                            <h3 className="text-sm font-bold text-white">Autopilot & 4 Betriebsmodi</h3>
+                            <p className="text-xs text-indigo-200/70 leading-relaxed">
+                                Autopilot, reiner PV-Überschuss, Börsenpreis-Sparer oder manueller Direktmodus.
+                            </p>
+                        </div>
+
+                        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
+                            <div className="text-2xl">🚗</div>
+                            <h3 className="text-sm font-bold text-white">Dynamisches PV-Laden (OCPP)</h3>
+                            <p className="text-xs text-indigo-200/70 leading-relaxed">
+                                Automatische Ampere-Regelung und Phasenumschaltung für deine Wallbox.
+                            </p>
+                        </div>
+
+                        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
+                            <div className="text-2xl">♨️</div>
+                            <h3 className="text-sm font-bold text-white">SG-Ready Wärmepumpen & BWWP</h3>
+                            <p className="text-xs text-indigo-200/70 leading-relaxed">
+                                Schalte Warmwasser-Sollwertanhebungen vollautomatisch bei Solar-Spitzen.
+                            </p>
+                        </div>
+
+                        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
+                            <div className="text-2xl">🔋</div>
+                            <h3 className="text-sm font-bold text-white">Batterie-Arbitrage & Grid-Boost</h3>
+                            <p className="text-xs text-indigo-200/70 leading-relaxed">
+                                Lade deinen Speicher gezielt bei negativen oder ultragünstigen Börsenstrompreisen nach.
+                            </p>
+                        </div>
+
+                        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
+                            <div className="text-2xl">🛡️</div>
+                            <h3 className="text-sm font-bold text-white">§ 14a EnWG Netzdrosselung</h3>
+                            <p className="text-xs text-indigo-200/70 leading-relaxed">
+                                Automatische Abarbeitung von Drosselsignalen des Netzbetreibers ohne Komfortverlust.
                             </p>
                         </div>
                     </div>
+
+                    {/* CTA Actions */}
+                    <div className="pt-4 border-t border-indigo-800/40 relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div className="text-xs text-indigo-200/70 text-center sm:text-left">
+                            Bereits ab <strong className="text-white font-mono">{proYearlyMonthlyEquiv} €</strong> / Monat (jährliche Zahlweise) · 14 Tage kostenlos testen · Jederzeit kündbar
+                        </div>
+                        <div className="flex items-center gap-3 w-full sm:w-auto">
+                            <button
+                                type="button"
+                                onClick={() => setProModalOpen(true)}
+                                className="w-full sm:w-auto px-6 py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 text-sm font-black rounded-2xl shadow-xl shadow-amber-500/20 transition cursor-pointer flex items-center justify-center gap-2"
+                            >
+                                <span>⭐</span>
+                                <span>Energiesteuerung mit Sharegy Pro freischalten</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* 🎛️ DASHBOARD CONTENT: ECHTE DATEN BZW. GELOCKTE DEMO-VORSCHAU */}
+            <div className={`space-y-6 ${!isPro ? "relative" : ""}`}>
+                {!isPro && (
+                    <div 
+                        onClick={() => setProModalOpen(true)}
+                        className="absolute inset-0 z-20 bg-slate-950/20 backdrop-blur-[1.5px] rounded-3xl cursor-pointer flex flex-col items-center justify-start pt-24 p-6 text-center hover:bg-slate-950/30 transition group"
+                    >
+                        <div className="px-5 py-3 rounded-2xl bg-slate-900/95 border border-indigo-500/40 shadow-2xl text-white flex items-center gap-3 transform group-hover:scale-105 transition">
+                            <span className="text-xl">🔒</span>
+                            <div className="text-left">
+                                <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                                    <span>Interaktive Demo-Vorschau</span>
+                                    <ProBadge size="xs" />
+                                </div>
+                                <div className="text-[11px] text-indigo-200/80">
+                                    Klicke hier, um alle Steuerungsoptionen mit Sharegy Pro freizuschalten
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* 1. Live Power Budget & Master Autopilot Header */}
+                <LivePowerBudgetHeader
+                    budget={liveBudget}
+                    masterMode={masterMode}
+                    onMasterModeChange={handleMasterModeChange}
+                    onQuickBoost={(type, durationHours) => {
+                        if (type === "wallbox_boost") {
+                            handleQuickAction("wallbox", "boost", null, { power_kw: 11, duration_hours: durationHours });
+                        } else if (type === "battery_reserve") {
+                            handleQuickAction("battery", "reserve_100", null, { duration_hours: durationHours });
+                        } else if (type === "max_pv") {
+                            handleMasterModeChange("pv_only");
+                        }
+                    }}
+                    isSaving={priorityMutation.isPending}
+                />
+
+                {/* 2. Priority Cascade Bar (Merit-Order) */}
+                <PriorityCascadeBar
+                    priorityOrder={priorityOrder}
+                    onOrderChange={handlePriorityOrderChange}
+                    isSaving={priorityMutation.isPending}
+                />
+
+                {/* 3. Live Surplus Waterfall Flow Card */}
+                <LiveSurplusWaterfallCard budget={liveBudget} />
+
+                {/* 4. 24h Dispatch Timeline & Schedule */}
+                <DispatchTimelineCard schedule={dispatchSchedule} />
+
+                {/* 4. SECTION: STEUERBARE GROSSVERBRAUCHER & AKTOREN */}
+                <div className="space-y-4 pt-2">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xl shadow-2xs">
+                                ⚡
+                            </div>
+                            <div>
+                                <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                    <span>Steuerbare Großverbraucher & Aktoren</span>
+                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                                        {consumers.length} Verbraucher
+                                    </span>
+                                </h2>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                    Direktsteuerung, Betriebsmodi und Sollwerte für alle angebundenen Relais, Wallboxen und Wärmepumpen.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Filter Tabs matching Merit-Order names */}
+                    <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                        {[
+                            { key: "all", label: "Alle Verbraucher", icon: "🎛️" },
+                            { key: "battery", label: "Heimspeicher", icon: "🔋" },
+                            { key: "bwwp", label: "Warmwasser", icon: "♨️" },
+                            { key: "wallbox", label: "Wallbox", icon: "🚗" },
+                            { key: "heatpump", label: "Wärmepumpe", icon: "🔥" },
+                            { key: "pool", label: "Pool", icon: "🏊" },
+                            { key: "ac", label: "Klimaanlage", icon: "❄️" },
+                            { key: "appliances", label: "Haushaltsgeräte", icon: "🧺" },
+                            { key: "heating_rod", label: "Heizstab", icon: "⚡" },
+                        ].map((tab) => (
+                            <button
+                                key={tab.key}
+                                type="button"
+                                onClick={() => setActiveTab(tab.key)}
+                                className={`px-3.5 py-2 rounded-2xl text-xs font-bold transition flex items-center gap-2 shrink-0 cursor-pointer ${
+                                    activeTab === tab.key
+                                        ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20"
+                                        : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800"
+                                }`}
+                            >
+                                <span>{tab.icon}</span>
+                                <span>{tab.label}</span>
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Consumer Cards Grid */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {/* ♨️ BWWP & Wärmepumpen SG-Ready Lastmanagement */}
+                        {(activeTab === "all" || activeTab === "bwwp" || activeTab === "heatpump") && (
+                            <BWWPLoadManagementCard />
+                        )}
+
+                        {/* 🚗 Wallbox / OCPP E-Auto Ladekarte */}
+                        {(activeTab === "all" || activeTab === "wallbox") && (
+                            <WallboxCard onOpenAddModal={() => setAddWallboxOpen(true)} />
+                        )}
+
+                        {/* 🔋 Heimspeicher / Battery Storage Control */}
+                        {(activeTab === "all" || activeTab === "battery") && (
+                            <BatteryStorageControlCard />
+                        )}
+
+                        {/* 🏊 Poolpumpen & Filteranlagen */}
+                        {(activeTab === "all" || activeTab === "pool") &&
+                            (poolConsumers.length > 0 ? (
+                                poolConsumers.map((c) => (
+                                    <PoolPumpCard
+                                        key={c.id}
+                                        consumer={c}
+                                        onAction={handleQuickAction}
+                                        isPending={actionMutation.isPending}
+                                    />
+                                ))
+                            ) : activeTab === "pool" ? (
+                                <div className="col-span-full bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 text-center space-y-3">
+                                    <div className="text-3xl">🏊</div>
+                                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">Keine Poolpumpe verknüpft</h3>
+                                    <p className="text-xs text-slate-500 max-w-md mx-auto">
+                                        Weise einem Shelly- oder MQTT-Relais die Rolle »Poolpumpe« zu, um die Filterzeiten automatisch über PV-Überschuss zu steuern.
+                                    </p>
+                                </div>
+                            ) : null)}
+
+                        {/* ❄️ Klimaanlagen (Pre-Cooling) */}
+                        {(activeTab === "all" || activeTab === "ac") &&
+                            (acConsumers.length > 0 ? (
+                                acConsumers.map((c) => (
+                                    <AirConditioningCard
+                                        key={c.id}
+                                        consumer={c}
+                                        onAction={handleQuickAction}
+                                        isPending={actionMutation.isPending}
+                                    />
+                                ))
+                            ) : activeTab === "ac" ? (
+                                <div className="col-span-full bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 text-center space-y-3">
+                                    <div className="text-3xl">❄️</div>
+                                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">Keine Klimaanlage verknüpft</h3>
+                                    <p className="text-xs text-slate-500 max-w-md mx-auto">
+                                        Nutze smartere Vor-Kühlung (Pre-Cooling) bei Solar-Peaks oder extrem günstigen Börsenpreisen.
+                                    </p>
+                                </div>
+                            ) : null)}
+
+                        {/* 🧺 Haushaltsgeräte / Ready-to-Start Smart Plugs */}
+                        {(activeTab === "all" || activeTab === "appliances") &&
+                            (applianceConsumers.length > 0 ? (
+                                applianceConsumers.map((c) => (
+                                    <SmartApplianceCard
+                                        key={c.id}
+                                        consumer={c}
+                                        onAction={handleQuickAction}
+                                        isPending={actionMutation.isPending}
+                                    />
+                                ))
+                            ) : activeTab === "appliances" ? (
+                                <div className="col-span-full bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 text-center space-y-3">
+                                    <div className="text-3xl">🧺</div>
+                                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">Keine smarten Zwischenstecker verknüpft</h3>
+                                    <p className="text-xs text-slate-500 max-w-md mx-auto">
+                                        Verbinde Zwischenstecker für Waschmaschine, Trockner oder Spülmaschine für automatischen Solar-Start.
+                                    </p>
+                                </div>
+                            ) : null)}
+
+                        {/* ⚡ Heizstab / Power-to-Heat Puffer */}
+                        {(activeTab === "all" || activeTab === "heating_rod") &&
+                            (heatingRodConsumers.length > 0 ? (
+                                heatingRodConsumers.map((c) => (
+                                    <HeatingRodCard
+                                        key={c.id}
+                                        consumer={c}
+                                        onAction={handleQuickAction}
+                                        isPending={actionMutation.isPending}
+                                    />
+                                ))
+                            ) : activeTab === "heating_rod" ? (
+                                <div className="col-span-full bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 text-center space-y-3">
+                                    <div className="text-3xl">⚡</div>
+                                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">Kein Heizstab verknüpft</h3>
+                                    <p className="text-xs text-slate-500 max-w-md mx-auto">
+                                        Verwandle überschüssigen Solarstrom in Warmwasser-Pufferenergie über stufenlose Thyristor- oder Relais-Heizstäbe.
+                                    </p>
+                                </div>
+                            ) : null)}
+                    </div>
                 </div>
 
-                {/* Filter Tabs matching Merit-Order names */}
-                <div className="flex items-center gap-2 overflow-x-auto pb-1">
-                    {[
-                        { key: "all", label: "Alle Verbraucher", icon: "🎛️" },
-                        { key: "battery", label: "Heimspeicher", icon: "🔋" },
-                        { key: "bwwp", label: "Warmwasser", icon: "♨️" },
-                        { key: "wallbox", label: "Wallbox", icon: "🚗" },
-                        { key: "heatpump", label: "Wärmepumpe", icon: "🔥" },
-                        { key: "pool", label: "Pool", icon: "🏊" },
-                        { key: "ac", label: "Klimaanlage", icon: "❄️" },
-                        { key: "appliances", label: "Haushaltsgeräte", icon: "🧺" },
-                        { key: "heating_rod", label: "Heizstab", icon: "⚡" },
-                    ].map((tab) => (
-                        <button
-                            key={tab.key}
-                            type="button"
-                            onClick={() => setActiveTab(tab.key)}
-                            className={`px-3.5 py-2 rounded-2xl text-xs font-bold transition flex items-center gap-2 shrink-0 cursor-pointer ${
-                                activeTab === tab.key
-                                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20"
-                                    : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800"
-                            }`}
-                        >
-                            <span>{tab.icon}</span>
-                            <span>{tab.label}</span>
-                        </button>
-                    ))}
-                </div>
-
-                {/* Consumer Cards Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* ♨️ BWWP & Wärmepumpen SG-Ready Lastmanagement */}
-                    {(activeTab === "all" || activeTab === "bwwp" || activeTab === "heatpump") && (
-                        <BWWPLoadManagementCard />
-                    )}
-
-                    {/* 🚗 Wallbox / OCPP E-Auto Ladekarte */}
-                    {(activeTab === "all" || activeTab === "wallbox") && (
-                        <WallboxCard onOpenAddModal={() => setAddWallboxOpen(true)} />
-                    )}
-
-                    {/* 🔋 Heimspeicher / Battery Storage Control */}
-                    {(activeTab === "all" || activeTab === "battery") && (
-                        <BatteryStorageControlCard />
-                    )}
-
-                    {/* 🏊 Poolpumpen & Filteranlagen */}
-                    {(activeTab === "all" || activeTab === "pool") &&
-                        (poolConsumers.length > 0 ? (
-                            poolConsumers.map((c) => (
-                                <PoolPumpCard
-                                    key={c.id}
-                                    consumer={c}
-                                    onAction={handleQuickAction}
-                                    isPending={actionMutation.isPending}
-                                />
-                            ))
-                        ) : activeTab === "pool" ? (
-                            <div className="col-span-full bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 text-center space-y-3">
-                                <div className="text-3xl">🏊</div>
-                                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Keine Poolpumpe verknüpft</h3>
-                                <p className="text-xs text-slate-500 max-w-md mx-auto">
-                                    Weise einem Shelly- oder MQTT-Relais die Rolle »Poolpumpe« zu, um die Filterzeiten automatisch über PV-Überschuss zu steuern.
-                                </p>
-                            </div>
-                        ) : null)}
-
-                    {/* ❄️ Klimaanlagen (Pre-Cooling) */}
-                    {(activeTab === "all" || activeTab === "ac") &&
-                        (acConsumers.length > 0 ? (
-                            acConsumers.map((c) => (
-                                <AirConditioningCard
-                                    key={c.id}
-                                    consumer={c}
-                                    onAction={handleQuickAction}
-                                    isPending={actionMutation.isPending}
-                                />
-                            ))
-                        ) : activeTab === "ac" ? (
-                            <div className="col-span-full bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 text-center space-y-3">
-                                <div className="text-3xl">❄️</div>
-                                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Keine Klimaanlage verknüpft</h3>
-                                <p className="text-xs text-slate-500 max-w-md mx-auto">
-                                    Nutze smartere Vor-Kühlung (Pre-Cooling) bei Solar-Peaks oder extrem günstigen Börsenpreisen.
-                                </p>
-                            </div>
-                        ) : null)}
-
-                    {/* 🧺 Haushaltsgeräte / Ready-to-Start Smart Plugs */}
-                    {(activeTab === "all" || activeTab === "appliances") &&
-                        (applianceConsumers.length > 0 ? (
-                            applianceConsumers.map((c) => (
-                                <SmartApplianceCard
-                                    key={c.id}
-                                    consumer={c}
-                                    onAction={handleQuickAction}
-                                    isPending={actionMutation.isPending}
-                                />
-                            ))
-                        ) : activeTab === "appliances" ? (
-                            <div className="col-span-full bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 text-center space-y-3">
-                                <div className="text-3xl">🧺</div>
-                                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Keine smarten Zwischenstecker verknüpft</h3>
-                                <p className="text-xs text-slate-500 max-w-md mx-auto">
-                                    Verbinde Zwischenstecker für Waschmaschine, Trockner oder Spülmaschine für automatischen Solar-Start.
-                                </p>
-                            </div>
-                        ) : null)}
-
-                    {/* ⚡ Heizstab / Power-to-Heat Puffer */}
-                    {(activeTab === "all" || activeTab === "heating_rod") &&
-                        (heatingRodConsumers.length > 0 ? (
-                            heatingRodConsumers.map((c) => (
-                                <HeatingRodCard
-                                    key={c.id}
-                                    consumer={c}
-                                    onAction={handleQuickAction}
-                                    isPending={actionMutation.isPending}
-                                />
-                            ))
-                        ) : activeTab === "heating_rod" ? (
-                            <div className="col-span-full bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 text-center space-y-3">
-                                <div className="text-3xl">⚡</div>
-                                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Kein Heizstab verknüpft</h3>
-                                <p className="text-xs text-slate-500 max-w-md mx-auto">
-                                    Verwandle überschüssigen Solarstrom in Warmwasser-Pufferenergie über stufenlose Thyristor- oder Relais-Heizstäbe.
-                                </p>
-                            </div>
-                        ) : null)}
-                </div>
+                {/* Quartiers-Energy Sharing (§ 42b EnWG) Banner at bottom */}
+                <CommunityInviteCard
+                    onOpenShareModal={() => setShareModalOpen(true)}
+                    kpis={{
+                        autarky_pct: liveBudget.battery_soc_pct || 86,
+                        self_consumption_pct: 92,
+                        community_shared_kwh: 148,
+                    }}
+                />
             </div>
-
-            {/* Quartiers-Energy Sharing (§ 42b EnWG) Banner at bottom */}
-            <CommunityInviteCard
-                onOpenShareModal={() => setShareModalOpen(true)}
-                kpis={{
-                    autarky_pct: liveBudget.battery_soc_pct || 86,
-                    self_consumption_pct: 92,
-                    community_shared_kwh: 148,
-                }}
-            />
 
             {/* Community Social Share Modal */}
             <CommunityShareModal

@@ -5,6 +5,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useSubscription } from "../../hooks/useSubscription";
 import ProBadge from "./ProBadge";
 
 export default function ProUpgradeModal({
@@ -15,6 +16,7 @@ export default function ProUpgradeModal({
 }) {
     const navigate = useNavigate();
     const { t } = useTranslation();
+    const { proYearlyMonthlyEquiv } = useSubscription();
 
     if (!open) return null;
 
@@ -93,7 +95,7 @@ export default function ProUpgradeModal({
                 <div className="p-5 bg-slate-50 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-3">
                     <div className="text-center sm:text-left">
                         <div className="text-xs font-extrabold text-gray-900">
-                            ab 4,17 € / Monat
+                            ab {proYearlyMonthlyEquiv} € / Monat
                         </div>
                         <div className="text-[10px] text-gray-400">
                             Monatlich kündbar · Sofortige Freischaltung
