@@ -391,7 +391,7 @@ action:
                             {haTab === "install" && (
                                 <div className="space-y-3">
                                     <ol className="list-decimal list-inside space-y-2 text-gray-700 leading-relaxed">
-                                        <li>Kopiere den Ordner <code className="bg-slate-100 px-1.5 py-0.5 rounded border border-slate-300 font-mono">plugins/homeassistant/custom_components/sharegy</code> in deinen Home Assistant Ordner <code className="bg-slate-100 px-1.5 py-0.5 rounded border border-slate-300 font-mono">config/custom_components/sharegy</code>.</li>
+                                        <li>Kopiere den Ordner <code className="bg-slate-100 px-1.5 py-0.5 rounded border border-slate-300 font-mono">integrations/homeassistant/custom_components/sharegy</code> in deinen Home Assistant Ordner <code className="bg-slate-100 px-1.5 py-0.5 rounded border border-slate-300 font-mono">config/custom_components/sharegy</code> (oder füge das HACS-Repository <code className="bg-slate-100 px-1.5 py-0.5 rounded border border-slate-300 font-mono">smartcuc/homeassistant-sharegy</code> hinzu).</li>
                                         <li>Starte Home Assistant neu.</li>
                                         <li>Öffne <strong>Einstellungen &rarr; Geräte & Dienste &rarr; Integration hinzufügen</strong> und wähle <strong>Sharegy HEMS</strong>.</li>
                                         <li>Füge dein persönliches Token ein (<code className="bg-slate-100 px-1 rounded font-mono">{primaryHome?.mqtt_token || "&lt;TOKEN&gt;"}</code>).</li>
@@ -593,7 +593,7 @@ action:
                                             <div className="flex justify-between items-center">
                                                 <span className="font-bold text-gray-800">Skript-Vorlage (sharegy_iobroker_bridge.js):</span>
                                                 <button
-                                                    onClick={() => safeCopy(`// Sharegy ioBroker Bridge\nconst HOME_TOKEN = "${primaryHome?.mqtt_token || "DEIN_TOKEN"}";\n// Siehe vollständiges Skript im Repository plugins/iobroker/sharegy_iobroker_bridge.js`, "iobroker_snippet")}
+                                                    onClick={() => safeCopy(`// Sharegy ioBroker Bridge\nconst HOME_TOKEN = "${primaryHome?.mqtt_token || "DEIN_TOKEN"}";\n// Siehe vollständiges Adapter-Paket im Repository integrations/iobroker.sharegy oder https://github.com/smartcuc/ioBroker.sharegy`, "iobroker_snippet")}
                                                     className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-[11px] font-bold cursor-pointer"
                                                 >
                                                     {copiedKey === "iobroker_snippet" ? "✓ Kopiert" : "📋 Skript kopieren"}
