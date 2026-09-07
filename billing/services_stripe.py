@@ -134,10 +134,10 @@ def create_checkout_session(user, plan_id, success_url=None, cancel_url=None, te
             if user_lang not in ("de", "en", "pl", "tr", "ru", "ro"):
                 user_lang = "auto"
 
+            # Stripe Checkout Session mit dynamischen Zahlungsmethoden (nutzt alle im Dashboard aktivierten Methoden: Karten, SEPA, PayPal, Apple Pay, Klarna etc.)
             session = stripe.checkout.Session.create(
                 customer=customer_id,
                 customer_update={"name": "auto", "address": "auto"},
-                payment_method_types=["card", "sepa_debit"],
                 line_items=line_items,
                 mode="subscription",
                 locale=user_lang,
