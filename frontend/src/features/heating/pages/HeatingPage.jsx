@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "../../../api/client";
 import { useSubscription } from "../../../hooks/useSubscription";
 import FloorHeatingLoadCard from "../../control/components/FloorHeatingLoadCard";
@@ -11,24 +11,74 @@ import AirConditioningCard from "../../control/components/AirConditioningCard";
 export default function HeatingPage() {
     const { t } = useTranslation();
     const { isPro } = useSubscription();
+    const queryClient = useQueryClient();
     const [activeTab, setActiveTab] = useState("all");
+    const [actionFeedback, setActionFeedback] = useState(null);
 
-    // Live Floor Heating Status abfragen für Quick-KPIs
+    // 1. Live Floor Heating Status abfragen für Quick-KPIs
     const fbhQuery = useQuery({
         queryKey: ["floor-heating"],
         queryFn: () => apiFetch("/api/energy/floor-heating/"),
         refetchInterval: 5000,
     });
 
+    // 2. Hub Live-Daten für Verbraucher & Klimaanlagen
+    const hubQuery = useQuery({
+        queryKey: ["load-management-hub"],
+        queryFn: () => apiFetch("/api/energy/load-management/hub/"),
+        refetchInterval: 15000,
+    });
+
+    // 3. Quick-Action Mutation für Klimaanlage & Aktoren
+    const actionMutation = useMutation({
+        mutationFn: (payload) =>
+            apiFetch("/api/energy/load-management/hub/action/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            }),
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ["load-management-hub"] });
+            queryClient.invalidateQueries({ queryKey: ["floor-heating"] });
+            queryClient.invalidateQueries({ queryKey: ["bwwp-load-mgmt"] });
+            showFeedback(data.message || "Aktion erfolgreich ausgeführt.");
+        },
+    });
+
+    const showFeedback = (msg) => {
+        setActionFeedback(msg);
+        setTimeout(() => setActionFeedback(null), 4000);
+    };
+
+    const handleQuickAction = (category, action, deviceId = null, params = {}) => {
+        actionMutation.mutate({
+            category,
+            action,
+            device_id: deviceId,
+            params,
+        });
+    };
+
     const fbhData = fbhQuery.data || {};
     const storage = fbhData.storage || {};
     const flow = fbhData.flow_temperature || {};
     const temp = fbhData.temperature || {};
-    const signals = fbhData.signals || {};
     const isLive = !fbhQuery.isLoading && !fbhQuery.isError && fbhData.config_id;
+
+    const hubData = hubQuery.data || {};
+    const consumers = hubData.consumers || [];
+    const acConsumers = consumers.filter((c) => c.category === "ac");
 
     return (
         <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+            {/* Feedback Toast */}
+            {actionFeedback && (
+                <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl border border-indigo-500/40 flex items-center gap-2 animate-slide-up">
+                    <span>⚡</span>
+                    <span>{actionFeedback}</span>
+                </div>
+            )}
+
             {/* 1. Header: Titel & Beschreibung */}
             <div className="space-y-4 border-b border-slate-200 dark:border-slate-800 pb-5">
                 <div className="flex items-start sm:items-center gap-3.5">
@@ -84,7 +134,7 @@ export default function HeatingPage() {
                         {[
                             { key: "all", label: "Alle Heizsysteme", icon: "♨️" },
                             { key: "fbh", label: "Fußbodenheizung", icon: "🌡️" },
-                            { key: "bwwp", label: "Warmwasser & WP", icon: "🔥" },
+                            { key: "bwwp", label: "Brauchwasser & WP", icon: "🔥" },
                             { key: "ac_rod", label: "Klima & Heizstab", icon: "❄️" },
                         ].map((tab) => (
                             <button
@@ -105,7 +155,7 @@ export default function HeatingPage() {
                 </div>
             </div>
 
-            {/* 3. Quick Thermal Metrics Overview (Echtdaten) */}
+            {/* 3. Quick Thermal Metrics Overview */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="p-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
                     <div className="w-11 h-11 rounded-2xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xl shrink-0">
@@ -170,40 +220,79 @@ export default function HeatingPage() {
                 </div>
             </div>
 
-            {/* 4. Main Cards Layout (Voll interaktiv & scharfgeschaltet) */}
+            {/* 4. Main Cards Layout: FBH oben, Brauchwasser & Klimaanlage NEBENEINANDER */}
             <div className="space-y-6">
-                {/* 🌡️ Fußbodenheizung & Thermische Estrich-Vorladung */}
+                {/* 🌡️ Fußbodenheizung & Thermische Estrich-Vorladung (Volle Breite) */}
                 {(activeTab === "all" || activeTab === "fbh") && (
                     <div>
                         <FloorHeatingLoadCard />
                     </div>
                 )}
 
-                {/* ♨️ BWWP & Wärmepumpen SG-Ready Lastmanagement */}
-                {(activeTab === "all" || activeTab === "bwwp") && (
-                    <div>
-                        <BWWPLoadManagementCard />
-                    </div>
-                )}
+                {/* ♨️ Brauchwasser-Wärmepumpe & ❄️ Klimaanlage / Heizstab NEBENEINANDER (2-Spalten-Raster) */}
+                {(activeTab === "all" || activeTab === "bwwp" || activeTab === "ac_rod") && (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                        {/* Spalte 1: Brauchwasser & SG-Ready Wärmepumpe */}
+                        {(activeTab === "all" || activeTab === "bwwp") && (
+                            <div className="space-y-4">
+                                <BWWPLoadManagementCard />
+                            </div>
+                        )}
 
-                {/* ❄️ Klimaanlagen & Heizstab Grid */}
-                {(activeTab === "all" || activeTab === "ac_rod") && (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <HeatingRodCard />
-                        <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 space-y-4">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-2xl bg-sky-500/10 text-sky-600 flex items-center justify-center text-xl">
-                                    ❄️
-                                </div>
-                                <div>
-                                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">Klimaanlage (Pre-Cooling)</h3>
-                                    <p className="text-xs text-slate-500">Solares Vorkühlen bei hohen Einstrahlungsspitzen.</p>
-                                </div>
+                        {/* Spalte 2: Klimaanlage (Pre-Cooling) & Heizstab */}
+                        {(activeTab === "all" || activeTab === "ac_rod") && (
+                            <div className="space-y-6">
+                                {acConsumers.length > 0 ? (
+                                    acConsumers.map((c) => (
+                                        <AirConditioningCard
+                                            key={c.id}
+                                            consumer={c}
+                                            onAction={handleQuickAction}
+                                            isPending={actionMutation.isPending}
+                                        />
+                                    ))
+                                ) : (
+                                    <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-12 h-12 rounded-2xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center text-2xl">
+                                                    ❄️
+                                                </div>
+                                                <div>
+                                                    <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                                                        Klimaanlage & Raumkühlung
+                                                    </h3>
+                                                    <p className="text-xs text-slate-400">
+                                                        Smarte Vor-Kühlung (Pre-Cooling)
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
+                                                Autopilot
+                                            </span>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200/60 dark:border-slate-700/60">
+                                                <div className="text-[11px] text-slate-500">Ziel-Kühltemperatur</div>
+                                                <div className="text-lg font-bold font-mono text-slate-900 dark:text-white mt-0.5">22.0 °C</div>
+                                            </div>
+                                            <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200/60 dark:border-slate-700/60">
+                                                <div className="text-[11px] text-slate-500">Solar-Precooling</div>
+                                                <div className="text-lg font-bold font-mono text-sky-600 dark:text-sky-400 mt-0.5">Aktiv</div>
+                                            </div>
+                                        </div>
+
+                                        <div className="p-3.5 rounded-2xl bg-sky-50/50 dark:bg-sky-950/20 border border-sky-200/60 dark:border-sky-800/40 text-xs text-slate-600 dark:text-slate-300">
+                                            ☀️ <strong>Solares Pre-Cooling:</strong> Kühlt Räume bei mittäglichen Solar-Peaks automatisch um 1,5 K vor, um teuren Netzbezug in der Abend-Spitze zu vermeiden.
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Heizstab Laststufen-Karte */}
+                                <HeatingRodCard />
                             </div>
-                            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-xs text-slate-600 dark:text-slate-300">
-                                Automatische Aktivierung bei Raumtemperaturen über 24,0°C und vorhandenem Solarüberschuss (&gt; 1.500 W).
-                            </div>
-                        </div>
+                        )}
                     </div>
                 )}
             </div>

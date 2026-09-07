@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../../api/client";
@@ -352,8 +353,8 @@ export default function FloorHeatingLoadCard() {
                 </div>
             </div>
 
-            {/* Settings Modal */}
-            {settingsOpen && formConfig && (
+            {/* Settings Modal (Global Portal Pop-up) */}
+            {settingsOpen && formConfig && typeof document !== "undefined" && createPortal(
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-xs overflow-y-auto">
                     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-6 w-full max-w-lg shadow-2xl animate-scale-in max-h-[88vh] flex flex-col my-auto">
                         <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-200 dark:border-slate-800 shrink-0">
@@ -553,7 +554,8 @@ export default function FloorHeatingLoadCard() {
                             </button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );
