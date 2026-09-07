@@ -145,6 +145,19 @@ class SharegyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         domain=["switch", "input_boolean", "light"]
                     )
                 ),
+                # Floor Heating (Fußbodenheizung & Estrich-Speicher) Bundle
+                vol.Optional(CONF_FLOOR_HEATING_NAME, default="Fussbodenheizung"): str,
+                vol.Optional(CONF_FLOOR_HEATING_POWER): selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain=["sensor"])
+                ),
+                vol.Optional(CONF_FLOOR_HEATING_ROOM_TEMP): selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain=["sensor"])
+                ),
+                vol.Optional(CONF_FLOOR_HEATING_SWITCH): selector.EntitySelector(
+                    selector.EntitySelectorConfig(
+                        domain=["switch", "input_boolean", "light"]
+                    )
+                ),
                 # Wallbox Bundle
                 vol.Optional(CONF_WALLBOX_NAME, default="Wallbox"): str,
                 vol.Optional(CONF_WALLBOX_POWER): selector.EntitySelector(

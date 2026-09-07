@@ -16,6 +16,7 @@ from .const import (
     CONF_WS_URL,
     CONF_HOME_TOKEN,
     CONF_PROTOCOL,
+    CONF_BIDIRECTIONAL_ENABLED,
     CONF_GRID_POWER_SENSOR,
     CONF_PV_POWER_SENSOR,
     CONF_BATTERY_POWER_SENSOR,
@@ -29,6 +30,10 @@ from .const import (
     CONF_HEATPUMP_POWER,
     CONF_HEATPUMP_TEMP,
     CONF_HEATPUMP_SWITCH,
+    CONF_FLOOR_HEATING_NAME,
+    CONF_FLOOR_HEATING_POWER,
+    CONF_FLOOR_HEATING_ROOM_TEMP,
+    CONF_FLOOR_HEATING_SWITCH,
     CONF_WALLBOX_NAME,
     CONF_WALLBOX_POWER,
     CONF_WALLBOX_SWITCH,
@@ -140,6 +145,7 @@ class SharegyBridge:
         self.ws_url_config = entry_data.get(CONF_WS_URL) or ""
         self.host = entry_data.get(CONF_HOST, "https://sharegy.de").rstrip("/")
         self.protocol = entry_data.get(CONF_PROTOCOL, "websocket")
+        self.bidirectional_enabled = entry_data.get(CONF_BIDIRECTIONAL_ENABLED, True)
         self.buffer = SharegyOfflineBuffer(db_path)
         self.is_connected = False
         self._running = False
@@ -147,6 +153,14 @@ class SharegyBridge:
         self._ws = None
         self._task = None
         self._unsub_listeners = []
+
+        # Real-time state received from Sharegy
+        self.flow_temp_setpoint_c = 30.0
+        self.screed_soc_pct = 50.0
+        self.operating_mode = "STANDBY"
+        self.spot_price_ct = 15.0
+        self.failsafe_active = False
+        self.last_heartbeat = time.time()
 
     def get_effective_ws_url(self) -> str:
         """Resolve full WebSocket URL."""
@@ -181,6 +195,7 @@ class SharegyBridge:
         tracked_switches = [
             (self.entry_data.get(CONF_BWWP_SWITCH), self.entry_data.get(CONF_BWWP_NAME, "Brauchwasser")),
             (self.entry_data.get(CONF_HEATPUMP_SWITCH), self.entry_data.get(CONF_HEATPUMP_NAME, "Waermepumpe")),
+            (self.entry_data.get(CONF_FLOOR_HEATING_SWITCH), self.entry_data.get(CONF_FLOOR_HEATING_NAME, "Fussbodenheizung")),
             (self.entry_data.get(CONF_WALLBOX_SWITCH), self.entry_data.get(CONF_WALLBOX_NAME, "Wallbox")),
         ]
 
@@ -243,6 +258,8 @@ class SharegyBridge:
         ) as ws:
             self._ws = ws
             self.is_connected = True
+            self.last_heartbeat = time.time()
+            self.failsafe_active = False
             _LOGGER.info("Connected to Sharegy WebSocket successfully!")
 
             # 1. Flush any pending offline buffer first
@@ -271,7 +288,7 @@ class SharegyBridge:
                 cmd_task.cancel()
 
     async def _listen_incoming_commands(self, ws):
-        """Receive switch/control commands from Sharegy and apply them in HA."""
+        """Receive switch/control commands and setpoints from Sharegy and apply them in HA."""
         async for msg in ws:
             if msg.type == aiohttp.WSMsgType.TEXT:
                 try:
@@ -283,18 +300,42 @@ class SharegyBridge:
                 break
 
     async def _handle_incoming_command(self, data: dict):
-        """Execute control command on matching HA entity."""
-        _LOGGER.info("Received control command from Sharegy: %s", data)
+        """Execute control command and update setpoints."""
+        self.last_heartbeat = time.time()
+        _LOGGER.info("Received control message from Sharegy: %s", data)
+
+        # Update setpoints and state metrics
+        if "flow_temp_setpoint_c" in data:
+            self.flow_temp_setpoint_c = float(data["flow_temp_setpoint_c"])
+        if "screed_soc_pct" in data:
+            self.screed_soc_pct = float(data["screed_soc_pct"])
+        if "mode" in data:
+            self.operating_mode = str(data["mode"])
+        if "spot_price_ct" in data:
+            self.spot_price_ct = float(data["spot_price_ct"])
+
+        # Check if bidirectional control is active
+        if not self.bidirectional_enabled:
+            _LOGGER.debug("Bidirectional control is paused in Home Assistant.")
+            return
 
         identifier = (data.get("identifier") or data.get("device") or data.get("src") or "").strip()
         raw_val = data.get("val") if "val" in data else data.get("value")
 
         # Map identifier to HA Switch Entity
         target_entity = None
-        if identifier == self.entry_data.get(CONF_BWWP_NAME, "Brauchwasser"):
+        if identifier == self.entry_data.get(CONF_BWWP_NAME, "Brauchwasser") or "bwwp_boost" in data:
             target_entity = self.entry_data.get(CONF_BWWP_SWITCH)
+            if "bwwp_boost" in data:
+                raw_val = data["bwwp_boost"]
         elif identifier == self.entry_data.get(CONF_HEATPUMP_NAME, "Waermepumpe"):
             target_entity = self.entry_data.get(CONF_HEATPUMP_SWITCH)
+        elif identifier == self.entry_data.get(CONF_FLOOR_HEATING_NAME, "Fussbodenheizung") or "floor_heating_boost" in data or data.get("action") == "FLOOR_HEATING_BOOST":
+            target_entity = self.entry_data.get(CONF_FLOOR_HEATING_SWITCH)
+            if "floor_heating_boost" in data:
+                raw_val = data["floor_heating_boost"]
+            elif data.get("action") == "FLOOR_HEATING_BOOST":
+                raw_val = True
         elif identifier == self.entry_data.get(CONF_WALLBOX_NAME, "Wallbox"):
             target_entity = self.entry_data.get(CONF_WALLBOX_SWITCH)
 
@@ -302,7 +343,7 @@ class SharegyBridge:
         if not target_entity and data.get("method", "").startswith("Switch."):
             on_val = data.get("params", {}).get("on")
             raw_val = on_val
-            target_entity = self.entry_data.get(CONF_BWWP_SWITCH) or self.entry_data.get(CONF_HEATPUMP_SWITCH)
+            target_entity = self.entry_data.get(CONF_FLOOR_HEATING_SWITCH) or self.entry_data.get(CONF_BWWP_SWITCH) or self.entry_data.get(CONF_HEATPUMP_SWITCH)
 
         if target_entity:
             bool_val = (raw_val is True or raw_val == 1 or str(raw_val).lower() in ("true", "1", "on"))
@@ -443,7 +484,39 @@ class SharegyBridge:
                 "source": "homeassistant",
             })
 
-        # 3. Heatpump Bundle
+        # 3. Floor Heating (Fußbodenheizung & Estrich-Speicher) Bundle
+        fh_name = self.entry_data.get(CONF_FLOOR_HEATING_NAME, "Fussbodenheizung").strip()
+        fh_p = _get_float_val(self.entry_data.get(CONF_FLOOR_HEATING_POWER))
+        if fh_p is not None:
+            packets.append({
+                "identifier": fh_name,
+                "device": fh_name,
+                "id": fh_name,
+                "metric": "power",
+                "unit": "W",
+                "role": "consumer",
+                "val": fh_p,
+                "value": fh_p,
+                "ts": now_sec,
+                "source": "homeassistant",
+            })
+
+        fh_room_t = _get_float_val(self.entry_data.get(CONF_FLOOR_HEATING_ROOM_TEMP))
+        if fh_room_t is not None:
+            packets.append({
+                "identifier": fh_name,
+                "device": fh_name,
+                "id": fh_name,
+                "metric": "temperature",
+                "unit": "°C",
+                "role": "sensor",
+                "val": fh_room_t,
+                "value": fh_room_t,
+                "ts": now_sec,
+                "source": "homeassistant",
+            })
+
+        # 4. Heatpump Bundle
         hp_name = self.entry_data.get(CONF_HEATPUMP_NAME, "Waermepumpe").strip()
         hp_p = _get_float_val(self.entry_data.get(CONF_HEATPUMP_POWER))
         if hp_p is not None:
@@ -475,7 +548,7 @@ class SharegyBridge:
                 "source": "homeassistant",
             })
 
-        # 4. Wallbox Bundle
+        # 5. Wallbox Bundle
         wb_name = self.entry_data.get(CONF_WALLBOX_NAME, "Wallbox").strip()
         wb_p = _get_float_val(self.entry_data.get(CONF_WALLBOX_POWER))
         if wb_p is not None:
@@ -492,7 +565,7 @@ class SharegyBridge:
                 "source": "homeassistant",
             })
 
-        # 5. Other Submeters & Individual Sensors
+        # 6. Other Submeters & Individual Sensors
         submeters = self.entry_data.get(CONF_SUBMETER_SENSORS, [])
         if isinstance(submeters, list):
             for ent_id in submeters:
