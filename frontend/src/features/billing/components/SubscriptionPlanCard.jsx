@@ -247,7 +247,7 @@ export default function SubscriptionPlanCard({ subscriptionData, onRefresh }) {
             iconEmoji: "⚡",
             priceMonthly: proMonthlyPrice,
             priceYearly: proYearlyPrice,
-            priceSub: interval === "year" ? t("billing.year_equiv_pro", `entspricht ${proMonthlyEquiv} / Monat`, { equiv: proMonthlyEquiv }) : t("billing.monthly_cancelable", "monatlich kündbar"),
+            priceSub: interval === "year" ? `entspricht ${proMonthlyEquiv} / Monat` : t("billing.monthly_cancelable", "monatlich kündbar"),
             desc: t("billing.plan_pro_desc", "Volle KI-Power, Speicher-Arbitrage und automatische Börsenpreis-Optimierung."),
             highlight: true,
             features: [
@@ -269,7 +269,7 @@ export default function SubscriptionPlanCard({ subscriptionData, onRefresh }) {
             iconEmoji: "🏢",
             priceMonthly: landlordMonthlyPrice,
             priceYearly: landlordYearlyPrice,
-            priceSub: interval === "year" ? t("billing.year_equiv_landlord", `entspricht ${landlordMonthlyEquiv} / Monat`, { equiv: landlordMonthlyEquiv }) : t("billing.monthly_cancelable", "monatlich kündbar"),
+            priceSub: interval === "year" ? `entspricht ${landlordMonthlyEquiv} / Monat` : t("billing.monthly_cancelable", "monatlich kündbar"),
             desc: t("billing.plan_landlord_desc", "Für Mehrfamilienhäuser, Vermieter und Mieterstrom-Gemeinschaften."),
             features: [
                 t("billing.f_landlord_pro", "Alle Pro-Funktionen inklusive"),
