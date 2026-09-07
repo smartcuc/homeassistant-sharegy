@@ -768,22 +768,22 @@
 │ • 🟢 Säule 1: Live-Sankey, Last-/PV-Forecasts, Smart Load Management Hub,     │
 │    1-Klick Quick Boost, BWWP SG-Ready Steuerung, OCPP 1.6-J CSMS Wallbox,      │
 │    Sungrow OpenAPI, ioBroker & HA Adapter, Multistring AC-Kopplung,           │
-│    Live-Pulse Topbar, Dark-Mode, 6-Sprachen i18n, 7d EPEX Trend & Demo-Hub.   │
+│    Live-Pulse Topbar, Dark-Mode, 6-Sprachen i18n, 7d EPEX Trend & Demo-Hub,   │
+│    🛡️ § 14a EnWG Summenleistungs-Dimmung (4,2 kW Netzkontingent & SteuVE).    │
 │ • 💳 Payment & Billing: Stripe Checkout (SEPA, Karten, PayPal, Klarna),       │
 │    § 14 UStG Invoicing, Customer Portal, Auto-Healing Customer-IDs & Coupons. │
 │ • ⚡ Säule 2: 15m OBIS-Clearing, Discovergy wMSB Hub, 3 Allokationsmodelle,    │
-│    Sharing-Tarife, Multi-Community Hub, PDF/Excel/XML-Exporte & Viral Sharing. │
+│    ⚡ Dynamische Börsenpreis-Sharingtarife (EPEX Spot, Floor, Cap, Aufschlag), │
+│    📜 BNetzA MSCONS EDIFACT Export & Ingest Bridge (D:04B),                   │
+│    Multi-Community Hub, PDF/Excel/XML-Exporte & Viral Referral System.        │
 └───────────────────────────────────────────────────────────────────────────────┘
                                        │
                                        ▼
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ ⏳ AUSSTEHENDE AUFGABEN (EXAKT 5 VERBLEIBENDE THEMEN)                          │
+│ ⏳ AUSSTEHENDE AUFGABEN (EXAKT DIE LETZTEN 2 FEATURES VOR DEM FINALEN STAND) │
 ├───────────────────────────────────────────────────────────────────────────────┤
 │ 1. 🌡️ Fußbodenheizungs-Steuerung & thermische Estrich-Vorladung (Abschnitt 5.32)│
 │ 2. ⛽ Mobilitäts- & Spritpreis-Radar (Tankerkönig-API Widget, Abschnitt 5.33)  │
-│ 3. 🛡️ § 14a EnWG Hardware-Steuerbox Dimmung (4,2 kW Begrenzung via Modbus/EEBUS)│
-│ 4. ⚡ Dynamische Börsenpreis-Sharingtarife (EPEX Spot Kopplung für P2P)        │
-│ 5. 📜 VNB Marktkommunikations-Bridge (EDIFACT / MSCONS Export)                │
 └───────────────────────────────────────────────────────────────────────────────┘
 ```
 

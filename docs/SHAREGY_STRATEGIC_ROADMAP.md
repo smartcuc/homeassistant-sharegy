@@ -166,15 +166,17 @@
 
 ---
 
-## 📋 4. Konkreter Action-Plan (Ausschließlich verbleibende offene Aufgaben)
+## 📋 4. Konkreter Action-Plan (Exakt die verbleibenden 2 Aufgaben)
 
 | Schritt | Modul | Maßnahme | Status / Prio | Ziel & Umsetzung |
 |---|---|---|:---:|---|
 | **Prio 1** | `energy/hvac/` | **🌡️ Fußbodenheizungs-Steuerung & thermische Estrich-Vorladung**: Nutzung des Estrichs als Speicher (+0,5°C bis +1,5°C Vorladung bei PV-Überschuss / Negativpreisen) | ⚡ **P1 (Nächster Fokus)** | 100% Eigenverbrauch & Peak-Shaving im HEMS Dispatch-Hub |
 | **Prio 2** | `mobility/radar/` | **⛽ Mobilitäts- & Spritpreis-Radar**: Integration der Tankerkönig-API / MTS-K für die 3 günstigsten Tankstellen (Diesel, E5, E10) im Umkreis | 🚗 **P2** | Alltags-Mehrwert für gemischte Haushalte (EV + Verbrenner/Hybrid) |
-| **Prio 3** | `grid/enwg/` | **🛡️ § 14a EnWG Hardware-Steuerbox Dimmung**: Dynamische 4,2 kW Summenleistungs-Begrenzung für SteuVE (WP, Wallbox, Speicher) via REST/Modbus/EEBUS | ⚡ **P3** | Gesetzliche Netzbetreiber-Konformität & Abregelungs-Protokollierung |
-| **Prio 4** | `billing/tariffs/` | **⚡ Dynamische Börsenpreis-Sharingtarife**: Indexierte Community-Tarife mit Formelaufschlag auf EPEX-Spotpreise | ⚡ **P4** | Marktnahe Bepreisung innerhalb von Bürgerenergie-Quartieren |
-| **Prio 5** | `billing/edifact/` | **📜 Standardisierte Marktkommunikations-Bridge**: Automatischer Export von MSCONS / EDIFACT-Datensätzen zur VNB-Abstimmung | ⚡ **P5** | Direkter Datenaustausch mit Verteilnetzbetreibern |
+
+> ℹ️ **Bereits vollständig implementiert & verifiziert**:
+> - 🛡️ **§ 14a EnWG Dimmung & Summenleistungsmodell** (`energy/services_dimming.py`, `energy/test_grid_dimming.py`, `ControlPage.jsx`)
+> - ⚡ **Dynamische Börsenpreis-Sharingtarife (EPEX Spot, Cap, Floor)** (`billing/services_sharing_settlement.py`, `billing/test_mscons_and_dynamic_tariffs.py`)
+> - 📜 **VNB Marktkommunikations-Bridge (EDIFACT / MSCONS Export & Import D:04B)** (`billing/services_mscons.py`, `CommunitiesManagementHub.jsx`, `MsbSmartMeterHub.jsx`)
 
 
 
