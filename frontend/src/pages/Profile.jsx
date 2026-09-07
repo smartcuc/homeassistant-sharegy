@@ -757,12 +757,8 @@ export default function Profile() {
                 <div className="space-y-6 animate-in fade-in duration-200">
                     <Card>
                         <div className="border-b border-gray-100 dark:border-slate-800 pb-4 mb-5">
-                            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 text-xs font-bold mb-1.5">
-                                <span>🏢</span>
-                                <span>{t("profile.b2b_badge", "Gewerbe & B2B")}</span>
-                            </div>
-                            <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-                                {t("profile.company_details_title", "Unternehmensdaten & USt-IdNr.")}
+                            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+                                <span>🏢</span> {t("profile.company_details_title", "Unternehmensdaten & USt-IdNr.")}
                             </h2>
                             <p className="text-xs text-gray-500 dark:text-gray-400">
                                 {t("profile.company_details_desc", "Optional für Firmenkunden: Hinterlege deinen offiziellen Firmennamen und deine USt-IdNr. für Vorsteuerabzug und korrekte B2B-Rechnungsbelege.")}
@@ -1071,14 +1067,10 @@ export default function Profile() {
                 <div className="space-y-6 animate-in fade-in duration-200">
                     <Card>
                         <div className="border-b border-gray-100 dark:border-slate-800 pb-4 mb-5">
-                            <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 text-xs font-bold mb-2">
-                                <span>🛡️</span>
-                                <span>{t("gdpr.badge", "Datenschutz & Betroffenenrechte (DSGVO)")}</span>
-                            </div>
-                            <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-                                {t("gdpr.title", "Deine Daten & Privatsphäre")}
+                            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+                                <span>🛡️</span> {t("gdpr.title", "Deine Daten & Privatsphäre")}
                             </h2>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
                                 {t("gdpr.subtitle", "Transparenz über alle gespeicherten Datenkategorien, Datenexport und Kontolöschung gem. Art. 15, 17 und 20 DSGVO.")}
                             </p>
                         </div>
