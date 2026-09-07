@@ -12,7 +12,7 @@ export default function FloorHeatingLoadCard() {
 
     // 1. Live Floor Heating Status & Configuration from Backend
     const heatingQuery = useQuery({
-        queryKey: ["floor-heating-status"],
+        queryKey: ["floor-heating"],
         queryFn: () => apiFetch("/api/energy/floor-heating/"),
         refetchInterval: 5000,
     });
@@ -32,7 +32,7 @@ export default function FloorHeatingLoadCard() {
                 body: JSON.stringify(payload || { duration_hours: 2.0 }),
             }),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["floor-heating-status"] });
+            queryClient.invalidateQueries({ queryKey: ["floor-heating"] });
             queryClient.invalidateQueries({ queryKey: ["load-management-hub"] });
         },
     });
@@ -45,7 +45,7 @@ export default function FloorHeatingLoadCard() {
                 body: JSON.stringify({ state }),
             }),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["floor-heating-status"] });
+            queryClient.invalidateQueries({ queryKey: ["floor-heating"] });
             queryClient.invalidateQueries({ queryKey: ["load-management-hub"] });
         },
     });
@@ -58,7 +58,7 @@ export default function FloorHeatingLoadCard() {
                 body: JSON.stringify(payload),
             }),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["floor-heating-status"] });
+            queryClient.invalidateQueries({ queryKey: ["floor-heating"] });
             queryClient.invalidateQueries({ queryKey: ["load-management-hub"] });
             setSettingsOpen(false);
         },
