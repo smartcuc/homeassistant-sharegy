@@ -35,6 +35,8 @@ def fuel_radar_view(request):
     Parameter:
     - radius_km: float (Standard 5.0, min 1.0, max 25.0)
     - fuel_type: str ("all", "e10", "e5", "diesel")
+    - lat: float (optional)
+    - lng: float (optional)
     """
     home = _get_home_for_request(request)
     if not home:
@@ -42,6 +44,14 @@ def fuel_radar_view(request):
 
     radius_km = float(request.query_params.get("radius_km", 5.0))
     fuel_type = request.query_params.get("fuel_type", "all")
+    custom_lat = request.query_params.get("lat")
+    custom_lng = request.query_params.get("lng")
 
-    data = fetch_fuel_radar_data(home, radius_km=radius_km, fuel_type=fuel_type)
+    data = fetch_fuel_radar_data(
+        home,
+        radius_km=radius_km,
+        fuel_type=fuel_type,
+        custom_lat=custom_lat,
+        custom_lng=custom_lng,
+    )
     return Response(data)
