@@ -1064,6 +1064,13 @@ class GDPRDeleteAccountView(APIView):
         with transaction.atomic():
             logger.info("GDPR Account deletion executed for user %s (ID: %s)", user.email, user.id)
 
+            # Stripe cleanup: cancel subscription and delete customer object
+            try:
+                from billing.services_stripe import delete_stripe_customer_for_user
+                delete_stripe_customer_for_user(user)
+            except Exception as e:
+                logger.warning("Stripe customer deletion during GDPR cleanup failed: %s", e)
+
             # Flush user session & logout
             logout(request)
             request.session.flush()

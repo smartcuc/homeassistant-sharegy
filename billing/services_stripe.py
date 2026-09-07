@@ -382,3 +382,23 @@ def _process_invoice_payment_failed(invoice):
     if sub:
         sub.status = EMSSubscription.STATUS_PAST_DUE
         sub.save(update_fields=["status", "updated_at"])
+
+
+def delete_stripe_customer_for_user(user):
+    """
+    Kündigt laufende Abos und löscht das Customer-Objekt bei Stripe im Rahmen der DSGVO-Kontolöschung.
+    """
+    try:
+        if hasattr(user, "ems_subscription"):
+            sub = user.ems_subscription
+            customer_id = sub.stripe_customer_id
+            if customer_id and is_stripe_configured():
+                if not customer_id.startswith("cus_sandbox_"):
+                    try:
+                        stripe.Customer.delete(customer_id)
+                        logger.info("Stripe Customer %s deleted for user %s during GDPR account deletion", customer_id, getattr(user, "id", None))
+                    except Exception as e:
+                        logger.warning("Could not delete Stripe customer %s: %s", customer_id, e)
+    except Exception as e:
+        logger.exception("Error during Stripe customer cleanup for user %s: %s", getattr(user, "id", None), e)
+

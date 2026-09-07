@@ -509,6 +509,85 @@ export default function Profile() {
                                 />
                             </div>
 
+                            {/* WOHNANSCHRIFT / ADRESSE */}
+                            <div className="border-t border-gray-100 dark:border-slate-800 pt-4">
+                                <div className="flex items-center justify-between mb-3">
+                                    <h3 className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase flex items-center gap-1.5">
+                                        <span>📍</span> {t("profile.address_title", "Wohnort & Rechnungsadresse")}
+                                    </h3>
+                                    <span className="text-[11px] text-gray-400">Optional / für Belege</span>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                                    <div className="md:col-span-3">
+                                        <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase mb-1">
+                                            {t("profile.street", "Straße")}
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={formData.street}
+                                            onChange={(e) => setFormData({ ...formData, street: e.target.value })}
+                                            placeholder="Sonnenallee"
+                                            className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3 py-2 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase mb-1">
+                                            {t("profile.house_number", "Hausnr.")}
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={formData.house_number}
+                                            onChange={(e) => setFormData({ ...formData, house_number: e.target.value })}
+                                            placeholder="42a"
+                                            className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3 py-2 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase mb-1">
+                                            {t("profile.postal_code", "PLZ")}
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={formData.postal_code}
+                                            onChange={(e) => setFormData({ ...formData, postal_code: e.target.value })}
+                                            placeholder="10115"
+                                            className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3 py-2 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                        />
+                                    </div>
+                                    <div className="md:col-span-2">
+                                        <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase mb-1">
+                                            {t("profile.city", "Ort")}
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={formData.city}
+                                            onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                                            placeholder="Berlin"
+                                            className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3 py-2 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase mb-1">
+                                            {t("profile.country", "Land")}
+                                        </label>
+                                        <select
+                                            value={formData.country || "DE"}
+                                            onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                                            className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3 py-2 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                        >
+                                            <option value="DE">🇩🇪 DE</option>
+                                            <option value="AT">🇦🇹 AT</option>
+                                            <option value="CH">🇨🇭 CH</option>
+                                            <option value="PL">🇵🇱 PL</option>
+                                            <option value="NL">🇳🇱 NL</option>
+                                            <option value="FR">🇫🇷 FR</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div className="flex justify-end pt-3">
                                 <button
                                     type="submit"
