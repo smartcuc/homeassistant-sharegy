@@ -11,6 +11,34 @@ import { initSentry } from "./tracking/sentry";
 // 🛡️ Sentry Error Tracking aktivieren
 initSentry();
 
+// 🔄 Automatische Behandlung von veralteten Chunks nach neuem Deployment (Vite Dynamic Imports)
+window.addEventListener("vite:preloadError", (event) => {
+  const reloadKey = "sharegy_chunk_reload";
+  const lastReload = sessionStorage.getItem(reloadKey);
+  const now = Date.now();
+  if (!lastReload || now - Number(lastReload) > 10000) {
+    sessionStorage.setItem(reloadKey, String(now));
+    window.location.reload();
+  }
+});
+
+window.addEventListener("unhandledrejection", (event) => {
+  const msg = event?.reason?.message || String(event?.reason || "");
+  if (
+    msg.includes("Failed to fetch dynamically imported module") ||
+    msg.includes("error loading dynamically imported module") ||
+    msg.includes("Importing a module script failed") ||
+    msg.includes("Loading chunk")
+  ) {
+    const reloadKey = "sharegy_chunk_reload";
+    const lastReload = sessionStorage.getItem(reloadKey);
+    const now = Date.now();
+    if (!lastReload || now - Number(lastReload) > 10000) {
+      sessionStorage.setItem(reloadKey, String(now));
+      window.location.reload();
+    }
+  }
+});
 
 // ✅ globaler Cache
 const queryClient = new QueryClient();
