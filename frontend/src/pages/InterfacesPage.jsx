@@ -16,9 +16,7 @@ export default function InterfacesPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [copiedKey, setCopiedKey] = useState(null);
     const [showQR, setShowQR] = useState(false);
-    const [guideTab, setGuideTab] = useState("iobroker_wss");
-    const [haTab, setHaTab] = useState("entities");
-    const [bidiEnabled, setBidiEnabled] = useState(true);
+    const [guideTab, setGuideTab] = useState("iobroker");
 
     function safeCopy(text, key) {
         if (navigator.clipboard) {
@@ -66,10 +64,10 @@ export default function InterfacesPage() {
             {/* HEADER */}
             <div>
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                    <span>📡</span> {t("interfaces.title", "Schnittstellen & Smart Home")}
+                    <span>📡</span> {t("interfaces.title", "Schnittstellen")}
                 </h1>
                 <p className="text-sm text-gray-500 mt-1">
-                    {t("interfaces.subtitle", "Verbinde deine Geräte und Zentralen direkt über Outbound-WebSocket (WSS bevorzugt), Home Assistant, ioBroker oder MQTT bidirektional mit Sharegy.")}
+                    {t("interfaces.subtitle", "Verbinde deine Geräte und Zentralen direkt über Outbound-WebSocket (Shelly), Sungrow Direkt-Kopplung, Cloud-Wechselrichter, das Home Assistant Plugin oder MQTT mit Sharegy.")}
                 </p>
             </div>
 
@@ -200,228 +198,86 @@ export default function InterfacesPage() {
                         <div>
                             <div className="flex items-center gap-2">
                                 <h2 className="text-base font-bold text-gray-900">
-                                    5. Home Assistant Integration (v2.1.0 – Bidirektionales Messen & Steuern)
+                                    {t("interfaces.ha_title", "5. Natives Home Assistant Plugin (HACS / Custom Component)")}
                                 </h2>
                                 <span className="text-[10px] font-bold px-2 py-0.5 bg-cyan-100 text-cyan-800 rounded-full border border-cyan-200">
-                                    WSS & MQTT Kompatibel
+                                    {t("interfaces.ha_badge", "Neu & Store-and-Forward")}
                                 </span>
                             </div>
                             <p className="text-xs text-gray-500">
-                                Vollständige HACS-Integration für Live-Monitoring, DIN EN 12831 Heizkurven, Estrich-Puffer-Boost und SG-Ready Steuerung.
+                                {t("interfaces.ha_desc", "Wähle deine Home Assistant Entitäten per Klick aus — inklusive lokalem 48h-Offline-Puffer bei Netzausfall.")}
                             </p>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                        {/* Interactive Toggle for Bidirectional Mode */}
-                        <div className="flex items-center gap-2 bg-white/80 backdrop-blur px-3 py-1.5 rounded-xl border border-cyan-200 shadow-2xs">
-                            <span className="text-xs font-bold text-gray-700">Bidirektionale Aktorik:</span>
-                            <button
-                                type="button"
-                                onClick={() => setBidiEnabled(!bidiEnabled)}
-                                className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${bidiEnabled ? 'bg-emerald-500' : 'bg-slate-300'}`}
-                            >
-                                <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition duration-200 ease-in-out ${bidiEnabled ? 'translate-x-4' : 'translate-x-0'}`} />
-                            </button>
-                            <span className={`text-[11px] font-bold ${bidiEnabled ? 'text-emerald-700' : 'text-slate-500'}`}>
-                                {bidiEnabled ? "Aktiv" : "Pausiert"}
-                            </span>
-                        </div>
-
-                        <button
-                            onClick={() => safeCopy(primaryHome?.mqtt_token || "", "ha_token")}
-                            className="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-semibold rounded-lg shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
-                        >
-                            {copiedKey === "ha_token" ? `✅ ${t("common.copied", "Kopiert!")}` : `📋 ${t("interfaces.copy_home_token", "Home Token kopieren")}`}
-                        </button>
-                    </div>
+                    <button
+                        onClick={() => safeCopy(primaryHome?.mqtt_token || "", "ha_token")}
+                        className="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-semibold rounded-lg shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
+                    >
+                        {copiedKey === "ha_token" ? `✅ ${t("common.copied", "Kopiert!")}` : `📋 ${t("interfaces.copy_home_token", "Home Token kopieren")}`}
+                    </button>
                 </div>
 
                 <div className="p-6 space-y-5">
-                    {/* PROTOCOL BANNER */}
-                    <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl flex flex-wrap items-center justify-between gap-3 text-xs">
-                        <div className="flex items-center gap-2">
-                            <span className="text-base">🔒</span>
-                            <span className="text-gray-700 font-medium">
-                                <strong>Verbindungsmethode:</strong> Outbound WSS über Port 443 (HTTPS) ist die <strong>bevorzugte Methode</strong>. Keine Portfreigaben nötig.
-                            </span>
+                    {/* FEATURES BADGES */}
+                    <div className="grid sm:grid-cols-3 gap-3 text-xs">
+                        <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-start gap-2.5">
+                            <span className="text-base">🎯</span>
+                            <div>
+                                <div className="font-bold text-gray-900">{t("interfaces.ha_picker", "1-Klick Entity Picker")}</div>
+                                <div className="text-gray-500 text-[11px]">{t("interfaces.ha_picker_desc", "Bequeme Auswahl aller Sensoren direkt in der Home Assistant UI.")}</div>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <span className="text-[11px] px-2 py-0.5 bg-emerald-100 text-emerald-800 font-bold rounded-md">
-                                WSS (Port 443) Bevorzugt
-                            </span>
-                            <span className="text-[11px] px-2 py-0.5 bg-indigo-100 text-indigo-800 font-medium rounded-md">
-                                MQTT Fallback Aktiv
-                            </span>
+                        <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-start gap-2.5">
+                            <span className="text-base">💾</span>
+                            <div>
+                                <div className="font-bold text-gray-900">{t("interfaces.ha_buffer", "48h Offline-Puffer")}</div>
+                                <div className="text-gray-500 text-[11px]">{t("interfaces.ha_buffer_desc", "Speichert Daten bei Internetausfall lokal und sendet sie lückenlos nach.")}</div>
+                            </div>
+                        </div>
+                        <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-start gap-2.5">
+                            <span className="text-base">⚡</span>
+                            <div>
+                                <div className="font-bold text-gray-900">{t("interfaces.ha_stream", "Live WebSocket Stream")}</div>
+                                <div className="text-gray-500 text-[11px]">{t("interfaces.ha_stream_desc", "Echtzeit-Übertragung über verschlüsseltes WSS (Port 443).")}</div>
+                            </div>
                         </div>
                     </div>
 
-                    {/* HA NAVIGATION TABS */}
-                    <div className="border border-slate-200 rounded-xl overflow-hidden">
-                        <div className="flex bg-slate-50 border-b border-slate-200 text-xs font-semibold overflow-x-auto">
-                            {[
-                                { id: "entities", label: "📊 Verfügbare Entitäten (Messen & Steuern)" },
-                                { id: "automations", label: "🤖 Automationen (FBH, BWWP & Dynamischer Strompreis)" },
-                                { id: "install", label: "📦 Installation & Einrichtung" },
-                            ].map((tab) => (
-                                <button
-                                    key={tab.id}
-                                    onClick={() => setHaTab(tab.id)}
-                                    className={`px-4 py-2.5 transition whitespace-nowrap cursor-pointer ${haTab === tab.id
-                                        ? "bg-white text-cyan-700 border-b-2 border-cyan-600 font-bold"
-                                        : "text-gray-500 hover:text-gray-900"
-                                    }`}
-                                >
-                                    {tab.label}
-                                </button>
-                            ))}
+                    {/* SETUP STEPS */}
+                    <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl text-xs space-y-3">
+                        <div className="font-bold text-gray-900 text-sm flex items-center gap-1.5">
+                            <span>📦</span> {t("interfaces.ha_install_title", "Installation in Home Assistant:")}
                         </div>
-
-                        <div className="p-4 text-xs text-gray-700 leading-relaxed bg-white">
-                            {haTab === "entities" && (
-                                <div className="space-y-4">
-                                    <div>
-                                        <h4 className="font-bold text-gray-900 text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                                            <span>📈</span> 1. Inbound Messwerte & Live-Sensoren (Sharegy &rarr; HA)
-                                        </h4>
-                                        <div className="overflow-x-auto border border-slate-200 rounded-lg">
-                                            <table className="min-w-full divide-y divide-slate-200 text-[11px]">
-                                                <thead className="bg-slate-50 text-gray-600 font-semibold">
-                                                    <tr>
-                                                        <th className="px-3 py-2 text-left">Entität</th>
-                                                        <th className="px-3 py-2 text-center">Einheit</th>
-                                                        <th className="px-3 py-2 text-left">Funktion</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody className="divide-y divide-slate-100 font-mono">
-                                                    <tr>
-                                                        <td className="px-3 py-1.5 font-bold text-cyan-800">sensor.sharegy_solar_erzeugung</td>
-                                                        <td className="px-3 py-1.5 text-center font-sans text-gray-500">W</td>
-                                                        <td className="px-3 py-1.5 font-sans text-gray-700">Aktuelle PV-Leistung aller Wechselrichter</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td className="px-3 py-1.5 font-bold text-cyan-800">sensor.sharegy_fbh_vorlauf_solltemperatur</td>
-                                                        <td className="px-3 py-1.5 text-center font-sans text-gray-500">°C</td>
-                                                        <td className="px-3 py-1.5 font-sans text-gray-700">Berechnete DIN EN 12831 Vorlauftemperatur nach Heizkurve</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td className="px-3 py-1.5 font-bold text-cyan-800">sensor.sharegy_fbh_estrich_speicher_ladestand_soc</td>
-                                                        <td className="px-3 py-1.5 text-center font-sans text-gray-500">%</td>
-                                                        <td className="px-3 py-1.5 font-sans text-gray-700">Ladezustand des thermischen Estrich-Speichers</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td className="px-3 py-1.5 font-bold text-cyan-800">sensor.sharegy_fbh_betriebsmodus</td>
-                                                        <td className="px-3 py-1.5 text-center font-sans text-gray-500">Text</td>
-                                                        <td className="px-3 py-1.5 font-sans text-gray-700">PV_BOOST, GRID_ARBITRAGE, COMFORT, ECO</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td className="px-3 py-1.5 font-bold text-cyan-800">sensor.sharegy_borsenstrompreis</td>
-                                                        <td className="px-3 py-1.5 text-center font-sans text-gray-500">ct/kWh</td>
-                                                        <td className="px-3 py-1.5 font-sans text-gray-700">Aktueller dynamischer Börsenstrompreis (EPEX Spot)</td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <h4 className="font-bold text-gray-900 text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                                            <span>🎛️</span> 2. Outbound Schalter & Sollwert-Regler (HA &rarr; Aktoren)
-                                        </h4>
-                                        <div className="overflow-x-auto border border-slate-200 rounded-lg">
-                                            <table className="min-w-full divide-y divide-slate-200 text-[11px]">
-                                                <thead className="bg-slate-50 text-gray-600 font-semibold">
-                                                    <tr>
-                                                        <th className="px-3 py-2 text-left">Entität</th>
-                                                        <th className="px-3 py-2 text-center">Typ</th>
-                                                        <th className="px-3 py-2 text-left">Funktion</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody className="divide-y divide-slate-100 font-mono">
-                                                    <tr>
-                                                        <td className="px-3 py-1.5 font-bold text-emerald-800">switch.sharegy_bidirektionale_steuerung</td>
-                                                        <td className="px-3 py-1.5 text-center font-sans text-emerald-600 font-bold">Schalter</td>
-                                                        <td className="px-3 py-1.5 font-sans text-gray-700">Master-Schalter: Freigabe / Not-Aus für automatische Eingriffe</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td className="px-3 py-1.5 font-bold text-emerald-800">switch.sharegy_fussbodenheizung_boost</td>
-                                                        <td className="px-3 py-1.5 text-center font-sans text-emerald-600 font-bold">Schalter</td>
-                                                        <td className="px-3 py-1.5 font-sans text-gray-700">Manueller Vorheiz-Boost für den thermischen Estrich-Speicher</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td className="px-3 py-1.5 font-bold text-emerald-800">switch.sharegy_brauchwasser_wp_boost</td>
-                                                        <td className="px-3 py-1.5 text-center font-sans text-emerald-600 font-bold">Schalter</td>
-                                                        <td className="px-3 py-1.5 font-sans text-gray-700">SG-Ready Warmwasser-Boost (PV / Günstigstrom)</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td className="px-3 py-1.5 font-bold text-blue-800">number.sharegy_fbh_soll_raumtemperatur</td>
-                                                        <td className="px-3 py-1.5 text-center font-sans text-blue-600 font-bold">Regler (18–24°C)</td>
-                                                        <td className="px-3 py-1.5 font-sans text-gray-700">Ziel-Komfort-Raumtemperatur</td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {haTab === "automations" && (
-                                <div className="space-y-3">
-                                    <p className="text-gray-600">
-                                        Beispiel-Automation: Fußbodenheizung bei dynamischem Tiefpreis automatisch vorheizen und Wärme im Estrich puffern:
-                                    </p>
-                                    <pre className="bg-slate-900 text-green-400 p-3 rounded-lg font-mono text-[11px] overflow-x-auto">
-{`alias: "Sharegy: Fußbodenheizung bei Tiefpreis boosten"
-trigger:
-  - platform: numeric_state
-    entity_id: sensor.sharegy_borsenstrompreis
-    below: 15.0 # unter 15 ct/kWh
-condition:
-  - condition: state
-    entity_id: switch.sharegy_bidirektionale_steuerung
-    state: "on"
-action:
-  - service: switch.turn_on
-    target:
-      entity_id: switch.sharegy_fussbodenheizung_boost`}
-                                    </pre>
-                                </div>
-                            )}
-
-                            {haTab === "install" && (
-                                <div className="space-y-3">
-                                    <ol className="list-decimal list-inside space-y-2 text-gray-700 leading-relaxed">
-                                        <li>Kopiere den Ordner <code className="bg-slate-100 px-1.5 py-0.5 rounded border border-slate-300 font-mono">integrations/homeassistant/custom_components/sharegy</code> in deinen Home Assistant Ordner <code className="bg-slate-100 px-1.5 py-0.5 rounded border border-slate-300 font-mono">config/custom_components/sharegy</code> (oder füge das HACS-Repository <code className="bg-slate-100 px-1.5 py-0.5 rounded border border-slate-300 font-mono">smartcuc/homeassistant-sharegy</code> hinzu).</li>
-                                        <li>Starte Home Assistant neu.</li>
-                                        <li>Öffne <strong>Einstellungen &rarr; Geräte & Dienste &rarr; Integration hinzufügen</strong> und wähle <strong>Sharegy HEMS</strong>.</li>
-                                        <li>Füge dein persönliches Token ein (<code className="bg-slate-100 px-1 rounded font-mono">{primaryHome?.mqtt_token || "&lt;TOKEN&gt;"}</code>).</li>
-                                    </ol>
-                                </div>
-                            )}
-                        </div>
+                        <ol className="list-decimal list-inside space-y-2 text-gray-700 leading-relaxed">
+                            <li>
+                                {t("interfaces.ha_step_1", "Kopiere den Ordner custom_components/sharegy in deinen Home Assistant Ordner config/custom_components/ (oder füge das Repository in HACS hinzu).")}
+                            </li>
+                            <li>
+                                {t("interfaces.ha_step_2", "Starte Home Assistant neu und öffne Einstellungen → Geräte & Dienste → Integration hinzufügen.")}
+                            </li>
+                            <li>
+                                {t("interfaces.ha_step_3", "Wähle Sharegy Cloud Energy Bridge, füge dein persönliches Home Token ein und wähle deine Sensoren per Dropdown aus.")}
+                            </li>
+                        </ol>
                     </div>
                 </div>
             </div>
 
-            {/* 6. SECTION: IOBROKER JAVASCRIPT & MQTT BROKER INTERFACE CARD */}
+            {/* 6. SECTION: MQTT INTERFACE CARD */}
             <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
                 <div className="p-5 bg-gradient-to-r from-slate-50 via-indigo-50/30 to-white border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xl shadow-xs">
-                            🔧
+                            📡
                         </div>
                         <div>
-                            <div className="flex items-center gap-2">
-                                <h2 className="text-base font-bold text-gray-900">
-                                    6. ioBroker Adapter & MQTT Schnittstelle (Messen & Steuern)
-                                </h2>
-                                <span className="text-[10px] font-bold px-2 py-0.5 bg-indigo-100 text-indigo-800 rounded-full border border-indigo-200">
-                                    WSS & MQTT Dual-Mode
-                                </span>
-                            </div>
+                            <h2 className="text-base font-bold text-gray-900">
+                                {t("interfaces.mqtt_title", "6. MQTT Broker Schnittstelle (ioBroker, Node-RED, OTel)")}
+                            </h2>
 
                             <p className="text-xs text-gray-500">
-                                Bidirektionale Anbindung für ioBroker JavaScript, MQTT-Client Adapter, Node-RED und OpenTelemetry.
+                                {t("interfaces.mqtt_desc", "Standard-IoT-Protokoll zur universellen Anbindung von Smart-Home-Servern und OpenTelemetry")}
                             </p>
                         </div>
                     </div>
@@ -435,7 +291,7 @@ action:
                         </button>
                         <button
                             onClick={() => {
-                                const text = `Host: ${mqttHost}\nPort: ${mqttPort}\nUser: ${mqttUser}\nPass: ${mqttPass}\nBase Topic: ${baseTopic}\nWSS URL: ${wsUrl}`;
+                                const text = `Host: ${mqttHost}\nPort: ${mqttPort}\nUser: ${mqttUser}\nPass: ${mqttPass}\nBase Topic: ${baseTopic}`;
                                 safeCopy(text, "all_mqtt");
                             }}
                             className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
@@ -476,10 +332,10 @@ action:
 
                                 <div className="bg-slate-50 border border-slate-200/80 p-3.5 rounded-xl">
                                     <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">
-                                        {t("interfaces.port", "Port (TCP / WSS)")}
+                                        {t("interfaces.port", "Port (TCP)")}
                                     </div>
                                     <div className="font-mono text-xs font-semibold text-gray-900 flex items-center justify-between">
-                                        <span>{mqttPort} (MQTT) / 443 (WSS)</span>
+                                        <span>{mqttPort}</span>
                                         <span className="text-[10px] px-1.5 py-0.5 bg-emerald-100 text-emerald-700 font-semibold rounded">
                                             {t("common.active", "Aktiv")}
                                         </span>
@@ -488,7 +344,7 @@ action:
 
                                 <div className="bg-slate-50 border border-slate-200/80 p-3.5 rounded-xl">
                                     <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">
-                                        {t("interfaces.username", "Benutzername / Token")}
+                                        {t("interfaces.username", "Benutzername")}
                                     </div>
                                     <div className="font-mono text-xs font-semibold text-gray-900 flex items-center justify-between">
                                         <span className="truncate">{mqttUser}</span>
@@ -559,8 +415,7 @@ action:
                             <div className="border border-slate-200 rounded-xl overflow-hidden">
                                 <div className="flex bg-slate-50 border-b border-slate-200 text-xs font-semibold overflow-x-auto">
                                     {[
-                                        { id: "iobroker_wss", label: "🔧 ioBroker JavaScript Bridge (WSS Bevorzugt)" },
-                                        { id: "iobroker_mqtt", label: "📡 ioBroker MQTT Client Adapter" },
+                                        { id: "iobroker", label: "🔧 ioBroker" },
                                         { id: "otel", label: "🔭 OpenTelemetry (OTel)" },
                                         { id: "nodered", label: "🟢 Node-RED / Tasmota" },
                                     ].map((tab) => (
@@ -570,7 +425,7 @@ action:
                                             className={`px-4 py-2.5 transition whitespace-nowrap cursor-pointer ${guideTab === tab.id
                                                 ? "bg-white text-indigo-600 border-b-2 border-indigo-600 font-bold"
                                                 : "text-gray-500 hover:text-gray-900"
-                                            }`}
+                                                }`}
                                         >
                                             {tab.label}
                                         </button>
@@ -578,41 +433,7 @@ action:
                                 </div>
 
                                 <div className="p-4 text-xs text-gray-700 leading-relaxed bg-white">
-                                    {guideTab === "iobroker_wss" && (
-                                        <div className="space-y-3">
-                                            <div className="p-3 bg-indigo-50/70 border border-indigo-200 rounded-xl text-indigo-900 flex items-start gap-2.5">
-                                                <span className="text-base">🚀</span>
-                                                <div>
-                                                    <div className="font-bold">WSS Outbound Bridge (Empfohlen)</div>
-                                                    <div className="text-[11px] text-indigo-800">
-                                                        Verbindet sich über den ioBroker JavaScript Adapter direkt mit Sharegy WSS (Port 443). Erstellt automatisch Datenpunkte unter <code className="bg-white px-1 rounded font-mono">0_userdata.0.sharegy.*</code> für bidirektionales Messen & Steuern mit 15-Minuten Fail-Safe Schutz.
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div className="flex justify-between items-center">
-                                                <span className="font-bold text-gray-800">Skript-Vorlage (sharegy_iobroker_bridge.js):</span>
-                                                <button
-                                                    onClick={() => safeCopy(`// Sharegy ioBroker Bridge\nconst HOME_TOKEN = "${primaryHome?.mqtt_token || "DEIN_TOKEN"}";\n// Siehe vollständiges Adapter-Paket im Repository integrations/iobroker.sharegy oder https://github.com/smartcuc/ioBroker.sharegy`, "iobroker_snippet")}
-                                                    className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-[11px] font-bold cursor-pointer"
-                                                >
-                                                    {copiedKey === "iobroker_snippet" ? "✓ Kopiert" : "📋 Skript kopieren"}
-                                                </button>
-                                            </div>
-
-                                            <pre className="bg-slate-900 text-green-400 p-2.5 rounded-lg font-mono text-[11px] overflow-x-auto">
-{`const CONFIG = {
-    HOME_TOKEN: "${primaryHome?.mqtt_token || "<TOKEN>"}",
-    CONNECTION_MODE: "WSS", // 'WSS' (Bevorzugt) oder 'MQTT'
-    WSS_HOST: "wss://${window.location.host || "sharegy.de"}",
-    ROOT_PATH: "0_userdata.0.sharegy",
-    TELEMETRY_INTERVAL_MS: 10000
-};`}
-                                            </pre>
-                                        </div>
-                                    )}
-
-                                    {guideTab === "iobroker_mqtt" && (
+                                    {guideTab === "iobroker" && (
                                         <div className="space-y-2">
                                             <p className="text-gray-600">
                                                 {t("interfaces.iobroker_step_1", "1. Installiere den MQTT Client Adapter (mqtt-client).")}<br />
