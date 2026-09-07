@@ -461,28 +461,25 @@ export default function Profile() {
             </div>
 
             {/* ========================================================= */}
-            {/* TAB 1: PERSÖNLICHE ANGABEN & AVATAR */}
+            {/* TAB 1: EINSTELLUNGEN DES BENUTZERKONTOS & PERSÖNLICHE ANGABEN */}
             {/* ========================================================= */}
             {activeTab === "profile" && (
-                <div className="grid gap-6 md:grid-cols-2 animate-in fade-in duration-200">
-                    {/* PERSONAL INFORMATION FORM */}
+                <div className="grid gap-6 md:grid-cols-2 animate-in fade-in duration-200 items-start">
+                    {/* 1. SPALTE LINKS: EINSTELLUNGEN DES BENUTZERKONTOS (ACCOUNT, SPRACHE, ZEITZONE) */}
                     <Card>
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                <span>👤</span> {t("profile.personal_info", "Persönliche Angaben & Account")}
+                                <span>⚙️</span> {t("profile.account_settings_heading", "Einstellungen des Benutzerkontos")}
                             </h2>
                             <span className="text-xs text-gray-400">ID: #{user?.id || "–"}</span>
                         </div>
 
-                        <form onSubmit={handleSaveProfile} className="space-y-5">
-                            {/* SECTION 1: ACCOUNT & LOGIN */}
+                        <div className="space-y-5">
+                            {/* SECTION 1: KONTO & IDENTIFIKATION */}
                             <div>
-                                <div className="flex items-center justify-between mb-3">
-                                    <h3 className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase flex items-center gap-1.5">
-                                        <span>🔑</span> {t("profile.account_settings_title", "Konto & Identifikation")}
-                                    </h3>
-                                    <span className="text-[11px] text-gray-400">Login & Avatar</span>
-                                </div>
+                                <h3 className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase flex items-center gap-1.5 mb-3">
+                                    <span>🔑</span> {t("profile.account_settings_title", "Konto & Identifikation")}
+                                </h3>
 
                                 <div className="space-y-3">
                                     {/* EMAIL WITH CHANGE WORKFLOW */}
@@ -549,8 +546,94 @@ export default function Profile() {
                                 </div>
                             </div>
 
-                            {/* SECTION 2: VORNAME & NACHNAME */}
+                            {/* SECTION 2: SPRACHE & LOKALISIERUNG */}
                             <div className="border-t border-gray-100 dark:border-slate-800 pt-4">
+                                <h3 className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase flex items-center gap-1.5 mb-1.5">
+                                    <span>🌐</span> {t("profile.language_title", "Sprache & Lokalisierung")}
+                                </h3>
+                                <p className="text-[11px] text-gray-500 dark:text-gray-400 mb-3">
+                                    {t("profile.language_desc", "Wähle deine bevorzugte Sprache für Benutzeroberfläche, Berichte und E-Mails.")}
+                                </p>
+
+                                <div className="grid grid-cols-3 gap-2">
+                                    {[
+                                        { id: "de", label: "Deutsch", flag: "🇩🇪", sub: "Standard" },
+                                        { id: "en", label: "English", flag: "🇬🇧", sub: "Global" },
+                                        { id: "pl", label: "Polski", flag: "🇵🇱", sub: "Regional" },
+                                        { id: "fr", label: "Français", flag: "🇫🇷", sub: "BETA" },
+                                        { id: "nl", label: "Nederlands", flag: "🇳🇱", sub: "BETA" },
+                                        { id: "es", label: "Español", flag: "🇪🇸", sub: "BETA" },
+                                    ].map((lang) => {
+                                        const isSelected = currentLang === lang.id;
+                                        return (
+                                            <button
+                                                key={lang.id}
+                                                type="button"
+                                                onClick={() => handleLanguageChange(lang.id)}
+                                                className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex items-center gap-2 ${
+                                                    isSelected
+                                                        ? "bg-indigo-50/80 dark:bg-indigo-950/60 border-indigo-500 text-indigo-900 dark:text-indigo-200 ring-2 ring-indigo-500/20 shadow-xs"
+                                                        : "bg-white dark:bg-slate-800/80 border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-slate-600"
+                                                }`}
+                                            >
+                                                <span className="text-xl shrink-0">{lang.flag}</span>
+                                                <div className="min-w-0">
+                                                    <div className="font-bold text-xs truncate">{lang.label}</div>
+                                                    <div className="text-[9px] text-gray-400 dark:text-gray-500 truncate">{lang.sub}</div>
+                                                </div>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            {/* SECTION 3: ZEITZONE */}
+                            <div className="border-t border-gray-100 dark:border-slate-800 pt-4">
+                                <h3 className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase flex items-center gap-1.5 mb-1.5">
+                                    <span>🕒</span> {t("profile.timezone_title", "Zeitzone & Zeitformat")}
+                                </h3>
+                                <p className="text-[11px] text-gray-500 dark:text-gray-400 mb-3">
+                                    {t("profile.timezone_desc", "Rechtssichere Zeitstempel für 15-Minuten Lastgänge und Energie-Abrechnungen.")}
+                                </p>
+
+                                <div className="flex items-center gap-2">
+                                    <select
+                                        value={activeTimezone}
+                                        onChange={(e) => setSelectedTimezone(e.target.value)}
+                                        className="flex-1 border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2 text-sm text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                    >
+                                        <option value="">{t("profile.timezone_default", "Standard (Europe/Berlin)")}</option>
+                                        {commonTimezones.map((tz) => (
+                                            <option key={tz} value={tz}>
+                                                {tz}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <button
+                                        type="button"
+                                        onClick={saveTimezone}
+                                        disabled={savingTimezone}
+                                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-xs transition cursor-pointer flex items-center gap-1.5 shrink-0"
+                                    >
+                                        <span>💾</span>
+                                        <span>{savingTimezone ? t("common.saving", "Speichere...") : t("profile.save_timezone", "Speichern")}</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </Card>
+
+                    {/* 2. SPALTE RECHTS: PERSÖNLICHE ANGABEN & RECHNUNGSADRESSE FORM */}
+                    <Card>
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                <span>👤</span> {t("profile.personal_info", "Persönliche Angaben & Anschrift")}
+                            </h2>
+                        </div>
+
+                        <form onSubmit={handleSaveProfile} className="space-y-5">
+                            {/* SECTION 1: VORNAME & NACHNAME */}
+                            <div>
                                 <h3 className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase flex items-center gap-1.5 mb-3">
                                     <span>👤</span> {t("profile.personal_name_title", "Persönliche Daten")}
                                 </h3>
@@ -583,7 +666,7 @@ export default function Profile() {
                                 </div>
                             </div>
 
-                            {/* SECTION 3: WOHNORT & RECHNUNGSADRESSE */}
+                            {/* SECTION 2: WOHNORT & RECHNUNGSADRESSE */}
                             <div className="border-t border-gray-100 dark:border-slate-800 pt-4">
                                 <div className="flex items-center justify-between mb-3">
                                     <h3 className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase flex items-center gap-1.5">
@@ -662,7 +745,7 @@ export default function Profile() {
                                 </div>
                             </div>
 
-                            {/* SECTION 4: TELEFON & NOTFALL-KONTAKT */}
+                            {/* SECTION 3: TELEFON & NOTFALL-KONTAKT */}
                             <div className="border-t border-gray-100 dark:border-slate-800 pt-4">
                                 <h3 className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase flex items-center gap-1.5 mb-3">
                                     <span>📞</span> {t("profile.contact_title", "Erreichbarkeit & Kontakt")}
@@ -680,7 +763,7 @@ export default function Profile() {
                                         className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                                     />
                                     <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
-                                        Wird für kritische Notfall-Benachrichtigungen, SMS-Alarme und Rückfragen bei Wartungen verwendet.
+                                        Wird für kritische Notfall-Benachrichtigungen, SMS-Alarme und Vor-Ort-Rückfragen verwendet.
                                     </p>
                                 </div>
                             </div>
@@ -697,85 +780,6 @@ export default function Profile() {
                             </div>
                         </form>
                     </Card>
-
-                    {/* REGIONAL PREFERENCES (LANGUAGE & TIMEZONE) */}
-                    <div className="space-y-6">
-                        <Card>
-                            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-                                <span>🌐</span> {t("profile.language_title", "Sprache & Lokalisierung")}
-                            </h2>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
-                                {t("profile.language_desc", "Wähle deine bevorzugte Sprache für Benutzeroberfläche, Berichte und E-Mails.")}
-                            </p>
-
-                            <div className="grid grid-cols-3 gap-2.5">
-                                {[
-                                    { id: "de", label: "Deutsch", flag: "🇩🇪", sub: "Standard" },
-                                    { id: "en", label: "English", flag: "🇬🇧", sub: "Global" },
-                                    { id: "pl", label: "Polski", flag: "🇵🇱", sub: "Regional" },
-                                    { id: "fr", label: "Français", flag: "🇫🇷", sub: "BETA" },
-                                    { id: "nl", label: "Nederlands", flag: "🇳🇱", sub: "BETA" },
-                                    { id: "es", label: "Español", flag: "🇪🇸", sub: "BETA" },
-                                ].map((lang) => {
-                                    const isSelected = currentLang === lang.id;
-                                    return (
-                                        <button
-                                            key={lang.id}
-                                            type="button"
-                                            onClick={() => handleLanguageChange(lang.id)}
-                                            className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex items-center gap-2.5 ${
-                                                isSelected
-                                                    ? "bg-indigo-50/80 dark:bg-indigo-950/60 border-indigo-500 text-indigo-900 dark:text-indigo-200 ring-2 ring-indigo-500/20 shadow-xs"
-                                                    : "bg-white dark:bg-slate-800/80 border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-slate-600"
-                                            }`}
-                                        >
-                                            <span className="text-2xl shrink-0">{lang.flag}</span>
-                                            <div className="min-w-0">
-                                                <div className="font-bold text-xs truncate">{lang.label}</div>
-                                                <div className="text-[10px] text-gray-400 dark:text-gray-500 truncate">{lang.sub}</div>
-                                            </div>
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        </Card>
-
-                        <Card>
-                            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-                                <span>🕒</span> {t("profile.timezone_title", "Zeitzone")}
-                            </h2>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
-                                {t("profile.timezone_desc", "Rechtssichere Zeitstempel für 15-Minuten Lastgänge und Energie-Abrechnungen.")}
-                            </p>
-
-                            <div className="space-y-4">
-                                <select
-                                    value={activeTimezone}
-                                    onChange={(e) => setSelectedTimezone(e.target.value)}
-                                    className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                                >
-                                    <option value="">{t("profile.timezone_default", "Standard (Europe/Berlin)")}</option>
-                                    {commonTimezones.map((tz) => (
-                                        <option key={tz} value={tz}>
-                                            {tz}
-                                        </option>
-                                    ))}
-                                </select>
-
-                                <div className="flex justify-end">
-                                    <button
-                                        type="button"
-                                        onClick={saveTimezone}
-                                        disabled={savingTimezone}
-                                        className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-xs transition cursor-pointer flex items-center gap-1.5"
-                                    >
-                                        <span>💾</span>
-                                        <span>{savingTimezone ? t("common.saving", "Speichere...") : t("profile.save_timezone", "Zeitzone speichern")}</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </Card>
-                    </div>
                 </div>
             )}
 
