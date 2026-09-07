@@ -219,3 +219,64 @@ class EnterpriseRBACTest(TestCase):
         )
         self.assertEqual(resp_demote_admin.status_code, 403)
 
+    def test_avatar_save_and_me_retrieval(self):
+        self.client.force_login(self.community_member)
+
+        # 1. Post avatar update
+        resp = self.client.post(
+            "/api/profile/",
+            data={
+                "first_name": "Max",
+                "last_name": "Mustermann",
+                "avatar": "solar_pro",
+            },
+            format="json",
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json()["avatar"], "solar_pro")
+
+        # 2. Verify via /api/profile/
+        resp_prof = self.client.get("/api/profile/")
+        self.assertEqual(resp_prof.status_code, 200)
+        self.assertEqual(resp_prof.json()["avatar"], "solar_pro")
+
+        # 3. Verify via /api/auth/me/
+        resp_me = self.client.get("/api/auth/me/")
+        self.assertEqual(resp_me.status_code, 200)
+        self.assertEqual(resp_me.json()["avatar"], "solar_pro")
+        self.assertEqual(resp_me.json()["profile"]["avatar"], "solar_pro")
+
+    def test_email_change_multilingual_dispatch(self):
+        from django.core import mail
+        from accounts.models import UserSettings
+
+        # Set user language to English
+        settings_obj, _ = UserSettings.objects.get_or_create(user=self.community_member)
+        settings_obj.language = "en"
+        settings_obj.save()
+
+        self.client.force_login(self.community_member)
+        mail.outbox = []
+
+        resp = self.client.post(
+            "/api/change-email/",
+            data={"new_email": "new.english.member@quartier-sonne.de"},
+            format="json",
+        )
+        self.assertEqual(resp.status_code, 200)
+
+        # Should send 2 emails: verification to new address + security alert to old address
+        self.assertEqual(len(mail.outbox), 2)
+
+        # Verification email in English
+        verification_mail = mail.outbox[0]
+        self.assertIn("Confirm your new email address for Sharegy", verification_mail.subject)
+        self.assertEqual(verification_mail.to, ["new.english.member@quartier-sonne.de"])
+        self.assertIn("30 minutes", verification_mail.body)
+
+        # Security alert in English
+        alert_mail = mail.outbox[1]
+        self.assertIn("Security Alert", alert_mail.subject)
+        self.assertEqual(alert_mail.to, ["member@quartier-sonne.de"])
+
+

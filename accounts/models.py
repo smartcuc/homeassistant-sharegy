@@ -102,6 +102,9 @@ class UserProfile(models.Model):
     consent_given = models.BooleanField(default=False)
     consent_timestamp = models.DateTimeField(null=True, blank=True)
 
+    # Avatar (Preset-Key, Emoji oder Icon-Identifier)
+    avatar = models.CharField(max_length=100, blank=True, default="")
+
     created_at = models.DateTimeField(auto_now_add=True)
 
 

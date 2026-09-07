@@ -9,18 +9,17 @@ import PushNotificationSettings from "../features/alerts/components/PushNotifica
 import { apiFetch } from "../api/client";
 import { useSettings } from "../hooks/useSettings";
 import { useUser } from "../hooks/useUser";
-import { useHomes } from "../hooks/useHomes";
 import { useSubscription } from "../hooks/useSubscription";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import i18n from "../i18n";
+import { AVATAR_PRESETS, getAvatarConfig } from "../utils/avatars";
 
 export default function Profile() {
     const { user } = useUser();
     const queryClient = useQueryClient();
     const { settings } = useSettings();
     const { t } = useTranslation();
-    const { primaryHome, homes, regenerateMqttPassword, isRegenerating } = useHomes();
     const { isPro, isLandlord, planName } = useSubscription();
     const [searchParams, setSearchParams] = useSearchParams();
 
@@ -67,6 +66,7 @@ export default function Profile() {
         first_name: "",
         last_name: "",
         phone: "",
+        avatar: "",
         customer_type: "private",
         company_name: "",
         billing_name: "",
@@ -78,12 +78,16 @@ export default function Profile() {
         country: "DE",
     });
 
+    // Avatar Picker Modal State
+    const [showAvatarModal, setShowAvatarModal] = useState(false);
+
     useEffect(() => {
         if (profileQuery.data) {
             setFormData({
                 first_name: profileQuery.data.first_name || user?.first_name || "",
                 last_name: profileQuery.data.last_name || user?.last_name || "",
                 phone: profileQuery.data.phone || "",
+                avatar: profileQuery.data.avatar || user?.avatar || user?.profile?.avatar || "",
                 customer_type: profileQuery.data.customer_type || "private",
                 company_name: profileQuery.data.company_name || "",
                 billing_name: profileQuery.data.billing_name || "",
@@ -99,15 +103,17 @@ export default function Profile() {
 
     const [savingProfile, setSavingProfile] = useState(false);
 
-    const handleSaveProfile = async (e) => {
+    const handleSaveProfile = async (e, customData = null) => {
         if (e) e.preventDefault();
         setSavingProfile(true);
+        const dataToSave = customData || formData;
         try {
             await apiFetch("/api/profile/", {
                 method: "POST",
-                body: JSON.stringify(formData),
+                body: JSON.stringify(dataToSave),
             });
             await queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+            await queryClient.invalidateQueries({ queryKey: ["user"] });
             await queryClient.invalidateQueries({ queryKey: ["me"] });
             showSuccess(t("profile.save_success", "Änderungen wurden erfolgreich gespeichert."));
         } catch (err) {
@@ -115,6 +121,13 @@ export default function Profile() {
         } finally {
             setSavingProfile(false);
         }
+    };
+
+    const handleSelectAvatar = async (avatarId) => {
+        const updated = { ...formData, avatar: avatarId };
+        setFormData(updated);
+        setShowAvatarModal(false);
+        await handleSaveProfile(null, updated);
     };
 
     // --- 2. TIMEZONE & LANGUAGE ---
@@ -198,16 +211,7 @@ export default function Profile() {
         }
     }
 
-    // --- 3. API KEY / TOKEN COPY & REGENERATE ---
-    const [copiedToken, setCopiedToken] = useState(false);
-    const handleCopyToken = (token) => {
-        if (!token) return;
-        navigator.clipboard.writeText(token);
-        setCopiedToken(true);
-        setTimeout(() => setCopiedToken(false), 2500);
-    };
-
-    // --- 4. GDPR / DATA EXPORT & DELETE ---
+    // --- 3. GDPR / DATA EXPORT & DELETE ---
     const [exporting, setExporting] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [deleteConfirmation, setDeleteConfirmation] = useState("");
@@ -264,12 +268,13 @@ export default function Profile() {
         ? `${user.first_name[0]}${user.last_name?.[0] || ""}`.toUpperCase()
         : user?.email?.slice(0, 2).toUpperCase();
 
-    // Tabs Definition
+    const currentAvatarConfig = getAvatarConfig(formData.avatar || user?.avatar || user?.profile?.avatar);
+
+    // 5 Clean Tabs Definition (API tab removed)
     const tabs = [
         { id: "profile", label: t("profile.tab_personal", "Persönliche Angaben"), icon: "👤", badge: null },
         { id: "company", label: t("profile.tab_company", "Unternehmen & B2B"), icon: "🏢", badge: formData.customer_type === "business" ? "B2B" : null },
         { id: "notifications", label: t("profile.tab_notifications", "Benachrichtigungen"), icon: "🔔", badge: null },
-        { id: "api", label: t("profile.tab_api", "API & Entwickler"), icon: "⚡", badge: "REST" },
         { id: "security", label: t("profile.tab_security", "Sicherheit & Sitzung"), icon: "🔐", badge: null },
         { id: "privacy", label: t("profile.tab_privacy", "Datenschutz & DSGVO"), icon: "🛡️", badge: null },
     ];
@@ -282,9 +287,22 @@ export default function Profile() {
                 <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
                 <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-500 to-cyan-400 text-white font-black text-2xl flex items-center justify-center shadow-lg ring-4 ring-white/10 shrink-0">
-                            {initials}
+                        {/* AVATAR HERO CONTAINER WITH QUICK-EDIT BUTTON */}
+                        <div className="relative group cursor-pointer" onClick={() => setShowAvatarModal(true)}>
+                            {currentAvatarConfig ? (
+                                <div className={`w-16 h-16 rounded-2xl bg-gradient-to-tr ${currentAvatarConfig.bg} text-white font-black text-3xl flex items-center justify-center shadow-lg ring-4 ring-white/10 shrink-0 transition-transform group-hover:scale-105`}>
+                                    <span>{currentAvatarConfig.emoji}</span>
+                                </div>
+                            ) : (
+                                <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-500 to-cyan-400 text-white font-black text-2xl flex items-center justify-center shadow-lg ring-4 ring-white/10 shrink-0 transition-transform group-hover:scale-105">
+                                    {initials}
+                                </div>
+                            )}
+                            <div className="absolute inset-0 bg-black/40 rounded-2xl opacity-0 group-hover:opacity-100 flex items-center justify-center text-xs font-bold text-white transition-opacity backdrop-blur-2xs">
+                                ✏️ Ändern
+                            </div>
                         </div>
+
                         <div>
                             <div className="flex flex-wrap items-center gap-2 mb-1">
                                 <h1 className="text-2xl font-bold tracking-tight text-white">
@@ -316,9 +334,17 @@ export default function Profile() {
                     </div>
 
                     <div className="flex items-center gap-3">
+                        <button
+                            type="button"
+                            onClick={() => setShowAvatarModal(true)}
+                            className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition border border-white/10 flex items-center gap-2 backdrop-blur-xs shadow-xs cursor-pointer"
+                        >
+                            <span>🎨</span>
+                            <span>{t("profile.choose_avatar", "Avatar wählen")}</span>
+                        </button>
                         <Link
                             to="/app/billing"
-                            className="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition border border-white/10 flex items-center gap-2 backdrop-blur-xs shadow-xs"
+                            className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition shadow-md flex items-center gap-2"
                         >
                             <span>💳</span>
                             <span>{t("profile.manage_subscription", "Abonnement verwalten")}</span>
@@ -339,7 +365,7 @@ export default function Profile() {
                 </div>
             )}
 
-            {/* ENTERPRISE TAB NAVIGATION */}
+            {/* ENTERPRISE TAB NAVIGATION (5 CLEAN TABS) */}
             <div className="flex overflow-x-auto no-scrollbar gap-1.5 p-1.5 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl">
                 {tabs.map((tab) => {
                     const isActive = activeTab === tab.id;
@@ -367,7 +393,7 @@ export default function Profile() {
             </div>
 
             {/* ========================================================= */}
-            {/* TAB 1: PERSÖNLICHE ANGABEN */}
+            {/* TAB 1: PERSÖNLICHE ANGABEN & AVATAR */}
             {/* ========================================================= */}
             {activeTab === "profile" && (
                 <div className="grid gap-6 md:grid-cols-2 animate-in fade-in duration-200">
@@ -381,6 +407,36 @@ export default function Profile() {
                         </div>
 
                         <form onSubmit={handleSaveProfile} className="space-y-4">
+                            {/* AVATAR PREVIEW IN FORM */}
+                            <div className="p-3.5 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-3">
+                                <div className="flex items-center gap-3 min-w-0">
+                                    {currentAvatarConfig ? (
+                                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-tr ${currentAvatarConfig.bg} flex items-center justify-center text-2xl shadow-xs shrink-0`}>
+                                            <span>{currentAvatarConfig.emoji}</span>
+                                        </div>
+                                    ) : (
+                                        <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-indigo-500 to-cyan-500 flex items-center justify-center text-base font-black text-white shadow-xs shrink-0">
+                                            {initials}
+                                        </div>
+                                    )}
+                                    <div className="min-w-0">
+                                        <div className="text-xs font-bold text-gray-900 dark:text-white truncate">
+                                            {currentAvatarConfig ? currentAvatarConfig.label : "Namensinitialen"}
+                                        </div>
+                                        <div className="text-[11px] text-gray-500 dark:text-gray-400 truncate">
+                                            {currentAvatarConfig ? "Ausgewähltes Profil-Avatar" : "Standard-Initialen (z. B. RK)"}
+                                        </div>
+                                    </div>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowAvatarModal(true)}
+                                    className="px-3.5 py-1.5 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-600 rounded-xl text-xs font-bold text-gray-800 dark:text-gray-200 transition cursor-pointer shrink-0 shadow-2xs"
+                                >
+                                    🎨 Ändern
+                                </button>
+                            </div>
+
                             {/* EMAIL WITH CHANGE WORKFLOW */}
                             <div>
                                 <div className="flex items-center justify-between mb-1">
@@ -448,19 +504,16 @@ export default function Profile() {
                                     type="tel"
                                     value={formData.phone}
                                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                    placeholder="+49 170 12345678"
+                                    placeholder="+49 170 1234567"
                                     className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                                 />
-                                <span className="text-[11px] text-gray-400 mt-1 block">
-                                    {t("profile.phone_hint", "Für kritische Alarme und Mieterstrom-Benachrichtigungen.")}
-                                </span>
                             </div>
 
-                            <div className="pt-2">
+                            <div className="flex justify-end pt-3">
                                 <button
                                     type="submit"
                                     disabled={savingProfile}
-                                    className="w-full sm:w-auto px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-xs transition cursor-pointer flex items-center justify-center gap-2"
+                                    className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-md transition cursor-pointer flex items-center gap-2"
                                 >
                                     <span>💾</span>
                                     <span>{savingProfile ? t("common.saving", "Speichere...") : t("profile.save_personal", "Angaben speichern")}</span>
@@ -469,98 +522,79 @@ export default function Profile() {
                         </form>
                     </Card>
 
-                    {/* LANGUAGE & REGION */}
+                    {/* REGIONAL PREFERENCES (LANGUAGE & TIMEZONE) */}
                     <div className="space-y-6">
-                        {/* COMPACT UI LANGUAGE GRID */}
                         <Card>
-                            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-1 flex items-center gap-2">
-                                <span>🌐</span> {t("profile.ui_language", "Sprache der Benutzeroberfläche")}
+                            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+                                <span>🌐</span> {t("profile.language_title", "Sprache & Lokalisierung")}
                             </h2>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-                                {t("profile.ui_language_desc", "Wähle deine Sprache. Die Änderung wird sofort aktiv.")}
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+                                {t("profile.language_desc", "Wähle deine bevorzugte Sprache für Benutzeroberfläche, Berichte und E-Mails.")}
                             </p>
 
-                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            <div className="grid grid-cols-3 gap-2.5">
                                 {[
-                                    { id: "de", label: "Deutsch", flag: "🇩🇪" },
-                                    { id: "en", label: "English", flag: "🇬🇧" },
-                                    { id: "pl", label: "Polski", flag: "🇵🇱" },
-                                    { id: "fr", label: "Français", flag: "🇫🇷", disabled: true, tag: "In Kürze" },
-                                    { id: "nl", label: "Nederlands", flag: "🇳🇱", disabled: true, tag: "In Kürze" },
-                                    { id: "es", label: "Español", flag: "🇪🇸", disabled: true, tag: "In Kürze" },
+                                    { id: "de", label: "Deutsch", flag: "🇩🇪", sub: "Standard" },
+                                    { id: "en", label: "English", flag: "🇬🇧", sub: "Global" },
+                                    { id: "pl", label: "Polski", flag: "🇵🇱", sub: "Regional" },
+                                    { id: "fr", label: "Français", flag: "🇫🇷", sub: "BETA" },
+                                    { id: "nl", label: "Nederlands", flag: "🇳🇱", sub: "BETA" },
+                                    { id: "es", label: "Español", flag: "🇪🇸", sub: "BETA" },
                                 ].map((lang) => {
-                                    const isActive = currentLang === lang.id;
+                                    const isSelected = currentLang === lang.id;
                                     return (
                                         <button
                                             key={lang.id}
                                             type="button"
-                                            disabled={lang.disabled}
-                                            onClick={() => !lang.disabled && handleLanguageChange(lang.id)}
-                                            className={`p-2.5 rounded-xl border text-left transition flex items-center justify-between cursor-pointer ${
-                                                isActive
-                                                    ? "border-indigo-600 bg-indigo-50/80 dark:bg-indigo-950/40 dark:border-indigo-500 ring-2 ring-indigo-500/20 shadow-xs"
-                                                    : lang.disabled
-                                                        ? "border-dashed border-gray-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 opacity-60 cursor-not-allowed"
-                                                        : "border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-gray-300 dark:hover:border-slate-600 hover:bg-gray-50"
+                                            onClick={() => handleLanguageChange(lang.id)}
+                                            className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex items-center gap-2.5 ${
+                                                isSelected
+                                                    ? "bg-indigo-50/80 dark:bg-indigo-950/60 border-indigo-500 text-indigo-900 dark:text-indigo-200 ring-2 ring-indigo-500/20 shadow-xs"
+                                                    : "bg-white dark:bg-slate-800/80 border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-slate-600"
                                             }`}
                                         >
-                                            <div className="flex items-center gap-2 truncate">
-                                                <span className="text-base">{lang.flag}</span>
-                                                <span className="font-semibold text-xs text-gray-900 dark:text-white truncate">{lang.label}</span>
+                                            <span className="text-2xl shrink-0">{lang.flag}</span>
+                                            <div className="min-w-0">
+                                                <div className="font-bold text-xs truncate">{lang.label}</div>
+                                                <div className="text-[10px] text-gray-400 dark:text-gray-500 truncate">{lang.sub}</div>
                                             </div>
-                                            {isActive && (
-                                                <span className="text-[10px] font-bold text-indigo-700 dark:text-indigo-300 bg-white dark:bg-slate-900 px-1.5 py-0.2 rounded border border-indigo-200 dark:border-indigo-800">
-                                                    ✓
-                                                </span>
-                                            )}
-                                            {lang.tag && (
-                                                <span className="text-[9px] font-medium text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-slate-800 px-1.5 py-0.2 rounded">
-                                                    {lang.tag}
-                                                </span>
-                                            )}
                                         </button>
                                     );
                                 })}
                             </div>
                         </Card>
 
-                        {/* TIMEZONE */}
                         <Card>
-                            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-1 flex items-center gap-2">
-                                <span>🕒</span> {t("profile.timezone_title", "Zeitzone & Zeitachse")}
+                            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+                                <span>🕒</span> {t("profile.timezone_title", "Zeitzone")}
                             </h2>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-                                {t("profile.timezone_desc", "Wichtig für stundengenaue Spotmarkt-Tarife und Diagramme.")}
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+                                {t("profile.timezone_desc", "Rechtssichere Zeitstempel für 15-Minuten Lastgänge und Energie-Abrechnungen.")}
                             </p>
 
-                            <div className="space-y-3">
+                            <div className="space-y-4">
                                 <select
                                     value={activeTimezone}
                                     onChange={(e) => setSelectedTimezone(e.target.value)}
-                                    className="w-full border border-gray-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 bg-white dark:bg-slate-800 text-gray-900 dark:text-white text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                    className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                                 >
-                                    <option value="">{t("profile.select_prompt", "Bitte auswählen")}</option>
+                                    <option value="">{t("profile.timezone_default", "Standard (Europe/Berlin)")}</option>
                                     {commonTimezones.map((tz) => (
-                                        <option key={tz} value={tz}>{tz}</option>
+                                        <option key={tz} value={tz}>
+                                            {tz}
+                                        </option>
                                     ))}
                                 </select>
 
-                                <div className="flex gap-2">
-                                    <button
-                                        type="button"
-                                        onClick={() => setSelectedTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone)}
-                                        className="px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 transition cursor-pointer"
-                                    >
-                                        {t("common.auto_detect", "Automatisch erkennen")}
-                                    </button>
-
+                                <div className="flex justify-end">
                                     <button
                                         type="button"
                                         onClick={saveTimezone}
                                         disabled={savingTimezone}
-                                        className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-xs transition cursor-pointer"
+                                        className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-xs transition cursor-pointer flex items-center gap-1.5"
                                     >
-                                        {savingTimezone ? t("common.saving", "Speichere...") : t("profile.save_timezone", "Zeitzone speichern")}
+                                        <span>💾</span>
+                                        <span>{savingTimezone ? t("common.saving", "Speichere...") : t("profile.save_timezone", "Zeitzone speichern")}</span>
                                     </button>
                                 </div>
                             </div>
@@ -570,63 +604,69 @@ export default function Profile() {
             )}
 
             {/* ========================================================= */}
-            {/* TAB 2: UNTERNEHMEN & RECHNUNGSADRESSE (B2B) */}
+            {/* TAB 2: UNTERNEHMEN & B2B RECHNUNGSEMPFÄNGER */}
             {/* ========================================================= */}
             {activeTab === "company" && (
-                <div className="grid gap-6 md:grid-cols-2 animate-in fade-in duration-200">
-                    <Card className="md:col-span-2">
-                        <div className="border-b border-gray-100 dark:border-slate-800 pb-4 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                            <div>
-                                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 text-xs font-bold mb-2">
-                                    <span>🏢</span>
-                                    <span>{t("profile.b2b_badge", "B2B & Vermieter Stammdaten")}</span>
-                                </div>
-                                <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-                                    {t("profile.company_title", "Unternehmensdaten & Rechnungsanschrift")}
-                                </h2>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                    {t("profile.company_desc", "Hinterlege deine Rechnungsdaten für ordnungsgemäße Rechnungen gem. § 14 UStG mit Ausweis der USt-IdNr.")}
-                                </p>
+                <div className="space-y-6 animate-in fade-in duration-200">
+                    <Card>
+                        <div className="border-b border-gray-100 dark:border-slate-800 pb-4 mb-5">
+                            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 text-xs font-bold mb-1.5">
+                                <span>🏢</span>
+                                <span>{t("profile.b2b_badge", "B2B & Gewerbekunden")}</span>
                             </div>
-
-                            {/* CUSTOMER TYPE TOGGLE */}
-                            <div className="inline-flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shrink-0">
-                                <button
-                                    type="button"
-                                    onClick={() => setFormData({ ...formData, customer_type: "private" })}
-                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
-                                        formData.customer_type === "private"
-                                            ? "bg-white dark:bg-slate-700 text-gray-900 dark:text-white shadow-xs"
-                                            : "text-gray-500 hover:text-gray-800 dark:hover:text-gray-200"
-                                    }`}
-                                >
-                                    🌱 {t("profile.type_private", "Privatkunde")}
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setFormData({ ...formData, customer_type: "business" })}
-                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
-                                        formData.customer_type === "business"
-                                            ? "bg-indigo-600 text-white shadow-xs"
-                                            : "text-gray-500 hover:text-gray-800 dark:hover:text-gray-200"
-                                    }`}
-                                >
-                                    🏢 {t("profile.type_business", "Gewerbe / Vermieter")}
-                                </button>
-                            </div>
+                            <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                                {t("profile.company_details_title", "Firmen- & Rechnungsdaten")}
+                            </h2>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                {t("profile.company_details_desc", "Hinterlege deine Unternehmensdaten und Umsatzsteuer-ID für korrekte Netto-Rechnungen mit ausgewiesener Mehrwertsteuer.")}
+                            </p>
                         </div>
 
-                        <form onSubmit={handleSaveProfile} className="space-y-6">
+                        <form onSubmit={handleSaveProfile} className="space-y-5">
+                            {/* KUNDENTYP SWITCHER */}
+                            <div>
+                                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-2">
+                                    {t("profile.customer_type", "Kundentyp")}
+                                </label>
+                                <div className="grid grid-cols-2 gap-3 max-w-md">
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData({ ...formData, customer_type: "private" })}
+                                        className={`p-3 rounded-2xl border text-center transition-all cursor-pointer font-bold text-xs flex items-center justify-center gap-2 ${
+                                            formData.customer_type === "private"
+                                                ? "bg-indigo-50 dark:bg-indigo-950/60 border-indigo-500 text-indigo-700 dark:text-indigo-300 ring-2 ring-indigo-500/20"
+                                                : "bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-600 dark:text-gray-400"
+                                        }`}
+                                    >
+                                        <span>👤</span>
+                                        <span>{t("profile.type_private", "Privatkunde")}</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData({ ...formData, customer_type: "business" })}
+                                        className={`p-3 rounded-2xl border text-center transition-all cursor-pointer font-bold text-xs flex items-center justify-center gap-2 ${
+                                            formData.customer_type === "business"
+                                                ? "bg-indigo-50 dark:bg-indigo-950/60 border-indigo-500 text-indigo-700 dark:text-indigo-300 ring-2 ring-indigo-500/20"
+                                                : "bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-600 dark:text-gray-400"
+                                        }`}
+                                    >
+                                        <span>🏢</span>
+                                        <span>{t("profile.type_business", "Unternehmen / B2B")}</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* FIRMENDATEN FELDER */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-1">
-                                        {t("profile.company_name", "Firmenname / Hausverwaltung")}
+                                        {t("profile.company_name", "Offizieller Firmenname")}
                                     </label>
                                     <input
                                         type="text"
                                         value={formData.company_name}
                                         onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
-                                        placeholder="Muster Energie GmbH & Co. KG"
+                                        placeholder="Muster Energie GmbH"
                                         className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                                     />
                                 </div>
@@ -638,15 +678,15 @@ export default function Profile() {
                                     <input
                                         type="text"
                                         value={formData.vat_id}
-                                        onChange={(e) => setFormData({ ...formData, vat_id: e.target.value.toUpperCase() })}
+                                        onChange={(e) => setFormData({ ...formData, vat_id: e.target.value })}
                                         placeholder="DE123456789"
-                                        className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white font-mono focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                        className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm font-mono text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                                     />
                                 </div>
 
                                 <div className="md:col-span-2">
                                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-1">
-                                        {t("profile.billing_name", "Rechnungsempfänger / Adresszeile 1")}
+                                        {t("profile.billing_name", "Rechnungsempfänger / Zusatzzeile")}
                                     </label>
                                     <input
                                         type="text"
@@ -788,114 +828,39 @@ export default function Profile() {
             )}
 
             {/* ========================================================= */}
-            {/* TAB 4: API & ENTWICKLER-HUB */}
-            {/* ========================================================= */}
-            {activeTab === "api" && (
-                <div className="grid gap-6 md:grid-cols-2 animate-in fade-in duration-200">
-                    <Card className="md:col-span-2">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 dark:border-slate-800 pb-4 mb-5">
-                            <div>
-                                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 text-xs font-bold mb-1.5">
-                                    <span>⚡</span>
-                                    <span>{t("profile.api_hub_badge", "Developer & IoT Bridge")}</span>
-                                </div>
-                                <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-                                    {t("profile.api_title", "REST API-Schlüssel & MQTT Gateway")}
-                                </h2>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                    {t("profile.api_desc", "Nutze deine persönlichen Schlüssel zur Anbindung von Home Assistant, Grafana, Node-RED oder eigenen Skripten.")}
-                                </p>
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-800">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                    API v1 Aktiv
-                                </span>
-                            </div>
-                        </div>
-
-                        {primaryHome ? (
-                            <div className="space-y-4">
-                                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <span className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">
-                                            {t("profile.api_token", "X-API-Key / Bearer Token")} ({primaryHome.name})
-                                        </span>
-                                        <button
-                                            type="button"
-                                            onClick={() => handleCopyToken(primaryHome.mqtt_token)}
-                                            className="text-xs font-bold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 flex items-center gap-1 cursor-pointer"
-                                        >
-                                            <span>{copiedToken ? "✅ Kopiert!" : "📋 Kopieren"}</span>
-                                        </button>
-                                    </div>
-                                    <div className="font-mono text-xs bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-800 select-all overflow-x-auto text-slate-800 dark:text-slate-200">
-                                        {primaryHome.mqtt_token || "Kein Token vorhanden"}
-                                    </div>
-                                    <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-[11px] text-gray-500">
-                                        <span>MQTT Benutzer: <strong className="font-mono text-gray-800 dark:text-gray-200">{primaryHome.mqtt_username || user?.email}</strong></span>
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                if (window.confirm("Bist du sicher? Alle bestehenden Schnittstellen (Home Assistant/MQTT) müssen anschließend aktualisiert werden.")) {
-                                                    regenerateMqttPassword();
-                                                }
-                                            }}
-                                            disabled={isRegenerating}
-                                            className="text-rose-600 dark:text-rose-400 hover:underline font-semibold cursor-pointer"
-                                        >
-                                            {isRegenerating ? "Erzeuge neuen Schlüssel..." : "🔄 Token neu generieren"}
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* CODE SNIPPET */}
-                                <div className="p-4 rounded-2xl bg-slate-900 text-slate-200 text-xs font-mono space-y-2">
-                                    <div className="text-slate-400 text-[10px] font-sans font-bold uppercase tracking-wider">
-                                        Beispiel cURL Request
-                                    </div>
-                                    <pre className="overflow-x-auto text-[11px] text-emerald-400">
-{`curl -X GET "https://sharegy.de/api/devices/live/" \\
-  -H "X-API-Key: ${primaryHome.mqtt_token || "<DEIN_TOKEN>"}" \\
-  -H "Accept: application/json"`}
-                                    </pre>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="p-6 text-center text-xs text-gray-500 bg-slate-50 dark:bg-slate-800 rounded-2xl">
-                                {t("profile.no_home_for_api", "Erstelle zuerst einen Haushalt in der Geräteverwaltung, um API-Schlüssel zu generieren.")}
-                            </div>
-                        )}
-                    </Card>
-                </div>
-            )}
-
-            {/* ========================================================= */}
-            {/* TAB 5: SICHERHEIT & SITZUNGSSTATUS */}
+            {/* TAB 4: SICHERHEIT & PASSWORT */}
             {/* ========================================================= */}
             {activeTab === "security" && (
                 <div className="grid gap-6 md:grid-cols-2 animate-in fade-in duration-200">
                     <Card>
                         <h2 className="text-base font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-                            <span>🔐</span> {t("profile.passwordless_auth", "Passwortloser Magic-Link Login")}
+                            <span>🔐</span> {t("profile.security_title", "Sicherheit & Anmeldung")}
                         </h2>
                         <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
-                            {t("profile.passwordless_desc", "Sharegy setzt auf modernste passwortlose Authentifizierung. Dein Account ist durch kryptografisch signierte Einmal-Tokens gegen Phishing und Passwort-Leaks geschützt.")}
+                            {t("profile.security_desc", "Verwalte deine Authentifizierungsmethode und Sitzungssicherheit.")}
                         </p>
 
-                        <div className="space-y-3">
-                            <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-900 dark:text-emerald-300 flex items-center gap-3">
-                                <span className="text-xl">🛡️</span>
-                                <div>
-                                    <div className="font-bold">{t("profile.auth_status_secure", "Höchste Sicherheitsstufe aktiv")}</div>
-                                    <div className="text-[11px] opacity-80">{t("profile.auth_status_sub", "Keine gespeicherten Klartext-Passwörter auf den Servern.")}</div>
-                                </div>
+                        <div className="space-y-4 text-xs">
+                            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+                                <div className="font-bold text-gray-900 dark:text-white mb-1">Passwortlose Authentifizierung (Magic Link)</div>
+                                <p className="text-gray-500 dark:text-gray-400 mb-3 text-[11px]">
+                                    Du meldest dich sicher über kryptografisch signierte Einmal-Links per E-Mail an. Es ist kein klassisches Passwort erforderlich.
+                                </p>
+                                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2.5 py-1 rounded-md border border-indigo-200 dark:border-indigo-800">
+                                    ✓ Magic Link Aktiv
+                                </span>
                             </div>
 
-                            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs space-y-1">
-                                <div className="font-bold text-gray-800 dark:text-gray-200">{t("profile.session_cookie", "Session-Verschlüsselung")}</div>
-                                <div className="text-gray-500 text-[11px]">HTTPOnly, SameSite=Lax, Secure SSL (AES-256)</div>
+                            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <div className="font-bold text-gray-900 dark:text-white">Zwei-Faktor-Authentifizierung (2FA / TOTP)</div>
+                                        <p className="text-gray-500 dark:text-gray-400 text-[11px]">Zusätzlicher Schutz über Authenticator-Apps.</p>
+                                    </div>
+                                    <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-800">
+                                        Demnächst
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </Card>
@@ -929,7 +894,7 @@ export default function Profile() {
             )}
 
             {/* ========================================================= */}
-            {/* TAB 6: DATENSCHUTZ, COMPLIANCE & DSGVO */}
+            {/* TAB 5: DATENSCHUTZ, COMPLIANCE & DSGVO */}
             {/* ========================================================= */}
             {activeTab === "privacy" && (
                 <div className="space-y-6 animate-in fade-in duration-200">
@@ -1044,6 +1009,106 @@ export default function Profile() {
                             </button>
                         </div>
                     </Card>
+                </div>
+            )}
+
+            {/* ========================================================= */}
+            {/* AVATAR PICKER MODAL */}
+            {/* ========================================================= */}
+            {showAvatarModal && (
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in duration-150">
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-gray-200 dark:border-slate-800 w-full max-w-xl overflow-hidden flex flex-col">
+                        <div className="p-6 bg-slate-50 dark:bg-slate-800/80 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <span className="text-2xl p-2 bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 rounded-2xl">🎨</span>
+                                <div>
+                                    <h3 className="text-base font-bold text-gray-900 dark:text-white">
+                                        Profil-Avatar auswählen
+                                    </h3>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                                        Wähle deinen persönlichen Avatar für TopNav, Menü und Dashboard.
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setShowAvatarModal(false)}
+                                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1.5 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
+                            {/* RESET TO INITIALS OPTION */}
+                            <button
+                                type="button"
+                                onClick={() => handleSelectAvatar("")}
+                                className={`w-full p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between ${
+                                    !formData.avatar
+                                        ? "bg-indigo-50 dark:bg-indigo-950/60 border-indigo-500 text-indigo-900 dark:text-indigo-200 ring-2 ring-indigo-500/20"
+                                        : "bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700/50"
+                                }`}
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-cyan-500 text-white font-black text-sm flex items-center justify-center shadow-xs">
+                                        {initials}
+                                    </div>
+                                    <div>
+                                        <div className="font-bold text-xs">Standard-Initialen verwenden ({initials})</div>
+                                        <div className="text-[11px] text-gray-400">Klassischer Buchstaben-Avatar basierend auf Vor- und Nachname</div>
+                                    </div>
+                                </div>
+                                {!formData.avatar && (
+                                    <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">✓ Aktiv</span>
+                                )}
+                            </button>
+
+                            {/* AVATAR GRID */}
+                            <div>
+                                <div className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3">
+                                    ⚡ Energie- & Smart-Home-Avatare
+                                </div>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                    {AVATAR_PRESETS.map((av) => {
+                                        const isSelected = formData.avatar === av.id;
+                                        return (
+                                            <button
+                                                key={av.id}
+                                                type="button"
+                                                onClick={() => handleSelectAvatar(av.id)}
+                                                className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex items-center gap-3 group ${
+                                                    isSelected
+                                                        ? "bg-indigo-50/80 dark:bg-indigo-950/60 border-indigo-500 text-indigo-900 dark:text-indigo-200 ring-2 ring-indigo-500/20 shadow-xs"
+                                                        : "bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800/60"
+                                                }`}
+                                            >
+                                                <div className={`w-11 h-11 rounded-xl bg-gradient-to-tr ${av.bg} flex items-center justify-center text-2xl shadow-xs shrink-0 transition-transform group-hover:scale-110`}>
+                                                    <span>{av.emoji}</span>
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <div className="font-bold text-xs truncate">{av.label}</div>
+                                                    <div className="text-[10px] text-gray-400 truncate">
+                                                        {isSelected ? "✓ Gewählt" : "Wählen"}
+                                                    </div>
+                                                </div>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="p-4 bg-slate-50 dark:bg-slate-800/60 border-t border-gray-100 dark:border-slate-800 flex items-center justify-end">
+                            <button
+                                type="button"
+                                onClick={() => setShowAvatarModal(false)}
+                                className="px-5 py-2 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 hover:bg-gray-100 transition cursor-pointer"
+                            >
+                                Schließen
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
 

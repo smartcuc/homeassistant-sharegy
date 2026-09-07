@@ -1,0 +1,38 @@
+{% extends "emails/base.html" %}
+
+{% block content %}
+<h2 style="font-size:20px; font-weight:700; color:#dc2626; margin-top:0;">
+  🛡️ {{ headline|default:"Sicherheitshinweis: E-Mail-Änderung angefordert" }}
+</h2>
+
+<p style="color:#4b5563; line-height:1.6; font-size:15px;">
+  {{ greeting|default:"Hallo" }}{% if user_name %} {{ user_name }}{% endif %},
+</p>
+
+<p style="color:#4b5563; line-height:1.6; font-size:15px;">
+  {{ alert_intro|default:"für deinen Sharegy-Account wurde soeben eine Änderung der primären E-Mail-Adresse angefordert:" }}
+</p>
+
+<div style="background:#fef2f2; border:1px solid #fecaca; border-radius:12px; padding:16px; margin:20px 0;">
+  <div style="font-size:13px; color:#991b1b; margin-bottom:6px;">
+    <strong>{{ old_email_label|default:"Bisherige E-Mail-Adresse" }}:</strong> <span style="font-family:monospace;">{{ old_email }}</span>
+  </div>
+  <div style="font-size:13px; color:#991b1b;">
+    <strong>{{ new_email_label|default:"Neu angeforderte Adresse" }}:</strong> <span style="font-family:monospace; font-weight:bold;">{{ new_email }}</span>
+  </div>
+</div>
+
+<p style="color:#4b5563; line-height:1.6; font-size:14px;">
+  {{ alert_info|default:"Eine Bestätigungs-E-Mail mit einem 30-minütigen Freigabelink wurde an die neue Adresse gesendet. Erst nach Klick auf diesen Link wird die Änderung wirksam." }}
+</p>
+
+<div style="margin-top:24px; padding:16px; background:#f9fafb; border-radius:12px; border:1px solid #e5e7eb; font-size:13px; color:#6b7280; line-height:1.5;">
+  <strong>⚠️ {{ alert_warning_title|default:"Warst du das nicht?" }}</strong><br>
+  {{ alert_warning_text|default:"Falls du diese Änderung nicht selbst veranlasst hast, kontaktiere bitte unverzüglich unseren Support oder ändere sofort dein Passwort." }}
+  <div style="margin-top:10px;">
+    <a href="mailto:support@sharegy.de" style="color:#4f46e5; font-weight:600; text-decoration:none;">
+      ✉️ support@sharegy.de
+    </a>
+  </div>
+</div>
+{% endblock %}

@@ -13,6 +13,7 @@ import { apiFetch } from "../api/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useHomes } from "../hooks/useHomes";
 import { useSubscription } from "../hooks/useSubscription";
+import { getAvatarConfig } from "../utils/avatars";
 
 export default function UserMenu() {
     const theme = useTheme();
@@ -41,6 +42,9 @@ export default function UserMenu() {
     }, []);
 
     if (!user) return null;
+
+    // Avatar Konfiguration
+    const avatarConfig = getAvatarConfig(user?.avatar || user?.profile?.avatar);
 
     // Name & Initialen
     const displayName = user?.first_name
@@ -84,14 +88,23 @@ export default function UserMenu() {
                 className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer group"
                 aria-expanded={open}
             >
-                <div
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-xs shrink-0 ring-2 ring-white dark:ring-slate-700"
-                    style={{
-                        background: `linear-gradient(135deg, ${theme.colors?.primary || "#4f46e5"}, ${theme.colors?.secondary || "#06b6d4"})`,
-                    }}
-                >
-                    {initials}
-                </div>
+                {avatarConfig ? (
+                    <div
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-sm shadow-xs shrink-0 ring-2 ring-white dark:ring-slate-700 bg-gradient-to-tr ${avatarConfig.bg}`}
+                        title={avatarConfig.label}
+                    >
+                        <span>{avatarConfig.emoji}</span>
+                    </div>
+                ) : (
+                    <div
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-xs shrink-0 ring-2 ring-white dark:ring-slate-700"
+                        style={{
+                            background: `linear-gradient(135deg, ${theme.colors?.primary || "#4f46e5"}, ${theme.colors?.secondary || "#06b6d4"})`,
+                        }}
+                    >
+                        {initials}
+                    </div>
+                )}
 
                 <div className="hidden sm:flex flex-col text-left">
                     <span className="text-xs font-semibold text-gray-800 dark:text-gray-200 truncate max-w-[130px]">
@@ -112,14 +125,23 @@ export default function UserMenu() {
                 <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-2xl shadow-2xl py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
                     {/* USER HEADER */}
                     <div className="px-4 py-3 bg-slate-50/70 dark:bg-slate-800/40 border-b border-gray-100 dark:border-slate-800 flex items-start gap-3">
-                        <div
-                            className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-xs shrink-0"
-                            style={{
-                                background: `linear-gradient(135deg, ${theme.colors?.primary || "#4f46e5"}, ${theme.colors?.secondary || "#06b6d4"})`,
-                            }}
-                        >
-                            {initials}
-                        </div>
+                        {avatarConfig ? (
+                            <div
+                                className={`w-10 h-10 rounded-2xl flex items-center justify-center text-xl shadow-xs shrink-0 bg-gradient-to-tr ${avatarConfig.bg} ring-2 ring-white/20`}
+                                title={avatarConfig.label}
+                            >
+                                <span>{avatarConfig.emoji}</span>
+                            </div>
+                        ) : (
+                            <div
+                                className="w-10 h-10 rounded-2xl flex items-center justify-center text-sm font-bold text-white shadow-xs shrink-0"
+                                style={{
+                                    background: `linear-gradient(135deg, ${theme.colors?.primary || "#4f46e5"}, ${theme.colors?.secondary || "#06b6d4"})`,
+                                }}
+                            >
+                                {initials}
+                            </div>
+                        )}
                         <div className="min-w-0 flex-1">
                             <div className="text-sm font-bold text-gray-900 dark:text-white truncate">
                                 {displayName}

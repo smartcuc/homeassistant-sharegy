@@ -100,6 +100,7 @@ class UserProfileView(APIView):
                 "last_name": user.last_name or "",
                 "email": user.email or "",
                 "phone": profile.phone or "",
+                "avatar": profile.avatar or "",
                 "customer_type": profile.customer_type or "private",
                 "company_name": profile.company_name or "",
                 "billing_name": profile.billing_name or "",
@@ -122,6 +123,9 @@ class UserProfileView(APIView):
 
         profile, _ = UserProfile.objects.get_or_create(user=user)
 
+        if "avatar" in data:
+            profile.avatar = str(data.get("avatar", "")).strip()
+
         profile.phone = data.get("phone", profile.phone)
         profile.customer_type = data.get("customer_type", profile.customer_type)
         profile.company_name = data.get("company_name", profile.company_name)
@@ -135,7 +139,7 @@ class UserProfileView(APIView):
         profile.country = data.get("country", profile.country or "DE")
         profile.save()
 
-        return Response({"status": "saved"})
+        return Response({"status": "saved", "avatar": profile.avatar})
 
 
 class UserUsageModeView(APIView):
@@ -621,42 +625,24 @@ class ChangeEmailRequestView(APIView):
 
         # Token erzeugen mit 30 Minuten Gültigkeit
         token = signing.dumps(
-            {"user_id": request.user.id, "new_email": new_email},
+            {"user_id": str(request.user.id), "new_email": new_email},
             salt="sharegy-change-email-v1",
         )
 
         frontend_url = getattr(settings, "FRONTEND_URL", "https://sharegy.de").rstrip("/")
         confirm_link = f"{frontend_url}/confirm-email-change?token={token}"
-        from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "Sharegy <invite@sharegy.cloud>")
+        from accounts.services.email_service import send_email_change_request_email, send_email_change_alert_email
 
-        # 1. Bestätigungs-Mail an NEUE Adresse
+        # 1. Bestätigungs-Mail an NEUE Adresse (in gewählter Nutzersprache)
         try:
-            subject = "Bestätige deine neue E-Mail-Adresse für Sharegy"
-            text_body = (
-                f"Hallo {request.user.first_name or 'dort'},\n\n"
-                f"du hast eine Änderung deiner E-Mail-Adresse für deinen Sharegy-Account angefordert.\n\n"
-                f"Klicke auf folgenden Link, um deine neue E-Mail-Adresse ({new_email}) zu bestätigen:\n"
-                f"{confirm_link}\n\n"
-                f"Der Link ist aus Sicherheitsgründen 30 Minuten gültig.\n\n"
-                f"Dein Sharegy Team"
-            )
-            msg = EmailMultiAlternatives(subject, text_body, from_email, [new_email])
-            msg.send(fail_silently=False)
+            send_email_change_request_email(request.user, new_email, confirm_link)
         except Exception as exc:
             logger.exception("Failed to send email change verification to %s: %s", new_email, exc)
             return Response({"error": f"Mailversand an die neue Adresse fehlgeschlagen: {str(exc)}"}, status=400)
 
         # 2. Sicherheits-Benachrichtigung an ALTE Adresse
         try:
-            subj_old = "Sicherheitshinweis: E-Mail-Änderung für deinen Sharegy-Account angefordert"
-            text_old = (
-                f"Hallo {request.user.first_name or 'dort'},\n\n"
-                f"für deinen Sharegy-Account ({request.user.email}) wurde eine Änderung der E-Mail-Adresse auf {new_email} angefordert.\n\n"
-                f"Falls du dies nicht selbst veranlasst hast, kontaktiere bitte umgehend den Support.\n\n"
-                f"Dein Sharegy Team"
-            )
-            msg_old = EmailMultiAlternatives(subj_old, text_old, from_email, [request.user.email])
-            msg_old.send(fail_silently=True)
+            send_email_change_alert_email(request.user, new_email)
         except Exception:
             pass
 
@@ -946,7 +932,10 @@ class GDPRExportView(APIView):
         user_data = {
             "id": str(user.id),
             "username": getattr(user, "username", ""),
+            "first_name": getattr(user, "first_name", ""),
+            "last_name": getattr(user, "last_name", ""),
             "email": user.email,
+            "avatar": getattr(getattr(user, "profile", None), "avatar", ""),
             "date_joined": user.date_joined.isoformat() if hasattr(user, "date_joined") and user.date_joined else None,
             "last_login": user.last_login.isoformat() if user.last_login else None,
             "is_active": user.is_active,
@@ -972,12 +961,17 @@ class GDPRExportView(APIView):
             profile_obj = getattr(user, "profile", None)
             if profile_obj:
                 profile_data = {
+                    "avatar": getattr(profile_obj, "avatar", ""),
+                    "first_name": getattr(user, "first_name", ""),
+                    "last_name": getattr(user, "last_name", ""),
                     "street": getattr(profile_obj, "street", ""),
                     "postal_code": getattr(profile_obj, "postal_code", ""),
                     "city": getattr(profile_obj, "city", ""),
                     "country": getattr(profile_obj, "country", "DE"),
                     "phone": getattr(profile_obj, "phone", ""),
+                    "customer_type": getattr(profile_obj, "customer_type", "private"),
                     "company_name": getattr(profile_obj, "company_name", ""),
+                    "billing_name": getattr(profile_obj, "billing_name", ""),
                     "vat_id": getattr(profile_obj, "vat_id", ""),
                     "consent_given": getattr(profile_obj, "consent_given", True),
                     "consent_timestamp": getattr(profile_obj, "consent_timestamp", None).isoformat() if getattr(profile_obj, "consent_timestamp", None) else None,

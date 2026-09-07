@@ -1,0 +1,16 @@
+🛡️ {{ headline|default:"Sicherheitshinweis: E-Mail-Änderung angefordert" }}
+
+{{ greeting|default:"Hallo" }}{% if user_name %} {{ user_name }}{% endif %},
+
+{{ alert_intro|default:"für deinen Sharegy-Account wurde soeben eine Änderung der primären E-Mail-Adresse angefordert:" }}
+
+{{ old_email_label|default:"Bisherige E-Mail-Adresse" }}: {{ old_email }}
+{{ new_email_label|default:"Neu angeforderte Adresse" }}: {{ new_email }}
+
+{{ alert_info|default:"Eine Bestätigungs-E-Mail mit einem 30-minütigen Freigabelink wurde an die neue Adresse gesendet. Erst nach Klick auf diesen Link wird die Änderung wirksam." }}
+
+{{ alert_warning_title|default:"Warst du das nicht?" }}
+{{ alert_warning_text|default:"Falls du diese Änderung nicht selbst veranlasst hast, kontaktiere bitte unverzüglich unseren Support: support@sharegy.de" }}
+
+Sharegy ⚡
+https://sharegy.de

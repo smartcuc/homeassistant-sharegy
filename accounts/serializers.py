@@ -69,6 +69,8 @@ class UserMeSerializer(serializers.ModelSerializer):
         read_only=True
     )
     is_pro = serializers.SerializerMethodField()
+    avatar = serializers.SerializerMethodField()
+    profile = serializers.SerializerMethodField()
     is_platform_admin = serializers.BooleanField(read_only=True)
     is_finance_admin = serializers.BooleanField(read_only=True)
     is_global_user_admin = serializers.BooleanField(read_only=True)
@@ -82,6 +84,8 @@ class UserMeSerializer(serializers.ModelSerializer):
             "username",
             "first_name",
             "last_name",
+            "avatar",
+            "profile",
             "is_staff",
             "is_superuser",
             "platform_role",
@@ -98,5 +102,31 @@ class UserMeSerializer(serializers.ModelSerializer):
             return bool(hasattr(obj, "ems_subscription") and obj.ems_subscription.is_pro_active)
         except Exception:
             return False
+
+    def get_avatar(self, obj):
+        try:
+            if hasattr(obj, "profile") and obj.profile and obj.profile.avatar:
+                return obj.profile.avatar
+        except Exception:
+            pass
+        return ""
+
+    def get_profile(self, obj):
+        try:
+            if hasattr(obj, "profile") and obj.profile:
+                return {
+                    "avatar": obj.profile.avatar or "",
+                    "customer_type": obj.profile.customer_type or "private",
+                    "company_name": obj.profile.company_name or "",
+                    "phone": obj.profile.phone or "",
+                    "street": obj.profile.street or "",
+                    "house_number": obj.profile.house_number or "",
+                    "postal_code": obj.profile.postal_code or "",
+                    "city": obj.profile.city or "",
+                    "country": obj.profile.country or "DE",
+                }
+        except Exception:
+            pass
+        return {}
 
 
