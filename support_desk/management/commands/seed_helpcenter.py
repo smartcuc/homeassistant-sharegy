@@ -1051,6 +1051,218 @@ Configure browser push notifications with customizable **Quiet Hours** (e.g., 22
                 "is_featured": True,
                 "sort_order": 1,
             },
+            # ---------------------------------------------------------------------
+            # 16. WÄRME & HEIZUNG: FUSSBODENHEIZUNG & ESTRICH-SPEICHER (THERMAL BATTERY)
+            # ---------------------------------------------------------------------
+            {
+                "category": cats["optimizer"],
+                "slug": "fussbodenheizung-und-estrich-speicher",
+                "context_key": "floor_heating",
+                "title_de": "Fußbodenheizung & Estrich-Speicher: Regelungskonzept, Mess- & Steuerwerte",
+                "title_en": "Underfloor Heating & Screed Thermal Battery: Control Logic, Metrics & Setpoints",
+                "summary_de": "Vollständige Anleitung zur wettergeführten Fußbodenheizung (DIN EN 12831), thermischen Estrich-Vorladung (MPC) und allen Schaltsignalen.",
+                "summary_en": "Complete guide to weather-guided underfloor heating (DIN EN 12831), predictive screed preheating (MPC), and control setpoints.",
+                "content_de": """# Intelligente Fußbodenheizung & Thermischer Estrich-Speicher
+
+Die **Fußbodenheizungs- & Estrich-Engine** von Sharegy verwandelt den Betonestrich deines Gebäudes in einen hocheffizienten thermischen Energiespeicher (*Thermal Battery Dispatch*).
+
+---
+
+## 1. Das physikalische Prinzip (Warum Estrich?)
+
+Ein typisches Einfamilienhaus mit ca. $120\,\text{m}^2$ Fußbodenheizungsfläche besitzt rund **16,8 Tonnen Betonestrich** (Dicke $7\,\text{cm}$, Rohdichte $2.000\,\text{kg/m}^3$). 
+
+* **Thermische Speicherkapazität:** ca. **4,67 kWh pro Kelvin** Temperaturerhöhung.
+* **Vorladepotenzial (+1,0 K bis +1,5 K):** ca. **7 bis 14 kWh thermische Energie** (entspricht bei einer Wärmepumpe mit COP 3,5 ca. **2 bis 4 kWh elektrischer Energie**).
+* **Phasenverschiebung:** Der Estrich nimmt Wärme tagsüber bei kostenlosem Solarüberschuss oder günstigen Börsenpreisen auf und gibt sie abends **über 3 bis 5 Stunden passiv an die Räume ab** – ganz ohne teuren Netzbezug in der Abendspitze!
+
+---
+
+## 2. Wo und wie wird geschaltet? (Aktorik)
+
+Sharegy steuert den Heizkreis digital über einen der folgenden Wege:
+1. **SG-Ready Eingang der Wärmepumpe:** Ein Relais (z. B. Shelly Plus 1 / Pro 1) schaltet den SG-Ready-Kontakt 2 (Betriebszustand 3 = *„Empfohlene Überhöhung / Speicherladung“*).
+2. **Heizkreispumpe / FBH-Verteiler:** Ein Schaltaktor schaltet die Zirkulationspumpe des Niedertemperatur-Heizkreises direkt ein oder aus.
+3. **Smart Home Integration:** Steuerung über Home Assistant, ioBroker oder Homematic IP via MQTT / WebSocket.
+
+> [!TIP]
+> In den Einstellungen der Karte (⚙️ Zahnrad) wählst du unter **„Verknüpftes Gerät / Aktor“** einfach deinen Schalter aus.
+
+---
+
+## 3. Benötigte Messwerte (Inputs) & Steuerwerte (Outputs)
+
+### A. Benötigte Messwerte (Sensorik):
+* **Raumtemperatur ($T_\text{ist}$):** Raumthermostat oder Temperatursensor (z. B. Shelly H&T, Zigbee, Homematic).
+* **PV-Überschuss ($P_\text{surplus}$ in W):** Smart Meter am Netzübergabepunkt (z. B. Shelly 3EM / Pro 3EM, Wechselrichter).
+* **Börsenstrompreis (EPEX Spot):** Automatisch via Sharegy Live-Schnittstelle.
+* **Wetterdaten & Globalstrahlung (DWD / Open-Meteo):** Außentemperatur und Strahlung ($W/m^2$) der nächsten 24 Stunden.
+
+### B. Berechnete Steuerwerte (Aktorik & MPC):
+* **Relais-Schaltzustand:** `ON` (Vorheizen / Normalbetrieb) oder `OFF` (Passives Entladen / Standby).
+* **Dynamische Vorlauftemperatur ($T_\text{flow}$):** Berechnet nach DIN EN 12831:
+  $$\text{Vorlauf} = \text{Basis-Heizkurve} + \text{Vorladeboost}\,(+1{,}5\,\text{K}) - \text{Solares Absenken}\,(-1{,}5\,\text{K})$$
+* **Thermischer Ladezustand (SoC in % & kWh):** Exakte Füllstandsanzeige des Estrich-Speichers.
+
+---
+
+## 4. Die 5 Betriebsmodi
+
+1. **🤖 Autopilot (Empfohlen):** Kombiniert Solarüberschuss und Börsenpreise mit 24h-Wetterprognose.
+2. **☀️ Nur PV-Überschuss:** Lädt den Estrich ausschließlich dann vor, wenn Solarstrom ins Netz fließen würde.
+3. **💰 Sparfuchs:** Nutzt die günstigsten Börsenstromstunden der Nacht zur Vorladung.
+4. **🛋️ Komfortbetrieb:** Hält konstant die eingestellte Wunschtemperatur (keine Vorladung).
+5. **🛑 Manuell:** Automatik pausiert, Steuerung ausschließlich von Hand.
+
+---
+
+## 5. Sicherheit & Schutzfunktionen
+
+* **🛡️ Überhitzungsschutz:** Bei Überschreiten der Maximaltemperatur (z. B. $24{,}5^\circ\text{C}$) schaltet Sharegy den Heizkreis sofort ab.
+* **❄️ Untertemperaturschutz:** Sinkt die Temperatur unter $20{,}5^\circ\text{C}$, heizt Sharegy sofort auf, um Wohnkomfort zu garantieren.
+* **⏳ Verdichter- & Pumpenschutz:** Anti-Cycling-Sperre (Mindestlaufzeit & Mindestruhezeit von je 10 Minuten) verhindert häufiges Takten.
+""",
+                "content_en": """# Smart Underfloor Heating & Screed Thermal Battery
+
+Sharegy's **Underfloor Heating & Screed Thermal Battery Engine** turns your building's concrete floor into an intelligent thermal energy storage system (*Thermal Battery Dispatch*).
+
+---
+
+## 1. Physical Principle (Why Screed?)
+
+A typical single-family home with $120\,\text{m}^2$ of underfloor heating contains roughly **16.8 tons of screed concrete** ($7\,\text{cm}$ thickness, density $2,000\,\text{kg/m}^3$).
+
+* **Thermal Capacity:** approx. **4.67 kWh per Kelvin** of temperature rise.
+* **Preheating Potential (+1.0 K to +1.5 K):** approx. **7 to 14 kWh of thermal energy** (approx. **2 to 4 kWh electrical** with a heat pump COP of 3.5).
+* **Load Shifting:** The screed absorbs surplus solar energy or cheap dynamic power during the day and passively releases heat over **3 to 5 hours in the evening**, completely avoiding expensive peak grid hours.
+
+---
+
+## 2. Where and How is it Switched? (Actuators)
+
+1. **Heat Pump SG-Ready Contacts:** An actuator relay switches state 3 (recommended preheating boost).
+2. **Heating Circuit Pump:** An actuator switches the circulation pump directly.
+3. **Smart Home Integration:** Controlled via Home Assistant or ioBroker via MQTT / WebSocket RPC.
+
+---
+
+## 3. Required Metrics & Output Setpoints
+
+* **Inputs:** Room temperature, live solar surplus, EPEX Spot price, 24h weather forecast.
+* **Outputs:** Relay on/off state, dynamic flow temperature (DIN EN 12831), solar gain compensation, thermal SoC (%).
+""",
+                "tags": [
+                    "fussbodenheizung",
+                    "estrich",
+                    "thermal battery",
+                    "wärmepumpe",
+                    "heizkurve",
+                    "mpc",
+                    "solarüberschuss",
+                    "sg ready",
+                    "heating",
+                ],
+                "is_featured": True,
+                "sort_order": 2,
+            },
+            # ---------------------------------------------------------------------
+            # 17. SCHNITTSTELLEN: IOBROKER & HOME ASSISTANT (MESSEN & STEUERN)
+            # ---------------------------------------------------------------------
+            {
+                "category": cats["devices-protocols"],
+                "slug": "smart-home-iobroker-home-assistant-messen-steuern",
+                "context_key": "interfaces_smarthome",
+                "title_de": "ioBroker & Home Assistant Integration: Bidirektionales Messen & Steuern",
+                "title_en": "ioBroker & Home Assistant Integration: Bidirectional Monitoring & Control",
+                "summary_de": "Erklärung der bidirektionalen Schnittstelle für Home Assistant und ioBroker (Sensordaten erfassen, Thermostate und Aktoren schalten).",
+                "summary_en": "Guide to the bidirectional interface for Home Assistant and ioBroker (sensor telemetry and actuator control).",
+                "content_de": """# ioBroker & Home Assistant: Bidirektionales Messen & Steuern
+
+Sharegy bietet eine universelle **MQTT- & WebSocket-Schnittstelle**, mit der du deine bestehende Smart-Home-Zentrale (**Home Assistant**, **ioBroker**, **Node-RED**, **OpenHAB**, **Homematic IP**) nahtlos einbinden kannst.
+
+---
+
+## 1. Das Konzept: Messen vs. Steuern
+
+Die Schnittstelle arbeitet **bidirektional**:
+
+```mermaid
+flowchart LR
+    subgraph HA["🏠 Home Assistant / ioBroker"]
+        S["🌡️ Sensoren<br>(Temperatur, Smart Meter, PV)"]
+        A["🔌 Aktoren<br>(Thermostate, Relais, Wallbox)"]
+    end
+
+    subgraph Sharegy["⚡ Sharegy Cloud & HEMS Optimizer"]
+        O["🧠 MPC-Optimierung<br>& Börsenstrom-Algorithmus"]
+    end
+
+    S -- "1. Messen (Inbound Telemetrie)" --> O
+    O -- "2. Steuern (Outbound Setpoints / Schaltsignale)" --> A
+```
+
+---
+
+## 2. Messen (Sensordaten an Sharegy senden)
+
+Home Assistant oder ioBroker übermitteln Sensorwerte per MQTT an Sharegy (`h/<home_token>/...`):
+* `power_production` (PV-Leistung in W)
+* `power_grid` (Netzbezug/Einspeisung in W)
+* `battery_soc` (Batterieladezustand in %)
+* `temperature_room` (Ist-Temperatur des Wohnzimmers)
+
+---
+
+## 3. Steuern (Schaltbefehle & Sollwerte von Sharegy empfangen)
+
+Wenn die Option **„Bidirektionale Steuerung aktivieren“** eingeschaltet ist, publiziert Sharegy optimierte Sollwerte:
+* `heating_relay` (`ON` / `OFF` für Wärmepumpe / Relais)
+* `target_temperature` ($21{,}0^\circ\text{C}$ bzw. $22{,}0^\circ\text{C}$ bei Vorlade-Boost)
+* `flow_temperature_target` (Berechnete Vorlauftemperatur nach DIN EN 12831)
+* `wallbox_max_current` (Ladefreigabe 6 bis 16 A)
+
+---
+
+## 4. Konfiguration & Ein/Aus-Schalter
+
+1. Öffne im Menü **„⚙️ Schnittstellen“** (`/app/interfaces`).
+2. Wähle den Tab **„Home Assistant“** oder **„ioBroker“**.
+3. Aktiviere den Schalter **„Bidirektionale Steuerung (Messen & Steuern)“**.
+4. Kopiere deine Zugangsdaten (MQTT Host, Token, Passwort) in deine Zentrale.
+""",
+                "content_en": """# ioBroker & Home Assistant: Bidirectional Monitoring & Control
+
+Sharegy provides a universal **MQTT and WebSocket interface** to connect **Home Assistant**, **ioBroker**, **Node-RED**, and other smart home platforms.
+
+---
+
+## 1. Bidirectional Concept: Monitoring vs. Control
+
+* **1. Monitoring (Inbound):** HA/ioB sends live sensors (PV power, grid meter, room temperatures) to Sharegy.
+* **2. Control (Outbound):** Sharegy computes the optimal dispatch schedule and sends setpoints (`target_temperature`, `relay_state`, `wallbox_current`) back to your actuators.
+
+---
+
+## 2. Configuration & Activation
+
+1. Navigate to **Interfaces** (`/app/interfaces`).
+2. Select the **Home Assistant** or **ioBroker** tab.
+3. Toggle **"Bidirectional Control (Monitor & Actuate)"** on.
+""",
+                "tags": [
+                    "home assistant",
+                    "iobroker",
+                    "mqtt",
+                    "smart home",
+                    "messen",
+                    "steuern",
+                    "aktoren",
+                    "sensoren",
+                    "schnittstellen",
+                ],
+                "is_featured": True,
+                "sort_order": 3,
+            },
         ]
 
         for adata in articles_data:
