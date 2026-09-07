@@ -1,12 +1,36 @@
 push_telemetry:
-  name: Push Telemetry to Sharegy
-  description: Überträgt lokale Home Assistant Sensorwerte (z. B. Shelly, Wallbox, Wärmepumpe) verschlüsselt an Sharegy HEMS.
+  name: Telemetrie übertragen
+  description: Überträgt Messwerte lokaler Sensoren verschlüsselt an Sharegy.
   fields:
     devices:
-      name: Devices
-      description: Liste von Geräten mit identifier, power_w, energy_kwh und role (grid/producer/consumer/battery).
+      name: Geräte & Messwerte
+      description: Liste von Geräten mit Messwerten (power_w, energy_kwh, role).
       required: true
-      example: '[{"identifier": "shelly_3em", "power_w": 2450.5, "energy_kwh": 1420.8, "role": "grid"}]'
-      selector:
-        object:
+      example: '[{"identifier": "shelly_3em", "name": "Hauptanschluss", "power_w": 450.0, "role": "grid"}]'
 
+set_floor_heating_boost:
+  name: Fußbodenheizung Boost steuern
+  description: Schaltet den thermischen Vorheiz-Boost für den Estrich-Speicher ein oder aus.
+  fields:
+    active:
+      name: Aktivieren
+      description: True für Boost EIN, False für AUS.
+      required: true
+      selector:
+        boolean:
+
+set_bwwp_switch:
+  name: Brauchwasser-Wärmepumpe schalten
+  description: Schaltet die SG-Ready Boost Anhebung der Brauchwasser-Wärmepumpe.
+  fields:
+    state:
+      name: Status
+      description: True für Boost EIN, False für AUS.
+      required: true
+      selector:
+        boolean:
+    reason:
+      name: Grund
+      description: Optionaler Grund für das Logbuch.
+      required: false
+      example: "PV-Überschuss erkannt"

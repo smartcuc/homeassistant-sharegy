@@ -12,6 +12,7 @@ from homeassistant.components.sensor import (
 from homeassistant.const import (
     UnitOfPower,
     UnitOfEnergy,
+    UnitOfTemperature,
     PERCENTAGE,
 )
 from homeassistant.core import HomeAssistant
@@ -29,6 +30,7 @@ async def async_setup_entry(hass: HomeAssistant, entry, async_add_entities) -> N
     coordinator: SharegyDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
 
     sensors = [
+        # Grid & Power Flows
         SharegySolarPowerSensor(coordinator, entry),
         SharegyHouseholdLoadSensor(coordinator, entry),
         SharegyGridPowerSensor(coordinator, entry),
@@ -38,6 +40,14 @@ async def async_setup_entry(hass: HomeAssistant, entry, async_add_entities) -> N
         SharegySelfConsumptionSensor(coordinator, entry),
         SharegySpotPriceSensor(coordinator, entry),
         SharegyOptimizerWindowSensor(coordinator, entry),
+
+        # Floor Heating & Screed Thermal Battery (Bidirectional)
+        SharegyFloorHeatingFlowTempSensor(coordinator, entry),
+        SharegyFloorHeatingScreedSoCSensor(coordinator, entry),
+        SharegyFloorHeatingPowerSensor(coordinator, entry),
+        SharegyFloorHeatingStatusSensor(coordinator, entry),
+        SharegyFloorHeatingRoomTempSensor(coordinator, entry),
+        SharegyBwwpStatusSensor(coordinator, entry),
     ]
 
     async_add_entities(sensors)
@@ -60,7 +70,7 @@ class SharegyBaseSensor(CoordinatorEntity, SensorEntity):
             name="Sharegy HEMS",
             manufacturer="Sharegy",
             model="Energy Management System",
-            sw_version="2.0.0",
+            sw_version="2.1.0",
         )
 
 
@@ -262,3 +272,131 @@ class SharegyOptimizerWindowSensor(SharegyBaseSensor):
             "timeline": opt.get("timeline", [])[:6],
         }
 
+
+# ============================================================================
+# 🌡️ FLOOR HEATING & THERMAL SCREED BATTERY SENSORS
+# ============================================================================
+
+class SharegyFloorHeatingFlowTempSensor(SharegyBaseSensor):
+    """Calculated Flow Temperature Setpoint according to DIN EN 12831 heating curve (°C)."""
+
+    _attr_device_class = SensorDeviceClass.TEMPERATURE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
+    _attr_icon = "mdi:water-thermometer"
+
+    def __init__(self, coordinator, entry) -> None:
+        super().__init__(coordinator, entry, "floor_heating_flow_temp", "FBH Vorlauf-Solltemperatur")
+
+    @property
+    def native_value(self) -> float:
+        fh = self.coordinator.data.get("floor_heating", {})
+        val = fh.get("flow_temp_setpoint_c") or fh.get("target_flow_temp_c")
+        if val is None:
+            val = fh.get("kpis", {}).get("flow_temp", 31.5)
+        return round(float(val or 30.0), 1)
+
+
+class SharegyFloorHeatingScreedSoCSensor(SharegyBaseSensor):
+    """Screed Thermal Storage State of Charge in %."""
+
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_native_unit_of_measurement = PERCENTAGE
+    _attr_icon = "mdi:battery-arrow-up"
+
+    def __init__(self, coordinator, entry) -> None:
+        super().__init__(coordinator, entry, "floor_heating_screed_soc", "FBH Estrich-Speicher Ladestand (SoC)")
+
+    @property
+    def native_value(self) -> float:
+        fh = self.coordinator.data.get("floor_heating", {})
+        soc = fh.get("screed_soc_pct")
+        if soc is None:
+            soc = fh.get("thermal_storage", {}).get("soc_pct", 50.0)
+        return round(float(soc or 50.0), 1)
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        fh = self.coordinator.data.get("floor_heating", {})
+        return {
+            "stored_kwh": fh.get("thermal_storage", {}).get("stored_kwh"),
+            "max_capacity_kwh": fh.get("thermal_storage", {}).get("capacity_kwh", 15.6),
+            "screed_mass_kg": fh.get("screed_mass_kg", 16800),
+        }
+
+
+class SharegyFloorHeatingPowerSensor(SharegyBaseSensor):
+    """Current Floor Heating Power in kW."""
+
+    _attr_device_class = SensorDeviceClass.POWER
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_native_unit_of_measurement = "kW"
+    _attr_icon = "mdi:heat-wave"
+
+    def __init__(self, coordinator, entry) -> None:
+        super().__init__(coordinator, entry, "floor_heating_power", "FBH Heizleistung")
+
+    @property
+    def native_value(self) -> float:
+        fh = self.coordinator.data.get("floor_heating", {})
+        val = fh.get("heating_power_kw") or fh.get("current_power_kw", 0.0)
+        return round(float(val or 0.0), 2)
+
+
+class SharegyFloorHeatingStatusSensor(SharegyBaseSensor):
+    """Current Operating Mode of the Floor Heating Dispatch System."""
+
+    _attr_icon = "mdi:tune-vertical"
+
+    def __init__(self, coordinator, entry) -> None:
+        super().__init__(coordinator, entry, "floor_heating_mode", "FBH Betriebsmodus")
+
+    @property
+    def native_value(self) -> str:
+        fh = self.coordinator.data.get("floor_heating", {})
+        mode = fh.get("mode") or fh.get("status", "STANDBY")
+        mode_labels = {
+            "pv_boost": "PV-Überschuss Boost",
+            "grid_arbitrage": "Netz-Arbitrage (Niedrigpreis)",
+            "comfort": "Komfortbetrieb",
+            "eco": "Eco-Absenkung",
+            "standby": "Standby / Deaktiviert",
+            "manual_boost": "Manueller Boost",
+        }
+        return mode_labels.get(str(mode).lower(), str(mode).upper())
+
+
+class SharegyFloorHeatingRoomTempSensor(SharegyBaseSensor):
+    """Current Room Temperature in °C."""
+
+    _attr_device_class = SensorDeviceClass.TEMPERATURE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
+    _attr_icon = "mdi:home-thermometer"
+
+    def __init__(self, coordinator, entry) -> None:
+        super().__init__(coordinator, entry, "floor_heating_room_temp", "FBH Ist-Raumtemperatur")
+
+    @property
+    def native_value(self) -> float:
+        fh = self.coordinator.data.get("floor_heating", {})
+        val = fh.get("current_room_temp_c")
+        if val is None:
+            val = fh.get("room_temp_c", 21.2)
+        return round(float(val or 21.0), 1)
+
+
+class SharegyBwwpStatusSensor(SharegyBaseSensor):
+    """Current Status of Brauchwasser-Wärmepumpe SG-Ready."""
+
+    _attr_icon = "mdi:water-boiler-alert"
+
+    def __init__(self, coordinator, entry) -> None:
+        super().__init__(coordinator, entry, "bwwp_status", "BWWP SG-Ready Status")
+
+    @property
+    def native_value(self) -> str:
+        bwwp = self.coordinator.data.get("bwwp", {})
+        if bwwp.get("is_active") or bwwp.get("status") == "boost":
+            return "SG-Ready Boost (Aktiv)"
+        return "Normalbetrieb (Standby)"

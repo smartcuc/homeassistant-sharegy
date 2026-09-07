@@ -20,13 +20,19 @@ from .const import (
     ENDPOINT_BALANCE,
     ENDPOINT_OPTIMIZER,
     ENDPOINT_TELEMETRY_PUSH,
+    ENDPOINT_FLOOR_HEATING,
+    ENDPOINT_FLOOR_HEATING_BOOST,
+    ENDPOINT_FLOOR_HEATING_TOGGLE,
+    ENDPOINT_FLOOR_HEATING_CONFIG,
+    ENDPOINT_BWWP,
+    ENDPOINT_BWWP_SWITCH,
 )
 
 _LOGGER = logging.getLogger(__name__)
 
 
 class SharegyDataUpdateCoordinator(DataUpdateCoordinator):
-    """Class to manage fetching Sharegy data from the API."""
+    """Class to manage fetching and controlling Sharegy HEMS data."""
 
     def __init__(self, hass: HomeAssistant, entry) -> None:
         """Initialize the coordinator."""
@@ -40,6 +46,9 @@ class SharegyDataUpdateCoordinator(DataUpdateCoordinator):
         self.host = host
         self.api_key = str(entry.data.get(CONF_API_KEY, "")).strip()
         scan_interval = entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
+
+        # Local bidirectional control enable state
+        self.bidirectional_enabled = True
 
         super().__init__(
             hass,
@@ -60,7 +69,13 @@ class SharegyDataUpdateCoordinator(DataUpdateCoordinator):
     async def _async_update_data(self) -> dict:
         """Fetch data from Sharegy API endpoints."""
         headers = self._get_headers()
-        data = {}
+        data = {
+            "dashboard": {},
+            "balance": {},
+            "optimizer": {},
+            "floor_heating": {},
+            "bwwp": {},
+        }
 
         try:
             connector = aiohttp.TCPConnector(ssl=False)
@@ -74,23 +89,36 @@ class SharegyDataUpdateCoordinator(DataUpdateCoordinator):
                         raise UpdateFailed("Authentifizierungsfehler bei Sharegy. Bitte API-Key prüfen.")
                     else:
                         _LOGGER.warning("Sharegy Dashboard HTTP %s", resp.status)
-                        data["dashboard"] = {}
 
                 # 2. Fetch Energy Balance & KPIs
                 balance_url = f"{self.host}{ENDPOINT_BALANCE}"
                 async with session.get(balance_url, headers=headers, timeout=10) as resp:
                     if resp.status == 200:
                         data["balance"] = await resp.json()
-                    else:
-                        data["balance"] = {}
 
                 # 3. Fetch Optimizer Schedule (1h, 2h, 4h Window)
                 opt_url = f"{self.host}{ENDPOINT_OPTIMIZER}"
                 async with session.get(opt_url, headers=headers, timeout=10) as resp:
                     if resp.status == 200:
                         data["optimizer"] = await resp.json()
-                    else:
-                        data["optimizer"] = {}
+
+                # 4. Fetch Floor Heating & Screed Thermal Battery Status
+                fh_url = f"{self.host}{ENDPOINT_FLOOR_HEATING}"
+                try:
+                    async with session.get(fh_url, headers=headers, timeout=10) as resp:
+                        if resp.status == 200:
+                            data["floor_heating"] = await resp.json()
+                except Exception as ex:
+                    _LOGGER.debug("Could not fetch floor heating status: %s", ex)
+
+                # 5. Fetch BWWP Status
+                bwwp_url = f"{self.host}{ENDPOINT_BWWP}"
+                try:
+                    async with session.get(bwwp_url, headers=headers, timeout=10) as resp:
+                        if resp.status == 200:
+                            data["bwwp"] = await resp.json()
+                except Exception as ex:
+                    _LOGGER.debug("Could not fetch BWWP status: %s", ex)
 
             return data
 
@@ -119,3 +147,73 @@ class SharegyDataUpdateCoordinator(DataUpdateCoordinator):
             _LOGGER.error("Error pushing telemetry to Sharegy: %s", err)
             return False
 
+    async def async_set_floor_heating_boost(self, active: bool) -> bool:
+        """Trigger or stop screed preheating boost."""
+        headers = self._get_headers()
+        url = f"{self.host}{ENDPOINT_FLOOR_HEATING_BOOST}"
+        payload = {"active": bool(active), "reason": "Home Assistant Trigger"}
+
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(url, json=payload, headers=headers, timeout=10) as resp:
+                    if resp.status == 200:
+                        await self.async_request_refresh()
+                        return True
+                    _LOGGER.error("Failed to set floor heating boost: HTTP %s", resp.status)
+                    return False
+        except Exception as err:
+            _LOGGER.error("Error sending floor heating boost to Sharegy: %s", err)
+            return False
+
+    async def async_toggle_floor_heating(self, enabled: bool) -> bool:
+        """Toggle floor heating dispatch module."""
+        headers = self._get_headers()
+        url = f"{self.host}{ENDPOINT_FLOOR_HEATING_TOGGLE}"
+        payload = {"enabled": bool(enabled)}
+
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(url, json=payload, headers=headers, timeout=10) as resp:
+                    if resp.status == 200:
+                        await self.async_request_refresh()
+                        return True
+                    _LOGGER.error("Failed to toggle floor heating: HTTP %s", resp.status)
+                    return False
+        except Exception as err:
+            _LOGGER.error("Error sending floor heating toggle: %s", err)
+            return False
+
+    async def async_set_floor_heating_config(self, updates: dict) -> bool:
+        """Update floor heating parameters (e.g. target_temp_comfort, max_screed_temp)."""
+        headers = self._get_headers()
+        url = f"{self.host}{ENDPOINT_FLOOR_HEATING_CONFIG}"
+
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(url, json=updates, headers=headers, timeout=10) as resp:
+                    if resp.status == 200:
+                        await self.async_request_refresh()
+                        return True
+                    _LOGGER.error("Failed to update floor heating config: HTTP %s", resp.status)
+                    return False
+        except Exception as err:
+            _LOGGER.error("Error updating floor heating config: %s", err)
+            return False
+
+    async def async_set_bwwp_switch(self, state: bool, reason: str = "Home Assistant Switch") -> bool:
+        """Switch BWWP state."""
+        headers = self._get_headers()
+        url = f"{self.host}{ENDPOINT_BWWP_SWITCH}"
+        payload = {"state": bool(state), "reason": reason}
+
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(url, json=payload, headers=headers, timeout=10) as resp:
+                    if resp.status == 200:
+                        await self.async_request_refresh()
+                        return True
+                    _LOGGER.error("Failed to switch BWWP: HTTP %s", resp.status)
+                    return False
+        except Exception as err:
+            _LOGGER.error("Error switching BWWP: %s", err)
+            return False

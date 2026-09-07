@@ -12,7 +12,11 @@ from .coordinator import SharegyDataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS: list[Platform] = [Platform.SENSOR]
+PLATFORMS: list[Platform] = [
+    Platform.SENSOR,
+    Platform.SWITCH,
+    Platform.NUMBER,
+]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -35,7 +39,20 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         if not success:
             _LOGGER.warning("Konnte Telemetrie nicht an Sharegy übertragen.")
 
+    # Register custom service: sharegy.set_floor_heating_boost
+    async def handle_floor_heating_boost(call: ServiceCall):
+        active = call.data.get("active", True)
+        await coordinator.async_set_floor_heating_boost(active)
+
+    # Register custom service: sharegy.set_bwwp_mode
+    async def handle_bwwp_switch(call: ServiceCall):
+        state = call.data.get("state", True)
+        reason = call.data.get("reason", "Service Call")
+        await coordinator.async_set_bwwp_switch(state, reason=reason)
+
     hass.services.async_register(DOMAIN, "push_telemetry", handle_push_telemetry)
+    hass.services.async_register(DOMAIN, "set_floor_heating_boost", handle_floor_heating_boost)
+    hass.services.async_register(DOMAIN, "set_bwwp_switch", handle_bwwp_switch)
 
     return True
 
@@ -47,4 +64,3 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.data[DOMAIN].pop(entry.entry_id)
 
     return unload_ok
-

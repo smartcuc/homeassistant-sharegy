@@ -1,9 +1,11 @@
-# 🏠 Sharegy Home Assistant Custom Component
+# 🏠 Sharegy Home Assistant Custom Component (v2.1.0)
 
-Die offizielle Home Assistant Integration verbindet dein **Sharegy HEMS** mit Home Assistant:
+Die offizielle Home Assistant Integration verbindet dein **Sharegy HEMS** bidirektional (**Messen & Steuern**) mit Home Assistant:
 * ☀️ **Live-Sensoren**: PV-Erzeugung, Hauslast, Netzleistung, Batteriespeicher-SoC und Autarkiegrad.
-* 💶 **Börsenstrompreis & Optimizer**: Bereitstellung der dynamischen EPEX Spot-Preise und der besten 1h-, 2h- und 4h-Ladefenster für deine HA-Automationen (z. B. E-Auto laden oder Wärmepumpe ansteuern).
-* 🔒 **Verschlüsselter Telemetrie-Rückkanal**: Übertrage Messwerte lokaler Smart-Home-Zähler (Shelly 3EM, Zigbee/Tasmota Steckdosen, Easee Wallbox) direkt an Sharegy.
+* 🌡️ **Fußbodenheizung & Estrich-Speicher**: Echtzeit-Berechnung der DIN EN 12831 Vorlauftemperatur, Ladezustand des Estrich-Speichers (SoC %) und aktueller Betriebsmodus.
+* 🎛️ **Bidirektionale Aktorik & Schalter**: Direkte Schaltung von Vorheiz-Boosts, SG-Ready Anhebung für Brauchwasser-Wärmepumpen und Anpassung der Ziel-Raumtemperatur.
+* 💶 **Börsenstrompreis & Optimizer**: Bereitstellung der dynamischen EPEX Spot-Preise und der besten Ladefenster für deine HA-Automationen.
+* 🔒 **Sichere Kommunikation (WSS bevorzugt)**: Volle Unterstützung für Outbound WSS über Port 443 (Firewall- und NAT-sicher ohne Portfreigaben) sowie MQTT.
 
 ---
 
@@ -28,13 +30,15 @@ Die offizielle Home Assistant Integration verbindet dein **Sharegy HEMS** mit Ho
 2. Suche nach **Sharegy HEMS**.
 3. Trage deine Zugangsdaten ein:
    * **Host**: `https://sharegy.de` (Standard vorausgefüllt)
-   * **API-Key / MQTT-Token**: Dein Token aus Sharegy (**Schnittstellen & MQTT**)
+   * **API-Key / Home-Token**: Dein Token aus Sharegy (**Schnittstellen**)
    * **Abfrage-Intervall**: Standard 10 Sekunden (einstellbar 5 bis 300 Sekunden).
-4. Fertig! Alle 9 Sensoren werden automatisch erstellt.
+4. Fertig! Alle Sensoren, Schalter und Schieberegler werden automatisch erstellt.
 
 ---
 
-## 📊 Verfügbare Sensoren
+## 📊 Verfügbare Entitäten
+
+### 📈 Sensoren (Messen & Monitoring)
 
 | Entität | Einheit | Beschreibung |
 | :--- | :---: | :--- |
@@ -42,45 +46,52 @@ Die offizielle Home Assistant Integration verbindet dein **Sharegy HEMS** mit Ho
 | `sensor.sharegy_hausverbrauch` | `W` | Gesamte Haushaltslast |
 | `sensor.sharegy_netzleistung` | `W` | Netzbezug (positiv) / Netzeinspeisung (negativ) |
 | `sensor.sharegy_batterieleistung` | `W` | Batterieladung (positiv) / Entladung (negativ) |
-| `sensor.sharegy_batterie_ladestand_soc` | `%` | Aggregierter Ladestand des Speichers |
+| `sensor.sharegy_batterie_ladestand_soc` | `%` | Aggregierter Ladestand des Batteriespeichers |
 | `sensor.sharegy_autarkiegrad` | `%` | Heutiger Autarkiegrad |
 | `sensor.sharegy_eigenverbrauchsquote` | `%` | Heutige Eigenverbrauchsquote |
 | `sensor.sharegy_borsenstrompreis` | `ct/kWh` | Aktueller dynamischer Strompreis |
-| `sensor.sharegy_optimizer_best_zeitfenster` | String | Bestes 2h-Zeitfenster (z. B. `13:00 - 15:00`) |
+| `sensor.sharegy_optimizer_best_zeitfenster` | String | Bestes Lade-/Heizfenster (z. B. `13:00 - 15:00`) |
+| `sensor.sharegy_fbh_vorlauf_solltemperatur` | `°C` | Berechnete DIN EN 12831 Heizkurven-Soll-Vorlauftemperatur |
+| `sensor.sharegy_fbh_estrich_speicher_ladestand_soc` | `%` | Ladezustand des thermischen Estrich-Speichers |
+| `sensor.sharegy_fbh_heizleistung` | `kW` | Aktuelle thermische Heizleistung |
+| `sensor.sharegy_fbh_betriebsmodus` | String | Betriebsmodus (`PV-Überschuss Boost`, `Netz-Arbitrage`, `Komfort`, `Eco`) |
+| `sensor.sharegy_fbh_ist_raumtemperatur` | `°C` | Aktuelle Raumtemperatur |
+| `sensor.sharegy_bwwp_sg_ready_status` | String | Status der Warmwasser-Wärmepumpe |
+
+### 🎛️ Schalter & Regler (Steuern & Aktorik)
+
+| Entität | Typ | Beschreibung |
+| :--- | :---: | :--- |
+| `switch.sharegy_bidirektionale_steuerung` | Schalter | Globaler Not-Aus / Pause für automatische Aktorik |
+| `switch.sharegy_fussbodenheizung_boost` | Schalter | Manueller Vorheiz-Boost für den thermischen Estrich-Speicher |
+| `switch.sharegy_fussbodenheizung_modul_aktiv` | Schalter | Fußbodenheizungs-Dispatch-Modul aktivieren / deaktivieren |
+| `switch.sharegy_brauchwasser_wp_boost` | Schalter | SG-Ready Boost Anhebung für BWWP |
+| `number.sharegy_fbh_soll_raumtemperatur` | Schieberegler | Gewünschte Komfort-Zielraumtemperatur (18.0 - 24.0 °C) |
+| `number.sharegy_fbh_estrich_uberhitzungs_toleranz` | Schieberegler | Max. Estrich-Puffertoleranz in Kelvin (0.5 - 3.0 K) |
 
 ---
 
-## 🤖 Beispiel-Automation: E-Auto im günstigsten Zeitfenster laden
+## 🤖 Beispiel-Automationen
 
+### 1. Fußbodenheizung bei dynamischem Tiefpreis vorheizen
 ```yaml
-alias: "Sharegy: Wallbox im günstigsten Ladefenster einschalten"
-description: "Startet das Laden, sobald das vom Optimizer empfohlene Zeitfenster aktiv ist"
+alias: "Sharegy: Fußbodenheizung bei Negativ-/Tiefpreis boosten"
+description: "Aktiviert den thermischen Estrich-Vorheiz-Boost bei günstigem Börsenstrompreis"
 trigger:
-  - platform: template
-    value_template: >
-      {% set window = states('sensor.sharegy_optimizer_best_zeitfenster') %}
-      {% if ' - ' in window %}
-        {% set start_time = window.split(' - ')[0] %}
-        {{ now().strftime('%H:%M') == start_time }}
-      {% else %}
-        false
-      {% endif %}
+  - platform: numeric_state
+    entity_id: sensor.sharegy_borsenstrompreis
+    below: 15.0 # unter 15 ct/kWh
 condition:
   - condition: state
-    entity_id: binary_sensor.wallbox_car_connected
+    entity_id: switch.sharegy_bidirektionale_steuerung
     state: "on"
 action:
   - service: switch.turn_on
     target:
-      entity_id: switch.wallbox_charging
+      entity_id: switch.sharegy_fussbodenheizung_boost
 ```
 
----
-
-## 📤 Lokale Messwerte an Sharegy senden (Service `push_telemetry`)
-
-Übertrage eigene Smart-Home-Zähler (z. B. Shelly 3EM) in festen Intervallen verschlüsselt an Sharegy:
-
+### 2. Lokale Messwerte (z. B. Shelly 3EM) an Sharegy senden
 ```yaml
 alias: "Sharegy: Shelly 3EM Telemetrie übertragen"
 trigger:
@@ -95,9 +106,8 @@ action:
           power_w: "{{ states('sensor.shelly_3em_total_power') | float }}"
           energy_kwh: "{{ states('sensor.shelly_3em_total_energy') | float }}"
           role: "grid"
-        - identifier: "shelly_heatpump"
+        - identifier: "heatpump_main"
           name: "Wärmepumpe"
           power_w: "{{ states('sensor.heatpump_power') | float }}"
           role: "consumer"
 ```
-
