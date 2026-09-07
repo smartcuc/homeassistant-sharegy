@@ -1024,42 +1024,112 @@ export default function Profile() {
                                 </div>
                             </div>
 
-                            {/* Hinterlegte Rechnungsadresse Kurzübersicht */}
-                            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 space-y-2 text-xs">
-                                <div className="flex items-center justify-between">
-                                    <div className="font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
-                                        <span>📍</span>
-                                        <span>{t("billing.invoice_recipient", "Rechnungsempfänger")}</span>
+                            {/* Hinterlegte Rechnungsadresse & Empfängertyp Kurzübersicht */}
+                            {(() => {
+                                const isBusinessCustomer = Boolean(formData.company_name?.trim() || formData.vat_id?.trim());
+                                const hasAddress = Boolean(formData.street?.trim() || formData.city?.trim());
+                                const personalName = `${formData.first_name || ""} ${formData.last_name || ""}`.trim();
+
+                                return (
+                                    <div className="p-4.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 space-y-3 text-xs">
+                                        <div className="flex flex-wrap items-center justify-between gap-2">
+                                            <div className="font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
+                                                <span>📍</span>
+                                                <span>{t("billing.invoice_recipient", "Rechnungsempfänger")}</span>
+                                            </div>
+                                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${
+                                                isBusinessCustomer
+                                                    ? "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800"
+                                                    : "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
+                                            }`}>
+                                                {isBusinessCustomer ? "🏢 Geschäftskunde (B2B)" : "👤 Privatkunde (B2C)"}
+                                            </span>
+                                        </div>
+
+                                        <div className="p-3 bg-white dark:bg-slate-800/80 rounded-xl border border-gray-200/70 dark:border-slate-700/70 space-y-1.5 text-[11px] leading-relaxed">
+                                            {isBusinessCustomer ? (
+                                                <>
+                                                    <div className="font-bold text-sm text-gray-900 dark:text-white">
+                                                        {formData.company_name}
+                                                    </div>
+                                                    {(formData.billing_name || personalName) && (
+                                                        <div className="text-gray-600 dark:text-gray-300">
+                                                            z. Hd.: <span className="font-medium">{formData.billing_name || personalName}</span>
+                                                        </div>
+                                                    )}
+                                                    {formData.vat_id && (
+                                                        <div className="text-gray-600 dark:text-gray-400 font-mono text-[10px]">
+                                                            USt-IdNr.: {formData.vat_id}
+                                                        </div>
+                                                    )}
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <div className="font-bold text-sm text-gray-900 dark:text-white">
+                                                        {personalName || user?.email}
+                                                    </div>
+                                                </>
+                                            )}
+
+                                            {hasAddress ? (
+                                                <div className="text-gray-600 dark:text-gray-300 pt-0.5">
+                                                    {formData.street} {formData.house_number}, {formData.postal_code} {formData.city} ({formData.country || "DE"})
+                                                </div>
+                                            ) : (
+                                                <div className="text-amber-600 dark:text-amber-400 font-medium pt-0.5 flex items-center gap-1">
+                                                    <span>⚠️</span>
+                                                    <span>Keine postalische Rechnungsadresse hinterlegt</span>
+                                                </div>
+                                            )}
+
+                                            <div className="text-gray-500 dark:text-gray-400 pt-1 border-t border-gray-100 dark:border-slate-700/50">
+                                                📧 Belegversand an: <span className="font-semibold text-gray-700 dark:text-gray-200">{formData.billing_email || user?.email}</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Kontextbezogene Aktionen / Links */}
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1">
+                                            {isBusinessCustomer ? (
+                                                <>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleTabChange("company")}
+                                                        className="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline font-bold cursor-pointer flex items-center gap-1"
+                                                    >
+                                                        <span>🏢</span>
+                                                        <span>Firmendaten & Rechnungsadresse anpassen ➔</span>
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleTabChange("profile")}
+                                                        className="text-[10px] text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:underline cursor-pointer"
+                                                    >
+                                                        Privatadresse ansehen
+                                                    </button>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleTabChange("profile")}
+                                                        className="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline font-bold cursor-pointer flex items-center gap-1"
+                                                    >
+                                                        <span>👤</span>
+                                                        <span>Persönliche Rechnungsanschrift anpassen ➔</span>
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleTabChange("company")}
+                                                        className="text-[10px] text-indigo-500 dark:text-indigo-400 hover:underline font-medium cursor-pointer"
+                                                    >
+                                                        🏢 Auf Firmenrechnung (B2B) umstellen ➔
+                                                    </button>
+                                                </>
+                                            )}
+                                        </div>
                                     </div>
-                                    <button
-                                        type="button"
-                                        onClick={() => handleTabChange("company")}
-                                        className="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline font-bold cursor-pointer"
-                                    >
-                                        Bearbeiten ➔
-                                    </button>
-                                </div>
-                                <div className="text-gray-600 dark:text-gray-300 text-[11px] leading-relaxed">
-                                    <div className="font-semibold text-gray-800 dark:text-gray-200">
-                                        {formData.billing_name || formData.company_name || `${formData.first_name || ""} ${formData.last_name || ""}`.trim() || user?.email}
-                                    </div>
-                                    {formData.street && (
-                                        <div className="text-gray-500 dark:text-gray-400 mt-0.5">
-                                            {formData.street} {formData.house_number}, {formData.postal_code} {formData.city} ({formData.country || "DE"})
-                                        </div>
-                                    )}
-                                    {formData.billing_email && (
-                                        <div className="text-gray-500 dark:text-gray-400 mt-0.5">
-                                            📧 Belegversand an: <span className="font-medium text-gray-700 dark:text-gray-300">{formData.billing_email}</span>
-                                        </div>
-                                    )}
-                                    {formData.vat_id && (
-                                        <div className="text-gray-500 dark:text-gray-400 font-mono text-[10px] mt-0.5">
-                                            USt-IdNr.: {formData.vat_id}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
+                                );
+                            })()}
 
                             {/* Rechtliche Hinweise & Vorsteuerabzug */}
                             <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/60 text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed space-y-1">
