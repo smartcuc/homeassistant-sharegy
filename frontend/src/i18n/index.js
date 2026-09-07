@@ -9,11 +9,17 @@ import LanguageDetector from "i18next-browser-languagedetector";
 import de from "./locales/de.json";
 import en from "./locales/en.json";
 import pl from "./locales/pl.json";
+import tr from "./locales/tr.json";
+import ru from "./locales/ru.json";
+import ro from "./locales/ro.json";
 
 const resources = {
     de: { translation: de },
     en: { translation: en },
     pl: { translation: pl },
+    tr: { translation: tr },
+    ru: { translation: ru },
+    ro: { translation: ro },
 };
 
 i18n
@@ -22,7 +28,7 @@ i18n
     .init({
         resources,
         fallbackLng: "de",
-        supportedLngs: ["de", "en", "pl"],
+        supportedLngs: ["de", "en", "pl", "tr", "ru", "ro"],
         nonExplicitSupportedLngs: true,
         load: "languageOnly",
         debug: false,

@@ -15,7 +15,7 @@ import AlertCenterModal from "../../features/alerts/components/AlertCenterModal"
 import { LifeBuoy, Bell, Sun, Moon, Check, ChevronDown, Building2, Home } from "lucide-react";
 
 export default function AppTopbar() {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const { user } = useUser();
     const navigate = useNavigate();
     const { homes = [], primaryHome } = useHomes();
@@ -27,6 +27,36 @@ export default function AppTopbar() {
     const [homeDropdownOpen, setHomeDropdownOpen] = useState(false);
     const homeDropdownRef = useRef(null);
 
+    // Sprach-Dropdown State (DE, EN, PL, TR, RU, RO)
+    const [langDropdownOpen, setLangDropdownOpen] = useState(false);
+    const langDropdownRef = useRef(null);
+
+    const languages = [
+        { code: "de", label: "Deutsch", flag: "🇩🇪" },
+        { code: "en", label: "English", flag: "🇬🇧" },
+        { code: "pl", label: "Polski", flag: "🇵🇱" },
+        { code: "tr", label: "Türkçe", flag: "🇹🇷" },
+        { code: "ru", label: "Русский", flag: "🇷🇺" },
+        { code: "ro", label: "Română", flag: "🇷🇴" },
+    ];
+
+    const currentLang = (i18n.resolvedLanguage || i18n.language || "de").substring(0, 2);
+    const currentLangObj = languages.find((l) => l.code === currentLang) || languages[0];
+
+    const handleLanguageChange = async (langCode) => {
+        setLangDropdownOpen(false);
+        await i18n.changeLanguage(langCode);
+        localStorage.setItem("i18nextLng", langCode);
+        try {
+            await apiFetch("/api/language/", {
+                method: "POST",
+                body: JSON.stringify({ language: langCode }),
+            });
+        } catch {
+            // Ignore API fallback
+        }
+    };
+
     // Aktive Liegenschaft (Default ist primaryHome)
     const [selectedHomeId, setSelectedHomeId] = useState(() => {
         return localStorage.getItem("sharegy_active_home_id") || primaryHome?.id;
@@ -34,11 +64,14 @@ export default function AppTopbar() {
 
     const activeHome = homes.find((h) => String(h.id) === String(selectedHomeId)) || primaryHome || homes[0];
 
-    // Outside-Click Listener für Home-Dropdown
+    // Outside-Click Listener für Dropdowns
     useEffect(() => {
         function handleClickOutside(e) {
             if (homeDropdownRef.current && !homeDropdownRef.current.contains(e.target)) {
                 setHomeDropdownOpen(false);
+            }
+            if (langDropdownRef.current && !langDropdownRef.current.contains(e.target)) {
+                setLangDropdownOpen(false);
             }
         }
         document.addEventListener("mousedown", handleClickOutside);
@@ -334,6 +367,52 @@ export default function AppTopbar() {
                         <Moon className="w-4 h-4 text-slate-600 dark:text-slate-300 hover:-rotate-12 transition-transform" />
                     )}
                 </button>
+
+                {/* 🌐 Sprach-Wähler (DE, EN, PL, TR, RU, RO) */}
+                <div className="relative" ref={langDropdownRef}>
+                    <button
+                        type="button"
+                        onClick={() => setLangDropdownOpen(!langDropdownOpen)}
+                        title={t("settings.language", "Sprache wählen")}
+                        className="flex items-center gap-1 px-2 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
+                        aria-expanded={langDropdownOpen}
+                    >
+                        <span className="text-base leading-none">{currentLangObj.flag}</span>
+                        <span className="hidden sm:inline font-mono uppercase text-[11px]">{currentLangObj.code}</span>
+                        <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform duration-200 ${langDropdownOpen ? "rotate-180" : ""}`} />
+                    </button>
+
+                    {langDropdownOpen && (
+                        <div className="absolute right-0 mt-2 w-44 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-2xl shadow-xl py-1.5 z-50 animate-in fade-in zoom-in-95 duration-150">
+                            <div className="px-3 py-1.5 text-[10px] uppercase font-bold text-gray-400 tracking-wider border-b border-gray-100 dark:border-slate-800">
+                                {t("settings.language", "Sprache wählen")}
+                            </div>
+                            <div className="py-1">
+                                {languages.map((lang) => {
+                                    const isActive = currentLang === lang.code;
+                                    return (
+                                        <button
+                                            key={lang.code}
+                                            type="button"
+                                            onClick={() => handleLanguageChange(lang.code)}
+                                            className={`w-full px-3 py-1.5 text-xs text-left flex items-center justify-between transition cursor-pointer ${
+                                                isActive
+                                                    ? "bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 font-bold"
+                                                    : "text-gray-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-slate-800/60"
+                                            }`}
+                                        >
+                                            <span className="flex items-center gap-2">
+                                                <span className="text-base">{lang.flag}</span>
+                                                <span>{lang.label}</span>
+                                            </span>
+                                            {isActive && <Check className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+                </div>
 
                 {/* 🛟 Hilfe & Support Trigger */}
                 <button
