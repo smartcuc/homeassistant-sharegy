@@ -1,0 +1,100 @@
+blueprint:
+  name: "Sharegy: Lokale Zähler & Telemetrie an Sharegy übertragen"
+  description: "Sendet Messwerte deiner lokalen Home Assistant Sensoren (z. B. Shelly 3EM, Wallbox, Wärmepumpe) in festen Intervallen verschlüsselt an Sharegy HEMS."
+  domain: automation
+  input:
+    push_interval:
+      name: Sende-Intervall (Sekunden)
+      description: Wie oft sollen die Messwerte übertragen werden? (Standard: alle 10 Sekunden)
+      default: 10
+      selector:
+        number:
+          min: 5
+          max: 60
+          unit_of_measurement: seconds
+    grid_power_sensor:
+      name: Netz-Leistungssensor (Optional)
+      description: Sensor für den Haus-Netzanschluss (z. B. Shelly 3EM Gesamtleistung in Watt)
+      default: []
+      selector:
+        entity:
+          domain: sensor
+          device_class: power
+    grid_energy_sensor:
+      name: Netz-Energiezähler (Optional)
+      description: Zählerstand des Haus-Netzanschlusses (in kWh)
+      default: []
+      selector:
+        entity:
+          domain: sensor
+          device_class: energy
+    pv_power_sensor:
+      name: PV-Erzeugungssensor (Optional)
+      description: Eigener lokaler Wechselrichter-Sensor in Home Assistant (in Watt)
+      default: []
+      selector:
+        entity:
+          domain: sensor
+          device_class: power
+    heatpump_power_sensor:
+      name: Wärmepumpen-Leistungssensor (Optional)
+      description: Sensor für Wärmepumpe / Heizstab (in Watt)
+      default: []
+      selector:
+        entity:
+          domain: sensor
+          device_class: power
+    wallbox_power_sensor:
+      name: Wallbox-Leistungssensor (Optional)
+      description: Sensor für Wallbox / E-Auto Ladeleistung (in Watt)
+      default: []
+      selector:
+        entity:
+          domain: sensor
+          device_class: power
+
+trigger:
+  - platform: time_pattern
+    seconds: "/{{ states('input_number.sharegy_push_interval') | default(10, true) }}"
+
+action:
+  - service: sharegy.push_telemetry
+    data:
+      devices: >
+        {% set devs = [] %}
+        {% if grid_power_sensor != [] and states(grid_power_sensor) not in ['unknown', 'unavailable'] %}
+          {% set energy_val = states(grid_energy_sensor) | float(0) if grid_energy_sensor != [] and states(grid_energy_sensor) not in ['unknown', 'unavailable'] else none %}
+          {% set devs = devs + [{
+            "identifier": "ha_grid_meter",
+            "name": "Hauptzähler (Home Assistant)",
+            "power_w": states(grid_power_sensor) | float(0),
+            "energy_kwh": energy_val,
+            "role": "grid"
+          }] %}
+        {% endif %}
+        {% if pv_power_sensor != [] and states(pv_power_sensor) not in ['unknown', 'unavailable'] %}
+          {% set devs = devs + [{
+            "identifier": "ha_pv_inverter",
+            "name": "PV-Anlage (Home Assistant)",
+            "power_w": states(pv_power_sensor) | float(0),
+            "role": "producer"
+          }] %}
+        {% endif %}
+        {% if heatpump_power_sensor != [] and states(heatpump_power_sensor) not in ['unknown', 'unavailable'] %}
+          {% set devs = devs + [{
+            "identifier": "ha_heatpump",
+            "name": "Wärmepumpe",
+            "power_w": states(heatpump_power_sensor) | float(0),
+            "role": "consumer"
+          }] %}
+        {% endif %}
+        {% if wallbox_power_sensor != [] and states(wallbox_power_sensor) not in ['unknown', 'unavailable'] %}
+          {% set devs = devs + [{
+            "identifier": "ha_wallbox",
+            "name": "Wallbox",
+            "power_w": states(wallbox_power_sensor) | float(0),
+            "role": "consumer"
+          }] %}
+        {% endif %}
+        {{ devs }}
+
