@@ -1172,8 +1172,11 @@
     "categories_title": "Themenbereiche",
     "articles_count": "Artikel gefunden",
     "featured_title": "Popular Guides & Handbooks",
-    "articles_title": "Artikel",
-    "search_placeholder": "Wissensportal & FAQ durchsuchen..."
+    "articles_title": "Articles",
+    "all_articles": "All Articles",
+    "clear_filter": "Clear filter",
+    "search_results_for": "Search results for",
+    "search_placeholder": "Search knowledge base & FAQs..."
   },
   "admin": {
     "title": "Admin & Conversion Center",

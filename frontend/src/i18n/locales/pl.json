@@ -1132,8 +1132,11 @@
     "categories_title": "Themenbereiche",
     "articles_count": "Artikel gefunden",
     "featured_title": "Najczęściej czytane poradniki",
-    "articles_title": "Artikel",
-    "search_placeholder": "Wissensportal & FAQ durchsuchen..."
+    "articles_title": "Artykuły",
+    "all_articles": "Wszystkie artykuły",
+    "clear_filter": "Wyczyść filtr",
+    "search_results_for": "Wyniki wyszukiwania dla",
+    "search_placeholder": "Szukaj w bazie wiedzy i FAQ..."
   },
   "admin": {
     "title": "Centrum Administracji & Konwersji",

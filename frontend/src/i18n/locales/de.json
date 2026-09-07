@@ -1173,6 +1173,9 @@
     "articles_count": "Artikel gefunden",
     "featured_title": "Häufig gelesene Anleitungen",
     "articles_title": "Artikel",
+    "all_articles": "Alle Artikel",
+    "clear_filter": "Filter aufheben",
+    "search_results_for": "Suchergebnisse für",
     "search_placeholder": "Wissensportal & FAQ durchsuchen..."
   },
   "admin": {
