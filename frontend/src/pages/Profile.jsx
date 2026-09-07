@@ -469,115 +469,121 @@ export default function Profile() {
                     <Card>
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                <span>👤</span> {t("profile.personal_info", "Persönliche Angaben & Kontakt")}
+                                <span>👤</span> {t("profile.personal_info", "Persönliche Angaben & Account")}
                             </h2>
                             <span className="text-xs text-gray-400">ID: #{user?.id || "–"}</span>
                         </div>
 
-                        <form onSubmit={handleSaveProfile} className="space-y-4">
-                            {/* AVATAR PREVIEW IN FORM */}
-                            <div className="p-3.5 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-3">
-                                <div className="flex items-center gap-3 min-w-0">
-                                    {currentAvatarConfig ? (
-                                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-tr ${currentAvatarConfig.bg} flex items-center justify-center text-2xl shadow-xs shrink-0`}>
-                                            <span>{currentAvatarConfig.emoji}</span>
+                        <form onSubmit={handleSaveProfile} className="space-y-5">
+                            {/* SECTION 1: ACCOUNT & LOGIN */}
+                            <div>
+                                <div className="flex items-center justify-between mb-3">
+                                    <h3 className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase flex items-center gap-1.5">
+                                        <span>🔑</span> {t("profile.account_settings_title", "Konto & Identifikation")}
+                                    </h3>
+                                    <span className="text-[11px] text-gray-400">Login & Avatar</span>
+                                </div>
+
+                                <div className="space-y-3">
+                                    {/* EMAIL WITH CHANGE WORKFLOW */}
+                                    <div>
+                                        <div className="flex items-center justify-between mb-1">
+                                            <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase">
+                                                {t("profile.email", "E-Mail-Adresse (Login)")}
+                                            </label>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setShowEmailModal(true);
+                                                    setEmailChangeSuccess(false);
+                                                    setNewEmailInput("");
+                                                }}
+                                                className="text-xs font-bold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 cursor-pointer flex items-center gap-1"
+                                            >
+                                                <span>✏️</span>
+                                                <span>{t("profile.change_email_btn", "E-Mail ändern")}</span>
+                                            </button>
                                         </div>
-                                    ) : (
-                                        <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-indigo-500 to-cyan-500 flex items-center justify-center text-base font-black text-white shadow-xs shrink-0">
-                                            {initials}
-                                        </div>
-                                    )}
-                                    <div className="min-w-0">
-                                        <div className="text-xs font-bold text-gray-900 dark:text-white truncate">
-                                            {currentAvatarConfig ? currentAvatarConfig.label : "Namensinitialen"}
-                                        </div>
-                                        <div className="text-[11px] text-gray-500 dark:text-gray-400 truncate">
-                                            {currentAvatarConfig ? "Ausgewähltes Profil-Avatar" : "Standard-Initialen (z. B. RK)"}
+                                        <div className="relative">
+                                            <input
+                                                type="email"
+                                                disabled
+                                                value={user?.email || ""}
+                                                className="w-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-slate-600 dark:text-slate-300 cursor-not-allowed font-medium pr-24"
+                                            />
+                                            <span className="absolute right-3 top-2.5 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800">
+                                                ✓ Verifiziert
+                                            </span>
                                         </div>
                                     </div>
-                                </div>
-                                <button
-                                    type="button"
-                                    onClick={() => setShowAvatarModal(true)}
-                                    className="px-3.5 py-1.5 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-600 rounded-xl text-xs font-bold text-gray-800 dark:text-gray-200 transition cursor-pointer shrink-0 shadow-2xs"
-                                >
-                                    🎨 Ändern
-                                </button>
-                            </div>
 
-                            {/* EMAIL WITH CHANGE WORKFLOW */}
-                            <div>
-                                <div className="flex items-center justify-between mb-1">
-                                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">
-                                        {t("profile.email", "E-Mail-Adresse (Login)")}
-                                    </label>
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setShowEmailModal(true);
-                                            setEmailChangeSuccess(false);
-                                            setNewEmailInput("");
-                                        }}
-                                        className="text-xs font-bold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 cursor-pointer flex items-center gap-1"
-                                    >
-                                        <span>✏️</span>
-                                        <span>{t("profile.change_email_btn", "E-Mail ändern")}</span>
-                                    </button>
-                                </div>
-                                <div className="relative">
-                                    <input
-                                        type="email"
-                                        disabled
-                                        value={user?.email || ""}
-                                        className="w-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-slate-600 dark:text-slate-300 cursor-not-allowed font-medium pr-24"
-                                    />
-                                    <span className="absolute right-3 top-2.5 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800">
-                                        ✓ Verifiziert
-                                    </span>
+                                    {/* AVATAR PREVIEW IN FORM */}
+                                    <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-3">
+                                        <div className="flex items-center gap-3 min-w-0">
+                                            {currentAvatarConfig ? (
+                                                <div className={`w-11 h-11 rounded-xl bg-gradient-to-tr ${currentAvatarConfig.bg} flex items-center justify-center text-2xl shadow-xs shrink-0`}>
+                                                    <span>{currentAvatarConfig.emoji}</span>
+                                                </div>
+                                            ) : (
+                                                <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-indigo-500 to-cyan-500 flex items-center justify-center text-sm font-black text-white shadow-xs shrink-0">
+                                                    {initials}
+                                                </div>
+                                            )}
+                                            <div className="min-w-0">
+                                                <div className="text-xs font-bold text-gray-900 dark:text-white truncate">
+                                                    {currentAvatarConfig ? currentAvatarConfig.label : "Namensinitialen"}
+                                                </div>
+                                                <div className="text-[11px] text-gray-500 dark:text-gray-400 truncate">
+                                                    {currentAvatarConfig ? "Ausgewähltes Profil-Avatar" : "Standard-Initialen (z. B. RK)"}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowAvatarModal(true)}
+                                            className="px-3 py-1.5 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-600 rounded-xl text-xs font-bold text-gray-800 dark:text-gray-200 transition cursor-pointer shrink-0 shadow-2xs"
+                                        >
+                                            🎨 Avatar wählen
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-1">
-                                        {t("profile.first_name", "Vorname")}
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={formData.first_name}
-                                        onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-                                        placeholder="Max"
-                                        className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-1">
-                                        {t("profile.last_name", "Nachname")}
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={formData.last_name}
-                                        onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                                        placeholder="Mustermann"
-                                        className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                                    />
+                            {/* SECTION 2: VORNAME & NACHNAME */}
+                            <div className="border-t border-gray-100 dark:border-slate-800 pt-4">
+                                <h3 className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase flex items-center gap-1.5 mb-3">
+                                    <span>👤</span> {t("profile.personal_name_title", "Persönliche Daten")}
+                                </h3>
+
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase mb-1">
+                                            {t("profile.first_name", "Vorname")}
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={formData.first_name}
+                                            onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                                            placeholder="Max"
+                                            className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase mb-1">
+                                            {t("profile.last_name", "Nachname")}
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={formData.last_name}
+                                            onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                                            placeholder="Mustermann"
+                                            className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                        />
+                                    </div>
                                 </div>
                             </div>
 
-                            <div>
-                                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-1">
-                                    {t("profile.phone", "Telefon / Notfall-Kontakt")}
-                                </label>
-                                <input
-                                    type="tel"
-                                    value={formData.phone}
-                                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                    placeholder="+49 170 1234567"
-                                    className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                                />
-                            </div>
-
-                            {/* WOHNANSCHRIFT / ADRESSE */}
+                            {/* SECTION 3: WOHNORT & RECHNUNGSADRESSE */}
                             <div className="border-t border-gray-100 dark:border-slate-800 pt-4">
                                 <div className="flex items-center justify-between mb-3">
                                     <h3 className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase flex items-center gap-1.5">
@@ -653,6 +659,29 @@ export default function Profile() {
                                             <option value="FR">🇫🇷 FR</option>
                                         </select>
                                     </div>
+                                </div>
+                            </div>
+
+                            {/* SECTION 4: TELEFON & NOTFALL-KONTAKT */}
+                            <div className="border-t border-gray-100 dark:border-slate-800 pt-4">
+                                <h3 className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase flex items-center gap-1.5 mb-3">
+                                    <span>📞</span> {t("profile.contact_title", "Erreichbarkeit & Kontakt")}
+                                </h3>
+
+                                <div>
+                                    <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase mb-1">
+                                        {t("profile.phone", "Telefon / Notfall-Kontakt")}
+                                    </label>
+                                    <input
+                                        type="tel"
+                                        value={formData.phone}
+                                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                        placeholder="+49 170 1234567"
+                                        className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                    />
+                                    <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
+                                        Wird für kritische Notfall-Benachrichtigungen, SMS-Alarme und Rückfragen bei Wartungen verwendet.
+                                    </p>
                                 </div>
                             </div>
 
