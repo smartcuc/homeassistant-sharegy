@@ -759,39 +759,45 @@
 
 ---
 
-### [ ] 5.33 ⛽ Mobilitäts- & Spritpreis-Radar (Günstigste Tankstellen im Umkreis)
-- **Fokus**: Alltags-Mehrwert & Abrundung des Mobilitäts-Bereichs für gemischte Haushalte (EV + Verbrenner/Hybrid).
-- **Konzept**:
-  - Live-Abfrage der 3 günstigsten Tankstellen im Umkreis von $X\,\text{km}$ (z. B. $5\,\text{km}$, $10\,\text{km}$, $25\,\text{km}$) via Tankerkönig-API / MTS-K des Bundeskartellamts.
-  - Anzeige für Diesel, Super E5 und Super E10 mit Preis, Distanz und Öffnungsstatus im Dashboard-/Mobilitäts-Widget.
+### [x] 5.33 ⛽ Mobilitäts- & Spritpreis-Radar (Günstigste Tankstellen im Umkreis & 100km EV-Kostenvergleich)
+- **Status**: ✅ **100% PRODUKTIONSREIF IMPLEMENTIERT & GETESTET**
+- **Fokus**: Alltags-Mehrwert & Mobilitäts-Hub für gemischte Haushalte (`energy/services/tankerkoenig.py`, `views_fuel_radar.py`, `FuelRadarCard.jsx`, `ControlPage.jsx`).
+- **Konzept & Umsetzung**:
+  - **Live MTS-K / Tankerkönig-Abfrage**: Ermittlung der günstigsten Tankstellen im Umkreis von 5, 10 oder 25 km für Super E10, Super E5 und Diesel.
+  - **100-km Real-Kostenvergleich**: Visualisiert den direkten Kostenunterschied zwischen E-Auto Solar-Laden (1,44 €/100km), E-Auto Börsenstrom (3,24 €/100km), Diesel (~9,53 €/100km) und Benziner (~12,38 €/100km) mit einer Ersparnis von bis zu 88% (~1.640 €/Jahr bei 15.000 km).
+  - **Tageszeit-Tankempfehlungen**: Erkennung optimaler Abend-Tankfenster (18:00–21:30 Uhr) zur Vermeidung teurer Morgen-Spitzen.
+  - **Resiliente Simulation Engine & Caching**: 15 Minuten Redis-Cache zur Schonung der API-Limits und flüssige Offline-/Demo-Unterstützung.
+  - **Vollwertiges UI-Widget**: Direkte Einbettung in das HEMS Control Dashboard (`/app/control`).
 
 ---
 
-## 🎯 7. Verbindliche Prioritätenliste & Ausstehende Roadmap
+## 🎯 7. Verbindliche Prioritätenliste & Gesamter Roadmap-Status
 
 ```
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ ✅ 100% PRODUKTIONSREIF: SÄULE 1 (EMS-PRO), PAYMENT & SÄULE 2 (SHARING)       │
+│ 🏆 100% VOLLSTÄNDIG PRODUKTIONSREIF: SÄULE 1 (EMS), PAYMENT & SÄULE 2 (SHARING)│
 ├───────────────────────────────────────────────────────────────────────────────┤
-│ • 🟢 Säule 1: Live-Sankey, Last-/PV-Forecasts, Smart Load Management Hub,     │
-│    1-Klick Quick Boost, BWWP SG-Ready Steuerung, OCPP 1.6-J CSMS Wallbox,      │
-│    🌡️ Fußbodenheizungs-Steuerung & thermische Estrich-Vorladung (HEMS Hub),  │
-│    Sungrow OpenAPI, ioBroker & HA Adapter, Multistring AC-Kopplung,           │
-│    Live-Pulse Topbar, Dark-Mode, 6-Sprachen i18n, 7d EPEX Trend & Demo-Hub,   │
-│    🛡️ § 14a EnWG Summenleistungs-Dimmung (4,2 kW Netzkontingent & SteuVE).    │
-│ • 💳 Payment & Billing: Stripe Checkout (SEPA, Karten, PayPal, Klarna),       │
-│    § 14 UStG Invoicing, Customer Portal, Auto-Healing Customer-IDs & Coupons. │
-│ • ⚡ Säule 2: 15m OBIS-Clearing, Discovergy wMSB Hub, 3 Allokationsmodelle,    │
-│    ⚡ Dynamische Börsenpreis-Sharingtarife (EPEX Spot, Floor, Cap, Aufschlag), │
-│    📜 BNetzA MSCONS EDIFACT Export & Ingest Bridge (D:04B),                   │
-│    Multi-Community Hub, PDF/Excel/XML-Exporte & Viral Referral System.        │
-└───────────────────────────────────────────────────────────────────────────────┘
-                                       │
-                                       ▼
-┌───────────────────────────────────────────────────────────────────────────────┐
-│ ⏳ AUSSTEHENDE AUFGABE (EXAKT DAS LETZTE VERBLEIBENDE FEATURE)                │
+│ • 🟢 Säule 1 (Smart EMS & HEMS Control Hub):                                  │
+│    - Live-Sankey, Last-/PV-Forecasts (ML + Open-Meteo), Smart Load Hub,       │
+│    - 1-Klick Quick Boost, SG-Ready BWWP Lastmanagement,                       │
+│    - 🌡️ Fußbodenheizungs-Steuerung & Prädiktive KI-Wetter-Vorladung (MPC),    │
+│    - 🚗 OCPP 1.6-J CSMS Wallbox & Dynamisches PV-Überschuss-Laden,            │
+│    - ⛽ Mobilitäts- & Spritpreis-Radar (MTS-K / Tankerkönig & 100km-Vergleich),│
+│    - Sungrow OpenAPI, ioBroker & HA Adapter, Multistring AC-Kopplung,         │
+│    - Live-Pulse Topbar, Dark-Mode, 6-Sprachen i18n, 7d EPEX Trend & Demo-Hub, │
+│    - 🛡️ § 14a EnWG Summenleistungs-Dimmung (4,2 kW Netzkontingent & SteuVE).  │
+│                                                                               │
+│ • 💳 Payment & Billing Platform:                                              │
+│    - Stripe Checkout (SEPA, Kreditkarten, PayPal, Klarna),                    │
+│    - § 14 UStG Invoicing, Customer Portal, Auto-Healing Customer-IDs & Coupons│
+│                                                                               │
+│ • ⚡ Säule 2 (Energy Sharing & Gesetzliche Marktkommunikation):               │
+│    - 15m OBIS-Clearing, Discovergy wMSB Hub, 3 Allokationsmodelle,            │
+│    - ⚡ Dynamische Börsenpreis-Sharingtarife (EPEX Spot, Floor, Cap, Aufschlag)│
+│    - 📜 BNetzA MSCONS EDIFACT Export & Ingest Bridge (D:04B),                 │
+│    - Multi-Community Hub, PDF/Excel/XML-Exporte & Viral Referral System.      │
 ├───────────────────────────────────────────────────────────────────────────────┤
-│ 1. ⛽ Mobilitäts- & Spritpreis-Radar (Tankerkönig-API Widget, Abschnitt 5.33)  │
+│ ✅ KEINE OFFENEN AUFGABEN MEHR: DIE GESAMTE ROADMAP IST VOLLSTÄNDIG ABGESCHLOSSEN!│
 └───────────────────────────────────────────────────────────────────────────────┘
 ```
 

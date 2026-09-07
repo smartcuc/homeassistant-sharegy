@@ -90,7 +90,7 @@ Sharegy ist die **erste ganzheitliche Energie-Plattform**, die hochperformantes 
 
 ---
 
-### 4. 🚗 OCPP 1.6-J Wallbox Gateway & Smart EV-Charging
+### 5. 🚗 OCPP 1.6-J Wallbox Gateway & Smart EV-Charging
 * **Natives CSMS (Charging Station Management System)**: Direkte WebSocket-Kopplung (`/ws/ocpp/<cp_id>/`) für alle normkonformen Wallboxen (Easee, openWB, cFos, Heidelberg, Mennekes, Alfen, Webasto).
 * **Intelligente Lademodi**:
   * ☀️ *Pure Solar*: Lädt ausschließlich mit reinem PV-Überschuss.
@@ -101,7 +101,23 @@ Sharegy ist die **erste ganzheitliche Energie-Plattform**, die hochperformantes 
 
 ---
 
-### 5. 🔋 Batterie-Arbitrage & Wechselrichter-Direktanbindung
+### 6. ⛽ Mobilitäts- & Spritpreis-Radar (MTS-K / Tankerkönig)
+* **Live-Spritpreis-Radar**:
+  * Abfrage der günstigsten Tankstellen im Umkreis ($5\,\text{km}$, $10\,\text{km}$, $25\,\text{km}$) für **Super E10**, **Super E5** und **Diesel** über die offizielle Markttransparenzstelle für Kraftstoffe (MTS-K).
+  * Anzeige von Marke, Straße, exakter Entfernung und Öffnungsstatus.
+* **100-km Real-Kostenvergleich (EV vs. Verbrenner)**:
+  * Direkte Gegenüberstellung der Kraftstoff- und Ladekosten pro $100\,\text{km}$:
+    * ☀️ **E-Auto Solar**: $\mathbf{1,44\,€ / 100\,\text{km}}$ *(18 kWh à 8 ct Opportunitätskosten)* $\rightarrow$ **bis zu 88% günstiger**
+    * 🌙 **E-Auto Börsentarif**: $\mathbf{3,24\,€ / 100\,\text{km}}$ *(18 kWh à 18 ct)*
+    * 🛢️ **Diesel**: $\mathbf{\approx 9,50\,€ / 100\,\text{km}}$ *(6,0 l/100km)*
+    * ⛽ **Benziner (E10)**: $\mathbf{\approx 12,40\,€ / 100\,\text{km}}$ *(7,2 l/100km)*
+  * Live-Vorteilsrechner: Visualisiert jährliche Ersparnisse von über $1.600\,€$ bei $15.000\,\text{km}$ Fahrleistung.
+* **Tageszeit-Tankempfehlung**:
+  * Analyse des statistischen Tagespreisverlaufs zur Erkennung günstiger Abendfenster (18:00–21:30 Uhr) und Vermeidung von Morgen-Aufschlägen (+10 bis 14 ct/l).
+
+---
+
+### 7. 🔋 Batterie-Arbitrage & Wechselrichter-Direktanbindung
 * **Autonome Börsenstrom-Arbitrage**: Automatisches Grid-Charging bei Tiefst- oder Negativpreisen an der Strombörse (EPEX Spot / Tibber) und Entladung in Hochpreisphasen (Ertragspotenzial: 180–320 € / Jahr).
 * **Zero-Hardware Cloud-Inverter Integration**:
   * **Sungrow iSolarCloud**: 1-Klick OpenAPI Steuerung (`forced_charge`, `forced_discharge`, `self_consumption`).

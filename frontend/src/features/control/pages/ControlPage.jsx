@@ -14,6 +14,7 @@ import BWWPLoadManagementCard from "../../energy/components/BWWPLoadManagementCa
 import FloorHeatingLoadCard from "../components/FloorHeatingLoadCard";
 import BatteryStorageControlCard from "../components/BatteryStorageControlCard";
 import WallboxCard from "../../energy/components/WallboxCard";
+import FuelRadarCard from "../components/FuelRadarCard";
 import PoolPumpCard from "../components/PoolPumpCard";
 import AirConditioningCard from "../components/AirConditioningCard";
 import SmartApplianceCard from "../components/SmartApplianceCard";
@@ -343,10 +344,10 @@ export default function ControlPage() {
                     <div className="flex items-center gap-2 overflow-x-auto pb-1">
                         {[
                             { key: "all", label: "Alle Verbraucher", icon: "🎛️" },
+                            { key: "mobility", label: "Mobilität & Sprit", icon: "🚗" },
                             { key: "battery", label: "Heimspeicher", icon: "🔋" },
                             { key: "floor_heating", label: "Fußbodenheizung", icon: "🌡️" },
                             { key: "bwwp", label: "Warmwasser", icon: "♨️" },
-                            { key: "wallbox", label: "Wallbox", icon: "🚗" },
                             { key: "heatpump", label: "Wärmepumpe", icon: "🔥" },
                             { key: "pool", label: "Pool", icon: "🏊" },
                             { key: "ac", label: "Klimaanlage", icon: "❄️" },
@@ -382,8 +383,13 @@ export default function ControlPage() {
                         )}
 
                         {/* 🚗 Wallbox / OCPP E-Auto Ladekarte */}
-                        {(activeTab === "all" || activeTab === "wallbox") && (
+                        {(activeTab === "all" || activeTab === "wallbox" || activeTab === "mobility") && (
                             <WallboxCard onOpenAddModal={() => setAddWallboxOpen(true)} />
+                        )}
+
+                        {/* ⛽ Mobilitäts- & Spritpreis-Radar (MTS-K / Tankerkönig) */}
+                        {(activeTab === "all" || activeTab === "wallbox" || activeTab === "mobility") && (
+                            <FuelRadarCard />
                         )}
 
                         {/* 🔋 Heimspeicher / Battery Storage Control */}

@@ -608,3 +608,10 @@ STRIPE_PRICE_IDS = {
     "landlord_yearly": os.getenv("STRIPE_PRICE_LANDLORD_YEARLY", ""),
 }
 
+# =============================
+# ⛽ TANKERKÖNIG / MTS-K KRAFTSTOFFPREIS-API
+# =============================
+TANKERKOENIG_API_KEY = os.getenv("TANKERKOENIG_API_KEY", "00000000-0000-0000-0000-000000000002").strip()
+
+
+

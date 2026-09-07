@@ -50,6 +50,9 @@ from .views_floor_heating import (
     floor_heating_boost_view,
     floor_heating_toggle_view,
 )
+from .views_fuel_radar import (
+    fuel_radar_view,
+)
 from .views_dispatch_hub import (
     load_management_hub_view,
     load_management_priorities_view,
@@ -57,6 +60,9 @@ from .views_dispatch_hub import (
 )
 
 urlpatterns += [
+    # ⛽ Mobilitäts- & Spritpreis-Radar (Tankerkönig / MTS-K)
+    path("fuel-radar/", fuel_radar_view),
+    path("mobility/fuel-radar/", fuel_radar_view),
     path("dashboard/me/", dashboard_me),
     path("balance/", energy_balance),
     path("export/balance/", export_energy_balance_view),

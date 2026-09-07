@@ -166,14 +166,16 @@
 
 ---
 
-## 📋 4. Konkreter Action-Plan (Exakt die letzte verbleibende Aufgabe)
+## 📋 4. Konkreter Action-Plan (Roadmap zu 100% abgeschlossen)
 
-| Schritt | Modul | Maßnahme | Status / Prio | Ziel & Umsetzung |
+| Schritt | Modul | Maßnahme | Status | Ziel & Umsetzung |
 |---|---|---|:---:|---|
-| **Prio 1** | `mobility/radar/` | **⛽ Mobilitäts- & Spritpreis-Radar**: Integration der Tankerkönig-API / MTS-K für die 3 günstigsten Tankstellen (Diesel, E5, E10) im Umkreis | ⚡ **P1 (Finaler Fokus)** | Alltags-Mehrwert für gemischte Haushalte (EV + Verbrenner/Hybrid) |
+| **Prio 1** | `mobility/radar/` | **⛽ Mobilitäts- & Spritpreis-Radar**: Integration der Tankerkönig-API / MTS-K für die 3 günstigsten Tankstellen (Diesel, E5, E10) & 100km-EV-Vergleich | ✅ **100% Fertig** | Alltags-Mehrwert & Kostenvergleich für gemischte Haushalte |
+| **Prio 2** | `energy/hvac/` | **🌡️ Fußbodenheizungs-Steuerung & Prädiktives MPC**: Wettergeführte Vorlauftemperatur & thermische Estrich-Vorladung | ✅ **100% Fertig** | 100% Eigenverbrauch & Peak-Shaving im HEMS Dispatch-Hub |
 
-> ℹ️ **Bereits vollständig implementiert & verifiziert**:
-> - 🌡️ **Fußbodenheizungs-Steuerung & thermische Estrich-Vorladung** (`energy/models.py`, `energy/services/floor_heating_manager.py`, `FloorHeatingLoadCard.jsx`, `ControlPage.jsx`)
+> 🏆 **Vollständiger Funktionsumfang verifiziert & produktionsreif**:
+> - ⛽ **Mobilitäts- & Spritpreis-Radar** (`energy/services/tankerkoenig.py`, `views_fuel_radar.py`, `FuelRadarCard.jsx`)
+> - 🌡️ **Fußbodenheizungs-Steuerung & thermische Estrich-Vorladung** (`energy/models.py`, `floor_heating_manager.py`, `FloorHeatingLoadCard.jsx`)
 > - 🛡️ **§ 14a EnWG Dimmung & Summenleistungsmodell** (`energy/services_dimming.py`, `energy/test_grid_dimming.py`, `ControlPage.jsx`)
 > - ⚡ **Dynamische Börsenpreis-Sharingtarife (EPEX Spot, Cap, Floor)** (`billing/services_sharing_settlement.py`, `billing/test_mscons_and_dynamic_tariffs.py`)
 > - 📜 **VNB Marktkommunikations-Bridge (EDIFACT / MSCONS Export & Import D:04B)** (`billing/services_mscons.py`, `CommunitiesManagementHub.jsx`, `MsbSmartMeterHub.jsx`)
