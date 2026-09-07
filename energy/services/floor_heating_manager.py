@@ -195,25 +195,37 @@ def generate_24h_predictive_heating_schedule(
     max_price_req = float(config.max_spot_price_ct_kwh or Decimal("16.00"))
 
     # Wetterdaten der nächsten 24h laden
-    weather_qs = WeatherForecast.objects.filter(
-        home=home, ts__gte=now, ts__lt=now + timedelta(hours=24)
-    ).order_by("ts")
-    weather_map = {wf.ts.strftime("%Y-%m-%d %H:00"): wf for wf in weather_qs}
+    try:
+        weather_qs = WeatherForecast.objects.filter(
+            home=home, ts__gte=now, ts__lt=now + timedelta(hours=24)
+        ).order_by("ts")
+        weather_map = {wf.ts.strftime("%Y-%m-%d %H:00"): wf for wf in weather_qs}
+    except Exception as e:
+        logger.debug("[FloorHeating] WeatherForecast Query fallback: %s", e)
+        weather_map = {}
 
     # Spotpreise laden
-    spot_qs = SpotPrice.objects.filter(
-        timestamp__gte=now, timestamp__lt=now + timedelta(hours=24)
-    ).order_by("timestamp")
-    spot_map = {sp.timestamp.strftime("%Y-%m-%d %H:00"): float(sp.price_ct_kwh or 14.0) for sp in spot_qs}
+    try:
+        spot_qs = SpotPrice.objects.filter(
+            timestamp__gte=now, timestamp__lt=now + timedelta(hours=24)
+        ).order_by("timestamp")
+        spot_map = {sp.timestamp.strftime("%Y-%m-%d %H:00"): float(sp.price_ct_kwh or 14.0) for sp in spot_qs}
+    except Exception as e:
+        logger.debug("[FloorHeating] SpotPrice Query fallback: %s", e)
+        spot_map = {}
 
     # Solar-Forecasts laden
-    solar_qs = SolarForecast.objects.filter(
-        timestamp__gte=now, timestamp__lt=now + timedelta(hours=24)
-    ).order_by("timestamp")
-    solar_map = {}
-    for sf in solar_qs:
-        key = sf.timestamp.strftime("%Y-%m-%d %H:00")
-        solar_map[key] = solar_map.get(key, 0.0) + float(sf.forecast_kwh or 0.0)
+    try:
+        solar_qs = SolarForecast.objects.filter(
+            timestamp__gte=now, timestamp__lt=now + timedelta(hours=24)
+        ).order_by("timestamp")
+        solar_map = {}
+        for sf in solar_qs:
+            key = sf.timestamp.strftime("%Y-%m-%d %H:00")
+            solar_map[key] = solar_map.get(key, 0.0) + float(sf.forecast_kwh or 0.0)
+    except Exception as e:
+        logger.debug("[FloorHeating] SolarForecast Query fallback: %s", e)
+        solar_map = {}
 
     timeline = []
     preheat_hours = []
@@ -426,9 +438,13 @@ def evaluate_floor_heating(home, config: FloorHeatingConfig = None, force: bool 
     if cached_spot is not None:
         current_spot_price_ct = float(cached_spot)
     else:
-        sp = SpotPrice.objects.filter(timestamp__lte=now).order_by("-timestamp").first()
-        spot_raw = float(sp.price_ct_kwh) if sp and hasattr(sp, "price_ct_kwh") else 12.5
-        current_spot_price_ct = float(calculate_effective_price(home, now, spot_raw))
+        try:
+            sp = SpotPrice.objects.filter(timestamp__lte=now).order_by("-timestamp").first()
+            spot_raw = float(sp.price_ct_kwh) if sp and getattr(sp, "price_ct_kwh", None) is not None else 12.5
+            current_spot_price_ct = float(calculate_effective_price(home, now, spot_raw))
+        except Exception as e:
+            logger.debug("[FloorHeating] Effective price calculation fallback: %s", e)
+            current_spot_price_ct = 14.5
 
     # 3. Thermische Speicherkennzahlen
     storage_metrics = calculate_thermal_storage_metrics(config, live_temp)
