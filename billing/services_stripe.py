@@ -127,12 +127,20 @@ def create_checkout_session(user, plan_id, success_url=None, cancel_url=None, te
                     }
                 ]
 
+            # Sprache des Nutzers für Stripe Checkout (de, en, pl, tr, ru, ro)
+            user_lang = "de"
+            if hasattr(user, "settings") and getattr(user.settings, "language", None):
+                user_lang = str(user.settings.language).lower().strip()
+            if user_lang not in ("de", "en", "pl", "tr", "ru", "ro"):
+                user_lang = "auto"
+
             session = stripe.checkout.Session.create(
                 customer=customer_id,
                 customer_update={"name": "auto", "address": "auto"},
                 payment_method_types=["card", "sepa_debit"],
                 line_items=line_items,
                 mode="subscription",
+                locale=user_lang,
                 success_url=success_url,
                 cancel_url=cancel_url,
                 billing_address_collection="required",
@@ -206,11 +214,18 @@ def create_customer_portal_session(user, return_url=None):
     return_url = return_url or f"{frontend_base}/app/billing"
     customer_id = get_or_create_stripe_customer(user)
 
+    user_lang = "de"
+    if hasattr(user, "settings") and getattr(user.settings, "language", None):
+        user_lang = str(user.settings.language).lower().strip()
+    if user_lang not in ("de", "en", "pl", "tr", "ru", "ro"):
+        user_lang = "auto"
+
     if is_stripe_configured():
         try:
             portal_session = stripe.billing_portal.Session.create(
                 customer=customer_id,
                 return_url=return_url,
+                locale=user_lang,
             )
             return {"portal_url": portal_session.url, "sandbox": getattr(settings, "STRIPE_SANDBOX_MODE", True)}
         except Exception as e:
