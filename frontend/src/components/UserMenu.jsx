@@ -92,7 +92,7 @@ export default function UserMenu() {
                         {displayName}
                     </span>
                     <span className="text-[10px] text-gray-400 font-medium">
-                        {isLandlord ? "⭐ Vermieter" : isPro ? "⭐ Pro Plan" : "Free Plan"}
+                        {isLandlord ? "🏢 Vermieter" : isPro ? "⚡ Sharegy Pro" : "🌱 Sharegy Free"}
                     </span>
                 </div>
 
@@ -132,14 +132,15 @@ export default function UserMenu() {
                             </div>
                             <div className="mt-1.5 flex items-center gap-1.5">
                                 <span
-                                    className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                                        isPro || isLandlord
-                                            ? "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300"
-                                            : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                                        isLandlord
+                                            ? "bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-300 dark:border-indigo-800"
+                                            : isPro
+                                                ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800"
+                                                : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700"
                                     }`}
                                 >
-                                    {isPro || isLandlord ? "⭐ " : "🌱 "}
-                                    {planName}
+                                    {isLandlord ? "🏢 Vermieter & Quartiere" : isPro ? "⚡ Sharegy Pro" : "🌱 Sharegy Free"}
                                 </span>
                             </div>
                         </div>
