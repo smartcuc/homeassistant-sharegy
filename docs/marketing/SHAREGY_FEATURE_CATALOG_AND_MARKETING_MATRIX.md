@@ -1,6 +1,6 @@
 # ⚡ Sharegy Gesamter Feature-Katalog & Marketing-Leistungsmatrix
 
-**Version**: 5.0 (Produktionsstand September 2026)  
+**Version**: 5.1 (Produktionsstand September 2026)  
 **Plattform**: Sharegy Dual-Core Platform (`app.sharegy.de`)  
 **Zielgruppen**: Eigenheimbesitzer, Prosumer, Mehrparteienhäuser (WEGs), Bürgerenergiegenossenschaften (EEGs), Quartiere, Vermieter, Stadtwerke & Installateure.
 
@@ -8,7 +8,7 @@
 
 ## 🌟 Die Dual-Core Vision auf einen Blick
 
-Sharegy ist die **erste ganzheitliche Energie-Plattform**, die hochperformantes **Home Energy Management (Säule 1: EMS)** mit gesetzeskonformer **Quartiers- und Bürgerenergie-Abrechnung (Säule 2: Energy Sharing)** vereint.
+Sharegy ist die **erste ganzheitliche Energie-Plattform**, die hochperformantes **Home Energy Management (Säule 1: EMS)** mit gesetzeskonformer **Quartiers- und Bürgerenergie-Abrechnung (Säule 2: Energy Sharing)** sowie einem **vollautomatisierten Multi-Zahlungs-Stack (Stripe, SEPA, PayPal, Klarna)** vereint.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
@@ -20,7 +20,8 @@ Sharegy ist die **erste ganzheitliche Energie-Plattform**, die hochperformantes 
 │ • BWWP & Wärmepumpen SG-Ready Steuerung    │ • Statische, dynamische & hybride Allokation│
 │ • Autonome Batterie-Arbitrage & Negativpreise • PDF-Abrechnungsbescheide & DATEV/ERP-Export│
 │ • OCPP 1.6-J Wallbox Smart Charging        │ • Smart Meter Gateways (wMSB Discovergy/inex│
-│ • 48h KI-Solarprognose & Baseline-Watchdog │ • Multi-Community Portfolio Dashboard      │
+│ • 48h KI-Solarprognose & 7d EPEX Trend     │ • Multi-Community Portfolio Dashboard      │
+│ • Stripe & SEPA Checkout (6 EU-Sprachen)   │ • Revisionssicheres Audit-Log & RBAC       │
 └────────────────────────────────────────────┴────────────────────────────────────────────┘
 ```
 
@@ -47,7 +48,7 @@ Sharegy ist die **erste ganzheitliche Energie-Plattform**, die hochperformantes 
   * ☀️ *Nur PV-Überschuss*: Strikt 100% Autarkie-Betrieb ohne zusätzlichen Netzbezug.
   * 💰 *Preise-Optimiert (Sparfuchs)*: Gezielte Aktivierung bei negativen und minimalen Spotmarkt-Preisen.
   * 🛑 *Manuell*: Pausierung der Automatik für manuelle Steuerung.
-* **Smarte EPEX-Ladefenster**: Automatische Erkennung der günstigsten Ladezeiten (Top 3 Stunden) und Empfehlungen zur Vermeidung von Abend-Lastspitzen.
+* **EPEX-Spot 7-Tage Trend & Ladefenster**: 6-Tage-Historie + Day-Ahead-Vorschau mit automatischer Identifikation der 3 günstigsten Ladezeiten und Spitzenvermeidung.
 * **Interaktive Prioritäten-Kaskade (Merit-Order)**: Zuteilungsreihenfolge flexibler Großverbraucher (z. B. 1. Heimspeicher $\rightarrow$ 2. BWWP $\rightarrow$ 3. Wallbox $\rightarrow$ 4. Pool $\rightarrow$ 5. Klima $\rightarrow$ 6. Haushaltsgeräte).
 * **24h-Fahrplan (Dispatch-Timeline)**: Stündliche Vorschau der geplanten Geräteschaltungen basierend auf 48h-Wetterprognose und Day-Ahead EPEX-Spotpreisen.
 * **7 Modulare Verbraucher-Karten**:
@@ -113,10 +114,10 @@ Sharegy ist die **erste ganzheitliche Energie-Plattform**, die hochperformantes 
 
 ---
 
-### 8. 📱 Native Apps, Push & User Experience
+### 8. 📱 Native Apps, Push & 6-Sprachiges EU-Paket (i18n)
+* **6 Europäische Sprachen**: Vollständige Lokalisierung in 🇩🇪 Deutsch, 🇬🇧 English, 🇵🇱 Polski, 🇹🇷 Türkçe, 🇷🇺 Русский und 🇷🇴 Română mit blitzschnellem Topbar-Umschalter.
 * **Native Android App**: Gebaut mit Capacitor 7 (`de.sharegy.app`) mit flackerfreiem Splashscreen und nativem Lifecycle.
 * **Web-Push (W3C / VAPID)**: Push-Benachrichtigungen auf Sperrbildschirmen für Android, Desktop und Apple iPhone (iOS 16.4+ Safari).
-* **Multi-Language (i18n)**: Vollständig dreisprachige Benutzeroberfläche (Deutsch, Englisch, Polnisch).
 * **DSGVO & TDDDG Konformität**: Duale Cookie-Persistenz (365 Tage) und lückenlose Audit-Logs.
 
 ---
@@ -137,7 +138,23 @@ Sharegy ist die **erste ganzheitliche Energie-Plattform**, die hochperformantes 
 
 ---
 
-### 10. 🛟 Integrierter Support- & Helpdesk-Hub
+### 10. 💳 Vollautomatisierter SaaS-Billing & Payment-Stack (Stripe)
+* **Multi-Zahlungsmethoden**: Kredit-/Debitkarten (Visa, Mastercard, Amex), SEPA-Lastschrift, PayPal, Klarna, Amazon Pay und Stripe Link.
+* **Rechtssichere Rechnungslegung (§ 14 UStG)**: Automatischer USt-Ausweis (19% MwSt., USt-IdNr `DE300917919`), Statement-Descriptor `SHAREGY PRO - SMARTEVO` und fortlaufende Nummernkreise (`SHAREGY-...`).
+* **Stripe Customer Portal**: Self-Service-Verwaltung für Zahlungsmethoden, Rechnungs-PDFs und Abo-Status.
+* **Self-Healing IDs**: Resiliente automatische Bereinigung ungültiger Customer-IDs zwischen Entwicklungs- und Produktivumgebungen.
+* **Gutschein- & Aktionscode-System**: Dezenter Coupon-Trigger zur Einlösung von Rabattcodes.
+
+---
+
+### 11. 🛡️ Enterprise Security, Hardware-Watchdog & Demo-Sandbox
+* **Server-Hardware & Kapazitäts-Wächter**: Rollenbasierte Überwachung von CPU, RAM, Disk und Latenzen (RBAC: exklusiv für HEMS- und Sysadmins).
+* **Autonome Demo-Sandbox**: 3 isolierte Demo-Profile (Smart Home, Community Admin, Member) für 1-Klick-Logins ohne Registrierung.
+* **Kaskadierende Hypertable-Sicherheit**: Sichere Bereinigung und Re-Seeding ohne Datenbank-Blockaden.
+
+---
+
+### 12. 🛟 Integrierter Support- & Helpdesk-Hub
 * **Integrierter Support-Drawer**: 1-Klick Ticket-Erstellung direkt aus der Topbar mit automatischer Übermittlung von Fehlermeldungen und Systemkontext.
 * **FAQ-Deflection**: Automatische Einblendung passender Handbuch-Lösungen während des Tippens zur Entlastung des Support-Teams.
-* **Interaktives Wissensportal (`/app/help`)**: 15 vollwertige Handbuch-Artikel in 9 Kategorien (DE & EN) mit Staff-Live-Editor.
+* **Interaktives Wissensportal (`/app/help`)**: 15 vollwertige Handbuch-Artikel in 9 Kategorien (DE & EN) mit sanfter Anchor-Navigation (`#articles-list`) und Staff-Live-Editor.

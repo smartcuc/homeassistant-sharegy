@@ -1,7 +1,7 @@
 # 🏆 Sharegy EMS & Energy Sharing: Strategischer Mitbewerber-Vergleich & Gesamtevaluation
 
-**Dokument-Version**: 5.0  
-**Stand**: September 2026 (Live Release v5.0)  
+**Dokument-Version**: 5.1  
+**Stand**: September 2026 (Live Release v5.1)  
 **Zielgruppe**: Investoren, B2B-Partner, Energiegenossenschaften, Stadtwerke, Hausverwaltungen & Management  
 
 ---
@@ -10,10 +10,11 @@
 
 Sharegy besetzt eine **einzigartige Marktposition im europäischen Energiemarkt**: Es verbindet ein **herstellerunabhängiges, hochperformantes Home Energy Management System (EMS, Säule 1)** mit einer **vollständigen, eichrechtskonformen Abrechnungs- und Clearing-Plattform für Energy Sharing Communities, Mieterstrom & Quartiere (Säule 2)**.
 
-Mit dem **Release des Smart Load Management & Dispatch Hubs (`/app/control`), der BWWP SG-Ready Steuerung mit Verdichterschutz, dem offiziellen ioBroker-Adapter sowie der Zero-Hardware Cloud-Inverter-Integration (1-Klick OpenAPI)** eliminiert Sharegy alle bisherigen Einstiegshürden:
+Mit dem **Release des Stripe & SEPA Subscription Checkouts (Karten, Lastschrift, PayPal, Klarna, Amazon Pay), des 6-sprachigen EU-Sprachpakets (DE, EN, PL, TR, RU, RO), des 7-Tage EPEX-Trend-Lookbacks, des Smart Load Management Hubs (`/app/control`) sowie der BWWP SG-Ready Steuerung** eliminiert Sharegy alle bisherigen Markteinstiegshürden:
 1. **Keine teure Hardware-Box nötig**: Kopplung via Cloud-API, Outbound-WSS, ioBroker, Home Assistant oder MQTT in unter 60 Sekunden.
 2. **Echtes Multi-Asset Lastmanagement**: Dynamische Merit-Order-Kaskade für Heimspeicher, BWWP (Boost bis 60°C), Wallbox (OCPP 1.6-J), Poolpumpen, Klimaanlagen (Pre-Cooling) und smarte Haushaltsgeräte.
 3. **Nahtloser Übergang zum Energy Sharing**: Vom einzelnen Balkonkraftwerk bis zur 500-Zähler-Bürgerenergiegenossenschaft nach § 42b EnWG.
+4. **Vollautomatisierter SaaS-Checkout**: Sofortiges Pro-Upgrade und Self-Service Customer Portal ohne Medienbruch.
 
 ---
 
@@ -33,12 +34,15 @@ Mit dem **Release des Smart Load Management & Dispatch Hubs (`/app/control`), de
 | **Säule 2: Energy Sharing & 15m Clearing** | 🟢 **Integriert** (RBAC, 15m Slots, Tarife, Multi-Community Hub) | 🟢 **Integriert** (Kernfokus B2B) | 🟡 Reiner Daten-Hub (keine Endabrechnung) | 🔴 Nein | 🔴 Nein | 🔴 Nein | 🔴 Nein |
 | **wMSB & Smart Meter Integration** | 🟢 **Ja** (Discovergy, inexogy, Solandeo REST API + MSCONS Ingest) | 🟡 Nur SFTP/MSCONS | 🟢 Gesetzlicher VNB-Hub | 🔴 Nur Heartbeat Zähler | 🟡 Nur Pulse IR | 🔴 Keine | 🟡 Über externe Integrationen |
 | **Abrechnungsnachweise & Multi-Format Exporte** | 🟢 **PDF (§ 42b EnWG), Excel .xlsx, CSV, ERP-XML** | 🟢 PDF & ERP-Exporte | 🟡 XML-Rohdaten (MSCONS / EBInterface) | 🔴 Nur monatliche Stromrechnung | 🔴 Nur Tibber-Rechnung | 🔴 Keine | 🔴 Keine |
+| **Zahlung & Billing-Stack (SaaS)** | 🟢 **Stripe Checkout** (Karten, SEPA, PayPal, Klarna, Amazon Pay, Link) | 🔴 Manuelle Enterprise-Rechnung | 🔴 Staatlich finanziert | 🔴 Nur Stromrechnung | 🟡 Nur Kreditkarte / SEPA | 🟡 Stripe Basis | 🔴 Keine |
+| **Internationalisierung (i18n)** | 🟢 **6 EU-Sprachen** (🇩🇪 DE, 🇬🇧 EN, 🇵🇱 PL, 🇹🇷 TR, 🇷🇺 RU, 🇷🇴 RO) | 🟡 DE / EN | 🔴 Nur DE | 🔴 Nur DE | 🟡 DE / EN / NO / SE / NL | 🟡 DE / EN | 🟢 Community-Übersetzungen |
 | **Echtzeit-Telemetrie & Sub-Sekunden Fluss** | 🟢 **TimescaleDB Sub-Sekunde ($O(1)$) + Live-Pulse Header** | 🔴 Nur historische 15m-Lastgänge | 🔴 Nur historische 15m-Vortagesdaten | 🟡 Cloud / Minuten-Takt | 🟡 Nur 1 Zähler (Pulse) | 🔴 1–5 Min Polling | 🟢 Lokal Sub-Sekunde |
 | **Fluss-Visualisierung & Live-Sankey** | 🟢 **Flackerfreies ECharts Sankey** (Räume/Etagen) | 🔴 Nur Balken-/Kuchendiagramme | 🔴 Kein Endkunden-Dashboard | 🟡 Einfacher Kreis | 🔴 Nur Balken | 🟡 Basis-Fluss | 🟡 Add-on Karten |
 | **Smart Aktorik & Relais-Schaltung** | 🟢 **WSS JSON-RPC (< 5ms) & OpenAPI Dispatch** | 🔴 Keine Aktorik / keine Steuerung | 🔴 Keine Aktorik | 🟢 Ja (Heartbeat) | 🟡 Nur E-Auto / WP | 🟢 Ja (Cloud API) | 🟢 Ja (Lokal) |
 | **Predictive Maintenance & KI-Profiling** | 🟢 **7-Tage Auto-ML Baseline** (Ruhestrom, Dauerlauf) | 🔴 Keine | 🔴 Keine | 🔴 Statische Schwellen | 🔴 Keine | 🔴 Keine | 🟡 Manuelle YAML-Regeln |
 | **48h Hybrid Physics + ML PV-Prognose** | 🟢 **Ja (Open-Meteo 96h + WAPE-Güte)** | 🟡 Basis-Portfolio-Forecast | 🔴 Keine | 🟢 Ja | 🟡 Basis-Forecast | 🟡 Basis-Wetter | 🟡 HACS Add-on |
-| **Dynamische Börsenpreise & Arbitrage** | 🟢 **Ja (Tibber/EPEX + Batteriesimulator, Ladefenster & OpenAPI Dispatch)** | 🟡 Tarifindexierung | 🔴 Keine | 🟢 Ja (Dynamic Pulse) | 🟢 Ja (Hauptfokus) | 🟢 Ja | 🟢 Ja |
+| **Dynamische Börsenpreise & Arbitrage** | 🟢 **Ja (Tibber/EPEX + 7-Tage Trend, Ladefenster & OpenAPI Dispatch)** | 🟡 Tarifindexierung | 🔴 Keine | 🟢 Ja (Dynamic Pulse) | 🟢 Ja (Hauptfokus) | 🟢 Ja | 🟢 Ja |
+| **Autonome Demo-Sandbox (Zero-Barrier)** | 🟢 **3 Rollen-Demos mit 1-Klick Login** (HEMS, Sharing Admin, Member) | 🔴 Nur Vertriebs-Webinar | 🔴 Kein Demo-Zugang | 🔴 Keine Demo | 🔴 Nur nach Zählerkauf | 🟡 Eingeschränkt | 🟢 Demo-Instanz lokal |
 | **Zielgruppe & Einstiegshürde** | Prosumer, WEGs, Quartiere, Genossenschaften (**Self-Service SaaS**) | Große Stadtwerke & EVUs (**>10.000 € Setup + B2B-Vertrag**) | Netzbetreiber & registrierte EEGs (**Regulatorischer Hub**) | Eigenheim-Käufer (**>20.000 € Neuanlage**) | Single-Haushalte (Tarifwechsel) | B2C-Balkonkraftwerk / PV (Abo) | Tech-Enthusiasten (Hoher Zeitaufwand) |
 
 ---
@@ -52,7 +56,7 @@ Mit dem **Release des Smart Load Management & Dispatch Hubs (`/app/control`), de
   * **Extrem hohe Einstiegshürde**: Sechsstellige Integrationsprojekte oder hohe monatliche Mindestgebühren (> 10.000–30.000 € Setup). Für private WEGs, kleine Vereine oder Bürgerenergiegenossenschaften unerschwinglich.
   * **Kein Home EMS (Säule 1 fehlt)**: Reines Backoffice-Abrechnungstool ohne Geräteintegration, ohne Live-Sankey und ohne Sub-Sekunden-Telemetrie.
   * **Keine Aktorik**: Keine Steuerung von Wärmepumpen, Relais, Heizstäben oder Wallboxen in Echtzeit.
-* **Sharegy-Vorteil**: **Vollwertige Dual-Core Plattform zu einem Bruchteil der Kosten**. Sharegy bietet 15m-Abrechnung und Exporte (§ 42b EnWG, PDF, Excel, XML) kombiniert mit Live-EMS, SG-Ready Steuerung und Aktorik – sofort einsatzbereit ohne monatelange IT-Projekte.
+* **Sharegy-Vorteil**: **Vollwertige Dual-Core Plattform zu einem Bruchteil der Kosten**. Sharegy bietet 15m-Abrechnung und Exporte (§ 42b EnWG, PDF, Excel, XML) kombiniert mit Live-EMS, SG-Ready Steuerung, 6 Sprachen und Self-Service Stripe Checkout – sofort einsatzbereit ohne monatelange IT-Projekte.
 
 ---
 
@@ -75,7 +79,7 @@ Mit dem **Release des Smart Load Management & Dispatch Hubs (`/app/control`), de
   * **Kein echtes Sub-Metering**: Einzelverbraucher (BWWP, Waschmaschine, Umwälzpumpen) werden nicht erfasst oder disaggregiert.
   * **Keine Geräte-Gesundheitsüberwachung**: Erkennt keine Kriechströme, defekten Thermostate oder schleichenden Mehrverbrauch.
   * **Kein Energy Sharing**: Reine 1:1 Versorgerbelieferung.
-* **Sharegy-Vorteil**: **Ganzheitliche Energie-Intelligenz**. Sharegy integriert Tibber-Preise nahtlos, bietet aber zusätzlich Tiefen-Monitoring auf Geräteebene, BWWP SG-Ready Steuerung, 48h-KI-Prognosen und Quartiers-Clearing.
+* **Sharegy-Vorteil**: **Ganzheitliche Energie-Intelligenz**. Sharegy integriert Tibber- und EPEX-Preise nahtlos (inkl. 7-Tage Trend-Lookback), bietet aber zusätzlich Tiefen-Monitoring auf Geräteebene, BWWP SG-Ready Steuerung, 48h-KI-Prognosen und Quartiers-Clearing.
 
 ---
 
@@ -86,7 +90,7 @@ Mit dem **Release des Smart Load Management & Dispatch Hubs (`/app/control`), de
   * **Reines Schalt-Tool ohne Tiefe**: Kein physikalisches Flussmodell, keine TimescaleDB-Performance, keine Continuous Aggregates.
   * **Keine Predictive Maintenance**: Keine statistischen Baseline-Lernalgorithmen oder Anomalieerkennung.
   * **Kein Energy Sharing**: Reines B2C-Single-Home-Tool.
-* **Sharegy-Vorteil**: **Enterprise-Architektur & Dual-Core**. Echtes Live-Sankey, Sub-Sekunden Outbound-WSS, ML-Ertragsprognosen, Merit-Order-Kaskade und revisionssicheres Multi-Tenant Sharing.
+* **Sharegy-Vorteil**: **Enterprise-Architektur & Dual-Core**. Echtes Live-Sankey, Sub-Sekunden Outbound-WSS, ML-Ertragsprognosen, Merit-Order-Kaskade, Multi-Zahlungsoptionen und revisionssicheres Multi-Tenant Sharing.
 
 ---
 
@@ -101,11 +105,11 @@ Mit dem **Release des Smart Load Management & Dispatch Hubs (`/app/control`), de
 
 ---
 
-## 🌟 3. Die 8 Alleinstellungsmerkmale (USPs) von Sharegy
+## 🌟 3. Die 10 Alleinstellungsmerkmale (USPs) von Sharegy
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│                                DIE 8 KERN-USPs VON SHAREGY                              │
+│                                DIE 10 KERN-USPs VON SHAREGY                             │
 ├─────────────────────────────────────────────────────────────────────────────────────────┤
 │ 1. 🌐 ECHTER ZERO-LOCK-IN: Outbound-WSS (Shelly Gen2/3), OCPP 1.6-J, ioBroker, HA & MQTT│
 │ 2. 🎛️ SMART LOAD MANAGEMENT HUB: Live Power Budget, Merit-Order Kaskade & 24h-Fahrplan │
@@ -113,8 +117,10 @@ Mit dem **Release des Smart Load Management & Dispatch Hubs (`/app/control`), de
 │ 4. ☁️ ZERO-HARDWARE CLOUD-INVERTER: 1-Klick OpenAPI Steuerung (Sungrow, Fronius, Kostal)│
 │ 5. ⚡ DUAL-CORE EMS + ENERGY SHARING: Vom Balkonkraftwerk bis zum 500-User-Quartier     │
 │ 6. 💶 GESETZESKONFORMES CLEARING (§ 42b EnWG): 15m-Slots, PDF-Nachweise, Excel & ERP-XML│
-│ 7. 🧠 HYBRIDE KI-ANOMALIE-ERKENNUNG: 7-Tage-ML-Baseline & Kriechstrom-/Dauerlauf-Schutz │
-│ 8. 🚀 ENTERPRISE PERFORMANCE: TimescaleDB Hypertables & Continuous Aggregates (< 10 ms)│
+│ 7. 💳 VOLLAUTOMATISIERTER BILLING-STACK: Stripe Checkout (SEPA, Karten, PayPal, Klarna) │
+│ 8. 🌍 6-SPRACHIGES EU-PAKET: Nativer Topbar-Switcher (DE, EN, PL, TR, RU, RO)           │
+│ 9. 🧠 HYBRIDE KI-ANOMALIE-ERKENNUNG: 7-Tage-ML-Baseline & Kriechstrom-/Dauerlauf-Schutz │
+│ 10. 🚀 ENTERPRISE PERFORMANCE: TimescaleDB Hypertables & Continuous Aggregates (< 10 ms)│
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -122,12 +128,13 @@ Mit dem **Release des Smart Load Management & Dispatch Hubs (`/app/control`), de
 
 ## 🎯 4. Gesamtevaluation, Strategischer Ausblick & Handlungsempfehlungen
 
-### 📈 Reifegrad-Bewertung: **9.8 / 10 (Production-Ready Live)**
+### 📈 Reifegrad-Bewertung: **9.9 / 10 (Production-Ready Live)**
 
-* **Backend- & Telemetrie-Architektur (10/10)**: TimescaleDB Hypertables, Continuous Aggregates, Redis Ingest-Buffer, Daphne WebSockets, Celery Priority Queues und 100% automatisierte Testabdeckung (144 Unit- & Integrationstests).
-* **Säule 1: EMS & Smart Load Management (9.9/10)**: Sub-Sekunden-Fluss, Live-Sankey, 48h Hybrid-Forecasts, autonome Batterie-Arbitrage (Sungrow Cloud OpenAPI), OCPP 1.6-J Wallbox CSMS, BWWP SG-Ready Steuerung mit Verdichterschutz, ioBroker & Home Assistant Adapter, Live-CO₂-Grid-Signal und Native Mobile App.
-* **Säule 2: Energy Sharing & Clearing (9.7/10)**: 15-Minuten-Bilanzierung (OBIS 1.8.0/2.8.0), wMSB Discovergy/inexogy Konnektor, 3 Allokationsmodelle (Dynamisch, Statisch, Hybrid), Community Cockpit, Tarife, Multi-Community Hub, PDF-Monatsabrechnungen und Multi-Format Exporte (.xlsx, .csv, .xml).
-* **Strategische Marktposition (10/10)**: Sharegy schließt die massive Lücke zwischen reinen B2C-Schalt-Apps (ohne Sharing) und unbezahlbaren B2B-Enterprise-Monolithen (Exnaton, EDA) als erste erschwingliche, hardware-offene und allumfassende Energie-Plattform im DACH-Raum.
+* **Backend- & Telemetrie-Architektur (10/10)**: TimescaleDB Hypertables, Continuous Aggregates, Redis Ingest-Buffer, Daphne WebSockets, Celery Priority Queues und 100% automatisierte Testabdeckung (150+ Unit- & Integrationstests).
+* **Säule 1: EMS & Smart Load Management (10/10)**: Sub-Sekunden-Fluss, Live-Sankey, 48h Hybrid-Forecasts, 7-Tage EPEX Lookback, autonome Batterie-Arbitrage (Sungrow Cloud OpenAPI), OCPP 1.6-J Wallbox CSMS, BWWP SG-Ready Steuerung mit Verdichterschutz, ioBroker & Home Assistant Adapter, Live-CO₂-Grid-Signal und Native Mobile App.
+* **Payment & Monetarisierung (10/10)**: Stripe & SEPA Checkout mit dynamischen Zahlungsmethoden (Karten, Lastschrift, PayPal, Klarna, Amazon Pay, Link), § 14 UStG Invoicing, Customer Portal, Auto-Healing Customer-IDs und Promo-Coupons.
+* **Säule 2: Energy Sharing & Clearing (9.8/10)**: 15-Minuten-Bilanzierung (OBIS 1.8.0/2.8.0), wMSB Discovergy/inexogy Konnektor, 3 Allokationsmodelle (Dynamisch, Statisch, Hybrid), Community Cockpit, Tarife, Multi-Community Hub, PDF-Monatsabrechnungen und Multi-Format Exporte (.xlsx, .csv, .xml).
+* **Strategische Marktposition (10/10)**: Sharegy schließt die massive Lücke zwischen reinen B2C-Schalt-Apps (ohne Sharing) und unbezahlbaren B2B-Enterprise-Monolithen (Exnaton, EDA) als erste erschwingliche, hardware-offene und allumfassende Energie-Plattform im europäischen Markt.
 
 ---
 
@@ -136,8 +143,9 @@ Mit dem **Release des Smart Load Management & Dispatch Hubs (`/app/control`), de
 1. **Go-to-Market: B2B2C statt reinem B2C**:
    * *Installateure*: Sharegy als herstellerunabhängiges EMS für PV- und Wärmepumpen-Installateure positionieren.
    * *Bürgerenergiegenossenschaften & WEGs*: Säule 2 gezielt an Hausverwaltungen und Bürgerenergie-Initiativen vertreiben, um das Schmerzproblem der Mieterstromabrechnung (§ 42b EnWG) softwareseitig zu lösen.
-2. **Onboarding-Fokus auf Cloud-Inverter**:
-   * Den 1-Klick Cloud-Login für Sungrow, Fronius und SolarEdge im Anmelde-Flow prominent platzieren, damit auch technisch unerfahrene Nutzer innerhalb von 60 Sekunden startklar sind.
+2. **Onboarding-Fokus auf Cloud-Inverter & Demo-Sandbox**:
+   * Den 1-Klick Cloud-Login und die Instant-Demo-Profile im Anmelde-Flow prominent platzieren, damit Interessenten ohne Registrierungshürde sofort den vollen Mehrwert erleben.
 3. **Nächste Entwicklungs-Prioritäten**:
-   * **Stripe & SEPA Checkout**: Automatisierung des Pro-Upgrades (4,99 €/Monat) und des Mitgliedsbeitragseinzugs.
-   * **§ 14a EnWG Steuerbox Testbed**: Protokollierte 4,2 kW Summenleistungs-Dimmung für Netzbetreiber.
+   * **🌡️ Fußbodenheizungs- & Estrich-Speicherregelung**: Thermische Vorladung bei PV-Überschuss & Negativpreisen.
+   * **⛽ Mobilitäts- & Spritpreis-Radar**: Tankerkönig-API Widget für gemischte Haushalte (EV + Verbrenner).
+   * **🛡️ § 14a EnWG Steuerbox Testbed**: Protokollierte 4,2 kW Summenleistungs-Dimmung für Netzbetreiber.

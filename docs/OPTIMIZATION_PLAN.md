@@ -12,8 +12,8 @@
 | **Phase 2** | DB- & Performance-Optimierung | 🟢 EMS-Free & Sharing | 🟢 100% Abgeschlossen | 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7 | – |
 | **Phase 3** | Celery & Buffer-Härtung | 🟢 EMS-Free Stabilität | 🟢 100% Abgeschlossen | 3.1, 3.2, 3.3, 3.4, 3.5 | – |
 | **Phase 4** | Architektur & Diagramme | 🟢 EMS-Free Sankey & Tests | 🟢 100% Abgeschlossen | 4.1, 4.2, 4.3, 4.4 | – |
-| **Phase 5** | EMS-Pro, KI, Apps & Aktorik | 🟢 EMS-Pro, Push & Mobile | 🟢 100% Abgeschlossen | 5.1 – 5.21 (inkl. 5.7 YAML Profiles) | – |
-| **Phase 6** | Säule 2: Energy Sharing & Clearing | 🟢 ESC & Multi-Community Hub | 🟢 100% Abgeschlossen | 6.1 – 6.10 | – |
+| **Phase 5** | EMS-Pro, KI, Apps & Aktorik | 🟢 EMS-Pro, Push, Billing & I18n | 🟢 100% Abgeschlossen | 5.1 – 5.31, 5.34 – 5.39 | 5.32, 5.33 |
+| **Phase 6** | Säule 2: Energy Sharing & Clearing | 🟢 ESC & Multi-Community Hub | 🟢 100% Abgeschlossen | 6.1 – 6.12 | – |
 
 
 
@@ -685,6 +685,63 @@
 
 ---
 
+### [x] 5.34 Stripe & SEPA-Lastschriften Checkout, Invoicing & Pro-Abonnement
+- **Dateien**: [`billing/services_stripe.py`](file:///c:/Users/Public/Dev/eswes/billing/services_stripe.py), [`billing/views_stripe.py`](file:///c:/Users/Public/Dev/eswes/billing/views_stripe.py), [`billing/management/commands/verify_stripe_setup.py`](file:///c:/Users/Public/Dev/eswes/billing/management/commands/verify_stripe_setup.py), [`frontend/src/features/billing/pages/BillingPage.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/billing/pages/BillingPage.jsx)
+- **Status**: ✅ **Erledigt**.
+  - **Live & Sandbox Verifiziert**: Stripe Account `acct_1UAyMEKVY8Tye05t` (smartEvo UG, DE, EUR) mit aktiviertem `charges_enabled`, `payouts_enabled` und allen Zahlungsmethoden.
+  - **Dynamische Zahlungsmethoden**: Kredit-/Debitkarten, SEPA-Lastschrift, PayPal, Klarna, Amazon Pay und Stripe Link.
+  - **Rechtssichere Rechnungslegung**: Konfiguration nach § 14 UStG, Reverse-Charge & 19% MwSt (DE VAT `DE300917919`), Statement-Descriptor `SHAREGY PRO - SMARTEVO` und Präfix `SHAREGY`.
+  - **Auto-Healing Customer IDs**: Robuste Selbstheilung bei ungültigen/gelöschten Customer-IDs im Dev-/Prod-Wechsel.
+  - **Webhook & Portal Integration**: Signatur-geprüfte Webhooks mit automatischer `is_pro` Provisionierung und Customer Portal Redirect für Rechnungsdownloads & Abo-Verwaltung.
+
+---
+
+### [x] 5.35 6-Sprachiges EU-Internationalisierungspaket (Topbar Native Switcher & i18n)
+- **Dateien**: [`frontend/src/i18n.js`](file:///c:/Users/Public/Dev/eswes/frontend/src/i18n.js), [`frontend/src/components/layout/Topbar.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/components/layout/Topbar.jsx), [`frontend/src/locales/`](file:///c:/Users/Public/Dev/eswes/frontend/src/locales/)
+- **Status**: ✅ **Erledigt**.
+  - **6 europäische Sprachen**: 🇩🇪 Deutsch (DE), 🇬🇧 English (EN), 🇵🇱 Polski (PL), 🇹🇷 Türkçe (TR), 🇷🇺 Русский (RU), 🇷🇴 Română (RO).
+  - **Nativer Topbar-Sprachumschalter**: Schneller Sprachwechsel mit Flaggen-Icons und `localStorage`-Persistenz.
+  - **Stripe Locale Pass-Through**: Automatische Übergabe der gewählten UI-Sprache an den Stripe Checkout.
+  - **Einheitliches Status-Badge**: Konsistente `⚡ Sharegy Pro` Badges in Topbar-UserMenu und Profilseite.
+  - **Länderauswahl-Standard**: Statisches `🇩🇪 Deutschland` als Vorgabe im Profil.
+
+---
+
+### [x] 5.36 EPEX Spot 7-Tage Trend-Lookback & Dynamische Ladefenster
+- **Dateien**: [`market/api/views.py`](file:///c:/Users/Public/Dev/eswes/market/api/views.py), [`frontend/src/features/market/components/SpotPriceModal.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/market/components/SpotPriceModal.jsx)
+- **Status**: ✅ **Erledigt**.
+  - **7-Tage Historie & Vorschau**: Unterstützt `range="week"` und `"7d"` mit 6-Tage-Historie + heute + Day-Ahead-Preisen für fundierte Arbitrage-Analysen.
+  - **Optimiertes X-Achsen-Rendering**: Tagesgrenzen-Formatierung (`Do 04.09.`, `Fr 05.09.`) mit stündlichen Tooltips.
+  - **Automatisierte Ladeempfehlungen**: Erkennung von Negativpreisen und Ausweisung der Top-3 Sparfenster.
+
+---
+
+### [x] 5.37 Server-Hardware & Kapazitäts-Wächter (RBAC HEMS-Sicherheit)
+- **Dateien**: [`operations/views.py`](file:///c:/Users/Public/Dev/eswes/operations/views.py), [`frontend/src/pages/admin/SystemStatusPage.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/pages/admin/SystemStatusPage.jsx)
+- **Status**: ✅ **Erledigt**.
+  - **Granularer RBAC-Schutz**: Beschränkung von CPU-, RAM-, Disk- und System-Hardwaremetriken exklusiv auf HEMS-Admins und Sysadmins.
+  - **Support-Desk Alarm-Routing**: Automatische Erstellung interner Support-Tickets bei Schwellenwert-Überschreitungen.
+
+---
+
+### [x] 5.38 Autonome Demo-Umgebungen & Multi-Tenant Sandbox-Isolation
+- **Dateien**: [`demo/services/data_generator.py`](file:///c:/Users/Public/Dev/eswes/demo/services/data_generator.py), [`demo/management/commands/rebuild_demo.py`](file:///c:/Users/Public/Dev/eswes/demo/management/commands/rebuild_demo.py), [`accounts/views_demo.py`](file:///c:/Users/Public/Dev/eswes/accounts/views_demo.py)
+- **Status**: ✅ **Erledigt**.
+  - **3 Isolierte Demo-Profile**: Smart Home HEMS (`demo@sharegy.de`), Community Admin (`sharing-admin@sharegy.de`), Community Mitglied (`sharing-user@sharegy.de`).
+  - **Hypertable-Sichere Re-Seeding Pipeline**: Kaskadierende Bereinigung vor Demo-Generierung zur Vermeidung von TimescaleDB-Konflikten.
+  - **Instant-Login & Auto-Hydrierung**: 1-Klick Demo-Login ohne Registrierungshürde.
+
+---
+
+### [x] 5.39 Wissensportal UX-Streamlining & Billing Coupon Redesign
+- **Dateien**: [`frontend/src/features/help/pages/HelpCenterPage.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/help/pages/HelpCenterPage.jsx), [`frontend/src/features/billing/pages/BillingPage.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/billing/pages/BillingPage.jsx)
+- **Status**: ✅ **Erledigt**.
+  - **Sanfte Anchor-Navigation**: Direktsprung zu `#articles-list` bei Kategorie-Klick mit aktivem Filter.
+  - **Kompakte Hero-Suche**: Schlanke Hero-Suchleiste (~85px) für maximale Übersicht.
+  - **Dezenter Gutschein-Trigger**: Platzierung unterhalb der Preiskarten auf `/app/billing`.
+
+---
+
 ### [ ] 5.32 🌡️ Intelligente Fußbodenheizungs- & Heizkreis-Regelung (Thermischer Speicher)
 - **Fokus**: HEMS Dispatch-Hub Integration für Fußbodenheizungen und thermische Bauteilaktivierung.
 - **Konzept**:
@@ -706,29 +763,30 @@
 
 ```
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ ✅ 100% PRODUKTIONSREIF: SÄULE 1 (EMS-PRO) & SÄULE 2 (ENERGY SHARING)         │
+│ ✅ 100% PRODUKTIONSREIF: SÄULE 1 (EMS-PRO), PAYMENT & SÄULE 2 (SHARING)       │
 ├───────────────────────────────────────────────────────────────────────────────┤
 │ • 🟢 Säule 1: Live-Sankey, Last-/PV-Forecasts, Smart Load Management Hub,     │
 │    1-Klick Quick Boost, BWWP SG-Ready Steuerung, OCPP 1.6-J CSMS Wallbox,      │
 │    Sungrow OpenAPI, ioBroker & HA Adapter, Multistring AC-Kopplung,           │
-│    Live-Pulse Topbar, Dark-Mode, 15 Handbuch-Artikel & Unmeasured PV Guard.   │
+│    Live-Pulse Topbar, Dark-Mode, 6-Sprachen i18n, 7d EPEX Trend & Demo-Hub.   │
+│ • 💳 Payment & Billing: Stripe Checkout (SEPA, Karten, PayPal, Klarna),       │
+│    § 14 UStG Invoicing, Customer Portal, Auto-Healing Customer-IDs & Coupons. │
 │ • ⚡ Säule 2: 15m OBIS-Clearing, Discovergy wMSB Hub, 3 Allokationsmodelle,    │
 │    Sharing-Tarife, Multi-Community Hub, PDF/Excel/XML-Exporte & Viral Sharing. │
 └───────────────────────────────────────────────────────────────────────────────┘
                                        │
                                        ▼
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ ⏳ AUSSTEHENDE AUFGABEN (OFFENE PUNKTE)                                       │
+│ ⏳ AUSSTEHENDE AUFGABEN (EXAKT 5 VERBLEIBENDE THEMEN)                          │
 ├───────────────────────────────────────────────────────────────────────────────┤
-│ 1. 👤 Userprofil-Seiten (Company, Privacy, Security, Magic Link Auto-Logout)  │
-│ 2. 🌡️ Fußbodenheizungs-Steuerung & thermische Estrich-Vorladung               │
-│ 3. ⛽ Mobilitäts- & Spritpreis-Radar (Tankerkönig-API Widget)                  │
-│ 4. 🛡️ § 14a EnWG Hardware-Steuerbox Dimmung (4,2 kW Begrenzung via Modbus/EEBUS)│
-│ 5. 💳 Stripe & SEPA-Lastschriften Checkout für Free vs. Pro (4,99 €/Monat)     │
-│ 6. ⚡ Dynamische Börsenpreis-Sharingtarife (EPEX Spot Kopplung)                │
-│ 7. 📜 VNB Marktkommunikations-Bridge (EDIFACT / MSCONS Export)                │
+│ 1. 🌡️ Fußbodenheizungs-Steuerung & thermische Estrich-Vorladung (Abschnitt 5.32)│
+│ 2. ⛽ Mobilitäts- & Spritpreis-Radar (Tankerkönig-API Widget, Abschnitt 5.33)  │
+│ 3. 🛡️ § 14a EnWG Hardware-Steuerbox Dimmung (4,2 kW Begrenzung via Modbus/EEBUS)│
+│ 4. ⚡ Dynamische Börsenpreis-Sharingtarife (EPEX Spot Kopplung für P2P)        │
+│ 5. 📜 VNB Marktkommunikations-Bridge (EDIFACT / MSCONS Export)                │
 └───────────────────────────────────────────────────────────────────────────────┘
 ```
+
 
 
 

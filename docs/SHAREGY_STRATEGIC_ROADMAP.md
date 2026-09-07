@@ -1,7 +1,7 @@
 # 🚀 Sharegy Strategische Produkt- & Architektur-Roadmap
 
 **Mission**: Die führende SaaS-Plattform für **Home Energy Management (EMS)** und **Energy Sharing Communities (ESC)**.  
-**Stand**: 1. September 2026 (Live v3.4)
+**Stand**: September 2026 (Live v3.5)
 
 ---
 
@@ -24,11 +24,11 @@
    │ • Takt: Sekunden / Minuten (W)│                               │ • Takt: 15-Minuten-Raster     │
    │ • Features: Live-Fluss,       │                               │ • Features: P2P-Bilanzierung, │
    │   Sankey, Spotpreise, Forecast│                               │   Tenant-RBAC, Community      │
-   │   Arbitrage, CO2, Aktorik     │                               │   Cockpit, 48h KI-Prognose,   │
-   │ • Monetarisierung: SaaS-Abo   │                               │   Late Ingestion, Audit-Log   │
-   │   (Free vs. Pro 4,99 €/M)     │                               │ • Monetarisierung: Gebühren   │
-   └───────────────────────────────┘                               │   pro Zähler / kWh-Clearing   │
-                                                                   └───────────────────────────────┘
+   │   Arbitrage, CO2, Aktorik,    │                               │   Cockpit, 48h KI-Prognose,   │
+   │   6-Sprachen i18n, 7d EPEX    │                               │   Late Ingestion, Audit-Log   │
+   │ • Monetarisierung: Stripe     │                               │ • Monetarisierung: Gebühren   │
+   │   (Karten, SEPA, PayPal 4,99€)│                               │   pro Zähler / kWh-Clearing   │
+   └───────────────────────────────┘                               └───────────────────────────────┘
 ```
 
 ---
@@ -55,7 +55,7 @@
 ### ✅ D. Forecast-Trio, Batterie-Arbitrage & Live-CO₂-Signal
 - **48h PV-Prognose** mit Hybrid Physics + ML (Open-Meteo 96h + PLZ-Geocoding) & Ist-vs-Soll-Trefferquote (WAPE).
 - **48h Last- & Batterie-SoC Simulation** mit Verlust- und Degradationsmodellen.
-- **Batterie-Arbitrage Simulator**: Netzdienliches Speicherladen bei Tiefst-/Negativpreisen und Peak-Vermeidung (~180–320 € / Jahr Ertragspotenzial).
+- **Batterie-Arbitrage Simulator & 7-Tage EPEX Trend**: Netzdienliches Speicherladen bei Tiefst-/Negativpreisen und Peak-Vermeidung (~180–320 € / Jahr Ertragspotenzial).
 - **Live CO₂-Grid-Signal**: Echtzeit-Emissionsintensität (g CO₂/kWh) des deutschen Stromnetzes (DE-LU) & Grünstrom-Index.
 
 ### ✅ E. Reporting, Multi-Format Exporte & AI-Alerting
@@ -63,11 +63,12 @@
 - **Multi-Format Export-Engine**: Excel `.xlsx` (formatiert mit Formeln), druckfähiger PDF-Bericht (ReportLab), CSV (UTF-8 BOM Semikolon) und JSON-Rohdaten.
 - **Proaktive Alarmzentrale**: 8 Erkennungsregeln (PV-Ertragsausfall, Nachtdauerlast-Leckage, Speicher-Notreserve, Börsen-Preisspitzen).
 
-### ✅ F. Multi-Tenant RBAC, Audit-Log & Helpdesk
+### ✅ F. Multi-Tenant RBAC, Audit-Log, Helpdesk & Stripe Monetarisierung
 - **Quartiers- & Tenant-Rollen**: Granulare Rechte (`admin`, `manager`, `member`, `auditor`).
 - **Revisionssicheres Audit-Log**: Automatische Protokollierung von Rollenänderungen, Einladungen und Mitglieder-Entfernungen.
-- **Vereinter Hilfe- & Support-Desk**: Ein einzelner Topbar-Button für Wissensportal, FAQ-Deflection und Live-Ticket-Support.
-- **Duale Cookie-Persistenz**: 365 Tage Speicherung über `localStorage` + persistenten HTTP-Cookie (`sharegy_cookie_consent_v1`).
+- **Vereinter Hilfe- & Support-Desk**: Ein einzelner Topbar-Button für Wissensportal mit sanfter Anchor-Navigation, FAQ-Deflection und Live-Ticket-Support.
+- **Stripe & SEPA Checkout Suite**: Vollautomatisierter Subscription-Billing-Stack (Kreditkarten, SEPA-Lastschrift, PayPal, Klarna, Amazon Pay, Link) mit USt-Ausweis (§ 14 UStG), Auto-Healing Customer-IDs und Customer Portal.
+- **6-Sprachen i18n**: Nativer Umschalter in der Topbar für DE, EN, PL, TR, RU, RO mit Stripe-Locale-Übergabe.
 
 ---
 
@@ -91,7 +92,7 @@
   └── 1.12 ✅ End-to-End Test Suite & CI/CD Stabilität (100% Tests OK)
 
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ MEILENSTEIN 2: EMS-PRO & AKTORIK (✅ In Umsetzung / Aktualisiert)               │
+│ MEILENSTEIN 2: EMS-PRO & AKTORIK (✅ 100% Abgeschlossen)                       │
 └───────────────────────────────────────────────────────────────────────────────┘
   ├── 2.1 ✅ Smart Energy Optimizer (1h, 2h, 4h Zeitfenster nach PV-Forecast & Börsenstrom)
   ├── 2.2 ✅ Verbrauchsbilanz, Virtuelle Zähler & Residual-Last Disaggregation
@@ -108,87 +109,44 @@
   ├── 2.13 ✅ Live CO₂-Grid-Signal & Grünstrom-Index (Echtzeit-Emissionen g CO₂/kWh & 36h Timeline)
   ├── 2.14 ✅ Universal Telemetrie-Push & OpenTelemetry Ingest Engine (OTel / REST)
   ├── 2.15 ✅ Bi-direktionale Ökosystem-Plugins (Home Assistant Custom Component & Grafana REST-Bridge)
-
   ├── 2.16 ✅ Outbound-WSS Ingestion für alle Shelly Gen2/Gen3/Pro Modelle (`wss://sharegy.de/ws/energy/`)
   ├── 2.17 ✅ Bidirektionale Aktorik & Relais-Steuerung (Shelly WSS JSON-RPC `Switch.Set`/`Switch.Toggle` & UI Toggles)
   ├── 2.18 ✅ Go-Live Checkout & Gutscheinsystem (Coupons, DSGVO AGB-Audit-Consent, E-Mail-Validation, GA4)
-  ├── 2.19 ✅ **Systemstatus- & Health-Monitoring Engine (Health-API, Watchdog & UI)**:
-  │          • Umfassende Health-Check API (`/api/status/health/`) für DB, Redis, Daphne WSS, Celery, Open-Meteo & Tibber
-  │          • Live-Status-Dashboard (`/app/status`) mit Latenzmessung, Ingest-Throughput und Störungsmeldung
-  │          • Automatischer Watchdog mit Auto-Ticket-Erstellung bei Subsystem-Ausfällen und Auto-Healing
-  ├── 2.20 ✅ **Geräteprofiling & Intelligente Baseline-Anomalieüberwachung (Predictive Maintenance)**:
-  │          • `DeviceBaselineProfile` Modell für Standby-Baseline, Grenzwerte, Betriebsleistung und max. Laufzeit
-  │          • 1-Klick Presets für BWWP, Wärmepumpen, Kühlschränke, Zirkulationspumpen & Umwälzpumpen
-  │          • 7-Tage Auto-ML-Learning aus realen Telemetrie-Zeitreihen (Quantil-Segmentierung)
-  │          • Echtzeit-Watchdog mit automatischer Alarmierung bei Ruhestrom-Anstieg (z. B. 30W -> 52W) oder Dauerlauf
-  ├── 2.21 ✅ **Mobile Push & Notification Engine (Web-Push VAPID, FCM/APNs & Service Worker)**:
-  │          • W3C Web-Push mit VAPID-Verschlüsselung für iPhones (iOS Safari 16.4+), Android & Desktop
-  │          • `DeviceSubscription` & `NotificationPreference` Modelle mit Quiet Hours & Notfall-Override
-  │          • Service Worker (`sw.js`) für Sperrbildschirm-Zustellung und Deep-Link-Fokussierung
-  │          • 1-Klick Permission Request & Sofort-Test-Push in Einstellungen & Alarmzentrale
-  ├── 2.22 ✅ **Native Mobile Apps via Capacitor (Android Initialisierung, Gradle & Deep Linking)**:
-│          • Capacitor 7 Plattform-Engine für Android (`frontend/android/`, `de.sharegy.app`)
-│          • Natives Lifecycle-Management, Status Bar Styling & flackerfreier Splashscreen
-│          • Deep-Linking Intent-Filter für Magic-Links (`https://sharegy.de/t/*`) & Alarme
-│          • Integrierte Build- & Sync-Pipelines (`npm run cap:open`)
-  ├── 2.23 ✅ **UX/UI & Navigation Overhaul (Slim Sidebar & Zentraler Support-Desk)**:
-│          • Schlanke Sidebar mit neuer Sektion `⚙️ Systemeinstellungen` (ohne redundante Links)
-│          • Vollständig integrierter `🛟 Hilfe & Support`-Drawer in der Topbar (Tickets, Triage & FAQ)
-│          • `📖 Wissensportal & Handbuch` (`/app/help`) mit Staff Live-Editor (Markdown, DE/EN)
-  ├── 2.24 ✅ **Operations & Celery-Prioritäts-Queues Härtung**:
-│          • 5-Stufen Prioritäts-Architektur (`fiscal`, `realtime`, `analytics`, `background`, `celery`)
-│          • Automatisches HealthState-Pruning veralteter Queues & exakter Device-Count für echte Geräte
-  ├── 2.25 ✅ **Nativer OCPP 1.6-J CSMS Gateway & Smart Charging Engine**:
-│          • WebSocket CSMS Server (`/ws/ocpp/<charge_point_id>/`) für Easee, openWB, cFos, Heidelberg, Mennekes, Alfen
-│          • 4 Intelligente Lademodi: PV-Überschuss, Börsenpreis-Tiefstpreise, Fast & Eco
-│          • `WallboxCard` Widget & `AddWallboxModal` mit Phasenumschaltung & Stromstärke-Slider
-  ├── 2.26 ✅ **Autonome Batterie-Arbitrage & Sungrow iSolarCloud OpenAPI Control**:
-│          • Bidirektionaler Inverter-Dispatch (`forced_charge`, `self_consumption`, `forced_discharge`)
-│          • Dynamische Netzladung bei Negativ- und Tiefstpreisen (Tibber/EPEX) via automatischer Celery-Task
-│          • Sub-Sekunden Statuscaching für Dashboard-Visualisierung
-  ├── 2.27 ✅ **Smart Load Management & Dispatch Hub (`/app/control`)**:
-│          • Live Power Budget Header ($P_\text{surplus} = P_\text{pv} - P_\text{load}$, SoC, Spotpreis, Schaltlast)
-│          • 4 Master-Autopilot-Modi (Smart Autopilot, Nur PV-Überschuss, Sparfuchs, Manuell)
-│          • Interaktive Prioritäten-Kaskade (Merit-Order) für solare Überschussverteilung
-│          • 24h-Fahrplan (Dispatch-Timeline) mit stündlicher Solar- & Preisallokation
-  ├── 2.28 ✅ **BWWP & Wärmepumpen SG-Ready Steuerung & Verdichterschutz**:
-│          • 4 SG-Ready Betriebszustände mit Wassertemperatur-Schwellen ($T_\text{min}=45^\circ\text{C}$, $T_\text{soll}=52^\circ\text{C}$, $T_\text{boost}=60^\circ\text{C}$, $T_\text{max}=65^\circ\text{C}$)
-│          • Integrierter Verdichter- & Taktschutz ($t_\text{run} \ge 20\,\text{min}$, $t_\text{cool} \ge 15\,\text{min}$)
-│          • Closed-Loop Aktorik über Outbound-WebSocket in Echtzeit
-  ├── 2.29 ✅ **Offizieller ioBroker Adapter (`ioBroker.sharegy`)**:
-│          • Multi-Sensor-Bündelung von Wirkleistung (W), Temperatur (°C) und Schaltrelais
-│          • WSS-Kopplung über TLS Port 443 mit Sub-100ms Reaktionszeit
-  ├── 2.30 ✅ **Digitales Benutzerhandbuch & Wissensportal (15 Artikel DE/EN)**:
-│          • 15 Handbuch-Artikel in 9 Kategorien im integrierten Support-Desk
-│          • Dynamische FAQ-Deflection und Live-Editor
-  ├── 2.31 ✅ **Topbar Live-Pulse Ticker, Sidenav Streamlining & Dark Theme**:
-│          • Sub-Sekunden Leistungsfluss in der Topbar (Solar, Haus, Netz, Akku)
-│          • Bereinigung redundanter Badges und nahtloser Liegenschafts-Switcher
-│          • Dark- & Light-Mode mit nativer ThemeContext-Persistenz
-  ├── 2.32 ✅ **Multistring & AC-Kopplung (BKW-Erkennung) mit physikalischer Entkopplung**:
-│          • Automatische Gutschrift negativer Hauslasten als Solarerzeugung
-│          • Strikte Trennung von Speicherladung und Haushaltsverbrauch
-│          • Smart-Meter Zero-Grid Schutz vor rechnerischen Verfälschungen
-  └── 2.33 ✅ **1-Klick Quick-Boost Override Bar & Smarte EPEX-Ladefenster**:
-             • 1-Klick Aktionen (11 kW Wallbox-Boost, 100% Notstromreserve, Max. PV-Eigenverbrauch)
-             • Live-Countdown & 1-Klick Reset zur nahtlosen Autopilot-Rückkehr
-             • Automatische Ermittlung von Best-Price Ladefenstern & Peak-Shaving im EPEX-Modal
+  ├── 2.19 ✅ Systemstatus- & Health-Monitoring Engine (Health-API, Watchdog & UI)
+  ├── 2.20 ✅ Geräteprofiling & Intelligente Baseline-Anomalieüberwachung (Predictive Maintenance)
+  ├── 2.21 ✅ Mobile Push & Notification Engine (Web-Push VAPID, FCM/APNs & Service Worker)
+  ├── 2.22 ✅ Native Mobile Apps via Capacitor (Android `de.sharegy.app`, Gradle & Deep Linking)
+  ├── 2.23 ✅ UX/UI & Navigation Overhaul (Slim Sidebar & Zentraler Support-Desk)
+  ├── 2.24 ✅ Operations & Celery-Prioritäts-Queues Härtung (5-Stufen Prioritäts-Architektur)
+  ├── 2.25 ✅ Nativer OCPP 1.6-J CSMS Gateway & Smart Charging Engine (Easee, openWB, cFos, Keba)
+  ├── 2.26 ✅ Autonome Batterie-Arbitrage & Sungrow iSolarCloud OpenAPI Control
+  ├── 2.27 ✅ Smart Load Management & Dispatch Hub (`/app/control` - Merit-Order & 24h-Fahrplan)
+  ├── 2.28 ✅ BWWP & Wärmepumpen SG-Ready Steuerung & Verdichterschutz (4 Zustände, Boost bis 60°C)
+  ├── 2.29 ✅ Offizieller ioBroker Adapter (`ioBroker.sharegy` - WSS Port 443)
+  ├── 2.30 ✅ Digitales Benutzerhandbuch & Wissensportal (15 Artikel DE/EN, Anchor-Navigation)
+  ├── 2.31 ✅ Topbar Live-Pulse Ticker, Sidenav Streamlining & Dark/Light Theme
+  ├── 2.32 ✅ Multistring & AC-Kopplung (BKW-Erkennung) mit physikalischer Entkopplung
+  ├── 2.33 ✅ 1-Klick Quick-Boost Override Bar & Smarte EPEX-Ladefenster Empfehlungen
+  ├── 2.34 ✅ 6-Sprachiges EU-Internationalisierungspaket (🇩🇪 DE, 🇬🇧 EN, 🇵🇱 PL, 🇹🇷 TR, 🇷🇺 RU, 🇷🇴 RO)
+  ├── 2.35 ✅ EPEX Spot 7-Tage Trend-Lookback (`range="week"`/`"7d"`) & Spitzenanalyse
+  ├── 2.36 ✅ Server-Hardware & Kapazitäts-Wächter mit RBAC-Schutz (HEMS-/Sysadmin)
+  └── 2.37 ✅ Autonome Demo-Umgebungen & Multi-Tenant Sandbox-Isolation (3 Profile)
 
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ MEILENSTEIN 3: PAYMENT, MONETARISIERUNG & BILLING-ARCHITEKTUR (💳 OFFEN)      │
+│ MEILENSTEIN 3: PAYMENT, MONETARISIERUNG & BILLING-ARCHITEKTUR (✅ 100% LIVE)   │
 └───────────────────────────────────────────────────────────────────────────────┘
-  ├── 3.1 ⏳ **Tarif- & Plan-Modellierung**:
-  │          • Free vs. Pro (Monatlich 4,99 € / Jährlich 49,99 €) & Vermieter-/Quartiers-Pakete
+  ├── 3.1 ✅ **Tarif- & Plan-Modellierung**:
+  │          • Free vs. Pro (Monatlich 4,99 € / Jährlich 49,99 €)
   │          • Feature-Gating Matrix (Alarmzentrale, ML-Solarprognose, Batterie-Arbitrage)
-  ├── 3.2 ⏳ **Stripe / Payment Gateway Checkout & Customer Portal Flow**:
-  │          • Reibungsloser Checkout ohne Medienbruch (SEPA-Lastschrift, Kreditkarte, Apple/Google Pay)
-  │          • Self-Service Customer Portal für Abo-Kündigung, Zahlungsmittel-Update & Rechnungsdownload
-  ├── 3.3 ⏳ **Automatische Rechnungsstellung & Fiskal-Sicherheit**:
-  │          • PDF-Rechnungserstellung (ReportLab mit USt-Ausweis, fortlaufender Rechnungsnummer & Anschrift)
-  │          • E-Mail-Versand mit PDF-Anhang bei erfolgreicher Abbuchung (`fiscal` Queue Prio 1)
-  └── 3.4 ⏳ **Payment & Webhook-Monitoring (Infrastruktur)**:
-             • Stripe-Webhook Health-Check im Systemstatus (`/app/status`)
-             • SMTP/E-Mail-Server Erreichbarkeits-Überwachung für transaktionale Mails
+  ├── 3.2 ✅ **Stripe / Payment Gateway Checkout & Customer Portal Flow**:
+  │          • Vollständig aktiviert: Kreditkarten, SEPA-Lastschrift, PayPal, Klarna, Amazon Pay, Link
+  │          • Self-Service Customer Portal für Abo-Verwaltung, Zahlungsmittel & Rechnungen
+  ├── 3.3 ✅ **Automatische Rechnungsstellung & Fiskal-Sicherheit (§ 14 UStG)**:
+  │          • Rechnungs- und Belegkonfiguration mit 19% MwSt (USt-IdNr `DE300917919`)
+  │          • Statement-Descriptor `SHAREGY PRO - SMARTEVO` & Nummernpräfix `SHAREGY-...`
+  └── 3.4 ✅ **Payment & Webhook-Monitoring & Diagnose**:
+             • Webhook-Handler mit Signatur-Prüfung & automatischem `is_pro` Provisioning
+             • Auto-Healing Customer-IDs & Diagnosebefehl `verify_stripe_setup`
 
 ┌───────────────────────────────────────────────────────────────────────────────┐
 │ MEILENSTEIN 4: ENERGY SHARING COMMUNITIES & CLEARING (Säule 2 - ✅ 100% LIVE) │
@@ -208,14 +166,16 @@
 
 ---
 
-## 📋 4. Konkreter Action-Plan (Ausschließlich offene Aufgaben)
+## 📋 4. Konkreter Action-Plan (Ausschließlich verbleibende offene Aufgaben)
 
 | Schritt | Modul | Maßnahme | Status / Prio | Ziel & Umsetzung |
 |---|---|---|:---:|---|
-| **Prio 1** | `grid/enwg/` | **§ 14a EnWG Steuerbox & Dimmung**: Dynamische Leistungsbegrenzung auf 4,2 kW für SteuVE (WP, Wallbox, Speicher) via REST/Modbus/EEBUS | ⚡ **P1 (Nächster Fokus)** | Gesetzliche Netzbetreiber-Konformität & Abregelungs-Protokollierung |
-| **Prio 2** | `billing/payment/` | **Stripe & SEPA Checkout Integration**: Anbindung von Stripe Subscription Billing für Free vs. Pro (4,99 €/Monat) inkl. Webhooks | 💳 **P2** | Automatisierte Monetarisierung & Self-Service Portal |
-| **Prio 3** | `billing/tariffs/` | **Dynamische Börsenpreis-Sharingtarife**: Indexierte Community-Tarife mit Formelaufschlag auf EPEX-Spotpreise | ⚡ **P3** | Marktnahe Bepreisung innerhalb von Bürgerenergie-Quartieren |
-| **Prio 4** | `billing/edifact/` | **Standardisierte Marktkommunikations-Bridge**: Automatischer Export von MSCONS / EDIFACT-Datensätzen zur VNB-Abstimmung | ⚡ **P4** | Direkter Datenaustausch mit Verteilnetzbetreibern |
+| **Prio 1** | `energy/hvac/` | **🌡️ Fußbodenheizungs-Steuerung & thermische Estrich-Vorladung**: Nutzung des Estrichs als Speicher (+0,5°C bis +1,5°C Vorladung bei PV-Überschuss / Negativpreisen) | ⚡ **P1 (Nächster Fokus)** | 100% Eigenverbrauch & Peak-Shaving im HEMS Dispatch-Hub |
+| **Prio 2** | `mobility/radar/` | **⛽ Mobilitäts- & Spritpreis-Radar**: Integration der Tankerkönig-API / MTS-K für die 3 günstigsten Tankstellen (Diesel, E5, E10) im Umkreis | 🚗 **P2** | Alltags-Mehrwert für gemischte Haushalte (EV + Verbrenner/Hybrid) |
+| **Prio 3** | `grid/enwg/` | **🛡️ § 14a EnWG Hardware-Steuerbox Dimmung**: Dynamische 4,2 kW Summenleistungs-Begrenzung für SteuVE (WP, Wallbox, Speicher) via REST/Modbus/EEBUS | ⚡ **P3** | Gesetzliche Netzbetreiber-Konformität & Abregelungs-Protokollierung |
+| **Prio 4** | `billing/tariffs/` | **⚡ Dynamische Börsenpreis-Sharingtarife**: Indexierte Community-Tarife mit Formelaufschlag auf EPEX-Spotpreise | ⚡ **P4** | Marktnahe Bepreisung innerhalb von Bürgerenergie-Quartieren |
+| **Prio 5** | `billing/edifact/` | **📜 Standardisierte Marktkommunikations-Bridge**: Automatischer Export von MSCONS / EDIFACT-Datensätzen zur VNB-Abstimmung | ⚡ **P5** | Direkter Datenaustausch mit Verteilnetzbetreibern |
+
 
 
 
