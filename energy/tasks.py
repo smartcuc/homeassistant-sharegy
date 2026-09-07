@@ -131,7 +131,6 @@ def send_weekly_energy_digest_task():
     seven_days_ago = now - timedelta(days=7)
     period_str = f"{seven_days_ago.strftime('%d.%m.%Y')} – {now.strftime('%d.%m.%Y')}"
 
-    # Finde alle Nutzer mit aktiver notify_weekly_report Option
     users_with_settings = User.objects.filter(
         is_active=True,
     ).select_related("settings")
@@ -144,6 +143,20 @@ def send_weekly_energy_digest_task():
             continue
 
         home = Home.objects.filter(user=user).first()
+
+        # Zeitzone des Nutzers / Haushalts ermitteln (Standard: Europe/Berlin / DE)
+        tz_name = (pref.timezone if pref and pref.timezone else (home.timezone if home and home.timezone else "Europe/Berlin")) or "Europe/Berlin"
+        try:
+            from zoneinfo import ZoneInfo
+            user_tz = ZoneInfo(tz_name)
+        except Exception:
+            from zoneinfo import ZoneInfo
+            user_tz = ZoneInfo("Europe/Berlin")
+
+        user_now = timezone.now().astimezone(user_tz)
+        seven_days_ago = user_now - timedelta(days=7)
+        period_str = f"{seven_days_ago.strftime('%d.%m.%Y')} – {user_now.strftime('%d.%m.%Y')}"
+
         pv_kwh = 0.0
         grid_in_kwh = 0.0
         grid_out_kwh = 0.0
