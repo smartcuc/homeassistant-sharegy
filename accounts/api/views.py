@@ -91,21 +91,48 @@ class UpdateOnboardingStepView(APIView):
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
+    def get(self, request):
+        user = request.user
+        profile, _ = UserProfile.objects.get_or_create(user=user)
+        return Response(
+            {
+                "first_name": user.first_name or "",
+                "last_name": user.last_name or "",
+                "email": user.email or "",
+                "phone": profile.phone or "",
+                "customer_type": profile.customer_type or "private",
+                "company_name": profile.company_name or "",
+                "billing_name": profile.billing_name or "",
+                "vat_id": profile.vat_id or "",
+                "street": profile.street or "",
+                "house_number": profile.house_number or "",
+                "postal_code": profile.postal_code or "",
+                "city": profile.city or "",
+                "country": profile.country or "DE",
+            }
+        )
+
     def post(self, request):
         user = request.user
         data = request.data
 
-        user.first_name = data.get("first_name", "")
-        user.last_name = data.get("last_name", "")
+        user.first_name = data.get("first_name", user.first_name)
+        user.last_name = data.get("last_name", user.last_name)
         user.save()
 
         profile, _ = UserProfile.objects.get_or_create(user=user)
 
-        profile.street = data.get("street", "")
-        profile.city = data.get("city", "")
-        profile.postal_code = data.get("postal_code", "")
-        profile.house_number = data.get("house_number", "")
-        profile.country = data.get("country", "DE")
+        profile.phone = data.get("phone", profile.phone)
+        profile.customer_type = data.get("customer_type", profile.customer_type)
+        profile.company_name = data.get("company_name", profile.company_name)
+        profile.billing_name = data.get("billing_name", profile.billing_name)
+        profile.vat_id = data.get("vat_id", profile.vat_id)
+
+        profile.street = data.get("street", profile.street)
+        profile.house_number = data.get("house_number", profile.house_number)
+        profile.postal_code = data.get("postal_code", profile.postal_code)
+        profile.city = data.get("city", profile.city)
+        profile.country = data.get("country", profile.country or "DE")
         profile.save()
 
         return Response({"status": "saved"})
