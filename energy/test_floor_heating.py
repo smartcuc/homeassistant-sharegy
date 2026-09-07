@@ -23,6 +23,8 @@ from energy.services.floor_heating_manager import (
     evaluate_floor_heating,
     find_or_create_floor_heating_config,
     calculate_thermal_storage_metrics,
+    calculate_predictive_flow_temperature,
+    generate_24h_predictive_heating_schedule,
     trigger_floor_heating_boost,
     actuate_floor_heating_relay,
 )
@@ -193,6 +195,9 @@ class FloorHeatingTests(TestCase):
             "target_room_temp_c": 21.5,
             "boost_delta_k": 1.5,
             "estrich_area_sqm": 140.0,
+            "heating_curve_slope": 0.55,
+            "predictive_mpc_enabled": True,
+            "solar_gain_compensation": True,
         }, format="json")
         self.assertEqual(res_cfg.status_code, 200)
         self.config.refresh_from_db()
@@ -200,6 +205,9 @@ class FloorHeatingTests(TestCase):
         self.assertEqual(self.config.target_room_temp_c, Decimal("21.5"))
         self.assertEqual(self.config.boost_delta_k, Decimal("1.5"))
         self.assertEqual(self.config.estrich_area_sqm, Decimal("140.0"))
+        self.assertEqual(self.config.heating_curve_slope, Decimal("0.55"))
+        self.assertTrue(self.config.predictive_mpc_enabled)
+        self.assertTrue(self.config.solar_gain_compensation)
 
         # 3. POST Boost
         res_boost = self.client.post("/api/energy/floor-heating/boost/", {
@@ -215,3 +223,58 @@ class FloorHeatingTests(TestCase):
         }, format="json")
         self.assertEqual(res_toggle.status_code, 200)
         self.assertFalse(cache.get(f"device_relay_state_{self.dev_heating.id}"))
+
+    def test_predictive_flow_temperature_mpc(self):
+        """Testet die physikalisch korrekte Berechnung der Vorlauftemperatur nach Heizkurve + MPC."""
+        # 1. Kaltes Wetter (5°C), keine Sonne, kein Vorladeboost
+        calc_cold = calculate_predictive_flow_temperature(
+            config=self.config,
+            outdoor_temp_c=5.0,
+            solar_radiation_wm2=0.0,
+            is_preheat_eligible=False,
+        )
+        self.assertGreaterEqual(calc_cold["base_flow_temp_c"], 28.0)
+        self.assertEqual(calc_cold["solar_offset_k"], 0.0)
+        self.assertEqual(calc_cold["preheat_offset_k"], 0.0)
+
+        # 2. Hohe Solarstrahlung (600 W/m²) -> Solares Absenken
+        calc_sunny = calculate_predictive_flow_temperature(
+            config=self.config,
+            outdoor_temp_c=10.0,
+            solar_radiation_wm2=600.0,
+            is_preheat_eligible=False,
+        )
+        self.assertGreater(calc_sunny["solar_offset_k"], 1.0)
+        self.assertLess(calc_sunny["opt_flow_temp_c"], calc_sunny["base_flow_temp_c"])
+
+        # 3. PV-Vorladung aktiv -> Vorlaufanhebung
+        calc_preheat = calculate_predictive_flow_temperature(
+            config=self.config,
+            outdoor_temp_c=8.0,
+            solar_radiation_wm2=150.0,
+            is_preheat_eligible=True,
+        )
+        self.assertEqual(calc_preheat["preheat_offset_k"], 1.5)
+        self.assertGreater(calc_preheat["opt_flow_temp_c"], calc_preheat["base_flow_temp_c"])
+
+    def test_predictive_24h_schedule_generation(self):
+        """Testet die Generierung des 24h MPC-Fahrplans und der KI-Handlungsempfehlungen."""
+        schedule = generate_24h_predictive_heating_schedule(
+            home=self.home,
+            config=self.config,
+            current_room_temp=21.2,
+            current_surplus_w=2500.0,
+            current_spot_ct=10.5,
+        )
+
+        self.assertIn("timeline", schedule)
+        self.assertEqual(len(schedule["timeline"]), 24)
+        self.assertIn("ai_recommendation_title", schedule)
+        self.assertIn("ai_recommendation_text", schedule)
+        self.assertIn("best_preheat_window", schedule)
+        self.assertIn("best_coast_window", schedule)
+
+        first_slot = schedule["timeline"][0]
+        self.assertIn("opt_flow_temp_c", first_slot)
+        self.assertIn("action_badge", first_slot)
+        self.assertIn("outdoor_temp_c", first_slot)

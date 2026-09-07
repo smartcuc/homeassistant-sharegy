@@ -17,7 +17,7 @@ from energy.models import FloorHeatingConfig
 from market.models_tariff import HomeTariff
 from market.services_tariff import get_home_tariff, calculate_effective_price
 from market.models import SpotPrice
-from forecast.models import SolarForecast
+from forecast.models import SolarForecast, WeatherForecast
 
 logger = logging.getLogger(__name__)
 
@@ -105,6 +105,253 @@ def calculate_thermal_storage_metrics(config: FloorHeatingConfig, current_temp: 
         "max_capacity_kwh_th": round(max_capacity_kwh_th, 1),
         "stored_energy_kwh_el": round(stored_kwh_el, 1),
         "max_capacity_kwh_el": round(max_capacity_kwh_el, 1),
+    }
+
+
+def calculate_predictive_flow_temperature(
+    config: FloorHeatingConfig,
+    outdoor_temp_c: float,
+    solar_radiation_wm2: float = 0.0,
+    is_preheat_eligible: bool = False,
+) -> dict:
+    """
+    Berechnet die wetter- & prognosegeführte Vorlauftemperatur (Model Predictive Control / MPC):
+    1. Basis-Heizkurve nach DIN EN 12831 / DIN 4701 für Niedertemperatur-Fußbodenheizungen.
+    2. Solares Absenken (Pre-Cooling/Coast): Bei hoher prognostizierter Globalstrahlung wird
+       der Vorlauf um bis zu 2,0 K gesenkt, um solare Fenster-Gewinne zu nutzen.
+    3. Thermischer Vorlade-Boost: Bei PV-Überschuss / Negativpreis wird der Vorlauf angehoben.
+    """
+    target_room_temp = float(config.target_room_temp_c or Decimal("21.0"))
+    slope = float(getattr(config, "heating_curve_slope", Decimal("0.60")) or Decimal("0.60"))
+    boost_delta = float(config.boost_delta_k or Decimal("1.0"))
+    solar_comp_active = bool(getattr(config, "solar_gain_compensation", True))
+    mpc_enabled = bool(getattr(config, "predictive_mpc_enabled", True))
+
+    # 1. Basis-Heizkurve (Niedertemperatur FBH)
+    delta_t = target_room_temp - outdoor_temp_c
+    if outdoor_temp_c >= 17.0:
+        base_flow_temp = 23.0
+    elif delta_t <= 0:
+        base_flow_temp = 24.0
+    else:
+        # FBH Kennlinie: T_flow = T_room + s * (delta_T)^0.8 * 1.25 + 2.5
+        base_flow_temp = target_room_temp + (slope * (delta_t ** 0.8) * 1.25) + 2.5
+    
+    # Begrenzung der Basiskurve
+    base_flow_temp = max(22.0, min(36.0, base_flow_temp))
+
+    # 2. Solares Absenken durch Einstrahlungsgewinne (bis zu -2.0 K)
+    solar_offset_k = 0.0
+    if mpc_enabled and solar_comp_active and solar_radiation_wm2 > 100.0:
+        # Bei 500 W/m² ca. -1.5 K, max -2.0 K
+        solar_offset_k = min(2.0, (solar_radiation_wm2 / 500.0) * 1.5)
+
+    # 3. Thermische Vorladung (PV-Überschuss / Günstiger Börsenpreis)
+    preheat_offset_k = 0.0
+    if is_preheat_eligible:
+        preheat_offset_k = boost_delta * 1.5  # z. B. +1.5 K bis +2.5 K Vorlaufanhebung
+
+    # 4. Gesamt-Vorlauftemperatur
+    if mpc_enabled:
+        opt_flow_temp = base_flow_temp + preheat_offset_k - solar_offset_k
+    else:
+        opt_flow_temp = base_flow_temp
+
+    # Sicherheits-Klammerung (22.0°C bis max 38.0°C für Estrichschutz)
+    opt_flow_temp = max(22.0, min(38.0, opt_flow_temp))
+    flow_delta_k = opt_flow_temp - base_flow_temp
+
+    return {
+        "base_flow_temp_c": round(base_flow_temp, 1),
+        "opt_flow_temp_c": round(opt_flow_temp, 1),
+        "flow_delta_k": round(flow_delta_k, 1),
+        "solar_offset_k": round(solar_offset_k, 1),
+        "preheat_offset_k": round(preheat_offset_k, 1),
+        "outdoor_temp_c": round(outdoor_temp_c, 1),
+        "solar_radiation_wm2": round(solar_radiation_wm2, 0),
+        "heating_curve_slope": slope,
+        "mpc_enabled": mpc_enabled,
+    }
+
+
+def generate_24h_predictive_heating_schedule(
+    home,
+    config: FloorHeatingConfig,
+    current_room_temp: float = 21.2,
+    current_surplus_w: float = 0.0,
+    current_spot_ct: float = 14.5,
+) -> dict:
+    """
+    Erstellt einen 24-Stunden prädiktiven MPC-Fahrplan und KI-Handlungsempfehlungen.
+    Kombiniert:
+    - Open-Meteo Wetterprognose (Temperatur & Globalstrahlung)
+    - EPEX-Spot Börsenstrompreise
+    - PV-Erzeugungsprognose
+    - Thermische Estrich-Trägheit (Coast-Down / Pre-Heating)
+    """
+    now = timezone.now().replace(minute=0, second=0, microsecond=0)
+    target_temp = float(config.target_room_temp_c or Decimal("21.0"))
+    min_surplus_req = float(config.min_pv_surplus_w or Decimal("1000.0"))
+    max_price_req = float(config.max_spot_price_ct_kwh or Decimal("16.00"))
+
+    # Wetterdaten der nächsten 24h laden
+    weather_qs = WeatherForecast.objects.filter(
+        home=home, ts__gte=now, ts__lt=now + timedelta(hours=24)
+    ).order_by("ts")
+    weather_map = {wf.ts.strftime("%Y-%m-%d %H:00"): wf for wf in weather_qs}
+
+    # Spotpreise laden
+    spot_qs = SpotPrice.objects.filter(
+        timestamp__gte=now, timestamp__lt=now + timedelta(hours=24)
+    ).order_by("timestamp")
+    spot_map = {sp.timestamp.strftime("%Y-%m-%d %H:00"): float(sp.price_ct_kwh or 14.0) for sp in spot_qs}
+
+    # Solar-Forecasts laden
+    solar_qs = SolarForecast.objects.filter(
+        timestamp__gte=now, timestamp__lt=now + timedelta(hours=24)
+    ).order_by("timestamp")
+    solar_map = {}
+    for sf in solar_qs:
+        key = sf.timestamp.strftime("%Y-%m-%d %H:00")
+        solar_map[key] = solar_map.get(key, 0.0) + float(sf.forecast_kwh or 0.0)
+
+    timeline = []
+    preheat_hours = []
+    coast_hours = []
+    total_solar_gain_kwh = 0.0
+    grid_peak_avoided_kwh = 0.0
+
+    for i in range(24):
+        slot_time = now + timedelta(hours=i)
+        slot_key = slot_time.strftime("%Y-%m-%d %H:00")
+        hour_label = slot_time.strftime("%H:00")
+        hour_int = slot_time.hour
+
+        # Wetter für diesen Slot
+        wf = weather_map.get(slot_key)
+        if wf:
+            out_temp = float(wf.temperature_c if wf.temperature_c is not None else 8.5)
+            radiation = float(wf.shortwave_radiation_wm2 if wf.shortwave_radiation_wm2 is not None else 0.0)
+        else:
+            # Realistischer diurnaler Fallback wenn noch kein Wetter gecached ist
+            # Tiefste Temperatur um 06:00, höchste um 15:00
+            if 6 <= hour_int <= 18:
+                out_temp = 5.0 + 8.0 * (1.0 - abs(hour_int - 14) / 8.0)
+                radiation = max(0.0, 550.0 * (1.0 - (abs(hour_int - 13) / 5.5) ** 2)) if 7 <= hour_int <= 19 else 0.0
+            else:
+                out_temp = 4.0 - 2.0 * (hour_int / 24.0)
+                radiation = 0.0
+
+        # Spotpreis
+        spot_ct = spot_map.get(slot_key, 12.0 + 10.0 * abs(hour_int - 13) / 12.0)
+        # Solar PV kW
+        pv_kw = solar_map.get(slot_key, (radiation / 1000.0) * 8.0 if radiation > 0 else 0.0)
+
+        # Pre-Heating Eignung prüfen
+        has_surplus = (pv_kw * 1000.0 >= min_surplus_req) or (i == 0 and current_surplus_w >= min_surplus_req)
+        has_cheap_price = (spot_ct <= max_price_req) or (i == 0 and current_spot_ct <= max_price_req)
+        is_preheat_eligible = has_surplus or has_cheap_price
+
+        # Vorlauftemperatur berechnen
+        flow_calc = calculate_predictive_flow_temperature(
+            config=config,
+            outdoor_temp_c=out_temp,
+            solar_radiation_wm2=radiation,
+            is_preheat_eligible=is_preheat_eligible,
+        )
+
+        # Aktionsmodus & Beschreibung für die Timeline
+        if is_preheat_eligible and (radiation > 200 or pv_kw >= 1.5):
+            action_mode = "preheat"
+            action_badge = "⚡ Vorladen"
+            action_color = "amber"
+            reason_text = f"PV-Vorladung (+{flow_calc['preheat_offset_k']:.1f} K) bei {pv_kw:.1f} kW Erzeugung"
+            preheat_hours.append(hour_label)
+            grid_peak_avoided_kwh += 1.2
+        elif flow_calc["solar_offset_k"] >= 0.8:
+            action_mode = "coast"
+            action_badge = "☀️ Solares Absenken"
+            action_color = "sky"
+            reason_text = f"Fenster-Sonnengewinn (-{flow_calc['solar_offset_k']:.1f} K) bei {radiation:.0f} W/m²"
+            coast_hours.append(hour_label)
+            total_solar_gain_kwh += 0.9
+        elif 17 <= hour_int <= 21 and len(preheat_hours) > 0:
+            action_mode = "coast"
+            action_badge = "🛋️ Passive Entladung"
+            action_color = "indigo"
+            reason_text = "Estrich gibt gespeicherte Wärme ab – Abendspitze vermieden"
+            coast_hours.append(hour_label)
+            grid_peak_avoided_kwh += 1.5
+        elif out_temp < 15.0:
+            action_mode = "heat"
+            action_badge = "♨️ Normalbetrieb"
+            action_color = "emerald"
+            reason_text = f"Grundheizung ({flow_calc['opt_flow_temp_c']:.1f}°C) nach Heizkurve"
+        else:
+            action_mode = "standby"
+            action_badge = "⏸️ Standby"
+            action_color = "slate"
+            reason_text = "Heizgrenze erreicht – Heizkreis pausiert"
+
+        timeline.append({
+            "hour_label": hour_label,
+            "timestamp": slot_time.isoformat(),
+            "outdoor_temp_c": round(out_temp, 1),
+            "solar_radiation_wm2": round(radiation, 0),
+            "spot_price_ct": round(spot_ct, 2),
+            "pv_kw": round(pv_kw, 2),
+            "base_flow_temp_c": flow_calc["base_flow_temp_c"],
+            "opt_flow_temp_c": flow_calc["opt_flow_temp_c"],
+            "flow_delta_k": flow_calc["flow_delta_k"],
+            "action_mode": action_mode,
+            "action_badge": action_badge,
+            "action_color": action_color,
+            "reason_text": reason_text,
+        })
+
+    # Fenster-Formatierung
+    best_preheat_window = (
+        f"{preheat_hours[0]} – {preheat_hours[-1]} Uhr"
+        if preheat_hours
+        else "Kein Vorladefenster (wenig Solarüberschuss)"
+    )
+    best_coast_window = (
+        f"{coast_hours[0]} – {coast_hours[-1]} Uhr"
+        if coast_hours
+        else "17:00 – 21:00 Uhr (Abend-Entladung)"
+    )
+
+    # Ersparnisberechnung
+    cop = 3.5
+    avg_price_peak_ct = 34.0
+    avg_price_solar_ct = 0.0
+    saved_money_eur = (grid_peak_avoided_kwh * (avg_price_peak_ct - avg_price_solar_ct)) / 100.0
+
+    # KI-Handlungsempfehlungstext
+    if preheat_hours:
+        ai_recommendation_title = f"☀️ Vorladung von {best_preheat_window} empfohlen"
+        ai_recommendation_text = (
+            f"Vorausschauendes MPC prognostiziert {total_solar_gain_kwh + grid_peak_avoided_kwh:.1f} kWh solare Wärmegewinne. "
+            f"Estrich zwischen {best_preheat_window} um +{float(config.boost_delta_k):.1f} K vorladen, "
+            f"um die Abendspitze ({best_coast_window}) ohne teuren Netzbezug zu überbrücken. "
+            f"Erwartete Ersparnis: ca. {saved_money_eur:.2f} € heute."
+        )
+    else:
+        ai_recommendation_title = "🛋️ Gleichmäßiger Heizkurvenbetrieb"
+        ai_recommendation_text = (
+            f"Aufgrund bedeckten Wetters regelt Sharegy die Vorlauftemperatur stetig auf Basis der Heizkurve "
+            f"(Steilheit {float(getattr(config, 'heating_curve_slope', 0.6)):.2f}), um optimalen Wohnkomfort bei minimalem Stromverbrauch zu sichern."
+        )
+
+    return {
+        "timeline": timeline,
+        "best_preheat_window": best_preheat_window,
+        "best_coast_window": best_coast_window,
+        "total_solar_gain_kwh": round(total_solar_gain_kwh, 1),
+        "grid_peak_avoided_kwh": round(grid_peak_avoided_kwh, 1),
+        "estimated_savings_eur": round(saved_money_eur, 2),
+        "ai_recommendation_title": ai_recommendation_title,
+        "ai_recommendation_text": ai_recommendation_text,
     }
 
 
@@ -281,6 +528,32 @@ def evaluate_floor_heating(home, config: FloorHeatingConfig = None, force: bool 
         config.is_preheating_active = preheating_active
         config.save(update_fields=["is_preheating_active"])
 
+    # 7. Aktuelles Wetter & Prognosewerte für Live-Vorlauf & MPC abrufen
+    latest_weather = WeatherForecast.objects.filter(home=home, ts__lte=now).order_by("-ts").first()
+    if latest_weather and latest_weather.temperature_c is not None:
+        live_outdoor_temp = float(latest_weather.temperature_c)
+        live_radiation = float(latest_weather.shortwave_radiation_wm2 or 0.0)
+    else:
+        # Fallback Außentemperatur aus Cache oder saisonalem Default
+        live_outdoor_temp = float(cache.get(f"home_{home.id}_outdoor_temp_c", 6.5))
+        hour_now = now.hour
+        live_radiation = 450.0 if (8 <= hour_now <= 17) else 0.0
+
+    live_flow_metrics = calculate_predictive_flow_temperature(
+        config=config,
+        outdoor_temp_c=live_outdoor_temp,
+        solar_radiation_wm2=live_radiation,
+        is_preheat_eligible=preheating_active,
+    )
+
+    mpc_schedule = generate_24h_predictive_heating_schedule(
+        home=home,
+        config=config,
+        current_room_temp=live_temp,
+        current_surplus_w=pv_surplus_w,
+        current_spot_ct=current_spot_price_ct,
+    )
+
     return {
         "active": config.active,
         "control_mode": config.control_mode,
@@ -295,12 +568,16 @@ def evaluate_floor_heating(home, config: FloorHeatingConfig = None, force: bool 
             "boost_target_c": float(config.target_room_temp_c + config.boost_delta_k),
             "max_floor_c": float(config.max_floor_temp_c),
         },
+        "flow_temperature": live_flow_metrics,
+        "predictive_mpc": mpc_schedule,
         "storage": storage_metrics,
         "signals": {
             "pv_surplus_w": round(pv_surplus_w, 0),
             "min_pv_surplus_w": float(config.min_pv_surplus_w),
             "spot_price_ct_kwh": round(current_spot_price_ct, 2),
             "max_spot_price_ct_kwh": float(config.max_spot_price_ct_kwh),
+            "outdoor_temp_c": round(live_outdoor_temp, 1),
+            "solar_radiation_wm2": round(live_radiation, 0),
         },
         "decision_reason": decision_reason,
         "config_id": str(config.id),

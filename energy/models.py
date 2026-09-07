@@ -696,6 +696,20 @@ class FloorHeatingConfig(models.Model):
         help_text="Beheizte Estrich-Fläche in m² zur Kapazitätsberechnung"
     )
 
+    # 🧠 Prädiktive KI-Wetter & MPC Vorlauf-Regelung
+    predictive_mpc_enabled = models.BooleanField(
+        default=True,
+        help_text="Aktiviert KI-Wetter-Vorhersagen & dynamische Vorlauf-Optimierung (MPC)"
+    )
+    heating_curve_slope = models.DecimalField(
+        max_digits=3, decimal_places=2, default=Decimal("0.60"),
+        help_text="Heizkurven-Steilheit für Fußbodenheizung (typisch 0.4 bis 0.8)"
+    )
+    solar_gain_compensation = models.BooleanField(
+        default=True,
+        help_text="Automatische Vorlaufabsenkung bei starker prognostizierter Sonneneinstrahlung"
+    )
+
     # Runtime & Safety States
     is_preheating_active = models.BooleanField(
         default=False,

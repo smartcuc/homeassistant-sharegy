@@ -742,15 +742,20 @@
 
 ---
 
-### [x] 5.32 🌡️ Intelligente Fußbodenheizungs- & Heizkreis-Regelung (Thermischer Speicher)
+### [x] 5.32 🌡️ Intelligente Fußbodenheizungs- & Heizkreis-Regelung (Thermischer Speicher & Prädiktives MPC)
 - **Status**: ✅ **100% PRODUKTIONSREIF IMPLEMENTIERT & GETESTET**
-- **Fokus**: HEMS Dispatch-Hub Integration für Fußbodenheizungen und thermische Bauteilaktivierung (`FloorHeatingConfig`, `FloorHeatingLoadCard`, `floor_heating_manager.py`).
+- **Fokus**: HEMS Dispatch-Hub Integration für Fußbodenheizungen, thermische Bauteilaktivierung und **vorausschauende KI-Wetter-Vorlauftemperaturregelung (Model Predictive Control / MPC)** (`FloorHeatingConfig`, `FloorHeatingLoadCard`, `floor_heating_manager.py`).
 - **Konzept & Umsetzung**:
-  - Nutzung des Estrichs als riesige, kostenlose thermische Batterie (Pre-Heating bei PV-Überschuss $\ge 1\,\text{kW}$ oder negativen/günstigen dynamischen Börsenstrompreisen um $+0,5\,\text{K}$ bis $+1,5\,\text{K}$).
-  - Berechnung der thermischen Speicherkapazität ($C_{\text{th}} = \frac{m \cdot c}{3600}$, z. B. $4,67\,\text{kWh/K}$ bei $120\,\text{m}^2 / 16,8\,\text{t}$ Estrich) und des thermischen Ladezustands ($\text{SoC}_{\text{thermal}}$ in $\%$) in Echtzeit.
-  - Passive Wärmeabgabe während teurer Abendstunden ohne zusätzlichen Netzbezug.
-  - Schaltschutz mit Mindestlaufzeit ($\ge 30\,\text{min}$) und Mindestruhezeit ($\ge 15\,\text{min}$) gegen Taktung.
-  - Vollwertiges Glassmorphism-UI (`FloorHeatingLoadCard.jsx`) mit 1-Klick 2h-Vorlade-Boost, Raumtemperatur-Sollwert, Estrich-Grenztemperatur und Merit-Order Kaskade.
+  - **Prädiktive Vorlauftemperatur ($T_{\text{flow, opt}}$)**:
+    - Niedertemperatur-Heizkurve nach DIN EN 12831 / DIN 4701 ($T_{\text{flow, base}} = T_{\text{room}} + s \cdot (T_{\text{room}} - T_{\text{out}})^{0.8} \cdot 1.25 + 2.5$).
+    - **Solares Absenken ($\Delta T_{\text{solar}}$)**: Bei prognostizierter Globalstrahlung ($G > 100\,\text{W/m}^2$) senkt Sharegy den Vorlauf um bis zu $2,0\,\text{K}$ im Voraus ab, um kostenlose passive Wärmegewinne durch Fenster zu nutzen.
+    - **Thermische Vorladung ($\Delta T_{\text{boost}}$)**: Bei PV-Überschuss $\ge 1\,\text{kW}$ oder negativen Börsenstrompreisen wird der Vorlauf gezielt angehoben ($+1,5\,\text{K}$ bis $+2,5\,\text{K}$).
+  - **24-Stunden MPC-Fahrplan & KI-Handlungsempfehlungen**:
+    - Automatische Berechnung optimaler Vorladefenster (z. B. `11:00 – 14:30 Uhr`) und passiver Entladephasen (z. B. `17:00 – 21:00 Uhr`).
+    - Live-Berechnung von solarem Energieertrag ($Q_{\text{solar}}$), vermiedener Abendspitze ($E_{\text{peak}}$) und täglicher Kostenersparnis.
+  - **Thermische Speicher-Physik**: $C_{\text{th}} = \frac{m \cdot c}{3600} \approx 4,67\,\text{kWh/K}$ (bei $120\,\text{m}^2 / 16,8\,\text{t}$ Estrich), Live-$\text{SoC}_{\text{thermal}}$ in $\%$.
+  - **Schaltschutz & Sicherheit**: Mindestlaufzeit $\ge 30\,\text{min}$, Mindestruhezeit $\ge 15\,\text{min}$, Maximaltemperatur $T_{\text{max}} \le 24,5^\circ\text{C}$.
+  - **Vollwertiges Glassmorphism-UI (`FloorHeatingLoadCard.jsx`)**: Mit Dual-Temperatur-Gauge, Live-Vorlaufanzeige, aufklappbarem 24h-Wetterfahrplan, 1-Klick 2h-Vorladeboost und Heizkurven-Steilheitsregler ($s$).
 
 ---
 

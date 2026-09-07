@@ -84,6 +84,12 @@ def floor_heating_config_view(request):
         config.max_spot_price_ct_kwh = Decimal(str(data["max_spot_price_ct_kwh"]))
     if "estrich_area_sqm" in data:
         config.estrich_area_sqm = Decimal(str(data["estrich_area_sqm"]))
+    if "heating_curve_slope" in data:
+        config.heating_curve_slope = Decimal(str(data["heating_curve_slope"]))
+    if "predictive_mpc_enabled" in data:
+        config.predictive_mpc_enabled = bool(data["predictive_mpc_enabled"])
+    if "solar_gain_compensation" in data:
+        config.solar_gain_compensation = bool(data["solar_gain_compensation"])
     if "active" in data:
         config.active = bool(data["active"])
 
