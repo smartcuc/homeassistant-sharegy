@@ -51,39 +51,45 @@ export default function HelpCenterPage() {
 
     return (
         <div className="p-6 max-w-7xl mx-auto space-y-8 animate-fade-in">
-            {/* Hero Header & Search */}
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 p-8 sm:p-12 text-white shadow-xl">
-                <div className="relative z-10 max-w-2xl space-y-4">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-xs font-semibold text-indigo-300">
-                        <span>📚</span> {t("help.center_badge", "Sharegy Wissensportal & Benutzerhandbuch")}
+            {/* Kompakter Header & Suche */}
+            <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <div className="flex items-center gap-2">
+                        <h1 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white flex items-center gap-2">
+                            <span>📚</span>
+                            <span>{t("help.hero_title", "Hilfe & Wissensportal")}</span>
+                        </h1>
+                        <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                            {t("help.center_badge", "Handbuch & FAQ")}
+                        </span>
                     </div>
-
-                    <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
-                        {t("help.hero_title", "Wie können wir dir heute helfen?")}
-                    </h1>
-
-                    <p className="text-sm text-indigo-200 leading-relaxed">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 max-w-xl">
                         {t("help.hero_subtitle", "Finde Schritt-für-Schritt-Anleitungen für Wechselrichter, den Smart Energy Optimizer, dynamische Tarife und die Alarmzentrale.")}
                     </p>
-
-                    {/* Search Input */}
-                    <div className="relative pt-2">
-                        <span className="absolute inset-y-0 left-0 pl-4 pt-2 flex items-center pointer-events-none text-gray-400 text-lg">
-                            🔍
-                        </span>
-                        <input
-                            type="text"
-                            placeholder={t("help.hero_search_placeholder", "Suche nach 'SMA', 'Prognose', 'Wallbox', 'Mieterstrom'...")}
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-12 pr-4 py-3.5 bg-white text-gray-900 placeholder-gray-400 rounded-2xl text-sm font-medium shadow-lg focus:outline-none focus:ring-4 focus:ring-indigo-500/30 transition"
-                        />
-                    </div>
                 </div>
 
-                {/* Background Glow */}
-                <div className="absolute right-0 top-0 -mt-12 -mr-12 w-96 h-96 rounded-full bg-indigo-500/20 blur-3xl pointer-events-none" />
-                <div className="absolute right-32 bottom-0 w-64 h-64 rounded-full bg-amber-500/10 blur-2xl pointer-events-none" />
+                {/* Schlankes Suchfeld */}
+                <div className="relative w-full md:w-80 lg:w-96 shrink-0">
+                    <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400 text-sm">
+                        🔍
+                    </span>
+                    <input
+                        type="text"
+                        placeholder={t("help.hero_search_placeholder", "Thema oder Stichwort suchen...")}
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-9 pr-8 py-2 bg-gray-50 dark:bg-slate-800 text-gray-900 dark:text-white placeholder-gray-400 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-medium focus:outline-hidden focus:ring-2 focus:ring-indigo-500 transition"
+                    />
+                    {searchQuery && (
+                        <button
+                            type="button"
+                            onClick={() => setSearchQuery("")}
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xs cursor-pointer"
+                        >
+                            ✕
+                        </button>
+                    )}
+                </div>
             </div>
 
             {/* Category Grid */}
