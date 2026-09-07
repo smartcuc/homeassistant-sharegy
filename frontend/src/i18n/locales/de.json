@@ -805,8 +805,8 @@
     "soh": "Batteriegesundheit (SoH)"
   },
   "billing": {
-    "title": "Abonnement, Tarife & Abrechnung",
-    "subtitle": "Verwalte deinen Sharegy EMS-Tarif, deine Rechnungsadresse und lade Rechnungen als PDF herunter.",
+    "title": "Abonnement & Tarife",
+    "subtitle": "Verwalte deinen Sharegy EMS-Tarif, wechsle zwischen Monats- und Jahresintervall oder erweitere deine Funktionen.",
     "loading": "Lade Abrechnungs- & Abonnement-Informationen...",
     "address_title": "Rechnungsanschrift & Stammdaten",
     "address_desc": "Wird für monatliche PDF-Rechnungen und Vorsteuerabzug verwendet.",

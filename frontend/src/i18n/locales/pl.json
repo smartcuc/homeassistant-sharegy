@@ -765,8 +765,8 @@
     "soh": "Kondycja baterii (SoH)"
   },
   "billing": {
-    "title": "Subskrypcja, Plany i Rozliczenia",
-    "subtitle": "Zarządzaj swoim planem Sharegy EMS, adresem rozliczeniowym i pobieraj faktury w formacie PDF.",
+    "title": "Subskrypcja i plany",
+    "subtitle": "Zarządzaj swoim planem Sharegy EMS, zmieniaj cykl rozliczeniowy lub odblokuj nowe funkcje.",
     "loading": "Ładowanie informacji o rozliczeniach i subskrypcji...",
     "address_title": "Adres rozliczeniowy i dane podstawowe",
     "address_desc": "Używane do comiesięcznych faktur PDF i odliczeń podatkowych.",

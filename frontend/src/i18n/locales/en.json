@@ -805,8 +805,8 @@
     "soh": "State of Health (SoH)"
   },
   "billing": {
-    "title": "Subscription, Plans & Billing",
-    "subtitle": "Manage your Sharegy EMS plan, billing address and download invoices as PDF.",
+    "title": "Subscription & Plans",
+    "subtitle": "Manage your Sharegy EMS plan, switch between monthly and annual billing, or upgrade your features.",
     "loading": "Loading billing and subscription info...",
     "address_title": "Billing Address & Master Data",
     "address_desc": "Used for monthly PDF invoices and tax deduction.",
