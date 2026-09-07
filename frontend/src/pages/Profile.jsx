@@ -935,13 +935,16 @@ export default function Profile() {
 
                         <div className="space-y-4 text-xs">
                             <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
-                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2.5">
-                                    <div>
-                                        <div className="font-bold text-gray-900 dark:text-white text-sm">Passwortlose Authentifizierung (Magic Link)</div>
-                                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800 mt-1">
-                                            ✓ Magic Link Aktiv
-                                        </span>
-                                    </div>
+                                <div className="font-bold text-gray-900 dark:text-white text-sm mb-1.5">
+                                    {t("profile.magic_link_title", "Passwortlose Authentifizierung (Magic Link)")}
+                                </div>
+                                <p className="text-gray-500 dark:text-gray-400 text-[11px] leading-relaxed mb-3">
+                                    {t("profile.magic_link_desc", "Du meldest dich sicher über kryptografisch signierte Einmal-Links per E-Mail an. Es ist kein klassisches Passwort erforderlich. Bei Sicherheitsbedenken kannst du alle offenen Links sofort entwerten und dich automatisch abmelden.")}
+                                </p>
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-1 border-t border-slate-200/60 dark:border-slate-700/60">
+                                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 rounded-lg border border-emerald-200 dark:border-emerald-800 self-start sm:self-center">
+                                        ✓ {t("profile.magic_link_active", "Magic Link Aktiv")}
+                                    </span>
                                     <button
                                         type="button"
                                         onClick={() => setShowRevokeModal(true)}
@@ -951,9 +954,6 @@ export default function Profile() {
                                         <span>{t("profile.revoke_links_btn", "Alle Links löschen & abmelden")}</span>
                                     </button>
                                 </div>
-                                <p className="text-gray-500 dark:text-gray-400 text-[11px] leading-relaxed">
-                                    Du meldest dich sicher über kryptografisch signierte Einmal-Links per E-Mail an. Es ist kein klassisches Passwort erforderlich. Bei Sicherheitsbedenken kannst du alle offenen Links sofort entwerten und dich automatisch abmelden.
-                                </p>
                             </div>
 
                             <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
