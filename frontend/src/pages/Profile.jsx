@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import Card from "../components/ui/Card";
 import PushNotificationSettings from "../features/alerts/components/PushNotificationSettings";
+import InvoicesListCard from "../features/billing/components/InvoicesListCard";
 import { apiFetch } from "../api/client";
 import { useSettings } from "../hooks/useSettings";
 import { useUser } from "../hooks/useUser";
@@ -20,7 +21,7 @@ export default function Profile() {
     const queryClient = useQueryClient();
     const { settings } = useSettings();
     const { t } = useTranslation();
-    const { isPro, isLandlord, planName } = useSubscription();
+    const { isPro, isLandlord, planName, invoices, refetch: refetchSubscription } = useSubscription();
     const [searchParams, setSearchParams] = useSearchParams();
 
     // Active tab from URL query param (e.g. ?tab=company) or default to 'profile'
@@ -338,10 +339,11 @@ export default function Profile() {
 
     const currentAvatarConfig = getAvatarConfig(formData.avatar || user?.avatar || user?.profile?.avatar);
 
-    // 5 Clean Tabs Definition (API tab removed)
+    // Clean Tabs Definition (Position 3: Invoices & Billing)
     const tabs = [
         { id: "profile", label: t("profile.tab_personal", "Persönliche Angaben"), icon: "👤", badge: null },
         { id: "company", label: t("profile.tab_company", "Unternehmensdaten & B2B"), icon: "🏢", badge: formData.company_name?.trim() ? "B2B" : null },
+        { id: "invoices", label: t("profile.tab_invoices", "Rechnungen & Belege"), icon: "📄", badge: invoices?.length > 0 ? invoices.length : null },
         { id: "notifications", label: t("profile.tab_notifications", "Benachrichtigungen"), icon: "🔔", badge: null },
         { id: "security", label: t("profile.tab_security", "Sicherheit & Sitzung"), icon: "🔐", badge: null },
         { id: "privacy", label: t("profile.tab_privacy", "Datenschutz & DSGVO"), icon: "🛡️", badge: null },
@@ -959,6 +961,121 @@ export default function Profile() {
                             </div>
                         </form>
                     </Card>
+                </div>
+            )}
+
+            {/* ========================================================= */}
+            {/* TAB 3: RECHNUNGEN & BELEGE (POSITION 3) */}
+            {/* ========================================================= */}
+            {activeTab === "invoices" && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start animate-in fade-in duration-200">
+                    {/* LINKE SPALTE: AKTUELLER TARIF & ZAHLUNGSSTATUS */}
+                    <Card>
+                        <div className="border-b border-gray-100 dark:border-slate-800 pb-4 space-y-1.5">
+                            <div className="flex items-center justify-between gap-3">
+                                <h2 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                    <span>💳</span> {t("billing.plan_details_title", "Tarif & Abrechnungsstatus")}
+                                </h2>
+                                <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${
+                                    isLandlord
+                                        ? "bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-300 dark:border-indigo-800"
+                                        : isPro
+                                            ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800"
+                                            : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700"
+                                }`}>
+                                    {isLandlord ? "🏢 Vermieter" : isPro ? "⚡ Pro" : "🌱 Free"}
+                                </span>
+                            </div>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                                {t("billing.plan_details_desc", "Übersicht zu deinem gebuchten Sharegy EMS-Tarif, Zahlungszyklus und Rechnungsdaten.")}
+                            </p>
+                        </div>
+
+                        <div className="space-y-4 pt-4">
+                            {/* Tarif-Detail Box */}
+                            <div className="p-4.5 rounded-2xl bg-gradient-to-br from-indigo-50/70 via-slate-50 to-white dark:from-slate-800/90 dark:via-slate-800/60 dark:to-slate-850 border border-indigo-100 dark:border-indigo-900/40 space-y-3 shadow-xs">
+                                <div className="flex items-center justify-between">
+                                    <div className="text-xs font-bold uppercase text-indigo-700 dark:text-indigo-400">
+                                        {t("billing.active_plan", "Aktiver Tarif")}
+                                    </div>
+                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                                        🟢 {t("billing.active", "Aktiv")}
+                                    </span>
+                                </div>
+                                <div className="text-xl font-black text-gray-900 dark:text-white">
+                                    {planName}
+                                </div>
+                                <div className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                                    {isLandlord
+                                        ? t("billing.landlord_features", "Umfasst Mieterstrom-Unterverteilung, PDF-Monatsabrechnungen und Mehrparteien-EMS.")
+                                        : isPro
+                                            ? t("billing.pro_features", "Umfasst unbegrenzte Historie, Multi-Sensor-Prognosen, Börsenstrom-Optimierung und Push-Alarme.")
+                                            : t("billing.free_features", "Kostenlose Basisfunktionen mit 7-Tage-Historie und lokaler EMS-Steuerung.")}
+                                </div>
+
+                                <div className="pt-2 border-t border-indigo-100/70 dark:border-slate-700/60 flex flex-wrap items-center gap-3">
+                                    <Link
+                                        to="/app/billing"
+                                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-md transition flex items-center gap-1.5"
+                                    >
+                                        <span>⚙️</span>
+                                        <span>{isPro || isLandlord ? t("billing.manage_plan", "Abonnement verwalten & Tarife") : t("billing.upgrade_pro", "Auf Pro upgraden")}</span>
+                                    </Link>
+                                </div>
+                            </div>
+
+                            {/* Hinterlegte Rechnungsadresse Kurzübersicht */}
+                            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 space-y-2 text-xs">
+                                <div className="flex items-center justify-between">
+                                    <div className="font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
+                                        <span>📍</span>
+                                        <span>{t("billing.invoice_recipient", "Rechnungsempfänger")}</span>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleTabChange("company")}
+                                        className="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline font-bold cursor-pointer"
+                                    >
+                                        Bearbeiten ➔
+                                    </button>
+                                </div>
+                                <div className="text-gray-600 dark:text-gray-300 text-[11px] leading-relaxed">
+                                    <div className="font-semibold text-gray-800 dark:text-gray-200">
+                                        {formData.billing_name || formData.company_name || `${formData.first_name || ""} ${formData.last_name || ""}`.trim() || user?.email}
+                                    </div>
+                                    {formData.street && (
+                                        <div className="text-gray-500 dark:text-gray-400 mt-0.5">
+                                            {formData.street} {formData.house_number}, {formData.postal_code} {formData.city} ({formData.country || "DE"})
+                                        </div>
+                                    )}
+                                    {formData.billing_email && (
+                                        <div className="text-gray-500 dark:text-gray-400 mt-0.5">
+                                            📧 Belegversand an: <span className="font-medium text-gray-700 dark:text-gray-300">{formData.billing_email}</span>
+                                        </div>
+                                    )}
+                                    {formData.vat_id && (
+                                        <div className="text-gray-500 dark:text-gray-400 font-mono text-[10px] mt-0.5">
+                                            USt-IdNr.: {formData.vat_id}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Rechtliche Hinweise & Vorsteuerabzug */}
+                            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/60 text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed space-y-1">
+                                <div className="font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+                                    <span>⚖️</span>
+                                    <span>Steuer- & Belegkonformität</span>
+                                </div>
+                                <p>
+                                    Alle Rechnungen enthalten ordnungsgemäß ausgewiesene 19 % MwSt. und erfüllen die gesetzlichen Vorgaben für den geschäftlichen Vorsteuerabzug.
+                                </p>
+                            </div>
+                        </div>
+                    </Card>
+
+                    {/* RECHTE SPALTE: RECHNUNGSARCHIV & PDF-DOWNLOADS */}
+                    <InvoicesListCard invoices={invoices} onRefresh={refetchSubscription} />
                 </div>
             )}
 
