@@ -61,10 +61,13 @@ class Command(BaseCommand):
         stripe.api_key = secret_key
         try:
             account = stripe.Account.retrieve()
-            acc_name = account.get("business_profile", {}).get("name") or account.get("settings", {}).get("dashboard", {}).get("display_name") or account.get("id")
-            country = account.get("country", "DE")
-            currency = account.get("default_currency", "eur").upper()
-            self.stdout.write(self.style.SUCCESS(f"   ✅ Verbindung erfolgreich! Account: {acc_name} (Land: {country}, Währung: {currency})"))
+            account_dict = account.to_dict() if hasattr(account, "to_dict") else dict(account)
+            settings_dict = account_dict.get("settings", {})
+            dashboard_dict = settings_dict.get("dashboard", {}) if isinstance(settings_dict, dict) else {}
+            acc_name = dashboard_dict.get("display_name") or getattr(account, "id", "Stripe Account")
+            country = account_dict.get("country", getattr(account, "country", "DE"))
+            currency = str(account_dict.get("default_currency", getattr(account, "default_currency", "eur"))).upper()
+            self.stdout.write(self.style.SUCCESS(f"   ✅ Verbindung erfolgreich! Account: {acc_name} (ID: {getattr(account, 'id', '')}, Land: {country}, Währung: {currency})"))
         except Exception as e:
             self.stdout.write(self.style.ERROR(f"   ❌ API-Verbindungsfehler: {e}"))
             return
