@@ -222,13 +222,22 @@ class EnterpriseRBACTest(TestCase):
     def test_avatar_save_and_me_retrieval(self):
         self.client.force_login(self.community_member)
 
-        # 1. Post avatar update
+        # 1. Post avatar and billing_email update
         resp = self.client.post(
             "/api/profile/",
             data={
                 "first_name": "Max",
                 "last_name": "Mustermann",
                 "avatar": "solar_pro",
+                "company_name": "Sonnenenergie GmbH",
+                "billing_name": "Buchhaltung",
+                "billing_email": "invoices@sonnenenergie.de",
+                "vat_id": "DE987654321",
+                "street": "Sonnenstraße",
+                "house_number": "10",
+                "postal_code": "10115",
+                "city": "Berlin",
+                "country": "DE",
             },
             format="json",
         )
@@ -239,12 +248,16 @@ class EnterpriseRBACTest(TestCase):
         resp_prof = self.client.get("/api/profile/")
         self.assertEqual(resp_prof.status_code, 200)
         self.assertEqual(resp_prof.json()["avatar"], "solar_pro")
+        self.assertEqual(resp_prof.json()["billing_email"], "invoices@sonnenenergie.de")
+        self.assertEqual(resp_prof.json()["company_name"], "Sonnenenergie GmbH")
 
         # 3. Verify via /api/auth/me/
         resp_me = self.client.get("/api/auth/me/")
         self.assertEqual(resp_me.status_code, 200)
         self.assertEqual(resp_me.json()["avatar"], "solar_pro")
         self.assertEqual(resp_me.json()["profile"]["avatar"], "solar_pro")
+        self.assertEqual(resp_me.json()["profile"]["billing_email"], "invoices@sonnenenergie.de")
+        self.assertEqual(resp_me.json()["profile"]["company_name"], "Sonnenenergie GmbH")
 
     def test_email_change_multilingual_dispatch(self):
         from django.core import mail

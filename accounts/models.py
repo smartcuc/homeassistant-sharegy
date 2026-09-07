@@ -95,6 +95,7 @@ class UserProfile(models.Model):
 
     # Business optional
     billing_name = models.CharField(max_length=255, blank=True)
+    billing_email = models.EmailField(blank=True, default="")
     company_name = models.CharField(max_length=255, blank=True)
     vat_id = models.CharField(max_length=50, blank=True)
 

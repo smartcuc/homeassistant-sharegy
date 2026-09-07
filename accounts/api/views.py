@@ -104,6 +104,7 @@ class UserProfileView(APIView):
                 "customer_type": profile.customer_type or "private",
                 "company_name": profile.company_name or "",
                 "billing_name": profile.billing_name or "",
+                "billing_email": profile.billing_email or "",
                 "vat_id": profile.vat_id or "",
                 "street": profile.street or "",
                 "house_number": profile.house_number or "",
@@ -130,6 +131,7 @@ class UserProfileView(APIView):
         profile.customer_type = data.get("customer_type", profile.customer_type)
         profile.company_name = data.get("company_name", profile.company_name)
         profile.billing_name = data.get("billing_name", profile.billing_name)
+        profile.billing_email = str(data.get("billing_email", profile.billing_email or "")).strip().lower()
         profile.vat_id = data.get("vat_id", profile.vat_id)
 
         profile.street = data.get("street", profile.street)
@@ -972,6 +974,7 @@ class GDPRExportView(APIView):
                     "customer_type": getattr(profile_obj, "customer_type", "private"),
                     "company_name": getattr(profile_obj, "company_name", ""),
                     "billing_name": getattr(profile_obj, "billing_name", ""),
+                    "billing_email": getattr(profile_obj, "billing_email", ""),
                     "vat_id": getattr(profile_obj, "vat_id", ""),
                     "consent_given": getattr(profile_obj, "consent_given", True),
                     "consent_timestamp": getattr(profile_obj, "consent_timestamp", None).isoformat() if getattr(profile_obj, "consent_timestamp", None) else None,

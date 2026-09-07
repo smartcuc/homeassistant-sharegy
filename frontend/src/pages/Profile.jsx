@@ -70,6 +70,7 @@ export default function Profile() {
         customer_type: "private",
         company_name: "",
         billing_name: "",
+        billing_email: "",
         vat_id: "",
         street: "",
         house_number: "",
@@ -91,6 +92,7 @@ export default function Profile() {
                 customer_type: profileQuery.data.customer_type || "private",
                 company_name: profileQuery.data.company_name || "",
                 billing_name: profileQuery.data.billing_name || "",
+                billing_email: profileQuery.data.billing_email || "",
                 vat_id: profileQuery.data.vat_id || "",
                 street: profileQuery.data.street || "",
                 house_number: profileQuery.data.house_number || "",
@@ -734,7 +736,7 @@ export default function Profile() {
                                     />
                                 </div>
 
-                                <div className="md:col-span-2">
+                                <div>
                                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-1">
                                         {t("profile.billing_name", "Rechnungsempfänger / Abteilungszusatz")}
                                     </label>
@@ -745,6 +747,25 @@ export default function Profile() {
                                         placeholder="z.B. Buchhaltung / Kostenstelle 4020 / WEG Sonnenweg 12"
                                         className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                                     />
+                                </div>
+
+                                <div>
+                                    <div className="flex items-center justify-between mb-1">
+                                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">
+                                            {t("profile.billing_email", "Rechnungs-E-Mail (Abweichend)")}
+                                        </label>
+                                        <span className="text-[10px] text-gray-400">Optional</span>
+                                    </div>
+                                    <input
+                                        type="email"
+                                        value={formData.billing_email}
+                                        onChange={(e) => setFormData({ ...formData, billing_email: e.target.value })}
+                                        placeholder="buchhaltung@firma.de"
+                                        className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                    />
+                                    <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">
+                                        {t("profile.billing_email_hint", "Rechnungen & Belege werden an dieses Postfach gesendet. Wenn leer, wird deine Login-E-Mail genutzt.")}
+                                    </p>
                                 </div>
                             </div>
 
