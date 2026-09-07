@@ -966,61 +966,54 @@ export default function Profile() {
             {/* TAB 3: BENACHRICHTIGUNGEN & ALARME */}
             {/* ========================================================= */}
             {activeTab === "notifications" && (
-                <div className="space-y-6 animate-in fade-in duration-200">
-                    <PushNotificationSettings />
-
-                    <Card>
-                        <h2 className="text-base font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-                            <span>📧</span> {t("profile.email_notifications", "E-Mail-Zusammenfassungen & Systemberichte")}
-                        </h2>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
-                            {t("profile.email_notifications_desc", "Erhalte automatisierte Wochenberichte und monatliche Mieterstrom-Abrechnungs-Bilanzen direkt per E-Mail.")}
-                        </p>
-
-                        <div className="space-y-3 text-xs">
-                            <label className="flex items-start gap-3 p-3.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/40 cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/70 transition">
-                                <input
-                                    type="checkbox"
-                                    checked={notifyWeekly}
-                                    onChange={(e) => handleToggleNotification("notify_weekly_report", e.target.checked)}
-                                    disabled={isSavingNotification}
-                                    className="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                                />
-                                <div className="flex-1">
-                                    <div className="flex items-center justify-between">
-                                        <span className="font-bold text-gray-900 dark:text-white">{t("profile.notify_weekly", "Wöchentlicher Energie- & Autarkie-Report")}</span>
-                                        {notifyWeekly && (
-                                            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
-                                                Aktiv (Mo 08:00)
-                                            </span>
-                                        )}
+                <div className="animate-in fade-in duration-200">
+                    <PushNotificationSettings
+                        emailSlot={
+                            <div className="space-y-2.5 text-xs">
+                                <label className="flex items-start gap-3 p-3.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/40 cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/70 transition">
+                                    <input
+                                        type="checkbox"
+                                        checked={notifyWeekly}
+                                        onChange={(e) => handleToggleNotification("notify_weekly_report", e.target.checked)}
+                                        disabled={isSavingNotification}
+                                        className="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                                    />
+                                    <div className="flex-1">
+                                        <div className="flex items-center justify-between">
+                                            <span className="font-bold text-gray-900 dark:text-white">{t("profile.notify_weekly", "Wöchentlicher Energie- & Autarkie-Report")}</span>
+                                            {notifyWeekly && (
+                                                <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
+                                                    Aktiv (Mo 08:00)
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="text-gray-500 dark:text-gray-400 text-[11px] mt-0.5">{t("profile.notify_weekly_sub", "Jeden Montag um 08:00 Uhr: PV-Erzeugung, Eigenverbrauch, Netzeinspeisung und Ersparnis in deiner Sprache.")}</div>
                                     </div>
-                                    <div className="text-gray-500 dark:text-gray-400 text-[11px] mt-0.5">{t("profile.notify_weekly_sub", "Jeden Montag um 08:00 Uhr: PV-Erzeugung, Eigenverbrauch, Netzeinspeisung und Ersparnis in deiner Sprache.")}</div>
-                                </div>
-                            </label>
+                                </label>
 
-                            <label className="flex items-start gap-3 p-3.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/40 cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/70 transition">
-                                <input
-                                    type="checkbox"
-                                    checked={notifyCritical}
-                                    onChange={(e) => handleToggleNotification("notify_critical_alerts", e.target.checked)}
-                                    disabled={isSavingNotification}
-                                    className="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                                />
-                                <div className="flex-1">
-                                    <div className="flex items-center justify-between">
-                                        <span className="font-bold text-gray-900 dark:text-white">{t("profile.notify_critical", "Kritische Hardware-Warnungen (Sofort)")}</span>
-                                        {notifyCritical && (
-                                            <span className="text-[10px] font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/60 px-2 py-0.5 rounded border border-rose-200 dark:border-rose-800">
-                                                Aktiv (Echtzeit)
-                                            </span>
-                                        )}
+                                <label className="flex items-start gap-3 p-3.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/40 cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/70 transition">
+                                    <input
+                                        type="checkbox"
+                                        checked={notifyCritical}
+                                        onChange={(e) => handleToggleNotification("notify_critical_alerts", e.target.checked)}
+                                        disabled={isSavingNotification}
+                                        className="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                                    />
+                                    <div className="flex-1">
+                                        <div className="flex items-center justify-between">
+                                            <span className="font-bold text-gray-900 dark:text-white">{t("profile.notify_critical", "Kritische Hardware-Warnungen (Sofort)")}</span>
+                                            {notifyCritical && (
+                                                <span className="text-[10px] font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/60 px-2 py-0.5 rounded border border-rose-200 dark:border-rose-800">
+                                                    Aktiv (Echtzeit)
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="text-gray-500 dark:text-gray-400 text-[11px] mt-0.5">{t("profile.notify_critical_sub", "Sofortige E-Mail bei Wechselrichter-Offline, Batterie-Tiefentladung oder Kommunikationsausfall.")}</div>
                                     </div>
-                                    <div className="text-gray-500 dark:text-gray-400 text-[11px] mt-0.5">{t("profile.notify_critical_sub", "Sofortige E-Mail bei Wechselrichter-Offline, Batterie-Tiefentladung oder Kommunikationsausfall.")}</div>
-                                </div>
-                            </label>
-                        </div>
-                    </Card>
+                                </label>
+                            </div>
+                        }
+                    />
                 </div>
             )}
 
