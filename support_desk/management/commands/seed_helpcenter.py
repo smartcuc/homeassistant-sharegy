@@ -926,6 +926,131 @@ You do not need a paid Shelly Cloud subscription. Sharegy supports direct, encry
                 "is_featured": True,
                 "sort_order": 16,
             },
+            # ---------------------------------------------------------------------
+            # ALERTS & NOTIFICATIONS: SYSTEMBERICHTE & BENACHRICHTIGUNGEN
+            # ---------------------------------------------------------------------
+            {
+                "category": cats["alerts"],
+                "slug": "benachrichtigungen-und-systemberichte",
+                "context_key": "notifications",
+                "title_de": "E-Mail-Zusammenfassungen, Systemberichte & Push-Benachrichtigungen",
+                "title_en": "Email Digests, System Reports & Push Notifications",
+                "summary_de": "Wöchentlicher Energie- & Autarkie-Report (jeden Montag 08:00 Uhr lokaler Benutzerzeit), Echtzeit-Warnungen bei Hardwareausfall und Push-Ruhezeiten konfigurieren.",
+                "summary_en": "Weekly energy & autarky digest (every Monday 08:00 user local time), real-time critical hardware failure alerts, and push quiet hours.",
+                "content_de": """# E-Mail-Zusammenfassungen, Systemberichte & Benachrichtigungen 📧⚡
+
+Sharegy hält dich über den Zustand deiner Energieanlagen, wöchentliche Einsparungen und kritische Hardware-Ereignisse auf dem Laufenden – wahlweise per **E-Mail**, **Browser-Push** oder **Mobile Notification**.
+
+---
+
+## 1. Wöchentlicher Energie- & Autarkie-Report 📊
+
+Der wöchentliche Report fasst deine wichtigsten Energiekennzahlen der vergangenen 7 Tage übersichtlich zusammen:
+
+* ☀️ **PV-Erzeugung (kWh)**: Wie viel Solarstrom hat deine PV-Anlage in der letzten Woche erzeugt?
+* 🔄 **Eigenverbrauch (kWh)**: Wie viel deines Solarstroms wurde direkt im Haushalt, in der Batterie oder im E-Auto verbraucht?
+* 🛡️ **Autarkiegrad (%)**: Wie unabhängig warst du vom öffentlichen Stromnetz?
+* 💰 **Erzielte Ersparnis (€)**: Berechnete finanzielle Einsparung durch Eigenverbrauch und Netzeinspeisung.
+* ⚡ **Netzeinspeisung & Netzbezug**: Genaue Zählerbilanz im Vergleich.
+
+### ⏰ Versandzeitpunkt & Zeitzone
+> **Versand jeden Montag um 08:00 Uhr:**  
+> Der Versand erfolgt pünktlich zum Start der neuen Woche um **08:00 Uhr in deiner persönlichen Benutzer-Zeitzone** (standardmäßig deutsche Zeit `Europe/Berlin` bzw. MEZ/MESZ).  
+> Hast du in deinen Profileinstellungen eine abweichende Zeitzone (z. B. `Europe/Warsaw` oder `UTC`) gewählt, richtet sich der Versand nach deiner eingestellten Ortszeit.
+
+### 🌍 Mehrsprachigkeit
+Die E-Mail wird automatisch in deiner im Profil eingestellten Sprache versendet (**Deutsch**, **Englisch** oder **Polnisch**).
+
+---
+
+## 2. Kritische Hardware-Warnungen (Sofort / Echtzeit) 🚨
+
+Bei schwerwiegenden Störungen deiner Energiehardware erhältst du sofort eine Benachrichtigung per E-Mail und Push, um Ertragsausfälle oder Schäden abzuwenden:
+
+* **Wechselrichter Offline / Ertragsausfall**: Die Sonne scheint, aber der Wechselrichter meldet keine Erzeugung (z. B. ausgelöster DC-Schalter oder FI-Sicherung).
+* **Batterie-Tiefentladung**: Der Ladestand (SoC) ist unter das kritische Notfall-Limit gefallen.
+* **Kommunikationsabbruch**: Smart Meter oder Wechselrichter senden seit mehr als 15 Minuten keine Telemetriedaten.
+
+Jede Notfall-Meldung enthält den genauen Gerätenamen, die Fehlerursache und **konkrete Sofortmaßnahmen zur Behebung** sowie einen Direktlink ins System.
+
+---
+
+## 3. Push-Benachrichtigungen & Ruhezeiten (Quiet Hours) 🔔
+
+Über die Push-Zentrale kannst du Desktop- und Smartphone-Benachrichtigungen aktivieren. Um in der Nacht nicht gestört zu werden, kannst du **Ruhezeiten** definieren (z. B. 22:00 bis 07:00 Uhr). In dieser Zeit werden unkritische Mitteilungen stummgeschaltet.
+
+---
+
+## 4. Wie aktiviere oder deaktiviere ich Benachrichtigungen?
+
+1. Klicke oben rechts auf dein **Profilbild** und wähle den Tab **Benachrichtigungen & Alarme**.
+2. Unter **„E-Mail-Zusammenfassungen & Systemberichte“** kannst du den wöchentlichen Report sowie kritische Hardware-Warnungen mit einem Klick aktivieren oder deaktivieren.
+3. Deine Auswahl wird sofort sicher gespeichert.
+""",
+                "content_en": """# Email Digests, System Reports & Notifications 📧⚡
+
+Sharegy keeps you informed about energy performance, weekly cost savings, and critical hardware health events via **Email**, **Browser Web Push**, and **Mobile Push**.
+
+---
+
+## 1. Weekly Energy & Autarky Digest 📊
+
+The weekly digest provides a concise summary of your home's energy performance over the past 7 days:
+
+* ☀️ **Solar Generation (kWh)**: Total PV generation achieved during the previous week.
+* 🔄 **Self-Consumption (kWh)**: Solar energy utilized directly by appliances, storage, or EV charging.
+* 🛡️ **Autarky Rate (%)**: Percentage of energy independence from the public grid.
+* 💰 **Estimated Savings (€)**: Financial benefit calculated from avoided grid purchases and feed-in compensation.
+* ⚡ **Grid Feed-In vs. Grid Purchase**: Comprehensive grid exchange balance.
+
+### ⏰ Schedule & Timezone
+> **Delivered every Monday at 08:00 AM:**  
+> Reports are dispatched at **08:00 AM local user time** (defaulting to `Europe/Berlin` / CET/CEST).  
+> If you configured a different timezone in your profile (e.g., `UTC` or `Europe/Warsaw`), the report is scheduled according to your configured local clock.
+
+### 🌍 Multilingual Delivery
+Emails are rendered in your selected interface language (**German**, **English**, or **Polish**).
+
+---
+
+## 2. Real-Time Critical Hardware Alerts 🚨
+
+When a critical failure occurs, Sharegy immediately dispatches an urgent alert via email and push:
+
+* **Inverter Offline / Zero-Yield**: High solar irradiance detected while solar inverter reports zero output (e.g., tripped breaker or DC switch).
+* **Battery Deep Discharge**: Battery state of charge (SoC) drops below the safe reserve threshold.
+* **Telemetry Timeout**: Smart meter or gateway communication lost for more than 15 minutes.
+
+Each alert includes affected device identifiers, root-cause diagnostics, and actionable steps.
+
+---
+
+## 3. Web Push Notifications & Quiet Hours 🔔
+
+Configure browser push notifications with customizable **Quiet Hours** (e.g., 22:00 to 07:00) to silence non-critical notifications during the night.
+
+---
+
+## 4. Managing Notification Settings
+
+1. Open your **Profile** and navigate to the **Notifications & Alerts** tab.
+2. Under **"Email Summaries & System Reports"**, toggle weekly reports and hardware alerts on or off.
+3. Changes are saved automatically.
+""",
+                "tags": [
+                    "benachrichtigungen",
+                    "email",
+                    "reports",
+                    "wochenbericht",
+                    "alarme",
+                    "hardware",
+                    "zeitzone",
+                    "push",
+                    "notifications",
+                ],
+                "is_featured": True,
+                "sort_order": 1,
+            },
         ]
 
         for adata in articles_data:
