@@ -303,6 +303,13 @@ def setup_demo_household(target_user=None):
     except Exception as e:
         logger.warning("Demo-Alarm-Generierung übersprungen: %s", e)
 
+    # Realistische Demo-Rechnungen im Profil/Billing erzeugen
+    try:
+        from billing.services_subscription import seed_demo_invoices
+        seed_demo_invoices(target_user)
+    except Exception as e:
+        logger.warning("Demo-Rechnungs-Generierung übersprungen: %s", e)
+
     logger.info("Demo Smart Home erfolgreich mit %d Geräten initialisiert", len(devices))
     return demo_home
 

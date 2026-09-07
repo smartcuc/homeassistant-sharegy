@@ -902,10 +902,23 @@ class DemoLoginView(View):
             return DemoSharingUserLoginView().get(request)
 
         # Standard Dashboard Demo
-        demo_user, _ = User.objects.get_or_create(
+        demo_user, created = User.objects.get_or_create(
             email="demo@sharegy.de",
             defaults={"username": "demo@sharegy.de", "first_name": "Demo", "last_name": "User", "is_active": True}
         )
+        if not demo_user.is_active:
+            demo_user.is_active = True
+            demo_user.save(update_fields=["is_active"])
+
+        # Sicherstellen, dass das Demo-Zuhause mit allen Geräten, Prognosen und Rechnungen existiert
+        if created or not demo_user.homes.exists() or demo_user.homes.first().devices.count() == 0:
+            try:
+                from demo.services.data_generator import setup_demo_household, generate_demo_telemetry
+                setup_demo_household(demo_user)
+                generate_demo_telemetry()
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).warning("Demo household initial setup warning: %s", e)
 
         login(
             request,
