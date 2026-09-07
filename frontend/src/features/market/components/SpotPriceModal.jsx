@@ -175,14 +175,19 @@ function SpotPriceModal({
                 },
                 axisLabel: {
                     color: textColor,
-                    interval: range === "5d" ? 95 : 15,
-                    formatter: (value) => {
-                        const [date, time] = value.split(" ");
-                        if (range === "5d") {
-                            if (time === "00:00") return date;
-                            return "";
+                    interval: (index, value) => {
+                        if (range === "week" || range === "7d" || range === "5d") {
+                            const [, time] = (value || "").split(" ");
+                            return time === "00:00" || time === "00:00:00";
                         }
-                        return time;
+                        return index % 16 === 0;
+                    },
+                    formatter: (value) => {
+                        const [date, time] = (value || "").split(" ");
+                        if (range === "week" || range === "7d" || range === "5d") {
+                            return date || value;
+                        }
+                        return time || value;
                     },
                 },
             },
@@ -360,6 +365,9 @@ function SpotPriceModal({
             const str = String(ts);
             if (str.includes(" ") && str.includes(":")) {
                 const parts = str.split(" ");
+                if (range === "week" || range === "7d" || range === "5d") {
+                    return `${parts[0]} ${parts[parts.length - 1].slice(0, 5)}`;
+                }
                 return parts[parts.length - 1].slice(0, 5);
             }
             const d = new Date(ts);
@@ -377,7 +385,7 @@ function SpotPriceModal({
             peakTime,
             peakVal: peakVal.toFixed(1),
         };
-    }, [chartData]);
+    }, [chartData, range]);
 
     if (!open) {
         return null;

@@ -102,11 +102,11 @@ def spot_price_chart(request):
             ZoneInfo("UTC")
         )
 
-    elif range_type == "5d":
+    elif range_type in ("week", "7d", "5d"):
 
         start = (
             today_start
-            - timezone.timedelta(days=4)
+            - timezone.timedelta(days=6)
         ).astimezone(
             ZoneInfo("UTC")
         )
