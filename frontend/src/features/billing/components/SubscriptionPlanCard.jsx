@@ -13,6 +13,7 @@ export default function SubscriptionPlanCard({ subscriptionData, onRefresh }) {
     const [termsAccepted, setTermsAccepted] = useState(true);
 
     // Gutschein State
+    const [showCouponInput, setShowCouponInput] = useState(false);
     const [couponCode, setCouponCode] = useState("");
     const [couponLoading, setCouponLoading] = useState(false);
     const [validatedCoupon, setValidatedCoupon] = useState(null);
@@ -318,70 +319,7 @@ export default function SubscriptionPlanCard({ subscriptionData, onRefresh }) {
                 </div>
             )}
 
-            {/* GUTSCHEIN & PROMO-CODE BEREICH */}
-            <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-5 rounded-2xl shadow-md border border-indigo-800/50">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div>
-                        <div className="flex items-center gap-2">
-                            <span className="text-xl">🎟️</span>
-                            <h3 className="font-bold text-base text-white">
-                                {t("billing.coupon_title", "Gutschein- oder Beta-Aktionscode")}
-                            </h3>
-                        </div>
-                        <p className="text-xs text-indigo-200 mt-0.5">
-                            {t("billing.coupon_subtitle", "Hast du einen Aktionscode (z. B. BETA100 für 3 Monate Pro kostenlos)? Löse ihn hier ein.")}
-                        </p>
-                    </div>
 
-                    <form onSubmit={handleValidateCoupon} className="flex items-center gap-2">
-                        <input
-                            type="text"
-                            placeholder="z. B. BETA100"
-                            value={couponCode}
-                            onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                            className="bg-slate-800/90 border border-indigo-700/60 rounded-xl px-3.5 py-2 text-xs font-mono font-bold text-white placeholder-indigo-300/50 focus:outline-hidden focus:ring-2 focus:ring-indigo-400 uppercase w-36 sm:w-44"
-                        />
-                        <button
-                            type="submit"
-                            disabled={couponLoading || !couponCode.trim()}
-                            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer shrink-0"
-                        >
-                            {couponLoading ? "..." : t("billing.check_code", "Prüfen")}
-                        </button>
-                    </form>
-                </div>
-
-                {/* Validierungs-Ergebnis & Sofort-Einlösen */}
-                {validatedCoupon && (
-                    <div className="mt-4 p-3.5 bg-indigo-900/60 border border-indigo-500/50 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in">
-                        <div className="text-xs">
-                            <div className="font-bold text-emerald-300 flex items-center gap-1.5">
-                                <span>🎉</span>
-                                <span>{validatedCoupon.description}</span>
-                            </div>
-                            <div className="text-indigo-200 text-[11px] mt-0.5">
-                                Code <span className="font-mono font-bold text-white">{validatedCoupon.code}</span> schaltet deinen Tarif sofort frei.
-                            </div>
-                        </div>
-                        <button
-                            type="button"
-                            onClick={handleRedeemCoupon}
-                            disabled={couponLoading}
-                            className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs rounded-xl transition shadow-xs cursor-pointer shrink-0"
-                        >
-                            {couponLoading ? "Wird aktiviert..." : "Jetzt kostenlos aktivieren →"}
-                        </button>
-                    </div>
-                )}
-
-                {couponMsg && (
-                    <div className={`mt-3 text-xs font-semibold px-3 py-1.5 rounded-lg ${
-                        couponMsg.type === "success" ? "bg-emerald-950/80 text-emerald-300 border border-emerald-800" : "bg-rose-950/80 text-rose-300 border border-rose-800"
-                    }`}>
-                        {couponMsg.text}
-                    </div>
-                )}
-            </div>
 
             {/* Billing Interval Toggle */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-4 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-xs">
@@ -534,6 +472,96 @@ export default function SubscriptionPlanCard({ subscriptionData, onRefresh }) {
                         </div>
                     );
                 })}
+            </div>
+
+            {/* GUTSCHEINCODE (DEZENT & AUFKLAPPBAR) */}
+            <div className="pt-1">
+                {!showCouponInput ? (
+                    <div className="flex justify-center">
+                        <button
+                            type="button"
+                            onClick={() => setShowCouponInput(true)}
+                            className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 transition cursor-pointer py-1.5 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800"
+                        >
+                            <span>🎟️</span>
+                            <span>{t("billing.have_coupon", "Hast du einen Gutscheincode?")}</span>
+                        </button>
+                    </div>
+                ) : (
+                    <div className="max-w-md mx-auto p-4 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-2xl shadow-xs animate-in fade-in space-y-3">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <span className="text-base">🎟️</span>
+                                <span className="font-bold text-xs text-gray-900 dark:text-white">
+                                    {t("billing.coupon_title", "Gutscheincode einlösen")}
+                                </span>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setShowCouponInput(false);
+                                    setCouponMsg(null);
+                                    setValidatedCoupon(null);
+                                }}
+                                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xs font-bold px-1.5 py-0.5 rounded-md hover:bg-gray-100 dark:hover:bg-slate-800 cursor-pointer"
+                                title={t("common.close", "Schließen")}
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleValidateCoupon} className="flex items-center gap-2">
+                            <input
+                                type="text"
+                                placeholder="z. B. PRO100"
+                                value={couponCode}
+                                onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                                className="flex-1 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl px-3.5 py-2 text-xs font-mono font-bold text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 uppercase"
+                                autoFocus
+                            />
+                            <button
+                                type="submit"
+                                disabled={couponLoading || !couponCode.trim()}
+                                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer shrink-0"
+                            >
+                                {couponLoading ? "..." : t("billing.check_code", "Prüfen")}
+                            </button>
+                        </form>
+
+                        {/* Validierungs-Ergebnis */}
+                        {validatedCoupon && (
+                            <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in">
+                                <div className="text-xs">
+                                    <div className="font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
+                                        <span>🎉</span>
+                                        <span>{validatedCoupon.description}</span>
+                                    </div>
+                                    <div className="text-emerald-700 dark:text-emerald-400 text-[11px] mt-0.5">
+                                        Code <span className="font-mono font-bold">{validatedCoupon.code}</span> schaltet deinen Tarif sofort frei.
+                                    </div>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={handleRedeemCoupon}
+                                    disabled={couponLoading}
+                                    className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl transition shadow-xs cursor-pointer shrink-0"
+                                >
+                                    {couponLoading ? "Wird aktiviert..." : "Jetzt aktivieren →"}
+                                </button>
+                            </div>
+                        )}
+
+                        {couponMsg && (
+                            <div className={`text-xs font-semibold px-3 py-2 rounded-xl border ${
+                                couponMsg.type === "success"
+                                    ? "bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800"
+                                    : "bg-rose-50 text-rose-800 border-rose-200 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800"
+                            }`}>
+                                {couponMsg.text}
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
 
             {/* AGB & DATENSCHUTZ ZUSTIMMUNG (AUDIT-PROOF) */}
