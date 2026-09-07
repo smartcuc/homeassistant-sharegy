@@ -51,18 +51,33 @@ Sharegy ist die **erste ganzheitliche Energie-Plattform**, die hochperformantes 
 * **EPEX-Spot 7-Tage Trend & Ladefenster**: 6-Tage-Historie + Day-Ahead-Vorschau mit automatischer Identifikation der 3 günstigsten Ladezeiten und Spitzenvermeidung.
 * **Interaktive Prioritäten-Kaskade (Merit-Order)**: Zuteilungsreihenfolge flexibler Großverbraucher (z. B. 1. Heimspeicher $\rightarrow$ 2. BWWP $\rightarrow$ 3. Wallbox $\rightarrow$ 4. Pool $\rightarrow$ 5. Klima $\rightarrow$ 6. Haushaltsgeräte).
 * **24h-Fahrplan (Dispatch-Timeline)**: Stündliche Vorschau der geplanten Geräteschaltungen basierend auf 48h-Wetterprognose und Day-Ahead EPEX-Spotpreisen.
-* **7 Modulare Verbraucher-Karten**:
-  1. ♨️ **Brauchwasserwärmepumpe (BWWP)**: SG-Ready Schaltung, Temperatur-Gauge, Solar-Boost bis 60°C.
-  2. 🚗 **Wallbox / EV Charger**: Ladestromregelung, Phasenumschaltung, Min+PV, Schnellladung.
-  3. 🔋 **Batteriespeicher**: Dynamische Netzladung (Grid-Charging), Entladesperre bei Negativpreisen.
-  4. 🏊 **Poolpumpen & Filterung**: Tägliche Mindestlaufzeit, garantierter Solarbetrieb.
-  5. ❄️ **Klimaanlagen (Pre-Cooling)**: 1,5°C Vorkühlung in PV-Spitzenstunden zur Abend-Einsparung.
-  6. 🧺 **Smarte Haushaltsgeräte**: Waschmaschine & Spülmaschine im "Ready-to-Start"-Modus.
-  7. ⚡ **Heizstäbe (Power-to-Heat)**: Stufenlose Pufferladung zur Restertrags-Verwertung.
+* **8 Modulare Verbraucher-Karten**:
+  1. 🌡️ **Fußbodenheizung & Estrich-Speicher**: Thermische Bauteilaktivierung (+0,5°C bis +1,5°C Vorladung), $15\text{–}20\,\text{t}$ Estrich-Speicher.
+  2. ♨️ **Brauchwasserwärmepumpe (BWWP)**: SG-Ready Schaltung, Temperatur-Gauge, Solar-Boost bis 60°C.
+  3. 🚗 **Wallbox / EV Charger**: Ladestromregelung, Phasenumschaltung, Min+PV, Schnellladung.
+  4. 🔋 **Batteriespeicher**: Dynamische Netzladung (Grid-Charging), Entladesperre bei Negativpreisen.
+  5. 🏊 **Poolpumpen & Filterung**: Tägliche Mindestlaufzeit, garantierter Solarbetrieb.
+  6. ❄️ **Klimaanlagen (Pre-Cooling)**: 1,5°C Vorkühlung in PV-Spitzenstunden zur Abend-Einsparung.
+  7. 🧺 **Smarte Haushaltsgeräte**: Waschmaschine & Spülmaschine im "Ready-to-Start"-Modus.
+  8. ⚡ **Heizstäbe (Power-to-Heat)**: Stufenlose Pufferladung zur Restertrags-Verwertung.
 
 ---
 
-### 3. ♨️ BWWP & Wärmepumpen-Lastmanagement (SG-Ready)
+### 3. 🌡️ Fußbodenheizungs-Steuerung & Thermische Estrich-Vorladung
+* **Thermische Bauteilaktivierung als Batterie**:
+  * $15\text{–}20\,\text{Tonnen}$ Estrichmasse fungieren als riesiger, abnutzungsfreier thermischer Energiespeicher ($\approx 14\text{–}18\,\text{kWh}_\text{th}$ Kapazität).
+  * Automatisches Vorladen (Pre-Heating) um $+0,5\,\text{K}$ bis $+1,5\,\text{K}$ bei PV-Überschuss $\ge 1\,\text{kW}$ oder extrem günstigen/negativen Börsenstrompreisen.
+  * Passive, zeitverzögerte Wärmeabgabe während der teuren Abendstunden (Peak-Shaving) zur vollständigen Vermeidung von Netzstrom-Heizbedarfen.
+* **Intelligenter Taktschutz & Sicherheit**:
+  * Mindestlaufzeit $\ge 30\,\text{min}$ und Mindestruhezeit $\ge 15\,\text{min}$ gegen schädliches Takten von Wärmepumpe und Stellantrieben.
+  * Estrich-Maximaltemperaturschutz ($T_\text{max} \le 24,5^\circ\text{C}$) zur Einhaltung physiologischer Fußboden-Grenzwerte.
+* **Live Thermal SoC & 1-Klick Vorlade-Boost**:
+  * Echtzeit-Berechnung des thermischen Ladezustands ($\text{SoC}_\text{thermal}$ in $\%$), der gespeicherten Wärme- ($Q_\text{th}$) und Äquivalenz-Stromenergie ($E_\text{el}$).
+  * 1-Klick 2-Stunden Vorlade-Boost direkt im HEMS Control Dashboard.
+
+---
+
+### 4. ♨️ BWWP & Wärmepumpen-Lastmanagement (SG-Ready)
 * **4 genormte SG-Ready Zustände**:
   * *Zustand 1*: EVU-Sperre / Überhitzungsschutz ($T \ge 65^\circ\text{C}$).
   * *Zustand 2*: Normalbetrieb nach internem Thermostat ($T_\text{soll} \approx 52^\circ\text{C}$).

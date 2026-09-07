@@ -11,6 +11,7 @@ import PriorityCascadeBar from "../components/PriorityCascadeBar";
 import LiveSurplusWaterfallCard from "../components/LiveSurplusWaterfallCard";
 import DispatchTimelineCard from "../components/DispatchTimelineCard";
 import BWWPLoadManagementCard from "../../energy/components/BWWPLoadManagementCard";
+import FloorHeatingLoadCard from "../components/FloorHeatingLoadCard";
 import BatteryStorageControlCard from "../components/BatteryStorageControlCard";
 import WallboxCard from "../../energy/components/WallboxCard";
 import PoolPumpCard from "../components/PoolPumpCard";
@@ -64,6 +65,7 @@ export default function ControlPage() {
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ["load-management-hub"] });
             queryClient.invalidateQueries({ queryKey: ["bwwp-load-mgmt"] });
+            queryClient.invalidateQueries({ queryKey: ["floor-heating"] });
             queryClient.invalidateQueries({ queryKey: ["storages"] });
             queryClient.invalidateQueries({ queryKey: ["wallboxes"] });
             showFeedback(data.message || "Aktion erfolgreich ausgeführt.");
@@ -79,7 +81,7 @@ export default function ControlPage() {
     const liveBudget = hubData.live_budget || {};
     const consumers = hubData.consumers || [];
     const dispatchSchedule = hubData.dispatch_schedule || [];
-    const priorityOrder = hubData.priority_order || ["battery", "bwwp", "wallbox", "heatpump", "pool", "ac", "appliances", "heating_rod"];
+    const priorityOrder = hubData.priority_order || ["battery", "floor_heating", "bwwp", "wallbox", "heatpump", "pool", "ac", "appliances", "heating_rod"];
     const masterMode = hubData.master_mode || "autopilot";
 
     const handlePriorityOrderChange = (newOrder) => {
@@ -120,7 +122,8 @@ export default function ControlPage() {
     // Filter consumers by category tab
     const filteredConsumers = consumers.filter((c) => {
         if (activeTab === "all") return true;
-        if (activeTab === "heat") return ["bwwp", "heatpump", "heating_rod"].includes(c.category);
+        if (activeTab === "floor_heating") return c.category === "floor_heating";
+        if (activeTab === "heat") return ["bwwp", "heatpump", "heating_rod", "floor_heating"].includes(c.category);
         if (activeTab === "mobility") return c.category === "wallbox";
         if (activeTab === "storage") return c.category === "battery";
         if (activeTab === "pool") return c.category === "pool";
@@ -341,6 +344,7 @@ export default function ControlPage() {
                         {[
                             { key: "all", label: "Alle Verbraucher", icon: "🎛️" },
                             { key: "battery", label: "Heimspeicher", icon: "🔋" },
+                            { key: "floor_heating", label: "Fußbodenheizung", icon: "🌡️" },
                             { key: "bwwp", label: "Warmwasser", icon: "♨️" },
                             { key: "wallbox", label: "Wallbox", icon: "🚗" },
                             { key: "heatpump", label: "Wärmepumpe", icon: "🔥" },
@@ -367,6 +371,11 @@ export default function ControlPage() {
 
                     {/* Consumer Cards Grid */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {/* 🌡️ Fußbodenheizung & Thermische Estrich-Vorladung */}
+                        {(activeTab === "all" || activeTab === "floor_heating" || activeTab === "heatpump") && (
+                            <FloorHeatingLoadCard />
+                        )}
+
                         {/* ♨️ BWWP & Wärmepumpen SG-Ready Lastmanagement */}
                         {(activeTab === "all" || activeTab === "bwwp" || activeTab === "heatpump") && (
                             <BWWPLoadManagementCard />

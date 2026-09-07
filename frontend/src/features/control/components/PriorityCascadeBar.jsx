@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 
 const CATEGORY_META = {
     battery: { name: "Heimspeicher", icon: "🔋", color: "bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800" },
+    floor_heating: { name: "Fußbodenheizung", icon: "🌡️", color: "bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800" },
     bwwp: { name: "Warmwasser", icon: "♨️", color: "bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800" },
     wallbox: { name: "Wallbox", icon: "🚗", color: "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800" },
     heatpump: { name: "Wärmepumpe", icon: "🔥", color: "bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800" },

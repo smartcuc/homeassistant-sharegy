@@ -44,6 +44,12 @@ from .views_bwwp import (
     bwwp_config_view,
     bwwp_switch_view,
 )
+from .views_floor_heating import (
+    floor_heating_status_view,
+    floor_heating_config_view,
+    floor_heating_boost_view,
+    floor_heating_toggle_view,
+)
 from .views_dispatch_hub import (
     load_management_hub_view,
     load_management_priorities_view,
@@ -65,6 +71,11 @@ urlpatterns += [
     path("bwwp/", bwwp_status_view),
     path("bwwp/config/", bwwp_config_view),
     path("bwwp/switch/", bwwp_switch_view),
+    # 🌡️ Fußbodenheizung & Estrich-Speicher
+    path("floor-heating/", floor_heating_status_view),
+    path("floor-heating/config/", floor_heating_config_view),
+    path("floor-heating/boost/", floor_heating_boost_view),
+    path("floor-heating/toggle/", floor_heating_toggle_view),
 
     path("battery-forecast/", battery_forecast_view),
     path("seed-demo/", seed_demo_data),

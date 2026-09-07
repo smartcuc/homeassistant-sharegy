@@ -742,12 +742,15 @@
 
 ---
 
-### [ ] 5.32 🌡️ Intelligente Fußbodenheizungs- & Heizkreis-Regelung (Thermischer Speicher)
-- **Fokus**: HEMS Dispatch-Hub Integration für Fußbodenheizungen und thermische Bauteilaktivierung.
-- **Konzept**:
-  - Nutzung des Estrichs als riesige, kostenlose thermische Batterie (Pre-Heating bei PV-Überschuss oder negativen dynamischen Börsenstrompreisen um +0,5°C bis +1,5°C).
+### [x] 5.32 🌡️ Intelligente Fußbodenheizungs- & Heizkreis-Regelung (Thermischer Speicher)
+- **Status**: ✅ **100% PRODUKTIONSREIF IMPLEMENTIERT & GETESTET**
+- **Fokus**: HEMS Dispatch-Hub Integration für Fußbodenheizungen und thermische Bauteilaktivierung (`FloorHeatingConfig`, `FloorHeatingLoadCard`, `floor_heating_manager.py`).
+- **Konzept & Umsetzung**:
+  - Nutzung des Estrichs als riesige, kostenlose thermische Batterie (Pre-Heating bei PV-Überschuss $\ge 1\,\text{kW}$ oder negativen/günstigen dynamischen Börsenstrompreisen um $+0,5\,\text{K}$ bis $+1,5\,\text{K}$).
+  - Berechnung der thermischen Speicherkapazität ($C_{\text{th}} = \frac{m \cdot c}{3600}$, z. B. $4,67\,\text{kWh/K}$ bei $120\,\text{m}^2 / 16,8\,\text{t}$ Estrich) und des thermischen Ladezustands ($\text{SoC}_{\text{thermal}}$ in $\%$) in Echtzeit.
   - Passive Wärmeabgabe während teurer Abendstunden ohne zusätzlichen Netzbezug.
-  - Anbindung über Relais / Stellantriebe (z. B. Shelly Pro 4PM / 1PM an Heizkreisverteilern), Zigbee/Matter-Thermostate und SG-Ready/Modbus-Wärmepumpenmodulation.
+  - Schaltschutz mit Mindestlaufzeit ($\ge 30\,\text{min}$) und Mindestruhezeit ($\ge 15\,\text{min}$) gegen Taktung.
+  - Vollwertiges Glassmorphism-UI (`FloorHeatingLoadCard.jsx`) mit 1-Klick 2h-Vorlade-Boost, Raumtemperatur-Sollwert, Estrich-Grenztemperatur und Merit-Order Kaskade.
 
 ---
 
@@ -767,6 +770,7 @@
 ├───────────────────────────────────────────────────────────────────────────────┤
 │ • 🟢 Säule 1: Live-Sankey, Last-/PV-Forecasts, Smart Load Management Hub,     │
 │    1-Klick Quick Boost, BWWP SG-Ready Steuerung, OCPP 1.6-J CSMS Wallbox,      │
+│    🌡️ Fußbodenheizungs-Steuerung & thermische Estrich-Vorladung (HEMS Hub),  │
 │    Sungrow OpenAPI, ioBroker & HA Adapter, Multistring AC-Kopplung,           │
 │    Live-Pulse Topbar, Dark-Mode, 6-Sprachen i18n, 7d EPEX Trend & Demo-Hub,   │
 │    🛡️ § 14a EnWG Summenleistungs-Dimmung (4,2 kW Netzkontingent & SteuVE).    │
@@ -780,10 +784,9 @@
                                        │
                                        ▼
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│ ⏳ AUSSTEHENDE AUFGABEN (EXAKT DIE LETZTEN 2 FEATURES VOR DEM FINALEN STAND) │
+│ ⏳ AUSSTEHENDE AUFGABE (EXAKT DAS LETZTE VERBLEIBENDE FEATURE)                │
 ├───────────────────────────────────────────────────────────────────────────────┤
-│ 1. 🌡️ Fußbodenheizungs-Steuerung & thermische Estrich-Vorladung (Abschnitt 5.32)│
-│ 2. ⛽ Mobilitäts- & Spritpreis-Radar (Tankerkönig-API Widget, Abschnitt 5.33)  │
+│ 1. ⛽ Mobilitäts- & Spritpreis-Radar (Tankerkönig-API Widget, Abschnitt 5.33)  │
 └───────────────────────────────────────────────────────────────────────────────┘
 ```
 

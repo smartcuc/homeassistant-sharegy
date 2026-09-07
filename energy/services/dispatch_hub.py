@@ -15,9 +15,15 @@ from collections import defaultdict
 from zoneinfo import ZoneInfo
 
 from devices.models import Device, DeviceLatestMetric
-from energy.models import LoadPriorityConfig, LoadConsumerConfig, BWWPLoadManagementConfig
+from energy.models import LoadPriorityConfig, LoadConsumerConfig, BWWPLoadManagementConfig, FloorHeatingConfig
 from energy.ems.services import build_device_signals
 from energy.services.bwwp_manager import evaluate_bwwp_load_management, find_or_create_bwwp_config, actuate_bwwp_relay
+from energy.services.floor_heating_manager import (
+    evaluate_floor_heating,
+    find_or_create_floor_heating_config,
+    actuate_floor_heating_relay,
+    trigger_floor_heating_boost,
+)
 from market.models_tariff import HomeTariff
 from market.services_tariff import get_home_tariff, calculate_effective_price
 from market.models import SpotPrice
@@ -32,7 +38,7 @@ def get_or_create_priority_config(home) -> LoadPriorityConfig:
         home=home,
         defaults={
             "master_mode": "autopilot",
-            "priority_order": ["battery", "bwwp", "wallbox", "heatpump", "pool", "ac", "appliances", "heating_rod"],
+            "priority_order": ["battery", "bwwp", "floor_heating", "wallbox", "heatpump", "pool", "ac", "appliances", "heating_rod"],
             "min_pv_headroom_w": Decimal("200.0"),
             "auto_dispatch_enabled": True,
         }
@@ -114,7 +120,53 @@ def get_all_load_consumers(home) -> list:
             "quick_action_label": "🚀 Boost (1h)",
         })
 
-    # 3. 🚗 Wallbox / E-Auto
+    # 3. 🌡️ Fußbodenheizung & thermischer Estrich-Speicher
+    try:
+        fh_cfg = find_or_create_floor_heating_config(home)
+        if fh_cfg:
+            fh_eval = evaluate_floor_heating(home, config=fh_cfg, force=False)
+            storage = fh_eval.get("storage", {})
+            temp_info = fh_eval.get("temperature", {})
+            is_preheating = fh_eval.get("is_preheating_active", False)
+            relay_active = fh_eval.get("relay_state", False)
+            
+            clean_fh_name = "Fußbodenheizung"
+            if fh_cfg.device:
+                if hasattr(fh_cfg.device, "config") and fh_cfg.device.config and fh_cfg.device.config.name:
+                    clean_fh_name = fh_cfg.device.config.name
+                elif fh_cfg.device.name:
+                    clean_fh_name = fh_cfg.device.name
+                elif fh_cfg.device.identifier:
+                    clean_fh_name = fh_cfg.device.identifier
+
+            consumers.append({
+                "id": f"floor_heating_{fh_cfg.id}",
+                "device_id": fh_cfg.device.id if fh_cfg.device else None,
+                "category": "floor_heating",
+                "category_label": "Fußbodenheizung & Estrich",
+                "name": clean_fh_name,
+                "icon": "🌡️",
+                "power_w": float(fh_eval.get("power_w", 0.0)),
+                "is_active": fh_cfg.active,
+                "status_state": "preheating" if is_preheating else ("on" if relay_active else "standby"),
+                "status_label": f"{temp_info.get('current_c', 21.0)}°C (Soll {temp_info.get('target_c', 21.0)}°C) · Estrich {storage.get('thermal_soc_pct', 50)}%",
+                "mode": fh_cfg.control_mode,
+                "details": {
+                    "temp_c": temp_info.get("current_c", 21.0),
+                    "target_temp_c": temp_info.get("target_c", 21.0),
+                    "boost_target_c": temp_info.get("boost_target_c", 22.0),
+                    "thermal_soc_pct": storage.get("thermal_soc_pct", 50.0),
+                    "stored_energy_kwh_th": storage.get("stored_energy_kwh_th", 0.0),
+                    "is_preheating_active": is_preheating,
+                    "reason": fh_eval.get("decision_reason", ""),
+                },
+                "quick_action": "boost_floor_heating",
+                "quick_action_label": "🔥 Estrich vorladen (2h)" if not is_preheating else "⏹️ Normalbetrieb",
+            })
+    except Exception as e:
+        logger.debug("[Dispatch-Hub] Fußbodenheizung laden: %s", e)
+
+    # 4. 🚗 Wallbox / E-Auto
     try:
         from devices.models_ocpp import ChargingStation
         for cs in ChargingStation.objects.filter(home=home):
@@ -439,6 +491,26 @@ def execute_hub_device_action(home, category: str, action: str, device_id: str =
             bwwp_cfg.save()
             evaluate_bwwp_load_management(home, config=bwwp_cfg, force=True)
             return {"status": "success", "message": "BWWP auf Automatik zurückgesetzt."}
+
+    elif category == "floor_heating":
+        fh_cfg = find_or_create_floor_heating_config(home)
+        if not fh_cfg:
+            return {"error": "Keine Fußbodenheizung vorhanden."}
+
+        if action in ("boost", "boost_floor_heating", "preheat"):
+            trigger_floor_heating_boost(home, duration_hours=float(params.get("duration_hours", 2.0)))
+            return {"status": "success", "message": "🔥 Thermischer Estrich-Vorladeboost aktiviert."}
+        elif action in ("normal", "auto", "stop"):
+            cache.delete(f"floor_heating_boost_{home.id}")
+            fh_cfg.is_preheating_active = False
+            fh_cfg.save(update_fields=["is_preheating_active"])
+            evaluate_floor_heating(home, config=fh_cfg, force=True)
+            return {"status": "success", "message": "Fußbodenheizung auf Automatik zurückgesetzt."}
+        elif action == "toggle":
+            curr_state = bool(cache.get(f"device_relay_state_{fh_cfg.device.id}", False)) if fh_cfg.device else False
+            actuate_floor_heating_relay(home, fh_cfg, not curr_state)
+            evaluate_floor_heating(home, config=fh_cfg, force=True)
+            return {"status": "success", "message": f"Fußbodenheizung {'eingeschaltet' if not curr_state else 'ausgeschaltet'}."}
 
     elif category in ("pool", "ac", "appliances", "heating_rod", "other"):
         # Custom Consumer

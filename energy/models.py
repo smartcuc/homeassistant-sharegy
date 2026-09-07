@@ -511,7 +511,7 @@ class BWWPLoadManagementConfig(models.Model):
 # Smart Load Management: LoadPriorityConfig & LoadConsumerConfig
 # ---------------------------------------------------------------------
 def default_priority_order():
-    return ["battery", "bwwp", "wallbox", "heatpump", "pool", "ac", "appliances", "heating_rod"]
+    return ["battery", "bwwp", "floor_heating", "wallbox", "heatpump", "pool", "ac", "appliances", "heating_rod"]
 
 
 class LoadPriorityConfig(models.Model):
@@ -559,7 +559,7 @@ class LoadPriorityConfig(models.Model):
 class LoadConsumerConfig(models.Model):
     """
     Konfiguration für flexible Großverbraucher (Poolpumpen, Klimaanlagen,
-    White Goods / Haushaltsgeräte, Heizstäbe).
+    White Goods / Haushaltsgeräte, Heizstäbe, Fußbodenheizung).
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
@@ -574,6 +574,7 @@ class LoadConsumerConfig(models.Model):
     CATEGORY_CHOICES = [
         ("pool", "Pool- & Filterpumpe"),
         ("ac", "Klimaanlage / Raumkühlung"),
+        ("floor_heating", "Fußbodenheizung & Estrich-Speicher"),
         ("appliances", "Haushaltsgerät (Waschmaschine/Spüler)"),
         ("heating_rod", "Heizstab / Power-to-Heat"),
         ("bwwp", "Brauchwasserwärmepumpe"),
@@ -621,4 +622,101 @@ class LoadConsumerConfig(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.name or self.device.name} ({self.get_category_display()})"
+        return f"{self.name or self.device.name} ({self.get_category_display()})"
+
+
+# ---------------------------------------------------------------------
+# FloorHeatingConfig: Intelligente Fußbodenheizung & thermischer Estrich-Speicher
+# ---------------------------------------------------------------------
+class FloorHeatingConfig(models.Model):
+    """
+    Konfiguration und State-Machine für Fußbodenheizungen & thermische Bauteilaktivierung (Estrich).
+    Nutzt den Estrich als thermischen Puffer (+0,5°C bis +1,5°C Vorladung bei PV-Überschuss / Negativpreisen).
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    home = models.OneToOneField(
+        "devices.Home", on_delete=models.CASCADE, related_name="floor_heating_config"
+    )
+
+    # Schaltrelais / Heizkreisverteiler oder Wärmepumpen-Modbus
+    device = models.ForeignKey(
+        "devices.Device", on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="floor_heating_controllers",
+        help_text="Heizkreispumpe, Shelly Relais oder Stellantrieb-Aktor"
+    )
+
+    # Optionaler Raum-/Estrich-Temperatursensor
+    temp_sensor_device = models.ForeignKey(
+        "devices.Device", on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="floor_heating_sensors",
+        help_text="Temperatursensor im Referenzraum oder Estrich-Fühler"
+    )
+
+    active = models.BooleanField(default=True)
+
+    CONTROL_MODE_CHOICES = [
+        ("autopilot", "Autopilot (Solar- & Börsenpreis-Vorladung)"),
+        ("pv_only", "Nur PV-Überschuss"),
+        ("price_saver", "Sparfuchs (Günstigste Börsenstunden)"),
+        ("comfort", "Komfortbetrieb (Feste Solltemperatur)"),
+        ("manual", "Manuell"),
+    ]
+    control_mode = models.CharField(
+        max_length=20, choices=CONTROL_MODE_CHOICES, default="autopilot"
+    )
+
+    target_room_temp_c = models.DecimalField(
+        max_digits=4, decimal_places=1, default=Decimal("21.0"),
+        help_text="Standard-Zieltemperatur im Raum (°C)"
+    )
+
+    boost_delta_k = models.DecimalField(
+        max_digits=3, decimal_places=1, default=Decimal("1.0"),
+        help_text="Thermische Vorladung / Überwärmungs-Delta (+K, z. B. +1,0°C bei Überschuss)"
+    )
+
+    max_floor_temp_c = models.DecimalField(
+        max_digits=4, decimal_places=1, default=Decimal("24.5"),
+        help_text="Überhitzungsschutz: Maximale Raum-/Estrich-Temperatur (°C)"
+    )
+
+    min_pv_surplus_w = models.DecimalField(
+        max_digits=6, decimal_places=1, default=Decimal("1000.0"),
+        help_text="Mindest-Solarüberschuss (W) für automatische Vorladung"
+    )
+
+    max_spot_price_ct_kwh = models.DecimalField(
+        max_digits=5, decimal_places=2, default=Decimal("16.00"),
+        help_text="Maximaler Strompreis (ct/kWh) für netzbasierte Vorladung"
+    )
+
+    estrich_area_sqm = models.DecimalField(
+        max_digits=6, decimal_places=1, default=Decimal("120.0"),
+        help_text="Beheizte Estrich-Fläche in m² zur Kapazitätsberechnung"
+    )
+
+    # Runtime & Safety States
+    is_preheating_active = models.BooleanField(
+        default=False,
+        help_text="Gibt an, ob aktuell eine thermische Vorladung aktiv ist"
+    )
+    last_switched_at = models.DateTimeField(null=True, blank=True)
+    min_run_minutes = models.PositiveIntegerField(
+        default=30,
+        help_text="Mindestlaufzeit (Min) zur Vermeidung von Pumpen-/Ventiltakten"
+    )
+    min_rest_minutes = models.PositiveIntegerField(
+        default=15,
+        help_text="Mindestruhezeit (Min) vor erneutem Einschalten"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Fußbodenheizung ({self.home.name}) - {self.get_control_mode_display()} (Soll {self.target_room_temp_c}°C)"
+
