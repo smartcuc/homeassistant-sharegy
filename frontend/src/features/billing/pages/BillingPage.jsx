@@ -1,11 +1,13 @@
+/*
+# src/features/billing/pages/BillingPage.jsx
+*/
+
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, Link } from "react-router-dom";
 import { apiFetch } from "../../../api/client";
 import SubscriptionPlanCard from "../components/SubscriptionPlanCard";
-import BillingAddressCard from "../components/BillingAddressCard";
-import InvoicesListCard from "../components/InvoicesListCard";
 
 export default function BillingPage() {
     const { t } = useTranslation();
@@ -28,13 +30,12 @@ export default function BillingPage() {
     useEffect(() => {
         const params = new URLSearchParams(location.search);
         if (params.get("success") === "true") {
-            const plan = params.get("plan") || "Pro";
             setStatusBanner({
                 type: "success",
                 title: t("billing.checkout_success_title", "🎉 Abonnement erfolgreich aktiviert!"),
                 message: t(
                     "billing.checkout_success_desc",
-                    "Vielen Dank! Dein Sharegy EMS-Abonnement wurde über Stripe freigeschaltet. Alle Pro-Funktionen stehen dir ab sofort zur Verfügung."
+                    "Vielen Dank! Dein Sharegy EMS-Abonnement wurde über Stripe freigeschaltet. Alle Funktionen stehen dir ab sofort zur Verfügung."
                 ),
             });
             refetch();
@@ -59,14 +60,14 @@ export default function BillingPage() {
     }
 
     return (
-        <div className="p-6 max-w-7xl mx-auto space-y-6">
+        <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6">
             {/* Success / Cancel Banner */}
             {statusBanner && (
                 <div
                     className={`p-4 rounded-2xl border flex items-start justify-between gap-3 animate-in fade-in ${
                         statusBanner.type === "success"
-                            ? "bg-emerald-50 border-emerald-300 text-emerald-900"
-                            : "bg-slate-50 border-slate-300 text-slate-800"
+                            ? "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200"
+                            : "bg-slate-50 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200"
                     }`}
                 >
                     <div>
@@ -85,30 +86,39 @@ export default function BillingPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2.5">
                         <span>💳</span>
-                        {t("billing.title", "Abonnement, Tarife & Abrechnung")}
+                        <span>{t("billing.title", "Abonnement & Tarife")}</span>
                     </h1>
-                    <p className="text-gray-500 mt-1 text-sm">
-                        {t("billing.subtitle", "Verwalte deinen Sharegy EMS-Tarif, deine Rechnungsadresse und lade Rechnungen als PDF herunter.")}
+                    <p className="text-gray-500 dark:text-gray-400 mt-1 text-xs sm:text-sm">
+                        {t("billing.subtitle", "Verwalte deinen Sharegy EMS-Tarif, wechsle zwischen Monats- und Jahresintervall oder erweitere deine Funktionen.")}
                     </p>
                 </div>
 
                 {stripeConfig?.sandbox_mode && (
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-300 text-amber-900 text-xs font-bold shadow-2xs shrink-0 self-start sm:self-auto">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-200 text-xs font-bold shadow-2xs shrink-0 self-start sm:self-auto">
                         <span className="animate-pulse">🧪</span>
                         <span>{t("billing.sandbox_badge", "Stripe Testmodus (Sandbox)")}</span>
                     </div>
                 )}
             </div>
 
-            {/* Plan Selector */}
+            {/* Plan Selector & Checkout */}
             <SubscriptionPlanCard subscriptionData={billingData} onRefresh={refetch} />
 
-            {/* Billing Address & Invoices */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <BillingAddressCard billingAddress={billingData?.billing_address} onSaveSuccess={refetch} />
-                <InvoicesListCard invoices={billingData?.invoices} onRefresh={refetch} />
+            {/* Footnote / Link to Profile Invoices & Address */}
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                    <span className="text-lg">📄</span>
+                    <span>Rechnungsbelege mit MwSt. oder Rechnungsanschrift gesucht?</span>
+                </div>
+                <Link
+                    to="/app/profile?tab=invoices"
+                    className="px-4 py-2 bg-white dark:bg-slate-700 hover:bg-gray-100 dark:hover:bg-slate-600 border border-gray-200 dark:border-slate-600 text-gray-800 dark:text-gray-200 font-bold rounded-xl shadow-2xs transition flex items-center gap-1.5 self-start sm:self-auto"
+                >
+                    <span>Zu meinen Rechnungen im Profil</span>
+                    <span>➔</span>
+                </Link>
             </div>
         </div>
     );
