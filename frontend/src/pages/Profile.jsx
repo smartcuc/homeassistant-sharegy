@@ -106,7 +106,11 @@ export default function Profile() {
     const handleSaveProfile = async (e, customData = null) => {
         if (e) e.preventDefault();
         setSavingProfile(true);
-        const dataToSave = customData || formData;
+        const base = customData || formData;
+        const dataToSave = {
+            ...base,
+            customer_type: base.company_name?.trim() ? "business" : "private",
+        };
         try {
             await apiFetch("/api/profile/", {
                 method: "POST",
@@ -273,7 +277,7 @@ export default function Profile() {
     // 5 Clean Tabs Definition (API tab removed)
     const tabs = [
         { id: "profile", label: t("profile.tab_personal", "Persönliche Angaben"), icon: "👤", badge: null },
-        { id: "company", label: t("profile.tab_company", "Unternehmen & B2B"), icon: "🏢", badge: formData.customer_type === "business" ? "B2B" : null },
+        { id: "company", label: t("profile.tab_company", "Unternehmensdaten & B2B"), icon: "🏢", badge: formData.company_name?.trim() ? "B2B" : null },
         { id: "notifications", label: t("profile.tab_notifications", "Benachrichtigungen"), icon: "🔔", badge: null },
         { id: "security", label: t("profile.tab_security", "Sicherheit & Sitzung"), icon: "🔐", badge: null },
         { id: "privacy", label: t("profile.tab_privacy", "Datenschutz & DSGVO"), icon: "🛡️", badge: null },
@@ -683,7 +687,7 @@ export default function Profile() {
             )}
 
             {/* ========================================================= */}
-            {/* TAB 2: UNTERNEHMEN & B2B RECHNUNGSEMPFÄNGER */}
+            {/* TAB 2: UNTERNEHMEN & B2B FIRMENDATEN */}
             {/* ========================================================= */}
             {activeTab === "company" && (
                 <div className="space-y-6 animate-in fade-in duration-200">
@@ -691,50 +695,17 @@ export default function Profile() {
                         <div className="border-b border-gray-100 dark:border-slate-800 pb-4 mb-5">
                             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 text-xs font-bold mb-1.5">
                                 <span>🏢</span>
-                                <span>{t("profile.b2b_badge", "B2B & Gewerbekunden")}</span>
+                                <span>{t("profile.b2b_badge", "Gewerbe & B2B")}</span>
                             </div>
                             <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-                                {t("profile.company_details_title", "Firmen- & Rechnungsdaten")}
+                                {t("profile.company_details_title", "Unternehmensdaten & USt-IdNr.")}
                             </h2>
                             <p className="text-xs text-gray-500 dark:text-gray-400">
-                                {t("profile.company_details_desc", "Hinterlege deine Unternehmensdaten und Umsatzsteuer-ID für korrekte Netto-Rechnungen mit ausgewiesener Mehrwertsteuer.")}
+                                {t("profile.company_details_desc", "Optional für Firmenkunden: Hinterlege deinen offiziellen Firmennamen und deine USt-IdNr. für Vorsteuerabzug und korrekte B2B-Rechnungsbelege.")}
                             </p>
                         </div>
 
                         <form onSubmit={handleSaveProfile} className="space-y-5">
-                            {/* KUNDENTYP SWITCHER */}
-                            <div>
-                                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-2">
-                                    {t("profile.customer_type", "Kundentyp")}
-                                </label>
-                                <div className="grid grid-cols-2 gap-3 max-w-md">
-                                    <button
-                                        type="button"
-                                        onClick={() => setFormData({ ...formData, customer_type: "private" })}
-                                        className={`p-3 rounded-2xl border text-center transition-all cursor-pointer font-bold text-xs flex items-center justify-center gap-2 ${
-                                            formData.customer_type === "private"
-                                                ? "bg-indigo-50 dark:bg-indigo-950/60 border-indigo-500 text-indigo-700 dark:text-indigo-300 ring-2 ring-indigo-500/20"
-                                                : "bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-600 dark:text-gray-400"
-                                        }`}
-                                    >
-                                        <span>👤</span>
-                                        <span>{t("profile.type_private", "Privatkunde")}</span>
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setFormData({ ...formData, customer_type: "business" })}
-                                        className={`p-3 rounded-2xl border text-center transition-all cursor-pointer font-bold text-xs flex items-center justify-center gap-2 ${
-                                            formData.customer_type === "business"
-                                                ? "bg-indigo-50 dark:bg-indigo-950/60 border-indigo-500 text-indigo-700 dark:text-indigo-300 ring-2 ring-indigo-500/20"
-                                                : "bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-600 dark:text-gray-400"
-                                        }`}
-                                    >
-                                        <span>🏢</span>
-                                        <span>{t("profile.type_business", "Unternehmen / B2B")}</span>
-                                    </button>
-                                </div>
-                            </div>
-
                             {/* FIRMENDATEN FELDER */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
@@ -765,22 +736,22 @@ export default function Profile() {
 
                                 <div className="md:col-span-2">
                                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-1">
-                                        {t("profile.billing_name", "Rechnungsempfänger / Zusatzzeile")}
+                                        {t("profile.billing_name", "Rechnungsempfänger / Abteilungszusatz")}
                                     </label>
                                     <input
                                         type="text"
                                         value={formData.billing_name}
                                         onChange={(e) => setFormData({ ...formData, billing_name: e.target.value })}
-                                        placeholder="z.B. Buchhaltung / WEG Sonnenweg 12"
+                                        placeholder="z.B. Buchhaltung / Kostenstelle 4020 / WEG Sonnenweg 12"
                                         className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                                     />
                                 </div>
                             </div>
 
-                            {/* RECHNUNGSADRESSE */}
+                            {/* RECHNUNGS- / FIRMENADRESSE */}
                             <div className="border-t border-gray-100 dark:border-slate-800 pt-5">
                                 <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                                    <span>📍</span> {t("profile.address_title", "Rechnungsanschrift")}
+                                    <span>📍</span> {t("profile.company_address_title", "Firmen- & Rechnungsanschrift")}
                                 </h3>
 
                                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -840,7 +811,7 @@ export default function Profile() {
                                             {t("profile.country", "Land")}
                                         </label>
                                         <select
-                                            value={formData.country}
+                                            value={formData.country || "DE"}
                                             onChange={(e) => setFormData({ ...formData, country: e.target.value })}
                                             className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                                         >
@@ -861,8 +832,8 @@ export default function Profile() {
                                     disabled={savingProfile}
                                     className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-md transition cursor-pointer flex items-center gap-2"
                                 >
-                                    <span>💾</span>
-                                    <span>{savingProfile ? t("common.saving", "Speichere...") : t("profile.save_company", "Rechnungsdaten speichern")}</span>
+                                    <span>🏢</span>
+                                    <span>{savingProfile ? t("common.saving", "Speichere...") : t("profile.save_company", "Firmendaten speichern")}</span>
                                 </button>
                             </div>
                         </form>
