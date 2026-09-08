@@ -46,20 +46,20 @@ Sharegy ist keine einfache CRUD-Webanwendung, sondern eine **hochkomplexe, verte
 |---|---|:---:|:---:|:---:|
 | **1. Backend & Data Pipeline**<br>• TimescaleDB Hypertables & Continuous Aggregates<br>• Redis Live-Buffer & Deadband-Filter<br>• Daphne ASGI WebSocket Server & Celery Priority Queues | Senior Backend Eng.<br>DevOps / DBA | 85 PT<br>*(~4,5 PM)* | 65.000 € – 80.000 € | 95.000 € – 125.000 € |
 | **2. IoT-Gateways & Protokolle**<br>• Outbound WSS Shelly Ingest (Gen2/Gen3)<br>• OCPP 1.6-J CSMS Wallbox Gateway & Smart Charging<br>• Offizieller ioBroker Adapter & Home Assistant HACS<br>• Globaler MQTT-Hub & OpenTelemetry OTel | Senior IoT Engineer<br>Senior Backend Eng. | 90 PT<br>*(~4,5 PM)* | 70.000 € – 88.000 € | 105.000 € – 135.000 € |
-| **3. Smart Load Hub, BWWP & Aktorik**<br>• Dispatch Hub (`/app/control`) & Live Power Budget<br>• 1-Klick Quick-Boost (11 kW Wallbox, 100% Notstromreserve)<br>• Merit-Order Prioritäten-Kaskade & 24h Fahrplan<br>• BWWP SG-Ready Steuerung & Verdichter-Taktschutz<br>• Sungrow Cloud OpenAPI Inverter Arbitrage | Senior Control Eng.<br>Fullstack Engineer | 85 PT<br>*(~4,2 PM)* | 66.000 € – 83.000 € | 95.000 € – 128.000 € |
+| **3. Smart Load Hub, HVAC, BWWP & Aktorik**<br>• 4 Pro Hubs (Control, Mobility, Heating, Alerts)<br>• 🌡️ Fußbodenheizungs-Steuerung & Prädiktives MPC (Estrich-Vorladung)<br>• ⛽ Mobilitäts- & Spritpreis-Radar (MTS-K / Tankerkönig & 100km-Vergleich)<br>• BWWP SG-Ready Steuerung (Boost 60°C & Verdichterschutz)<br>• Sungrow Cloud OpenAPI Inverter Arbitrage | Senior Control Eng.<br>HVAC/Fullstack Eng. | 125 PT<br>*(~6,2 PM)* | 98.000 € – 124.000 € | 145.000 € – 190.000 € |
 | **4. KI-Forecasts & Anomalieerkennung**<br>• 48h Hybrid Physics + ML PV-Ertragsprognose<br>• Haushalts-Lastprognose & Netto-Überschuss<br>• 7-Tage Auto-ML Baseline (Predictive Maintenance)<br>• Smarte EPEX-Ladefenster & Peak-Shaving Analyse | Senior ML Engineer<br>Data Scientist | 65 PT<br>*(~3,2 PM)* | 52.000 € – 68.000 € | 78.000 € – 105.000 € |
-| **5. Säule 2: Energy Sharing & Clearing**<br>• 15-Minuten OBIS-Bilanzierung & Resiliente Ingestion<br>• 3 Allokationsmodelle (§ 42b EnWG: Dyn, Stat, Hyb)<br>• Discovergy/inexogy wMSB REST Hub & Tarife<br>• PDF-, Excel-, CSV- & ERP-XML-Abrechnungsengine | Senior FinTech Eng.<br>Regulatory Energy Eng. | 110 PT<br>*(~5,5 PM)* | 88.000 € – 115.000 € | 130.000 € – 175.000 € |
-| **6. Frontend UI/UX, Sankey & Native Apps**<br>• Responsive React SPA mit Live-Pulse Ticker & Dark/Light Theme<br>• Multistring AC-Erkennung (2. Wechselrichter / BKW)<br>• Capacitor 7 Android App & W3C Web-Push VAPID<br>• Multi-Language i18n (DE, EN, PL) & Support-Desk | Senior Frontend Eng.<br>Mobile App Eng.<br>UI/UX Designer | 100 PT<br>*(~5,0 PM)* | 76.000 € – 97.000 € | 110.000 € – 148.000 € |
-| **7. QA, Testabdeckung, Security & Compliance**<br>• 100% automatisierte Test Suite (144 Unit- & Integrationstests)<br>• Multi-Tenant RBAC, Audit-Logging & DSGVO-Consent<br>• System-Health-Monitoring Engine & Auto-Watchdog | QA / Test Engineer<br>Security Specialist | 50 PT<br>*(~2,5 PM)* | 38.000 € – 50.000 € | 55.000 € – 75.000 € |
-| **8. Architektur, Projektleitung & Regulatory**<br>• Technische Gesamtarchitektur & Systemdesign<br>• BNetzA / § 42b EnWG / MsbG Normenabgleich<br>• Handbuch- & Dokumentationserstellung (15 Artikel) | Lead Architect<br>Product Owner | 60 PT<br>*(~3,0 PM)* | 55.000 € – 72.000 € | 80.000 € – 110.000 € |
-| **GESAMT-ENTWICKLUNGSAUFWAND** | **Team: 4–6 Experten** | **645 PT**<br>*(~33 PM)* | **510.000 € – 653.000 €** | **748.000 € – 1.001.000 €** |
+| **5. Säule 2: Energy Sharing, Clearing & § 14a EnWG**<br>• 15-Minuten OBIS-Bilanzierung & Resiliente Ingestion<br>• 3 Allokationsmodelle (§ 42b EnWG: Dyn, Stat, Hyb)<br>• 🛡️ § 14a EnWG Summenleistungs-Dimmung (4,2 kW Kontingent)<br>• Discovergy/inexogy wMSB REST Hub & Tarife<br>• PDF-, Excel-, CSV- & ERP-XML-Abrechnungsengine | Senior FinTech Eng.<br>Regulatory Energy Eng. | 135 PT<br>*(~6,8 PM)* | 108.000 € – 140.000 € | 160.000 € – 215.000 € |
+| **6. Frontend UI/UX, Sankey, Pro Gating & Native Apps**<br>• Responsive React SPA mit Live-Pulse Ticker & Dark/Light Theme<br>• 👑 Standardisierte Pro-Freemium Gating-UX mit interaktiver Demo-Vorschau<br>• Multistring AC-Erkennung (2. Wechselrichter / BKW)<br>• Capacitor 7 Android App & W3C Web-Push VAPID<br>• Multi-Language i18n (6 EU-Sprachen: DE, EN, PL, TR, RU, RO) | Senior Frontend Eng.<br>Mobile App Eng.<br>UI/UX Designer | 125 PT<br>*(~6,2 PM)* | 95.000 € – 120.000 € | 140.000 € – 185.000 € |
+| **7. QA, Testabdeckung, Security & Compliance**<br>• 100% automatisierte Test Suite (160+ Unit- & Integrationstests)<br>• Multi-Tenant RBAC, Audit-Logging & DSGVO-Consent<br>• System-Health-Monitoring Engine & Auto-Watchdog | QA / Test Engineer<br>Security Specialist | 55 PT<br>*(~2,8 PM)* | 42.000 € – 55.000 € | 60.000 € – 82.000 € |
+| **8. Architektur, Projektleitung & Regulatory**<br>• Technische Gesamtarchitektur & Systemdesign<br>• BNetzA / § 42b EnWG / MsbG / § 14a EnWG Normenabgleich<br>• Handbuch- & Dokumentationserstellung (15 Artikel) | Lead Architect<br>Product Owner | 65 PT<br>*(~3,2 PM)* | 60.000 € – 78.000 € | 85.000 € – 118.000 € |
+| **GESAMT-ENTWICKLUNGSAUFWAND** | **Team: 4–6 Experten** | **745 PT**<br>*(~38 PM)* | **590.000 € – 753.000 €** | **868.000 € – 1.155.000 €** |
 
 ---
 
 ### 1.4 Gesamtfazit der Entwicklungskosten
 
-* **Inhouse-Softwareteam**: Bei Aufbau eines eigenen spezialisierten Entwicklungsteams (4–6 Senior Engineers über eine Laufzeit von **14 bis 18 Monaten**) belaufen sich die reinen Lohn- und Arbeitgeber-Vollkosten auf **ca. 500.000 € bis 650.000 €**.
-* **Beauftragung einer Digitalagentur / IT-Dienstleisters**: Bei Vergabe an eine spezialisierte IoT- und Cloud-Agentur im DACH-Raum (inkl. Agentur-Marge, PM-Overhead und Risikopuffer) lägen die Entwicklungskosten bei **ca. 750.000 € bis 1.000.000 € netto**.
+* **Inhouse-Softwareteam**: Bei Aufbau eines eigenen spezialisierten Entwicklungsteams (4–6 Senior Engineers über eine Laufzeit von **16 bis 20 Monaten**) belaufen sich die reinen Lohn- und Arbeitgeber-Vollkosten auf **ca. 590.000 € bis 750.000 €**.
+* **Beauftragung einer Digitalagentur / IT-Dienstleisters**: Bei Vergabe an eine spezialisierte IoT- und Cloud-Agentur im DACH-Raum (inkl. Agentur-Marge, PM-Overhead und Risikopuffer) lägen die Entwicklungskosten bei **ca. 870.000 € bis 1.150.000 € netto**.
 
 ---
 
@@ -78,8 +78,8 @@ Zur Ermittlung des Unternehmens- und Asset-Werts werden in der Praxis drei anerk
    │ 1. Substanzwert   │             │ 2. SaaS Multiple  │             │ 3. Strategischer  │
    │ (Cost-to-Duplicate)│            │ (ARR / DCF)       │             │ Transaktionswert  │
    ├───────────────────┤             ├───────────────────┤             ├───────────────────┤
-   │ 650.000 € –       │             │ 1.800.000 € –     │             │ 2.500.000 € –     │
-   │ 950.000 €         │             │ 3.500.000 €       │             │ 4.500.000 €       │
+   │ 850.000 € –       │             │ 2.200.000 € –     │             │ 3.000.000 € –     │
+   │ 1.150.000 €       │             │ 3.800.000 €       │             │ 5.000.000 €       │
    └───────────────────┘             └───────────────────┘             └───────────────────┘
 ```
 
@@ -88,10 +88,10 @@ Zur Ermittlung des Unternehmens- und Asset-Werts werden in der Praxis drei anerk
 ### 2.1 Methode 1: Substanz- & Wiederbeschaffungswert (Cost-to-Duplicate)
 Der Substanzwert bewertet den Wert des geistigen Eigentums (IP), des Source-Codes, der Architektur und der Dokumentation, wenn ein Dritter diesen Stand heute exakt nachbauen müsste.
 
-* **Reine Software- & Codebasis (635 PT)**: 650.000 € – 850.000 €
-* **Architektur-Know-how & regulatorische Schnittstellen (§ 42b EnWG, OBIS, wMSB)**: 75.000 € – 100.000 €
-* **Produktionsreife Dokumentation & Wissensportal (15 Artikel DE/EN)**: 25.000 € – 35.000 €
-* 👉 **Substanzwert (Minimum Asset Value)**: **750.000 € – 985.000 €**
+* **Reine Software- & Codebasis (745 PT)**: 750.000 € – 980.000 €
+* **Architektur-Know-how & regulatorische Schnittstellen (§ 42b EnWG, § 14a EnWG, OBIS, wMSB)**: 90.000 € – 120.000 €
+* **Produktionsreife Dokumentation & Wissensportal (15 Artikel DE/EN)**: 30.000 € – 45.000 €
+* 👉 **Substanzwert (Minimum Asset Value)**: **870.000 € – 1.145.000 €**
 
 ---
 
@@ -100,17 +100,17 @@ Im Bereich Green-Tech SaaS und Energy Management (B2C Prosumer + B2B Energy Shar
 
 #### Erlöspotenzial-Modellierung (Konservatives Szenario Jahr 1–2):
 1. **Säule 1: EMS Pro (B2C / Prosumer)**:
-   * 3.000 Pro-Abonnenten à 4,99 € / Monat = **179.640 € ARR**
+   * 3.000 Pro-Abonnenten à 7,99 € / Monat (bzw. 79,90 € / Jahr) = **~240.000 € ARR**
 2. **Säule 2: Energy Sharing Communities & Quartiere (B2B)**:
    * 20 Energiegenossenschaften / WEGs mit durchschnittlich 35 Zählern (700 Zähler à 10 € / Monat Zähler-Clearing) = **84.000 € ARR**
    * Transaktions-/Clearing-Fee (0,5 Cent / geteilte kWh bei 5 GWh Durchsatz) = **25.000 € p.a.**
-3. **Gesamter ARR-Ansatz**: **ca. 288.640 € ARR**
+3. **Gesamter ARR-Ansatz**: **ca. 349.000 € ARR**
 
 #### Bewertung über Green-Tech SaaS Multiples:
 * Im europäischen Energy-Tech Sektor liegen SaaS-Multiples für hochgradig skalierbare Cloud-Plattformen (Software-Only, Zero-Lock-in) typischerweise bei **8x bis 14x ARR**:
-  * Konservativ (8x ARR): `288.640 € × 8` = **~2.300.000 €**
-  * Moderat (11x ARR): `288.640 € × 11` = **~3.175.000 €**
-* 👉 **SaaS-Marktwert (Jahr 1–2 Traktion)**: **2,3 Mio. € – 3,2 Mio. €**
+  * Konservativ (8x ARR): `349.000 € × 8` = **~2.790.000 €**
+  * Moderat (11x ARR): `349.000 € × 11` = **~3.840.000 €**
+* 👉 **SaaS-Marktwert (Jahr 1–2 Traktion)**: **2,5 Mio. € – 3,8 Mio. €**
 
 ---
 
@@ -118,12 +118,12 @@ Im Bereich Green-Tech SaaS und Energy Management (B2C Prosumer + B2B Energy Shar
 Für strategische Käufer (Stadtwerke, große Energieversorger wie E.ON, EnBW, Vattenfall oder Hardware-Konzerne wie Sungrow, Shelly, SMA, Viessmann) hat Sharegy einen deutlich höheren Wert als der reine Ertragswert:
 
 1. **Massiver Time-to-Market Vorteil (18–24 Monate Vorsprung)**:
-   * Ein Energieversorger spart 1,5 bis 2 Jahre Entwicklungszeit, um ein marktfertiges Energy-Sharing Produkt nach § 42b EnWG anzubieten.
+   * Ein Energieversorger spart 1,5 bis 2 Jahre Entwicklungszeit, um ein marktfertiges EMS und Energy-Sharing Produkt nach § 42b EnWG anzubieten.
 2. **Eliminierung von Entwicklungs- und Team-Risiken**:
-   * Das System ist bereits erprobt, architektonisch gehärtet und umfasst offizielle Integrationen für ioBroker, Home Assistant, Shelly, Sungrow und wMSB (Discovergy).
+   * Das System ist bereits erprobt, architektonisch gehärtet und umfasst offizielle Integrationen für ioBroker, Home Assistant, Shelly, Sungrow, OCPP 1.6-J, Tankerkönig und wMSB (Discovergy).
 3. **Verhinderung von Kundenabwanderung (Churn-Reduction)**:
    * EVUs können ihren Prosumern ein modernes EMS und Quartiers-Sharing unter eigener Marke (White-Label) anbieten.
-* 👉 **Strategischer M&A-Transaktionswert**: **2,5 Mio. € – 4,5 Mio. €**
+* 👉 **Strategischer M&A-Transaktionswert**: **3,0 Mio. € – 5,0 Mio. €**
 
 ---
 
@@ -131,14 +131,14 @@ Für strategische Käufer (Stadtwerke, große Energieversorger wie E.ON, EnBW, V
 
 | Bewertungsansatz | Zweck & Zielgruppe | Wertansatz (€) |
 |---|---|:---:|
-| **1. Substanzwert (Cost-to-Duplicate)** | Basis für Bilanzierung, Asset-Verkauf & Mindestabsicherung | **ca. 750.000 € – 985.000 €** |
-| **2. SaaS-Unternehmensbewertung (Early Growth)** | Seed- / Series-A Finanzierungsrunden mit VCs & Business Angels | **ca. 2,0 Mio. € – 3,2 Mio. €** |
-| **3. Strategischer M&A-Unternehmenswert** | Strategische Übernahme / Buy-out durch Stadtwerk, EVU oder Hardware-Konzern | **ca. 2,5 Mio. € – 4,5 Mio. €** |
+| **1. Substanzwert (Cost-to-Duplicate)** | Basis für Bilanzierung, Asset-Verkauf & Mindestabsicherung | **ca. 870.000 € – 1.145.000 €** |
+| **2. SaaS-Unternehmensbewertung (Early Growth)** | Seed- / Series-A Finanzierungsrunden mit VCs & Business Angels | **ca. 2,5 Mio. € – 3,8 Mio. €** |
+| **3. Strategischer M&A-Unternehmenswert** | Strategische Übernahme / Buy-out durch Stadtwerk, EVU oder Hardware-Konzern | **ca. 3,0 Mio. € – 5,0 Mio. €** |
 
 ---
 
 ## 🎯 Strategisches Gesamtfazit
 
-1. **Hohe Entwicklungseffizienz**: Die Plattform repräsentiert einen realen Entwicklungsgegenwert von über **750.000 €**, der softwareseitig in herausragender Qualität und mit modernstem Architektur-Stack umgesetzt wurde.
-2. **Solider Sockelwert**: Sharegy hat als reine Software-Asset-Basis bereits heute einen unverhandelbaren Mindestwert von **~800.000 €**.
-3. **Hebel durch Markteintritt**: Sobald die ersten 1.000 bis 3.000 Prosumer und 10 bis 20 Quartiere auf der Plattform aktiv sind, liegt der faire Unternehmenswert bei **2,5 bis 3,5 Millionen Euro**.
+1. **Hohe Entwicklungseffizienz**: Die Plattform repräsentiert einen realen Entwicklungsgegenwert von über **870.000 € bis 1,1 Mio. €**, der softwareseitig in herausragender Qualität und mit modernstem Architektur-Stack umgesetzt wurde.
+2. **Solider Sockelwert**: Sharegy hat als reine Software-Asset-Basis bereits heute einen unverhandelbaren Mindestwert von **~900.000 € bis 1.000.000 €**.
+3. **Hebel durch Markteintritt**: Sobald die ersten 1.000 bis 3.000 Prosumer und 10 bis 20 Quartiere auf der Plattform aktiv sind, liegt der faire Unternehmenswert bei **3,0 bis 4,0 Millionen Euro**.

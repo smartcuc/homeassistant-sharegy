@@ -112,15 +112,15 @@ Mit dem **Release des Stripe & SEPA Subscription Checkouts (Karten, Lastschrift,
 │                                DIE 10 KERN-USPs VON SHAREGY                             │
 ├─────────────────────────────────────────────────────────────────────────────────────────┤
 │ 1. 🌐 ECHTER ZERO-LOCK-IN: Outbound-WSS (Shelly Gen2/3), OCPP 1.6-J, ioBroker, HA & MQTT│
-│ 2. 🎛️ SMART LOAD MANAGEMENT HUB: Live Power Budget, Merit-Order Kaskade & 24h-Fahrplan │
-│ 3. ♨️ BWWP SG-READY STEUERUNG: 4 Zustände, Boost bis 60°C & Verdichter-Anti-Cycling    │
-│ 4. ☁️ ZERO-HARDWARE CLOUD-INVERTER: 1-Klick OpenAPI Steuerung (Sungrow, Fronius, Kostal)│
-│ 5. ⚡ DUAL-CORE EMS + ENERGY SHARING: Vom Balkonkraftwerk bis zum 500-User-Quartier     │
-│ 6. 💶 GESETZESKONFORMES CLEARING (§ 42b EnWG): 15m-Slots, PDF-Nachweise, Excel & ERP-XML│
-│ 7. 💳 VOLLAUTOMATISIERTER BILLING-STACK: Stripe Checkout (SEPA, Karten, PayPal, Klarna) │
-│ 8. 🌍 6-SPRACHIGES EU-PAKET: Nativer Topbar-Switcher (DE, EN, PL, TR, RU, RO)           │
-│ 9. 🧠 HYBRIDE KI-ANOMALIE-ERKENNUNG: 7-Tage-ML-Baseline & Kriechstrom-/Dauerlauf-Schutz │
-│ 10. 🚀 ENTERPRISE PERFORMANCE: TimescaleDB Hypertables & Continuous Aggregates (< 10 ms)│
+│ 2. 🎛️ 4 PRO-AUTOMATIONS-HUBS: Control (`/app/control`), Mobility, Heating & Alerts       │
+│ 3. 🌡️ PRÄDIKTIVES MPC HEIZEN: Wettergeführte Estrich-Vorladung & SG-Ready BWWP bis 60°C │
+│ 4. 🚗 MOBILITÄTS- & SPRITPREIS-RADAR: 1,4-11 kW PV-Laden + MTS-K Live-Spritpreisvergleich│
+│ 5. ☁️ ZERO-HARDWARE CLOUD-INVERTER: 1-Klick OpenAPI Steuerung (Sungrow, Fronius, Kostal)│
+│ 6. ⚡ DUAL-CORE EMS + ENERGY SHARING: Vom Balkonkraftwerk bis zum 500-User-Quartier     │
+│ 7. 💶 GESETZESKONFORMES CLEARING (§ 42b EnWG): 15m-Slots, PDF-Nachweise, Excel & ERP-XML│
+│ 8. 🛡️ § 14a EnWG NETZDROSSELUNG: Dynamisches 4,2 kW Summenleistungsbudget (BK6-22-300) │
+│ 9. 💳 VOLLAUTOMATISIERTER BILLING-STACK: Stripe Checkout (SEPA, Karten, PayPal, Klarna) │
+│ 10. 👑 CONVERSION-STARKE FREEMIUM-UX: Pro Showcases & interaktive Live-Demo-Vorschau     │
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -128,24 +128,24 @@ Mit dem **Release des Stripe & SEPA Subscription Checkouts (Karten, Lastschrift,
 
 ## 🎯 4. Gesamtevaluation, Strategischer Ausblick & Handlungsempfehlungen
 
-### 📈 Reifegrad-Bewertung: **9.9 / 10 (Production-Ready Live)**
+### 📈 Reifegrad-Bewertung: **9.95 / 10 (Production-Ready Live)**
 
-* **Backend- & Telemetrie-Architektur (10/10)**: TimescaleDB Hypertables, Continuous Aggregates, Redis Ingest-Buffer, Daphne WebSockets, Celery Priority Queues und 100% automatisierte Testabdeckung (150+ Unit- & Integrationstests).
-* **Säule 1: EMS & Smart Load Management (10/10)**: Sub-Sekunden-Fluss, Live-Sankey, 48h Hybrid-Forecasts, 7-Tage EPEX Lookback, autonome Batterie-Arbitrage (Sungrow Cloud OpenAPI), OCPP 1.6-J Wallbox CSMS, BWWP SG-Ready Steuerung mit Verdichterschutz, ioBroker & Home Assistant Adapter, Live-CO₂-Grid-Signal und Native Mobile App.
-* **Payment & Monetarisierung (10/10)**: Stripe & SEPA Checkout mit dynamischen Zahlungsmethoden (Karten, Lastschrift, PayPal, Klarna, Amazon Pay, Link), § 14 UStG Invoicing, Customer Portal, Auto-Healing Customer-IDs und Promo-Coupons.
-* **Säule 2: Energy Sharing & Clearing (9.8/10)**: 15-Minuten-Bilanzierung (OBIS 1.8.0/2.8.0), wMSB Discovergy/inexogy Konnektor, 3 Allokationsmodelle (Dynamisch, Statisch, Hybrid), Community Cockpit, Tarife, Multi-Community Hub, PDF-Monatsabrechnungen und Multi-Format Exporte (.xlsx, .csv, .xml).
+* **Backend- & Telemetrie-Architektur (10/10)**: TimescaleDB Hypertables, Continuous Aggregates, Redis Ingest-Buffer, Daphne WebSockets, Celery Priority Queues und 100% automatisierte Testabdeckung (160+ Unit- & Integrationstests).
+* **Säule 1: EMS & Smart Load Management (10/10)**: 4 dedizierte Pro-Hubs (Energiesteuerung, E-Mobilität & Spritpreise, Wärme & Estrich-Speicher, Alarmzentrale), Sub-Sekunden-Fluss, Live-Sankey, 48h Hybrid-Forecasts, 7-Tage EPEX Lookback, autonome Batterie-Arbitrage (Sungrow Cloud OpenAPI), OCPP 1.6-J Wallbox CSMS, BWWP SG-Ready Steuerung mit Verdichterschutz, ioBroker & Home Assistant Adapter, Live-CO₂-Grid-Signal und Native Mobile App.
+* **Payment & Monetarisierung (10/10)**: Stripe & SEPA Checkout mit dynamischen Zahlungsmethoden (Karten, Lastschrift, PayPal, Klarna, Amazon Pay, Link), § 14 UStG Invoicing, Customer Portal, Auto-Healing Customer-IDs und Promo-Coupons. Standardisierte Pro-Freemium Gating-Architektur mit interaktiver Demo-Vorschau auf allen 4 Automationsseiten.
+* **Säule 2: Energy Sharing & Clearing (9.9/10)**: 15-Minuten-Bilanzierung (OBIS 1.8.0/2.8.0), wMSB Discovergy/inexogy Konnektor, 3 Allokationsmodelle (Dynamisch, Statisch, Hybrid), dynamische Börsentarife (Floor/Cap), Community Cockpit, Tarife, Multi-Community Hub, PDF-Monatsabrechnungen und Multi-Format Exporte (.xlsx, .csv, .xml).
 * **Strategische Marktposition (10/10)**: Sharegy schließt die massive Lücke zwischen reinen B2C-Schalt-Apps (ohne Sharing) und unbezahlbaren B2B-Enterprise-Monolithen (Exnaton, EDA) als erste erschwingliche, hardware-offene und allumfassende Energie-Plattform im europäischen Markt.
 
 ---
 
 ### 💡 Strategische Handlungsempfehlungen für das Management
 
-1. **Go-to-Market: B2B2C statt reinem B2C**:
-   * *Installateure*: Sharegy als herstellerunabhängiges EMS für PV- und Wärmepumpen-Installateure positionieren.
+1. **Go-to-Market: B2B2C Hebel (Installateure, Hausverwaltungen, Genossenschaften)**:
+   * *Installateure*: Sharegy als herstellerunabhängiges EMS für PV-, Wärmepumpen- und Wallbox-Installateure positionieren (White-Label / Partner-Dashboard).
    * *Bürgerenergiegenossenschaften & WEGs*: Säule 2 gezielt an Hausverwaltungen und Bürgerenergie-Initiativen vertreiben, um das Schmerzproblem der Mieterstromabrechnung (§ 42b EnWG) softwareseitig zu lösen.
-2. **Onboarding-Fokus auf Cloud-Inverter & Demo-Sandbox**:
-   * Den 1-Klick Cloud-Login und die Instant-Demo-Profile im Anmelde-Flow prominent platzieren, damit Interessenten ohne Registrierungshürde sofort den vollen Mehrwert erleben.
-3. **Nächste Entwicklungs-Prioritäten**:
-   * **🌡️ Fußbodenheizungs- & Estrich-Speicherregelung**: Thermische Vorladung bei PV-Überschuss & Negativpreisen.
-   * **⛽ Mobilitäts- & Spritpreis-Radar**: Tankerkönig-API Widget für gemischte Haushalte (EV + Verbrenner).
-   * **🛡️ § 14a EnWG Steuerbox Testbed**: Protokollierte 4,2 kW Summenleistungs-Dimmung für Netzbetreiber.
+2. **Onboarding-Fokus auf 1-Klick Cloud-Inverter & Interaktive Demo-Vorschau**:
+   * Den 1-Klick Cloud-Login und die Instant-Demo-Profile im Anmelde-Flow prominent platzieren, damit Interessenten ohne Registrierungshürde sofort den vollen Mehrwert der 4 Pro-Suiten erleben.
+3. **Nächste strategische Wachstums-Horizonte**:
+   * **Matter / EEBUS Bridge**: Lokale Protokollzertifizierung zur Ergänzung von Cloud- und Outbound-WSS-Kanälen.
+   * **BNetzA AS4 Marktkommunikations-Partnerschaft**: Kooperation mit zertifizierten EDIFACT-Dienstleistern für automatisierte Bilanzkreis-Meldungen bei EVUs.
+   * **App Store & Play Store Direktvertrieb**: Release der nativen Apps im Apple App Store & Google Play Store für maximale Markenpräsenz.

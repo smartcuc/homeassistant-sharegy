@@ -126,7 +126,16 @@ Sharegy ist die **erste ganzheitliche Energie-Plattform**, die hochperformantes 
 
 ---
 
-### 6. 🌐 Offene Konnektivität & Zero-Lock-in
+### 7. 👑 Standardisierte Pro-Freemium Gating- & Showcase-Architektur
+* **Konsequenter 3-Stufen-Aufbau**:
+  * **1. Header**: Prominenter Pro-Statusindikator und 1-Klick Upgrade-Button (`⭐ Auf Pro upgraden ab 6,66 €/M`).
+  * **2. Pro Hero Showcase Banner**: Dunkles Glassmorphism-Design (Indigo/Slate-Glow) mit 6 fokussierten Kernvorteilen und dynamischer Preisberechnung.
+  * **3. Interaktive Demo-Vorschau**: Echte Dashboard-Inhalte und Widgets sind für Free-User mit einem leichten Unschärfe-Filter (`backdrop-blur-[1.5px]`) und zentriertem `🔒 Interaktive Demo-Vorschau`-Lock-Badge sichtbar. Klick öffnet das `ProUpgradeModal`.
+* **Sidebar-Harmonisierung**: Konsistente goldene `PRO`-Badges für alle 4 Automationsbereiche (`/app/control`, `/app/mobility`, `/app/heating`, `/app/alerts`).
+
+---
+
+### 8. 🌐 Offene Konnektivität & Zero-Lock-in
 * **Offizieller ioBroker Adapter (`ioBroker.sharegy`)**: Native Einbindung aller ioBroker-Objekte mit Multi-Sensor-Bündelung und bidirektionalem Schalt-Rückkanal via Outbound WebSocket.
 * **Home Assistant Integration**: Offizielle HACS Custom Component mit 9 Sensoren, Telemetrie-Push (`sharegy.push_telemetry`) und Lade-Blueprints.
 * **Outbound-WSS für Shelly Gen2/Gen3/Pro**: Plug-and-Play WebSocket-Verbindung für Shelly 1PM, Pro 3EM, Plus PlugS etc. mit automatischem 5s Live-Polling.
@@ -136,7 +145,7 @@ Sharegy ist die **erste ganzheitliche Energie-Plattform**, die hochperformantes 
 
 ---
 
-### 7. 🧠 KI-Prognosen, Anomalieerkennung & Alarmzentrale
+### 9. 🧠 KI-Prognosen, Anomalieerkennung & Alarmzentrale
 * **48h Hybrid Physics + ML PV-Prognose**: Open-Meteo 96h Globalstrahlung + Anlagenausrichtung + Machine Learning (RandomForest) mit kontinuierlicher WAPE-Güteprüfung.
 * **48h Haushalts-Lastprognose**: Wochentags- und stundenspezifische Verbrauchsprognose.
 * **Predictive Maintenance & 7-Tage ML-Baseline**: Automatische Ermittlung der Ruhestrom-Baseline zur Erkennung defekter Thermostate, Pumpen-Dauerläufe und schleichender Mehrverbräuche.
@@ -145,7 +154,15 @@ Sharegy ist die **erste ganzheitliche Energie-Plattform**, die hochperformantes 
 
 ---
 
-### 8. 📱 Native Apps, Push & 6-Sprachiges EU-Paket (i18n)
+### 10. 🛡️ § 14a EnWG Netzdrosselung & Summenleistungs-Modell (SteuVE)
+* **BNetzA BK6-22-300 Konformität**: Dynamisches Netzleistungs-Budget:
+  $$P_{\text{allow}} = 4{,}2\,\text{kW (Netzkontingent)} + P_{\text{PV}} + P_{\text{Batt}} - P_{\text{Base}}$$
+* **Priorisierte Abarbeitung von Drosselsignalen**: Wärmepumpen (Prio 1) bleiben im Mindestbetrieb, Speicher stoppen Netzladung, Wallboxen (Prio 3) modulieren dynamisch auf das Restkontingent herunter.
+* **Signalquellen**: Netzbetreiber-API, Steuerbox-CLS, potentialfreier Shelly-Schaltkontakt oder Handtest.
+
+---
+
+### 11. 📱 Native Apps, Push & 6-Sprachiges EU-Paket (i18n)
 * **6 Europäische Sprachen**: Vollständige Lokalisierung in 🇩🇪 Deutsch, 🇬🇧 English, 🇵🇱 Polski, 🇹🇷 Türkçe, 🇷🇺 Русский und 🇷🇴 Română mit blitzschnellem Topbar-Umschalter.
 * **Native Android App**: Gebaut mit Capacitor 7 (`de.sharegy.app`) mit flackerfreiem Splashscreen und nativem Lifecycle.
 * **Web-Push (W3C / VAPID)**: Push-Benachrichtigungen auf Sperrbildschirmen für Android, Desktop und Apple iPhone (iOS 16.4+ Safari).
@@ -153,7 +170,7 @@ Sharegy ist die **erste ganzheitliche Energie-Plattform**, die hochperformantes 
 
 ---
 
-### 9. 🏛️ Säule 2: Energy Sharing Communities & Quartiers-Clearing
+### 12. 🏛️ Säule 2: Energy Sharing Communities & Quartiers-Clearing
 * **Eichrechtskonforme 15-Minuten Bilanzierung**: Exakte Abrechnungsschnittstelle basierend auf OBIS-Zählerständen (`1.8.0` Bezug, `2.8.0` Einspeisung).
 * **3 Flexible Allokationsmodelle (§ 42b / § 42a EnWG)**:
   * *Dynamisch*: Zuteilung nach zeitgleichem 15-Minuten Lastgang.
@@ -169,7 +186,7 @@ Sharegy ist die **erste ganzheitliche Energie-Plattform**, die hochperformantes 
 
 ---
 
-### 10. 💳 Vollautomatisierter SaaS-Billing & Payment-Stack (Stripe)
+### 13. 💳 Vollautomatisierter SaaS-Billing & Payment-Stack (Stripe)
 * **Multi-Zahlungsmethoden**: Kredit-/Debitkarten (Visa, Mastercard, Amex), SEPA-Lastschrift, PayPal, Klarna, Amazon Pay und Stripe Link.
 * **Rechtssichere Rechnungslegung (§ 14 UStG)**: Automatischer USt-Ausweis (19% MwSt., USt-IdNr `DE300917919`), Statement-Descriptor `SHAREGY PRO - SMARTEVO` und fortlaufende Nummernkreise (`SHAREGY-...`).
 * **Stripe Customer Portal**: Self-Service-Verwaltung für Zahlungsmethoden, Rechnungs-PDFs und Abo-Status.
@@ -178,14 +195,14 @@ Sharegy ist die **erste ganzheitliche Energie-Plattform**, die hochperformantes 
 
 ---
 
-### 11. 🛡️ Enterprise Security, Hardware-Watchdog & Demo-Sandbox
+### 14. 🛡️ Enterprise Security, Hardware-Watchdog & Demo-Sandbox
 * **Server-Hardware & Kapazitäts-Wächter**: Rollenbasierte Überwachung von CPU, RAM, Disk und Latenzen (RBAC: exklusiv für HEMS- und Sysadmins).
 * **Autonome Demo-Sandbox**: 3 isolierte Demo-Profile (Smart Home, Community Admin, Member) für 1-Klick-Logins ohne Registrierung.
 * **Kaskadierende Hypertable-Sicherheit**: Sichere Bereinigung und Re-Seeding ohne Datenbank-Blockaden.
 
 ---
 
-### 12. 🛟 Integrierter Support- & Helpdesk-Hub
+### 15. 🛟 Integrierter Support- & Helpdesk-Hub
 * **Integrierter Support-Drawer**: 1-Klick Ticket-Erstellung direkt aus der Topbar mit automatischer Übermittlung von Fehlermeldungen und Systemkontext.
 * **FAQ-Deflection**: Automatische Einblendung passender Handbuch-Lösungen während des Tippens zur Entlastung des Support-Teams.
 * **Interaktives Wissensportal (`/app/help`)**: 15 vollwertige Handbuch-Artikel in 9 Kategorien (DE & EN) mit sanfter Anchor-Navigation (`#articles-list`) und Staff-Live-Editor.

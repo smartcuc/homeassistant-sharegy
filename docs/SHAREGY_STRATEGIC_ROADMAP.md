@@ -1,7 +1,7 @@
 # 🚀 Sharegy Strategische Produkt- & Architektur-Roadmap
 
 **Mission**: Die führende SaaS-Plattform für **Home Energy Management (EMS)** und **Energy Sharing Communities (ESC)**.  
-**Stand**: September 2026 (Live v3.5)
+**Stand**: September 2026 (Live v5.2)
 
 ---
 
@@ -22,12 +22,14 @@
    │ • Daten: WSS, MQTT, OTel,     │                               │ • Daten: iMSys Zähler (OBIS   │
    │   Modbus, Home Assistant      │                               │   1.8.0 Bezug, 2.8.0 Einspeis)│
    │ • Takt: Sekunden / Minuten (W)│                               │ • Takt: 15-Minuten-Raster     │
-   │ • Features: Live-Fluss,       │                               │ • Features: P2P-Bilanzierung, │
-   │   Sankey, Spotpreise, Forecast│                               │   Tenant-RBAC, Community      │
-   │   Arbitrage, CO2, Aktorik,    │                               │   Cockpit, 48h KI-Prognose,   │
-   │   6-Sprachen i18n, 7d EPEX    │                               │   Late Ingestion, Audit-Log   │
+   │ • 4 Pro Hubs: Control, Heat,  │                               │ • Features: P2P-Bilanzierung, │
+   │   Mobility & Alerts           │                               │   Tenant-RBAC, Community      │
+   │ • Features: Live-Fluss,       │                               │   Cockpit, 48h KI-Prognose,   │
+   │   Sankey, Spotpreise, Forecast│                               │   Late Ingestion, Audit-Log   │
+   │   Arbitrage, CO2, Aktorik,    │                               │   § 42b EnWG PDF & ERP Exporte│
+   │   6-Sprachen i18n, 7d EPEX    │                               │   § 14a EnWG Netzdrosselung   │
    │ • Monetarisierung: Stripe     │                               │ • Monetarisierung: Gebühren   │
-   │   (Karten, SEPA, PayPal 4,99€)│                               │   pro Zähler / kWh-Clearing   │
+   │   (Karten, SEPA, PayPal 7,99€)│                               │   pro Zähler / kWh-Clearing   │
    └───────────────────────────────┘                               └───────────────────────────────┘
 ```
 
@@ -130,14 +132,18 @@
   ├── 2.34 ✅ 6-Sprachiges EU-Internationalisierungspaket (🇩🇪 DE, 🇬🇧 EN, 🇵🇱 PL, 🇹🇷 TR, 🇷🇺 RU, 🇷🇴 RO)
   ├── 2.35 ✅ EPEX Spot 7-Tage Trend-Lookback (`range="week"`/`"7d"`) & Spitzenanalyse
   ├── 2.36 ✅ Server-Hardware & Kapazitäts-Wächter mit RBAC-Schutz (HEMS-/Sysadmin)
-  └── 2.37 ✅ Autonome Demo-Umgebungen & Multi-Tenant Sandbox-Isolation (3 Profile)
+  ├── 2.37 ✅ Autonome Demo-Umgebungen & Multi-Tenant Sandbox-Isolation (3 Profile)
+  ├── 2.38 ✅ 🌡️ Fußbodenheizungs-Steuerung & Prädiktives MPC (Model Predictive Control & Estrich-Vorladung)
+  ├── 2.39 ✅ ⛽ Mobilitäts- & Spritpreis-Radar (MTS-K / Tankerkönig Live-Preise & 100km EV-Vergleich)
+  ├── 2.40 ✅ 👑 Standardisiertes Pro-Freemium Gating mit interaktiver Live-Demo-Vorschau (4 Hubs)
+  └── 2.41 ✅ 🧭 Dedizierte Sub-Hubs-Architektur (`/app/mobility`, `/app/heating`) mit Bi-direktionalem Link
 
 ┌───────────────────────────────────────────────────────────────────────────────┐
 │ MEILENSTEIN 3: PAYMENT, MONETARISIERUNG & BILLING-ARCHITEKTUR (✅ 100% LIVE)   │
 └───────────────────────────────────────────────────────────────────────────────┘
   ├── 3.1 ✅ **Tarif- & Plan-Modellierung**:
-  │          • Free vs. Pro (Monatlich 4,99 € / Jährlich 49,99 €)
-  │          • Feature-Gating Matrix (Alarmzentrale, ML-Solarprognose, Batterie-Arbitrage)
+  │          • Free vs. Pro (Monatlich 7,99 € / Jährlich 79,90 €)
+  │          • 4 Pro Hubs (Control, Mobility, Heating, Alerts) mit interaktiver Demo-Vorschau
   ├── 3.2 ✅ **Stripe / Payment Gateway Checkout & Customer Portal Flow**:
   │          • Vollständig aktiviert: Kreditkarten, SEPA-Lastschrift, PayPal, Klarna, Amazon Pay, Link
   │          • Self-Service Customer Portal für Abo-Verwaltung, Zahlungsmittel & Rechnungen

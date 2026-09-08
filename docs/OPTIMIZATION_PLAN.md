@@ -12,7 +12,7 @@
 | **Phase 2** | DB- & Performance-Optimierung | 🟢 EMS-Free & Sharing | 🟢 100% Abgeschlossen | 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7 | – |
 | **Phase 3** | Celery & Buffer-Härtung | 🟢 EMS-Free Stabilität | 🟢 100% Abgeschlossen | 3.1, 3.2, 3.3, 3.4, 3.5 | – |
 | **Phase 4** | Architektur & Diagramme | 🟢 EMS-Free Sankey & Tests | 🟢 100% Abgeschlossen | 4.1, 4.2, 4.3, 4.4 | – |
-| **Phase 5** | EMS-Pro, KI, Apps & Aktorik | 🟢 EMS-Pro, Push, Billing & I18n | 🟢 100% Abgeschlossen | 5.1 – 5.31, 5.34 – 5.39 | 5.32, 5.33 |
+| **Phase 5** | EMS-Pro, KI, Apps & Aktorik | 🟢 EMS-Pro, Push, Billing & I18n | 🟢 100% Abgeschlossen | 5.1 – 5.41 | – |
 | **Phase 6** | Säule 2: Energy Sharing & Clearing | 🟢 ESC & Multi-Community Hub | 🟢 100% Abgeschlossen | 6.1 – 6.12 | – |
 
 
@@ -767,7 +767,28 @@
   - **100-km Real-Kostenvergleich**: Visualisiert den direkten Kostenunterschied zwischen E-Auto Solar-Laden (1,44 €/100km), E-Auto Börsenstrom (3,24 €/100km), Diesel (~9,53 €/100km) und Benziner (~12,38 €/100km) mit einer Ersparnis von bis zu 88% (~1.640 €/Jahr bei 15.000 km).
   - **Tageszeit-Tankempfehlungen**: Erkennung optimaler Abend-Tankfenster (18:00–21:30 Uhr) zur Vermeidung teurer Morgen-Spitzen.
   - **Resiliente Simulation Engine & Caching**: 15 Minuten Redis-Cache zur Schonung der API-Limits und flüssige Offline-/Demo-Unterstützung.
-  - **Vollwertiges UI-Widget**: Direkte Einbettung in das HEMS Control Dashboard (`/app/control`).
+### [x] 5.40 👑 Standardisierte Pro-Freemium Gating- & Showcase-Architektur (4 Automations-Hubs)
+- **Status**: ✅ **100% PRODUKTIONSREIF IMPLEMENTIERT & GETESTET**
+- **Fokus**: Konsistente, conversion-starke UX-Architektur für alle 4 fortgeschrittenen Steuerungs- und Automationsbereiche (`/app/control`, `/app/mobility`, `/app/heating`, `/app/alerts`).
+- **Konzept & Umsetzung**:
+  - **Einheitlicher 3-Stufen-Aufbau**:
+    1. *Header*: Titel mit goldenem `PRO`-Badge für Free-Nutzer und 1-Klick CTA `⭐ Auf Pro upgraden`.
+    2. *Hero Showcase Card (`!isPro`)*: Modernes Slate-/Indigo-Design mit 6 fokussierten Kernvorteilen, Live-Preisen (`proYearlyMonthlyEquiv`) und Upgrade-Button.
+    3. *Interaktive Live-Vorschau (`!isPro`)*: Echte Dashboard-Inhalte und Widgets sind sichtbar, aber mit semi-transparentem Weichzeichner (`backdrop-blur-[1.5px]`) und zentriertem `🔒 Interaktive Demo-Vorschau`-Lock-Badge überlagert. Klick öffnet das `ProUpgradeModal`.
+    4. *Vollfreischaltung (`isPro: true`)*: Ungetrübter Zugriff auf alle Schaltflächen, Live-Werte und Konfigurationen.
+  - **Sidebar-Harmonisierung**: Alle 4 Pro-Module sind in der Hauptnavigation (`Sidebar.jsx`) einheitlich mit dem goldenen Pro-Badge versehen.
+
+---
+
+### [x] 5.41 🧭 Multi-Hub Navigations- & Sub-Hub-Architektur (Mobility & Heating)
+- **Status**: ✅ **100% PRODUKTIONSREIF IMPLEMENTIERT & GETESTET**
+- **Fokus**: Übersichtliche Strukturierung wachsender Aktorik- und Verbraucher-Karten (`MobilityPage.jsx`, `HeatingPage.jsx`, `ControlPage.jsx`).
+- **Konzept & Umsetzung**:
+  - **Entzerrung der Master-Steuerung**: Reduktion der Filterleiste in `/app/control` auf 5 gestraffte Hauptkategorien (`Alle`, `Mobilität`, `Wärme`, `Heimspeicher`, `Komfort & Haushalt`).
+  - **Dedizierte Sub-Hubs**:
+    - `/app/mobility`: Fokussierter Hub für E-Mobilität, Wallbox-Steuerung (1,4–11 kW) und MTS-K Spritpreis-Radar.
+    - `/app/heating`: Fokussierter Hub für Fußbodenheizung (MPC Estrich-Vorladung), SG-Ready BWWP, Klimaanlage (Pre-Cooling) und PV-Heizstab.
+  - **Bi-direktionale Verlinkung**: Prominente Gradient-Banners auf `/app/control` für direkten Absprung in die spezialisierten Sub-Hubs.
 
 ---
 
@@ -777,18 +798,20 @@
 ┌───────────────────────────────────────────────────────────────────────────────┐
 │ 🏆 100% VOLLSTÄNDIG PRODUKTIONSREIF: SÄULE 1 (EMS), PAYMENT & SÄULE 2 (SHARING)│
 ├───────────────────────────────────────────────────────────────────────────────┤
-│ • 🟢 Säule 1 (Smart EMS & HEMS Control Hub):                                  │
+│ • 🟢 Säule 1 (Smart EMS & 4 Pro HEMS Hubs):                                   │
 │    - Live-Sankey, Last-/PV-Forecasts (ML + Open-Meteo), Smart Load Hub,       │
+│    - 4 Pro-Hubs: Energiesteuerung, E-Mobilität, Wärme & Alarmzentrale,        │
 │    - 1-Klick Quick Boost, SG-Ready BWWP Lastmanagement,                       │
 │    - 🌡️ Fußbodenheizungs-Steuerung & Prädiktive KI-Wetter-Vorladung (MPC),    │
 │    - 🚗 OCPP 1.6-J CSMS Wallbox & Dynamisches PV-Überschuss-Laden,            │
 │    - ⛽ Mobilitäts- & Spritpreis-Radar (MTS-K / Tankerkönig & 100km-Vergleich),│
+│    - 👑 Standardisiertes Pro-Freemium Gating mit interaktiver Demo-Vorschau,  │
 │    - Sungrow OpenAPI, ioBroker & HA Adapter, Multistring AC-Kopplung,         │
 │    - Live-Pulse Topbar, Dark-Mode, 6-Sprachen i18n, 7d EPEX Trend & Demo-Hub, │
 │    - 🛡️ § 14a EnWG Summenleistungs-Dimmung (4,2 kW Netzkontingent & SteuVE).  │
 │                                                                               │
 │ • 💳 Payment & Billing Platform:                                              │
-│    - Stripe Checkout (SEPA, Kreditkarten, PayPal, Klarna),                    │
+│    - Stripe Checkout (SEPA, Kreditkarten, PayPal, Klarna, Amazon Pay, Link),  │
 │    - § 14 UStG Invoicing, Customer Portal, Auto-Healing Customer-IDs & Coupons│
 │                                                                               │
 │ • ⚡ Säule 2 (Energy Sharing & Gesetzliche Marktkommunikation):               │
