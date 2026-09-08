@@ -931,7 +931,19 @@
     "up_to_yearly": "bis zu 350 € / Jahr",
     "dynamic_spot_control": "Dynamische Börsenpreis-Steuerung:",
     "auto_charge_plan": "Automatischer Ladefahrplan",
-    "exclusive_pro": "Exklusiv für Pro-Abonnenten verfügbar"
+    "exclusive_pro": "Exklusiv für Pro-Abonnenten verfügbar",
+    "advice_charge_title": "Günstiges Nacht-Ladefenster",
+    "advice_charge_desc": "Lade den Speicher nachts von {{window}} zu durchschnittlich {{price}} ct/kWh aus dem Netz voll.",
+    "advice_discharge_title": "Verbrauchsspitzen & Entlastung",
+    "advice_discharge_desc": "Nutze den gespeicherten Strom während der teuren Abendspitze ({{window}}, Börsenpreis {{price}} ct/kWh).",
+    "advice_profit_title": "Netto-Arbitragegewinn",
+    "advice_profit_desc": "Durch die Preisdifferenz von {{spread}} ct/kWh sparst du ca. {{profit}} € pro Zyklus (~{{yearly}} €/Jahr).",
+    "advice_pv_priority_title": "PV-Eigenverbrauch Vorrang",
+    "advice_pv_priority_desc": "Günstigstes Netzfenster liegt bei {{price}} ct/kWh ({{window}}). Die Preisdifferenz reicht aktuell nicht für profitable Netzladung.",
+    "advice_avoid_peaks_title": "Verbrauchsspitzen meiden",
+    "advice_avoid_peaks_desc": "Höchster Bezugspreis um {{window}} ({{price}} ct/kWh). Decke Spitzenlasten aus dem PV-Ertrag oder Batteriespeicher.",
+    "status_prices_today": "Börsenpreise bis heute 24:00 Uhr verfügbar · Neue Spotpreise für morgen ab ca. 13:00 Uhr",
+    "status_prices_full_24h": "Vollständige 24h+ Börsenpreise bis morgen aktiv"
   },
   "energy_kpis": {
     "grid_import_kwh": "Netzbezug: {{val}} kWh",
@@ -970,7 +982,9 @@
     "peak_day": "Peak-Verbrauchstag",
     "solar_savings_short": "Solar-Ersparnis",
     "trend_label": "Zeitverlauf",
-    "intervals": "Intervalle"
+    "intervals": "Intervalle",
+    "loading_trends": "Lade historische Zählertrends...",
+    "legend_tooltip": "Klick: Ein-/Ausblenden · Doppelklick: Detailanalyse"
   },
   "optimizer": {
     "duration_1h": "1 Stunde",
@@ -1500,7 +1514,19 @@
     "efficiency_label": "Wirkungsgrad:",
     "reserve_label": "Notstromreserve:",
     "no_live_sensor": "⚠️ Kein Live-SoC Sensor",
-    "live_sensor_active": "✓ SoC Live-Sensor aktiv"
+    "live_sensor_active": "✓ SoC Live-Sensor aktiv",
+    "in_storage": "{{kwh}} kWh im Speicher",
+    "full_at": "Voll um {{time}} Uhr",
+    "not_reaching_full": "Erreicht keine 100%",
+    "load_coverage": "Deckung für Haushaltslast",
+    "reserve_reached_at": "Reserve um {{time}} Uhr erreicht",
+    "lasts_all_night": "Reicht durchgehend (kein Leerlaufen)",
+    "storage": "Speicher",
+    "soc_level": "Ladestand (SoC)",
+    "solar_yield": "Solar-Ertrag",
+    "house_load": "Hauslast",
+    "battery_charge_flow": "Speicher-Ladung",
+    "battery_discharge_flow": "Speicher-Entladung"
   },
   "T": "T",
   "-": "-",

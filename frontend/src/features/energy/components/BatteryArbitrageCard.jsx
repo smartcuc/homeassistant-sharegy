@@ -213,8 +213,12 @@ export default function BatteryArbitrageCard() {
                             const isString = typeof item === "string";
                             const type = isString ? "general" : item.type;
                             const icon = isString ? "💡" : (item.icon || "ℹ️");
-                            const title = isString ? (item.split(":")[0] || "Empfehlung") : item.title;
-                            const description = isString ? (item.includes(":") ? item.split(":").slice(1).join(":") : item) : item.description;
+                            const title = item.title_key 
+                                ? t(item.title_key, item.params || {}, item.title) 
+                                : (isString ? (item.split(":")[0] || "Empfehlung") : item.title);
+                            const description = item.desc_key 
+                                ? t(item.desc_key, item.params || {}, item.description) 
+                                : (isString ? (item.includes(":") ? item.split(":").slice(1).join(":") : item) : item.description);
 
                             return (
                                 <div
@@ -242,7 +246,7 @@ export default function BatteryArbitrageCard() {
             {data.status_message && (
                 <div className="mt-4 p-3 bg-indigo-50/60 dark:bg-indigo-950/30 rounded-2xl border border-indigo-100 dark:border-indigo-900/40 text-xs text-indigo-900 dark:text-indigo-200 flex items-center gap-2">
                     <span className="text-indigo-600 dark:text-indigo-400 font-bold shrink-0">ℹ️</span>
-                    <span>{data.status_message}</span>
+                    <span>{data.status_key ? t(data.status_key, data.status_message) : data.status_message}</span>
                 </div>
             )}
         </div>

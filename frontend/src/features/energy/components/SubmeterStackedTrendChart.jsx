@@ -81,7 +81,7 @@ export default function SubmeterStackedTrendChart({ period = "30d", onSelectMete
                         </div>`;
                     });
                     html += `<div style="border-top:1px solid #e2e8f0;margin-top:4px;padding-top:4px;display:flex;justify-content:space-between;gap:12px;font-size:11px;font-weight:bold;">
-                        <span>Gesamt:</span>
+                        <span>${t("common.total", "Gesamt")}:</span>
                         <span style="font-family:monospace;color:#4f46e5;">${total.toFixed(2)} kWh</span>
                     </div>`;
                     return html;
@@ -118,7 +118,7 @@ export default function SubmeterStackedTrendChart({ period = "30d", onSelectMete
             },
             series,
         };
-    }, [data, hiddenMeters]);
+    }, [data, hiddenMeters, t]);
 
     const onChartClick = (params) => {
         if (onSelectMeter && params.seriesName) {
@@ -130,7 +130,7 @@ export default function SubmeterStackedTrendChart({ period = "30d", onSelectMete
     if (trendQuery.isLoading) {
         return (
             <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 shadow-xs animate-pulse text-center text-xs text-slate-400">
-                Lade historische Zählertrends...
+                {t("submeters.loading_trends", "Lade historische Zählertrends...")}
             </div>
         );
     }
@@ -170,7 +170,7 @@ export default function SubmeterStackedTrendChart({ period = "30d", onSelectMete
                                 ? "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400 opacity-60 line-through"
                                 : "bg-white dark:bg-slate-850 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 hover:border-indigo-300 dark:hover:border-indigo-500 shadow-2xs"
                                 }`}
-                            title="Klick: Ein-/Ausblenden · Doppelklick: Detailanalyse"
+                            title={t("submeters.legend_tooltip", "Klick: Ein-/Ausblenden · Doppelklick: Detailanalyse")}
                         >
                             <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: m.color }} />
                             <span>{m.icon}</span>

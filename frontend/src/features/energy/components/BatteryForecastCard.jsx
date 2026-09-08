@@ -51,6 +51,12 @@ export default function BatteryForecastCard() {
             return Number(dis) > 0 ? Number(dis) : 0;
         });
 
+        const translateDateLabel = (dl) => {
+            if (dl === "Heute") return t("common.today", "Heute");
+            if (dl === "Morgen") return t("common.tomorrow", "Morgen");
+            return dl || "";
+        };
+
         return {
             backgroundColor: "transparent",
             animation: true,
@@ -74,26 +80,28 @@ export default function BatteryForecastCard() {
                     const chargeVal = Number(slot.charge_kw ?? (slot.bat_flow_kw > 0 ? slot.bat_flow_kw : 0));
                     const dischargeVal = Number(slot.discharge_kw ?? (slot.bat_flow_kw < 0 ? Math.abs(slot.bat_flow_kw) : 0));
 
+                    const dateStr = translateDateLabel(slot.date_label);
+
                     return `
                         <div style="font-weight: bold; margin-bottom: 6px; border-bottom: 1px solid rgba(51, 65, 85, 0.8); padding-bottom: 4px; color: #fff;">
-                            ${slot.date_label || ""} ${slot.time_label} Uhr ${slot.is_night ? "🌙" : "☀️"}
+                            ${dateStr} ${slot.time_label} ${slot.is_night ? "🌙" : "☀️"}
                         </div>
                         <div style="display: flex; justify-content: space-between; gap: 16px; margin: 3px 0; color: #34d399;">
-                            <span>🔋 Ladestand (SoC):</span>
+                            <span>🔋 ${t("battery_forecast.soc_level", "Ladestand (SoC)")}:</span>
                             <b style="font-family: monospace;">${socVal}% (${storedVal} kWh)</b>
                         </div>
                         <div style="display: flex; justify-content: space-between; gap: 16px; margin: 3px 0; color: #fbbf24;">
-                            <span>☀️ Solar-Ertrag:</span>
+                            <span>☀️ ${t("battery_forecast.solar_yield", "Solar-Ertrag")}:</span>
                             <b style="font-family: monospace;">+${solarVal} kW</b>
                         </div>
                         <div style="display: flex; justify-content: space-between; gap: 16px; margin: 3px 0; color: #60a5fa;">
-                            <span>🏠 Hauslast:</span>
+                            <span>🏠 ${t("battery_forecast.house_load", "Hauslast")}:</span>
                             <b style="font-family: monospace;">-${loadVal} kW</b>
                         </div>
                         ${
                             chargeVal > 0.01
                                 ? `<div style="display: flex; justify-content: space-between; gap: 16px; margin: 3px 0; color: #4ade80; font-weight: bold; border-top: 1px solid rgba(51, 65, 85, 0.6); padding-top: 3px;">
-                                    <span>⚡ Speicher-Ladung:</span>
+                                    <span>⚡ ${t("battery_forecast.battery_charge_flow", "Speicher-Ladung")}:</span>
                                     <b style="font-family: monospace;">+${chargeVal.toFixed(2)} kW</b>
                                    </div>`
                                 : ""
@@ -101,7 +109,7 @@ export default function BatteryForecastCard() {
                         ${
                             dischargeVal > 0.01
                                 ? `<div style="display: flex; justify-content: space-between; gap: 16px; margin: 3px 0; color: #38bdf8; font-weight: bold; border-top: 1px solid rgba(51, 65, 85, 0.6); padding-top: 3px;">
-                                    <span>🔄 Speicher-Entladung:</span>
+                                    <span>🔄 ${t("battery_forecast.battery_discharge_flow", "Speicher-Entladung")}:</span>
                                     <b style="font-family: monospace;">-${dischargeVal.toFixed(2)} kW</b>
                                    </div>`
                                 : ""
@@ -327,7 +335,7 @@ export default function BatteryForecastCard() {
                         {kpis.start_soc_pct} <span className="text-xs font-semibold text-emerald-400/80">%</span>
                     </div>
                     <div className="text-[10px] text-emerald-200/70">
-                        {kpis.start_stored_kwh} kWh im Speicher
+                        {t("battery_forecast.in_storage", "{{kwh}} kWh im Speicher", { kwh: kpis.start_stored_kwh })}
                     </div>
                 </div>
 
@@ -340,7 +348,9 @@ export default function BatteryForecastCard() {
                         +{kpis.total_charged_kwh} <span className="text-xs font-semibold text-emerald-400/80">kWh</span>
                     </div>
                     <div className="text-[10px] text-emerald-200/70">
-                        {kpis.full_charge_time ? `Voll um ${kpis.full_charge_time} Uhr` : "Erreicht keine 100%"}
+                        {kpis.full_charge_time 
+                            ? t("battery_forecast.full_at", "Voll um {{time}}", { time: kpis.full_charge_time }) 
+                            : t("battery_forecast.not_reaching_full", "Erreicht keine 100%")}
                     </div>
                 </div>
 
@@ -353,7 +363,7 @@ export default function BatteryForecastCard() {
                         -{kpis.total_discharged_kwh} <span className="text-xs font-semibold text-emerald-400/80">kWh</span>
                     </div>
                     <div className="text-[10px] text-emerald-200/70">
-                        Deckung für Haushaltslast
+                        {t("battery_forecast.load_coverage", "Deckung für Haushaltslast")}
                     </div>
                 </div>
 
@@ -366,7 +376,9 @@ export default function BatteryForecastCard() {
                         {kpis.night_autarky_pct} <span className="text-xs font-semibold text-emerald-300">%</span>
                     </div>
                     <div className="text-[10px] text-emerald-200/70">
-                        {kpis.depleted_time ? `Reserve um ${kpis.depleted_time} Uhr erreicht` : "Reicht komplett über Nacht"}
+                        {kpis.depleted_time 
+                            ? t("battery_forecast.reserve_reached_at", "Reserve um {{time}} erreicht", { time: kpis.depleted_time }) 
+                            : t("battery_forecast.lasts_all_night", "Reicht durchgehend (kein Leerlaufen)")}
                     </div>
                 </div>
             </div>
@@ -381,10 +393,7 @@ export default function BatteryForecastCard() {
                     </span>
                     <div className="flex flex-wrap items-center gap-3 text-[11px]">
                         <span className="flex items-center gap-1">
-                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block shadow-xs shadow-emerald-400/50" /> {t("battery_forecast.legend_soc", "SoC %")}
-                        </span>
-                        <span className="flex items-center gap-1">
-                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block" /> {t("battery_forecast.legend_soc", "SoC (%)")}
+                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block shadow-xs shadow-emerald-400/50" /> {t("battery_forecast.legend_soc", "SoC (%)")}
                         </span>
                         <span className="flex items-center gap-1">
                             <span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block" /> {t("battery_forecast.legend_solar", "Solar (kW)")}
@@ -407,11 +416,15 @@ export default function BatteryForecastCard() {
 
                     {/* Timeline footer dates */}
                     <div className="mt-1 flex items-center justify-between text-[11px] text-slate-400 font-medium px-4 pb-2 border-t border-slate-800/60 pt-2">
-                        <span>{timeline[0]?.date_label} ({timeline[0]?.time_label})</span>
-                        <span className="text-emerald-300 font-semibold">
-                            🔋 {params.battery_name || "Speicher"} · {kpis.night_autarky_pct || 0}% Nachtautarkie
+                        <span>
+                            {timeline[0]?.date_label === "Heute" ? t("common.today", "Heute") : timeline[0]?.date_label === "Morgen" ? t("common.tomorrow", "Morgen") : timeline[0]?.date_label} ({timeline[0]?.time_label})
                         </span>
-                        <span>{timeline[timeline.length - 1]?.date_label} ({timeline[timeline.length - 1]?.time_label})</span>
+                        <span className="text-emerald-300 font-semibold">
+                            🔋 {params.battery_name || t("battery_forecast.storage", "Speicher")} · {kpis.night_autarky_pct || 0}% {t("battery_forecast.night_autarky", "Nachtautarkie")}
+                        </span>
+                        <span>
+                            {timeline[timeline.length - 1]?.date_label === "Heute" ? t("common.today", "Heute") : timeline[timeline.length - 1]?.date_label === "Morgen" ? t("common.tomorrow", "Morgen") : timeline[timeline.length - 1]?.date_label} ({timeline[timeline.length - 1]?.time_label})
+                        </span>
                     </div>
                 </div>
             </div>

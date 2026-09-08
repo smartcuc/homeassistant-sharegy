@@ -206,38 +206,74 @@ def calculate_battery_arbitrage(user, horizon_hours: int = 36) -> dict:
         advice.append({
             "type": "charge",
             "icon": "🌙",
+            "title_key": "arbitrage.advice_charge_title",
             "title": "Günstiges Nacht-Ladefenster",
+            "desc_key": "arbitrage.advice_charge_desc",
             "description": f"Lade den Speicher nachts von {charge_window_label} zu durchschnittlich {avg_charge_price_ct:.1f} ct/kWh aus dem Netz voll.",
+            "params": {
+                "window": charge_window_label,
+                "price": f"{avg_charge_price_ct:.1f}",
+            },
         })
         advice.append({
             "type": "discharge",
             "icon": "⚡",
+            "title_key": "arbitrage.advice_discharge_title",
             "title": "Verbrauchsspitzen & Entlastung",
+            "desc_key": "arbitrage.advice_discharge_desc",
             "description": f"Nutze den gespeicherten Strom während der teuren Abendspitze ({discharge_window_label}, Börsenpreis {avg_discharge_price_ct:.1f} ct/kWh).",
+            "params": {
+                "window": discharge_window_label,
+                "price": f"{avg_discharge_price_ct:.1f}",
+            },
         })
         advice.append({
             "type": "general",
             "icon": "💶",
+            "title_key": "arbitrage.advice_profit_title",
             "title": "Netto-Arbitragegewinn",
+            "desc_key": "arbitrage.advice_profit_desc",
             "description": f"Durch die Preisdifferenz von {spread_ct:.1f} ct/kWh sparst du ca. {daily_profit_eur:.2f} € pro Zyklus (~{projected_yearly_savings_eur:.0f} €/Jahr).",
+            "params": {
+                "spread": f"{spread_ct:.1f}",
+                "profit": f"{daily_profit_eur:.2f}",
+                "yearly": f"{projected_yearly_savings_eur:.0f}",
+            },
         })
     else:
         advice.append({
             "type": "charge",
             "icon": "☀️",
+            "title_key": "arbitrage.advice_pv_priority_title",
             "title": "PV-Eigenverbrauch Vorrang",
+            "desc_key": "arbitrage.advice_pv_priority_desc",
             "description": f"Günstigstes Netzfenster liegt bei {avg_charge_price_ct:.1f} ct/kWh ({charge_window_label}). Die Preisdifferenz reicht aktuell nicht für profitable Netzladung.",
+            "params": {
+                "price": f"{avg_charge_price_ct:.1f}",
+                "window": charge_window_label,
+            },
         })
         advice.append({
             "type": "discharge",
             "icon": "🔋",
+            "title_key": "arbitrage.advice_avoid_peaks_title",
             "title": "Verbrauchsspitzen meiden",
+            "desc_key": "arbitrage.advice_avoid_peaks_desc",
             "description": f"Höchster Bezugspreis um {discharge_window_label} ({avg_discharge_price_ct:.1f} ct/kWh). Decke Spitzenlasten aus dem PV-Ertrag oder Batteriespeicher.",
+            "params": {
+                "window": discharge_window_label,
+                "price": f"{avg_discharge_price_ct:.1f}",
+            },
         })
 
     available_until_label = (
         "heute 24:00 Uhr" if not has_tomorrow_prices
         else f"morgen {(start_hour + timedelta(hours=effective_horizon)).strftime('%H:00')} Uhr"
+    )
+    status_key = (
+        "arbitrage.status_prices_today"
+        if not has_tomorrow_prices
+        else "arbitrage.status_prices_full_24h"
     )
     status_message = (
         "Börsenpreise bis heute 24:00 Uhr verfügbar · Neue Spotpreise für morgen ab ca. 13:00 Uhr"
@@ -265,6 +301,7 @@ def calculate_battery_arbitrage(user, horizon_hours: int = 36) -> dict:
         "timeline": slots,
         "has_tomorrow_prices": has_tomorrow_prices,
         "available_until_label": available_until_label,
+        "status_key": status_key,
         "status_message": status_message,
         "data_horizon_hours": effective_horizon,
     }
