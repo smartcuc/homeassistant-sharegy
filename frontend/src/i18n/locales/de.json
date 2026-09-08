@@ -696,6 +696,7 @@
     "next_hour": "Nächste Stunde",
     "peak_production": "Spitzenertrag",
     "at_hour": "um",
+    "at_time": "um {{time}} Uhr",
     "model": "Modell",
     "load_title": "Haushalts- & Verbrauchs-Prognose",
     "load_subtitle": "Vorausschauende 24h/48h Simulation von Grundlast, Wärmepumpen-Bedarf und Netto-Solarüberschuss.",

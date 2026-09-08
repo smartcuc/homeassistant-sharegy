@@ -180,7 +180,7 @@ export default function ForecastPage() {
                                     </div>
                                     {peak && (
                                         <div className="text-xs text-gray-400 dark:text-slate-500 mt-1">
-                                            {t("forecast.at_hour", "um")} {formatHour(peak.t, timezone)} Uhr
+                                            {t("forecast.at_time", { time: formatHour(peak.t, timezone), defaultValue: `um ${formatHour(peak.t, timezone)} Uhr` })}
                                         </div>
                                     )}
                                 </div>
