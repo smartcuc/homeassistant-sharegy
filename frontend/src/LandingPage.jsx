@@ -135,6 +135,8 @@ export default function LandingPage() {
                     <div className="flex items-center gap-3">
                         <a
                             href="/api/demo/"
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border border-indigo-200 text-xs font-bold transition cursor-pointer shadow-2xs"
                         >
                             <Eye className="w-3.5 h-3.5 text-indigo-600" />
@@ -189,6 +191,8 @@ export default function LandingPage() {
                     <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
                         <a
                             href="/api/demo/"
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="w-full sm:w-auto px-7 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-600 hover:to-teal-600 text-white font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2.5 shadow-xl shadow-emerald-500/25 hover:scale-[1.02] transition-all cursor-pointer"
                         >
                             <span>🚀 Echte Live-Demo starten (1-Klick)</span>
@@ -528,6 +532,8 @@ export default function LandingPage() {
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
                             <a
                                 href="/api/demo/"
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="w-full sm:w-auto px-8 py-4 rounded-xl bg-slate-950 hover:bg-slate-800 text-indigo-300 border border-indigo-400/40 font-bold text-sm transition cursor-pointer flex items-center justify-center gap-2"
                             >
                                 <span>🚀 Echte Live-Demo starten (1-Klick)</span>
