@@ -46,5 +46,32 @@ export function translateInsight(text, t) {
         return t("energy.insight_financial_benefit", { amount, defaultValue: text });
     }
 
+    // 5. Forecast accuracy insights
+    if (text.includes("Exzellente Trefferquote von")) {
+        const match = text.match(/([0-9]+(?:\.[0-9]+)?)\s*%/);
+        const pct = match ? match[1] : "";
+        return t("forecast.insight_excellent_hit_rate", { pct, defaultValue: text });
+    }
+    if (text.includes("Aktuelle Prognosegenauigkeit:")) {
+        const match = text.match(/([0-9]+(?:\.[0-9]+)?)\s*%/);
+        const pct = match ? match[1] : "";
+        return t("forecast.insight_current_accuracy", { pct, defaultValue: text });
+    }
+    if (text.includes("Mehrertrag: Die Solaranlage hat")) {
+        const match = text.match(/hat\s+([0-9]+(?:\.[0-9]+)?)\s*kWh\s*\(\+?([0-9]+(?:\.[0-9]+)?)\s*%\)/);
+        if (match) {
+            return t("forecast.insight_surplus", { kwh: match[1], pct: match[2], defaultValue: text });
+        }
+    }
+    if (text.includes("Minderertrag: Die Erzeugung lag um")) {
+        const match = text.match(/um\s+([0-9]+(?:\.[0-9]+)?)\s*kWh\s*\(-?([0-9]+(?:\.[0-9]+)?)\s*%\)/);
+        if (match) {
+            return t("forecast.insight_deficit", { kwh: match[1], pct: match[2], defaultValue: text });
+        }
+    }
+    if (text.includes("Punktlandung: Die kumulierte Gesamterzeugung")) {
+        return t("forecast.insight_spot_on", "⚖️ Punktlandung: Die kumulierte Gesamterzeugung deckt sich mit der Prognose.");
+    }
+
     return text;
 }

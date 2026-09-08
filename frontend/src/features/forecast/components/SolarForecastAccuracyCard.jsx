@@ -17,8 +17,9 @@ export default function SolarForecastAccuracyCard({ stringId = "all" }) {
     const data = query.data || {};
 
     const accuracyPct = data.accuracy_percent ?? 0;
-    const ratingLabel = data.rating_label || "Gut";
-    const ratingDesc = data.rating_desc || "";
+    const ratingKey = data.rating || "calibrating";
+    const ratingLabel = t(`forecast.rating_${ratingKey}_label`, data.rating_label || "Gut");
+    const ratingDesc = t(`forecast.rating_${ratingKey}_desc`, data.rating_desc || "");
     const badgeColor = data.badge_color || "emerald";
 
     const totalActual = data.total_actual_kwh ?? 0;
@@ -75,16 +76,16 @@ export default function SolarForecastAccuracyCard({ stringId = "all" }) {
                     if (!pt) return "";
                     let accHtml = "";
                     if (pt.accuracy_pct !== null && pt.accuracy_pct !== undefined) {
-                        accHtml = `<div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid #334155; color: #34d399; font-weight: bold; font-size: 11px;">🎯 Trefferquote: ${pt.accuracy_pct}%</div>`;
+                        accHtml = `<div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid #334155; color: #34d399; font-weight: bold; font-size: 11px;">${t("forecast.hit_rate", { pct: pt.accuracy_pct, defaultValue: `🎯 Trefferquote: ${pt.accuracy_pct}%` })}</div>`;
                     }
                     return `
                         <div style="font-weight: bold; margin-bottom: 6px; font-size: 12px; color: #cbd5e1;">⏰ ${pt.time_str}</div>
                         <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 2px;">
-                            <span style="color: #fbbf24; font-size: 11px;">☀️ Ist (Gemessen):</span>
+                            <span style="color: #fbbf24; font-size: 11px;">☀️ ${t("forecast.actual_production", "Ist (Gemessen)")}:</span>
                             <b>${formatNumber(pt.actual_kwh, 2)} kWh</b>
                         </div>
                         <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
-                            <span style="color: #818cf8; font-size: 11px;">⛅ Soll (Prognose):</span>
+                            <span style="color: #818cf8; font-size: 11px;">⛅ ${t("forecast.expected_production", "Soll (Prognose)")}:</span>
                             <b>${formatNumber(pt.forecast_kwh, 2)} kWh</b>
                         </div>
                         ${accHtml}
@@ -150,7 +151,7 @@ export default function SolarForecastAccuracyCard({ stringId = "all" }) {
                 : [],
             series: [
                 {
-                    name: "Ist (Gemessen)",
+                    name: t("forecast.actual_production", "Ist (Gemessen)"),
                     type: "bar",
                     data: actualData,
                     itemStyle: {
@@ -162,7 +163,7 @@ export default function SolarForecastAccuracyCard({ stringId = "all" }) {
                     maxBarWidth: 32,
                 },
                 {
-                    name: "Soll (Prognose)",
+                    name: t("forecast.expected_production", "Soll (Prognose)"),
                     type: "bar",
                     data: forecastData,
                     itemStyle: {
@@ -247,7 +248,7 @@ export default function SolarForecastAccuracyCard({ stringId = "all" }) {
                                     {formatNumber(totalActual, 2)} <span className="text-xs font-normal text-gray-500">kWh</span>
                                 </div>
                                 <div className="text-[11px] text-amber-700/90 font-medium">
-                                    Realer Solar-Ertrag
+                                    {t("forecast.actual_desc", "Realer Solar-Ertrag")}
                                 </div>
                             </div>
 
@@ -260,7 +261,7 @@ export default function SolarForecastAccuracyCard({ stringId = "all" }) {
                                     {formatNumber(totalForecast, 2)} <span className="text-xs font-normal text-gray-500">kWh</span>
                                 </div>
                                 <div className="text-[11px] text-indigo-700/90 font-medium">
-                                    Physik/ML Modell
+                                    {t("forecast.model_desc", "Physik/ML Modell")}
                                 </div>
                             </div>
 
@@ -273,7 +274,10 @@ export default function SolarForecastAccuracyCard({ stringId = "all" }) {
                                     {deltaKwh > 0 ? `+${formatNumber(deltaKwh, 2)}` : formatNumber(deltaKwh, 2)} <span className="text-xs font-normal text-gray-500">kWh</span>
                                 </div>
                                 <div className="text-[11px] text-gray-500 font-medium">
-                                    {deltaPct >= 0 ? `+${deltaPct}% Mehrertrag` : `${deltaPct}% Minderertrag`}
+                                    {deltaPct >= 0
+                                        ? t("forecast.surplus_yield", { pct: deltaPct, defaultValue: `+${deltaPct}% Mehrertrag` })
+                                        : t("forecast.deficit_yield", { pct: deltaPct, defaultValue: `${deltaPct}% Minderertrag` })
+                                    }
                                 </div>
                             </div>
 
@@ -286,7 +290,7 @@ export default function SolarForecastAccuracyCard({ stringId = "all" }) {
                                     {calibFactor.toFixed(3)}x
                                 </div>
                                 <div className="text-[11px] text-emerald-700 font-medium">
-                                    Adaptive Anpassung
+                                    {t("forecast.adaptive_adjustment", "Adaptive Anpassung")}
                                 </div>
                             </div>
                         </div>
@@ -354,10 +358,10 @@ export default function SolarForecastAccuracyCard({ stringId = "all" }) {
                                     <span>🧠</span> {t("forecast.learning_loop_title", "Selbstlernendes Korrektur-Modell")}
                                 </div>
                                 <p className="text-indigo-900/90 leading-relaxed">
-                                    Die Sharegy-Engine passt den standortbezogenen Dämpfungsfaktor (Wolkendurchzug, Neigungswinkel, Verschmutzung) kontinuierlich an reale Erträge an.
+                                    {t("forecast.learning_loop_desc", "Die Sharegy-Engine passt den standortbezogenen Dämpfungsfaktor (Wolkendurchzug, Neigungswinkel, Verschmutzung) kontinuierlich an reale Erträge an.")}
                                 </p>
                                 <div className="text-[11px] font-mono text-indigo-700 bg-indigo-100/50 px-2.5 py-1 rounded-lg inline-block">
-                                    Kalibrierungs-Multiplikator: {calibFactor.toFixed(3)}x
+                                    {t("forecast.calibration_multiplier", { val: `${calibFactor.toFixed(3)}x`, defaultValue: `Kalibrierungs-Multiplikator: ${calibFactor.toFixed(3)}x` })}
                                 </div>
                             </div>
                         </div>
