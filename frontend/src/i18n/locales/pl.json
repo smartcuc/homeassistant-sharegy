@@ -39,15 +39,15 @@
     "sending": "Wysyłanie...",
     "realtime": "Czas rzeczywisty",
     "today": "Dzisiaj",
-    "yesterday": "Gestern",
-    "downloading": "Lade...",
+    "yesterday": "Yesterday",
+    "downloading": "Downloading...",
     "idle": "Bezczynny",
     "standby": "Czuwanie",
-    "date": "Datum",
-    "yes": "Ja",
-    "no": "Nein",
+    "date": "Date",
+    "yes": "Yes",
+    "no": "No",
     "tomorrow": "Jutro",
-    "2d": "2 Tage",
+    "2d": "2 Days",
     "week": "Woche",
     "reset": "Reset",
     "connected": "Verbunden",
@@ -71,7 +71,8 @@
     "collapse": "Einklappen",
     "details_btn": "▼ Details",
     "close_btn": "▲ Schließen",
-    "o_clock": ""
+    "o_clock": "",
+    "open_hub": "Open Hub →"
   },
   "nav": {
     "dashboard": "Pulpit",
@@ -98,14 +99,21 @@
     "admin_group": "Administracja i personel",
     "admin_dashboard": "Panel administratora",
     "admin_tracking": "Zdarzenia i analityka",
-    "tenant_management": "Najemcy i społeczności",
+    "tenant_management": "Społeczność i Lokatorzy",
     "help_group": "Pomoc i wsparcie",
     "support_tickets": "Wsparcie i zgłoszenia",
     "knowledge_base": "Baza wiedzy i podręcznik",
     "alerts": "Centrum alertów",
     "logout": "Wyloguj się",
     "energy_control": "Sterowanie energią",
-    "agent_support_hub": "Centrum wsparcia"
+    "agent_support_hub": "Centrum wsparcia",
+    "mobility": "E-Mobilność i Flota",
+    "mobility_short": "E-Mobilność",
+    "heating_climate": "Ogrzewanie i Klimat",
+    "heating_climate_short": "Ogrzewanie",
+    "tariff": "Taryfa Dynamiczna",
+    "help_center": "Pomoc i Baza Wiedzy",
+    "energy_balance": "Bilans Energetyczny"
   },
   "dashboard": {
     "title": "Twoje Centrum Energii ⚡",
@@ -1318,7 +1326,12 @@
     "appliances": "Sprzęt AGD",
     "heating_rod": "Grzałka",
     "hub_title": "Smart Load Management & Dispatch Hub",
-    "pv_only": "Tylko nadwyżka PV"
+    "pv_only": "Tylko nadwyżka PV",
+    "tab_all": "All Loads",
+    "tab_mobility": "Mobility & Wallbox",
+    "tab_heat": "Heating & Climate",
+    "tab_battery": "Home Storage",
+    "tab_comfort": "Comfort & Household"
   },
   "consumers": {
     "warmwasser": "Ciepła woda",
@@ -1747,5 +1760,18 @@
   "home_setup": {
     "modal_title": "Konfiguracja domu i Omi-Check",
     "modal_subtitle": "Przegląd podłączonych komponentów i stanu konfiguracji."
+  },
+  "mobility": {
+    "title": "E-Mobility & Fuel Price Radar",
+    "subtitle": "OCPP wallbox control, solar surplus charging & real-time fuel price comparison (Tankerkönig MTS-K).",
+    "badge": "Smart Mobility Hub",
+    "connect_wallbox": "Connect Wallbox",
+    "banner_desc": "Wallbox control (1.4–11 kW) & live MTS-K fuel price comparison."
+  },
+  "heating": {
+    "title": "Heating & Thermal Storage",
+    "subtitle": "Weather-compensated underfloor heating (MPC screed pre-charging) & DHW heat pump.",
+    "badge": "Thermal Hub",
+    "banner_desc": "Weather-compensated underfloor heating (MPC screed pre-charging) & DHW heat pump."
   }
 }

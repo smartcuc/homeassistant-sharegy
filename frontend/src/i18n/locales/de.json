@@ -48,6 +48,7 @@
     "no": "Nein",
     "tomorrow": "Morgen",
     "2d": "2 Tage",
+    "open_hub": "Hub öffnen →",
     "week": "Woche",
     "reset": "Reset",
     "connected": "Verbunden",
@@ -76,6 +77,7 @@
   "nav": {
     "dashboard": "Dashboard",
     "energy": "Energie",
+    "energy_balance": "Energiebilanz",
     "overview": "Übersicht",
     "devices": "Geräte",
     "all_devices": "Geräteübersicht",
@@ -89,8 +91,9 @@
     "solar_forecast": "Solar-Prognose",
     "metrics": "Messwert-Explorer",
     "settings_group": "Systemeinstellungen",
-    "producers": "Erzeugeranlagen",
+    "producers": "Erzeuger & Speicher",
     "tariffs": "Strompreise & Tarife",
+    "tariff": "Dynamischer Tarif",
     "billing": "Abonnement & Tarife",
     "mqtt_interfaces": "Schnittstellen",
     "system_status": "Systemstatus",
@@ -98,13 +101,18 @@
     "admin_group": "Administration & Staff",
     "admin_dashboard": "Admin Dashboard",
     "admin_tracking": "Event & Tracking",
-    "tenant_management": "Mandanten & Mieter",
+    "tenant_management": "Community & Mieter",
     "help_group": "Hilfe & Support",
+    "help_center": "Hilfe & Knowledge Base",
     "support_tickets": "Support & Tickets",
     "knowledge_base": "Wissensportal & Handbuch",
     "alerts": "Alarmzentrale",
     "logout": "Abmelden",
-    "energy_control": "Energiesteuerung",
+    "energy_control": "Energiesteuerung (HEMS)",
+    "mobility": "E-Mobilität & Fuhrpark",
+    "mobility_short": "E-Mobilität",
+    "heating_climate": "Wärme & Raumklima",
+    "heating_climate_short": "Wärme & Klima",
     "agent_support_hub": "Support-Zentrale (Triage)"
   },
   "dashboard": {
@@ -1327,6 +1335,11 @@
   "control": {
     "title": "Energiesteuerung & Lastmanagement",
     "subtitle": "Intelligente PV-Überschusssteuerung, Prioritäten-Kaskade und automatisierte Verbraucher-Fahrpläne.",
+    "tab_all": "Alle Verbraucher",
+    "tab_mobility": "Mobilität & Wallbox",
+    "tab_heat": "Wärme & Klima",
+    "tab_battery": "Heimspeicher",
+    "tab_comfort": "Komfort & Haushalt",
     "warmwasser": "Warmwasser",
     "bwwp": "Warmwasser",
     "battery": "Heimspeicher",
@@ -1441,6 +1454,19 @@
     "wallbox_title": "5. Wallbox / E-Auto (Priorität 3)",
     "wallbox_desc": "OCPP 1.6-J dynamisches PV-Überschussladen",
     "grid_export": "Netzexport"
+  },
+  "mobility": {
+    "title": "E-Mobilität & Spritpreis-Radar",
+    "subtitle": "OCPP-Wallbox-Steuerung, PV-Überschussladung & Echtzeit-Spritpreisvergleich (Tankerkönig MTS-K).",
+    "badge": "Smart Mobility Hub",
+    "connect_wallbox": "Wallbox anbinden",
+    "banner_desc": "Wallbox-Steuerung (1,4–11 kW) & MTS-K Live-Spritpreisvergleich."
+  },
+  "heating": {
+    "title": "Wärme & Thermische Speicher",
+    "subtitle": "Wettergeführte FBH (MPC Estrich-Vorladung) & BWWP Wärmepumpe.",
+    "badge": "Thermal Hub",
+    "banner_desc": "Wettergeführte FBH (MPC Estrich-Vorladung) & BWWP Wärmepumpe."
   },
   "wallbox": {
     "waiting_for_solar": "Warte auf Solarstrom",

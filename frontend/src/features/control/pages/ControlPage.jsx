@@ -344,11 +344,11 @@ export default function ControlPage() {
                     {/* Filter Tabs - Grouped into 5 streamlined domains */}
                     <div className="flex flex-wrap items-center gap-2 pb-1">
                         {[
-                            { key: "all", label: "Alle Verbraucher", icon: "🎛️" },
-                            { key: "mobility", label: "Mobilität & Wallbox", icon: "🚗" },
-                            { key: "heat", label: "Wärme & Klima", icon: "🔥" },
-                            { key: "battery", label: "Heimspeicher", icon: "🔋" },
-                            { key: "comfort", label: "Komfort & Haushalt", icon: "🧺" },
+                            { key: "all", label: t("control.tab_all", "Alle Verbraucher"), icon: "🎛️" },
+                            { key: "mobility", label: t("control.tab_mobility", "Mobilität & Wallbox"), icon: "🚗" },
+                            { key: "heat", label: t("control.tab_heat", "Wärme & Klima"), icon: "🔥" },
+                            { key: "battery", label: t("control.tab_battery", "Heimspeicher"), icon: "🔋" },
+                            { key: "comfort", label: t("control.tab_comfort", "Komfort & Haushalt"), icon: "🧺" },
                         ].map((tab) => (
                             <button
                                 key={tab.key}
@@ -379,13 +379,13 @@ export default function ControlPage() {
                                     </div>
                                     <div>
                                         <div className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                                            <span>E-Mobilität & Spritpreis-Radar</span>
+                                            <span>{t("mobility.title", "E-Mobilität & Spritpreis-Radar")}</span>
                                             <span className="text-[10px] px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 font-mono">
-                                                Hub öffnen →
+                                                {t("common.open_hub", "Hub öffnen →")}
                                             </span>
                                         </div>
                                         <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                                            Wallbox-Steuerung (1,4–11 kW) & MTS-K Live-Spritpreisvergleich.
+                                            {t("mobility.banner_desc", "Wallbox-Steuerung (1,4–11 kW) & MTS-K Live-Spritpreisvergleich.")}
                                         </div>
                                     </div>
                                 </div>
@@ -404,13 +404,13 @@ export default function ControlPage() {
                                     </div>
                                     <div>
                                         <div className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                                            <span>Wärme & Thermische Speicher</span>
+                                            <span>{t("heating.title", "Wärme & Thermische Speicher")}</span>
                                             <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 font-mono">
-                                                Hub öffnen →
+                                                {t("common.open_hub", "Hub öffnen →")}
                                             </span>
                                         </div>
                                         <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                                            Wettergeführte FBH (MPC Estrich-Vorladung) & BWWP Wärmepumpe.
+                                            {t("heating.banner_desc", "Wettergeführte FBH (MPC Estrich-Vorladung) & BWWP Wärmepumpe.")}
                                         </div>
                                     </div>
                                 </div>
