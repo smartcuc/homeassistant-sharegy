@@ -1,35 +1,42 @@
-# Sharegy Cloud Energy Bridge for Home Assistant ⚡🏠
+# Sharegy Integration for Home Assistant (v2.2.0)
 
-Offizielle native Home Assistant Integration zur unterbrechungsfreien Übertragung aller lokalen Energiedaten an die **Sharegy Cloud**.
+![Logo](logo.png)
 
----
+Official Home Assistant Integration for the **Sharegy Energy Management Platform** ([sharegy.de](https://sharegy.de)).
 
-## Highlights
-
-* **🎯 1-Klick Entity Picker:** Wähle deine Sensoren (Netzbezug, PV, Speicher, Wallbox, Smart Plugs) einfach per Klick in der Home Assistant Oberfläche aus.
-* **⚡ Outbound WebSocket (WSS) & REST:** Direkter Stream an `wss://sharegy.de/ws/energy/<TOKEN>/` über Port 443 (keine Portfreigaben nötig).
-* **💾 Lokaler SQLite Store & Forward Puffer:** Bei Internetausfall oder Neustarts werden alle Messwerte lokal auf dem Home Assistant gespeichert (bis zu 48h) und lückenlos nachgesendet, sobald die Verbindung wieder steht.
-* **🔄 Live-Anpassung (Options Flow):** Sensoren und Einzelverbraucher können jederzeit unter *Einstellungen -> Geräte & Dienste -> Sharegy -> Konfigurieren* geändert werden.
-
----
-
-## Installation
-
-### Methode 1: Über HACS (Custom Repository) — Empfohlen
-1. Öffne **HACS** in deinem Home Assistant.
-2. Klicke oben rechts auf das Drei-Punkte-Menü $\rightarrow$ **Benutzerdefinierte Repositories**.
-3. Füge die URL `https://github.com/smartcuc/eswes` (Kategorie: *Integration*) hinzu.
-4. Klicke auf **Herunterladen** und starte Home Assistant neu.
-
-### Methode 2: Manuelle Installation
-1. Kopiere den Ordner `custom_components/sharegy` in das Verzeichnis `config/custom_components/` deines Home Assistant.
-2. Starte Home Assistant neu.
+Connects your Home Assistant smart home (PV systems, battery storages, heat pumps, floor heating, BWWP, wallboxes, smart meters, Shelly, Zigbee, ESPHome, KNX, Homematic) with Sharegy for:
+- ☀️ **Realtime EMS Telemetry** (Live energy flow, PV generation, grid feed-in/import, battery SoC)
+- 🔥 **Wärme, Heizung & Raumklima (DIN EN 12831 / MPC)**: Vorausschauende Fußbodenheizungs- & thermische Estrichspeicher-Steuerung
+- 🛡️ **Lokale 24h-Offline-Resilienz**: Cacht den 24h-MPC-Fahrplan lokal in SQLite und regelt die Heizung bei Internetausfall vollkommen autonom weiter
+- 🌡️ **Custom Devices & Submeters** (Heatpumps, Brauchwasserwärmepumpen, temperature sensors, smart plugs)
+- 📦 **SQLite Store & Forward Offline Buffer** (Lückenlose Historie ohne Datenverlust bei Internetausfall)
+- 🎛️ **Bidirectional Smart Load Control** (SG-Ready und dynamische Tarif-Optimierung direkt in HA-Entities)
 
 ---
 
-## Einrichtung
+## 🚀 Installation via HACS (Recommended)
 
-1. Gehe in Home Assistant auf **Einstellungen** $\rightarrow$ **Geräte & Dienste** $\rightarrow$ **Integration hinzufügen**.
-2. Suche nach **Sharegy Cloud Energy Bridge**.
-3. Trage dein persönliches **Home Token** (aus deiner Sharegy-Oberfläche unter *Schnittstellen*) ein.
-4. Wähle deine Sensoren in der Auswahlliste aus $\rightarrow$ Fertig!
+1. Ensure [HACS (Home Assistant Community Store)](https://hacs.xyz/) is installed.
+2. In Home Assistant, open **HACS** ➔ **Integrations**.
+3. Click the **3 dots** in the top right corner and select **Custom repositories**.
+4. Enter repository URL:
+   ```
+   https://github.com/smartcuc/homeassistant-sharegy
+   ```
+   Category: **Integration**
+5. Click **Add**, find **Sharegy Energy Management**, and click **Download**.
+6. **Restart Home Assistant**.
+
+---
+
+## ⚙️ Configuration
+
+1. In Home Assistant, go to **Settings** ➔ **Devices & Services** ➔ **Add Integration**.
+2. Search for **Sharegy**.
+3. Enter your **Sharegy Home Token** (from the Sharegy Web-App under *Settings ➔ Interfaces*).
+4. Select your EMS sensors (Grid Power, Solar Generation, Battery SoC/Power, House Load).
+5. **Fußbodenheizung & Estrich (Wärme & Raumklima)**:
+   - Wähle deine Raumtemperatur-, Vorlauftemperatur- und Estrich-Sensoren.
+   - Wähle das Heizkreis-Relais / Ventil-Entity und optional das Vorlauf-Solltemperatur-Entity.
+   - Stelle Zieltemperatur, Vorladehub (+K) und maximale Estrich-Sicherheitstemperatur ein.
+6. Fertig! Die Daten werden live synchronisiert und bei Internetausfall steuert die lokale 24h-Offline-Resilienz deine Heizung autonom weiter.
