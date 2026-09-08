@@ -329,13 +329,13 @@ export default function ControlPage() {
                             </div>
                             <div>
                                 <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                                    <span>Steuerbare Großverbraucher & Aktoren</span>
+                                    <span>{t("control.controllable_consumers_title", "Steuerbare Großverbraucher & Aktoren")}</span>
                                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
-                                        {consumers.length} Verbraucher
+                                        {t("control.consumers_count", { count: consumers.length, defaultValue: `${consumers.length} Verbraucher` })}
                                     </span>
                                 </h2>
                                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                                    Direktsteuerung, Betriebsmodi und Sollwerte für alle angebundenen Relais, Wallboxen und Wärmepumpen.
+                                    {t("control.controllable_consumers_desc", "Direktsteuerung, Betriebsmodi und Sollwerte für alle angebundenen Relais, Wallboxen und Wärmepumpen.")}
                                 </p>
                             </div>
                         </div>

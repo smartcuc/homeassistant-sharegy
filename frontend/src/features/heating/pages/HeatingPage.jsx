@@ -95,12 +95,12 @@ export default function HeatingPage() {
                     <div>
                         <div className="flex items-center gap-2">
                             <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-                                Wärme, Heizung & Raumklima
+                                {t("heating.hub_title", "Wärme, Heizung & Raumklima")}
                             </h1>
                             {!isPro && <ProBadge size="sm" />}
                         </div>
                         <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-                            Wettergeführte Fußbodenheizung (DIN EN 12831 / MPC), thermische Estrich-Speicherbatterie & Wärmepumpen-Lastmanagement.
+                            {t("heating.hub_subtitle", "Wettergeführte Fußbodenheizung (DIN EN 12831 / MPC), thermische Estrich-Speicherbatterie & Wärmepumpen-Lastmanagement.")}
                         </p>
                     </div>
                 </div>
@@ -235,30 +235,30 @@ export default function HeatingPage() {
                     <div className="flex flex-wrap items-center gap-2">
                         <span className="text-[11px] font-bold px-3 py-1 rounded-full bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 flex items-center gap-1.5">
                             <span>🔥</span>
-                            <span>Thermische Speicher & MPC</span>
+                            <span>{t("heating.badge_thermal_mpc", "Thermische Speicher & MPC")}</span>
                         </span>
 
                         {isLive ? (
                             <span className="text-[11px] font-bold px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1.5">
                                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                                <span>Live-Steuerung aktiv ({fbhData.control_mode_display || "Autopilot"})</span>
+                                <span>{t("heating.live_control_active", { mode: fbhData.control_mode_display || "Autopilot", defaultValue: `Live-Steuerung aktiv (${fbhData.control_mode_display || "Autopilot"})` })}</span>
                             </span>
                         ) : fbhQuery.isLoading ? (
                             <span className="text-[11px] font-bold px-3 py-1 rounded-full bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 flex items-center gap-1.5">
                                 <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
-                                <span>Verbinde mit Heizkreis...</span>
+                                <span>{t("heating.connecting", "Verbinde mit Heizkreis...")}</span>
                             </span>
                         ) : (
                             <span className="text-[11px] font-bold px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 flex items-center gap-1.5">
                                 <span>⚙️</span>
-                                <span>Bereit</span>
+                                <span>{t("common.ready", "Bereit")}</span>
                             </span>
                         )}
 
                         {fbhData.is_preheating_active && (
                             <span className="text-[11px] font-bold px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 flex items-center gap-1.5">
                                 <span>⚡</span>
-                                <span>Estrich-Vorladeboost aktiv</span>
+                                <span>{t("heating.preheat_boost_active", "Estrich-Vorladeboost aktiv")}</span>
                             </span>
                         )}
                     </div>
@@ -266,10 +266,10 @@ export default function HeatingPage() {
                     {/* Filter Tabs */}
                     <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
                         {[
-                            { key: "all", label: "Alle Heizsysteme", icon: "♨️" },
-                            { key: "fbh", label: "Fußbodenheizung", icon: "🌡️" },
-                            { key: "bwwp", label: "Brauchwasser & WP", icon: "🔥" },
-                            { key: "ac_rod", label: "Klima & Heizstab", icon: "❄️" },
+                            { key: "all", label: t("heating.tab_all", "Alle Heizsysteme"), icon: "♨️" },
+                            { key: "fbh", label: t("heating.tab_fbh", "Fußbodenheizung"), icon: "🌡️" },
+                            { key: "bwwp", label: t("heating.tab_bwwp", "Brauchwasser & WP"), icon: "🔥" },
+                            { key: "ac_rod", label: t("heating.tab_ac_rod", "Klima & Heizstab"), icon: "❄️" },
                         ].map((tab) => (
                             <button
                                 key={tab.key}
@@ -295,12 +295,12 @@ export default function HeatingPage() {
                         🧱
                     </div>
                     <div>
-                        <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Estrich-Speichermasse</div>
+                        <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">{t("heating.screed_mass", "Estrich-Speichermasse")}</div>
                         <div className="text-base font-black text-slate-900 dark:text-white font-mono">
-                            {storage.estrich_mass_kg ? (storage.estrich_mass_kg / 1000).toFixed(1) : "—"} <span className="text-xs font-normal text-slate-500">t Beton</span>
+                            {storage.estrich_mass_kg ? (storage.estrich_mass_kg / 1000).toFixed(1) : "—"} <span className="text-xs font-normal text-slate-500">{t("heating.ton_concrete", "t Beton")}</span>
                         </div>
                         <div className="text-[11px] text-slate-500">
-                            {storage.thermal_capacity_kwh_k ? `${storage.thermal_capacity_kwh_k} kWh/K Kapazität` : "Berechne..."}
+                            {storage.thermal_capacity_kwh_k ? t("heating.capacity_kwh_k", { cap: storage.thermal_capacity_kwh_k, defaultValue: `${storage.thermal_capacity_kwh_k} kWh/K Kapazität` }) : t("common.calculating", "Berechne...")}
                         </div>
                     </div>
                 </div>
@@ -310,12 +310,12 @@ export default function HeatingPage() {
                         🔥
                     </div>
                     <div>
-                        <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Thermischer Ladezustand</div>
+                        <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">{t("heating.thermal_soc", "Thermischer Ladezustand")}</div>
                         <div className="text-base font-black text-slate-900 dark:text-white font-mono">
                             {storage.thermal_soc_pct !== undefined ? `${storage.thermal_soc_pct}%` : "—"} <span className="text-xs font-normal text-slate-500">SoC</span>
                         </div>
                         <div className="text-[11px] text-rose-600 dark:text-rose-400 font-bold">
-                            {storage.stored_energy_kwh_th !== undefined ? `${storage.stored_energy_kwh_th} kWh th. geladen` : "Berechne..."}
+                            {storage.stored_energy_kwh_th !== undefined ? t("heating.stored_th_kwh", { kwh: storage.stored_energy_kwh_th, defaultValue: `${storage.stored_energy_kwh_th} kWh th. geladen` }) : t("common.calculating", "Berechne...")}
                         </div>
                     </div>
                 </div>
@@ -325,14 +325,14 @@ export default function HeatingPage() {
                         📉
                     </div>
                     <div>
-                        <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">MPC Vorlauftemperatur</div>
+                        <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">{t("heating.mpc_flow_temp", "MPC Vorlauftemperatur")}</div>
                         <div className="text-base font-black text-slate-900 dark:text-white font-mono">
                             {flow.opt_flow_temp_c !== undefined ? `${flow.opt_flow_temp_c}°C` : "—"} <span className="text-xs font-normal text-slate-500">Soll</span>
                         </div>
                         <div className="text-[11px] text-indigo-600 dark:text-indigo-400 font-medium">
                             {flow.solar_offset_k > 0 
-                                ? `☀️ -${flow.solar_offset_k} K Sonnengewinn` 
-                                : `Heizkurve ${flow.heating_curve_slope || "0.60"}`}
+                                ? t("heating.solar_gain_offset", { offset: flow.solar_offset_k, defaultValue: `☀️ -${flow.solar_offset_k} K Sonnengewinn` })
+                                : t("heating.heating_curve", { slope: flow.heating_curve_slope || "0.60", defaultValue: `Heizkurve ${flow.heating_curve_slope || "0.60"}` })}
                         </div>
                     </div>
                 </div>
@@ -342,12 +342,12 @@ export default function HeatingPage() {
                         🛋️
                     </div>
                     <div>
-                        <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Raumtemperatur</div>
+                        <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">{t("control.room_temp", "Raumtemperatur")}</div>
                         <div className="text-base font-black text-slate-900 dark:text-white font-mono">
                             {temp.current_c !== undefined ? `${temp.current_c}°C` : "—"} <span className="text-xs font-normal text-slate-500">Ist</span>
                         </div>
                         <div className="text-[11px] text-slate-500">
-                            {temp.target_c !== undefined ? `Sollwert: ${temp.target_c}°C` : "Soll: 21.0°C"}
+                            {temp.target_c !== undefined ? t("heating.target_val", { temp: temp.target_c, defaultValue: `Sollwert: ${temp.target_c}°C` }) : t("heating.target_val", { temp: "21.0", defaultValue: "Soll: 21.0°C" })}
                         </div>
                     </div>
                 </div>
