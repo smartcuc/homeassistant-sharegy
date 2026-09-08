@@ -170,8 +170,20 @@ Trotz herausragender Softwarequalität hat Sharegy aktuell **5 kritische Baustel
 
 ---
 
+## ⚡ 6. Erreichte Meilensteine: Go-To-Market & PLG Conversion Engine
+
+| Feature | Status | Beschreibung & Impact |
+| :--- | :---: | :--- |
+| **Landingpage 2.0 (CleanTech)** | ✅ Live | Modernes, helles SaaS-Design mit gleichberechtigter Präsentation von Säule 1 (EMS & § 14a) und Säule 2 (P2P Energy Sharing). |
+| **1-Klick-Gast-Zugang (`/api/demo/`)** | ✅ Live | Barrierefreier Einstieg ins echte Live-Dashboard (`demo@sharegy.de`) in einem neuen Tab – ohne Registrierungshürde. |
+| **Live Energy Flow Simulator** | ✅ Live | Interaktive 4-Szenarien-Simulation (Mittags-Überschuss, Nacht-Arbitrage, Peak-Shaving, § 14a Dimmung). |
+| **§ 14a & Sharing ROI-Rechner** | ✅ Live | Interaktive Haushalts-Kalkulation des jährlichen finanziellen Vorteils (PV + Speicher + WP + Wallbox + Sharing). |
+| **Hardware-Kompatibilität & § 23 MarkenG** | ✅ Live | Symmetrisches 12-Hersteller Grid (SMA, Fronius, Sungrow, Huawei, Tesla, BYD, Daikin, Viessmann etc.) inkl. rechtssicherem Disclaimer. |
+
+---
+
 ## 🎯 Schlussfazit
 
 Sharegy hat das schwierigste Problem gelöst: **Das Produkt ist softwareseitig fertig, architektonisch brillant und dem Wettbewerb inhaltlich überlegen.**
 
-Der Fokus für die kommenden Quartale muss nun auf **Vertriebshebeln (Installateure & Genossenschaften)**, **Offline-Resilienz (Edge Daemon)** und **App-Store-Präsenz** liegen. Mit diesen Schritten ist Sharegy optimal aufgestellt, um die dominierende Energie-Plattform im DACH-Raum zu werden.
+Mit der neuen **Landingpage 2.0**, dem **1-Klick-Gast-Zugang** und der **Dual-Pillar-Positionierung** steht die Product-Led Growth (PLG) Conversion Engine bereit. Der Fokus für die kommenden Quartale liegt nun auf **Vertriebshebeln (Installateure & Genossenschaften)**, **Offline-Resilienz (Edge Daemon)** und **App-Store-Präsenz**. Damit ist Sharegy optimal aufgestellt, um die dominierende Energie-Plattform im DACH-Raum zu werden.

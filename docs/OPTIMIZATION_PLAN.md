@@ -814,15 +814,49 @@
 │    - Stripe Checkout (SEPA, Kreditkarten, PayPal, Klarna, Amazon Pay, Link),  │
 │    - § 14 UStG Invoicing, Customer Portal, Auto-Healing Customer-IDs & Coupons│
 │                                                                               │
-│ • ⚡ Säule 2 (Energy Sharing & Gesetzliche Marktkommunikation):               │
-│    - 15m OBIS-Clearing, Discovergy wMSB Hub, 3 Allokationsmodelle,            │
-│    - ⚡ Dynamische Börsenpreis-Sharingtarife (EPEX Spot, Floor, Cap, Aufschlag)│
-│    - 📜 BNetzA MSCONS EDIFACT Export & Ingest Bridge (D:04B),                 │
-│    - Multi-Community Hub, PDF/Excel/XML-Exporte & Viral Referral System.      │
+│ • 🚀 Go-To-Market & PLG Conversion Engine:                                     │
+│    - Landingpage 2.0 (CleanTech Light-Design, Dual-Pillar Hub Säule 1 & 2),    │
+│    - ⚡ Interaktiver Live Energy Flow Simulator (4 Wetter-/Preisszenarien),     │
+│    - 💰 Interaktiver § 14a & P2P Sharing Transparenz-Rechner,                  │
+│    - 🚀 1-Klick-Gast-Zugang (`/api/demo/` in neuem Tab) ins echte Dashboard,  │
+│    - 🛠️ 12-Hersteller Hardware-Grid & rechtssicherer § 23 MarkenG Disclaimer.   │
 ├───────────────────────────────────────────────────────────────────────────────┤
 │ ✅ KEINE OFFENEN AUFGABEN MEHR: DIE GESAMTE ROADMAP IST VOLLSTÄNDIG ABGESCHLOSSEN!│
 └───────────────────────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## Phase 7 — Go-To-Market, Conversion-Funnel & Landingpage 2.0 (PLG Engine)
+
+### [x] 7.1 Landingpage 2.0 mit CleanTech Light-Design & Dualer Säulenpräsentation
+- **Datei**: [`frontend/src/LandingPage.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/LandingPage.jsx)
+- **Status**: ✅ **Erledigt**. Modernes, helles CleanTech-Design mit gleichberechtigter interaktiver Präsentation von Säule 1 (Smart EMS & § 14a) und Säule 2 (P2P Energy Sharing & Quartiere).
+
+---
+
+### [x] 7.2 Interaktiver Live Energy Flow Simulator (Ersatz für altes SVG)
+- **Datei**: [`frontend/src/components/landing/LiveEnergyFlowSimulator.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/components/landing/LiveEnergyFlowSimulator.jsx)
+- **Status**: ✅ **Erledigt**. High-End Simulations-Konsole mit 4 umschaltbaren Szenarien (Mittags-Überschuss, Nacht-Arbitrage, Peak-Shaving, § 14a Dimmung).
+
+---
+
+### [x] 7.3 Interaktiver § 14a EnWG & P2P Sharing Transparenz-Rechner
+- **Datei**: [`frontend/src/components/landing/SavingsRoiCalculator.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/components/landing/SavingsRoiCalculator.jsx)
+- **Status**: ✅ **Erledigt**. Interaktive Schieberegler für PV (kWp), Speicher (kWh), Wallbox, Wärmepumpe und Sharing zur Live-Ermittlung des finanziellen Vorteils.
+
+---
+
+### [x] 7.4 1-Klick-Gast-Zugang (`/api/demo/`) ins echte Live-Dashboard (Neuer Tab)
+- **Dateien**: [`frontend/src/LandingPage.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/LandingPage.jsx), [`accounts/api/views.py`](file:///c:/Users/Public/Dev/eswes/accounts/api/views.py)
+- **Status**: ✅ **Erledigt**. Barrierefreier 1-Klick-Einstieg via `target="_blank"` direkt in das vorkonfigurierte Demo-Zuhause (`demo@sharegy.de`) mit echten Gerätediagrammen und Telemetrie.
+
+---
+
+### [x] 7.5 Symmetrisches 12-Hersteller Grid & § 23 MarkenG Disclaimer
+- **Datei**: [`frontend/src/LandingPage.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/LandingPage.jsx)
+- **Status**: ✅ **Erledigt**. Exakt 12 Hersteller-Kacheln für ein 100% symmetrisches Responsive-Grid, Ergänzung von ioBroker & Home Assistant sowie rechtssicherer Markendisclaimer.
+
 
 
 
