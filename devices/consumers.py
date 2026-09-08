@@ -174,6 +174,7 @@ def process_incoming_telemetry(token, payload_str, user):
                 "status": "ok",
                 "device": identifier,
                 "device_id": device.id,
+                "home_id": home.id,
                 "relay_state": relay_state,
                 "metrics": metrics,
                 "msg_id": data.get("id"),
@@ -317,17 +318,24 @@ class EnergyConsumer(AsyncWebsocketConsumer):
         res = await process_incoming_telemetry(self.token, payload, user)
 
         # Wenn ein Gerät identifiziert wurde, dynamisch der Channel-Gruppe für Aktorik beitreten
-        if res and res.get("device_id") and self.is_device:
-            dev_id = res["device_id"]
-            dev_ident = res.get("device")
-            grp_id = f"device_{dev_id}"
-            grp_ident = f"device_{dev_ident}"
-            if grp_id not in self.joined_devices:
-                await self.channel_layer.group_add(grp_id, self.channel_name)
-                self.joined_devices.add(grp_id)
-            if grp_ident and grp_ident not in self.joined_devices:
-                await self.channel_layer.group_add(grp_ident, self.channel_name)
-                self.joined_devices.add(grp_ident)
+        if res and self.is_device:
+            if res.get("home_id"):
+                home_grp = f"home_{res['home_id']}"
+                if home_grp not in self.joined_devices:
+                    await self.channel_layer.group_add(home_grp, self.channel_name)
+                    self.joined_devices.add(home_grp)
+
+            if res.get("device_id"):
+                dev_id = res["device_id"]
+                dev_ident = res.get("device")
+                grp_id = f"device_{dev_id}"
+                grp_ident = f"device_{dev_ident}"
+                if grp_id not in self.joined_devices:
+                    await self.channel_layer.group_add(grp_id, self.channel_name)
+                    self.joined_devices.add(grp_id)
+                if grp_ident and grp_ident not in self.joined_devices:
+                    await self.channel_layer.group_add(grp_ident, self.channel_name)
+                    self.joined_devices.add(grp_ident)
 
         # Quittierung nur an den Shelly zurücksenden falls er eine ID mitgeschickt hat
         if res and res.get("msg_id") is not None and self.is_device:
@@ -363,6 +371,47 @@ class EnergyConsumer(AsyncWebsocketConsumer):
             self.msg_counter += 1
             logger.info("[WebSocket:EnergyConsumer] ⚡ Sende Schaltbefehl an Relais: %s", rpc_req)
             await self.send(text_data=json.dumps(rpc_req))
+
+    async def device_control_event(self, event):
+        """
+        Empfängt gerätebezogene Steuerungsbefehle (z. B. FBH-Aktorik, BWWP SG-Ready)
+        und leitet sie an verbundene Clients / ioBroker weiter.
+        """
+        try:
+            payload = {
+                "id": self.msg_counter,
+                "src": "sharegy",
+                "method": event.get("action", "Switch.Set"),
+                "params": event.get("params", {}),
+                "device_id": event.get("device_id"),
+                "identifier": event.get("identifier"),
+                "val": event.get("val"),
+                "value": event.get("value"),
+                "action": event.get("action"),
+                "flow_temp_setpoint_c": event.get("flow_temp_setpoint_c"),
+                "predictive_mpc": event.get("predictive_mpc"),
+            }
+            self.msg_counter += 1
+            await self.send(text_data=json.dumps(payload))
+        except Exception as e:
+            logger.debug("[EnergyConsumer] Fehler beim Senden von device_control_event: %s", e)
+
+    async def schedule_sync_event(self, event):
+        """
+        Empfängt 24h MPC-Fahrpläne und synct diese an verbundene Bridges / ioBroker für Offline-Resilienz.
+        """
+        try:
+            payload = {
+                "type": "schedule_sync",
+                "timeline": event.get("timeline", []),
+                "best_preheat_window": event.get("best_preheat_window"),
+                "flow_temp_setpoint_c": event.get("flow_temp_setpoint_c"),
+                "mode": event.get("mode"),
+                "ts": int(timezone.now().timestamp()),
+            }
+            await self.send(text_data=json.dumps(payload))
+        except Exception as e:
+            logger.debug("[EnergyConsumer] Fehler beim Senden von schedule_sync_event: %s", e)
 
     async def send_energy_update(self, event):
         # Nur an Browser-Clients senden, nicht an den Shelly selbst!
