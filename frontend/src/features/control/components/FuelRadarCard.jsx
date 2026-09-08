@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../../api/client";
+import { translateInsight } from "../../../utils/translateInsight";
 
 export default function FuelRadarCard() {
     const { t } = useTranslation();
@@ -48,7 +49,7 @@ export default function FuelRadarCard() {
                         </div>
                         <p className="text-xs text-slate-500 dark:text-slate-400">
                             {location.city || location.postal_code 
-                                ? `Günstigste Tankstellen in ${location.postal_code} ${location.city} & 100km Kostenvergleich`
+                                ? t("control.fuel_radar_city_desc", { postal: location.postal_code, city: location.city, defaultValue: `Günstigste Tankstellen in ${location.postal_code} ${location.city} & 100km Kostenvergleich` })
                                 : t("control.fuel_radar_desc", "Günstigste Tankstellen im Umkreis & 100km Real-Kostenvergleich")
                             }
                         </p>
@@ -91,13 +92,13 @@ export default function FuelRadarCard() {
                     >
                         <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
                             <span>{f.icon} {f.label}</span>
-                            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">ab</span>
+                            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">{t("common.from", "ab")}</span>
                         </div>
                         <div className="text-base font-black text-slate-900 dark:text-white mt-0.5 font-mono">
                             {f.price ? `${f.price.toFixed(3)} €` : "—"}
                         </div>
                         <div className="text-[10px] text-slate-400 truncate">
-                            {f.bestSt ? `bester Preis bei ${f.bestSt}` : "Suche..."}
+                            {f.bestSt ? t("control.best_price_at", { station: f.bestSt, defaultValue: `bester Preis bei ${f.bestSt}` }) : t("common.searching", "Suche...")}
                         </div>
                     </button>
                 ))}
@@ -106,13 +107,13 @@ export default function FuelRadarCard() {
             {/* Top Stations Grid */}
             <div className="space-y-2 mb-4">
                 <div className="flex items-center justify-between text-[11px] font-bold text-slate-700 dark:text-slate-300">
-                    <span>Günstigste Tankstellen ({fuelType.toUpperCase()}):</span>
-                    <span className="text-slate-400 font-normal">Sortiert nach Entfernung</span>
+                    <span>{t("control.cheapest_stations_title", { fuel: fuelType.toUpperCase(), defaultValue: `Günstigste Tankstellen (${fuelType.toUpperCase()}):` })}</span>
+                    <span className="text-slate-400 font-normal">{t("control.sorted_by_distance", "Sortiert nach Entfernung")}</span>
                 </div>
 
                 {radarQuery.isLoading ? (
                     <div className="p-6 text-center text-xs text-slate-400 animate-pulse">
-                        Lade aktuelle Kraftstoffpreise via MTS-K...
+                        {t("control.loading_fuel_prices", "Lade aktuelle Kraftstoffpreise via MTS-K...")}
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -136,7 +137,7 @@ export default function FuelRadarCard() {
                                             </span>
                                             {isCheapest && (
                                                 <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded bg-emerald-500 text-white shrink-0">
-                                                    TIEFSTPREIS
+                                                    {t("control.lowest_price_badge", "TIEFSTPREIS")}
                                                 </span>
                                             )}
                                         </div>
@@ -150,7 +151,7 @@ export default function FuelRadarCard() {
                                             {price ? `${price.toFixed(3)} €` : "—"}
                                         </div>
                                         <div className="text-[9px] font-semibold text-emerald-600 dark:text-emerald-400">
-                                            {st.is_open ? "🟢 Geöffnet" : "🔴 Geschlossen"}
+                                            {st.is_open ? t("control.station_open", "🟢 Geöffnet") : t("control.station_closed", "🔴 Geschlossen")}
                                         </div>
                                     </div>
                                 </div>
@@ -164,10 +165,10 @@ export default function FuelRadarCard() {
             <div className="mb-4 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 rounded-2xl p-4 text-white border border-indigo-500/30 shadow-md">
                 <div className="flex items-center justify-between text-xs mb-3">
                     <span className="font-bold text-indigo-200 flex items-center gap-1.5">
-                        <span>⚡</span> 100-km Real-Kostenvergleich (EV vs. Verbrenner)
+                        <span>⚡</span> {t("control.cost_comp_heading", "⚡ 100-km Real-Kostenvergleich (EV vs. Verbrenner)")}
                     </span>
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 font-bold">
-                        -{costComp.solar_advantage_pct || 88}% mit Solar
+                        {t("control.solar_savings_badge", { pct: costComp.solar_advantage_pct || 88, defaultValue: `-${costComp.solar_advantage_pct || 88}% mit Solar` })}
                     </span>
                 </div>
 
@@ -176,7 +177,7 @@ export default function FuelRadarCard() {
                     <div>
                         <div className="flex justify-between text-[11px] mb-0.5">
                             <span className="text-emerald-400 font-bold flex items-center gap-1">
-                                <span>☀️</span> E-Auto (Solar-Überschuss 8 ct)
+                                {t("control.ev_solar_label", "☀️ E-Auto (Solar-Überschuss 8 ct)")}
                             </span>
                             <span className="font-black text-emerald-400 font-mono">{costComp.ev_solar_cost_eur !== undefined ? costComp.ev_solar_cost_eur.toFixed(2) : "1.44"} € / 100 km</span>
                         </div>
@@ -189,7 +190,7 @@ export default function FuelRadarCard() {
                     <div>
                         <div className="flex justify-between text-[11px] mb-0.5">
                             <span className="text-indigo-300 font-semibold flex items-center gap-1">
-                                <span>🌙</span> E-Auto (Börsen-Nachtladen)
+                                {t("control.ev_spot_label", "🌙 E-Auto (Börsen-Nachtladen)")}
                             </span>
                             <span className="font-bold text-indigo-200 font-mono">{costComp.ev_spot_night_cost_eur !== undefined ? costComp.ev_spot_night_cost_eur.toFixed(2) : "3.24"} € / 100 km</span>
                         </div>
@@ -202,7 +203,7 @@ export default function FuelRadarCard() {
                     <div>
                         <div className="flex justify-between text-[11px] mb-0.5">
                             <span className="text-slate-400 flex items-center gap-1">
-                                <span>🛢️</span> Diesel ({bestPrices.diesel?.price ? bestPrices.diesel.price.toFixed(3) : "1.589"} €/l · 6.0 l)
+                                {t("control.diesel_label", { price: bestPrices.diesel?.price ? bestPrices.diesel.price.toFixed(3) : "1.589", defaultValue: `🛢️ Diesel (${bestPrices.diesel?.price ? bestPrices.diesel.price.toFixed(3) : "1.589"} €/l · 6.0 l)` })}
                             </span>
                             <span className="font-semibold text-slate-300 font-mono">{costComp.diesel_cost_eur !== undefined ? costComp.diesel_cost_eur.toFixed(2) : "9.53"} € / 100 km</span>
                         </div>
@@ -215,7 +216,7 @@ export default function FuelRadarCard() {
                     <div>
                         <div className="flex justify-between text-[11px] mb-0.5">
                             <span className="text-slate-400 flex items-center gap-1">
-                                <span>⛽</span> Benziner E10 ({bestPrices.e10?.price ? bestPrices.e10.price.toFixed(3) : "1.719"} €/l · 7.2 l)
+                                {t("control.gasoline_label", { price: bestPrices.e10?.price ? bestPrices.e10.price.toFixed(3) : "1.719", defaultValue: `⛽ Benziner E10 (${bestPrices.e10?.price ? bestPrices.e10.price.toFixed(3) : "1.719"} €/l · 7.2 l)` })}
                             </span>
                             <span className="font-semibold text-slate-300 font-mono">{costComp.gasoline_e10_cost_eur !== undefined ? costComp.gasoline_e10_cost_eur.toFixed(2) : "12.38"} € / 100 km</span>
                         </div>
@@ -227,9 +228,13 @@ export default function FuelRadarCard() {
 
                 {/* Savings Callout Banner */}
                 <div className="mt-3 pt-2.5 border-t border-indigo-900/60 flex items-center justify-between text-xs">
-                    <span className="text-indigo-200/80">Ersparnis mit PV-Laden:</span>
+                    <span className="text-indigo-200/80">{t("control.savings_pv_label", "Ersparnis mit PV-Laden:")}</span>
                     <span className="font-black text-emerald-400 font-mono">
-                        ~{costComp.savings_vs_gasoline_per_100km_eur !== undefined ? costComp.savings_vs_gasoline_per_100km_eur.toFixed(2) : "10.94"} € / 100 km · ~{costComp.savings_annual_15k_km_eur !== undefined ? Math.round(costComp.savings_annual_15k_km_eur).toLocaleString("de-DE") : "1.641"} € / Jahr
+                        {t("control.savings_pv_summary", {
+                            savings100: costComp.savings_vs_gasoline_per_100km_eur !== undefined ? costComp.savings_vs_gasoline_per_100km_eur.toFixed(2) : "10.94",
+                            savingsYear: costComp.savings_annual_15k_km_eur !== undefined ? Math.round(costComp.savings_annual_15k_km_eur).toLocaleString("de-DE") : "1.641",
+                            defaultValue: `~${costComp.savings_vs_gasoline_per_100km_eur !== undefined ? costComp.savings_vs_gasoline_per_100km_eur.toFixed(2) : "10.94"} € / 100 km · ~${costComp.savings_annual_15k_km_eur !== undefined ? Math.round(costComp.savings_annual_15k_km_eur).toLocaleString("de-DE") : "1.641"} € / Jahr`
+                        })}
                     </span>
                 </div>
             </div>
@@ -238,12 +243,13 @@ export default function FuelRadarCard() {
             <div className="text-xs bg-slate-100/70 dark:bg-slate-800/70 text-slate-600 dark:text-slate-300 p-2.5 rounded-xl flex items-center justify-between gap-2 border border-slate-200/50 dark:border-slate-700/50">
                 <div className="flex items-center gap-2">
                     <span className="text-sm">💡</span>
-                    <span className="font-medium">{timing.text || "Preise sinken zum Abend hin ab 18:00 Uhr."}</span>
+                    <span className="font-medium">{translateInsight(timing.text, t) || t("control.timing_favorable_text", "Preise sinken zum Abend hin ab 18:00 Uhr.")}</span>
                 </div>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 shrink-0">
-                    {timing.badge || "Günstiges Fenster"}
+                    {translateInsight(timing.badge, t) || t("control.timing_favorable_badge", "Günstiges Fenster")}
                 </span>
             </div>
         </div>
     );
 }
+

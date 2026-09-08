@@ -97,5 +97,32 @@ export function translateInsight(text, t) {
         }
     }
 
+    // 7. Fuel Radar Timing Advice & Badges
+    if (text === "🟢 Optimales Tankfenster aktiv") {
+        return t("control.timing_optimal_badge", "🟢 Optimales Tankfenster aktiv");
+    }
+    if (text.includes("Jetzt tanken! Zwischen 18:00 und 21:30 Uhr")) {
+        return t("control.timing_optimal_text", "Jetzt tanken! Zwischen 18:00 und 21:30 Uhr sind die Spritpreise im Tagesverlauf statistisch am niedrigsten.");
+    }
+    if (text === "🔴 Teure Morgen-Spitze") {
+        return t("control.timing_morning_badge", "🔴 Teure Morgen-Spitze");
+    }
+    if (text.includes("Tanken vermeiden! Zur morgendlichen Hauptverkehrszeit")) {
+        return t("control.timing_morning_text", "Tanken vermeiden! Zur morgendlichen Hauptverkehrszeit ist Kraftstoff bis zu 10–14 ct/l teurer als am Abend.");
+    }
+    if (text === "🟡 Mittleres Preisniveau") {
+        return t("control.timing_moderate_badge", "🟡 Mittleres Preisniveau");
+    }
+    if (text.includes("Preise fallen zum Abend hin")) {
+        return t("control.timing_moderate_text", "Preise fallen zum Abend hin. Wenn möglich, erst ab ca. 18:00 Uhr anfahren.");
+    }
+    if (text === "Günstiges Fenster") {
+        return t("control.timing_favorable_badge", "Günstiges Fenster");
+    }
+    if (text.includes("Preise sinken zum Abend hin")) {
+        return t("control.timing_favorable_text", "Preise sinken zum Abend hin ab 18:00 Uhr.");
+    }
+
     return text;
 }
+

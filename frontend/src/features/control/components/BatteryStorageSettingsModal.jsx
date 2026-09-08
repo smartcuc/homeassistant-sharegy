@@ -98,10 +98,10 @@ export default function BatteryStorageSettingsModal({ isOpen, onClose, storage, 
                     <div>
                         <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                             <span>⚙️</span>
-                            <span>{isEdit ? "Batteriespeicher bearbeiten" : "Neuen Batteriespeicher anlegen"}</span>
+                            <span>{isEdit ? t("storage.edit_title", "Batteriespeicher bearbeiten") : t("storage.create_title", "Neuen Batteriespeicher anlegen")}</span>
                         </h3>
                         <p className="text-xs text-slate-400 mt-0.5">
-                            Definiere Kapazität, Ladelimits und Betriebsstrategie.
+                            {t("storage.modal_subtitle", "Definiere Kapazität, Ladelimits und Betriebsstrategie.")}
                         </p>
                     </div>
 
@@ -125,13 +125,13 @@ export default function BatteryStorageSettingsModal({ isOpen, onClose, storage, 
                     {/* Section 1: Basic Info & Capacity */}
                     <div className="space-y-3">
                         <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                            1. Allgemeine Angaben & Kapazität
+                            {t("storage.section_general", "1. Allgemeine Angaben & Kapazität")}
                         </h4>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
                                 <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                    Bezeichnung *
+                                    {t("storage.name_label", "Bezeichnung *")}
                                 </label>
                                 <input
                                     type="text"
@@ -144,7 +144,7 @@ export default function BatteryStorageSettingsModal({ isOpen, onClose, storage, 
 
                             <div>
                                 <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                    Nennkapazität (kWh) *
+                                    {t("storage.capacity_label", "Nennkapazität (kWh) *")}
                                 </label>
                                 <input
                                     type="number"
@@ -162,7 +162,7 @@ export default function BatteryStorageSettingsModal({ isOpen, onClose, storage, 
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                             <div>
                                 <label className="block text-[11px] font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                    Max. Laden (kW)
+                                    {t("storage.max_charge_label", "Max. Laden (kW)")}
                                 </label>
                                 <input
                                     type="number"
@@ -175,7 +175,7 @@ export default function BatteryStorageSettingsModal({ isOpen, onClose, storage, 
 
                             <div>
                                 <label className="block text-[11px] font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                    Max. Entladen (kW)
+                                    {t("storage.max_discharge_label", "Max. Entladen (kW)")}
                                 </label>
                                 <input
                                     type="number"
@@ -188,7 +188,7 @@ export default function BatteryStorageSettingsModal({ isOpen, onClose, storage, 
 
                             <div>
                                 <label className="block text-[11px] font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                    Notstromreserve (%)
+                                    {t("storage.backup_reserve_label", "Notstromreserve (%)")}
                                 </label>
                                 <input
                                     type="number"
@@ -203,7 +203,7 @@ export default function BatteryStorageSettingsModal({ isOpen, onClose, storage, 
 
                             <div>
                                 <label className="block text-[11px] font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                    Wirkungsgrad (%)
+                                    {t("storage.efficiency_label", "Wirkungsgrad (%)")}
                                 </label>
                                 <input
                                     type="number"
@@ -226,7 +226,7 @@ export default function BatteryStorageSettingsModal({ isOpen, onClose, storage, 
                     <div className="space-y-3 pt-3 border-t border-slate-100 dark:border-slate-800">
                         <div className="flex items-center justify-between">
                             <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                                <span>⚡</span> 2. Aktive EMS-Steuerung & Smart-Charging
+                                <span>⚡</span> {t("storage.section_ems", "2. Aktive EMS-Steuerung & Smart-Charging")}
                             </h4>
                             <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold">
                                 <input
@@ -236,7 +236,7 @@ export default function BatteryStorageSettingsModal({ isOpen, onClose, storage, 
                                     className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer"
                                 />
                                 <span className={formData.ems_control_enabled ? "text-indigo-600 dark:text-indigo-400 font-bold" : "text-slate-400"}>
-                                    Steuerung aktiv
+                                    {t("storage.control_active", "Steuerung aktiv")}
                                 </span>
                             </label>
                         </div>
@@ -245,24 +245,24 @@ export default function BatteryStorageSettingsModal({ isOpen, onClose, storage, 
                             <div className="p-3.5 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/40 border border-indigo-200/60 dark:border-indigo-800/50 space-y-3">
                                 <div>
                                     <label className="block text-[11px] font-bold text-indigo-900 dark:text-indigo-300 uppercase tracking-wider mb-1">
-                                        Betriebsmodus
+                                        {t("storage.control_mode_label", "Betriebsmodus")}
                                     </label>
                                     <select
                                         value={formData.control_mode}
                                         onChange={(e) => setFormData({ ...formData, control_mode: e.target.value })}
                                         className="w-full p-2.5 bg-white dark:bg-slate-800 border border-indigo-200 dark:border-indigo-800 rounded-xl text-xs font-medium text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 transition"
                                     >
-                                        <option value="self_consumption">☀️ PV-Vorrang (Autarkie & Eigenverbrauch)</option>
-                                        <option value="price_optimized">💶 Spotmarkt-Arbitrage (Preisgeführt)</option>
-                                        <option value="forced_charge">🚀 Manuelle Zwangsladung</option>
-                                        <option value="idle">💤 Standby / Ladesperre</option>
+                                        <option value="self_consumption">{t("storage.mode_self_consumption", "☀️ PV-Vorrang (Autarkie & Eigenverbrauch)")}</option>
+                                        <option value="price_optimized">{t("storage.mode_price_optimized", "💶 Spotmarkt-Arbitrage (Preisgeführt)")}</option>
+                                        <option value="forced_charge">{t("storage.mode_forced_charge", "🚀 Manuelle Zwangsladung")}</option>
+                                        <option value="idle">{t("storage.mode_idle", "💤 Standby / Ladesperre")}</option>
                                     </select>
                                 </div>
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <div>
                                         <label className="block text-[11px] font-bold text-indigo-900 dark:text-indigo-300 uppercase tracking-wider mb-1">
-                                            Soll-Ladeleistung (kW)
+                                            {t("storage.target_power_label", "Soll-Ladeleistung (kW)")}
                                         </label>
                                         <input
                                             type="number"
@@ -277,7 +277,7 @@ export default function BatteryStorageSettingsModal({ isOpen, onClose, storage, 
 
                                     <div>
                                         <label className="block text-[11px] font-bold text-indigo-900 dark:text-indigo-300 uppercase tracking-wider mb-1">
-                                            Preisschwelle (ct/kWh)
+                                            {t("storage.price_threshold_label", "Preisschwelle (ct/kWh)")}
                                         </label>
                                         <input
                                             type="number"
@@ -290,7 +290,7 @@ export default function BatteryStorageSettingsModal({ isOpen, onClose, storage, 
                                 </div>
 
                                 <p className="text-[11px] text-indigo-700 dark:text-indigo-300/80 leading-relaxed">
-                                    Bei <strong>Spotmarkt-Arbitrage</strong> lädt Sharegy den Batteriespeicher bei dynamischen Tarifen automatisch aus dem Netz auf, sobald der Börsenstrompreis unter die Preisschwelle fällt.
+                                    {t("storage.arbitrage_hint", "Bei Spotmarkt-Arbitrage lädt Sharegy den Batteriespeicher bei dynamischen Tarifen automatisch aus dem Netz auf, sobald der Börsenstrompreis unter die Preisschwelle fällt.")}
                                 </p>
                             </div>
                         )}

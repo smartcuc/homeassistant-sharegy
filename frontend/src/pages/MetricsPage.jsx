@@ -444,13 +444,13 @@ export default function MetricsPage() {
                             statusQuery.refetch();
                         }}
                         className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-700 text-xs font-semibold hover:bg-emerald-100/70 transition shadow-2xs cursor-pointer"
-                        title="Live-Telemetrie aktiv (Klicken für sofortigen Refetch)"
+                        title={t("metrics.live_telemetry_tooltip", "Live-Telemetrie aktiv (Klicken für sofortigen Refetch)")}
                     >
                         <span className="relative flex h-2 w-2">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                             <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                         </span>
-                        <span>Live-Sync (~10s)</span>
+                        <span>{t("metrics.live_sync", "Live-Sync (~10s)")}</span>
                     </button>
                 </div>
             </div>
@@ -483,10 +483,10 @@ export default function MetricsPage() {
 
                 <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-xs">
                     <div className="text-xs font-semibold uppercase text-gray-500 tracking-wider">
-                        {t("common.status", "Telemetrie-Takt")}
+                        {t("metrics.telemetry_clock", "Telemetrie-Takt")}
                     </div>
                     <div className="text-3xl font-bold text-indigo-600 mt-2">
-                        Echtzeit
+                        {t("common.realtime", "Echtzeit")}
                     </div>
                     <div className="text-xs text-indigo-500 font-medium mt-1">
                         ⚡ WSS / HTTP Stream

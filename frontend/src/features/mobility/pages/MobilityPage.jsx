@@ -33,8 +33,8 @@ export default function MobilityPage() {
         ? `${Math.round(costComp.savings_annual_15k_km_eur).toLocaleString("de-DE")} €` 
         : "1.641 €";
     const advantagePct = costComp.solar_advantage_pct !== undefined 
-        ? `-${costComp.solar_advantage_pct}% vs. Verbrenner` 
-        : "-88% vs. Verbrenner";
+        ? t("mobility.vs_combustion", { pct: costComp.solar_advantage_pct, defaultValue: `-${costComp.solar_advantage_pct}% vs. Verbrenner` })
+        : t("mobility.vs_combustion", { pct: 88, defaultValue: "-88% vs. Verbrenner" });
 
     return (
         <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
