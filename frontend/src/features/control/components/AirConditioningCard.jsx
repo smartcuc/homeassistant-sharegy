@@ -31,11 +31,11 @@ export default function AirConditioningCard({ consumer, onAction, isPending }) {
                                         ? "bg-sky-500/15 text-sky-600 dark:text-sky-400 border-sky-500/30 animate-pulse"
                                         : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 border-slate-200"
                                 }`}>
-                                    {isRunning ? "❄️ Kühlen aktiv" : "⚪ Standby"}
+                                    {isRunning ? t("control.ac_running", "❄️ Kühlen aktiv") : t("control.ac_standby", "⚪ Standby")}
                                 </span>
                             </div>
                             <p className="text-xs text-slate-400 mt-0.5">
-                                Intelligentes Solar Pre-Cooling
+                                {t("control.ac_subtitle", "Intelligentes Solar Pre-Cooling")}
                             </p>
                         </div>
                     </div>
@@ -44,14 +44,14 @@ export default function AirConditioningCard({ consumer, onAction, isPending }) {
                 {/* Metrics */}
                 <div className="grid grid-cols-2 gap-3">
                     <div className="p-3 bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-700/60">
-                        <div className="text-[11px] text-slate-500">Solltemperatur</div>
+                        <div className="text-[11px] text-slate-500">{t("control.target_temp", "Solltemperatur")}</div>
                         <div className="text-lg font-bold font-mono text-slate-900 dark:text-white mt-0.5">
                             {targetTemp.toFixed(1)} °C
                         </div>
                     </div>
 
                     <div className="p-3 bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-700/60">
-                        <div className="text-[11px] text-slate-500">Kühlleistung (Live)</div>
+                        <div className="text-[11px] text-slate-500">{t("control.cooling_power", "Kühlleistung (Live)")}</div>
                         <div className="text-lg font-bold font-mono text-sky-600 dark:text-sky-400 mt-0.5">
                             {isRunning ? `${consumer.power_w.toFixed(0)} W` : "0 W"}
                         </div>
@@ -61,8 +61,8 @@ export default function AirConditioningCard({ consumer, onAction, isPending }) {
                 {/* Pre-Cooling Info Box */}
                 <div className="p-3 bg-white/70 dark:bg-slate-800/50 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 flex items-center justify-between gap-3 text-xs">
                     <div>
-                        <div className="font-bold text-slate-800 dark:text-slate-200">☀️ Solar Pre-Cooling</div>
-                        <div className="text-[11px] text-slate-400">Kühlt bei PV-Peak 1,5°C vor, spart teuren Abendstrom</div>
+                        <div className="font-bold text-slate-800 dark:text-slate-200">{t("control.pre_cooling_title", "☀️ Solar Pre-Cooling")}</div>
+                        <div className="text-[11px] text-slate-400">{t("control.pre_cooling_desc", "Kühlt bei PV-Peak 1,5°C vor, spart teuren Abendstrom")}</div>
                     </div>
                     <input
                         type="checkbox"
@@ -76,7 +76,7 @@ export default function AirConditioningCard({ consumer, onAction, isPending }) {
             {/* Actions */}
             <div className="pt-4 mt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-3 relative z-10">
                 <span className="text-xs text-slate-400">
-                    Pre-Cool: <strong className="text-sky-600">{preCoolEnabled ? "Aktiviert" : "Aus"}</strong>
+                    {t("control.pre_cool_label", "Pre-Cool:")} <strong className="text-sky-600">{preCoolEnabled ? t("control.pre_cool_active", "Aktiviert") : t("control.pre_cool_off", "Aus")}</strong>
                 </span>
                 <button
                     type="button"
@@ -88,7 +88,7 @@ export default function AirConditioningCard({ consumer, onAction, isPending }) {
                             : "bg-sky-600 hover:bg-sky-700 text-white shadow-sky-600/20"
                     }`}
                 >
-                    {isRunning ? "⏹️ Klimaanlage Aus" : "❄️ Jetzt 1h Vorkühlen"}
+                    {isRunning ? t("control.ac_off", "⏹️ Klimaanlage Aus") : t("control.ac_pre_cool_now", "❄️ Jetzt 1h Vorkühlen")}
                 </button>
             </div>
         </div>

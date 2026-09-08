@@ -151,13 +151,13 @@ export default function AlertsPage() {
                     <div className="relative z-10 max-w-3xl space-y-4">
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 text-xs font-bold uppercase tracking-wider">
                             <span>⭐</span>
-                            <span>Sharegy Pro Exklusiv</span>
+                            <span>{t("alerts.pro_exclusive", "Sharegy Pro Exklusiv")}</span>
                         </div>
                         <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight">
-                            Schütze dein Zuhause mit automatischen Echtzeit-Alarmen & Push-Nachrichten
+                            {t("alerts.pro_hero_title", "Schütze dein Zuhause mit automatischen Echtzeit-Alarmen & Push-Nachrichten")}
                         </h2>
                         <p className="text-indigo-200/80 text-sm sm:text-base leading-relaxed">
-                            Verpasse nie wieder Wechselrichterausfälle, Speicher-Tiefentladungen oder extreme Börsenstrom-Preistiefs. Werde sofort mobil auf deinem Smartphone benachrichtigt.
+                            {t("alerts.pro_hero_desc", "Verpasse nie wieder Wechselrichterausfälle, Speicher-Tiefentladungen oder extreme Börsenstrom-Preistiefs. Werde sofort mobil auf deinem Smartphone benachrichtigt.")}
                         </p>
                     </div>
 
@@ -165,49 +165,49 @@ export default function AlertsPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 relative z-10">
                         <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
                             <div className="text-2xl">📲</div>
-                            <h3 className="text-sm font-bold text-white">Mobile Push-Alarme</h3>
+                            <h3 className="text-sm font-bold text-white">{t("alerts.feat_push_title", "Mobile Push-Alarme")}</h3>
                             <p className="text-xs text-indigo-200/70 leading-relaxed">
-                                Benachrichtigungen direkt auf dein Android- und iOS-Handy – ohne die App öffnen zu müssen.
+                                {t("alerts.feat_push_desc", "Benachrichtigungen direkt auf dein Android- und iOS-Handy – ohne die App öffnen zu müssen.")}
                             </p>
                         </div>
 
                         <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
                             <div className="text-2xl">☀️</div>
-                            <h3 className="text-sm font-bold text-white">Ertrags- & Ausfallwächter</h3>
+                            <h3 className="text-sm font-bold text-white">{t("alerts.feat_inverter_title", "Ertrags- & Ausfallwächter")}</h3>
                             <p className="text-xs text-indigo-200/70 leading-relaxed">
-                                Erkennt stillstehende PV-Strings, Netzabschaltungen und unerwartete Leistungsabfälle sofort.
+                                {t("alerts.feat_inverter_desc", "Erkennt stillstehende PV-Strings, Netzabschaltungen und unerwartete Leistungsabfälle sofort.")}
                             </p>
                         </div>
 
                         <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
                             <div className="text-2xl">🔋</div>
-                            <h3 className="text-sm font-bold text-white">Batterie- & Notstromschutz</h3>
+                            <h3 className="text-sm font-bold text-white">{t("alerts.feat_battery_title", "Batterie- & Notstromschutz")}</h3>
                             <p className="text-xs text-indigo-200/70 leading-relaxed">
-                                Warnt bei Unterschreitung der Notstromreserve und schützt vor Tiefentladungen im Winter.
+                                {t("alerts.feat_battery_desc", "Warnt bei Unterschreitung der Notstromreserve und schützt vor Tiefentladungen im Winter.")}
                             </p>
                         </div>
 
                         <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
                             <div className="text-2xl">⚡</div>
-                            <h3 className="text-sm font-bold text-white">Dynamische Preis-Peaks</h3>
+                            <h3 className="text-sm font-bold text-white">{t("alerts.feat_peaks_title", "Dynamische Preis-Peaks")}</h3>
                             <p className="text-xs text-indigo-200/70 leading-relaxed">
-                                Sofortwarnung vor teuren Verbrauchsspitzen und Hinweis auf negative Börsenstrompreise.
+                                {t("alerts.feat_peaks_desc", "Sofortwarnung vor teuren Verbrauchsspitzen und Hinweis auf negative Börsenstrompreise.")}
                             </p>
                         </div>
 
                         <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
                             <div className="text-2xl">🔌</div>
-                            <h3 className="text-sm font-bold text-white">Dauerlast- & Leckage-Finder</h3>
+                            <h3 className="text-sm font-bold text-white">{t("alerts.feat_leaks_title", "Dauerlast- & Leckage-Finder")}</h3>
                             <p className="text-xs text-indigo-200/70 leading-relaxed">
-                                Erkennt vergessene Großverbraucher (z. B. Heizlüfter, Poolpumpe) und hohe Standby-Verbräuche.
+                                {t("alerts.feat_leaks_desc", "Erkennt vergessene Großverbraucher (z. B. Heizlüfter, Poolpumpe) und hohe Standby-Verbräuche.")}
                             </p>
                         </div>
 
                         <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
                             <div className="text-2xl">💡</div>
-                            <h3 className="text-sm font-bold text-white">KI-Spar-Empfehlungen</h3>
+                            <h3 className="text-sm font-bold text-white">{t("alerts.feat_ai_title", "KI-Spar-Empfehlungen")}</h3>
                             <p className="text-xs text-indigo-200/70 leading-relaxed">
-                                Handlungsanweisungen zur Maximierung deiner Autarkie und Senkung deiner Netzbezugskosten.
+                                {t("alerts.feat_ai_desc", "Handlungsanweisungen zur Maximierung deiner Autarkie und Senkung deiner Netzbezugskosten.")}
                             </p>
                         </div>
                     </div>
@@ -215,7 +215,7 @@ export default function AlertsPage() {
                     {/* CTA Actions */}
                     <div className="pt-4 border-t border-indigo-800/40 relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div className="text-xs text-indigo-200/70 text-center sm:text-left">
-                            Bereits ab <strong className="text-white font-mono">{proYearlyMonthlyEquiv} €</strong> / Monat (jährliche Zahlweise) · 14 Tage kostenlos testen · Jederzeit kündbar
+                            {t("alerts.pro_pricing_sub", "Bereits ab {{price}} € / Monat (jährliche Zahlweise) · 14 Tage kostenlos testen · Jederzeit kündbar", { price: proYearlyMonthlyEquiv })}
                         </div>
                         <div className="flex items-center gap-3 w-full sm:w-auto">
                             <button
@@ -224,7 +224,7 @@ export default function AlertsPage() {
                                 className="w-full sm:w-auto px-6 py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 text-sm font-black rounded-2xl shadow-xl shadow-amber-500/20 transition cursor-pointer flex items-center justify-center gap-2"
                             >
                                 <span>⭐</span>
-                                <span>Alarmzentrale mit Sharegy Pro freischalten</span>
+                                <span>{t("alerts.unlock_pro_btn", "Sharegy Pro jetzt freischalten")}</span>
                             </button>
                         </div>
                     </div>

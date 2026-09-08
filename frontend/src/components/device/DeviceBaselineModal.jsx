@@ -101,7 +101,7 @@ export default function DeviceBaselineModal({ device, isOpen, onClose }) {
                         <span className="text-2xl">🧠</span>
                         <div>
                             <h3 className="font-extrabold text-base text-gray-900 dark:text-white">
-                                Geräteprofil & Baseline-Überwachung
+                                {t("device_baseline.title", "Geräteprofil & Baseline-Überwachung")}
                             </h3>
                             <p className="text-xs text-gray-500">{devName}</p>
                         </div>
@@ -123,14 +123,17 @@ export default function DeviceBaselineModal({ device, isOpen, onClose }) {
                     <span className="text-xl shrink-0">{isAnomaly ? "🚨" : "🟢"}</span>
                     <div className="space-y-1">
                         <div className="font-bold flex items-center gap-2">
-                            <span>Status: {isAnomaly ? "Anomalie / Abweichung erkannt!" : "Normal / Baseline eingehalten"}</span>
+                            <span>Status: {isAnomaly ? t("device_baseline.anomaly_detected", "Anomalie / Abweichung erkannt!") : t("device_baseline.normal_status", "Normal / Baseline eingehalten")}</span>
                         </div>
                         {isAnomaly && profileData?.anomaly_reason && (
                             <p className="opacity-90">{profileData.anomaly_reason}</p>
                         )}
                         {!isAnomaly && (
                             <p className="opacity-80">
-                                Gerät arbeitet innerhalb der definierten Toleranz (Standby: {profileData?.standby_power_w ?? 30} W, Obergrenze: {profileData?.standby_max_w ?? 45} W).
+                                {t("device_baseline.normal_desc", "Gerät arbeitet innerhalb der definierten Toleranz (Standby: {{standby}} W, Obergrenze: {{max}} W).", {
+                                    standby: profileData?.standby_power_w ?? 30,
+                                    max: profileData?.standby_max_w ?? 45,
+                                })}
                             </p>
                         )}
                     </div>
@@ -150,7 +153,7 @@ export default function DeviceBaselineModal({ device, isOpen, onClose }) {
                 <div className="space-y-3">
                     <div className="flex items-center justify-between">
                         <label className="text-xs font-bold text-gray-700 dark:text-gray-300">
-                            Gerätetyp / Preset-Vorlage
+                            {t("device_baseline.preset_label", "Gerätetyp / Preset-Vorlage")}
                         </label>
                         <button
                             type="button"
@@ -159,7 +162,7 @@ export default function DeviceBaselineModal({ device, isOpen, onClose }) {
                             className="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 cursor-pointer"
                         >
                             <span>✨</span>
-                            <span>{learnMutation.isLoading ? "Berechne..." : "Aus Daten lernen (7 Tage)"}</span>
+                            <span>{learnMutation.isLoading ? t("device_baseline.learning", "Berechne...") : t("device_baseline.learn_btn", "Aus Daten lernen (7 Tage)")}</span>
                         </button>
                     </div>
 
@@ -182,7 +185,7 @@ export default function DeviceBaselineModal({ device, isOpen, onClose }) {
                     {/* Standby Power */}
                     <div className="p-3 bg-gray-50 dark:bg-slate-800/50 rounded-xl border border-gray-100 dark:border-slate-800">
                         <label className="block text-[11px] font-bold text-gray-500 uppercase">
-                            Ruhe-Baseline (Standby)
+                            {t("device_baseline.standby_baseline", "Ruhe-Baseline (Standby)")}
                         </label>
                         <div className="flex items-center gap-2 mt-1">
                             <input
@@ -194,13 +197,13 @@ export default function DeviceBaselineModal({ device, isOpen, onClose }) {
                             />
                             <span className="text-xs font-bold text-gray-400">W</span>
                         </div>
-                        <span className="text-[10px] text-gray-400">Soll-Ruhezustand</span>
+                        <span className="text-[10px] text-gray-400">{t("device_baseline.standby_desc", "Soll-Ruhezustand")}</span>
                     </div>
 
                     {/* Standby Max Alarm Threshold */}
                     <div className="p-3 bg-rose-50/50 dark:bg-rose-950/20 rounded-xl border border-rose-100 dark:border-rose-900/40">
                         <label className="block text-[11px] font-bold text-rose-700 dark:text-rose-400 uppercase">
-                            Standby-Alarm ab
+                            {t("device_baseline.standby_alarm_threshold", "Standby-Alarm ab")}
                         </label>
                         <div className="flex items-center gap-2 mt-1">
                             <input
@@ -212,13 +215,13 @@ export default function DeviceBaselineModal({ device, isOpen, onClose }) {
                             />
                             <span className="text-xs font-bold text-rose-400">W</span>
                         </div>
-                        <span className="text-[10px] text-rose-400">Alarmierung bei Überschreitung</span>
+                        <span className="text-[10px] text-rose-400">{t("device_baseline.standby_alarm_desc", "Alarmierung bei Überschreitung")}</span>
                     </div>
 
                     {/* Operating Range */}
                     <div className="p-3 bg-gray-50 dark:bg-slate-800/50 rounded-xl border border-gray-100 dark:border-slate-800">
                         <label className="block text-[11px] font-bold text-gray-500 uppercase">
-                            Betriebsleistung Min
+                            {t("device_baseline.operating_power_min", "Betriebsleistung Min")}
                         </label>
                         <div className="flex items-center gap-2 mt-1">
                             <input
@@ -230,13 +233,13 @@ export default function DeviceBaselineModal({ device, isOpen, onClose }) {
                             />
                             <span className="text-xs font-bold text-gray-400">W</span>
                         </div>
-                        <span className="text-[10px] text-gray-400">Kompressor / Pumpe an</span>
+                        <span className="text-[10px] text-gray-400">{t("device_baseline.compressor_on", "Kompressor / Pumpe an")}</span>
                     </div>
 
                     {/* Max Run Hours */}
                     <div className="p-3 bg-gray-50 dark:bg-slate-800/50 rounded-xl border border-gray-100 dark:border-slate-800">
                         <label className="block text-[11px] font-bold text-gray-500 uppercase">
-                            Max. Dauerlaufzeit
+                            {t("device_baseline.max_run_hours", "Max. Dauerlaufzeit")}
                         </label>
                         <div className="flex items-center gap-2 mt-1">
                             <input
@@ -246,9 +249,9 @@ export default function DeviceBaselineModal({ device, isOpen, onClose }) {
                                 onChange={(e) => setMaxRunHours(parseFloat(e.target.value) || 0)}
                                 className="w-full text-xs font-bold p-1.5 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900"
                             />
-                            <span className="text-xs font-bold text-gray-400">Std.</span>
+                            <span className="text-xs font-bold text-gray-400">{t("common.unit_hours", "Std.")}</span>
                         </div>
-                        <span className="text-[10px] text-gray-400">Schutz vor Vereisung/Defekt</span>
+                        <span className="text-[10px] text-gray-400">{t("device_baseline.freeze_protection", "Schutz vor Vereisung/Defekt")}</span>
                     </div>
                 </div>
 
@@ -261,7 +264,7 @@ export default function DeviceBaselineModal({ device, isOpen, onClose }) {
                             onChange={(e) => setIsActive(e.target.checked)}
                             className="rounded text-indigo-600 cursor-pointer"
                         />
-                        <span>Baseline-Überwachung aktiv</span>
+                        <span>{t("device_baseline.active_toggle", "Baseline-Überwachung aktiv")}</span>
                     </label>
 
                     <div className="flex items-center gap-2">
@@ -270,7 +273,7 @@ export default function DeviceBaselineModal({ device, isOpen, onClose }) {
                             onClick={onClose}
                             className="px-4 py-2 text-xs font-bold text-gray-500 hover:text-gray-700 cursor-pointer"
                         >
-                            Schließen
+                            {t("common.close", "Schließen")}
                         </button>
                         <button
                             type="button"
@@ -288,7 +291,7 @@ export default function DeviceBaselineModal({ device, isOpen, onClose }) {
                             disabled={saveMutation.isLoading}
                             className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition shadow-xs cursor-pointer"
                         >
-                            {saveMutation.isLoading ? "Speichere..." : "Baseline aktivieren →"}
+                            {saveMutation.isLoading ? t("device_baseline.saving", "Speichere...") : t("device_baseline.activate_btn", "Baseline aktivieren →")}
                         </button>
                     </div>
                 </div>

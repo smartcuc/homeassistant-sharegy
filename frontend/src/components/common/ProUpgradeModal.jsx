@@ -11,12 +11,15 @@ import ProBadge from "./ProBadge";
 export default function ProUpgradeModal({
     open,
     onClose,
-    featureName = "Dieses Feature",
-    featureDesc = "Erweitere dein Energiemanagement mit Sharegy Pro für maximale Transparenz und Einsparungen.",
+    featureName,
+    featureDesc,
 }) {
     const navigate = useNavigate();
     const { t } = useTranslation();
     const { proYearlyMonthlyEquiv } = useSubscription();
+
+    const resolvedFeatureName = featureName || t("billing.pro_modal.default_feature", "Dieses Feature");
+    const resolvedFeatureDesc = featureDesc || t("billing.pro_modal.default_desc", "Erweitere dein Energiemanagement mit Sharegy Pro für maximale Transparenz und Einsparungen.");
 
     if (!open) return null;
 
@@ -43,10 +46,10 @@ export default function ProUpgradeModal({
 
                     <div className="mt-4 relative z-10 space-y-1">
                         <h3 className="text-xl font-extrabold text-white">
-                            {featureName} freischalten
+                            {t("billing.pro_modal.unlock", "{{feature}} freischalten", { feature: resolvedFeatureName })}
                         </h3>
                         <p className="text-xs text-indigo-200 leading-relaxed">
-                            {featureDesc}
+                            {resolvedFeatureDesc}
                         </p>
                     </div>
                 </div>
@@ -61,23 +64,23 @@ export default function ProUpgradeModal({
                         {[
                             {
                                 icon: "☀️",
-                                title: "48h-Prognose-Trio",
-                                desc: "Doppelter Planungshorizont für Solar, Haushaltslast & Batteriespeicher",
+                                title: t("billing.pro_modal.benefit1_title", "48h-Prognose-Trio"),
+                                desc: t("billing.pro_modal.benefit1_desc", "Doppelter Planungshorizont für Solar, Haushaltslast & Batteriespeicher"),
                             },
                             {
                                 icon: "📊",
-                                title: "Multi-Format Exporte",
-                                desc: "Druckfähige PDF-Berichte, Excel-Arbeitsmappen & unbegrenzte Historie",
+                                title: t("billing.pro_modal.benefit2_title", "Multi-Format Exporte"),
+                                desc: t("billing.pro_modal.benefit2_desc", "Druckfähige PDF-Berichte, Excel-Arbeitsmappen & unbegrenzte Historie"),
                             },
                             {
                                 icon: "🚨",
-                                title: "Proaktive AI-Alarmzentrale",
-                                desc: "8 intelligente Regeln für Frost, Leckagen, Negativpreise & Signalverlust",
+                                title: t("billing.pro_modal.benefit3_title", "Proaktive AI-Alarmzentrale"),
+                                desc: t("billing.pro_modal.benefit3_desc", "8 intelligente Regeln für Frost, Leckagen, Negativpreise & Signalverlust"),
                             },
                             {
                                 icon: "⚡",
-                                title: "Börsenstrom & Arbitrage-Simulation",
-                                desc: "Multi-Dauer Ladestrategien & dynamischer Strompreis-Optimierer",
+                                title: t("billing.pro_modal.benefit4_title", "Börsenstrom & Arbitrage-Simulation"),
+                                desc: t("billing.pro_modal.benefit4_desc", "Multi-Dauer Ladestrategien & dynamischer Strompreis-Optimierer"),
                             },
                         ].map((item, idx) => (
                             <div key={idx} className="flex items-start gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100">
@@ -95,10 +98,10 @@ export default function ProUpgradeModal({
                 <div className="p-5 bg-slate-50 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-3">
                     <div className="text-center sm:text-left">
                         <div className="text-xs font-extrabold text-gray-900">
-                            ab {proYearlyMonthlyEquiv} € / Monat
+                            {t("billing.pro_modal.from_price", "ab {{price}} € / Monat", { price: proYearlyMonthlyEquiv })}
                         </div>
                         <div className="text-[10px] text-gray-400">
-                            Monatlich kündbar · Sofortige Freischaltung
+                            {t("billing.pro_modal.cancel_anytime", "Monatlich kündbar · Sofortige Freischaltung")}
                         </div>
                     </div>
 
@@ -108,7 +111,7 @@ export default function ProUpgradeModal({
                             onClick={onClose}
                             className="flex-1 sm:flex-none px-3.5 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold text-gray-600 hover:bg-gray-100 transition cursor-pointer"
                         >
-                            Später
+                            {t("billing.pro_modal.later", "Später")}
                         </button>
                         <button
                             type="button"
@@ -116,7 +119,7 @@ export default function ProUpgradeModal({
                             className="flex-1 sm:flex-none px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-bold text-xs shadow-md shadow-indigo-200 transition cursor-pointer flex items-center justify-center gap-1.5"
                         >
                             <span>⭐</span>
-                            <span>Jetzt Pro upgraden</span>
+                            <span>{t("billing.pro_modal.upgrade_now", "Jetzt Pro upgraden")}</span>
                         </button>
                     </div>
                 </div>

@@ -28,11 +28,11 @@ export default function HeatingRodCard({ consumer, onAction, isPending }) {
                                         ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30 animate-pulse"
                                         : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 border-slate-200"
                                 }`}>
-                                    {isRunning ? "⚡ Heizen aktiv" : "⚪ Standby"}
+                                    {isRunning ? t("control.heating_rod_running", "⚡ Heizen aktiv") : t("control.ac_standby", "⚪ Standby")}
                                 </span>
                             </div>
                             <p className="text-xs text-slate-400 mt-0.5">
-                                Power-to-Heat · Pufferspeicher Überschussverwertung
+                                {t("control.heating_rod_subtitle", "Power-to-Heat · Pufferspeicher Überschussverwertung")}
                             </p>
                         </div>
                     </div>
@@ -41,16 +41,16 @@ export default function HeatingRodCard({ consumer, onAction, isPending }) {
                 {/* Metrics */}
                 <div className="grid grid-cols-2 gap-3">
                     <div className="p-3 bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-700/60">
-                        <div className="text-[11px] text-slate-500">Heizleistung (Live)</div>
+                        <div className="text-[11px] text-slate-500">{t("control.heating_power", "Heizleistung (Live)")}</div>
                         <div className="text-lg font-bold font-mono text-slate-900 dark:text-white mt-0.5">
                             {isRunning ? `${consumer.power_w.toFixed(0)} W` : "0 W"}
                         </div>
                     </div>
 
                     <div className="p-3 bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-700/60">
-                        <div className="text-[11px] text-slate-500">Aktivierungsschwelle</div>
+                        <div className="text-[11px] text-slate-500">{t("control.activation_threshold", "Aktivierungsschwelle")}</div>
                         <div className="text-lg font-bold font-mono text-amber-600 dark:text-amber-400 mt-0.5">
-                            ab 1.500 W PV
+                            {t("control.threshold_from", "ab {{power}} W PV", { power: "1.500" })}
                         </div>
                     </div>
                 </div>
@@ -58,11 +58,11 @@ export default function HeatingRodCard({ consumer, onAction, isPending }) {
                 {/* Mode / Strategy Strip */}
                 <div className="p-3 bg-white/70 dark:bg-slate-800/50 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 flex items-center justify-between gap-3 text-xs">
                     <div className="min-w-0">
-                        <div className="font-bold text-slate-800 dark:text-slate-200 truncate">⚡ Überschuss-Verwertung</div>
-                        <div className="text-[11px] text-slate-400 truncate">Heizt Puffer bei vollem Speicher vor Netzeinspeisung</div>
+                        <div className="font-bold text-slate-800 dark:text-slate-200 truncate">{t("control.surplus_utilization", "⚡ Überschuss-Verwertung")}</div>
+                        <div className="text-[11px] text-slate-400 truncate">{t("control.surplus_utilization_desc", "Heizt Puffer bei vollem Speicher vor Netzeinspeisung")}</div>
                     </div>
                     <span className="font-mono text-xs font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-2.5 py-1 rounded-xl border border-amber-200 dark:border-amber-800 shrink-0">
-                        ab 1.500 W PV
+                        {t("control.threshold_from", "ab {{power}} W PV", { power: "1.500" })}
                     </span>
                 </div>
             </div>
@@ -70,7 +70,7 @@ export default function HeatingRodCard({ consumer, onAction, isPending }) {
             {/* Actions */}
             <div className="pt-4 mt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-3 relative z-10">
                 <span className="text-xs text-slate-400">
-                    Modus: <strong className="text-amber-600">Überschuss-Verwertung</strong>
+                    {t("control.mode_label", "Modus:")} <strong className="text-amber-600">{t("control.surplus_utilization", "Überschuss-Verwertung")}</strong>
                 </span>
                 <button
                     type="button"
@@ -82,7 +82,7 @@ export default function HeatingRodCard({ consumer, onAction, isPending }) {
                             : "bg-amber-600 hover:bg-amber-700 text-white shadow-amber-600/20"
                     }`}
                 >
-                    {isRunning ? "⏹️ Heizstab Aus" : "🔥 Sofort-Pufferladung"}
+                    {isRunning ? t("control.heating_rod_off", "⏹️ Heizstab Aus") : t("control.heating_rod_boost", "🔥 Sofort-Pufferladung")}
                 </button>
             </div>
         </div>

@@ -32,11 +32,11 @@ export default function SmartApplianceCard({ consumer, onAction, isPending }) {
                                         ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30"
                                         : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 border-slate-200"
                                 }`}>
-                                    {isRunning ? "● Läuft aktiv" : readyToStart ? "⏳ Ready-to-Start" : "⚪ Aus"}
+                                    {isRunning ? t("control.appliance_running", "● Läuft aktiv") : readyToStart ? t("control.appliance_ready", "⏳ Ready-to-Start") : t("control.appliance_off", "⚪ Aus")}
                                 </span>
                             </div>
                             <p className="text-xs text-slate-400 mt-0.5">
-                                Smart Plug · Automatischer Start im Best-Fenster
+                                {t("control.appliance_subtitle", "Smart Plug · Automatischer Start im Best-Fenster")}
                             </p>
                         </div>
                     </div>
@@ -45,14 +45,14 @@ export default function SmartApplianceCard({ consumer, onAction, isPending }) {
                 {/* Metrics */}
                 <div className="grid grid-cols-2 gap-3">
                     <div className="p-3 bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-700/60">
-                        <div className="text-[11px] text-slate-500">Leistung (Live)</div>
+                        <div className="text-[11px] text-slate-500">{t("control.power_live", "Leistung (Live)")}</div>
                         <div className="text-lg font-bold font-mono text-slate-900 dark:text-white mt-0.5">
                             {isRunning ? `${consumer.power_w.toFixed(0)} W` : "0 W"}
                         </div>
                     </div>
 
                     <div className="p-3 bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-700/60">
-                        <div className="text-[11px] text-slate-500">Nächstes Best-Fenster</div>
+                        <div className="text-[11px] text-slate-500">{t("control.next_best_window", "Nächstes Best-Fenster")}</div>
                         <div className="text-lg font-bold font-mono text-purple-600 dark:text-purple-400 mt-0.5">
                             13:00 – 15:00
                         </div>
@@ -62,8 +62,8 @@ export default function SmartApplianceCard({ consumer, onAction, isPending }) {
                 {/* Ready-to-Start Toggle */}
                 <div className="p-3 bg-white/70 dark:bg-slate-800/50 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 flex items-center justify-between gap-3 text-xs">
                     <div>
-                        <div className="font-bold text-slate-800 dark:text-slate-200">✨ Ready-to-Start Modus</div>
-                        <div className="text-[11px] text-slate-400">Maschine beladen & scharfschalten: Startet automatisch</div>
+                        <div className="font-bold text-slate-800 dark:text-slate-200">{t("control.ready_to_start_mode", "✨ Ready-to-Start Modus")}</div>
+                        <div className="text-[11px] text-slate-400">{t("control.ready_to_start_desc", "Maschine beladen & scharfschalten: Startet automatisch")}</div>
                     </div>
                     <input
                         type="checkbox"
@@ -77,7 +77,7 @@ export default function SmartApplianceCard({ consumer, onAction, isPending }) {
             {/* Actions */}
             <div className="pt-4 mt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-3 relative z-10">
                 <span className="text-xs text-slate-400">
-                    Status: <strong className="text-purple-600">{readyToStart ? "Wartet auf Solarpeak" : "Inaktiv"}</strong>
+                    {t("common.status", "Status")}: <strong className="text-purple-600">{readyToStart ? t("control.status_waiting_solar", "Wartet auf Solarpeak") : t("control.status_inactive", "Inaktiv")}</strong>
                 </span>
                 <button
                     type="button"
@@ -89,7 +89,7 @@ export default function SmartApplianceCard({ consumer, onAction, isPending }) {
                             : "bg-purple-600 hover:bg-purple-700 text-white shadow-purple-600/20"
                     }`}
                 >
-                    {isRunning ? "⏹️ Steckdose Aus" : "▶️ Jetzt sofort starten"}
+                    {isRunning ? t("control.socket_off", "⏹️ Steckdose Aus") : t("control.socket_start_now", "▶️ Jetzt sofort starten")}
                 </button>
             </div>
         </div>

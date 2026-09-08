@@ -173,7 +173,7 @@ export default function AddWallboxModal({ isOpen, onClose, onCreated }) {
                     {/* 1. Hersteller / Marke auswählen */}
                     <div>
                         <label className="block text-xs font-semibold text-slate-300 mb-2">
-                            1. Hersteller / Modell wählen
+                            {t("wallbox_modal.brand_select", "1. Hersteller / Modell wählen")}
                         </label>
                         <div className="grid grid-cols-3 sm:grid-cols-3 gap-2">
                             {BRAND_PRESETS.map((brand) => (
@@ -203,7 +203,7 @@ export default function AddWallboxModal({ isOpen, onClose, onCreated }) {
                     <div className="bg-slate-950/80 border border-emerald-500/30 rounded-xl p-4 relative overflow-hidden">
                         <div className="flex items-center justify-between mb-2">
                             <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
-                                2. Deine persönliche OCPP WebSocket URL
+                                {t("wallbox_modal.url_heading", "2. Deine persönliche OCPP WebSocket URL")}
                             </span>
                             <span className="text-[10px] text-slate-400 font-mono">Port 443 (SSL/WSS)</span>
                         </div>
@@ -219,7 +219,7 @@ export default function AddWallboxModal({ isOpen, onClose, onCreated }) {
                                 onClick={handleCopyUrl}
                                 className="px-3 py-1 rounded-md text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all flex items-center gap-1 shrink-0 font-bold"
                             >
-                                {copied ? "✓ Kopiert!" : "📋 Kopieren"}
+                                {copied ? t("common.copied", "✓ Kopiert!") : t("common.copy", "📋 Kopieren")}
                             </button>
                         </div>
 
@@ -233,7 +233,7 @@ export default function AddWallboxModal({ isOpen, onClose, onCreated }) {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-xs font-medium text-slate-300 mb-1">
-                                Anzeigename
+                                {t("wallbox_modal.display_name", "Anzeigename")}
                             </label>
                             <input
                                 type="text"
@@ -247,7 +247,7 @@ export default function AddWallboxModal({ isOpen, onClose, onCreated }) {
 
                         <div>
                             <label className="block text-xs font-medium text-slate-300 mb-1">
-                                Charge Point ID (Kennung)
+                                {t("wallbox_modal.charge_point_id", "Charge Point ID (Kennung)")}
                             </label>
                             <input
                                 type="text"
@@ -261,15 +261,15 @@ export default function AddWallboxModal({ isOpen, onClose, onCreated }) {
 
                         <div>
                             <label className="block text-xs font-medium text-slate-300 mb-1">
-                                Max. Stromstärke (Absicherung)
+                                {t("wallbox_modal.max_current", "Max. Stromstärke (Absicherung)")}
                             </label>
                             <select
                                 value={maxCurrentA}
                                 onChange={(e) => setMaxCurrentA(e.target.value)}
                                 className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500"
                             >
-                                <option value="16">16 A (11 kW bei 3 Phasen)</option>
-                                <option value="32">32 A (22 kW bei 3 Phasen)</option>
+                                <option value="16">16 A (11 kW @ 3P)</option>
+                                <option value="32">32 A (22 kW @ 3P)</option>
                                 <option value="10">10 A (Schuko / Reduziert)</option>
                                 <option value="13">13 A</option>
                             </select>
@@ -277,17 +277,17 @@ export default function AddWallboxModal({ isOpen, onClose, onCreated }) {
 
                         <div>
                             <label className="block text-xs font-medium text-slate-300 mb-1">
-                                Standard-Lademodus
+                                {t("wallbox_modal.default_mode", "Standard-Lademodus")}
                             </label>
                             <select
                                 value={smartMode}
                                 onChange={(e) => setSmartMode(e.target.value)}
                                 className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500"
                             >
-                                <option value="pv_surplus">☀️ Nur PV-Überschuss (100% Solar)</option>
-                                <option value="min_pv">⛅ Min + PV-Überschuss (Basis 6A)</option>
-                                <option value="spot_price">💶 Börsenpreisgeführt</option>
-                                <option value="instant">⚡ Sofortladen (Volle Leistung)</option>
+                                <option value="pv_surplus">{t("wallbox_modal.mode_pv_only", "☀️ Nur PV-Überschuss (100% Solar)")}</option>
+                                <option value="min_pv">{t("wallbox_modal.mode_min_pv", "⛅ Min + PV-Überschuss (Basis 6A)")}</option>
+                                <option value="spot_price">{t("wallbox_modal.mode_spot_price", "💶 Börsenpreisgeführt")}</option>
+                                <option value="instant">{t("wallbox_modal.mode_instant", "⚡ Sofortladen (Volle Leistung)")}</option>
                             </select>
                         </div>
                     </div>
@@ -299,14 +299,14 @@ export default function AddWallboxModal({ isOpen, onClose, onCreated }) {
                             onClick={onClose}
                             className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition-colors"
                         >
-                            Abbrechen
+                            {t("common.cancel", "Abbrechen")}
                         </button>
                         <button
                             type="submit"
                             disabled={createMutation.isPending}
                             className="px-5 py-2.5 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all shadow-lg shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
                         >
-                            {createMutation.isPending ? "Registriere..." : "Wallbox anlegen & verbinden 🚀"}
+                            {createMutation.isPending ? t("common.loading", "Registriere...") : t("devices.add_wallbox_btn", "Wallbox anlegen & verbinden 🚀")}
                         </button>
                     </div>
                 </form>
