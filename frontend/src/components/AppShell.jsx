@@ -5,9 +5,11 @@
 import { useUser } from "../hooks/useUser";
 import AppTopbar from "../components/layout/Topbar";
 import Sidebar from "../components/layout/Sidebar";
+import MobileBottomNav from "../components/layout/MobileBottomNav";
+import MobileMenuDrawer from "../components/layout/MobileMenuDrawer";
 import Dashboard from "../pages/dashboard/Dashboard";
 import BackToTopButton from "../components/common/BackToTopButton";
-import { useRef, useEffect, lazy, Suspense } from "react";
+import { useRef, useEffect, useState, lazy, Suspense } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 
 // ⚡ LAZY LOADED ROUTE MODULES
@@ -54,12 +56,14 @@ export default function AppShell() {
     const { user, loading, isStaffOrAdmin, hasCommunityAdminAccess } = useUser();
     const location = useLocation();
     const contentRef = useRef(null);
+    const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
-    // 🔄 Bei jedem Navigationswechsel sofort nach ganz oben scrollen
+    // 🔄 Bei jedem Navigationswechsel sofort nach ganz oben scrollen & Mobile Drawer schließen
     useEffect(() => {
         if (contentRef.current) {
             contentRef.current.scrollTop = 0;
         }
+        setMobileDrawerOpen(false);
     }, [location.pathname]);
 
     if (loading) {
@@ -71,18 +75,24 @@ export default function AppShell() {
     }
 
     return (
-        <div className="flex h-screen">
+        <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
 
-            {/* ✅ SIDEBAR */}
+            {/* ✅ DESKTOP SIDEBAR (hidden on mobile) */}
             <Sidebar />
 
-            <div className="flex-1 flex flex-col">
+            {/* ✅ MOBILE SLIDE-OVER DRAWER */}
+            <MobileMenuDrawer 
+                isOpen={mobileDrawerOpen} 
+                onClose={() => setMobileDrawerOpen(false)} 
+            />
+
+            <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
 
                 {/* ✅ TOPBAR */}
-                <AppTopbar />
+                <AppTopbar onOpenMobileMenu={() => setMobileDrawerOpen(true)} />
 
-                {/* ✅ CONTENT */}
-                <div ref={contentRef} className="flex-1 overflow-auto">
+                {/* ✅ CONTENT WITH SAFE BOTTOM PADDING ON MOBILE FOR FIXED NAV */}
+                <div ref={contentRef} className="flex-1 overflow-y-auto pb-20 md:pb-0">
                     <Suspense fallback={<PageSuspenseLoader />}>
                         <Routes>
 
@@ -159,12 +169,11 @@ export default function AppShell() {
                 {/* 🔝 GLOBAL BACK TO TOP BUTTON */}
                 <BackToTopButton scrollContainerRef={contentRef} threshold={160} />
 
+                {/* 📱 MOBILE BOTTOM NAVIGATION (< md screens) */}
+                <MobileBottomNav onOpenMenu={() => setMobileDrawerOpen(true)} />
+
             </div>
         </div>
     );
 
 }
-
-
-// {isRefreshing && <span className="text-xs text-gray-400">Syncing...</span>} muss noch iregenwo in
-// der UI eingebaut werden

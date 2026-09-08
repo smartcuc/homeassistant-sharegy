@@ -12,9 +12,9 @@ import UserMenu from "../UserMenu";
 import SpotPriceModal from "../../features/market/components/SpotPriceModal";
 import SupportDrawer from "../../features/support/components/SupportDrawer";
 import AlertCenterModal from "../../features/alerts/components/AlertCenterModal";
-import { LifeBuoy, Bell, Sun, Moon, Check, ChevronDown, Building2, Home } from "lucide-react";
+import { LifeBuoy, Bell, Sun, Moon, Check, ChevronDown, Building2, Home, Menu } from "lucide-react";
 
-export default function AppTopbar() {
+export default function AppTopbar({ onOpenMobileMenu }) {
     const { t, i18n } = useTranslation();
     const { user } = useUser();
     const navigate = useNavigate();
@@ -147,8 +147,18 @@ export default function AppTopbar() {
     return (
         <>
             <header className="h-14 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 sticky top-0 z-30 flex items-center justify-between px-3 sm:px-4 transition-colors">
-                {/* LEFT: 🏡 Gebäude- / Liegenschafts-Kontext */}
-                <div className="flex items-center gap-2 sm:gap-3 min-w-0 shrink-0">
+                {/* LEFT: 🏡 Gebäude- / Liegenschafts-Kontext & Mobile Drawer Button */}
+                <div className="flex items-center gap-1.5 sm:gap-3 min-w-0 shrink-0">
+                    {onOpenMobileMenu && (
+                        <button
+                            type="button"
+                            onClick={onOpenMobileMenu}
+                            aria-label="Menü öffnen"
+                            className="md:hidden p-1.5 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition shrink-0 cursor-pointer"
+                        >
+                            <Menu className="w-5 h-5" />
+                        </button>
+                    )}
                     {homes.length > 1 ? (
                         /* 🏢 Mehrere Liegenschaften -> Moderner Switcher */
                         <div className="relative" ref={homeDropdownRef}>

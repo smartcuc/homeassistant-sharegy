@@ -131,7 +131,7 @@ export default function Sidebar() {
     }, [t, count, alertCount, alertBadgeClass, isStaffOrAdmin, hasTenantAccess, isPro]);
 
     return (
-        <div className="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col shrink-0 transition-colors">
+        <div className="hidden md:flex w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex-col shrink-0 transition-colors">
             {/* ✅ Logo -> Link zur Homepage */}
             <div className="h-14 flex items-center px-4 border-b border-slate-200 dark:border-slate-800">
                 <NavLink
