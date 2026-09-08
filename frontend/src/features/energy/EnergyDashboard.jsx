@@ -269,6 +269,7 @@ export default function EnergyDashboard() {
             <MonthlySavingsRecapCard
                 kpis={kpis}
                 period={period}
+                onOpenShareModal={() => setShareModalOpen(true)}
             />
 
             {/* =========================================================

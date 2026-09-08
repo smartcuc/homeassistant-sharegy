@@ -9,9 +9,10 @@ export default function MonthlySavingsRecapCard({
     gridPriceCt = 36.5,
     feedinTariffCt = 8.2,
     className = "",
+    onOpenShareModal,
 }) {
     const { t } = useTranslation();
-    const [shareOpen, setShareOpen] = useState(false);
+    const [localShareOpen, setLocalShareOpen] = useState(false);
 
     // kWh calculations
     const solarGenKwh = Number(kpis.solar_generation_kwh || kpis.pv_kwh || 0);
@@ -42,6 +43,14 @@ export default function MonthlySavingsRecapCard({
             : period === "year" 
                 ? t("energy.period_year", "Dieses Jahr") 
                 : t("energy.period_30d", "Letzte 30 Tage");
+
+    const handleShareClick = () => {
+        if (typeof onOpenShareModal === "function") {
+            onOpenShareModal();
+        } else {
+            setLocalShareOpen(true);
+        }
+    };
 
     return (
         <>
@@ -74,7 +83,7 @@ export default function MonthlySavingsRecapCard({
 
                         <button
                             type="button"
-                            onClick={() => setShareOpen(true)}
+                            onClick={handleShareClick}
                             className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-200 hover:text-white border border-indigo-400/30 text-xs font-bold transition cursor-pointer self-start sm:self-center shadow-xs"
                         >
                             <Share2 className="w-3.5 h-3.5" />
@@ -85,7 +94,7 @@ export default function MonthlySavingsRecapCard({
                     {/* Main Stats Grid */}
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
                         {/* 1. Netto-Ersparnis */}
-                        <div className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-xs">
+                        <div className="bg-slate-900/60 border border-indigo-500/20 rounded-2xl p-4 hover:border-indigo-400/40 transition-colors shadow-xs">
                             <div className="text-xs font-medium text-indigo-200/80 flex items-center justify-between">
                                 <span>{t("recap.cost_savings", "Kostenersparnis")}</span>
                                 <TrendingUp className="w-4 h-4 text-emerald-400" />
@@ -100,7 +109,7 @@ export default function MonthlySavingsRecapCard({
                         </div>
 
                         {/* 2. Autarkiegrad */}
-                        <div className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-xs">
+                        <div className="bg-slate-900/60 border border-indigo-500/20 rounded-2xl p-4 hover:border-indigo-400/40 transition-colors shadow-xs">
                             <div className="text-xs font-medium text-indigo-200/80 flex items-center justify-between">
                                 <span>{t("energy.autarky_rate", "Autarkiegrad")}</span>
                                 <Award className="w-4 h-4 text-amber-400" />
@@ -115,7 +124,7 @@ export default function MonthlySavingsRecapCard({
                         </div>
 
                         {/* 3. CO2-Vermeidung */}
-                        <div className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-xs">
+                        <div className="bg-slate-900/60 border border-indigo-500/20 rounded-2xl p-4 hover:border-indigo-400/40 transition-colors shadow-xs">
                             <div className="text-xs font-medium text-indigo-200/80 flex items-center justify-between">
                                 <span>{t("energy.co2_saved", "CO₂-Vermeidung")}</span>
                                 <Trees className="w-4 h-4 text-teal-400" />
@@ -130,7 +139,7 @@ export default function MonthlySavingsRecapCard({
                         </div>
 
                         {/* 4. § 14a EnWG Netzentgelt-Vorteil */}
-                        <div className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-xs">
+                        <div className="bg-slate-900/60 border border-indigo-500/20 rounded-2xl p-4 hover:border-indigo-400/40 transition-colors shadow-xs">
                             <div className="text-xs font-medium text-indigo-200/80 flex items-center justify-between">
                                 <span>{t("recap.grid_fee_bonus", "§ 14a Netzentgelt")}</span>
                                 <ShieldCheck className="w-4 h-4 text-indigo-400" />
@@ -147,16 +156,11 @@ export default function MonthlySavingsRecapCard({
                 </div>
             </div>
 
-            {shareOpen && (
+            {!onOpenShareModal && localShareOpen && (
                 <CommunityShareModal
-                    open={shareOpen}
-                    onClose={() => setShareOpen(false)}
-                    metrics={{
-                        kwhShared: selfConsumedKwh,
-                        co2SavedKg: co2AvoidedKg,
-                        moneySavedEur: savedEur,
-                        autarkyPct: autarkyPct,
-                    }}
+                    isOpen={localShareOpen}
+                    onClose={() => setLocalShareOpen(false)}
+                    kpis={kpis}
                 />
             )}
         </>
