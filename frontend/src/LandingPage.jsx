@@ -61,8 +61,7 @@ export default function LandingPage() {
         { name: "go-e", type: "Charger Gemini / Home" },
         { name: "openWB", type: "Wallbox & Steuerung" },
         { name: "Daikin", type: "Altherma (SG-Ready)" },
-        { name: "Viessmann", type: "Vitocal (Modbus / API)" },
-        { name: "Vaillant", type: "aroTHERM (eBUS / Relay)" },
+        { name: "Viessmann & Vaillant", type: "Wärmepumpen (SG-Ready)" },
         { name: "Shelly", type: "Pro / Plus Smart Relais" },
     ];
 
@@ -251,8 +250,9 @@ export default function LandingPage() {
                         <span className="px-3 py-1 rounded-lg bg-slate-100 border border-slate-200 font-semibold">OCPP 1.6-J</span>
                         <span className="px-3 py-1 rounded-lg bg-slate-100 border border-slate-200 font-semibold">SunSpec</span>
                         <span className="px-3 py-1 rounded-lg bg-slate-100 border border-slate-200 font-semibold">SG-Ready</span>
-                        <span className="px-3 py-1 rounded-lg bg-slate-100 border border-slate-200 font-semibold">REST API</span>
+                        <span className="px-3 py-1 rounded-lg bg-slate-100 border border-slate-200 font-semibold">REST API & MQTT</span>
                         <span className="px-3 py-1 rounded-lg bg-slate-100 border border-slate-200 font-semibold">Home Assistant Bridge</span>
+                        <span className="px-3 py-1 rounded-lg bg-slate-100 border border-slate-200 font-semibold">ioBroker Adapter</span>
                     </div>
 
                     {/* ⚖️ RECHTLICHER MARKENHINWEIS GEM. § 23 MARKENG */}
