@@ -5,6 +5,7 @@ import { apiFetch } from "../../../api/client";
 import { useSubscription } from "../../../hooks/useSubscription";
 import ProBadge from "../../../components/common/ProBadge";
 import ProUpgradeModal from "../../../components/common/ProUpgradeModal";
+import EditWallboxModal from "../../devices/components/EditWallboxModal";
 
 export default function WallboxCard({ onOpenAddModal }) {
     const { t } = useTranslation();
@@ -12,6 +13,7 @@ export default function WallboxCard({ onOpenAddModal }) {
     const queryClient = useQueryClient();
 
     const [proModalOpen, setProModalOpen] = useState(false);
+    const [editModalOpen, setEditModalOpen] = useState(false);
     const [selectedStationId, setSelectedStationId] = useState(null);
     const [actionPending, setActionPending] = useState(null);
     const [feedback, setFeedback] = useState({ text: null, type: null });
@@ -49,7 +51,36 @@ export default function WallboxCard({ onOpenAddModal }) {
         },
     });
 
-    // 3. Remote Aktionen (Start, Stop, Unlock)
+    // 3. Wallbox Löschen
+    const deleteMutation = useMutation({
+        mutationFn: async (id) => {
+            return apiFetch(`/api/energy/wallboxes/${id}/`, {
+                method: "DELETE",
+            });
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["wallboxes"] });
+            setSelectedStationId(null);
+            setFeedback({
+                text: t("wallbox.deleted", "Wallbox erfolgreich gelöscht."),
+                type: "success",
+            });
+            setTimeout(() => setFeedback({ text: null, type: null }), 4000);
+        },
+        onError: (err) => {
+            setFeedback({ text: err.message || "Fehler beim Löschen der Wallbox.", type: "error" });
+        },
+    });
+
+    const handleDelete = () => {
+        if (!activeStation) return;
+        const stationName = activeStation.name || activeStation.charge_point_id || "Wallbox";
+        if (window.confirm(t("wallbox.confirm_delete", `Möchtest du die Wallbox "${stationName}" wirklich löschen?`))) {
+            deleteMutation.mutate(activeStation.id);
+        }
+    };
+
+    // 4. Remote Aktionen (Start, Stop, Unlock)
     const handleRemoteAction = async (action) => {
         if (!activeStation) return;
         setActionPending(action);
@@ -241,11 +272,30 @@ export default function WallboxCard({ onOpenAddModal }) {
 
                         <button
                             type="button"
+                            onClick={() => setEditModalOpen(true)}
+                            title={t("wallbox.edit_btn_title", "Einstellungen & Ladeparameter bearbeiten")}
+                            className="p-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-slate-600 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400 border border-slate-200 dark:border-slate-700 transition cursor-pointer shadow-2xs"
+                        >
+                            ⚙️
+                        </button>
+
+                        <button
+                            type="button"
                             onClick={onOpenAddModal}
-                            title="Weitere Wallbox hinzufügen"
+                            title={t("wallbox.add_btn_title", "Weitere Wallbox hinzufügen")}
                             className="p-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition cursor-pointer shadow-2xs"
                         >
                             ➕
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={handleDelete}
+                            disabled={deleteMutation.isPending}
+                            title={t("wallbox.delete_btn_title", "Diese Wallbox löschen")}
+                            className="p-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 hover:bg-red-50 dark:hover:bg-red-950/40 text-slate-400 hover:text-red-600 dark:hover:text-red-400 border border-slate-200 dark:border-slate-700 hover:border-red-200 dark:hover:border-red-900 transition cursor-pointer shadow-2xs disabled:opacity-50"
+                        >
+                            🗑️
                         </button>
                     </div>
                 </div>
@@ -403,6 +453,14 @@ export default function WallboxCard({ onOpenAddModal }) {
                     onClose={() => setProModalOpen(false)}
                     featureName={t("wallbox.pro_modal_title", "Intelligentes Wallbox Smart-Charging")}
                     featureDesc={t("wallbox.pro_modal_desc", "Automatische PV-Überschussregelung und dynamische Börsenstrompreis-Ladung für dein Elektroauto.")}
+                />
+            )}
+
+            {editModalOpen && (
+                <EditWallboxModal
+                    isOpen={editModalOpen}
+                    onClose={() => setEditModalOpen(false)}
+                    station={activeStation}
                 />
             )}
         </div>

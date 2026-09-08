@@ -173,6 +173,8 @@ class WallboxDetailView(APIView):
             station.min_current_a = float(data["min_current_a"])
         if "phases" in data:
             station.phases = int(data["phases"])
+        if "min_soc_target_pct" in data:
+            station.min_soc_target_pct = int(data["min_soc_target_pct"])
 
         station.save()
 

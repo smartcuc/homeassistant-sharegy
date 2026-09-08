@@ -29,3 +29,9 @@ class SpotPrice(models.Model):
 
     def __str__(self):
         return f"{self.timestamp} → {self.price_eur_per_kwh} €/kWh"
+
+    @property
+    def price_ct_kwh(self):
+        if self.price_eur_per_kwh is not None:
+            return float(self.price_eur_per_kwh * 100)
+        return 0.0

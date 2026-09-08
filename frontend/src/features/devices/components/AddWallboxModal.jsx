@@ -87,7 +87,7 @@ export default function AddWallboxModal({ isOpen, onClose, onCreated }) {
     // Generierte WebSocket OCPP URL
     const host = window.location.hostname || "sharegy.de";
     const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const ocppWsUrl = `${wsProtocol}//${host}/ocpp/${chargePointId}`;
+    const ocppWsUrl = `${wsProtocol}//${host}/ws/ocpp/${chargePointId}`;
 
     const createMutation = useMutation({
         mutationFn: async (payload) => {

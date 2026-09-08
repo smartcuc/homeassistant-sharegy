@@ -209,7 +209,12 @@ def generate_24h_predictive_heating_schedule(
         spot_qs = SpotPrice.objects.filter(
             timestamp__gte=now, timestamp__lt=now + timedelta(hours=24)
         ).order_by("timestamp")
-        spot_map = {sp.timestamp.strftime("%Y-%m-%d %H:00"): float(sp.price_ct_kwh or 14.0) for sp in spot_qs}
+        spot_map = {
+            sp.timestamp.strftime("%Y-%m-%d %H:00"): float(
+                getattr(sp, "price_ct_kwh", float(sp.price_eur_per_kwh * 100) if getattr(sp, "price_eur_per_kwh", None) is not None else 14.0)
+            )
+            for sp in spot_qs
+        }
     except Exception as e:
         logger.debug("[FloorHeating] SpotPrice Query fallback: %s", e)
         spot_map = {}
