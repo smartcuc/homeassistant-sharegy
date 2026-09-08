@@ -2,25 +2,46 @@
   "config": {
     "step": {
       "user": {
-        "title": "Sharegy Cloud Authentication",
-        "description": "Connect your Home Assistant instance with the Sharegy Cloud Platform.",
+        "title": "Sharegy Platform Connection",
+        "description": "Connect your Home Assistant with the Sharegy Cloud Platform. Copy and paste your personal WebSocket URL from the Sharegy Web-App (Settings → Interfaces).",
         "data": {
-          "host": "Sharegy Cloud Host (e.g. https://sharegy.de)",
-          "home_token": "Your Home Token (UUID)",
+          "ws_url": "WebSocket URL (Copy & Paste from Sharegy Interfaces)",
+          "home_token": "Home Token (optional if included in URL)",
           "protocol": "Transmission Protocol"
         }
       },
       "entities": {
-        "title": "Assign Sensors & Entities",
-        "description": "Select which Home Assistant sensors should be streamed to Sharegy for live energy balance.",
+        "title": "EMS Core Metrics & Device Bundles",
+        "description": "Map your Home Assistant sensors and switches to unified Sharegy device cards (e.g. Floor heating, BWWP power + temperature + switch).",
         "data": {
-          "grid_power_sensor": "Grid Import / Export (Watts)",
-          "pv_power_sensor": "Solar Generation / PV (Watts)",
-          "battery_power_sensor": "Battery Charge / Discharge (Watts)",
-          "battery_soc_sensor": "Battery State of Charge (SoC %)",
-          "load_power_sensor": "Total House Demand (Watts)",
-          "submeter_sensors": "Submeters / Smart Plugs (Multi-Select)",
-          "sync_interval": "Sync Interval (Seconds)"
+          "grid_power_sensor": "⚡ Grid Power (W / kW)",
+          "pv_power_sensor": "☀️ Solar Generation / PV (W / kW)",
+          "battery_power_sensor": "🔋 Battery Power (W / kW)",
+          "battery_soc_sensor": "🔋 Battery State of Charge (SoC %)",
+          "load_power_sensor": "🏠 Total House Demand (W / kW)",
+          "floor_heating_name": "🔥 Floor Heating Device Identifier",
+          "floor_heating_room_temp": "🔥 Actual Room Temperature Sensor (°C)",
+          "floor_heating_flow_temp": "🔥 Actual Flow Temperature Sensor (°C, optional)",
+          "floor_heating_floor_temp": "🔥 Floor / Screed Surface Temperature (°C, optional)",
+          "floor_heating_switch": "🔥 Heating Circuit Relay / Valve Switch",
+          "floor_heating_flow_setpoint": "🔥 Flow Temperature Setpoint Entity (°C, optional)",
+          "floor_heating_power": "🔥 Floor Heating / Heat Pump Power Sensor (W)",
+          "floor_heating_target_room_temp": "🎯 Target Room Temperature (°C)",
+          "floor_heating_boost_delta_k": "⚡ Thermal Pre-Heat Boost Delta (+K)",
+          "floor_heating_max_floor_temp": "🛡️ Max. Floor Surface Safety Temp (°C)",
+          "bwwp_name": "♨️ BWWP Device Identifier",
+          "bwwp_power": "♨️ BWWP Power Sensor (W)",
+          "bwwp_temp": "♨️ BWWP Temperature Sensor (°C)",
+          "bwwp_switch": "♨️ BWWP SG-Ready Switch / Relay",
+          "heatpump_name": "🔥 Heat Pump Device Identifier",
+          "heatpump_power": "🔥 Heat Pump Power Sensor (W)",
+          "heatpump_temp": "🔥 Heat Pump Temperature Sensor (°C)",
+          "heatpump_switch": "🔥 Heat Pump SG-Ready Switch",
+          "wallbox_name": "🚗 Wallbox Device Identifier",
+          "wallbox_power": "🚗 Wallbox Power Sensor (W)",
+          "wallbox_switch": "🚗 Wallbox Charge Enable Switch",
+          "submeter_sensors": "📊 Other Submeters / Sensors (Multi-Select)",
+          "sync_interval": "⏱️ Sync Interval (Seconds)"
         }
       }
     },
@@ -35,16 +56,37 @@
   "options": {
     "step": {
       "init": {
-        "title": "Edit Sharegy Sensors",
-        "description": "Update your sensor and submeter mappings live.",
+        "title": "Edit Sharegy Sensors & Devices",
+        "description": "Update your sensor and device bundle mappings live.",
         "data": {
-          "grid_power_sensor": "Grid Import / Export (Watts)",
-          "pv_power_sensor": "Solar Generation / PV (Watts)",
-          "battery_power_sensor": "Battery Charge / Discharge (Watts)",
-          "battery_soc_sensor": "Battery State of Charge (SoC %)",
-          "load_power_sensor": "Total House Demand (Watts)",
-          "submeter_sensors": "Submeters / Smart Plugs",
-          "sync_interval": "Sync Interval (Seconds)"
+          "grid_power_sensor": "⚡ Grid Power (W / kW)",
+          "pv_power_sensor": "☀️ Solar Generation / PV (W / kW)",
+          "battery_power_sensor": "🔋 Battery Power (W / kW)",
+          "battery_soc_sensor": "🔋 Battery State of Charge (SoC %)",
+          "load_power_sensor": "🏠 Total House Demand (W / kW)",
+          "floor_heating_name": "🔥 Floor Heating Device Identifier",
+          "floor_heating_room_temp": "🔥 Actual Room Temperature Sensor (°C)",
+          "floor_heating_flow_temp": "🔥 Actual Flow Temperature Sensor (°C, optional)",
+          "floor_heating_floor_temp": "🔥 Floor / Screed Surface Temperature (°C, optional)",
+          "floor_heating_switch": "🔥 Heating Circuit Relay / Valve Switch",
+          "floor_heating_flow_setpoint": "🔥 Flow Temperature Setpoint Entity (°C, optional)",
+          "floor_heating_power": "🔥 Floor Heating / Heat Pump Power Sensor (W)",
+          "floor_heating_target_room_temp": "🎯 Target Room Temperature (°C)",
+          "floor_heating_boost_delta_k": "⚡ Thermal Pre-Heat Boost Delta (+K)",
+          "floor_heating_max_floor_temp": "🛡️ Max. Floor Surface Safety Temp (°C)",
+          "bwwp_name": "♨️ BWWP Device Identifier",
+          "bwwp_power": "♨️ BWWP Power Sensor (W)",
+          "bwwp_temp": "♨️ BWWP Temperature Sensor (°C)",
+          "bwwp_switch": "♨️ BWWP SG-Ready Switch / Relay",
+          "heatpump_name": "🔥 Heat Pump Device Identifier",
+          "heatpump_power": "🔥 Heat Pump Power Sensor (W)",
+          "heatpump_temp": "🔥 Heat Pump Temperature Sensor (°C)",
+          "heatpump_switch": "🔥 Heat Pump SG-Ready Switch",
+          "wallbox_name": "🚗 Wallbox Device Identifier",
+          "wallbox_power": "🚗 Wallbox Power Sensor (W)",
+          "wallbox_switch": "🚗 Wallbox Charge Enable Switch",
+          "submeter_sensors": "📊 Other Submeters / Sensors",
+          "sync_interval": "⏱️ Sync Interval (Seconds)"
         }
       }
     }

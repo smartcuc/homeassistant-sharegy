@@ -1,8 +1,9 @@
-"""Background Telemetry Bridge, Bidirectional Control & Offline Buffer for Sharegy."""
+"""Background Telemetry Bridge, Bidirectional Control, 24h Offline-Resilience & Buffer for Sharegy."""
 
 import asyncio
 import json
 import logging
+import random
 import sqlite3
 import time
 from datetime import datetime, timezone
@@ -33,19 +34,29 @@ from .const import (
     CONF_FLOOR_HEATING_NAME,
     CONF_FLOOR_HEATING_POWER,
     CONF_FLOOR_HEATING_ROOM_TEMP,
+    CONF_FLOOR_HEATING_FLOW_TEMP,
+    CONF_FLOOR_HEATING_FLOOR_TEMP,
     CONF_FLOOR_HEATING_SWITCH,
+    CONF_FLOOR_HEATING_FLOW_SETPOINT,
+    CONF_FLOOR_HEATING_TARGET_ROOM_TEMP,
+    CONF_FLOOR_HEATING_BOOST_DELTA_K,
+    CONF_FLOOR_HEATING_MAX_FLOOR_TEMP,
     CONF_WALLBOX_NAME,
     CONF_WALLBOX_POWER,
     CONF_WALLBOX_SWITCH,
     CONF_SUBMETER_SENSORS,
     CONF_SYNC_INTERVAL,
+    DEFAULT_FBH_TARGET_ROOM_TEMP,
+    DEFAULT_FBH_BOOST_DELTA_K,
+    DEFAULT_FBH_MAX_FLOOR_TEMP,
+    VERSION,
 )
 
 _LOGGER = logging.getLogger(__name__)
 
 
 class SharegyOfflineBuffer:
-    """Persistent SQLite-backed buffer for Store & Forward telemetry."""
+    """Persistent SQLite-backed buffer for Store & Forward telemetry and 24h schedule cache."""
 
     def __init__(self, db_path: str, max_records: int = 100000):
         self.db_path = db_path
@@ -66,6 +77,15 @@ class SharegyOfflineBuffer:
                 )
                 conn.execute(
                     "CREATE INDEX IF NOT EXISTS idx_telemetry_created ON telemetry_queue(created_at)"
+                )
+                conn.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS schedule_cache (
+                        key TEXT PRIMARY KEY,
+                        timeline_json TEXT NOT NULL,
+                        updated_at REAL NOT NULL
+                    )
+                    """
                 )
                 conn.commit()
         except Exception as err:
@@ -134,9 +154,34 @@ class SharegyOfflineBuffer:
         except Exception:
             return 0
 
+    def save_schedule(self, timeline: list):
+        """Persist 24h schedule for offline resilience."""
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                conn.execute(
+                    "INSERT OR REPLACE INTO schedule_cache (key, timeline_json, updated_at) VALUES ('24h_schedule', ?, ?)",
+                    (json.dumps(timeline), time.time()),
+                )
+                conn.commit()
+        except Exception as err:
+            _LOGGER.warning("Could not persist 24h schedule cache: %s", err)
+
+    def load_schedule(self) -> list:
+        """Load persisted 24h schedule."""
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute("SELECT timeline_json FROM schedule_cache WHERE key = '24h_schedule'")
+                row = cursor.fetchone()
+                if row and row[0]:
+                    return json.loads(row[0])
+        except Exception:
+            pass
+        return []
+
 
 class SharegyBridge:
-    """Manages WSS connection, live state aggregation, and upload to Sharegy."""
+    """Manages WSS connection, live state aggregation, upload, and 24h offline resilience."""
 
     def __init__(self, hass, entry_data: dict, db_path: str):
         self.hass = hass
@@ -148,19 +193,22 @@ class SharegyBridge:
         self.bidirectional_enabled = entry_data.get(CONF_BIDIRECTIONAL_ENABLED, True)
         self.buffer = SharegyOfflineBuffer(db_path)
         self.is_connected = False
+        self.offline_autonomous = False
         self._running = False
         self._ws_session = None
         self._ws = None
         self._task = None
+        self._offline_task = None
         self._unsub_listeners = []
+        self._reconnect_attempts = 0
 
         # Real-time state received from Sharegy
         self.flow_temp_setpoint_c = 30.0
         self.screed_soc_pct = 50.0
         self.operating_mode = "STANDBY"
         self.spot_price_ct = 15.0
-        self.failsafe_active = False
         self.last_heartbeat = time.time()
+        self.cached_schedule_24h = self.buffer.load_schedule()
 
     def get_effective_ws_url(self) -> str:
         """Resolve full WebSocket URL."""
@@ -175,6 +223,7 @@ class SharegyBridge:
         self._running = True
         self._setup_control_listeners()
         self._task = asyncio.create_task(self._main_loop())
+        self._offline_task = asyncio.create_task(self._offline_heating_loop())
 
     async def stop(self):
         """Stop worker and close connections."""
@@ -189,6 +238,8 @@ class SharegyBridge:
             await self._ws_session.close()
         if self._task:
             self._task.cancel()
+        if self._offline_task:
+            self._offline_task.cancel()
 
     def _setup_control_listeners(self):
         """Listen to state changes on control switches for closed-loop status feedback."""
@@ -233,7 +284,7 @@ class SharegyBridge:
                 self._unsub_listeners.append(unsub)
 
     async def _main_loop(self):
-        """Continuous connection & sync loop."""
+        """Continuous connection & sync loop with exponential backoff and watchdog."""
         while self._running:
             try:
                 if self.protocol == "websocket":
@@ -243,9 +294,19 @@ class SharegyBridge:
             except asyncio.CancelledError:
                 break
             except Exception as err:
-                _LOGGER.warning("Sharegy connection error: %s. Retrying in 5s...", err)
                 self.is_connected = False
-                await asyncio.sleep(5)
+                self._reconnect_attempts += 1
+                # Exponential backoff: 2s -> 3s -> 4.5s -> 6.75s ... max 25s
+                backoff = min(25.0, 2.0 * (1.5 ** min(self._reconnect_attempts - 1, 7)))
+                jitter = random.uniform(0.0, 0.5)
+                delay = round(backoff + jitter, 1)
+                _LOGGER.warning(
+                    "Sharegy connection error: %s. Retrying in %.1fs (Attempt #%d)...",
+                    err,
+                    delay,
+                    self._reconnect_attempts,
+                )
+                await asyncio.sleep(delay)
 
     async def _run_websocket_stream(self):
         """Maintain persistent WSS connection, receive commands, and stream telemetry."""
@@ -254,12 +315,13 @@ class SharegyBridge:
 
         self._ws_session = aiohttp.ClientSession()
         async with self._ws_session.ws_connect(
-            ws_url, heartbeat=25.0, timeout=15.0
+            ws_url, heartbeat=15.0, timeout=10.0
         ) as ws:
             self._ws = ws
             self.is_connected = True
+            self.offline_autonomous = False
+            self._reconnect_attempts = 0
             self.last_heartbeat = time.time()
-            self.failsafe_active = False
             _LOGGER.info("Connected to Sharegy WebSocket successfully!")
 
             # 1. Flush any pending offline buffer first
@@ -267,6 +329,7 @@ class SharegyBridge:
 
             # 2. Start concurrent listener for incoming commands from Sharegy
             cmd_task = asyncio.create_task(self._listen_incoming_commands(ws))
+            watchdog_task = asyncio.create_task(self._heartbeat_watchdog(ws))
 
             # 3. Main telemetry sync loop
             try:
@@ -286,12 +349,32 @@ class SharegyBridge:
                     await asyncio.sleep(sync_interval)
             finally:
                 cmd_task.cancel()
+                watchdog_task.cancel()
+
+    async def _heartbeat_watchdog(self, ws):
+        """Send explicit ping frames and verify connection health."""
+        try:
+            while self._running and not ws.closed:
+                await asyncio.sleep(15)
+                now = time.time()
+                try:
+                    await ws.send_str(json.dumps({"method": "ping"}))
+                except Exception:
+                    pass
+
+                if self.last_heartbeat > 0 and (now - self.last_heartbeat > 40.0):
+                    _LOGGER.warning("Sharegy WebSocket heartbeat watchdog timeout (>40s). Forcing reconnect...")
+                    await ws.close()
+                    break
+        except asyncio.CancelledError:
+            pass
 
     async def _listen_incoming_commands(self, ws):
-        """Receive switch/control commands and setpoints from Sharegy and apply them in HA."""
+        """Receive switch/control commands, schedules and setpoints from Sharegy."""
         async for msg in ws:
             if msg.type == aiohttp.WSMsgType.TEXT:
                 try:
+                    self.last_heartbeat = time.time()
                     data = json.loads(msg.data)
                     await self._handle_incoming_command(data)
                 except Exception as err:
@@ -300,13 +383,28 @@ class SharegyBridge:
                 break
 
     async def _handle_incoming_command(self, data: dict):
-        """Execute control command and update setpoints."""
+        """Execute control command, update setpoints and cache 24h schedule."""
         self.last_heartbeat = time.time()
-        _LOGGER.info("Received control message from Sharegy: %s", data)
+        _LOGGER.debug("Received control message from Sharegy: %s", data)
 
-        # Update setpoints and state metrics
+        # 1. 24h MPC Schedule Caching
+        timeline = data.get("timeline") or data.get("predictive_mpc", {}).get("timeline")
+        if isinstance(timeline, list) and len(timeline) > 0:
+            self.cached_schedule_24h = timeline
+            self.buffer.save_schedule(timeline)
+            _LOGGER.info("Cached 24h predictive heating schedule (%d slots) in Home Assistant.", len(timeline))
+
+        # 2. Update setpoints and state metrics
         if "flow_temp_setpoint_c" in data:
             self.flow_temp_setpoint_c = float(data["flow_temp_setpoint_c"])
+            # If setpoint entity configured (e.g. number or input_number), update it
+            sp_entity = self.entry_data.get(CONF_FLOOR_HEATING_FLOW_SETPOINT)
+            if sp_entity:
+                domain = sp_entity.split(".")[0]
+                await self.hass.services.async_call(
+                    domain, "set_value", {"entity_id": sp_entity, "value": self.flow_temp_setpoint_c}
+                )
+
         if "screed_soc_pct" in data:
             self.screed_soc_pct = float(data["screed_soc_pct"])
         if "mode" in data:
@@ -320,7 +418,7 @@ class SharegyBridge:
             return
 
         identifier = (data.get("identifier") or data.get("device") or data.get("src") or "").strip()
-        raw_val = data.get("val") if "val" in data else data.get("value")
+        raw_val = data.get("val") if "val" in data else (data.get("value") if "value" in data else data.get("relay_state"))
 
         # Map identifier to HA Switch Entity
         target_entity = None
@@ -330,7 +428,7 @@ class SharegyBridge:
                 raw_val = data["bwwp_boost"]
         elif identifier == self.entry_data.get(CONF_HEATPUMP_NAME, "Waermepumpe"):
             target_entity = self.entry_data.get(CONF_HEATPUMP_SWITCH)
-        elif identifier == self.entry_data.get(CONF_FLOOR_HEATING_NAME, "Fussbodenheizung") or "floor_heating_boost" in data or data.get("action") == "FLOOR_HEATING_BOOST":
+        elif identifier in (self.entry_data.get(CONF_FLOOR_HEATING_NAME, "Fussbodenheizung"), "floor_heating", "floor_heating_relay") or "floor_heating_boost" in data or data.get("action") == "FLOOR_HEATING_BOOST":
             target_entity = self.entry_data.get(CONF_FLOOR_HEATING_SWITCH)
             if "floor_heating_boost" in data:
                 raw_val = data["floor_heating_boost"]
@@ -353,6 +451,92 @@ class SharegyBridge:
             await self.hass.services.async_call(
                 domain, service, {"entity_id": target_entity}, blocking=True
             )
+
+    async def _offline_heating_loop(self):
+        """Autonomous 24h Offline-Resilience Controller Loop (Runs every 60s)."""
+        while self._running:
+            try:
+                await asyncio.sleep(60)
+
+                # If online, cloud handles live optimization
+                if self.is_connected:
+                    self.offline_autonomous = False
+                    continue
+
+                fh_switch = self.entry_data.get(CONF_FLOOR_HEATING_SWITCH)
+                fh_room_temp_id = self.entry_data.get(CONF_FLOOR_HEATING_ROOM_TEMP)
+
+                if not fh_switch or not fh_room_temp_id:
+                    continue
+
+                self.offline_autonomous = True
+
+                # Read current room temperature
+                state_obj = self.hass.states.get(fh_room_temp_id)
+                if not state_obj or state_obj.state in ("unknown", "unavailable", "None", ""):
+                    continue
+
+                try:
+                    current_temp = float(state_obj.state)
+                except (ValueError, TypeError):
+                    continue
+
+                target_temp = float(self.entry_data.get(CONF_FLOOR_HEATING_TARGET_ROOM_TEMP, DEFAULT_FBH_TARGET_ROOM_TEMP))
+                boost_delta = float(self.entry_data.get(CONF_FLOOR_HEATING_BOOST_DELTA_K, DEFAULT_FBH_BOOST_DELTA_K))
+                max_floor_temp = float(self.entry_data.get(CONF_FLOOR_HEATING_MAX_FLOOR_TEMP, DEFAULT_FBH_MAX_FLOOR_TEMP))
+
+                current_hour = datetime.now().hour
+                hour_label = f"{current_hour:02d}:00"
+
+                # Match slot from cached schedule
+                current_slot = None
+                if self.cached_schedule_24h:
+                    current_slot = next((s for s in self.cached_schedule_24h if s.get("hour_label") == hour_label), self.cached_schedule24h[0] if self.cached_schedule_24h else None)
+
+                should_heat = False
+                if current_temp >= max_floor_temp:
+                    should_heat = False
+                elif current_temp < (target_temp - 0.5):
+                    should_heat = True
+                elif current_slot:
+                    action = current_slot.get("action_mode", "heat")
+                    if action == "preheat":
+                        should_heat = (current_temp < (target_temp + boost_delta))
+                    elif action == "coast":
+                        should_heat = False
+                    elif action == "heat":
+                        should_heat = (current_temp < target_temp)
+                    else:
+                        should_heat = False
+                else:
+                    should_heat = (current_temp < target_temp)
+
+                domain = fh_switch.split(".")[0]
+                service = "turn_on" if should_heat else "turn_off"
+                _LOGGER.info(
+                    "[HA Offline-Resilience 🛡️] Autonomously controlling floor heating: Room=%.1f°C, Action=%s -> %s.%s",
+                    current_temp,
+                    current_slot.get("action_mode", "thermostat") if current_slot else "thermostat",
+                    domain,
+                    service,
+                )
+                await self.hass.services.async_call(
+                    domain, service, {"entity_id": fh_switch}, blocking=True
+                )
+
+                # Set flow temp setpoint if configured
+                sp_entity = self.entry_data.get(CONF_FLOOR_HEATING_FLOW_SETPOINT)
+                if sp_entity and current_slot and current_slot.get("opt_flow_temp_c"):
+                    sp_val = float(current_slot["opt_flow_temp_c"])
+                    sp_domain = sp_entity.split(".")[0]
+                    await self.hass.services.async_call(
+                        sp_domain, "set_value", {"entity_id": sp_entity, "value": sp_val}
+                    )
+
+            except asyncio.CancelledError:
+                break
+            except Exception as loop_err:
+                _LOGGER.debug("Error in offline heating loop: %s", loop_err)
 
     async def _flush_buffer_ws(self, ws):
         """Transmit buffered backlog over WebSocket."""
@@ -504,7 +688,7 @@ class SharegyBridge:
         fh_room_t = _get_float_val(self.entry_data.get(CONF_FLOOR_HEATING_ROOM_TEMP))
         if fh_room_t is not None:
             packets.append({
-                "identifier": fh_name,
+                "identifier": "floor_heating_room_temp",
                 "device": fh_name,
                 "id": fh_name,
                 "metric": "temperature",
@@ -512,6 +696,36 @@ class SharegyBridge:
                 "role": "sensor",
                 "val": fh_room_t,
                 "value": fh_room_t,
+                "ts": now_sec,
+                "source": "homeassistant",
+            })
+
+        fh_flow_t = _get_float_val(self.entry_data.get(CONF_FLOOR_HEATING_FLOW_TEMP))
+        if fh_flow_t is not None:
+            packets.append({
+                "identifier": "floor_heating_flow_temp",
+                "device": fh_name,
+                "id": fh_name,
+                "metric": "temperature",
+                "unit": "°C",
+                "role": "sensor",
+                "val": fh_flow_t,
+                "value": fh_flow_t,
+                "ts": now_sec,
+                "source": "homeassistant",
+            })
+
+        fh_floor_t = _get_float_val(self.entry_data.get(CONF_FLOOR_HEATING_FLOOR_TEMP))
+        if fh_floor_t is not None:
+            packets.append({
+                "identifier": "floor_heating_surface_temp",
+                "device": fh_name,
+                "id": fh_name,
+                "metric": "temperature",
+                "unit": "°C",
+                "role": "sensor",
+                "val": fh_floor_t,
+                "value": fh_floor_t,
                 "ts": now_sec,
                 "source": "homeassistant",
             })

@@ -28,6 +28,16 @@ from .const import (
     CONF_HEATPUMP_POWER,
     CONF_HEATPUMP_TEMP,
     CONF_HEATPUMP_SWITCH,
+    CONF_FLOOR_HEATING_NAME,
+    CONF_FLOOR_HEATING_POWER,
+    CONF_FLOOR_HEATING_ROOM_TEMP,
+    CONF_FLOOR_HEATING_FLOW_TEMP,
+    CONF_FLOOR_HEATING_FLOOR_TEMP,
+    CONF_FLOOR_HEATING_SWITCH,
+    CONF_FLOOR_HEATING_FLOW_SETPOINT,
+    CONF_FLOOR_HEATING_TARGET_ROOM_TEMP,
+    CONF_FLOOR_HEATING_BOOST_DELTA_K,
+    CONF_FLOOR_HEATING_MAX_FLOOR_TEMP,
     CONF_WALLBOX_NAME,
     CONF_WALLBOX_POWER,
     CONF_WALLBOX_SWITCH,
@@ -35,6 +45,9 @@ from .const import (
     CONF_SYNC_INTERVAL,
     DEFAULT_WS_URL,
     DEFAULT_SYNC_INTERVAL,
+    DEFAULT_FBH_TARGET_ROOM_TEMP,
+    DEFAULT_FBH_BOOST_DELTA_K,
+    DEFAULT_FBH_MAX_FLOOR_TEMP,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -104,6 +117,7 @@ class SharegyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         entity_schema = vol.Schema(
             {
+                # Core EMS Sensors
                 vol.Optional(CONF_GRID_POWER_SENSOR): selector.EntitySelector(
                     selector.EntitySelectorConfig(domain=["sensor"])
                 ),
@@ -118,6 +132,37 @@ class SharegyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 ),
                 vol.Optional(CONF_LOAD_POWER_SENSOR): selector.EntitySelector(
                     selector.EntitySelectorConfig(domain=["sensor"])
+                ),
+                # Floor Heating & Estrich-Speicher Bundle
+                vol.Optional(CONF_FLOOR_HEATING_NAME, default="Fussbodenheizung"): str,
+                vol.Optional(CONF_FLOOR_HEATING_ROOM_TEMP): selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain=["sensor"])
+                ),
+                vol.Optional(CONF_FLOOR_HEATING_FLOW_TEMP): selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain=["sensor"])
+                ),
+                vol.Optional(CONF_FLOOR_HEATING_FLOOR_TEMP): selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain=["sensor"])
+                ),
+                vol.Optional(CONF_FLOOR_HEATING_SWITCH): selector.EntitySelector(
+                    selector.EntitySelectorConfig(
+                        domain=["switch", "input_boolean", "light"]
+                    )
+                ),
+                vol.Optional(CONF_FLOOR_HEATING_FLOW_SETPOINT): selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain=["number", "input_number", "sensor"])
+                ),
+                vol.Optional(CONF_FLOOR_HEATING_POWER): selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain=["sensor"])
+                ),
+                vol.Optional(CONF_FLOOR_HEATING_TARGET_ROOM_TEMP, default=DEFAULT_FBH_TARGET_ROOM_TEMP): selector.NumberSelector(
+                    selector.NumberSelectorConfig(min=15.0, max=28.0, step=0.5, unit_of_measurement="°C")
+                ),
+                vol.Optional(CONF_FLOOR_HEATING_BOOST_DELTA_K, default=DEFAULT_FBH_BOOST_DELTA_K): selector.NumberSelector(
+                    selector.NumberSelectorConfig(min=0.2, max=3.0, step=0.1, unit_of_measurement="K")
+                ),
+                vol.Optional(CONF_FLOOR_HEATING_MAX_FLOOR_TEMP, default=DEFAULT_FBH_MAX_FLOOR_TEMP): selector.NumberSelector(
+                    selector.NumberSelectorConfig(min=20.0, max=35.0, step=0.5, unit_of_measurement="°C")
                 ),
                 # BWWP Bundle
                 vol.Optional(CONF_BWWP_NAME, default="Brauchwasser"): str,
@@ -141,19 +186,6 @@ class SharegyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     selector.EntitySelectorConfig(domain=["sensor"])
                 ),
                 vol.Optional(CONF_HEATPUMP_SWITCH): selector.EntitySelector(
-                    selector.EntitySelectorConfig(
-                        domain=["switch", "input_boolean", "light"]
-                    )
-                ),
-                # Floor Heating (Fußbodenheizung & Estrich-Speicher) Bundle
-                vol.Optional(CONF_FLOOR_HEATING_NAME, default="Fussbodenheizung"): str,
-                vol.Optional(CONF_FLOOR_HEATING_POWER): selector.EntitySelector(
-                    selector.EntitySelectorConfig(domain=["sensor"])
-                ),
-                vol.Optional(CONF_FLOOR_HEATING_ROOM_TEMP): selector.EntitySelector(
-                    selector.EntitySelectorConfig(domain=["sensor"])
-                ),
-                vol.Optional(CONF_FLOOR_HEATING_SWITCH): selector.EntitySelector(
                     selector.EntitySelectorConfig(
                         domain=["switch", "input_boolean", "light"]
                     )
@@ -233,6 +265,46 @@ class SharegyOptionsFlowHandler(config_entries.OptionsFlow):
                 fields[vol.Optional(key)] = selector.EntitySelector(
                     selector.EntitySelectorConfig(domain=["sensor"])
                 )
+
+        # Floor Heating Bundle
+        fields[vol.Optional(CONF_FLOOR_HEATING_NAME, default=data.get(CONF_FLOOR_HEATING_NAME, "Fussbodenheizung"))] = str
+        for key in [CONF_FLOOR_HEATING_ROOM_TEMP, CONF_FLOOR_HEATING_FLOW_TEMP, CONF_FLOOR_HEATING_FLOOR_TEMP, CONF_FLOOR_HEATING_POWER]:
+            if data.get(key):
+                fields[vol.Optional(key, default=data[key])] = selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain=["sensor"])
+                )
+            else:
+                fields[vol.Optional(key)] = selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain=["sensor"])
+                )
+
+        if data.get(CONF_FLOOR_HEATING_SWITCH):
+            fields[vol.Optional(CONF_FLOOR_HEATING_SWITCH, default=data[CONF_FLOOR_HEATING_SWITCH])] = selector.EntitySelector(
+                selector.EntitySelectorConfig(domain=["switch", "input_boolean", "light"])
+            )
+        else:
+            fields[vol.Optional(CONF_FLOOR_HEATING_SWITCH)] = selector.EntitySelector(
+                selector.EntitySelectorConfig(domain=["switch", "input_boolean", "light"])
+            )
+
+        if data.get(CONF_FLOOR_HEATING_FLOW_SETPOINT):
+            fields[vol.Optional(CONF_FLOOR_HEATING_FLOW_SETPOINT, default=data[CONF_FLOOR_HEATING_FLOW_SETPOINT])] = selector.EntitySelector(
+                selector.EntitySelectorConfig(domain=["number", "input_number", "sensor"])
+            )
+        else:
+            fields[vol.Optional(CONF_FLOOR_HEATING_FLOW_SETPOINT)] = selector.EntitySelector(
+                selector.EntitySelectorConfig(domain=["number", "input_number", "sensor"])
+            )
+
+        fields[vol.Optional(CONF_FLOOR_HEATING_TARGET_ROOM_TEMP, default=data.get(CONF_FLOOR_HEATING_TARGET_ROOM_TEMP, DEFAULT_FBH_TARGET_ROOM_TEMP))] = selector.NumberSelector(
+            selector.NumberSelectorConfig(min=15.0, max=28.0, step=0.5, unit_of_measurement="°C")
+        )
+        fields[vol.Optional(CONF_FLOOR_HEATING_BOOST_DELTA_K, default=data.get(CONF_FLOOR_HEATING_BOOST_DELTA_K, DEFAULT_FBH_BOOST_DELTA_K))] = selector.NumberSelector(
+            selector.NumberSelectorConfig(min=0.2, max=3.0, step=0.1, unit_of_measurement="K")
+        )
+        fields[vol.Optional(CONF_FLOOR_HEATING_MAX_FLOOR_TEMP, default=data.get(CONF_FLOOR_HEATING_MAX_FLOOR_TEMP, DEFAULT_FBH_MAX_FLOOR_TEMP))] = selector.NumberSelector(
+            selector.NumberSelectorConfig(min=20.0, max=35.0, step=0.5, unit_of_measurement="°C")
+        )
 
         # BWWP Bundle
         fields[vol.Optional(CONF_BWWP_NAME, default=data.get(CONF_BWWP_NAME, "Brauchwasser"))] = str
