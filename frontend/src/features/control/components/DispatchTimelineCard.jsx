@@ -71,26 +71,26 @@ export default function DispatchTimelineCard({ schedule = [] }) {
                     </div>
                     <div>
                         <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                            <span>24h-Fahrplan & Dispatch-Timeline</span>
+                            <span>{t("control.timeline_title", "24h-Fahrplan & Dispatch-Timeline")}</span>
                             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
-                                24 Stunden Übersicht
+                                {t("control.timeline_24h_view", "24 Stunden Übersicht")}
                             </span>
                         </h3>
                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                            Automatische Schaltungen basierend auf Solarprognose, Spotmarktpreisen und Prioritäten. Klicke auf eine Stunde für Details.
+                            {t("control.timeline_desc", "Automatische Schaltungen basierend auf Solarprognose, Spotmarktpreisen und Prioritäten. Klicke auf eine Stunde für Details.")}
                         </p>
                     </div>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3 text-xs font-semibold text-slate-500 dark:text-slate-400 self-start sm:self-auto">
                     <span className="flex items-center gap-1.5">
-                        <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-2xs"></span> ☀️ PV-Ertrag
+                        <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-2xs"></span> {t("control.legend_pv", "☀️ PV-Ertrag")}
                     </span>
                     <span className="flex items-center gap-1.5">
-                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-2xs"></span> ⚡ Tiefstpreis
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-2xs"></span> {t("control.legend_lowest_price", "⚡ Tiefstpreis")}
                     </span>
                     <span className="flex items-center gap-1.5">
-                        <span className="w-2.5 h-2.5 rounded-full bg-indigo-600 shadow-2xs"></span> 🎛️ Aktivität
+                        <span className="w-2.5 h-2.5 rounded-full bg-indigo-600 shadow-2xs"></span> {t("control.legend_activity", "🎛️ Aktivität")}
                     </span>
                 </div>
             </div>
@@ -157,11 +157,11 @@ export default function DispatchTimelineCard({ schedule = [] }) {
 
                 {/* Legend Time Scale */}
                 <div className="flex justify-between px-2 text-[10px] font-mono text-slate-400">
-                    <span>00:00 (Nacht)</span>
-                    <span>06:00 (Morgen)</span>
-                    <span>12:00 (PV-Peak)</span>
-                    <span>18:00 (Abend)</span>
-                    <span>23:00 (Nacht)</span>
+                    <span>00:00</span>
+                    <span>06:00</span>
+                    <span>12:00</span>
+                    <span>18:00</span>
+                    <span>23:00</span>
                 </div>
             </div>
 
@@ -173,7 +173,7 @@ export default function DispatchTimelineCard({ schedule = [] }) {
                         <div className="flex items-center gap-2">
                             <span className="text-base">⏰</span>
                             <span className="text-sm font-bold text-slate-900 dark:text-white">
-                                {selectedSlot.time_label} – {String((selectedSlot.hour + 1) % 24).padStart(2, "0")}:00 Uhr
+                                {selectedSlot.time_label} – {String((selectedSlot.hour + 1) % 24).padStart(2, "0")}:00
                             </span>
                         </div>
                         <div className="flex items-center gap-2">
@@ -192,7 +192,7 @@ export default function DispatchTimelineCard({ schedule = [] }) {
 
                     <div>
                         <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                            Geplante Lasten in dieser Stunde:
+                            {t("control.scheduled_loads_hour", "Geplante Lasten in dieser Stunde:")}
                         </div>
                         {selectedSlot.scheduled_devices && selectedSlot.scheduled_devices.length > 0 ? (
                             <div className="space-y-1.5">
@@ -219,7 +219,7 @@ export default function DispatchTimelineCard({ schedule = [] }) {
                             </div>
                         ) : (
                             <div className="text-xs text-slate-400 dark:text-slate-500 py-1">
-                                Keine Sonderzuschaltungen geplant · Standard Grundlast-Betrieb (~0,35 kW).
+                                {t("control.no_special_dispatches", "Keine Sonderzuschaltungen geplant · Standard Grundlast-Betrieb (~0,35 kW).")}
                             </div>
                         )}
                     </div>
@@ -231,11 +231,11 @@ export default function DispatchTimelineCard({ schedule = [] }) {
                         <div className="flex items-center gap-2">
                             <span className="text-base">📋</span>
                             <span className="text-sm font-bold text-slate-900 dark:text-white">
-                                Heute geplante Schaltungen
+                                {t("control.today_scheduled_actions", "Heute geplante Schaltungen")}
                             </span>
                         </div>
                         <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">
-                            {activeScheduleSummaries.length} Aktionen
+                            {t("control.actions_count", "{{count}} Aktionen", { count: activeScheduleSummaries.length })}
                         </span>
                     </div>
 
@@ -268,7 +268,7 @@ export default function DispatchTimelineCard({ schedule = [] }) {
                         </div>
                     ) : (
                         <div className="text-xs text-slate-400 dark:text-slate-500 py-3 text-center">
-                            Für heute sind keine Sonder-Laufzeiten erforderlich.
+                            {t("control.no_special_runs_needed", "Für heute sind keine Sonder-Laufzeiten erforderlich.")}
                         </div>
                     )}
                 </div>

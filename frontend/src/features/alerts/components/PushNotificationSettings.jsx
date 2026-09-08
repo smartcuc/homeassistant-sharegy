@@ -310,20 +310,20 @@ export default function PushNotificationSettings({ emailSlot = null }) {
                     <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 space-y-2.5 text-xs text-slate-600 dark:text-slate-400">
                         <div className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
                             <span>🛡️</span>
-                            <span>Web-Push & Datensicherheit</span>
+                            <span>{t("alerts.security_title", "Web-Push & Datensicherheit")}</span>
                         </div>
                         <ul className="space-y-1.5 text-[11px] leading-relaxed">
                             <li className="flex items-center gap-2">
                                 <span className="text-emerald-500 font-bold">✓</span>
-                                <span>Ende-zu-Ende verschlüsselte Zustellung (VAPID / RFC 8291 Standard)</span>
+                                <span>{t("alerts.security_item1", "Ende-zu-Ende verschlüsselte Zustellung (VAPID / RFC 8291 Standard)")}</span>
                             </li>
                             <li className="flex items-center gap-2">
                                 <span className="text-emerald-500 font-bold">✓</span>
-                                <span>Keine App-Store-Installation nötig (PWA & moderner Web-Standard)</span>
+                                <span>{t("alerts.security_item2", "Keine App-Store-Installation nötig (PWA & moderner Web-Standard)")}</span>
                             </li>
                             <li className="flex items-center gap-2">
                                 <span className="text-emerald-500 font-bold">✓</span>
-                                <span>Jederzeit pro Endgerät mit einem Klick abmeldbar</span>
+                                <span>{t("alerts.security_item3", "Jederzeit pro Endgerät mit einem Klick abmeldbar")}</span>
                             </li>
                         </ul>
                     </div>

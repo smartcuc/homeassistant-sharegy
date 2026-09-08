@@ -1,16 +1,16 @@
 import { useTranslation } from "react-i18next";
 
 const CATEGORY_META = {
-    battery: { name: "Heimspeicher", icon: "🔋", color: "bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800" },
-    floor_heating: { name: "Fußbodenheizung", icon: "🌡️", color: "bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800" },
-    bwwp: { name: "Warmwasser", icon: "♨️", color: "bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800" },
-    wallbox: { name: "Wallbox", icon: "🚗", color: "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800" },
-    heatpump: { name: "Wärmepumpe", icon: "🔥", color: "bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800" },
-    pool: { name: "Pool", icon: "🏊", color: "bg-cyan-50 dark:bg-cyan-950/40 text-cyan-700 dark:text-cyan-300 border-cyan-200 dark:border-cyan-800" },
-    ac: { name: "Klimaanlage", icon: "❄️", color: "bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-800" },
-    appliances: { name: "Haushaltsgeräte", icon: "🧺", color: "bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800" },
-    heating_rod: { name: "Heizstab", icon: "⚡", color: "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800" },
-    other: { name: "Sonstiges", icon: "🔌", color: "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700" },
+    battery: { nameKey: "control.cat_battery", defaultName: "Heimspeicher", icon: "🔋", color: "bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800" },
+    floor_heating: { nameKey: "control.cat_floor_heating", defaultName: "Fußbodenheizung", icon: "🌡️", color: "bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800" },
+    bwwp: { nameKey: "control.cat_bwwp", defaultName: "Warmwasser", icon: "♨️", color: "bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800" },
+    wallbox: { nameKey: "control.cat_wallbox", defaultName: "Wallbox", icon: "🚗", color: "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800" },
+    heatpump: { nameKey: "control.cat_heatpump", defaultName: "Wärmepumpe", icon: "🔥", color: "bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800" },
+    pool: { nameKey: "control.cat_pool", defaultName: "Pool", icon: "🏊", color: "bg-cyan-50 dark:bg-cyan-950/40 text-cyan-700 dark:text-cyan-300 border-cyan-200 dark:border-cyan-800" },
+    ac: { nameKey: "control.cat_ac", defaultName: "Klimaanlage", icon: "❄️", color: "bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-800" },
+    appliances: { nameKey: "control.cat_appliances", defaultName: "Haushaltsgeräte", icon: "🧺", color: "bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800" },
+    heating_rod: { nameKey: "control.cat_heating_rod", defaultName: "Heizstab", icon: "⚡", color: "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800" },
+    other: { nameKey: "control.cat_other", defaultName: "Sonstiges", icon: "🔌", color: "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700" },
 };
 
 export default function PriorityCascadeBar({ priorityOrder = [], onOrderChange, isSaving }) {
@@ -38,20 +38,20 @@ export default function PriorityCascadeBar({ priorityOrder = [], onOrderChange, 
                     </div>
                     <div>
                         <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                            <span>Prioritäten-Kaskade (Merit-Order)</span>
+                            <span>{t("control.priority_cascade_title", "Prioritäten-Kaskade (Merit-Order)")}</span>
                             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                                {priorityOrder.length} Stufen
+                                {t("control.priority_cascade_steps", "{{count}} Stufen", { count: priorityOrder.length })}
                             </span>
                         </h3>
                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                            Reihenfolge der Lastzuteilung bei Solarüberschuss. Nutze die Pfeiltasten zum Verschieben der Ränge.
+                            {t("control.priority_cascade_desc", "Reihenfolge der Lastzuteilung bei Solarüberschuss. Nutze die Pfeiltasten zum Verschieben der Ränge.")}
                         </p>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-2 self-start sm:self-auto">
                     <span className="text-xs font-semibold text-slate-400">
-                        {isSaving ? "⏳ Speichern..." : "✓ Automatisch aktiv"}
+                        {isSaving ? t("control.saving_state", "⏳ Speichern...") : t("control.auto_active", "✓ Automatisch aktiv")}
                     </span>
                 </div>
             </div>
@@ -59,7 +59,8 @@ export default function PriorityCascadeBar({ priorityOrder = [], onOrderChange, 
             {/* 5-Column Grid Layout for uniform badge width */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5 pt-1">
                 {priorityOrder.map((catKey, idx) => {
-                    const meta = CATEGORY_META[catKey] || { name: catKey, icon: "🔌", color: "bg-slate-50 text-slate-700 border-slate-200" };
+                    const meta = CATEGORY_META[catKey] || { nameKey: "control.cat_other", defaultName: catKey, icon: "🔌", color: "bg-slate-50 text-slate-700 border-slate-200" };
+                    const resolvedName = meta.nameKey ? t(meta.nameKey, meta.defaultName) : meta.defaultName;
                     const isFirst = idx === 0;
                     const isLast = idx === priorityOrder.length - 1;
 
@@ -80,7 +81,7 @@ export default function PriorityCascadeBar({ priorityOrder = [], onOrderChange, 
 
                                 {/* Icon & Label */}
                                 <span className="text-base shrink-0">{meta.icon}</span>
-                                <span className="text-xs font-bold truncate" title={meta.name}>{meta.name}</span>
+                                <span className="text-xs font-bold truncate" title={resolvedName}>{resolvedName}</span>
                             </div>
 
                             {/* Reorder Controls */}
@@ -94,7 +95,7 @@ export default function PriorityCascadeBar({ priorityOrder = [], onOrderChange, 
                                             ? "text-black/20 dark:text-white/20 cursor-not-allowed"
                                             : "hover:bg-black/10 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 cursor-pointer"
                                     }`}
-                                    title={isFirst ? "Bereits höchste Priorität" : "Höhere Priorität (nach links)"}
+                                    title={isFirst ? t("control.prio_already_highest", "Bereits höchste Priorität") : t("control.prio_higher", "Höhere Priorität (nach links)")}
                                 >
                                     ◀
                                 </button>
@@ -107,7 +108,7 @@ export default function PriorityCascadeBar({ priorityOrder = [], onOrderChange, 
                                             ? "text-black/20 dark:text-white/20 cursor-not-allowed"
                                             : "hover:bg-black/10 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 cursor-pointer"
                                     }`}
-                                    title={isLast ? "Bereits niedrigste Priorität" : "Niedrigere Priorität (nach rechts)"}
+                                    title={isLast ? t("control.prio_already_lowest", "Bereits niedrigste Priorität") : t("control.prio_lower", "Niedrigere Priorität (nach rechts)")}
                                 >
                                     ▶
                                 </button>
@@ -121,7 +122,7 @@ export default function PriorityCascadeBar({ priorityOrder = [], onOrderChange, 
             <div className="text-[11px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-2xl border border-slate-100 dark:border-slate-800 flex items-start gap-2">
                 <span className="text-amber-500 text-sm">💡</span>
                 <span>
-                    <strong>Merit-Order Prinzip:</strong> Rang 1 (z. B. Heimspeicher) erhält erzeugten Solarüberschuss vorrangig. Sobald die Leistung ausreicht oder der Speicher voll ist, wird der Überschuss kaskadierend an die nachfolgenden Ränge weitergereicht.
+                    <strong>{t("control.merit_order_principle_title", "Merit-Order Prinzip:")}</strong> {t("control.merit_order_principle_desc", "Rang 1 (z. B. Heimspeicher) erhält erzeugten Solarüberschuss vorrangig. Sobald die Leistung ausreicht oder der Speicher voll ist, wird der Überschuss kaskadierend an die nachfolgenden Ränge weitergereicht.")}
                 </span>
             </div>
         </div>

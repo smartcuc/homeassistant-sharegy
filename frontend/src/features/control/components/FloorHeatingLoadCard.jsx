@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../../api/client";
+import { translateInsight } from "../../../utils/translateInsight";
 
 export default function FloorHeatingLoadCard() {
     const { t } = useTranslation();
@@ -168,7 +169,7 @@ export default function FloorHeatingLoadCard() {
                 <div className="flex items-center gap-2">
                     <button
                         onClick={handleOpenSettings}
-                        className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                         title={t("common.settings", "Einstellungen")}
                     >
                         ⚙️
@@ -176,7 +177,7 @@ export default function FloorHeatingLoadCard() {
                     <button
                         onClick={() => toggleMutation.mutate(!relayState)}
                         disabled={toggleMutation.isPending}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                             relayState
                                 ? "bg-red-500/15 text-red-600 dark:text-red-400 hover:bg-red-500/25 border border-red-500/30"
                                 : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/25 border border-emerald-500/30"
@@ -204,9 +205,9 @@ export default function FloorHeatingLoadCard() {
                     ></div>
                 </div>
                 <div className="flex items-center justify-between text-[11px] text-slate-400 mt-1">
-                    <span>Basis ({targetTemp - 0.5}°C)</span>
-                    <span>Speichermasse: ~{(estrichMassKg / 1000).toFixed(1)} t Beton</span>
-                    <span>Voll ({boostTarget}°C)</span>
+                    <span>{t("control.thermal_basis", { temp: targetTemp - 0.5 })}</span>
+                    <span>{t("control.thermal_mass", { mass: (estrichMassKg / 1000).toFixed(1) })}</span>
+                    <span>{t("control.thermal_full", { temp: boostTarget })}</span>
                 </div>
             </div>
 
@@ -215,36 +216,36 @@ export default function FloorHeatingLoadCard() {
                 {/* Raum-Ist */}
                 <div className="bg-slate-50/80 dark:bg-slate-800/40 rounded-xl p-2.5 border border-slate-200/60 dark:border-slate-800/60 text-center">
                     <div className="text-[10px] font-medium text-slate-500 dark:text-slate-400">
-                        {t("control.room_temp", "Raum-Ist")}
+                        {t("control.room_actual", "Raum-Ist")}
                     </div>
                     <div className="text-base font-black text-slate-900 dark:text-white mt-0.5">
                         {currentTemp}°C
                     </div>
-                    <div className="text-[10px] text-slate-400">Soll {targetTemp}°C</div>
+                    <div className="text-[10px] text-slate-400">{t("control.target_label", { temp: targetTemp })}</div>
                 </div>
 
                 {/* Vorlauf KI-Soll */}
                 <div className="bg-indigo-50/70 dark:bg-indigo-950/30 rounded-xl p-2.5 border border-indigo-200/60 dark:border-indigo-800/60 text-center">
                     <div className="text-[10px] font-medium text-indigo-700 dark:text-indigo-300 flex items-center justify-center gap-1">
-                        <span>🧠</span> <span>Vorlauf KI</span>
+                        <span>🧠</span> <span>{t("control.flow_ki", "Vorlauf KI")}</span>
                     </div>
                     <div className="text-base font-black text-indigo-700 dark:text-indigo-300 mt-0.5">
                         {optFlowTemp}°C
                     </div>
                     <div className="text-[10px] font-semibold text-indigo-500">
-                        {flowDeltaK > 0 ? `+${flowDeltaK}K Boost` : flowDeltaK < 0 ? `${flowDeltaK}K Solar` : `Basis ${baseFlowTemp}°C`}
+                        {flowDeltaK > 0 ? t("control.flow_boost", { delta: flowDeltaK }) : flowDeltaK < 0 ? t("control.flow_solar", { delta: flowDeltaK }) : t("control.flow_basis", { temp: baseFlowTemp })}
                     </div>
                 </div>
 
                 {/* Außentemperatur */}
                 <div className="bg-slate-50/80 dark:bg-slate-800/40 rounded-xl p-2.5 border border-slate-200/60 dark:border-slate-800/60 text-center">
                     <div className="text-[10px] font-medium text-slate-500 dark:text-slate-400">
-                        Außenwetter
+                        {t("control.outdoor_weather", "Außenwetter")}
                     </div>
                     <div className="text-base font-black text-slate-900 dark:text-white mt-0.5">
                         {outdoorTemp}°C
                     </div>
-                    <div className="text-[10px] text-slate-400">{solarRadiation} W/m² Sonne</div>
+                    <div className="text-[10px] text-slate-400">{t("control.sun_radiation", { solar: solarRadiation })}</div>
                 </div>
 
                 {/* Vorlade-Ziel */}
@@ -255,14 +256,14 @@ export default function FloorHeatingLoadCard() {
                     <div className="text-base font-black text-amber-600 dark:text-amber-400 mt-0.5">
                         {boostTarget}°C
                     </div>
-                    <div className="text-[10px] text-amber-600 dark:text-amber-400">+{boostDelta}K Delta</div>
+                    <div className="text-[10px] text-amber-600 dark:text-amber-400">{t("control.boost_delta", { delta: boostDelta })}</div>
                 </div>
             </div>
 
             {/* Decision Reason Banner */}
             <div className="text-xs bg-slate-100/70 dark:bg-slate-800/70 text-slate-600 dark:text-slate-300 px-3 py-2 rounded-xl mb-4 flex items-center gap-2 border border-slate-200/50 dark:border-slate-700/50">
                 <span className="text-sm">💡</span>
-                <span className="truncate">{decisionReason}</span>
+                <span className="truncate">{translateInsight(decisionReason, t)}</span>
             </div>
 
             {/* 🧠 KI-WETTER & PRÄDIKTIVER FAHRPLAN PREVIEW BUTTON / BANNER */}
@@ -272,32 +273,32 @@ export default function FloorHeatingLoadCard() {
                         <div className="flex items-center gap-2">
                             <span className="text-sm">🧠</span>
                             <span className="text-xs font-bold text-indigo-900 dark:text-indigo-200">
-                                {mpcInfo.ai_recommendation_title || "KI-Wetter & Prädiktiver MPC-Fahrplan"}
+                                {mpcInfo.ai_recommendation_title ? translateInsight(mpcInfo.ai_recommendation_title, t) : t("control.mpc_ai_title", "KI-Wetter & Prädiktiver MPC-Fahrplan")}
                             </span>
                         </div>
                         <button
                             onClick={() => setScheduleDrawerOpen(!scheduleDrawerOpen)}
                             className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer flex items-center gap-1"
                         >
-                            <span>{scheduleDrawerOpen ? "Fahrplan schließen" : "24h-Fahrplan anzeigen"}</span>
+                            <span>{scheduleDrawerOpen ? t("control.hide_24h_schedule", "Fahrplan schließen") : t("control.show_24h_schedule", "24h-Fahrplan anzeigen")}</span>
                             <span>{scheduleDrawerOpen ? "▲" : "▼"}</span>
                         </button>
                     </div>
                     <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                        {mpcInfo.ai_recommendation_text}
+                        {translateInsight(mpcInfo.ai_recommendation_text, t)}
                     </p>
 
                     {/* Summary Badges */}
                     <div className="flex flex-wrap items-center gap-2 mt-2.5 pt-2 border-t border-indigo-100 dark:border-indigo-900/50 text-[11px]">
                         <span className="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-700 dark:text-amber-300 font-medium">
-                            ⚡ Vorladen: {mpcInfo.best_preheat_window}
+                            {t("control.preheat_window", { window: mpcInfo.best_preheat_window })}
                         </span>
                         <span className="px-2 py-0.5 rounded-md bg-sky-500/15 text-sky-700 dark:text-sky-300 font-medium">
-                            🛋️ Entladen: {mpcInfo.best_coast_window}
+                            {t("control.coast_window", { window: mpcInfo.best_coast_window })}
                         </span>
                         {mpcInfo.estimated_savings_eur > 0 && (
                             <span className="px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-bold ml-auto">
-                                💰 ~{mpcInfo.estimated_savings_eur.toFixed(2)} € Ersparnis/Tag
+                                {t("control.savings_per_day", { savings: mpcInfo.estimated_savings_eur.toFixed(2) })}
                             </span>
                         )}
                     </div>
@@ -306,8 +307,8 @@ export default function FloorHeatingLoadCard() {
                     {scheduleDrawerOpen && timeline.length > 0 && (
                         <div className="mt-4 pt-3 border-t border-indigo-200/50 dark:border-indigo-800/50 space-y-2">
                             <div className="text-[11px] font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
-                                <span>24-Stunden Vorlauf- & Wetterfahrplan:</span>
-                                <span className="text-[10px] text-slate-400">Heizkurve vs. Vorlade-Boost</span>
+                                <span>{t("control.schedule_timeline_heading", "24-Stunden Vorlauf- & Wetterfahrplan:")}</span>
+                                <span className="text-[10px] text-slate-400">{t("control.schedule_timeline_sub", "Heizkurve vs. Vorlade-Boost")}</span>
                             </div>
                             <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-1.5 max-h-48 overflow-y-auto pr-1">
                                 {timeline.slice(0, 16).map((slot, idx) => (
@@ -338,18 +339,18 @@ export default function FloorHeatingLoadCard() {
                 <button
                     onClick={() => boostMutation.mutate({ duration_hours: 2.0 })}
                     disabled={boostMutation.isPending}
-                    className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 ${
+                    className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer ${
                         isPreheating
                             ? "bg-amber-500 text-white hover:bg-amber-600"
                             : "bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:opacity-95"
                     }`}
                 >
                     <span>🔥</span>
-                    <span>{isPreheating ? t("control.boost_active", "Vorladeboost aktiv (2h)") : t("control.boost_screed", "Estrich vorladen (2h)")}</span>
+                    <span>{isPreheating ? t("control.preheat_active_btn", "Vorladeboost aktiv (2h)") : t("control.preheat_screed_btn", "Estrich vorladen (2h)")}</span>
                 </button>
 
                 <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg">
-                    Modus: <span className="font-bold text-slate-700 dark:text-slate-200 capitalize">{controlMode}</span>
+                    {t("common.mode", "Modus")}: <span className="font-bold text-slate-700 dark:text-slate-200 capitalize">{controlMode}</span>
                 </div>
             </div>
 
@@ -381,18 +382,18 @@ export default function FloorHeatingLoadCard() {
                                     onChange={(e) => setFormConfig({ ...formConfig, control_mode: e.target.value })}
                                     className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white"
                                 >
-                                    <option value="autopilot">🤖 Autopilot (Solar- & Börsenpreis-Vorladung)</option>
-                                    <option value="pv_only">☀️ Nur PV-Überschuss</option>
-                                    <option value="price_saver">💰 Sparfuchs (Günstigste Börsenstunden)</option>
-                                    <option value="comfort">🛋️ Komfortbetrieb (Feste Solltemperatur)</option>
-                                    <option value="manual">🛑 Manuell (Automatik pausiert)</option>
+                                    <option value="autopilot">{t("control.mode_autopilot", "🤖 Autopilot (Solar- & Börsenpreis-Vorladung)")}</option>
+                                    <option value="pv_only">{t("control.mode_pv_only", "☀️ Nur PV-Überschuss")}</option>
+                                    <option value="price_saver">{t("control.mode_price_saver", "💰 Sparfuchs (Günstigste Börsenstunden)")}</option>
+                                    <option value="comfort">{t("control.mode_comfort", "🛋️ Komfortbetrieb (Feste Solltemperatur)")}</option>
+                                    <option value="manual">{t("control.mode_manual", "🛑 Manuell (Automatik pausiert)")}</option>
                                 </select>
                             </div>
 
                             {/* Target Temperature Slider */}
                             <div>
                                 <div className="flex justify-between text-xs font-semibold mb-1">
-                                    <span className="text-slate-700 dark:text-slate-300">Raum-Solltemperatur</span>
+                                    <span className="text-slate-700 dark:text-slate-300">{t("control.target_room_temp", "Raum-Solltemperatur")}</span>
                                     <span className="text-amber-500 font-bold">{formConfig.target_room_temp_c}°C</span>
                                 </div>
                                 <input
@@ -409,8 +410,8 @@ export default function FloorHeatingLoadCard() {
                             {/* Preheating Boost Delta */}
                             <div>
                                 <div className="flex justify-between text-xs font-semibold mb-1">
-                                    <span className="text-slate-700 dark:text-slate-300">Thermische Vorladung (Delta K)</span>
-                                    <span className="text-amber-500 font-bold">+{formConfig.boost_delta_k} K (Ziel: {(parseFloat(formConfig.target_room_temp_c) + parseFloat(formConfig.boost_delta_k)).toFixed(1)}°C)</span>
+                                    <span className="text-slate-700 dark:text-slate-300">{t("control.thermal_preheat_delta", "Thermische Vorladung (Delta K)")}</span>
+                                    <span className="text-amber-500 font-bold">+{formConfig.boost_delta_k} K {t("control.target_preview", { temp: (parseFloat(formConfig.target_room_temp_c) + parseFloat(formConfig.boost_delta_k)).toFixed(1) })}</span>
                                 </div>
                                 <input
                                     type="range"
@@ -422,14 +423,14 @@ export default function FloorHeatingLoadCard() {
                                     className="w-full accent-amber-500 cursor-pointer"
                                 />
                                 <p className="text-[11px] text-slate-400 mt-1">
-                                    Hebt die Zieltemperatur bei Solarüberschuss oder Negativpreisen temporär an, um den Estrich vorzuladen.
+                                    {t("control.boost_delta_hint", "Hebt die Zieltemperatur bei Solarüberschuss oder Negativpreisen temporär an, um den Estrich vorzuladen.")}
                                 </p>
                             </div>
 
                             {/* 🧠 Heizkurven-Steilheit (Slope) */}
                             <div>
                                 <div className="flex justify-between text-xs font-semibold mb-1">
-                                    <span className="text-slate-700 dark:text-slate-300">Heizkurven-Steilheit (Niedertemperatur FBH)</span>
+                                    <span className="text-slate-700 dark:text-slate-300">{t("control.heating_curve_slope", "Heizkurven-Steilheit (Niedertemperatur FBH)")}</span>
                                     <span className="text-indigo-500 font-bold">{formConfig.heating_curve_slope}</span>
                                 </div>
                                 <input
@@ -442,9 +443,9 @@ export default function FloorHeatingLoadCard() {
                                     className="w-full accent-indigo-500 cursor-pointer"
                                 />
                                 <div className="flex justify-between text-[10px] text-slate-400 mt-0.5">
-                                    <span>0.30 (Sehr gut gedämmt)</span>
-                                    <span>0.60 (Standard FBH)</span>
-                                    <span>1.00 (Altbau)</span>
+                                    <span>{t("control.slope_well_insulated", "0.30 (Sehr gut gedämmt)")}</span>
+                                    <span>{t("control.slope_standard_fbh", "0.60 (Standard FBH)")}</span>
+                                    <span>{t("control.slope_old_building", "1.00 (Altbau)")}</span>
                                 </div>
                             </div>
 
@@ -457,7 +458,7 @@ export default function FloorHeatingLoadCard() {
                                         onChange={(e) => setFormConfig({ ...formConfig, predictive_mpc_enabled: e.target.checked })}
                                         className="rounded text-amber-500 focus:ring-amber-400 cursor-pointer"
                                     />
-                                    <span>🧠 Prädiktive KI-Wetter-Optimierung (MPC) aktivieren</span>
+                                    <span>{t("control.enable_mpc", "🧠 Prädiktive KI-Wetter-Optimierung (MPC) aktivieren")}</span>
                                 </label>
                                 <label className="flex items-center gap-2.5 cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-300">
                                     <input
@@ -466,14 +467,14 @@ export default function FloorHeatingLoadCard() {
                                         onChange={(e) => setFormConfig({ ...formConfig, solar_gain_compensation: e.target.checked })}
                                         className="rounded text-amber-500 focus:ring-amber-400 cursor-pointer"
                                     />
-                                    <span>☀️ Solares Absenken bei prognostizierter Sonneneinstrahlung</span>
+                                    <span>{t("control.enable_solar_gain", "☀️ Solares Absenken bei prognostizierter Sonneneinstrahlung")}</span>
                                 </label>
                             </div>
 
                             {/* Overheating Safety Threshold */}
                             <div>
                                 <div className="flex justify-between text-xs font-semibold mb-1">
-                                    <span className="text-slate-700 dark:text-slate-300">Überhitzungsschutz (Max-Temperatur)</span>
+                                    <span className="text-slate-700 dark:text-slate-300">{t("control.overheating_protection", "Überhitzungsschutz (Max-Temperatur)")}</span>
                                     <span className="text-red-500 font-bold">{formConfig.max_floor_temp_c}°C</span>
                                 </div>
                                 <input
@@ -490,7 +491,7 @@ export default function FloorHeatingLoadCard() {
                             {/* Estrich Area */}
                             <div>
                                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                                    Beheizte Estrichfläche (m²)
+                                    {t("control.heated_screed_area", "Beheizte Estrichfläche (m²)")}
                                 </label>
                                 <input
                                     type="number"
@@ -507,7 +508,7 @@ export default function FloorHeatingLoadCard() {
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                                        Min. Solarüberschuss (W)
+                                        {t("control.min_pv_surplus_w", "Min. Solarüberschuss (W)")}
                                     </label>
                                     <input
                                         type="number"
@@ -521,7 +522,7 @@ export default function FloorHeatingLoadCard() {
                                 </div>
                                 <div>
                                     <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                                        Max. Börsenpreis (ct/kWh)
+                                        {t("control.max_spot_price", "Max. Börsenpreis (ct/kWh)")}
                                     </label>
                                     <input
                                         type="number"
@@ -560,4 +561,5 @@ export default function FloorHeatingLoadCard() {
         </div>
     );
 }
+
 

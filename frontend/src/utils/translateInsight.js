@@ -73,5 +73,29 @@ export function translateInsight(text, t) {
         return t("forecast.insight_spot_on", "⚖️ Punktlandung: Die kumulierte Gesamterzeugung deckt sich mit der Prognose.");
     }
 
+    // 6. Floor heating & MPC insights
+    if (text.includes("Manuelle Steuerung aktiv (Automatik pausiert).")) {
+        return t("control.manual_control_active", "Manuelle Steuerung aktiv (Automatik pausiert).");
+    }
+    if (text.includes("Vorladung von") && text.includes("empfohlen")) {
+        const match = text.match(/Vorladung von\s+([0-9:]+\s*–\s*[0-9:]+\s*Uhr)/);
+        if (match) {
+            return t("control.preheating_recommended_title", { preheat: match[1], defaultValue: text });
+        }
+    }
+    if (text.startsWith("Vorausschauendes MPC prognostiziert")) {
+        const match = text.match(/prognostiziert\s+([0-9]+(?:\.[0-9]+)?)\s*kWh.*?zwischen\s+([0-9:]+\s*–\s*[0-9:]+\s*Uhr)\s+um\s+(\+?[0-9]+(?:\.[0-9]+)?\s*K)\s+vorladen.*?Abendspitze\s*\(([0-9:]+\s*–\s*[0-9:]+\s*Uhr)\).*?ca\.\s*([0-9]+(?:\.[0-9]+)?)\s*€/);
+        if (match) {
+            return t("control.mpc_insight_preheat", {
+                kwh: match[1],
+                preheat: match[2],
+                delta: match[3],
+                peak: match[4],
+                savings: match[5],
+                defaultValue: text
+            });
+        }
+    }
+
     return text;
 }

@@ -54,11 +54,11 @@ export default function LivePowerBudgetHeader({
                                     {t("control.hub_title", "Smart Load Management & Dispatch Hub")}
                                 </h2>
                                 <span className="px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                                    ● Live Regelung
+                                    ● {t("control.live_budget_title", "Live Regelung")}
                                 </span>
                             </div>
                             <p className="text-xs text-indigo-200/70 mt-0.5">
-                                Intelligente Verteilung von Solarüberschuss & Börsentarifen auf BWWP, Wallbox, Speicher, Pool & Großverbraucher.
+                                {t("control.live_budget_subtitle", "Intelligente Verteilung von Solarüberschuss & Börsentarifen auf BWWP, Wallbox, Speicher, Pool & Großverbraucher.")}
                             </p>
                         </div>
                     </div>
@@ -66,7 +66,7 @@ export default function LivePowerBudgetHeader({
                     {/* Master Mode Selector */}
                     <div className="flex items-center gap-2.5 bg-white/5 border border-white/10 rounded-2xl p-1.5 backdrop-blur-xs">
                         <span className="text-xs font-semibold text-indigo-200 px-2 hidden sm:inline">
-                            Master-Modus:
+                            {t("control.master_mode", "Master-Modus:")}
                         </span>
                         <select
                             value={masterMode}
@@ -74,10 +74,10 @@ export default function LivePowerBudgetHeader({
                             disabled={isSaving}
                             className="bg-indigo-900/80 hover:bg-indigo-800/90 text-white font-bold text-xs rounded-xl px-3 py-2 border border-indigo-400/40 cursor-pointer transition outline-none"
                         >
-                            <option value="autopilot">🟢 Autopilot (PV + Spotmarkt)</option>
-                            <option value="pv_only">☀️ Nur PV-Überschuss</option>
-                            <option value="price_saver">⚡ Sparfuchs (Börsen-Tiefstpreise)</option>
-                            <option value="manual">✋ Manuell (Urlaub)</option>
+                            <option value="autopilot">{t("control.autopilot_mode", "🟢 Autopilot (PV + Spotmarkt)")}</option>
+                            <option value="pv_only">{t("control.pv_only_mode", "☀️ Nur PV-Überschuss")}</option>
+                            <option value="price_saver">{t("control.price_saver_mode", "⚡ Sparfuchs (Börsen-Tiefstpreise)")}</option>
+                            <option value="manual">{t("control.manual_mode", "✋ Manuell (Urlaub)")}</option>
                         </select>
                     </div>
                 </div>
@@ -87,24 +87,24 @@ export default function LivePowerBudgetHeader({
                     <div className="flex items-center gap-2">
                         <span className="text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1 shrink-0">
                             <Zap className="w-3.5 h-3.5 text-amber-400" />
-                            1-Klick Aktionen:
+                            {t("control.quick_actions", "1-Klick Aktionen:")}
                         </span>
                         {activeBoost ? (
                             <div className="flex items-center gap-2 bg-amber-500/20 border border-amber-400/40 px-2.5 py-1 rounded-xl text-xs font-bold text-amber-200 animate-pulse">
                                 <Clock className="w-3.5 h-3.5 text-amber-300" />
-                                <span>{activeBoost.label} aktiv</span>
+                                <span>{activeBoost.label} {t("control.boost_active", "aktiv")}</span>
                                 <button
                                     type="button"
                                     onClick={handleCancelBoost}
                                     className="ml-1.5 text-xs bg-white/20 hover:bg-white/30 px-1.5 py-0.5 rounded text-white cursor-pointer"
                                     title="Sofort beenden & Autopilot aktivieren"
                                 >
-                                    ✕ Beenden
+                                    {t("control.cancel_boost", "✕ Beenden")}
                                 </button>
                             </div>
                         ) : (
                             <span className="text-xs text-indigo-200/60 hidden md:inline">
-                                Schnellschaltung für Sofort-Laden oder Notstrom-Reserve
+                                {t("control.boost_desc", "Schnellschaltung für Sofort-Laden oder Notstrom-Reserve")}
                             </span>
                         )}
                     </div>
@@ -117,7 +117,7 @@ export default function LivePowerBudgetHeader({
                             title="Startet Wallbox mit maximaler Ladeleistung (11 kW) für 2 Stunden"
                         >
                             <Zap className="w-3.5 h-3.5 text-amber-400" />
-                            <span>Wallbox Boost (11 kW)</span>
+                            <span>{t("control.wallbox_boost_btn", "Wallbox Boost (11 kW)")}</span>
                         </button>
 
                         <button
@@ -127,7 +127,7 @@ export default function LivePowerBudgetHeader({
                             title="Hält den Heimspeicher als Notstromreserve und sperrt Entladung"
                         >
                             <ShieldCheck className="w-3.5 h-3.5 text-indigo-400" />
-                            <span>Speicher-Schutz</span>
+                            <span>{t("control.battery_reserve_btn", "Speicher-Schutz")}</span>
                         </button>
 
                         <button
@@ -137,7 +137,7 @@ export default function LivePowerBudgetHeader({
                             title="Gibt alle flexiblen Verbraucher für maximalen Eigenverbrauch frei"
                         >
                             <Sun className="w-3.5 h-3.5 text-emerald-400" />
-                            <span>Max. Eigenverbrauch</span>
+                            <span>{t("control.max_pv_btn", "Max. Eigenverbrauch")}</span>
                         </button>
 
                         {activeBoost && (
@@ -159,7 +159,7 @@ export default function LivePowerBudgetHeader({
                     {/* Solarüberschuss */}
                     <div className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-xs">
                         <div className="text-xs font-medium text-indigo-200/80 flex items-center justify-between">
-                            <span>Verfügbarer Überschuss</span>
+                            <span>{t("control.available_surplus", "Verfügbarer Überschuss")}</span>
                             <span>☀️</span>
                         </div>
                         <div className="text-2xl font-black font-mono text-emerald-400 mt-1 flex items-baseline gap-1">
@@ -167,14 +167,17 @@ export default function LivePowerBudgetHeader({
                             <span className="text-xs font-normal text-indigo-200/70">W</span>
                         </div>
                         <div className="text-[11px] text-indigo-200/60 mt-0.5">
-                            PV: {pvW.toLocaleString("de-DE")} W · Last: {loadW.toLocaleString("de-DE")} W
+                            {t("control.pv_load_split", "PV: {{pv}} W · Last: {{load}} W", {
+                                pv: pvW.toLocaleString("de-DE"),
+                                load: loadW.toLocaleString("de-DE"),
+                            })}
                         </div>
                     </div>
 
                     {/* Heimspeicher SoC */}
                     <div className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-xs">
                         <div className="text-xs font-medium text-indigo-200/80 flex items-center justify-between">
-                            <span>Heimspeicher Stand</span>
+                            <span>{t("control.battery_soc_level", "Heimspeicher Stand")}</span>
                             <span>🔋</span>
                         </div>
                         <div className="text-2xl font-black font-mono text-indigo-300 mt-1 flex items-baseline gap-1">
@@ -182,14 +185,14 @@ export default function LivePowerBudgetHeader({
                             <span className="text-xs font-normal text-indigo-200/70">%</span>
                         </div>
                         <div className="text-[11px] text-indigo-200/60 mt-0.5">
-                            {soc >= 80 ? "Prio 1 gedeckt ➔ Überschuss frei" : "Prio 1 lädt mit Vorrang"}
+                            {soc >= 80 ? t("control.prio1_covered", "Prio 1 gedeckt ➔ Überschuss frei") : t("control.prio1_charging", "Prio 1 lädt mit Vorrang")}
                         </div>
                     </div>
 
                     {/* Börsenstrompreis */}
                     <div className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-xs">
                         <div className="text-xs font-medium text-indigo-200/80 flex items-center justify-between">
-                            <span>Börsenpreis (Effektiv)</span>
+                            <span>{t("control.effective_spot_price", "Börsenpreis (Effektiv)")}</span>
                             <span>⚡</span>
                         </div>
                         <div className="text-2xl font-black font-mono text-amber-300 mt-1 flex items-baseline gap-1">
@@ -197,22 +200,22 @@ export default function LivePowerBudgetHeader({
                             <span className="text-xs font-normal text-indigo-200/70">ct/kWh</span>
                         </div>
                         <div className="text-[11px] text-indigo-200/60 mt-0.5">
-                            Spotmarkt Day-Ahead aktiv
+                            {t("control.spot_day_ahead_active", "Spotmarkt Day-Ahead aktiv")}
                         </div>
                     </div>
 
                     {/* Gesteuerte Lasten */}
                     <div className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-xs">
                         <div className="text-xs font-medium text-indigo-200/80 flex items-center justify-between">
-                            <span>Aktive Regelung</span>
+                            <span>{t("control.active_regulation", "Aktive Regelung")}</span>
                             <span>🤖</span>
                         </div>
                         <div className="text-2xl font-black font-mono text-white mt-1 flex items-baseline gap-1">
                             <span>{activeCount}</span>
-                            <span className="text-xs font-normal text-indigo-200/70">/ {totalCount} Lasten</span>
+                            <span className="text-xs font-normal text-indigo-200/70">/ {t("control.controlled_loads", "{{total}} Lasten", { total: totalCount })}</span>
                         </div>
                         <div className="text-[11px] text-indigo-200/60 mt-0.5">
-                            Gesteuert: {((budget.total_controlled_w || 0) / 1000).toFixed(1)} kW
+                            {t("control.controlled_power", "Gesteuert: {{power}} kW", { power: ((budget.total_controlled_w || 0) / 1000).toFixed(1) })}
                         </div>
                     </div>
                 </div>
