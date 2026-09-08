@@ -3,29 +3,27 @@
 */
 
 import { useEffect, useState } from "react";
+import LiveEnergyFlowSimulator from "./landing/LiveEnergyFlowSimulator";
 
-export default function EnergyFlow({ mode = "demo", endpoint = null }) {
-
+export default function EnergyFlow({ mode = "demo", endpoint = null, data = null }) {
     const [flowData, setFlowData] = useState(null);
     const [hoverText, setHoverText] = useState(null);
 
+    // If demo mode or no custom live endpoint is supplied, use the high-end interactive simulator
+    if (mode === "demo" || (!endpoint && !data?.endpoint)) {
+        return <LiveEnergyFlowSimulator />;
+    }
+
+    const activeEndpoint = endpoint || data?.endpoint;
+
     useEffect(() => {
-
-        // ✅ DEMO MODE (Landing)
-        if (mode === "demo") {
-            setFlowData(getDemoFlow());
-            return;
-        }
-
-        // ✅ LIVE MODE (Dashboard)
-        if (mode === "live" && endpoint) {
-            fetch(endpoint)
+        if (activeEndpoint) {
+            fetch(activeEndpoint)
                 .then(res => res.json())
                 .then(setFlowData)
                 .catch(() => setFlowData(getDemoFlow()));
         }
-
-    }, [mode, endpoint]);
+    }, [activeEndpoint]);
 
     if (!flowData) {
         return <div className="text-gray-400 text-center py-10">Lade Energiefluss...</div>;
@@ -34,18 +32,16 @@ export default function EnergyFlow({ mode = "demo", endpoint = null }) {
     const { nodes, flows } = flowData;
 
     return (
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-3xl mx-auto">
-
-            <h2 className="text-xl font-semibold text-center mb-6">
-                Energie fließt live
+        <div className="bg-slate-900 border border-slate-800 rounded-3xl shadow-xl p-8 max-w-3xl mx-auto text-white">
+            <h2 className="text-xl font-bold text-center mb-6 flex items-center justify-center gap-2">
+                <span>⚡</span>
+                <span>Energie fließt live</span>
             </h2>
 
             <svg viewBox="0 0 500 300" className="w-full">
-
                 {/* FLOWS */}
                 {flows.map(f => (
                     <g key={f.id}>
-
                         {/* Hover area */}
                         <path
                             d={f.path}
@@ -62,7 +58,7 @@ export default function EnergyFlow({ mode = "demo", endpoint = null }) {
                             stroke={f.color}
                             strokeWidth="3"
                             fill="none"
-                            strokeOpacity="0.4"
+                            strokeOpacity="0.6"
                         />
 
                         {/* moving dots */}
@@ -76,17 +72,15 @@ export default function EnergyFlow({ mode = "demo", endpoint = null }) {
                                 />
                             </circle>
                         ))}
-
                     </g>
                 ))}
 
                 {/* NODES */}
                 {nodes.map(n => (
                     <g key={n.id} transform={`translate(${n.x}, ${n.y})`}>
-
                         <circle
                             r="28"
-                            fill={n.type === "solar" ? "#fb923c20" : "#6366f120"}
+                            fill={n.type === "solar" ? "#fb923c30" : "#6366f130"}
                         />
 
                         <rect
@@ -95,7 +89,7 @@ export default function EnergyFlow({ mode = "demo", endpoint = null }) {
                             width="40"
                             height="40"
                             rx="10"
-                            fill={n.type === "solar" ? "#fb923c" : "#6366f1"}
+                            fill={n.type === "solar" ? "#f97316" : "#6366f1"}
                         />
 
                         <text
@@ -111,27 +105,24 @@ export default function EnergyFlow({ mode = "demo", endpoint = null }) {
                             textAnchor="middle"
                             y="40"
                             fontSize="12"
-                            fill="#666"
+                            fill="#cbd5e1"
+                            fontWeight="bold"
                         >
                             {n.name}
                         </text>
-
                     </g>
                 ))}
-
             </svg>
 
             {/* TOOLTIP */}
             {hoverText && (
-                <div className="mt-4 text-center text-sm text-gray-700">
+                <div className="mt-4 text-center text-sm font-semibold text-emerald-400 bg-slate-950/80 border border-slate-800 py-2 px-4 rounded-xl">
                     {hoverText}
                 </div>
             )}
-
         </div>
     );
 }
-
 
 /* ✅ DEMO DATA */
 function getDemoFlow() {
@@ -152,7 +143,7 @@ function getDemoFlow() {
             {
                 id: 2,
                 label: "Solar → Haus B (3 kWh)",
-                color: "#ec4899",
+                color: "#10b981",
                 path: "M100,220 Q180,150 250,80",
                 speed: 3
             },

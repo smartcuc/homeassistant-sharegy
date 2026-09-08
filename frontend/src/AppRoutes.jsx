@@ -20,6 +20,8 @@ export default function AppRoutes() {
     return (
         <Routes>
             <Route path="/" element={<LandingPage />} />
+            <Route path="/demo" element={<LandingPage />} />
+            <Route path="/preview-landing" element={<LandingPage />} />
 
             <Route path="/login" element={<Login />} />
             <Route path="/join" element={<Join />} />
