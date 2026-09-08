@@ -1,0 +1,45 @@
+name: Sync Integrations to Standalone Repositories
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "integrations/**"
+      - ".github/workflows/sync-integrations.yml"
+  workflow_dispatch:
+
+jobs:
+  sync-iobroker:
+    name: Sync ioBroker.sharegy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout eswes repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.SYNC_REPO_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Push ioBroker Subtree to smartcuc/ioBroker.sharegy
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          AUTH_TOKEN="${{ secrets.SYNC_REPO_TOKEN || secrets.GITHUB_TOKEN }}"
+          git subtree push --prefix integrations/iobroker.sharegy "https://x-access-token:${AUTH_TOKEN}@github.com/smartcuc/ioBroker.sharegy.git" main
+
+  sync-homeassistant:
+    name: Sync homeassistant-sharegy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout eswes repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.SYNC_REPO_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Push Home Assistant Subtree to smartcuc/homeassistant-sharegy
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          AUTH_TOKEN="${{ secrets.SYNC_REPO_TOKEN || secrets.GITHUB_TOKEN }}"
+          git subtree push --prefix integrations/homeassistant "https://x-access-token:${AUTH_TOKEN}@github.com/smartcuc/homeassistant-sharegy.git" main
