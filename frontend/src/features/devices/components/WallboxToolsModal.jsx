@@ -139,21 +139,28 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-            <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl max-w-2xl w-full overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl max-w-3xl lg:max-w-4xl w-full overflow-hidden flex flex-col max-h-[92vh]">
                 {/* Header */}
-                <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
+                <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/70 dark:bg-slate-900/70">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xl">
+                        <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xl shadow-inner">
                             🛠️
                         </div>
                         <div>
-                            <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                                {t("wallbox.tools_title", "OCPP 1.6 / 2.0.1 / 2.1 & V2G Experte")}
-                                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+                            <div className="flex items-center gap-2 flex-wrap">
+                                <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                                    {t("wallbox.tools_title", "OCPP 1.6 / 2.0.1 / 2.1 & V2G Experte")}
+                                </h3>
+                                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 border border-indigo-300/80 dark:border-indigo-800/80">
                                     {station.ocpp_version?.toUpperCase() || "OCPP 1.6-J"}
                                 </span>
-                            </h3>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                                {station.supports_bidirectional && (
+                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 border border-emerald-300/80 dark:border-emerald-800/80">
+                                        ⚡ V2G / V2H
+                                    </span>
+                                )}
+                            </div>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                                 {station.name} · {station.vendor || "OCPP Standard"} ({station.charge_point_id})
                             </p>
                         </div>
@@ -161,43 +168,58 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                     <button
                         type="button"
                         onClick={onClose}
-                        className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 flex items-center justify-center transition cursor-pointer"
+                        className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition cursor-pointer"
+                        aria-label="Schließen"
                     >
                         ✕
                     </button>
                 </div>
 
-                {/* Tabs Bar */}
-                <div className="flex border-b border-slate-200 dark:border-slate-800 px-6 bg-slate-50/30 dark:bg-slate-950/30 overflow-x-auto gap-2">
-                    {[
-                        { id: "v2g", label: "🔄 V2G / V2H (ISO 15118)", icon: "🚗" },
-                        { id: "trigger", label: "🎯 Remote Trigger", icon: "⚡" },
-                        { id: "rfid", label: "💳 Offline-RFID", icon: "📶" },
-                        { id: "reservation", label: "🔒 Reservierung", icon: "🕒" },
-                        { id: "diagnostics", label: "🛠️ Diagnose & Logs", icon: "📋" },
-                        { id: "schedule", label: "📊 Composite Schedule", icon: "📈" },
-                        { id: "variables", label: "📋 OCPP 2.x Variablen", icon: "⚙️" },
-                    ].map((tab) => (
-                        <button
-                            key={tab.id}
-                            type="button"
-                            onClick={() => setActiveTab(tab.id)}
-                            className={`py-3 px-3 text-xs font-bold border-b-2 whitespace-nowrap transition cursor-pointer flex items-center gap-1.5 ${
-                                activeTab === tab.id
-                                    ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
-                                    : "border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-                            }`}
-                        >
-                            <span>{tab.icon}</span>
-                            <span>{tab.label}</span>
-                        </button>
-                    ))}
+                {/* Tabs Segmented Control Bar */}
+                <div className="px-6 pt-3.5 pb-2 bg-slate-50/50 dark:bg-slate-950/40 border-b border-slate-100 dark:border-slate-800">
+                    <div className="flex items-center gap-1.5 p-1 bg-slate-200/60 dark:bg-slate-950/80 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl overflow-x-auto no-scrollbar scroll-smooth">
+                        {[
+                            { id: "v2g", label: "V2G / V2H", icon: "🚗", tag: "ISO 15118" },
+                            { id: "trigger", label: "Remote Trigger", icon: "⚡" },
+                            { id: "rfid", label: "RFID Whitelist", icon: "💳" },
+                            { id: "reservation", label: "Reservierung", icon: "🔒" },
+                            { id: "schedule", label: "Fahrplan", icon: "📊" },
+                            { id: "diagnostics", label: "Diagnose & Logs", icon: "🛠️" },
+                            { id: "variables", label: "OCPP 2.x Variablen", icon: "⚙️", tag: "v2.0.1" },
+                        ].map((tab) => {
+                            const isActive = activeTab === tab.id;
+                            return (
+                                <button
+                                    key={tab.id}
+                                    type="button"
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-150 cursor-pointer ${
+                                        isActive
+                                            ? "bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm border border-slate-200/90 dark:border-slate-700 font-bold"
+                                            : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-white/40 dark:hover:bg-slate-800/40 border border-transparent"
+                                    }`}
+                                >
+                                    <span className="text-sm">{tab.icon}</span>
+                                    <span>{tab.label}</span>
+                                    {tab.tag && (
+                                        <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded-full uppercase ${
+                                            isActive
+                                                ? "bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300"
+                                                : "bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
+                                        }`}>
+                                            {tab.tag}
+                                        </span>
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
                 </div>
 
                 {/* Feedback Notification */}
                 {feedback.text && (
                     <div
-                        className={`mx-6 mt-4 p-3 rounded-2xl text-xs font-bold flex items-center gap-2 border ${
+                        className={`mx-6 mt-4 p-3 rounded-2xl text-xs font-bold flex items-center gap-2 border animate-fade ${
                             feedback.type === "success"
                                 ? "bg-emerald-50 dark:bg-emerald-950/60 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300"
                                 : "bg-red-50 dark:bg-red-950/60 border-red-200 dark:border-red-800 text-red-800 dark:text-red-300"
