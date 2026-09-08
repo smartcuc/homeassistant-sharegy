@@ -1067,6 +1067,7 @@
     "avg_green_share": "🔋 Ø Grünstromanteil",
     "legend": "🟢 < 250g (Grün) · 🟡 250-420g · 🔴 > 420g",
     "level_green": "Grün (Hoher Erneuerbaren-Anteil)",
+    "level_yellow": "Mittel (Normaler Netzmix)",
     "level_amber": "Mittel (Normaler Netzmix)",
     "level_red": "Rot (Hohe fossile Emissionen)",
     "ee_short": "EE",

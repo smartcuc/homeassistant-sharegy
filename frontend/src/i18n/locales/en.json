@@ -1067,6 +1067,7 @@
     "avg_green_share": "🔋 Ø Green Share",
     "legend": "🟢 < 250g (Green) · 🟡 250-420g · 🔴 > 420g",
     "level_green": "Green (High Renewable Share)",
+    "level_yellow": "Medium (Normal Grid Mix)",
     "level_amber": "Medium (Normal Grid Mix)",
     "level_red": "Red (High Fossil Emissions)",
     "ee_short": "RES",

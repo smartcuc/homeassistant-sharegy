@@ -54,7 +54,7 @@ export default function GridCo2Card() {
                 <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
                     <div className="flex items-center gap-2">
                         <span className={`px-2.5 py-1 rounded-xl text-xs font-extrabold border ${levelBadgeColor}`}>
-                            {t(`co2_grid.level_${data.current_level}`, data.current_level_label || "Normaler Netzmix")}
+                            {t(`co2_grid.level_${data.current_level}`, t("co2_grid.level_amber", "Mittel (Normaler Netzmix)"))}
                         </span>
                     </div>
 
