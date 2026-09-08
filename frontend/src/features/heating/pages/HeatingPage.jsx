@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "../../../api/client";
 import { useSubscription } from "../../../hooks/useSubscription";
+import ProBadge from "../../../components/common/ProBadge";
+import ProUpgradeModal from "../../../components/common/ProUpgradeModal";
 import FloorHeatingLoadCard from "../../control/components/FloorHeatingLoadCard";
 import BWWPLoadManagementCard from "../../energy/components/BWWPLoadManagementCard";
 import HeatingRodCard from "../../control/components/HeatingRodCard";
@@ -10,10 +12,11 @@ import AirConditioningCard from "../../control/components/AirConditioningCard";
 
 export default function HeatingPage() {
     const { t } = useTranslation();
-    const { isPro } = useSubscription();
+    const { isPro, proYearlyMonthlyEquiv } = useSubscription();
     const queryClient = useQueryClient();
     const [activeTab, setActiveTab] = useState("all");
     const [actionFeedback, setActionFeedback] = useState(null);
+    const [proModalOpen, setProModalOpen] = useState(false);
 
     // 1. Live Floor Heating Status abfragen für Quick-KPIs
     const fbhQuery = useQuery({
@@ -51,6 +54,10 @@ export default function HeatingPage() {
     };
 
     const handleQuickAction = (category, action, deviceId = null, params = {}) => {
+        if (!isPro) {
+            setProModalOpen(true);
+            return;
+        }
         actionMutation.mutate({
             category,
             action,
@@ -80,20 +87,147 @@ export default function HeatingPage() {
             )}
 
             {/* 1. Header: Titel & Beschreibung */}
-            <div className="space-y-4 border-b border-slate-200 dark:border-slate-800 pb-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
                 <div className="flex items-start sm:items-center gap-3.5">
                     <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-rose-500 to-amber-500 text-white flex items-center justify-center text-2xl shadow-lg shadow-rose-500/20 shrink-0">
                         🌡️
                     </div>
                     <div>
-                        <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-                            Wärme, Heizung & Raumklima
-                        </h1>
+                        <div className="flex items-center gap-2">
+                            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+                                Wärme, Heizung & Raumklima
+                            </h1>
+                            {!isPro && <ProBadge size="sm" />}
+                        </div>
                         <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
                             Wettergeführte Fußbodenheizung (DIN EN 12831 / MPC), thermische Estrich-Speicherbatterie & Wärmepumpen-Lastmanagement.
                         </p>
                     </div>
                 </div>
+
+                {!isPro && (
+                    <button
+                        type="button"
+                        onClick={() => setProModalOpen(true)}
+                        className="self-start sm:self-auto px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 text-xs font-black rounded-2xl shadow-md shadow-amber-500/20 transition cursor-pointer flex items-center gap-1.5 shrink-0"
+                    >
+                        <span>⭐</span>
+                        <span>Auf Pro upgraden (ab {proYearlyMonthlyEquiv} €/M)</span>
+                    </button>
+                )}
+            </div>
+
+            {/* 👑 PRO PAYWALL HERO BANNER FOR FREE USERS */}
+            {!isPro && (
+                <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 border border-indigo-500/40 rounded-3xl p-8 sm:p-10 shadow-2xl text-white relative overflow-hidden space-y-8 animate-in fade-in duration-300">
+                    {/* Background glow */}
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-rose-500/15 rounded-full blur-3xl pointer-events-none" />
+                    <div className="absolute bottom-0 left-0 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+
+                    <div className="relative z-10 max-w-3xl space-y-4">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 text-xs font-bold uppercase tracking-wider">
+                            <span>⭐</span>
+                            <span>Sharegy Pro Exklusiv</span>
+                        </div>
+                        <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight">
+                            Nutze deinen Estrich als thermische Batterie & spare bis zu 45% Heizkosten
+                        </h2>
+                        <p className="text-indigo-200/80 text-sm sm:text-base leading-relaxed">
+                            Vorausschauende KI-Wetter-Vorladung (MPC), SG-Ready Warmwasser-Überhitzung bei Solar-Peaks und intelligente Heizstab-Modulation für maximale Autarkie.
+                        </p>
+                    </div>
+
+                    {/* Features Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 relative z-10">
+                        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
+                            <div className="text-2xl">🧠</div>
+                            <h3 className="text-sm font-bold text-white">Predictive MPC Estrich-Vorladung</h3>
+                            <p className="text-xs text-indigo-200/70 leading-relaxed">
+                                Erkennt Kältefronten & Preissprünge 24h im Voraus und lädt deinen Fußboden mit Solarstrom vor.
+                            </p>
+                        </div>
+
+                        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
+                            <div className="text-2xl">🧱</div>
+                            <h3 className="text-sm font-bold text-white">Thermische Bauteilaktivierung</h3>
+                            <p className="text-xs text-indigo-200/70 leading-relaxed">
+                                Speichert 10–25 kWh thermische Energie im Betonestrich – ganz ohne teure Zusatzspeicher.
+                            </p>
+                        </div>
+
+                        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
+                            <div className="text-2xl">♨️</div>
+                            <h3 className="text-sm font-bold text-white">BWWP SG-Ready Solar-Boost</h3>
+                            <p className="text-xs text-indigo-200/70 leading-relaxed">
+                                Hebt die Warmwasser-Solltemperatur bei Solar-Peaks auf 60–65°C an (inkl. Legionellenschutz).
+                            </p>
+                        </div>
+
+                        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
+                            <div className="text-2xl">⚡</div>
+                            <h3 className="text-sm font-bold text-white">Heizstab Power-to-Heat</h3>
+                            <p className="text-xs text-indigo-200/70 leading-relaxed">
+                                Stufenlose Modulation für Thyristor- und Relais-Heizstäbe für 100% Eigenverbrauchsquote.
+                            </p>
+                        </div>
+
+                        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
+                            <div className="text-2xl">❄️</div>
+                            <h3 className="text-sm font-bold text-white">Solares Pre-Cooling (Klimaanlage)</h3>
+                            <p className="text-xs text-indigo-200/70 leading-relaxed">
+                                Kühlt Wohnräume während maximaler Sonnenstunden vor und verhindert teuren Abend-Netzbezug.
+                            </p>
+                        </div>
+
+                        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
+                            <div className="text-2xl">📉</div>
+                            <h3 className="text-sm font-bold text-white">Heizkurven-Feinabstimmung</h3>
+                            <p className="text-xs text-indigo-200/70 leading-relaxed">
+                                Automatische Anpassung der Steilheit nach DIN EN 12831 und lokalen Wetterprognosen.
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* CTA Actions */}
+                    <div className="pt-4 border-t border-indigo-800/40 relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div className="text-xs text-indigo-200/70 text-center sm:text-left">
+                            Bereits ab <strong className="text-white font-mono">{proYearlyMonthlyEquiv} €</strong> / Monat (jährliche Zahlweise) · 14 Tage kostenlos testen · Jederzeit kündbar
+                        </div>
+                        <div className="flex items-center gap-3 w-full sm:w-auto">
+                            <button
+                                type="button"
+                                onClick={() => setProModalOpen(true)}
+                                className="w-full sm:w-auto px-6 py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 text-sm font-black rounded-2xl shadow-xl shadow-amber-500/20 transition cursor-pointer flex items-center justify-center gap-2"
+                            >
+                                <span>⭐</span>
+                                <span>Wärmemanagement mit Sharegy Pro freischalten</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* 🌡️ DASHBOARD CONTENT: ECHTE DATEN BZW. GELOCKTE DEMO-VORSCHAU */}
+            <div className={`space-y-6 ${!isPro ? "relative" : ""}`}>
+                {!isPro && (
+                    <div 
+                        onClick={() => setProModalOpen(true)}
+                        className="absolute inset-0 z-20 bg-slate-950/20 backdrop-blur-[1.5px] rounded-3xl cursor-pointer flex flex-col items-center justify-start pt-24 p-6 text-center hover:bg-slate-950/30 transition group"
+                    >
+                        <div className="px-5 py-3 rounded-2xl bg-slate-900/95 border border-indigo-500/40 shadow-2xl text-white flex items-center gap-3 transform group-hover:scale-105 transition">
+                            <span className="text-xl">🔒</span>
+                            <div className="text-left">
+                                <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                                    <span>Interaktive Demo-Vorschau</span>
+                                    <ProBadge size="xs" />
+                                </div>
+                                <div className="text-[11px] text-indigo-200/80">
+                                    Klicke hier, um alle Wärme- und Estrich-Optionen mit Sharegy Pro freizuschalten
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* 2. Badges & Filter-Tabs unter dem Titel */}
                 <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
@@ -153,7 +287,6 @@ export default function HeatingPage() {
                         ))}
                     </div>
                 </div>
-            </div>
 
             {/* 3. Quick Thermal Metrics Overview */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -289,13 +422,22 @@ export default function HeatingPage() {
                                     </div>
                                 )}
 
-                                {/* Heizstab Laststufen-Karte */}
+                {/* Heizstab Laststufen-Karte */}
                                 <HeatingRodCard />
                             </div>
                         )}
                     </div>
                 )}
             </div>
+            </div>
+
+            {/* Pro Upgrade Modal */}
+            <ProUpgradeModal
+                open={proModalOpen}
+                onClose={() => setProModalOpen(false)}
+                featureName="Smart Wärme- & Thermischer Speicher-Autopilot"
+                featureDesc="Nutze die Estrich-Vorladung (MPC), SG-Ready Warmwasser-Boost und PV-Heizstab-Modulation für bis zu 45% Heizkostenersparnis."
+            />
         </div>
     );
 }

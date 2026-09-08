@@ -76,11 +76,13 @@ export default function Sidebar() {
                         name: t("nav.mobility", "E-Mobilität & Fuhrpark"),
                         path: "/app/mobility",
                         icon: "🚗",
+                        isProGated: true,
                     },
                     {
                         name: t("nav.heating_climate", "Wärme & Raumklima"),
                         path: "/app/heating",
                         icon: "🌡️",
+                        isProGated: true,
                     },
                     {
                         name: t("nav.all_devices", "Geräteübersicht"),

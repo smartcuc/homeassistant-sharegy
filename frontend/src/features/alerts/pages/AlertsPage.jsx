@@ -11,6 +11,36 @@ import PushNotificationSettings from "../components/PushNotificationSettings";
 import ProBadge from "../../../components/common/ProBadge";
 import ProUpgradeModal from "../../../components/common/ProUpgradeModal";
 
+const DEMO_PREVIEW_ALERTS = [
+    {
+        id: "demo-1",
+        severity: "critical",
+        title: "Wechselrichter String 2: Ertragsabfall erkannt",
+        message: "String 2 liefert trotz Sonnenschein 85% weniger Leistung als Referenz-String 1. Mögliche Verschattung oder Moduldefekt.",
+        action_hint: "String-Diagnose öffnen",
+        status: "active",
+        created_at: new Date(Date.now() - 1000 * 60 * 35).toISOString(),
+    },
+    {
+        id: "demo-2",
+        severity: "warning",
+        title: "Hohe Börsenstrom-Preisspitze (44,2 ct/kWh um 19:30 Uhr)",
+        message: "Der dynamische Strompreis steigt heute Abend stark an. Automatische Lastverschiebung und Speichernutzung empfohlen.",
+        action_hint: "Großverbraucher pausieren",
+        status: "active",
+        created_at: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
+    },
+    {
+        id: "demo-3",
+        severity: "info",
+        title: "Negativer Börsenstrompreis (13:00 - 15:00 Uhr)",
+        message: "Strompreis sinkt auf -2,4 ct/kWh. Perfektes Zeitfenster zum Laden des E-Autos und Aufheizen des Warmwasserspeichers.",
+        action_hint: "Ladefenster im Optimizer ansehen",
+        status: "active",
+        created_at: new Date(Date.now() - 1000 * 60 * 240).toISOString(),
+    },
+];
+
 export default function AlertsPage() {
     const { t } = useTranslation();
     const { isPro, proYearlyMonthlyEquiv } = useSubscription();
@@ -23,7 +53,7 @@ export default function AlertsPage() {
         queryKey: ["alerts-list"],
         queryFn: () => apiFetch("/api/alerts/"),
         refetchInterval: 30000,
-        enabled: isPro,
+        enabled: true,
     });
 
     const ackMutation = useMutation({
@@ -37,9 +67,14 @@ export default function AlertsPage() {
     });
 
     const data = query.data || {};
-    const summary = data.summary || { critical: 0, warning: 0, info: 0, active_total: 0 };
-    const activeAlerts = data.alerts || [];
+    const rawActiveAlerts = data.alerts || [];
     const historyAlerts = data.history || [];
+
+    // Für Free-User im Vorschaumodus Demo-Alarme anzeigen, falls keine vorhanden
+    const activeAlerts = (!isPro && rawActiveAlerts.length === 0) ? DEMO_PREVIEW_ALERTS : rawActiveAlerts;
+    const summary = (!isPro && rawActiveAlerts.length === 0)
+        ? { critical: 1, warning: 1, info: 1, active_total: 3 }
+        : (data.summary || { critical: 0, warning: 0, info: 0, active_total: 0 });
 
     const filteredAlerts = filterSeverity === "resolved"
         ? historyAlerts
@@ -60,26 +95,55 @@ export default function AlertsPage() {
         }
     };
 
-    // =========================================================
-    // 🛡️ PRO-SPERRSEITE FÜR FREE-NUTZER
-    // =========================================================
-    if (!isPro) {
-        return (
-            <div className="p-6 max-w-7xl mx-auto space-y-6">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2.5">
-                            <span className="text-2xl">🚨</span> {t("alerts.page_title", "Alarm- & Notifikationszentrale")}
-                            <ProBadge size="sm" />
-                        </h1>
-                        <p className="text-sm text-gray-500 mt-1">
-                            {t("alerts.page_subtitle", "Echtzeit-Überwachung von Ertragsausfällen, Akkuzustand, Dauerlasten und Börsenstrom-Chancen.")}
-                        </p>
-                    </div>
+    return (
+        <div className="p-6 max-w-7xl mx-auto space-y-6">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2.5">
+                        <span className="text-2xl">🚨</span> {t("alerts.page_title", "Alarm- & Notifikationszentrale")}
+                        {!isPro && <ProBadge size="sm" />}
+                    </h1>
+                    <p className="text-sm text-gray-500 mt-1">
+                        {t("alerts.page_subtitle", "Echtzeit-Überwachung von Ertragsausfällen, Akkuzustand, Dauerlasten und Börsenstrom-Chancen.")}
+                    </p>
                 </div>
 
-                {/* Hero Upgrade Card */}
-                <div className="bg-linear-to-br from-slate-900 via-indigo-950 to-slate-950 border border-indigo-500/40 rounded-3xl p-8 sm:p-10 shadow-2xl text-white relative overflow-hidden space-y-8">
+                <div className="flex flex-wrap items-center gap-2">
+                    {!isPro && (
+                        <button
+                            type="button"
+                            onClick={() => setProModalOpen(true)}
+                            className="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 text-xs font-black rounded-xl shadow-md shadow-amber-500/20 transition cursor-pointer flex items-center gap-1.5"
+                        >
+                            <span>⭐</span>
+                            <span>Auf Pro upgraden (ab {proYearlyMonthlyEquiv} €/M)</span>
+                        </button>
+                    )}
+                    <button
+                        type="button"
+                        onClick={() => {
+                            if (!isPro) {
+                                setProModalOpen(true);
+                            } else {
+                                setShowPushSettings(!showPushSettings);
+                            }
+                        }}
+                        className={`px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-xs flex items-center gap-1.5 cursor-pointer ${
+                            showPushSettings
+                                ? "bg-indigo-50 border border-indigo-200 text-indigo-700"
+                                : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"
+                        }`}
+                    >
+                        <span>📲</span>
+                        <span>{showPushSettings ? t("notifications.hide_settings", "Push-Einstellungen schließen") : t("notifications.configure_push", "Push-Alarme einrichten")}</span>
+                    </button>
+                </div>
+            </div>
+
+            {/* 👑 PRO PAYWALL HERO BANNER FOR FREE USERS */}
+            {!isPro && (
+                <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 border border-indigo-500/40 rounded-3xl p-8 sm:p-10 shadow-2xl text-white relative overflow-hidden space-y-8 animate-in fade-in duration-300">
                     {/* Background glow */}
                     <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none" />
                     <div className="absolute bottom-0 left-0 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -151,7 +215,7 @@ export default function AlertsPage() {
                     {/* CTA Actions */}
                     <div className="pt-4 border-t border-indigo-800/40 relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div className="text-xs text-indigo-200/70 text-center sm:text-left">
-                            Bereits ab <strong className="text-white font-mono">{proYearlyMonthlyEquiv} €</strong> / Monat (jährliche Zahlweise) · Jederzeit kündbar
+                            Bereits ab <strong className="text-white font-mono">{proYearlyMonthlyEquiv} €</strong> / Monat (jährliche Zahlweise) · 14 Tage kostenlos testen · Jederzeit kündbar
                         </div>
                         <div className="flex items-center gap-3 w-full sm:w-auto">
                             <button
@@ -165,223 +229,214 @@ export default function AlertsPage() {
                         </div>
                     </div>
                 </div>
-
-                <ProUpgradeModal
-                    open={proModalOpen}
-                    onClose={() => setProModalOpen(false)}
-                    featureName="Alarmzentrale & Mobile Push-Benachrichtigungen"
-                    featureDesc="Schütze deine PV-Anlage, Heimspeicher und Haushaltsgeräte mit automatischen Echtzeit-Alarmen direkt auf dein Smartphone."
-                />
-            </div>
-        );
-    }
-
-    // =========================================================
-    // ✅ PRO USER VIEW (VOLLE ALARMZENTRALE)
-    // =========================================================
-    return (
-        <div className="p-6 max-w-7xl mx-auto space-y-6">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2.5">
-                        <span className="text-2xl">🚨</span> {t("alerts.page_title", "Alarm- & Notifikationszentrale")}
-                    </h1>
-                    <p className="text-sm text-gray-500 mt-1">
-                        {t("alerts.page_subtitle", "Echtzeit-Überwachung von Ertragsausfällen, Akkuzustand, Dauerlasten und Börsenstrom-Chancen.")}
-                    </p>
-                </div>
-
-                <div className="flex items-center gap-2">
-                    <button
-                        onClick={() => setShowPushSettings(!showPushSettings)}
-                        className={`px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-xs flex items-center gap-1.5 cursor-pointer ${
-                            showPushSettings
-                                ? "bg-indigo-50 border border-indigo-200 text-indigo-700"
-                                : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"
-                        }`}
-                    >
-                        <span>📲</span>
-                        <span>{showPushSettings ? t("notifications.hide_settings", "Push-Einstellungen schließen") : t("notifications.configure_push", "Push-Alarme einrichten")}</span>
-                    </button>
-                </div>
-            </div>
-
-            {/* PUSH NOTIFICATIONS SETTINGS DRAWER / SECTION */}
-            {showPushSettings && (
-                <div className="animate-in fade-in duration-200">
-                    <PushNotificationSettings />
-                </div>
             )}
 
-            {/* Summary Counters */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
-                <div className="p-4 rounded-2xl bg-white border border-gray-200 shadow-xs space-y-1">
-                    <div className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">{t("alerts.active_total", "Aktive Alarme")}</div>
-                    <div className="text-3xl font-black text-slate-900 font-mono">{summary.active_total}</div>
-                </div>
-                <div className="p-4 rounded-2xl bg-rose-50/60 border border-rose-200/80 shadow-xs space-y-1">
-                    <div className="text-[11px] font-bold text-rose-700 uppercase tracking-wider">🔴 {t("alerts.critical", "Kritisch")}</div>
-                    <div className="text-3xl font-black text-rose-700 font-mono">{summary.critical}</div>
-                </div>
-                <div className="p-4 rounded-2xl bg-amber-50/60 border border-amber-200/80 shadow-xs space-y-1">
-                    <div className="text-[11px] font-bold text-amber-800 uppercase tracking-wider">🟡 {t("alerts.warning", "Warnungen")}</div>
-                    <div className="text-3xl font-black text-amber-700 font-mono">{summary.warning}</div>
-                </div>
-                <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200/80 shadow-xs space-y-1">
-                    <div className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">🟢 {t("alerts.info", "Spar-Chancen")}</div>
-                    <div className="text-3xl font-black text-emerald-700 font-mono">{summary.info}</div>
-                </div>
-            </div>
-
-            {/* Filter Tabs */}
-            <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-2.5 rounded-2xl border border-gray-200 shadow-xs">
-                <div className="flex flex-wrap gap-1 bg-gray-100 p-1 rounded-xl text-xs font-semibold">
-                    {[
-                        { key: "all", label: `${t("common.all", "Alle")} (${activeAlerts.length})` },
-                        { key: "critical", label: `🔴 ${t("alerts.critical", "Kritisch")} (${summary.critical})` },
-                        { key: "warning", label: `🟡 ${t("alerts.warning", "Warnungen")} (${summary.warning})` },
-                        { key: "info", label: `🟢 ${t("alerts.info", "Spar-Tipps")} (${summary.info})` },
-                        { key: "resolved", label: `${t("alerts.resolved_history", "Historie")} (${historyAlerts.length})` },
-                    ].map((tab) => (
-                        <button
-                            key={tab.key}
-                            onClick={() => setFilterSeverity(tab.key)}
-                            className={`px-3.5 py-1.5 rounded-lg transition cursor-pointer ${filterSeverity === tab.key
-                                ? "bg-white text-gray-900 shadow-xs font-bold"
-                                : "text-gray-500 hover:text-gray-900"
-                                }`}
-                        >
-                            {tab.label}
-                        </button>
-                    ))}
-                </div>
-
-                <div className="text-xs text-gray-400 font-medium px-2 flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> {t("alerts.live_monitoring", "Live-Überwachung aktiv")}
-                </div>
-            </div>
-
-            {/* Alerts List */}
-            <div className="space-y-3">
-                {query.isLoading ? (
-                    <div className="bg-white rounded-3xl p-12 border border-gray-200 animate-pulse text-gray-400 text-center space-y-3">
-                        <div className="text-3xl">⏳</div>
-                        <div className="text-sm font-semibold">{t("common.loading", "Lade Alarme…")}</div>
-                    </div>
-                ) : filteredAlerts.length === 0 ? (
-                    <div className="bg-gradient-to-b from-white to-slate-50/50 rounded-3xl p-10 sm:p-14 border border-slate-200 text-center space-y-6 shadow-sm relative overflow-hidden">
-                        <div className="absolute top-0 right-1/2 translate-x-1/2 w-80 h-32 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-                        
-                        <div className="relative z-10 w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center justify-center text-3xl mx-auto shadow-sm">
-                            <span>🛡️</span>
-                        </div>
-
-                        <div className="relative z-10 space-y-2 max-w-lg mx-auto">
-                            <h3 className="text-xl font-black text-slate-900 tracking-tight">
-                                {filterSeverity === "resolved" 
-                                    ? t("alerts.empty_history", "Keine erledigten Alarme") 
-                                    : t("alerts.all_optimal_title", "Alles im grünen Bereich – Keine aktiven Alarme")}
-                            </h3>
-                            <p className="text-xs text-slate-500 leading-relaxed">
-                                {filterSeverity === "resolved"
-                                    ? t("alerts.empty_history_desc", "Quittierte oder automatisch gelöste Alarme werden in der Historie archiviert.")
-                                    : t("alerts.all_optimal", "Alle überwachten PV-Generatoren, Batteriespeicher, Wechselrichter und Haushaltsverbraucher laufen einwandfrei im optimalen Betriebsbereich.")}
-                            </p>
-                        </div>
-
-                        {filterSeverity !== "resolved" && (
-                            <div className="relative z-10 grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-xl mx-auto pt-2">
-                                <div className="p-3 bg-white border border-slate-200 rounded-2xl flex items-center gap-2.5 shadow-2xs">
-                                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
-                                    <div className="text-left text-xs">
-                                        <div className="font-bold text-slate-800">Solar & Ertrag</div>
-                                        <div className="text-[10px] text-slate-400">Normalbetrieb</div>
-                                    </div>
+            {/* 🎛️ DASHBOARD CONTENT: ECHTE DATEN BZW. GELOCKTE DEMO-VORSCHAU */}
+            <div className={`space-y-6 ${!isPro ? "relative" : ""}`}>
+                {!isPro && (
+                    <div 
+                        onClick={() => setProModalOpen(true)}
+                        className="absolute inset-0 z-20 bg-slate-950/20 backdrop-blur-[1.5px] rounded-3xl cursor-pointer flex flex-col items-center justify-start pt-24 p-6 text-center hover:bg-slate-950/30 transition group"
+                    >
+                        <div className="px-5 py-3 rounded-2xl bg-slate-900/95 border border-indigo-500/40 shadow-2xl text-white flex items-center gap-3 transform group-hover:scale-105 transition">
+                            <span className="text-xl">🔒</span>
+                            <div className="text-left">
+                                <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                                    <span>Interaktive Demo-Vorschau</span>
+                                    <ProBadge size="xs" />
                                 </div>
-                                <div className="p-3 bg-white border border-slate-200 rounded-2xl flex items-center gap-2.5 shadow-2xs">
-                                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
-                                    <div className="text-left text-xs">
-                                        <div className="font-bold text-slate-800">Speicher & Notstrom</div>
-                                        <div className="text-[10px] text-slate-400">Geschützt</div>
-                                    </div>
-                                </div>
-                                <div className="p-3 bg-white border border-slate-200 rounded-2xl flex items-center gap-2.5 shadow-2xs">
-                                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
-                                    <div className="text-left text-xs">
-                                        <div className="font-bold text-slate-800">Sensoren & Zähler</div>
-                                        <div className="text-[10px] text-slate-400">Online</div>
-                                    </div>
+                                <div className="text-[11px] text-indigo-200/80">
+                                    Klicke hier, um automatische Push-Alarme & Benachrichtigungen mit Sharegy Pro freizuschalten
                                 </div>
                             </div>
-                        )}
+                        </div>
                     </div>
-                ) : (
-                    filteredAlerts.map((alert) => (
-                        <div
-                            key={alert.id}
-                            className={`p-5 rounded-2xl border transition-all ${alert.status === "resolved"
-                                ? "bg-gray-50/60 border-gray-200 opacity-70"
-                                : alert.status === "acknowledged"
-                                    ? "bg-slate-50/80 border-slate-200 opacity-80"
-                                    : alert.severity === "critical"
-                                        ? "bg-rose-50/40 border-rose-200/80 shadow-xs"
-                                        : alert.severity === "warning"
-                                            ? "bg-amber-50/40 border-amber-200/80 shadow-xs"
-                                            : "bg-emerald-50/40 border-emerald-200/80 shadow-xs"
-                                }`}
-                        >
-                            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                                <div className="space-y-1.5 flex-1">
-                                    <div className="flex flex-wrap items-center gap-2">
-                                        {getSeverityBadge(alert.severity)}
-                                        {alert.status === "resolved" && (
-                                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-600 border border-gray-200">
-                                                ✓ Erledigt
-                                            </span>
-                                        )}
-                                        {alert.status === "acknowledged" && (
-                                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                                                👁️ Quittiert
-                                            </span>
-                                        )}
-                                        <h3 className="font-bold text-base text-gray-900">{alert.title}</h3>
-                                        <span className="text-xs text-gray-400 font-mono">
-                                            {new Date(alert.created_at).toLocaleString([], { dateStyle: "short", timeStyle: "short" })} Uhr
-                                        </span>
-                                    </div>
-                                    <p className="text-sm text-gray-700 leading-relaxed">{alert.message}</p>
+                )}
 
-                                    {alert.action_hint && (
-                                        <div className="pt-2 flex items-center gap-2">
-                                            <span className="text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 px-3 py-1 rounded-xl inline-flex items-center gap-1.5 shadow-2xs">
-                                                <span>👉</span> {alert.action_hint}
+                {/* PUSH NOTIFICATIONS SETTINGS DRAWER / SECTION */}
+                {showPushSettings && (
+                    <div className="animate-in fade-in duration-200">
+                        <PushNotificationSettings />
+                    </div>
+                )}
+
+                {/* Summary Counters */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+                    <div className="p-4 rounded-2xl bg-white border border-gray-200 shadow-xs space-y-1">
+                        <div className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">{t("alerts.active_total", "Aktive Alarme")}</div>
+                        <div className="text-3xl font-black text-slate-900 font-mono">{summary.active_total}</div>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-rose-50/60 border border-rose-200/80 shadow-xs space-y-1">
+                        <div className="text-[11px] font-bold text-rose-700 uppercase tracking-wider">🔴 {t("alerts.critical", "Kritisch")}</div>
+                        <div className="text-3xl font-black text-rose-700 font-mono">{summary.critical}</div>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-amber-50/60 border border-amber-200/80 shadow-xs space-y-1">
+                        <div className="text-[11px] font-bold text-amber-800 uppercase tracking-wider">🟡 {t("alerts.warning", "Warnungen")}</div>
+                        <div className="text-3xl font-black text-amber-700 font-mono">{summary.warning}</div>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200/80 shadow-xs space-y-1">
+                        <div className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">🟢 {t("alerts.info", "Spar-Chancen")}</div>
+                        <div className="text-3xl font-black text-emerald-700 font-mono">{summary.info}</div>
+                    </div>
+                </div>
+
+                {/* Filter Tabs */}
+                <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-2.5 rounded-2xl border border-gray-200 shadow-xs">
+                    <div className="flex flex-wrap gap-1 bg-gray-100 p-1 rounded-xl text-xs font-semibold">
+                        {[
+                            { key: "all", label: `${t("common.all", "Alle")} (${activeAlerts.length})` },
+                            { key: "critical", label: `🔴 ${t("alerts.critical", "Kritisch")} (${summary.critical})` },
+                            { key: "warning", label: `🟡 ${t("alerts.warning", "Warnungen")} (${summary.warning})` },
+                            { key: "info", label: `🟢 ${t("alerts.info", "Spar-Tipps")} (${summary.info})` },
+                            { key: "resolved", label: `${t("alerts.resolved_history", "Historie")} (${historyAlerts.length})` },
+                        ].map((tab) => (
+                            <button
+                                key={tab.key}
+                                onClick={() => setFilterSeverity(tab.key)}
+                                className={`px-3.5 py-1.5 rounded-lg transition cursor-pointer ${filterSeverity === tab.key
+                                    ? "bg-white text-gray-900 shadow-xs font-bold"
+                                    : "text-gray-500 hover:text-gray-900"
+                                    }`}
+                            >
+                                {tab.label}
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="text-xs text-gray-400 font-medium px-2 flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> {t("alerts.live_monitoring", "Live-Überwachung aktiv")}
+                    </div>
+                </div>
+
+                {/* Alerts List */}
+                <div className="space-y-3">
+                    {query.isLoading ? (
+                        <div className="bg-white rounded-3xl p-12 border border-gray-200 animate-pulse text-gray-400 text-center space-y-3">
+                            <div className="text-3xl">⏳</div>
+                            <div className="text-sm font-semibold">{t("common.loading", "Lade Alarme…")}</div>
+                        </div>
+                    ) : filteredAlerts.length === 0 ? (
+                        <div className="bg-gradient-to-b from-white to-slate-50/50 rounded-3xl p-10 sm:p-14 border border-slate-200 text-center space-y-6 shadow-sm relative overflow-hidden">
+                            <div className="absolute top-0 right-1/2 translate-x-1/2 w-80 h-32 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+                            
+                            <div className="relative z-10 w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center justify-center text-3xl mx-auto shadow-sm">
+                                <span>🛡️</span>
+                            </div>
+
+                            <div className="relative z-10 space-y-2 max-w-lg mx-auto">
+                                <h3 className="text-xl font-black text-slate-900 tracking-tight">
+                                    {filterSeverity === "resolved" 
+                                        ? t("alerts.empty_history", "Keine erledigten Alarme") 
+                                        : t("alerts.all_optimal_title", "Alles im grünen Bereich – Keine aktiven Alarme")}
+                                </h3>
+                                <p className="text-xs text-slate-500 leading-relaxed">
+                                    {filterSeverity === "resolved"
+                                        ? t("alerts.empty_history_desc", "Quittierte oder automatisch gelöste Alarme werden in der Historie archiviert.")
+                                        : t("alerts.all_optimal", "Alle überwachten PV-Generatoren, Batteriespeicher, Wechselrichter und Haushaltsverbraucher laufen einwandfrei im optimalen Betriebsbereich.")}
+                                </p>
+                            </div>
+
+                            {filterSeverity !== "resolved" && (
+                                <div className="relative z-10 grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-xl mx-auto pt-2">
+                                    <div className="p-3 bg-white border border-slate-200 rounded-2xl flex items-center gap-2.5 shadow-2xs">
+                                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
+                                        <div className="text-left text-xs">
+                                            <div className="font-bold text-slate-800">Solar & Ertrag</div>
+                                            <div className="text-[10px] text-slate-400">Normalbetrieb</div>
+                                        </div>
+                                    </div>
+                                    <div className="p-3 bg-white border border-slate-200 rounded-2xl flex items-center gap-2.5 shadow-2xs">
+                                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
+                                        <div className="text-left text-xs">
+                                            <div className="font-bold text-slate-800">Speicher & Notstrom</div>
+                                            <div className="text-[10px] text-slate-400">Geschützt</div>
+                                        </div>
+                                    </div>
+                                    <div className="p-3 bg-white border border-slate-200 rounded-2xl flex items-center gap-2.5 shadow-2xs">
+                                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
+                                        <div className="text-left text-xs">
+                                            <div className="font-bold text-slate-800">Sensoren & Zähler</div>
+                                            <div className="text-[10px] text-slate-400">Online</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        filteredAlerts.map((alert) => (
+                            <div
+                                key={alert.id}
+                                className={`p-5 rounded-2xl border transition-all ${alert.status === "resolved"
+                                    ? "bg-gray-50/60 border-gray-200 opacity-70"
+                                    : alert.status === "acknowledged"
+                                        ? "bg-slate-50/80 border-slate-200 opacity-80"
+                                        : alert.severity === "critical"
+                                            ? "bg-rose-50/40 border-rose-200/80 shadow-xs"
+                                            : alert.severity === "warning"
+                                                ? "bg-amber-50/40 border-amber-200/80 shadow-xs"
+                                                : "bg-emerald-50/40 border-emerald-200/80 shadow-xs"
+                                    }`}
+                            >
+                                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                                    <div className="space-y-1.5 flex-1">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            {getSeverityBadge(alert.severity)}
+                                            {alert.status === "resolved" && (
+                                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-600 border border-gray-200">
+                                                    ✓ Erledigt
+                                                </span>
+                                            )}
+                                            {alert.status === "acknowledged" && (
+                                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                                    👁️ Quittiert
+                                                </span>
+                                            )}
+                                            <h3 className="font-bold text-base text-gray-900">{alert.title}</h3>
+                                            <span className="text-xs text-gray-400 font-mono">
+                                                {new Date(alert.created_at).toLocaleString([], { dateStyle: "short", timeStyle: "short" })} Uhr
                                             </span>
+                                        </div>
+                                        <p className="text-sm text-gray-700 leading-relaxed">{alert.message}</p>
+
+                                        {alert.action_hint && (
+                                            <div className="pt-2 flex items-center gap-2">
+                                                <span className="text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 px-3 py-1 rounded-xl inline-flex items-center gap-1.5 shadow-2xs">
+                                                    <span>👉</span> {alert.action_hint}
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {alert.status === "active" && (
+                                        <div className="flex sm:flex-col items-center sm:items-end gap-2 shrink-0">
+                                            <button
+                                                onClick={() => resolveMutation.mutate(alert.id)}
+                                                className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white border border-gray-200 text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 shadow-2xs transition cursor-pointer"
+                                            >
+                                                ✓ {t("alerts.mark_resolved", "Erledigt")}
+                                            </button>
+                                            <button
+                                                onClick={() => ackMutation.mutate(alert.id)}
+                                                className="px-2.5 py-1 rounded-lg text-[11px] font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-100 cursor-pointer"
+                                            >
+                                                {t("alerts.mark_seen", "Quittieren")}
+                                            </button>
                                         </div>
                                     )}
                                 </div>
-
-                                {alert.status === "active" && (
-                                    <div className="flex sm:flex-col items-center sm:items-end gap-2 shrink-0">
-                                        <button
-                                            onClick={() => resolveMutation.mutate(alert.id)}
-                                            className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white border border-gray-200 text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 shadow-2xs transition cursor-pointer"
-                                        >
-                                            ✓ {t("alerts.mark_resolved", "Erledigt")}
-                                        </button>
-                                        <button
-                                            onClick={() => ackMutation.mutate(alert.id)}
-                                            className="px-2.5 py-1 rounded-lg text-[11px] font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-100 cursor-pointer"
-                                        >
-                                            {t("alerts.mark_seen", "Quittieren")}
-                                        </button>
-                                    </div>
-                                )}
                             </div>
-                        </div>
-                    ))
-                )}
+                        ))
+                    )}
+                </div>
             </div>
+
+            {/* Pro Upgrade Modal */}
+            <ProUpgradeModal
+                open={proModalOpen}
+                onClose={() => setProModalOpen(false)}
+                featureName="Alarmzentrale & Mobile Push-Benachrichtigungen"
+                featureDesc="Schütze deine PV-Anlage, Heimspeicher und Haushaltsgeräte mit automatischen Echtzeit-Alarmen direkt auf dein Smartphone."
+            />
         </div>
     );
 }
