@@ -133,13 +133,13 @@ export default function LandingPage() {
 
                     {/* Action CTAs */}
                     <div className="flex items-center gap-3">
-                        <button
-                            onClick={() => scrollToSection("simulator")}
-                            className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 border border-slate-200 text-xs font-bold transition cursor-pointer"
+                        <a
+                            href="/api/demo/"
+                            className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border border-indigo-200 text-xs font-bold transition cursor-pointer shadow-2xs"
                         >
                             <Eye className="w-3.5 h-3.5 text-indigo-600" />
-                            <span>Live-Demo</span>
-                        </button>
+                            <span>Echte Live-Demo</span>
+                        </a>
 
                         {user ? (
                             <Link
@@ -187,17 +187,25 @@ export default function LandingPage() {
 
                     {/* Hero Buttons */}
                     <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
-                        <button
-                            onClick={() => scrollToSection("simulator")}
+                        <a
+                            href="/api/demo/"
                             className="w-full sm:w-auto px-7 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-600 hover:to-teal-600 text-white font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2.5 shadow-xl shadow-emerald-500/25 hover:scale-[1.02] transition-all cursor-pointer"
                         >
-                            <span>🚀 Live-Demo ohne Registrierung</span>
+                            <span>🚀 Echte Live-Demo starten (1-Klick)</span>
                             <ArrowRight className="w-4 h-4" />
+                        </a>
+
+                        <button
+                            type="button"
+                            onClick={() => scrollToSection("simulator")}
+                            className="w-full sm:w-auto px-6 py-4 rounded-2xl bg-white hover:bg-slate-50 text-slate-700 hover:text-indigo-600 font-bold text-sm border border-slate-300 hover:border-indigo-400 flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md"
+                        >
+                            <span>Simulator ansehen ↓</span>
                         </button>
 
                         <Link
                             to="/login"
-                            className="w-full sm:w-auto px-7 py-4 rounded-2xl bg-white hover:bg-slate-50 text-slate-900 font-bold text-sm border border-slate-300 hover:border-indigo-400 flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md"
+                            className="w-full sm:w-auto px-6 py-4 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm border border-slate-800 flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md"
                         >
                             <span>Kostenlos starten</span>
                             <ChevronRight className="w-4 h-4 text-slate-400" />
@@ -518,12 +526,12 @@ export default function LandingPage() {
                             Verbinde deine PV-Anlage, Wallbox & Speicher in wenigen Klicks – oder teste sofort die interaktive Live-Demo.
                         </p>
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
-                            <button
-                                onClick={() => scrollToSection("simulator")}
-                                className="w-full sm:w-auto px-8 py-4 rounded-xl bg-slate-950 hover:bg-slate-800 text-indigo-300 border border-indigo-400/40 font-bold text-sm transition cursor-pointer"
+                            <a
+                                href="/api/demo/"
+                                className="w-full sm:w-auto px-8 py-4 rounded-xl bg-slate-950 hover:bg-slate-800 text-indigo-300 border border-indigo-400/40 font-bold text-sm transition cursor-pointer flex items-center justify-center gap-2"
                             >
-                                <span>Live-Demo im Simulator testen</span>
-                            </button>
+                                <span>🚀 Echte Live-Demo starten (1-Klick)</span>
+                            </a>
                             <Link
                                 to="/login"
                                 className="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-sm uppercase tracking-wider transition cursor-pointer shadow-lg shadow-emerald-500/25"
