@@ -12,7 +12,7 @@ from homeassistant.const import UnitOfTemperature, PERCENTAGE
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN
+from .const import DOMAIN, VERSION
 
 
 async def async_setup_entry(
@@ -25,6 +25,8 @@ async def async_setup_entry(
 
     sensors = [
         SharegyStatusSensor(entry, bridge),
+        SharegyOfflineAutonomousSensor(entry, bridge),
+        SharegyIntegrationVersionSensor(entry, bridge),
         SharegyBufferCountSensor(entry, bridge),
         SharegyFlowTempSetpointSensor(entry, bridge),
         SharegyScreedSoCSensor(entry, bridge),
@@ -162,3 +164,47 @@ class SharegySpotPriceSensor(SensorEntity):
     @property
     def native_value(self) -> float:
         return round(float(getattr(self._bridge, "spot_price_ct", 15.0)), 2)
+
+
+class SharegyOfflineAutonomousSensor(SensorEntity):
+    """Indicates whether local 24h offline autonomous control loop is active."""
+
+    _attr_icon = "mdi:shield-home"
+    _attr_has_entity_name = True
+    _attr_name = "Offline-Resilienz Status"
+
+    def __init__(self, entry: ConfigEntry, bridge):
+        self._entry = entry
+        self._bridge = bridge
+        self._attr_unique_id = f"{entry.entry_id}_offline_autonomous"
+
+    @property
+    def native_value(self) -> str:
+        if getattr(self._bridge, "offline_autonomous", False):
+            return "Aktiv (Autonomer 24h-Fahrplan)"
+        return "Inaktiv (Cloud-Echtzeit)"
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        return {
+            "cached_slots": len(getattr(self._bridge, "cached_schedule_24h", []) or []),
+            "is_connected": self._bridge.is_connected,
+        }
+
+
+class SharegyIntegrationVersionSensor(SensorEntity):
+    """Sharegy Home Assistant integration version."""
+
+    _attr_icon = "mdi:information-outline"
+    _attr_has_entity_name = True
+    _attr_name = "Integration Version"
+
+    def __init__(self, entry: ConfigEntry, bridge):
+        self._entry = entry
+        self._bridge = bridge
+        self._attr_unique_id = f"{entry.entry_id}_version"
+
+    @property
+    def native_value(self) -> str:
+        return VERSION
+
