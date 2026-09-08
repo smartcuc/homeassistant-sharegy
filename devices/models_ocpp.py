@@ -122,6 +122,18 @@ class ChargingStation(models.Model):
     def current_power_kw(self):
         return round(self.active_power_w / 1000.0, 2)
 
+    @property
+    def charging_mode(self):
+        return self.smart_charging_mode
+
+    @property
+    def max_charge_power_kw(self):
+        return round((float(self.max_current_a or 16.0) * 230.0 * int(self.phases or 3)) / 1000.0, 1)
+
+    @property
+    def min_charge_current_a(self):
+        return float(self.min_current_a or 6.0)
+
 
 class ChargingSession(models.Model):
     """

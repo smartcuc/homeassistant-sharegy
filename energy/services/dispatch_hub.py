@@ -170,23 +170,29 @@ def get_all_load_consumers(home) -> list:
     try:
         from devices.models_ocpp import ChargingStation
         for cs in ChargingStation.objects.filter(home=home):
-            is_charging = (cs.status == "Charging")
-            power_kw = float(cs.max_charge_power_kw or 11.0) if is_charging else 0.0
+            is_charging = cs.is_charging or (cs.status == "Charging")
+            live_power_w = float(cs.active_power_w or 0.0)
+            if is_charging and live_power_w <= 0:
+                live_power_w = float(cs.max_current_a * 230.0 * cs.phases)
+            power_kw = live_power_w / 1000.0
+            max_power_kw = round((float(cs.max_current_a or 16.0) * 230.0 * int(cs.phases or 3)) / 1000.0, 1)
+
             consumers.append({
                 "id": f"wallbox_{cs.id}",
                 "category": "wallbox",
                 "category_label": "Wallbox & E-Auto",
                 "name": cs.name or f"Wallbox {cs.charge_point_id}",
                 "icon": "🚗",
-                "power_w": power_kw * 1000.0,
-                "is_active": True,
+                "power_w": live_power_w,
+                "is_active": cs.is_online,
                 "status_state": "charging" if is_charging else "connected" if cs.status == "Preparing" else "available",
                 "status_label": f"{cs.get_status_display()} ({power_kw:.1f} kW)",
-                "mode": cs.charging_mode or "solar_surplus",
+                "mode": cs.smart_charging_mode or "pv_surplus",
                 "details": {
                     "charge_point_id": cs.charge_point_id,
-                    "max_power_kw": float(cs.max_charge_power_kw or 11.0),
-                    "min_current_a": cs.min_charge_current_a,
+                    "max_power_kw": max_power_kw,
+                    "min_current_a": float(cs.min_current_a or 6.0),
+                    "phases": int(cs.phases or 3),
                 },
                 "quick_action": "fast_charge",
                 "quick_action_label": "⚡ Schnellladen",
