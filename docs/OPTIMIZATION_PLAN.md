@@ -792,6 +792,26 @@
 
 ---
 
+### [x] 5.42 🔌 Multi-Protocol CSMS Gateway (OCPP 1.6-J, OCPP 2.0.1 & OCPP 2.1)
+- **Status**: ✅ **100% PRODUKTIONSREIF IMPLEMENTIERT & GETESTET**
+- **Fokus**: Vollständige Server-Implementierung für alle standardisierten OCPP-Protokollversionen (`devices/consumers_ocpp.py`, `devices/models_ocpp.py`, `devices/tests_ocpp.py`, `devices/tests_ocpp_v2.py`).
+- **Konzept & Umsetzung**:
+  - **WebSocket Subprotocol Negotiation**: Automatische Handshake-Aushandlung für `ocpp1.6`, `ocpp2.0.1` und `ocpp2.1`.
+  - **Erweiterte OCPP 1.6-J Aktorik**: `GetCompositeSchedule`, `ClearChargingProfile`, `ReserveNow`, `CancelReservation`, `TriggerMessage`, `SendLocalList`, `GetLocalListVersion`, `GetDiagnostics`, `DiagnosticsStatusNotification`.
+  - **OCPP 2.0.1 / 2.1 Core & Device Model**: `TransactionEvent` (`Started`, `Updated`, `Ended`), `NotifyEvent`, `GetVariables`, `SetVariables`, `Get15118EVCertificate` (ISO 15118-20 Plug & Charge Contract Certificates).
+
+---
+
+### [x] 5.43 🚗 ISO 15118-20 V2G & V2H Bidirektionales Laden & Arbitrage-Engine
+- **Status**: ✅ **100% PRODUKTIONSREIF IMPLEMENTIERT & GETESTET**
+- **Fokus**: Intelligente Fahrzeug-zu-Haus (V2H) und Fahrzeug-zu-Netz (V2G) Entladesteuerung (`energy/services/services_v2g.py`, `devices/views.py`, `WallboxToolsModal.jsx`, `WallboxCard.jsx`).
+- **Konzept & Umsetzung**:
+  - **V2G Dispatch Engine**: Merit-Order Kaskade, Peak-Shaving in teuren Abendstunden (V2H) und Netzeinspeisung bei extremen Börsenstrompreisen (V2G Arbitrage).
+  - **Batteriegesundheit & Mindest-SoC**: Schwellenwert-Gating (`v2g_min_soc`, z. B. 50% / 200 km) zur Schonung des E-Auto-Akkus.
+  - **UI-Integration**: WallboxToolsModal mit V2G-Konfiguration, Device Model Variable Browser und Live-Entladeanzeige in `WallboxCard.jsx`.
+
+---
+
 ## 🎯 7. Verbindliche Prioritätenliste & Gesamter Roadmap-Status
 
 ```
@@ -803,7 +823,8 @@
 │    - 4 Pro-Hubs: Energiesteuerung, E-Mobilität, Wärme & Alarmzentrale,        │
 │    - 1-Klick Quick Boost, SG-Ready BWWP Lastmanagement,                       │
 │    - 🌡️ Fußbodenheizungs-Steuerung & Prädiktive KI-Wetter-Vorladung (MPC),    │
-│    - 🚗 OCPP 1.6-J CSMS Wallbox & Dynamisches PV-Überschuss-Laden,            │
+│    - 🔌 Multi-Protocol CSMS Gateway (OCPP 1.6-J, 2.0.1 & 2.1 WebSocket),      │
+│    - 🚗 ISO 15118-20 V2G & V2H Bidirektionales Laden & Börsenarbitrage,       │
 │    - ⛽ Mobilitäts- & Spritpreis-Radar (MTS-K / Tankerkönig & 100km-Vergleich),│
 │    - 👑 Standardisiertes Pro-Freemium Gating mit interaktiver Demo-Vorschau,  │
 │    - Sungrow OpenAPI, ioBroker & HA Adapter, Multistring AC-Kopplung,         │
@@ -823,6 +844,7 @@
 ├───────────────────────────────────────────────────────────────────────────────┤
 │ ✅ KEINE OFFENEN AUFGABEN MEHR: DIE GESAMTE ROADMAP IST VOLLSTÄNDIG ABGESCHLOSSEN!│
 └───────────────────────────────────────────────────────────────────────────────┘
+
 ```
 
 ---

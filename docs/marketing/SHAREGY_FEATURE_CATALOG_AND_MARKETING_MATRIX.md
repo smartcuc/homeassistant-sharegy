@@ -90,14 +90,21 @@ Sharegy ist die **erste ganzheitliche Energie-Plattform**, die hochperformantes 
 
 ---
 
-### 5. 🚗 OCPP 1.6-J Wallbox Gateway & Smart EV-Charging
-* **Natives CSMS (Charging Station Management System)**: Direkte WebSocket-Kopplung (`/ws/ocpp/<cp_id>/`) für alle normkonformen Wallboxen (Easee, openWB, cFos, Heidelberg, Mennekes, Alfen, Webasto).
+### 5. 🚗 Multi-Protocol CSMS Gateway & ISO 15118-20 V2G/V2H Bidirektionales Laden
+* **Multi-Protocol CSMS (Charging Station Management System)**: Direkte WebSocket-Kopplung mit automatischer Subprotocol-Aushandlung (`ocpp1.6`, `ocpp2.0.1`, `ocpp2.1`) für alle normkonformen Ladestationen (Easee, openWB, cFos, Heidelberg, Mennekes, Alfen, Webasto, Keba).
+* **ISO 15118-20 V2G & V2H Bidirektionalität**:
+  * 🏠 *Vehicle-to-Home (V2H)*: Fahrzeug speist in teuren Abend- und Nachtstunden bis zu 11 kW in das Hausnetz ein.
+  * ⚡ *Vehicle-to-Grid (V2G Arbitrage)*: Laden bei negativen Preisen, Netzeinspeisung bei extremen Börsenspitzen.
+  * 🛡️ *Intelligenter Batteriewächter*: Einstellbare Mindest-SoC Notreserve (z. B. 50% / 200 km) zur Schonung des E-Auto-Akkus.
 * **Intelligente Lademodi**:
   * ☀️ *Pure Solar*: Lädt ausschließlich mit reinem PV-Überschuss.
   * ⚖️ *Min + PV*: Garantiert Mindestladestrom (z. B. 6 A) und stockt mit Solarstrom auf.
-  * 💶 *Börsenpreis-Laden*: Lädt automatisch in den 3 bis 5 günstigsten Stunden der Nacht.
+  * 💶 *Börsenpreis-Laden*: Lädt automatisch in den günstigsten Stunden des EPEX Spotmarkts.
   * ⚡ *Fast Charge*: Sofortige Vollladung mit 11 kW / 22 kW.
-* **Dynamische Phasenumschaltung & Ampere-Slider**: Nahtlose Stromstärkeregelung von 6 A bis 32 A in Echtzeit.
+* **Erweiterte CSMS-Aktorik & Diagnose**:
+  * Vollständiges Remote-Management: `SetChargingProfile`, `GetCompositeSchedule`, `ClearChargingProfile`, `ReserveNow`, `CancelReservation`, `TriggerMessage`.
+  * Offline-RFID-Synchronisation (`SendLocalList`, `GetLocalListVersion`) und automatischer Protokolldiagnose-Upload (`GetDiagnostics`, `DiagnosticsStatusNotification`).
+  * OCPP 2.0.1 / 2.1 Device Model: `TransactionEvent`, `NotifyEvent`, `GetVariables`, `SetVariables` und ISO 15118 Zertifikatsverwaltung (`Get15118EVCertificate`).
 
 ---
 

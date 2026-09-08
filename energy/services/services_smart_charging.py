@@ -30,6 +30,10 @@ def calculate_smart_charging_current(
       - pv_surplus: Reine Überschussladung (6A - 16A/32A)
       - min_pv: Mindestens 6A + solarer Booster
     """
+    # 1. Wenn die Wallbox reserviert, gestört oder außer Betrieb ist -> Ladevorgang blockieren (0.0 A)
+    if station.status in ["Reserved", "Unavailable", "Faulted", "SuspendedEVSE"]:
+        return 0.0
+
     mode = station.smart_charging_mode
     max_a = float(station.max_current_a or 16.0)
     min_a = float(station.min_current_a or 6.0)
@@ -85,6 +89,10 @@ def dispatch_wallbox_charging_profile(station: ChargingStation, target_current_a
     Überträgt ein neues Ladeprofil (SetChargingProfile) über Django Channels an die Wallbox.
     Enthält einen Hysterese-Filter, um überflüssigen Netzwerkverkehr zu vermeiden.
     """
+    # Wenn Station blockiert / reserviert / gestört ist, Strom immer auf 0.0A begrenzen
+    if station.status in ["Reserved", "Unavailable", "Faulted"]:
+        target_current_a = 0.0
+
     target_current_a = round(float(target_current_a), 1)
     previous_current_a = float(station.target_current_a or 0.0)
 

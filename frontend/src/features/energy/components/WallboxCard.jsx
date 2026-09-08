@@ -6,6 +6,7 @@ import { useSubscription } from "../../../hooks/useSubscription";
 import ProBadge from "../../../components/common/ProBadge";
 import ProUpgradeModal from "../../../components/common/ProUpgradeModal";
 import EditWallboxModal from "../../devices/components/EditWallboxModal";
+import WallboxToolsModal from "../../devices/components/WallboxToolsModal";
 
 export default function WallboxCard({ onOpenAddModal }) {
     const { t } = useTranslation();
@@ -14,6 +15,7 @@ export default function WallboxCard({ onOpenAddModal }) {
 
     const [proModalOpen, setProModalOpen] = useState(false);
     const [editModalOpen, setEditModalOpen] = useState(false);
+    const [toolsModalOpen, setToolsModalOpen] = useState(false);
     const [selectedStationId, setSelectedStationId] = useState(null);
     const [actionPending, setActionPending] = useState(null);
     const [feedback, setFeedback] = useState({ text: null, type: null });
@@ -126,12 +128,20 @@ export default function WallboxCard({ onOpenAddModal }) {
         }
     }
 
-    function getStatusBadge(status, isOnline) {
+    function getStatusBadge(status, isOnline, isDischargingV2g) {
         if (!isOnline) {
             return (
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
                     <span className="w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-500"></span>
                     {t("common.offline", "Offline")}
+                </span>
+            );
+        }
+        if (isDischargingV2g) {
+            return (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal-500/15 text-teal-700 dark:text-teal-300 border border-teal-500/30 animate-pulse">
+                    <span className="w-1.5 h-1.5 rounded-full bg-teal-500"></span>
+                    {t("wallbox.status_v2g_discharging", "🔄 V2G / V2H Entladung")}
                 </span>
             );
         }
@@ -151,13 +161,48 @@ export default function WallboxCard({ onOpenAddModal }) {
                     </span>
                 );
             case "SuspendedEVSE":
+                return (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-cyan-500/15 text-cyan-700 dark:text-cyan-400 border border-cyan-500/30">
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-500"></span>
+                        {t("wallbox.status_suspended_evse", "Pausiert (Station)")}
+                    </span>
+                );
             case "SuspendedEV":
                 return (
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-cyan-500/15 text-cyan-700 dark:text-cyan-400 border border-cyan-500/30">
                         <span className="w-1.5 h-1.5 rounded-full bg-cyan-500"></span>
-                        {t("wallbox.waiting_for_solar", "Warte auf Solarstrom")}
+                        {t("wallbox.status_suspended_ev", "Pausiert (Fahrzeug voll)")}
                     </span>
                 );
+            case "Reserved":
+                return (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-500/15 text-purple-700 dark:text-purple-400 border border-purple-500/30">
+                        <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+                        {t("wallbox.status_reserved", "🔒 Reserviert")}
+                    </span>
+                );
+            case "Faulted":
+                return (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/30">
+                        <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                        {t("wallbox.status_faulted", "⚠️ Störung")}
+                    </span>
+                );
+            case "Unavailable":
+                return (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-500/15 text-slate-700 dark:text-slate-400 border border-slate-500/30">
+                        <span className="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
+                        {t("wallbox.status_unavailable", "Außer Betrieb")}
+                    </span>
+                );
+            case "Finishing":
+                return (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-700 dark:text-indigo-400 border border-indigo-500/30">
+                        <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                        {t("wallbox.status_finishing", "Beendet")}
+                    </span>
+                );
+            case "Available":
             default:
                 return (
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-500/15 text-blue-700 dark:text-blue-400 border border-blue-500/30">
@@ -226,9 +271,15 @@ export default function WallboxCard({ onOpenAddModal }) {
     }
 
     const currentMode = activeStation.smart_charging_mode || "pv_surplus";
-    const activePowerKw = Number(activeStation.active_power_kw || 0).toFixed(2);
-    const sessionKwh = Number(activeStation.session_energy_kwh || 0).toFixed(1);
-    const targetAmpere = activeStation.target_current_a || 16.0;
+    const isOnline = Boolean(activeStation.is_online);
+    const isCharging = Boolean(activeStation.is_charging || activeStation.status === "Charging" || activeStation.active_session);
+    const isDischargingV2g = Boolean(activeStation.is_discharging_v2g || (activeStation.v2g_discharge_power_w && activeStation.v2g_discharge_power_w > 50.0));
+    const isReserved = activeStation.status === "Reserved";
+    const isFaulted = activeStation.status === "Faulted";
+    const isUnavailable = activeStation.status === "Unavailable";
+    const activePowerKw = Number(activeStation.power_kw ?? activeStation.active_power_kw ?? ((activeStation.active_power_w || 0) / 1000)).toFixed(2);
+    const sessionKwh = Number(activeStation.session_energy_kwh || activeStation.active_session?.total_energy_kwh || 0).toFixed(1);
+    const targetAmpere = activeStation.target_current_a || (isCharging ? activeStation.max_current_a : 0.0) || 16.0;
 
     return (
         <div className="bg-gradient-to-br from-white via-slate-50/70 to-emerald-50/30 dark:from-slate-900 dark:via-slate-900/90 dark:to-emerald-950/20 rounded-3xl p-6 border border-slate-200/90 dark:border-slate-800 shadow-sm relative overflow-hidden flex flex-col justify-between">
@@ -247,10 +298,10 @@ export default function WallboxCard({ onOpenAddModal }) {
                                 <h3 className="text-base font-bold text-slate-900 dark:text-white tracking-tight">
                                     {activeStation.name || "Wallbox"}
                                 </h3>
-                                {getStatusBadge(activeStation.status, activeStation.is_online)}
+                                {getStatusBadge(activeStation.status, activeStation.is_online, isDischargingV2g)}
                             </div>
                             <p className="text-xs text-slate-400 mt-0.5">
-                                {activeStation.vendor || "OCPP"} · {activeStation.phases || 3}-phasig ({targetAmpere} A)
+                                {activeStation.vendor || "OCPP"} · {activeStation.phases || 3}-phasig ({targetAmpere} A) · {activeStation.ocpp_version?.toUpperCase() || "OCPP 1.6-J"} {activeStation.v2g_mode && activeStation.v2g_mode !== "off" && "· 🔄 V2G"}
                             </p>
                         </div>
                     </div>
@@ -269,6 +320,15 @@ export default function WallboxCard({ onOpenAddModal }) {
                                 ))}
                             </select>
                         )}
+
+                        <button
+                            type="button"
+                            onClick={() => setToolsModalOpen(true)}
+                            title={t("wallbox.tools_btn_title", "OCPP 1.6 Expertenwerkzeuge, Offline-RFID Sync & Diagnose")}
+                            className="p-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-600 hover:text-emerald-600 dark:text-slate-300 dark:hover:text-emerald-400 border border-slate-200 dark:border-slate-700 transition cursor-pointer shadow-2xs"
+                        >
+                            🛠️
+                        </button>
 
                         <button
                             type="button"
@@ -414,32 +474,56 @@ export default function WallboxCard({ onOpenAddModal }) {
             {/* Actions Footer */}
             <div className="pt-4 mt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-3 relative z-10">
                 <span className="text-xs text-slate-400">
-                    {t("wallbox.cable", "Kabel:")} <strong className="text-emerald-600 dark:text-emerald-400">{activeStation.connector_status || t("wallbox.connected", "Gesteckt")}</strong>
+                    {t("wallbox.cable", "Kabel:")} <strong className={`${isCharging || activeStation.status === "Preparing" ? "text-emerald-600 dark:text-emerald-400" : isReserved ? "text-purple-600 dark:text-purple-400" : "text-slate-600 dark:text-slate-300"}`}>
+                        {activeStation.connector_status || (activeStation.status === "Preparing" || isCharging ? t("wallbox.connected", "Gesteckt") : isReserved ? t("wallbox.status_reserved", "Reserviert") : t("wallbox.ready", "Bereit"))}
+                    </strong>
                 </span>
                 <div className="flex items-center gap-2">
+                    {isReserved && (
+                        <button
+                            type="button"
+                            disabled={actionPending !== null}
+                            onClick={() => handleRemoteAction("cancel-reserve")}
+                            className="px-2.5 py-2 rounded-xl text-xs font-bold bg-purple-100 hover:bg-purple-200 dark:bg-purple-950/50 dark:hover:bg-purple-900/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 transition-all cursor-pointer shadow-2xs"
+                            title={t("wallbox.cancel_reserve_title", "Reservierung aufheben")}
+                        >
+                            {actionPending === "cancel-reserve" ? "..." : t("wallbox.cancel_reserve_btn", "🔓 Freigeben")}
+                        </button>
+                    )}
+
                     <button
                         type="button"
-                        disabled={actionPending !== null}
+                        disabled={actionPending !== null || isCharging || !isOnline || isFaulted || isUnavailable}
                         onClick={() => handleRemoteAction("remote-start")}
-                        className="px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-all disabled:opacity-50 cursor-pointer shadow-xs"
+                        className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer ${
+                            isCharging || !isOnline || isFaulted || isUnavailable
+                                ? "bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed opacity-50 shadow-none"
+                                : "bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/20"
+                        }`}
+                        title={isCharging ? t("wallbox.already_charging", "Ladevorgang läuft bereits") : t("wallbox.start_charging", "Ladevorgang manuell starten")}
                     >
                         {actionPending === "remote-start" ? "..." : t("wallbox.start_btn", "▶️ Start")}
                     </button>
 
                     <button
                         type="button"
-                        disabled={actionPending !== null}
+                        disabled={actionPending !== null || (!isCharging && !activeStation.active_session)}
                         onClick={() => handleRemoteAction("remote-stop")}
-                        className="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition-all disabled:opacity-50 cursor-pointer"
+                        className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                            isCharging || activeStation.active_session
+                                ? "bg-rose-600 hover:bg-rose-500 text-white shadow-md shadow-rose-600/25 animate-pulse"
+                                : "bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed opacity-50"
+                        }`}
+                        title={!isCharging && !activeStation.active_session ? t("wallbox.no_active_session", "Kein aktiver Ladevorgang zum Stoppen") : t("wallbox.stop_charging", "Ladevorgang jetzt stoppen")}
                     >
                         {actionPending === "remote-stop" ? "..." : t("wallbox.stop_btn", "⏹️ Stop")}
                     </button>
 
                     <button
                         type="button"
-                        disabled={actionPending !== null}
+                        disabled={actionPending !== null || !isOnline}
                         onClick={() => handleRemoteAction("unlock")}
-                        className="px-2.5 py-2 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 transition-all disabled:opacity-50 cursor-pointer"
+                        className="px-2.5 py-2 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 transition-all disabled:opacity-50 cursor-pointer shadow-2xs"
                         title={t("wallbox.unlock_cable_title", "Ladekabel entriegeln")}
                     >
                         🔓
@@ -460,6 +544,14 @@ export default function WallboxCard({ onOpenAddModal }) {
                 <EditWallboxModal
                     isOpen={editModalOpen}
                     onClose={() => setEditModalOpen(false)}
+                    station={activeStation}
+                />
+            )}
+
+            {toolsModalOpen && (
+                <WallboxToolsModal
+                    isOpen={toolsModalOpen}
+                    onClose={() => setToolsModalOpen(false)}
                     station={activeStation}
                 />
             )}

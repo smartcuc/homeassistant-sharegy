@@ -91,11 +91,15 @@ Ein intelligenter Chat- und Empfehlungs-Assistent direkt im Dashboard:
 ---
 
 ### 🚗 Feature 2: V2G & V2H Bidirektionales Laden (ISO 15118-20)
-- **Hintergrund**: Moderne E-Autos (z. B. VW ID-Serie, Hyundai Ioniq 5/6, Kia EV6/9, Renault 5) unterstützen bidirektionales Laden. Ein 77-kWh-Fahrzeugakku ersetzt einen 10.000 € teuren stationären Heimspeicher.
+- **Status**: ✅ **100% PRODUKTIV & IMPLEMENTIERT**
+- **Dateien**: [`energy/services/services_v2g.py`](file:///c:/Users/Public/Dev/eswes/energy/services/services_v2g.py), [`devices/consumers_ocpp.py`](file:///c:/Users/Public/Dev/eswes/devices/consumers_ocpp.py), [`devices/models_ocpp.py`](file:///c:/Users/Public/Dev/eswes/devices/models_ocpp.py), [`frontend/src/features/energy/components/WallboxToolsModal.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/energy/components/WallboxToolsModal.jsx), [`frontend/src/features/energy/components/WallboxCard.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/energy/components/WallboxCard.jsx)
+- **Hintergrund**: Moderne E-Autos (z. B. VW ID-Serie, Hyundai Ioniq 5/6, Kia EV6/9, Renault 5, Cupra Born) unterstützen bidirektionales Laden. Ein 77-kWh-Fahrzeugakku ersetzt einen 10.000 € teuren stationären Heimspeicher.
 - **Funktion in Sharegy**:
-  - **Vehicle-to-Home (V2H)**: Das Auto versorgt das Haus in den teuren Abend- und Nachtstunden mit Strom.
-  - **Vehicle-to-Grid (V2G)**: Das Auto lädt bei negativen Börsenstrompreisen und speist bei extremen Preisspitzen gegen hohe Vergütung zurück ins Netz.
-  - **Sicherheits-Gating**: Einstellbarer Mindest-SoC (z. B. `„Immer mindestens 50% / 200 km Reichweite im Auto behalten“`).
+  - **Multi-Protocol Gateway**: OCPP 1.6-J, OCPP 2.0.1 und OCPP 2.1 mit Subprotocol Negotiation, TransactionEvents und ISO 15118-20 Zertifikats-Handshake (`Get15118EVCertificate`).
+  - **Vehicle-to-Home (V2H)**: Das Auto versorgt das Haus in den teuren Abend- und Nachtstunden mit bis zu 11 kW Entladeleistung.
+  - **Vehicle-to-Grid (V2G Arbitrage)**: Das Auto lädt bei negativen Börsenstrompreisen und speist bei extremen Preisspitzen gegen hohe Vergütung zurück ins Netz.
+  - **Autonome Merit-Order & Batteriewächter**: Einstellbarer Mindest-SoC (z. B. `50% / 200 km Notfall-Reserve`), Schutz gegen zyklische Zellalterung und sofortiges Bremsen bei Erreichen des Schwellenwerts.
+  - **Device Model & Diagnostics**: Volle Remote-Diagnose (`GetDiagnostics`, `RemoteTrigger`, `SendLocalList` Offline-RFID-Whitelisting, OCPP 2.0.1 `GetVariables`/`SetVariables`).
 
 ---
 
@@ -137,14 +141,14 @@ gantt
     title Sharegy Roadmap 2026 / 2027
     dateFormat  YYYY-MM
     section Frontend & Performance
-    Bundle Splitting & ECharts Lazy Loading :2026-09, 2026-10
-    Mobile Bottom Navigation & Touch Polish :2026-10, 2026-11
-    WebSockets / SSE Live Telemetrie       :2026-11, 2026-12
+    Bundle Splitting & ECharts Lazy Loading :done, 2026-09, 2026-10
+    Mobile Bottom Navigation & Touch Polish :done, 2026-10, 2026-11
+    WebSockets / SSE Live Telemetrie       :done, 2026-11, 2026-12
     section Neue Features & B2B
+    V2G / V2H Bidirektionales Laden (ISO 15118-20 / OCPP 2.0.1/2.1) :done, 2026-09, 2026-10
     B2B Installateur- & Fachpartner Portal :2026-10, 2026-12
     § 14a EnWG Modul 3 (Variable Netzentgelte):2026-12, 2027-02
     Sharegy Copilot (KI-Energieberater)     :2027-01, 2027-03
-    V2G / V2H Bidirektionales Laden        :2027-02, 2027-05
     Matter & EEBUS Local Bridge            :2027-04, 2027-07
 ```
 

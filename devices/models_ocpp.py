@@ -35,6 +35,19 @@ class ChargingStation(models.Model):
         ("Faulted", "Fehler / Störung"),
     ]
 
+    OCPP_VERSION_CHOICES = [
+        ("ocpp1.6", "OCPP 1.6-J"),
+        ("ocpp2.0.1", "OCPP 2.0.1"),
+        ("ocpp2.1", "OCPP 2.1"),
+    ]
+
+    V2G_MODES = [
+        ("off", "Aus / Nur Laden"),
+        ("v2h_home", "V2H Heimspeicher-Puffer"),
+        ("v2g_grid", "V2G Börsenstrom-Arbitrage"),
+        ("v2x_auto", "V2X Smart Auto"),
+    ]
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     home = models.ForeignKey(
         "devices.Home",
@@ -48,6 +61,13 @@ class ChargingStation(models.Model):
         unique=True,
         db_index=True,
         help_text="Eindeutige OCPP ChargePoint-Kennung"
+    )
+    
+    ocpp_version = models.CharField(
+        max_length=16,
+        choices=OCPP_VERSION_CHOICES,
+        default="ocpp1.6",
+        help_text="Aktive oder ausgehandelte OCPP Protokollversion"
     )
     
     name = models.CharField(max_length=120, default="Wallbox")
@@ -88,6 +108,22 @@ class ChargingStation(models.Model):
         help_text="Mindest-Ziel-SoC, bis zu dem unabhängig vom Sonnenstand geladen wird"
     )
 
+    # 🚗 V2G & V2H Bidirektionales Laden (ISO 15118-20 / OCPP 2.0.1 / OCPP 2.1)
+    supports_bidirectional = models.BooleanField(default=False, help_text="Wallbox und Fahrzeug unterstützen bidirektionales Laden (V2G/V2H)")
+    v2g_mode = models.CharField(max_length=32, choices=V2G_MODES, default="off", help_text="Aktiver V2G/V2H Betriebsmodus")
+    v2g_min_soc_pct = models.PositiveIntegerField(default=50, help_text="Sicherheits-Mindestladestand des Fahrzeugakkus in %")
+    v2g_max_discharge_power_kw = models.FloatField(default=11.0, help_text="Max. Entladeleistung in kW für Haus- oder Netzeinspeisung")
+    v2g_discharge_power_w = models.FloatField(default=0.0, help_text="Aktuelle Live-Entladeleistung in Watt")
+    
+    # Fahrzeug-Batterie- und ISO 15118-20 Telemetrie
+    ev_battery_capacity_kwh = models.FloatField(default=77.0, help_text="Brutto-Kapazität der Fahrzeugbatterie in kWh")
+    ev_soc_pct = models.FloatField(null=True, blank=True, help_text="Aktueller State of Charge (SoC) des Elektroautos in %")
+    iso15118_evccid = models.CharField(max_length=128, blank=True, default="", help_text="ISO 15118 EVCCID des Fahrzeugs")
+    iso15118_emaid = models.CharField(max_length=128, blank=True, default="", help_text="ISO 15118 Contract eMAID (Plug & Charge)")
+    
+    # OCPP 2.0.1 / 2.1 Device Model & Variable Monitoring Storage
+    device_variables = models.JSONField(default=dict, blank=True, help_text="Gespeicherte Device-Model-Variablen (OCPP 2.0.1/2.1)")
+
     # Telemetrie & Live-Messwerte
     active_power_w = models.FloatField(default=0.0, help_text="Aktuelle Ladeleistung in Watt")
     current_l1 = models.FloatField(default=0.0, help_text="Strom L1 in Ampere")
@@ -103,6 +139,21 @@ class ChargingStation(models.Model):
     session_energy_kwh = models.FloatField(default=0.0, help_text="Geladene Energie der aktuellen Session in kWh")
     total_energy_kwh = models.FloatField(default=0.0, help_text="Gesamter Zählerstand der Wallbox in kWh")
     
+    # Reservierungs-Status (OCPP 1.6 Reservation Profile)
+    reservation_id = models.IntegerField(null=True, blank=True, help_text="Aktive Reservierungs-ID")
+    reserved_id_tag = models.CharField(max_length=64, blank=True, default="", help_text="RFID Tag / Auth ID der Reservierung")
+    reservation_expiry = models.DateTimeField(null=True, blank=True, help_text="Ablaufzeitpunkt der Reservierung")
+
+    # Local Auth List Management (OCPP 1.6 Local Auth List Profile)
+    local_auth_list_version = models.IntegerField(default=0, help_text="Version der lokalen Offline-Auth-Liste auf der Box")
+
+    # Diagnostics & Firmware Management (OCPP 1.6 Firmware Management Profile)
+    diagnostics_status = models.CharField(max_length=32, blank=True, default="Idle", help_text="Status des Diagnostics-Uploads")
+    last_diagnostics_file = models.CharField(max_length=255, blank=True, default="", help_text="Name der letzten Diagnosedatei")
+
+    # Smart Charging Schedule Snapshot (OCPP 1.6 GetCompositeSchedule)
+    composite_schedule_data = models.JSONField(null=True, blank=True, help_text="Letzter empfangener zusammengesetzter Ladefahrplan")
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -116,10 +167,16 @@ class ChargingStation(models.Model):
 
     @property
     def is_charging(self):
-        return self.status == "Charging" and self.active_power_w > 50.0
+        return (self.status == "Charging") or (self.active_transaction_id is not None and self.active_power_w > 50.0)
+
+    @property
+    def is_discharging_v2g(self):
+        return self.v2g_discharge_power_w > 50.0
 
     @property
     def current_power_kw(self):
+        if self.is_discharging_v2g:
+            return -round(self.v2g_discharge_power_w / 1000.0, 2)
         return round(self.active_power_w / 1000.0, 2)
 
     @property
@@ -131,14 +188,14 @@ class ChargingStation(models.Model):
         return round((float(self.max_current_a or 16.0) * 230.0 * int(self.phases or 3)) / 1000.0, 1)
 
     @property
-    def min_charge_current_a(self):
+    def min_charge_current(self):
         return float(self.min_current_a or 6.0)
 
 
 class ChargingSession(models.Model):
     """
     Dokumentiert einen vollständigen Ladevorgang mit Beginn, Ende, Zählerständen,
-    Solarer Deckungsquote und berechneten Kosten für Community-Clearing (§ 42b EnWG).
+    Solarer Deckungsquote, V2G-Entladung und berechneten Kosten für Community-Clearing (§ 42b EnWG).
     """
     STATUS_CHOICES = [
         ("active", "Aktiv"),
@@ -175,6 +232,15 @@ class ChargingSession(models.Model):
     solar_energy_kwh = models.FloatField(default=0.0, help_text="Anteil kostenloser Sonnenstrom")
     grid_energy_kwh = models.FloatField(default=0.0, help_text="Anteil zugekaufter Netzstrom")
     solar_coverage_pct = models.FloatField(default=0.0, help_text="Prozentualer PV-Anteil")
+    
+    # 🚗 V2G / V2H Entladerückspeisung & Erträge
+    v2g_discharged_kwh = models.FloatField(default=0.0, help_text="Ins Haus / Netz entladene Energie in kWh")
+    v2g_earnings_eur = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        help_text="Erwirtschafteter Ertrag aus V2G-Börsenarbitrage / V2H-Einsparung"
+    )
     
     cost_eur = models.DecimalField(
         max_digits=8,

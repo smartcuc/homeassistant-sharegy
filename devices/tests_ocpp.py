@@ -6,6 +6,7 @@ import json
 from django.test import TransactionTestCase
 from django.contrib.auth import get_user_model
 from channels.testing import WebsocketCommunicator
+from channels.db import database_sync_to_async
 
 from backend.asgi import application
 from devices.models import Home
@@ -153,9 +154,276 @@ class OcppConsumerTests(TransactionTestCase):
                 "idTag": "TAG_NEIGHBOR_1"
             }
         ]
-        await communicator.send_json_to(stop_msg)
-        res_stop = await communicator.receive_json_from()
-        self.assertEqual(res_stop[0], 3)
-        self.assertEqual(res_stop[2]["idTagInfo"]["status"], "Accepted")
+        await communicator.disconnect()
+
+    async def test_ocpp_reserved_status_handling(self):
+        """Testet, dass eine reservierte Station nicht autorisierte Ladevorgänge abweist."""
+        communicator = WebsocketCommunicator(
+            application,
+            "/ocpp/TEST-CP-01",
+            subprotocols=["ocpp1.6"]
+        )
+        connected, _ = await communicator.connect()
+        self.assertTrue(connected)
+
+        # 1. Station auf 'Reserved' für TAG_OWNER setzen via StatusNotification
+        status_msg = [
+            2,
+            "status-res-1",
+            "StatusNotification",
+            {"connectorId": 1, "status": "Reserved", "errorCode": "NoError"}
+        ]
+        await communicator.send_json_to(status_msg)
+        await communicator.receive_json_from()
+
+        # Station DB-Status prüfen
+        station = await database_sync_to_async(ChargingStation.objects.get)(charge_point_id="TEST-CP-01")
+        self.assertEqual(station.status, "Reserved")
+        self.assertEqual(station.active_power_w, 0.0)
+
+        # Reservierungstag manuell in DB hinterlegen
+        station.reserved_id_tag = "TAG_RESERVED_VIP"
+        await database_sync_to_async(station.save)()
+
+        # 2. StartTransaction mit falschem Tag versuchen -> Muss abgelehnt (Blocked) werden
+        start_wrong = [
+            2,
+            "tx-start-wrong",
+            "StartTransaction",
+            {
+                "connectorId": 1,
+                "idTag": "TAG_STRANGER",
+                "meterStart": 0,
+                "timestamp": "2026-09-03T04:10:00Z"
+            }
+        ]
+        await communicator.send_json_to(start_wrong)
+        res_wrong = await communicator.receive_json_from()
+        self.assertEqual(res_wrong[0], 3)
+        self.assertEqual(res_wrong[2]["idTagInfo"]["status"], "Blocked")
+
+        # 3. MeterValues empfangen während 'Reserved' -> darf Status NICHT auf 'Charging' überschreiben!
+        mv_msg = [
+            2,
+            "mv-res-1",
+            "MeterValues",
+            {
+                "connectorId": 1,
+                "meterValue": [
+                    {
+                        "timestamp": "2026-09-03T04:12:00Z",
+                        "sampledValue": [
+                            {"value": "3500", "measurand": "Power.Active.Import", "unit": "W"}
+                        ]
+                    }
+                ]
+            }
+        ]
+        await communicator.send_json_to(mv_msg)
+        await communicator.receive_json_from()
+
+        station_after_mv = await database_sync_to_async(ChargingStation.objects.get)(charge_point_id="TEST-CP-01")
+        self.assertEqual(station_after_mv.status, "Reserved")
+
+        # 4. StartTransaction mit passendem Reservierungs-Tag -> Wird akzeptiert!
+        start_correct = [
+            2,
+            "tx-start-correct",
+            "StartTransaction",
+            {
+                "connectorId": 1,
+                "idTag": "TAG_RESERVED_VIP",
+                "meterStart": 0,
+                "timestamp": "2026-09-03T04:15:00Z"
+            }
+        ]
+        await communicator.send_json_to(start_correct)
+        res_correct = await communicator.receive_json_from()
+        self.assertEqual(res_correct[0], 3)
+        self.assertEqual(res_correct[2]["idTagInfo"]["status"], "Accepted")
+        self.assertTrue(res_correct[2]["transactionId"] > 0)
 
         await communicator.disconnect()
+
+    async def test_ocpp_diagnostics_and_firmware_notifications(self):
+        """Testet DiagnosticsStatusNotification & FirmwareStatusNotification Handling."""
+        communicator = WebsocketCommunicator(
+            application,
+            "/ocpp/TEST-CP-01",
+            subprotocols=["ocpp1.6"]
+        )
+        connected, _ = await communicator.connect()
+        self.assertTrue(connected)
+
+        # 1. DiagnosticsStatusNotification: Uploading
+        diag_msg = [
+            2,
+            "diag-1",
+            "DiagnosticsStatusNotification",
+            {"status": "Uploading"}
+        ]
+        await communicator.send_json_to(diag_msg)
+        res1 = await communicator.receive_json_from()
+        self.assertEqual(res1[0], 3)
+        self.assertEqual(res1[1], "diag-1")
+
+        station = await database_sync_to_async(ChargingStation.objects.get)(charge_point_id="TEST-CP-01")
+        self.assertEqual(station.diagnostics_status, "Uploading")
+
+        # 2. DiagnosticsStatusNotification: Uploaded
+        diag_done_msg = [
+            2,
+            "diag-2",
+            "DiagnosticsStatusNotification",
+            {"status": "Uploaded"}
+        ]
+        await communicator.send_json_to(diag_done_msg)
+        res2 = await communicator.receive_json_from()
+        self.assertEqual(res2[0], 3)
+
+        station = await database_sync_to_async(ChargingStation.objects.get)(charge_point_id="TEST-CP-01")
+        self.assertEqual(station.diagnostics_status, "Uploaded")
+
+        # 3. CallResult von GetDiagnostics mit Dateinamen
+        call_res_diag = [
+            3,
+            "msg-diag-req-1",
+            {"fileName": "diagnostics_20260908_TEST-CP-01.log"}
+        ]
+        await communicator.send_json_to(call_res_diag)
+        import asyncio
+        await asyncio.sleep(0.1)
+        station = await database_sync_to_async(ChargingStation.objects.get)(charge_point_id="TEST-CP-01")
+        self.assertEqual(station.last_diagnostics_file, "diagnostics_20260908_TEST-CP-01.log")
+
+        # 4. CallResult von GetLocalListVersion
+        call_res_local_list = [
+            3,
+            "msg-local-list-req-1",
+            {"listVersion": 4}
+        ]
+        await communicator.send_json_to(call_res_local_list)
+        await asyncio.sleep(0.1)
+        station = await database_sync_to_async(ChargingStation.objects.get)(charge_point_id="TEST-CP-01")
+        self.assertEqual(station.local_auth_list_version, 4)
+
+        # 5. CallResult von GetCompositeSchedule
+        call_res_schedule = [
+            3,
+            "msg-sched-req-1",
+            {
+                "status": "Accepted",
+                "connectorId": 1,
+                "scheduleStart": "2026-09-08T22:00:00Z",
+                "chargingSchedule": {
+                    "duration": 86400,
+                    "chargingRateUnit": "A",
+                    "chargingSchedulePeriod": [
+                        {"startPeriod": 0, "limit": 16.0, "numberPhases": 3}
+                    ]
+                }
+            }
+        ]
+        await communicator.send_json_to(call_res_schedule)
+        await asyncio.sleep(0.1)
+        station = await database_sync_to_async(ChargingStation.objects.get)(charge_point_id="TEST-CP-01")
+        self.assertIsNotNone(station.composite_schedule_data)
+        self.assertEqual(station.composite_schedule_data.get("status"), "Accepted")
+
+        await communicator.disconnect()
+
+
+from django.test import TestCase
+from rest_framework.test import APIClient
+
+class OcppRestApiTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="ocpp_api_user",
+            email="ocppapi@sharegy.de",
+            password="securepassword123"
+        )
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+
+        self.home = Home.objects.create(
+            user=self.user,
+            name="API Test Home"
+        )
+        self.station = ChargingStation.objects.create(
+            home=self.home,
+            charge_point_id="TEST-API-CP-01",
+            name="API Test Wallbox",
+            max_current_a=16.0,
+            smart_charging_mode="pv_surplus"
+        )
+        self.rfid = ChargingRfidTag.objects.create(
+            home=self.home,
+            id_tag="RFID_12345",
+            name="Familienauto"
+        )
+
+    def test_wallbox_remote_action_endpoints(self):
+        # 1. Trigger Message
+        res_trigger = self.client.post(
+            f"/api/energy/wallboxes/{self.station.id}/trigger-message/",
+            {"requested_message": "MeterValues"},
+            format="json"
+        )
+        self.assertEqual(res_trigger.status_code, 200)
+
+        # 2. Get Local List Version
+        res_ll_ver = self.client.post(f"/api/energy/wallboxes/{self.station.id}/get-local-list-version/")
+        self.assertEqual(res_ll_ver.status_code, 200)
+
+        # 3. Sync RFID List
+        res_sync_rfid = self.client.post(
+            f"/api/energy/wallboxes/{self.station.id}/sync-rfid-list/",
+            {"update_type": "Full"},
+            format="json"
+        )
+        self.assertEqual(res_sync_rfid.status_code, 200)
+
+        # 4. Get Composite Schedule
+        res_sched = self.client.post(
+            f"/api/energy/wallboxes/{self.station.id}/get-composite-schedule/",
+            {"duration": 86400},
+            format="json"
+        )
+        self.assertEqual(res_sched.status_code, 200)
+
+        # 5. Clear Charging Profile
+        res_clear_prof = self.client.post(
+            f"/api/energy/wallboxes/{self.station.id}/clear-charging-profile/",
+            {"profile_id": 1},
+            format="json"
+        )
+        self.assertEqual(res_clear_prof.status_code, 200)
+
+        # 6. Reserve Now
+        res_reserve = self.client.post(
+            f"/api/energy/wallboxes/{self.station.id}/reserve/",
+            {"id_tag": "RFID_12345", "duration_minutes": 60},
+            format="json"
+        )
+        self.assertEqual(res_reserve.status_code, 200)
+        self.station.refresh_from_db()
+        self.assertEqual(self.station.status, "Reserved")
+        self.assertEqual(self.station.reserved_id_tag, "RFID_12345")
+
+        # 7. Cancel Reservation
+        res_cancel = self.client.post(f"/api/energy/wallboxes/{self.station.id}/cancel-reserve/")
+        self.assertEqual(res_cancel.status_code, 200)
+        self.station.refresh_from_db()
+        self.assertEqual(self.station.status, "Available")
+        self.assertEqual(self.station.reserved_id_tag, "")
+        self.assertIsNone(self.station.reservation_id)
+
+        # 8. Get Diagnostics
+        res_diag = self.client.post(
+            f"/api/energy/wallboxes/{self.station.id}/get-diagnostics/",
+            {"target_url": "ftp://upload.sharegy.de/diagnostics/"},
+            format="json"
+        )
+        self.assertEqual(res_diag.status_code, 200)
+

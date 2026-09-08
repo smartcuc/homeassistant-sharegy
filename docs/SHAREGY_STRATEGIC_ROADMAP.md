@@ -136,7 +136,10 @@
   ├── 2.38 ✅ 🌡️ Fußbodenheizungs-Steuerung & Prädiktives MPC (Model Predictive Control & Estrich-Vorladung)
   ├── 2.39 ✅ ⛽ Mobilitäts- & Spritpreis-Radar (MTS-K / Tankerkönig Live-Preise & 100km EV-Vergleich)
   ├── 2.40 ✅ 👑 Standardisiertes Pro-Freemium Gating mit interaktiver Live-Demo-Vorschau (4 Hubs)
-  └── 2.41 ✅ 🧭 Dedizierte Sub-Hubs-Architektur (`/app/mobility`, `/app/heating`) mit Bi-direktionalem Link
+  ├── 2.41 ✅ 🧭 Dedizierte Sub-Hubs-Architektur (`/app/mobility`, `/app/heating`) mit Bi-direktionalem Link
+  ├── 2.42 ✅ 🔌 Multi-Protocol CSMS Gateway (OCPP 1.6-J, OCPP 2.0.1 & OCPP 2.1 JSON WebSocket Subprotocol Negotiation)
+  ├── 2.43 ✅ 🚗 ISO 15118-20 V2G & V2H Bidirektionales Laden (Merit-Order, Peak-Shaving, EPEX-Börsenarbitrage & Entladesteuerung)
+  └── 2.44 ✅ 🛡️ Offline-RFID Whitelist Sync (Local Auth List) & Diagnostics Engine (GetDiagnostics, Remote Trigger, Composite Schedule)
 
 ┌───────────────────────────────────────────────────────────────────────────────┐
 │ MEILENSTEIN 3: PAYMENT, MONETARISIERUNG & BILLING-ARCHITEKTUR (✅ 100% LIVE)   │
@@ -178,10 +181,14 @@
 |---|---|---|:---:|---|
 | **Prio 1** | `mobility/radar/` | **⛽ Mobilitäts- & Spritpreis-Radar**: Integration der Tankerkönig-API / MTS-K für die 3 günstigsten Tankstellen (Diesel, E5, E10) & 100km-EV-Vergleich | ✅ **100% Fertig** | Alltags-Mehrwert & Kostenvergleich für gemischte Haushalte |
 | **Prio 2** | `energy/hvac/` | **🌡️ Fußbodenheizungs-Steuerung & Prädiktives MPC**: Wettergeführte Vorlauftemperatur & thermische Estrich-Vorladung | ✅ **100% Fertig** | 100% Eigenverbrauch & Peak-Shaving im HEMS Dispatch-Hub |
+| **Prio 3** | `devices/ocpp/` | **🔌 Multi-Protocol CSMS Gateway**: OCPP 1.6-J, OCPP 2.0.1 & OCPP 2.1 (Subprotocol Negotiation, TransactionEvents, Device Model Variables, Local Auth List, Diagnostics) | ✅ **100% Fertig** | Normkonforme Anbindung aller modernen & kommenden Ladestationen |
+| **Prio 4** | `energy/v2g/` | **🚗 ISO 15118-20 V2G & V2H Bidirektionales Laden**: Fahrzeugakku als Heimspeicher-Ersatz, Spitzenlast-Pufferung & dynamic Börsen-Arbitrage | ✅ **100% Fertig** | Bidirektionales Laden & Netzentlastung bei 100% Batterieschutz |
 
 > 🏆 **Vollständiger Funktionsumfang verifiziert & produktionsreif**:
 > - ⛽ **Mobilitäts- & Spritpreis-Radar** (`energy/services/tankerkoenig.py`, `views_fuel_radar.py`, `FuelRadarCard.jsx`)
 > - 🌡️ **Fußbodenheizungs-Steuerung & thermische Estrich-Vorladung** (`energy/models.py`, `floor_heating_manager.py`, `FloorHeatingLoadCard.jsx`)
+> - 🔌 **Multi-Protocol CSMS Gateway (OCPP 1.6-J, 2.0.1 & 2.1)** (`devices/consumers_ocpp.py`, `devices/models_ocpp.py`, `devices/tests_ocpp.py`, `devices/tests_ocpp_v2.py`)
+> - 🚗 **ISO 15118-20 V2G & V2H Bidirektionales Entlademanagement** (`energy/services/services_v2g.py`, `WallboxToolsModal.jsx`, `WallboxCard.jsx`)
 > - 🛡️ **§ 14a EnWG Dimmung & Summenleistungsmodell** (`energy/services_dimming.py`, `energy/test_grid_dimming.py`, `ControlPage.jsx`)
 > - ⚡ **Dynamische Börsenpreis-Sharingtarife (EPEX Spot, Cap, Floor)** (`billing/services_sharing_settlement.py`, `billing/test_mscons_and_dynamic_tariffs.py`)
 > - 📜 **VNB Marktkommunikations-Bridge (EDIFACT / MSCONS Export & Import D:04B)** (`billing/services_mscons.py`, `CommunitiesManagementHub.jsx`, `MsbSmartMeterHub.jsx`)

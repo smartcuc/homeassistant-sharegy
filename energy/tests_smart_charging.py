@@ -122,3 +122,50 @@ class SmartChargingServiceTests(TestCase):
         res_dispatch = self.client.post(f"/api/energy/wallboxes/{new_id}/dispatch-now/")
         self.assertEqual(res_dispatch.status_code, status.HTTP_200_OK)
         self.assertEqual(res_dispatch.data["target_current_a"], 16.0)
+
+    def test_reserved_and_faulted_status_blocks_charging(self):
+        """Prüft, dass bei Status 'Reserved', 'Faulted' oder 'Unavailable' niemals geladen wird."""
+        self.station.smart_charging_mode = "instant"
+
+        # 1. Status 'Reserved' -> muss 0.0 A liefern trotz Modus 'instant'
+        self.station.status = "Reserved"
+        current_res = calculate_smart_charging_current(station=self.station)
+        self.assertEqual(current_res, 0.0)
+
+        # 2. Status 'Faulted' -> 0.0 A
+        self.station.status = "Faulted"
+        current_fault = calculate_smart_charging_current(station=self.station)
+        self.assertEqual(current_fault, 0.0)
+
+        # 3. Status 'Unavailable' -> 0.0 A
+        self.station.status = "Unavailable"
+        current_unavail = calculate_smart_charging_current(station=self.station)
+        self.assertEqual(current_unavail, 0.0)
+
+        # 4. Zurück auf 'Available' -> 16.0 A
+        self.station.status = "Available"
+        current_ok = calculate_smart_charging_current(station=self.station)
+        self.assertEqual(current_ok, 16.0)
+
+    def test_wallbox_reservation_remote_actions(self):
+        """Testet die REST-Endpunkte für Reservierung (reserve / cancel-reserve)."""
+        wb_id = str(self.station.id)
+
+        # 1. Reservieren
+        res_reserve = self.client.post(f"/api/energy/wallboxes/{wb_id}/reserve/", {
+            "id_tag": "TAG_VIP_RESERVED",
+            "reservation_id": 42
+        })
+        self.assertEqual(res_reserve.status_code, status.HTTP_200_OK)
+        self.station.refresh_from_db()
+        self.assertEqual(self.station.status, "Reserved")
+        self.assertEqual(self.station.reserved_id_tag, "TAG_VIP_RESERVED")
+        self.assertEqual(self.station.reservation_id, 42)
+
+        # 2. Reservierung aufheben
+        res_cancel = self.client.post(f"/api/energy/wallboxes/{wb_id}/cancel-reserve/")
+        self.assertEqual(res_cancel.status_code, status.HTTP_200_OK)
+        self.station.refresh_from_db()
+        self.assertEqual(self.station.status, "Available")
+        self.assertIsNone(self.station.reservation_id)
+
