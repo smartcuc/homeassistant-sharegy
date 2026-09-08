@@ -19,6 +19,10 @@ Willkommen in der offiziellen Dokumentation der **Sharegy**-Plattform (Smart Hom
 | 🚀 **[`OPERATIONS_AND_DEPLOYMENT.md`](./OPERATIONS_AND_DEPLOYMENT.md)** | Deployment Guide (Ubuntu/Pi), Systemd Services, Redis, Celery & Health-Checks |
 | 🛠️ **[`OPTIMIZATION_PLAN.md`](./OPTIMIZATION_PLAN.md)** | Audit-Ergebnisse, Stabilitäts-Härtung und abgeschlossene Meilensteine |
 | 🗺️ **[`SHAREGY_STRATEGIC_ROADMAP.md`](./SHAREGY_STRATEGIC_ROADMAP.md)** | Strategische Produkt-Roadmap (EMS Pro, Smarte Laststeuerung, Energy Sharing) |
+| 🎯 **[`SHAREGY_STRATEGIC_EVALUATION_AND_GAP_ANALYSIS.md`](./SHAREGY_STRATEGIC_EVALUATION_AND_GAP_ANALYSIS.md)** | Schonungslose Gesamtevaluation: Stärken, Schwachstellen, Mitbewerber-Vorteile & Masterplan |
+| 🏆 **[`SHAREGY_COMPETITOR_BENCHMARK_AND_EVALUATION.md`](./SHAREGY_COMPETITOR_BENCHMARK_AND_EVALUATION.md)** | Detaillierter Mitbewerber-Vergleich (1Komma5°, Tibber, evcc, Exnaton, Clever-PV) & Matrix |
+| 💰 **[`SHAREGY_FINANCIAL_VALUATION_AND_DEVELOPMENT_COSTS.md`](./SHAREGY_FINANCIAL_VALUATION_AND_DEVELOPMENT_COSTS.md)** | Finanzielle Bewertung, Substanzwert (Cost-to-Duplicate), SaaS ARR-Multiples & M&A-Wert |
+| ⚡ **[`marketing/SHAREGY_FEATURE_CATALOG_AND_MARKETING_MATRIX.md`](./marketing/SHAREGY_FEATURE_CATALOG_AND_MARKETING_MATRIX.md)** | Gesamter Feature-Katalog & Marketing-Leistungsmatrix aller 15 Module |
 | 📱 **[`ANDROID_APP_BUILD_AND_RELEASE.md`](./ANDROID_APP_BUILD_AND_RELEASE.md)** | Native Android App (Capacitor 7, Gradle Build, Deep Linking & Play Store Release) |
 | 🛠️ **[`ANDROID_STUDIO_SETUP_GUIDE.md`](./ANDROID_STUDIO_SETUP_GUIDE.md)** | Schritt-für-Schritt Anleitung: Android Studio installieren, Emulator einrichten & App starten |
 | 📋 **[`walkthroughs/`](./walkthroughs/README.md)** | Detaillierte Meilenstein- und Änderungsprotokolle der Entwicklung |
