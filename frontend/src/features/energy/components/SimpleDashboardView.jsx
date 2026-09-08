@@ -33,6 +33,15 @@ export default function SimpleDashboardView({
 }) {
     const { t } = useTranslation();
 
+    // Localized period label fallback handler
+    const resolvedPeriodLabel = useMemo(() => {
+        if (period === "today" || periodLabel === "Heute") return t("energy.period_today", "Heute");
+        if (period === "7d" || periodLabel === "Letzte 7 Tage") return t("energy.period_7d", "Letzte 7 Tage");
+        if (period === "30d" || periodLabel === "Letzte 30 Tage") return t("energy.period_30d", "Letzte 30 Tage");
+        if (period === "year" || periodLabel === "Dieses Jahr") return t("energy.period_year", "Dieses Jahr");
+        return periodLabel || t("energy.period_today", "Heute");
+    }, [period, periodLabel, t]);
+
     // 1. Perioden-KPIs (Echte Aggregatwerte für den ausgewählten Zeitraum)
     const kpis = balanceData.kpis || {};
     const submeters = balanceData.submeters || [];
@@ -133,7 +142,7 @@ export default function SimpleDashboardView({
                     <div className="flex items-center justify-between">
                         <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                             <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                            {t("simple_dashboard.autarky_period", { period: periodLabel, defaultValue: `Autarkie (${periodLabel})` })}
+                            {t("simple_dashboard.autarky_period", { period: resolvedPeriodLabel, defaultValue: `Autarkie (${resolvedPeriodLabel})` })}
                         </span>
                         <span className="w-8 h-8 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-sm font-bold border border-emerald-200 dark:border-emerald-900/50">
                             🛡️
@@ -173,7 +182,7 @@ export default function SimpleDashboardView({
                     <div className="flex items-center justify-between">
                         <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                             <TrendingUp className="w-4 h-4 text-amber-500" />
-                            {t("simple_dashboard.net_benefit_period", { period: periodLabel, defaultValue: `Finanzvorteil (${periodLabel})` })}
+                            {t("simple_dashboard.net_benefit_period", { period: resolvedPeriodLabel, defaultValue: `Finanzvorteil (${resolvedPeriodLabel})` })}
                         </span>
                         <span className="w-8 h-8 rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center text-sm font-bold border border-amber-200 dark:border-amber-900/50">
                             💶
@@ -384,7 +393,7 @@ export default function SimpleDashboardView({
                     <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-800 space-y-4">
                         <div className="flex items-center justify-between">
                             <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                                <span>📊</span> {t("simple_dashboard.total_energy_period", "Gesamtenergie im Zeitraum ({{period}})", { period: periodLabel })}
+                                <span>📊</span> {t("simple_dashboard.total_energy_period", "Gesamtenergie im Zeitraum ({{period}})", { period: resolvedPeriodLabel })}
                             </h3>
                             <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 font-mono">
                                 {t("energy.kwh_balance", "kWh-Bilanz")}

@@ -259,7 +259,7 @@ export default function EnergyDashboard() {
                     balanceData={data}
                     liveData={liveData}
                     period={period}
-                    periodLabel={data.period_label || periods.find(p => p.key === period)?.label || "Heute"}
+                    periodLabel={periods.find(p => p.key === period)?.label || customDates.label || data.period_label || t("energy.period_today", "Heute")}
                     onSwitchToExpert={() => handleSetViewMode("expert")}
                     onOpenWallbox={() => setAddWallboxOpen(true)}
                 />
