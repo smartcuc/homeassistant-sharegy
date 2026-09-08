@@ -442,7 +442,7 @@ class WallboxRemoteActionView(APIView):
             user = home.user if home else None
             signals = build_device_signals(user) if user else {}
             latest_spot = SpotPrice.objects.filter(timestamp__lte=timezone.now()).order_by("-timestamp").first()
-            spot_mwh = float(latest_spot.price_eur_mwh) if latest_spot else 80.0
+            spot_mwh = (float(latest_spot.price_eur_per_kwh) * 1000.0) if (latest_spot and latest_spot.price_eur_per_kwh is not None) else 80.0
 
             class HomeMetricDummy:
                 pv_power_w = float(signals.get("pv", {}).get("production", 0.0) or 0.0)
