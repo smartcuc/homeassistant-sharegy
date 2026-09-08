@@ -1425,7 +1425,15 @@
     "all_optimal_title": "Alles im grünen Bereich – Keine aktiven Alarme",
     "all_optimal": "Alle überwachten PV-Generatoren, Batteriespeicher, Wechselrichter und Haushaltsverbraucher laufen einwandfrei im optimalen Betriebsbereich.",
     "mark_resolved": "Erledigt",
-    "mark_seen": "Quittieren"
+    "mark_seen": "Quittieren",
+    "pillar_solar": "Solar & Ertrag",
+    "status_normal": "Normalbetrieb",
+    "pillar_storage": "Speicher & Notstrom",
+    "status_protected": "Geschützt",
+    "pillar_sensors": "Sensoren & Zähler",
+    "status_online": "Online",
+    "resolved_badge": "Erledigt",
+    "seen_badge": "Quittiert"
   },
   "theme": {
     "light_mode": "Zu hellem Design wechseln",

@@ -275,7 +275,7 @@ export default function AlertsPage() {
                         <div className="text-3xl font-black text-amber-700 font-mono">{summary.warning}</div>
                     </div>
                     <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200/80 shadow-xs space-y-1">
-                        <div className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">🟢 {t("alerts.info", "Spar-Chancen")}</div>
+                        <div className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">🟢 {t("alerts.info", "Spar-Tipps")}</div>
                         <div className="text-3xl font-black text-emerald-700 font-mono">{summary.info}</div>
                     </div>
                 </div>
@@ -341,22 +341,22 @@ export default function AlertsPage() {
                                     <div className="p-3 bg-white border border-slate-200 rounded-2xl flex items-center gap-2.5 shadow-2xs">
                                         <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
                                         <div className="text-left text-xs">
-                                            <div className="font-bold text-slate-800">Solar & Ertrag</div>
-                                            <div className="text-[10px] text-slate-400">Normalbetrieb</div>
+                                            <div className="font-bold text-slate-800">{t("alerts.pillar_solar", "Solar & Ertrag")}</div>
+                                            <div className="text-[10px] text-slate-400">{t("alerts.status_normal", "Normalbetrieb")}</div>
                                         </div>
                                     </div>
                                     <div className="p-3 bg-white border border-slate-200 rounded-2xl flex items-center gap-2.5 shadow-2xs">
                                         <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
                                         <div className="text-left text-xs">
-                                            <div className="font-bold text-slate-800">Speicher & Notstrom</div>
-                                            <div className="text-[10px] text-slate-400">Geschützt</div>
+                                            <div className="font-bold text-slate-800">{t("alerts.pillar_storage", "Speicher & Notstrom")}</div>
+                                            <div className="text-[10px] text-slate-400">{t("alerts.status_protected", "Geschützt")}</div>
                                         </div>
                                     </div>
                                     <div className="p-3 bg-white border border-slate-200 rounded-2xl flex items-center gap-2.5 shadow-2xs">
                                         <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
                                         <div className="text-left text-xs">
-                                            <div className="font-bold text-slate-800">Sensoren & Zähler</div>
-                                            <div className="text-[10px] text-slate-400">Online</div>
+                                            <div className="font-bold text-slate-800">{t("alerts.pillar_sensors", "Sensoren & Zähler")}</div>
+                                            <div className="text-[10px] text-slate-400">{t("alerts.status_online", "Online")}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -383,17 +383,17 @@ export default function AlertsPage() {
                                             {getSeverityBadge(alert.severity)}
                                             {alert.status === "resolved" && (
                                                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-600 border border-gray-200">
-                                                    ✓ Erledigt
+                                                    ✓ {t("alerts.resolved_badge", "Erledigt")}
                                                 </span>
                                             )}
                                             {alert.status === "acknowledged" && (
                                                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                                                    👁️ Quittiert
+                                                    👁️ {t("alerts.seen_badge", "Quittiert")}
                                                 </span>
                                             )}
                                             <h3 className="font-bold text-base text-gray-900">{alert.title}</h3>
                                             <span className="text-xs text-gray-400 font-mono">
-                                                {new Date(alert.created_at).toLocaleString([], { dateStyle: "short", timeStyle: "short" })} Uhr
+                                                {new Date(alert.created_at).toLocaleString([], { dateStyle: "short", timeStyle: "short" })}
                                             </span>
                                         </div>
                                         <p className="text-sm text-gray-700 leading-relaxed">{alert.message}</p>
