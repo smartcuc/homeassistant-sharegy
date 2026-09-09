@@ -112,6 +112,151 @@ class Command(BaseCommand):
         # =========================================================================
         articles_data = [
             # ---------------------------------------------------------------------
+            # 0. GETTING STARTED: TARIF- & ERSPARNIS-KOMPASS (KERN-LEITFADEN)
+            # ---------------------------------------------------------------------
+            {
+                "category": cats["getting-started"],
+                "slug": "tarif-und-ersparnis-kompass-matrix",
+                "context_key": "tariffs_savings_compass",
+                "title_de": "Tarif- & Ersparnis-Kompass: Welches Setup und welcher Stromtarif passt zu mir?",
+                "title_en": "Tariff & Savings Compass: Which Setup and Electricity Tariff Fits My Home?",
+                "summary_de": "Der große Ratgeber: Fester vs. Dynamischer Stromtarif, Balkonkraftwerk, Wärmepumpe, Wallbox und Ersparnis-Potenziale für alle 12 Haushalts-Profile.",
+                "summary_en": "The definitive guide: Fixed vs. Dynamic electricity tariffs, balcony solar, heat pumps, EV charging, and savings potential across all home profiles.",
+                "content_de": """# Tarif- & Ersparnis-Kompass: Welches Setup und welcher Stromtarif passt zu mir?
+
+Nicht jeder Haushalt besitzt eine große Dach-Photovoltaikanlage, einen 10-kWh-Batteriespeicher oder ein Elektroauto. Sharegy ist modular aufgebaut und bietet für **jede Wohnsituation und Geräte-Ausstattung** konkrete finanzielle und ökologische Hebel.
+
+---
+
+## 1. Die goldene Grundregel der Tarif-Entscheidung
+
+| Kriterium | 🔒 Fester Stromtarif (z. B. 28–32 ct/kWh) | ⚡ Dynamischer Börsentarif (Tibber, Awattar, Ostrom etc.) |
+| :--- | :--- | :--- |
+| **Zusatzkosten** | Keine / Standard-Grundgebühr (~10 €/Mt.) | Zusätzliche Monatsgebühr (~4–6 €/Mt.) + Smart-Meter-Messentgelt |
+| **Preisrisiko** | 0 % Preisrisiko, feste Planbarkeit | Preisschwankungen; Risiko bei ungesteuertem Abend-Peak |
+| **Voraussetzung** | Keine Steuerung notwendig | **Verschiebbare Großlast (≥ 2.000 kWh/a)** (z. B. E-Auto, modulierbare WP, Heimspeicher) |
+| **Wann optimal?** | Reiner Haushaltsstrom, Mietwohnung, BKW ohne Speicher | E-Auto vorhanden, Speicher mit Winter-Netzladung, Wärmepumpe |
+
+> [!IMPORTANT]
+> **Warum lohnt sich ein dynamischer Tarif ohne Großverbraucher NICHT?**  
+> Bei normalem Haushaltsstrom fällt der Verbrauch unverschiebbar in die Morgen- (07–09 Uhr) und Abendstunden (18–22 Uhr) – genau dann, wenn Strom an der Börse am teuersten ist. Zusammen mit den Zusatzgebühren zahlt ein Mieter im Börsentarif oft mehr als bei einem günstigen Festvertrag.
+
+---
+
+## 2. Die 6 Profile & 12 Hardware-Kombinationen
+
+### 🏠 Kategorie A: Basishaushalt (Nur Haushaltsstrom)
+* **Profil A.1 (Nur Stromzähler)**: 🔒 **FESTER TARIF**.  
+  * *Hebel*: Standby-Killer (senkt 50–100 W Grundlast = **140–280 €/a**), Stromfresser-Alarme (**40–80 €/a**), P2P-Mieterstrom (**~120 €/a**).  
+  * *Gesamtersparnis*: **180 € bis 360 € / Jahr**.
+
+---
+
+### ☀️ Kategorie B: Balkonkraftwerk (Stecker-Solar 600–800 W)
+* **Profil B.1 (BKW ohne Speicher)**: 🔒 **FESTER TARIF**.  
+  * *Hebel*: BKW deckt günstige Sonnenstunden gratis ab. Einschalttipps zur Mittagszeit steigern Eigenverbrauch von 45 % auf 80 % (**+80 €/a Zusatznutzen**). Amortisation in ~2,5 Jahren. Gesamtertrag: **200–260 € / a**.
+* **Profil B.2 (BKW mit 1–2 kWh Minispeicher)**: 🔒 **FESTER TARIF**.  
+  * *Hebel*: Nulleinspeisung / bedarfsgeführte Grundlast-Abgabe nachts. Gesamtertrag: **260–340 € / a**.
+
+---
+
+### 🚗 Kategorie C: Elektromobilität (Wallbox + E-Auto)
+* **Profil C.1 (EV + Wallbox ohne PV)**: ⚡ **DYNAMISCHER TARIF + § 14a EnWG**.  
+  * *Hebel*: 3.000 kWh Fahrstrom nachts zu Tiefpreisen (15–18 ct statt 32 ct) laden (**~420 €/a**) + **160 € § 14a Netzentgeltbonus**. Gesamtersparnis: **580–680 € / Jahr**.
+* **Profil C.2 (EV + Wallbox + BKW)**: ⚡ **DYNAMISCHER TARIF** (ab 8.000 km/a). Gesamtersparnis: **720–850 € / Jahr**.
+* **Profil C.3 (EV + Wallbox + Dach-PV ohne Speicher)**: ⚡ **DYNAMISCHER TARIF**. Sommer = 100 % Solarüberschuss; Winter = Windstrom-Nachtladen. Gesamtersparnis: **730–920 € / Jahr**.
+* **Profil C.4 (EV + Dach-PV + Heimspeicher)**: ⚡ **DYNAMISCHER TARIF**. Sommer-Autarkie + Winter-Arbitrage + V2G/V2H. Gesamtersparnis: **1.400–1.900 € / Jahr**.
+
+---
+
+### 🏡 Kategorie D: Klassische Dach-PV (ohne EV/WP)
+* **Profil D.1 (Dach-PV ohne Speicher)**: 🔒 **FESTER TARIF**. Eigenverbrauchssteuerung (WaMa, Heizstab) bringt **330–480 € / Jahr**.
+* **Profil D.2 (Dach-PV mit Heimspeicher)**: 🔒 **FEST / DYN**. Festtarif für Standardbetrieb; Dynamisch nur bei aktiver Winter-Netzladung (**950–1.250 € / Jahr**).
+
+---
+
+### ♨️ Kategorie E: Wärmepumpen-Haushalt
+* **Profil E.1 (Wärmepumpe ohne PV)**: ⚡ **DYN. TARIF oder § 14a WP-TARIF**. Smart Thermal Storage (Estrich-Vorlaufüberhöhung) + § 14a Rabatt (**300–420 € / Jahr**).
+* **Profil E.2 (Wärmepumpe + Dach-PV)**: ⚡ **DYNAMISCHER TARIF**. Gesamtersparnis: **510–680 € / Jahr**.
+* **Profil E.3 (Wärmepumpe + PV + Speicher)**: ⚡ **DYNAMISCHER TARIF**. Gesamtersparnis: **1.200–1.650 € / Jahr**.
+
+---
+
+### ⚡ Kategorie F: Voll-Prosumer (All-in-One)
+* **Profil F.1 (PV + Speicher + EV + WP + V2G)**: 🚀 **DYNAMISCHER TARIF (Absolute Pflicht!)**.  
+  * *Hebel*: Maximale Sektorenkopplung, Doppelter § 14a Vorteil (Wallbox + WP = **+320 €/a**), Netzarbitrage und V2G-Lastspitzenkappung.  
+  * *Gesamtersparnis*: **1.950 € bis 2.600 € / Jahr**.
+
+---
+
+## 3. Übersichtstabelle aller Profile
+
+| Profil | Hardware-Ausstattung | Tarif-Empfehlung | Realistisches Sparpotenzial |
+| :--- | :--- | :---: | :---: |
+| **A.1** | Nur Stromzähler | 🔒 **Fest** | **180 – 360 € / a** |
+| **B.1** | BKW ohne Speicher | 🔒 **Fest** | **200 – 260 € / a** |
+| **B.2** | BKW + Minispeicher | 🔒 **Fest** | **260 – 340 € / a** |
+| **C.1** | EV + Wallbox (ohne PV) | ⚡ **Dynamisch** | **580 – 680 € / a** |
+| **C.2** | EV + Wallbox + BKW | ⚡ **Dynamisch** | **720 – 850 € / a** |
+| **C.3** | EV + Wallbox + Dach-PV | ⚡ **Dynamisch** | **730 – 920 € / a** |
+| **C.4** | EV + PV + Heimspeicher | ⚡ **Dynamisch** | **1.400 – 1.900 € / a** |
+| **D.1** | Dach-PV ohne Speicher | 🔒 **Fest** | **330 – 480 € / a** |
+| **D.2** | Dach-PV + Heimspeicher | 🔒 **Fest / Dyn.** | **950 – 1.250 € / a** |
+| **E.1** | Wärmepumpe (ohne PV) | ⚡ **Dyn. / WP** | **300 – 420 € / a** |
+| **E.2** | Wärmepumpe + Dach-PV | ⚡ **Dynamisch** | **510 – 680 € / a** |
+| **F.1** | PV + Speicher + EV + WP | 🚀 **Dynamisch** | **1.950 – 2.600 € / a** |
+""",
+                "content_en": """# Tariff & Savings Compass: Which Setup and Electricity Tariff Fits My Home?
+
+Not every household owns a massive rooftop solar array, a 10 kWh battery, or an electric vehicle. Sharegy is built modularly to deliver **measurable financial and environmental savings** for every residential setup.
+
+---
+
+## 1. The Golden Rule of Electricity Tariffs
+
+| Criterion | 🔒 Fixed Tariff (e.g. 28–32 ct/kWh) | ⚡ Dynamic Tariff (Tibber, Awattar, Ostrom etc.) |
+| :--- | :--- | :--- |
+| **Extra Costs** | None / standard base fee (~10 €/mo) | Monthly service fee (~4–6 €/mo) + smart metering costs |
+| **Price Risk** | 0 % risk, full predictability | Price fluctuations; exposure to expensive evening peaks |
+| **Prerequisite** | No automation required | **Shiftable heavy load (≥ 2,000 kWh/yr)** (EV, heat pump, battery) |
+| **Best Choice** | Pure household load, rental flats, balcony solar | EV owners, winter grid battery charging, controllable heat pumps |
+
+---
+
+## 2. All 6 Profiles & 12 Hardware Combinations
+
+### 🏠 Category A: Standard Household (No PV / EV / Heat Pump)
+* **Profile A.1 (Smart Meter Only)**: 🔒 **FIXED TARIFF**.  
+  * *Lever*: Standby killer (cuts 50–100 W continuous waste = **140–280 €/yr**), appliance anomaly alerts (**40–80 €/yr**), tenant sharing (**~120 €/yr**).  
+  * *Total Savings*: **180 € to 360 € / year**.
+
+### ☀️ Category B: Balcony Solar (Plug-in Solar 600–800 W)
+* **Profile B.1 (Balcony Solar without Battery)**: 🔒 **FIXED TARIFF**. Midday appliance triggers boost self-consumption to 80 % (**+80 €/yr bonus**). Total output benefit: **200–260 € / yr**.
+* **Profile B.2 (Balcony Solar with 1–2 kWh Battery)**: 🔒 **FIXED TARIFF**. Zero-feed-in baseload coverage at night (**260–340 € / yr**).
+
+### 🚗 Category C: Electric Mobility (Wallbox + EV)
+* **Profile C.1 (EV + Wallbox without Solar)**: ⚡ **DYNAMIC TARIFF + § 14a EnWG**. Night charging at 15–18 ct instead of 32 ct (**~420 €/yr**) + **160 € § 14a grid discount**. Total savings: **580–680 € / year**.
+* **Profile C.2 (EV + Wallbox + Balcony Solar)**: ⚡ **DYNAMIC TARIFF**. Total savings: **720–850 € / year**.
+* **Profile C.3 (EV + Wallbox + Rooftop Solar)**: ⚡ **DYNAMIC TARIFF**. Summer = free solar; Winter = cheap wind power. Total savings: **730–920 € / year**.
+* **Profile C.4 (EV + Rooftop Solar + Battery)**: ⚡ **DYNAMIC TARIFF**. Full autarky + winter arbitrage + V2G/V2H (**1,400–1,900 € / year**).
+
+### 🏡 Category D: Classic Rooftop Solar (No EV / Heat Pump)
+* **Profile D.1 (Rooftop Solar without Battery)**: 🔒 **FIXED TARIFF**. Self-consumption optimization delivers **330–480 € / year**.
+* **Profile D.2 (Rooftop Solar with Battery)**: 🔒 **FIXED / DYN**. Fixed for standard use; dynamic if winter grid charging is used (**950–1,250 € / year**).
+
+### ♨️ Category E: Heat Pump Households
+* **Profile E.1 (Heat Pump without Solar)**: ⚡ **DYNAMIC / HEAT PUMP TARIFF**. Smart thermal preheating + § 14a rebate (**300–420 € / year**).
+* **Profile E.2 (Heat Pump + Rooftop Solar)**: ⚡ **DYNAMIC TARIFF** (**510–680 € / year**).
+* **Profile E.3 (Heat Pump + Solar + Battery)**: ⚡ **DYNAMIC TARIFF** (**1,200–1,650 € / year**).
+
+### ⚡ Category F: Full Prosumer (All-in-One)
+* **Profile F.1 (Solar + Battery + EV + Heat Pump + V2G)**: 🚀 **DYNAMIC TARIFF (Mandatory!)**. Dual § 14a bonus (**+320 €/yr**), grid arbitrage, and V2G peak shaving (**1,950–2,600 € / year**).
+""",
+                "tags": ["tarif", "stromtarif", "ersparnis", "matrix", "balkonkraftwerk", "wallbox", "waermepumpe", "prosumer", "mieter", "savings", "tariffs"],
+                "is_featured": True,
+                "sort_order": 1,
+            },
+            # ---------------------------------------------------------------------
             # 1. GETTING STARTED: ENERGIEBILANZ & AUTARKIE
             # ---------------------------------------------------------------------
             {
