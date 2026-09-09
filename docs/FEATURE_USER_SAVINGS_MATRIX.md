@@ -1,204 +1,225 @@
-# 📊 Sharegy Feature-Nutzer-Matrix & Ersparnis-Potenzial-Katalog
+# 📊 Sharegy Feature-Nutzer-Matrix & Tarif-Entscheidungskompass
 
-Dieses Dokument dient als strategische und technische Arbeitsgrundlage, um Sharegy für **alle Nutzergruppen** – vom klassischen Mieter im Mehrfamilienhaus ohne Solaranlage bis zum vollausgestatteten Prosumer – wertstiftend, verständlich und finanziell messbar zu gestalten.
+Dieses Dokument enthält die **vollständige kombinatorische Aufschlüsselung aller Hardware-Konstellationen** im Haushalt, konkrete **Tarif-Empfehlungen (Fester Tarif vs. Dynamischer Börsenstromtarif vs. § 14a WP-Tarif)** sowie die exakten **Sharegy-Einsparpotenziale**.
 
 ---
 
-## 1. Motivation & Leitbild
+## 1. Das Grundprinzip: Wann lohnt sich welcher Tarif?
 
-Aktuelle Energiemanagement-Systeme (EMS) leiden häufig an **„Prosumer-Blindheit“**: Sie setzen voraus, dass ein Nutzer bereits eine große Dach-PV-Anlage, einen 10-kWh-Batteriespeicher und einen dynamischen Stromtarif besitzt.
+| Kriterium | Fester Stromtarif (z. B. 28–32 ct/kWh) | Dynamischer Börsentarif (Tibber, Awattar, Ostrom etc.) |
+| :--- | :--- | :--- |
+| **Zusatzkosten** | Keine / Standard-Grundpreis (~10 €/Mt.) | Zusätzliche Monatsgebühr (~4–6 €/Mt.) + Smart-Meter-Kosten |
+| **Preisrisiko** | 0 % Preisrisiko, feste Kalkulierbarkeit | Preisschwankungen; Risiko bei ungesteuertem Peak-Verbrauch |
+| **Voraussetzung** | Keine Steuerung notwendig | **Verschiebbare Großlast ($\ge 2.000$ kWh/a)** (z. B. E-Auto, großer Speicher, Wärmepumpe) |
+| **Wann optimal?** | Geringer Verbrauch, keine Großverbraucher, reiner Haushaltsstrom oder BKW ohne Speicher | E-Auto vorhanden, Speicher mit Winter-Netzladung, modulierbare Wärmepumpe |
 
-In der Realität stellen **Mieter, Wohnungseigentümer (WEG) und Haushalte mit fixen Stromtarifen über 65 % des Marktes** dar. Sharegy soll modular und adaptiv für jedes Setup den **maximalen finanziellen und ökologischen Nutzen** herausarbeiten:
+---
+
+## 2. Vollständige Matrix aller Hardware-Kombinationen
 
 ```mermaid
 graph TD
-    User([Nutzer Onboarding / Hardware-Erkennung]) --> A[Profil A: Mieter / Basishaushalt]
-    User --> B[Profil B: Balkonkraftwerk]
-    User --> C[Profil C: EV-Fahrer ohne PV]
-    User --> D[Profil D: Klassische Dach-PV]
-    User --> E[Profil E: Wärmepumpen-Haushalt]
-    User --> F[Profil F: Voll-Prosumer]
+    Start([Welche Hardware ist vorhanden?]) --> KatA[Kat. A: Basishaushalt - Nur Stromzähler]
+    Start --> KatB[Kat. B: Balkonkraftwerk 600-800W]
+    Start --> KatC[Kat. C: E-Mobilität / Wallbox]
+    Start --> KatD[Kat. D: Klassische Dach-PV]
+    Start --> KatE[Kat. E: Wärmepumpe]
+    Start --> KatF[Kat. F: Voll-Prosumer All-in-One]
+
+    KatA --> A1[A.1: Nur Zähler / Haushaltsstrom]
     
-    A --> UI_A[Dashboard: Standby-Killer, Mieterstrom, Kosten-Transparenz]
-    B --> UI_B[Dashboard: BKW-Ertrag, Amortisation, Gerätestart-Tipps]
-    C --> UI_C[Dashboard: Günstigstes Laden, § 14a EnWG Bonus, Abfahrtsplaner]
-    D --> UI_D[Dashboard: PV-Überschuss, Eigenverbrauchsquote, String-Health]
-    E --> UI_E[Dashboard: Smart Thermal Storage, § 14a EnWG, Heizstab]
-    F --> UI_F[Dashboard: Voll-Kaskade, V2G / V2H, Börsentarif-Arbitrage]
+    KatB --> B1[B.1: BKW ohne Speicher]
+    KatB --> B2[B.2: BKW mit 1-2 kWh Speicher]
+
+    KatC --> C1[C.1: EV ohne PV]
+    KatC --> C2[C.2: EV + BKW]
+    KatC --> C3[C.3: EV + Dach-PV ohne Speicher]
+    KatC --> C4[C.4: EV + Dach-PV + Heimspeicher]
+
+    KatD --> D1[D.1: Dach-PV ohne Speicher]
+    KatD --> D2[D.2: Dach-PV + Speicher ohne EV/WP]
+
+    KatE --> E1[E.1: Wärmepumpe ohne PV]
+    KatE --> E2[E.2: Wärmepumpe + BKW]
+    KatE --> E3[E.3: Wärmepumpe + Dach-PV ohne Speicher]
+    KatE --> E4[E.4: Wärmepumpe + Dach-PV + Speicher]
+
+    KatF --> F1[F.1: PV + Speicher + EV + WP + V2G]
 ```
 
 ---
 
-## 2. Die 6 Nutzer-Archetypen (Personas)
-
-### 🏠 Profil A: Der Mieter / Basishaushalt
-* **Ausstattung**: Digitaler Stromzähler (mME) mit IR-Lesekopf (Tasmota SML) oder Shelly 3EM in Unterverteilung, smarte Zwischenstecker (Shelly/Zigbee).
-* **Stromtarif**: Fixer Standardtarif (z. B. 32 ct/kWh Grundversorger / Ökostrom).
-* **Hauptziel**: Transparenz, Standby-Verschwendung stoppen, Stromrechnung senken, Mieterstrom nutzen.
-* **Typischer Jahresverbrauch**: 2.200 – 3.500 kWh.
-
-### ☀️ Profil B: Der Balkonkraftwerk-Nutzer (BKW)
-* **Ausstattung**: Smart Meter / Sensor + 600 W oder 800 Wp steckerfertige Mini-PV (z. B. Hoymiles / Envertech / Shelly Plug).
-* **Stromtarif**: Fixer Standardtarif (32 ct/kWh).
-* **Hauptziel**: Maximaler Eigenverbrauch des erzeugten Balkonstroms, schnelle Amortisation (< 3 Jahre).
-* **Typischer Jahresverbrauch**: 2.800 – 4.000 kWh | BKW-Ertrag: ~650–850 kWh/a.
-
-### 🚗 Profil C: Der EV-Fahrer (ohne eigene Solaranlage)
-* **Ausstattung**: Smart Meter + Wallbox (OCPP 1.6 / 2.0.1 steuerbar, z. B. Easee, go-e, Keba, Alfen) + Elektroauto (40–80 kWh Akku).
-* **Stromtarif**: Fixer Tarif oder dynamischer Börsentarif (Tibber/Awattar) + **§ 14a EnWG steuerbare Last**.
-* **Hauptziel**: Günstigstes Laden (Nachtfenster), garantierte Reichweite am Morgen, § 14a EnWG Netzentgelt-Bonus.
-* **Typischer Jahresverbrauch**: 3.000 kWh Haushalt + 3.000 kWh Fahrstrom (15.000 km/a) = 6.000 kWh.
-
-### 🏡 Profil D: Der klassische PV-Besitzer (ohne Speicher)
-* **Ausstattung**: 5–15 kWp Dach-PV (z. B. SMA, Fronius, Sungrow, Growatt, SolarEdge), Zweirichtungszähler.
-* **Stromtarif**: Fixer Bezugstarif (32 ct/kWh) + feste EEG-Einspeisevergütung (~8,2 ct/kWh).
-* **Hauptziel**: Eigenverbrauchsquote von 30 % auf 50–60 % steigern (Vermeidung von teurem Netzbezug).
-* **Typischer Jahresverbrauch**: 4.000 kWh | PV-Ertrag: ~8.000–14.000 kWh/a.
-
-### ♨️ Profil E: Der Wärmepumpen-Haushalt
-* **Ausstattung**: Luft-Wasser- oder Sole-Wärmepumpe (SG-Ready / Modbus / § 14a EnWG Relais), Pufferspeicher / Estrich, optional Heizstab.
-* **Stromtarif**: Separater WP-Tarif, § 14a EnWG steuerbar oder dyn. Börsenstromtarif.
-* **Hauptziel**: Vorlauf-Überhöhung bei günstigen Stunden / PV, Netzentgelt-Ersparnis, Vermeidung teurer Sperrzeiten.
-* **Typischer Jahresverbrauch**: 3.500 kWh Haushalt + 4.500 kWh Heizwärme = 8.000 kWh.
-
-### ⚡ Profil F: Der Voll-Prosumer (All-in-One)
-* **Ausstattung**: Dach-PV (10–25 kWp) + Heimspeicher (5–20 kWh) + Wallbox (mit ISO 15118-20 V2G) + Wärmepumpe + dynamischer Börsentarif.
-* **Stromtarif**: Dynamischer Spotmarkttarif + § 14a EnWG (Modul 1 + Modul 2).
-* **Hauptziel**: Maximale Autarkie (85–95 %), Netzarbitrage (Laden bei Negativpreisen), Peak Shaving, V2G-Einspeisung.
-* **Typischer Jahresverbrauch**: 10.000 – 14.000 kWh.
+## 3. Detaillierte Profile & Tarif-Empfehlungen
 
 ---
 
-## 3. Umfassende Feature-Nutzer-Matrix
+### 🏠 KATEGORIE A: Basishaushalt (Nur Haushaltsstrom, keine PV/EV/WP)
 
-| Funktionsbereich | Feature in Sharegy | Profil A (Mieter) | Profil B (BKW) | Profil C (EV o. PV) | Profil D (PV o. Speicher) | Profil E (Wärmepumpe) | Profil F (Prosumer) |
-| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Transparenz & Basisanalyse** | Echtzeit-Leistungsmessung (1s/10s) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| | Standby- & Grundlast-Detektor | ⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐ | ⭐⭐ | ⭐⭐ | ⭐⭐ |
-| | NILM / Smarte Geräteerkennung | ⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐ | ⭐⭐ | ⭐⭐ | ⭐⭐ |
-| | Stromfresser- & Fehlverhaltensalarm | ⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐ | ⭐⭐ | ⭐⭐ | ⭐⭐ |
-| | Wöchentlicher KI-Digest per E-Mail | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Balkonkraftwerk (Mini-PV)** | BKW-Erzeugungstracking (W / kWh) | ❌ | ⭐⭐⭐ | ❌ | ❌ | ❌ | ❌ |
-| | BKW-Eigenverbrauchsquote (%) | ❌ | ⭐⭐⭐ | ❌ | ❌ | ❌ | ❌ |
-| | BKW-Amortisationsrechner (ROI-Uhr) | ❌ | ⭐⭐⭐ | ❌ | ❌ | ❌ | ❌ |
-| | Einschalttipps für Wasch-/Spülmaschine | ❌ | ⭐⭐⭐ | ❌ | ⭐⭐⭐ | ❌ | ⭐⭐ |
-| **Elektromobilität (Wallbox / EV)**| Günstigstes Börsenstunden-Laden | ❌ | ❌ | ⭐⭐⭐ | ❌ | ❌ | ⭐⭐⭐ |
-| | Abfahrtsgarantie (Departure Ready) | ❌ | ❌ | ⭐⭐⭐ | ⭐⭐ | ❌ | ⭐⭐⭐ |
-| | PV-Überschuss-Laden & Phasensprung | ❌ | ❌ | ❌ | ⭐⭐⭐ | ❌ | ⭐⭐⭐ |
-| | V2G / V2H Lastspitzenkappung (ISO 15118-20) | ❌ | ❌ | ❌ | ❌ | ❌ | ⭐⭐⭐ |
-| | Battery-Care Ladeschonung (C-Rate) | ❌ | ❌ | ⭐⭐ | ⭐⭐ | ❌ | ⭐⭐⭐ |
-| **Wärme & Sektorenkopplung** | Smart Thermal Storage (MPC-Vorlauf) | ❌ | ❌ | ❌ | ❌ | ⭐⭐⭐ | ⭐⭐⭐ |
-| | PV-Heizstab Warmwasser-Kaskade | ❌ | ❌ | ❌ | ⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐ |
-| | SG-Ready / Modbus Wärmepumpen-Relais | ❌ | ❌ | ❌ | ❌ | ⭐⭐⭐ | ⭐⭐⭐ |
-| **Speicher & Arbitrage** | Winter-Netzladung bei Minuspreisen | ❌ | ❌ | ❌ | ❌ | ❌ | ⭐⭐⭐ |
-| | Dynamisches DoD / Akkuschutz | ❌ | ❌ | ❌ | ❌ | ❌ | ⭐⭐⭐ |
-| **Regulatorik & Recht** | § 14a EnWG Pauschalrabatt (Modul 1) | ❌ | ❌ | ⭐⭐⭐ | ❌ | ⭐⭐⭐ | ⭐⭐⭐ |
-| | § 14a EnWG Zeitvariable Netzentgelte (Modul 3)| ❌ | ❌ | ⭐⭐ | ❌ | ⭐⭐ | ⭐⭐⭐ |
-| | § 14a EnWG Audit-Logging & Nachweis | ❌ | ❌ | ⭐⭐⭐ | ❌ | ⭐⭐⭐ | ⭐⭐⭐ |
-| **Quartier & Community** | P2P Mieterstrom-Sharing (§ 42b EnWG) | ⭐⭐⭐ | ⭐⭐ | ⭐⭐ | ⭐⭐ | ⭐⭐ | ⭐⭐⭐ |
-| | Virtuelle Quartiers-Saldierung (15m) | ⭐⭐⭐ | ⭐⭐ | ⭐⭐ | ⭐⭐ | ⭐⭐ | ⭐⭐⭐ |
-
-*Legende: ⭐⭐⭐ = Kern-Mehrwert / Maximaler Hebel | ⭐⭐ = Sinnvolle Ergänzung | ❌ = Nicht relevant / Hardware fehlt*
+#### Profil A.1: Nur Zähler (mME / IR-Lesekopf / Shelly)
+* **Hardware**: Zähler (Tasmota SML / Shelly 3EM / Tibber Pulse), smarte Zwischenstecker.
+* **Jahresverbrauch**: 2.000 – 3.500 kWh (Haushaltsstrom).
+* **🎯 Tarif-Empfehlung**: 🔒 **FESTER STROMTARIF (z. B. 28–30 ct/kWh)**
+  * *Warum KEIN dynamischer Tarif?* Da der Strombedarf unverschiebbar morgens (07–09 Uhr) und abends (18–22 Uhr) in die teuren Börsenspitzen fällt, zahlt der Nutzer im Börsenschnitt oft 32–36 ct/kWh. Zusammen mit der monatlichen Zusatzgebühr (~60 €/a) entstünde ein **Verlust**.
+* **💡 Sharegy-Funktionen & Hebel**:
+  * **Standby-Killer**: Erkennt 50–100 W Grundlastverschwendung $\rightarrow$ **~140–280 € / a**.
+  * **Stromfresser-Alarm**: Warnt bei defekten Geräten, offenen Kühlungen $\rightarrow$ **~40–80 € / a**.
+  * **P2P-Mieterstrom (Quartier)**: Günstiger Solarstrom vom Nachbardach (22 ct statt 30 ct) $\rightarrow$ **~120 € / a**.
+* **💰 Gesamtersparnis**: **180 € bis 360 € / Jahr**
 
 ---
 
-## 4. Detaillierte Ersparnis-Kalkulationsmodelle (€ / Jahr)
+### ☀️ KATEGORIE B: Balkonkraftwerk (Stecker-Solar 600–800 W)
 
-### 🧮 1. Grundlast- & Standby-Reduktion (Für Profile A, B, C, D, E, F)
-* **Problem**: Viele Haushalte haben eine verdeckte Grundlast von 150–250 W durch daueraktive Altgeräte, Standby-Netzteile, Zirkulationspumpen und NAS-Systeme.
-* **Sharegy-Lösung**: Automatischer Algorithmus erkennt die minimale Dauerlast zwischen 02:00 und 05:00 Uhr und identifiziert Einsparpotenziale.
-* **Formel**: 
-  $$\Delta \text{Kosten} = \Delta P_{\text{Standby}} \text{ (kW)} \times 8.760 \text{ h} \times \text{Strompreis (€/kWh)}$$
-* **Beispiel**: Senkung der Grundlast um **70 W**:
-  $$0{,}070 \text{ kW} \times 8.760 \text{ h} \times 0{,}32 \text{ €/kWh} = \mathbf{196{,}22 \text{ € / Jahr}}$$
+#### Profil B.1: Balkonkraftwerk OHNE Speicher (Direktverbrauch)
+* **Hardware**: Zähler + 800 Wp BKW (Hoymiles, Envertech, Shelly Plug).
+* **Erzeugung**: ~700–850 kWh/a | **Verbrauch**: 2.500 – 3.800 kWh/a.
+* **🎯 Tarif-Empfehlung**: 🔒 **FESTER STROMTARIF**
+  * *Warum?* Das BKW deckt tagsüber genau die günstigen Sonnenstunden bereits kostenlos ab. Reststrom wird nur morgens/abends gebraucht (wo Börsenpreise hoch sind).
+* **💡 Sharegy-Funktionen & Hebel**:
+  * **Einschalttipps / Smart Plugs**: Start von WaMa/Spülmaschine bei BKW > 400 W (steigert Eigenverbrauch von 45 % auf 80 %) $\rightarrow$ **~80 € / a Zusatzvorteil**.
+  * **BKW-Amortisationsuhr**: Live-Zähler bis zur vollen Amortisation (typisch 2,5 Jahre).
+  * **Standby-Kompensationsanzeige**: Visualisiert, wann das BKW die Grundlast auf 0 W drückt.
+* **💰 Gesamtersparnis**: **~200 € bis 260 € / Jahr** (BKW-Gesamtertrag)
 
----
-
-### 🧮 2. Balkonkraftwerk-Eigenverbrauchsoptimierung (Profil B)
-* **Problem**: Ohne Steuerung verpuffen 40–50 % des Mini-PV-Stroms ungenutzt als unvergütete Einspeisung ins Netz.
-* **Sharegy-Lösung**: Push-Benachrichtigungen und smarte Steckdosen starten Spülmaschine, Waschmaschine oder Akku-Ladestationen genau dann, wenn das BKW > 400 W liefert.
-* **Formel**:
-  $$\text{Ersparnis} = E_{\text{BKW}} \times (\text{Quote}_{\text{optimiert}} - \text{Quote}_{\text{ohne}}) \times \text{Strompreis}$$
-* **Beispiel**: 800 Wp BKW (Ertrag 750 kWh/a), Steigerung Eigenverbrauch von 50 % auf 85 % (+262,5 kWh genutzt):
-  $$262{,}5 \text{ kWh} \times 0{,}32 \text{ €/kWh} = \mathbf{84{,}00 \text{ € / Jahr (Zusatzvorteil)}}$$
-  *(Gesamtersparnis BKW gesamt: $637{,}5 \text{ kWh} \times 0{,}32 \text{ €} = \mathbf{204{,}00 \text{ € / Jahr}}$)*
-
----
-
-### 🧮 3. Börsenstrom-Nachtladen für E-Autos (Profil C)
-* **Problem**: Unkontrolliertes Laden am Feierabend (18:00–21:00 Uhr) fällt in die teuersten Peak-Stunden.
-* **Sharegy-Lösung**: Die Wallbox lädt automatisch in den 3–4 günstigsten Nachtstunden (z. B. 01:00–05:00 Uhr).
-* **Formel**:
-  $$\text{Ersparnis} = E_{\text{Fahrstrom}} \times (\text{Preis}_{\text{Standard}} - \text{Preis}_{\text{Nacht\_Ø}})$$
-* **Beispiel**: 15.000 km/Jahr (3.000 kWh), Standardpreis 32 ct/kWh, Nacht-Spot-Ø 18 ct/kWh:
-  $$3.000 \text{ kWh} \times (0{,}32 \text{ €} - 0{,}18 \text{ €}) = \mathbf{420{,}00 \text{ € / Jahr}}$$
+#### Profil B.2: Balkonkraftwerk MIT Mini-Speicher (1–2 kWh, z. B. Anker Solix, Zendure SolarFlow, EcoFlow)
+* **Hardware**: Zähler + 800 W BKW + 1–2 kWh Niedervolt-Speicher.
+* **🎯 Tarif-Empfehlung**: 🔒 **FESTER STROMTARIF** *(Sonderfall: Nur bei sehr aktiver Winter-Netzladung experimentell dynamisch)*
+  * *Warum?* Der Speicher puffert den Tagesüberschuss für die Nacht. Der verbleibende Netzbezug ist sehr gering (< 1.500 kWh/a) – ein dynamischer Tarif lohnt die Zusatz-Grundgebühr nicht.
+* **💡 Sharegy-Funktionen & Hebel**:
+  * **Bedarfsgeführte Einspeisung (Nulleinspeisung)**: Speicher gibt immer exakt die aktuelle Grundlast (z. B. 120 W) ab, kein Verschenken von Strom ins Netz.
+  * **Akkugesundheits-Schutz (DoD & Temperaturüberwachung)**.
+* **💰 Gesamtersparnis**: **~260 € bis 340 € / Jahr**
 
 ---
 
-### 🧮 4. § 14a EnWG Netzentgelt-Rückerstattung (Profile C, E, F)
-* **Gesetzliche Grundlage**: Seit 01.01.2024 erhalten Betreiber von steuerbaren Verbrauchseinrichtungen (Wallboxen $\ge 4{,}2$ kW, Wärmepumpen, Batteriespeicher) bundesweit verbindliche Rabatte auf Netzentgelte.
-* **Modul 1 (Pauschale)**:
-  * Jährliche Pauschale je Anlage: **110 € bis 190 € / Jahr** (bundesweiter Durchschnitt: **~160 € / a**).
-* **Modul 2 (Prozentuale Reduzierung des Arbeitspreises)**:
-  * 60 % Rabatt auf den Netzentgelt-Arbeitspreis (ca. 4–6 ct/kWh Ersparnis auf den WP- oder Ladestrom).
-* **Beispiel (Profil F mit Wallbox + Wärmepumpe)**:
-  $$\text{Pauschale Modul 1} = 2 \times 160 \text{ €} = \mathbf{320{,}00 \text{ € / Jahr Cash-Vorteil}}$$
+### 🚗 KATEGORIE C: Elektromobilität (Wallbox + Elektroauto)
+
+#### Profil C.1: EV + Wallbox OHNE PV (Reiner Netzstrom)
+* **Hardware**: Zähler + steuerbare Wallbox (OCPP 1.6/2.0.1) + E-Auto (15.000 km/a = 3.000 kWh).
+* **🎯 Tarif-Empfehlung**: ⚡ **DYNAMISCHER BÖRSENTARIF (Dringende Empfehlung!) + § 14a EnWG Modul 1**
+  * *Warum?* 3.000 kWh Fahrstrom sind **zu 100 % flexibel**. Sie können nachts zwischen 01:00 und 05:00 Uhr geladen werden, wenn Windstrom die Preise auf 15–20 ct/kWh drückt (Delta zu 32 ct: **~14 ct/kWh**).
+* **💡 Sharegy-Funktionen & Hebel**:
+  * **Automatisches Börsenpreis-Nachtladen**: Findet automatisch die $N$ günstigsten Stunden $\rightarrow$ **~420 € / a**.
+  * **§ 14a EnWG Pauschal-Gutschrift (Modul 1)**: Gesetzlicher Netzentgelt-Rabatt $\rightarrow$ **+160 € / a Cash-Vorteil**.
+  * **Abfahrtsgarantie (Smart Departure)**: Morgens 07:30 Uhr garantiert 80 % SoC.
+* **💰 Gesamtersparnis**: **~580 € bis 680 € / Jahr**
+
+#### Profil C.2: EV + Wallbox + Balkonkraftwerk (BKW)
+* **Hardware**: Zähler + Wallbox + E-Auto + 800 W BKW.
+* **🎯 Tarif-Empfehlung**: ⚡ **DYNAMISCHER TARIF** (ab 8.000 km Fahrleistung)
+  * *Warum?* BKW fängt tagsüber den Haushalt ab, das Auto lädt nachts billig an der Börse.
+* **💡 Sharegy-Funktionen & Hebel**:
+  * BKW-Ertragsanalyse tagsüber + intelligentes Nachtladefenster.
+* **💰 Gesamtersparnis**: **~720 € / Jahr**
+
+#### Profil C.3: EV + Wallbox + Dach-PV (5–12 kWp, OHNE Heimspeicher)
+* **Hardware**: Zähler + Wallbox + E-Auto + Dach-PV.
+* **🎯 Tarif-Empfehlung**: ⚡ **DYNAMISCHER TARIF (Hybrid-Vorteil)** oder **GÜNSTIGER FESTTARIF**
+  * *Warum?* 
+    * **März bis Oktober**: Auto lädt primär kostenlosen Solarüberschuss (0 ct Bezug vs. 8 ct EEG-Verlust).
+    * **November bis Februar**: Keine PV vorhanden $\rightarrow$ Auto lädt zu nächtlichen Windstrom-Tiefpreisen.
+* **💡 Sharegy-Funktionen & Hebel**:
+  * **Automatische Phasenumschaltung (1-phasig 1,4 kW bis 3-phasig 11 kW)**: Maximale PV-Ausnutzung $\rightarrow$ **~450 € / a**.
+  * **Winter-Spot-Laden + § 14a EnWG**: $\rightarrow$ **~280 € / a**.
+* **💰 Gesamtersparnis**: **~730 € bis 920 € / Jahr**
+
+#### Profil C.4: EV + Wallbox + Dach-PV + Heimspeicher (5–15 kWh)
+* **Hardware**: Zähler + Wallbox + E-Auto + Dach-PV + Speicher.
+* **🎯 Tarif-Empfehlung**: ⚡ **DYNAMISCHER BÖRSENTARIF (Volle Empfehlung!)**
+* **💡 Sharegy-Funktionen & Hebel**:
+  * Sommer: 100 % Autarkie für Haus + Auto.
+  * Winter: Speicher & EV laden nachts bei Negativpreisen, Speicher versorgt Haus am Tag.
+  * **V2G / V2H (ISO 15118-20)**: Auto unterstützt Haus bei Abendspitzen.
+* **💰 Gesamtersparnis**: **~1.400 € bis 1.900 € / Jahr**
 
 ---
 
-### 🧮 5. PV-Überschuss-Laden & Warmwasser-Heizstab (Profile D & F)
-* **Problem**: Für eingespeisten Solarstrom gibt es nur ~8 ct/kWh, während Bezugsstrom 32 ct/kWh kostet (Spread: **24 ct/kWh**).
-* **Sharegy-Lösung**: Stufenlose Regelung der Wallbox (6–16A / 1-zu-3-Phasenumschaltung) und Zuschalten eines modulierenden Heizstabs (0–3 kW) für den Warmwasserspeicher.
-* **Beispiel (Profil D)**: 2.000 kWh Solarstrom von Einspeisung in Eigenverbrauch umgewandelt:
-  $$2.000 \text{ kWh} \times (0{,}32 \text{ €} - 0{,}08 \text{ €}) = \mathbf{480{,}00 \text{ € / Jahr}}$$
+### 🏡 KATEGORIE D: Klassische Dach-PV (ohne EV, ohne Wärmepumpe)
+
+#### Profil D.1: Dach-PV OHNE Speicher
+* **Hardware**: 5–12 kWp Dach-PV, Zweirichtungszähler.
+* **🎯 Tarif-Empfehlung**: 🔒 **FESTER STROMTARIF**
+  * *Warum?* Ohne große verschiebbare Last (kein Auto/Speicher) liefert die PV tagsüber genug Strom. Der Restbezug abends sollte zum planbaren Festpreis erfolgen.
+* **💡 Sharegy-Funktionen & Hebel**:
+  * **PV-Überschuss-Verbrauchersteuerung**: Smarte Steckdosen, Warmwasser-Heizstab $\rightarrow$ **~250–400 € / a**.
+  * **Wechselrichter-String-Überwachung**: Schutz vor unbemerktem Ertragsausfall $\rightarrow$ **~80 € / a**.
+* **💰 Gesamtersparnis**: **~330 € bis 480 € / Jahr**
+
+#### Profil D.2: Dach-PV MIT Heimspeicher (5–12 kWh)
+* **Hardware**: Dach-PV + Heimspeicher (ohne EV/WP).
+* **🎯 Tarif-Empfehlung**: ⚖️ **FESTER TARIF** (bei hoher PV-Größe) ODER **DYN. TARIF** (wenn Speicher im Winter aus dem Netz geladen wird).
+* **💡 Sharegy-Funktionen & Hebel**:
+  * 80 % PV-Autarkie im Sommer $\rightarrow$ **~800–1.100 € / a**.
+  * Optionale Winter-Speicher-Arbitrage bei dynamischem Tarif $\rightarrow$ **~150 € / a**.
+* **💰 Gesamtersparnis**: **~950 € bis 1.250 € / Jahr**
 
 ---
 
-### 🧮 6. Smart Thermal Storage / Wärmepumpen-Vorlauf (Profile E & F)
-* **Problem**: Wärmepumpen takten häufig am Abend bei Spitzenstrompreisen oder laufen morgens bei kaltem Außentemperaturen ineffizient.
-* **Sharegy-Lösung**: Vorausschauende MPC-Modellierung überhöht den Vorlauf um +1,5 K bei Solarüberschuss oder Tiefpreisstunden und nutzt den Estrich als thermische Batterie.
-* **Beispiel (Profil E)**: 15 % Tarifarbitrage auf 4.500 kWh WP-Strom:
-  $$4.500 \text{ kWh} \times 0{,}15 \times (0{,}32 \text{ €} - 0{,}18 \text{ €}) = \mathbf{94{,}50 \text{ € / a}} + \text{§ 14a Bonus (160 €)} = \mathbf{254{,}50 \text{ € / Jahr}}$$
+### ♨️ KATEGORIE E: Wärmepumpen-Haushalt (ohne EV)
+
+#### Profil E.1: Wärmepumpe OHNE PV
+* **Hardware**: Zähler + Wärmepumpe (§ 14a EnWG fähig, 4.000–5.500 kWh/a).
+* **🎯 Tarif-Empfehlung**: ⚡ **DYNAMISCHER BÖRSENTARIF** ODER **§ 14a WP-SPEZIALTARIF (Modul 2 mit 60% Netzentgeltrabatt)**
+  * *Warum?* Wärmepumpen können über thermische Pufferspeicher und Estrich gezielt in günstige Stunden gesteuert werden.
+* **💡 Sharegy-Funktionen & Hebel**:
+  * **Smart Thermal Storage (MPC-Vorlaufüberhöhung)**: Vorheizen in günstigen Stunden $\rightarrow$ **~140 € / a**.
+  * **§ 14a EnWG Rabatt**: Modul 1 (Pauschale ~160 €) oder Modul 2 (-60 % Netzentgelt auf WP-Strom) $\rightarrow$ **~160–240 € / a**.
+* **💰 Gesamtersparnis**: **~300 € bis 420 € / Jahr**
+
+#### Profil E.2: Wärmepumpe + Dach-PV OHNE Speicher
+* **Hardware**: Wärmepumpe + 8–15 kWp Dach-PV.
+* **🎯 Tarif-Empfehlung**: ⚡ **DYNAMISCHER BÖRSENTARIF (für Winter)** oder **FESTER TARIF**
+* **💡 Sharegy-Funktionen & Hebel**:
+  * Übergangszeit: PV-Überschuss heizt Warmwasser & Estrich über SG-Ready / Modbus $\rightarrow$ **~350 € / a**.
+  * § 14a EnWG Bonus $\rightarrow$ **+160 € / a**.
+* **💰 Gesamtersparnis**: **~510 € bis 680 € / Jahr**
+
+#### Profil E.3: Wärmepumpe + Dach-PV + Heimspeicher
+* **Hardware**: WP + PV + Speicher (10–15 kWh).
+* **🎯 Tarif-Empfehlung**: ⚡ **DYNAMISCHER BÖRSENTARIF (Volle Empfehlung!)**
+* **💰 Gesamtersparnis**: **~1.200 € bis 1.650 € / Jahr**
 
 ---
 
-## 5. Zusammenfassung der Ersparnis-Potenziale
+### ⚡ KATEGORIE F: Voll-Prosumer (All-in-One Sektorenkopplung)
 
-| Archetyp | Profil-Name | Typische Hardware | Minimal-Ersparnis | Realistisches Sparpotenzial | Maximal-Potenzial |
-| :--- | :--- | :--- | :---: | :---: | :---: |
-| **A** | Mieter / Basishaushalt | Smart Meter / IR-Lesekopf | 90 € / a | **180 € / a** | 350 € / a (inkl. P2P) |
-| **B** | Balkonkraftwerk | 800 W BKW + Smart Plug | 150 € / a | **245 € / a** | 320 € / a |
-| **C** | EV-Fahrer ohne PV | Wallbox + E-Auto | 350 € / a | **580 € / a** | 720 € / a |
-| **D** | Klassische Dach-PV | 8 kWp PV (ohne Speicher) | 320 € / a | **510 € / a** | 680 € / a |
-| **E** | Wärmepumpe | WP (§ 14a steuerbar) | 280 € / a | **420 € / a** | 580 € / a |
-| **F** | Voll-Prosumer | PV + Speicher + EV + WP | 1.400 € / a | **1.950 € / a** | 2.600 € / a |
-
----
-
-## 6. Konsequenzen für Produkt, UI & Onboarding
-
-### 1. Wizard-Basiertes Hardware-Onboarding
-Beim ersten Login wählt der Nutzer sein Profil oder klickt seine Hardware an:
-* `[ ] Stromzähler (mME / Shelly / IR-Kopf)`
-* `[ ] Balkonkraftwerk (600/800 W)`
-* `[ ] Dach-Photovoltaikanlage`
-* `[ ] Heimspeicher`
-* `[ ] Wallbox / Elektroauto`
-* `[ ] Wärmepumpe`
-* `[ ] Dynamischer Börsenstromtarif vorhanden`
-
-### 2. Adaptive Dashboard-Kacheln
-* **Wenn kein Speicher / keine Wallbox vorhanden**: Die Kacheln werden **nicht als leere Fehler/Offline-Meldungen** angezeigt, sondern das Dashboard ordnet sich automatisch kompakt an.
-* **Stattdessen**: Einblendung der **„Potenzial-Kachel“** (z. B. *„💡 Was würde dir ein Balkonkraftwerk bringen? Rechner öffnen“*).
-
-### 3. Personalisierte ROI- & Spar-Berichte
-* Der wöchentliche E-Mail-Report rechnet spezifisch für das hinterlegte Profil ab (z. B. Mieter: *„Grundlast diese Woche um 12 W gesenkt = 3,40 € gespart“* vs. Prosumer: *„Autarkie 88 %, 42 € Ersparnis“*).
+#### Profil F.1: PV + Speicher + Wallbox/EV + Wärmepumpe + V2G
+* **Hardware**: 10–25 kWp PV + 10–20 kWh Speicher + Wallbox + E-Auto + WP + § 14a steuerbar.
+* **🎯 Tarif-Empfehlung**: 🚀 **DYNAMISCHER BÖRSENTARIF (Absolute Pflicht!)**
+* **💡 Sharegy-Funktionen & Hebel**:
+  * **Maximale Sektorenkopplungs-Kaskade**: PV $\rightarrow$ Haus $\rightarrow$ WP $\rightarrow$ Speicher $\rightarrow$ EV $\rightarrow$ Netz.
+  * **Doppelter § 14a EnWG Vorteil** (Wallbox + WP getrennt abrechenbar) $\rightarrow$ **+320 € / a**.
+  * **V2G / V2H Lastspitzenkappung & Netzarbitrage** $\rightarrow$ **~250 € / a**.
+  * **Winter-Speicherladung bei Negativpreisen** $\rightarrow$ **~280 € / a**.
+* **💰 Gesamtersparnis**: **~1.950 € bis 2.600 € / Jahr**
 
 ---
 
-## 7. Offene Diskussionspunkte zur gemeinsamen Optimierung
+## 4. Entscheidungs-Matrix auf einen Blick
 
-> [!NOTE]
-> 1. **Welche Profile sollen im ersten Schritt in der UI speziell visualisiert werden?** (Empfehlung: Mieter/BKW vs. Prosumer als Haupt-Umschalter).
-> 2. **Soll ein interaktiver Ersparnisrechner („Savings Simulator“) als neue Seite in Sharegy integriert werden?**
-> 3. **Welche Sensoren für Mieter (z. B. Tasmota IR-Lesekopf, Shelly Plug S, Tibber Pulse) sollen im Setup priorisiert werden?**
+| Profil | Hardware-Konfiguration | Tarif-Empfehlung | Begründung in 1 Satz | Ersparnis (€/a) |
+| :--- | :--- | :---: | :--- | :---: |
+| **A.1** | Nur Stromzähler | 🔒 **Fest** | Keine Lastverschiebung möglich; dyn. Tarif birgt Preis- & Gebührenrisiko. | **180 – 360 €** |
+| **B.1** | BKW ohne Speicher | 🔒 **Fest** | Günstige Sonnenstunden deckt BKW ab; Restbezug erfolgt in Peakstunden. | **200 – 260 €** |
+| **B.2** | BKW + 1–2 kWh Speicher | 🔒 **Fest** | Speicher deckt Grundlast nachts; Netzbezug zu gering für dyn. Tarif. | **260 – 340 €** |
+| **C.1** | EV + Wallbox (ohne PV) | ⚡ **Dynamisch** | 3.000 kWh Fahrstrom lassen sich nachts zu Tiefpreisen laden (+§ 14a Bonus). | **580 – 680 €** |
+| **C.2** | EV + Wallbox + BKW | ⚡ **Dynamisch** | BKW fängt Haushalt tagsüber ab; EV lädt nachts an der Strombörse. | **720 – 850 €** |
+| **C.3** | EV + Wallbox + Dach-PV | ⚡ **Dynamisch** | Sommer = 100 % Solarüberschuss; Winter = Windstrom-Nachtladen. | **730 – 920 €** |
+| **C.4** | EV + PV + Speicher | ⚡ **Dynamisch** | Maximale Autarkie im Sommer + Speicher-Netzarbitrage im Winter + V2G. | **1.400 – 1.900 €** |
+| **D.1** | Dach-PV ohne Speicher | 🔒 **Fest** | Keine flexible Großlast vorhanden; Eigenverbrauchssteuerung reicht aus. | **330 – 480 €** |
+| **D.2** | Dach-PV + Heimspeicher | 🔒 **Fest / Dyn.** | Festpreis für Standardbetrieb; Dynamisch nur bei Winter-Netzladung. | **950 – 1.250 €** |
+| **E.1** | Wärmepumpe (ohne PV) | ⚡ **Dyn. / WP-Tarif** | WP kann über Estrich/Puffer in günstige Tiefpreisstunden geschoben werden. | **300 – 420 €** |
+| **E.2** | Wärmepumpe + Dach-PV | ⚡ **Dynamisch** | Sommer = PV-Warmwasser; Winter = Börsen-Tiefstpreise für Heizbetrieb. | **510 – 680 €** |
+| **F.1** | PV + Speicher + EV + WP | 🚀 **Dynamisch** | Größtmögliche Flexibilität, Doppel-§ 14a-Bonus, V2G und Netzarbitrage. | **1.950 – 2.600 €** |
+
+---
+
+## 5. Technische Integration in Sharegy
+
+### 1. Tarif-Empfehlungs-Widget im Dashboard
+Im Bereich „Tarif & Kosten“ sieht der Nutzer einen transparenten Tarif-Kompass:
+* *„Basierend auf deinen Geräten (z. B. Wallbox vorhanden, keine PV) sparst du mit einem **dynamischen Tarif ca. 420 € / Jahr** gegenüber einem Festtarif.“*
+* Oder bei Mietern: *„Für deinen aktuellen Haushalt ist ein **günstiger Festtarif (unter 30 ct/kWh)** die wirtschaftlichste Wahl.“*
+
+### 2. Tarif-Wechsel-Simulator
+Nutzer können simulieren: *„Was würde passieren, wenn ich morgen zu Tibber wechsle?“* bzw. *„Was würde mir ein 800 W Balkonkraftwerk bringen?“*
