@@ -453,9 +453,14 @@ class OcppConsumer(AsyncWebsocketConsumer):
         """Fordert die Wallbox auf, eine bestimmte Nachricht sofort zu senden (Remote Trigger)."""
         requested_message = event.get("requested_message", "StatusNotification")
         connector_id = event.get("connector_id")
-        payload = {"requestedMessage": requested_message}
-        if connector_id is not None:
-            payload["connectorId"] = int(connector_id)
+        if self.ocpp_version in ["ocpp2.0.1", "ocpp2.1"]:
+            payload = {"requestedMessage": requested_message}
+            if connector_id is not None:
+                payload["evse"] = {"id": int(connector_id)}
+        else:
+            payload = {"requestedMessage": requested_message}
+            if connector_id is not None:
+                payload["connectorId"] = int(connector_id)
         await self.send_call("TriggerMessage", payload)
         logger.info(f"🎯 TriggerMessage an {self.cp_id}: {requested_message}")
 
@@ -521,50 +526,78 @@ class OcppConsumer(AsyncWebsocketConsumer):
         """Startet den Ladevorgang aus der Sharegy App heraus."""
         connector_id = int(event.get("connector_id", 1))
         id_tag = event.get("id_tag", "SHAREGY_APP")
-        payload = {
-            "connectorId": connector_id,
-            "idTag": id_tag
-        }
-        await self.send_call("RemoteStartTransaction", payload)
-        logger.info(f"▶️ RemoteStartTransaction an {self.cp_id} (Tag: {id_tag})")
+        if self.ocpp_version in ["ocpp2.0.1", "ocpp2.1"]:
+            payload = {
+                "evseId": connector_id,
+                "remoteStartId": 1,
+                "idToken": {
+                    "idToken": id_tag,
+                    "type": "ISO14443"
+                }
+            }
+            await self.send_call("RequestStartTransaction", payload)
+            logger.info(f"▶️ RequestStartTransaction (OCPP 2.x) an {self.cp_id} (Tag: {id_tag})")
+        else:
+            payload = {
+                "connectorId": connector_id,
+                "idTag": id_tag
+            }
+            await self.send_call("RemoteStartTransaction", payload)
+            logger.info(f"▶️ RemoteStartTransaction an {self.cp_id} (Tag: {id_tag})")
 
     async def ocpp_remote_stop(self, event):
         """Stoppt die aktive Ladesitzung."""
-        tx_id = int(event.get("transaction_id", 0))
+        tx_id = event.get("transaction_id")
         if not tx_id:
             tx_id = await self.get_active_or_latest_transaction_id(self.cp_id)
         if tx_id:
-            payload = {"transactionId": tx_id}
-            await self.send_call("RemoteStopTransaction", payload)
-            logger.info(f"⏹️ RemoteStopTransaction an {self.cp_id} (Tx: {tx_id})")
+            if self.ocpp_version in ["ocpp2.0.1", "ocpp2.1"]:
+                payload = {"transactionId": str(tx_id)}
+                await self.send_call("RequestStopTransaction", payload)
+                logger.info(f"⏹️ RequestStopTransaction (OCPP 2.x) an {self.cp_id} (Tx: {tx_id})")
+            else:
+                payload = {"transactionId": int(tx_id)}
+                await self.send_call("RemoteStopTransaction", payload)
+                logger.info(f"⏹️ RemoteStopTransaction an {self.cp_id} (Tx: {tx_id})")
 
     async def ocpp_unlock_connector(self, event):
         """Entriegelt das Ladekabel."""
         connector_id = int(event.get("connector_id", 1))
-        payload = {"connectorId": connector_id}
+        if self.ocpp_version in ["ocpp2.0.1", "ocpp2.1"]:
+            payload = {"evseId": 1, "connectorId": connector_id}
+        else:
+            payload = {"connectorId": connector_id}
         await self.send_call("UnlockConnector", payload)
         logger.info(f"🔓 UnlockConnector an {self.cp_id} (Connector: {connector_id})")
 
     async def ocpp_reserve_now(self, event):
-        """Reserviert die Ladesäule für einen bestimmten RFID-Tag / Nutzer (OCPP 1.6 ReserveNow)."""
+        """Reserviert die Ladesäule für einen bestimmten RFID-Tag / Nutzer (OCPP 1.6 & 2.x ReserveNow)."""
         connector_id = int(event.get("connector_id", 1))
         id_tag = event.get("id_tag", "RESERVED_USER")
         reservation_id = int(event.get("reservation_id", 1))
         expiry_iso = event.get("expiry_date") or (timezone.now() + timezone.timedelta(hours=2)).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
-        payload = {
-            "connectorId": connector_id,
-            "expiryDate": expiry_iso,
-            "idTag": id_tag,
-            "reservationId": reservation_id,
-        }
+        if self.ocpp_version in ["ocpp2.0.1", "ocpp2.1"]:
+            payload = {
+                "id": reservation_id,
+                "expiryDateTime": expiry_iso,
+                "idToken": {"idToken": id_tag, "type": "ISO14443"},
+                "evseId": connector_id,
+            }
+        else:
+            payload = {
+                "connectorId": connector_id,
+                "expiryDate": expiry_iso,
+                "idTag": id_tag,
+                "reservationId": reservation_id,
+            }
         await self.send_call("ReserveNow", payload)
         await self.set_station_reserved(self.cp_id, reservation_id, id_tag, expiry_iso)
         await self.broadcast_wallbox_update()
         logger.info(f"🔒 ReserveNow an {self.cp_id} (ResId: {reservation_id}, Tag: {id_tag})")
 
     async def ocpp_cancel_reservation(self, event):
-        """Hebt eine bestehende Reservierung auf (OCPP 1.6 CancelReservation)."""
+        """Hebt eine bestehende Reservierung auf (OCPP 1.6 & 2.x CancelReservation)."""
         reservation_id = int(event.get("reservation_id", 1))
         payload = {"reservationId": reservation_id}
         await self.send_call("CancelReservation", payload)
@@ -588,7 +621,11 @@ class OcppConsumer(AsyncWebsocketConsumer):
     async def ocpp_reset(self, event):
         """Führt einen Soft- oder Hard-Reset der Wallbox durch."""
         reset_type = event.get("type", "Soft")
-        payload = {"type": reset_type}
+        if self.ocpp_version in ["ocpp2.0.1", "ocpp2.1"]:
+            reset_val = "Immediate" if str(reset_type).lower() == "hard" else "OnIdle"
+            payload = {"type": reset_val}
+        else:
+            payload = {"type": reset_type}
         await self.send_call("Reset", payload)
         logger.info(f"🔄 Reset an {self.cp_id}: {reset_type}")
 
