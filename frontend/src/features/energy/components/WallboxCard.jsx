@@ -364,20 +364,6 @@ export default function WallboxCard({ onOpenAddModal }) {
                     </div>
                 </div>
 
-                {/* Feedback Alert */}
-                {feedback.text && (
-                    <div
-                        className={`p-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 border transition-all ${
-                            feedback.type === "success"
-                                ? "bg-emerald-50 dark:bg-emerald-950/60 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300"
-                                : "bg-red-50 dark:bg-red-950/60 border-red-200 dark:border-red-800 text-red-800 dark:text-red-300"
-                        }`}
-                    >
-                        <span className="text-sm">{feedback.type === "success" ? "✓" : "⚠️"}</span>
-                        <span>{feedback.text}</span>
-                    </div>
-                )}
-
                 {/* Metrics */}
                 <div className="grid grid-cols-3 gap-2.5">
                     <div className="p-3 bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-700/60">
@@ -483,13 +469,40 @@ export default function WallboxCard({ onOpenAddModal }) {
             </div>
 
             {/* Actions Footer */}
-            <div className="pt-4 mt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-3 relative z-10">
-                <span className="text-xs text-slate-400">
+            <div className="pt-4 mt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-2.5 relative z-10">
+                <span className="text-xs text-slate-400 shrink-0">
                     {t("wallbox.cable", "Kabel:")} <strong className={`${isCharging || activeStation.status === "Preparing" ? "text-emerald-600 dark:text-emerald-400" : isReserved ? "text-purple-600 dark:text-purple-400" : "text-slate-600 dark:text-slate-300"}`}>
                         {activeStation.connector_status || (activeStation.status === "Preparing" || isCharging ? t("wallbox.connected", "Gesteckt") : isReserved ? t("wallbox.status_reserved", "Reserviert") : t("wallbox.ready", "Bereit"))}
                     </strong>
                 </span>
-                <div className="flex items-center gap-2">
+
+                {/* Visuelle Rückmeldung (Pulsierender Punkt & Kurzstatus) */}
+                <div className="flex-1 flex items-center justify-center px-1 min-w-0">
+                    {actionPending !== null || updateModeMutation.isPending ? (
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 animate-pulse truncate max-w-[130px] sm:max-w-[160px]">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span>
+                            <span className="truncate">{t("wallbox.status_sending", "Wird gesendet...")}</span>
+                        </span>
+                    ) : feedback.text ? (
+                        <span
+                            title={feedback.text}
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border transition-all truncate max-w-[130px] sm:max-w-[160px] ${
+                                feedback.type === "success"
+                                    ? "bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/25"
+                                    : "bg-rose-500/10 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 border-rose-500/25"
+                            }`}
+                        >
+                            <span className={`w-1.5 h-1.5 rounded-full ${feedback.type === "success" ? "bg-emerald-500" : "bg-rose-500"}`}></span>
+                            <span className="truncate">
+                                {feedback.type === "success"
+                                    ? t("wallbox.status_sent", "Gesendet")
+                                    : t("wallbox.status_error", "Fehler")}
+                            </span>
+                        </span>
+                    ) : null}
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
                     {isReserved && (
                         <button
                             type="button"
