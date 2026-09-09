@@ -303,6 +303,10 @@ class OcppConsumer(AsyncWebsocketConsumer):
         if not isinstance(payload, dict):
             return
 
+        if "status" in payload:
+            status_val = payload.get("status")
+            logger.info(f"📥 OCPP CallResult von {self.cp_id} (ID: {unique_id}): Status = {status_val}")
+
         # 1. GetCompositeSchedule Antwort
         if "chargingSchedule" in payload or "scheduleStart" in payload:
             await self.save_composite_schedule(self.cp_id, payload)
