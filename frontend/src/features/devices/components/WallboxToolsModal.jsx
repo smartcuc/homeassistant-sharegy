@@ -21,9 +21,6 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
     const [reserveTag, setReserveTag] = useState(station?.reserved_id_tag || "APP_USER");
     const [reserveDuration, setReserveDuration] = useState("120"); // 120 Minuten
 
-    // Diagnostics Formular
-    const [diagnosticsUrl, setDiagnosticsUrl] = useState("https://sharegy.de/api/energy/wallboxes/diagnostics-upload/");
-
     // Generic Action Mutation
     const remoteActionMutation = useMutation({
         mutationFn: async ({ action, payload = {} }) => {
@@ -110,13 +107,6 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
         remoteActionMutation.mutate({ action: "cancel-reserve" });
     };
 
-    const handleGetDiagnostics = () => {
-        remoteActionMutation.mutate({
-            action: "get-diagnostics",
-            payload: { location: diagnosticsUrl.trim() },
-        });
-    };
-
     const handleGetSchedule = () => {
         remoteActionMutation.mutate({
             action: "get-composite-schedule",
@@ -184,7 +174,6 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                             { id: "rfid", label: "RFID Whitelist", icon: "💳" },
                             { id: "reservation", label: "Reservierung", icon: "🔒" },
                             { id: "schedule", label: "Fahrplan", icon: "📊" },
-                            { id: "diagnostics", label: "Diagnose & Logs", icon: "🛠️" },
                             { id: "variables", label: "OCPP 2.x Variablen", icon: "⚙️", tag: "v2.0.1" },
                         ].map((tab) => {
                             const isActive = activeTab === tab.id;
@@ -551,52 +540,7 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                         </div>
                     )}
 
-                    {/* TAB 4: DIAGNOSTICS */}
-                    {activeTab === "diagnostics" && (
-                        <div className="space-y-4">
-                            <p className="text-xs text-slate-500 dark:text-slate-400">
-                                Fordere die Wallbox an, ihre internen Betriebs- und Fehlerprotokolle via <strong>OCPP GetDiagnostics</strong> an eine Ziel-URL hochzuladen.
-                            </p>
-
-                            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
-                                <div>
-                                    <div className="text-[11px] uppercase font-bold text-slate-500">Status des Diagnose-Uploads</div>
-                                    <div className="text-sm font-bold text-slate-900 dark:text-white mt-0.5 flex items-center gap-2">
-                                        <span className={`w-2 h-2 rounded-full ${station.diagnostics_status === "Uploading" ? "bg-amber-500 animate-pulse" : station.diagnostics_status === "Uploaded" ? "bg-emerald-500" : "bg-slate-400"}`}></span>
-                                        <span>{station.diagnostics_status || "Idle (Bereit)"}</span>
-                                    </div>
-                                    {station.last_diagnostics_file && (
-                                        <div className="text-[10px] font-mono text-slate-400 mt-1">
-                                            Datei: {station.last_diagnostics_file}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                                    Ziel-Upload-URL (HTTPS / FTP)
-                                </label>
-                                <input
-                                    type="text"
-                                    value={diagnosticsUrl}
-                                    onChange={(e) => setDiagnosticsUrl(e.target.value)}
-                                    className="w-full px-3 py-2 rounded-xl text-xs font-mono bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none"
-                                />
-                            </div>
-
-                            <button
-                                type="button"
-                                disabled={actionPending !== null}
-                                onClick={handleGetDiagnostics}
-                                className="px-4 py-2.5 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition shadow-md shadow-indigo-600/20 cursor-pointer"
-                            >
-                                📋 Diagnose-Upload jetzt anfordern
-                            </button>
-                        </div>
-                    )}
-
-                    {/* TAB 5: COMPOSITE SCHEDULE */}
+                    {/* TAB 4: COMPOSITE SCHEDULE */}
                     {activeTab === "schedule" && (
                         <div className="space-y-4">
                             <p className="text-xs text-slate-500 dark:text-slate-400">
