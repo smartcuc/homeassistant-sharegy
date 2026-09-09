@@ -2124,7 +2124,7 @@
     "battery_storage_desc": "Stationärer Akku zur Zwischenspeicherung",
     "ev_wallbox": "E-Auto / Wallbox",
     "ev_wallbox_desc": "Elektrofahrzeug mit intelligenter Lademöglichkeit",
-    "heat_pump": "Wärmepumpe / BWWP",
+    "heat_pump": "Wärmepumpe",
     "heat_pump_desc": "Heizungs-Wärmepumpe oder Brauchwasser-Wärmepumpe",
     "tariff_selection_title": "Aktueller Stromtarif",
     "tariff_selection_desc": "Welcher Vertrag liegt aktuell zugrunde?",

@@ -2124,7 +2124,7 @@
     "battery_storage_desc": "Stationary battery for energy storage",
     "ev_wallbox": "EV / Wallbox",
     "ev_wallbox_desc": "Electric vehicle with smart charging capabilities",
-    "heat_pump": "Heat Pump / DHW Heat Pump",
+    "heat_pump": "Heat Pump",
     "heat_pump_desc": "Heating heat pump or domestic hot water heat pump",
     "tariff_selection_title": "Current Electricity Tariff",
     "tariff_selection_desc": "Which contract is currently active?",

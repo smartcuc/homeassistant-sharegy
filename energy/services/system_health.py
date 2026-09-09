@@ -318,12 +318,27 @@ def check_home_system_status(user) -> Dict[str, Any]:
         # ---------------------------------------------------------
         # 🏠 SÄULE 4: HAUSVERBRAUCH
         # ---------------------------------------------------------
+        # 4. Zeitzone prüfen
+        user_settings = getattr(user, "settings", None) if user else None
+        tz_val = user_settings.timezone if (user_settings and getattr(user_settings, "timezone", None)) else None
+        has_timezone = bool(tz_val)
+
+        # 5. Energie-Profil des Nutzers ermitteln
+        from energy.services.energy_profile import get_user_energy_profile
+        energy_profile = get_user_energy_profile(user)
+        user_solar_type = energy_profile.get("solar_type", "none")
+        user_has_no_solar = (user_solar_type == "none") and not has_pv
+        user_expects_battery = bool(energy_profile.get("has_battery", False)) or has_battery
+
+        # 6. Hausverbrauch ermitteln
         has_direct_load = len(load_devices) > 0 or any(any(m.metric_key.lower() in ["load_power", "house_power"] for m in inv.latest_metrics.all()) for inv in inverter_devices)
         load_dev = load_devices[0] if load_devices else None
         load_device_name = (load_dev.name or load_dev.identifier) if load_dev else None
-        can_calculate_load = has_direct_load or (has_pv and has_grid)
+        
+        # Bei einem Haushalt ohne Solaranlage ist der Netzbezug direkt gleich dem Hausverbrauch!
+        can_calculate_load = has_direct_load or (has_pv and has_grid) or (user_has_no_solar and has_grid)
 
-        # 6. Submeter (Geräte, Räume, Etagen)
+        # 7. Submeter (Geräte, Räume, Etagen)
         assigned_device_ids = {
             dev.id for dev in (pv_devices + grid_devices + battery_devices + load_devices)
         }
@@ -342,7 +357,7 @@ def check_home_system_status(user) -> Dict[str, Any]:
             if getattr(d, "config", None) and d.config.floor
         }
 
-        # 7. Aktive Alarme & Störungen (z. B. via Sungrow Webhook oder Modbus/MQTT)
+        # 8. Aktive Alarme & Störungen (z. B. via Sungrow Webhook oder Modbus/MQTT)
         active_alarms = []
         for d in active_devices:
             alarm_info = cache.get(f"device:{d.id}:sungrow_alarm")
@@ -361,11 +376,6 @@ def check_home_system_status(user) -> Dict[str, Any]:
             if alarm_info:
                 active_alarms.append(alarm_info)
 
-        # Prüfen, ob Zeitzone konfiguriert ist
-        user_settings = getattr(user, "settings", None) if user else None
-        tz_val = user_settings.timezone if (user_settings and getattr(user_settings, "timezone", None)) else None
-        has_timezone = bool(tz_val)
-
         # Prüfen, ob unkonfigurierte Geräte vorliegen
         configured_device_ids = {
             dev.id for dev in (pv_devices + grid_devices + battery_devices + load_devices + inverter_devices)
@@ -377,20 +387,38 @@ def check_home_system_status(user) -> Dict[str, Any]:
             and (not getattr(d, "config", None) or not getattr(d.config, "role", None) or d.config.role.key in ["unknown", "unassigned", "default"])
         ]
 
-        # 8. Readiness Score & Status-Ampel berechnen (5 Kernsäulen, 0 .. 100%)
+        # 9. Readiness Score & Status-Ampel berechnen (Profil-abhängig 0 .. 100%)
         score = 0
-        if has_pv:
-            score += 30
-        if has_grid:
-            score += 30
-        if can_calculate_load:
-            score += 25
-        if has_battery:
-            score += 15
-        elif has_timezone:
-            score += 15
+        if user_has_no_solar:
+            # Haushalt ohne Solar: Netzzähler (50%), Hauslast (35%), Zeitzone (15%)
+            if has_grid:
+                score += 50
+            if can_calculate_load:
+                score += 35
+            if has_timezone:
+                score += 15
+        elif user_expects_battery:
+            # PV + Speicher Prosumer
+            if has_pv:
+                score += 30
+            if has_grid:
+                score += 30
+            if can_calculate_load:
+                score += 20
+            if has_battery:
+                score += 10
+            if has_timezone:
+                score += 10
         else:
-            score += 15
+            # PV / BKW ohne Speicher Prosumer
+            if has_pv:
+                score += 35
+            if has_grid:
+                score += 35
+            if can_calculate_load:
+                score += 20
+            if has_timezone:
+                score += 10
 
         if unconfigured_devices:
             score = max(0, score - min(25, len(unconfigured_devices) * 10))
@@ -410,30 +438,40 @@ def check_home_system_status(user) -> Dict[str, Any]:
                 "action": "check_device_fault",
             })
 
-        if not has_pv and not has_grid:
-            recommendations.append({
-                "priority": "critical",
-                "pillar": "pv_or_grid",
-                "title": "Verbinde deine erste Energiequelle",
-                "text": "Verknüpfe deinen Wechselrichter (z. B. Sungrow, Fronius, SMA) oder deinen digitalen Stromzähler (z. B. Tibber Pulse, Shelly 3EM).",
-                "action": "connect_inverter_or_meter",
-            })
-        elif has_pv and not has_grid:
-            recommendations.append({
-                "priority": "high",
-                "pillar": "grid",
-                "title": "Netzzähler fehlt für Autarkie-Berechnung",
-                "text": "Deine Solaranlage ist verbunden! Damit wir deinen Netzbezug, Einspeisevergütung und echte Autarkie berechnen können, verknüpfe deinen Netzstromzähler (z. B. Tibber Pulse, Shelly Pro 3EM oder Powerfox).",
-                "action": "connect_grid_meter",
-            })
-        elif has_grid and not has_pv:
-            recommendations.append({
-                "priority": "medium",
-                "pillar": "pv",
-                "title": "Solaranlage hinzufügen",
-                "text": "Dein Netzstromzähler ist aktiv. Wenn du eine Solaranlage oder ein Balkonkraftwerk besitzt, kannst du sie jetzt verbinden, um deine Einsparungen live zu sehen.",
-                "action": "connect_pv",
-            })
+        if user_has_no_solar:
+            if not has_grid:
+                recommendations.append({
+                    "priority": "critical",
+                    "pillar": "grid",
+                    "title": "Stromzähler verknüpfen",
+                    "text": "Verbinde deinen digitalen Stromzähler (z. B. Tibber Pulse, Shelly 3EM oder Powerfox), um deinen Verbrauch live zu erfassen.",
+                    "action": "connect_grid_meter",
+                })
+        else:
+            if not has_pv and not has_grid:
+                recommendations.append({
+                    "priority": "critical",
+                    "pillar": "pv_or_grid",
+                    "title": "Verbinde deine erste Energiequelle",
+                    "text": "Verknüpfe deinen Wechselrichter (z. B. Sungrow, Fronius, SMA) oder deinen digitalen Stromzähler (z. B. Tibber Pulse, Shelly 3EM).",
+                    "action": "connect_inverter_or_meter",
+                })
+            elif has_pv and not has_grid:
+                recommendations.append({
+                    "priority": "high",
+                    "pillar": "grid",
+                    "title": "Netzzähler fehlt für Autarkie-Berechnung",
+                    "text": "Deine Solaranlage ist verbunden! Damit wir deinen Netzbezug, Einspeisevergütung und echte Autarkie berechnen können, verknüpfe deinen Netzstromzähler (z. B. Tibber Pulse, Shelly Pro 3EM oder Powerfox).",
+                    "action": "connect_grid_meter",
+                })
+            elif has_grid and not has_pv:
+                recommendations.append({
+                    "priority": "medium",
+                    "pillar": "pv",
+                    "title": "Solaranlage hinzufügen",
+                    "text": "Dein Netzstromzähler ist aktiv. Wenn du eine Solaranlage oder ein Balkonkraftwerk besitzt, kannst du sie jetzt verbinden, um deine Einsparungen live zu sehen.",
+                    "action": "connect_pv",
+                })
 
         if not submeter_devices:
             recommendations.append({
@@ -470,20 +508,23 @@ def check_home_system_status(user) -> Dict[str, Any]:
                 pv_status = "fault"
                 pv_status_text = f"🚨 Störung: {alarm.get('name')} (Code {alarm.get('code')})"
 
+        # 10. Pillar-Datenstrukturen aufbereiten
         pv_pillar_data = {
             "installed": has_pv,
-            "configured": has_pv,
-            "status": pv_status,
+            "configured": has_pv or user_has_no_solar,
+            "status": "optional" if user_has_no_solar else pv_status,
+            "optional": user_has_no_solar,
             "method": "direct" if has_pv else "none",
             "label": "Solarerzeugung",
-            "device_name": pv_device_name,
-            "status_text": pv_status_text,
+            "device_name": pv_device_name or ("Nicht vorhanden (Haushalt ohne Solar)" if user_has_no_solar else None),
+            "status_text": "Nicht vorhanden (Haushalt ohne Solar)" if user_has_no_solar else pv_status_text,
         }
 
         grid_pillar_data = {
             "installed": has_grid,
             "configured": has_grid,
             "status": "ok" if has_grid else "missing",
+            "optional": False,
             "method": "direct" if has_grid else "none",
             "label": "Netzanschluss & Zähler",
             "device_name": grid_device_name,
@@ -492,39 +533,48 @@ def check_home_system_status(user) -> Dict[str, Any]:
 
         battery_pillar_data = {
             "installed": has_battery,
-            "configured": has_battery,
-            "status": "ok" if has_battery else "optional",
+            "configured": has_battery or not user_expects_battery,
+            "status": ("ok" if has_battery else ("missing" if user_expects_battery else "optional")),
+            "optional": not user_expects_battery,
             "method": "direct" if has_battery else "none",
             "label": "Batteriespeicher",
-            "device_name": battery_name,
+            "device_name": battery_name or ("Kein Speicher (Optional)" if not user_expects_battery else None),
             "capacity_kwh": battery_capacity,
             "status_text": battery_status_text,
         }
+
+        load_device_display = (
+            load_device_name
+            or ("Direkt über Netzzähler erfasst" if (user_has_no_solar and has_grid) else ("Berechnet (PV + Netz ± Speicher)" if can_calculate_load else None))
+        )
+        load_status_display = (
+            "Vollständig in Echtzeit erfasst" if has_direct_load
+            else ("Direkt über Netzzähler erfasst" if (user_has_no_solar and has_grid)
+            else ("Wird aus PV & Netz berechnet" if can_calculate_load else "Nicht berechenbar"))
+        )
 
         load_pillar_data = {
             "installed": can_calculate_load,
             "configured": can_calculate_load,
             "status": "ok" if can_calculate_load else "missing",
+            "optional": False,
             "method": "direct" if has_direct_load else ("calculated" if can_calculate_load else "none"),
             "label": "Hausverbrauch",
-            "device_name": load_device_name or ("Berechnet (PV + Netz ± Speicher)" if can_calculate_load else None),
-            "is_direct": has_direct_load,
-            "status_text": "Vollständig in Echtzeit erfasst" if has_direct_load else ("Wird aus PV & Netz berechnet" if can_calculate_load else "Nicht berechenbar"),
+            "device_name": load_device_display,
+            "is_direct": has_direct_load or (user_has_no_solar and has_grid),
+            "status_text": load_status_display,
         }
 
         timezone_pillar_data = {
             "installed": has_timezone,
             "configured": has_timezone,
             "status": "ok" if has_timezone else "missing",
+            "optional": False,
             "method": "direct" if has_timezone else "none",
             "label": "Zeitzone",
             "device_name": tz_val if tz_val else "Nicht festgelegt",
             "status_text": f"Aktiv ({tz_val})" if tz_val else "Zeitzone fehlt",
         }
-
-        # 9. Energie-Profil & Tarif-Kompass ermitteln
-        from energy.services.energy_profile import get_user_energy_profile
-        energy_profile = get_user_energy_profile(user)
 
         return {
             "score": min(100, score),

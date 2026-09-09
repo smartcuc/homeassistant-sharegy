@@ -95,6 +95,21 @@ class EnergyProfileServiceTests(TestCase):
         self.assertEqual(data_e2["profile_code"], "E.2")
         self.assertEqual(data_e2["recommended_tariff"], "dynamic")
 
+    def test_pv_battery_heatpump_profile_f1(self):
+        """Profil F.1: PV + Speicher + Wärmepumpe (ohne EV) -> Dynamischer Tarif empfohlen"""
+        data = calculate_energy_profile_data(
+            solar_type="pv",
+            has_battery=True,
+            has_ev=False,
+            has_heatpump=True,
+            tariff_type="static"
+        )
+        self.assertEqual(data["profile_code"], "F.1")
+        self.assertEqual(data["recommended_tariff"], "dynamic")
+        self.assertEqual(data["profile_name"], "PV-Anlage + Speicher + Wärmepumpe")
+        self.assertIn("alternative_tariff_hint", data)
+        self.assertGreaterEqual(data["estimated_savings_eur_year"], 1400)
+
     def test_all_in_profile_f1(self):
         """Profil F.1: PV + Speicher + E-Auto + WP"""
         data = calculate_energy_profile_data(

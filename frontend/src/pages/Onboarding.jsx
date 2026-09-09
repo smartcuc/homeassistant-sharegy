@@ -335,7 +335,7 @@ export default function Onboarding() {
                                             🔒 Klassischer Festpreis-Tarif (~30–35 ct/kWh)
                                         </div>
                                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                                            Konstanter Strompreis rund um die Uhr (z. B. Stadtwerke, Grundversorger, Standard-Ökostrom).
+                                            Konstanter Strompreis rund um die Uhr (z. B. Stadtwerke, Grundversorger, Standard-Stromtarif).
                                         </p>
                                     </div>
                                 </div>

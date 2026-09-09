@@ -31,14 +31,14 @@ def calculate_energy_profile_data(
 
     # Standardwerte & Basisfall
     profile_code = "A.1"
-    profile_name = "Mieter / Haushalt ohne Solar"
+    profile_name = "Haushalt ohne Solar"
     profile_subtitle = "Fokus auf Standby-Reduktion, Transparenz & Strompreis-Alarm"
     recommended_tariff = "static"
     tariff_verdict_title = "Fester Stromtarif empfohlen"
     tariff_verdict_reason = (
         "Ohne große verschiebbare Lasten (wie E-Auto oder Wärmepumpe) fressen "
         "zusätzliche Messstellen- und Grundgebühren den Börsenpreis-Vorteil auf. "
-        "Ein günstiger fester Ökostromtarif bietet optimale Planbarkeit."
+        "Ein günstiger fester Stromtarif bietet optimale Planbarkeit."
     )
     shiftable_kwh_year = 200  # Standby & Haushaltsgeräte
     base_savings_eur = 80  # Standby-Killer & Bewusstsein
@@ -76,7 +76,7 @@ def calculate_energy_profile_data(
         recommended_tariff = "dynamic"
         tariff_verdict_title = "Dynamischer Börsenstromtarif ist Pflicht!"
         tariff_verdict_reason = (
-            "Mit über 6.000 kWh verschiebbarer Last (Fahrstrom + Wärme + Batterie) ist das "
+            "Mit über 6.500 kWh verschiebbarer Last (Fahrstrom + Wärme + Batterie) ist das "
             "Einsparpotenzial durch Börsenpreis-Tiefs und § 14a Rabatt maximal."
         )
         shiftable_kwh_year = 6500
@@ -95,10 +95,37 @@ def calculate_energy_profile_data(
             "color": "indigo",
         })
 
-    # 2. ARCHETYP E.2: PROSUMER MULTI-SEKTOR (PV + SPEICHER + EV)
+    # 2. ARCHETYP F.1 / E.3: PV + SPEICHER + WÄRMEPUMPE (OHNE EV)
+    elif (solar_type in ["pv", "bkw"]) and has_battery and has_heatpump and not has_ev:
+        profile_code = "F.1"
+        profile_name = "PV-Anlage + Speicher + Wärmepumpe"
+        profile_subtitle = "Sektorenkopplung: Solarerzeugung, Heimspeicher & Wärmepumpe"
+        recommended_tariff = "dynamic"
+        tariff_verdict_title = "Dynamischer Börsenstromtarif empfohlen"
+        tariff_verdict_reason = (
+            "Mit Wärmepumpe (hoher Winterstrombedarf) und Heimspeicher profitierst du ideal "
+            "von dynamischen Winter-Tiefpreisen, Akku-Arbitrage und § 14a Netzentgelt-Rabatt (~160 €/a)."
+        )
+        shiftable_kwh_year = 5500
+        base_savings_eur = 1450
+        savings_breakdown = [
+            {"title": "PV-Eigenverbrauch Haus & Wärmepumpe", "amount_eur": 920, "icon": "☀️"},
+            {"title": "§ 14a EnWG Modul 1 Netzentgelt-Rabatt", "amount_eur": 160, "icon": "🛡️"},
+            {"title": "Dynamisches Heizen bei Börsenpreis-Tiefs", "amount_eur": 250, "icon": "♨️"},
+            {"title": "Batterie-Arbitrage & Winter-Nachladung", "amount_eur": 120, "icon": "🔋"},
+        ]
+        action_links.insert(0, {
+            "title": "Energiesteuerung (HEMS) öffnen",
+            "subtitle": "Prioritäten zwischen Wärmepumpe, Speicher & Haus festlegen",
+            "path": "/app/control",
+            "icon": "🎛️",
+            "color": "indigo",
+        })
+
+    # 3. ARCHETYP E.2: PROSUMER MULTI-SEKTOR (PV + SPEICHER + EV)
     elif solar_type == "pv" and has_battery and has_ev and not has_heatpump:
         profile_code = "E.2"
-        profile_name = "PV-Dachanlage + Speicher + E-Auto"
+        profile_name = "PV-Anlage + Speicher + E-Auto"
         profile_subtitle = "Multi-Sektor Prosumer: Solarstrom für Haus & Mobilität"
         recommended_tariff = "dynamic"
         tariff_verdict_title = "Dynamischer Börsenstromtarif empfohlen"
@@ -121,10 +148,10 @@ def calculate_energy_profile_data(
             "color": "indigo",
         })
 
-    # 3. ARCHETYP E.1: BASIS-PROSUMER (PV + SPEICHER)
+    # 4. ARCHETYP E.1: BASIS-PROSUMER (PV + SPEICHER)
     elif solar_type == "pv" and has_battery and not has_ev and not has_heatpump:
         profile_code = "E.1"
-        profile_name = "PV-Dachanlage mit Heimspeicher (Basis-Prosumer)"
+        profile_name = "PV-Anlage mit Heimspeicher (Basis-Prosumer)"
         profile_subtitle = "Hohe Autarkie (70–80%) & netzdienliche Winterladung"
         recommended_tariff = "dynamic" if is_dynamic_tariff else "static"
         tariff_verdict_title = "Dynamischer Tarif (Winter-Arbitrage) oder Festpreis"
@@ -146,10 +173,10 @@ def calculate_energy_profile_data(
             "color": "emerald",
         })
 
-    # 4. ARCHETYP D.2: WÄRMEPUMPE + PV (OHNE SPEICHER)
-    elif solar_type == "pv" and has_heatpump and not has_battery and not has_ev:
+    # 5. ARCHETYP D.2: WÄRMEPUMPE + PV (OHNE SPEICHER)
+    elif (solar_type in ["pv", "bkw"]) and has_heatpump and not has_battery and not has_ev:
         profile_code = "D.2"
-        profile_name = "Wärmepumpe + PV-Dachanlage"
+        profile_name = "Wärmepumpe + PV-Anlage"
         profile_subtitle = "Thermische Speicherung im Estrich & Warmwasser"
         recommended_tariff = "dynamic"
         tariff_verdict_title = "Dynamischer Tarif mit § 14a EnWG Rabatt"
@@ -166,13 +193,13 @@ def calculate_energy_profile_data(
         ]
         action_links.insert(0, {
             "title": "Heizungs-Lastmanagement",
-            "subtitle": "BWWP & Fußbodenheizung optimieren",
+            "subtitle": "Wärmepumpe & Fußbodenheizung optimieren",
             "path": "/app/heating",
             "icon": "♨️",
             "color": "rose",
         })
 
-    # 5. ARCHETYP D.1: WÄRMEPUMPE OHNE GROSSE PV
+    # 6. ARCHETYP D.1: WÄRMEPUMPE OHNE GROSSE PV
     elif has_heatpump and not has_ev and not has_battery:
         profile_code = "D.1"
         profile_name = "Wärmepumpe ohne große PV"
@@ -198,10 +225,10 @@ def calculate_energy_profile_data(
             "color": "rose",
         })
 
-    # 6. ARCHETYP C.3: E-AUTO + PV (OHNE SPEICHER)
+    # 7. ARCHETYP C.3: E-AUTO + PV (OHNE SPEICHER)
     elif solar_type == "pv" and has_ev and not has_battery and not has_heatpump:
         profile_code = "C.3"
-        profile_name = "E-Auto + PV-Dachanlage (ohne Heimspeicher)"
+        profile_name = "E-Auto + PV-Anlage (ohne Heimspeicher)"
         profile_subtitle = "Reines PV-Überschussladen & dynamische Ergänzung"
         recommended_tariff = "dynamic"
         tariff_verdict_title = "Dynamischer Börsenstromtarif empfohlen"
@@ -224,7 +251,7 @@ def calculate_energy_profile_data(
             "color": "emerald",
         })
 
-    # 7. ARCHETYP C.2: E-AUTO + BKW
+    # 8. ARCHETYP C.2: E-AUTO + BKW
     elif solar_type == "bkw" and has_ev and not has_heatpump:
         profile_code = "C.2"
         profile_name = "E-Auto + Balkonkraftwerk"
@@ -250,7 +277,7 @@ def calculate_energy_profile_data(
             "color": "emerald",
         })
 
-    # 8. ARCHETYP C.1: E-AUTO OHNE PV
+    # 9. ARCHETYP C.1: E-AUTO OHNE PV
     elif solar_type == "none" and has_ev and not has_heatpump:
         profile_code = "C.1"
         profile_name = "E-Auto / Wallbox ohne PV"
@@ -275,7 +302,7 @@ def calculate_energy_profile_data(
             "color": "emerald",
         })
 
-    # 9. ARCHETYP B.2: BKW MIT SPEICHER
+    # 10. ARCHETYP B.2: BKW MIT SPEICHER
     elif solar_type == "bkw" and has_battery and not has_ev and not has_heatpump:
         profile_code = "B.2"
         profile_name = "Balkonkraftwerk mit Speicher"
@@ -300,7 +327,7 @@ def calculate_energy_profile_data(
             "color": "emerald",
         })
 
-    # 10. ARCHETYP B.1: BKW OHNE SPEICHER
+    # 11. ARCHETYP B.1: BKW OHNE SPEICHER
     elif solar_type == "bkw" and not has_battery and not has_ev and not has_heatpump:
         profile_code = "B.1"
         profile_name = "Balkonkraftwerk ohne Speicher"
@@ -325,7 +352,7 @@ def calculate_energy_profile_data(
             "color": "amber",
         })
 
-    # 11. SONSTIGE KOMBINATIONEN
+    # 12. SONSTIGE KOMBINATIONEN
     elif has_ev and has_heatpump:
         profile_code = "D.1"
         profile_name = "E-Auto & Wärmepumpe (ohne PV)"
@@ -346,11 +373,18 @@ def calculate_energy_profile_data(
 
     elif solar_type == "pv":
         profile_code = "E.1"
-        profile_name = "PV-Dachanlage"
+        profile_name = "PV-Anlage"
         profile_subtitle = "Solarerzeugung & Eigenverbrauchsoptimierung"
         recommended_tariff = "dynamic" if is_dynamic_tariff else "static"
         shiftable_kwh_year = 2000
         base_savings_eur = 650
+
+    alternative_tariff_hint = (
+        "Alternative mit separatem Zähler: Ein fester Tarif kombiniert mit einem vergünstigten "
+        "Wärmestrom- oder Autostromtarif ist möglich, erfordert jedoch einen 2. Zähler (Kaskadenschaltung). "
+        "Dadurch entstehen Zusatzkosten von ca. 80–120 €/Jahr für Messstellenbetrieb und Grundgebühr. "
+        "Bei einem dynamischen Börsenstromtarif genügt 1 Zähler bei vollem § 14a Rabatt (ca. 160 €/Jahr)."
+    )
 
     return {
         "profile_code": profile_code,
@@ -365,6 +399,7 @@ def calculate_energy_profile_data(
         "recommended_tariff": recommended_tariff,
         "tariff_verdict_title": tariff_verdict_title,
         "tariff_verdict_reason": tariff_verdict_reason,
+        "alternative_tariff_hint": alternative_tariff_hint,
         "shiftable_kwh_year": shiftable_kwh_year,
         "estimated_savings_eur_year": base_savings_eur,
         "savings_breakdown": savings_breakdown,

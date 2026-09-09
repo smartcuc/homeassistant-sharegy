@@ -154,7 +154,7 @@ export default function EnergyProfilePage() {
                         </div>
 
                         <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-                            {profile?.profile_name || "Mieter / Haushalt ohne Solar"}
+                            {profile?.profile_name || "Haushalt ohne Solar"}
                         </h2>
                         <p className="text-sm text-indigo-200/90 leading-relaxed">
                             {profile?.profile_subtitle}
@@ -212,9 +212,9 @@ export default function EnergyProfilePage() {
                             </label>
                             <div className="grid grid-cols-3 gap-2">
                                 {[
-                                    { key: "none", label: "🏢 Kein Solar", desc: "Wohnung / Dach frei" },
+                                    { key: "none", label: "🏢 Kein Solar", desc: "Haushalt ohne PV" },
                                     { key: "bkw", label: "☀️ Balkonkraftwerk", desc: "bis 800W Stecker-Solar" },
-                                    { key: "pv", label: "🏡 PV-Dachanlage", desc: "große Solaranlage" },
+                                    { key: "pv", label: "🏡 PV-Anlage", desc: "große Solaranlage" },
                                 ].map((opt) => (
                                     <button
                                         key={opt.key}
@@ -287,7 +287,7 @@ export default function EnergyProfilePage() {
                                 <span className="text-2xl">♨️</span>
                                 <div>
                                     <div className="font-bold text-xs text-slate-900 dark:text-white">
-                                        {t("energy_profile.heat_pump", "Wärmepumpe / BWWP")}
+                                        {t("energy_profile.heat_pump", "Wärmepumpe")}
                                     </div>
                                     <div className="text-[11px] text-slate-500 dark:text-slate-400">
                                         {t("energy_profile.heat_pump_desc", "Heizungs-Wärmepumpe oder Brauchwasser-Wärmepumpe")}
@@ -307,7 +307,7 @@ export default function EnergyProfilePage() {
                     </div>
                 </Card>
 
-                {/* 2.2 AKTUELLER STROMTARIF */}
+                {/* 2.2 AKTUELLER STROMTARIF & ALTERNATIVEN */}
                 <Card>
                     <div className="flex items-center justify-between mb-4">
                         <div>
@@ -378,6 +378,17 @@ export default function EnergyProfilePage() {
                                     </p>
                                 </div>
                             </div>
+                        </div>
+
+                        {/* ALTERNATIVE: 2. ZÄHLER / KASKADENMESSUNG HINWEIS */}
+                        <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs space-y-1">
+                            <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5 text-[11px]">
+                                <span>ℹ️</span>
+                                <span>Alternative: Fester Tarif mit günstigem Lade-/Wärmetarif</span>
+                            </div>
+                            <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+                                Ein separater Festpreis-Wärme- oder Autostromtarif ist möglich, erfordert jedoch einen <strong>2. Zählerplatz (Kaskadenschaltung)</strong> mit Zusatzkosten von ca. <strong>80–120 €/Jahr</strong> für Messstellenbetrieb und Grundgebühr. Bei einem dynamischen Börsenstromtarif genügt <strong>1 intelligenter Zähler</strong> bei vollem § 14a Netzentgelt-Rabatt (~160 €/a).
+                            </p>
                         </div>
 
                         {/* ACTION LINK ZU TARIFSEITE */}
