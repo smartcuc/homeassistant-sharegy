@@ -177,7 +177,7 @@
     "relay_turn_on": "Relais einschalten",
     "role_sensor": "Sensor",
     "role_both": "Beides",
-    "confirm_trash_single": "devices.confirm_trash_single",
+    "confirm_trash_single": "Gerät \"{{name}}\" in den Papierkorb verschieben?",
     "all_floors": "Alle Etagen",
     "all_rooms": "Alle Räume",
     "group_by_floors": "Geräte nach Etagen gruppieren",
@@ -258,7 +258,7 @@
     "move_to_trash": "In den Papierkorb verschieben ({{count}})",
     "empty": "Keine Geräte vorhanden",
     "online_warning": "⚠ Mindestens ein ausgewähltes Gerät ist aktuell online.\\n\\nWenn MQTT, Home Assistant oder ioBroker weiterhin Daten senden, kann das Gerät automatisch erneut erkannt werden.\\n\\nEntfernen Sie nach Möglichkeit zuerst die Datenquelle.\\n\\nTrotzdem in den Papierkorb verschieben?",
-    "confirm_trash": "device_remove.confirm_trash",
+    "confirm_trash": "Möchten Sie die ausgewählten Geräte wirklich in den Papierkorb verschieben?",
     "error": "Fehler beim Entfernen."
   },
   "device_trash": {
@@ -513,7 +513,7 @@
     "ha_picker_desc": "Bequeme Auswahl aller Sensoren direkt in der Home Assistant UI.",
     "ha_buffer": "48h Offline-Puffer",
     "ha_buffer_desc": "Speichert Daten bei Internetausfall lokal und sendet sie lückenlos nach.",
-    "ha_stream": "Live WebSocket Stream",
+    "ha_stream": "Live-WebSocket Stream",
     "ha_stream_desc": "Echtzeit-Übertragung über verschlüsseltes WSS (Port 443).",
     "ha_install_title": "Installation in Home Assistant:",
     "ha_step_1": "Kopiere den Ordner custom_components/sharegy in deinen Home Assistant Ordner config/custom_components/ (oder füge das Repository in HACS hinzu).",
@@ -664,7 +664,7 @@
     "delete_error": "Fehler beim Löschen des Tarifs.",
     "loading": "Lade Stromtarif-Einstellungen…",
     "model_title": "Strombezug & Tarifmodell",
-    "model_desc": "tariffs.model_desc",
+    "model_desc": "Konfigurieren Sie dynamische oder zeitvariable Stromtarife zur automatischen Verbrauchs- und Ladeoptimierung.",
     "history_title": "Tarif-Historie & Geplante Wechsel",
     "history_subtitle": "Übersicht aller hinterlegten Tarifzeiträume für dieses Haus.",
     "save_tibber_success": "Tibber-Zugangsdaten erfolgreich gespeichert!",
@@ -767,7 +767,7 @@
     "rooms": "Räume",
     "floors_count": "{{count}} Etagen",
     "rooms_count": "{{count}} Räume",
-    "devices_count": "structure.devices_count"
+    "devices_count": "{{count}} Gerät(e) zugeordnet"
   },
   "roles": {
     "producer": "Erzeuger",
@@ -915,7 +915,7 @@
     "f_landlord_p2p": "Quartiers-Clearing & P2P-Bilanzen",
     "f_landlord_sla": "Prioritäts-Support mit SLA",
     "canceled_title": "Abonnement zum Periodenende gekündigt",
-    "canceled_desc": "billing.canceled_desc",
+    "canceled_desc": "Ihr Abonnement wurde zum Ende der aktuellen Abrechnungsperiode gekündigt.",
     "period_end": "Ende der Laufzeit",
     "revoke_cancel": "Kündigung widerrufen",
     "have_coupon": "Hast du einen Gutscheincode?",
@@ -1145,7 +1145,7 @@
     "edit_title": "Speicher & Messpunkte bearbeiten",
     "detected_storage": "Erkannter Speicher aus Plugin / Wechselrichter",
     "auto_discovery": "Auto-Discovery",
-    "detected_desc": "storage_system.detected_desc",
+    "detected_desc": "Es wurde ein kompatibles Speichersystem erkannt. Konfigurieren Sie die Parameter für die automatische Steuerung.",
     "apply_suggestion": "✨ Vorschlag mit 1-Klick übernehmen",
     "section_general": "1. Allgemeine Angaben & Kapazität",
     "max_charge_power": "Max. Laden (kW)",
@@ -1176,9 +1176,9 @@
     "timezone_warning": "⚠️ Zeitzone nicht konfiguriert",
     "timezone_desc": "Für korrekte Zeitreihen, Berichte und Benachrichtigungen sollte eine Zeitzone ausgewählt werden.",
     "detected_timezone": "Erkannte Zeitzone:",
-    "accept_timezone": "banners.accept_timezone",
+    "accept_timezone": "Zeitzone übernehmen",
     "open_settings": "Einstellungen öffnen",
-    "devices_need_config": "banners.devices_need_config",
+    "devices_need_config": "Einige Geräte erfordern noch eine Konfiguration",
     "set_device_types_desc": "Setze Gerätetypen, damit Energy Flow korrekt berechnet werden kann.",
     "open_devices": "Geräte öffnen →"
   },
@@ -1430,7 +1430,7 @@
     "heating_rod_off": "⏹️ Heizstab Aus",
     "heating_rod_boost": "🔥 Sofort-Pufferladung",
     "appliance_running": "● Läuft aktiv",
-    "appliance_ready": "⏳ Ready-to-Start",
+    "appliance_ready": "⏳ Bereit zum Start",
     "appliance_off": "⚪ Aus",
     "appliance_subtitle": "Smart Plug · Automatischer Start im Best-Fenster",
     "next_best_window": "Nächstes Best-Fenster",
@@ -1675,7 +1675,7 @@
     "edit_title": "Batteriespeicher bearbeiten",
     "add_title": "Neuen Batteriespeicher anlegen",
     "modal_subtitle": "Definiere Kapazität, Ladelimits und Betriebsstrategie.",
-    "delete_confirm": "storage.delete_confirm",
+    "delete_confirm": "Möchten Sie diesen Speicher wirklich aus dem System entfernen?",
     "add_btn": "Batteriespeicher anlegen",
     "tab_storage": "Batteriespeicher & Messpunkte",
     "empty_title": "Keine Batteriespeicher angelegt",
@@ -1761,7 +1761,7 @@
   },
   "wallbox": {
     "waiting_for_solar": "Warte auf Solarstrom",
-    "mode_updated": "wallbox.mode_updated",
+    "mode_updated": "Lademodus für Wallbox erfolgreich aktualisiert.",
     "mode_pv_surplus": "☀️ Nur Solarüberschuss",
     "mode_min_pv": "⛅ Min + PV-Überschuss",
     "mode_spot_price": "💶 Börsenpreisgeführt",
@@ -1809,7 +1809,7 @@
   "community": {
     "share_stats": "Erfolge teilen",
     "invite_link": "Einladungslink",
-    "share_stats_title": "Share achievements & autarky with neighbors and social media",
+    "share_stats_title": "Erfolge & Autarkie mit Nachbarn und Social Media teilen",
     "sharing_title": "Quartiers-Energy Sharing (§ 42b EnWG)",
     "badge": "Community",
     "sharing_desc": "Teile deinen überschüssigen Solarstrom mit Nachbarn oder Mietern und spare gemeinsam teure Netzgebühren durch automatisiertes 15-Minuten-Clearing.",
@@ -1915,10 +1915,10 @@
     "active_check": "Aktiv ✓",
     "missing": "Fehlt",
     "calculated_load": "Berechnet (PV + Netz)",
-    "submeter_summary": "system_health.submeter_summary",
+    "submeter_summary": "Unterzähler & Messkonzept",
     "manage_devices_rooms": "Geräte & Räume verwalten",
     "recommendations_title": "💡 Handlungsempfehlungen:",
-    "accept_timezone": "system_health.accept_timezone",
+    "accept_timezone": "Zeitzone übernehmen",
     "assign_devices": "Geräte zuweisen →",
     "connect_device": "Gerät anbinden",
     "rec_connect_inverter_or_meter_title": "Verbinde deine erste Energiequelle",
@@ -1933,12 +1933,12 @@
     "rec_configure_devices_text": "{{count}} neue(s) Gerät(e) erkannt. Bitte weise Gerätetyp und Raum zu, damit alle Energieflüsse präzise berechnet werden.",
     "rec_set_timezone_title": "Zeitzone einstellen",
     "rec_set_timezone_text": "Für minutengenaue Auswertungen, Solarprognosen und dynamische Strompreise sollte deine lokale Zeitzone eingestellt sein.",
-    "score_badge_critical": "Setup Incomplete",
-    "omi_check_title": "System Check & Setup Grade (Omi-Check)",
-    "score_badge_good": "Well Prepared",
-    "score_badge_basic": "Basic Setup",
+    "score_badge_critical": "Setup unvollständig",
+    "omi_check_title": "Systemprüfung & Setup-Status (Omi-Check)",
+    "score_badge_good": "Gut vorbereitet",
+    "score_badge_basic": "Basis-Setup",
     "optional": "Optional",
-    "score_badge_excellent": "Excellent"
+    "score_badge_excellent": "Exzellent"
   },
   "string_id": "string_id",
   "hours": "hours",
@@ -1990,7 +1990,7 @@
     "sungrow_step_3": "Nach der Freigabe erfolgt die Rückleitung zu Sharegy — dein Wechselrichter und Batteriespeicher werden vollautomatisch angelegt und synchronisiert.",
     "choose_vendor_title": "1. Wähle deinen Wechselrichter-Hersteller / Cloud-Dienst",
     "no_vendor_selected": "Bitte wähle oben einen Hersteller aus, um die zugehörigen Einstellungen und Zugangsdaten anzuzeigen.",
-    "setup_instructions": "cloud_inverter.setup_instructions",
+    "setup_instructions": "Geben Sie Ihre Cloud-Zugangsdaten oder API-Tokens ein, um Wechselrichter- und Erzeugungsdaten automatisch zu synchronisieren.",
     "credentials_title": "2. Zugangsdaten & Konfiguration",
     "display_name_label": "Anzeigename in Sharegy",
     "polling_interval_label": "Abfrage-Intervall (Cloud Polling)",
@@ -2020,7 +2020,7 @@
     "discovering": "Suche Shelly Geräte...",
     "discover_btn": "Shelly-Geräte suchen (Discovery)",
     "importing": "Importiere Geräte...",
-    "import_all_btn": "shelly_cloud.import_all_btn",
+    "import_all_btn": "Alle Shelly-Geräte importieren",
     "import_success_desc": "Die Geräte sind jetzt im System registriert und können im Dashboard und im Energiemanagement genutzt werden."
   },
   "bwwp": {
@@ -2063,7 +2063,7 @@
   },
   "home_setup": {
     "modal_title": "Home Setup & Omi-Check",
-    "modal_subtitle": "Overview of connected system components and configuration status."
+    "modal_subtitle": "Übersicht der angebundenen Systemkomponenten und Konfigurationsstatus."
   },
   "device_baseline": {
     "title": "Geräteprofil & Baseline-Überwachung",
@@ -2096,5 +2096,15 @@
     "mode_min_pv": "⛅ Min + PV-Überschuss (Basis 6A)",
     "mode_spot_price": "💶 Börsenpreisgeführt",
     "mode_instant": "⚡ Sofortladen (Volle Leistung)"
+  },
+  "ocpp": {
+    "tab_v2g": "V2G / V2H",
+    "tab_trigger": "Remote Trigger",
+    "tab_rfid": "RFID Whitelist",
+    "tab_reservation": "Reservierung",
+    "tab_schedule": "Fahrplan",
+    "tab_variables": "OCPP 2.x Variablen",
+    "modal_title": "OCPP Experten-Tools",
+    "modal_subtitle": "Live-Diagnose, Fernsteuerung & ISO 15118-20 V2X Management"
   }
 }

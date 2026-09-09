@@ -33,6 +33,7 @@ Thumbs.db
 # Backup / temporär
 *.bak
 *.tmp
+scratch/
 
 # Migrations cache
 */migrations/__pycache__/

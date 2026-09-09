@@ -159,7 +159,7 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                         type="button"
                         onClick={onClose}
                         className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition cursor-pointer"
-                        aria-label="Schließen"
+                        aria-label={t("common.close", "Schließen")}
                     >
                         ✕
                     </button>
@@ -169,12 +169,12 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                 <div className="px-6 pt-3.5 pb-2 bg-slate-50/50 dark:bg-slate-950/40 border-b border-slate-100 dark:border-slate-800">
                     <div className="flex items-center gap-1.5 p-1 bg-slate-200/60 dark:bg-slate-950/80 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl overflow-x-auto no-scrollbar scroll-smooth">
                         {[
-                            { id: "v2g", label: "V2G / V2H", icon: "🚗", tag: "ISO 15118" },
-                            { id: "trigger", label: "Remote Trigger", icon: "⚡" },
-                            { id: "rfid", label: "RFID Whitelist", icon: "💳" },
-                            { id: "reservation", label: "Reservierung", icon: "🔒" },
-                            { id: "schedule", label: "Fahrplan", icon: "📊" },
-                            { id: "variables", label: "OCPP 2.x Variablen", icon: "⚙️", tag: "v2.0.1" },
+                            { id: "v2g", label: t("ocpp.tab_v2g", "V2G / V2H"), icon: "🚗", tag: "ISO 15118" },
+                            { id: "trigger", label: t("ocpp.tab_trigger", "Remote Trigger"), icon: "⚡" },
+                            { id: "rfid", label: t("ocpp.tab_rfid", "RFID Whitelist"), icon: "💳" },
+                            { id: "reservation", label: t("ocpp.tab_reservation", "Reservierung"), icon: "🔒" },
+                            { id: "schedule", label: t("ocpp.tab_schedule", "Fahrplan"), icon: "📊" },
+                            { id: "variables", label: t("ocpp.tab_variables", "OCPP 2.x Variablen"), icon: "⚙️", tag: "v2.0.1" },
                         ].map((tab) => {
                             const isActive = activeTab === tab.id;
                             return (

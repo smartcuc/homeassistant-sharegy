@@ -245,7 +245,7 @@ export default function EnergyDashboard() {
                         type="button"
                         onClick={() => setShareModalOpen(true)}
                         className="px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all shadow-xs flex items-center gap-1.5 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-                        title="Erfolge & Autarkie mit Nachbarn und Social Media teilen"
+                        title={t("community.share_stats_title", "Erfolge & Autarkie mit Nachbarn und Social Media teilen")}
                     >
                         <span>📢</span>
                         <span>{t("community.share_stats", "Erfolge teilen")}</span>
