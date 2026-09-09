@@ -280,6 +280,9 @@ export default function WallboxCard({ onOpenAddModal }) {
     const activePowerKw = Number(activeStation.power_kw ?? activeStation.active_power_kw ?? ((activeStation.active_power_w || 0) / 1000)).toFixed(2);
     const sessionKwh = Number(activeStation.session_energy_kwh || activeStation.active_session?.total_energy_kwh || 0).toFixed(1);
     const targetAmpere = activeStation.target_current_a || (isCharging ? activeStation.max_current_a : 0.0) || 16.0;
+    const hasRealSoc = activeStation.ev_soc_pct !== null && activeStation.ev_soc_pct !== undefined;
+    const evSocValue = hasRealSoc ? Math.round(Number(activeStation.ev_soc_pct)) : Math.min(100, Math.round(42 + (Number(sessionKwh) / 60) * 100));
+    const liveCurrentA = activeStation.current_l1 || targetAmpere;
 
     return (
         <div className="bg-gradient-to-br from-white via-slate-50/70 to-emerald-50/30 dark:from-slate-900 dark:via-slate-900/90 dark:to-emerald-950/20 rounded-3xl p-6 border border-slate-200/90 dark:border-slate-800 shadow-sm relative overflow-hidden flex flex-col justify-between">
@@ -301,7 +304,7 @@ export default function WallboxCard({ onOpenAddModal }) {
                                 {getStatusBadge(activeStation.status, activeStation.is_online, isDischargingV2g)}
                             </div>
                             <p className="text-xs text-slate-400 mt-0.5">
-                                {activeStation.vendor || "OCPP"} · {activeStation.phases || 3}-phasig ({targetAmpere} A) · {activeStation.ocpp_version?.toUpperCase() || "OCPP 1.6-J"} {activeStation.v2g_mode && activeStation.v2g_mode !== "off" && "· 🔄 V2G"}
+                                {activeStation.vendor || "OCPP"} · {activeStation.phases ? `${activeStation.phases}-phasig` : "DC CCS2"} ({liveCurrentA} A) · {activeStation.ocpp_version?.toUpperCase() || "OCPP 1.6-J"} {activeStation.v2g_mode && activeStation.v2g_mode !== "off" && "· 🔄 V2G"}
                             </p>
                         </div>
                     </div>
@@ -324,7 +327,7 @@ export default function WallboxCard({ onOpenAddModal }) {
                         <button
                             type="button"
                             onClick={() => setToolsModalOpen(true)}
-                            title={t("wallbox.tools_btn_title", "OCPP 1.6 Expertenwerkzeuge, Offline-RFID Sync & Diagnose")}
+                            title={t("wallbox.tools_btn_title", "OCPP Expertenwerkzeuge, Offline-RFID Sync & V2G")}
                             className="p-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-600 hover:text-emerald-600 dark:text-slate-300 dark:hover:text-emerald-400 border border-slate-200 dark:border-slate-700 transition cursor-pointer shadow-2xs"
                         >
                             🛠️
@@ -381,8 +384,8 @@ export default function WallboxCard({ onOpenAddModal }) {
                         <div className="text-base sm:text-lg font-bold font-mono text-slate-900 dark:text-white mt-0.5 flex items-baseline justify-between">
                             <span>{activePowerKw} kW</span>
                         </div>
-                        <div className="text-[10px] text-slate-400 font-sans mt-0.5">
-                            {activeStation.phases || 3}P · {targetAmpere}A
+                        <div className="text-[10px] text-slate-400 font-sans mt-0.5 truncate">
+                            {liveCurrentA} A {activeStation.voltage_v ? `· ${Math.round(activeStation.voltage_v)} V` : ""}
                         </div>
                     </div>
 
@@ -391,18 +394,25 @@ export default function WallboxCard({ onOpenAddModal }) {
                         <div className="text-base sm:text-lg font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-0.5 flex items-baseline justify-between">
                             <span>{sessionKwh} kWh</span>
                         </div>
-                        <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-sans mt-0.5 font-semibold">
+                        <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-sans mt-0.5 font-semibold truncate">
                             +{Math.round(Number(sessionKwh) / 0.17)} {t("wallbox.km_range", "km Reichweite")}
                         </div>
                     </div>
 
                     <div className="p-3 bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-700/60">
-                        <div className="text-[10px] text-slate-500 uppercase font-semibold">{t("wallbox.ev_battery", "Fahrzeug-Akku")}</div>
+                        <div className="text-[10px] text-slate-500 uppercase font-semibold flex items-center justify-between">
+                            <span>{t("wallbox.ev_battery", "Fahrzeug-Akku")}</span>
+                            {hasRealSoc && (
+                                <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-1.5 py-0.2 rounded-md">
+                                    Live ISO
+                                </span>
+                            )}
+                        </div>
                         <div className="text-base sm:text-lg font-bold font-mono text-indigo-600 dark:text-indigo-400 mt-0.5 flex items-baseline justify-between">
-                            <span>{Math.min(100, Math.round(42 + (Number(sessionKwh) / 60) * 100))}%</span>
+                            <span>{evSocValue}%</span>
                         </div>
                         <div className="text-[10px] text-slate-400 font-sans mt-0.5 truncate">
-                            ~{Math.round((Math.min(100, Math.round(42 + (Number(sessionKwh) / 60) * 100)) / 100) * 450)} {t("wallbox.km_total", "km Gesamt")}
+                            ~{Math.round((evSocValue / 100) * (activeStation.ev_battery_capacity_kwh ? (activeStation.ev_battery_capacity_kwh / 0.17) : 450))} {t("wallbox.km_total", "km Gesamt")}
                         </div>
                     </div>
                 </div>
