@@ -229,13 +229,18 @@ class OcppConsumer(AsyncWebsocketConsumer):
                                 meter_start = float(sv.get("value", 0))
                             except ValueError:
                                 pass
+                if raw_tx_id:
+                    cache.set(f"ocpp_tx_raw_{self.cp_id}", str(raw_tx_id), timeout=86400)
                 await self.create_start_transaction(self.cp_id, connector_id, id_tag, meter_start, custom_tx_id=tx_id)
 
             elif event_type == "Updated":
+                if raw_tx_id:
+                    cache.set(f"ocpp_tx_raw_{self.cp_id}", str(raw_tx_id), timeout=86400)
                 if meter_values:
                     await self.process_meter_values(self.cp_id, connector_id, tx_id, meter_values)
 
             elif event_type == "Ended":
+                cache.delete(f"ocpp_tx_raw_{self.cp_id}")
                 meter_stop = 0
                 if meter_values and len(meter_values) > 0:
                     for sv in meter_values[-1].get("sampledValue", []):
@@ -552,9 +557,11 @@ class OcppConsumer(AsyncWebsocketConsumer):
             tx_id = await self.get_active_or_latest_transaction_id(self.cp_id)
         if tx_id:
             if self.ocpp_version in ["ocpp2.0.1", "ocpp2.1"]:
-                payload = {"transactionId": str(tx_id)}
+                cached_raw_id = cache.get(f"ocpp_tx_raw_{self.cp_id}")
+                str_tx_id = str(cached_raw_id) if cached_raw_id else str(tx_id)
+                payload = {"transactionId": str_tx_id}
                 await self.send_call("RequestStopTransaction", payload)
-                logger.info(f"⏹️ RequestStopTransaction (OCPP 2.x) an {self.cp_id} (Tx: {tx_id})")
+                logger.info(f"⏹️ RequestStopTransaction (OCPP 2.x) an {self.cp_id} (Tx: {str_tx_id})")
             else:
                 payload = {"transactionId": int(tx_id)}
                 await self.send_call("RemoteStopTransaction", payload)
