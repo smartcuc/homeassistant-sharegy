@@ -16,6 +16,11 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
     const [v2gMinSoc, setV2gMinSoc] = useState(station?.v2g_min_soc_pct || 50);
     const [v2gMaxPower, setV2gMaxPower] = useState(station?.v2g_max_discharge_power_kw || 11.0);
     const [manualDischargePower, setManualDischargePower] = useState("3500");
+    const [departureTime, setDepartureTime] = useState(station?.departure_time || "07:30");
+    const [targetDepartureSoc, setTargetDepartureSoc] = useState(station?.target_departure_soc_pct || 80);
+    const [peakShavingThreshold, setPeakShavingThreshold] = useState(station?.peak_shaving_threshold_w || 4200);
+    const [batteryCareMode, setBatteryCareMode] = useState(station?.battery_care_mode ?? true);
+    const [maxCRate, setMaxCRate] = useState(station?.max_c_rate || 0.5);
 
     // Reservierungsformular
     const [reserveTag, setReserveTag] = useState(station?.reserved_id_tag || "APP_USER");
@@ -51,6 +56,11 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                 v2g_mode: v2gMode,
                 v2g_min_soc_pct: parseInt(v2gMinSoc, 10) || 50,
                 v2g_max_discharge_power_kw: parseFloat(v2gMaxPower) || 11.0,
+                departure_time: departureTime || null,
+                target_departure_soc_pct: parseInt(targetDepartureSoc, 10) || 80,
+                peak_shaving_threshold_w: parseFloat(peakShavingThreshold) || 4200.0,
+                battery_care_mode: Boolean(batteryCareMode),
+                max_c_rate: parseFloat(maxCRate) || 0.5,
             },
         });
     };
@@ -249,8 +259,9 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                     {[
                                         { id: "v2h_home", title: "🏠 V2H Heimspeicher-Puffer", desc: "Versorgt das Haus nachts mit Auto-Strom, sobald keine PV da ist." },
-                                        { id: "v2g_grid", title: "⚡ V2G Börsenstrom-Arbitrage", desc: "Speist bei Spitzenpreisen (> 30 ct/kWh) mit voller Leistung ins Netz ein." },
-                                        { id: "v2x_auto", title: "🤖 V2X Smart Auto (KI-Opt)", desc: "Kombiniert Hauspufferung & Börsenspitzen automatisch." },
+                                        { id: "peak_shaving", title: "⚡ Peak Shaving (Lastspitzen)", desc: "Kappt Netzlastspitzen über dem Grenzwert (§ 14a EnWG)." },
+                                        { id: "v2g_grid", title: "💶 V2G Börsenstrom-Arbitrage", desc: "Speist bei Spitzenpreisen (> 30 ct/kWh) mit voller Leistung ins Netz ein." },
+                                        { id: "v2x_auto", title: "🤖 V2X Smart Auto (KI-Opt)", desc: "Kombiniert Peak Shaving, Hauspuffer & Börsenspitzen automatisch." },
                                         { id: "off", title: "🛑 V2G Aus / Nur Laden", desc: "Fahrzeug wird nur normal geladen, keine Rückspeisung." },
                                     ].map((m) => (
                                         <div
@@ -258,7 +269,7 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                                             onClick={() => setV2gMode(m.id)}
                                             className={`p-3 rounded-2xl border transition cursor-pointer ${
                                                 v2gMode === m.id
-                                                    ? "bg-emerald-50/80 dark:bg-emerald-950/50 border-emerald-500 text-emerald-950 dark:text-emerald-200"
+                                                    ? "bg-emerald-50/80 dark:bg-emerald-950/50 border-emerald-500 text-emerald-950 dark:text-emerald-200 shadow-xs"
                                                     : "bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-300"
                                             }`}
                                         >
@@ -266,6 +277,91 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                                             <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">{m.desc}</div>
                                         </div>
                                     ))}
+                                </div>
+                            </div>
+
+                            {/* Smart Departure Guarantee (ISO 15118-20) */}
+                            <div className="p-3.5 bg-indigo-50/60 dark:bg-indigo-950/30 rounded-2xl border border-indigo-200/80 dark:border-indigo-800/60 space-y-2">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-base">⏱️</span>
+                                        <span className="text-xs font-bold text-slate-900 dark:text-white">Smart Departure Guarantee (ISO 15118-20)</span>
+                                    </div>
+                                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300">
+                                        Automatische Vorab-Ladung
+                                    </span>
+                                </div>
+                                <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                                    Garantiert, dass dein Auto zur Abfahrtszeit den gewünschten Ziel-SoC erreicht hat. Rückspeisung wird rechtzeitig gestoppt und das Vorab-Laden gestartet.
+                                </p>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                                    <div>
+                                        <label className="block text-[10px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+                                            Abfahrtszeit
+                                        </label>
+                                        <input
+                                            type="time"
+                                            value={departureTime}
+                                            onChange={(e) => setDepartureTime(e.target.value)}
+                                            className="w-full px-3 py-1.5 rounded-xl text-xs font-mono font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 outline-none"
+                                        />
+                                    </div>
+                                    <div>
+                                        <div className="flex items-center justify-between text-[10px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+                                            <span>Garantierter Ziel-SoC</span>
+                                            <span className="font-mono text-indigo-600 dark:text-indigo-400 font-bold">{targetDepartureSoc}%</span>
+                                        </div>
+                                        <input
+                                            type="range"
+                                            min="50"
+                                            max="100"
+                                            step="5"
+                                            value={targetDepartureSoc}
+                                            onChange={(e) => setTargetDepartureSoc(e.target.value)}
+                                            className="w-full accent-indigo-600 cursor-pointer mt-1"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Peak Shaving & Battery Care Settings */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                                <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700">
+                                    <div className="flex items-center justify-between text-xs font-bold mb-1">
+                                        <span className="text-slate-700 dark:text-slate-300">⚡ Peak Shaving Schwelle</span>
+                                        <span className="font-mono text-amber-600 dark:text-amber-400">{peakShavingThreshold} W</span>
+                                    </div>
+                                    <input
+                                        type="number"
+                                        step="100"
+                                        min="1000"
+                                        max="15000"
+                                        value={peakShavingThreshold}
+                                        onChange={(e) => setPeakShavingThreshold(e.target.value)}
+                                        className="w-full px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 outline-none"
+                                    />
+                                    <div className="text-[10px] text-slate-400 mt-1">
+                                        Entlädt das E-Auto, wenn Hauslast diese Schwelle übersteigt (§ 14a EnWG).
+                                    </div>
+                                </div>
+
+                                <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700">
+                                    <div className="flex items-center justify-between text-xs font-bold mb-1">
+                                        <span className="text-slate-700 dark:text-slate-300">🛡️ Battery Care (C-Rate Limit)</span>
+                                        <span className="font-mono text-emerald-600 dark:text-emerald-400">{maxCRate}C (~{Math.round(maxCRate * (station.ev_battery_capacity_kwh || 77))} kW)</span>
+                                    </div>
+                                    <input
+                                        type="range"
+                                        min="0.2"
+                                        max="1.0"
+                                        step="0.05"
+                                        value={maxCRate}
+                                        onChange={(e) => setMaxCRate(e.target.value)}
+                                        className="w-full accent-emerald-600 cursor-pointer mt-1"
+                                    />
+                                    <div className="text-[10px] text-slate-400 mt-1">
+                                        Schont den Akku durch Begrenzung der Dauerentladerate.
+                                    </div>
                                 </div>
                             </div>
 

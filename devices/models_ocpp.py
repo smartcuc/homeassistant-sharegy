@@ -46,6 +46,7 @@ class ChargingStation(models.Model):
         ("v2h_home", "V2H Heimspeicher-Puffer"),
         ("v2g_grid", "V2G Börsenstrom-Arbitrage"),
         ("v2x_auto", "V2X Smart Auto"),
+        ("peak_shaving", "⚡ Peak Shaving (Lastspitzenkappung)"),
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -114,6 +115,17 @@ class ChargingStation(models.Model):
     v2g_min_soc_pct = models.PositiveIntegerField(default=50, help_text="Sicherheits-Mindestladestand des Fahrzeugakkus in %")
     v2g_max_discharge_power_kw = models.FloatField(default=11.0, help_text="Max. Entladeleistung in kW für Haus- oder Netzeinspeisung")
     v2g_discharge_power_w = models.FloatField(default=0.0, help_text="Aktuelle Live-Entladeleistung in Watt")
+    
+    # ⏱️ Smart Departure Guarantee (ISO 15118-20)
+    departure_time = models.TimeField(null=True, blank=True, help_text="Tägliche Abfahrtszeit für garantierte Mindestladung (z.B. 07:30)")
+    target_departure_soc_pct = models.PositiveIntegerField(default=80, help_text="Ziel-SoC zur Abfahrtszeit in %")
+    
+    # ⚡ Grid Peak Shaving (§ 14a EnWG / Lastspitzenkappung)
+    peak_shaving_threshold_w = models.FloatField(default=4200.0, help_text="Netzbezugsschwelle in Watt für Peak Shaving Entladung")
+    
+    # 🛡️ Battery Health Care & Degradation Protection
+    battery_care_mode = models.BooleanField(default=True, help_text="Schonendes Laden/Entladen zur Verlängerung der Batterielebensdauer")
+    max_c_rate = models.FloatField(default=0.5, help_text="Maximale Dauerentladerate bezogen auf die Akkukapazität (C-Rate)")
     
     # Fahrzeug-Batterie- und ISO 15118-20 Telemetrie
     ev_battery_capacity_kwh = models.FloatField(default=77.0, help_text="Brutto-Kapazität der Fahrzeugbatterie in kWh")

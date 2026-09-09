@@ -158,6 +158,39 @@ def run_all_wallboxes_smart_charging_cycle():
             latest_spot = SpotPrice.objects.filter(timestamp__lte=timezone.now()).order_by("-timestamp").first()
             spot_price_ct = float(latest_spot.price_ct_kwh) if latest_spot else 20.0
 
+            # 🚗 V2G & V2H Bidirektionale Prüfung (ISO 15118-20)
+            if station.supports_bidirectional and station.v2g_mode != "off":
+                from energy.services.services_v2g import V2GDispatchEngine
+                
+                class HomeMetricSnapshot:
+                    pass
+                
+                metric_snap = HomeMetricSnapshot()
+                metric_snap.pv_power_w = pv_power_w
+                metric_snap.house_power_w = load_power_w
+                metric_snap.battery_soc_pct = float(signals.get("battery", {}).get("soc", 100.0) or 100.0)
+                metric_snap.battery_power_w = battery_charge_w
+
+                spot_mwh = spot_price_ct * 10.0
+                v2g_res = V2GDispatchEngine.calculate_v2x_dispatch(station, metric_snap, spot_mwh)
+
+                if v2g_res.get("mode") == "discharging":
+                    V2GDispatchEngine.dispatch_v2x_command(station, v2g_res)
+                    results.append({
+                        "v2g_dispatched": True,
+                        "charge_point_id": station.charge_point_id,
+                        "mode": "discharging",
+                        "power_w": v2g_res.get("target_power_w", 0.0),
+                        "reason": v2g_res.get("reason", "")
+                    })
+                    continue
+                elif v2g_res.get("departure_info", {}).get("charging_must_start", False):
+                    # Smart Departure: Vorab-Laden für garantierten Ziel-SoC
+                    target_a = float(station.max_current_a or 16.0)
+                    res = dispatch_wallbox_charging_profile(station, target_a)
+                    results.append(res)
+                    continue
+
             target_a = calculate_smart_charging_current(
                 station=station,
                 pv_power_w=pv_power_w,

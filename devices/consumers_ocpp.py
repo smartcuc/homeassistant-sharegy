@@ -408,51 +408,100 @@ class OcppConsumer(AsyncWebsocketConsumer):
         current_limit_a = float(event.get("current_a", 16.0))
         connector_id = int(event.get("connector_id", 1))
 
-        payload = {
-            "connectorId": connector_id,
-            "csChargingProfiles": {
-                "chargingProfileId": 1,
-                "stackLevel": 1,
-                "chargingProfilePurpose": "TxDefaultProfile",
-                "chargingProfileKind": "Relative",
-                "chargingSchedule": {
-                    "chargingRateUnit": "A",
-                    "chargingSchedulePeriod": [
+        if self.ocpp_version in ["ocpp2.0.1", "ocpp2.1"]:
+            # OCPP 2.0.1 & 2.1 SetChargingProfile mit chargingProfile & evseId
+            payload = {
+                "evseId": connector_id,
+                "chargingProfile": {
+                    "id": 1,
+                    "stackLevel": 1,
+                    "chargingProfilePurpose": "TxDefaultProfile",
+                    "chargingProfileKind": "Relative",
+                    "chargingSchedule": [
                         {
-                            "startPeriod": 0,
-                            "limit": current_limit_a,
-                            "numberPhases": 3
+                            "id": 1,
+                            "startSchedule": timezone.now().strftime("%Y-%m-%dT%H:%M:%SZ"),
+                            "duration": 86400,
+                            "chargingRateUnit": "A",
+                            "chargingSchedulePeriod": [
+                                {
+                                    "startPeriod": 0,
+                                    "limit": current_limit_a,
+                                    "numberPhases": 3
+                                }
+                            ]
                         }
                     ]
                 }
             }
-        }
+        else:
+            # OCPP 1.6 SetChargingProfile mit csChargingProfiles
+            payload = {
+                "connectorId": connector_id,
+                "csChargingProfiles": {
+                    "chargingProfileId": 1,
+                    "stackLevel": 1,
+                    "chargingProfilePurpose": "TxDefaultProfile",
+                    "chargingProfileKind": "Relative",
+                    "chargingSchedule": {
+                        "chargingRateUnit": "A",
+                        "chargingSchedulePeriod": [
+                            {
+                                "startPeriod": 0,
+                                "limit": current_limit_a,
+                                "numberPhases": 3
+                            }
+                        ]
+                    }
+                }
+            }
         await self.send_call("SetChargingProfile", payload)
         await self.update_target_current(self.cp_id, current_limit_a)
-        logger.info(f"⚡ OCPP SetChargingProfile gesendet an {self.cp_id}: {current_limit_a} A")
+        logger.info(f"⚡ OCPP SetChargingProfile gesendet an {self.cp_id}: {current_limit_a} A (Version: {self.ocpp_version})")
 
     async def ocpp_clear_charging_profile(self, event):
         """Löscht das aktive Ladeprofil (Wallbox lädt mit Default-Einstellung oder stoppt)."""
-        payload = {
-            "id": int(event.get("charging_profile_id", 1)),
-            "connectorId": int(event.get("connector_id", 1)),
-        }
+        profile_id = int(event.get("charging_profile_id", 1))
+        connector_id = int(event.get("connector_id", 1))
+
+        if self.ocpp_version in ["ocpp2.0.1", "ocpp2.1"]:
+            # OCPP 2.0.1 & 2.1 ClearChargingProfile
+            payload = {
+                "chargingProfileId": profile_id,
+                "chargingProfileCriteria": {
+                    "evseId": connector_id
+                }
+            }
+        else:
+            # OCPP 1.6 ClearChargingProfile
+            payload = {
+                "id": profile_id,
+                "connectorId": connector_id,
+            }
         await self.send_call("ClearChargingProfile", payload)
         await self.update_target_current(self.cp_id, 0.0)
-        logger.info(f"🧹 ClearChargingProfile an {self.cp_id}")
+        logger.info(f"🧹 ClearChargingProfile an {self.cp_id} (Version: {self.ocpp_version})")
 
     async def ocpp_get_composite_schedule(self, event):
         """Fragt den effektiven zusammengesetzten Ladefahrplan der Wallbox ab."""
         connector_id = int(event.get("connector_id", 1))
         duration = int(event.get("duration", 86400))
         rate_unit = event.get("charging_rate_unit", "A")
-        payload = {
-            "connectorId": connector_id,
-            "duration": duration,
-            "chargingRateUnit": rate_unit
-        }
+
+        if self.ocpp_version in ["ocpp2.0.1", "ocpp2.1"]:
+            payload = {
+                "duration": duration,
+                "chargingRateUnit": rate_unit,
+                "evseId": connector_id
+            }
+        else:
+            payload = {
+                "connectorId": connector_id,
+                "duration": duration,
+                "chargingRateUnit": rate_unit
+            }
         await self.send_call("GetCompositeSchedule", payload)
-        logger.info(f"📊 GetCompositeSchedule an {self.cp_id} (Duration: {duration}s)")
+        logger.info(f"📊 GetCompositeSchedule an {self.cp_id} (Duration: {duration}s, Version: {self.ocpp_version})")
 
     async def ocpp_trigger_message(self, event):
         """Fordert die Wallbox auf, eine bestimmte Nachricht sofort zu senden (Remote Trigger)."""
@@ -615,15 +664,22 @@ class OcppConsumer(AsyncWebsocketConsumer):
     async def ocpp_change_availability(self, event):
         """Ändert Verfügbarkeit (Operative / Inoperative)."""
         connector_id = int(event.get("connector_id", 1))
-        avail_type = event.get("type", "Operative")
-        payload = {
-            "connectorId": connector_id,
-            "type": avail_type
-        }
+        avail_type = event.get("availability_type") or event.get("avail_type") or event.get("operational_status") or "Operative"
+
+        if self.ocpp_version in ["ocpp2.0.1", "ocpp2.1"]:
+            payload = {
+                "operationalStatus": avail_type,
+                "evse": {"id": connector_id}
+            }
+        else:
+            payload = {
+                "connectorId": connector_id,
+                "type": avail_type
+            }
         await self.send_call("ChangeAvailability", payload)
         await self.set_station_availability(self.cp_id, avail_type)
         await self.broadcast_wallbox_update()
-        logger.info(f"⚙️ ChangeAvailability an {self.cp_id}: {avail_type}")
+        logger.info(f"⚙️ ChangeAvailability an {self.cp_id}: {avail_type} (Version: {self.ocpp_version})")
 
     async def ocpp_reset(self, event):
         """Führt einen Soft- oder Hard-Reset der Wallbox durch."""
@@ -759,12 +815,12 @@ class OcppConsumer(AsyncWebsocketConsumer):
                 except ValueError:
                     continue
 
-                if measurand == "Power.Active.Import":
+                if measurand in ["Power.Active.Import", "Power.Active.Import.Register"]:
                     power_import_w = val * 1000.0 if unit.lower() in ["kw", "kvar"] else val
-                elif measurand == "Power.Active.Export":
+                elif measurand in ["Power.Active.Export", "Power.Active.Export.Register"]:
                     # 🚗 V2G / V2H Entladeleistung
                     power_export_w = val * 1000.0 if unit.lower() in ["kw", "kvar"] else val
-                elif measurand == "Current.Import":
+                elif measurand in ["Current.Import", "Current.Import.Offered"]:
                     if phase == "L1":
                         current_l1 = val
                     elif phase == "L2":
@@ -773,13 +829,23 @@ class OcppConsumer(AsyncWebsocketConsumer):
                         current_l3 = val
                     else:
                         current_l1 = val
+                elif measurand in ["Current.Export"]:
+                    # V2G Entladestrom
+                    if phase == "L1":
+                        current_l1 = -val
+                    elif phase == "L2":
+                        current_l2 = -val
+                    elif phase == "L3":
+                        current_l3 = -val
+                    else:
+                        current_l1 = -val
                 elif measurand == "Voltage":
                     voltage_v = val
                 elif measurand in ["Energy.Active.Import.Register", "Energy.Active.Import.Interval"]:
                     energy_import_wh = val * 1000.0 if unit.lower() in ["kwh", "kvarh"] else val
                 elif measurand in ["Energy.Active.Export.Register", "Energy.Active.Export.Interval"]:
                     energy_export_wh = val * 1000.0 if unit.lower() in ["kwh", "kvarh"] else val
-                elif measurand in ["SoC", "StateOfCharge"]:
+                elif measurand in ["SoC", "StateOfCharge", "BatteryLevel", "EVStateOfCharge"]:
                     # 🔋 ISO 15118-20 Fahrzeug-Ladestand
                     ev_soc = val
 

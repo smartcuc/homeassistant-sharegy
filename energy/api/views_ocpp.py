@@ -3,6 +3,7 @@
 ##############################
 
 import secrets
+import datetime
 import logging
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -115,6 +116,11 @@ class WallboxListCreateView(APIView):
                     "v2g_min_soc_pct": s.v2g_min_soc_pct,
                     "v2g_max_discharge_power_kw": s.v2g_max_discharge_power_kw,
                     "v2g_discharge_power_w": s.v2g_discharge_power_w,
+                    "departure_time": s.departure_time.strftime("%H:%M") if s.departure_time else None,
+                    "target_departure_soc_pct": s.target_departure_soc_pct,
+                    "peak_shaving_threshold_w": s.peak_shaving_threshold_w,
+                    "battery_care_mode": s.battery_care_mode,
+                    "max_c_rate": s.max_c_rate,
                     "ev_battery_capacity_kwh": s.ev_battery_capacity_kwh,
                     "ev_soc_pct": s.ev_soc_pct,
                     "iso15118_evccid": s.iso15118_evccid,
@@ -212,6 +218,24 @@ class WallboxDetailView(APIView):
             station.v2g_min_soc_pct = int(data["v2g_min_soc_pct"])
         if "v2g_max_discharge_power_kw" in data:
             station.v2g_max_discharge_power_kw = float(data["v2g_max_discharge_power_kw"])
+        if "departure_time" in data:
+            val = str(data["departure_time"]).strip() if data["departure_time"] else None
+            if val:
+                try:
+                    parts = val.split(":")
+                    station.departure_time = datetime.time(int(parts[0]), int(parts[1]))
+                except (ValueError, IndexError):
+                    station.departure_time = None
+            else:
+                station.departure_time = None
+        if "target_departure_soc_pct" in data:
+            station.target_departure_soc_pct = int(data["target_departure_soc_pct"])
+        if "peak_shaving_threshold_w" in data:
+            station.peak_shaving_threshold_w = float(data["peak_shaving_threshold_w"])
+        if "battery_care_mode" in data:
+            station.battery_care_mode = bool(data["battery_care_mode"])
+        if "max_c_rate" in data:
+            station.max_c_rate = float(data["max_c_rate"])
         if "ev_battery_capacity_kwh" in data:
             station.ev_battery_capacity_kwh = float(data["ev_battery_capacity_kwh"])
         if "ev_soc_pct" in data:
@@ -432,7 +456,30 @@ class WallboxRemoteActionView(APIView):
             station.v2g_mode = v2g_mode
             station.v2g_min_soc_pct = min_soc
             station.v2g_max_discharge_power_kw = max_pwr
-            station.save(update_fields=["supports_bidirectional", "v2g_mode", "v2g_min_soc_pct", "v2g_max_discharge_power_kw"])
+
+            if "departure_time" in request.data:
+                val = str(request.data["departure_time"]).strip() if request.data["departure_time"] else None
+                if val:
+                    try:
+                        parts = val.split(":")
+                        station.departure_time = datetime.time(int(parts[0]), int(parts[1]))
+                    except (ValueError, IndexError):
+                        station.departure_time = None
+                else:
+                    station.departure_time = None
+            if "target_departure_soc_pct" in request.data:
+                station.target_departure_soc_pct = int(request.data["target_departure_soc_pct"])
+            if "peak_shaving_threshold_w" in request.data:
+                station.peak_shaving_threshold_w = float(request.data["peak_shaving_threshold_w"])
+            if "battery_care_mode" in request.data:
+                station.battery_care_mode = bool(request.data["battery_care_mode"])
+            if "max_c_rate" in request.data:
+                station.max_c_rate = float(request.data["max_c_rate"])
+
+            station.save(update_fields=[
+                "supports_bidirectional", "v2g_mode", "v2g_min_soc_pct", "v2g_max_discharge_power_kw",
+                "departure_time", "target_departure_soc_pct", "peak_shaving_threshold_w", "battery_care_mode", "max_c_rate"
+            ])
 
             # V2G Dispatch berechnen und anwenden
             from energy.services.services_v2g import V2GDispatchEngine

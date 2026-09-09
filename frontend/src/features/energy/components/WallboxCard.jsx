@@ -305,7 +305,7 @@ export default function WallboxCard({ onOpenAddModal }) {
                                 {getStatusBadge(activeStation.status, activeStation.is_online, isDischargingV2g)}
                             </div>
                             <p className="text-xs text-slate-400 mt-0.5">
-                                {activeStation.vendor || "OCPP"} · {activeStation.phases ? `${activeStation.phases}-phasig` : "DC CCS2"} ({liveCurrentA} A) · {activeStation.ocpp_version?.toUpperCase() || "OCPP 1.6-J"} {activeStation.v2g_mode && activeStation.v2g_mode !== "off" && "· 🔄 V2G"}
+                                {activeStation.vendor || "OCPP"} · {activeStation.phases ? `${activeStation.phases}-phasig` : "DC CCS2"} ({liveCurrentA} A) · {activeStation.ocpp_version?.toUpperCase() || "OCPP 1.6-J"} {activeStation.v2g_mode && activeStation.v2g_mode !== "off" && (activeStation.v2g_mode === "peak_shaving" ? "· ⚡ Peak Shaving" : "· 🔄 V2G")} {activeStation.departure_time && `· ⏱️ ${activeStation.departure_time}`}
                             </p>
                         </div>
                     </div>

@@ -270,6 +270,67 @@ class Ocpp2ProtocolTests(TransactionTestCase):
 
         await communicator.disconnect()
 
+    async def test_ocpp2_steering_commands(self):
+        """Testet OCPP 2.0.1 Steuersignale: SetChargingProfile, ClearChargingProfile, ChangeAvailability."""
+        from channels.layers import get_channel_layer
+        channel_layer = get_channel_layer()
+
+        communicator = WebsocketCommunicator(
+            application,
+            "/ocpp/CP-OCPP2-01",
+            subprotocols=["ocpp2.0.1"]
+        )
+        connected, _ = await communicator.connect()
+        self.assertTrue(connected)
+
+        # 1. SetChargingProfile Event über Channel Layer
+        await channel_layer.group_send(
+            "ocpp_CP-OCPP2-01",
+            {"type": "ocpp_set_charging_profile", "current_a": 12.0, "connector_id": 1}
+        )
+        msg_set = await communicator.receive_json_from()
+        self.assertEqual(msg_set[0], 2)
+        self.assertEqual(msg_set[2], "SetChargingProfile")
+        # In OCPP 2.0.1 muss evseId & chargingProfile vorhanden sein
+        self.assertEqual(msg_set[3]["evseId"], 1)
+        self.assertIn("chargingProfile", msg_set[3])
+        self.assertEqual(msg_set[3]["chargingProfile"]["chargingSchedule"][0]["chargingSchedulePeriod"][0]["limit"], 12.0)
+
+        # 2. ClearChargingProfile Event
+        await channel_layer.group_send(
+            "ocpp_CP-OCPP2-01",
+            {"type": "ocpp_clear_charging_profile", "charging_profile_id": 1, "connector_id": 1}
+        )
+        msg_clear = await communicator.receive_json_from()
+        self.assertEqual(msg_clear[0], 2)
+        self.assertEqual(msg_clear[2], "ClearChargingProfile")
+        self.assertEqual(msg_clear[3]["chargingProfileId"], 1)
+        self.assertEqual(msg_clear[3]["chargingProfileCriteria"]["evseId"], 1)
+
+        # 3. ChangeAvailability Event
+        await channel_layer.group_send(
+            "ocpp_CP-OCPP2-01",
+            {"type": "ocpp_change_availability", "availability_type": "Inoperative", "connector_id": 1}
+        )
+        msg_avail = await communicator.receive_json_from()
+        self.assertEqual(msg_avail[0], 2)
+        self.assertEqual(msg_avail[2], "ChangeAvailability")
+        self.assertEqual(msg_avail[3]["operationalStatus"], "Inoperative")
+        self.assertEqual(msg_avail[3]["evse"]["id"], 1)
+
+        # 4. GetCompositeSchedule Event
+        await channel_layer.group_send(
+            "ocpp_CP-OCPP2-01",
+            {"type": "ocpp_get_composite_schedule", "duration": 3600, "charging_rate_unit": "W", "connector_id": 1}
+        )
+        msg_sched = await communicator.receive_json_from()
+        self.assertEqual(msg_sched[0], 2)
+        self.assertEqual(msg_sched[2], "GetCompositeSchedule")
+        self.assertEqual(msg_sched[3]["evseId"], 1)
+        self.assertEqual(msg_sched[3]["duration"], 3600)
+
+        await communicator.disconnect()
+
 
 class V2GDispatchEngineTests(TestCase):
     def setUp(self):
