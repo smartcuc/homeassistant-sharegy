@@ -134,3 +134,38 @@ class GridDimmingEngineTestCase(TestCase):
         }, format="json")
         self.assertEqual(res_clear.status_code, 200)
         self.assertEqual(res_clear.data["status"], "cleared")
+
+    def test_audit_logging_lifecycle(self):
+        """Prüft die lückenlose Erstellung von Revisions-Audit-Logs für VNB-Nachweise."""
+        from energy.models import EnWG14aDimmingAuditLog
+
+        # 1. Dimming auslösen
+        signal = trigger_grid_dimming(
+            home=self.home,
+            source="vnb_api",
+            target_max_kw=Decimal("4.20"),
+            duration_minutes=60,
+        )
+
+        # Audit Logs prüfen: DIMMING_TRIGGERED + SteuVE Einträge
+        triggered_log = EnWG14aDimmingAuditLog.objects.filter(home=self.home, action="DIMMING_TRIGGERED").first()
+        self.assertIsNotNone(triggered_log)
+        self.assertEqual(triggered_log.signal, signal)
+        self.assertEqual(triggered_log.commanded_power_limit_kw, Decimal("4.20"))
+        self.assertTrue(triggered_log.compliance_verified)
+
+        dimmed_wb_log = EnWG14aDimmingAuditLog.objects.filter(home=self.home, device=self.dev_wb, action="DEVICE_DIMMED").first()
+        self.assertIsNotNone(dimmed_wb_log)
+        self.assertEqual(dimmed_wb_log.commanded_power_limit_kw, Decimal("3.20"))
+        self.assertTrue(dimmed_wb_log.response_time_ms > 0)
+
+        # 2. Dimming aufheben
+        clear_grid_dimming(self.home)
+
+        cleared_log = EnWG14aDimmingAuditLog.objects.filter(home=self.home, action="LIMIT_CLEARED").first()
+        self.assertIsNotNone(cleared_log)
+
+        restored_wb_log = EnWG14aDimmingAuditLog.objects.filter(home=self.home, device=self.dev_wb, action="DEVICE_RESTORED").first()
+        self.assertIsNotNone(restored_wb_log)
+        self.assertEqual(restored_wb_log.commanded_power_limit_kw, Decimal("11.00"))
+

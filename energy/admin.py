@@ -159,7 +159,7 @@ class EMSSignalTypeAdmin(admin.ModelAdmin):
 # ---------------------------------------------------------------------
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
-from energy.models import GridDimmingSignal, SteuVEDeviceConfig
+from energy.models import GridDimmingSignal, SteuVEDeviceConfig, EnWG14aDimmingAuditLog
 
 
 @admin.register(GridDimmingSignal)
@@ -237,6 +237,57 @@ class SteuVEDeviceConfigAdmin(admin.ModelAdmin):
             '<span style="background-color: #10b981; color: white; padding: 2px 7px; border-radius: 4px; font-weight: bold; font-size: 11px;">🟢 Aktiv (100%)</span>'
         )
     dimming_state_badge.short_description = "Aktorik Status"
+
+
+@admin.register(EnWG14aDimmingAuditLog)
+class EnWG14aDimmingAuditLogAdmin(admin.ModelAdmin):
+    list_display = (
+        "created_at",
+        "home",
+        "action_badge",
+        "steuve_type",
+        "commanded_power_limit_kw",
+        "response_time_badge",
+        "compliance_badge",
+        "reason",
+    )
+    list_filter = ("action", "steuve_type", "compliance_verified", "created_at")
+    search_fields = ("home__name", "device__identifier", "reason", "vnb_operator_id")
+    readonly_fields = ("id", "created_at")
+    raw_id_fields = ("signal", "home", "device")
+    ordering = ["-created_at"]
+
+    def action_badge(self, obj):
+        colors = {
+            "DIMMING_TRIGGERED": "#ef4444",
+            "DEVICE_DIMMED": "#f97316",
+            "DEVICE_RESTORED": "#10b981",
+            "LIMIT_CLEARED": "#3b82f6",
+            "COMPLIANCE_VERIFIED": "#10b981",
+            "OVERRIDE_REJECTED": "#8b5cf6",
+        }
+        color = colors.get(obj.action, "#64748b")
+        return format_html(
+            '<span style="background-color: {0}; color: white; padding: 2px 8px; border-radius: 5px; font-weight: bold; font-size: 11px;">{1}</span>',
+            color,
+            obj.get_action_display(),
+        )
+    action_badge.short_description = "Aktion"
+
+    def response_time_badge(self, obj):
+        color = "#10b981" if obj.response_time_ms < 5000 else "#f59e0b" if obj.response_time_ms < 30000 else "#ef4444"
+        return format_html(
+            '<span style="color: {0}; font-family: monospace; font-weight: bold;">{1} ms</span>',
+            color,
+            obj.response_time_ms,
+        )
+    response_time_badge.short_description = "Latenz"
+
+    def compliance_badge(self, obj):
+        if obj.compliance_verified:
+            return mark_safe('<span style="color: #10b981; font-weight: bold;">✓ 4,2 kW OK</span>')
+        return mark_safe('<span style="color: #ef4444; font-weight: bold;">✗ Verletzung</span>')
+    compliance_badge.short_description = "VNB Compliance"
 
 
 # ---------------------------------------------------------------------

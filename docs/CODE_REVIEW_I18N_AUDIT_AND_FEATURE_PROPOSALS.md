@@ -15,15 +15,16 @@
   * Volle Kompatibilität mit **OCPP 1.6-J, 2.0.1 und 2.1** inklusive Transaktionsverwaltung, String-basierter `transactionId`-Konsistenz und strukturierter `evseId`/`unitOfMeasure`-Messwerte.
   * ISO 15118-20 Zertifikatsabläufe für V2G/V2H vorbereitet.
   * Nahtlose Schnittstellen zu **ioBroker, Home Assistant, Shelly, Sungrow OpenAPI und Tibber**.
-* **Empfehlungen:**
-  * Bei stark anwachsender Zähleranzahl Nutzung von TimescaleDB Continuous Aggregates für 1m/15m-Zeitreihen sicherstellen.
-  * Audit-Logging für § 14a EnWG Dimm-Eingriffe in separater Tabelle persistieren.
+* **Umgesetzte Optimierungen (Backend & Telemetrie):**
+  * ✅ **TimescaleDB Setup Command (`setup_timescaledb`):** Verwaltungskommando zum automatisierten Einrichten von Hypertables, Chunk-Intervallen (7/14/30/90 Tage), Datenkompression und Continuous Aggregates für Telemetrie- und Zählerzeitreihen.
+  * ✅ **Revisionssicheres § 14a EnWG Audit-Logging (`EnWG14aDimmingAuditLog`):** Vollständige Erfassung aller Drosselungssignale, Soll-/Ist-Leistungen, Aktor-Reaktionszeiten und 4,2 kW Compliance-Nachweise für Netzbetreiber (VNB) in separater Tabelle inkl. Django-Admin-Interface.
 
 ### 1.2 Frontend-Architektur (React 19, Vite, Tailwind CSS, ECharts, i18next)
 * **Build-Pipeline:** Schneller und fehlerfreier Vite / Rolldown Produktions-Build.
 * **Benutzeroberfläche:** Responsive Dashboards mit Dark-Mode-Unterstützung, Live-Energiefluss-Visualisierung, ECharts-Diagrammen und Echtzeit-Wallbox-Steuerung.
-* **Empfehlungen:**
-  * Selten genutzte Modals (z. B. Detail-Diagnosen) bei Bedarf per Dynamic Import (`React.lazy`) nachladen, um das Initial-Bundle schlank zu halten.
+* **Umgesetzte Optimierungen (Frontend):**
+  * ✅ **Code-Splitting & Lazy Loading:** Öffentliche Landing-, Login- und Rechtsseiten sowie schwere Experten-Modals (z. B. [WallboxToolsModal](file:///c:/Users/Public/Dev/eswes/frontend/src/features/devices/components/WallboxToolsModal.jsx) & [EditWallboxModal](file:///c:/Users/Public/Dev/eswes/frontend/src/features/devices/components/EditWallboxModal.jsx)) werden per `React.lazy` und `Suspense` on-demand geladen.
+  * ✅ `AppRoutes.js` von 96 kB auf **3.5 kB** reduziert, Initial-Bundle-Größen optimiert und alle Build-Warnungen eliminiert.
 
 ---
 

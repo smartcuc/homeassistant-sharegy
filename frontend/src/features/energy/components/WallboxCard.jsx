@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../../api/client";
 import { useSubscription } from "../../../hooks/useSubscription";
 import ProBadge from "../../../components/common/ProBadge";
 import ProUpgradeModal from "../../../components/common/ProUpgradeModal";
-import EditWallboxModal from "../../devices/components/EditWallboxModal";
-import WallboxToolsModal from "../../devices/components/WallboxToolsModal";
+
+const EditWallboxModal = lazy(() => import("../../devices/components/EditWallboxModal"));
+const WallboxToolsModal = lazy(() => import("../../devices/components/WallboxToolsModal"));
 
 export default function WallboxCard({ onOpenAddModal }) {
     const { t } = useTranslation();
@@ -550,21 +551,23 @@ export default function WallboxCard({ onOpenAddModal }) {
                 />
             )}
 
-            {editModalOpen && (
-                <EditWallboxModal
-                    isOpen={editModalOpen}
-                    onClose={() => setEditModalOpen(false)}
-                    station={activeStation}
-                />
-            )}
+            <Suspense fallback={null}>
+                {editModalOpen && (
+                    <EditWallboxModal
+                        isOpen={editModalOpen}
+                        onClose={() => setEditModalOpen(false)}
+                        station={activeStation}
+                    />
+                )}
 
-            {toolsModalOpen && (
-                <WallboxToolsModal
-                    isOpen={toolsModalOpen}
-                    onClose={() => setToolsModalOpen(false)}
-                    station={activeStation}
-                />
-            )}
+                {toolsModalOpen && (
+                    <WallboxToolsModal
+                        isOpen={toolsModalOpen}
+                        onClose={() => setToolsModalOpen(false)}
+                        station={activeStation}
+                    />
+                )}
+            </Suspense>
         </div>
     );
 }

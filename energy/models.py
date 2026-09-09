@@ -403,6 +403,89 @@ class SteuVEDeviceConfig(models.Model):
 
 
 # ---------------------------------------------------------------------
+# § 14a EnWG: Audit-Logging für Netzdrosselungs- und Steuerungseingriffe
+# ---------------------------------------------------------------------
+class EnWG14aDimmingAuditLog(models.Model):
+    """
+    Revisionssicheres Audit-Log für alle netz- und steuerungsrelevanten Eingriffe
+    gem. § 14a EnWG (BNetzA Festlegung BK6-22-300).
+    Dokumentiert Dimmsignale, Soll-/Ist-Leistungen, Reaktionszeiten und Compliance-Status
+    für den Nachweis gegenüber Verteilnetzbetreibern (VNB).
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    signal = models.ForeignKey(
+        GridDimmingSignal,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="audit_logs",
+    )
+
+    home = models.ForeignKey(
+        "devices.Home",
+        on_delete=models.CASCADE,
+        related_name="enwg_dimming_audit_logs",
+    )
+
+    device = models.ForeignKey(
+        "devices.Device",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="enwg_dimming_audit_logs",
+    )
+
+    ACTION_CHOICES = [
+        ("DIMMING_TRIGGERED", "Dimmsignal empfangen & aktiviert"),
+        ("DEVICE_DIMMED", "SteuVE-Leistung gedrosselt"),
+        ("DEVICE_RESTORED", "SteuVE-Drosselung aufgehoben"),
+        ("LIMIT_CLEARED", "Netzdrosselung beendet"),
+        ("COMPLIANCE_VERIFIED", "4,2 kW Compliance am Netzanschlusspunkt bestätigt"),
+        ("OVERRIDE_REJECTED", "Manueller Eingriff abgewiesen (Netzsicherheitsvorrang)"),
+    ]
+    action = models.CharField(max_length=40, choices=ACTION_CHOICES, db_index=True)
+
+    steuve_type = models.CharField(max_length=30, blank=True, default="")
+    commanded_power_limit_kw = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    power_before_kw = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    power_after_kw = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+
+    pv_power_kw = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    battery_power_kw = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    grid_power_kw = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+
+    response_time_ms = models.PositiveIntegerField(
+        default=0,
+        help_text="Aktor-Reaktionszeit in Millisekunden (Nachweis der < 30s Frist)",
+    )
+
+    compliance_verified = models.BooleanField(
+        default=True,
+        help_text="Gesetzliches 4,2 kW Netzkontingent am Netzanschlusspunkt eingehalten",
+    )
+
+    vnb_operator_id = models.CharField(max_length=100, blank=True, default="")
+    reason = models.CharField(max_length=255, blank=True, default="")
+    metadata = models.JSONField(default=dict, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        verbose_name = "§ 14a EnWG Dimm-Audit-Log"
+        verbose_name_plural = "§ 14a EnWG Dimm-Audit-Logs (Revisionsnachweis)"
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["home", "-created_at"]),
+            models.Index(fields=["action", "-created_at"]),
+            models.Index(fields=["compliance_verified", "-created_at"]),
+        ]
+
+    def __str__(self):
+        return f"AuditLog: {self.home.name} - {self.get_action_display()} ({self.created_at.strftime('%d.%m.%Y %H:%M:%S')})"
+
+
+# ---------------------------------------------------------------------
 # SG-Ready / Lastmanagement: BWWPLoadManagementConfig
 # ---------------------------------------------------------------------
 class BWWPLoadManagementConfig(models.Model):

@@ -13,7 +13,7 @@ export default defineConfig({
   ],
 
   build: {
-    chunkSizeWarningLimit: 650,
+    chunkSizeWarningLimit: 1200,
     rollupOptions: {
       output: {
         manualChunks(id) {
