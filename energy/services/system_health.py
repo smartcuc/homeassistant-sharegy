@@ -522,11 +522,16 @@ def check_home_system_status(user) -> Dict[str, Any]:
             "status_text": f"Aktiv ({tz_val})" if tz_val else "Zeitzone fehlt",
         }
 
+        # 9. Energie-Profil & Tarif-Kompass ermitteln
+        from energy.services.energy_profile import get_user_energy_profile
+        energy_profile = get_user_energy_profile(user)
+
         return {
             "score": min(100, score),
             "status": "fault" if active_alarms else ("ready" if score >= 70 else ("partial" if score > 0 else "empty")),
             "alarms": active_alarms,
             "home_name": home.name,
+            "energy_profile": energy_profile,
             "pillars": {
                 "pv": pv_pillar_data,
                 "generation": pv_pillar_data,
@@ -556,7 +561,9 @@ def check_home_system_status(user) -> Dict[str, Any]:
             "score": 0,
             "status": "error",
             "home_name": getattr(home, "name", "Mein Zuhause") if home else "Mein Zuhause",
+            "energy_profile": None,
             "pillars": {},
             "submeters": {"count": 0, "rooms_count": 0, "rooms": [], "floors_count": 0, "floors": []},
             "recommendations": [],
         }
+

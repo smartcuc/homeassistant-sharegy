@@ -100,11 +100,13 @@ export default function Sidebar() {
             {
                 title: `⚙️ ${t("nav.settings_group", "Systemeinstellungen")}`,
                 items: [
+                    { name: t("nav.energy_profile", "Energie-Profil & Setup"), path: "/app/energy-profile", icon: "🏡" },
                     { name: t("nav.tariffs", "Strompreise & Tarife"), path: "/app/tariff", icon: "💶" },
                     { name: t("nav.mqtt_interfaces", "Schnittstellen"), path: "/app/interfaces", icon: "📡" },
                     { name: t("nav.system_status", "Systemstatus (Server)"), path: "/app/status", icon: "🌐" },
                 ],
             },
+
 
         ];
 

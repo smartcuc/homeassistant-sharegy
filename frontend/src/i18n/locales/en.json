@@ -2106,5 +2106,36 @@
     "tab_variables": "OCPP 2.x Variables",
     "modal_title": "OCPP Expert Tools",
     "modal_subtitle": "Live diagnostics, remote control & ISO 15118-20 V2X management"
+  },
+  "energy_profile": {
+    "page_title": "Energy Profile & Savings Calculator",
+    "page_subtitle": "Manage your hardware equipment, calculate your savings potential and receive tailored tariff recommendations.",
+    "view_matrix_guide": "Open Tariff & Savings Guide",
+    "saved_success": "Energy profile successfully saved!",
+    "badge_label": "Energy Profile",
+    "badge_tooltip": "Click to open your energy profile and savings calculator",
+    "open_profile_btn": "Open Profile & Calculator",
+    "estimated_annual_savings": "Estimated Annual Savings",
+    "shiftable_load": "Shiftable Load:",
+    "hardware_switches_title": "Adjust Hardware Equipment",
+    "hardware_switches_desc": "Toggle components to immediately re-calculate your profile and savings potential.",
+    "solar_presence": "Solar Energy",
+    "battery_storage": "Battery Storage / Home Battery",
+    "battery_storage_desc": "Stationary battery for energy storage",
+    "ev_wallbox": "EV / Wallbox",
+    "ev_wallbox_desc": "Electric vehicle with smart charging capabilities",
+    "heat_pump": "Heat Pump / DHW Heat Pump",
+    "heat_pump_desc": "Heating heat pump or domestic hot water heat pump",
+    "tariff_selection_title": "Current Electricity Tariff",
+    "tariff_selection_desc": "Which contract is currently active?",
+    "fixed_tariff_title": "Classic Fixed Rate Tariff (~30–35 ct/kWh)",
+    "fixed_tariff_desc": "Constant energy rate around the clock (e.g. municipal utilities or standard green power).",
+    "dynamic_tariff_title": "Dynamic Spot Tariff (e.g. Tibber, Rabot, Ostrom)",
+    "dynamic_tariff_desc": "Hourly/quarter-hourly fluctuating spot prices. Ideal for load shifting.",
+    "configure_exact_rates": "Configure exact work prices & Tibber API token:",
+    "savings_breakdown_title": "Breakdown of Your Savings Potential",
+    "savings_breakdown_desc": "How your estimated annual savings are structured with smart management:",
+    "action_steps_title": "Recommended Next Steps for Your Profile",
+    "action_steps_desc": "Use these Sharegy features to unlock your full calculated savings potential:"
   }
-}
+}

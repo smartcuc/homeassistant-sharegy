@@ -882,3 +882,23 @@ def system_setup_status_view(request):
     status = check_home_system_status(request.user)
     return Response(status)
 
+
+@api_view(["GET", "POST"])
+@permission_classes([IsAuthenticated])
+def energy_profile_view(request):
+    """
+    Liefert oder speichert das Energie-Profil des Haushalts (Hardware-Schalter & Tarif-Kompass).
+    GET: Berechnet das aktuelle Profil aus Cache / Geräten.
+    POST: Speichert modifizierte Hardware-Schalter und liefert das neu berechnete Profil.
+    """
+    from energy.services.energy_profile import get_user_energy_profile, save_user_energy_profile
+
+    if request.method == "POST":
+        data = request.data or {}
+        profile = save_user_energy_profile(request.user, data)
+        return Response(profile)
+
+    profile = get_user_energy_profile(request.user)
+    return Response(profile)
+
+

@@ -28,8 +28,10 @@ export default function MobileMenuDrawer({ isOpen, onClose }) {
         ...(hasCommunityAdminAccess
             ? [{ name: t("nav.tenant_management", "Community & Mieter"), path: "/app/tenant", icon: "👥" }]
             : []),
+        { name: t("nav.energy_profile", "Energie-Profil & Setup"), path: "/app/energy-profile", icon: "🏡" },
         { name: t("nav.tariff", "Dynamischer Tarif"), path: "/app/tariff", icon: "💶" },
         { name: t("nav.system_status", "Systemstatus & Live-Sync"), path: "/app/status", icon: "📶" },
+
         { name: t("nav.help_center", "Hilfe & Knowledge Base"), path: "/app/help", icon: "📚" },
         ...(isStaffOrAdmin
             ? [{ name: t("nav.admin_dashboard", "Admin Dashboard"), path: "/app/admin/dashboard", icon: "🛡️" }]

@@ -1207,7 +1207,7 @@ Configure browser push notifications with customizable **Quiet Hours** (e.g., 22
                 "title_en": "Underfloor Heating & Screed Thermal Battery: Control Logic, Metrics & Setpoints",
                 "summary_de": "Vollständige Anleitung zur wettergeführten Fußbodenheizung (DIN EN 12831), thermischen Estrich-Vorladung (MPC) und allen Schaltsignalen.",
                 "summary_en": "Complete guide to weather-guided underfloor heating (DIN EN 12831), predictive screed preheating (MPC), and control setpoints.",
-                "content_de": """# Intelligente Fußbodenheizung & Thermischer Estrich-Speicher
+                "content_de": r"""# Intelligente Fußbodenheizung & Thermischer Estrich-Speicher
 
 Die **Fußbodenheizungs- & Estrich-Engine** von Sharegy verwandelt den Betonestrich deines Gebäudes in einen hocheffizienten thermischen Energiespeicher (*Thermal Battery Dispatch*).
 
@@ -1267,7 +1267,7 @@ Sharegy steuert den Heizkreis digital über einen der folgenden Wege:
 * **❄️ Untertemperaturschutz:** Sinkt die Temperatur unter $20{,}5^\circ\text{C}$, heizt Sharegy sofort auf, um Wohnkomfort zu garantieren.
 * **⏳ Verdichter- & Pumpenschutz:** Anti-Cycling-Sperre (Mindestlaufzeit & Mindestruhezeit von je 10 Minuten) verhindert häufiges Takten.
 """,
-                "content_en": """# Smart Underfloor Heating & Screed Thermal Battery
+                "content_en": r"""# Smart Underfloor Heating & Screed Thermal Battery
 
 Sharegy's **Underfloor Heating & Screed Thermal Battery Engine** turns your building's concrete floor into an intelligent thermal energy storage system (*Thermal Battery Dispatch*).
 
@@ -1321,7 +1321,7 @@ A typical single-family home with $120\,\text{m}^2$ of underfloor heating contai
                 "title_en": "ioBroker & Home Assistant Integration: Bidirectional Monitoring & Control",
                 "summary_de": "Erklärung der bidirektionalen Schnittstelle für Home Assistant und ioBroker (Sensordaten erfassen, Thermostate und Aktoren schalten).",
                 "summary_en": "Guide to the bidirectional interface for Home Assistant and ioBroker (sensor telemetry and actuator control).",
-                "content_de": """# ioBroker & Home Assistant: Bidirektionales Messen & Steuern
+                "content_de": r"""# ioBroker & Home Assistant: Bidirektionales Messen & Steuern
 
 Sharegy bietet eine universelle **MQTT- & WebSocket-Schnittstelle**, mit der du deine bestehende Smart-Home-Zentrale (**Home Assistant**, **ioBroker**, **Node-RED**, **OpenHAB**, **Homematic IP**) nahtlos einbinden kannst.
 
@@ -1373,7 +1373,6 @@ Wenn die Option **„Bidirektionale Steuerung aktivieren“** eingeschaltet ist,
 1. Öffne im Menü **„⚙️ Schnittstellen“** (`/app/interfaces`).
 2. Wähle den Tab **„Home Assistant“** oder **„ioBroker“**.
 3. Aktiviere den Schalter **„Bidirektionale Steuerung (Messen & Steuern)“**.
-4. Kopiere deine Zugangsdaten (MQTT Host, Token, Passwort) in deine Zentrale.
 """,
                 "content_en": """# ioBroker & Home Assistant: Bidirectional Monitoring & Control
 

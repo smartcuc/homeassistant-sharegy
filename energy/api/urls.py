@@ -19,7 +19,9 @@ from .views import (
     export_chart_csv,
     export_chart_pdf,
     system_setup_status_view,
+    energy_profile_view,
 )
+
 
 urlpatterns = [
     path("fake-dashboard/", fake_dashboard),
@@ -97,6 +99,8 @@ urlpatterns += [
     path("grid/steuve/", steuve_devices_config_view),
     # 🎯 Onboarding & System Readiness Check (Omi-Test)
     path("setup-status/", system_setup_status_view),
+    # 🏡 Energie-Profil & Ersparnis-Kompass
+    path("profile/", energy_profile_view),
     # 🚗 OCPP 1.6-J Wallbox & Smart-Charging Endpunkte
     path("wallboxes/", WallboxListCreateView.as_view()),
     path("wallboxes/<uuid:pk>/", WallboxDetailView.as_view()),

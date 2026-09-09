@@ -3,8 +3,9 @@
 */
 
 import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../../api/client";
 
@@ -116,7 +117,7 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "", i
             {/* COMPACT SUMMARY STRIP (Nur auf Dashboard / wenn nicht im Modal) */}
             {!inModal && (
                 <div className="px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs">
-                    {/* Left: Omi-Check Badge & 5 Mini Status Chips */}
+                    {/* Left: Omi-Check Badge, Energie-Profil Badge & 5 Mini Status Chips */}
                     <div className="flex flex-wrap items-center gap-2.5 min-w-0">
                         <div className="flex items-center gap-1.5 shrink-0 font-bold text-slate-900 dark:text-white">
                             <span className="text-base">🩺</span>
@@ -125,6 +126,19 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "", i
                                 {score}% {score >= 90 ? t("system_health.optimal", "Optimal") : score >= 60 ? t("system_health.ready", "Bereit") : t("system_health.incomplete", "Unvollständig")}
                             </span>
                         </div>
+
+                        {/* 🌟 ENERGIE-PROFIL BADGE (KLICKBAR) */}
+                        {data.energy_profile && (
+                            <Link
+                                to="/app/energy-profile"
+                                className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900 transition shadow-2xs cursor-pointer shrink-0"
+                                title={t("energy_profile.badge_tooltip", "Klicken, um dein Energie-Profil und den Ersparnisrechner zu öffnen")}
+                            >
+                                <span>🏡</span>
+                                <span>{t("energy_profile.badge_label", "Energie-Profil")}: {data.energy_profile.profile_code}</span>
+                                <span className="text-indigo-400 dark:text-indigo-500 font-bold">↗</span>
+                            </Link>
+                        )}
 
                         {/* 5 Mini Pillar Badges */}
                         <div className="flex items-center gap-1.5 overflow-x-auto py-0.5">
@@ -179,6 +193,7 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "", i
                 </div>
             )}
 
+
             {/* PROGRESS BAR (Nur wenn ausgeklappt oder Score < 100) */}
             {!inModal && !collapsed && (
                 <div className="w-full h-1 bg-slate-100 dark:bg-slate-800 overflow-hidden">
@@ -192,8 +207,37 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "", i
             {/* EXPANDABLE / MODAL BODY */}
             {(!collapsed || inModal) && (
                 <div className="p-5 space-y-5 animate-fade-in border-t border-slate-100 dark:border-slate-800">
+                    {/* 🌟 ENERGIE-PROFIL & TARIF-KOMPASS BANNER */}
+                    {data.energy_profile && (
+                        <div className="p-4 rounded-2xl bg-gradient-to-r from-indigo-900/90 via-slate-900 to-indigo-950 text-white shadow-md border border-indigo-700/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div className="space-y-1">
+                                <div className="flex items-center gap-2">
+                                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-indigo-500/30 text-indigo-300 border border-indigo-400/30">
+                                        {t("energy_profile.badge_label", "Energie-Profil")}: {data.energy_profile.profile_code}
+                                    </span>
+                                    <span className="text-xs font-bold text-white">{data.energy_profile.profile_name}</span>
+                                </div>
+                                <div className="text-xs text-indigo-200/90 flex items-center gap-1.5">
+                                    <span>💡</span>
+                                    <span>{data.energy_profile.tariff_verdict_title}</span>
+                                    <span className="text-slate-400">·</span>
+                                    <span className="text-emerald-400 font-bold">ca. {data.energy_profile.estimated_savings_eur_year} €/Jahr Sparpotenzial</span>
+                                </div>
+                            </div>
+                            <Link
+                                to="/app/energy-profile"
+                                className="px-3.5 py-2 rounded-xl bg-white text-indigo-900 hover:bg-indigo-50 text-xs font-bold transition shrink-0 flex items-center gap-1 shadow-sm self-start sm:self-auto cursor-pointer"
+                            >
+                                <span>🏡</span>
+                                <span>{t("energy_profile.open_profile_btn", "Profil & Rechner öffnen")}</span>
+                                <span>→</span>
+                            </Link>
+                        </div>
+                    )}
+
                     {/* 5 PILLARS STATUS CARDS */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+
                         {pillarConfigs.map((item) => {
                             const isOk = Boolean(
                                 item.pillar?.installed ||

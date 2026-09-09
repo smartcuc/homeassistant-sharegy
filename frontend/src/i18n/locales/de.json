@@ -2106,5 +2106,36 @@
     "tab_variables": "OCPP 2.x Variablen",
     "modal_title": "OCPP Experten-Tools",
     "modal_subtitle": "Live-Diagnose, Fernsteuerung & ISO 15118-20 V2X Management"
+  },
+  "energy_profile": {
+    "page_title": "Energie-Profil & Ersparnisrechner",
+    "page_subtitle": "Verwalte deine Hardware-Ausstattung, berechne dein Sparpotenzial und erhalte konkrete Tarif-Empfehlungen.",
+    "view_matrix_guide": "Tarif- & Ersparnis-Kompass öffnen",
+    "saved_success": "Energie-Profil erfolgreich gespeichert!",
+    "badge_label": "Energie-Profil",
+    "badge_tooltip": "Klicken, um dein Energie-Profil und den Ersparnisrechner zu öffnen",
+    "open_profile_btn": "Profil & Rechner öffnen",
+    "estimated_annual_savings": "Geschätztes Sparpotenzial",
+    "shiftable_load": "Verschiebbare Last:",
+    "hardware_switches_title": "Hardware-Ausstattung anpassen",
+    "hardware_switches_desc": "Aktiviere oder deaktiviere Komponenten, um dein Profil und Sparpotenzial sofort neu zu berechnen.",
+    "solar_presence": "Solarenergie",
+    "battery_storage": "Batteriespeicher / Heimspeicher",
+    "battery_storage_desc": "Stationärer Akku zur Zwischenspeicherung",
+    "ev_wallbox": "E-Auto / Wallbox",
+    "ev_wallbox_desc": "Elektrofahrzeug mit intelligenter Lademöglichkeit",
+    "heat_pump": "Wärmepumpe / BWWP",
+    "heat_pump_desc": "Heizungs-Wärmepumpe oder Brauchwasser-Wärmepumpe",
+    "tariff_selection_title": "Aktueller Stromtarif",
+    "tariff_selection_desc": "Welcher Vertrag liegt aktuell zugrunde?",
+    "fixed_tariff_title": "Klassischer Festpreis-Tarif (~30–35 ct/kWh)",
+    "fixed_tariff_desc": "Konstanter Arbeitspreis rund um die Uhr (z. B. Stadtwerke / Grundversorgung).",
+    "dynamic_tariff_title": "Dynamischer Börsenstromtarif (z. B. Tibber, Rabot, Ostrom)",
+    "dynamic_tariff_desc": "Viertelstündlich/stündlich schwankender Börsenpreis. Ideal für Lastverschiebung.",
+    "configure_exact_rates": "Genaue ct/kWh Arbeitspreise & Tibber Token einstellen:",
+    "savings_breakdown_title": "Aufschlüsselung deines Sparpotenzials",
+    "savings_breakdown_desc": "So setzt sich deine jährliche Ersparnis bei optimaler Steuerung zusammen:",
+    "action_steps_title": "Empfohlene nächste Schritte für dein Profil",
+    "action_steps_desc": "Nutze diese Funktionen in Sharegy, um dein errechnetes Sparpotenzial vollständig auszuschöpfen:"
   }
-}
+}
