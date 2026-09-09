@@ -137,7 +137,7 @@ class OcppConsumer(AsyncWebsocketConsumer):
             await self.broadcast_wallbox_update()
 
         elif action == "MeterValues":
-            connector_id = payload.get("connectorId", 1)
+            connector_id = payload.get("connectorId") or payload.get("evseId", 1)
             tx_id = payload.get("transactionId")
             meter_values = payload.get("meterValue", [])
             await self.process_meter_values(self.cp_id, connector_id, tx_id, meter_values)
@@ -743,6 +743,10 @@ class OcppConsumer(AsyncWebsocketConsumer):
                 val_str = sv.get("value", "0")
                 phase = sv.get("phase")
                 unit = sv.get("unit", "")
+                if isinstance(sv.get("unitOfMeasure"), dict):
+                    unit = sv.get("unitOfMeasure", {}).get("unit", unit)
+                elif sv.get("unitOfMeasure"):
+                    unit = str(sv.get("unitOfMeasure"))
                 try:
                     val = float(val_str)
                 except ValueError:
