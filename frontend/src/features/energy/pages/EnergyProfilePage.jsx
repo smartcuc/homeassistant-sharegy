@@ -10,14 +10,16 @@ import Card from "../../../components/ui/Card";
 import { apiFetch } from "../../../api/client";
 
 export default function EnergyProfilePage() {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const queryClient = useQueryClient();
 
+    const activeLang = (i18n.language || "de").split("-")[0];
+
     // 1. Energie-Profil Daten abrufen
     const { data: profile, isLoading } = useQuery({
-        queryKey: ["energy-profile"],
-        queryFn: () => apiFetch("/api/energy/profile/"),
+        queryKey: ["energy-profile", activeLang],
+        queryFn: () => apiFetch(`/api/energy/profile/?lang=${activeLang}`),
         staleTime: 30000,
     });
 
@@ -45,10 +47,10 @@ export default function EnergyProfilePage() {
         mutationFn: (payload) =>
             apiFetch("/api/energy/profile/", {
                 method: "POST",
-                body: JSON.stringify(payload),
+                body: JSON.stringify({ ...payload, lang: activeLang }),
             }),
         onSuccess: (updatedProfile) => {
-            queryClient.setQueryData(["energy-profile"], updatedProfile);
+            queryClient.setQueryData(["energy-profile", activeLang], updatedProfile);
             queryClient.invalidateQueries({ queryKey: ["system-setup-status"] });
             queryClient.invalidateQueries({ queryKey: ["home-tariff"] });
             setStatusMsg({ type: "success", text: t("energy_profile.saved_success", "Energie-Profil erfolgreich gespeichert!") });
@@ -93,6 +95,12 @@ export default function EnergyProfilePage() {
     const savingsAmount = profile?.estimated_savings_eur_year || 80;
     const shiftableKwh = profile?.shiftable_kwh_year || 200;
 
+    const solarOptions = [
+        { key: "none", label: t("energy_profile.solar_none_label", "🏢 Kein Solar"), desc: t("energy_profile.solar_none_desc", "Haushalt ohne PV") },
+        { key: "bkw", label: t("energy_profile.solar_bkw_label", "☀️ Balkonkraftwerk"), desc: t("energy_profile.solar_bkw_desc", "bis 800W Stecker-Solar") },
+        { key: "pv", label: t("energy_profile.solar_pv_label", "🏡 PV-Anlage"), desc: t("energy_profile.solar_pv_desc", "große Solaranlage") },
+    ];
+
     return (
         <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6 animate-fade-in">
             {/* HEADER */}
@@ -103,7 +111,7 @@ export default function EnergyProfilePage() {
                         <span>{t("energy_profile.page_title", "Energie-Profil & Ersparnisrechner")}</span>
                     </h1>
                     <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                        {t("energy_profile.page_subtitle", "Verwalte deine Hardware-Ausstattung, berechne dein Sparpotenzial und erhalte konkrete Tarif-Empfehlungen.")}
+                        {t("energy_profile.page_subtitle", "Verwalte deine Ausstattung, berechne dein Sparpotenzial und erhalte konkrete Tarif-Empfehlungen.")}
                     </p>
                 </div>
 
@@ -149,12 +157,14 @@ export default function EnergyProfilePage() {
                                     ? "bg-amber-500/20 text-amber-300 border-amber-400/30"
                                     : "bg-emerald-500/20 text-emerald-300 border-emerald-400/30"
                             }`}>
-                                {profile?.recommended_tariff === "dynamic" ? "⚡ Dynamischer Tarif empfohlen" : "🔒 Fester Tarif empfohlen"}
+                                {recommendedIsDynamic
+                                    ? t("energy_profile.tag_dynamic_recommended", "⚡ Dynamischer Tarif empfohlen")
+                                    : t("energy_profile.tag_static_recommended", "🔒 Fester Tarif empfohlen")}
                             </span>
                         </div>
 
                         <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-                            {profile?.profile_name || "Haushalt ohne Solar"}
+                            {profile?.profile_name || t("energy_profile.default_profile_name", "Haushalt ohne Solar")}
                         </h2>
                         <p className="text-sm text-indigo-200/90 leading-relaxed">
                             {profile?.profile_subtitle}
@@ -178,7 +188,7 @@ export default function EnergyProfilePage() {
                         </span>
                         <div className="text-4xl font-black text-emerald-400">
                             ca. {savingsAmount} €
-                            <span className="text-sm font-semibold text-slate-300 block">/ Jahr</span>
+                            <span className="text-sm font-semibold text-slate-300 block">{t("energy_profile.per_year", "/ Jahr")}</span>
                         </div>
                         <div className="text-xs text-indigo-200 pt-2 border-t border-white/10 w-full flex items-center justify-between">
                             <span>{t("energy_profile.shiftable_load", "Verschiebbare Last:")}</span>
@@ -188,18 +198,18 @@ export default function EnergyProfilePage() {
                 </div>
             </div>
 
-            {/* 2. SCHALTER-ZENTRALE: HARDWARE- & TARIF-TOGGLES */}
+            {/* 2. SCHALTER-ZENTRALE: AUSSTATTUNG & TARIF-TOGGLES */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* 2.1 HARDWARE AUSSTATTUNG */}
+                {/* 2.1 DEINE ENERGIE-AUSSTATTUNG */}
                 <Card>
                     <div className="flex items-center justify-between mb-4">
                         <div>
                             <h2 className="font-bold text-slate-900 dark:text-white text-base flex items-center gap-2">
                                 <span>🎛️</span>
-                                <span>{t("energy_profile.hardware_switches_title", "Hardware-Ausstattung anpassen")}</span>
+                                <span>{t("energy_profile.equipment_title", "Deine Energie-Ausstattung")}</span>
                             </h2>
                             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                                {t("energy_profile.hardware_switches_desc", "Aktiviere oder deaktiviere Komponenten, um dein Profil und Sparpotenzial sofort neu zu berechnen.")}
+                                {t("energy_profile.equipment_desc", "Aktiviere oder deaktiviere Komponenten, um dein Profil und Sparpotenzial sofort neu zu berechnen.")}
                             </p>
                         </div>
                     </div>
@@ -211,11 +221,7 @@ export default function EnergyProfilePage() {
                                 ☀️ {t("energy_profile.solar_presence", "Solarenergie")}
                             </label>
                             <div className="grid grid-cols-3 gap-2">
-                                {[
-                                    { key: "none", label: "🏢 Kein Solar", desc: "Haushalt ohne PV" },
-                                    { key: "bkw", label: "☀️ Balkonkraftwerk", desc: "bis 800W Stecker-Solar" },
-                                    { key: "pv", label: "🏡 PV-Anlage", desc: "große Solaranlage" },
-                                ].map((opt) => (
+                                {solarOptions.map((opt) => (
                                     <button
                                         key={opt.key}
                                         type="button"
@@ -384,10 +390,10 @@ export default function EnergyProfilePage() {
                         <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs space-y-1">
                             <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5 text-[11px]">
                                 <span>ℹ️</span>
-                                <span>Alternative: Fester Tarif mit günstigem Lade-/Wärmetarif</span>
+                                <span>{t("energy_profile.alt_tariff_title", "Alternative: Fester Tarif mit günstigem Lade-/Wärmetarif")}</span>
                             </div>
                             <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
-                                Ein separater Festpreis-Wärme- oder Autostromtarif ist möglich, erfordert jedoch einen <strong>2. Zählerplatz (Kaskadenschaltung)</strong> mit Zusatzkosten von ca. <strong>80–120 €/Jahr</strong> für Messstellenbetrieb und Grundgebühr. Bei einem dynamischen Börsenstromtarif genügt <strong>1 intelligenter Zähler</strong> bei vollem § 14a Netzentgelt-Rabatt (~160 €/a).
+                                {profile?.alternative_tariff_hint || t("energy_profile.alt_tariff_desc", "Ein separater Festpreis-Wärme- oder Autostromtarif ist möglich, erfordert jedoch einen 2. Zählerplatz (Kaskadenschaltung) mit Zusatzkosten von ca. 80–120 €/Jahr für Messstellenbetrieb und Grundgebühr. Bei einem dynamischen Börsenstromtarif genügt 1 intelligenter Zähler bei vollem § 14a Netzentgelt-Rabatt (~160 €/a).")}
                             </p>
                         </div>
 
@@ -400,7 +406,7 @@ export default function EnergyProfilePage() {
                                 to="/app/tariff"
                                 className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
                             >
-                                <span>Strompreise & Tarife</span>
+                                <span>{t("nav.tariffs", "Strompreise & Tarife")}</span>
                                 <span>→</span>
                             </Link>
                         </div>

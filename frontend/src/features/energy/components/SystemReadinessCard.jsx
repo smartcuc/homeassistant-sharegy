@@ -222,7 +222,7 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "", i
                                     <span>💡</span>
                                     <span>{data.energy_profile.tariff_verdict_title}</span>
                                     <span className="text-slate-400">·</span>
-                                    <span className="text-emerald-400 font-bold">ca. {data.energy_profile.estimated_savings_eur_year} €/Jahr Sparpotenzial</span>
+                                    <span className="text-emerald-400 font-bold">ca. {data.energy_profile.estimated_savings_eur_year} €{t("energy_profile.per_year", "/Jahr")} {t("energy_profile.savings_potential", "Sparpotenzial")}</span>
                                 </div>
                             </div>
                             <Link

@@ -28,7 +28,7 @@ export default function MobileMenuDrawer({ isOpen, onClose }) {
         ...(hasCommunityAdminAccess
             ? [{ name: t("nav.tenant_management", "Community & Mieter"), path: "/app/tenant", icon: "👥" }]
             : []),
-        { name: t("nav.energy_profile", "Energie-Profil & Setup"), path: "/app/energy-profile", icon: "🏡" },
+        { name: t("nav.energy_profile", "Energie-Profil"), path: "/app/energy-profile", icon: "🏡" },
         { name: t("nav.tariff", "Dynamischer Tarif"), path: "/app/tariff", icon: "💶" },
         { name: t("nav.system_status", "Systemstatus & Live-Sync"), path: "/app/status", icon: "📶" },
 

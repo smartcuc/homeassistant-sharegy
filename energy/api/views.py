@@ -888,17 +888,20 @@ def system_setup_status_view(request):
 def energy_profile_view(request):
     """
     Liefert oder speichert das Energie-Profil des Haushalts (Hardware-Schalter & Tarif-Kompass).
-    GET: Berechnet das aktuelle Profil aus Cache / Geräten.
+    GET: Berechnet das aktuelle Profil aus Cache / Geräten (DE oder EN).
     POST: Speichert modifizierte Hardware-Schalter und liefert das neu berechnete Profil.
     """
     from energy.services.energy_profile import get_user_energy_profile, save_user_energy_profile
 
+    lang = request.query_params.get("lang") or getattr(request, "LANGUAGE_CODE", "de") or "de"
+
     if request.method == "POST":
         data = request.data or {}
-        profile = save_user_energy_profile(request.user, data)
+        lang = data.get("lang") or lang
+        profile = save_user_energy_profile(request.user, data, lang=lang)
         return Response(profile)
 
-    profile = get_user_energy_profile(request.user)
+    profile = get_user_energy_profile(request.user, lang=lang)
     return Response(profile)
 
 
