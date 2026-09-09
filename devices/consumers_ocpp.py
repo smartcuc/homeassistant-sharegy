@@ -213,12 +213,13 @@ class OcppConsumer(AsyncWebsocketConsumer):
             except (ValueError, TypeError):
                 tx_id = 100001
 
-            id_token_data = payload.get("idToken") or {}
-            id_tag = id_token_data.get("idToken", "") if isinstance(id_token_data, dict) else str(id_token_data)
+            id_token_data = payload.get("idToken") or tx_info.get("idToken") or {}
+            id_tag = id_token_data.get("idToken", "APP_USER") if isinstance(id_token_data, dict) else str(id_token_data) or "APP_USER"
             evse = payload.get("evse") or {}
-            connector_id = evse.get("connectorId", 1)
+            connector_id = evse.get("connectorId") or evse.get("id", 1)
             meter_values = payload.get("meterValue", [])
             stopped_reason = tx_info.get("stoppedReason", "Local")
+            charging_state = tx_info.get("chargingState")
 
             if event_type == "Started":
                 meter_start = 0
@@ -232,10 +233,16 @@ class OcppConsumer(AsyncWebsocketConsumer):
                 if raw_tx_id:
                     cache.set(f"ocpp_tx_raw_{self.cp_id}", str(raw_tx_id), timeout=86400)
                 await self.create_start_transaction(self.cp_id, connector_id, id_tag, meter_start, custom_tx_id=tx_id)
+                if charging_state:
+                    mapped_status = "Charging" if charging_state == "Charging" else "Preparing" if charging_state == "EVConnected" else charging_state
+                    await self.update_status(self.cp_id, connector_id, mapped_status, "NoError")
 
             elif event_type == "Updated":
                 if raw_tx_id:
                     cache.set(f"ocpp_tx_raw_{self.cp_id}", str(raw_tx_id), timeout=86400)
+                if charging_state:
+                    mapped_status = "Charging" if charging_state == "Charging" else "Preparing" if charging_state == "EVConnected" else charging_state
+                    await self.update_status(self.cp_id, connector_id, mapped_status, "NoError")
                 if meter_values:
                     await self.process_meter_values(self.cp_id, connector_id, tx_id, meter_values)
 
@@ -590,7 +597,7 @@ class OcppConsumer(AsyncWebsocketConsumer):
                 "remoteStartId": 1,
                 "idToken": {
                     "idToken": id_tag,
-                    "type": "ISO14443"
+                    "type": "Central"
                 }
             }
             await self.send_call("RequestStartTransaction", payload)
