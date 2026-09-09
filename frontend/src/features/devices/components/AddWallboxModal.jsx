@@ -5,6 +5,13 @@ import { apiFetch } from "../../../api/client";
 
 const BRAND_PRESETS = [
     {
+        id: "ocpp-universal",
+        name: "OCPP (Universal / 1.6 / 2.0.1 / 2.1)",
+        models: ["Standard OCPP (Auto-Detect)", "ISO 15118-20 Plug & Charge", "V2G / V2H Bidirektional"],
+        icon: "🌐",
+        hint: "Funktioniert mit jeder OCPP-fähigen Wallbox. Trage einfach die WSS-Server-URL in deiner Wallbox ein – Sharegy erkennt die Protokollversion (1.6-J, 2.0.1 oder 2.1) vollautomatisch.",
+    },
+    {
         id: "go-e",
         name: "go-eCharger",
         models: ["Gemini", "Gemini flex", "HOMEfix", "HOME+"],
@@ -16,7 +23,7 @@ const BRAND_PRESETS = [
         name: "Easee",
         models: ["Charge Lite", "Equalizer", "Charge Max", "One"],
         icon: "⚡",
-        hint: "Im Easee Cloud Portal oder Installer-App den Betreiber auf OCPP 1.6-J (Sharegy) setzen.",
+        hint: "Im Easee Cloud Portal oder Installer-App den Betreiber auf OCPP (Sharegy) setzen.",
     },
     {
         id: "keba",
@@ -44,7 +51,7 @@ const BRAND_PRESETS = [
         name: "Zaptec",
         models: ["Zaptec Go", "Zaptec Pro"],
         icon: "🇳🇴",
-        hint: "Im Zaptec Portal unter 'Installationen' > 'Authentifizierung' die OCPP 1.6-J Cloud anbinden.",
+        hint: "Im Zaptec Portal unter 'Installationen' > 'Authentifizierung' die OCPP Cloud anbinden.",
     },
     {
         id: "heidelberg",
@@ -59,13 +66,6 @@ const BRAND_PRESETS = [
         models: ["series2 standard+", "series2 custom", "pro"],
         icon: "🐧",
         hint: "In den openWB Einstellungen unter 'Lademodus / OCPP Client' die Verbindung aktivieren.",
-    },
-    {
-        id: "custom",
-        name: "Andere Wallbox (OCPP 1.6-J)",
-        models: ["Standard OCPP 1.6-J / JSON"],
-        icon: "🌐",
-        hint: "Jede Wallbox mit OCPP 1.6-JSON Unterstützung kann direkt verbunden werden.",
     },
 ];
 
