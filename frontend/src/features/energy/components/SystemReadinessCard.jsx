@@ -136,7 +136,7 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "", i
                         </div>
 
                         {/* 6 Mini Pillar Badges */}
-                        <div className="flex items-center gap-1.5 overflow-x-auto py-0.5">
+                        <div className="flex flex-wrap items-center gap-1.5 py-0.5">
                             {pillarConfigs.map((item) => {
                                 const isOk = Boolean(
                                     (item.pillar?.installed && item.pillar?.status === "ok") ||
@@ -146,7 +146,7 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "", i
                                 const isWarning = item.pillar?.status === "warning";
                                 const isOptional = Boolean(item.pillar?.optional ?? item.optional);
 
-                                const badgeClass = `inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-semibold border transition shrink-0 ${
+                                const badgeClass = `inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-semibold border transition-all shrink-0 ${
                                     isOk
                                         ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
                                         : isWarning
@@ -154,14 +154,18 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "", i
                                         : isOptional
                                         ? "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700"
                                         : "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800"
-                                } ${item.link ? "hover:scale-105 hover:shadow-2xs cursor-pointer" : ""}`;
+                                } ${item.link ? "hover:border-indigo-400 dark:hover:border-indigo-500 hover:bg-indigo-50/70 dark:hover:bg-indigo-950/60 hover:text-indigo-700 dark:hover:text-indigo-300 hover:shadow-2xs cursor-pointer group" : ""}`;
 
                                 const content = (
                                     <>
                                         <span>{item.icon}</span>
                                         <span className="hidden sm:inline">{item.label}</span>
                                         <span>{isOk ? "✓" : isWarning ? "!" : isOptional ? "—" : "!"}</span>
-                                        {item.link && <span className="text-[9px] opacity-70">↗</span>}
+                                        {item.link && (
+                                            <span className="text-[9px] opacity-70 group-hover:opacity-100 group-hover:translate-x-0.5 transition-transform inline-block">
+                                                ↗
+                                            </span>
+                                        )}
                                     </>
                                 );
 
