@@ -214,9 +214,13 @@ class SharegyBridge:
         """Resolve full WebSocket URL."""
         if self.ws_url_config and self.ws_url_config.strip().startswith("wss://"):
             url = self.ws_url_config.strip()
-            return url if url.endswith("/") else f"{url}/"
+            base = url if url.endswith("/") else f"{url}/"
+        else:
+            base = f"wss://sharegy.de/ws/energy/{self.token}/"
 
-        return f"wss://sharegy.de/ws/energy/{self.token}/"
+        if "?" not in base:
+            base += "?client=homeassistant&source=homeassistant&version=2.1.0"
+        return base
 
     async def start(self):
         """Start the background streaming worker and state change listeners."""
