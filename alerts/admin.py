@@ -33,7 +33,9 @@ class AlertEventAdmin(admin.ModelAdmin):
         }
         color, label = colors.get(obj.severity, ("#64748b", obj.severity.upper()))
         return format_html(
-            f'<span style="background-color: {color}; color: white; padding: 2px 7px; border-radius: 4px; font-weight: bold; font-size: 10px;">{label}</span>'
+            '<span style="background-color: {}; color: white; padding: 2px 7px; border-radius: 4px; font-weight: bold; font-size: 10px;">{}</span>',
+            color,
+            label,
         )
     severity_badge.short_description = "Schweregrad"
 
@@ -45,6 +47,9 @@ class AlertEventAdmin(admin.ModelAdmin):
         }
         color, label = colors.get(obj.status, ("#64748b", obj.status))
         return format_html(
-            f'<span style="color: {color}; font-weight: bold; font-size: 11px;">{label}</span>'
+            '<span style="color: {}; font-weight: bold; font-size: 11px;">{}</span>',
+            color,
+            label,
         )
     status_badge.short_description = "Status"
+
