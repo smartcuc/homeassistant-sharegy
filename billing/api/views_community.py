@@ -46,7 +46,31 @@ def community_cockpit_view(request):
         tenant = membership.tenant if membership else None
 
     if not tenant:
-        return Response({"error": "No active community found for user."}, status=404)
+        return Response({
+            "active": False,
+            "community": None,
+            "message": "No active community found for user.",
+            "today": {
+                "produced_kwh": 0.0,
+                "consumed_kwh": 0.0,
+                "shared_kwh": 0.0,
+                "grid_import_kwh": 0.0,
+                "grid_export_kwh": 0.0,
+                "autarky_pct": 0.0,
+                "savings_eur": 0.0,
+            },
+            "month": {
+                "produced_kwh": 0.0,
+                "consumed_kwh": 0.0,
+                "shared_kwh": 0.0,
+                "grid_import_kwh": 0.0,
+                "grid_export_kwh": 0.0,
+                "autarky_pct": 0.0,
+                "savings_eur": 0.0,
+            },
+            "timeseries_15m": [],
+            "forecast_48h": {"hours": [], "total_forecast_kwh": 0.0},
+        }, status=200)
 
     now = timezone.now()
     today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -198,7 +222,7 @@ def community_tariffs_view(request):
         tenant = membership.tenant if membership else None
 
     if not tenant:
-        return Response({"error": "No active community found for user."}, status=404)
+        return Response({"active_tariff": None, "tariffs": []}, status=200)
 
     from billing.models import CommunityTariff
     from billing.services_sharing_settlement import get_active_community_tariff
@@ -298,7 +322,7 @@ def community_statements_view(request):
         tenant = membership.tenant if membership else None
 
     if not tenant:
-        return Response({"error": "No active community found for user."}, status=404)
+        return Response([], status=200)
 
     from billing.models import CommunityMonthlyStatement
 
@@ -848,7 +872,7 @@ def community_member_shares_view(request):
         tenant = membership.tenant if membership else None
 
     if not tenant:
-        return Response({"error": "No active community found for user."}, status=404)
+        return Response({"community": None, "total_shares_pct": 0.0, "members": []}, status=200)
 
     from billing.models import CommunityMemberShare
 

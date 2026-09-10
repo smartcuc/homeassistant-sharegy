@@ -35,19 +35,27 @@ export default function TenantDashboard() {
             setMembers(data.members || []);
             setInvites(data.invites || []);
 
-            const [logData, cockpitData, tariffsRes, statementsRes, sharesRes] = await Promise.all([
-                apiFetch("/api/audit-log/").catch(() => []),
-                apiFetch("/api/billing/community/cockpit/").catch(() => null),
-                apiFetch("/api/billing/community/tariffs/").catch(() => null),
-                apiFetch("/api/billing/community/statements/").catch(() => null),
-                apiFetch("/api/billing/community/shares/").catch(() => null),
-            ]);
+            if (data.tenant) {
+                const [logData, cockpitData, tariffsRes, statementsRes, sharesRes] = await Promise.all([
+                    apiFetch("/api/audit-log/").catch(() => []),
+                    apiFetch("/api/billing/community/cockpit/").catch(() => null),
+                    apiFetch("/api/billing/community/tariffs/").catch(() => null),
+                    apiFetch("/api/billing/community/statements/").catch(() => null),
+                    apiFetch("/api/billing/community/shares/").catch(() => null),
+                ]);
 
-            setLogs(logData || []);
-            setCockpit(cockpitData);
-            setTariffData(tariffsRes);
-            setStatementsData(statementsRes);
-            setSharesData(sharesRes);
+                setLogs(logData || []);
+                setCockpit(cockpitData);
+                setTariffData(tariffsRes);
+                setStatementsData(statementsRes);
+                setSharesData(sharesRes);
+            } else {
+                setLogs([]);
+                setCockpit(null);
+                setTariffData(null);
+                setStatementsData(null);
+                setSharesData(null);
+            }
         } catch (err) {
             console.error("Load failed:", err);
         } finally {
