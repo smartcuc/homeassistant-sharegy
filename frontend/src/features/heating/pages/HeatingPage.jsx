@@ -112,7 +112,7 @@ export default function HeatingPage() {
                         className="self-start sm:self-auto px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 text-xs font-black rounded-2xl shadow-md shadow-amber-500/20 transition cursor-pointer flex items-center gap-1.5 shrink-0"
                     >
                         <span>⭐</span>
-                        <span>Auf Pro upgraden (ab {proYearlyMonthlyEquiv} €/M)</span>
+                        <span>{t("heating.upgrade_pro_btn", { price: proYearlyMonthlyEquiv, defaultValue: `Auf Pro upgraden (ab ${proYearlyMonthlyEquiv} €/M)` })}</span>
                     </button>
                 )}
             </div>
@@ -127,13 +127,13 @@ export default function HeatingPage() {
                     <div className="relative z-10 max-w-3xl space-y-4">
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 text-xs font-bold uppercase tracking-wider">
                             <span>⭐</span>
-                            <span>Sharegy Pro Exklusiv</span>
+                            <span>{t("heating.pro_exclusive", "Sharegy Pro Exklusiv")}</span>
                         </div>
                         <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight">
-                            Nutze deinen Estrich als thermische Batterie & spare bis zu 45% Heizkosten
+                            {t("heating.pro_hero_title", "Nutze deinen Estrich als thermische Batterie & spare bis zu 45% Heizkosten")}
                         </h2>
                         <p className="text-indigo-200/80 text-sm sm:text-base leading-relaxed">
-                            Vorausschauende KI-Wetter-Vorladung (MPC), SG-Ready Warmwasser-Überhitzung bei Solar-Peaks und intelligente Heizstab-Modulation für maximale Autarkie.
+                            {t("heating.pro_hero_subtitle", "Vorausschauende KI-Wetter-Vorladung (MPC), SG-Ready Warmwasser-Überhitzung bei Solar-Peaks und intelligente Heizstab-Modulation für maximale Autarkie.")}
                         </p>
                     </div>
 
@@ -141,49 +141,49 @@ export default function HeatingPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 relative z-10">
                         <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
                             <div className="text-2xl">🧠</div>
-                            <h3 className="text-sm font-bold text-white">Predictive MPC Estrich-Vorladung</h3>
+                            <h3 className="text-sm font-bold text-white">{t("heating.feature_mpc_title", "Predictive MPC Estrich-Vorladung")}</h3>
                             <p className="text-xs text-indigo-200/70 leading-relaxed">
-                                Erkennt Kältefronten & Preissprünge 24h im Voraus und lädt deinen Fußboden mit Solarstrom vor.
+                                {t("heating.feature_mpc_desc", "Erkennt Kältefronten & Preissprünge 24h im Voraus und lädt deinen Fußboden mit Solarstrom vor.")}
                             </p>
                         </div>
 
                         <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
                             <div className="text-2xl">🧱</div>
-                            <h3 className="text-sm font-bold text-white">Thermische Bauteilaktivierung</h3>
+                            <h3 className="text-sm font-bold text-white">{t("heating.feature_tba_title", "Thermische Bauteilaktivierung")}</h3>
                             <p className="text-xs text-indigo-200/70 leading-relaxed">
-                                Speichert 10–25 kWh thermische Energie im Betonestrich – ganz ohne teure Zusatzspeicher.
+                                {t("heating.feature_tba_desc", "Speichert 10–25 kWh thermische Energie im Betonestrich – ganz ohne teure Zusatzspeicher.")}
                             </p>
                         </div>
 
                         <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
                             <div className="text-2xl">♨️</div>
-                            <h3 className="text-sm font-bold text-white">BWWP SG-Ready Solar-Boost</h3>
+                            <h3 className="text-sm font-bold text-white">{t("heating.feature_bwwp_title", "BWWP SG-Ready Solar-Boost")}</h3>
                             <p className="text-xs text-indigo-200/70 leading-relaxed">
-                                Hebt die Warmwasser-Solltemperatur bei Solar-Peaks auf 60–65°C an (inkl. Legionellenschutz).
+                                {t("heating.feature_bwwp_desc", "Hebt die Warmwasser-Solltemperatur bei Solar-Peaks auf 60–65°C an (inkl. Legionellenschutz).")}
                             </p>
                         </div>
 
                         <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
                             <div className="text-2xl">⚡</div>
-                            <h3 className="text-sm font-bold text-white">Heizstab Power-to-Heat</h3>
+                            <h3 className="text-sm font-bold text-white">{t("heating.feature_rod_title", "Heizstab Power-to-Heat")}</h3>
                             <p className="text-xs text-indigo-200/70 leading-relaxed">
-                                Stufenlose Modulation für Thyristor- und Relais-Heizstäbe für 100% Eigenverbrauchsquote.
+                                {t("heating.feature_rod_desc", "Stufenlose Modulation für Thyristor- und Relais-Heizstäbe für 100% Eigenverbrauchsquote.")}
                             </p>
                         </div>
 
                         <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
                             <div className="text-2xl">❄️</div>
-                            <h3 className="text-sm font-bold text-white">Solares Pre-Cooling (Klimaanlage)</h3>
+                            <h3 className="text-sm font-bold text-white">{t("heating.feature_ac_title", "Solares Pre-Cooling (Klimaanlage)")}</h3>
                             <p className="text-xs text-indigo-200/70 leading-relaxed">
-                                Kühlt Wohnräume während maximaler Sonnenstunden vor und verhindert teuren Abend-Netzbezug.
+                                {t("heating.feature_ac_desc", "Kühlt Wohnräume während maximaler Sonnenstunden vor und verhindert teuren Abend-Netzbezug.")}
                             </p>
                         </div>
 
                         <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
                             <div className="text-2xl">📉</div>
-                            <h3 className="text-sm font-bold text-white">Heizkurven-Feinabstimmung</h3>
+                            <h3 className="text-sm font-bold text-white">{t("heating.feature_curve_title", "Heizkurven-Feinabstimmung")}</h3>
                             <p className="text-xs text-indigo-200/70 leading-relaxed">
-                                Automatische Anpassung der Steilheit nach DIN EN 12831 und lokalen Wetterprognosen.
+                                {t("heating.feature_curve_desc", "Automatische Anpassung der Steilheit nach DIN EN 12831 und lokalen Wetterprognosen.")}
                             </p>
                         </div>
                     </div>
@@ -191,7 +191,7 @@ export default function HeatingPage() {
                     {/* CTA Actions */}
                     <div className="pt-4 border-t border-indigo-800/40 relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div className="text-xs text-indigo-200/70 text-center sm:text-left">
-                            Bereits ab <strong className="text-white font-mono">{proYearlyMonthlyEquiv} €</strong> / Monat (jährliche Zahlweise) · 14 Tage kostenlos testen · Jederzeit kündbar
+                            {t("heating.pro_pricing_info", { price: proYearlyMonthlyEquiv, defaultValue: `Bereits ab ${proYearlyMonthlyEquiv} € / Monat (jährliche Zahlweise) · 14 Tage kostenlos testen · Jederzeit kündbar` })}
                         </div>
                         <div className="flex items-center gap-3 w-full sm:w-auto">
                             <button
@@ -200,7 +200,7 @@ export default function HeatingPage() {
                                 className="w-full sm:w-auto px-6 py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 text-sm font-black rounded-2xl shadow-xl shadow-amber-500/20 transition cursor-pointer flex items-center justify-center gap-2"
                             >
                                 <span>⭐</span>
-                                <span>Wärmemanagement mit Sharegy Pro freischalten</span>
+                                <span>{t("heating.unlock_pro_btn", "Wärmemanagement mit Sharegy Pro freischalten")}</span>
                             </button>
                         </div>
                     </div>
@@ -218,11 +218,11 @@ export default function HeatingPage() {
                             <span className="text-xl">🔒</span>
                             <div className="text-left">
                                 <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                                    <span>Interaktive Demo-Vorschau</span>
+                                    <span>{t("heating.interactive_demo", "Interaktive Demo-Vorschau")}</span>
                                     <ProBadge size="xs" />
                                 </div>
                                 <div className="text-[11px] text-indigo-200/80">
-                                    Klicke hier, um alle Wärme- und Estrich-Optionen mit Sharegy Pro freizuschalten
+                                    {t("heating.click_to_unlock", "Klicke hier, um alle Wärme- und Estrich-Optionen mit Sharegy Pro freizuschalten")}
                                 </div>
                             </div>
                         </div>
@@ -393,10 +393,10 @@ export default function HeatingPage() {
                                                 </div>
                                                 <div>
                                                     <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                                                        Klimaanlage & Raumkühlung
+                                                        {t("heating.ac_cooling_title", "Klimaanlage & Raumkühlung")}
                                                     </h3>
                                                     <p className="text-xs text-slate-400">
-                                                        Smarte Vor-Kühlung (Pre-Cooling)
+                                                        {t("heating.ac_cooling_sub", "Smarte Vor-Kühlung (Pre-Cooling)")}
                                                     </p>
                                                 </div>
                                             </div>
@@ -407,17 +407,17 @@ export default function HeatingPage() {
 
                                         <div className="grid grid-cols-2 gap-3">
                                             <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200/60 dark:border-slate-700/60">
-                                                <div className="text-[11px] text-slate-500">Ziel-Kühltemperatur</div>
+                                                <div className="text-[11px] text-slate-500">{t("heating.target_cooling_temp", "Ziel-Kühltemperatur")}</div>
                                                 <div className="text-lg font-bold font-mono text-slate-900 dark:text-white mt-0.5">22.0 °C</div>
                                             </div>
                                             <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200/60 dark:border-slate-700/60">
-                                                <div className="text-[11px] text-slate-500">Solar-Precooling</div>
-                                                <div className="text-lg font-bold font-mono text-sky-600 dark:text-sky-400 mt-0.5">Aktiv</div>
+                                                <div className="text-[11px] text-slate-500">{t("heating.solar_precooling", "Solar-Precooling")}</div>
+                                                <div className="text-lg font-bold font-mono text-sky-600 dark:text-sky-400 mt-0.5">{t("common.active", "Aktiv")}</div>
                                             </div>
                                         </div>
 
                                         <div className="p-3.5 rounded-2xl bg-sky-50/50 dark:bg-sky-950/20 border border-sky-200/60 dark:border-sky-800/40 text-xs text-slate-600 dark:text-slate-300">
-                                            ☀️ <strong>Solares Pre-Cooling:</strong> Kühlt Räume bei mittäglichen Solar-Peaks automatisch um 1,5 K vor, um teuren Netzbezug in der Abend-Spitze zu vermeiden.
+                                            ☀️ <strong>{t("heating.solar_precooling_note_strong", "Solares Pre-Cooling:")}</strong> {t("heating.solar_precooling_note_text", "Kühlt Räume bei mittäglichen Solar-Peaks automatisch um 1,5 K vor, um teuren Netzbezug in der Abend-Spitze zu vermeiden.")}
                                         </div>
                                     </div>
                                 )}
@@ -435,8 +435,8 @@ export default function HeatingPage() {
             <ProUpgradeModal
                 open={proModalOpen}
                 onClose={() => setProModalOpen(false)}
-                featureName="Smart Wärme- & Thermischer Speicher-Autopilot"
-                featureDesc="Nutze die Estrich-Vorladung (MPC), SG-Ready Warmwasser-Boost und PV-Heizstab-Modulation für bis zu 45% Heizkostenersparnis."
+                featureName={t("heating.modal_feature_name", "Smart Wärme- & Thermischer Speicher-Autopilot")}
+                featureDesc={t("heating.modal_feature_desc", "Nutze die Estrich-Vorladung (MPC), SG-Ready Warmwasser-Boost und PV-Heizstab-Modulation für bis zu 45% Heizkostenersparnis.")}
             />
         </div>
     );

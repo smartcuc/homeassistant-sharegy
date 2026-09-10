@@ -173,7 +173,7 @@ export default function ControlPage() {
                         className="self-start sm:self-auto px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 text-xs font-black rounded-xl shadow-md shadow-amber-500/20 transition cursor-pointer flex items-center gap-1.5"
                     >
                         <span>⭐</span>
-                        <span>Auf Pro upgraden (ab {proYearlyMonthlyEquiv} €/M)</span>
+                        <span>{t("heating.upgrade_pro_btn", { price: proYearlyMonthlyEquiv, defaultValue: `Auf Pro upgraden (ab ${proYearlyMonthlyEquiv} €/M)` })}</span>
                     </button>
                 )}
             </div>
@@ -188,13 +188,13 @@ export default function ControlPage() {
                     <div className="relative z-10 max-w-3xl space-y-4">
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 text-xs font-bold uppercase tracking-wider">
                             <span>⭐</span>
-                            <span>Sharegy Pro Exklusiv</span>
+                            <span>{t("heating.pro_exclusive", "Sharegy Pro Exklusiv")}</span>
                         </div>
                         <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight">
-                            Automatisiere dein Zuhause mit intelligenter Laststeuerung & PV-Überschuss-Kaskade
+                            {t("control.pro_hero_title", "Automatisiere dein Zuhause mit intelligenter Laststeuerung & PV-Überschuss-Kaskade")}
                         </h2>
                         <p className="text-indigo-200/80 text-sm sm:text-base leading-relaxed">
-                            Verteile deinen Solarstrom in Echtzeit auf Heimspeicher, Wärmepumpe, Wallbox und Klimaanlage. Schütze dein Netz mit gesetzeskonformer § 14a EnWG Drosselung und profitiere von dynamischen Börsenpreisen.
+                            {t("control.pro_hero_subtitle", "Verteile deinen Solarstrom in Echtzeit auf Heimspeicher, Wärmepumpe, Wallbox und Klimaanlage. Schütze dein Netz mit gesetzeskonformer § 14a EnWG Drosselung und profitiere von dynamischen Börsenpreisen.")}
                         </p>
                     </div>
 
@@ -202,49 +202,49 @@ export default function ControlPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 relative z-10">
                         <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
                             <div className="text-2xl">⚡</div>
-                            <h3 className="text-sm font-bold text-white">Merit-Order Kaskade</h3>
+                            <h3 className="text-sm font-bold text-white">{t("control.feature_merit_title", "Merit-Order Kaskade")}</h3>
                             <p className="text-xs text-indigo-200/70 leading-relaxed">
-                                Bestimme per Drag & Drop, welcher Verbraucher bei Solarüberschuss priorisiert versorgt wird.
+                                {t("control.feature_merit_desc", "Bestimme per Drag & Drop, welcher Verbraucher bei Solarüberschuss priorisiert versorgt wird.")}
                             </p>
                         </div>
 
                         <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
                             <div className="text-2xl">🤖</div>
-                            <h3 className="text-sm font-bold text-white">Autopilot & 4 Betriebsmodi</h3>
+                            <h3 className="text-sm font-bold text-white">{t("control.feature_modes_title", "Autopilot & 4 Betriebsmodi")}</h3>
                             <p className="text-xs text-indigo-200/70 leading-relaxed">
-                                Autopilot, reiner PV-Überschuss, Börsenpreis-Sparer oder manueller Direktmodus.
+                                {t("control.feature_modes_desc", "Autopilot, reiner PV-Überschuss, Börsenpreis-Sparer oder manueller Direktmodus.")}
                             </p>
                         </div>
 
                         <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
                             <div className="text-2xl">🚗</div>
-                            <h3 className="text-sm font-bold text-white">Dynamisches PV-Laden (OCPP)</h3>
+                            <h3 className="text-sm font-bold text-white">{t("control.feature_pv_charge_title", "Dynamisches PV-Laden (OCPP)")}</h3>
                             <p className="text-xs text-indigo-200/70 leading-relaxed">
-                                Automatische Ampere-Regelung und Phasenumschaltung für deine Wallbox.
+                                {t("control.feature_pv_charge_desc", "Automatische Ampere-Regelung und Phasenumschaltung für deine Wallbox.")}
                             </p>
                         </div>
 
                         <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
                             <div className="text-2xl">♨️</div>
-                            <h3 className="text-sm font-bold text-white">SG-Ready Wärmepumpen & BWWP</h3>
+                            <h3 className="text-sm font-bold text-white">{t("control.feature_sg_ready_title", "SG-Ready Wärmepumpen & BWWP")}</h3>
                             <p className="text-xs text-indigo-200/70 leading-relaxed">
-                                Schalte Warmwasser-Sollwertanhebungen vollautomatisch bei Solar-Spitzen.
+                                {t("control.feature_sg_ready_desc", "Schalte Warmwasser-Sollwertanhebungen vollautomatisch bei Solar-Spitzen.")}
                             </p>
                         </div>
 
                         <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
                             <div className="text-2xl">🔋</div>
-                            <h3 className="text-sm font-bold text-white">Batterie-Arbitrage & Grid-Boost</h3>
+                            <h3 className="text-sm font-bold text-white">{t("control.feature_battery_arb_title", "Batterie-Arbitrage & Grid-Boost")}</h3>
                             <p className="text-xs text-indigo-200/70 leading-relaxed">
-                                Lade deinen Speicher gezielt bei negativen oder ultragünstigen Börsenstrompreisen nach.
+                                {t("control.feature_battery_arb_desc", "Lade deinen Speicher gezielt bei negativen oder ultragünstigen Börsenstrompreisen nach.")}
                             </p>
                         </div>
 
                         <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
                             <div className="text-2xl">🛡️</div>
-                            <h3 className="text-sm font-bold text-white">§ 14a EnWG Netzdrosselung</h3>
+                            <h3 className="text-sm font-bold text-white">{t("control.feature_enwg_title", "§ 14a EnWG Netzdrosselung")}</h3>
                             <p className="text-xs text-indigo-200/70 leading-relaxed">
-                                Automatische Abarbeitung von Drosselsignalen des Netzbetreibers ohne Komfortverlust.
+                                {t("control.feature_enwg_desc", "Automatische Abarbeitung von Drosselsignalen des Netzbetreibers ohne Komfortverlust.")}
                             </p>
                         </div>
                     </div>
@@ -252,7 +252,7 @@ export default function ControlPage() {
                     {/* CTA Actions */}
                     <div className="pt-4 border-t border-indigo-800/40 relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div className="text-xs text-indigo-200/70 text-center sm:text-left">
-                            Bereits ab <strong className="text-white font-mono">{proYearlyMonthlyEquiv} €</strong> / Monat (jährliche Zahlweise) · 14 Tage kostenlos testen · Jederzeit kündbar
+                            {t("heating.pro_pricing_info", { price: proYearlyMonthlyEquiv, defaultValue: `Bereits ab ${proYearlyMonthlyEquiv} € / Monat (jährliche Zahlweise) · 14 Tage kostenlos testen · Jederzeit kündbar` })}
                         </div>
                         <div className="flex items-center gap-3 w-full sm:w-auto">
                             <button
@@ -261,7 +261,7 @@ export default function ControlPage() {
                                 className="w-full sm:w-auto px-6 py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 text-sm font-black rounded-2xl shadow-xl shadow-amber-500/20 transition cursor-pointer flex items-center justify-center gap-2"
                             >
                                 <span>⭐</span>
-                                <span>Energiesteuerung mit Sharegy Pro freischalten</span>
+                                <span>{t("control.unlock_pro_btn", "Energiesteuerung mit Sharegy Pro freischalten")}</span>
                             </button>
                         </div>
                     </div>
@@ -279,11 +279,11 @@ export default function ControlPage() {
                             <span className="text-xl">🔒</span>
                             <div className="text-left">
                                 <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                                    <span>Interaktive Demo-Vorschau</span>
+                                    <span>{t("heating.interactive_demo", "Interaktive Demo-Vorschau")}</span>
                                     <ProBadge size="xs" />
                                 </div>
                                 <div className="text-[11px] text-indigo-200/80">
-                                    Klicke hier, um alle Steuerungsoptionen mit Sharegy Pro freizuschalten
+                                    {t("control.click_to_unlock", "Klicke hier, um alle Steuerungsoptionen mit Sharegy Pro freizuschalten")}
                                 </div>
                             </div>
                         </div>

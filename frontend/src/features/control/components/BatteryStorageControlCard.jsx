@@ -115,17 +115,17 @@ export default function BatteryStorageControlCard() {
                             </div>
                             <div>
                                 <h3 className="font-bold text-base text-slate-900 dark:text-white">
-                                    Heimspeicher
+                                    {t("control.home_storage", "Heimspeicher")}
                                 </h3>
                                 <p className="text-xs text-slate-400 mt-0.5">
-                                    Kein Batteriespeicher angebunden
+                                    {t("control.no_storage_connected", "Kein Batteriespeicher angebunden")}
                                 </p>
                             </div>
                         </div>
                     </div>
 
                     <div className="p-4 bg-white/70 dark:bg-slate-800/50 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 text-xs text-slate-500 dark:text-slate-400 text-center">
-                        Binde deinen Hybrid-Wechselrichter oder Hausspeicher ein, um Notstrom-Reserve, Zellschonung und Spotmarkt-Laden zu steuern.
+                        {t("control.connect_hybrid_storage_desc", "Binde deinen Hybrid-Wechselrichter oder Hausspeicher ein, um Notstrom-Reserve, Zellschonung und Spotmarkt-Laden zu steuern.")}
                     </div>
                 </div>
 
@@ -136,7 +136,7 @@ export default function BatteryStorageControlCard() {
                         className="px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-600/20 flex items-center gap-1.5"
                     >
                         <span>➕</span>
-                        <span>Speicher anlegen</span>
+                        <span>{t("control.create_storage_btn", "Speicher anlegen")}</span>
                     </button>
                 </div>
 
@@ -165,7 +165,7 @@ export default function BatteryStorageControlCard() {
                         <div>
                             <div className="flex items-center gap-2">
                                 <h3 className="font-bold text-base text-slate-900 dark:text-white">
-                                    {storage?.name || "Heimspeicher"}
+                                    {storage?.name || t("control.home_storage", "Heimspeicher")}
                                 </h3>
                                 <span className={`px-2 py-0.5 text-[11px] font-bold rounded-full border ${
                                     isCharging
@@ -174,11 +174,11 @@ export default function BatteryStorageControlCard() {
                                         ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30"
                                         : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 border-slate-200"
                                 }`}>
-                                    {isCharging ? "⚡ Lädt" : isDischarging ? "🔋 Entlädt" : "⚪ Standby"}
+                                    {isCharging ? t("control.charging", "⚡ Lädt") : isDischarging ? t("control.discharging", "🔋 Entlädt") : t("control.standby_dot", "⚪ Standby")}
                                 </span>
                             </div>
                             <p className="text-xs text-slate-400 mt-0.5">
-                                {capacityKwh.toFixed(1)} kWh Kapazität · max. {storage?.max_charge_power_kw || 5.0} kW Laden
+                                {t("control.storage_capacity_power", { cap: capacityKwh.toFixed(1), pwr: storage?.max_charge_power_kw || 5.0, defaultValue: `${capacityKwh.toFixed(1)} kWh Kapazität · max. ${storage?.max_charge_power_kw || 5.0} kW Laden` })}
                             </p>
                         </div>
                     </div>
@@ -187,7 +187,7 @@ export default function BatteryStorageControlCard() {
                         type="button"
                         onClick={() => setEditModalOpen(true)}
                         className="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition cursor-pointer border border-slate-200/80 dark:border-slate-700 shadow-2xs"
-                        title="Speicher-Parameter bearbeiten"
+                        title={t("control.edit_storage_params", "Speicher-Parameter bearbeiten")}
                     >
                         ⚙️
                     </button>
@@ -204,7 +204,7 @@ export default function BatteryStorageControlCard() {
                 {/* Metrics */}
                 <div className="grid grid-cols-2 gap-3">
                     <div className="p-3 bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-700/60">
-                        <div className="text-[11px] text-slate-500">Ladestand (SoC)</div>
+                        <div className="text-[11px] text-slate-500">{t("control.battery_soc_label", "Ladestand (SoC)")}</div>
                         <div className="text-lg font-bold font-mono text-slate-900 dark:text-white mt-0.5 flex items-baseline justify-between">
                             <span>{liveSoc}%</span>
                             <span className="text-xs font-normal text-slate-400 font-sans">{storedKwh} kWh</span>
@@ -212,7 +212,7 @@ export default function BatteryStorageControlCard() {
                     </div>
 
                     <div className="p-3 bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-700/60">
-                        <div className="text-[11px] text-slate-500">Ladeleistung (Live)</div>
+                        <div className="text-[11px] text-slate-500">{t("control.battery_live_power", "Ladeleistung (Live)")}</div>
                         <div className="text-lg font-bold font-mono text-indigo-600 dark:text-indigo-400 mt-0.5">
                             {Math.abs(livePowerW) > 10 ? `${Math.abs(livePowerW).toLocaleString("de-DE")} W` : "0 W"}
                         </div>
@@ -222,9 +222,9 @@ export default function BatteryStorageControlCard() {
                 {/* Strategy & Reserve Settings Strip */}
                 <div className="p-3 bg-white/70 dark:bg-slate-800/50 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 flex items-center justify-between gap-3 text-xs">
                     <div className="min-w-0">
-                        <div className="font-bold text-slate-800 dark:text-slate-200 truncate">🧭 Betriebsstrategie</div>
+                        <div className="font-bold text-slate-800 dark:text-slate-200 truncate">🧭 {t("control.operating_strategy", "Betriebsstrategie")}</div>
                         <div className="text-[11px] text-slate-400 truncate">
-                            {controlMode === "price_optimized" ? `Spot-Arbitrage (≤ ${storage?.price_threshold_ct || 15} ct/kWh)` : controlMode === "backup_only" ? "Notstrom-Reserve (100% Prio)" : controlMode === "forced_charge" ? "Zwangsladung aktiv" : "PV-Vorrang (Eigenverbrauch)"}
+                            {controlMode === "price_optimized" ? t("control.mode_desc_spot", { price: storage?.price_threshold_ct || 15, defaultValue: `Spot-Arbitrage (≤ ${storage?.price_threshold_ct || 15} ct/kWh)` }) : controlMode === "backup_only" ? t("control.mode_desc_backup", "Notstrom-Reserve (100% Prio)") : controlMode === "forced_charge" ? t("control.mode_desc_forced", "Zwangsladung aktiv") : t("control.mode_desc_pv", "PV-Vorrang (Eigenverbrauch)")}
                         </div>
                     </div>
                     <select
@@ -233,11 +233,11 @@ export default function BatteryStorageControlCard() {
                         disabled={modeMutation.isPending}
                         className="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-bold cursor-pointer outline-none shrink-0"
                     >
-                        <option value="self_consumption">☀️ PV-Vorrang</option>
-                        <option value="price_optimized">⚡ Spot-Arbitrage</option>
-                        <option value="backup_only">🛡️ Notstrom</option>
-                        <option value="forced_charge">🚀 Zwangsladung</option>
-                        <option value="idle">💤 Standby</option>
+                        <option value="self_consumption">{t("control.mode_opt_pv", "☀️ PV-Vorrang")}</option>
+                        <option value="price_optimized">{t("control.mode_opt_spot", "⚡ Spot-Arbitrage")}</option>
+                        <option value="backup_only">{t("control.mode_opt_backup", "🛡️ Notstrom")}</option>
+                        <option value="forced_charge">{t("control.mode_opt_forced", "🚀 Zwangsladung")}</option>
+                        <option value="idle">{t("control.mode_opt_idle", "💤 Standby")}</option>
                     </select>
                 </div>
             </div>
@@ -245,7 +245,7 @@ export default function BatteryStorageControlCard() {
             {/* Actions */}
             <div className="pt-4 mt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-3 relative z-10">
                 <span className="text-xs text-slate-400">
-                    Schutz: <strong className="text-indigo-600 dark:text-indigo-400">{minSoc}% Min · {maxSoc}% Max</strong>
+                    {t("control.protection_label", "Schutz:")} <strong className="text-indigo-600 dark:text-indigo-400">{t("control.protection_values", { min: minSoc, max: maxSoc, defaultValue: `${minSoc}% Min · ${maxSoc}% Max` })}</strong>
                 </span>
                 <button
                     type="button"
@@ -253,7 +253,7 @@ export default function BatteryStorageControlCard() {
                     disabled={actionMutation.isPending}
                     className="px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-600/20"
                 >
-                    {isCharging ? "⏹️ Ladung stoppen" : "🚀 Schnellladung (1h)"}
+                    {isCharging ? t("control.stop_charge", "⏹️ Ladung stoppen") : t("control.quick_charge_1h", "🚀 Schnellladung (1h)")}
                 </button>
             </div>
 
