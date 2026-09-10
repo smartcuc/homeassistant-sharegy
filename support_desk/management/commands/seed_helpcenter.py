@@ -1980,8 +1980,613 @@ Every watt from balcony solar is correctly categorized as clean solar generation
                 "is_featured": True,
                 "sort_order": 5,
             },
-        ]
 
+            {
+                "category": cats["inverters-meters"],
+                "slug": "benoetigte-messwerte-und-geraetebindung",
+                "context_key": "devices",
+                "title_de": "Welche Messwerte benötigt Sharegy? (Herstellerunabhängige Übersicht)",
+                "title_en": "Which Telemetry Metrics Does Sharegy Require? (Universal Guide)",
+                "summary_de": "Vom reinen Verbraucher-Tracking bis zum Hybrid-System mit Speicher: Welche physikalischen Größen für Bilanzierung, Autarkie und Sub-Metering nötig sind.",
+                "summary_en": "From dynamic tariff tracking without PV to complex solar storage hybrids: What physical metrics are required for energy balance and sub-metering.",
+                "content_de": r"""# Welche Messwerte benötigt Sharegy? ⚡📊
+
+Sharegy ist vollständig **hersteller- und hardwareunabhängig**. Egal ob du Daten über Home Assistant, MQTT, ioBroker, Shelly, REST-Webhooks oder Cloud-APIs (Sungrow, SolarEdge, Fronius) einspeist: Sharegy verarbeitet die physikalischen Standardgrößen.
+
+---
+
+## 1. Funktioniert Sharegy auch ohne PV oder Batteriespeicher?
+**Ja, absolut!** Sharegy ist modular aufgebaut:
+* **Reine Verbraucher- & Tarifoptimierung**: Auch ohne eigene Erzeugung nutzt Sharegy Börsenstrompreise (EPEX Spot), steuert schaltbare Steckdosen und berechnet den Verbrauch einzelner Geräte (Sub-Metering).
+* **Balkonkraftwerk-Setup**: Erfasst bereits mit einem einfachen Zwischenstecker an der Balkon-PV deinen erzeugten Solarstrom und berechnet, wie viel davon deine Haushaltsgeräte direkt nutzen.
+* **Vollständiges Hybrid-System**: Mit PV-Anlage, Batteriespeicher und Smart Meter schöpfst du das maximale Potenzial für Autarkie und Lastoptimierung aus.
+
+---
+
+## 2. Die physikalischen Messgrößen im Überblick
+
+| Messgröße | Einheit | Datenpunkt-Beispiele | Wofür wird der Wert genutzt? |
+| :--- | :---: | :--- | :--- |
+| **Wirkleistung** | **Watt (W)** | `power`, `pv_power`, `battery_power`, `grid_power`, `load_power` | Live-Energieflüsse, Sankey-Diagramm, Leistungsspitzen |
+| **Stromstärke** | **Ampere (A)** | `battery_current`, `current`, `phase_current` | Eindeutige **Flussrichtung** bei Speichern (negativ = Laden, positiv = Entladen) |
+| **Spannung** | **Volt (V)** | `voltage`, `battery_voltage`, `phase_voltage` | Netzstabilität, $P = U 	imes I$ Ersatzberechnung |
+| **Ladestand** | **%** | `soc`, `battery_soc`, `battery_level` | Speicherstand, EMS-Ladelimits und Entladepuffer |
+| **Zählerstand** | **kWh** | `energy`, `energy_in`, `energy_out`, `total_yield` | Exakte Tages-, Monats- und Jahresbilanzierung |
+
+---
+
+## 3. Die mathematische Grundregel für das Gesamthaus: *„3 von 4 reichen aus!“*
+
+Im Haushalt gilt physikalisch immer der Knotenpunktsatz:
+$$\text{Hausverbrauch } (P_{\text{Load}}) = \text{PV-Erzeugung } (P_{\text{PV}}) + \text{Batterieleistung } (P_{\text{Bat}}) + \text{Netzübergabe } (P_{\text{Grid}})$$
+
+* Wenn du **3 dieser 4 Werte** lieferst, errechnet Sharegy den 4. Wert automatisch zu 100 % fehlerfrei.
+* Lieferst du alle 4 Werte (z. B. aus einem modernen Wechselrichter mit Smart Meter), gleicht Sharegy die Werte zusätzlich ab.
+
+---
+
+## 4. Häufige Frage: Warum habe ich 2 Datenpunkte für die Batterie (Strom in A und Leistung in W)?
+Manche Wechselrichter (wie z. B. Sungrow) liefern die Batterieleistung immer als positive Zahl und die Richtung separat über den **Batteriestrom in Ampere (A)**:
+* **Batteriestrom < 0 A**: Batterie lädt aus PV/Netz.
+* **Batteriestrom > 0 A**: Batterie entlädt ins Haus.
+
+In Sharegy wird hierfür **nur 1 virtueller Batteriespeicher** angelegt: In den Einstellungen des Speichers ordnest du die Wirkleistung (W) als *Ladeleistung* und den Strom (A) als *Batteriestrom* zu. Sharegy trennt Lade- und Entladezyklen daraufhin automatisch und physikalisch exakt!
+""",
+                "content_en": r"""# Telemetry Metrics & Universal Device Mapping ⚡📊
+
+Sharegy is completely **vendor- and hardware-agnostic**. Whether you stream data via Home Assistant, MQTT, ioBroker, Shelly, REST webhooks, or Cloud APIs (Sungrow, SolarEdge, Fronius): Sharegy processes standardized physical electrical units.
+
+
+---
+
+## 1. Does Sharegy work without PV or Battery Storage?
+**Yes, absolutely!** Sharegy is built modularly:
+* **Consumer & Dynamic Tariff Tracking**: Even without generation assets, Sharegy tracks spot market prices (EPEX Spot), schedules smart plugs, and provides granular sub-metering.
+* **Balcony PV (Plug-in Solar)**: Measure solar output with a simple plug and track direct consumption across household appliances.
+* **Full Solar + Storage Hybrid**: Harness maximal self-sufficiency and automated energy optimization.
+
+---
+
+## 2. Core Physical Quantities
+
+| Physical Quantity | Unit | Metric Key Examples | Primary Usage |
+| :--- | :---: | :--- | :--- |
+| **Active Power** | **Watt (W)** | `power`, `pv_power`, `battery_power`, `grid_power` | Real-time energy flow, Sankey diagrams, live load tracking |
+| **Electric Current** | **Ampere (A)** | `battery_current`, `current` | Unambiguous **flow direction** (negative = charging, positive = discharging) |
+| **Voltage** | **Volt (V)** | `voltage`, `battery_voltage` | Grid stability, backup $P = U 	imes I$ power calculations |
+| **State of Charge** | **%** | `soc`, `battery_soc`, `battery_level` | Battery status, smart reserve thresholds, optimization |
+| **Energy Totals** | **kWh** | `energy`, `energy_in`, `energy_out` | Daily, monthly, and yearly fiscal energy balances |
+""",
+                "tags": ["telemetry", "messwerte", "watt", "ampere", "volt", "soc", "kwh", "hardware"],
+                "is_featured": True,
+                "sort_order": 1,
+            },
+            {
+                "category": cats["inverters-meters"],
+                "slug": "sma-sungrow-modbus-tcp-einrichten",
+                "context_key": "devices",
+                "title_de": "Wechselrichter (SMA, Sungrow, Fronius, Deye) via Home Assistant anbinden",
+                "title_en": "Connecting Inverters (SMA, Sungrow, Fronius, Deye) via Home Assistant",
+                "summary_de": "Da Modbus TCP ein rein lokales Netzwerkprotokoll ist, liest Home Assistant oder ioBroker den Wechselrichter aus und streamt die Datenpunkte in die Sharegy Cloud.",
+                "summary_en": "Since Modbus TCP operates locally within your LAN, Home Assistant or ioBroker reads the inverter and streams telemetry into Sharegy Cloud.",
+                "content_de": r"""# Wechselrichter & Speicher via Home Assistant Bridge anbinden ☀️🏠
+
+Klassische Solar-Wechselrichter und Batteriespeicher (wie **SMA Sunny Tripower**, **Sungrow SH**, **Fronius GEN24**, **Deye**, **Huawei SUN2000**) kommunizieren im lokalen Heimnetzwerk über das industrielle **Modbus TCP** Protokoll (Port 502).
+
+## Warum erfolgt die Anbindung über Home Assistant oder ioBroker?
+* 🔒 **Sicherheit & Router-Schutz**: Modbus TCP ist unverschlüsselt und darf niemals direkt ins Internet geöffnet werden.
+* 🌐 **SaaS Cloud-Architektur**: Sharegy verbindet sich nicht invasiv in dein privates Heimnetzwerk, sondern empfängt die Datenpunkte verschlüsselt von deiner lokalen Zentrale.
+* ⚡ **1-Klick Auswahl**: Dein lokaler **Home Assistant** (oder ioBroker) liest den Wechselrichter per lokaler Integration (z. B. SunSpec, SMA oder Sungrow) aus – und du wählst die Sensoren in der Sharegy Integration einfach per Klick aus!
+
+---
+
+## Einrichtung in 3 einfachen Schritten
+
+### Schritt 1: Modbus TCP im Wechselrichter aktivieren
+1. Rufe das lokale Webportal deines Wechselrichters auf (z. B. im Installateurs-Menü).
+2. Aktiviere **Modbus TCP** (Standard-Port: `502`).
+
+### Schritt 2: Wechselrichter in Home Assistant hinzufügen
+Füge in Home Assistant die passende Hersteller-Integration hinzu (z. B. *SMA Solar*, *Sungrow*, *Fronius* oder *SunSpec*). Home Assistant erkennt sofort alle Live-Werte:
+* PV-Erzeugung (W)
+* Netzeinspeisung / Bezug (W)
+* Batterie-Ladestand (SoC %) & Batterieleistung (W)
+
+### Schritt 3: In der Sharegy Home Assistant Integration auswählen
+1. Öffne in Home Assistant **Einstellungen → Geräte & Dienste → Sharegy → Konfigurieren**.
+2. Wähle die vom Wechselrichter bereitgestellten Entitäten im **1-Klick Entity Picker** aus.
+3. Fertig! Ab sofort fließen alle Erzeugungs- und Speicherdaten in Echtzeit und mit 48h Offline-Puffer in dein Sharegy Dashboard.
+""",
+                "content_en": r"""# Connecting Inverters & Storage via Home Assistant Bridge ☀️🏠
+
+Solar inverters and battery systems (such as **SMA Sunny Tripower**, **Sungrow SH**, **Fronius GEN24**, **Deye**, **Huawei**) communicate locally via **Modbus TCP** (Port 502).
+
+## Why bridge through Home Assistant or ioBroker?
+* 🔒 **Network Security**: Raw Modbus TCP is unencrypted and should never be exposed to the public internet.
+* 🌐 **Clean SaaS Architecture**: Sharegy receives outbound encrypted telemetry without requiring local network ingress.
+* ⚡ **1-Click Entity Selection**: Home Assistant reads the inverter locally, and you simply map the entities to Sharegy in seconds.
+
+## Setup Workflow
+1. **Enable Modbus TCP** in your inverter's local web portal (Port 502).
+2. **Add Inverter Integration** in Home Assistant (e.g. SMA, Sungrow, Fronius, SunSpec).
+3. **Map Sensors in Sharegy Integration**: Select the discovered entities in the Sharegy configuration flow.
+""",
+                "tags": ["modbus", "inverter", "homeassistant", "sma", "sungrow", "fronius", "deye", "huawei"],
+                "is_featured": True,
+                "sort_order": 1,
+            },
+            {
+                "category": cats["forecast"],
+                "slug": "solar-prognose-und-genauigkeit",
+                "context_key": "forecast",
+                "title_de": "Solar-Prognose, Wettermodelle & Genauigkeitsabgleich (%-Score)",
+                "title_en": "Solar Forecasting, Weather Models & Accuracy Score",
+                "summary_de": "Wie die Hybrid-Prognose aus Wetterdaten, Sensor.Community und ML berechnet wird und wie der Güte-Score funktioniert.",
+                "summary_en": "How the hybrid solar forecast combines numerical weather predictions with local observations and ML.",
+                "content_de": r"""# Solar-Prognose & Genauigkeitsabgleich
+
+Die Solar-Prognose berechnet auf Basis hochauflösender Wetterdaten (Globalstrahlung in W/m², Bewölkung, Temperatur) und deiner Anlagenausrichtung die stündliche PV-Erzeugung für die nächsten 24 bis 48 Stunden.
+
+## Wie wird der Genauigkeits-Score berechnet?
+
+Der stündliche Abgleich vergleicht die tatsächliche Wechselrichter-Leistung mit der Modellvorhersage:
+
+> 📐 **Formel:**  
+> **Prognosegüte (%)** = `100 % - prozentuale Abweichung zwischen Ist-Ertrag und Modellvorhersage`
+
+* 🟢 **Hervorragend (≥ 90 %)**: Optimale Übereinstimmung mit realen Messwerten.
+* 🟡 **Gut (75 bis 89 %)**: Normale wetterbedingte Schwankungen (z. B. wechselnde Wolkenfelder).
+* 🔵 **In Kalibrierung (unter 75 %)**: Das System lernt standortspezifische Abschattungen oder Horizontverläufe ein.
+
+## Selbstlernende Korrekturfaktoren
+Stellt das System über mehrere Tage systematische Abweichungen fest (z. B. Nachmittagsschatten durch Bäume), passt ein adaptiver Korrekturfaktor zukünftige Vorhersagen automatisch an.
+""",
+                "content_en": r"""# Solar Forecasting & Accuracy Scoring
+
+The solar forecast combines physical irradiation models (Global Horizontal Irradiance in W/m², cloud cover, ambient temperature) with machine learning adjustments.
+
+## Accuracy Score Calculation
+
+> 📐 **Formula:**  
+> **Accuracy Score (%)** = `100% - percentage deviation between actual yield and forecast model`
+
+* 🟢 **Excellent (≥ 90%)**: High model fidelity and clear sky tracking.
+* 🟡 **Good (75 to 89%)**: Typical cloud drift and transient weather.
+* 🔵 **Calibrating (under 75%)**: Continuous horizon and local shading adaptation.
+""",
+                "tags": ["forecast", "solar", "prognose", "wetter", "ml", "genauigkeit"],
+                "is_featured": True,
+                "sort_order": 1,
+            },
+            {
+                "category": cats["forecast"],
+                "slug": "lastprognose-und-haushaltsverbrauch",
+                "context_key": "forecast",
+                "title_de": "Haushalts-Lastprognose & Wochentags-Profile",
+                "title_en": "Household Load Forecasting & Weekly Profiles",
+                "summary_de": "So prognostiziert Sharegy den Haushaltsverbrauch anhand historischer Wochentags- und Stundenmuster.",
+                "summary_en": "How Sharegy predicts domestic consumption using historical weekday and hourly load profiles.",
+                "content_de": r"""# Haushalts-Lastprognose & Verbrauchsmuster
+
+Die Lastprognose ermittelt für jede Stunde der kommenden 24 bis 48 Stunden den erwarteten Strombedarf deines Haushalts.
+
+## Berechnungsmethode
+* **Wochentags-Cluster**: Das System unterscheidet automatisch zwischen Werktagen (Montag bis Freitag) und Wochenenden (Samstag/Sonntag).
+* **Gleitender Durchschnitt**: Verbräuche der letzten 4 bis 8 Wochen fließen gewichtet ein, um saisonale Veränderungen (z. B. Heizperiode) abzubilden.
+* **Grundlast-Erkennung**: Konstante Ruhelasten in der Nacht werden isoliert, um Peaks von Standard-Verbräuchen zu trennen.
+
+> [!NOTE]
+> Zusammen mit der Solar-Prognose bildet die Lastprognose die mathematische Grundlage für die **Batterie-SoC-Simulation** und den **Smart Energy Optimizer**.
+""",
+                "content_en": r"""# Household Load Forecasting & Daily Profiles
+
+The load forecasting engine estimates household demand for every hour of the upcoming 24 to 48 hours.
+
+## Methodology
+* **Weekday vs. Weekend Clustering**: Differentiates working days from weekends.
+* **Rolling Historical Averages**: Weighted 4- to 8-week consumption patterns adapt to seasonal shifts.
+* **Baseload Isolation**: Distinguishes continuous standby loads from active peaks.
+""",
+                "tags": ["lastprognose", "verbrauch", "profile", "grundlast", "wochentage"],
+                "is_featured": False,
+                "sort_order": 1,
+            },
+            {
+                "category": cats["optimizer"],
+                "slug": "smart-energy-optimizer-funktionsweise",
+                "context_key": "optimizer",
+                "title_de": "Smart Energy Optimizer: Zeitfenster (1h/2h/4h) & Fahrplan optimal nutzen",
+                "title_en": "Smart Energy Optimizer: 1h/2h/4h Time Windows & Smart Scheduling",
+                "summary_de": "So ermittelt der Optimizer die günstigsten Zeitfenster für Wallbox, Wärmepumpe und Haushaltsgeräte.",
+                "summary_en": "How the optimizer identifies the best time slots for EV charging, heat pump heating, and home appliances.",
+                "content_de": r"""# Smart Energy Optimizer & EMS
+
+Der **Smart Energy Optimizer** verknüpft Solar-Ertragsprognose, dynamische Börsenstrompreise (Day-Ahead) und deinen Grundverbrauch zu einem optimalen Fahrplan.
+
+## Die drei Standard-Zeitfenster
+
+1. **1-Stunden-Fenster (1h)**:
+   * Perfekt für Waschmaschine, Wäschetrockner oder Geschirrspüler.
+2. **2-Stunden-Fenster (2h)**:
+   * Ideal für Wärmepumpen (Warmwasserbereitung oder thermische Pufferüberhöhung).
+3. **4-Stunden-Fenster (4h)**:
+   * Optimiert für das Laden von Elektrofahrzeugen an der Wallbox (11 kW oder 22 kW).
+
+## Optimierungs-Strategie
+* **Priorität 1 (Solarüberschuss)**: Nutzung von 100 % kostenlosem PV-Strom vor der Einspeisung ins Netz.
+* **Priorität 2 (Günstigste Börsenstunden)**: Netzbezug gezielt in Phasen mit negativen oder extrem niedrigen Strompreisen.
+* **Priorität 3 (Akkuschutz)**: Vermeidung von unnötiger Batterie-Zyklisierung, wenn zeitnah Sonne ansteht.
+""",
+                "content_en": r"""# Smart Energy Optimizer & EMS
+
+The **Smart Energy Optimizer** merges solar generation forecasts with dynamic spot market electricity prices to compute cost-minimal operating schedules.
+
+## Optimized Time Windows
+1. **1-Hour Window (1h)**: Ideal for washing machines, dryers, or dishwashers.
+2. **2-Hour Window (2h)**: Optimal for heat pump domestic hot water cycles.
+3. **4-Hour Window (4h)**: Designed for Electric Vehicle (EV) charging via 11 kW / 22 kW wallboxes.
+
+## Dispatch Strategy
+* **Priority 1**: 100% free solar surplus utilization before grid export.
+* **Priority 2**: Grid import during lowest or negative dynamic price periods.
+* **Priority 3**: Battery preservation when solar generation is imminent.
+""",
+                "tags": ["optimizer", "ems", "fahrplan", "wallbox", "wärmepumpe", "ladefenster", "börsenstrom"],
+                "is_featured": True,
+                "sort_order": 1,
+            },
+            {
+                "category": cats["tariffs"],
+                "slug": "stromtarife-und-stichtagsberechnung",
+                "context_key": "tariffs",
+                "title_de": "Strompreise, Stichtage & Tarifhistorie verwalten",
+                "title_en": "Managing Electricity Tariffs, Effective Dates & Price History",
+                "summary_de": "Wie Tarifänderungen mit Stichtag (valid_from) erfasst werden, damit historische Energiebilanzen stimmig bleiben.",
+                "summary_en": "How to record tariff changes with a valid-from date to preserve accurate historical billing.",
+                "content_de": r"""# Strompreise & Tarifhistorie
+
+Damit deine monatlichen und jährlichen Energiekosten mathematisch exakt bleiben, unterstützt Sharegy **stichtagsgenaue Tarifhistorien**.
+
+## Tarifwechsel erfassen (z. B. Preisanpassung zum 01.09.)
+
+1. Navigiere zu **Strompreise & Tarife**.
+2. Wähle das Datum **Gültig ab** (z. B. `01.09.2026`).
+3. Trage den neuen Arbeitspreis (ct/kWh), Grundpreis (€/Monat) oder Einspeisevergütung ein.
+4. Klicke auf **Speichern**.
+
+### Automatische Verrechnung:
+* Tage und Monate **vor dem Stichtag** werden mit dem damals gültigen Alttarif abgerechnet.
+* Verbräuche **ab dem Stichtag** fließen sofort mit den neuen Konditionen in alle Berechnungen ein.
+""",
+                "content_en": r"""# Tariffs & Historical Precision
+
+Sharegy uses date-effective tariffs (`valid_from`) to guarantee exact retroactive energy accounting.
+
+## Setting Up a Tariff Change
+1. Go to **Electricity Tariffs & Prices**.
+2. Set the **Valid from** date (e.g., `2026-09-01`).
+3. Enter the new energy rate (ct/kWh), base fee (€/month), or feed-in tariff.
+4. Click **Save**.
+""",
+                "tags": ["tariffs", "strompreis", "stichtag", "historie", "einspeisung", "arbeitspreis"],
+                "is_featured": False,
+                "sort_order": 1,
+            },
+            {
+                "category": cats["tariffs"],
+                "slug": "dynamische-stromtarife-und-tibber",
+                "context_key": "tariffs",
+                "title_de": "Dynamische Börsenstrompreise & Tibber API Anbindung",
+                "title_en": "Dynamic Spot Tariffs & Tibber API Integration",
+                "summary_de": "Anbindung von Day-Ahead-Börsenpreisen via Energy-Charts, SMARD und Tibber API.",
+                "summary_en": "Connecting day-ahead spot market prices via Energy-Charts, SMARD, and Tibber API.",
+                "content_de": r"""# Dynamische Stromtarife & Börsenpreise
+
+Dynamische Stromtarife ermöglichen es dir, Strom genau dann aus dem Netz zu beziehen, wenn er an der europäischen Strombörse (EPEX Spot DE-LU) am günstigsten ist.
+
+## Unterstützte Preisquellen
+1. **Energy-Charts (Fraunhofer ISE)**: Primäre Echtzeit- und Day-Ahead-Schnittstelle.
+2. **SMARD (Bundesnetzagentur)**: Automatischer Hochverfügbarkeits-Fallback.
+3. **Tibber API**: Direkte Synchronisation deiner kundenspezifischen Endkundenpreise inklusive Netzgebühren und Umlagen.
+
+## Preis-Formel
+Für eigene dynamische Tarife kannst du flexible Formeln hinterlegen (z. B. `spot * 1.19 + 0.15` für Mehrwertsteuer und 15 ct/kWh fixe Netzentgelte).
+""",
+                "content_en": r"""# Dynamic Electricity Tariffs & Spot Market Integration
+
+Dynamic tariffs allow you to consume grid electricity when spot market prices on the European Power Exchange (EPEX Spot) are lowest.
+
+## Supported Data Providers
+1. **Energy-Charts (Fraunhofer ISE)**: Primary day-ahead spot price source.
+2. **SMARD (German Federal Network Agency)**: Automatic high-availability fallback.
+3. **Tibber API**: Direct synchronization of your real retail electricity price.
+""",
+                "tags": ["tibber", "börsenstrom", "epex", "smard", "dynamisch", "dayahead"],
+                "is_featured": True,
+                "sort_order": 1,
+            },
+            {
+                "category": cats["alerts"],
+                "slug": "alarmzentrale-und-anomalieerkennung",
+                "context_key": "alerts",
+                "title_de": "Alarm- & Notifikationszentrale: Echtzeit-Regeln & Anomalieerkennung",
+                "title_en": "Alert & Notification Center: Live Rules & Anomaly Detection",
+                "summary_de": "Übersicht aller 8 automatisierten Überwachungsregeln für Ertragsausfälle, Tiefentladeschutz und Dauerlasten.",
+                "summary_en": "Overview of the 8 automated health checks for solar yield drops, battery protection, and baseload alarms.",
+                "content_de": r"""# Alarm- & Notifikationszentrale
+
+Die Alarmzentrale überwacht rund um die Uhr deine Erzeugung, Speicher und Verbräuche auf Unregelmäßigkeiten.
+
+## Die 8 Live-Überwachungsregeln
+
+1. 🔴 **Keine PV-Erzeugung (Ertragsausfall)**:
+   * Löst aus, wenn die Globalstrahlung > 400 W/m² beträgt, der Wechselrichter aber 0 W meldet (z. B. DC-Freischalter aus oder Sicherung gefallen).
+2. 🟡 **Batterie leer / Ungewöhnliche Entladung**:
+   * Warnung bei Absinken des SoC unter die Notstromreserve (< 10 %).
+3. 🟡 **Unerwarteter Nachtverbrauch (Dauerlast-Alarm)**:
+   * Benachrichtigung bei konstantem Verbrauch > 1.500 W zwischen 01:00 und 05:00 Uhr.
+4. 🔴 **Gerät offline / Signal-Verlust**:
+   * Alarm bei Ausbleiben von Zähler- oder Wechselrichter-Telemetrie seit mehr als 15 Minuten.
+5. 🟢 **Börsentief- & Negativpreis-Chance**:
+   * Spar-Tipp bei anstehenden Negativpreisen an der Strombörse.
+6. 🔴 **Netzbezug trotz Solarüberschuss**:
+   * Erkennt Phasenasymmetrien oder fehlerhafte Zählerkonfigurationen.
+7. 🟡 **Extremer Preis-Peak**:
+   * Warnung vor teuren Verbrauchsspitzen bei Dunkelflauten.
+8. 🔵 **Frostschutz & Wärmepumpen-Vorlauf**:
+   * Hinweis bei extremen Außentemperaturen.
+
+## Alarme quittieren & Historie
+* **✓ Erledigt**: Schließt den Alarm ab und verschiebt ihn in die Historie.
+* **Gesehen**: Bestätigt die Kenntnisnahme, lässt den Alarm aber aktiv.
+""",
+                "content_en": r"""# Alert & Notification Center
+
+The Alert Center continuously scans energy flows and device telemetry to proactively flag equipment faults and cost-saving opportunities.
+
+## The 8 Core Health Checks
+1. 🔴 **PV Yield Loss**: Solar radiation > 400 W/m² but inverter power is 0 W.
+2. 🟡 **Battery Depleted**: SoC falls below configured emergency reserve (< 10%).
+3. 🟡 **Unexpected Night Baseload**: Sustained load > 1500 W between 01:00 and 05:00.
+4. 🔴 **Device Offline**: Missing telemetry for > 15 minutes.
+5. 🟢 **Negative Spot Price Opportunity**: Alerts to scheduled negative electricity price hours.
+6. 🔴 **Grid Import During Solar Surplus**: Detects phase imbalance or meter misconfiguration.
+7. 🟡 **Extreme Price Peak**: Warns before expensive peak hours.
+8. 🔵 **Freeze Protection & Heat Pump Guard**: Temperature monitoring for heating systems.
+""",
+                "tags": ["alerts", "alarm", "benachrichtigung", "ertragsausfall", "überwachung", "notifikation"],
+                "is_featured": True,
+                "sort_order": 1,
+            },
+            {
+                "category": cats["billing"],
+                "slug": "virtuelle-zaehler-und-submetering",
+                "context_key": "billing",
+                "title_de": "Virtuelle Zähler, Sub-Metering & Mieterstrom-Abrechnung",
+                "title_en": "Virtual Meters, Sub-Metering & Multi-Tenant Billing",
+                "summary_de": "Aufteilung des Gesamtstroms auf einzelne Verbraucher (Wallbox, Wärmepumpe, Einliegerwohnung) und PDF-Abrechnung.",
+                "summary_en": "Allocating total electricity across submeters (EV charger, heat pump, rental unit) with PDF reports.",
+                "content_de": r"""# Virtuelle Zähler & Sub-Metering
+
+Mit dem Sub-Metering-Modul kannst du deinen Gesamtverbrauch mathematisch auf einzelne Stromkreise oder Mieter aufteilen.
+
+## Funktionsweise der Zählerhierarchie
+1. **Hauptzähler (Grid Meter)**: Misst den gesamten Netzbezug und die Einspeisung am Hausanschluss.
+2. **Sub-Zähler (Unterzähler)**: Messen dedizierte Verbraucher wie Wallbox, Wärmepumpe oder Einliegerwohnung.
+3. **Restverbrauch (Virtueller Zähler)**:
+   > 📐 **Formel:**  
+   > `Restverbrauch = Gesamtverbrauch - Summe aller Unterzähler`
+
+## Solare Deckungsquote je Verbraucher
+Sharegy berechnet für jeden Unterzähler sekundengenau, zu wie viel Prozent der Verbrauch durch die Solaranlage gedeckt wurde und welcher Anteil Netzstrom war.
+""",
+                "content_en": r"""# Virtual Meters & Sub-Metering
+
+The sub-metering engine enables precise breakdown of total household consumption into individual consumer circuits or multi-tenant parties.
+
+## Meter Hierarchy
+1. **Main Grid Meter**: Measures total import and export at the grid connection point.
+2. **Sub-Meters**: Dedicated meters for EV chargers, heat pumps, or rental units.
+3. **Residual Load (Virtual Meter)**:
+   > 📐 **Formula:**  
+   > `Residual Load = Total Consumption - Sum of all Submeters`
+""",
+                "tags": ["billing", "submetering", "mieterstrom", "virtuelle zähler", "abrechnung", "pdf"],
+                "is_featured": False,
+                "sort_order": 1,
+            },
+            {
+                "category": cats["devices-protocols"],
+                "slug": "mqtt-und-smart-home-integration",
+                "context_key": "devices",
+                "title_de": "MQTT, ioBroker, Node-RED & Smart-Home Gateways",
+                "title_en": "Connecting MQTT, ioBroker, Node-RED & Gateways",
+                "summary_de": "Integration von Smart-Home-Zentralen und Custom-Zählern über den integrierten MQTT-Broker und REST-APIs.",
+                "summary_en": "Integrating smart home systems and custom telemetry via MQTT broker and REST APIs.",
+                "content_de": r"""# MQTT & Smart Home Gateway Integration
+
+Sharegy lässt sich nahtlos mit lokalen Smart-Home-Zentralen wie **ioBroker**, **Node-RED** oder **OpenHAB** verbinden.
+
+## Anbindung via MQTT
+* **Broker-Host**: IP deines Sharegy-Servers (oder externer Mosquitto Broker).
+* **Port**: `1883` (bzw. `8883` für TLS).
+* **Topic-Struktur**: `h/<token>/<device_id>/telemetry`
+* **JSON-Payload**:
+```json
+{
+  "power_w": 2450.5,
+  "voltage_v": 230.2,
+  "energy_kwh": 1420.8
+}
+```
+
+> [!IMPORTANT]
+> **Shelly-Geräte bitte NICHT über MQTT anbinden!**  
+> Für alle Shelly-Geräte (Gen2 / Gen3 / Plus / Pro / Mini) steht die native **Outbound-WebSocket (WSS)** Schnittstelle zur Verfügung.  
+> * **Warum kein MQTT bei Shelly?** MQTT erfordert komplexe Broker-Konfigurationen, scheitert an Routern/Firewalls und unterstützt keine zuverlässige bidirektionale Aktorik in Cloud-Umgebungen.  
+> * **Empfohlener Weg:** Nutze für Shelly immer **Outbound WebSocket (Port 443)** (siehe Handbuch-Artikel *„Shelly Outbound WebSocket & Bidirektionale Relais-Steuerung“*). Dies funktioniert in 2 Minuten ohne Routerfreigaben und ermöglicht sekundenschnelle Relais-Schaltung direkt im Dashboard.
+""",
+                "content_en": r"""# MQTT & Smart Home Gateway Integration
+
+Connect Sharegy to your smart home environment including **ioBroker**, **Node-RED**, or **OpenHAB**.
+
+## MQTT Configuration
+* **Broker Host**: IP address of your server.
+* **Port**: `1883` (or `8883` for TLS).
+* **Topic**: `h/<token>/<device_id>/telemetry`
+* **Sample Payload**:
+```json
+{
+  "power_w": 2450.5,
+  "energy_kwh": 1420.8
+}
+```
+
+> [!IMPORTANT]
+> **Do NOT use MQTT for Shelly devices!**  
+> For all Shelly devices (Gen2 / Gen3 / Plus / Pro / Mini), always use the native **Outbound WebSocket (WSS)** interface over Port 443. It requires zero router configuration and enables low-latency bidirectional relay switching.
+""",
+                "tags": ["mqtt", "iobroker", "nodered", "openhab", "smart home", "protokolle"],
+                "is_featured": False,
+                "sort_order": 1,
+            },
+            {
+                "category": cats["devices-protocols"],
+                "slug": "grafana-integration-und-cockpit-dashboards",
+                "context_key": "interfaces",
+                "title_de": "Grafana Integration & Energy Cockpit Dashboards",
+                "title_en": "Grafana Integration & Energy Cockpit Dashboards",
+                "summary_de": "Einrichtung der Grafana JSON/Infinity Datasource, Token-Authentifizierung und Nutzung des fertigen Sharegy Cockpit Dashboards.",
+                "summary_en": "Setting up Grafana JSON/Infinity datasource, token authentication, and importing the Sharegy Energy Cockpit dashboard.",
+                "content_de": r"""# Grafana Integration & Energy Cockpit
+
+Mit der integrierten Grafana-Schnittstelle kannst du hochentwickelte Dashboards und Zeitreihenanalysen in Grafana erstellen.
+
+## 1. REST-Bridge Endpoints
+Sharegy stellt standardisierte Endpunkte für Grafana (JSON / Infinity Datasource) bereit:
+* `GET /api/grafana/`: Healthcheck & Ping.
+* `POST /api/grafana/search`: Dynamische Metrikenliste (`pv_power_w`, `load_power_w`, `battery_soc_pct`, `autarky_rate_pct`, `spot_price_ct_per_kwh`, `submeter_*`).
+* `POST /api/grafana/query`: Zeitreihen-Stream im Grafana Datapoint-Format `[[value, timestamp_ms], ...]`.
+* `POST /api/grafana/annotations`: Überträgt Live-System-Warnungen und Optimizer-Ereignisse als Markierungen in den Zeitstrahl.
+
+## 2. Authentifizierung in Grafana
+Trage in den Grafana Datasource-Einstellungen unter **Custom HTTP Headers** einen der folgenden Header ein:
+* `X-API-Key: <DEIN_MQTT_PASSWORT_ODER_TOKEN>`
+* oder `Authorization: Bearer <DEIN_MQTT_PASSWORT_ODER_TOKEN>`
+
+## 3. Fertiges Cockpit-Dashboard
+Im Verzeichnis `plugins/grafana/dashboards/sharegy_energy_cockpit.json` findest du ein sofort importierbares Dashboard mit Gauges für PV/Last/SoC/Autarkie, 24h-Verläufen, dynamischen Strompreisen und gestapelten Sub-Metering-Kacheln.
+""",
+                "content_en": r"""# Grafana Integration & Energy Cockpit
+
+Build professional dashboards and time-series analytics in Grafana powered by live Sharegy telemetry.
+
+## 1. REST-Bridge Endpoints
+Sharegy offers dedicated endpoints compatible with Grafana JSON / Infinity Datasources:
+* `GET /api/grafana/`: Healthcheck & Ping.
+* `POST /api/grafana/search`: Metrics list (`pv_power_w`, `load_power_w`, `battery_soc_pct`, `autarky_rate_pct`, `spot_price_ct_per_kwh`, `submeter_*`).
+* `POST /api/grafana/query`: Time series data stream in `[[value, timestamp_ms], ...]` format.
+* `POST /api/grafana/annotations`: System alerts and optimizer events.
+
+## 2. Authentication
+In Grafana Datasource settings, configure **Custom HTTP Headers**:
+* `X-API-Key: <YOUR_MQTT_PASSWORD_OR_TOKEN>`
+* or `Authorization: Bearer <YOUR_MQTT_PASSWORD_OR_TOKEN>`
+""",
+                "tags": ["grafana", "visualisierung", "dashboards", "json datasource", "infinity", "api"],
+                "is_featured": True,
+                "sort_order": 1,
+            },
+            {
+                "category": cats["devices-protocols"],
+                "slug": "home-assistant-integration-und-telemetrie-push",
+                "context_key": "interfaces",
+                "title_de": "Home Assistant Native Integration & 1-Klick Entity Bridge",
+                "title_en": "Home Assistant Native Integration & 1-Click Entity Bridge",
+                "summary_de": "Vollständige Anleitung für die offizielle Sharegy Home Assistant Integration mit 1-Klick Entity Picker, Outbound WSS und 48h Offline-Puffer.",
+                "summary_en": "Complete guide for the official Sharegy Home Assistant integration with 1-click entity selector, outbound WSS, and 48h offline buffer.",
+                "content_de": r"""# Sharegy Cloud Energy Bridge für Home Assistant ⚡🏠
+
+Die offizielle **Sharegy Home Assistant Integration** überträgt alle deine lokalen Energiedaten ohne Portfreigaben und vollkommen verschlüsselt an die Sharegy Cloud.
+
+## 🌟 Highlights der Integration
+* **🎯 1-Klick Entity Picker**: Wähle deine Zähler (Netzbezug, PV-Erzeugung, Batteriespeicher, Wallbox, Wärmepumpe, Einzel-Zwischenstecker) direkt in der Home Assistant Benutzeroberfläche aus.
+* **⚡ Outbound WebSocket (WSS)**: Direkte verschlüsselte Verbindung zu `wss://sharegy.de/ws/energy/<TOKEN>/` über Standard-Port 443 (funktioniert durch jede FRITZ!Box und Firewall ohne VPN oder Portweiterleitung).
+* **💾 48h SQLite Store & Forward Puffer**: Bei Internet- oder Stromausfällen speichert Home Assistant alle Messdaten lokal in einer SQLite-Datenbank und sendet sie nach Wiederverbindung lückenlos nach.
+* **🔄 Live-Anpassung (Options Flow)**: Konfigurierte Sensoren können jederzeit unter *Einstellungen → Geräte & Dienste → Sharegy → Konfigurieren* angepasst werden.
+
+## 🚀 Installation & Einrichtung
+
+### Methode 1: Über HACS (Empfohlen)
+1. Öffne **HACS** in deinem Home Assistant.
+2. Klicke oben rechts auf das Drei-Punkte-Menü → **Benutzerdefinierte Repositories**.
+3. Trage die Repository-URL deines Sharegy-Projekts ein (Kategorie: *Integration*).
+4. Klicke auf **Herunterladen** und starte Home Assistant neu.
+5. Gehe zu **Einstellungen → Geräte & Dienste → Integration hinzufügen → Sharegy** und trage deinen persönlichen Haushalts-Token ein.
+
+### Methode 2: Manuelle Installation
+1. Kopiere den Ordner `custom_components/sharegy` in deinen HA-Ordner `config/custom_components/`.
+2. Starte Home Assistant neu und füge Sharegy unter *Geräte & Dienste* hinzu.
+""",
+                "content_en": r"""# Sharegy Cloud Energy Bridge for Home Assistant ⚡🏠
+
+The official **Sharegy Home Assistant Integration** streams all your local smart home and energy data securely to the Sharegy Cloud without firewall changes or open ports.
+
+## 🌟 Key Features
+* **🎯 1-Click Entity Picker**: Select your energy sensors (Grid, Solar PV, Battery Storage, EV Charger, Heat Pump, Smart Plugs) natively inside the HA UI.
+* **⚡ Outbound WebSocket (WSS)**: Secure streaming directly to `wss://sharegy.de/ws/energy/<TOKEN>/` over standard Port 443.
+* **💾 48h SQLite Store & Forward Buffer**: If your internet connection drops, telemetry is buffered locally and automatically synchronized once reconnected.
+* **🔄 Live Options Flow**: Easily modify mapped sensors anytime under *Settings → Devices & Services → Sharegy → Configure*.
+""",
+                "tags": ["homeassistant", "custom component", "hacs", "websocket", "offline buffer", "entity picker", "shelly"],
+                "is_featured": True,
+                "sort_order": 1,
+            },
+            {
+                "category": cats["devices-protocols"],
+                "slug": "matter-1-3-energy-management-und-hub",
+                "context_key": "interfaces",
+                "title_de": "Matter 1.3 Energy Hub (Smart Plugs, EVSE & Inverter)",
+                "title_en": "Matter 1.3 Energy Hub (Smart Plugs, EVSE & Inverters)",
+                "summary_de": "Kopplung und Steuerung moderner Matter-Geräte via Thread/Wi-Fi/IP unter Nutzung des CSA Matter 1.3 Energy Management Standards.",
+                "summary_en": "Commissioning and controlling Matter devices via Thread/Wi-Fi/IP utilizing the CSA Matter 1.3 Energy Management standard.",
+                "content_de": r"""# Matter 1.3 Energy Management Hub
+
+Sharegy verfügt über einen nativen **Matter Hub** mit voller Unterstützung des **CSA Matter 1.3 Energy Management Standards**.
+
+## 1. Unterstützte Matter-Cluster
+* **`0x0090` (Electrical Power Measurement)**: Misst Live-Leistung (`ActivePower` in W/mW), Spannung (`RMSVoltage` in mV), Stromstärke (`ActiveCurrent` in mA) und Power Factor.
+* **`0x0091` (Electrical Energy Measurement)**: Erfasst kumulierte Zählerstände (`CumulativeEnergyImported`) in kWh.
+* **`0x0006` (On/Off Cluster)**: Schaltet Relais und Zwischenstecker ein, aus oder toggelt ihren Zustand.
+* **`0x0098` / `0x0099` (Device Energy Management & EVSE)**: Dynamische Leistungsbegrenzung (`power_adjustment_limit_w`) und Ladestromsteuerung (`max_charge_current_a`) für Wallboxen und Wärmepumpen.
+
+## 2. Gerät per QR-Code oder Pairing-Code koppeln
+1. Gehe in Sharegy auf **Schnittstellen & MQTT → Matter 1.3 Energy Hub**.
+2. Klicke auf **+ Neues Matter-Gerät koppeln**.
+3. Wähle die Kopplungsmethode:
+   * **📷 QR-Code Payload**: z. B. `MT:Y.K9042C00KA0648G00`
+   * **🔢 Manueller Code**: 11-stellig (z. B. `34970112332`) oder 21-stellig
+   * **🔑 Setup-PIN**: 8-stelliger Geräte-PIN (z. B. `20202021`)
+4. Nach dem Klick auf **Gerät verbinden** wird das Gerät automatisch in der Matter Fabric registriert und in die Sharegy-Zählerhierarchie eingebunden.
+""",
+                "content_en": r"""# Matter 1.3 Energy Management Hub
+
+Sharegy provides a native **Matter Hub** fully compliant with the **CSA Matter 1.3 Energy Management standard**.
+
+## 1. Supported Matter Clusters
+* **`0x0090` (Electrical Power Measurement)**: Real-time active power (W), RMS voltage, active current, and power factor.
+* **`0x0091` (Electrical Energy Measurement)**: Cumulative imported energy (kWh).
+* **`0x0006` (On/Off Cluster)**: Smart plug relay toggling and switching.
+* **`0x0098` / `0x0099` (Device Energy Management & EVSE)**: Dynamic EV charging limits and heat pump modulation.
+
+## 2. Commissioning Devices
+Pair devices in seconds via QR-Code (`MT:...`), 11-/21-digit manual pairing codes, or setup PINs directly from the **Matter 1.3 Energy Hub** card.
+""",
+                "tags": ["matter", "matter 1.3", "csa", "thread", "smart plug", "evse", "energy management"],
+                "is_featured": True,
+                "sort_order": 1,
+            },
+        ]
         for adata in articles_data:
             HelpArticle.objects.update_or_create(
                 slug=adata["slug"],
