@@ -2,11 +2,11 @@
 
 {% block content %}
 <h2 style="font-size:20px; font-weight:700; color:#0f172a; margin-top:0; margin-bottom:12px;">
-  Willkommen zurück 👋
+  {{ headline|default:"Willkommen zurück 👋" }}
 </h2>
 
 <p style="color:#475569; line-height:1.6; margin-top:0; margin-bottom:16px;">
-  Hier ist dein persönlicher Einmal-Login-Link für <strong>Sharegy</strong>. Klicke einfach auf den folgenden Button, um dich sicher in dein Konto einzuloggen:
+  {{ intro_text|default:"Hier ist dein persönlicher Einmal-Login-Link für <strong>Sharegy</strong>. Klicke einfach auf den folgenden Button, um dich sicher in dein Konto einzuloggen:"|safe }}
 </p>
 
 <!-- CTA BUTTON (Email-Safe Table) -->
@@ -26,7 +26,7 @@
           box-shadow:0 4px 14px rgba(79, 70, 229, 0.35);
           text-align:center;
          ">
-        🔐 Sicher einloggen
+        {{ button_text|default:"🔐 Sicher einloggen" }}
       </a>
     </td>
   </tr>
@@ -35,7 +35,7 @@
 <!-- URL FALLBACK BOX -->
 <div style="background-color:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:12px 14px; margin:24px 0 16px 0;">
   <div style="font-size:11px; font-weight:700; text-transform:uppercase; color:#64748b; letter-spacing:0.5px; margin-bottom:4px;">
-    Alternativer Direktlink:
+    {{ fallback_label|default:"Alternativer Direktlink:" }}
   </div>
   <p style="font-size:12px; color:#6366f1; word-break:break-all; margin:0; line-height:1.4;">
     <a href="{{ magic_link }}" style="color:#6366f1; text-decoration:underline;">{{ magic_link }}</a>
@@ -45,10 +45,10 @@
 <!-- SECURITY & EXPIRATION NOTICE -->
 <div style="margin-top:24px; padding-top:16px; border-top:1px solid #f1f5f9; color:#64748b; font-size:12px; line-height:1.5;">
   <p style="margin:4px 0;">
-    ⏳ <strong>Gültigkeit:</strong> Dieser Login-Link ist nur <strong>15 Minuten</strong> gültig und kann nur einmal verwendet werden.
+    ⏳ <strong>{{ validity_label|default:"Gültigkeit:" }}</strong> {{ validity_text|default:"Dieser Login-Link ist nur 15 Minuten gültig und kann nur einmal verwendet werden." }}
   </p>
   <p style="margin:4px 0; color:#94a3b8;">
-    🔒 Falls du diese Anfrage nicht selbst gestellt hast, kannst du diese E-Mail ignorieren. Dein Account bleibt vollständig geschützt.
+    🔒 {{ ignore_text|default:"Falls du diese Anfrage nicht selbst gestellt hast, kannst du diese E-Mail ignorieren. Dein Account bleibt vollständig geschützt." }}
   </p>
 </div>
 

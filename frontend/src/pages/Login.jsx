@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { apiFetch } from "../api/client";
 
 export default function Login() {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [email, setEmail] = useState("");
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState("");
@@ -21,7 +21,7 @@ export default function Login() {
         try {
             await apiFetch("/api/request-magic-link/", {
                 method: "POST",
-                body: JSON.stringify({ email }),
+                body: JSON.stringify({ email, lang: i18n.language }),
             });
 
             setStatus(t("auth.magic_link_sent", "✅ Check deine E-Mails – dein Login-Link ist unterwegs!"));

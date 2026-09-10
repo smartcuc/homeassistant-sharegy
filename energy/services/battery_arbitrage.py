@@ -106,7 +106,7 @@ def calculate_battery_arbitrage(user, horizon_hours: int = 36) -> dict:
         if tariff_type == HomeTariff.TARIFF_DYNAMIC:
             eff_ct = calculate_effective_price(home, curr, base_spot_ct) if home else (base_spot_ct + 17.59)
         else:
-            eff_ct = float(tariff.static_price_eur_per_kwh * 100.0) if (tariff and tariff.static_price_eur_per_kwh) else 32.50
+            eff_ct = float(tariff.static_price_eur_per_kwh) * 100.0 if (tariff and tariff.static_price_eur_per_kwh) else 32.50
 
         pv_w = pv_map.get(curr, 0.0)
         is_solar_surplus = (pv_w > 1200.0)

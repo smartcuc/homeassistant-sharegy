@@ -639,19 +639,29 @@ def get_user_energy_profile(user, lang: str = "de") -> Dict[str, Any]:
             solar_type = "bkw" if 0 < max_kw <= 1.0 else ("pv" if max_kw > 1.0 else "pv")
             is_configured = True
         else:
+            from django.db.models import Q
             pv_devices = Device.objects.filter(
                 home=home,
                 active=True,
-                config__role__key__in=["producer", "pv", "inverter", "hybrid"]
-            )
+            ).filter(
+                Q(config__role__key__in=["producer", "pv", "inverter", "hybrid"])
+                | Q(identifier__icontains="hybrid")
+                | Q(identifier__icontains="sungrow")
+                | Q(identifier__icontains="inverter")
+                | Q(latest_metrics__metric_key__in=["power", "pv_power"])
+            ).distinct()
             if pv_devices.exists():
                 solar_type = "pv"
                 is_configured = True
 
         # 2. Speicher prüfen
+        from django.db.models import Q
         has_battery = StorageSystem.objects.filter(home=home).exists() or Device.objects.filter(
-            home=home, active=True, config__role__key__in=["battery", "storage"]
-        ).exists()
+            home=home, active=True
+        ).filter(
+            Q(config__role__key__in=["battery", "storage"])
+            | Q(latest_metrics__metric_key__in=["battery_soc", "battery_power", "soc"])
+        ).distinct().exists()
         if has_battery:
             is_configured = True
 

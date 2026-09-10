@@ -573,9 +573,10 @@ class RequestMagicLinkView(APIView):
         # ✅ BEST PRACTICE: LINK IMMER FRONTEND / TRACKING
         frontend_url = getattr(settings, "FRONTEND_URL", "https://sharegy.de").rstrip("/")
         link = f"{frontend_url}/t/{token.token}"
+        req_lang = request.data.get("language") or request.data.get("lang") or request.GET.get("lang")
 
         try:
-            send_magic_link_email(user, link, token.token)
+            send_magic_link_email(user, link, token.token, language=req_lang)
         except Exception as exc:
             logger.exception("Failed to send magic link email to %s: %s", user.email, exc)
             return Response({"error": f"Mailversand fehlgeschlagen: {str(exc)}"}, status=400)

@@ -31,7 +31,7 @@ import SavingsRoiCalculator from "./components/landing/SavingsRoiCalculator";
 import { trackEvent } from "./lib/track";
 
 export default function LandingPage() {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const { user, loading } = useUser();
     const navigate = useNavigate();
 
@@ -67,26 +67,28 @@ export default function LandingPage() {
 
     const FAQS = [
         {
-            q: "Brauche ich eine zusätzliche teure Hardware-Box im Zählerschrank?",
-            a: "Nein! Sharegy ist 100% Cloud- & Protokoll-basiert. Wir verbinden uns direkt über die Standard-Schnittstellen deiner vorhandenen Geräte (Modbus TCP, OCPP 1.6-J, SunSpec, Cloud-APIs). Du sparst dir Anschaffungs- und Installationskosten von 800 € bis 1.500 € für proprietäre Hardware."
+            q: t("landing.faq_1_q", "Brauche ich eine zusätzliche teure Hardware-Box im Zählerschrank?"),
+            a: t("landing.faq_1_a", "Nein! Sharegy ist 100% Cloud- & Protokoll-basiert. Wir verbinden uns direkt über die Standard-Schnittstellen deiner vorhandenen Geräte (Modbus TCP, OCPP 1.6-J, SunSpec, Cloud-APIs). Du sparst dir Anschaffungs- und Installationskosten von 800 € bis 1.500 € für proprietäre Hardware.")
         },
         {
-            q: "Wie funktioniert die § 14a EnWG Netzentgelt-Reduzierung?",
-            a: "Sharegy erfüllt alle Vorgaben nach § 14a EnWG für steuerbare Verbrauchseinrichtungen (Wallboxen, Wärmepumpen, Batteriespeicher). Durch die netzdienliche Dimmungsfähigkeit sicherst du dir die jährliche Pauschale (Modul 1: ca. 160 € bis 190 €/Jahr) oder signifikant reduzierte Netzentgelte (Modul 2)."
+            q: t("landing.faq_2_q", "Wie funktioniert die § 14a EnWG Netzentgelt-Reduzierung?"),
+            a: t("landing.faq_2_a", "Sharegy erfüllt alle Vorgaben nach § 14a EnWG für steuerbare Verbrauchseinrichtungen (Wallboxen, Wärmepumpen, Batteriespeicher). Durch die netzdienliche Dimmungsfähigkeit sicherst du dir die jährliche Pauschale (Modul 1: ca. 160 € bis 190 €/Jahr) oder signifikant reduzierte Netzentgelte (Modul 2).")
         },
         {
-            q: "Was ist der Unterschied zwischen Säule 1 (Smart EMS) und Säule 2 (Energy Sharing)?",
-            a: "Säule 1 optimiert deine eigene Anlage im Haus (PV-Überschuss ins Auto und den Speicher, dynamische Strompreise, § 14a Netzentgelte). Säule 2 verbindet dich mit deinen Nachbarn, Mietern oder deiner Familie: Wenn dein Speicher voll ist, teilst du deinen Solarstrom im Quartier zu fairen Preisen (z.B. 18,5 ct/kWh), statt ihn für geringe Cent-Beträge ins Netz einzuspeisen."
+            q: t("landing.faq_3_q", "Was ist der Unterschied zwischen Säule 1 (Smart EMS) und Säule 2 (Energy Sharing)?"),
+            a: t("landing.faq_3_a", "Säule 1 optimiert deine eigene Anlage im Haus (PV-Überschuss ins Auto und den Speicher, dynamische Strompreise, § 14a Netzentgelte). Säule 2 verbindet dich mit deinen Nachbarn, Mietern oder deiner Familie: Wenn dein Speicher voll ist, teilst du deinen Solarstrom im Quartier zu fairen Preisen (z.B. 18,5 ct/kWh), statt ihn für geringe Cent-Beträge ins Netz einzuspeisen.")
         },
         {
-            q: "Sind alle genannten Herstellernamen und Marken geschützt?",
-            a: "Ja. Alle auf dieser Website genannten Marken, Markenzeichen und Produktnamen sind Eigentum der jeweiligen Rechteinhaber. Ihre Nennung dient ausschließlich der sachlichen und informativen Beschreibung der technischen Kompatibilität und Schnittstellen gem. § 23 MarkenG."
+            q: t("landing.faq_4_q", "Sind alle genannten Herstellernamen und Marken geschützt?"),
+            a: t("landing.faq_4_a", "Ja. Alle auf dieser Website genannten Marken, Markenzeichen und Produktnamen sind Eigentum der jeweiligen Rechteinhaber. Ihre Nennung dient ausschließlich der sachlichen und informativen Beschreibung der technischen Kompatibilität und Schnittstellen gem. § 23 MarkenG.")
         },
         {
-            q: "Wie kann ich die Live-Demo testen?",
-            a: "Klicke einfach oben auf 'Live-Demo ansehen' oder nutze den interaktiven Simulator direkt auf dieser Seite. Du kannst sofort alle Steuerungsmodi und Szenarien interaktiv ausprobieren – ganz ohne Registrierung."
+            q: t("landing.faq_5_q", "Wie kann ich die Live-Demo testen?"),
+            a: t("landing.faq_5_a", "Klicke einfach oben auf 'Live-Demo ansehen' oder nutze den interaktiven Simulator direkt auf dieser Seite. Du kannst sofort alle Steuerungsmodi und Szenarien interaktiv ausprobieren – ganz ohne Registrierung.")
         }
     ];
+
+    const currentLang = (i18n.language || "de").toLowerCase().split("-")[0];
 
     return (
         <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-emerald-500 selection:text-white font-sans">
@@ -114,25 +116,53 @@ export default function LandingPage() {
                     {/* Navigation Links */}
                     <nav className="hidden md:flex items-center gap-7 text-xs font-bold text-slate-600">
                         <button onClick={() => scrollToSection("pillars")} className="hover:text-indigo-600 transition cursor-pointer">
-                            Die 2 Säulen
+                            {t("landing.nav_pillars", "Die 2 Säulen")}
                         </button>
                         <button onClick={() => scrollToSection("simulator")} className="hover:text-indigo-600 transition cursor-pointer flex items-center gap-1.5">
                             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                            Live-Simulator
+                            {t("landing.nav_simulator", "Live-Simulator")}
                         </button>
                         <button onClick={() => scrollToSection("calculator")} className="hover:text-indigo-600 transition cursor-pointer">
-                            Ersparnis-Rechner
+                            {t("landing.nav_calculator", "Ersparnis-Rechner")}
                         </button>
                         <button onClick={() => scrollToSection("hardware")} className="hover:text-indigo-600 transition cursor-pointer">
-                            Kompatibilität
+                            {t("landing.nav_compatibility", "Kompatibilität")}
                         </button>
                         <button onClick={() => scrollToSection("faq")} className="hover:text-indigo-600 transition cursor-pointer">
-                            FAQ
+                            {t("landing.nav_faq", "FAQ")}
                         </button>
                     </nav>
 
-                    {/* Action CTAs */}
+                    {/* Action CTAs & Language Switcher */}
                     <div className="flex items-center gap-3">
+                        {/* DE/EN Switcher */}
+                        <div className="flex items-center bg-slate-100 rounded-xl p-0.5 border border-slate-200">
+                            <button
+                                type="button"
+                                onClick={() => i18n.changeLanguage("de")}
+                                className={`px-2 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                                    currentLang === "de"
+                                        ? "bg-white text-indigo-700 shadow-xs"
+                                        : "text-slate-500 hover:text-slate-800"
+                                }`}
+                                title="Auf Deutsch wechseln"
+                            >
+                                DE
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => i18n.changeLanguage("en")}
+                                className={`px-2 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                                    currentLang === "en"
+                                        ? "bg-white text-indigo-700 shadow-xs"
+                                        : "text-slate-500 hover:text-slate-800"
+                                }`}
+                                title="Switch to English"
+                            >
+                                EN
+                            </button>
+                        </div>
+
                         <a
                             href="/api/demo/"
                             target="_blank"
@@ -140,7 +170,7 @@ export default function LandingPage() {
                             className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border border-indigo-200 text-xs font-bold transition cursor-pointer shadow-2xs"
                         >
                             <Eye className="w-3.5 h-3.5 text-indigo-600" />
-                            <span>Echte Live-Demo</span>
+                            <span>{t("landing.live_demo_btn", "Echte Live-Demo")}</span>
                         </a>
 
                         {user ? (
@@ -148,7 +178,7 @@ export default function LandingPage() {
                                 to="/app/dashboard"
                                 className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-indigo-600/20"
                             >
-                                <span>Zum Dashboard</span>
+                                <span>{t("landing.dashboard_btn", "Zum Dashboard")}</span>
                                 <ArrowRight className="w-3.5 h-3.5" />
                             </Link>
                         ) : (
@@ -156,7 +186,7 @@ export default function LandingPage() {
                                 to="/login"
                                 className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-xs font-black uppercase tracking-wider transition flex items-center gap-1.5 shadow-md shadow-emerald-500/20"
                             >
-                                <span>Login / Starten</span>
+                                <span>{t("landing.login_btn", "Login / Starten")}</span>
                                 <ArrowRight className="w-3.5 h-3.5" />
                             </Link>
                         )}
@@ -173,18 +203,20 @@ export default function LandingPage() {
                     {/* Top Pill */}
                     <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-indigo-200/80 text-xs font-bold text-indigo-900 shadow-sm">
                         <Sparkles className="w-4 h-4 text-amber-500" />
-                        <span>Säule 1 (Smart EMS & § 14a) & Säule 2 (P2P Energy Sharing)</span>
-                        <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] uppercase font-mono font-bold">100% Cloud</span>
+                        <span>{t("landing.hero_pill", "Säule 1 (Smart EMS & § 14a) & Säule 2 (P2P Energy Sharing)")}</span>
+                        <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] uppercase font-mono font-bold">
+                            {t("landing.hero_pill_badge", "100% Cloud")}
+                        </span>
                     </div>
 
                     {/* Main Headline */}
                     <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-slate-900 leading-[1.1]">
-                        Das <span className="bg-gradient-to-r from-amber-500 via-emerald-600 to-teal-600 bg-clip-text text-transparent">Energy OS</span> für dein Zuhause & dein Quartier.
+                        {t("landing.hero_title_prefix", "Das")} <span className="bg-gradient-to-r from-amber-500 via-emerald-600 to-teal-600 bg-clip-text text-transparent">{t("landing.hero_title_highlight", "Energy OS")}</span> {t("landing.hero_title_suffix", "für dein Zuhause & dein Quartier.")}
                     </h1>
 
                     {/* Subtitle */}
                     <p className="max-w-3xl mx-auto text-base sm:text-lg text-slate-600 leading-relaxed font-normal">
-                        Keine teure 1.500 € Zusatzbox. Sharegy steuert deine <strong>PV-Anlage, Heimspeicher, Wallbox & Wärmepumpe</strong> vollautomatisch nach dynamischen Strompreisen & § 14a EnWG – und ermöglicht <strong>echtes P2P Energy Sharing</strong> mit deinen Nachbarn.
+                        {t("landing.hero_subtitle", "Keine teure 1.500 € Zusatzbox. Sharegy steuert deine PV-Anlage, Heimspeicher, Wallbox & Wärmepumpe vollautomatisch nach dynamischen Strompreisen & § 14a EnWG – und ermöglicht echtes P2P Energy Sharing mit deinen Nachbarn.")}
                     </p>
 
                     {/* Hero Buttons */}
@@ -195,7 +227,7 @@ export default function LandingPage() {
                             rel="noopener noreferrer"
                             className="w-full sm:w-auto px-7 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-600 hover:to-teal-600 text-white font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2.5 shadow-xl shadow-emerald-500/25 hover:scale-[1.02] transition-all cursor-pointer"
                         >
-                            <span>🚀 Echte Live-Demo starten (1-Klick)</span>
+                            <span>{t("landing.hero_demo_btn", "🚀 Echte Live-Demo starten (1-Klick)")}</span>
                             <ArrowRight className="w-4 h-4" />
                         </a>
 
@@ -204,14 +236,14 @@ export default function LandingPage() {
                             onClick={() => scrollToSection("simulator")}
                             className="w-full sm:w-auto px-6 py-4 rounded-2xl bg-white hover:bg-slate-50 text-slate-700 hover:text-indigo-600 font-bold text-sm border border-slate-300 hover:border-indigo-400 flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md"
                         >
-                            <span>Simulator ansehen ↓</span>
+                            <span>{t("landing.hero_sim_btn", "Simulator ansehen ↓")}</span>
                         </button>
 
                         <Link
                             to="/login"
                             className="w-full sm:w-auto px-6 py-4 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm border border-slate-800 flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md"
                         >
-                            <span>Kostenlos starten</span>
+                            <span>{t("landing.hero_start_btn", "Kostenlos starten")}</span>
                             <ChevronRight className="w-4 h-4 text-slate-400" />
                         </Link>
                     </div>
@@ -220,15 +252,15 @@ export default function LandingPage() {
                     <div className="pt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-xs text-slate-600 font-medium">
                         <div className="flex items-center gap-2">
                             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                            <span>100% Cloud-basiert (Kein Raspberry Pi / keine Box)</span>
+                            <span>{t("landing.hero_feat_1", "100% Cloud-basiert (Kein Raspberry Pi / keine Box)")}</span>
                         </div>
                         <div className="flex items-center gap-2">
                             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                            <span>§ 14a EnWG Netzentgelt-Prämie (+160 €/a)</span>
+                            <span>{t("landing.hero_feat_2", "§ 14a EnWG Netzentgelt-Prämie (+160 €/a)")}</span>
                         </div>
                         <div className="flex items-center gap-2">
                             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                            <span>Sub-Sekunden PV-Überschussregelung</span>
+                            <span>{t("landing.hero_feat_3", "Sub-Sekunden PV-Überschussregelung")}</span>
                         </div>
                     </div>
                 </div>
@@ -238,7 +270,7 @@ export default function LandingPage() {
             <section id="hardware" className="py-14 border-y border-slate-200/80 bg-white">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <p className="text-center text-xs font-bold uppercase tracking-widest text-slate-500 mb-6">
-                        Nahtlos kompatibel mit führenden Herstellern & offenen Industriestandards
+                        {t("landing.hardware_heading", "Nahtlos kompatibel mit führenden Herstellern & offenen Industriestandards")}
                     </p>
 
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5">
@@ -271,7 +303,7 @@ export default function LandingPage() {
                     <div className="mt-8 text-center max-w-4xl mx-auto flex items-center justify-center gap-2 text-[11px] text-slate-400 leading-relaxed border-t border-slate-100 pt-4">
                         <Info className="w-3.5 h-3.5 flex-shrink-0 text-slate-400" />
                         <span>
-                            <strong>Rechtlicher Hinweis:</strong> Alle genannten Marken-, Firmen- und Produktnamen sind eingetragene Warenzeichen ihrer jeweiligen Rechteinhaber. Ihre Nennung erfolgt ausschließlich zur sachlichen Information über die Schnittstellen- und Protokollkompatibilität gem. § 23 MarkenG.
+                            {t("landing.hardware_disclaimer", "Rechtlicher Hinweis: Alle genannten Marken-, Firmen- und Produktnamen sind eingetragene Warenzeichen ihrer jeweiligen Rechteinhaber. Ihre Nennung erfolgt ausschließlich zur sachlichen Information über die Schnittstellen- und Protokollkompatibilität gem. § 23 MarkenG.")}
                         </span>
                     </div>
                 </div>
@@ -281,13 +313,13 @@ export default function LandingPage() {
             <section id="pillars" className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
                 <div className="text-center max-w-3xl mx-auto mb-14">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-200 text-xs font-black uppercase tracking-wider mb-3">
-                        Das Fundament
+                        {t("landing.pillars_badge", "Das Fundament")}
                     </div>
                     <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
-                        Zwei gleichberechtigte Säulen für deine Energiezukunft
+                        {t("landing.pillars_title", "Zwei gleichberechtigte Säulen für deine Energiezukunft")}
                     </h2>
                     <p className="text-slate-600 text-sm sm:text-base mt-4">
-                        Sharegy vereint dezentrales High-Tech Smart-Home Energiemanagement mit dezentralem P2P Energy Sharing im Quartier.
+                        {t("landing.pillars_subtitle", "Sharegy vereint dezentrales High-Tech Smart-Home Energiemanagement mit dezentralem P2P Energy Sharing im Quartier.")}
                     </p>
                 </div>
 
@@ -304,7 +336,7 @@ export default function LandingPage() {
                             }`}
                         >
                             <Zap className="w-4 h-4 text-amber-300" />
-                            <span>Säule 1: Smart EMS & § 14a EnWG</span>
+                            <span>{t("landing.pillar1_tab", "Säule 1: Smart EMS & § 14a EnWG")}</span>
                         </button>
 
                         <button
@@ -317,7 +349,7 @@ export default function LandingPage() {
                             }`}
                         >
                             <Users className="w-4 h-4 text-teal-200" />
-                            <span>Säule 2: P2P Energy Sharing</span>
+                            <span>{t("landing.pillar2_tab", "Säule 2: P2P Energy Sharing")}</span>
                         </button>
                     </div>
                 </div>
@@ -330,12 +362,12 @@ export default function LandingPage() {
                             <div className="w-12 h-12 rounded-2xl bg-amber-100 border border-amber-200 flex items-center justify-center text-2xl mb-5">
                                 ☀️
                             </div>
-                            <h3 className="text-lg font-bold text-slate-900">Sub-Sekunden PV-Überschussregelung</h3>
+                            <h3 className="text-lg font-bold text-slate-900">{t("landing.p1_f1_title", "Sub-Sekunden PV-Überschussregelung")}</h3>
                             <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                                Dynamische Anpassung von Wallbox und Heizstab in Echtzeit. Dein Auto lädt genau mit der Sonnenenergie, die vom Dach kommt – ohne teuren Netzstrom.
+                                {t("landing.p1_f1_desc", "Dynamische Anpassung von Wallbox und Heizstab in Echtzeit. Dein Auto lädt genau mit der Sonnenenergie, die vom Dach kommt – ohne teuren Netzstrom.")}
                             </p>
                             <div className="mt-4 pt-4 border-t border-slate-100 text-xs text-amber-700 font-bold">
-                                ✓ Automatische Phasen-Umschaltung (1p/3p)
+                                {t("landing.p1_f1_badge", "✓ Automatische Phasen-Umschaltung (1p/3p)")}
                             </div>
                         </div>
 
@@ -344,12 +376,12 @@ export default function LandingPage() {
                             <div className="w-12 h-12 rounded-2xl bg-indigo-100 border border-indigo-200 flex items-center justify-center text-2xl mb-5">
                                 📈
                             </div>
-                            <h3 className="text-lg font-bold text-slate-900">Dynamischer Strompreis-Radar</h3>
+                            <h3 className="text-lg font-bold text-slate-900">{t("landing.p1_f2_title", "Dynamischer Strompreis-Radar")}</h3>
                             <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                                Integration von Börsenstrompreisen (EPEX Spot / Awattar / Tibber). Der Heimspeicher lädt vollautomatisch in Niedrigpreisphasen und puffert Spitzenpreise ab.
+                                {t("landing.p1_f2_desc", "Integration von Börsenstrompreisen (EPEX Spot / Awattar / Tibber). Der Heimspeicher lädt vollautomatisch in Niedrigpreisphasen und puffert Spitzenpreise ab.")}
                             </p>
                             <div className="mt-4 pt-4 border-t border-slate-100 text-xs text-indigo-700 font-bold">
-                                ✓ Bis zu 35% geringere Netzstromkosten
+                                {t("landing.p1_f2_badge", "✓ Bis zu 35% geringere Netzstromkosten")}
                             </div>
                         </div>
 
@@ -358,12 +390,12 @@ export default function LandingPage() {
                             <div className="w-12 h-12 rounded-2xl bg-cyan-100 border border-cyan-200 flex items-center justify-center text-2xl mb-5">
                                 🛡️
                             </div>
-                            <h3 className="text-lg font-bold text-slate-900">§ 14a EnWG Netzentgelt-Bonus</h3>
+                            <h3 className="text-lg font-bold text-slate-900">{t("landing.p1_f3_title", "§ 14a EnWG Netzentgelt-Bonus")}</h3>
                             <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                                Gesetzliche Steuerung für Wallboxen und Wärmepumpen (SteuVE). Sharegy garantiert netzdienliche Dimmung auf 4,2 kW und sichert dir die volle Jahrespauschale.
+                                {t("landing.p1_f3_desc", "Gesetzliche Steuerung für Wallboxen und Wärmepumpen (SteuVE). Sharegy garantiert netzdienliche Dimmung auf 4,2 kW und sichert dir die volle Jahrespauschale.")}
                             </p>
                             <div className="mt-4 pt-4 border-t border-slate-100 text-xs text-cyan-700 font-bold">
-                                ✓ Modul 1 Pauschale (+160 € / Jahr)
+                                {t("landing.p1_f3_badge", "✓ Modul 1 Pauschale (+160 € / Jahr)")}
                             </div>
                         </div>
                     </div>
@@ -377,12 +409,12 @@ export default function LandingPage() {
                             <div className="w-12 h-12 rounded-2xl bg-emerald-100 border border-emerald-200 flex items-center justify-center text-2xl mb-5">
                                 🏘️
                             </div>
-                            <h3 className="text-lg font-bold text-slate-900">Quartiers-Strompool (§ 42b EnWG)</h3>
+                            <h3 className="text-lg font-bold text-slate-900">{t("landing.p2_f1_title", "Quartiers-Strompool (§ 42b EnWG)")}</h3>
                             <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                                Überschussstrom nicht für 8 Cent verschenken: Teile deinen Solarstrom direkt mit Nachbarn, Mietern oder Familienmitgliedern im selben Quartier.
+                                {t("landing.p2_f1_desc", "Überschussstrom nicht für 8 Cent verschenken: Teile deinen Solarstrom direkt mit Nachbarn, Mietern oder Familienmitgliedern im selben Quartier.")}
                             </p>
                             <div className="mt-4 pt-4 border-t border-slate-100 text-xs text-emerald-700 font-bold">
-                                ✓ Mehr Ertrag für Erzeuger, günstiger für Nachbarn
+                                {t("landing.p2_f1_badge", "✓ Mehr Ertrag für Erzeuger, günstiger für Nachbarn")}
                             </div>
                         </div>
 
@@ -391,12 +423,12 @@ export default function LandingPage() {
                             <div className="w-12 h-12 rounded-2xl bg-teal-100 border border-teal-200 flex items-center justify-center text-2xl mb-5">
                                 📊
                             </div>
-                            <h3 className="text-lg font-bold text-slate-900">100% Automatisierte Abrechnung</h3>
+                            <h3 className="text-lg font-bold text-slate-900">{t("landing.p2_f2_title", "100% Automatisierte Abrechnung")}</h3>
                             <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                                Keine manuellen Excel-Tabellen oder Zählerablesungen. Sharegy saldiert alle kWh sub-sekundengenau und generiert automatische monatliche Abrechnungsbelege.
+                                {t("landing.p2_f2_desc", "Keine manuellen Excel-Tabellen oder Zählerablesungen. Sharegy saldiert alle kWh sub-sekundengenau und generiert automatische monatliche Abrechnungsbelege.")}
                             </p>
                             <div className="mt-4 pt-4 border-t border-slate-100 text-xs text-teal-700 font-bold">
-                                ✓ Rechtssicher & Mieterstrom-konform
+                                {t("landing.p2_f2_badge", "✓ Rechtssicher & Mieterstrom-konform")}
                             </div>
                         </div>
 
@@ -405,29 +437,29 @@ export default function LandingPage() {
                             <div className="w-12 h-12 rounded-2xl bg-teal-100 border border-teal-200 flex items-center justify-center text-2xl mb-5">
                                 🏆
                             </div>
-                            <h3 className="text-lg font-bold text-slate-900">Community Autarkie & Social Proof</h3>
+                            <h3 className="text-lg font-bold text-slate-900">{t("landing.p2_f3_title", "Community Autarkie & Social Proof")}</h3>
                             <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                                Verfolge den gemeinsamen Autarkiegrad deines Quartiers, teile Erfolge auf LinkedIn & WhatsApp und mache dein Viertel gemeinsam CO₂-neutral.
+                                {t("landing.p2_f3_desc", "Verfolge den gemeinsamen Autarkiegrad deines Quartiers, teile Erfolge und mache dein Viertel gemeinsam CO₂-neutral.")}
                             </p>
                             <div className="mt-4 pt-4 border-t border-slate-100 text-xs text-teal-700 font-bold">
-                                ✓ Gamification & Quartiers-Rangliste
+                                {t("landing.p2_f3_badge", "✓ Gamification & Quartiers-Rangliste")}
                             </div>
                         </div>
                     </div>
                 )}
             </section>
 
-            {/* ⚡ INTERACTIVE LIVE ENERGY FLOW SIMULATOR (HIGH-TECH CONSOLE IN CONTRAST) */}
+            {/* ⚡ INTERACTIVE LIVE ENERGY FLOW SIMULATOR */}
             <section id="simulator" className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
                 <div className="text-center max-w-3xl mx-auto mb-10">
                     <span className="p-1.5 rounded-lg bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-black uppercase tracking-wider">
-                        Live Simulation
+                        {t("landing.sim_badge", "Live Simulation")}
                     </span>
                     <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mt-2 tracking-tight">
-                        So steuert Sharegy dein Energie-Ökosystem
+                        {t("landing.sim_title", "So steuert Sharegy dein Energie-Ökosystem")}
                     </h2>
                     <p className="text-slate-600 text-xs sm:text-sm mt-2">
-                        Wähle verschiedene Wetterszenarien & Strompreise und beobachte die sub-sekundengenaue Verteilung in Echtzeit.
+                        {t("landing.sim_subtitle", "Wähle verschiedene Wetterszenarien & Strompreise und beobachte die sub-sekundengenaue Verteilung in Echtzeit.")}
                     </p>
                 </div>
 
@@ -439,43 +471,43 @@ export default function LandingPage() {
             <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
                 <div className="bg-white border border-slate-200/90 rounded-3xl p-6 md:p-10 shadow-lg">
                     <h3 className="text-2xl sm:text-3xl font-black text-slate-900 text-center mb-8">
-                        Warum Sharegy? Der direkte Vergleich
+                        {t("landing.compare_title", "Warum Sharegy? Der direkte Vergleich")}
                     </h3>
 
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-xs sm:text-sm">
                             <thead>
                                 <tr className="border-b border-slate-200 text-slate-500">
-                                    <th className="pb-4 font-bold">Merkmal</th>
-                                    <th className="pb-4 font-black text-emerald-600">⚡ Sharegy Cloud Energy OS</th>
-                                    <th className="pb-4 font-medium text-slate-500">Klassische Hardware-Boxen</th>
+                                    <th className="pb-4 font-bold">{t("landing.compare_col_feature", "Merkmal")}</th>
+                                    <th className="pb-4 font-black text-emerald-600">{t("landing.compare_col_sharegy", "⚡ Sharegy Cloud Energy OS")}</th>
+                                    <th className="pb-4 font-medium text-slate-500">{t("landing.compare_col_hardware", "Klassische Hardware-Boxen")}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
                                 <tr>
-                                    <td className="py-4 font-semibold text-slate-800">Anschaffungskosten</td>
-                                    <td className="py-4 font-bold text-emerald-600">0 € (100% Cloud-basiert)</td>
-                                    <td className="py-4 text-slate-500">800 € – 1.500 € Hardware-Kauf</td>
+                                    <td className="py-4 font-semibold text-slate-800">{t("landing.compare_r1_feat", "Anschaffungskosten")}</td>
+                                    <td className="py-4 font-bold text-emerald-600">{t("landing.compare_r1_sharegy", "0 € (100% Cloud-basiert)")}</td>
+                                    <td className="py-4 text-slate-500">{t("landing.compare_r1_hw", "800 € – 1.500 € Hardware-Kauf")}</td>
                                 </tr>
                                 <tr>
-                                    <td className="py-4 font-semibold text-slate-800">Elektriker-Installation</td>
-                                    <td className="py-4 font-bold text-emerald-600">Nicht erforderlich (Plug & Connect)</td>
-                                    <td className="py-4 text-slate-500">300 € – 600 € Einbau im Schaltschrank</td>
+                                    <td className="py-4 font-semibold text-slate-800">{t("landing.compare_r2_feat", "Elektriker-Installation")}</td>
+                                    <td className="py-4 font-bold text-emerald-600">{t("landing.compare_r2_sharegy", "Nicht erforderlich (Plug & Connect)")}</td>
+                                    <td className="py-4 text-slate-500">{t("landing.compare_r2_hw", "300 € – 600 € Einbau im Schaltschrank")}</td>
                                 </tr>
                                 <tr>
-                                    <td className="py-4 font-semibold text-slate-800">P2P Energy Sharing</td>
-                                    <td className="py-4 font-bold text-emerald-600">Nativ integriert (Quartiers-Pool)</td>
-                                    <td className="py-4 text-slate-400">❌ Nicht unterstützt (Insel-System)</td>
+                                    <td className="py-4 font-semibold text-slate-800">{t("landing.compare_r3_feat", "P2P Energy Sharing")}</td>
+                                    <td className="py-4 font-bold text-emerald-600">{t("landing.compare_r3_sharegy", "Nativ integriert (Quartiers-Pool)")}</td>
+                                    <td className="py-4 text-slate-400">{t("landing.compare_r3_hw", "❌ Nicht unterstützt (Insel-System)")}</td>
                                 </tr>
                                 <tr>
-                                    <td className="py-4 font-semibold text-slate-800">§ 14a EnWG Steuerung</td>
-                                    <td className="py-4 font-bold text-emerald-600">Automatisiert (Modul 1 + 2)</td>
-                                    <td className="py-4 text-slate-500">Oft nur mit teuren Zusatz-Relais</td>
+                                    <td className="py-4 font-semibold text-slate-800">{t("landing.compare_r4_feat", "§ 14a EnWG Steuerung")}</td>
+                                    <td className="py-4 font-bold text-emerald-600">{t("landing.compare_r4_sharegy", "Automatisiert (Modul 1 + 2)")}</td>
+                                    <td className="py-4 text-slate-500">{t("landing.compare_r4_hw", "Oft nur mit teuren Zusatz-Relais")}</td>
                                 </tr>
                                 <tr>
-                                    <td className="py-4 font-semibold text-slate-800">Hersteller-Freiheit</td>
-                                    <td className="py-4 font-bold text-emerald-600">Offen (Modbus, OCPP, SunSpec)</td>
-                                    <td className="py-4 text-slate-400">Oft proprietärer Vendor Lock-in</td>
+                                    <td className="py-4 font-semibold text-slate-800">{t("landing.compare_r5_feat", "Hersteller-Freiheit")}</td>
+                                    <td className="py-4 font-bold text-emerald-600">{t("landing.compare_r5_sharegy", "Offen (Modbus, OCPP, SunSpec)")}</td>
+                                    <td className="py-4 text-slate-400">{t("landing.compare_r5_hw", "Oft proprietärer Vendor Lock-in")}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -491,8 +523,8 @@ export default function LandingPage() {
             {/* ❓ FAQ SECTION */}
             <section id="faq" className="py-20 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
                 <div className="text-center mb-12">
-                    <h2 className="text-2xl sm:text-4xl font-black text-slate-900">Häufig gestellte Fragen</h2>
-                    <p className="text-slate-600 text-xs sm:text-sm mt-2">Alles, was du über Sharegy, die Cloud-Steuerung und Energy Sharing wissen musst.</p>
+                    <h2 className="text-2xl sm:text-4xl font-black text-slate-900">{t("landing.faq_title", "Häufig gestellte Fragen")}</h2>
+                    <p className="text-slate-600 text-xs sm:text-sm mt-2">{t("landing.faq_subtitle", "Alles, was du über Sharegy, die Cloud-Steuerung und Energy Sharing wissen musst.")}</p>
                 </div>
 
                 <div className="space-y-4">
@@ -524,10 +556,10 @@ export default function LandingPage() {
                 <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-indigo-500/30 rounded-3xl p-8 sm:p-12 text-center text-white shadow-2xl relative overflow-hidden">
                     <div className="relative z-10 space-y-6">
                         <h2 className="text-3xl sm:text-5xl font-black tracking-tight">
-                            Bereit für dein smartes Energy OS?
+                            {t("landing.final_cta_title", "Bereit für dein smartes Energy OS?")}
                         </h2>
                         <p className="text-sm sm:text-base text-indigo-200/90 max-w-2xl mx-auto">
-                            Verbinde deine PV-Anlage, Wallbox & Speicher in wenigen Klicks – oder teste sofort die interaktive Live-Demo.
+                            {t("landing.final_cta_desc", "Verbinde deine PV-Anlage, Wallbox & Speicher in wenigen Klicks – oder teste sofort die interaktive Live-Demo.")}
                         </p>
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
                             <a
@@ -536,13 +568,13 @@ export default function LandingPage() {
                                 rel="noopener noreferrer"
                                 className="w-full sm:w-auto px-8 py-4 rounded-xl bg-slate-950 hover:bg-slate-800 text-indigo-300 border border-indigo-400/40 font-bold text-sm transition cursor-pointer flex items-center justify-center gap-2"
                             >
-                                <span>🚀 Echte Live-Demo starten (1-Klick)</span>
+                                <span>{t("landing.hero_demo_btn", "🚀 Echte Live-Demo starten (1-Klick)")}</span>
                             </a>
                             <Link
                                 to="/login"
                                 className="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-sm uppercase tracking-wider transition cursor-pointer shadow-lg shadow-emerald-500/25"
                             >
-                                <span>Jetzt kostenlos starten →</span>
+                                <span>{t("landing.final_cta_btn", "Jetzt kostenlos starten →")}</span>
                             </Link>
                         </div>
                     </div>

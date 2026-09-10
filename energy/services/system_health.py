@@ -388,7 +388,7 @@ def check_home_system_status(user) -> Dict[str, Any]:
         ]
 
         # 6. SÄULE: ENERGIE-PROFIL & TARIF-ABSTIMMUNG
-        profile_configured = bool(energy_profile.get("is_configured", False))
+        profile_configured = bool(energy_profile.get("is_configured", False)) or has_pv or has_grid or has_battery
         is_tariff_optimal = bool(energy_profile.get("is_tariff_optimal", True))
         profile_code = energy_profile.get("profile_code", "A.1")
         profile_name = energy_profile.get("profile_name", "Energie-Profil")

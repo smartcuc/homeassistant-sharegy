@@ -409,6 +409,16 @@ class GrafanaAndHomeAssistantPluginTest(TestCase):
     def test_system_setup_status_hybrid_inverter(self):
         """Testet ein einzelnes Hybrid-Gerät (Sungrow / Growatt), das alle 4 Säulen meldet."""
         from devices.models import DeviceLatestMetric
+        from accounts.models import UserSettings
+        from market.models_tariff import HomeTariff
+
+        UserSettings.objects.update_or_create(user=self.user, defaults={"timezone": "Europe/Berlin"})
+        HomeTariff.objects.update_or_create(
+            home=self.home,
+            valid_from=timezone.now().date(),
+            defaults={"tariff_type": HomeTariff.TARIFF_DYNAMIC, "feed_in_tariff_eur_per_kwh": Decimal("0.0820")}
+        )
+
         hybrid_dev = Device.objects.create(
             home=self.home,
             identifier="sungrow_hybrid_sh10rt",

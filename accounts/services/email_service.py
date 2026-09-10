@@ -9,14 +9,15 @@ logger = logging.getLogger(__name__)
 
 def get_user_language(user, override_lang=None):
     """
-    Ermittelt die bevorzugte Sprache des Nutzers ('de', 'en', 'pl'). Fallback: 'de'.
+    Ermittelt die bevorzugte Sprache des Nutzers ('de', 'en', 'pl', 'ro', 'tr', 'ru'). Fallback: 'de'.
     """
-    if override_lang and str(override_lang).lower() in ["de", "en", "pl"]:
+    supported = ["de", "en", "pl", "ro", "tr", "ru"]
+    if override_lang and str(override_lang).lower() in supported:
         return str(override_lang).lower()
 
     if hasattr(user, "settings") and getattr(user.settings, "language", None):
         lang = str(user.settings.language).lower()
-        if lang in ["de", "en", "pl"]:
+        if lang in supported:
             return lang
 
     return "de"
@@ -24,7 +25,7 @@ def get_user_language(user, override_lang=None):
 
 def send_email(template, subject, user, context):
     # ✅ Tenant sauber ermitteln über Membership
-    membership = user.memberships.filter(is_active=True).select_related("tenant").first()
+    membership = user.memberships.filter(is_active=True).select_related("tenant").first() if hasattr(user, "memberships") else None
     tenant = membership.tenant if membership else None
 
     # ✅ Fallback
@@ -64,22 +65,101 @@ def send_email(template, subject, user, context):
 def send_magic_link_email(user, link, token, language=None):
     lang = get_user_language(user, language)
 
-    subjects = {
-        "de": "Dein Login-Link für Sharegy ⚡",
-        "en": "Your magic login link for Sharegy ⚡",
-        "pl": "Twój link logowania do Sharegy ⚡",
+    I18N = {
+        "de": {
+            "subject": "Dein Login-Link für Sharegy ⚡",
+            "headline": "Willkommen zurück 👋",
+            "intro_text": "Hier ist dein persönlicher Einmal-Login-Link für <strong>Sharegy</strong>. Klicke einfach auf den folgenden Button, um dich sicher in dein Konto einzuloggen:",
+            "button_text": "🔐 Sicher einloggen",
+            "fallback_label": "Alternativer Direktlink:",
+            "validity_label": "Gültigkeit:",
+            "validity_text": "Dieser Login-Link ist nur 15 Minuten gültig und kann nur einmal verwendet werden.",
+            "ignore_text": "Falls du diese Anfrage nicht selbst gestellt hast, kannst du diese E-Mail ignorieren. Dein Account bleibt vollständig geschützt.",
+            "plain_intro": "Schön, dass du wieder da bist bei Sharegy.",
+            "plain_link_label": "Hier anmelden:",
+            "plain_expiry": "Der Link ist 15 Minuten gültig.",
+        },
+        "en": {
+            "subject": "Your magic login link for Sharegy ⚡",
+            "headline": "Welcome back 👋",
+            "intro_text": "Here is your personal one-time login link for <strong>Sharegy</strong>. Simply click the button below to sign in securely to your account:",
+            "button_text": "🔐 Sign in securely",
+            "fallback_label": "Alternative direct link:",
+            "validity_label": "Validity:",
+            "validity_text": "This login link is valid for 15 minutes only and can be used once.",
+            "ignore_text": "If you did not request this login link, you can safely ignore this email. Your account remains completely secure.",
+            "plain_intro": "Welcome back to Sharegy.",
+            "plain_link_label": "Sign in here:",
+            "plain_expiry": "This link is valid for 15 minutes.",
+        },
+        "pl": {
+            "subject": "Twój link logowania do Sharegy ⚡",
+            "headline": "Witaj ponownie 👋",
+            "intro_text": "Oto Twój osobisty jednorazowy link do logowania w <strong>Sharegy</strong>. Kliknij poniższy przycisk, aby bezpiecznie zalogować się na swoje konto:",
+            "button_text": "🔐 Zaloguj się bezpiecznie",
+            "fallback_label": "Alternatywny link bezpośredni:",
+            "validity_label": "Ważność:",
+            "validity_text": "Ten link logowania jest ważny przez 15 minut i może być użyty tylko raz.",
+            "ignore_text": "Jeśli to nie Ty żądałeś tego linku, możesz zignorować tę wiadomość. Twoje konto pozostaje w pełni bezpieczne.",
+            "plain_intro": "Witaj ponownie w Sharegy.",
+            "plain_link_label": "Zaloguj się tutaj:",
+            "plain_expiry": "Link jest ważny przez 15 minut.",
+        },
+        "ro": {
+            "subject": "Linkul tău de conectare pentru Sharegy ⚡",
+            "headline": "Bine ai revenit 👋",
+            "intro_text": "Iată linkul tău personal de conectare unică pentru <strong>Sharegy</strong>. Fă clic pe butonul de mai jos pentru a te conecta în siguranță:",
+            "button_text": "🔐 Conectează-te în siguranță",
+            "fallback_label": "Link direct alternativ:",
+            "validity_label": "Valabilitate:",
+            "validity_text": "Acest link este valabil timp de 15 minute și poate fi folosit o singură dată.",
+            "ignore_text": "Dacă nu ai solicitat acest link, poți ignora acest e-mail. Contul tău rămâne în deplină siguranță.",
+            "plain_intro": "Bine ai revenit la Sharegy.",
+            "plain_link_label": "Conectează-te aici:",
+            "plain_expiry": "Linkul este valabil 15 minute.",
+        },
+        "tr": {
+            "subject": "Sharegy Giriş Bağlantınız ⚡",
+            "headline": "Tekrar Hoş Geldiniz 👋",
+            "intro_text": "İşte <strong>Sharegy</strong> için kişisel tek seferlik giriş bağlantınız. Hesabınıza güvenli bir şekilde giriş yapmak için aşağıdaki düğmeye tıklayın:",
+            "button_text": "🔐 Güvenli Giriş Yap",
+            "fallback_label": "Alternatif doğrudan bağlantı:",
+            "validity_label": "Geçerlilik:",
+            "validity_text": "Bu giriş bağlantısı sadece 15 dakika geçerlidir ve tek seferliktir.",
+            "ignore_text": "Bu talebi siz yapmadıysanız bu e-postayı güvenle yok sayabilirsiniz. Hesabınız tamamen güvendedir.",
+            "plain_intro": "Sharegy'ye tekrar hoş geldiniz.",
+            "plain_link_label": "Buradan giriş yapın:",
+            "plain_expiry": "Bağlantı 15 dakika geçerlidir.",
+        },
+        "ru": {
+            "subject": "Ваша ссылка для входа в Sharegy ⚡",
+            "headline": "С возвращением 👋",
+            "intro_text": "Вот ваша персональная одноразовая ссылка для входа в <strong>Sharegy</strong>. Нажмите кнопку ниже, чтобы безопасно войти в систему:",
+            "button_text": "🔐 Безопасный вход",
+            "fallback_label": "Прямая ссылка:",
+            "validity_label": "Срок действия:",
+            "validity_text": "Эта ссылка действительна в течение 15 минут и может быть использована один раз.",
+            "ignore_text": "Если вы не запрашивали эту ссылку, просто проигнорируйте письмо. Ваш аккаунт в безопасности.",
+            "plain_intro": "С возвращением в Sharegy.",
+            "plain_link_label": "Войти здесь:",
+            "plain_expiry": "Ссылка действительна 15 минут.",
+        },
     }
-    subject = subjects.get(lang, subjects["de"])
+
+    t = I18N.get(lang, I18N["de"])
+    subject = t["subject"]
     tracking_url = getattr(settings, "TRACKING_BASE_URL", getattr(settings, "BACKEND_URL", "https://api.sharegy.de"))
     from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "Sharegy <invite@sharegy.cloud>")
 
-    html_message = render_to_string("emails/magic_login.html", {
+    context = {
         "magic_link": link,
         "token": token,
         "tracking_base_url": tracking_url,
-    })
+        **t,
+    }
 
-    plain_message = f"Login-Link: {link}"
+    html_message = render_to_string("emails/magic_login.html", context)
+    plain_message = f"Hallo 👋\n\n{t['plain_intro']}\n\n{t['plain_link_label']}\n{link}\n\n{t['plain_expiry']}\n\nSharegy ⚡\nhttps://sharegy.de"
 
     logger.info("Sending magic link email to %s via %s (Language: %s)", user.email, from_email, lang)
 
