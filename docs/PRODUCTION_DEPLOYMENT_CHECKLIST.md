@@ -4,7 +4,7 @@ Diese Checkliste dient als verbindlicher Leitfaden für das **Produktivreif-Depl
 
 ---
 
-## 📋 Übersicht der 8 Kernbereiche
+## 📋 Übersicht der 9 Kernbereiche
 
 ```
 ┌───────────────────────────────────────────────────────────────────────────────────┐
@@ -14,10 +14,11 @@ Diese Checkliste dient als verbindlicher Leitfaden für das **Produktivreif-Depl
 │ 2. 🗄️ TIMESCALEDB & POSTGRESQL (Hypertables, Continuous Aggregates, Retention)     │
 │ 3. ⚡ REDIS & CELERY WORKER QUEUES (realtime, fiscal, analytics, background)      │
 │ 4. 🔌 DAPHNE ASGI & WEBSOCKETS (Shelly Outbound-WSS, OCPP 1.6-J CSMS Gateway)     │
-│ 5. ☀️ HARDWARE CONNECTIVITY (Sungrow OpenAPI, Discovergy wMSB, Inverter YAML Maps) │
-│ 6. 💳 STRIPE PAYMENTS & SEPA-ABRECHNUNG (Pain.008 XML, § 42b EnWG, MSCONS EDIFACT)│
-│ 7. 📈 MONITORING, METRICS & SENTRY (Healthchecks, Prometheus /metrics, Sentry DSN)│
-│ 8. 💾 BACKUP, DISASTER RECOVERY & DSGVO (Tägliche DB-Dumps, 30-Tage Löschroutine) │
+│ 5. 🌐 FRONTEND BUILD & STATIC ASSETS (Vite React Build, SPA Routing, collectstatic)│
+│ 6. ☀️ HARDWARE CONNECTIVITY (Sungrow OpenAPI, Discovergy wMSB, Inverter YAML Maps) │
+│ 7. 💳 STRIPE PAYMENTS & SEPA-ABRECHNUNG (Pain.008 XML, § 42b EnWG, MSCONS EDIFACT)│
+│ 8. 📈 MONITORING, METRICS & SENTRY (Healthchecks, Prometheus /metrics, Sentry DSN)│
+│ 9. 💾 BACKUP, DISASTER RECOVERY & CRONJOBS (backup_db.sh, Retention, restore_db.sh)│
 └───────────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -28,25 +29,25 @@ Diese Checkliste dient als verbindlicher Leitfaden für das **Produktivreif-Depl
 - [ ] **Betriebssystem**: Ubuntu 22.04 LTS oder 24.04 LTS mit aktuellem Patch-Stand (`apt update && apt upgrade -y`).
 - [ ] **UFW Firewall**:
   ```bash
-  ufw default deny incoming
-  ufw default allow outgoing
-  ufw allow 22/tcp      # SSH (oder Custom Port)
-  ufw allow 80/tcp      # HTTP (Let's Encrypt Challenge)
-  ufw allow 443/tcp     # HTTPS / WSS
-  ufw allow 1883/tcp    # MQTT (nur falls extern zugänglich, sonst über TLS 8883)
-  ufw allow 8883/tcp    # MQTTS (TLS mit Client-Zertifikaten / dynsec)
-  ufw enable
+  sudo ufw default deny incoming
+  sudo ufw default allow outgoing
+  sudo ufw allow 22/tcp      # SSH (oder Custom Port)
+  sudo ufw allow 80/tcp      # HTTP (Let's Encrypt Challenge & Redirect)
+  sudo ufw allow 443/tcp     # HTTPS / WSS
+  sudo ufw enable
   ```
-- [ ] **TLS & Nginx**:
-  - Let's Encrypt Zertifikate via `certbot --nginx -d sharegy.de -d api.sharegy.de`.
+- [ ] **TLS & Nginx Zertifikate**:
+  - Let's Encrypt Zertifikate via `certbot --nginx -d sharegy.de -d api.sharegy.de -d app.sharegy.de`.
+  - Certbot Auto-Renewal Timer aktiv: `sudo systemctl status certbot.timer` & `sudo certbot renew --dry-run`.
   - HTTP Strict Transport Security (`HSTS: max-age=31536000; includeSubDomains; preload`).
-  - TLS 1.2 und TLS 1.3 only mit `ECDHE-ECDSA-AES256-GCM-SHA384` Ciphers.
-- [ ] **Umgebungsvariablen (`.env`)**:
+  - TLS 1.2 und TLS 1.3 only mit sicheren Ciphers.
+- [ ] **Umgebungsvariablen (`/var/www/sharegy/shared/.env`)**:
   - `DEBUG=False`
   - `HTTPS=True`
+  - `DJANGO_SETTINGS_MODULE=backend.settings.prod`
   - `SECRET_KEY` = 64-stelliger kryptografischer Zufallsschlüssel.
   - `ALLOWED_HOSTS=sharegy.de,api.sharegy.de,app.sharegy.de`
-  - Keine Secrets im Git-Repository eingecheckt.
+  - Dateiberechtigungen restriktiv setzen: `chmod 600 /var/www/sharegy/shared/.env`.
 
 ---
 
@@ -57,24 +58,23 @@ Diese Checkliste dient als verbindlicher Leitfaden für das **Produktivreif-Depl
   CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
   CREATE EXTENSION IF NOT EXISTS pgcrypto CASCADE;
   ```
-- [ ] **Hypertables initialisiert**:
-  - Hypertable auf `core_intervalreading` (`start_time`, Chunk-Intervall: 7 Tage).
-  - Hypertable auf `devices_devicemetric` (`timestamp`, Chunk-Intervall: 1 Tag).
-- [ ] **Continuous Aggregates eingerichtet**:
-  - `core_intervalreading_15m` (für 15m-Energy-Sharing-Clearing).
-  - `core_intervalreading_1h` (für historische Monats-Charts).
-  - `core_intervalreading_1d` (für Jahresberichte).
-- [ ] **TimescaleDB Compression Policy**:
-  ```sql
-  ALTER TABLE devices_devicemetric SET (
-    timescaledb.compress,
-    timescaledb.compress_segmentby = 'device_id',
-    timescaledb.compress_orderby = 'timestamp DESC'
-  );
-  SELECT add_compression_policy('devices_devicemetric', INTERVAL '7 days');
+- [ ] **Django-Migrationen ausführen**:
+  ```bash
+  python manage.py migrate
   ```
-- [ ] **Daten-Retention Policies**:
-  - Hochauflösende 1s/5s Telemetrie nach 90 Tagen automatisch bereinigen.
+- [ ] **TimescaleDB Hypertables & Retention initialisieren**:
+  ```bash
+  python manage.py setup_timescaledb
+  ```
+  *Richtet automatisch Hypertables für `devices_devicemetric`, `devices_devicemetric1m..1h`, `core_intervalreading`, `core_balanceslot` und `market_spotprice` ein.*
+- [ ] **Handbuch & Wissensportal initialisieren**:
+  ```bash
+  python manage.py seed_helpcenter
+  ```
+  *Erstellt/aktualisiert alle 37 Handbuch-Artikel in Deutsch & Englisch.*
+- [ ] **Daten-Retention Policies verifiziert**:
+  - Hochfrequente 1s/5s Roh-Telemetrie komprimiert nach 7 Tagen, bereinigt nach 30 Tagen.
+  - Stündliche & tägliche Aggregate bleiben dauerhaft erhalten.
   - 15m Bilanzierungsdaten gem. § 42b EnWG revisionssicher für 10 Jahre archivieren.
 
 ---
@@ -82,7 +82,7 @@ Diese Checkliste dient als verbindlicher Leitfaden für das **Produktivreif-Depl
 ## 3. ⚡ Redis & Celery Multi-Queue Setup
 
 - [ ] **Redis 7.x Server**:
-  - Gesichert mit starkem Passwort (`requirepass`).
+  - Gesichert mit starkem Passwort (`requirepass` in `/etc/redis/redis.conf`).
   - Maxmemory-Policy auf `volatile-lru` konfiguriert.
 - [ ] **Celery Worker Queues**:
   Systemd Services mit dedizierter Queue-Trennung starten:
@@ -111,7 +111,7 @@ Diese Checkliste dient als verbindlicher Leitfaden für das **Produktivreif-Depl
 - [ ] **WebSocket-Routen**:
   - `/ws/energy/` – Sub-Sekunden Sankey-Live-Feed.
   - `/ws/shelly/` – Shelly Outbound-WSS Ingestion.
-  - `/ocpp/v16/<station_id>/` – OCPP 1.6-J CSMS Gateway für Wallboxen (Easee, openWB, Webasto, Mennekes).
+  - `/ocpp/v16/<station_id>/` & `/ocpp/v201/<station_id>/` – OCPP CSMS Gateway für Wallboxen.
 - [ ] **Nginx WebSocket Upgrade Header**:
   ```nginx
   proxy_http_version 1.1;
@@ -122,7 +122,49 @@ Diese Checkliste dient als verbindlicher Leitfaden für das **Produktivreif-Depl
 
 ---
 
-## 5. ☀️ Hardware-Konnektivität & Profile
+## 5. 🌐 Frontend Build & Static Assets
+
+- [ ] **Frontend Production Build**:
+  ```bash
+  cd /var/www/sharegy/live/frontend
+  npm install --frozen-lockfile
+  npm run build
+  ```
+- [ ] **Django Static Assets sammeln**:
+  ```bash
+  cd /var/www/sharegy/live
+  python manage.py collectstatic --noinput
+  ```
+- [ ] **Nginx SPA Routing & Static Handling**:
+  ```nginx
+  # Frontend Single-Page-App
+  location / {
+      root /var/www/sharegy/live/frontend/dist;
+      try_files $uri $uri/ /index.html;
+      expires 1h;
+      add_header Cache-Control "public, no-transform";
+  }
+
+  # Django Static Files
+  location /static/ {
+      alias /var/www/sharegy/live/static/;
+      expires 30d;
+      access_log off;
+  }
+
+  # Django Backend API & Admin
+  location ~ ^/(api|admin)/ {
+      proxy_pass http://127.0.0.1:8000;
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto $scheme;
+  }
+  ```
+
+---
+
+## 6. ☀️ Hardware-Konnektivität & Profile
 
 - [ ] **Sungrow OpenAPI**:
   - Offizielle `SUNGROW_APPKEY`, `SUNGROW_APP_SECRET`, `SUNGROW_REDIRECT_URL` in `.env` hinterlegt.
@@ -137,7 +179,7 @@ Diese Checkliste dient als verbindlicher Leitfaden für das **Produktivreif-Depl
 
 ---
 
-## 6. 💳 Stripe Payments, Abrechnung & Marktkommunikation
+## 7. 💳 Stripe Payments, Abrechnung & Marktkommunikation
 
 - [ ] **Stripe Live-Modus**:
   - `STRIPE_SANDBOX_MODE=False`
@@ -153,7 +195,7 @@ Diese Checkliste dient als verbindlicher Leitfaden für das **Produktivreif-Depl
 
 ---
 
-## 7. 📈 Monitoring, Metriken & Observability
+## 8. 📈 Monitoring, Metriken & Observability
 
 - [ ] **Sentry Error & Performance Tracking**:
   - `SENTRY_DSN` in `.env` konfiguriert.
@@ -162,16 +204,47 @@ Diese Checkliste dient als verbindlicher Leitfaden für das **Produktivreif-Depl
 - [ ] **Healthcheck Endpoints**:
   - `GET /health/` – Prüft PostgreSQL/TimescaleDB, Redis, Celery & MQTT Ping.
   - Uptime Kuma / StatusCake Alerting auf Latenz $> 500\,\text{ms}$ oder HTTP $\neq 200$.
-- [ ] **Log Rotation**:
-  - `logrotate` für `/var/log/sharegy/*.log` eingerichtet (täglich, 14 Tage Historie, komprimiert).
+- [ ] **Log Rotation (`/etc/logrotate.d/sharegy`)**:
+  ```logrotate
+  /var/log/sharegy/*.log {
+      daily
+      missingok
+      rotate 14
+      compress
+      delaycompress
+      notifempty
+      create 0640 www-data www-data
+      sharedscripts
+      postrotate
+          systemctl reload gunicorn daphne > /dev/null 2>/dev/null || true
+      endscript
+  }
+  ```
 
 ---
 
-## 8. 💾 Backup, Disaster Recovery & DSGVO-Compliance
+## 9. 💾 Backup, Disaster Recovery & Crontab-Konfiguration
 
-- [ ] **Automatisierte Datenbank-Backups**:
-  - Täglicher verschlüsselter Snapshot via `pg_dump` nach Offsite-Storage (z. B. AWS S3 / Hetzner Storage Box).
-  - Backup-Prüfung: Automatischer Restore-Test einmal monatlich.
+- [ ] **Automatisierte Datenbank-Backups via [`scripts/backup_db.sh`](file:///c:/Users/Public/Dev/eswes/scripts/backup_db.sh)**:
+  - Tägliches komprimiertes PostgreSQL & TimescaleDB Backup (`.dump` Custom-Format & `.sql.gz`).
+  - Automatische Bereinigung alter Backups (Standard: 14 Tage Retention).
+  - Protokollierung in `/var/log/sharegy/db_backup.log`.
+- [ ] **Berechtigungen & Verzeichnisse anlegen**:
+  ```bash
+  sudo mkdir -p /var/backups/sharegy/db /var/log/sharegy
+  sudo chown -R www-data:www-data /var/backups/sharegy /var/log/sharegy
+  chmod +x /var/www/sharegy/live/scripts/backup_db.sh
+  chmod +x /var/www/sharegy/live/scripts/restore_db.sh
+  ```
+- [ ] **Crontab-Eintrag einrichten (`sudo crontab -e`)**:
+  ```cron
+  # ==============================================================================
+  # Sharegy Tägliches Datenbank-Backup (Jede Nacht um 03:00 Uhr)
+  # ==============================================================================
+  0 3 * * * /var/www/sharegy/live/scripts/backup_db.sh >> /var/log/sharegy/cron_backup.log 2>&1
+  ```
+- [ ] **Disaster Recovery Test via [`scripts/restore_db.sh`](file:///c:/Users/Public/Dev/eswes/scripts/restore_db.sh)**:
+  - Einmaliger Trockenlauf des Restore-Skripts zur Verifikation der Wiederherstellbarkeit.
 - [ ] **DSGVO & Datenlöschung**:
   - 30-tägige Soft-Delete Bereinigung (`purge_pending_devices` und `purge_deleted_accounts`).
   - Revisionssicheres Logging von Nutzerdatenexporten gem. Art. 15 / 20 DSGVO.
@@ -182,6 +255,6 @@ Diese Checkliste dient als verbindlicher Leitfaden für das **Produktivreif-Depl
 
 | Rolle | Name / Verantwortlicher | Status | Datum |
 |---|---|:---:|---|
-| **Lead Developer** | Sharegy Core Engineering | 🟢 BEREIT | 03.09.2026 |
-| **DevOps / SysAdmin** | Platform Infrastructure | 🟢 BEREIT | 03.09.2026 |
-| **Data Protection Officer** | Compliance & Legal | 🟢 BEREIT | 03.09.2026 |
+| **Lead Developer** | Sharegy Core Engineering | 🟢 BEREIT | 10.09.2026 |
+| **DevOps / SysAdmin** | Platform Infrastructure | 🟢 BEREIT | 10.09.2026 |
+| **Data Protection Officer** | Compliance & Legal | 🟢 BEREIT | 10.09.2026 |
