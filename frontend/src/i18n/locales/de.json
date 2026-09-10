@@ -2126,7 +2126,7 @@
     "disconnect_btn": "Trennen",
     "disconnect_confirm": "Möchtest du die Verbindung zu '{{name}}' wirklich trennen?",
     "add_another_sungrow": "+ Weiteren Sungrow Wechselrichter hinzufügen",
-    "add_another_inverter": "+ Weiteren Wechselrichter koppeln",
+    "add_another_inverter": "Weiteren Wechselrichter koppeln",
     "editing_title": "Wechselrichter-Verbindung bearbeiten",
     "adding_title": "Neuen Wechselrichter koppeln",
     "cancel_edit": "Abbrechen",
@@ -2135,7 +2135,10 @@
     "status_error": "Fehler bei Abfrage",
     "status_pending": "Ausstehend",
     "error_poll_failed": "Sofort-Abfrage fehlgeschlagen.",
-    "error_delete_failed": "Fehler beim Trennen der Verbindung."
+    "error_delete_failed": "Fehler beim Trennen der Verbindung.",
+    "add_inverter_btn": "Wechselrichter koppeln",
+    "sungrow_reauth_btn": "iSolarCloud Autorisierung erneuern",
+    "sungrow_api_active": "Sungrow iSolarCloud API ist autorisiert & aktiv"
   },
   "shelly_cloud": {
     "error_no_key": "Bitte gib deinen Shelly Cloud Auth-Key / Token ein.",

@@ -2080,7 +2080,7 @@
     "disconnect_btn": "Rozłącz",
     "disconnect_confirm": "Czy na pewno chcesz rozłączyć '{{name}}'?",
     "add_another_sungrow": "+ Dodaj kolejny falownik Sungrow",
-    "add_another_inverter": "+ Podłącz kolejny falownik",
+    "add_another_inverter": "Podłącz kolejny falownik",
     "editing_title": "Edytuj połączenie falownika",
     "adding_title": "Podłącz nowy falownik",
     "cancel_edit": "Anuluj",
@@ -2089,7 +2089,10 @@
     "status_error": "Błąd odpytywania",
     "status_pending": "Oczekujący",
     "error_poll_failed": "Natychmiastowe odpytanie nie powiodło się.",
-    "error_delete_failed": "Błąd podczas rozłączania integracji."
+    "error_delete_failed": "Błąd podczas rozłączania integracji.",
+    "add_inverter_btn": "Podłącz falownik",
+    "sungrow_reauth_btn": "Odnów autoryzację iSolarCloud",
+    "sungrow_api_active": "API Sungrow iSolarCloud jest autoryzowane i aktywne"
   },
   "shelly_cloud": {
     "error_no_key": "Wprowadź klucz uwierzytelniający / token Shelly Cloud.",

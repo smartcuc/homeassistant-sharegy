@@ -2126,7 +2126,7 @@
     "disconnect_btn": "Disconnect",
     "disconnect_confirm": "Do you really want to disconnect '{{name}}'?",
     "add_another_sungrow": "+ Add another Sungrow inverter",
-    "add_another_inverter": "+ Connect another inverter",
+    "add_another_inverter": "Connect another inverter",
     "editing_title": "Edit Inverter Connection",
     "adding_title": "Connect New Inverter",
     "cancel_edit": "Cancel",
@@ -2135,7 +2135,10 @@
     "status_error": "Polling error",
     "status_pending": "Pending",
     "error_poll_failed": "Immediate sync failed.",
-    "error_delete_failed": "Error disconnecting inverter."
+    "error_delete_failed": "Error disconnecting inverter.",
+    "add_inverter_btn": "Connect inverter",
+    "sungrow_reauth_btn": "Renew iSolarCloud authorization",
+    "sungrow_api_active": "Sungrow iSolarCloud API is authorized & active"
   },
   "shelly_cloud": {
     "error_no_key": "Please enter your Shelly Cloud auth key / token.",

@@ -2080,7 +2080,7 @@
     "disconnect_btn": "Отключить",
     "disconnect_confirm": "Вы уверены, что хотите отключить '{{name}}'?",
     "add_another_sungrow": "+ Добавить еще один инвертор Sungrow",
-    "add_another_inverter": "+ Подключить еще один инвертор",
+    "add_another_inverter": "Подключить еще один инвертор",
     "editing_title": "Редактировать подключение инвертора",
     "adding_title": "Подключить новый инвертор",
     "cancel_edit": "Отмена",
@@ -2089,7 +2089,10 @@
     "status_error": "Ошибка опроса",
     "status_pending": "Ожидание",
     "error_poll_failed": "Ошибка немедленного опроса.",
-    "error_delete_failed": "Ошибка при отключении интеграции."
+    "error_delete_failed": "Ошибка при отключении интеграции.",
+    "add_inverter_btn": "Подключить инвертор",
+    "sungrow_reauth_btn": "Обновить авторизацию iSolarCloud",
+    "sungrow_api_active": "API Sungrow iSolarCloud авторизован и активен"
   },
   "shelly_cloud": {
     "error_no_key": "Please enter your Shelly Cloud auth key / token.",

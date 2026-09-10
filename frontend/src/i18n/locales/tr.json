@@ -2080,7 +2080,7 @@
     "disconnect_btn": "Bağlantıyı Kes",
     "disconnect_confirm": "'{{name}}' bağlantısını gerçekten kesmek istiyor musunuz?",
     "add_another_sungrow": "+ Başka bir Sungrow invertör ekle",
-    "add_another_inverter": "+ Başka bir invertör bağla",
+    "add_another_inverter": "Başka bir invertör bağla",
     "editing_title": "İnvertör Bağlantısını Düzenle",
     "adding_title": "Yeni İnvertör Bağla",
     "cancel_edit": "İptal",
@@ -2089,7 +2089,10 @@
     "status_error": "Sorgulama hatası",
     "status_pending": "Beklemede",
     "error_poll_failed": "Anlık sorgulama başarısız oldu.",
-    "error_delete_failed": "Entegrasyon bağlantısı kesilirken hata oluştu."
+    "error_delete_failed": "Entegrasyon bağlantısı kesilirken hata oluştu.",
+    "add_inverter_btn": "İnvertör bağla",
+    "sungrow_reauth_btn": "iSolarCloud yetkilendirmesini yenile",
+    "sungrow_api_active": "Sungrow iSolarCloud API yetkilendirildi ve etkin"
   },
   "shelly_cloud": {
     "error_no_key": "Please enter your Shelly Cloud auth key / token.",
