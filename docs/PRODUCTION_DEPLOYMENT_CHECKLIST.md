@@ -229,19 +229,27 @@ Diese Checkliste dient als verbindlicher Leitfaden für das **Produktivreif-Depl
   - Tägliches komprimiertes PostgreSQL & TimescaleDB Backup (`.dump` Custom-Format & `.sql.gz`).
   - Automatische Bereinigung alter Backups (Standard: 14 Tage Retention).
   - Protokollierung in `/var/log/sharegy/db_backup.log`.
+- [ ] **Monatliches Server- & Konfigurations-Backup via [`scripts/backup_config.sh`](file:///c:/Users/Public/Dev/eswes/scripts/backup_config.sh)**:
+  - Vollständige Sicherung von `.env`, Nginx, Fail2ban, Systemd Units, UFW, Redis, Crontabs & Paketlisten.
+  - Sichere Dateirechte (`chmod 600`) und 12 Monate Retention.
 - [ ] **Berechtigungen & Verzeichnisse anlegen**:
   ```bash
-  sudo mkdir -p /var/backups/sharegy/db /var/log/sharegy
+  sudo mkdir -p /var/backups/sharegy/db /var/backups/sharegy/config /var/log/sharegy
   sudo chown -R www-data:www-data /var/backups/sharegy /var/log/sharegy
   chmod +x /var/www/sharegy/live/scripts/backup_db.sh
+  chmod +x /var/www/sharegy/live/scripts/backup_config.sh
   chmod +x /var/www/sharegy/live/scripts/restore_db.sh
   ```
-- [ ] **Crontab-Eintrag einrichten (`sudo crontab -e`)**:
+- [ ] **Crontab-Einträge einrichten (`sudo crontab -e`)**:
   ```cron
   # ==============================================================================
-  # Sharegy Tägliches Datenbank-Backup (Jede Nacht um 03:00 Uhr)
+  # Sharegy Automatisierte Backups
   # ==============================================================================
+  # 1. Tägliches DB-Backup um 03:00 Uhr
   0 3 * * * /var/www/sharegy/live/scripts/backup_db.sh >> /var/log/sharegy/cron_backup.log 2>&1
+
+  # 2. Monatliches System- & Konfigurations-Backup am 1. jedes Monats um 03:30 Uhr
+  30 3 1 * * /var/www/sharegy/live/scripts/backup_config.sh >> /var/log/sharegy/cron_config_backup.log 2>&1
   ```
 - [ ] **Disaster Recovery Test via [`scripts/restore_db.sh`](file:///c:/Users/Public/Dev/eswes/scripts/restore_db.sh)**:
   - Einmaliger Trockenlauf des Restore-Skripts zur Verifikation der Wiederherstellbarkeit.
