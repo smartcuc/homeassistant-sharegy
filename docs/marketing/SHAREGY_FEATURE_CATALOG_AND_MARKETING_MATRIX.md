@@ -212,4 +212,29 @@ Sharegy ist die **erste ganzheitliche Energie-Plattform**, die hochperformantes 
 ### 15. 🛟 Integrierter Support- & Helpdesk-Hub
 * **Integrierter Support-Drawer**: 1-Klick Ticket-Erstellung direkt aus der Topbar mit automatischer Übermittlung von Fehlermeldungen und Systemkontext.
 * **FAQ-Deflection**: Automatische Einblendung passender Handbuch-Lösungen während des Tippens zur Entlastung des Support-Teams.
-* **Interaktives Wissensportal (`/app/help`)**: 15 vollwertige Handbuch-Artikel in 9 Kategorien (DE & EN) mit sanfter Anchor-Navigation (`#articles-list`) und Staff-Live-Editor.
+* **Interaktives Wissensportal (`/app/help`)**: 20 vollwertige Handbuch-Artikel in 9 Kategorien (DE & EN) mit sanfter Anchor-Navigation (`#articles-list`), Volltextsuche und Staff-Live-Editor.
+* **Kontextuelle Profil-Empfehlung**: Automatische Einblendung des passenden Leitfadens für das eigene Energie-Profil direkt beim Betreten.
+
+---
+
+### 16. 🏡 Energie-Profil Matrix (A.1 bis F.1) & Intelligenter Ersparnisrechner
+* **Präzise 6-Archetypen Klassifizierung**:
+  * 🏢 *A.1 (Haushalt ohne Solar)*: Fokus auf Standby-Reduktion, Strompreis-Radar & Transparenz.
+  * ☀️ *B.1 & B.2 (Balkonkraftwerk mit/ohne Speicher)*: Grundlast-Kompensation, Direktverbrauch & BKW-Speicher.
+  * 🚗 *C.1 bis C.3 (E-Mobilität / Wallbox)*: Smart-Charging bei Börsentiefs, PV-Überschussladung.
+  * ♨️ *D.1 & D.2 (Wärmepumpen-Haushalte)*: SG-Ready, § 14a EnWG Modul 1 Netzentgelt-Rabatt (~160 €/a), Estrich-Vorladung.
+  * 🏡 *E.1 & E.2 (PV-Prosumer mit/ohne Speicher & EV)*: Maximale Autarkie, Sektorenkopplung & Winter-Arbitrage.
+  * ⚡ *F.1 (Voll-Elektrifiziert / All-In)*: Ganzheitliches HEMS Multi-Sektor Cockpit.
+* **Dynamischer 4-Kanal Ersparnisrechner**: Exakte Bezifferung des finanziellen Vorteils (€/Jahr) und der verschiebbaren Jahreslast ($E_\text{shiftable}$ in kWh/a).
+* **Kontextuelles Tarif-Verdikt & Kaskaden-Check**: Fundierte Empfehlung für Festpreis vs. Dynamischen Börsenstromtarif inklusive Kostenanalyse für 2. Zählerplatz / Kaskadenschaltung (Zusatzkosten 80–120 €/a).
+* **Profil-Adaptives UI-System**: Zentraler `useEnergyProfile()` Hook, Hero Quick-Actions auf dem Dashboard und automatischer Tarif-Kompass auf `/app/tariff`.
+* **4-Säulen Omi-Check V2**: Klickbares Profil-Badge im Readiness-Header mit Absprung zur Konfiguration.
+
+---
+
+### 17. 🚀 Go-To-Market & PLG Engine (Landingpage 2.0 & Live-Simulator)
+* **CleanTech Light-Design**: Gleichberechtigte Präsentation von Säule 1 (Smart EMS & § 14a) und Säule 2 (Energy Sharing & Quartiere).
+* **Interaktiver Live Energy Flow Simulator**: 4 schaltbare Wetter- & Preisszenarien (Mittags-Überschuss, Nacht-Arbitrage, Peak-Shaving, § 14a Dimmung).
+* **Interaktiver Transparenz-Rechner**: Schieberegler für PV (kWp), Speicher (kWh), Wallbox, Wärmepumpe und Sharing zur Ermittlung des Vorteils.
+* **1-Klick-Gast-Zugang (`/api/demo/`)**: Sofortiger Einstieg ins echte Dashboard im neuen Tab ohne Registrierung.
+* **Symmetrisches 12-Hersteller Grid**: Vollständige Hersteller-Übersicht inklusive ioBroker & Home Assistant mit § 23 MarkenG Disclaimer.

@@ -173,6 +173,27 @@
   ├── 4.11 ✅ wMSB Smart Meter Hub & API-Konnektor (Discovergy, inexogy, Solandeo)
   └── 4.12 ✅ Community Viral Growth & Social Referral System
 
+┌───────────────────────────────────────────────────────────────────────────────┐
+│ MEILENSTEIN 5: ENERGIE-PROFIL-ENGINE & ADAPTIVES UI (✅ 100% LIVE)             │
+└───────────────────────────────────────────────────────────────────────────────┘
+  ├── 5.1 ✅ **Mathematische Matrix-Engine (A.1 bis F.1)**:
+  │          • 6 Archetypen: Kein Solar, BKW, EV, Wärmepumpe, Prosumer, All-In
+  │          • Automatische Hardware-Erkennung & manuelle Anpassung mit 24h-Cache
+  ├── 5.2 ✅ **Dynamischer 4-Kanal Ersparnisrechner**:
+  │          • Berechnung von Netto-Sparpotenzial (€/a) & verschiebbaren Lasten ($E_\text{shiftable}$)
+  │          • Aufschlüsselung: PV-Eigenverbrauch, § 14a EnWG Netzentgelt-Rabatt, Börsentiefs & Arbitrage
+  ├── 5.3 ✅ **Kontextuelles Tarif-Verdikt & Kaskadenmessung**:
+  │          • Festpreis vs. Dynamischer Börsenstromtarif
+  │          • Gegenüberstellung: 2. Zählerplatz (80–120 €/a Zusatzkosten) vs. 1 smarter Zähler
+  ├── 5.4 ✅ **Profil-Adaptives UI-System**:
+  │          • Zentraler React-Hook `useEnergyProfile()` für alle Komponenten
+  │          • Hero Quick-Actions auf dem Dashboard & Tarif-Kompass auf `/app/tariff`
+  ├── 5.5 ✅ **4-Säulen Omi-Check V2**:
+  │          • Direkte Profil-Verknüpfung im Readiness-Header
+  └── 5.6 ✅ **Wissensportal & Help Center 2.0**:
+             • 9 Kategorien & 20 fundierte Handbuch-Artikel in DE & EN
+             • Kontextuelle Leitfaden-Empfehlung direkt für das eigene Profil
+
 ---
 
 ## 📋 4. Konkreter Action-Plan (Roadmap zu 100% abgeschlossen)

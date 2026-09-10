@@ -12,8 +12,10 @@
 | **Phase 2** | DB- & Performance-Optimierung | 🟢 EMS-Free & Sharing | 🟢 100% Abgeschlossen | 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7 | – |
 | **Phase 3** | Celery & Buffer-Härtung | 🟢 EMS-Free Stabilität | 🟢 100% Abgeschlossen | 3.1, 3.2, 3.3, 3.4, 3.5 | – |
 | **Phase 4** | Architektur & Diagramme | 🟢 EMS-Free Sankey & Tests | 🟢 100% Abgeschlossen | 4.1, 4.2, 4.3, 4.4 | – |
-| **Phase 5** | EMS-Pro, KI, Apps & Aktorik | 🟢 EMS-Pro, Push, Billing & I18n | 🟢 100% Abgeschlossen | 5.1 – 5.41 | – |
+| **Phase 5** | EMS-Pro, KI, Apps & Aktorik | 🟢 EMS-Pro, Push, Billing & I18n | 🟢 100% Abgeschlossen | 5.1 – 5.43 | – |
 | **Phase 6** | Säule 2: Energy Sharing & Clearing | 🟢 ESC & Multi-Community Hub | 🟢 100% Abgeschlossen | 6.1 – 6.12 | – |
+| **Phase 7** | Go-To-Market & PLG Engine | 🟢 Landingpage 2.0 & Simulator | 🟢 100% Abgeschlossen | 7.1 – 7.5 | – |
+| **Phase 8** | Energie-Profil, Rechner & Help 2.0 | 🟢 Matrix A.1–F.1 & Adaptives UI | 🟢 100% Abgeschlossen | 8.1 – 8.7 | – |
 
 
 
@@ -878,6 +880,51 @@
 ### [x] 7.5 Symmetrisches 12-Hersteller Grid & § 23 MarkenG Disclaimer
 - **Datei**: [`frontend/src/LandingPage.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/LandingPage.jsx)
 - **Status**: ✅ **Erledigt**. Exakt 12 Hersteller-Kacheln für ein 100% symmetrisches Responsive-Grid, Ergänzung von ioBroker & Home Assistant sowie rechtssicherer Markendisclaimer.
+
+---
+
+## Phase 8 — Energie-Profil Matrix (A.1–F.1), Ersparnisrechner, Adaptives UI & Help Center 2.0
+
+### [x] 8.1 Energie-Profil Klassifizierungs-Engine (A.1 bis F.1)
+- **Dateien**: [`energy/services/energy_profile.py`](file:///c:/Users/Public/Dev/eswes/energy/services/energy_profile.py), [`energy/api/views.py`](file:///c:/Users/Public/Dev/eswes/energy/api/views.py)
+- **Status**: ✅ **Erledigt**. Vollständige mathematische Klassifizierung aller 6 Archetypen (A: Kein Solar, B: BKW, C: E-Auto, D: Wärmepumpe, E: PV-Prosumer, F: All-In) mit automatischer Hardware-Erkennung und 24h-Cache.
+
+---
+
+### [x] 8.2 Dynamischer Ersparnisrechner & Verschiebbare Lasten
+- **Datei**: [`energy/services/energy_profile.py`](file:///c:/Users/Public/Dev/eswes/energy/services/energy_profile.py)
+- **Status**: ✅ **Erledigt**. Detaillierte Berechnung des finanziellen Sparpotenzials (€/Jahr) und der verschiebbaren Jahresenergiemenge ($E_\text{shiftable}$ in kWh/a) inklusive 4-Kanal-Aufschlüsselung (Direktverbrauch, § 14a Netzentgelt-Rabatt, Börsenpreistiefs, Winter-Arbitrage).
+
+---
+
+### [x] 8.3 Fundiertes Tarif-Verdikt & 2. Zähler / Kaskaden-Kostenanalyse
+- **Dateien**: [`energy/services/energy_profile.py`](file:///c:/Users/Public/Dev/eswes/energy/services/energy_profile.py), [`frontend/src/features/market/components/TariffProfileRecommendationBanner.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/market/components/TariffProfileRecommendationBanner.jsx)
+- **Status**: ✅ **Erledigt**. Eindeutige Empfehlung für Festpreis- vs. Dynamischen Börsenstromtarif inklusive wirtschaftlicher Gegenüberstellung von 2. Zählerplatz / Kaskadenschaltung (Zusatzkosten 80–120 €/a) vs. 1 intelligenter Zähler bei dynamischen Tarifen.
+
+---
+
+### [x] 8.4 Profil-Adaptives UI & Hero Quick-Actions
+- **Dateien**: [`frontend/src/features/energy/components/ProfileHeroQuickActions.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/energy/components/ProfileHeroQuickActions.jsx), [`frontend/src/features/energy/hooks/useEnergyProfile.js`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/energy/hooks/useEnergyProfile.js), [`frontend/src/pages/dashboard/DashboardUser.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/pages/dashboard/DashboardUser.jsx)
+- **Status**: ✅ **Erledigt**. Zentraler Hook `useEnergyProfile()` und adaptive Hero-Kacheln auf dem Dashboard mit 1-Klick Absprüngen zu relevanten Fach-Hubs (Mobilität, Wärme, Erzeuger, Schnittstellen) und automatischer Warnung bei Tarif-Fehlstellungen.
+
+---
+
+### [x] 8.5 4-Säulen Omi-Check V2 Integration
+- **Datei**: [`frontend/src/features/energy/components/SystemReadinessCard.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/energy/components/SystemReadinessCard.jsx)
+- **Status**: ✅ **Erledigt**. Klickbares Energie-Profil Badge im Omi-Check Header mit Absprung zur Konfiguration und dynamischer Sparpotenzial-Vorschau.
+
+---
+
+### [x] 8.6 Wissensportal & Help Center 2.0 (9 Kategorien & 20 Handbuch-Artikel)
+- **Dateien**: [`support_desk/management/commands/seed_helpcenter.py`](file:///c:/Users/Public/Dev/eswes/support_desk/management/commands/seed_helpcenter.py), [`frontend/src/features/help/pages/HelpCenterPage.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/help/pages/HelpCenterPage.jsx)
+- **Status**: ✅ **Erledigt**. 9 Kategorien und 20 fundierte Handbuch-Artikel in DE & EN, inklusive kontextueller Profil-Empfehlung direkt beim Betreten des Help Centers.
+
+---
+
+### [x] 8.7 Bereinigung von Marketing- und Fachbegriffen (Kein "Ökostrom")
+- **Dateien**: Gesamte Codebasis, Locales (`de.json`, `en.json`) & Services
+- **Status**: ✅ **Erledigt**. Vollständige Bereinigung: Nur noch neutrale, präzise Fachbegriffe (*"Strom"*, *"Stromtarif"*, *"Klassischer Festpreis-Tarif"*, *"Dynamischer Börsenstromtarif"*).
+
 
 
 

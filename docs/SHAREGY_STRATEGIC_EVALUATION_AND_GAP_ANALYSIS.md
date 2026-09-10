@@ -24,7 +24,7 @@ Dieses Dokument liefert eine **ungeschminkte, ehrliche und schonungslose Analyse
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│                               DIE 6 KERN-SPITZENLEISTUNGEN                              │
+│                               DIE 7 KERN-SPITZENLEISTUNGEN                              │
 ├─────────────────────────────────────────────────────────────────────────────────────────┤
 │ 1. ⚡ ECHTE DUAL-CORE PLATTFORM: EMS (Prosumer) + Energy Sharing (Quartiere) in einem   │
 │ 2. 🚀 UNERREICHTE TELEMETRIE-PERFORMANCE: TimescaleDB Hypertables & $O(1)$ Live-Cache   │
@@ -32,6 +32,8 @@ Dieses Dokument liefert eine **ungeschminkte, ehrliche und schonungslose Analyse
 │ 4. 🌐 MAXIMALER ZERO-LOCK-IN: Outbound-WSS, OCPP 1.6-J, ioBroker, Home Assistant, MQTT  │
 │ 5. 💳 VOLLAUTOMATISIERTER EU-ZAHLUNGS-STACK: 6 Sprachen, Stripe, SEPA, PayPal, Klarna   │
 │ 6. 👑 CONVERSION-STARKE FREEMIUM-UX: 4 Pro-Hubs mit interaktiver Demo-Vorschau          │
+│ 7. 🎯 ENERGIE-PROFIL MATRIX & ADAPTIVE UX: Präzise Klassifizierung (A.1–F.1), Rechner,  │
+│       automatischer Tarif-Kompass & 2. Zähler Kaskaden-Analyse                          │
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -54,6 +56,12 @@ Dieses Dokument liefert eine **ungeschminkte, ehrliche und schonungslose Analyse
 
 ### 1.5 Standardisiertes Pro-Freemium Gating
 * Alle 4 Pro-Hubs (`/app/control`, `/app/mobility`, `/app/heating`, `/app/alerts`) bieten Free-Nutzern eine transparente, interaktive Vorschau mit Weichzeichner (`backdrop-blur-[1.5px]`) und Showcase-Hero – maximale Conversion bei null Frustration.
+
+### 1.6 Die Energie-Profil Matrix (A.1 bis F.1) & Intelligenter Ersparnisrechner
+* **Ganzheitliche Klassifizierung**: 6 Archetypen bilden jede Haushaltskonstellation (vom Balkonkraftwerk bis zum voll-elektrifizierten All-In Prosumer) präzise ab.
+* **4-Kanal Sparpotenzial-Berechnung**: Ermittlung der jährlichen Ersparnis (€/a) und verschiebbaren Lasten ($E_\text{shiftable}$) aus Direktverbrauch, § 14a EnWG Netzentgelt-Pauschale (~160 €/a), Börsentiefs und Winter-Arbitrage.
+* **Fundierter Tarif-Kompass**: Wirtschaftliche Gegenüberstellung von Festpreis vs. dynamischem Tarif inklusive 2. Zählerplatz / Kaskadenschaltung (Zusatzkosten 80–120 €/a).
+* **Adaptives UI-System**: Hero Quick-Actions auf dem Dashboard und passgenaue Wissensportal-Leitfäden für jedes Profil.
 
 ---
 
@@ -179,6 +187,9 @@ Trotz herausragender Softwarequalität hat Sharegy aktuell **5 kritische Baustel
 | **Live Energy Flow Simulator** | ✅ Live | Interaktive 4-Szenarien-Simulation (Mittags-Überschuss, Nacht-Arbitrage, Peak-Shaving, § 14a Dimmung). |
 | **§ 14a & Sharing ROI-Rechner** | ✅ Live | Interaktive Haushalts-Kalkulation des jährlichen finanziellen Vorteils (PV + Speicher + WP + Wallbox + Sharing). |
 | **Hardware-Kompatibilität & § 23 MarkenG** | ✅ Live | Symmetrisches 12-Hersteller Grid (SMA, Fronius, Sungrow, Huawei, Tesla, BYD, Daikin, Viessmann etc.) inkl. rechtssicherem Disclaimer. |
+| **Energie-Profil Matrix (A.1–F.1)** | ✅ Live | Präzise Klassifizierung aller 6 Archetypen, 4-Kanal Ersparnisrechner, Lastverschiebungs-Analyse und automatischer Tarif-Kompass. |
+| **Profil-Adaptives UI & Hero Actions** | ✅ Live | Dynamische Dashboard Hero-Kacheln, kontextuelle 1-Klick Aktionen und automatisches Erkennen von Tarif-Fehlstellungen. |
+| **Wissensportal & Help Center 2.0** | ✅ Live | 9 Kategorien & 20 fundierte Handbuch-Artikel in DE & EN mit automatischer Empfehlung passend zum Haushalts-Profil. |
 
 ---
 

@@ -50,16 +50,17 @@ Sharegy ist keine einfache CRUD-Webanwendung, sondern eine **hochkomplexe, verte
 | **4. KI-Forecasts & Anomalieerkennung**<br>• 48h Hybrid Physics + ML PV-Ertragsprognose<br>• Haushalts-Lastprognose & Netto-Überschuss<br>• 7-Tage Auto-ML Baseline (Predictive Maintenance)<br>• Smarte EPEX-Ladefenster & Peak-Shaving Analyse | Senior ML Engineer<br>Data Scientist | 65 PT<br>*(~3,2 PM)* | 52.000 € – 68.000 € | 78.000 € – 105.000 € |
 | **5. Säule 2: Energy Sharing, Clearing & § 14a EnWG**<br>• 15-Minuten OBIS-Bilanzierung & Resiliente Ingestion<br>• 3 Allokationsmodelle (§ 42b EnWG: Dyn, Stat, Hyb)<br>• 🛡️ § 14a EnWG Summenleistungs-Dimmung (4,2 kW Kontingent)<br>• Discovergy/inexogy wMSB REST Hub & Tarife<br>• PDF-, Excel-, CSV- & ERP-XML-Abrechnungsengine | Senior FinTech Eng.<br>Regulatory Energy Eng. | 135 PT<br>*(~6,8 PM)* | 108.000 € – 140.000 € | 160.000 € – 215.000 € |
 | **6. Frontend UI/UX, Sankey, Pro Gating & Native Apps**<br>• Responsive React SPA mit Live-Pulse Ticker & Dark/Light Theme<br>• 👑 Standardisierte Pro-Freemium Gating-UX mit interaktiver Demo-Vorschau<br>• Multistring AC-Erkennung (2. Wechselrichter / BKW)<br>• Capacitor 7 Android App & W3C Web-Push VAPID<br>• Multi-Language i18n (6 EU-Sprachen: DE, EN, PL, TR, RU, RO) | Senior Frontend Eng.<br>Mobile App Eng.<br>UI/UX Designer | 125 PT<br>*(~6,2 PM)* | 95.000 € – 120.000 € | 140.000 € – 185.000 € |
-| **7. QA, Testabdeckung, Security & Compliance**<br>• 100% automatisierte Test Suite (160+ Unit- & Integrationstests)<br>• Multi-Tenant RBAC, Audit-Logging & DSGVO-Consent<br>• System-Health-Monitoring Engine & Auto-Watchdog | QA / Test Engineer<br>Security Specialist | 55 PT<br>*(~2,8 PM)* | 42.000 € – 55.000 € | 60.000 € – 82.000 € |
-| **8. Architektur, Projektleitung & Regulatory**<br>• Technische Gesamtarchitektur & Systemdesign<br>• BNetzA / § 42b EnWG / MsbG / § 14a EnWG Normenabgleich<br>• Handbuch- & Dokumentationserstellung (15 Artikel) | Lead Architect<br>Product Owner | 65 PT<br>*(~3,2 PM)* | 60.000 € – 78.000 € | 85.000 € – 118.000 € |
-| **GESAMT-ENTWICKLUNGSAUFWAND** | **Team: 4–6 Experten** | **745 PT**<br>*(~38 PM)* | **590.000 € – 753.000 €** | **868.000 € – 1.155.000 €** |
+| **7. QA, Testabdeckung, Security & Compliance**<br>• 100% automatisierte Test Suite (170+ Unit- & Integrationstests)<br>• Multi-Tenant RBAC, Audit-Logging & DSGVO-Consent<br>• System-Health-Monitoring Engine & Auto-Watchdog | QA / Test Engineer<br>Security Specialist | 55 PT<br>*(~2,8 PM)* | 42.000 € – 55.000 € | 60.000 € – 82.000 € |
+| **8. Architektur, Projektleitung & Regulatory**<br>• Technische Gesamtarchitektur & Systemdesign<br>• BNetzA / § 42b EnWG / MsbG / § 14a EnWG Normenabgleich<br>• Handbuch- & Dokumentationserstellung | Lead Architect<br>Product Owner | 65 PT<br>*(~3,2 PM)* | 60.000 € – 78.000 € | 85.000 € – 118.000 € |
+| **9. Energie-Profil Matrix, Rechner & Wissensportal 2.0**<br>• Mathematische Klassifikation A.1–F.1 mit Hardware-Erkennung<br>• 4-Kanal Sparpotenzial- & Lastverschiebungskalkulation<br>• Profil-Adaptives UI-System & Hero Quick-Actions<br>• 9 Kategorien & 20 Handbuch-Artikel (DE & EN) | Senior Algorithm Eng.<br>Fullstack & Technical Writer | 50 PT<br>*(~2,5 PM)* | 40.000 € – 52.000 € | 57.000 € – 75.000 € |
+| **GESAMT-ENTWICKLUNGSAUFWAND** | **Team: 4–6 Experten** | **795 PT**<br>*(~40 PM)* | **630.000 € – 805.000 €** | **925.000 € – 1.230.000 €** |
 
 ---
 
 ### 1.4 Gesamtfazit der Entwicklungskosten
 
-* **Inhouse-Softwareteam**: Bei Aufbau eines eigenen spezialisierten Entwicklungsteams (4–6 Senior Engineers über eine Laufzeit von **16 bis 20 Monaten**) belaufen sich die reinen Lohn- und Arbeitgeber-Vollkosten auf **ca. 590.000 € bis 750.000 €**.
-* **Beauftragung einer Digitalagentur / IT-Dienstleisters**: Bei Vergabe an eine spezialisierte IoT- und Cloud-Agentur im DACH-Raum (inkl. Agentur-Marge, PM-Overhead und Risikopuffer) lägen die Entwicklungskosten bei **ca. 870.000 € bis 1.150.000 € netto**.
+* **Inhouse-Softwareteam**: Bei Aufbau eines eigenen spezialisierten Entwicklungsteams (4–6 Senior Engineers über eine Laufzeit von **18 bis 22 Monaten**) belaufen sich die reinen Lohn- und Arbeitgeber-Vollkosten auf **ca. 630.000 € bis 805.000 €**.
+* **Beauftragung einer Digitalagentur / IT-Dienstleisters**: Bei Vergabe an eine spezialisierte IoT- und Cloud-Agentur im DACH-Raum (inkl. Agentur-Marge, PM-Overhead und Risikopuffer) lägen die Entwicklungskosten bei **ca. 925.000 € bis 1.230.000 € netto**.
 
 ---
 
@@ -78,8 +79,8 @@ Zur Ermittlung des Unternehmens- und Asset-Werts werden in der Praxis drei anerk
    │ 1. Substanzwert   │             │ 2. SaaS Multiple  │             │ 3. Strategischer  │
    │ (Cost-to-Duplicate)│            │ (ARR / DCF)       │             │ Transaktionswert  │
    ├───────────────────┤             ├───────────────────┤             ├───────────────────┤
-   │ 850.000 € –       │             │ 2.200.000 € –     │             │ 3.000.000 € –     │
-   │ 1.150.000 €       │             │ 3.800.000 €       │             │ 5.000.000 €       │
+   │ 930.000 € –       │             │ 2.200.000 € –     │             │ 3.000.000 € –     │
+   │ 1.230.000 €       │             │ 3.800.000 €       │             │ 5.000.000 €       │
    └───────────────────┘             └───────────────────┘             └───────────────────┘
 ```
 
@@ -88,10 +89,10 @@ Zur Ermittlung des Unternehmens- und Asset-Werts werden in der Praxis drei anerk
 ### 2.1 Methode 1: Substanz- & Wiederbeschaffungswert (Cost-to-Duplicate)
 Der Substanzwert bewertet den Wert des geistigen Eigentums (IP), des Source-Codes, der Architektur und der Dokumentation, wenn ein Dritter diesen Stand heute exakt nachbauen müsste.
 
-* **Reine Software- & Codebasis (745 PT)**: 750.000 € – 980.000 €
+* **Reine Software- & Codebasis (795 PT)**: 800.000 € – 1.050.000 €
 * **Architektur-Know-how & regulatorische Schnittstellen (§ 42b EnWG, § 14a EnWG, OBIS, wMSB)**: 90.000 € – 120.000 €
-* **Produktionsreife Dokumentation & Wissensportal (15 Artikel DE/EN)**: 30.000 € – 45.000 €
-* 👉 **Substanzwert (Minimum Asset Value)**: **870.000 € – 1.145.000 €**
+* **Produktionsreife Dokumentation & Wissensportal (20 Artikel DE/EN, Matrix A.1–F.1)**: 40.000 € – 60.000 €
+* 👉 **Substanzwert (Minimum Asset Value)**: **930.000 € – 1.230.000 €**
 
 ---
 

@@ -42,6 +42,8 @@ Mit dem **Release des Stripe & SEPA Subscription Checkouts (Karten, Lastschrift,
 | **Predictive Maintenance & KI-Profiling** | 🟢 **7-Tage Auto-ML Baseline** (Ruhestrom, Dauerlauf) | 🔴 Keine | 🔴 Keine | 🔴 Statische Schwellen | 🔴 Keine | 🔴 Keine | 🟡 Manuelle YAML-Regeln |
 | **48h Hybrid Physics + ML PV-Prognose** | 🟢 **Ja (Open-Meteo 96h + WAPE-Güte)** | 🟡 Basis-Portfolio-Forecast | 🔴 Keine | 🟢 Ja | 🟡 Basis-Forecast | 🟡 Basis-Wetter | 🟡 HACS Add-on |
 | **Dynamische Börsenpreise & Arbitrage** | 🟢 **Ja (Tibber/EPEX + 7-Tage Trend, Ladefenster & OpenAPI Dispatch)** | 🟡 Tarifindexierung | 🔴 Keine | 🟢 Ja (Dynamic Pulse) | 🟢 Ja (Hauptfokus) | 🟢 Ja | 🟢 Ja |
+| **Energie-Profil Matrix & Spar-Rechner** | 🟢 **Ja (A.1–F.1 Archetypen, €/a Sparpotenzial, 2. Zähler Kaskaden-Check)** | 🔴 Keine | 🔴 Keine | 🔴 Keine | 🔴 Keine Profil-Matrix | 🔴 Keine | 🔴 Keine |
+| **Wissensportal & Self-Service Guide** | 🟢 **Ja (9 Kategorien, 20 Deep-Dive Artikel in DE & EN, Profil-Empfehlungen)** | 🔴 Nur Doku für Admins | 🟡 Regulatorische PDFs | 🔴 Nur Support-Hotline | 🟡 FAQ-Center | 🟡 Forum / FAQ | 🟢 Community-Docs |
 | **Autonome Demo-Sandbox (Zero-Barrier)** | 🟢 **3 Rollen-Demos mit 1-Klick Login** (HEMS, Sharing Admin, Member) | 🔴 Nur Vertriebs-Webinar | 🔴 Kein Demo-Zugang | 🔴 Keine Demo | 🔴 Nur nach Zählerkauf | 🟡 Eingeschränkt | 🟢 Demo-Instanz lokal |
 | **Zielgruppe & Einstiegshürde** | Prosumer, WEGs, Quartiere, Genossenschaften (**Self-Service SaaS**) | Große Stadtwerke & EVUs (**>10.000 € Setup + B2B-Vertrag**) | Netzbetreiber & registrierte EEGs (**Regulatorischer Hub**) | Eigenheim-Käufer (**>20.000 € Neuanlage**) | Single-Haushalte (Tarifwechsel) | B2C-Balkonkraftwerk / PV (Abo) | Tech-Enthusiasten (Hoher Zeitaufwand) |
 
