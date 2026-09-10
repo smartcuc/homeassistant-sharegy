@@ -48,7 +48,7 @@ export default function EditWallboxModal({ isOpen, onClose, station }) {
             onClose();
         },
         onError: (err) => {
-            setError(err.message || "Fehler beim Speichern der Einstellungen.");
+            setError(err.message || t("wallbox.save_error", "Fehler beim Speichern der Einstellungen."));
         },
     });
 
@@ -121,7 +121,7 @@ export default function EditWallboxModal({ isOpen, onClose, station }) {
                             required
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            placeholder="z. B. Garage Links"
+                            placeholder={t("wallbox.name_placeholder", "z. B. Garage Links")}
                             className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 transition"
                         />
                     </div>
@@ -137,8 +137,8 @@ export default function EditWallboxModal({ isOpen, onClose, station }) {
                                 onChange={(e) => setPhases(Number(e.target.value))}
                                 className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none focus:border-indigo-500 transition cursor-pointer"
                             >
-                                <option value={3}>3-phasig (400V - z. B. 11 kW / 22 kW)</option>
-                                <option value={1}>1-phasig (230V - z. B. 3.7 kW)</option>
+                                <option value={3}>{t("wallbox.phase_3", "3-phasig (400V - z. B. 11 kW / 22 kW)")}</option>
+                                <option value={1}>{t("wallbox.phase_1", "1-phasig (230V - z. B. 3.7 kW)")}</option>
                             </select>
                         </div>
                         <div>
@@ -152,7 +152,7 @@ export default function EditWallboxModal({ isOpen, onClose, station }) {
                             >
                                 <option value={10}>10 A ({phases === 3 ? "6.9 kW" : "2.3 kW"})</option>
                                 <option value={13}>13 A ({phases === 3 ? "9.0 kW" : "3.0 kW"})</option>
-                                <option value={16}>16 A ({phases === 3 ? "11.0 kW" : "3.7 kW"} - Standard)</option>
+                                <option value={16}>16 A ({phases === 3 ? "11.0 kW" : "3.7 kW"} - {t("wallbox.standard_hint", "Standard")})</option>
                                 <option value={20}>20 A ({phases === 3 ? "13.8 kW" : "4.6 kW"})</option>
                                 <option value={24}>24 A ({phases === 3 ? "16.5 kW" : "5.5 kW"})</option>
                                 <option value={32}>32 A ({phases === 3 ? "22.0 kW" : "7.4 kW"})</option>
@@ -171,7 +171,7 @@ export default function EditWallboxModal({ isOpen, onClose, station }) {
                                 onChange={(e) => setMinCurrentA(Number(e.target.value))}
                                 className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none focus:border-indigo-500 transition cursor-pointer"
                             >
-                                <option value={6}>6 A (1.4 kW / 4.1 kW - Standard)</option>
+                                <option value={6}>6 A (1.4 kW / 4.1 kW - {t("wallbox.standard_hint", "Standard")})</option>
                                 <option value={8}>8 A (1.8 kW / 5.5 kW)</option>
                                 <option value={10}>10 A (2.3 kW / 6.9 kW)</option>
                             </select>
@@ -204,11 +204,11 @@ export default function EditWallboxModal({ isOpen, onClose, station }) {
                                 onChange={(e) => setSmartMode(e.target.value)}
                                 className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none focus:border-indigo-500 transition cursor-pointer"
                             >
-                                <option value="pv_surplus">☀️ Nur Solarüberschuss</option>
-                                <option value="min_pv">⛅ Min + PV-Überschuss</option>
-                                <option value="spot_price">💶 Börsenpreisgeführt</option>
-                                <option value="instant">⚡ Sofortladen (Max. Power)</option>
-                                <option value="off">🛑 Gesperrt / Pausiert</option>
+                                <option value="pv_surplus">{t("wallbox.mode_pv_surplus", "☀️ Nur Solarüberschuss")}</option>
+                                <option value="min_pv">{t("wallbox.mode_min_pv", "⛅ Min + PV-Überschuss")}</option>
+                                <option value="spot_price">{t("wallbox.mode_spot_price", "💶 Börsenpreisgeführt")}</option>
+                                <option value="instant">{t("wallbox.mode_instant", "⚡ Sofortladen (Max. Power)")}</option>
+                                <option value="off">{t("wallbox.mode_off", "🛑 Gesperrt / Pausiert")}</option>
                             </select>
                         </div>
                         <div>
@@ -263,7 +263,7 @@ export default function EditWallboxModal({ isOpen, onClose, station }) {
                             disabled={updateMutation.isPending}
                             className="px-5 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition shadow-lg shadow-indigo-600/20 disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
                         >
-                            {updateMutation.isPending ? "Speichere..." : t("wallbox.save", "Änderungen speichern")}
+                            {updateMutation.isPending ? t("wallbox.saving", "Speichere...") : t("wallbox.save", "Änderungen speichern")}
                         </button>
                     </div>
                 </form>

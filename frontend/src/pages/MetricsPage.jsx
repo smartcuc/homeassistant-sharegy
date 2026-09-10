@@ -722,9 +722,9 @@ export default function MetricsPage() {
                                                 type="button"
                                                 onClick={() => setSelectedDeviceForChart(channel.device)}
                                                 className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 text-xs font-semibold transition cursor-pointer"
-                                                title="Verlauf / Chart anzeigen"
+                                                title={t("metrics.view_history_tooltip", "Verlauf / Chart anzeigen")}
                                             >
-                                                📈 Verlauf
+                                                📈 {t("metrics.view_history", "Verlauf")}
                                             </button>
                                         </td>
                                     </tr>
@@ -740,17 +740,17 @@ export default function MetricsPage() {
                         {/* Summary Count */}
                         <div>
                             {isAll ? (
-                                <span>Zeige alle <b>{totalItems}</b> Messkanäle</span>
+                                <span>{t("metrics.showing_all", { count: totalItems, defaultValue: `Zeige alle ${totalItems} Messkanäle` })}</span>
                             ) : (
                                 <span>
-                                    Zeige <b>{startIdx}–{endIdx}</b> von <b>{totalItems}</b> Messkanälen
+                                    {t("metrics.showing_range", { start: startIdx, end: endIdx, total: totalItems, defaultValue: `Zeige ${startIdx}–${endIdx} von ${totalItems} Messkanälen` })}
                                 </span>
                             )}
                         </div>
 
                         {/* Page Size Selector */}
                         <div className="flex items-center gap-1 bg-white border border-gray-200 p-0.5 rounded-xl shadow-2xs">
-                            <span className="text-[11px] font-semibold text-gray-400 px-2">Zeilen:</span>
+                            <span className="text-[11px] font-semibold text-gray-400 px-2">{t("metrics.rows", "Zeilen:")}</span>
                             {[15, 25, 50, 99999].map((size) => (
                                 <button
                                     key={size}
@@ -765,7 +765,7 @@ export default function MetricsPage() {
                                             : "text-gray-600 hover:bg-gray-100"
                                     }`}
                                 >
-                                    {size >= 9999 ? "Alle" : size}
+                                    {size >= 9999 ? t("common.all", "Alle") : size}
                                 </button>
                             ))}
                         </div>
@@ -779,7 +779,7 @@ export default function MetricsPage() {
                                     onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                                     className="px-2.5 py-1 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed font-semibold transition cursor-pointer"
                                 >
-                                    ‹ Zurück
+                                    ‹ {t("common.back", "Zurück")}
                                 </button>
 
                                 {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((p) => (
@@ -803,7 +803,7 @@ export default function MetricsPage() {
                                     onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                                     className="px-2.5 py-1 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed font-semibold transition cursor-pointer"
                                 >
-                                    Vor ›
+                                    {t("common.next", "Weiter")} ›
                                 </button>
                             </div>
                         )}

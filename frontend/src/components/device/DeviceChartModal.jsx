@@ -446,7 +446,7 @@ function DeviceChartModal({ device, onClose }) {
                 >
                     <div className="flex justify-between items-center">
                         <div>
-                            <div className="text-xs text-gray-500">Zeitreihe analysieren</div>
+                            <div className="text-xs text-gray-500">{t("device_chart.analyze_timeseries", "Zeitreihe analysieren")}</div>
                             <h3 className="font-semibold text-lg text-gray-900">{deviceStyle.icon} {device.display_name}</h3>
                             <div className="text-xs text-gray-500">{device.identifier}</div>
                         </div>

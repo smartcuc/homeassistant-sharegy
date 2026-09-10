@@ -37,12 +37,12 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
         },
         onSuccess: (res) => {
             queryClient.invalidateQueries({ queryKey: ["wallboxes"] });
-            setFeedback({ text: res.message || "Aktion erfolgreich ausgeführt.", type: "success" });
+            setFeedback({ text: res.message || t("ocpp.action_success", "Aktion erfolgreich ausgeführt."), type: "success" });
             setActionPending(null);
             setTimeout(() => setFeedback({ text: null, type: null }), 5000);
         },
         onError: (err) => {
-            setFeedback({ text: err.message || "Fehler bei Ausführung.", type: "error" });
+            setFeedback({ text: err.message || t("ocpp.action_error", "Fehler bei Ausführung."), type: "error" });
             setActionPending(null);
         },
     });
@@ -129,7 +129,7 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
     };
 
     const handleReset = (type) => {
-        if (window.confirm(`Möchtest du wirklich einen ${type}-Reset an ${station.name} senden?`)) {
+        if (window.confirm(t("ocpp.reset_confirm", { type, name: station.name, defaultValue: `Möchtest du wirklich einen ${type}-Reset an ${station.name} senden?` }))) {
             remoteActionMutation.mutate({
                 action: "reset",
                 payload: { type },
@@ -239,30 +239,30 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                                     <div className="flex items-center gap-2">
                                         <span className="text-xl">🚗⚡</span>
                                         <h4 className="font-bold text-xs text-slate-900 dark:text-white">
-                                            Bidirektionales Laden nach ISO 15118-20 & OCPP 2.0.1 / 2.1
+                                            {t("ocpp.v2g_header_title", "Bidirektionales Laden nach ISO 15118-20 & OCPP 2.0.1 / 2.1")}
                                         </h4>
                                     </div>
                                     <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
-                                        V2G & V2H Aktiv
+                                        {t("ocpp.v2g_header_badge", "V2G & V2H Aktiv")}
                                     </span>
                                 </div>
                                 <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-1">
-                                    Nutze den Fahrzeugakku ({station.ev_battery_capacity_kwh || 77} kWh) als mobilen Heimspeicher oder verdiene Geld durch Netzeinspeisung bei extremen Börsenstrom-Spitzenpreisen.
+                                    {t("ocpp.v2g_header_desc", { capacity: station.ev_battery_capacity_kwh || 77, defaultValue: `Nutze den Fahrzeugakku (${station.ev_battery_capacity_kwh || 77} kWh) als mobilen Heimspeicher oder verdiene Geld durch Netzeinspeisung bei extremen Börsenstrom-Spitzenpreisen.` })}
                                 </p>
                             </div>
 
                             {/* Betriebsmodus */}
                             <div className="space-y-1.5">
                                 <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300">
-                                    V2G / V2H Betriebsmodus
+                                    {t("ocpp.v2g_mode_label", "V2G / V2H Betriebsmodus")}
                                 </label>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                     {[
-                                        { id: "v2h_home", title: "🏠 V2H Heimspeicher-Puffer", desc: "Versorgt das Haus nachts mit Auto-Strom, sobald keine PV da ist." },
-                                        { id: "peak_shaving", title: "⚡ Peak Shaving (Lastspitzen)", desc: "Kappt Netzlastspitzen über dem Grenzwert (§ 14a EnWG)." },
-                                        { id: "v2g_grid", title: "💶 V2G Börsenstrom-Arbitrage", desc: "Speist bei Spitzenpreisen (> 30 ct/kWh) mit voller Leistung ins Netz ein." },
-                                        { id: "v2x_auto", title: "🤖 V2X Smart Auto (KI-Opt)", desc: "Kombiniert Peak Shaving, Hauspuffer & Börsenspitzen automatisch." },
-                                        { id: "off", title: "🛑 V2G Aus / Nur Laden", desc: "Fahrzeug wird nur normal geladen, keine Rückspeisung." },
+                                        { id: "v2h_home", title: t("ocpp.mode_v2h_home_title", "🏠 V2H Heimspeicher-Puffer"), desc: t("ocpp.mode_v2h_home_desc", "Versorgt das Haus nachts mit Auto-Strom, sobald keine PV da ist.") },
+                                        { id: "peak_shaving", title: t("ocpp.mode_peak_shaving_title", "⚡ Peak Shaving (Lastspitzen)"), desc: t("ocpp.mode_peak_shaving_desc", "Kappt Netzlastspitzen über dem Grenzwert (§ 14a EnWG).") },
+                                        { id: "v2g_grid", title: t("ocpp.mode_v2g_grid_title", "💶 V2G Börsenstrom-Arbitrage"), desc: t("ocpp.mode_v2g_grid_desc", "Speist bei Spitzenpreisen (> 30 ct/kWh) mit voller Leistung ins Netz ein.") },
+                                        { id: "v2x_auto", title: t("ocpp.mode_v2x_auto_title", "🤖 V2X Smart Auto (KI-Opt)"), desc: t("ocpp.mode_v2x_auto_desc", "Kombiniert Peak Shaving, Hauspuffer & Börsenspitzen automatisch.") },
+                                        { id: "off", title: t("ocpp.mode_off_title", "🛑 V2G Aus / Nur Laden"), desc: t("ocpp.mode_off_desc", "Fahrzeug wird nur normal geladen, keine Rückspeisung.") },
                                     ].map((m) => (
                                         <div
                                             key={m.id}
@@ -285,19 +285,19 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
                                         <span className="text-base">⏱️</span>
-                                        <span className="text-xs font-bold text-slate-900 dark:text-white">Smart Departure Guarantee (ISO 15118-20)</span>
+                                        <span className="text-xs font-bold text-slate-900 dark:text-white">{t("ocpp.departure_guarantee_title", "Smart Departure Guarantee (ISO 15118-20)")}</span>
                                     </div>
                                     <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300">
-                                        Automatische Vorab-Ladung
+                                        {t("ocpp.departure_guarantee_badge", "Automatische Vorab-Ladung")}
                                     </span>
                                 </div>
                                 <p className="text-[10px] text-slate-500 dark:text-slate-400">
-                                    Garantiert, dass dein Auto zur Abfahrtszeit den gewünschten Ziel-SoC erreicht hat. Rückspeisung wird rechtzeitig gestoppt und das Vorab-Laden gestartet.
+                                    {t("ocpp.departure_guarantee_desc", "Garantiert, dass dein Auto zur Abfahrtszeit den gewünschten Ziel-SoC erreicht hat. Rückspeisung wird rechtzeitig gestoppt und das Vorab-Laden gestartet.")}
                                 </p>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                                     <div>
                                         <label className="block text-[10px] font-bold text-slate-600 dark:text-slate-400 mb-1">
-                                            Abfahrtszeit
+                                            {t("ocpp.departure_time_label", "Abfahrtszeit")}
                                         </label>
                                         <input
                                             type="time"
@@ -308,7 +308,7 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                                     </div>
                                     <div>
                                         <div className="flex items-center justify-between text-[10px] font-bold text-slate-600 dark:text-slate-400 mb-1">
-                                            <span>Garantierter Ziel-SoC</span>
+                                            <span>{t("ocpp.target_soc_label", "Garantierter Ziel-SoC")}</span>
                                             <span className="font-mono text-indigo-600 dark:text-indigo-400 font-bold">{targetDepartureSoc}%</span>
                                         </div>
                                         <input
@@ -328,7 +328,7 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                                 <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700">
                                     <div className="flex items-center justify-between text-xs font-bold mb-1">
-                                        <span className="text-slate-700 dark:text-slate-300">⚡ Peak Shaving Schwelle</span>
+                                        <span className="text-slate-700 dark:text-slate-300">{t("ocpp.peak_shaving_threshold_label", "⚡ Peak Shaving Schwelle")}</span>
                                         <span className="font-mono text-amber-600 dark:text-amber-400">{peakShavingThreshold} W</span>
                                     </div>
                                     <input
@@ -341,13 +341,13 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                                         className="w-full px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 outline-none"
                                     />
                                     <div className="text-[10px] text-slate-400 mt-1">
-                                        Entlädt das E-Auto, wenn Hauslast diese Schwelle übersteigt (§ 14a EnWG).
+                                        {t("ocpp.peak_shaving_threshold_desc", "Entlädt das E-Auto, wenn Hauslast diese Schwelle übersteigt (§ 14a EnWG).")}
                                     </div>
                                 </div>
 
                                 <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700">
                                     <div className="flex items-center justify-between text-xs font-bold mb-1">
-                                        <span className="text-slate-700 dark:text-slate-300">🛡️ Battery Care (C-Rate Limit)</span>
+                                        <span className="text-slate-700 dark:text-slate-300">{t("ocpp.battery_care_label", "🛡️ Battery Care (C-Rate Limit)")}</span>
                                         <span className="font-mono text-emerald-600 dark:text-emerald-400">{maxCRate}C (~{Math.round(maxCRate * (station.ev_battery_capacity_kwh || 77))} kW)</span>
                                     </div>
                                     <input
@@ -360,7 +360,7 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                                         className="w-full accent-emerald-600 cursor-pointer mt-1"
                                     />
                                     <div className="text-[10px] text-slate-400 mt-1">
-                                        Schont den Akku durch Begrenzung der Dauerentladerate.
+                                        {t("ocpp.battery_care_desc", "Schont den Akku durch Begrenzung der Dauerentladerate.")}
                                     </div>
                                 </div>
                             </div>
@@ -369,7 +369,7 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                                 <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700">
                                     <div className="flex items-center justify-between text-xs font-bold mb-1">
-                                        <span className="text-slate-700 dark:text-slate-300">🛡️ Mindest-SoC Reserve</span>
+                                        <span className="text-slate-700 dark:text-slate-300">{t("ocpp.min_soc_reserve_label", "🛡️ Mindest-SoC Reserve")}</span>
                                         <span className="font-mono text-indigo-600 dark:text-indigo-400">{v2gMinSoc}% (~{Math.round((v2gMinSoc / 100) * 450)} km)</span>
                                     </div>
                                     <input
@@ -382,13 +382,13 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                                         className="w-full accent-indigo-600 cursor-pointer mt-1"
                                     />
                                     <div className="text-[10px] text-slate-400 mt-1">
-                                        Fahrzeug wird niemals unter diesen Ladestand entladen.
+                                        {t("ocpp.min_soc_reserve_desc", "Fahrzeug wird niemals unter diesen Ladestand entladen.")}
                                     </div>
                                 </div>
 
                                 <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700">
                                     <div className="flex items-center justify-between text-xs font-bold mb-1">
-                                        <span className="text-slate-700 dark:text-slate-300">⚡ Max. Entladeleistung</span>
+                                        <span className="text-slate-700 dark:text-slate-300">{t("ocpp.max_discharge_power_label", "⚡ Max. Entladeleistung")}</span>
                                         <span className="font-mono text-emerald-600 dark:text-emerald-400">{v2gMaxPower} kW</span>
                                     </div>
                                     <input
@@ -401,7 +401,7 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                                         className="w-full px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 outline-none"
                                     />
                                     <div className="text-[10px] text-slate-400 mt-1">
-                                        Maximale Inverter-Rückspeiseleistung.
+                                        {t("ocpp.max_discharge_power_desc", "Maximale Inverter-Rückspeiseleistung.")}
                                     </div>
                                 </div>
                             </div>
@@ -411,10 +411,10 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                                 <div className="font-bold flex items-center justify-between text-indigo-400 mb-2">
                                     <span className="flex items-center gap-1.5">
                                         <span>🔐</span>
-                                        <span>ISO 15118-20 Plug & Charge Kommunikation</span>
+                                        <span>{t("ocpp.iso15118_title", "ISO 15118-20 Plug & Charge Kommunikation")}</span>
                                     </span>
                                     <span className="text-[10px] font-mono bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-800">
-                                        TLS Verschlüsselt
+                                        {t("ocpp.tls_encrypted", "TLS Verschlüsselt")}
                                     </span>
                                 </div>
                                 <div className="grid grid-cols-2 gap-2 text-[11px] font-mono">
@@ -424,7 +424,7 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                                     </div>
                                     <div>
                                         <span className="text-slate-500">EV SoC: </span>
-                                        <span className="text-emerald-400 font-bold">{station.ev_soc_pct !== null && station.ev_soc_pct !== undefined ? `${station.ev_soc_pct}%` : "74% (Live ISO)"}</span>
+                                        <span className="text-emerald-400 font-bold">{station.ev_soc_pct !== null && station.ev_soc_pct !== undefined ? `${station.ev_soc_pct}%` : `74% (${t("ocpp.live_iso", "Live ISO")})`}</span>
                                     </div>
                                 </div>
                             </div>
@@ -436,7 +436,7 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                                     onClick={handleSaveV2g}
                                     className="px-5 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition shadow-md shadow-emerald-600/20 cursor-pointer"
                                 >
-                                    💾 V2G / V2H Konfiguration speichern
+                                    {t("ocpp.save_v2g_btn", "💾 V2G / V2H Konfiguration speichern")}
                                 </button>
 
                                 <button
@@ -445,7 +445,7 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                                     onClick={handleManualDischarge}
                                     className="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition cursor-pointer"
                                 >
-                                    ⚡ Sofort-Entladetest (3,5 kW)
+                                    {t("ocpp.manual_discharge_test_btn", "⚡ Sofort-Entladetest (3,5 kW)")}
                                 </button>
                             </div>
                         </div>
@@ -455,7 +455,7 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                     {activeTab === "trigger" && (
                         <div className="space-y-4">
                             <p className="text-xs text-slate-500 dark:text-slate-400">
-                                Sende einen <strong>OCPP 1.6 / 2.0.1 TriggerMessage</strong> Befehl, um die Wallbox zur sofortigen Übertragung von Messwerten oder Statusnachrichten zu zwingen.
+                                {t("ocpp.trigger_desc", "Sende einen OCPP 1.6 / 2.0.1 TriggerMessage Befehl, um die Wallbox zur sofortigen Übertragung von Messwerten oder Statusnachrichten zu zwingen.")}
                             </p>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -466,11 +466,11 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                                     className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 border border-slate-200 dark:border-slate-700 text-left transition cursor-pointer"
                                 >
                                     <div className="font-bold text-xs text-slate-900 dark:text-white flex items-center justify-between">
-                                        <span>📊 MeterValues anfordern</span>
+                                        <span>{t("ocpp.trigger_metervalues", "📊 MeterValues anfordern")}</span>
                                         <span className="text-xs">⚡</span>
                                     </div>
                                     <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                                        Aktuelle Zählerstände, Spannung & Phasenströme sofort abfragen.
+                                        {t("ocpp.trigger_metervalues_desc", "Aktuelle Zählerstände, Spannung & Phasenströme sofort abfragen.")}
                                     </p>
                                 </button>
 
@@ -481,11 +481,11 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                                     className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 border border-slate-200 dark:border-slate-700 text-left transition cursor-pointer"
                                 >
                                     <div className="font-bold text-xs text-slate-900 dark:text-white flex items-center justify-between">
-                                        <span>🔄 StatusNotification anfordern</span>
+                                        <span>{t("ocpp.trigger_status", "🔄 StatusNotification anfordern")}</span>
                                         <span className="text-xs">🔌</span>
                                     </div>
                                     <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                                        Aktuellen Steck- und Betriebszustand der Wallbox synchronisieren.
+                                        {t("ocpp.trigger_status_desc", "Aktuellen Steck- und Betriebszustand der Wallbox synchronisieren.")}
                                     </p>
                                 </button>
 
@@ -496,11 +496,11 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                                     className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 border border-slate-200 dark:border-slate-700 text-left transition cursor-pointer"
                                 >
                                     <div className="font-bold text-xs text-slate-900 dark:text-white flex items-center justify-between">
-                                        <span>💓 Heartbeat anfordern</span>
+                                        <span>{t("ocpp.trigger_heartbeat", "💓 Heartbeat anfordern")}</span>
                                         <span className="text-xs">⏱️</span>
                                     </div>
                                     <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                                        Uhrzeitsynchronisation & Lebenszeichen-Ping ausführen.
+                                        {t("ocpp.trigger_heartbeat_desc", "Uhrzeitsynchronisation & Lebenszeichen-Ping ausführen.")}
                                     </p>
                                 </button>
 
@@ -511,17 +511,17 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                                     className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 border border-slate-200 dark:border-slate-700 text-left transition cursor-pointer"
                                 >
                                     <div className="font-bold text-xs text-slate-900 dark:text-white flex items-center justify-between">
-                                        <span>🚀 BootNotification anfordern</span>
+                                        <span>{t("ocpp.trigger_boot", "🚀 BootNotification anfordern")}</span>
                                         <span className="text-xs">⚙️</span>
                                     </div>
                                     <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                                        Hersteller-, Modell- und Firmware-Infos neu einlesen.
+                                        {t("ocpp.trigger_boot_desc", "Hersteller-, Modell- und Firmware-Infos neu einlesen.")}
                                     </p>
                                 </button>
                             </div>
 
                             <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">Station-Reset:</span>
+                                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">{t("ocpp.station_reset_label", "Station-Reset:")}</span>
                                 <div className="flex items-center gap-2">
                                     <button
                                         type="button"
@@ -529,7 +529,7 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                                         onClick={() => handleReset("Soft")}
                                         className="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-amber-50 dark:hover:bg-amber-950/40 text-slate-700 dark:text-slate-300 hover:text-amber-600 border border-slate-200 dark:border-slate-700 transition cursor-pointer"
                                     >
-                                        🔄 Soft Reset
+                                        {t("ocpp.soft_reset", "🔄 Soft Reset")}
                                     </button>
                                     <button
                                         type="button"
@@ -537,7 +537,7 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                                         onClick={() => handleReset("Hard")}
                                         className="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-red-50 dark:hover:bg-red-950/40 text-slate-700 dark:text-slate-300 hover:text-red-600 border border-slate-200 dark:border-slate-700 transition cursor-pointer"
                                     >
-                                        ⚡ Hard Reset
+                                        {t("ocpp.hard_reset", "⚡ Hard Reset")}
                                     </button>
                                 </div>
                             </div>
@@ -548,13 +548,13 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                     {activeTab === "rfid" && (
                         <div className="space-y-4">
                             <p className="text-xs text-slate-500 dark:text-slate-400">
-                                Das <strong>OCPP 1.6 Local Auth List</strong> Profil synchronisiert alle in Sharegy angelegten RFID-Chips direkt in den internen Flash-Speicher der Wallbox. Damit funktioniert die Freischaltung auch bei Internetausfall (100% Offline-Resilienz).
+                                {t("ocpp.rfid_desc", "Das OCPP 1.6 Local Auth List Profil synchronisiert alle in Sharegy angelegten RFID-Chips direkt in den internen Flash-Speicher der Wallbox. Damit funktioniert die Freischaltung auch bei Internetausfall (100% Offline-Resilienz).")}
                             </p>
 
                             <div className="p-4 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/40 border border-indigo-200/80 dark:border-indigo-800/60 flex items-center justify-between">
                                 <div>
                                     <div className="text-[11px] uppercase tracking-wider text-indigo-700 dark:text-indigo-400 font-bold">
-                                        Aktuelle Listenversion auf der Box
+                                        {t("ocpp.rfid_version_label", "Aktuelle Listenversion auf der Box")}
                                     </div>
                                     <div className="text-2xl font-bold font-mono text-indigo-950 dark:text-indigo-200 mt-0.5">
                                         v{station.local_auth_list_version || 0}
@@ -567,7 +567,7 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                                     className="px-4 py-2.5 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition shadow-md shadow-indigo-600/20 cursor-pointer flex items-center gap-2"
                                 >
                                     <span>📶</span>
-                                    <span>{actionPending === "sync-rfid-list" ? "Übertrage..." : "Alle RFID-Chips jetzt übertragen"}</span>
+                                    <span>{actionPending === "sync-rfid-list" ? t("ocpp.rfid_syncing", "Übertrage...") : t("ocpp.rfid_sync_btn", "Alle RFID-Chips jetzt übertragen")}</span>
                                 </button>
                             </div>
                         </div>
@@ -577,37 +577,37 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                     {activeTab === "reservation" && (
                         <div className="space-y-4">
                             <p className="text-xs text-slate-500 dark:text-slate-400">
-                                Reserviere diese Wallbox für einen bestimmten RFID-Tag (OCPP <code>ReserveNow</code>). Andere Nutzer oder nicht passende Tags werden währenddessen blockiert.
+                                {t("ocpp.reservation_desc", "Reserviere diese Wallbox für einen bestimmten RFID-Tag (OCPP ReserveNow). Andere Nutzer oder nicht passende Tags werden währenddessen blockiert.")}
                             </p>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                                        Berechtigter RFID-Tag / Nutzer-ID
+                                        {t("ocpp.reservation_tag_label", "Berechtigter RFID-Tag / Nutzer-ID")}
                                     </label>
                                     <input
                                         type="text"
                                         value={reserveTag}
                                         onChange={(e) => setReserveTag(e.target.value)}
-                                        placeholder="z. B. TAG_VIP_USER"
+                                        placeholder={t("ocpp.reservation_tag_placeholder", "z. B. TAG_VIP_USER")}
                                         className="w-full px-3 py-2 rounded-xl text-xs font-mono font-bold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none"
                                     />
                                 </div>
 
                                 <div>
                                     <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                                        Dauer der Reservierung
+                                        {t("ocpp.reservation_duration_label", "Dauer der Reservierung")}
                                     </label>
                                     <select
                                         value={reserveDuration}
                                         onChange={(e) => setReserveDuration(e.target.value)}
                                         className="w-full px-3 py-2 rounded-xl text-xs font-bold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none cursor-pointer"
                                     >
-                                        <option value="30">30 Minuten</option>
-                                        <option value="60">1 Stunde</option>
-                                        <option value="120">2 Stunden</option>
-                                        <option value="240">4 Stunden</option>
-                                        <option value="480">8 Stunden</option>
+                                        <option value="30">{t("ocpp.dur_30m", "30 Minuten")}</option>
+                                        <option value="60">{t("ocpp.dur_1h", "1 Stunde")}</option>
+                                        <option value="120">{t("ocpp.dur_2h", "2 Stunden")}</option>
+                                        <option value="240">{t("ocpp.dur_4h", "4 Stunden")}</option>
+                                        <option value="480">{t("ocpp.dur_8h", "8 Stunden")}</option>
                                     </select>
                                 </div>
                             </div>
@@ -619,7 +619,7 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                                     onClick={handleReserve}
                                     className="px-4 py-2 rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-500 text-white transition shadow-md shadow-purple-600/20 cursor-pointer"
                                 >
-                                    🔒 Wallbox jetzt reservieren
+                                    {t("ocpp.reserve_btn", "🔒 Wallbox jetzt reservieren")}
                                 </button>
 
                                 {station.status === "Reserved" && (
@@ -629,7 +629,7 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                                         onClick={handleCancelReserve}
                                         className="px-4 py-2 rounded-xl text-xs font-bold bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition cursor-pointer"
                                     >
-                                        🔓 Reservierung aufheben
+                                        {t("ocpp.cancel_reserve_btn", "🔓 Reservierung aufheben")}
                                     </button>
                                 )}
                             </div>
@@ -640,7 +640,7 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                     {activeTab === "schedule" && (
                         <div className="space-y-4">
                             <p className="text-xs text-slate-500 dark:text-slate-400">
-                                <strong>GetCompositeSchedule</strong> fragt den resultierenden Ladefahrplan ab, den die Wallbox aus allen aktiven Profilen (ChargePointMax, TxDefault, TxProfile) berechnet hat.
+                                {t("ocpp.schedule_desc", "GetCompositeSchedule fragt den resultierenden Ladefahrplan ab, den die Wallbox aus allen aktiven Profilen (ChargePointMax, TxDefault, TxProfile) berechnet hat.")}
                             </p>
 
                             <div className="flex items-center gap-3">
@@ -650,7 +650,7 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                                     onClick={handleGetSchedule}
                                     className="px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition shadow-md shadow-indigo-600/20 cursor-pointer"
                                 >
-                                    📊 Fahrplan für nächste 24h abrufen
+                                    {t("ocpp.get_schedule_btn", "📊 Fahrplan für nächste 24h abrufen")}
                                 </button>
 
                                 <button
@@ -659,7 +659,7 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                                     onClick={handleClearProfile}
                                     className="px-3 py-2 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-red-50 dark:hover:bg-red-950/40 text-slate-700 dark:text-slate-300 hover:text-red-600 border border-slate-200 dark:border-slate-700 transition cursor-pointer"
                                 >
-                                    🧹 Ladeprofile zurücksetzen
+                                    {t("ocpp.clear_profile_btn", "🧹 Ladeprofile zurücksetzen")}
                                 </button>
                             </div>
 
@@ -669,7 +669,7 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                                 </div>
                             ) : (
                                 <div className="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs text-slate-400 text-center">
-                                    Noch kein zusammengesetzter Fahrplan abgerufen. Klicke auf den Button oben.
+                                    {t("ocpp.no_schedule_data", "Noch kein zusammengesetzter Fahrplan abgerufen. Klicke auf den Button oben.")}
                                 </div>
                             )}
                         </div>
@@ -679,7 +679,7 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                     {activeTab === "variables" && (
                         <div className="space-y-4">
                             <p className="text-xs text-slate-500 dark:text-slate-400">
-                                <strong>OCPP 2.0.1 / 2.1 Device Model & Variable Monitoring</strong> erlaubt standardisierte Fernkonfiguration von Controller-Parametern (z.B. ISO 15118, EVSE, OCPPCommCtrlr, SmartChargingCtrlr).
+                                {t("ocpp.variables_desc", "OCPP 2.0.1 / 2.1 Device Model & Variable Monitoring erlaubt standardisierte Fernkonfiguration von Controller-Parametern (z.B. ISO 15118, EVSE, OCPPCommCtrlr, SmartChargingCtrlr).")}
                             </p>
 
                             <div className="flex items-center gap-3">
@@ -689,7 +689,7 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                                     onClick={handleGetVariables}
                                     className="px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition shadow-md shadow-indigo-600/20 cursor-pointer"
                                 >
-                                    🔍 GetVariables abfragen
+                                    {t("ocpp.get_variables_btn", "🔍 GetVariables abfragen")}
                                 </button>
                             </div>
 
@@ -706,7 +706,7 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                                 </div>
                             ) : (
                                 <div className="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs text-slate-400 text-center">
-                                    Keine gespeicherten Device-Model-Variablen vorhanden. Klicke auf &quot;GetVariables abfragen&quot;.
+                                    {t("ocpp.no_variables_data", "Keine gespeicherten Device-Model-Variablen vorhanden. Klicke auf \"GetVariables abfragen\".")}
                                 </div>
                             )}
                         </div>

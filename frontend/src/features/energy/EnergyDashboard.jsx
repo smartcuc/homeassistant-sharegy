@@ -720,7 +720,7 @@ export default function EnergyDashboard() {
             <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 shadow-xs space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                     <h3 className="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
-                        <span>📈</span> {t("energy.generation_vs_load", "Erzeugung vs. Verbrauch")} ({data?.period_label || period})
+                        <span>📈</span> {t("energy.generation_vs_load", "Erzeugung vs. Verbrauch")} ({periods.find(p => p.key === period)?.label || customDates.label || (data?.period_label === "Heute" ? t("energy.period_today", "Heute") : data?.period_label === "Gestern" ? t("energy.period_yesterday", "Gestern") : data?.period_label || period)})
                     </h3>
                     <div className="flex items-center gap-4 text-xs font-semibold">
                         <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">

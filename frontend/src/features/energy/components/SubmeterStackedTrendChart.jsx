@@ -153,7 +153,7 @@ export default function SubmeterStackedTrendChart({ period = "30d", onSelectMete
                 </div>
 
                 <span className="text-xs font-semibold px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-800/50 rounded-xl self-start sm:self-auto">
-                    {data?.period_label || period}
+                    {(period === "today" || data?.period_label === "Heute") ? t("energy.period_today", "Heute") : (period === "yesterday" || data?.period_label === "Gestern") ? t("energy.period_yesterday", "Gestern") : (data?.period_label || period)}
                 </span>
             </div>
 
