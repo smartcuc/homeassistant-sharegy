@@ -177,7 +177,7 @@ export default function InterfacesPage() {
                 primaryHome={primaryHome} 
                 filterVendor="sungrow" 
                 sectionNumber={3} 
-                cardTitle="3. Sungrow Wechselrichter & Batteriespeicher (SH-Serie)" 
+                cardTitle={t("interfaces.sungrow_title", "3. Sungrow Wechselrichter & Batteriespeicher (SH-Serie)")} 
             />
 
             {/* 4. SECTION: WEITERE WECHSELRICHTER & CLOUD-DIENSTE */}
@@ -185,7 +185,7 @@ export default function InterfacesPage() {
                 primaryHome={primaryHome} 
                 filterVendor="others" 
                 sectionNumber={4} 
-                cardTitle="4. Weitere Wechselrichter (SolarEdge, Fronius, Kostal, Growatt)" 
+                cardTitle={t("interfaces.other_inverters_title", "4. Weitere Wechselrichter (SolarEdge, Fronius, Kostal, Growatt)")} 
             />
 
             {/* 5. SECTION: NATIVE HOME ASSISTANT INTEGRATION (HACS / CUSTOM COMPONENT) */}

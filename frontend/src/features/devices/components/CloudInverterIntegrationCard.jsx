@@ -128,7 +128,7 @@ export default function CloudInverterIntegrationCard({ primaryHome, filterVendor
                                 {cardTitle || `${sectionNumber}. ${t("cloud_inverter.default_card_title", "Hersteller Cloud-Kopplung (Sungrow, SolarEdge, Fronius)")}`}
                             </h2>
                             <span className={`text-[10px] font-bold px-2 py-0.5 ${filterVendor === "sungrow" ? "bg-amber-100 text-amber-900 border border-amber-200" : "bg-blue-100 text-blue-800 border border-blue-200"} rounded-full`}>
-                                {filterVendor === "sungrow" ? "Zero-Hardware Direct" : "Cloud & Modbus"}
+                                {filterVendor === "sungrow" ? "Zero-Hardware Direct" : t("cloud_inverter.badge_cloud_openapi", "Cloud & OpenAPI")}
                             </span>
                         </div>
                         <p className="text-xs text-gray-500">

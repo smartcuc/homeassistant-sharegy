@@ -157,14 +157,14 @@ export default function ProducerPage() {
                             <div>
                                 <div className="flex items-center gap-2">
                                     <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                                        Automatische Erkennung sekundärer AC-Erzeuger (2. Wechselrichter / BKW)
+                                        {t("producers.secondary_ac_title", "Automatische Erkennung sekundärer AC-Erzeuger (2. Wechselrichter / BKW)")}
                                     </h3>
                                     <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/50">
-                                        ● Automatisch aktiv
+                                        {t("producers.auto_active", "● Automatisch aktiv")}
                                     </span>
                                 </div>
                                 <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 max-w-2xl">
-                                    Strom von ungebundenen AC-Wechselrichtern oder Balkonkraftwerken im Hausnetz wird in der Energiebilanz physikalisch als Solarerzeugung bilanziert und nicht als Hausverbrauch fehlinterpretiert.
+                                    {t("producers.secondary_ac_desc", "Strom von ungebundenen AC-Wechselrichtern oder Balkonkraftwerken im Hausnetz wird in der Energiebilanz physikalisch als Solarerzeugung bilanziert und nicht als Hausverbrauch fehlinterpretiert.")}
                                 </p>
                             </div>
                         </div>
@@ -173,7 +173,7 @@ export default function ProducerPage() {
                             onClick={() => setOpenAdd(true)}
                             className="px-3.5 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-700 text-xs font-bold transition cursor-pointer shrink-0 self-start md:self-center"
                         >
-                            + 2. Anlage benennen
+                            {t("producers.name_2nd_generator_btn", "+ 2. Anlage benennen")}
                         </button>
                     </div>
 

@@ -352,7 +352,7 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
                                     className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 w-4 h-4"
                                 />
                                 <span className={formData.ems_control_enabled ? "text-emerald-700 font-bold" : "text-gray-500"}>
-                                    Steuerung aktiv
+                                    {t("storage_system.control_active", "Steuerung aktiv")}
                                 </span>
                             </label>
                         </div>
@@ -362,23 +362,23 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                     <div>
                                         <label className="block text-[11px] font-bold text-blue-900 uppercase tracking-wider mb-1">
-                                            Betriebsmodus
+                                            {t("storage_system.control_mode_label", "Betriebsmodus")}
                                         </label>
                                         <select
                                             value={formData.control_mode}
                                             onChange={(e) => setFormData({ ...formData, control_mode: e.target.value })}
                                             className="w-full px-3 py-2 bg-white border border-blue-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-blue-500 transition"
                                         >
-                                            <option value="self_consumption">☀️ PV-Autarkie (Autonom)</option>
-                                            <option value="price_optimized">💶 Preisgeführt (EPEX Spot / Tibber)</option>
-                                            <option value="forced_charge">⚡ Manuelle Zwangsladung</option>
-                                            <option value="idle">💤 Standby / Ladesperre</option>
+                                            <option value="self_consumption">☀️ {t("storage_system.mode_self_consumption", "PV-Autarkie (Autonom)")}</option>
+                                            <option value="price_optimized">💶 {t("storage_system.mode_price_optimized", "Preisgeführt (EPEX Spot / Tibber)")}</option>
+                                            <option value="forced_charge">⚡ {t("storage_system.mode_forced_charge", "Manuelle Zwangsladung")}</option>
+                                            <option value="idle">💤 {t("storage_system.mode_idle", "Standby / Ladesperre")}</option>
                                         </select>
                                     </div>
 
                                     <div>
                                         <label className="block text-[11px] font-bold text-blue-900 uppercase tracking-wider mb-1">
-                                            Soll-Ladeleistung (kW)
+                                            {t("storage_system.target_power_label", "Soll-Ladeleistung (kW)")}
                                         </label>
                                         <input
                                             type="number"
@@ -393,7 +393,7 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
 
                                     <div>
                                         <label className="block text-[11px] font-bold text-blue-900 uppercase tracking-wider mb-1">
-                                            Preisschwelle (ct/kWh)
+                                            {t("storage_system.price_threshold_label", "Preisschwelle (ct/kWh)")}
                                         </label>
                                         <input
                                             type="number"
@@ -405,7 +405,7 @@ export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }
                                     </div>
                                 </div>
                                 <p className="text-[11px] text-blue-700 leading-relaxed">
-                                    Bei <strong>Preisgeführt</strong> lädt Sharegy den Batteriespeicher bei dynamischen Tarifen (z. B. Tibber) automatisch aus dem Netz auf, sobald der Börsenstrompreis unter die Preisschwelle fällt.
+                                    {t("storage_system.price_mode_hint", "Bei Preisgeführt lädt Sharegy den Batteriespeicher bei dynamischen Tarifen (z. B. Tibber) automatisch aus dem Netz auf, sobald der Börsenstrompreis unter die Preisschwelle fällt.")}
                                 </p>
                             </div>
                         )}

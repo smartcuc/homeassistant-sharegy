@@ -37,7 +37,7 @@ export default function SystemStatusPage() {
             trackEvent("incident_reported", "support", ticketCategory);
             setTicketResult({
                 type: "success",
-                message: `✅ Störungsmeldung erfolgreich übermittelt! Ticket-ID: #${res.ticket_number || res.id?.slice(0, 8)}`,
+                message: t("system_status.incident_submitted", { id: res.ticket_number || res.id?.slice(0, 8), defaultValue: `✅ Störungsmeldung erfolgreich übermittelt! Ticket-ID: #${res.ticket_number || res.id?.slice(0, 8)}` }),
             });
             setTicketSubject("");
             setTicketDescription("");
@@ -46,7 +46,7 @@ export default function SystemStatusPage() {
         onError: (err) => {
             setTicketResult({
                 type: "error",
-                message: `Fehler beim Senden der Störungsmeldung: ${err.message}`,
+                message: t("system_status.incident_error", { msg: err.message, defaultValue: `Fehler beim Senden der Störungsmeldung: ${err.message}` }),
             });
         },
     });
@@ -98,10 +98,10 @@ export default function SystemStatusPage() {
                                 isAllOperational ? "bg-emerald-500" : "bg-amber-500"
                             }`}></span>
                         </span>
-                        <span>{t("status.title", "Systemstatus & Live-Infrastruktur")}</span>
+                        <span>{t("system_status.title", "Systemstatus & Live-Infrastruktur")}</span>
                     </h1>
                     <p className="text-sm text-gray-500 mt-1">
-                        {t("status.subtitle", "Echtzeit-Überwachung aller Dienste, Datenbanken, Ingest-Pipelines und APIs.")}
+                        {t("system_status.subtitle", "Echtzeit-Überwachung aller Dienste, Datenbanken, Ingest-Pipelines und APIs.")}
                     </p>
                 </div>
 
@@ -112,14 +112,14 @@ export default function SystemStatusPage() {
                         className="px-3.5 py-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-200 text-xs font-bold rounded-xl hover:bg-gray-50 transition shadow-xs flex items-center gap-1.5 cursor-pointer"
                     >
                         <span className={isFetching ? "animate-spin" : ""}>🔄</span>
-                        <span>{isFetching ? "Aktualisiere..." : "Jetzt prüfen"}</span>
+                        <span>{isFetching ? t("system_status.refreshing", "Aktualisiere...") : t("system_status.check_now", "Jetzt prüfen")}</span>
                     </button>
                     <button
                         onClick={() => setShowTicketModal(true)}
                         className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition shadow-xs flex items-center gap-2 cursor-pointer"
                     >
                         <span>🚨</span>
-                        <span>{t("status.report_incident", "Störung melden")}</span>
+                        <span>{t("system_status.report_incident", "Störung melden")}</span>
                     </button>
                 </div>
             </div>
@@ -139,23 +139,23 @@ export default function SystemStatusPage() {
                         </div>
                         <div>
                             <div className="text-xl font-extrabold flex items-center gap-2">
-                                <span>{healthData?.status_label || "Prüfe Systemkomponenten..."}</span>
+                                <span>{isAllOperational ? t("system_status.all_operational", "Alle Systeme operativ") : healthData?.status === "degraded" ? t("system_status.capacity_warning", "Kapazitäts-Warnung") : (healthData?.status_label || t("system_status.degraded", "Teilweise beeinträchtigt"))}</span>
                             </div>
                             <div className="text-xs opacity-80 mt-0.5">
-                                Letzte Überprüfung: {healthData?.timestamp ? new Date(healthData.timestamp).toLocaleTimeString() : "vor wenigen Sekunden"} • Version: {healthData?.version || "3.2.0-beta"}
+                                {t("system_status.last_check", "Letzte Überprüfung:")} {healthData?.timestamp ? new Date(healthData.timestamp).toLocaleTimeString() : t("system_status.just_now", "vor wenigen Sekunden")} • {t("system_status.version", "Version:")} {healthData?.version || "3.2.0-beta"}
                             </div>
                         </div>
                     </div>
 
                     <div className="flex items-center gap-6 border-t md:border-t-0 md:border-l border-emerald-200 dark:border-emerald-800/60 pt-4 md:pt-0 md:pl-6">
                         <div>
-                            <div className="text-[10px] uppercase font-bold tracking-wider opacity-70">Uptime (30 Tage)</div>
+                            <div className="text-[10px] uppercase font-bold tracking-wider opacity-70">{t("system_status.uptime_30d", "Uptime (30 Tage)")}</div>
                             <div className="text-2xl font-extrabold text-emerald-700 dark:text-emerald-400">
                                 {healthData?.overall_uptime_pct || "99.98"} %
                             </div>
                         </div>
                         <div>
-                            <div className="text-[10px] uppercase font-bold tracking-wider opacity-70">Aktive Geräte</div>
+                            <div className="text-[10px] uppercase font-bold tracking-wider opacity-70">{t("system_status.active_devices", "Aktive Geräte")}</div>
                             <div className="text-2xl font-extrabold text-gray-900 dark:text-white">
                                 {healthData?.metrics?.active_devices ?? 0}
                             </div>
@@ -183,7 +183,7 @@ export default function SystemStatusPage() {
                                             ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
                                             : "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
                                     }`}>
-                                        {isSrvOk ? "Online 🟢" : "Störung 🔴"}
+                                        {isSrvOk ? t("system_status.online", "Online 🟢") : t("system_status.incident", "Störung 🔴")}
                                     </span>
                                 </div>
                                 <p className="text-xs text-gray-500 leading-relaxed min-h-[36px]">
@@ -192,7 +192,7 @@ export default function SystemStatusPage() {
                             </div>
 
                             <div className="mt-4 pt-3 border-t border-gray-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-gray-400">
-                                <span>Latenz:</span>
+                                <span>{t("system_status.latency", "Latenz:")}</span>
                                 <span className="font-mono font-bold text-gray-700 dark:text-gray-300">
                                     {srv.latency_ms} ms
                                 </span>
@@ -210,10 +210,10 @@ export default function SystemStatusPage() {
                             <span className="text-xl">🖥️</span>
                             <div>
                                 <h2 className="text-sm font-bold text-gray-900 dark:text-white">
-                                    Server-Kapazität & Hardware-Auslastung
+                                    {t("system_status.server_capacity_title", "Server-Kapazität & Hardware-Auslastung")}
                                 </h2>
                                 <p className="text-xs text-gray-500">
-                                    Proaktiver Aufrüst-Wächter zur Erkennung von Performance-Engpässen.
+                                    {t("system_status.server_capacity_desc", "Proaktiver Aufrüst-Wächter zur Erkennung von Performance-Engpässen.")}
                                 </p>
                             </div>
                         </div>
@@ -224,7 +224,7 @@ export default function SystemStatusPage() {
                                     ? "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-300"
                                     : "bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-300"
                             }`}>
-                                <span>{healthData.metrics.server_hardware.upgrade_recommended ? "⚠️ Upgrade empfohlen" : "✅ Ausreichend Puffer"}</span>
+                                <span>{healthData.metrics.server_hardware.upgrade_recommended ? t("system_status.upgrade_recommended", "⚠️ Upgrade empfohlen") : t("system_status.buffer_sufficient", "✅ Ausreichend Puffer")}</span>
                             </span>
                         </div>
                     </div>
@@ -234,7 +234,7 @@ export default function SystemStatusPage() {
                         {/* CPU */}
                         <div className="space-y-2">
                             <div className="flex justify-between text-xs font-bold text-gray-700 dark:text-gray-300">
-                                <span>CPU-Auslastung ({healthData.metrics.server_hardware.cpu_count} vCPUs)</span>
+                                <span>{t("system_status.cpu_utilization", { count: healthData.metrics.server_hardware.cpu_count, defaultValue: `CPU-Auslastung (${healthData.metrics.server_hardware.cpu_count} vCPUs)` })}</span>
                                 <span className="font-mono">{healthData.metrics.server_hardware.cpu_used_pct}%</span>
                             </div>
                             <div className="w-full h-2.5 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
@@ -250,14 +250,14 @@ export default function SystemStatusPage() {
                                 ></div>
                             </div>
                             <div className="text-[11px] text-gray-400">
-                                Load Avg: <span className="font-mono">{healthData.metrics.server_hardware.load1}</span>
+                                {t("system_status.load_avg", "Load Avg:")} <span className="font-mono">{healthData.metrics.server_hardware.load1}</span>
                             </div>
                         </div>
 
                         {/* RAM */}
                         <div className="space-y-2">
                             <div className="flex justify-between text-xs font-bold text-gray-700 dark:text-gray-300">
-                                <span>RAM-Speicher ({Math.round(healthData.metrics.server_hardware.ram_total_mb / 1024)} GB)</span>
+                                <span>{t("system_status.ram_memory", { gb: Math.round(healthData.metrics.server_hardware.ram_total_mb / 1024), defaultValue: `RAM-Speicher (${Math.round(healthData.metrics.server_hardware.ram_total_mb / 1024)} GB)` })}</span>
                                 <span className="font-mono">{healthData.metrics.server_hardware.ram_used_pct}%</span>
                             </div>
                             <div className="w-full h-2.5 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
@@ -273,14 +273,14 @@ export default function SystemStatusPage() {
                                 ></div>
                             </div>
                             <div className="text-[11px] text-gray-400">
-                                Frei: <span className="font-mono">{Math.round(healthData.metrics.server_hardware.ram_available_mb / 1024 * 10) / 10} GB</span>
+                                {t("system_status.free", "Frei:")} <span className="font-mono">{Math.round(healthData.metrics.server_hardware.ram_available_mb / 1024 * 10) / 10} GB</span>
                             </div>
                         </div>
 
                         {/* DISK */}
                         <div className="space-y-2">
                             <div className="flex justify-between text-xs font-bold text-gray-700 dark:text-gray-300">
-                                <span>SSD-Speicher ({healthData.metrics.server_hardware.disk_total_gb} GB)</span>
+                                <span>{t("system_status.ssd_storage", { gb: healthData.metrics.server_hardware.disk_total_gb, defaultValue: `SSD-Speicher (${healthData.metrics.server_hardware.disk_total_gb} GB)` })}</span>
                                 <span className="font-mono">{healthData.metrics.server_hardware.disk_used_pct}%</span>
                             </div>
                             <div className="w-full h-2.5 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
@@ -296,7 +296,7 @@ export default function SystemStatusPage() {
                                 ></div>
                             </div>
                             <div className="text-[11px] text-gray-400">
-                                Frei: <span className="font-mono">{healthData.metrics.server_hardware.disk_free_gb} GB</span>
+                                {t("system_status.free", "Frei:")} <span className="font-mono">{healthData.metrics.server_hardware.disk_free_gb} GB</span>
                             </div>
                         </div>
                     </div>
@@ -305,10 +305,10 @@ export default function SystemStatusPage() {
                     <div className="p-3.5 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-gray-100 dark:border-slate-800 flex items-center justify-between text-xs text-gray-600 dark:text-gray-300">
                         <div className="flex items-center gap-2">
                             <span>💡</span>
-                            <span><strong>Empfehlung:</strong> {healthData.metrics.server_hardware.recommended_hardware}</span>
+                            <span><strong>{t("system_status.recommendation", "Empfehlung:")}</strong> {healthData.metrics.server_hardware.recommended_hardware}</span>
                         </div>
                         <span className="text-[11px] text-gray-400">
-                            Aktive DB-Verbindungen: <strong className="text-gray-700 dark:text-gray-200 font-mono">{healthData.metrics.server_hardware.db_active_connections}</strong>
+                            {t("system_status.active_db_conns", "Aktive DB-Verbindungen:")} <strong className="text-gray-700 dark:text-gray-200 font-mono">{healthData.metrics.server_hardware.db_active_connections}</strong>
                         </span>
                     </div>
                 </div>
@@ -322,9 +322,9 @@ export default function SystemStatusPage() {
                             ⚡
                         </div>
                         <div>
-                            <div className="text-[11px] font-bold text-gray-400 uppercase">Ingest-Durchsatz</div>
+                            <div className="text-[11px] font-bold text-gray-400 uppercase">{t("system_status.ingest_throughput", "Ingest-Durchsatz")}</div>
                             <div className="text-lg font-bold text-gray-900 dark:text-white">
-                                {healthData?.metrics?.ingest_throughput_msg_sec || 48.5} Msg / Sekunde
+                                {healthData?.metrics?.ingest_throughput_msg_sec || 48.5} {t("system_status.msg_per_sec", "Msg / Sekunde")}
                             </div>
                         </div>
                     </div>
@@ -336,7 +336,7 @@ export default function SystemStatusPage() {
                             ⏱️
                         </div>
                         <div>
-                            <div className="text-[11px] font-bold text-gray-400 uppercase">Durchschn. API-Latenz</div>
+                            <div className="text-[11px] font-bold text-gray-400 uppercase">{t("system_status.avg_api_latency", "Durchschn. API-Latenz")}</div>
                             <div className="text-lg font-bold text-gray-900 dark:text-white">
                                 {healthData?.metrics?.avg_api_latency_ms || 12.4} ms
                             </div>
@@ -350,9 +350,9 @@ export default function SystemStatusPage() {
                             🛡️
                         </div>
                         <div>
-                            <div className="text-[11px] font-bold text-gray-400 uppercase">Störungen (30 Tage)</div>
+                            <div className="text-[11px] font-bold text-gray-400 uppercase">{t("system_status.incidents_30d", "Störungen (30 Tage)")}</div>
                             <div className="text-lg font-bold text-gray-900 dark:text-white">
-                                0 ungelöste Vorfälle
+                                {healthData?.metrics?.incident_count_30d ? `${healthData.metrics.incident_count_30d} Vorfälle` : t("system_status.no_open_incidents", "0 ungelöste Vorfälle")}
                             </div>
                         </div>
                     </div>
@@ -367,7 +367,7 @@ export default function SystemStatusPage() {
                             <div className="flex items-center gap-2">
                                 <span className="text-xl">🚨</span>
                                 <h3 className="font-bold text-base text-gray-900 dark:text-white">
-                                    Störung oder Problem melden
+                                    {t("system_status.modal_report_title", "Störung oder Problem melden")}
                                 </h3>
                             </div>
                             <button
@@ -397,37 +397,37 @@ export default function SystemStatusPage() {
                                     }}
                                     className="w-full py-2.5 bg-gray-900 hover:bg-black text-white text-xs font-bold rounded-xl transition cursor-pointer"
                                 >
-                                    Schließen
+                                    {t("common.close", "Schließen")}
                                 </button>
                             </div>
                         ) : (
                             <form onSubmit={handleTicketSubmit} className="mt-4 space-y-4">
                                 <div>
                                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
-                                        Kategorie der Störung
+                                        {t("system_status.incident_category", "Kategorie der Störung")}
                                     </label>
                                     <select
                                         value={ticketCategory}
                                         onChange={(e) => setTicketCategory(e.target.value)}
                                         className="w-full text-xs font-semibold p-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-800 dark:text-gray-200"
                                     >
-                                        <option value="telemetry_issue">Verzögerte / Fehlende Live-Messwerte</option>
-                                        <option value="relay_actuation">Relais / Aktorik schaltet nicht</option>
-                                        <option value="inverter_bridge">Wechselrichter / Home Assistant Bridge</option>
-                                        <option value="forecast_bug">Solar- oder Lastprognose fehlerhaft</option>
-                                        <option value="billing_question">Abonnement & Abrechnung</option>
-                                        <option value="other">Sonstiges technisches Problem</option>
+                                        <option value="telemetry_issue">{t("system_status.cat_telemetry", "Verzögerte / Fehlende Live-Messwerte")}</option>
+                                        <option value="relay_actuation">{t("system_status.cat_relay", "Relais / Aktorik schaltet nicht")}</option>
+                                        <option value="inverter_bridge">{t("system_status.cat_inverter", "Wechselrichter / Home Assistant Bridge")}</option>
+                                        <option value="forecast_bug">{t("system_status.cat_forecast", "Solar- oder Lastprognose fehlerhaft")}</option>
+                                        <option value="billing_question">{t("system_status.cat_billing", "Abonnement & Abrechnung")}</option>
+                                        <option value="other">{t("system_status.cat_other", "Sonstiges technisches Problem")}</option>
                                     </select>
                                 </div>
 
                                 <div>
                                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
-                                        Kurzer Betreff
+                                        {t("system_status.subject_label", "Kurzer Betreff")}
                                     </label>
                                     <input
                                         type="text"
                                         required
-                                        placeholder="z. B. Shelly Pro 3EM sendet seit 10 Minuten keine Werte"
+                                        placeholder={t("system_status.subject_placeholder", "z. B. Shelly Pro 3EM sendet seit 10 Minuten keine Werte")}
                                         value={ticketSubject}
                                         onChange={(e) => setTicketSubject(e.target.value)}
                                         className="w-full text-xs p-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-indigo-500"
@@ -436,12 +436,12 @@ export default function SystemStatusPage() {
 
                                 <div>
                                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
-                                        Problembeschreibung
+                                        {t("system_status.desc_label", "Problembeschreibung")}
                                     </label>
                                     <textarea
                                         required
                                         rows={4}
-                                        placeholder="Beschreibe kurz, was genau passiert ist und bei welchem Gerät/Menü..."
+                                        placeholder={t("system_status.desc_placeholder", "Beschreibe kurz, was genau passiert ist und bei welchem Gerät/Menü...")}
                                         value={ticketDescription}
                                         onChange={(e) => setTicketDescription(e.target.value)}
                                         className="w-full text-xs p-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-indigo-500"
@@ -457,7 +457,7 @@ export default function SystemStatusPage() {
                                         className="rounded text-indigo-600 cursor-pointer"
                                     />
                                     <label htmlFor="attach_diag" className="text-xs text-gray-500 cursor-pointer">
-                                        Aktuelle System- & Latenzdiagnose automatisch anhängen
+                                        {t("system_status.attach_diag", "Aktuelle System- & Latenzdiagnose automatisch anhängen")}
                                     </label>
                                 </div>
 
@@ -467,14 +467,14 @@ export default function SystemStatusPage() {
                                         onClick={() => setShowTicketModal(false)}
                                         className="px-4 py-2 text-xs font-bold text-gray-500 hover:text-gray-700 transition cursor-pointer"
                                     >
-                                        Abbrechen
+                                        {t("common.cancel", "Abbrechen")}
                                     </button>
                                     <button
                                         type="submit"
                                         disabled={createTicketMutation.isLoading}
                                         className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition shadow-xs cursor-pointer"
                                     >
-                                        {createTicketMutation.isLoading ? "Sende Störungsmeldung..." : "Störung absenden →"}
+                                        {createTicketMutation.isLoading ? t("system_status.submitting_incident", "Sende Störungsmeldung...") : t("system_status.submit_incident", "Störung absenden →")}
                                     </button>
                                 </div>
                             </form>

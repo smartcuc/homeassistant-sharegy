@@ -165,7 +165,7 @@ export default function StorageSystemCard({ storage, onEdit, onDelete, onControl
                         <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono">
                             <span>0%</span>
                             {storage.min_soc_reserve_pct > 0 && (
-                                <span className="text-rose-400/90 font-medium">Reserve: {storage.min_soc_reserve_pct}%</span>
+                                <span className="text-rose-400/90 font-medium">{t("storage.reserve", "Reserve")}: {storage.min_soc_reserve_pct}%</span>
                             )}
                             <span>100%</span>
                         </div>
@@ -188,7 +188,7 @@ export default function StorageSystemCard({ storage, onEdit, onDelete, onControl
                     </div>
 
                     <div className="pt-2 border-t border-slate-700/50 flex items-center justify-between text-[11px] text-slate-400">
-                        <span>Wirkungsgrad: <strong className="text-slate-200">{storage.charge_efficiency_pct}%</strong></span>
+                        <span>{t("storage.efficiency", "Wirkungsgrad")}: <strong className="text-slate-200">{storage.charge_efficiency_pct}%</strong></span>
                         <span>Max: <strong className="text-slate-200">{storage.max_charge_power_kw} kW</strong></span>
                     </div>
                 </div>
@@ -199,12 +199,12 @@ export default function StorageSystemCard({ storage, onEdit, onDelete, onControl
                 <div className="flex items-center gap-2">
                     <span className="text-sm">🎛️</span>
                     <span className="text-slate-300">
-                        Steuerungsmodus: <strong className="text-white capitalize">{
-                            storage.control_mode === "price_optimized" ? "💶 Preisgeführt (Börsenpreis)" :
-                            storage.control_mode === "forced_charge" ? "⚡ Sofortladen" :
-                            storage.control_mode === "forced_discharge" ? "🔋 Zwangsentladung" :
-                            storage.control_mode === "idle" ? "💤 Standby" :
-                            "☀️ PV-Autarkie"
+                        {t("storage.control_mode_label", "Steuerungsmodus")}: <strong className="text-white capitalize">{
+                            storage.control_mode === "price_optimized" ? t("storage.mode_price_optimized", "💶 Preisgeführt (Börsenpreis)") :
+                            storage.control_mode === "forced_charge" ? t("storage.mode_forced_charge", "⚡ Sofortladen") :
+                            storage.control_mode === "forced_discharge" ? t("storage.mode_forced_discharge", "🔋 Zwangsentladung") :
+                            storage.control_mode === "idle" ? t("storage.mode_idle", "💤 Standby") :
+                            t("storage.mode_pv_autarky", "☀️ PV-Autarkie")
                         }</strong>
                     </span>
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
@@ -212,7 +212,7 @@ export default function StorageSystemCard({ storage, onEdit, onDelete, onControl
                             ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" 
                             : "bg-slate-700/50 text-slate-400 border-slate-600/50"
                     }`}>
-                        {storage.ems_control_enabled ? "Aktiv" : "Standby"}
+                        {storage.ems_control_enabled ? t("common.active", "Aktiv") : t("common.standby", "Standby")}
                     </span>
                 </div>
 
@@ -220,7 +220,7 @@ export default function StorageSystemCard({ storage, onEdit, onDelete, onControl
                     href="/app/control"
                     className="px-2.5 py-1 rounded-lg bg-blue-600/30 hover:bg-blue-600/50 border border-blue-500/40 text-blue-200 text-[11px] font-semibold transition flex items-center gap-1 cursor-pointer"
                 >
-                    <span>⚡ Energiesteuerung öffnen</span>
+                    <span>⚡ {t("storage.open_control_btn", "Energiesteuerung öffnen")}</span>
                     <span>→</span>
                 </a>
             </div>
@@ -241,7 +241,7 @@ export default function StorageSystemCard({ storage, onEdit, onDelete, onControl
                     <div className="flex items-center gap-2 p-2 rounded-xl bg-slate-900/90 border border-slate-800">
                         <span className="text-emerald-400">🔋</span>
                         <div className="truncate">
-                            <div className="text-[10px] text-slate-400">{t("storage_system.soc_sensor", "SoC-Sensor (%)")}</div>
+                            <div className="text-[10px] text-slate-400">{t("storage_system.soc_sensor", "Batterie - SoC")}</div>
                             <div className="font-semibold text-slate-200 truncate">
                                 {storage.soc_device?.name || storage.primary_device?.name || t("common.unassigned", "Nicht zugeordnet")}
                             </div>
@@ -252,7 +252,7 @@ export default function StorageSystemCard({ storage, onEdit, onDelete, onControl
                     <div className="flex items-center gap-2 p-2 rounded-xl bg-slate-900/90 border border-slate-800">
                         <span className="text-amber-400">⚡</span>
                         <div className="truncate">
-                            <div className="text-[10px] text-slate-400">{t("storage_system.power_meter", "Leistungsmesser (W)")}</div>
+                            <div className="text-[10px] text-slate-400">{t("storage_system.power_meter", "Batterie - Leistung")}</div>
                             <div className="font-semibold text-slate-200 truncate">
                                 {storage.power_device?.name || storage.primary_device?.name || t("common.unassigned", "Nicht zugeordnet")}
                             </div>
