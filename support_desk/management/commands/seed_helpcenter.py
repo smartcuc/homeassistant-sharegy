@@ -1407,6 +1407,579 @@ Sharegy provides a universal **MQTT and WebSocket interface** to connect **Home 
                 "is_featured": True,
                 "sort_order": 3,
             },
+
+            # ---------------------------------------------------------------------
+            # 18. ENERGIEPROFIL & HAUSHALTS-BASELINE-ASSISTENT
+            # ---------------------------------------------------------------------
+            {
+                "category": cats["getting-started"],
+                "slug": "energieprofil-und-baseline-assistent",
+                "context_key": "energy_profile",
+                "title_de": "Energieprofil & Haushalts-Baseline: Grundlast, Effizienz-Benchmarking & Einsparpotenziale",
+                "title_en": "Energy Profile & Home Baseline: Baseload, Efficiency Benchmarking & Savings",
+                "summary_de": "Konfiguration deines Haushalts-Energieprofils (/app/energy-profile): Haushaltsgröße, Wohnfläche, Heizungstyp, theoretische Grundlast-Berechnung und Identifikation versteckter Standby-Stromfresser.",
+                "summary_en": "Configuring your household Energy Profile (/app/energy-profile): household size, floor area, heating type, theoretical baseload calculation, and eliminating standby power leakages.",
+                "content_de": r"""# Energieprofil & Haushalts-Baseline: Grundlast & Effizienz 🏠📊
+
+Das **Energieprofil** unter `/app/energy-profile` ist das Herzstück zur individuellen Modellierung deines Haushalts in Sharegy. Es liefert dem Smart Energy Optimizer (EMS) und der KI-Lastprognose die mathematische Basis für präzise Berechnungen.
+
+---
+
+## 1. Warum ist das Energieprofil unverzichtbar?
+
+Jeder Haushalt ist einzigartig: Ein Single in einer Altbauwohnung hat völlig andere Verbrauchsmuster als eine 4-köpfige Familie im KfW-40-Neubau mit Wärmepumpe und Elektrofahrzeug.
+
+Durch das Ausfüllen des Energieprofils erzielst du:
+* 🎯 **Präzise 24h-Lastprognosen**: Das System weiß exakt, wie viel Strom dein Haushalt zu welcher Tageszeit benötigt.
+* 🔍 **Aufdecken von Standby-Leckagen**: Automatischer Abgleich deiner echten nächtlichen Grundlast mit dem theoretischen Soll-Wert.
+* 💰 **Gezielte Optimierungsempfehlungen**: Individuelle Spartipps für Heizung, Warmwasser, Mobilität und Haushaltsgeräte.
+
+---
+
+## 2. Die Eingabeparameter im Baseline-Assistenten
+
+Im Assistenten erfasst du in wenigen Schritten deine Eckdaten:
+
+| Parameter | Beschreibung | Auswirkung auf die Optimierung |
+| :--- | :--- | :--- |
+| **Haushaltsgröße** | Anzahl der ständig im Haushalt lebenden Personen | Skaliert den personenbezogenen Grund- und Kochstrom |
+| **Wohnfläche ($m^2$)** | Beheizte Wohnfläche | Berechnet den spezifischen Heizwärmebedarf ($kWh/m^2a$) |
+| **Gebäudestandard** | Baujahr / Sanierungsstufe (z. B. KfW 40, KfW 55, Altbau) | Bestimmt die thermische Gebäudeträgheit und Vorlauftemperaturen |
+| **Heizungssystem** | Wärmepumpe, Fernwärme, Gas/Öl, Pelletheizung | Definiert flexible thermische Lastverschiebungs-Potenziale |
+| **Warmwasserbereitung** | BWWP, Durchlauferhitzer, zentral über Heizung, Boiler | Modelliert Warmwasser-Peaks am Morgen und Abend |
+| **E-Mobilität** | Anzahl Elektrofahrzeuge & jährliche Fahrleistung (km/a) | Plant Ladefenster und Akkukapazitäten im Fahrplan ein |
+| **Sonderverbraucher** | Klimaanlage, Poolpumpe, Sauna, Home-Server, Teichfilter | Erkennt planbare Großverbraucher für Solar-Dispatching |
+
+---
+
+## 3. Die theoretische Grundlast-Berechnung (Benchmark)
+
+Sharegy errechnet aus deinen Profildaten eine **theoretische Referenz-Grundlast** ($P_\text{theoretisch}$):
+
+$$P_\text{theoretisch} = P_\text{Basis} + (\text{Personen} \times P_\text{Person}) + P_\text{Dauerverbraucher}$$
+
+### Typische Richtwerte für die normale Haushaltsgrundlast:
+* 👤 **1-Personen-Haushalt**: ca. **60 bis 90 W**
+* 👥 **2-Personen-Haushalt**: ca. **90 bis 140 W**
+* 👨‍👩‍👧‍👦 **3–4-Personen-Haushalt**: ca. **130 bis 200 W**
+* 🏡 **Einfamilienhaus mit Komfortausstattung**: ca. **180 bis 250 W**
+
+---
+
+## 4. Standby-Leckage-Erkennung & Kostenfalle
+
+Die automatische Analyse prüft kontinuierlich deine gemessene Dauerlast in der tiefen Nacht (**02:00 bis 05:00 Uhr**):
+
+> ⚠️ **Beispiel für teure Dauerlasten:**  
+> Liegt deine gemessene Nachtlast bei **280 W**, während dein theoretischer Soll-Wert nur **120 W** beträgt, verlierst du **160 W als reine Standby-Leckage**!  
+> $$160\,\text{W} \times 8.760\,\text{h} = 1.401{,}6\,\text{kWh/Jahr} \approx \mathbf{420\text{ bis }490\text{ €/Jahr}}$$
+
+### Typische versteckte Stromfresser:
+1. 🔄 **Alte ungesteuerte Heizungspumpen**: Laufen oft ganzjährig mit 60–90 W durch (**~180–270 €/a**).
+2. 📺 **Media-Receiver & HiFi-Verstärker**: Viele Altgeräte ziehen im Standby 15–30 W.
+3. ❄️ **Zweit-Kühlschrank im Keller**: Defekte Dichtungen oder Vereisung führen zu dauerhaftem Kompressorlauf.
+4. 🌐 **Ungesteuerte Netzwerk-Switches & Dauer-Netzteile**: Sammeln sich unbemerkt an.
+
+---
+
+## 5. Integration mit dem Smart Energy Optimizer
+
+Sobald dein Profil vollständig konfiguriert ist:
+* Berechnet das EMS die täglichen Lade- und Entladezyklen deines Batteriespeichers millimetergenau.
+* Werden flexible Lasten (Wallbox, BWWP, Klimaanlage) so eingetaktet, dass die Grundlast nie zu ungeplantem Netzbezug führt.
+""",
+                "content_en": r"""# Energy Profile & Home Baseline: Baseload & Efficiency 🏠📊
+
+The **Energy Profile** at `/app/energy-profile` provides the foundational blueprint for your home in Sharegy. It equips the Smart Energy Optimizer (EMS) and AI load forecasting engine with accurate parameters for simulation and dispatch.
+
+---
+
+## 1. Why is the Energy Profile essential?
+
+Every household exhibits distinct consumption dynamics. A single occupant in a well-insulated apartment has completely different needs than a family of four in a single-family home with a heat pump and EV.
+
+Completing your Energy Profile delivers:
+* 🎯 **Precise 24h Load Forecasts**: Tailored expected hourly consumption patterns.
+* 🔍 **Standby Leakage Detection**: Automated benchmarking of measured nighttime baseload against theoretical targets.
+* 💰 **Targeted Savings Recommendations**: Tailored guidance for HVAC, hot water, EV charging, and smart appliances.
+
+---
+
+## 2. Input Parameters
+
+| Parameter | Description | Optimization Impact |
+| :--- | :--- | :--- |
+| **Household Size** | Number of permanent residents | Scales occupancy-driven baseload and appliance usage |
+| **Living Area ($m^2$)** | Heated floor area | Calculates specific thermal demand ($kWh/m^2a$) |
+| **Building Standard** | Year of construction / insulation rating | Determines thermal inertia and heating curve parameters |
+| **Heating System** | Heat pump, district heating, gas/oil, biomass | Defines flexible thermal shift capacity |
+| **Hot Water (DHW)** | DHW heat pump, instantaneous heater, boiler | Schedules morning and evening peak demands |
+| **EV Mobility** | Electric vehicle count and annual mileage (km/y) | Reserves charging slots in the 24h dispatch plan |
+| **Special Loads** | Air conditioning, pool pump, sauna, home servers | Pinpoints schedulable heavy loads for solar dispatch |
+
+---
+
+## 3. Theoretical Baseload Calculation
+
+Sharegy computes a **theoretical benchmark baseload** ($P_\text{theoretical}$):
+
+$$P_\text{theoretical} = P_\text{base} + (\text{Occupants} \times P_\text{person}) + P_\text{constant\_loads}$$
+
+### Typical Industry Benchmarks:
+* 👤 **1-Person Household**: approx. **60 to 90 W**
+* 👥 **2-Person Household**: approx. **90 to 140 W**
+* 👨‍👩‍👧‍👦 **3–4-Person Household**: approx. **130 to 200 W**
+* 🏡 **Single-Family Home with Smart Equipment**: approx. **180 to 250 W**
+
+---
+
+## 4. Standby Leakage Alert & Cost Impact
+
+The analytics engine continually verifies your nighttime minimum power draw (**02:00 to 05:00 AM**):
+
+> ⚠️ **Cost Example:**  
+> If measured baseload is **280 W** against a target of **120 W**, the unexplained **160 W excess standby** costs:  
+> $$160\,\text{W} \times 8,760\,\text{h} = 1,401.6\,\text{kWh/year} \approx \mathbf{420\text{ to }490\text{ €/year}}$$
+""",
+                "tags": ["energieprofil", "baseline", "grundlast", "standby", "stromfresser", "effizienz", "haushalt", "benchmark"],
+                "is_featured": True,
+                "sort_order": 3,
+            },
+
+            # ---------------------------------------------------------------------
+            # 19. DC-DC LADEN, SPEICHER-ZU-SPEICHER & V2H / V2G
+            # ---------------------------------------------------------------------
+            {
+                "category": cats["inverters-meters"],
+                "slug": "dc-dc-laden-und-speicher-zu-speicher-v2g",
+                "context_key": "dcdc_v2g",
+                "title_de": "DC-DC Laden, Speicher-zu-Speicher & Bidirektionales Laden (V2H / V2G)",
+                "title_en": "DC-DC Charging, Storage-to-Storage & Bidirectional Charging (V2H / V2G)",
+                "summary_de": "Verlustfreies DC-Koppeln (bis 95 % Wirkungsgrad), Umladung von Heimspeicher ins E-Auto und Fahrzeug-Rückspeisung (Vehicle-to-Home / Vehicle-to-Grid) bei Spitzenlasten.",
+                "summary_en": "Lossless DC-coupling (up to 95% efficiency), home battery to EV transfer, and Vehicle-to-Home / Vehicle-to-Grid (V2H / V2G) peak-shaving strategies.",
+                "content_de": r"""# DC-DC Laden, Speicher-zu-Speicher & Bidirektionales Laden (V2H / V2G) 🔋⚡🚗
+
+Moderne PV- und Speicher-Architekturen ermöglichen direkten Gleichstrom-Transfer (**DC-DC**) sowie bidirektionale Energieflüsse zwischen Heimspeicher, Solarmodulen und Elektrofahrzeug.
+
+---
+
+## 1. DC-Kopplung vs. AC-Kopplung: Die Physik der Wirkungsgrade
+
+Klassische Wallboxen und Batteriespeicher arbeiten wechselstromseitig (AC). Dabei muss der Strom mehrfach umgewandelt werden:
+
+```
+[ Klassische AC-Kette ]
+PV (DC) ➔ Wechselrichter (AC) ➔ Hausnetz (AC) ➔ Onboard-Lader (DC) ➔ Autobatterie (DC)
+Gesamtwirkungsgrad: ca. 80 % bis 85 % (15–20 % Wandlungsverlust!)
+
+[ Direkte DC-DC-Kette ]
+PV (DC) ➔ DC/DC-Zwischenkreis ➔ Fahrzeugakku (DC)
+Gesamtwirkungsgrad: ca. 94 % bis 97 % (Nur 3–6 % Verlust!)
+```
+
+### Warum ist DC-DC Laden so überlegen?
+* **Minimaler Wandlungsverlust**: Keine doppelte Gleich- und Wechselrichtung ($DC \rightarrow AC \rightarrow DC$).
+* **Geringere Wärmeentwicklung**: Schont Elektronik, Ladeinfrastruktur und Akkuzellen.
+* **Höhere Ladeleistungen bei Schwachlicht**: Schnelleres Ansprechverhalten bereits ab geringen Solarströmen.
+
+---
+
+## 2. Speicher-zu-Speicher Umladung (Heimspeicher ➔ Elektroauto)
+
+Im Sharegy EMS kannst du definieren, ob und unter welchen Bedingungen das Elektroauto aus dem stationären Heimspeicher geladen werden darf.
+
+### Wann ist das Umladen wirtschaftlich sinnvoll?
+* ☀️ **Sommer / Hohe Solarprognose**:  
+  Wenn die Wetterprognose für den nächsten Vormittag $100\,\%$ Sonnenschein vorhersagt, kann der Heimspeicher abends bedenkenlos ins E-Auto entleert werden – am nächsten Morgen wird der Speicher ohnehin sofort wieder voll.
+* 🍂 **Übergangszeit / Winter**:  
+  Hier sollte die Heimspeicher-Energie primär für die nächtliche Haushaltsgrundlast und Wärmepumpe reserviert werden. Ein Umladen ins Auto würde doppelten Zyklenverschleiß bedeuten und nachts teuren Netzbezug (30+ ct/kWh) provozieren.
+
+### Zyklenkosten-Formel im Sharegy Optimizer:
+$$C_\text{Zyklus} = \frac{\text{Anschaffungskosten Speicher (€)}}{\text{Garantierte Vollzyklen} \times \text{Kapazität (kWh)}} \approx 0{,}08\text{ bis }0{,}12\text{ €/kWh}$$
+Das EMS gibt das Umladen nur frei, wenn:
+$$\text{Netzstrompreis} > \text{Einspeisevergütung} + C_\text{Zyklus} + \text{Wandlungsverlust}$$
+
+---
+
+## 3. Bidirektionales Laden: V2H (Vehicle-to-Home) & V2G (Vehicle-to-Grid)
+
+Ein modernes Elektroauto besitzt eine Batteriekapazität von **50 bis 100 kWh** – das entspricht der **5- bis 10-fachen Kapazität** eines typischen Heimspeichers!
+
+| Modus | Beschreibung | Typischer Einsatzbereich |
+| :--- | :--- | :--- |
+| **V2H (Vehicle-to-Home)** | Das E-Auto speist Energie in das private Hausnetz ein. | Versorgt Haus und Wärmepumpe über mehrere trübe Tage hinweg; Notstromversorgung bei Stromausfall. |
+| **V2G (Vehicle-to-Grid)** | Das E-Auto speist geregelt ins öffentliche Stromnetz ein. | Teilnahme am Regelenergiemarkt; Spitzenlastkappung (Peak Shaving); Arbitrage bei Börsenpreis-Spitzen. |
+
+---
+
+## 4. Schutzfunktionen & Mindest-SoC-Garantie
+
+Um sicherzustellen, dass dein Auto jederzeit abfahrbereit bleibt, setzt Sharegy strikte Sicherheitsgrenzen:
+1. 🚗 **Mobilitäts-Reserve (Fahrzeug-Mindest-SoC)**: z. B. $60\,\%$ oder $150\,\text{km}$ Restreichweite werden niemals für V2H entladen.
+2. 🔋 **Heimspeicher-Tiefentladeschutz**: Stationäre Speicher werden nie unter die Notstrom-Schwelle (z. B. $10\,\%$) entladen.
+3. 🌡️ **Temperatur- und Zellüberwachung**: Reduktion der Lade-/Entladeleistung bei extremen Akkutemperaturen.
+""",
+                "content_en": r"""# DC-DC Charging, Storage-to-Storage & Bidirectional Charging (V2H / V2G) 🔋⚡🚗
+
+Modern solar and storage topologies enable direct DC power transfer (**DC-DC**) and bidirectional energy exchange between stationary batteries, solar arrays, and electric vehicles.
+
+---
+
+## 1. DC vs. AC Coupling: Efficiency & Power Flow
+
+Traditional EV chargers operate on alternating current (AC), necessitating dual conversion stages:
+
+```
+[ Traditional AC Topology ]
+PV (DC) ➔ Inverter (AC) ➔ Home Grid (AC) ➔ Onboard Charger (DC) ➔ EV Battery (DC)
+Overall Efficiency: approx. 80 % to 85 %
+
+[ Direct DC-DC Coupling ]
+PV (DC) ➔ DC Bus ➔ EV Battery (DC)
+Overall Efficiency: approx. 94 % to 97 %
+```
+
+---
+
+## 2. Storage-to-Storage Energy Transfer (Home Battery ➔ EV)
+
+Sharegy EMS orchestrates whether stationary battery capacity should discharge into your electric vehicle based on dynamic economics and weather forecasting:
+
+* ☀️ **High Solar Forecast**: Evening discharge into the EV is permitted if the home battery will reach full capacity early the next day.
+* ❄️ **Winter / Low Solar**: Home battery capacity is strictly prioritized for household baseload and heat pumps to avoid costly peak grid purchases.
+
+$$\text{Cycle Cost} \approx \frac{\text{Battery Investment Cost}}{\text{Guaranteed Cycles} \times \text{Capacity}} \approx 0.08\text{ to }0.12\text{ €/kWh}$$
+
+---
+
+## 3. Bidirectional Charging: V2H & V2G
+
+With EV capacities ranging from **50 to 100 kWh**, vehicles represent massive distributed energy reservoirs:
+* **V2H (Vehicle-to-Home)**: Powers domestic loads, shaving grid peaks and supplying multi-day resilience.
+* **V2G (Vehicle-to-Grid)**: Injects power into the public distribution grid during extreme price events and grid stress.
+
+---
+
+## 4. Guardrails & Minimum SoC Protection
+
+* 🚗 **Vehicle Mobility Reserve**: Guaranteed minimum EV SoC (e.g., $60\,\%$) is never discharged to home loads.
+* 🔋 **Stationary Battery Deep Discharge Lock**: Reserves emergency backup margins.
+""",
+                "tags": ["dc-dc", "v2g", "v2h", "bidirektional", "speicher-zu-speicher", "wirkungsgrad", "peak shaving", "batterie"],
+                "is_featured": True,
+                "sort_order": 4,
+            },
+
+            # ---------------------------------------------------------------------
+            # 20. OCPP 1.6 / 2.0.1 / 2.1 SMART CHARGING & PHASENUMSCHALTUNG
+            # ---------------------------------------------------------------------
+            {
+                "category": cats["devices-protocols"],
+                "slug": "ocpp-2-0-1-smart-charging-phasenumschaltung",
+                "context_key": "ocpp",
+                "title_de": "OCPP 1.6 / 2.0.1 / 2.1 Experte: Dynamisches PV-Laden, Phasenumschaltung & Departure Ready",
+                "title_en": "OCPP 1.6 / 2.0.1 / 2.1 Expert: Dynamic PV Charging, Phase Switching & Departure Ready",
+                "summary_de": "OCPP-Protokoll-Generationen (1.6-J, 2.0.1, 2.1), automatische 1p/3p Phasenumschaltung (1,4 kW – 11/22 kW), Abfahrtszeit-Zielladen (Departure Ready) und CSMS-Konfiguration.",
+                "summary_en": "OCPP protocol generations (1.6-J, 2.0.1, 2.1), automatic 1p/3p phase switching (1.4 kW – 11/22 kW), Departure Ready schedule optimization, and CSMS setup.",
+                "content_de": r"""# OCPP 1.6 / 2.0.1 / 2.1 Experte: Smart Charging & Phasenumschaltung 🚗🔌
+
+Das integrierte **Sharegy OCPP Charging Station Management System (CSMS)** unterstützt alle maßgeblichen offenen Ladeprotokolle für professionelles intelligentes Laden.
+
+---
+
+## 1. Die OCPP-Protokoll-Generationen im Vergleich
+
+| Feature | OCPP 1.6-J (JSON) | OCPP 2.0.1 | OCPP 2.1 |
+| :--- | :--- | :--- | :--- |
+| **Sicherheit & Verschlüsselung** | HTTP Basic Auth / TLS (WSS) | mTLS mit Client-Zertifikaten | Fortgeschrittene Zero-Trust mTLS |
+| **Smart Charging Profiles** | `SetChargingProfile` (Composite Schedule) | Granulares Device Model & Constraints | Erweiterte dynamische Stromrampen (0,1 A) |
+| **ISO 15118 Integration** | Eingeschränkt | Vollständig (Plug & Charge) | Nativ inkl. V2G Bidirektionalität |
+| **Phasenumschaltung** | Vendor-spezifisch / Relay Trigger | Standardisierte Variablen | Nativer Phasenumschaltungs-Befehl |
+
+---
+
+## 2. Automatische 1-Phasen / 3-Phasen-Umschaltung (1p / 3p)
+
+Nach der internationalen Ladungsnorm **IEC 61851** beträgt der minimale Ladestrom für Elektrofahrzeuge **6 Ampere pro Phase**.
+
+### Das Problem bei reiner 3-Phasen-Ladung:
+* $6\,\text{A} \times 3\,\text{Phasen} \times 230\,\text{V} = \mathbf{4{,}14\,\text{kW Mindestleistung}}$.
+* Erzeugt deine PV-Anlage an bewölkten Tagen z. B. nur $2{,}0\,\text{kW}$ Überschuss, müsste bei 3 Phasen entweder $2{,}14\,\text{kW}$ teurer Netzstrom zugekauft werden – oder das Laden pausiert komplett!
+
+### Die Lösung: Automatische Phasenumschaltung
+* **1-phasiger Modus**: Lädt stufenlos von **$1{,}38\,\text{kW}$** ($6\,\text{A}$) bis **$3{,}68\,\text{kW}$** ($16\,\text{A}$) bzw. $7{,}36\,\text{kW}$ ($32\,\text{A}$).
+* **3-phasiger Modus**: Lädt bei starkem Sonnenschein von **$4{,}14\,\text{kW}$** bis **$11{,}0\,\text{kW}$** (oder $22{,}0\,\text{kW}$).
+
+```
+[ PV-Überschuss < 4,2 kW ] ➔ 1-phasig aktiv (Laden startet bereits ab 1,4 kW!)
+[ PV-Überschuss >= 4,4 kW (für > 120 s) ] ➔ Umschaltung auf 3-phasig (Volle Power bis 11 kW)
+```
+
+> [!IMPORTANT]
+> **Schütz-Schonzeit (Totzeit)**:  
+> Sharegy hält bei der Umschaltung zwischen 1 und 3 Phasen eine Sicherheits-Pause von **60 bis 120 Sekunden** ein. Dies schützt das Bordladegerät (OBC) deines Autos vor zerstörerischen Phasen-Lichtbögen.
+
+---
+
+## 3. Departure Ready (Zielladen nach Abfahrtszeit)
+
+Mit **Departure Ready** stellst du sicher, dass dein Auto pünktlich zur Abfahrt den gewünschten Ladestand erreicht – zu den absolut geringsten Stromkosten:
+
+1. ⏰ **Abfahrtszeit festlegen**: z. B. morgen früh um `07:30 Uhr`.
+2. 🎯 **Ziel-SoC wählen**: z. B. `80 %` (oder gewünschte Reichweite in kWh).
+3. 🧠 **Sharegy Optimierungs-Algorithmus**:
+   - Lädt tagsüber priorisiert mit solarem Überschuss.
+   - Ermittelt die verbleibende Restenergiemenge.
+   - Berechnet anhand der Day-Ahead-Börsenstrompreise (EPEX Spot) die **günstigsten Stunden der Nacht** (z. B. 02:00 bis 04:30 Uhr) und schaltet die Wallbox exakt in diesem Preisfenster ein.
+
+---
+
+## 4. OCPP Server-Konfiguration & Einbindung
+
+Trage in der Weboberfläche deiner Wallbox (Easee, openWB, Webasto, Mennekes, Alfen, go-e, DaheimLaden, cFos, ABB etc.) folgende Verbindungsdaten ein:
+
+* **Backend-URL**: `wss://sharegy.de/ocpp/<DEINE_CHARGE_POINT_ID>`
+* **Port**: `443` (Verschlüsseltes TLS/WSS)
+* **Heartbeat-Intervall**: `60 Sekunden`
+* **MeterValues SampleInterval**: `10 bis 30 Sekunden`
+""",
+                "content_en": r"""# OCPP 1.6 / 2.0.1 / 2.1 Expert: Smart Charging & Phase Switching 🚗🔌
+
+Sharegy's built-in **OCPP Charging Station Management System (CSMS)** complies with universal open EV charging standards.
+
+---
+
+## 1. OCPP Protocol Generations Compared
+
+| Feature | OCPP 1.6-J (JSON) | OCPP 2.0.1 | OCPP 2.1 |
+| :--- | :--- | :--- | :--- |
+| **Security** | HTTP Basic / TLS (WSS) | mTLS with Client Certificates | Advanced Zero-Trust mTLS |
+| **Smart Charging Profiles** | Composite Schedules (`SetChargingProfile`) | Granular Device Variables | Dynamic current ramps in 0.1 A steps |
+| **ISO 15118** | Basic | Native Plug & Charge | Bidirectional V2G & V2X |
+| **Phase Switching** | Vendor-specific extensions | Standardized device model | Native phase control commands |
+
+---
+
+## 2. Automatic 1-Phase / 3-Phase Switching (1p / 3p)
+
+Under standard **IEC 61851**, EV onboard chargers require a minimum current of **6 A per phase**.
+
+* **3-Phase Minimum**: $6\,\text{A} \times 3 \times 230\,\text{V} = \mathbf{4.14\,\text{kW}}$.
+* **1-Phase Minimum**: $6\,\text{A} \times 1 \times 230\,\text{V} = \mathbf{1.38\,\text{kW}}$.
+
+Automatic phase switching dynamically shifts between 1-phase mode (1.4 kW to 3.7 kW) during cloudy periods and 3-phase mode (4.1 kW to 11/22 kW) under peak sunshine, incorporating a mandatory 60–120s safety dead-time to protect vehicle contactors.
+
+---
+
+## 3. Departure Ready (Target-Based Charging)
+
+Specify departure time (e.g., `07:30 AM`) and target battery SoC (e.g., `80 %`). Sharegy maximizes solar surplus during the day and schedules remaining required kilowatt-hours into the lowest-priced nighttime spot market hours.
+
+---
+
+## 4. CSMS Connection Parameters
+
+* **CSMS Endpoint**: `wss://sharegy.de/ocpp/<CHARGE_POINT_ID>`
+* **Port**: `443` (TLS)
+* **Heartbeat Interval**: `60 seconds`
+""",
+                "tags": ["ocpp", "ocpp 2.0.1", "ocpp 2.1", "phasenumschaltung", "smart charging", "1p3p", "departure ready", "wallbox"],
+                "is_featured": True,
+                "sort_order": 4,
+            },
+
+            # ---------------------------------------------------------------------
+            # 21. WÄRME, ESTRICH-SPEICHER & SOLARES PRE-COOLING
+            # ---------------------------------------------------------------------
+            {
+                "category": cats["optimizer"],
+                "slug": "waerme-mpc-estrich-speicher-und-pre-cooling",
+                "context_key": "heating",
+                "title_de": "Wärme, Estrich-Speicher & Solares Pre-Cooling: Thermische Bauteilaktivierung & MPC",
+                "title_en": "Heating, Screed Storage & Solar Pre-Cooling: Thermal Mass Activation & MPC",
+                "summary_de": "Prädiktives Lastmanagement für Heizung und Kühlung: Estrich als 10–25 kWh thermischer Speicher (DIN EN 12831), wettergeführte Vorlauftemperatur und solare Raumvorkühlung (Pre-Cooling).",
+                "summary_en": "Predictive HVAC load management: Building screed as 10–25 kWh thermal storage (DIN EN 12831), weather-guided flow temperature, and solar AC pre-cooling.",
+                "content_de": r"""# Wärme, Estrich-Speicher & Solares Pre-Cooling ♨️❄️🏠
+
+Das Heizungs- und Kühlungs-Modul auf `/app/heating` nutzt die thermische Trägheit deines Gebäudes als virtuellen Großspeicher (**Thermische Bauteilaktivierung**).
+
+---
+
+## 1. Das Konzept: Gebäude als 10–25 kWh Thermobatterie
+
+Ein massiver Betonestrich besitzt enorme Wärmekapazität:
+* Durch eine gezielte Vorladung um nur **$+1{,}0\,\text{K}$ bis $+1{,}5\,\text{K}$** nimmt der Baukörper **8 bis 18 kWh thermische Energie** auf.
+* Bei einer Wärmepumpe mit Leistungszahl (COP) von 3,5 entspricht dies einer flexiblen Stromaufnahme von **2,5 bis 5,0 kWh**.
+* **Der Effekt**: Das Haus bleibt den gesamten Abend über warm, ohne dass die Wärmepumpe in den teuren Spitzenlastzeiten Strom beziehen muss.
+
+---
+
+## 2. Wettergeführte Vorlauftemperatur & Prädiktives MPC (DIN EN 12831)
+
+Sharegy passt die Heizkurve vorausschauend an:
+* 📉 **Solares Absenken**: Erkennt die Wetterprognose intensive Sonneneinstrahlung auf Fensterflächen, senkt Sharegy die Vorlauftemperatur rechtzeitig ab, um ein Überhitzen der Wohnräume zu verhindern.
+* 📈 **Surplus-Boost (SG-Ready State 3)**: Bei PV-Überschuss wird die Vorlauftemperatur um $+2$ bis $+4\,\text{K}$ angehoben, um kostenlose Wärme im Estrich einzulagern.
+
+---
+
+## 3. Solares Pre-Cooling (Raumkühlung & Klimaanlage im Sommer)
+
+Im Sommer tritt häufig folgendes Dilemma auf:
+* Die stärkste Hitze staut sich in den späten Nachmittags- und Abendstunden (17:00–21:00 Uhr) im Gebäude.
+* Zu diesem Zeitpunkt sinkt die PV-Erzeugung bereits ab, und Strom an der Börse wird teuer.
+
+### Die Lösung mit Sharegy Pre-Cooling:
+1. ☀️ **Mittags-Kältepuffer**: Bei maximalem Solar-Peak (**12:00 bis 15:00 Uhr**) kühlt Sharegy die Räume automatisch um **$1{,}5\,\text{K}$ unter die Solltemperatur** vor (z. B. von $23{,}5^\circ\text{C}$ auf $22{,}0^\circ\text{C}$).
+2. 🛡️ **Abend-Entlastung**: Die abgekühlten Wände und Böden halten den Raum bis in die Nacht kühl – die Klimaanlage bleibt in der teuren Abendspitze ausgeschaltet!
+
+---
+
+## 4. Brauchwasserwärmepumpe (BWWP) & Verdichterschutz
+
+* **Solarer Heißwasser-Boost**: Aufheizung des Warmwasserspeichers auf bis zu **$60\text{–}65^\circ\text{C}$** bei PV-Überschuss.
+* **Verdichterschutz (Anti-Cycling)**: Mindestlaufzeit von $20\,\text{Minuten}$ und Mindestruhezeit von $15\,\text{Minuten}$ schützen den Wärmepumpen-Kompressor vor vorzeitigem Verschleiß.
+""",
+                "content_en": r"""# Heating, Screed Storage & Solar Pre-Cooling ♨️❄️🏠
+
+The HVAC module on `/app/heating` leverages the building's thermal mass as a distributed virtual battery (**Thermal Mass Activation**).
+
+---
+
+## 1. The Building as a 10–25 kWh Thermal Battery
+
+Concrete floor screed holds massive thermal capacity:
+* A slight pre-charge of **$+1.0\,\text{K}$ to $+1.5\,\text{K}$** stores **8 to 18 kWh of thermal energy**.
+* With a heat pump COP of 3.5, this shifts **2.5 to 5.0 kWh of electrical load**.
+* **Benefit**: The building maintains comfort throughout the evening without requiring grid power during expensive peak hours.
+
+---
+
+## 2. Model Predictive Control (MPC) & DIN EN 12831 Flow Temperature
+
+* 📉 **Anticipatory Curtailment**: Lowers heating curve hours before solar window irradiance warms the living spaces.
+* 📈 **Surplus Boost (SG-Ready State 3)**: Raises flow setpoint by $+2$ to $+4\,\text{K}$ when free solar power is available.
+
+---
+
+## 3. Solar Pre-Cooling (Summer Air Conditioning)
+
+* ☀️ **Midday Cold Storage**: Pre-cools rooms by **$1.5\,\text{K}$ below setpoint** during peak solar production (12:00 to 15:00).
+* 🛡️ **Evening Peak Shaving**: Cooled thermal mass keeps interior temperatures comfortable into the night, preventing expensive AC grid consumption.
+
+---
+
+## 4. DHW Heat Pump & Compressor Safeguards
+
+* **Solar Thermal Boost**: Heats domestic hot water tanks up to $60\text{–}65^\circ\text{C}$.
+* **Anti-Cycling Locks**: Enforces 20-minute minimum runtime and 15-minute resting intervals.
+""",
+                "tags": ["wärme", "heizung", "estrich", "pre-cooling", "klimaanlage", "thermische bauteilaktivierung", "mpc", "vorlauftemperatur"],
+                "is_featured": True,
+                "sort_order": 5,
+            },
+
+            # ---------------------------------------------------------------------
+            # 22. SEKUNDÄRE AC-ERZEUGER & BALKONKRAFTWERK-BILANZERKENNUNG
+            # ---------------------------------------------------------------------
+            {
+                "category": cats["inverters-meters"],
+                "slug": "sekundaere-ac-erzeuger-und-balkonkraftwerk-erkennung",
+                "context_key": "producers",
+                "title_de": "Sekundäre AC-Erzeuger: Balkonkraftwerke & 2. Wechselrichter sauber bilanzieren",
+                "title_en": "Secondary AC Generation: Accurate Balancing for Balcony Solar & 2nd Inverters",
+                "summary_de": "Automatische Erkennung und mathematisch saubere Bilanzierung ungebundener AC-Erzeuger (Balkonkraftwerke, Mikrowechselrichter, 2. Dachanlage) zur Vermeidung von Fehlberechnungen im Hausverbrauch.",
+                "summary_en": "Automated detection and accurate mathematical balancing of independent AC generators (balcony solar, microinverters, 2nd rooftop arrays) to prevent house load distortion.",
+                "content_de": r"""# Sekundäre AC-Erzeuger & Balkonkraftwerke sauber bilanzieren ☀️🔌
+
+Viele Haushalte erweitern ihre Photovoltaik um zusätzliche AC-Erzeuger: ein **Balkonkraftwerk (600 W / 800 W)** an der Steckdose, ein zweiter Garagen-Wechselrichter oder Mikrowechselrichter (Hoymiles, Enphase, Deye).
+
+---
+
+## 1. Das Problem ungebundener AC-Erzeuger im Hausnetz
+
+Klassische Wechselrichter-Systeme messen die Solarerzeugung nur an den eigenen DC-Strings. Speist nun ein separates Balkonkraftwerk Strom auf einer Phase ins Hausnetz ein, passiert Folgendes:
+
+* ❌ **Falsche Hausverbrauchsanzeige**: Der Smart Meter am Netzübergabepunkt sieht weniger Netzbezug und interpretiert dies fälschlicherweise als gesunkenen Hausverbrauch (oder sogar als negativen Hausverbrauch).
+* ❌ **Fehlerhafte Solarstatistik**: Die tatsächliche Gesamterzeugung der Solaranlagen wird um Hunderte Kilowattstunden pro Jahr zu niedrig ausgewiesen.
+* ❌ **Verfälschter Autarkiegrad**: Die Autarkie- und Eigenverbrauchsquoten stimmen mathematisch nicht mehr.
+
+---
+
+## 2. Die physikalische Bilanzkorrektur in Sharegy
+
+Sharegy löst dieses Problem durch eine entkoppelte Energiebilanzierung:
+
+$$P_\text{Solar, Gesamt} = P_\text{PV, Haupt-WR} + \sum P_\text{Sekundär, AC}$$
+
+$$P_\text{Haus, Real} = P_\text{Netzbezug} + P_\text{Solar, Gesamt} + P_\text{Batterie, Entladung} - P_\text{Netzeinspeisung} - P_\text{Batterie, Ladung}$$
+
+Dadurch wird der erzeugte Strom des Balkonkraftwerks physikalisch exakt als **Solarerzeugung** bilanziert und der echte Verbrauch aller Haushaltsgeräte transparent dargestellt.
+
+---
+
+## 3. Anbindungsmöglichkeiten in Sharegy
+
+Unter `/app/producers` im Bereich **„Sekundäre AC-Erzeuger“** kannst du beliebig viele zusätzliche Erzeuger anlegen:
+
+### Methode A: Smart Plug / Zwischenstecker (Empfohlen)
+* Stecke das Balkonkraftwerk an eine smarte Steckdose mit Energiemessung (z. B. **Shelly Plus 1PM**, **Shelly Plug S**, **Tasmota**, **Zigbee**).
+* Wähle das Gerät im Dropdown-Menü als Messpunkt aus.
+* Sharegy addiert die Live-Wattwerte sekundengenau zur Gesamterzeugung hinzu.
+
+### Methode B: Direkte Cloud- / API-Kopplung
+* Binde die Monitoring-Cloud des Mikrowechselrichters an (z. B. Hoymiles DTU, Enphase Envoy, SolarMAN Deye).
+
+### Methode C: Automatische Bilanzerkennung
+* Erkennt Sharegy anhand des Netzübergabepunkts und der regionalen Einstrahlungsdaten ein Einspeisemuster ohne registrierte PV-Erzeugung, schlägt das System automatisch das Anlegen eines sekundären Erzeugers vor.
+
+---
+
+## 4. Schritt-für-Schritt Einrichtung
+
+1. Öffne **Erzeuger & Speicher** (`/app/producers`).
+2. Scrolle zu **„Automatische Erkennung sekundärer AC-Erzeuger (2. Wechselrichter / BKW)“**.
+3. Klicke auf **„2. Anlage benennen & hinzufügen“**.
+4. Vergib einen Namen (z. B. *„Balkonkraftwerk Süd 800 W“*) und verknüpfe den Leistungssensor.
+5. Speichern – ab sofort stimmt deine Energiebilanz auf das Watt genau!
+""",
+                "content_en": r"""# Secondary AC Generation: Accurate Balancing for Balcony Solar & 2nd Inverters ☀️🔌
+
+Many homes expand their solar capacity with secondary generators: **plug-in balcony solar (600 W / 800 W)**, garage inverters, or microinverter arrays (Hoymiles, Enphase, Deye).
+
+---
+
+## 1. The Challenge of Unbound AC Generation
+
+Standard hybrid inverters only measure generation on their own DC strings. When a secondary AC inverter feeds power directly into a household circuit:
+
+* ❌ **Distorted Home Consumption**: Main grid meters observe lower grid import and misinterpret generation as reduced household load (or even negative consumption).
+* ❌ **Underreported Solar Yield**: Solar statistics miss hundreds of kilowatt-hours annually.
+* ❌ **Skewed Autarky Metrics**: Self-consumption and energy independence ratios become mathematically invalid.
+
+---
+
+## 2. Physical Energy Balance Correction in Sharegy
+
+Sharegy applies decoupled power-flow equations:
+
+$$P_\text{Solar, Total} = P_\text{PV, Main Inverter} + \sum P_\text{Secondary, AC}$$
+
+$$P_\text{Home, Actual} = P_\text{Grid Import} + P_\text{Solar, Total} + P_\text{Battery Discharge} - P_\text{Grid Export} - P_\text{Battery Charge}$$
+
+Every watt from balcony solar is correctly categorized as clean solar generation.
+
+---
+
+## 3. Integration Methods
+
+1. **Smart Plug / Relay (Recommended)**: Connect balcony inverters via a power-measuring smart switch (e.g., Shelly Plus 1PM, Shelly Plug S, Tasmota).
+2. **Direct Cloud / Gateway Ingestion**: Link manufacturer monitoring gateways (Hoymiles DTU, Enphase Envoy).
+3. **Automated Signature Detection**: Matches unmetered daytime export signatures with regional solar irradiance telemetry.
+""",
+                "tags": ["balkonkraftwerk", "bkw", "sekundärerzeuger", "wechselrichter", "bilanzierung", "autarkie", "ac-erzeugung", "mikrowechselrichter"],
+                "is_featured": True,
+                "sort_order": 5,
+            },
         ]
 
         for adata in articles_data:
