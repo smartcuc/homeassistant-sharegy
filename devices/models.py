@@ -291,18 +291,13 @@ class DeviceConfig(models.Model):
         return self.name or self.device.identifier
 
     def is_classified(self):
-
         if self.role is None:
             return False
 
         if self.metric_definition is None:
             return False
 
-        if self.energy_signal_type is None:
-            return False
-
         if self.role.key == "producer":
-
             return self.generator_type is not None and (
                 self.room is not None or self.floor is not None
             )
