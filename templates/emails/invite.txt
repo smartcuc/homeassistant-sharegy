@@ -1,0 +1,12 @@
+Hallo,
+
+du wurdest eingeladen, Teil der Sharegy-Energiegemeinschaft {{ tenant.name|default:"unserer Quartiers-Community" }} zu werden!
+
+Klicke auf folgenden Link, um die Einladung anzunehmen und dein Konto einzurichten:
+{{ invite_link }}
+
+Mit Sharegy kannst du deine Energiedaten in Echtzeit einsehen, Stromkosten optimieren und lokalen Solarstrom teilen.
+
+Viele Grüße,
+Dein Sharegy Team ⚡
+https://sharegy.de

@@ -28,8 +28,8 @@ def send_email(template, subject, user, context):
     tenant = membership.tenant if membership else None
 
     # ✅ Fallback
-    brand_color = "#00C48C"
-    logo_url = "https://sharegy.de/logo.png"
+    brand_color = "#4F46E5"
+    logo_url = None
     from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "Sharegy <invite@sharegy.cloud>")
 
     if tenant:

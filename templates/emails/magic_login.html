@@ -1,32 +1,30 @@
 {% extends "emails/base.html" %}
 
 {% block content %}
-<h2 style="font-size:20px; font-weight:700; color:#111; margin-top:0;">
+<h2 style="font-size:20px; font-weight:700; color:#0f172a; margin-top:0; margin-bottom:12px;">
   Willkommen zurück 👋
 </h2>
 
-<p style="color:#444; line-height:1.5;">
-  Hier ist dein persönlicher Login-Link für <strong>Sharegy</strong>.
+<p style="color:#475569; line-height:1.6; margin-top:0; margin-bottom:16px;">
+  Hier ist dein persönlicher Einmal-Login-Link für <strong>Sharegy</strong>. Klicke einfach auf den folgenden Button, um dich sicher in dein Konto einzuloggen:
 </p>
 
-<p style="color:#444; line-height:1.5;">
-  Öffne ihn einfach, um dich sicher einzuloggen:
-</p>
-
-<!-- ✅ CTA BUTTON (email-safe table) -->
-<table align="center" role="presentation" cellspacing="0" cellpadding="0" style="margin:30px auto;">
+<!-- CTA BUTTON (Email-Safe Table) -->
+<table align="center" role="presentation" cellspacing="0" cellpadding="0" style="margin:28px auto;">
   <tr>
-    <td align="center">
+    <td align="center" style="border-radius:12px; background:linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);">
       <a href="{{ magic_link }}"
          style="
           display:inline-block;
-          padding:14px 24px;
-          border-radius:10px;
+          padding:14px 32px;
+          border-radius:12px;
           text-decoration:none;
-          font-weight:600;
+          font-weight:700;
+          font-size:15px;
           color:#ffffff;
-          background: linear-gradient(90deg,#6366f1,#9333ea);
-          box-shadow: 0 4px 14px rgba(99,102,241,0.4);
+          background:linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+          box-shadow:0 4px 14px rgba(79, 70, 229, 0.35);
+          text-align:center;
          ">
         🔐 Sicher einloggen
       </a>
@@ -34,38 +32,32 @@
   </tr>
 </table>
 
-<!-- ✅ URL sichtbar (TRUST BOOST!) -->
-<p style="font-size:0.85em; color:#888; word-break:break-all; text-align:center;">
-  {{ magic_link }}
-</p>
+<!-- URL FALLBACK BOX -->
+<div style="background-color:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:12px 14px; margin:24px 0 16px 0;">
+  <div style="font-size:11px; font-weight:700; text-transform:uppercase; color:#64748b; letter-spacing:0.5px; margin-bottom:4px;">
+    Alternativer Direktlink:
+  </div>
+  <p style="font-size:12px; color:#6366f1; word-break:break-all; margin:0; line-height:1.4;">
+    <a href="{{ magic_link }}" style="color:#6366f1; text-decoration:underline;">{{ magic_link }}</a>
+  </p>
+</div>
 
-<!-- ✅ FALLBACK -->
-<p style="font-size:0.9em;color:#666; margin-top:20px;">
-  Falls der Button nicht funktioniert, kannst du den Link oben direkt öffnen.
-</p>
+<!-- SECURITY & EXPIRATION NOTICE -->
+<div style="margin-top:24px; padding-top:16px; border-top:1px solid #f1f5f9; color:#64748b; font-size:12px; line-height:1.5;">
+  <p style="margin:4px 0;">
+    ⏳ <strong>Gültigkeit:</strong> Dieser Login-Link ist nur <strong>15 Minuten</strong> gültig und kann nur einmal verwendet werden.
+  </p>
+  <p style="margin:4px 0; color:#94a3b8;">
+    🔒 Falls du diese Anfrage nicht selbst gestellt hast, kannst du diese E-Mail ignorieren. Dein Account bleibt vollständig geschützt.
+  </p>
+</div>
 
-<!-- ✅ SECURITY -->
-<p style="font-size:0.9em;color:#888;margin-top:20px;">
-  ⏳ Dieser Login-Link ist nur <strong>15 Minuten</strong> gültig  
-  und kann nur einmal verwendet werden.
-</p>
-
-<p style="font-size:0.9em;color:#888;">
-  🔒 Falls du diese Anfrage nicht gestartet hast, kannst du diese E-Mail ignorieren.
-</p>
-
-<!-- ✅ BRAND FOOTER -->
-<p style="font-size:0.8em;color:#bbb;margin-top:28px;">
-  Sharegy · Energie verstehen & teilen
-</p>
-
-<!-- ✅ TRACKING PIXEL -->
+<!-- TRACKING PIXEL -->
+{% if tracking_base_url and token %}
 <img src="{{ tracking_base_url }}/email/open/{{ token }}"
      width="1"
      height="1"
-     style="display:none;" />
-
+     alt=""
+     style="display:none; width:1px; height:1px;" />
+{% endif %}
 {% endblock %}
-
-
-

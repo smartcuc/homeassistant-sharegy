@@ -1,0 +1,13 @@
+Hallo{% if user.first_name %} {{ user.first_name }}{% endif %},
+
+deine aktuelle Abrechnung für Sharegy ist verfügbar.
+
+Gesamtbetrag: {{ amount|default:"0,00" }} €
+{% if invoice_number %}Rechnungsnummer: {{ invoice_number }}{% endif %}
+
+Zur Übersicht und PDF-Download:
+{{ dashboard_link|default:"https://sharegy.de/app/billing" }}
+
+Viele Grüße,
+Dein Sharegy Team ⚡
+https://sharegy.de

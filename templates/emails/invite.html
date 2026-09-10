@@ -1,15 +1,60 @@
 {% extends "emails/base.html" %}
 
 {% block content %}
+<h2 style="font-size:20px; font-weight:700; color:#0f172a; margin-top:0; margin-bottom:12px;">
+  Du wurdest eingeladen 🎉
+</h2>
 
-<h2>Du wurdest eingeladen 🎉</h2>
-
-<p>Du wurdest eingeladen, Teil einer Sharegy-Community zu werden.</p>
-
-<p>
-   invite_link }}" style="background:#00C48C;color:white;padding:12px 20px;">
-    Einladung annehmen
-  </a>
+<p style="color:#475569; line-height:1.6; margin-top:0; margin-bottom:16px;">
+  Hallo,<br>
+  du wurdest herzlich eingeladen, der Sharegy-Energiegemeinschaft 
+  <strong>{{ tenant.name|default:"unserer Quartiers-Community" }}</strong> beizutreten!
 </p>
 
+<!-- INVITATION HIGHLIGHT CARD -->
+<div style="background-color:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px; padding:18px; margin:20px 0;">
+  <div style="font-size:12px; font-weight:700; text-transform:uppercase; color:#166534; letter-spacing:0.5px; margin-bottom:6px;">
+    ⚡ Gemeinsam saubere Energie nutzen
+  </div>
+  <p style="font-size:13px; color:#15803d; line-height:1.5; margin:0;">
+    Mit Sharegy kannst du deine Energiedaten in Echtzeit einsehen, an lokalem Energy Sharing teilnehmen, Stromkosten senken und die Energiewende aktiv mitgestalten.
+  </p>
+</div>
+
+<!-- CTA BUTTON -->
+<table align="center" role="presentation" cellspacing="0" cellpadding="0" style="margin:28px auto 20px;">
+  <tr>
+    <td align="center" style="border-radius:12px; background:linear-gradient(135deg, #059669 0%, #0284c7 100%);">
+      <a href="{{ invite_link }}"
+         style="
+          display:inline-block;
+          padding:14px 32px;
+          border-radius:12px;
+          text-decoration:none;
+          font-weight:700;
+          font-size:15px;
+          color:#ffffff;
+          background:linear-gradient(135deg, #059669 0%, #0284c7 100%);
+          box-shadow:0 4px 14px rgba(5, 150, 105, 0.35);
+          text-align:center;
+         ">
+        ✨ Einladung jetzt annehmen
+      </a>
+    </td>
+  </tr>
+</table>
+
+<!-- URL FALLBACK -->
+<div style="background-color:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:12px 14px; margin:20px 0 16px 0;">
+  <div style="font-size:11px; font-weight:700; text-transform:uppercase; color:#64748b; letter-spacing:0.5px; margin-bottom:4px;">
+    Alternativer Direktlink:
+  </div>
+  <p style="font-size:12px; color:#0284c7; word-break:break-all; margin:0; line-height:1.4;">
+    <a href="{{ invite_link }}" style="color:#0284c7; text-decoration:underline;">{{ invite_link }}</a>
+  </p>
+</div>
+
+<p style="font-size:12px; color:#94a3b8; text-align:center; margin-top:20px;">
+  Falls du diese Einladung unerwartet erhalten hast, kannst du diese Nachricht ignorieren.
+</p>
 {% endblock %}

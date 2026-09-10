@@ -1,57 +1,110 @@
 <!DOCTYPE html>
-<html>
-  <body style="margin:0;padding:0;background:#f4f6f8;">
-    <table width="100%" cellpadding="0" cellspacing="0">
-      <tr>
-        <td align="center">
+<html lang="de" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <title>Sharegy</title>
+  <style type="text/css">
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
+    body { margin: 0; padding: 0; width: 100% !important; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    @media only screen and (max-width: 620px) {
+      .email-container { width: 100% !important; margin: 0 auto !important; border-radius: 0 !important; }
+      .mobile-p-20 { padding: 20px 16px !important; }
+      .mobile-p-16 { padding: 16px 12px !important; }
+    }
+  </style>
+</head>
+<body style="margin:0; padding:0; background-color:#f8fafc; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color:#334155;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f8fafc; margin:0; padding:24px 0 32px 0;">
+    <tr>
+      <td align="center">
+        <!--[if (gte mso 9)|(IE)]>
+        <table role="presentation" width="600" align="center" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td>
+        <![endif]-->
+        
+        <!-- MAIN CONTAINER -->
+        <table role="presentation" class="email-container" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px; background-color:#ffffff; margin:0 auto; border-radius:16px; border:1px solid #e2e8f0; overflow:hidden; box-shadow:0 4px 16px rgba(15, 23, 42, 0.04);">
+          
+          <!-- BRAND HEADER -->
+          <tr>
+            <td align="center" style="padding:28px 24px 20px 24px; border-bottom:1px solid #f1f5f9; background:linear-gradient(180deg, #fafafa 0%, #ffffff 100%);">
+              {% if logo_url and logo_url != "https://sharegy.de/logo.png" %}
+                <img src="{{ logo_url }}" alt="{{ tenant.name|default:'Sharegy' }}" height="38" style="display:block; margin:0 auto; height:38px; width:auto; max-width:200px; object-fit:contain; border:0;" />
+              {% else %}
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center">
+                  <tr>
+                    <td align="center" style="vertical-align:middle;">
+                      <a href="https://sharegy.de" style="text-decoration:none; display:inline-block;">
+                        <span style="font-size:24px; line-height:28px; vertical-align:middle;">⚡</span>
+                        <span style="font-size:22px; font-weight:800; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; letter-spacing:-0.5px; color:#4f46e5; vertical-align:middle; text-transform:lowercase;">sharegy</span>
+                      </a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td align="center" style="padding-top:4px;">
+                      <span style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1.2px; color:#94a3b8; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                        Intelligentes Energiemanagement
+                      </span>
+                    </td>
+                  </tr>
+                </table>
+              {% endif %}
+            </td>
+          </tr>
 
-          <!-- CONTAINER -->
-          <table width="600" cellpadding="0" cellspacing="0" style="
-              background:#ffffff;
-              margin:40px 0;
-              padding:32px;
-              font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
-              border-radius:10px;
-              box-shadow:0 2px 10px rgba(0,0,0,0.03);
-          ">
+          <!-- MAIN CONTENT BLOCK -->
+          <tr>
+            <td class="mobile-p-20" style="padding:32px 32px 28px 32px; font-size:15px; line-height:1.6; color:#334155;">
+              {% block content %}{% endblock %}
+            </td>
+          </tr>
 
-            <!-- LOGO -->
-            <tr>
-              <td align="center" style="padding-bottom:25px;">
-                <img src="https://sharegy.de/logo.png" height="38" alt="Sharegy">
-              </td>
-            </tr>
+          <!-- FOOTER -->
+          <tr>
+            <td style="padding:24px 32px; background-color:#f8fafc; border-top:1px solid #f1f5f9; text-align:center; font-size:12px; line-height:1.6; color:#94a3b8;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td align="center" style="padding-bottom:12px;">
+                    <span style="font-weight:600; color:#64748b;">Sharegy ⚡</span> · Energie verstehen, steuern & teilen
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding-bottom:12px; font-size:11px;">
+                    <a href="https://sharegy.de" style="color:#6366f1; text-decoration:none; font-weight:500; margin:0 8px;">Web-App</a>
+                    <span style="color:#cbd5e1;">•</span>
+                    <a href="https://sharegy.de/help" style="color:#6366f1; text-decoration:none; font-weight:500; margin:0 8px;">Hilfe & Support</a>
+                    <span style="color:#cbd5e1;">•</span>
+                    <a href="https://sharegy.de/datenschutz" style="color:#6366f1; text-decoration:none; font-weight:500; margin:0 8px;">Datenschutz</a>
+                    <span style="color:#cbd5e1;">•</span>
+                    <a href="https://sharegy.de/impressum" style="color:#6366f1; text-decoration:none; font-weight:500; margin:0 8px;">Impressum</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="font-size:11px; color:#cbd5e1;">
+                    © {% now "Y" %} smartEvo GmbH · Alle Rechte vorbehalten.
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
 
-            <!-- CONTENT -->
-            <tr>
-              <td>
-                {% block content %}{% endblock %}
-              </td>
-            </tr>
+        </table>
+        <!-- /MAIN CONTAINER -->
 
-            <!-- FOOTER -->
-            <tr>
-              <td style="
-                  padding-top:35px;
-                  font-size:12px;
-                  color:#9ca3af;
-                  text-align:center;
-                  line-height:1.6;
-              ">
-                Sharegy ⚡<br>
-                Intelligentes Energiemanagement<br><br>
-
-                <a href="https://sharegy.de"
-                   style="color:#9ca3af;text-decoration:none;">
-                   sharegy.de
-                </a>
-              </td>
-            </tr>
-
-          </table>
-
-        </td>
-      </tr>
-    </table>
-  </body>
+        <!--[if (gte mso 9)|(IE)]>
+            </td>
+          </tr>
+        </table>
+        <![endif]-->
+      </td>
+    </tr>
+  </table>
+</body>
 </html>

@@ -1,55 +1,60 @@
 {% extends "emails/base.html" %}
 
 {% block content %}
-
-<h2 style="margin-bottom:20px;">
+<h2 style="font-size:20px; font-weight:700; color:#0f172a; margin-top:0; margin-bottom:12px;">
   MQTT-Konfiguration für dein Gerät ✅
 </h2>
 
-<p>
-  Dein Gerät wurde erfolgreich angelegt. Nachfolgend findest du die MQTT-Zugangsdaten für die Verbindung mit Sharegy.
+<p style="color:#475569; line-height:1.6; margin-top:0; margin-bottom:16px;">
+  Dein Gerät wurde erfolgreich im System registriert. Nachfolgend findest du die verschlüsselten MQTT-Zugangsdaten für die direkte Telemetrie-Anbindung an Sharegy:
 </p>
 
-<table style="margin-top:20px;font-size:14px;">
-  <tr>
-    <td><strong>Host:</strong></td>
-    <td>{{ host }}</td>
-  </tr>
-  <tr>
-    <td><strong>Port:</strong></td>
-    <td>{{ port }}</td>
-  </tr>
-  <tr>
-    <td><strong>Benutzer:</strong></td>
-    <td>{{ username }}</td>
-  </tr>
-  <tr>
-    <td><strong>Passwort:</strong></td>
-    <td>{{ password }}</td>
-  </tr>
-</table>
+<!-- CREDENTIALS TABLE -->
+<div style="background-color:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:18px; margin:20px 0;">
+  <div style="font-size:11px; font-weight:700; text-transform:uppercase; color:#64748b; letter-spacing:0.5px; margin-bottom:10px;">
+    📡 Server- & Zugangsdaten
+  </div>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="font-size:13px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', monospace;">
+    <tr>
+      <td style="padding:6px 0; color:#64748b; width:100px;">Host:</td>
+      <td style="padding:6px 0; color:#0f172a; font-weight:700;"><code>{{ host }}</code></td>
+    </tr>
+    <tr>
+      <td style="padding:6px 0; color:#64748b; border-top:1px dashed #e2e8f0;">Port:</td>
+      <td style="padding:6px 0; color:#0f172a; font-weight:700; border-top:1px dashed #e2e8f0;"><code>{{ port }}</code></td>
+    </tr>
+    <tr>
+      <td style="padding:6px 0; color:#64748b; border-top:1px dashed #e2e8f0;">Benutzer:</td>
+      <td style="padding:6px 0; color:#0f172a; font-weight:700; border-top:1px dashed #e2e8f0;"><code>{{ username }}</code></td>
+    </tr>
+    <tr>
+      <td style="padding:6px 0; color:#64748b; border-top:1px dashed #e2e8f0;">Passwort:</td>
+      <td style="padding:6px 0; color:#0f172a; font-weight:700; border-top:1px dashed #e2e8f0;"><code>{{ password }}</code></td>
+    </tr>
+  </table>
+</div>
 
-<p style="margin-top:20px;">
-  <strong>Topic</strong>
+<!-- TOPIC SECTION -->
+<div style="background-color:#f1f5f9; border:1px solid #cbd5e1; border-radius:10px; padding:12px 14px; margin:16px 0;">
+  <div style="font-size:11px; font-weight:700; text-transform:uppercase; color:#475569; letter-spacing:0.5px; margin-bottom:4px;">
+    🎯 MQTT Publish Topic
+  </div>
+  <code style="font-size:13px; color:#4f46e5; word-break:break-all; font-weight:700; font-family:monospace;">
+    {{ topic }}
+  </code>
+</div>
+
+<!-- CLI TEST COMMAND -->
+<div style="margin:20px 0;">
+  <div style="font-size:11px; font-weight:700; text-transform:uppercase; color:#64748b; letter-spacing:0.5px; margin-bottom:6px;">
+    💻 Testbefehl (Mosquitto CLI)
+  </div>
+  <pre style="background:#0f172a; color:#38bdf8; padding:12px 14px; border-radius:10px; font-size:12px; line-height:1.5; overflow-x:auto; margin:0; font-family:Consolas, Monaco, monospace;">mosquitto_pub -h {{ host }} -p {{ port }} \
+  -u {{ username }} -P {{ password }} \
+  -t "{{ topic }}" -m '{"power_w": 250}'</pre>
+</div>
+
+<p style="font-size:13px; color:#64748b; line-height:1.5; margin-top:20px;">
+  💡 Sobald die ersten Telemetriedaten empfangen werden, wird der Status des Geräts im Sharegy-Dashboard automatisch auf <strong>Aktiv</strong> gesetzt.
 </p>
-
-<p style="color:#4f46e5;word-break:break-all;">
-  {{ topic }}
-</p>
-
-<p style="margin-top:20px;">
-  <strong>MQTT-Testnachricht (optional)</strong>
-</p>
-
-<pre style="background:#f3f4f6;padding:10px;border-radius:6px;">
-mosquitto_pub -h {{ host }} -p {{ port }} \
--u {{ username }} -P {{ password }} \
--t "{{ topic }}" -m 1
-</pre>
-
-<p style="margin-top:20px;">
-  Sobald die ersten Messwerte von diesem Gerät empfangen werden,
-  erscheint es automatisch als aktiv in Sharegy.
-</p>
-
 {% endblock %}
