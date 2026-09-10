@@ -208,34 +208,6 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "", i
             {/* EXPANDABLE / MODAL BODY */}
             {(!collapsed || inModal) && (
                 <div className="p-5 space-y-5 animate-fade-in border-t border-slate-100 dark:border-slate-800">
-                    {/* 🌟 ENERGIE-PROFIL & TARIF-KOMPASS BANNER */}
-                    {data.energy_profile && (
-                        <div className="p-4 rounded-2xl bg-gradient-to-r from-indigo-900/90 via-slate-900 to-indigo-950 text-white shadow-md border border-indigo-700/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                            <div className="space-y-1">
-                                <div className="flex items-center gap-2">
-                                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-indigo-500/30 text-indigo-300 border border-indigo-400/30">
-                                        {t("energy_profile.badge_label", "Energie-Profil")}: {data.energy_profile.profile_code}
-                                    </span>
-                                    <span className="text-xs font-bold text-white">{data.energy_profile.profile_name}</span>
-                                </div>
-                                <div className="text-xs text-indigo-200/90 flex items-center gap-1.5">
-                                    <span>💡</span>
-                                    <span>{data.energy_profile.tariff_verdict_title}</span>
-                                    <span className="text-slate-400">·</span>
-                                    <span className="text-emerald-400 font-bold">ca. {data.energy_profile.estimated_savings_eur_year} €{t("energy_profile.per_year", "/Jahr")} {t("energy_profile.savings_potential", "Sparpotenzial")}</span>
-                                </div>
-                            </div>
-                            <Link
-                                to="/app/energy-profile"
-                                className="px-3.5 py-2 rounded-xl bg-white text-indigo-900 hover:bg-indigo-50 text-xs font-bold transition shrink-0 flex items-center gap-1 shadow-sm self-start sm:self-auto cursor-pointer"
-                            >
-                                <span>🏡</span>
-                                <span>{t("energy_profile.open_profile_btn", "Profil & Rechner öffnen")}</span>
-                                <span>→</span>
-                            </Link>
-                        </div>
-                    )}
-
                     {/* 5 PILLARS STATUS CARDS */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
 
