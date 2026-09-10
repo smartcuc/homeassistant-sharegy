@@ -148,6 +148,6 @@ Mit dem **Release des Stripe & SEPA Subscription Checkouts (Karten, Lastschrift,
 2. **Onboarding-Fokus auf 1-Klick Cloud-Inverter & Interaktive Demo-Vorschau**:
    * Den 1-Klick Cloud-Login und die Instant-Demo-Profile im Anmelde-Flow prominent platzieren, damit Interessenten ohne Registrierungshürde sofort den vollen Mehrwert der 4 Pro-Suiten erleben.
 3. **Nächste strategische Wachstums-Horizonte**:
-   * **Matter / EEBUS Bridge**: Lokale Protokollzertifizierung zur Ergänzung von Cloud- und Outbound-WSS-Kanälen.
+   * **EEBUS & Cloud Ecosystem Bridge**: Standardisierte Schnittstellen zur Ergänzung von Cloud- und Outbound-WSS-Kanälen.
    * **BNetzA AS4 Marktkommunikations-Partnerschaft**: Kooperation mit zertifizierten EDIFACT-Dienstleistern für automatisierte Bilanzkreis-Meldungen bei EVUs.
    * **App Store & Play Store Direktvertrieb**: Release der nativen Apps im Apple App Store & Google Play Store für maximale Markenpräsenz.

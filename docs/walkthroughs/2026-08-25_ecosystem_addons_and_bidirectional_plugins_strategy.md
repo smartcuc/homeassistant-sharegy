@@ -111,13 +111,8 @@ fields:
 * **REST-Bridge**: Bereitstellung von `/api/grafana/search`, `/query` und `/annotations` (kompatibel mit Grafana JSON / Infinity Datasource).
 * **Fertiges Cockpit**: `sharegy_energy_cockpit.json` mit Gauges, 24h-Verläufen, Börsenpreisen und Sub-Metering-Charts.
 
-### D. Matter 1.3 Energy Management Hub (`providers.matter`)
-* **Nativer CSA Matter 1.3 Hub**: Direkte Einbindung von Smart Plugs (Eve Energy, Shelly), EVSE-Wallboxen und Wärmepumpen via Thread / Wi-Fi / IP.
-* **Unterstützte Cluster**:
-  * `0x0090` Electrical Power Measurement (Live W, V, A, Power Factor).
-  * `0x0091` Electrical Energy Measurement (kWh Zählerstände).
-  * `0x0006` On/Off Cluster (Schalten & Toggeln).
-  * `0x0098` / `0x0099` Device Energy Management & EVSE Wallbox-Ladedrosselung.
+### D. Shelly Outbound WSS & Relais-Aktorik
+* **Direkte WSS-Anbindung**: Zero-Hardware Kopplung für Shelly Gen2/Gen3/Pro Relais über Port 443 Outbound ohne Portweiterleitung.
 
 ### E. ioBroker Adapter (`iobroker.sharegy`)
 * Zwei-Wege-Synchronisation von Datenpunkten über den Sharegy MQTT-Hub für klassische KNX- und SPS-Installationen.
@@ -126,7 +121,7 @@ fields:
 
 ## 🚀 Fazit & Nutzen
 * **Keine eigene Hardware nötig**: Spart 18 Monate Entwicklungszeit und massive Supportkosten.
-* **100 % Kompatibilität**: Mit HA, Matter 1.3, Grafana und evcc ist Sharegy ab Tag 1 kompatibel zu nahezu allen am Markt existierenden Wallboxen, Wärmepumpen und Wechselrichtern.
+* **100 % Kompatibilität**: Mit HA, Shelly, OCPP, Grafana und evcc ist Sharegy ab Tag 1 kompatibel zu nahezu allen am Markt existierenden Wallboxen, Wärmepumpen und Wechselrichtern.
 * **Fokus auf Kernkompetenz**: Sharegy konzentriert sich auf KI-Prognosen, EPEX-Spot-Optimierung, Community-Bilanzen und Abrechnung.
 
 

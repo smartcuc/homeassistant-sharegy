@@ -28,7 +28,7 @@ graph TD
     subgraph TIER 3: Ökosystem-Bridges & Hardware (✅ 100%)
         T3_1["8. Deklaratives Device-Profile Addon-System (Task 5.7) ⏳"]
         T3_2["9. Bi-direktionale Plugins: Home Assistant & Grafana (Task 5.8) ✅"]
-        T3_3["10. Matter 1.3 Energy Management Hub (Task 5.12) ✅"]
+        T3_3["10. Shelly Outbound WSS & Relais-Aktorik (Task 5.12) ✅"]
     end
 
     subgraph TIER 4: Mobile Apps & User Experience
@@ -158,18 +158,14 @@ graph TD
   3. **ioBroker & Shelly MQTT Integration**: 2-Wege-Sync über globale MQTT-Zugangsdaten.
 * **Ergebnis**: 100 % Kompatibilität zu Home Assistant, Grafana und Smart-Home-Umgebungen.
 
-#### 8. ⚡ Task 5.12 (Matter Hub): Matter Bridge & CSA Matter 1.3 Energy Management (🟢 ABGESCHLOSSEN / 100%)
+#### 8. ⚡ Task 5.12: Shelly Outbound WSS & Relais-Aktorik (🟢 ABGESCHLOSSEN / 100%)
 * **Maßnahmen**:
-  1. **Matter 1.3 Cluster Engine (`providers.matter`)**:
-     * `0x0090` Electrical Power Measurement (Live W, V, A, Power Factor).
-     * `0x0091` Electrical Energy Measurement (kWh Zählerstände).
-     * `0x0006` On/Off Switch & Relais Control.
-     * `0x0098` / `0x0099` Device Energy Management & EVSE Wallbox-Ladedrosselung.
-  2. **Commissioning Engine**:
-     * Matter QR-Code Parser (`MT:...`), 11-/21-stelliger Pairing-Code & Setup-PIN Decoder.
-  3. **Frontend UI**:
-     * `MatterHubCard.jsx` & `MatterPairingModal.jsx` in `InterfacesPage.jsx`.
-* **Ergebnis**: Direkte, herstellerunabhängige Anbindung modernster Matter-Geräte (Eve Energy, Shelly Matter, Wallboxen).
+  1. **Outbound WebSocket Engine (Port 443 WSS)**:
+     * Direkte verschlüsselte Live-Anbindung für Shelly Plus 1PM, Pro 3EM, Plugs und Gen3 Geräte.
+     * < 50 ms Reaktionszeit ohne Cloud-Kosten und ohne Portweiterleitung.
+  2. **Relais-Schaltung & Live-Aktorik**:
+     * Bidirektionale Steuerung für BWWP, Heizstäbe und Haushaltsgeräte.
+* **Ergebnis**: Zero-Hardware Anbindung ohne lokales Zusatz-Gateway.
 
 ---
 
@@ -186,7 +182,7 @@ graph TD
 #### 10. ❓ Task 5.4 & 5.5: Kontextuelles Help-System & FAQ/Handbuch (DE/EN) (🟢 ABGESCHLOSSEN / 100%)
 * **Maßnahmen**:
   1. In-App Side-Drawer mit Quick-Guides auf allen Hauptseiten.
-  2. Durchsuchbares FAQ- und Wissensportal (8 Kategorien, 14 umfassende Artikel) inkl. Grafana, Home Assistant und Matter 1.3.
+  2. Durchsuchbares FAQ- und Wissensportal (9 Kategorien, 37 umfassende Artikel) inkl. Grafana, Home Assistant und OCPP 2.0.1.
   3. Zweisprachig gepflegt (Deutsch / Englisch).
 * **Ergebnis**: Nahtloses Onboarding und minimale Support-Aufwände.
 

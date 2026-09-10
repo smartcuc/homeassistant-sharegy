@@ -127,10 +127,10 @@ Ein intelligenter Chat- und Empfehlungs-Assistent direkt im Dashboard:
 
 ---
 
-### 🏠 Feature 6: Matter & EEBUS Local Bridge (Offline-First)
-- **Hintergrund**: Zukunftsfähige Wärmepumpen (Daikin, Vaillant, Viessmann, Bosch) und Smart-Home-Komponenten unterstützen die offenen Standards **Matter** und **EEBUS**.
+### 🏠 Feature 6: EEBUS & Home Connect Cloud Bridge (SaaS-kompatibel)
+- **Hintergrund**: Zukunftsfähige Wärmepumpen (Daikin, Vaillant, Viessmann, Bosch) und Smart-Home-Großgeräte unterstützen offene Cloud- und Outbound-Schnittstellen (EEBUS Cloud, Home Connect API).
 - **Funktion in Sharegy**:
-  - Lokale Anbindung von Haushaltsgroßgeräten (Waschmaschinen, Trockner, Geschirrspüler via Matter/Home Connect), um Spül- und Waschgänge automatisch bei PV-Überschuss zu starten.
+  - Cloud-Anbindung von Haushaltsgroßgeräten (Waschmaschinen, Trockner, Geschirrspüler via Home Connect / EEBUS API), um Spül- und Waschgänge automatisch bei PV-Überschuss zu starten.
 
 ---
 
@@ -149,7 +149,7 @@ gantt
     B2B Installateur- & Fachpartner Portal :2026-10, 2026-12
     § 14a EnWG Modul 3 (Variable Netzentgelte):2026-12, 2027-02
     Sharegy Copilot (KI-Energieberater)     :2027-01, 2027-03
-    Matter & EEBUS Local Bridge            :2027-04, 2027-07
+    EEBUS & Home Connect Cloud Bridge      :2027-04, 2027-07
 ```
 
 ---

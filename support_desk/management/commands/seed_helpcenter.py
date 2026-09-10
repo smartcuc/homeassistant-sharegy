@@ -2542,50 +2542,6 @@ The official **Sharegy Home Assistant Integration** streams all your local smart
                 "is_featured": True,
                 "sort_order": 1,
             },
-            {
-                "category": cats["devices-protocols"],
-                "slug": "matter-1-3-energy-management-und-hub",
-                "context_key": "interfaces",
-                "title_de": "Matter 1.3 Energy Hub (Smart Plugs, EVSE & Inverter)",
-                "title_en": "Matter 1.3 Energy Hub (Smart Plugs, EVSE & Inverters)",
-                "summary_de": "Kopplung und Steuerung moderner Matter-Geräte via Thread/Wi-Fi/IP unter Nutzung des CSA Matter 1.3 Energy Management Standards.",
-                "summary_en": "Commissioning and controlling Matter devices via Thread/Wi-Fi/IP utilizing the CSA Matter 1.3 Energy Management standard.",
-                "content_de": r"""# Matter 1.3 Energy Management Hub
-
-Sharegy verfügt über einen nativen **Matter Hub** mit voller Unterstützung des **CSA Matter 1.3 Energy Management Standards**.
-
-## 1. Unterstützte Matter-Cluster
-* **`0x0090` (Electrical Power Measurement)**: Misst Live-Leistung (`ActivePower` in W/mW), Spannung (`RMSVoltage` in mV), Stromstärke (`ActiveCurrent` in mA) und Power Factor.
-* **`0x0091` (Electrical Energy Measurement)**: Erfasst kumulierte Zählerstände (`CumulativeEnergyImported`) in kWh.
-* **`0x0006` (On/Off Cluster)**: Schaltet Relais und Zwischenstecker ein, aus oder toggelt ihren Zustand.
-* **`0x0098` / `0x0099` (Device Energy Management & EVSE)**: Dynamische Leistungsbegrenzung (`power_adjustment_limit_w`) und Ladestromsteuerung (`max_charge_current_a`) für Wallboxen und Wärmepumpen.
-
-## 2. Gerät per QR-Code oder Pairing-Code koppeln
-1. Gehe in Sharegy auf **Schnittstellen & MQTT → Matter 1.3 Energy Hub**.
-2. Klicke auf **+ Neues Matter-Gerät koppeln**.
-3. Wähle die Kopplungsmethode:
-   * **📷 QR-Code Payload**: z. B. `MT:Y.K9042C00KA0648G00`
-   * **🔢 Manueller Code**: 11-stellig (z. B. `34970112332`) oder 21-stellig
-   * **🔑 Setup-PIN**: 8-stelliger Geräte-PIN (z. B. `20202021`)
-4. Nach dem Klick auf **Gerät verbinden** wird das Gerät automatisch in der Matter Fabric registriert und in die Sharegy-Zählerhierarchie eingebunden.
-""",
-                "content_en": r"""# Matter 1.3 Energy Management Hub
-
-Sharegy provides a native **Matter Hub** fully compliant with the **CSA Matter 1.3 Energy Management standard**.
-
-## 1. Supported Matter Clusters
-* **`0x0090` (Electrical Power Measurement)**: Real-time active power (W), RMS voltage, active current, and power factor.
-* **`0x0091` (Electrical Energy Measurement)**: Cumulative imported energy (kWh).
-* **`0x0006` (On/Off Cluster)**: Smart plug relay toggling and switching.
-* **`0x0098` / `0x0099` (Device Energy Management & EVSE)**: Dynamic EV charging limits and heat pump modulation.
-
-## 2. Commissioning Devices
-Pair devices in seconds via QR-Code (`MT:...`), 11-/21-digit manual pairing codes, or setup PINs directly from the **Matter 1.3 Energy Hub** card.
-""",
-                "tags": ["matter", "matter 1.3", "csa", "thread", "smart plug", "evse", "energy management"],
-                "is_featured": True,
-                "sort_order": 1,
-            },
         ]
         for adata in articles_data:
             HelpArticle.objects.update_or_create(

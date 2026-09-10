@@ -167,7 +167,7 @@ Trotz herausragender Softwarequalität hat Sharegy aktuell **5 kritische Baustel
 │ STUFE 2: HARDWARE- & OFFLINE-RESILIENZ (Q1–Q2 2027)                           │
 │ • Sharegy Edge Daemon (Offline-First Dispatch für Raspberry Pi / HA)          │
 │ • 1-Klick Ingestion für Infrarot-Leseköpfe (Hichi / Tasmota)                  │
-│ • Matter & EEBUS Bridge für native Wärmepumpen- & Wallbox-Kopplung            │
+│ • EEBUS & Cloud API Bridge für herstellerunabhängige Wärmepumpen-Kopplung    │
 │                                                                               │
 │ STUFE 3: INSTITUTIONELLE SKALIERUNG & B2B-CLEARING (Q3–Q4 2027)               │
 │ • White-Label AS4 Marktkommunikations-Partnerschaft für EVUs & Stadtwerke     │

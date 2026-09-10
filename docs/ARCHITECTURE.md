@@ -29,8 +29,8 @@
 │ Ingestion & IoT   │          │ Datenbank & Cache │                                      │ Intelligenz & KI  │
 ├───────────────────┤          ├───────────────────┤                                      ├───────────────────┤
 │ • MQTT Broker     │          │ • TimescaleDB     │                                      │ • Hybrid PV-Model │
-│ • Matter 1.3 Hub  │          │   (Hypertables)   │                                      │   (Physics + ML)  │
-│   (0x0090, 0x0091)│          │ • Continuous Aggr.│                                      │ • WAPE Treffer-   │
+│ • OCPP CSMS 2.0.1 │          │   (Hypertables)   │                                      │   (Physics + ML)  │
+│ • Shelly WSS Relais│         │ • Continuous Aggr.│                                      │ • WAPE Treffer-   │
 │ • Home Assistant  │          │ • DeviceLatest-   │                                      │   quoten-Prüfung  │
 │   REST-Bridge     │          │   Metric Snapshot │                                      │ • 48h Last- & SoC-│
 │ • OpenTelemetry   │          │ • Redis Pub/Sub   │                                      │   Simulation      │
@@ -69,15 +69,16 @@
 ---
 
 ### C. Ingestion, Protokolle & Hardware-Schnittstellen
-* **CSA Matter 1.3 Energy Management Hub** (`providers/matter/`):
-  * Cluster `0x0090` (Electrical Power Measurement: W, V, A, Power Factor).
-  * Cluster `0x0091` (Electrical Energy Measurement: kWh kumuliert & periodisch).
-  * Cluster `0x0006` (On/Off Relais-Steuerung).
-  * Cluster `0x0098` / `0x0099` (Device Energy Management & EVSE / Wallboxen).
-  * Matter Commissioning-Parser für QR-Codes (`MT:...`), 11-/21-stellige Pairing-Codes und Setup-PINs.
+* **OCPP 1.6-J / 2.0.1 / 2.1 Charging Station Management System (CSMS)**:
+  * Nativer WebSocket-Endpoint (`wss://sharegy.de/ocpp/{chargebox_id}`).
+  * Dynamic Smart Charging Profiles, Departure Ready Zielladen & Automatische 1p/3p Phasenumschaltung (1,4 kW – 11/22 kW).
+  * Bidirektionales Laden (V2H & V2G Peak Shaving).
+* **Shelly Outbound WebSocket & Relais-Aktorik**:
+  * Direkte, verschlüsselte Outbound-WSS-Verbindung (Port 443) für Shelly Plus, Pro und Gen3.
+  * < 50 ms Latenz für SG-Ready Wärmepumpensteuerung und Echtzeit-Schaltungen ohne Cloud-Kosten.
 * **MQTT-Hub & Deadband-Ingestion** (`core/management/commands/mqtt_consume.py`):
   * Paho MQTT Daemon mit Redis-Live-Cache.
-  * 2-Stufen-Deadband-Filterung: Datenbank-Writes erfolgen nur bei signifikantem Delta ($\Delta > 1\,	ext{W}$) oder Heartbeat (60s), wodurch die DB-Schreiblast um **85 %** reduziert wird.
+  * 2-Stufen-Deadband-Filterung: Datenbank-Writes erfolgen nur bei signifikantem Delta ($\Delta > 1\,\text{W}$) oder Heartbeat (60s), wodurch die DB-Schreiblast um **85 %** reduziert wird.
 * **Home Assistant Integration** (`plugins/homeassistant/`):
   * Native Custom Component (`custom_components/sharegy`).
   * 9 Live-Sensoren (PV, Hauslast, Netzbezug, Einspeisung, Batterie-Leistung, SoC, Tagesverbrauch, Ersparnis, Autarkie).
@@ -121,7 +122,7 @@
 ## 🔒 3. Sicherheits- & Betriebs-Architektur
 
 1. **SaaS Cloud-Sicherheit**:
-   * Alle externen Verbindungen (Matter, Home Assistant, Web-Clients) kommunizieren ausschließlich über gesichertes Outbound-HTTPS (`Port 443`) und TLS-verschlüsseltes MQTT (`Port 8883`).
+   * Alle externen Verbindungen (OCPP, Shelly WSS, Home Assistant, Web-Clients) kommunizieren ausschließlich über gesichertes Outbound-HTTPS/WSS (`Port 443`) und TLS-verschlüsseltes MQTT (`Port 8883`).
    * Keine Portweiterleitungen oder DynDNS im lokalen Heimnetzwerk des Nutzers erforderlich.
 2. **Daten-Isolation & Multi-Tenancy**:
    * Strikte Tenant- und Home-Isolation auf ORM-Ebene (`Home.objects.filter(user=request.user)`).
