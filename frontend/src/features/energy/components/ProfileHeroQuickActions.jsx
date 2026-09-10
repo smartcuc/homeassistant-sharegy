@@ -29,8 +29,6 @@ export default function ProfileHeroQuickActions({ className = "" }) {
         return null;
     }
 
-    const isTariffMismatched = isDynamicRecommended !== isDynamicTariff;
-
     // Archetyp-Farben & Icons
     const archetypeConfig = {
         A: { badgeBg: "bg-blue-500/20 text-blue-300 border-blue-400/30", icon: "🏢", title: t("energy_profile.default_profile_name", "Haushalt ohne Solar") },
@@ -64,11 +62,6 @@ export default function ProfileHeroQuickActions({ className = "" }) {
                                 ? t("energy_profile.tag_dynamic_recommended", "⚡ Dynamischer Tarif empfohlen")
                                 : t("energy_profile.tag_static_recommended", "🔒 Fester Tarif empfohlen")}
                         </span>
-                        {isTariffMismatched && (
-                            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-400/30 animate-pulse">
-                                {t("energy_profile.tariff_mismatch_badge", "⚠️ Tarif-Optimierungspotenzial")}
-                            </span>
-                        )}
                     </div>
 
                     <div>

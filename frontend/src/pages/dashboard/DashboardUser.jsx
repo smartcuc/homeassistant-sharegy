@@ -13,7 +13,6 @@ import { apiFetch } from "../../api/client";
 import LiveEnergySankeyECharts from "../../features/energy/components/LiveEnergySankeyECharts";
 import { useTranslation } from "react-i18next";
 import SystemReadinessCard from "../../features/energy/components/SystemReadinessCard";
-import ProfileHeroQuickActions from "../../features/energy/components/ProfileHeroQuickActions";
 
 export default function DashboardUser() {
 
@@ -62,9 +61,6 @@ export default function DashboardUser() {
 
             {/* 🩺 System-Check & Einrichtungsgrad (4-Säulen-Omi-Check) */}
             <SystemReadinessCard onOpenAddDevice={() => setOpenSetup(true)} />
-
-            {/* 🌟 PROFIL-BASIERTE SCHNELLAKTIONEN & HERO-EMPFEHLUNGEN */}
-            <ProfileHeroQuickActions />
 
             {/* Modal für Geräteanbindung */}
             <DeviceSetupModal

@@ -21,8 +21,6 @@ export default function TariffProfileRecommendationBanner() {
         return null;
     }
 
-    const isMatched = isDynamicRecommended === isDynamicTariff;
-
     return (
         <div className="p-5 sm:p-6 rounded-3xl bg-gradient-to-br from-indigo-900 via-slate-900 to-indigo-950 text-white shadow-lg border border-indigo-700/50 space-y-4">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
