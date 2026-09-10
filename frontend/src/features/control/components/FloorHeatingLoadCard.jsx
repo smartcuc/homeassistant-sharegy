@@ -128,9 +128,9 @@ export default function FloorHeatingLoadCard() {
     return (
         <div className="relative overflow-hidden bg-white dark:bg-slate-900/90 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs backdrop-blur-xl transition-all hover:border-amber-500/40">
             {/* Top Row: Title & Action Toggles */}
-            <div className="flex items-start justify-between gap-4 mb-4">
-                <div className="flex items-center gap-3">
-                    <div className={`w-11 h-11 rounded-2xl flex items-center justify-center text-xl shadow-inner transition-colors ${
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-2xl shrink-0 flex items-center justify-center text-xl shadow-inner transition-colors ${
                         isPreheating
                             ? "bg-amber-500/20 text-amber-500 ring-2 ring-amber-500/40"
                             : relayState
@@ -139,34 +139,34 @@ export default function FloorHeatingLoadCard() {
                     }`}>
                         🌡️
                     </div>
-                    <div>
-                        <div className="flex items-center gap-2">
-                            <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                    <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                            <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white leading-tight">
                                 {t("control.floor_heating", "Fußbodenheizung & Estrich-Speicher")}
                             </h3>
                             {isPreheating ? (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 animate-pulse">
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] sm:text-xs font-semibold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 animate-pulse whitespace-nowrap">
                                     <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
                                     {t("control.preheating_badge", "Thermische Vorladung")}
                                 </span>
                             ) : relayState ? (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] sm:text-xs font-semibold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 whitespace-nowrap">
                                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                     {t("control.heating_active", "Heizen aktiv")}
                                 </span>
                             ) : (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700">
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] sm:text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700 whitespace-nowrap">
                                     {t("control.standby", "Standby / Passiv")}
                                 </span>
                             )}
                         </div>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
                             {t("control.floor_heating_desc", "Vorausschauende KI-Wetter Vorlauftemperatur & thermische Bauteilaktivierung")}
                         </p>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-end gap-2 shrink-0 self-end sm:self-center">
                     <button
                         onClick={handleOpenSettings}
                         className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
@@ -177,7 +177,7 @@ export default function FloorHeatingLoadCard() {
                     <button
                         onClick={() => toggleMutation.mutate(!relayState)}
                         disabled={toggleMutation.isPending}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                             relayState
                                 ? "bg-red-500/15 text-red-600 dark:text-red-400 hover:bg-red-500/25 border border-red-500/30"
                                 : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/25 border border-emerald-500/30"
