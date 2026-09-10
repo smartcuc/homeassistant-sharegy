@@ -51,6 +51,72 @@ export default function InterfacesPage() {
 
     const wsUrl = `wss://${window.location.host || "sharegy.de"}/ws/energy/${primaryHome?.mqtt_token || "<TOKEN>"}/`;
 
+    function renderInterfaceStatusCard({ icon, name, status, guideTab: targetTab }) {
+        const isOnline = status?.online || status?.connected;
+        const isConfigured = status?.configured;
+        const secondsAgo = status?.seconds_ago;
+
+        let statusBadge = null;
+        if (isOnline) {
+            statusBadge = (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    {t("interfaces.status_online", "Live Verbunden")}
+                </span>
+            );
+        } else if (isConfigured) {
+            statusBadge = (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-700">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                    {t("interfaces.status_standby", "Bereit")}
+                </span>
+            );
+        } else {
+            statusBadge = (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700">
+                    {t("interfaces.status_not_connected", "Nicht aktiv")}
+                </span>
+            );
+        }
+
+        let timeText = t("interfaces.no_telemetry_yet", "Noch keine Telemetrie empfangen");
+        if (secondsAgo !== null && secondsAgo !== undefined) {
+            if (secondsAgo < 60) {
+                timeText = t("interfaces.seen_seconds_ago", { count: secondsAgo, defaultValue: `vor ${secondsAgo}s synchronisiert` });
+            } else if (secondsAgo < 3600) {
+                const mins = Math.floor(secondsAgo / 60);
+                timeText = t("interfaces.seen_minutes_ago", { count: mins, defaultValue: `vor ${mins} Min. synchronisiert` });
+            } else {
+                const hrs = Math.floor(secondsAgo / 3600);
+                timeText = t("interfaces.seen_hours_ago", { count: hrs, defaultValue: `vor ${hrs} Std. synchronisiert` });
+            }
+        }
+
+        return (
+            <div
+                key={name}
+                className={`p-3.5 rounded-2xl border transition-all ${
+                    isOnline
+                        ? "bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-200/80 dark:border-emerald-800/60"
+                        : isConfigured
+                        ? "bg-slate-50 dark:bg-slate-800/40 border-slate-200/80 dark:border-slate-700/60"
+                        : "bg-white dark:bg-slate-900 border-slate-200/60 dark:border-slate-800/60"
+                }`}
+            >
+                <div className="flex items-center justify-between gap-2 mb-2">
+                    <div className="flex items-center gap-2 font-bold text-xs text-slate-900 dark:text-white">
+                        <span className="text-base">{icon}</span>
+                        <span>{name}</span>
+                    </div>
+                    {statusBadge}
+                </div>
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono truncate">
+                    {timeText}
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="p-6 max-w-7xl mx-auto space-y-8 relative">
             {/* Centered Floating Checkmark Tooltip / Toast */}
@@ -69,6 +135,73 @@ export default function InterfacesPage() {
                 <p className="text-sm text-gray-500 mt-1">
                     {t("interfaces.subtitle", "Verbinde deine Geräte und Zentralen direkt über Outbound-WebSocket (Shelly), Sungrow Direkt-Kopplung, Cloud-Wechselrichter, das Home Assistant Plugin oder MQTT mit Sharegy.")}
                 </p>
+            </div>
+
+            {/* LIVE INTERFACES STATUS & DIAGNOSTICS */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-5 sm:p-6 shadow-xs space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+                    <div className="flex items-center gap-2.5">
+                        <span className="text-xl">🩺</span>
+                        <div>
+                            <h2 className="text-base font-bold text-gray-900 dark:text-white">
+                                {t("interfaces.diagnostics_title", "Live Schnittstellen-Status & Verbindungstest")}
+                            </h2>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                {t("interfaces.diagnostics_desc", "Echtzeit-Erkennung aktiver Telemetrie über Home Assistant, ioBroker, Shelly WSS, Sungrow Cloud und MQTT.")}
+                            </p>
+                        </div>
+                    </div>
+                    <span className="text-xs font-semibold px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded-full flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        {t("interfaces.live_monitoring", "Live Überwachung")}
+                    </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {/* Home Assistant Card */}
+                    {renderInterfaceStatusCard({
+                        icon: "🏠",
+                        name: "Home Assistant",
+                        key: "homeassistant",
+                        status: primaryHome?.interface_status?.homeassistant,
+                        guideTab: "ha",
+                    })}
+
+                    {/* ioBroker Card */}
+                    {renderInterfaceStatusCard({
+                        icon: "🔴",
+                        name: "ioBroker",
+                        key: "iobroker",
+                        status: primaryHome?.interface_status?.iobroker,
+                        guideTab: "iobroker",
+                    })}
+
+                    {/* Shelly WSS Card */}
+                    {renderInterfaceStatusCard({
+                        icon: "⚡",
+                        name: "Shelly Direct WSS",
+                        key: "shelly_wss",
+                        status: primaryHome?.interface_status?.shelly_wss,
+                        guideTab: "shelly",
+                    })}
+
+                    {/* Cloud Inverters Card */}
+                    {renderInterfaceStatusCard({
+                        icon: "☁️",
+                        name: t("interfaces.cloud_inverters", "Cloud-Wechselrichter"),
+                        key: "cloud_inverter",
+                        status: primaryHome?.interface_status?.cloud_inverter,
+                    })}
+
+                    {/* MQTT Direct */}
+                    {renderInterfaceStatusCard({
+                        icon: "📡",
+                        name: "MQTT / Tasmota",
+                        key: "mqtt_direct",
+                        status: primaryHome?.interface_status?.mqtt_direct,
+                        guideTab: "mqtt",
+                    })}
+                </div>
             </div>
 
             {/* 1. SECTION: WEBSOCKET INTERFACE (SHELLY WSS - EMPFOHLEN) */}

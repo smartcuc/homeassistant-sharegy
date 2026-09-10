@@ -76,6 +76,51 @@ export default function AdminDashboard() {
         };
     }, [data, t]);
 
+    const interfaceChartOption = useMemo(() => {
+        if (!data || !data.interface_stats || !data.interface_stats.interfaces) return null;
+        const ifaces = data.interface_stats.interfaces;
+        const colorPalette = ["#0284c7", "#ea580c", "#f59e0b", "#10b981", "#8b5cf6"];
+
+        const filtered = ifaces.filter(i => (i.total_configured > 0 || i.active_24h > 0));
+        const chartData = filtered.length > 0 ? filtered : ifaces;
+
+        return {
+            tooltip: {
+                trigger: "item",
+                formatter: "{b}: {c} Haushalte ({d}%)",
+                backgroundColor: "rgba(255, 255, 255, 0.95)",
+                borderColor: "#e2e8f0",
+                textStyle: { color: "#1e293b", fontSize: 12 },
+            },
+            legend: {
+                bottom: "0%",
+                left: "center",
+                textStyle: { color: "#64748b", fontSize: 11 },
+            },
+            series: [
+                {
+                    name: "Schnittstellen",
+                    type: "pie",
+                    radius: ["42%", "72%"],
+                    avoidLabelOverlap: false,
+                    itemStyle: {
+                        borderRadius: 8,
+                        borderColor: "#fff",
+                        borderWidth: 2,
+                    },
+                    label: {
+                        show: false,
+                    },
+                    data: chartData.map((item, idx) => ({
+                        value: item.total_configured || item.active_24h || 0,
+                        name: item.name,
+                        itemStyle: { color: colorPalette[idx % colorPalette.length] },
+                    })),
+                },
+            ],
+        };
+    }, [data, t]);
+
     if (loading) {
         return (
             <div className="p-8 max-w-7xl mx-auto flex items-center justify-center text-gray-400 text-sm animate-pulse">
@@ -85,6 +130,7 @@ export default function AdminDashboard() {
     }
 
     const funnelData = data?.funnel || { total: 0, opened: 0, clicked: 0, used: 0 };
+    const ifaceStats = data?.interface_stats || { interfaces: [], total_homes: 0, total_telemetry_homes: 0 };
 
     return (
         <div className="p-6 max-w-7xl mx-auto space-y-6">
@@ -129,7 +175,91 @@ export default function AdminDashboard() {
                 <KpiCard title={t("admin.kpi_logins_success", "✅ Erfolgreiche Logins")} value={funnelData.used} />
             </div>
 
-            {/* Main Chart */}
+            {/* INTERFACE & ADAPTER ECOSYSTEM ANALYTICS */}
+            <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-xs space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-4">
+                    <div>
+                        <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                            <span>📡</span> {t("admin.interface_analytics_title", "Schnittstellen & Adapter-Nutzung (Ecosystem Analytics)")}
+                        </h2>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                            {t("admin.interface_analytics_sub", "Welche Schnittstellen und Zentralen (Home Assistant, ioBroker, Shelly, Cloud-WR) werden von aktiven Nutzern verwendet?")}
+                        </p>
+                    </div>
+                    <span className="text-xs font-mono px-3 py-1 bg-slate-100 rounded-full text-slate-700 font-semibold self-start sm:self-auto">
+                        {ifaceStats.total_telemetry_homes} / {ifaceStats.total_homes} {t("admin.homes_with_telemetry", "Haushalte aktiv")}
+                    </span>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                    {/* Donut Chart */}
+                    <div className="lg:col-span-5 h-64 w-full">
+                        {interfaceChartOption ? (
+                            <ReactECharts
+                                option={interfaceChartOption}
+                                style={{ height: "100%", width: "100%" }}
+                                notMerge={true}
+                                lazyUpdate={true}
+                            />
+                        ) : (
+                            <div className="h-full flex items-center justify-center text-gray-400 text-xs">
+                                {t("admin.no_interface_data", "Keine Schnittstellendaten")}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Table / Breakdown */}
+                    <div className="lg:col-span-7 space-y-3">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left text-xs">
+                                <thead>
+                                    <tr className="border-b border-gray-100 text-gray-400 uppercase tracking-wider font-semibold">
+                                        <th className="pb-2 font-medium">{t("admin.interface_name", "Schnittstelle")}</th>
+                                        <th className="pb-2 text-center font-medium">{t("admin.active_24h", "Aktiv (24h)")}</th>
+                                        <th className="pb-2 text-center font-medium">{t("admin.active_7d", "Aktiv (7d)")}</th>
+                                        <th className="pb-2 text-right font-medium">{t("admin.share", "Anteil")}</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-50">
+                                    {ifaceStats.interfaces?.map((item) => (
+                                        <tr key={item.key} className="hover:bg-slate-50 transition">
+                                            <td className="py-2.5 font-bold text-gray-900 flex items-center gap-2">
+                                                <span>
+                                                    {item.key === "homeassistant" ? "🏠" :
+                                                     item.key === "iobroker" ? "🔴" :
+                                                     item.key === "shelly_wss" ? "⚡" :
+                                                     item.key === "cloud_inverter" ? "☁️" : "📡"}
+                                                </span>
+                                                <span>{item.name}</span>
+                                            </td>
+                                            <td className="py-2.5 text-center font-mono font-semibold text-emerald-600">
+                                                {item.active_24h}
+                                            </td>
+                                            <td className="py-2.5 text-center font-mono text-gray-600">
+                                                {item.active_7d}
+                                            </td>
+                                            <td className="py-2.5 text-right font-mono font-bold text-indigo-600">
+                                                {item.percentage}%
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Strategic Insight Alert */}
+                        <div className="p-3.5 bg-gradient-to-r from-indigo-50/70 via-sky-50/50 to-white rounded-2xl border border-indigo-100/80 flex items-start gap-2.5 text-xs text-indigo-950">
+                            <span className="text-base shrink-0">💡</span>
+                            <div>
+                                <span className="font-bold">{t("admin.strategic_insight_title", "Entwicklungs-Fokus & Roadmap:")} </span>
+                                <span>{ifaceStats.recommendation || t("admin.strategic_insight_default", "Ermöglicht gezielte Optimierung für die populärsten Zentralen im Kundenkreis.")}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Main Conversion Chart */}
             <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-xs space-y-4">
                 <div className="flex items-center justify-between">
                     <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">

@@ -2524,5 +2524,26 @@
     "final_cta_title": "Ready for your smart Energy OS?",
     "final_cta_desc": "Connect your solar system, wallbox & battery storage in a few clicks – or test the interactive live demo immediately.",
     "final_cta_btn": "Get Started for Free →"
-  }
+  },
+  "interfaces.diagnostics_title": "Stare interfețe în timp real și diagnosticare",
+  "interfaces.diagnostics_desc": "Detectarea telemetriei active în timp real prin Home Assistant, ioBroker, Shelly WSS, Sungrow Cloud și MQTT.",
+  "interfaces.live_monitoring": "Monitorizare în direct",
+  "interfaces.status_online": "Conectat în direct",
+  "interfaces.status_standby": "Gata",
+  "interfaces.status_not_connected": "Inactiv",
+  "interfaces.no_telemetry_yet": "Nicio telemetrie primită încă",
+  "interfaces.cloud_inverters": "Invertoare Cloud",
+  "interfaces.seen_seconds_ago": "sincronizat acum {{count}} s",
+  "interfaces.seen_minutes_ago": "sincronizat acum {{count}} min",
+  "interfaces.seen_hours_ago": "sincronizat acum {{count}} ore",
+  "admin.interface_analytics_title": "Utilizarea interfețelor și adaptoarelor (Ecosystem Analytics)",
+  "admin.interface_analytics_sub": "Ce interfețe și controlere (Home Assistant, ioBroker, Shelly, Cloud Inverter) sunt utilizate de utilizatorii activi?",
+  "admin.homes_with_telemetry": "Gospodării active",
+  "admin.no_interface_data": "Fără date despre interfețe",
+  "admin.interface_name": "Interfață",
+  "admin.active_24h": "Activ (24h)",
+  "admin.active_7d": "Activ (7d)",
+  "admin.share": "Pondere",
+  "admin.strategic_insight_title": "Focalizare pe dezvoltare și foaie de parcurs:",
+  "admin.strategic_insight_default": "Permite optimizarea țintită pentru cele mai populare controlere."
 }

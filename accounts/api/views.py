@@ -882,6 +882,9 @@ class DashboardStatsView(APIView):
             for t in recent
         ]
 
+        from devices.services.interface_tracker import get_aggregated_interface_stats
+        interface_stats = get_aggregated_interface_stats()
+
         return Response({
             "funnel": {
                 "total": total,
@@ -889,7 +892,8 @@ class DashboardStatsView(APIView):
                 "clicked": clicked,
                 "used": used,
             },
-            "live_logins": live_logins
+            "live_logins": live_logins,
+            "interface_stats": interface_stats,
         })
 
 

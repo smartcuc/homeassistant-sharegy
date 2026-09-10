@@ -324,6 +324,7 @@ class DeviceSerializer(serializers.ModelSerializer):
 class HomeSerializer(serializers.ModelSerializer):
     mqtt_host = serializers.SerializerMethodField()
     mqtt_port = serializers.SerializerMethodField()
+    interface_status = serializers.SerializerMethodField()
 
     class Meta:
         model = Home
@@ -338,6 +339,7 @@ class HomeSerializer(serializers.ModelSerializer):
             "mqtt_password",
             "mqtt_host",
             "mqtt_port",
+            "interface_status",
             "created_at",
         )
 
@@ -348,6 +350,13 @@ class HomeSerializer(serializers.ModelSerializer):
     def get_mqtt_port(self, obj):
         import os
         return int(os.getenv("MQTT_PORT", 1883))
+
+    def get_interface_status(self, obj):
+        try:
+            from devices.services.interface_tracker import get_home_interface_statuses
+            return get_home_interface_statuses(obj)
+        except Exception:
+            return {}
 
 
 class MQTTProfileSerializer(serializers.ModelSerializer):

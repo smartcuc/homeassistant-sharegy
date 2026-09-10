@@ -126,6 +126,18 @@ def process_incoming_telemetry(token, payload_str, user):
         metrics = process_canonical_sensor_reading(device=device, reading=reading, source="websocket")
         relay_state = reading.relay_state
 
+        # 4b. Track active interface source
+        try:
+            from devices.services.interface_tracker import track_interface_telemetry
+            src_tag = (
+                data.get("source")
+                or data.get("client")
+                or ("shelly" if ("shelly" in identifier.lower() or data.get("method") in ("NotifyStatus", "Shelly.GetStatus")) else "websocket")
+            )
+            track_interface_telemetry(home.id, src_tag, data)
+        except Exception:
+            pass
+
         if relay_state is not None:
             cache.set(f"device_relay_state_{device.id}", relay_state, timeout=86400)
             cache.set(f"device_switchable_{device.id}", True, timeout=86400)

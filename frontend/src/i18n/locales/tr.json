@@ -2524,5 +2524,26 @@
     "final_cta_title": "Ready for your smart Energy OS?",
     "final_cta_desc": "Connect your solar system, wallbox & battery storage in a few clicks – or test the interactive live demo immediately.",
     "final_cta_btn": "Get Started for Free →"
-  }
+  },
+  "interfaces.diagnostics_title": "Canlı Arayüz Durumu ve Teşhis",
+  "interfaces.diagnostics_desc": "Home Assistant, ioBroker, Shelly WSS, Sungrow Cloud ve MQTT üzerinden gerçek zamanlı telemetri algılama.",
+  "interfaces.live_monitoring": "Canlı İzleme",
+  "interfaces.status_online": "Canlı Bağlı",
+  "interfaces.status_standby": "Hazır",
+  "interfaces.status_not_connected": "Aktif Değil",
+  "interfaces.no_telemetry_yet": "Henüz telemetri alınmadı",
+  "interfaces.cloud_inverters": "Bulut İnvertörleri",
+  "interfaces.seen_seconds_ago": "{{count}} sn önce senkronize edildi",
+  "interfaces.seen_minutes_ago": "{{count}} dk önce senkronize edildi",
+  "interfaces.seen_hours_ago": "{{count}} sa önce senkronize edildi",
+  "admin.interface_analytics_title": "Arayüz ve Adaptör Kullanımı (Ecosystem Analytics)",
+  "admin.interface_analytics_sub": "Aktif kullanıcılar tarafından hangi arayüzler ve kontrol sistemleri (Home Assistant, ioBroker, Shelly, Cloud Inverter) kullanılıyor?",
+  "admin.homes_with_telemetry": "Aktif Hane",
+  "admin.no_interface_data": "Arayüz verisi yok",
+  "admin.interface_name": "Arayüz",
+  "admin.active_24h": "Aktif (24s)",
+  "admin.active_7d": "Aktif (7g)",
+  "admin.share": "Pay",
+  "admin.strategic_insight_title": "Geliştirme Odağı ve Yol Haritası:",
+  "admin.strategic_insight_default": "En popüler kontrol sistemleri için hedefe yönelik optimizasyon sağlar."
 }

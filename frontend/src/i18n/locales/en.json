@@ -2504,5 +2504,26 @@
     "final_cta_title": "Ready for your smart Energy OS?",
     "final_cta_desc": "Connect your solar system, wallbox & battery storage in a few clicks – or test the interactive live demo immediately.",
     "final_cta_btn": "Get Started for Free →"
-  }
+  },
+  "interfaces.diagnostics_title": "Live Interface Status & Diagnostics",
+  "interfaces.diagnostics_desc": "Real-time detection of active telemetry via Home Assistant, ioBroker, Shelly WSS, Sungrow Cloud, and MQTT.",
+  "interfaces.live_monitoring": "Live Monitoring",
+  "interfaces.status_online": "Live Connected",
+  "interfaces.status_standby": "Ready",
+  "interfaces.status_not_connected": "Not Active",
+  "interfaces.no_telemetry_yet": "No telemetry received yet",
+  "interfaces.cloud_inverters": "Cloud Inverters",
+  "interfaces.seen_seconds_ago": "synced {{count}}s ago",
+  "interfaces.seen_minutes_ago": "synced {{count}} min ago",
+  "interfaces.seen_hours_ago": "synced {{count}} hrs ago",
+  "admin.interface_analytics_title": "Interface & Adapter Usage (Ecosystem Analytics)",
+  "admin.interface_analytics_sub": "Which interfaces and controllers (Home Assistant, ioBroker, Shelly, Cloud Inverter) are used by active users?",
+  "admin.homes_with_telemetry": "Households Active",
+  "admin.no_interface_data": "No interface data",
+  "admin.interface_name": "Interface",
+  "admin.active_24h": "Active (24h)",
+  "admin.active_7d": "Active (7d)",
+  "admin.share": "Share",
+  "admin.strategic_insight_title": "Development Focus & Roadmap:",
+  "admin.strategic_insight_default": "Enables targeted optimization for the most popular smart home controllers."
 }

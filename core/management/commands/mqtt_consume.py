@@ -258,7 +258,14 @@ def ingest(topic: str, payload: bytes, auto_prov: bool):
     if not ts:
         ts = timezone.now()
 
-    source = str(meta.get("from") or "mqtt")[:64] if isinstance(meta, dict) else "mqtt"
+    source = str(meta.get("from") or meta.get("source") or "mqtt")[:64] if isinstance(meta, dict) else "mqtt"
+
+    # Track interface telemetry
+    try:
+        from devices.services.interface_tracker import track_interface_telemetry
+        track_interface_telemetry(home.id, source, meta if isinstance(meta, dict) else {})
+    except Exception:
+        pass
 
     logger.debug(
         "METRICS: %s | STATE: %s | SOURCE: %s",

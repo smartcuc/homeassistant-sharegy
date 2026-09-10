@@ -2524,5 +2524,26 @@
     "final_cta_title": "Ready for your smart Energy OS?",
     "final_cta_desc": "Connect your solar system, wallbox & battery storage in a few clicks – or test the interactive live demo immediately.",
     "final_cta_btn": "Get Started for Free →"
-  }
+  },
+  "interfaces.diagnostics_title": "Stan interfejsów na żywo i diagnostyka",
+  "interfaces.diagnostics_desc": "Wykrywanie aktywnej telemetrii w czasie rzeczywistym przez Home Assistant, ioBroker, Shelly WSS, Sungrow Cloud i MQTT.",
+  "interfaces.live_monitoring": "Monitorowanie na żywo",
+  "interfaces.status_online": "Połączono na żywo",
+  "interfaces.status_standby": "Gotowy",
+  "interfaces.status_not_connected": "Nieaktywny",
+  "interfaces.no_telemetry_yet": "Brak odebranej telemetrii",
+  "interfaces.cloud_inverters": "Falowniki chmurowe",
+  "interfaces.seen_seconds_ago": "zsynchronizowano {{count}} s temu",
+  "interfaces.seen_minutes_ago": "zsynchronizowano {{count}} min temu",
+  "interfaces.seen_hours_ago": "zsynchronizowano {{count}} godz. temu",
+  "admin.interface_analytics_title": "Użycie interfejsów i adapterów (Ecosystem Analytics)",
+  "admin.interface_analytics_sub": "Jakie interfejsy i centrale (Home Assistant, ioBroker, Shelly, Cloud Inverter) są używane przez aktywnych użytkowników?",
+  "admin.homes_with_telemetry": "Gospodarstw aktywnych",
+  "admin.no_interface_data": "Brak danych o interfejsach",
+  "admin.interface_name": "Interfejs",
+  "admin.active_24h": "Aktywny (24h)",
+  "admin.active_7d": "Aktywny (7d)",
+  "admin.share": "Udział",
+  "admin.strategic_insight_title": "Fokus rozwojowy i harmonogram:",
+  "admin.strategic_insight_default": "Umożliwia celową optymalizację pod kątem najpopularniejszych central."
 }

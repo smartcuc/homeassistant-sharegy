@@ -2504,5 +2504,26 @@
     "final_cta_title": "Bereit für dein smartes Energy OS?",
     "final_cta_desc": "Verbinde deine PV-Anlage, Wallbox & Speicher in wenigen Klicks – oder teste sofort die interaktive Live-Demo.",
     "final_cta_btn": "Jetzt kostenlos starten →"
-  }
+  },
+  "interfaces.diagnostics_title": "Live Schnittstellen-Status & Verbindungstest",
+  "interfaces.diagnostics_desc": "Echtzeit-Erkennung aktiver Telemetrie über Home Assistant, ioBroker, Shelly WSS, Sungrow Cloud und MQTT.",
+  "interfaces.live_monitoring": "Live Überwachung",
+  "interfaces.status_online": "Live Verbunden",
+  "interfaces.status_standby": "Bereit",
+  "interfaces.status_not_connected": "Nicht aktiv",
+  "interfaces.no_telemetry_yet": "Noch keine Telemetrie empfangen",
+  "interfaces.cloud_inverters": "Cloud-Wechselrichter",
+  "interfaces.seen_seconds_ago": "vor {{count}}s synchronisiert",
+  "interfaces.seen_minutes_ago": "vor {{count}} Min. synchronisiert",
+  "interfaces.seen_hours_ago": "vor {{count}} Std. synchronisiert",
+  "admin.interface_analytics_title": "Schnittstellen & Adapter-Nutzung (Ecosystem Analytics)",
+  "admin.interface_analytics_sub": "Welche Schnittstellen und Zentralen (Home Assistant, ioBroker, Shelly, Cloud-WR) werden von aktiven Nutzern verwendet?",
+  "admin.homes_with_telemetry": "Haushalte aktiv",
+  "admin.no_interface_data": "Keine Schnittstellendaten",
+  "admin.interface_name": "Schnittstelle",
+  "admin.active_24h": "Aktiv (24h)",
+  "admin.active_7d": "Aktiv (7d)",
+  "admin.share": "Anteil",
+  "admin.strategic_insight_title": "Entwicklungs-Fokus & Roadmap:",
+  "admin.strategic_insight_default": "Ermöglicht gezielte Optimierung für die populärsten Zentralen im Kundenkreis."
 }
