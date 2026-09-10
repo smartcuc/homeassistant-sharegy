@@ -180,6 +180,25 @@ class ProfileRunnerTestCase(TestCase):
         self.assertEqual(resp_int.status_code, 200)
         self.assertEqual(resp_int.data["status"], "success")
         self.assertIn("device_id", resp_int.data)
+        int_id = resp_int.data["integration_id"]
+
+        # 4. GET /api/devices/cloud-integrations/
+        resp_list = self.client.get(f"/api/devices/cloud-integrations/?home_id={self.home.id}")
+        self.assertEqual(resp_list.status_code, 200)
+        self.assertEqual(resp_list.data["status"], "success")
+        self.assertGreaterEqual(len(resp_list.data["integrations"]), 1)
+
+        # 5. PUT /api/devices/cloud-integrations/<id>/
+        resp_update = self.client.put(f"/api/devices/cloud-integrations/{int_id}/", {
+            "name": "Mein Sungrow SH10RT (Updated)",
+            "polling_interval": 30,
+        }, format="json")
+        self.assertEqual(resp_update.status_code, 200)
+        self.assertEqual(resp_update.data["status"], "success")
+
+        # 6. DELETE /api/devices/cloud-integrations/<id>/
+        resp_del = self.client.delete(f"/api/devices/cloud-integrations/{int_id}/")
+        self.assertEqual(resp_del.status_code, 200)
 
     def test_08_load_and_simulate_kostal_profile(self):
         """Testet das Laden und die Testverbindung für Kostal Solar Portal."""

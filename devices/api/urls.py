@@ -40,6 +40,9 @@ from devices.views import (
 from .views_telemetry_push import telemetry_push
 from .views_profiles import (
     list_cloud_profiles_view,
+    list_user_cloud_integrations_view,
+    manage_user_cloud_integration_view,
+    test_cloud_credentials,
     test_cloud_connection_view,
     integrate_cloud_device_view,
     poll_cloud_device_now_view,
@@ -75,6 +78,8 @@ urlpatterns = [
     path("<int:device_id>/profile/evaluate/", device_baseline_evaluate_view),
     # ☁️ CLOUD WECHSELRICHTER & 3RD-PARTY PROFILE (SUNGROW, SOLAREDGE, FRONIUS, KOSTAL, GROWATT)
     path("cloud-profiles/", list_cloud_profiles_view, name="device_cloud_profiles_list"),
+    path("cloud-integrations/", list_user_cloud_integrations_view, name="device_cloud_integrations_list"),
+    path("cloud-integrations/<uuid:integration_id>/", manage_user_cloud_integration_view, name="device_cloud_integration_manage"),
     path("cloud-profiles/test/", test_cloud_connection_view, name="device_cloud_profiles_test"),
     path("cloud-profiles/integrate/", integrate_cloud_device_view, name="device_cloud_profiles_integrate"),
     path("cloud-profiles/polling-interval/", update_cloud_polling_interval_view, name="device_cloud_polling_interval"),

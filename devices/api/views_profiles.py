@@ -5,6 +5,7 @@ REST-API Endpoints für deklarative Hersteller-Cloud-Profile (Sungrow iSolarClou
 """
 
 import logging
+import uuid
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
@@ -33,6 +34,138 @@ def list_cloud_profiles_view(request):
         "profiles": profiles,
         "count": len(profiles),
     })
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def list_user_cloud_integrations_view(request):
+    """
+    Liefert alle aktiven und konfigurierten CloudDeviceIntegration-Objekte des aktuellen Benutzers.
+    """
+    user = request.user
+    home_id = request.query_params.get("home_id")
+    qs = CloudDeviceIntegration.objects.filter(device__home__user=user).select_related("device", "device__config", "device__home")
+    if home_id:
+        qs = qs.filter(device__home_id=home_id)
+
+    profiles_cache = {p["id"]: p for p in list_available_profiles()}
+    items = []
+    for item in qs:
+        prof = profiles_cache.get(item.profile_id, {})
+        cfg = getattr(item.device, "config", None)
+        name = cfg.name if (cfg and cfg.name) else item.device.identifier
+
+        masked_creds = {}
+        for k, v in (item.credentials or {}).items():
+            if any(secret_w in k.lower() for secret_w in ["password", "secret", "token", "key", "pass"]):
+                masked_creds[k] = "••••••••" if v else ""
+            else:
+                masked_creds[k] = v
+
+        items.append({
+            "id": str(item.id),
+            "device_id": item.device.id,
+            "device_identifier": item.device.identifier,
+            "device_name": name,
+            "profile_id": item.profile_id,
+            "profile_name": prof.get("name") or item.profile_id,
+            "vendor": prof.get("vendor") or ("sungrow" if "sungrow" in item.profile_id else "other"),
+            "polling_interval_seconds": item.polling_interval_seconds,
+            "is_active": item.is_active,
+            "last_status": item.last_status,
+            "last_polled_at": item.last_polled_at.isoformat() if item.last_polled_at else None,
+            "last_error_message": item.last_error_message or "",
+            "credentials_masked": masked_creds,
+            "credentials": item.credentials or {},
+        })
+
+    return Response({
+        "status": "success",
+        "integrations": items,
+        "count": len(items),
+    })
+
+
+@api_view(["GET", "PUT", "DELETE"])
+@permission_classes([IsAuthenticated])
+def manage_user_cloud_integration_view(request, integration_id):
+    """
+    CRUD Endpoint für eine spezifische CloudDeviceIntegration.
+    """
+    user = request.user
+    integration = CloudDeviceIntegration.objects.filter(
+        id=integration_id,
+        device__home__user=user,
+    ).select_related("device", "device__config").first()
+
+    if not integration:
+        return Response(
+            {"status": "error", "message": "Cloud-Integration nicht gefunden."},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    if request.method == "GET":
+        cfg = getattr(integration.device, "config", None)
+        return Response({
+            "status": "success",
+            "integration": {
+                "id": str(integration.id),
+                "device_id": integration.device.id,
+                "device_name": cfg.name if (cfg and cfg.name) else integration.device.identifier,
+                "profile_id": integration.profile_id,
+                "polling_interval_seconds": integration.polling_interval_seconds,
+                "is_active": integration.is_active,
+                "last_status": integration.last_status,
+                "last_polled_at": integration.last_polled_at.isoformat() if integration.last_polled_at else None,
+                "last_error_message": integration.last_error_message,
+                "credentials": integration.credentials or {},
+            }
+        })
+
+    if request.method == "PUT":
+        data = request.data
+        name = data.get("name")
+        credentials = data.get("credentials")
+        interval = data.get("polling_interval") or data.get("polling_interval_seconds")
+        is_active = data.get("is_active")
+
+        cfg = getattr(integration.device, "config", None)
+        if name and cfg:
+            cfg.name = name
+            cfg.save(update_fields=["name"])
+
+        if credentials is not None and isinstance(credentials, dict):
+            merged_creds = dict(integration.credentials or {})
+            for k, v in credentials.items():
+                if v != "••••••••" and v is not None:
+                    merged_creds[k] = v
+            integration.credentials = merged_creds
+
+        if interval is not None:
+            integration.polling_interval_seconds = int(interval)
+        if is_active is not None:
+            integration.is_active = bool(is_active)
+
+        integration.save()
+        poll_res = execute_cloud_poll(integration)
+
+        return Response({
+            "status": "success",
+            "message": "Cloud-Integration erfolgreich aktualisiert.",
+            "integration_id": str(integration.id),
+            "poll_result": poll_res,
+        })
+
+    if request.method == "DELETE":
+        device = integration.device
+        integration.delete()
+        device.active = False
+        device.configured = False
+        device.save(update_fields=["active", "configured"])
+        return Response({
+            "status": "success",
+            "message": "Cloud-Integration erfolgreich getrennt und entfernt.",
+        })
 
 
 @api_view(["POST"])
@@ -68,6 +201,7 @@ def integrate_cloud_device_view(request):
     """
     Erstellt ein neues Cloud-Gerät oder verknüpft ein bestehendes Gerät mit einem Cloud-Profil.
     Payload: {
+        integration_id: optional,
         home_id: ...,
         name: "Sungrow SH10RT",
         profile_id: "sungrow_isolarcloud",
@@ -76,6 +210,7 @@ def integrate_cloud_device_view(request):
     }
     """
     user = request.user
+    integration_id = request.data.get("integration_id")
     home_id = request.data.get("home_id")
     name = request.data.get("name") or "Cloud-Wechselrichter"
     profile_id = request.data.get("profile_id")
@@ -84,6 +219,35 @@ def integrate_cloud_device_view(request):
 
     if not profile_id:
         return Response({"status": "error", "message": "profile_id ist erforderlich."}, status=400)
+
+    # Wenn bestehende integration_id übergeben wurde: Aktualisieren
+    if integration_id:
+        integration = CloudDeviceIntegration.objects.filter(
+            id=integration_id,
+            device__home__user=user,
+        ).select_related("device", "device__config").first()
+        if integration:
+            cfg = getattr(integration.device, "config", None)
+            if cfg and name:
+                cfg.name = name
+                cfg.save(update_fields=["name"])
+            merged_creds = dict(integration.credentials or {})
+            for k, v in credentials.items():
+                if v != "••••••••" and v is not None:
+                    merged_creds[k] = v
+            integration.credentials = merged_creds
+            integration.profile_id = profile_id
+            integration.polling_interval_seconds = interval
+            integration.is_active = True
+            integration.save()
+            poll_res = execute_cloud_poll(integration)
+            return Response({
+                "status": "success",
+                "message": f"Gerät '{name}' erfolgreich aktualisiert!",
+                "device_id": integration.device.id,
+                "integration_id": str(integration.id),
+                "poll_result": poll_res,
+            })
 
     # Home finden oder erstes Home des Users nutzen
     home = None
@@ -100,9 +264,14 @@ def integrate_cloud_device_view(request):
     except Exception as e:
         return Response({"status": "error", "message": f"Ungültiges Profil: {e}"}, status=400)
 
-    identifier = f"cloud-{profile_id}-{home.id}"[:64]
+    # Eindeutiger Identifier, um mehrere WRs desselben Herstellers im selben Home zu ermöglichen
+    base_identifier = f"cloud-{profile_id}-{home.id}"[:45]
+    if Device.objects.filter(home=home, identifier=base_identifier).exists():
+        identifier = f"{base_identifier}-{uuid.uuid4().hex[:6]}"[:64]
+    else:
+        identifier = base_identifier
 
-    # Gerät anlegen oder aktualisieren
+    # Gerät anlegen
     device, created = Device.objects.get_or_create(
         home=home,
         identifier=identifier,
