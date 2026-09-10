@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { fetchHelpCategories, fetchHelpArticles } from "../api";
+import { useEnergyProfile } from "../../energy/hooks/useEnergyProfile";
 
 export default function HelpCenterPage() {
     const { t, i18n } = useTranslation();
@@ -14,6 +15,7 @@ export default function HelpCenterPage() {
     const [searchQuery, setSearchQuery] = useState("");
 
     const isEnglish = i18n.language?.startsWith("en");
+    const { profile, profileCode, helpArticleSlug } = useEnergyProfile();
 
     const categoriesQuery = useQuery({
         queryKey: ["help-categories"],
@@ -91,6 +93,40 @@ export default function HelpCenterPage() {
                     )}
                 </div>
             </div>
+
+            {/* 🌟 EMPFOHLENER LEITFADEN FÜR DAS ENERGIE-PROFIL */}
+            {profile && (
+                <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-indigo-900 via-slate-900 to-indigo-950 text-white shadow-md border border-indigo-800/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-indigo-500/30 text-indigo-300 border border-indigo-400/30">
+                                {t("energy_profile.badge_label", "Energie-Profil")}: {profileCode}
+                            </span>
+                            <span className="text-xs font-bold text-white">
+                                {profile.profile_name}
+                            </span>
+                        </div>
+                        <h3 className="text-sm font-bold text-indigo-100 flex items-center gap-1.5">
+                            <span>📖</span>
+                            <span>{t("help.profile_guide_title", "Empfohlener Leitfaden:")} {t("energy_profile.view_matrix_guide", "Tarif- & Ersparnis-Kompass")}</span>
+                        </h3>
+                        <p className="text-xs text-indigo-200/80 max-w-2xl">
+                            {profile.tariff_verdict_reason}
+                        </p>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                        <Link
+                            to={`/app/help/${helpArticleSlug}`}
+                            className="px-3.5 py-2 rounded-xl bg-white text-indigo-950 hover:bg-indigo-50 text-xs font-bold transition flex items-center gap-1.5 shadow-sm cursor-pointer"
+                        >
+                            <span>📖</span>
+                            <span>{t("energy_profile.view_guide_btn", "Leitfaden lesen")}</span>
+                            <span>→</span>
+                        </Link>
+                    </div>
+                </div>
+            )}
 
             {/* Category Grid */}
             <div className="space-y-4">

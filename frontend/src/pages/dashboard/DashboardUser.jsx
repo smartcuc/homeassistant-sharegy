@@ -13,6 +13,7 @@ import { apiFetch } from "../../api/client";
 import LiveEnergySankeyECharts from "../../features/energy/components/LiveEnergySankeyECharts";
 import { useTranslation } from "react-i18next";
 import SystemReadinessCard from "../../features/energy/components/SystemReadinessCard";
+import ProfileHeroQuickActions from "../../features/energy/components/ProfileHeroQuickActions";
 
 export default function DashboardUser() {
 
@@ -51,16 +52,19 @@ export default function DashboardUser() {
 
             {/* 🏠 Dashboard Header */}
             <div>
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
                     {t("dashboard.title", "Deine Energiezentrale ⚡")}
                 </h1>
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
                     {t("dashboard.subtitle", "Alle wichtigen Energiedaten auf einen Blick.")}
                 </p>
             </div>
 
             {/* 🩺 System-Check & Einrichtungsgrad (4-Säulen-Omi-Check) */}
             <SystemReadinessCard onOpenAddDevice={() => setOpenSetup(true)} />
+
+            {/* 🌟 PROFIL-BASIERTE SCHNELLAKTIONEN & HERO-EMPFEHLUNGEN */}
+            <ProfileHeroQuickActions />
 
             {/* Modal für Geräteanbindung */}
             <DeviceSetupModal

@@ -1236,6 +1236,7 @@
     "feedback_thanks": "Vielen Dank für dein Feedback!",
     "back_to_portal": "Zurück zum Wissensportal",
     "center_badge": "Handbuch & FAQ",
+    "profile_guide_title": "Empfohlener Leitfaden:",
     "hero_title": "Hilfe & Wissensportal",
     "hero_subtitle": "Finde Schritt-für-Schritt-Anleitungen für Wechselrichter, den Smart Energy Optimizer, dynamische Tarife und die Alarmzentrale.",
     "hero_search_placeholder": "Thema oder Stichwort suchen...",
@@ -2149,6 +2150,15 @@
     "configure_exact_rates": "Genaue ct/kWh Arbeitspreise & Tibber Token einstellen:",
     "savings_breakdown_title": "Aufschlüsselung deines Sparpotenzials",
     "savings_breakdown_desc": "So setzt sich deine jährliche Ersparnis bei optimaler Steuerung zusammen:",
+    "bkw_profile_name": "Balkonkraftwerk-Haushalt",
+    "ev_profile_name": "E-Mobilitäts-Haushalt",
+    "heatpump_profile_name": "Wärmepumpen-Haushalt",
+    "prosumer_profile_name": "PV-Prosumer",
+    "all_in_profile_name": "Voll-Elektrifiziert (All-In)",
+    "tariff_mismatch_badge": "⚠️ Tarif-Optimierungspotenzial",
+    "view_guide_btn": "Leitfaden lesen",
+    "quick_actions_title": "Empfohlene Schnellaktionen für dein Profil:",
+    "adjust_equipment_btn": "Ausstattung & Profil anpassen",
     "action_steps_title": "Empfohlene nächste Schritte für dein Profil",
     "action_steps_desc": "Nutze diese Funktionen in Sharegy, um dein errechnetes Sparpotenzial vollständig auszuschöpfen:"
   }
