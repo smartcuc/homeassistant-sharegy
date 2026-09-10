@@ -20,6 +20,7 @@ def calculate_energy_profile_data(
     has_heatpump: bool = False,
     tariff_type: str = "static",  # "static", "dynamic"
     lang: str = "de",
+    is_configured: bool = False,
 ) -> Dict[str, Any]:
     """
     Klassifiziert die Hardware- und Tarif-Kombination präzise in die Profile
@@ -549,6 +550,29 @@ def calculate_energy_profile_data(
         "Bei einem dynamischen Börsenstromtarif genügt 1 Zähler bei vollem § 14a Rabatt (ca. 160 €/Jahr)."
     )
 
+    # Prüfen, ob der hinterlegte Tarif optimal zum Profil passt
+    allows_both_tariffs = profile_code in ["E.1", "B.2"]
+    if allows_both_tariffs:
+        is_tariff_optimal = True
+    elif recommended_tariff == "dynamic":
+        is_tariff_optimal = (tariff_type == "dynamic")
+    else:
+        is_tariff_optimal = (tariff_type == "static")
+
+    if not is_configured:
+        tariff_status_code = "unconfigured"
+        tariff_status_label = "Profil noch nicht geprüft" if not is_en else "Profile not reviewed"
+    elif is_tariff_optimal:
+        tariff_status_code = "optimal"
+        tariff_status_label = "Optimal abgestimmt" if not is_en else "Optimally configured"
+    else:
+        tariff_status_code = "potential"
+        tariff_status_label = (
+            f"Optimierungspotenzial (~{base_savings_eur} €/Jahr)"
+            if not is_en
+            else f"Optimization potential (~{base_savings_eur} €/year)"
+        )
+
     return {
         "profile_code": profile_code,
         "profile_name": profile_name,
@@ -560,6 +584,10 @@ def calculate_energy_profile_data(
         "tariff_type": tariff_type,
         "is_dynamic_tariff": is_dynamic_tariff,
         "recommended_tariff": recommended_tariff,
+        "is_tariff_optimal": is_tariff_optimal,
+        "is_configured": is_configured,
+        "tariff_status_code": tariff_status_code,
+        "tariff_status_label": tariff_status_label,
         "tariff_verdict_title": tariff_verdict_title,
         "tariff_verdict_reason": tariff_verdict_reason,
         "alternative_tariff_hint": alternative_tariff_hint,
@@ -586,6 +614,7 @@ def get_user_energy_profile(user, lang: str = "de") -> Dict[str, Any]:
             has_heatpump=cached_data.get("has_heatpump", False),
             tariff_type=cached_data.get("tariff_type", "static"),
             lang=lang,
+            is_configured=cached_data.get("is_configured", True),
         )
 
     # Automatische Erkennung anhand existierender Hardware im Haushalt
@@ -600,6 +629,7 @@ def get_user_energy_profile(user, lang: str = "de") -> Dict[str, Any]:
     has_ev = False
     has_heatpump = False
     tariff_type = "static"
+    is_configured = False
 
     if home:
         # 1. Solar prüfen
@@ -607,6 +637,7 @@ def get_user_energy_profile(user, lang: str = "de") -> Dict[str, Any]:
         if generators:
             max_kw = max([float(getattr(g, "peak_power_kw", 0) or 0) for g in generators] or [0])
             solar_type = "bkw" if 0 < max_kw <= 1.0 else ("pv" if max_kw > 1.0 else "pv")
+            is_configured = True
         else:
             pv_devices = Device.objects.filter(
                 home=home,
@@ -615,11 +646,14 @@ def get_user_energy_profile(user, lang: str = "de") -> Dict[str, Any]:
             )
             if pv_devices.exists():
                 solar_type = "pv"
+                is_configured = True
 
         # 2. Speicher prüfen
         has_battery = StorageSystem.objects.filter(home=home).exists() or Device.objects.filter(
             home=home, active=True, config__role__key__in=["battery", "storage"]
         ).exists()
+        if has_battery:
+            is_configured = True
 
         # 3. E-Auto / Wallbox prüfen
         try:
@@ -635,6 +669,8 @@ def get_user_energy_profile(user, lang: str = "de") -> Dict[str, Any]:
             ).filter(
                 Q(identifier__icontains="wallbox") | Q(config__name__icontains="wallbox")
             ).exists()
+        if has_ev:
+            is_configured = True
 
         # 4. Wärmepumpe prüfen
         try:
@@ -650,6 +686,8 @@ def get_user_energy_profile(user, lang: str = "de") -> Dict[str, Any]:
             )
         except Exception:
             has_heatpump = False
+        if has_heatpump:
+            is_configured = True
 
         # 5. Tarif prüfen
         try:
@@ -657,6 +695,7 @@ def get_user_energy_profile(user, lang: str = "de") -> Dict[str, Any]:
             home_tariff = HomeTariff.objects.filter(home=home).order_by("-valid_from").first()
             if home_tariff:
                 tariff_type = home_tariff.tariff_type
+                is_configured = True
         except Exception:
             tariff_type = "static"
 
@@ -667,6 +706,7 @@ def get_user_energy_profile(user, lang: str = "de") -> Dict[str, Any]:
         has_heatpump=has_heatpump,
         tariff_type=tariff_type,
         lang=lang,
+        is_configured=is_configured,
     )
 
     # In Cache sichern
@@ -676,6 +716,7 @@ def get_user_energy_profile(user, lang: str = "de") -> Dict[str, Any]:
         "has_ev": has_ev,
         "has_heatpump": has_heatpump,
         "tariff_type": tariff_type,
+        "is_configured": is_configured,
     }, timeout=86400)
 
     return calculated
@@ -699,6 +740,7 @@ def save_user_energy_profile(user, data: Dict[str, Any], lang: str = "de") -> Di
         "has_ev": has_ev,
         "has_heatpump": has_heatpump,
         "tariff_type": tariff_type,
+        "is_configured": True,
     }
     cache.set(cache_key, stored, timeout=86400 * 30)
 
@@ -733,4 +775,5 @@ def save_user_energy_profile(user, data: Dict[str, Any], lang: str = "de") -> Di
         has_heatpump=has_heatpump,
         tariff_type=tariff_type,
         lang=lang,
+        is_configured=True,
     )

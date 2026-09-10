@@ -387,38 +387,67 @@ def check_home_system_status(user) -> Dict[str, Any]:
             and (not getattr(d, "config", None) or not getattr(d.config, "role", None) or d.config.role.key in ["unknown", "unassigned", "default"])
         ]
 
-        # 9. Readiness Score & Status-Ampel berechnen (Profil-abhängig 0 .. 100%)
+        # 6. SÄULE: ENERGIE-PROFIL & TARIF-ABSTIMMUNG
+        profile_configured = bool(energy_profile.get("is_configured", False))
+        is_tariff_optimal = bool(energy_profile.get("is_tariff_optimal", True))
+        profile_code = energy_profile.get("profile_code", "A.1")
+        profile_name = energy_profile.get("profile_name", "Energie-Profil")
+        savings_eur = energy_profile.get("estimated_savings_eur_year", 0)
+
+        if not profile_configured:
+            profile_status = "missing"
+            profile_status_text = "Profil noch nicht geprüft"
+        elif is_tariff_optimal:
+            profile_status = "ok"
+            profile_status_text = "Optimal abgestimmt"
+        else:
+            profile_status = "warning"
+            profile_status_text = f"Optimierbar (~{savings_eur} €/Jahr Sparpotenzial)"
+
+        # 9. Readiness Score & Status-Ampel berechnen (Profil-abhängig 0 .. 100%, 6 Säulen)
         score = 0
         if user_has_no_solar:
-            # Haushalt ohne Solar: Netzzähler (50%), Hauslast (35%), Zeitzone (15%)
+            # Haushalt ohne Solar: Netzzähler (40%), Hauslast (30%), Zeitzone (15%), Profil (15%)
             if has_grid:
-                score += 50
+                score += 40
             if can_calculate_load:
-                score += 35
+                score += 30
             if has_timezone:
                 score += 15
+            if profile_status == "ok":
+                score += 15
+            elif profile_status == "warning":
+                score += 10
         elif user_expects_battery:
-            # PV + Speicher Prosumer
+            # PV + Speicher Prosumer: PV (25%), Netzzähler (25%), Hauslast (20%), Speicher (10%), Zeitzone (10%), Profil (10%)
             if has_pv:
-                score += 30
+                score += 25
             if has_grid:
-                score += 30
+                score += 25
             if can_calculate_load:
                 score += 20
             if has_battery:
                 score += 10
             if has_timezone:
                 score += 10
+            if profile_status == "ok":
+                score += 10
+            elif profile_status == "warning":
+                score += 6
         else:
-            # PV / BKW ohne Speicher Prosumer
+            # PV / BKW ohne Speicher Prosumer: PV (30%), Netzzähler (30%), Hauslast (20%), Zeitzone (10%), Profil (10%)
             if has_pv:
-                score += 35
+                score += 30
             if has_grid:
-                score += 35
+                score += 30
             if can_calculate_load:
                 score += 20
             if has_timezone:
                 score += 10
+            if profile_status == "ok":
+                score += 10
+            elif profile_status == "warning":
+                score += 6
 
         if unconfigured_devices:
             score = max(0, score - min(25, len(unconfigured_devices) * 10))
@@ -472,6 +501,23 @@ def check_home_system_status(user) -> Dict[str, Any]:
                     "text": "Dein Netzstromzähler ist aktiv. Wenn du eine Solaranlage oder ein Balkonkraftwerk besitzt, kannst du sie jetzt verbinden, um deine Einsparungen live zu sehen.",
                     "action": "connect_pv",
                 })
+
+        if not profile_configured:
+            recommendations.append({
+                "priority": "medium",
+                "pillar": "profile",
+                "title": "Energie-Profil prüfen",
+                "text": "Bestätige deine Haushalts-Ausstattung und deinen Stromtarif, um dein Einsparpotenzial optimal zu nutzen.",
+                "action": "configure_energy_profile",
+            })
+        elif not is_tariff_optimal:
+            recommendations.append({
+                "priority": "medium",
+                "pillar": "profile",
+                "title": "Tarif-Optimierung prüfen",
+                "text": f"Mit deinem Profil ({profile_name}) kannst du durch einen dynamischen Börsenstromtarif ca. {savings_eur} €/Jahr sparen.",
+                "action": "check_tariff_optimization",
+            })
 
         if not submeter_devices:
             recommendations.append({
@@ -576,6 +622,21 @@ def check_home_system_status(user) -> Dict[str, Any]:
             "status_text": f"Aktiv ({tz_val})" if tz_val else "Zeitzone fehlt",
         }
 
+        profile_pillar_data = {
+            "installed": profile_configured,
+            "configured": profile_configured,
+            "status": profile_status,
+            "optional": False,
+            "method": "profile",
+            "label": "Energie-Profil",
+            "device_name": f"{profile_code}: {profile_name}",
+            "status_text": profile_status_text,
+            "profile_code": profile_code,
+            "profile_name": profile_name,
+            "is_tariff_optimal": is_tariff_optimal,
+            "savings_eur": savings_eur,
+        }
+
         return {
             "score": min(100, score),
             "status": "fault" if active_alarms else ("ready" if score >= 70 else ("partial" if score > 0 else "empty")),
@@ -595,6 +656,8 @@ def check_home_system_status(user) -> Dict[str, Any]:
                 "timezone": timezone_pillar_data,
                 "location": timezone_pillar_data,
                 "settings": timezone_pillar_data,
+                "profile": profile_pillar_data,
+                "energy_profile": profile_pillar_data,
             },
             "submeters": {
                 "count": len(submeter_devices),

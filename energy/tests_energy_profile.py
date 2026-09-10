@@ -154,3 +154,16 @@ class EnergyProfileAPITests(TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(res.data["profile_code"], "C.2")
         self.assertEqual(res.data["recommended_tariff"], "dynamic")
+        self.assertTrue(res.data["is_tariff_optimal"])
+        self.assertEqual(res.data["tariff_status_code"], "optimal")
+
+    def test_system_setup_status_has_six_pillars(self):
+        """Prüft, dass der Omi-Check die 6. Säule Energie-Profil enthält"""
+        from energy.services.system_health import check_home_system_status
+        status = check_home_system_status(self.user)
+        self.assertIn("pillars", status)
+        self.assertIn("profile", status["pillars"])
+        self.assertIn("energy_profile", status["pillars"])
+        profile_pillar = status["pillars"]["profile"]
+        self.assertEqual(profile_pillar["label"], "Energie-Profil")
+        self.assertIn(profile_pillar["status"], ["ok", "warning", "missing"])

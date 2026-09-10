@@ -110,6 +110,14 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "", i
             pillar: pillars.timezone || pillars.location || pillars.settings,
             missingHint: t("system_health.missing_tz", "Zeitzone nicht gesetzt"),
         },
+        {
+            key: "profile",
+            icon: "🏡",
+            label: t("system_health.pillar_profile", "Energie-Profil"),
+            pillar: pillars.profile || pillars.energy_profile,
+            missingHint: t("system_health.missing_profile", "Profil prüfen"),
+            link: "/app/energy-profile",
+        },
     ];
 
     return (
@@ -117,7 +125,7 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "", i
             {/* COMPACT SUMMARY STRIP (Nur auf Dashboard / wenn nicht im Modal) */}
             {!inModal && (
                 <div className="px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs">
-                    {/* Left: Omi-Check Badge, Energie-Profil Badge & 5 Mini Status Chips */}
+                    {/* Left: Omi-Check Score & 6 Mini Status Chips */}
                     <div className="flex flex-wrap items-center gap-2.5 min-w-0">
                         <div className="flex items-center gap-1.5 shrink-0 font-bold text-slate-900 dark:text-white">
                             <span className="text-base">🩺</span>
@@ -127,20 +135,7 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "", i
                             </span>
                         </div>
 
-                        {/* 🌟 ENERGIE-PROFIL BADGE (KLICKBAR) */}
-                        {data.energy_profile && (
-                            <Link
-                                to="/app/energy-profile"
-                                className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900 transition shadow-2xs cursor-pointer shrink-0"
-                                title={t("energy_profile.badge_tooltip", "Klicken, um dein Energie-Profil und den Ersparnisrechner zu öffnen")}
-                            >
-                                <span>🏡</span>
-                                <span>{t("energy_profile.badge_label", "Energie-Profil")}</span>
-                                <span className="text-indigo-400 dark:text-indigo-500 font-bold">↗</span>
-                            </Link>
-                        )}
-
-                        {/* 5 Mini Pillar Badges */}
+                        {/* 6 Mini Pillar Badges */}
                         <div className="flex items-center gap-1.5 overflow-x-auto py-0.5">
                             {pillarConfigs.map((item) => {
                                 const isOk = Boolean(
@@ -148,22 +143,48 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "", i
                                     (item.pillar?.configured && item.pillar?.status === "ok") ||
                                     item.pillar?.status === "ok"
                                 );
+                                const isWarning = item.pillar?.status === "warning";
                                 const isOptional = Boolean(item.pillar?.optional ?? item.optional);
+
+                                const badgeClass = `inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-semibold border transition shrink-0 ${
+                                    isOk
+                                        ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
+                                        : isWarning
+                                        ? "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800"
+                                        : isOptional
+                                        ? "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700"
+                                        : "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800"
+                                } ${item.link ? "hover:scale-105 hover:shadow-2xs cursor-pointer" : ""}`;
+
+                                const content = (
+                                    <>
+                                        <span>{item.icon}</span>
+                                        <span className="hidden sm:inline">{item.label}</span>
+                                        <span>{isOk ? "✓" : isWarning ? "!" : isOptional ? "—" : "!"}</span>
+                                        {item.link && <span className="text-[9px] opacity-70">↗</span>}
+                                    </>
+                                );
+
+                                if (item.link) {
+                                    return (
+                                        <Link
+                                            key={item.key}
+                                            to={item.link}
+                                            className={badgeClass}
+                                            title={`${item.label}: ${isOk ? t("common.active", "Aktiv") : isWarning ? t("system_health.optimizable", "Optimierbar") : isOptional ? t("common.optional", "Optional") : item.missingHint} (${t("common.click_to_open", "Klicken zum Öffnen")})`}
+                                        >
+                                            {content}
+                                        </Link>
+                                    );
+                                }
+
                                 return (
                                     <span
                                         key={item.key}
-                                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-semibold border ${
-                                            isOk
-                                                ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
-                                                : isOptional
-                                                ? "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700"
-                                                : "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800"
-                                        }`}
-                                        title={`${item.label}: ${isOk ? t("common.active", "Aktiv") : isOptional ? t("common.optional", "Optional") : item.missingHint}`}
+                                        className={badgeClass}
+                                        title={`${item.label}: ${isOk ? t("common.active", "Aktiv") : isWarning ? t("system_health.optimizable", "Optimierbar") : isOptional ? t("common.optional", "Optional") : item.missingHint}`}
                                     >
-                                        <span>{item.icon}</span>
-                                        <span className="hidden sm:inline">{item.label}</span>
-                                        <span>{isOk ? "✓" : isOptional ? "—" : "!"}</span>
+                                        {content}
                                     </span>
                                 );
                             })}
@@ -208,25 +229,33 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "", i
             {/* EXPANDABLE / MODAL BODY */}
             {(!collapsed || inModal) && (
                 <div className="p-5 space-y-5 animate-fade-in border-t border-slate-100 dark:border-slate-800">
-                    {/* 5 PILLARS STATUS CARDS */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                    {/* 6 PILLARS STATUS CARDS */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
 
                         {pillarConfigs.map((item) => {
                             const isOk = Boolean(
-                                item.pillar?.installed ||
+                                (item.pillar?.installed && item.pillar?.status === "ok") ||
                                 (item.pillar?.configured && item.pillar?.status === "ok") ||
                                 item.pillar?.status === "ok"
                             );
+                            const isWarning = item.pillar?.status === "warning";
+                            const isOptional = Boolean(item.pillar?.optional ?? item.optional);
                             const deviceName = item.pillar?.device_name;
                             const statusText = item.pillar?.status_text;
                             const isCalculated = item.pillar?.method === "calculated";
 
+                            const CardWrapper = item.link ? Link : "div";
+                            const wrapperProps = item.link ? { to: item.link, title: t("common.click_to_configure", "Klicken zum Öffnen & Konfigurieren") } : {};
+
                             return (
-                                <div
+                                <CardWrapper
                                     key={item.key}
-                                    className={`p-3.5 rounded-2xl border transition-all flex flex-col justify-between space-y-2 ${
+                                    {...wrapperProps}
+                                    className={`p-3.5 rounded-2xl border transition-all flex flex-col justify-between space-y-2 text-left ${item.link ? "cursor-pointer hover:border-indigo-400 dark:hover:border-indigo-600 hover:shadow-xs group" : ""} ${
                                         isOk
                                             ? "bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-200/80 dark:border-emerald-800/60 text-emerald-950 dark:text-emerald-200"
+                                            : isWarning
+                                            ? "bg-amber-50/70 dark:bg-amber-950/30 border-amber-300 dark:border-amber-700 text-amber-950 dark:text-amber-200"
                                             : item.optional
                                             ? "bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200"
                                             : "bg-amber-50/50 dark:bg-amber-950/20 border-amber-200/80 dark:border-amber-800/60 text-amber-950 dark:text-amber-200"
@@ -238,17 +267,22 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "", i
                                             className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
                                                 isOk
                                                     ? "bg-emerald-500 text-white"
+                                                    : isWarning
+                                                    ? "bg-amber-500 text-white"
                                                     : item.optional
                                                     ? "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300"
                                                     : "bg-amber-500 text-white"
                                             }`}
                                         >
-                                            {isOk ? t("system_health.active_check", "Aktiv ✓") : item.optional ? t("common.optional", "Optional") : t("system_health.missing", "Fehlt")}
+                                            {isOk ? t("system_health.active_check", "Aktiv ✓") : isWarning ? t("system_health.optimizable", "Hinweis !") : item.optional ? t("common.optional", "Optional") : t("system_health.missing", "Fehlt")}
                                         </span>
                                     </div>
 
                                     <div>
-                                        <div className="font-bold text-xs text-slate-900 dark:text-white">{item.label}</div>
+                                        <div className="font-bold text-xs text-slate-900 dark:text-white flex items-center justify-between">
+                                            <span>{item.label}</span>
+                                            {item.link && <span className="text-indigo-500 group-hover:translate-x-0.5 transition-transform text-[11px]">↗</span>}
+                                        </div>
                                         <div className="text-[11px] text-gray-500 dark:text-slate-400 truncate mt-0.5">
                                             {deviceName
                                                 ? deviceName
@@ -259,7 +293,7 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "", i
                                                 : item.missingHint}
                                         </div>
                                     </div>
-                                </div>
+                                </CardWrapper>
                             );
                         })}
                     </div>
@@ -327,6 +361,26 @@ export default function SystemReadinessCard({ onOpenAddDevice, className = "", i
                                                 >
                                                     <span>📟</span>
                                                     <span>{t("system_health.assign_devices", "Geräte zuweisen →")}</span>
+                                                </button>
+                                            )}
+                                            {rec.action === "configure_energy_profile" && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => navigate("/app/energy-profile")}
+                                                    className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[11px] rounded-lg shadow-2xs transition cursor-pointer flex items-center gap-1"
+                                                >
+                                                    <span>🏡</span>
+                                                    <span>{t("system_health.configure_profile_btn", "Profil prüfen →")}</span>
+                                                </button>
+                                            )}
+                                            {rec.action === "check_tariff_optimization" && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => navigate("/app/tariff")}
+                                                    className="px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] rounded-lg shadow-2xs transition cursor-pointer flex items-center gap-1"
+                                                >
+                                                    <span>⚡</span>
+                                                    <span>{t("system_health.check_tariff_btn", "Tarif prüfen →")}</span>
                                                 </button>
                                             )}
                                             {["connect_inverter_or_meter", "connect_grid_meter", "connect_pv", "add_submeter"].includes(rec.action) && onOpenAddDevice && (
