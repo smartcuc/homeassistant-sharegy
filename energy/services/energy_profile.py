@@ -159,7 +159,7 @@ def calculate_energy_profile_data(
             {"title": "Battery arbitrage & winter recharge" if is_en else "Batterie-Arbitrage & Winter-Nachladung", "amount_eur": 120, "icon": "🔋"},
         ]
         action_links.insert(0, {
-            "title": "Open Energy Control (HEMS)" if is_en else "Energiesteuerung (HEMS) öffnen",
+            "title": "Open Energy Control (EMS)" if is_en else "Energiesteuerung (EMS) öffnen",
             "subtitle": "Set priorities between heat pump, storage & home" if is_en else "Prioritäten zwischen Wärmepumpe, Speicher & Haus festlegen",
             "path": "/app/control",
             "icon": "🎛️",
@@ -196,7 +196,7 @@ def calculate_energy_profile_data(
             {"title": "Battery care & grid support" if is_en else "Batterie-Schonung & Netzdienlichkeit", "amount_eur": 120, "icon": "🔋"},
         ]
         action_links.insert(0, {
-            "title": "Open Energy Control (HEMS)" if is_en else "Energiesteuerung (HEMS) öffnen",
+            "title": "Open Energy Control (EMS)" if is_en else "Energiesteuerung (EMS) öffnen",
             "subtitle": "Set priorities between car, battery & home" if is_en else "Prioritäten zwischen Auto, Speicher & Haus festlegen",
             "path": "/app/control",
             "icon": "🎛️",

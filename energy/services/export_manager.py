@@ -45,7 +45,7 @@ def export_energy_balance(user, period="today", start_date=None, end_date=None, 
     if export_format == "json":
         payload = {
             "meta": {
-                "system": "Sharegy HEMS Cloud",
+                "system": "Sharegy EMS Cloud",
                 "user": user.username,
                 "exported_at": export_ts_str,
                 "period": period,
@@ -65,7 +65,7 @@ def export_energy_balance(user, period="today", start_date=None, end_date=None, 
         string_io = StringIO()
         writer = csv.writer(string_io, delimiter=";", lineterminator="\r\n")
 
-        writer.writerow(["# Sharegy HEMS - Energiebilanz & Verbrauchsbericht"])
+        writer.writerow(["# Sharegy EMS - Energiebilanz & Verbrauchsbericht"])
         writer.writerow(["# Zeitraum:", period_label])
         writer.writerow(["# Exportdatum:", export_ts_str])
         writer.writerow(["# Benutzer:", user.username])
@@ -140,7 +140,7 @@ def export_energy_balance(user, period="today", start_date=None, end_date=None, 
             bottom=Side(style="thin", color="E2E8F0"),
         )
 
-        ws_kpi["A1"] = "Sharegy HEMS - Energie- & Kostenbilanz"
+        ws_kpi["A1"] = "Sharegy EMS - Energie- & Kostenbilanz"
         ws_kpi["A1"].font = title_font
         ws_kpi["A2"] = f"Zeitraum: {period_label} | Exportiert am: {export_ts_str} | Benutzer: {user.username}"
         ws_kpi["A2"].font = Font(name="Calibri", size=10, italic=True, color="64748B")
@@ -277,7 +277,7 @@ def export_energy_balance(user, period="today", start_date=None, end_date=None, 
 
         elements = []
 
-        elements.append(Paragraph("☀️ Sharegy HEMS — Energie- & Kostenbericht", title_style))
+        elements.append(Paragraph("☀️ Sharegy EMS — Energie- & Kostenbericht", title_style))
         elements.append(Paragraph(f"Zeitraum: <b>{period_label}</b> &nbsp;|&nbsp; Erstellt am: {export_ts_str} &nbsp;|&nbsp; Kunde: {user.username}", subtitle_style))
         elements.append(Spacer(1, 6))
 

@@ -67,7 +67,7 @@ export default function Sidebar() {
                 title: `🎛️ ${t("nav.assets_group", "Steuerung & Geräte")}`,
                 items: [
                     {
-                        name: t("nav.energy_control", "Energiesteuerung (HEMS)"),
+                        name: t("nav.energy_control", "Energiesteuerung (EMS)"),
                         path: "/app/control",
                         icon: "🎛️",
                         isProGated: true,

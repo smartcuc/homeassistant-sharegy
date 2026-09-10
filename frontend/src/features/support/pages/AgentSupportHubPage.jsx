@@ -140,7 +140,7 @@ export default function AgentSupportHubPage() {
                             </span>
                         </div>
                         <p className="text-xs text-slate-500 dark:text-slate-400">
-                            Zentrale Bearbeitung aller Kunden- & Systemtickets aus Sharegy HEMS und Factofy Digital Twin
+                            Zentrale Bearbeitung aller Kunden- & Systemtickets aus Sharegy EMS und Factofy Digital Twin
                         </p>
                     </div>
 

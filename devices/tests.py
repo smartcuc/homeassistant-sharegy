@@ -249,7 +249,7 @@ class DeviceAggregationTest(TestCase):
         self.assertEqual(resp_csv.status_code, 200)
         self.assertEqual(resp_csv["Content-Type"], "text/csv; charset=utf-8")
         csv_content = resp_csv.content.decode("utf-8")
-        self.assertIn("# Sharegy HEMS - Geräte-Zeitreihenexport", csv_content)
+        self.assertIn("# Sharegy EMS - Geräte-Zeitreihenexport", csv_content)
         self.assertIn("Zeitpunkt;Messwert", csv_content)
 
         # 3. XLSX Export

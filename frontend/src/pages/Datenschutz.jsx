@@ -35,7 +35,7 @@ export default function Datenschutz({ onClose }) {
                 <p>Wir verarbeiten personenbezogene Daten auf folgenden Rechtsgrundlagen:</p>
                 <ul className="list-disc pl-5 space-y-1 text-xs sm:text-sm">
                     <li><strong>Einwilligung (Art. 6 Abs. 1 lit. a DSGVO, § 25 Abs. 1 TDDDG):</strong> Für optionale Analyse- und Personalisierungsfunktionen oder externe API-Verknüpfungen (z. B. Tibber API-Token).</li>
-                    <li><strong>Vertragserfüllung & vorvertragliche Maßnahmen (Art. 6 Abs. 1 lit. b DSGVO):</strong> Zur Bereitstellung des Energiemanagement-Systems (HEMS/EMS), Verarbeitung von Zähler- und Erzeugungsdaten, Tarifeinstellungen, Rechnungsstellung und Nutzerverwaltung.</li>
+                    <li><strong>Vertragserfüllung & vorvertragliche Maßnahmen (Art. 6 Abs. 1 lit. b DSGVO):</strong> Zur Bereitstellung des Energiemanagement-Systems (EMS), Verarbeitung von Zähler- und Erzeugungsdaten, Tarifeinstellungen, Rechnungsstellung und Nutzerverwaltung.</li>
                     <li><strong>Rechtliche Verpflichtung (Art. 6 Abs. 1 lit. c DSGVO):</strong> Zur Erfüllung handels- und steuerrechtlicher Aufbewahrungsfristen (z. B. Belegaufbewahrung gem. § 147 AO, § 257 HGB).</li>
                     <li><strong>Berechtigtes Interesse (Art. 6 Abs. 1 lit. f DSGVO):</strong> Zur Gewährleistung der IT-Sicherheit, Betrugsprävention, Lastverteilung und Stabilität der Serverinfrastruktur.</li>
                 </ul>
@@ -56,7 +56,7 @@ export default function Datenschutz({ onClose }) {
                     </div>
 
                     <div>
-                        <h3 className="text-base font-bold text-gray-800">b) Energie-, Mess- & Telemetriedaten (HEMS / EMS)</h3>
+                        <h3 className="text-base font-bold text-gray-800">b) Energie-, Mess- & Telemetriedaten (EMS)</h3>
                         <p className="text-xs sm:text-sm text-gray-600">
                             Kernfunktion von Sharegy ist das Erfassen und Visualisieren von Energieflüssen. Hierbei verarbeiten wir Messdaten von angeschlossenen Geräten (Smart Meter, Wechselrichter, Batteriespeicher, Wärmepumpen, schaltbare Steckdosen, OCPP-Wallboxen, WSS- und MQTT-Sensoren). Zu den verarbeiteten Werten gehören Wirkleistung (W), Zählerstände (kWh, OBIS 1.8.0 / 2.8.0), Batterieladezustand (SoC %), Netzspannung und Timestamp. Diese Daten werden zur Aggregation, Berechnung von Autarkiegraden, Erzeugungs- und Lastprognosen sowie zur Eigenverbrauchsoptimierung verwendet.
                         </p>

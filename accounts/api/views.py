@@ -1097,7 +1097,7 @@ class GDPRExportView(APIView):
             "export_metadata": {
                 "title": "Sharegy GDPR Personal Data Export",
                 "export_date": timezone.now().isoformat(),
-                "service": "Sharegy HEMS/EMS (smartEvo GmbH)",
+                "service": "Sharegy EMS (smartEvo GmbH)",
                 "gdpr_reference": "Article 15 & Article 20 GDPR",
             },
             "user": user_data,

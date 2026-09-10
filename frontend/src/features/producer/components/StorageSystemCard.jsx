@@ -94,10 +94,10 @@ export default function StorageSystemCard({ storage, onEdit, onDelete, onControl
                 <div className="flex items-center gap-1.5">
                     <button
                         onClick={() => onEdit(storage)}
-                        className="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition cursor-pointer border border-slate-700"
+                        className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition cursor-pointer border border-slate-700"
                         title={t("storage_system.edit_title", "Speicher & Messpunkte bearbeiten")}
                     >
-                        ✏️ {t("common.edit", "Bearbeiten")}
+                        ✏️
                     </button>
                     <button
                         onClick={() => onDelete(storage.id, storage.name)}

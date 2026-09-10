@@ -361,7 +361,7 @@ def export_device_timeseries(user, device_id, range_str="24h", requested_metric=
     if export_format == "json":
         payload = {
             "meta": {
-                "system": "Sharegy HEMS Cloud",
+                "system": "Sharegy EMS Cloud",
                 "user": user.username if user and user.is_authenticated else "anonymous",
                 "exported_at": export_ts_str,
                 "device_id": device.id,
@@ -397,7 +397,7 @@ def export_device_timeseries(user, device_id, range_str="24h", requested_metric=
         string_io = StringIO()
         writer = csv.writer(string_io, delimiter=";", lineterminator="\r\n")
 
-        writer.writerow(["# Sharegy HEMS - Geräte-Zeitreihenexport"])
+        writer.writerow(["# Sharegy EMS - Geräte-Zeitreihenexport"])
         writer.writerow(["# Gerät:", f"{device_name} ({device.identifier})"])
         writer.writerow(["# Messkanal:", f"{metric_name} [{unit}]"])
         writer.writerow(["# Zeitraum:", period_label])
@@ -454,7 +454,7 @@ def export_device_timeseries(user, device_id, range_str="24h", requested_metric=
         )
 
         # Title & Meta Info
-        ws["A1"] = f"Sharegy HEMS — {device_name}"
+        ws["A1"] = f"Sharegy EMS — {device_name}"
         ws["A1"].font = title_font
         ws["A2"] = f"Messkanal: {metric_name} [{unit}] | Identifikator: {device.identifier} | Zeitraum: {period_label}"
         ws["A2"].font = Font(name="Calibri", size=10, italic=True, color="64748B")
@@ -567,7 +567,7 @@ def export_device_timeseries(user, device_id, range_str="24h", requested_metric=
         )
 
         elements = []
-        elements.append(Paragraph(f"📈 Sharegy HEMS — {device_name}", title_style))
+        elements.append(Paragraph(f"📈 Sharegy EMS — {device_name}", title_style))
         elements.append(Paragraph(
             f"Messkanal: <b>{metric_name} [{unit}]</b> &nbsp;|&nbsp; ID: <code>{device.identifier}</code> &nbsp;|&nbsp; Zeitraum: <b>{period_label}</b><br/>"
             f"Erstellt am: {export_ts_str} &nbsp;|&nbsp; Benutzer: {user.username if user and user.is_authenticated else '-'}",
