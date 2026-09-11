@@ -127,13 +127,18 @@ class GrowattAdapter(BaseInverterAdapter):
                     low = raw.lower()
                     has_kw = "kw" in low or "kw" in str(k).lower()
                     has_w = "w" in low and not has_kw
-                    if has_kw:
-                        factor = 1000.0
-                        low = low.replace("kwh", "").replace("kw", "").strip()
-                    elif has_w:
-                        low = low.replace("wh", "").replace("w", "").strip()
-                    elif "%" in low:
-                        low = low.replace("%", "").strip()
+                    if is_power:
+                        if has_kw:
+                            factor = 1000.0
+                        elif has_w:
+                            factor = 1.0
+                    else:
+                        # Für Energie / Zählerstände (Standardeinheit: kWh)
+                        if has_w and not has_kw and "wh" in low:
+                            factor = 0.001
+                        elif has_kw:
+                            factor = 1.0
+                    low = low.replace("kwh", "").replace("wh", "").replace("kw", "").replace("w", "").replace("%", "").strip()
                     import re
                     match = re.search(r"[-+]?\d*\.?\d+", low)
                     if match:
@@ -155,7 +160,7 @@ class GrowattAdapter(BaseInverterAdapter):
 
         # 1. PV Erzeugung (DC Solar Input & AC Output & Plant Totals)
         ppv_direct = _get_val("ppv", "ppvTotal", "p_pv", "pv_power", "pvPower", "pAct", "pact", "invTodayPpv", "current_power", "currentpower", "current_power_kw", "currentpowerkw", is_power=True)
-        curr_power = _get_val("currentPower", "current_power", "currPower", "curr_power", "total_power", "nominalPower", "plantPower", "current_power_kw", "currentpowerkw", is_power=True)
+        curr_power = _get_val("currentPower", "current_power", "currPower", "curr_power", "total_power", "plantPower", "current_power_kw", "currentpowerkw", is_power=True)
         pac_direct = _get_val("pac", "invPac", "pacToUserTotal", "pac1", "power", is_power=True)
 
         # Multi-String PV Summe (z. B. String 1 + String 2 + String 3 + String 4)

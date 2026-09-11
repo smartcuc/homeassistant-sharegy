@@ -10,6 +10,8 @@ from typing import Dict, Optional, List, Type
 from devices.adapters.contracts import BaseInverterAdapter
 from devices.adapters.sungrow import SungrowAdapter
 from devices.adapters.growatt import GrowattAdapter
+from devices.adapters.fronius import FroniusAdapter
+from devices.adapters.victron import VictronAdapter
 from devices.adapters.declarative import DeclarativeProfileAdapter
 
 logger = logging.getLogger(__name__)
@@ -57,6 +59,8 @@ class AdapterRegistry:
 # Standard-Adapter initial registrieren
 AdapterRegistry.register(SungrowAdapter())
 AdapterRegistry.register(GrowattAdapter())
+AdapterRegistry.register(FroniusAdapter())
+AdapterRegistry.register(VictronAdapter())
 
 
 def get_adapter(profile_id: str) -> BaseInverterAdapter:

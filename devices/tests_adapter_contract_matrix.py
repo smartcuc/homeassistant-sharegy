@@ -197,11 +197,111 @@ class AdapterContractMatrixTest(TestCase):
         self.assertEqual(soc_metric.value, 80.0)
 
     def test_05_declarative_profile_adapters_work_seamlessly(self):
-        """Stellt sicher, dass auch SolarEdge, Kostal und Fronius über die Registry geladen werden."""
-        for prof_id in ["solaredge_cloud", "kostal_solar_portal", "fronius_solarweb", "deye_solarman"]:
+        """Stellt sicher, dass auch SolarEdge, Kostal und Deye über die Registry geladen werden."""
+        for prof_id in ["solaredge_cloud", "kostal_solar_portal", "deye_solarman"]:
             adapter = get_adapter(prof_id)
             self.assertIsNotNone(adapter)
             test_res = adapter.test_connection({"token": "mock_tok", "api_key": "mock_key"})
             self.assertEqual(test_res.status, "success")
             self.assertTrue(test_res.simulated)
             self.assertIn("pv_power_w", test_res.live_metrics)
+
+    def test_06_fronius_adapter_isolation(self):
+        """Testet den Fronius-Adapter isoliert mit Solar.web flowdata und lokaler Solar API v1."""
+        adapter = get_adapter("fronius_solarweb")
+        self.assertIsNotNone(adapter)
+
+        # 1. Solar.web Cloud flowdata
+        raw_cloud = {
+            "data": {
+                "channels": [
+                    {"channelName": "PowerPV", "value": 4850.0, "unit": "W"},
+                    {"channelName": "PowerGrid", "value": -2100.0, "unit": "W"},
+                    {"channelName": "PowerLoad", "value": -1250.0, "unit": "W"},
+                    {"channelName": "PowerAkku", "value": 1500.0, "unit": "W"},
+                    {"channelName": "StateOfCharge_Akku", "value": 78.5, "unit": "%"},
+                    {"channelName": "EnergyToday", "value": 18.4, "unit": "kWh"},
+                    {"channelName": "EnergyTotal", "value": 12450.0, "unit": "kWh"},
+                ]
+            }
+        }
+        tel_cloud = adapter.parse_payload(raw_cloud)
+        self.assertEqual(tel_cloud.pv_power_w, 4850.0)
+        self.assertEqual(tel_cloud.grid_power_w, -2100.0)
+        self.assertEqual(tel_cloud.load_power_w, 1250.0)
+        self.assertEqual(tel_cloud.battery_power_w, 1500.0)
+        self.assertEqual(tel_cloud.battery_soc, 78.5)
+        self.assertEqual(tel_cloud.daily_yield_kwh, 18.4)
+        self.assertEqual(tel_cloud.total_yield_kwh, 12450.0)
+
+        # 2. Lokale Solar API v1 (/solar_api/v1/GetPowerFlowRealtimeData.fcgi)
+        raw_local = {
+            "Body": {
+                "Data": {
+                    "Site": {
+                        "P_PV": 3200.0,
+                        "P_Grid": 450.0,
+                        "P_Load": -1650.0,
+                        "P_Akku": -2000.0,
+                        "E_Day": 12500.0,
+                        "E_Total": 8500000.0,
+                    },
+                    "Inverters": {
+                        "1": {
+                            "DT": 1,
+                            "P": 3200.0,
+                            "SOC": 92.0,
+                        }
+                    }
+                }
+            }
+        }
+        tel_local = adapter.parse_payload(raw_local)
+        self.assertEqual(tel_local.pv_power_w, 3200.0)
+        self.assertEqual(tel_local.grid_power_w, 450.0)
+        self.assertEqual(tel_local.load_power_w, 1650.0)
+        self.assertEqual(tel_local.battery_power_w, -2000.0)
+        self.assertEqual(tel_local.battery_soc, 92.0)
+        self.assertEqual(tel_local.daily_yield_kwh, 12.5) # 12500 Wh -> 12.5 kWh
+        self.assertEqual(tel_local.total_yield_kwh, 8500.0) # 8500000 Wh -> 8500.0 kWh
+
+        # 3. Connection Test
+        test_res = adapter.test_connection({"mock": True})
+        self.assertEqual(test_res.status, "success")
+        self.assertIn("pv_power_w", test_res.live_metrics)
+
+    def test_07_victron_adapter_isolation(self):
+        """Testet den Victron-Adapter isoliert mit typischen VRM Portal System-Overview Payloads."""
+        adapter = get_adapter("victron_vrm")
+        self.assertIsNotNone(adapter)
+
+        # 1. System Overview Payload
+        raw_vrm = {
+            "success": True,
+            "records": {
+                "solar_yield": 4350.0,
+                "pv_power": 4350.0,
+                "grid_power": -1200.0,
+                "consumption": 1650.0,
+                "battery_power": -1500.0, # Laden (negativ)
+                "soc": 84.5,
+                "yield_today": 22.8,
+                "yield_total": 9850.4,
+            }
+        }
+        tel = adapter.parse_payload(raw_vrm)
+        self.assertEqual(tel.pv_power_w, 4350.0)
+        self.assertEqual(tel.grid_power_w, -1200.0)
+        self.assertEqual(tel.load_power_w, 1650.0)
+        self.assertEqual(tel.battery_power_w, -1500.0)
+        self.assertEqual(tel.battery_soc, 84.5)
+        self.assertEqual(tel.daily_yield_kwh, 22.8)
+        self.assertEqual(tel.total_yield_kwh, 9850.4)
+
+        # 2. Connection Test (Simulation)
+        test_res = adapter.test_connection({"mock": True})
+        self.assertEqual(test_res.status, "success")
+        self.assertIn("pv_power_w", test_res.live_metrics)
+        self.assertIn("battery_soc", test_res.live_metrics)
+
+

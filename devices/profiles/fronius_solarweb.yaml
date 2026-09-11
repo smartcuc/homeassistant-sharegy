@@ -1,42 +1,43 @@
 id: "fronius_solarweb"
-name: "Fronius Solar.web API"
+name: "Fronius Solar.web"
 vendor: "Fronius"
 category: "inverter_hybrid"
 protocol: "http_cloud"
-description: "Cloud-Schnittstelle für Fronius GEN24 Plus, Symo, Primo und Fronius Solar.web Monitoring."
+description: "Direkte Anbindung für Fronius GEN24 Plus, Symo, Primo und Tauro über Solar.web oder lokale Solar API."
 
 help:
-  de: "1. Logge dich auf solarweb.com ein.\n2. Gehe zu 'Einstellungen' -> 'API-Zugriffsverwaltung'.\n3. Erstelle einen API-Schlüssel und kopiere AccessKeyId und AccessKeyValue.\n4. Deine PV-System-ID findest du in der URL deiner Anlage auf Solar.web."
-  en: "1. Log into solarweb.com.\n2. Go to 'Settings' -> 'API Access Management'.\n3. Create an API Key and copy the AccessKeyId and AccessKeyValue.\n4. Find your PV System ID in the URL of your plant on Solar.web."
+  de: "1. Gib deine gewohnten Solar.web Zugangsdaten (E-Mail und Passwort) ein.\n2. Deine PV-Anlage wird automatisch erkannt.\n3. Alternativ: Gib die lokale IP-Adresse deines Fronius Wechselrichters ein, um die Daten direkt im Heimnetzwerk abzurufen (oder nutze die Sharegy Home Assistant / ioBroker Integration)."
+  en: "1. Enter your standard Solar.web credentials (Email and Password).\n2. Your PV system is automatically discovered.\n3. Alternatively: Enter the local IP address of your Fronius inverter to query it directly on your local network (or use the Sharegy Home Assistant / ioBroker integration)."
 
 connection:
-
-  auth_type: "api_key_header"
-  default_base_url: "https://api.solarweb.com"
+  auth_type: "basic_or_token"
+  default_base_url: "https://swqapi.solarweb.com"
   polling_interval_seconds: 60
   fields:
-    - key: "pv_system_id"
-      label: "Solar.web PV-System ID"
+    - key: "username"
+      label: "Solar.web E-Mail / Benutzername"
       type: "string"
       required: true
-      placeholder: "z. B. 01234567-89ab-cdef-0123-456789abcdef"
-    - key: "access_key_id"
-      label: "AccessKey ID"
-      type: "string"
-      required: true
-      placeholder: "FKS..."
-    - key: "access_key_value"
-      label: "AccessKey Value"
+      placeholder: "name@beispiel.de"
+    - key: "password"
+      label: "Solar.web Passwort"
       type: "password"
       required: true
+    - key: "host"
+      label: "Lokale IP-Adresse / Host (Optional für Direkt-LAN)"
+      type: "string"
+      required: false
+      placeholder: "z. B. 192.168.1.150"
+    - key: "pv_system_id"
+      label: "PV-System ID (Optional, wird sonst autom. ermittelt)"
+      type: "string"
+      required: false
+      placeholder: "01234567-89ab-cdef-0123-456789abcdef"
 
 requests:
   telemetry:
     method: "GET"
     endpoint: "/pvsystems/{{pv_system_id}}/flowdata"
-    headers:
-      "AccessKeyId": "{{access_key_id}}"
-      "AccessKeyValue": "{{access_key_value}}"
 
 metrics_mapping:
   pv_power_w:

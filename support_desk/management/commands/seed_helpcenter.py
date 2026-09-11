@@ -400,10 +400,10 @@ Mit der **Cloud-Kopplung** bindest du deinen Wechselrichter und Batteriespeicher
 | Hersteller | Unterstützte Modelle | Benötigte Zugangsdaten |
 | :--- | :--- | :--- |
 | **Sungrow** | SH5.0–SH25T Hybrid, SG-Serie, SBR-Speicher | `Anlagen-ID (ps_id)`, `E-Mail / Benutzer`, `Passwort`, `AppKey` |
-| **Fronius** | GEN24 Plus, Symo, Primo, Tauro | `PV-System-ID`, `AccessKeyId`, `AccessKeyValue` |
+| **Fronius** | GEN24 Plus, Symo, Primo, Tauro | `Solar.web E-Mail`, `Passwort` (oder lokale IP) |
 | **SolarEdge** | SE-Serie, HD-Wave, StorEdge, Optimierer | `Standort-ID (site_id)`, `API-Schlüssel (api_key)` |
 | **Kostal** | PLENTICORE plus, PIKO IQ, PIKO MP, BYD | `Anlagen-ID (plant_id)`, `API-Schlüssel (api_key)` |
-| **Growatt** | MIN, MOD, MID, SPH, SPA, ARK-Speicher | `Anlagen-ID (plant_id)`, `OpenAPI Token` |
+| **Growatt** | MIN, MOD, MID, SPH, SPA, ARK-Speicher | `Benutzername / E-Mail`, `Passwort` (oder OpenAPI Token) |
 | **Deye** | SUN 3–12k Hybrid, Mikrowechselrichter | `AppID`, `AppSecret`, `E-Mail`, `Passwort`, `Geräte-SN` |
 | **Huawei** | SUN2000 3–30KTL, LUNA2000 Speicher | `SystemCode`, `SecretKey`, `Anlagencode (Plant Code)` |
 | **GoodWe** | ET, EH, BH, ES Hybrid, Lynx Home | `SEMS Account (E-Mail)`, `Passwort`, `PowerStation-ID` |
@@ -414,10 +414,19 @@ Mit der **Cloud-Kopplung** bindest du deinen Wechselrichter und Batteriespeicher
 
 ## 2. Einrichtung je Hersteller
 
+### ☀️ Fronius (Solar.web Cloud & Lokale Anbindung)
+Fronius unterstützt zwei besonders komfortable Wege:
+* **Weg 1 (Direkt-Cloud via Solar.web)**: Gib einfach deine gewohnten Solar.web Zugangsdaten (**E-Mail und Passwort**) ein. Sharegy synchronisiert deine Anlage automatisch.
+* **Weg 2 (Lokal via Home Assistant oder ioBroker)**: Falls du Home Assistant oder ioBroker nutzt, binde Fronius direkt im LAN über die lokale Solar API v1 ein und leite die Sensoren per 1-Klick über die Sharegy Home Assistant / ioBroker Integration weiter.
+
 ### ☀️ Sungrow (iSolarCloud OpenAPI & OAuth)
 1. Logge dich unter [isolarcloud.eu](https://www.isolarcloud.eu) ein.
 2. In der Adresszeile deines Browsers findest du die **Power Station ID (`ps_id`)** (`...stationDetail?ps_id=1234567`).
 3. Trage deine Zugangsdaten ein und klicke auf **„Verbindung testen“**.
+
+### ☀️ Growatt (ShineServer & ShinePhone)
+1. Gib deinen normalen ShineServer / ShinePhone Benutzernamen und dein Passwort ein.
+2. Sharegy ermittelt automatisch deine Anlage und liest alle Hybrid-, PV- und Speicherdaten aus.
 
 ### ☀️ Deye / SolarMAN Smart API
 1. Registriere dich auf [open.solarmanpv.com](https://open.solarmanpv.com) oder nutze deinen SolarMAN Smart Account.
@@ -436,11 +445,11 @@ Mit der **Cloud-Kopplung** bindest du deinen Wechselrichter und Batteriespeicher
 Connect solar inverters and home batteries directly via server-to-server APIs – **no local hardware required**.
 
 ## Supported Manufacturers (10 Major Brands)
-1. **Sungrow** (iSolarCloud OpenAPI)
-2. **Fronius** (Solar.web API)
-3. **SolarEdge** (Monitoring Portal API)
-4. **Kostal** (Solar Portal API)
-5. **Growatt** (ShineServer OpenAPI)
+1. **Fronius** (Solar.web Direct & Local Solar API)
+2. **Sungrow** (iSolarCloud OpenAPI & Web)
+3. **Growatt** (ShineServer & OpenAPI)
+4. **SolarEdge** (Monitoring Portal API)
+5. **Kostal** (Solar Portal API)
 6. **Deye** (SolarMAN Smart API)
 7. **Huawei** (FusionSolar OpenAPI)
 8. **GoodWe** (SEMS Portal API)
