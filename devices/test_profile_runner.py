@@ -375,7 +375,7 @@ class ProfileRunnerTestCase(TestCase):
         }
         parsed_sg = _parse_metrics_from_payload(sungrow_prof, sungrow_payload)
         self.assertEqual(parsed_sg["pv_power_w"], 7390.0)
-        self.assertEqual(parsed_sg["grid_power_w"], 1500.0)
+        self.assertEqual(parsed_sg["grid_power_w"], -1500.0)
         self.assertEqual(parsed_sg["load_power_w"], 5890.0)
         self.assertEqual(parsed_sg["battery_soc"], 65.0)
 

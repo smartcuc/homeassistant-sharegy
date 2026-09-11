@@ -544,12 +544,13 @@ def _execute_growatt_query(base_url: str, credentials: dict) -> dict:
         if raw_data.get("data"):
             return raw_data
 
-    # PFAD B: ShineServer / ShinePhone Web Login (Username & Passwort via PyPi_GrowattServer)
+    # PFAD B: ShineServer / ShinePhone Web Login (Home Assistant / PyPi_GrowattServer kompatibel)
     if username and password:
         hashed_pw = _growatt_hash_password(str(password))
         server_hosts = [
             "https://server.growatt.com",
             "https://server-api.growatt.com",
+            "https://server-us.growatt.com",
             "https://openapi.growatt.com",
         ]
         
@@ -558,46 +559,182 @@ def _execute_growatt_query(base_url: str, credentials: dict) -> dict:
         user_id = None
 
         for host in server_hosts:
-            login_url = f"{host}/newTwoLoginAPI.do"
-            try:
-                l_resp = session.post(login_url, data={"userName": username, "password": hashed_pw}, timeout=10)
-                if l_resp.status_code == 200:
-                    l_json = l_resp.json().get("back", {})
-                    if l_json.get("success"):
-                        logged_in = True
-                        active_host = host
-                        user_id = l_json.get("user", {}).get("id") or l_json.get("userId")
-                        credentials["user_id"] = user_id
-                        break
-            except Exception as e:
-                logger.debug("Growatt login attempt failed on host %s: %s", host, e)
-
-        if logged_in and user_id:
-            try:
-                # 1. Plant List & Übersicht
-                p_list_resp = session.get(f"{active_host}/PlantListAPI.do", params={"userId": user_id}, timeout=10)
-                if p_list_resp.status_code == 200:
-                    plants_info = p_list_resp.json().get("back", {})
-                    if plants_info.get("totalData"):
-                        raw_data["data"].update(plants_info["totalData"])
-                    plant_arr = plants_info.get("data", [])
-                    if plant_arr and isinstance(plant_arr, list):
-                        first_plant = plant_arr[0]
-                        if isinstance(first_plant, dict):
-                            raw_data["data"].update(first_plant)
-                        if not plant_id:
-                            plant_id = str(first_plant.get("plantId") or first_plant.get("id") or "")
-                            credentials["plant_id"] = plant_id
-
-                # 2. Plant Detail / Overview / Inverter
-                if plant_id:
-                    # Inverter List
-                    inv_resp = session.post(
-                        f"{active_host}/newTwoPlantAPI.do",
-                        params={"op": "getAllPlantListTwo"},
-                        data={"plantId": plant_id, "language": "1"},
+            for pw_candidate in [hashed_pw, str(password)]:
+                try:
+                    l_resp = session.post(
+                        f"{host}/newTwoLoginAPI.do",
+                        data={"userName": username, "password": pw_candidate},
                         timeout=10,
                     )
+                    if l_resp.status_code == 200:
+                        l_body = l_resp.json()
+                        l_back = l_body.get("back", {}) if isinstance(l_body.get("back"), dict) else l_body
+                        if l_back.get("success") or l_body.get("result") == 1 or l_body.get("success"):
+                            logged_in = True
+                            active_host = host
+                            user_id = (
+                                l_back.get("user", {}).get("id")
+                                or l_back.get("userId")
+                                or l_back.get("user", {}).get("userId")
+                                or l_body.get("obj", {}).get("userId")
+                                or l_body.get("obj", {}).get("id")
+                                or l_body.get("data", {}).get("userId")
+                                or l_body.get("data", {}).get("id")
+                                or l_body.get("userId")
+                            )
+                            credentials["user_id"] = user_id
+                            break
+                except Exception as e:
+                    logger.debug("Growatt login attempt failed on host %s: %s", host, e)
+
+                try:
+                    form_resp = session.post(
+                        f"{host}/login",
+                        data={"account": username, "password": pw_candidate, "validateCode": ""},
+                        timeout=10,
+                    )
+                    if form_resp.status_code == 200:
+                        try:
+                            f_body = form_resp.json()
+                            if f_body.get("result") == 1 or f_body.get("success"):
+                                logged_in = True
+                                active_host = host
+                                user_id = f_body.get("obj", {}).get("userId") or user_id
+                                break
+                        except Exception:
+                            if "index" in form_resp.url or "main" in form_resp.url or session.cookies.get("JSESSIONID"):
+                                logged_in = True
+                                active_host = host
+                                break
+                except Exception as e:
+                    logger.debug("Growatt /login endpoint failed on host %s: %s", host, e)
+
+                if logged_in:
+                    break
+            if logged_in:
+                break
+
+        if logged_in:
+            try:
+                today_str = timezone.now().strftime("%Y-%m-%d")
+
+                # 1. Plant List & Übersicht
+                if user_id:
+                    p_list_resp = session.get(f"{active_host}/PlantListAPI.do", params={"userId": user_id}, timeout=10)
+                    if p_list_resp.status_code == 200:
+                        p_j = p_list_resp.json()
+                        plants_info = p_j.get("back") if isinstance(p_j.get("back"), dict) else p_j
+                        if isinstance(plants_info.get("totalData"), dict):
+                            raw_data["data"].update(plants_info["totalData"])
+                        plant_arr = plants_info.get("data", [])
+                        if plant_arr and isinstance(plant_arr, list):
+                            first_plant = plant_arr[0]
+                            if isinstance(first_plant, dict):
+                                raw_data["data"].update(first_plant)
+                                if isinstance(first_plant.get("plantData"), dict):
+                                    raw_data["data"].update(first_plant["plantData"])
+                            if not plant_id:
+                                plant_id = str(first_plant.get("plantId") or first_plant.get("id") or "")
+                                credentials["plant_id"] = plant_id
+
+                # 2. Plant Detail API
+                if plant_id:
+                    try:
+                        p_det_resp = session.get(
+                            f"{active_host}/PlantDetailAPI.do",
+                            params={"plantId": plant_id, "type": "1", "date": today_str},
+                            timeout=10,
+                        )
+                        if p_det_resp.status_code == 200:
+                            det_data = p_det_resp.json().get("back") or p_det_resp.json()
+                            if isinstance(det_data, dict):
+                                raw_data["data"].update(det_data)
+                                if isinstance(det_data.get("plantData"), dict):
+                                    raw_data["data"].update(det_data["plantData"])
+                    except Exception as p_det_err:
+                        logger.debug("PlantDetailAPI query failed: %s", p_det_err)
+
+                # 3. Inverter Device Discovery für die Anlage
+                discovered_devices = []
+                if device_sn:
+                    discovered_devices.append(device_sn)
+
+                if plant_id:
+                    for plant_ep, params, post_data in [
+                        (
+                            f"{active_host}/newTwoPlantAPI.do",
+                            {"op": "getAllPlantListTwo"},
+                            {
+                                "language": "1",
+                                "nominalPower": "",
+                                "order": "1",
+                                "pageSize": "15",
+                                "plantName": "",
+                                "plantStatus": "",
+                                "toPageNum": "1",
+                            },
+                        ),
+                        (f"{active_host}/newPlantAPI.do", {"op": "getPlantList"}, {"plantId": plant_id}),
+                        (f"{active_host}/panel/getPlantData", None, {"plantId": plant_id}),
+                        (f"{active_host}/panel/getPlantData", {"plantId": plant_id}, None),
+                        (f"{active_host}/newPlantAPI.do", {"op": "getPlantData", "plantId": plant_id}, None),
+                        (f"{active_host}/indexLogAPI.do", {"op": "getPlantData"}, {"plantId": plant_id}),
+                    ]:
+                        try:
+                            if post_data is not None:
+                                inv_list_resp = session.post(plant_ep, params=params, data=post_data, timeout=8)
+                            else:
+                                inv_list_resp = session.get(plant_ep, params=params, timeout=8)
+                            if inv_list_resp.status_code == 200:
+                                inv_data = inv_list_resp.json()
+                                if isinstance(inv_data, dict):
+                                    raw_data["data"].update(inv_data)
+                                    for list_key in ["PlantList", "obj", "deviceList", "data", "invList", "storageList", "minList", "tlxList", "mixList", "spaList", "sphList"]:
+                                        items = inv_data.get(list_key)
+                                        if isinstance(items, list):
+                                            for d in items:
+                                                if isinstance(d, dict):
+                                                    raw_data["data"].update(d)
+                                                    sn = str(d.get("sn") or d.get("deviceSn") or d.get("inverterId") or d.get("datalogSn") or "").strip()
+                                                    if sn and sn not in discovered_devices:
+                                                        discovered_devices.append(sn)
+                        except Exception:
+                            pass
+
+                if discovered_devices and not device_sn:
+                    credentials["device_sn"] = discovered_devices[0]
+
+                target_sn_list = discovered_devices if discovered_devices else ([device_sn] if device_sn else [])
+                for sn in target_sn_list:
+                    for inv_ep, params, data_payload in [
+                        (f"{active_host}/newInverterAPI.do", {"op": "getInverterDetailData", "inverterId": sn}, None),
+                        (f"{active_host}/newInverterAPI.do", {"op": "getInverterDetailData_two", "inverterId": sn}, None),
+                        (f"{active_host}/newInverterAPI.do", {"op": "getInverterData", "id": sn, "type": "1", "date": today_str}, None),
+                        (f"{active_host}/newTlxApi.do", {"op": "getEnergyOverview"}, {"plantId": plant_id, "id": sn}),
+                        (f"{active_host}/newTlxApi.do", {"op": "getSystemStatus_KW"}, {"plantId": plant_id, "id": sn}),
+                        (f"{active_host}/newMinApi.do", {"op": "getEnergyOverview"}, {"plantId": plant_id, "id": sn}),
+                        (f"{active_host}/newMinApi.do", {"op": "getSystemStatus_KW"}, {"plantId": plant_id, "id": sn}),
+                        (f"{active_host}/newMixApi.do", {"op": "getEnergyOverview"}, {"plantId": plant_id, "id": sn}),
+                        (f"{active_host}/newMixApi.do", {"op": "getSystemStatus_KW"}, {"plantId": plant_id, "id": sn}),
+                        (f"{active_host}/newSphApi.do", {"op": "getEnergyOverview"}, {"plantId": plant_id, "id": sn}),
+                        (f"{active_host}/newSphApi.do", {"op": "getSystemStatus_KW"}, {"plantId": plant_id, "id": sn}),
+                        (f"{active_host}/newMaxApi.do", {"op": "getEnergyOverview"}, {"plantId": plant_id, "id": sn}),
+                        (f"{active_host}/newSpaApi.do", {"op": "getEnergyOverview"}, {"plantId": plant_id, "id": sn}),
+                        (f"{active_host}/newNoahApi.do", {"op": "getNoahDetailData"}, {"noahSn": sn}),
+                    ]:
+                        try:
+                            if data_payload:
+                                r = session.post(inv_ep, params=params, data=data_payload, timeout=8)
+                            else:
+                                r = session.get(inv_ep, params=params, timeout=8)
+                            if r.status_code == 200:
+                                j = r.json()
+                                if isinstance(j, dict):
+                                    d = j.get("obj") or j.get("back") or j.get("data") or j
+                                    if isinstance(d, dict) and d:
+                                        raw_data["data"].update(d)
+                        except Exception:
+                            pass
                     if inv_resp.status_code == 200:
                         inv_json = inv_resp.json()
                         if isinstance(inv_json, dict):
@@ -747,7 +884,7 @@ def _parse_metrics_from_payload(profile: dict, raw_payload: dict) -> dict:
                 for k in [
                     "curr_power", "curr_pac", "currPower", "currPac", "currentPower", "current_power",
                     "currentEnergy", "current_energy", "pac", "ppv", "ppv1", "ppv2", "pPv1", "pPv2",
-                    "pactouser", "pacToUserTotal", "nominalPower", "invPac", "power", "pv_power",
+                    "nominalPower", "invPac", "power", "pv_power",
                     "pvPower", "pAct", "pact", "pac1", "ppvTotal", "p_pv", "p_pv1", "p_pv2", "total_power"
                 ]:
                     if k in data_dict and data_dict[k] is not None:
@@ -808,8 +945,9 @@ def _parse_metrics_from_payload(profile: dict, raw_payload: dict) -> dict:
 
             elif metric_name == "load_power_w":
                 for k in [
+                    "pactouser", "pacToUserTotal", "pLocalLoad", "pToUser",
                     "curr_load_power", "load_power", "loadPower", "p_load", "pload", "use_power",
-                    "use_power_w", "useEnergy", "familyLoadPower", "consumption", "pLocalLoad",
+                    "use_power_w", "useEnergy", "familyLoadPower", "consumption",
                     "loadPowerW", "home_load"
                 ]:
                     if k in data_dict and data_dict[k] is not None:
@@ -875,6 +1013,35 @@ def _parse_metrics_from_payload(profile: dict, raw_payload: dict) -> dict:
                 extracted[metric_name] = fallback
         else:
             extracted[metric_name] = fallback
+
+    # Physikalische Plausibilisierung für Grid & Load Vorzeichen
+    pv_val = float(extracted.get("pv_power_w") or 0.0)
+    bat_val = float(extracted.get("battery_power_w") or 0.0)
+    load_val = float(extracted.get("load_power_w") or 0.0) if extracted.get("load_power_w") is not None else None
+    grid_val = float(extracted.get("grid_power_w")) if extracted.get("grid_power_w") is not None else None
+
+    if grid_val is not None:
+        bat_charging = abs(min(0.0, bat_val))
+        bat_discharging = max(0.0, bat_val)
+        eff_load = load_val if (load_val is not None and load_val > 0) else 0.0
+
+        if pv_val > 50.0:
+            surplus = pv_val + bat_discharging - eff_load - bat_charging
+            if surplus > 30.0:
+                if grid_val > 0:
+                    extracted["grid_power_w"] = -abs(grid_val)
+                elif grid_val == 0.0 and surplus > 50.0 and load_val is not None:
+                    extracted["grid_power_w"] = -round(surplus, 1)
+            elif eff_load > (pv_val + bat_discharging + 30.0):
+                if grid_val < 0:
+                    extracted["grid_power_w"] = abs(grid_val)
+
+        if (load_val is None or load_val <= 0.0) and pv_val > 50.0:
+            cur_grid = float(extracted.get("grid_power_w", 0.0) or 0.0)
+            if cur_grid > 0 and abs(cur_grid - pv_val) < (pv_val * 0.5 + 500):
+                cur_grid = -abs(cur_grid)
+                extracted["grid_power_w"] = cur_grid
+            extracted["load_power_w"] = max(0.0, round(pv_val + cur_grid + bat_val, 1))
 
     return extracted
 

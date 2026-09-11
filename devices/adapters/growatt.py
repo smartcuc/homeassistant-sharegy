@@ -138,7 +138,7 @@ class GrowattAdapter(BaseInverterAdapter):
         # 1. PV Erzeugung (DC Solar Input & AC Output & Plant Totals)
         ppv_direct = _get_val("ppv", "ppvTotal", "p_pv", "pv_power", "pvPower", "pAct", "pact", "invTodayPpv", is_power=True)
         curr_power = _get_val("currentPower", "current_power", "currPower", "curr_power", "total_power", "nominalPower", "plantPower", is_power=True)
-        pac_direct = _get_val("pac", "invPac", "pactouser", "pacToUserTotal", "pac1", "power", is_power=True)
+        pac_direct = _get_val("pac", "invPac", "pacToUserTotal", "pac1", "power", is_power=True)
 
         # Multi-String PV Summe (z. B. String 1 + String 2 + String 3 + String 4)
         ppv1 = _get_val("ppv1", "pPv1", "p_pv1", is_power=True) or 0.0
@@ -161,28 +161,66 @@ class GrowattAdapter(BaseInverterAdapter):
         else:
             pv = ppv_direct or curr_power or pac_direct or 0.0
 
-        # 2. Netzleistung (+ Bezug, - Einspeisung)
-        grid = _get_val("pgrid", "pactogrid", "grid_power", "gridPower", "toGridPower", "to_grid_power", "pGrid", "pToGrid", "pToUser", "feed_in_power", "gridPurchasedPower", is_power=True)
-
-        # 3. Hausverbrauch
-        load = _get_val("pload", "use_power", "useEnergy", "familyLoadPower", "load_power", "loadPower", "use_power_w", "pLocalLoad", "home_load", "consumption", is_power=True)
-        if (load is None or load == 0.0) and (pv > 0 or grid is not None):
-            computed_load = round(pv + (grid or 0.0) - (bat_dis - bat_chg if "bat_dis" in locals() else 0.0), 1)
-            if computed_load > 0:
-                load = computed_load
-
-        # 4. Batterie Leistung (+ Entladung, - Ladung)
+        # 2. Batterie Leistung (+ Entladung, - Ladung) & SoC
         bat_dis = _get_val("pdisCharge", "pdisCharge1", "pDisCharge", "pDischarge", is_power=True) or 0.0
         bat_chg = _get_val("pcharge", "pcharge1", "pCharge", is_power=True) or 0.0
-        bat_generic = _get_val("battery_power", "pactostorage", "pstorage", "battery_power_w", "batteryPower", "batPower", is_power=True)
+        bat_to_storage = _get_val("pactostorage", "pstorage", is_power=True) or 0.0
+        bat_generic = _get_val("battery_power", "battery_power_w", "batteryPower", "batPower", "B_P1", is_power=True)
 
-        if bat_generic is not None and bat_dis == 0.0 and bat_chg == 0.0:
+        if bat_generic is not None and bat_dis == 0.0 and bat_chg == 0.0 and bat_to_storage == 0.0:
             bat_pwr = bat_generic
+        elif bat_to_storage > 0 and bat_chg == 0:
+            bat_pwr = -abs(bat_to_storage)
         else:
-            bat_pwr = bat_dis - bat_chg
+            bat_pwr = bat_dis - (bat_chg or bat_to_storage)
 
-        # 5. Batterie SoC
         soc = _get_val("soc", "batterySoc", "battery_soc", "batteryPercent", "chargeLevel", "capacity", "SOC", "storageSoc", "bmsSoc")
+
+        # 3. Netzleistung (+ Bezug, - Einspeisung)
+        grid_export_val = _get_val("pactogrid", "toGridPower", "to_grid_power", "pToGrid", "feed_in_power", "p_feed_in", is_power=True)
+        grid_import_val = _get_val("pfromgrid", "fromGridPower", "gridPurchasedPower", "pFromGrid", "p_import", is_power=True)
+        grid_net = _get_val("pgrid", "pGrid", "grid_power", "gridPower", is_power=True)
+
+        if grid_export_val is not None or grid_import_val is not None:
+            grid = float(grid_import_val or 0.0) - float(grid_export_val or 0.0)
+        elif grid_net is not None:
+            grid = float(grid_net)
+        else:
+            grid = None
+
+        # 4. Hausverbrauch (pactouser / pLocalLoad / pload)
+        load = _get_val("pactouser", "pLocalLoad", "pToUser", "pload", "use_power", "useEnergy", "familyLoadPower", "load_power", "loadPower", "use_power_w", "home_load", "consumption", is_power=True)
+
+        # 5. Physikalische Plausibilisierung für Grid & Load
+        pv_val = max(0.0, float(pv or 0.0))
+        bat_val = float(bat_pwr or 0.0)
+        eff_load = float(load) if (load is not None and load > 0) else 0.0
+
+        if grid is not None:
+            grid_val = float(grid)
+            bat_charging = abs(min(0.0, bat_val))
+            bat_discharging = max(0.0, bat_val)
+
+            if pv_val > 50.0:
+                surplus = pv_val + bat_discharging - eff_load - bat_charging
+                if surplus > 30.0:
+                    if grid_val > 0:
+                        grid = -abs(grid_val)
+                    elif grid_val == 0.0 and surplus > 50.0 and load is not None:
+                        grid = -round(surplus, 1)
+                elif eff_load > (pv_val + bat_discharging + 30.0):
+                    if grid_val < 0:
+                        grid = abs(grid_val)
+
+            if (load is None or load <= 0.0) and pv_val > 50.0:
+                if grid_val > 0 and abs(grid_val - pv_val) < (pv_val * 0.5 + 500):
+                    grid = -abs(grid_val)
+                computed_load = round(pv_val + float(grid) + bat_val, 1)
+                if load is None or load <= 0:
+                    load = max(0.0, computed_load)
+        elif load is None or load <= 0.0:
+            if pv_val > 0 or bat_val != 0:
+                load = max(0.0, round(pv_val + bat_val, 1))
 
         # 6. Tagesertrag
         daily = _get_val("eToday", "etoday", "todayEnergy", "today_energy", "e_today", "eTodayTotal", "eAcChargeToday", "todayYield", "daily_generation", "solar_yield")
@@ -238,7 +276,10 @@ class GrowattAdapter(BaseInverterAdapter):
         raw_data: Dict[str, Any] = {"data": {}}
         session = requests.Session()
         session.headers.update({
-            "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 12; https://github.com/indykoning/PyPi_GrowattServer)",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/javascript, */*; q=0.01",
+            "Accept-Language": "de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7",
+            "X-Requested-With": "XMLHttpRequest",
         })
 
         # PFAD A: Growatt OpenAPI (Token vorhanden)
@@ -317,12 +358,13 @@ class GrowattAdapter(BaseInverterAdapter):
                 simulated=False,
             )
 
-        # PFAD B: ShineServer Web Login
+        # PFAD B: ShineServer Web Login (Home Assistant / PyPi_GrowattServer kompatibel)
         if username and password:
             hashed_pw = self._hash_password(str(password))
             server_hosts = [
                 "https://server.growatt.com",
                 "https://server-api.growatt.com",
+                "https://server-us.growatt.com",
                 "https://openapi.growatt.com",
             ]
 
@@ -331,21 +373,64 @@ class GrowattAdapter(BaseInverterAdapter):
             user_id = None
 
             for host in server_hosts:
-                login_url = f"{host}/newTwoLoginAPI.do"
-                try:
-                    l_resp = session.post(login_url, data={"userName": username, "password": hashed_pw}, timeout=10)
-                    if l_resp.status_code == 200:
-                        l_json = l_resp.json().get("back", {})
-                        if l_json.get("success"):
-                            logged_in = True
-                            active_host = host
-                            user_id = l_json.get("user", {}).get("id") or l_json.get("userId")
-                            credentials["user_id"] = user_id
-                            break
-                except Exception as e:
-                    logger.debug("Growatt login attempt failed on host %s: %s", host, e)
+                # 1. Versuch: newTwoLoginAPI.do mit MD5-Nibble Hash
+                for pw_candidate in [hashed_pw, str(password)]:
+                    try:
+                        l_resp = session.post(
+                            f"{host}/newTwoLoginAPI.do",
+                            data={"userName": username, "password": pw_candidate},
+                            timeout=10,
+                        )
+                        if l_resp.status_code == 200:
+                            l_body = l_resp.json()
+                            l_back = l_body.get("back", {}) if isinstance(l_body.get("back"), dict) else l_body
+                            if l_back.get("success") or l_body.get("result") == 1 or l_body.get("success"):
+                                logged_in = True
+                                active_host = host
+                                user_id = (
+                                    l_back.get("user", {}).get("id")
+                                    or l_back.get("userId")
+                                    or l_back.get("user", {}).get("userId")
+                                    or l_body.get("obj", {}).get("userId")
+                                    or l_body.get("obj", {}).get("id")
+                                    or l_body.get("data", {}).get("userId")
+                                    or l_body.get("data", {}).get("id")
+                                    or l_body.get("userId")
+                                )
+                                credentials["user_id"] = user_id
+                                break
+                    except Exception as e:
+                        logger.debug("Growatt newTwoLoginAPI failed on host %s: %s", host, e)
 
-            if logged_in and user_id:
+                    # 2. Versuch: /login Form Endpoint (PyPi_GrowattServer)
+                    try:
+                        form_resp = session.post(
+                            f"{host}/login",
+                            data={"account": username, "password": pw_candidate, "validateCode": ""},
+                            timeout=10,
+                        )
+                        if form_resp.status_code == 200:
+                            try:
+                                f_body = form_resp.json()
+                                if f_body.get("result") == 1 or f_body.get("success"):
+                                    logged_in = True
+                                    active_host = host
+                                    user_id = f_body.get("obj", {}).get("userId") or user_id
+                                    break
+                            except Exception:
+                                if "index" in form_resp.url or "main" in form_resp.url or session.cookies.get("JSESSIONID"):
+                                    logged_in = True
+                                    active_host = host
+                                    break
+                    except Exception as e:
+                        logger.debug("Growatt /login endpoint failed on host %s: %s", host, e)
+
+                    if logged_in:
+                        break
+                if logged_in:
+                    break
+
+            if logged_in:
                 try:
                     today_str = timezone.now().strftime("%Y-%m-%d")
 

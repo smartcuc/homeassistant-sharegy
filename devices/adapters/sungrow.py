@@ -175,6 +175,39 @@ class SungrowAdapter(BaseInverterAdapter):
         if daily is not None and daily > 1000.0:
             daily = daily / 1000.0 # Falls in Wh geliefert
 
+        # Physikalische Plausibilisierung der Netzeinspeisung / des Hausverbrauchs:
+        # In Sungrow OpenAPI / iSolarCloud wird 'grid_power' bei Netzeinspeisung als positiver Betrag geliefert.
+        # In Sharegy gilt kanonisch: Positiv = Netzbezug (Import), Negativ = Netzeinspeisung (Export).
+        pv_val = max(0.0, float(pv or 0.0))
+        bat_val = float(battery or 0.0)
+        load_val = float(load) if load is not None else None
+
+        if grid is not None:
+            grid_val = float(grid)
+            bat_charging = abs(min(0.0, bat_val))
+            bat_discharging = max(0.0, bat_val)
+            eff_load = load_val if (load_val is not None and load_val > 0) else 0.0
+
+            if pv_val > 50.0:
+                surplus = pv_val + bat_discharging - eff_load - bat_charging
+                if surplus > 30.0:
+                    # Echter PV-Überschuss -> Netzeinspeisung muss negativ sein
+                    if grid_val > 0:
+                        grid = -abs(grid_val)
+                    elif grid_val == 0.0 and surplus > 50.0 and load_val is not None:
+                        grid = -round(surplus, 1)
+                elif eff_load > (pv_val + bat_discharging + 30.0):
+                    # PV-Defizit -> Netzbezug ist positiv
+                    if grid_val < 0:
+                        grid = abs(grid_val)
+
+            if (load_val is None or load_val <= 0.0) and pv_val > 50.0 and grid is not None:
+                if grid_val > 0 and abs(grid_val - pv_val) < (pv_val * 0.5 + 500):
+                    grid = -abs(grid_val)
+                computed_load = round(pv_val + float(grid) + bat_val, 1)
+                if load_val is None or load_val <= 0:
+                    load = max(0.0, computed_load)
+
         telemetry = CanonicalTelemetry(
             pv_power_w=pv,
             grid_power_w=grid,
@@ -421,14 +454,27 @@ class SungrowAdapter(BaseInverterAdapter):
                             else:
                                 bat_pwr = abs(bat_pwr)
 
-                        # Netzeinspeisung / Grid Plausibilisierung
-                        if bat_pwr < 0:
-                            bat_charge = abs(bat_pwr)
-                            true_excess = max(0.0, pv - load - bat_charge)
-                            if grid < 0 and abs(abs(grid) - bat_charge) < 200:
-                                grid = -true_excess
-                            elif grid < 0 and abs(grid) > (true_excess + 100):
-                                grid = -true_excess
+                        # Netzeinspeisung / Grid Plausibilisierung vorzeichengenau:
+                        # Sharegy-Standard: Negativ = Netzeinspeisung (Export), Positiv = Netzbezug (Import)
+                        bat_charge = abs(min(0.0, bat_pwr))
+                        bat_discharge = max(0.0, bat_pwr)
+
+                        if pv > 50.0:
+                            surplus = pv + bat_discharge - load - bat_charge
+                            if surplus > 30.0:
+                                if grid > 0:
+                                    grid = -abs(grid)
+                                elif grid == 0.0 and surplus > 50.0 and load > 0:
+                                    grid = -round(surplus, 1)
+                            elif load > (pv + bat_discharge + 30.0):
+                                if grid < 0:
+                                    grid = abs(grid)
+
+                        # Falls Load nicht als eigener Punkt geliefert wurde (oder 0):
+                        if load <= 0.0 and pv > 50.0:
+                            if grid > 0 and abs(grid - pv) < (pv * 0.5 + 500):
+                                grid = -abs(grid)
+                            load = max(0.0, round(pv + grid + bat_pwr, 1))
 
                         raw_data["_direct_metrics"] = {
                             "pv_power_w": max(0.0, pv),
@@ -457,45 +503,8 @@ class SungrowAdapter(BaseInverterAdapter):
 
             telemetry = self.parse_payload(raw_data)
 
-            # Validitätsprüfung
+            # Validitätsprüfung (Kein Option B Fallback für offizielle OAuth OpenAPI)
             if "_direct_metrics" not in raw_data and not raw_data.get("result_data"):
-                # Fallback auf Legacy Login falls Benutzername & Passwort vorliegen
-                if credentials.get("user_account") and credentials.get("user_password"):
-                    try:
-                        logger.info("Falling back to Sungrow Legacy Login...")
-                        token_info = self._execute_login(
-                            base_url=base_url,
-                            appkey=appkey,
-                            account=credentials.get("user_account"),
-                            password=credentials.get("user_password"),
-                        )
-                        token = token_info["token"]
-                        credentials["token"] = token
-                        credentials["user_id"] = token_info["user_id"]
-                        legacy_headers = {
-                            "Content-Type": "application/json",
-                            "sys_code": "901",
-                            "token": token,
-                        }
-                        legacy_resp = requests.post(
-                            f"{base_url.rstrip('/')}/v1/powerStationService/getPowerStationDetail",
-                            headers=legacy_headers,
-                            json={"appkey": appkey, "ps_id": str(ps_id or "")},
-                            timeout=12,
-                        )
-                        if legacy_resp.status_code == 200:
-                            raw_data = legacy_resp.json()
-                            telemetry = self.parse_payload(raw_data)
-                            return AdapterTestResult(
-                                status="success",
-                                message=f"Live-Verbindung zu {self.name} erfolgreich!",
-                                live_metrics=telemetry.to_metrics_dict(),
-                                raw_sample=raw_data,
-                                simulated=False,
-                            )
-                    except Exception as leg_err:
-                        logger.warning("Sungrow Legacy login fallback failed: %s", leg_err)
-
                 if is_mock:
                     return AdapterTestResult(
                         status="success",
@@ -505,7 +514,7 @@ class SungrowAdapter(BaseInverterAdapter):
                         simulated=True,
                     )
                 else:
-                    err_msg = "Sungrow OpenAPI lieferte keine Daten (HTTP 401 / Token ungültig). Bitte Autorisierung unter Schnittstellen erneuern."
+                    err_msg = "Sungrow OpenAPI-Sitzung ist abgelaufen oder ungültig. Bitte Autorisierung unter Schnittstellen erneuern."
                     logger.warning(err_msg)
                     return AdapterTestResult(
                         status="error",

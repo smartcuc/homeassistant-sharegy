@@ -388,9 +388,16 @@ def build_device_signals(user):
         # Standard Smart-Meter-Konvention (z.B. DTSU666):
         # positiv (> 0): Netzbezug (Import)
         # negativ (< 0): Netzeinspeisung (Export / Überschusseinspeisung)
-        if grid_power >= 0:
-            signals["grid"]["import"] = round(grid_power, 2)
-            signals["grid"]["export"] = 0.0
+        if grid_power > 0:
+            # Plausibilitätsprüfung: Falls PV-Erzeugung vorliegt, die Hausbedarf & Batterieladung übersteigt,
+            # meldet der Wechselrichter die Netzeinspeisung als positiven Betrag.
+            net_pv_surplus = pv_power - eff_load_est - signals["battery"]["charge"]
+            if pv_power > 100 and net_pv_surplus > 30 and (abs(grid_power - net_pv_surplus) < 800 or grid_power >= (pv_power * 0.7)):
+                signals["grid"]["export"] = round(grid_power, 2)
+                signals["grid"]["import"] = 0.0
+            else:
+                signals["grid"]["import"] = round(grid_power, 2)
+                signals["grid"]["export"] = 0.0
         else:
             raw_export = abs(grid_power)
             # WICHTIG: Wenn der Speicher lädt, darf die Batterieladung nicht als Einspeisung gewertet werden
