@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from .models import (
     BankAccount,
     Contract,
@@ -101,7 +102,7 @@ class CommunityMonthlyStatementAdmin(admin.ModelAdmin):
             return format_html("<b style='color:green;'>+{} €</b>", f"{val:.2f}")
         elif val < 0:
             return format_html("<b style='color:red;'>{} €</b>", f"{val:.2f}")
-        return format_html("<span>0.00 €</span>")
+        return mark_safe("<span>0.00 €</span>")
     balance_colored.short_description = "Netto-Saldo (€)"
 
 

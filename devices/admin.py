@@ -75,7 +75,7 @@ class DeviceAdmin(admin.ModelAdmin):
         vals = get_latest_values([obj.id])
         val = vals.get(obj.id)
         if val is None:
-            return format_html('<span style="color: #9CA3AF;">-</span>')
+            return mark_safe('<span style="color: #9CA3AF;">-</span>')
         
         cfg = getattr(obj, "config", None)
         role = cfg.role.key if (cfg and cfg.role) else ""
@@ -277,14 +277,29 @@ class CloudDeviceIntegrationAdmin(admin.ModelAdmin):
     list_display = (
         "device",
         "profile_id",
+        "get_user",
         "polling_interval_display",
         "last_status_badge",
         "last_polled_at",
         "is_active",
     )
-    list_filter = ("profile_id", "last_status", "is_active")
-    search_fields = ("device__identifier", "device__config__name", "profile_id")
+    list_filter = ("device__home__user", "profile_id", "last_status", "is_active")
+    search_fields = (
+        "device__identifier",
+        "device__config__name",
+        "device__home__user__username",
+        "device__home__user__email",
+        "profile_id",
+    )
     raw_id_fields = ("device",)
+    list_select_related = ("device__home__user", "device__config")
+
+    @admin.display(ordering="device__home__user", description="Benutzer")
+    def get_user(self, obj):
+        if obj.device and obj.device.home and obj.device.home.user:
+            user = obj.device.home.user
+            return user.email or user.username
+        return "-"
 
     def polling_interval_display(self, obj):
         if obj.polling_interval_seconds:

@@ -5,6 +5,7 @@
 from django.contrib import admin
 from django.utils import timezone
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from django.db.models import OuterRef, Subquery, DateTimeField
 from django_celery_results.models import TaskResult
 
@@ -78,9 +79,10 @@ class MeterAdmin(admin.ModelAdmin):
         "integration_type",
     )
 
-    search_fields = ("serial_number", "tibber_home_id")
+    search_fields = ("serial_number", "tibber_home_id", "owner_user__email", "owner_user__username")
 
     raw_id_fields = ("tenant", "owner_user", "owner_membership")
+    list_select_related = ("tenant", "owner_user", "owner_membership")
 
     ordering = ("serial_number",)
 
@@ -115,16 +117,16 @@ class MeterAdmin(admin.ModelAdmin):
 
     def status_colored(self, obj):
         if not obj.last_reading_ts:
-            return format_html("<span style='color:gray;'>no_data</span>")
+            return mark_safe("<span style='color:gray;'>no_data</span>")
 
         delay = self.delay_minutes(obj)
 
         if delay < 60:
-            return format_html("<b style='color:green;'>ok</b>")
+            return mark_safe("<b style='color:green;'>ok</b>")
         elif delay < 180:
-            return format_html("<b style='color:orange;'>delayed</b>")
+            return mark_safe("<b style='color:orange;'>delayed</b>")
         else:
-            return format_html("<b style='color:red;'>stale</b>")
+            return mark_safe("<b style='color:red;'>stale</b>")
 
 
 # ============================================================

@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from .models import DeviceSubscription, NotificationPreference
 
 
@@ -15,8 +16,9 @@ class DeviceSubscriptionAdmin(admin.ModelAdmin):
         "created_at",
     )
     list_filter = ("device_type", "is_active", "created_at")
-    search_fields = ("user__email", "device_name", "endpoint", "registered_ip")
+    search_fields = ("user__email", "user__username", "device_name", "endpoint", "registered_ip")
     raw_id_fields = ("user", "home")
+    list_select_related = ("user", "home")
     readonly_fields = ("created_at", "last_used_at", "unregistered_at")
 
     def id_short(self, obj):
@@ -34,8 +36,8 @@ class DeviceSubscriptionAdmin(admin.ModelAdmin):
 
     def is_active_badge(self, obj):
         if obj.is_active:
-            return format_html('<span style="color: #10b981; font-weight: bold;">🟢 Aktiv</span>')
-        return format_html('<span style="color: #94a3b8;">⚪ Inaktiv</span>')
+            return mark_safe('<span style="color: #10b981; font-weight: bold;">🟢 Aktiv</span>')
+        return mark_safe('<span style="color: #94a3b8;">⚪ Inaktiv</span>')
     is_active_badge.short_description = "Status"
 
 
