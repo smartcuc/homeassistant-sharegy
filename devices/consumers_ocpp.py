@@ -27,19 +27,30 @@ class OcppConsumer(AsyncWebsocketConsumer):
     """
 
     async def connect(self):
-        self.cp_id = self.scope["url_route"]["kwargs"].get("cp_id", "default_cp").strip()
+        raw_cp_id = self.scope["url_route"]["kwargs"].get("cp_id", "default_cp").strip()
+        self.cp_id = raw_cp_id
         self.group_name = f"ocpp_{self.cp_id}"
         self.home_group = None
 
         # OCPP Subprotocol aushandeln (Priorität: OCPP 2.1 > OCPP 2.0.1 > OCPP 1.6)
         subprotocols = self.scope.get("subprotocols", [])
         selected_subprotocol = "ocpp1.6"
-        if "ocpp2.1" in subprotocols:
-            selected_subprotocol = "ocpp2.1"
-        elif "ocpp2.0.1" in subprotocols:
+
+        for sub in subprotocols:
+            sub_lower = sub.lower().strip()
+            if "ocpp2.1" in sub_lower:
+                selected_subprotocol = "ocpp2.1"
+                break
+            elif "ocpp2.0" in sub_lower or "ocpp201" in sub_lower:
+                selected_subprotocol = "ocpp2.0.1"
+                break
+            elif "ocpp1.6" in sub_lower or "ocpp16" in sub_lower:
+                selected_subprotocol = "ocpp1.6"
+
+        # Fallback falls Subprotocol-Header fehlt, aber Pfad /v201/ enthält
+        path_str = self.scope.get("path", "")
+        if not subprotocols and ("v201" in path_str or "v2.0.1" in path_str or "2.0.1" in path_str):
             selected_subprotocol = "ocpp2.0.1"
-        elif "ocpp1.6" in subprotocols:
-            selected_subprotocol = "ocpp1.6"
 
         self.ocpp_version = selected_subprotocol
         await self.channel_layer.group_add(self.group_name, self.channel_name)
@@ -719,7 +730,7 @@ class OcppConsumer(AsyncWebsocketConsumer):
     def get_or_create_station(self, cp_id: str, ocpp_ver: str = "ocpp1.6"):
         from .models_ocpp import ChargingStation
         from .models import Home
-        station = ChargingStation.objects.filter(charge_point_id=cp_id).first()
+        station = ChargingStation.objects.filter(charge_point_id__iexact=cp_id).first()
         if not station:
             home = Home.objects.first()
             if not home:
@@ -742,7 +753,7 @@ class OcppConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def set_station_offline(self, cp_id: str):
         from .models_ocpp import ChargingStation
-        ChargingStation.objects.filter(charge_point_id=cp_id).update(
+        ChargingStation.objects.filter(charge_point_id__iexact=cp_id).update(
             is_online=False,
             last_heartbeat=timezone.now()
         )
@@ -750,7 +761,7 @@ class OcppConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def update_boot_notification(self, cp_id, vendor, model, serial, fw):
         from .models_ocpp import ChargingStation
-        station = ChargingStation.objects.filter(charge_point_id=cp_id).first()
+        station = ChargingStation.objects.filter(charge_point_id__iexact=cp_id).first()
         if station:
             station.vendor = vendor
             station.model = model
@@ -763,7 +774,7 @@ class OcppConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def update_heartbeat(self, cp_id):
         from .models_ocpp import ChargingStation
-        ChargingStation.objects.filter(charge_point_id=cp_id).update(
+        ChargingStation.objects.filter(charge_point_id__iexact=cp_id).update(
             is_online=True,
             last_heartbeat=timezone.now()
         )
@@ -771,7 +782,7 @@ class OcppConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def update_status(self, cp_id, connector_id, status, error_code):
         from .models_ocpp import ChargingStation
-        station = ChargingStation.objects.filter(charge_point_id=cp_id).first()
+        station = ChargingStation.objects.filter(charge_point_id__iexact=cp_id).first()
         if station:
             station.status = status
             station.error_code = error_code
@@ -796,7 +807,7 @@ class OcppConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def process_meter_values(self, cp_id, connector_id, tx_id, meter_values):
         from .models_ocpp import ChargingStation, ChargingSession
-        station = ChargingStation.objects.filter(charge_point_id=cp_id).first()
+        station = ChargingStation.objects.filter(charge_point_id__iexact=cp_id).first()
         if not station:
             return
 
@@ -905,7 +916,7 @@ class OcppConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def validate_rfid_tag(self, cp_id, id_tag):
         from .models_ocpp import ChargingRfidTag, ChargingStation
-        station = ChargingStation.objects.filter(charge_point_id=cp_id).first()
+        station = ChargingStation.objects.filter(charge_point_id__iexact=cp_id).first()
         if not station:
             return "Accepted"
         if station.status in ["Unavailable", "Faulted"]:
@@ -920,7 +931,7 @@ class OcppConsumer(AsyncWebsocketConsumer):
     def create_start_transaction(self, cp_id, connector_id, id_tag, meter_start, custom_tx_id=None):
         from .models_ocpp import ChargingStation, ChargingSession, ChargingRfidTag
         import random
-        station = ChargingStation.objects.filter(charge_point_id=cp_id).first()
+        station = ChargingStation.objects.filter(charge_point_id__iexact=cp_id).first()
         if not station:
             return 0, "Invalid"
 
@@ -973,7 +984,7 @@ class OcppConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def finish_stop_transaction(self, cp_id, tx_id, meter_stop, reason, id_tag):
         from .models_ocpp import ChargingStation, ChargingSession
-        station = ChargingStation.objects.filter(charge_point_id=cp_id).first()
+        station = ChargingStation.objects.filter(charge_point_id__iexact=cp_id).first()
         if not station:
             return
 
@@ -1019,7 +1030,7 @@ class OcppConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def get_active_or_latest_transaction_id(self, cp_id):
         from .models_ocpp import ChargingStation, ChargingSession
-        station = ChargingStation.objects.filter(charge_point_id=cp_id).first()
+        station = ChargingStation.objects.filter(charge_point_id__iexact=cp_id).first()
         if not station:
             return 0
         if station.active_transaction_id:
@@ -1030,7 +1041,7 @@ class OcppConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def set_station_reserved(self, cp_id, reservation_id, id_tag, expiry_iso):
         from .models_ocpp import ChargingStation
-        station = ChargingStation.objects.filter(charge_point_id=cp_id).first()
+        station = ChargingStation.objects.filter(charge_point_id__iexact=cp_id).first()
         if station:
             station.status = "Reserved"
             station.reservation_id = reservation_id
@@ -1042,7 +1053,7 @@ class OcppConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def clear_station_reservation(self, cp_id):
         from .models_ocpp import ChargingStation
-        station = ChargingStation.objects.filter(charge_point_id=cp_id).first()
+        station = ChargingStation.objects.filter(charge_point_id__iexact=cp_id).first()
         if station:
             station.status = "Available"
             station.reservation_id = None
@@ -1053,7 +1064,7 @@ class OcppConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def set_station_availability(self, cp_id, avail_type):
         from .models_ocpp import ChargingStation
-        station = ChargingStation.objects.filter(charge_point_id=cp_id).first()
+        station = ChargingStation.objects.filter(charge_point_id__iexact=cp_id).first()
         if station:
             station.status = "Available" if avail_type == "Operative" else "Unavailable"
             if station.status == "Unavailable":
@@ -1064,27 +1075,27 @@ class OcppConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def update_target_current(self, cp_id, current_a):
         from .models_ocpp import ChargingStation
-        ChargingStation.objects.filter(charge_point_id=cp_id).update(target_current_a=current_a)
+        ChargingStation.objects.filter(charge_point_id__iexact=cp_id).update(target_current_a=current_a)
 
     @database_sync_to_async
     def update_diagnostics_status(self, cp_id, status_str):
         from .models_ocpp import ChargingStation
-        ChargingStation.objects.filter(charge_point_id=cp_id).update(diagnostics_status=status_str)
+        ChargingStation.objects.filter(charge_point_id__iexact=cp_id).update(diagnostics_status=status_str)
 
     @database_sync_to_async
     def save_diagnostics_file_name(self, cp_id, file_name):
         from .models_ocpp import ChargingStation
-        ChargingStation.objects.filter(charge_point_id=cp_id).update(last_diagnostics_file=file_name)
+        ChargingStation.objects.filter(charge_point_id__iexact=cp_id).update(last_diagnostics_file=file_name)
 
     @database_sync_to_async
     def update_local_list_version(self, cp_id, version_num):
         from .models_ocpp import ChargingStation
-        ChargingStation.objects.filter(charge_point_id=cp_id).update(local_auth_list_version=version_num)
+        ChargingStation.objects.filter(charge_point_id__iexact=cp_id).update(local_auth_list_version=version_num)
 
     @database_sync_to_async
     def save_composite_schedule(self, cp_id, schedule_data):
         from .models_ocpp import ChargingStation
-        ChargingStation.objects.filter(charge_point_id=cp_id).update(composite_schedule_data=schedule_data)
+        ChargingStation.objects.filter(charge_point_id__iexact=cp_id).update(composite_schedule_data=schedule_data)
 
     @database_sync_to_async
     def save_device_variables(self, cp_id, event_data_list):
