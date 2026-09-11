@@ -326,6 +326,8 @@ class SungrowAdapter(BaseInverterAdapter):
             payload = dict(json_data)
             if appkey and "appkey" not in payload:
                 payload["appkey"] = appkey
+            if token and "token" not in payload:
+                payload["token"] = token
             if "lang" not in payload:
                 payload["lang"] = "_de_DE"
 
@@ -353,6 +355,7 @@ class SungrowAdapter(BaseInverterAdapter):
                         logger.info("[SUNGROW_OPENAPI] Auth error on %s, attempting automatic token refresh...", url)
                         if _refresh_openapi_token():
                             headers["Authorization"] = f"Bearer {token}"
+                            payload["token"] = token
                             resp = requests.post(url, json=payload, headers=headers, timeout=4)
                             if resp.status_code == 200:
                                 return resp
@@ -368,31 +371,33 @@ class SungrowAdapter(BaseInverterAdapter):
             for gw in gateway_list:
                 try:
                     t_resp = requests.post(
-                        f"{gw}/openapi/oauth/token",
+                        f"{gw}/openapi/apiManage/token",
                         json={
                             "appkey": appkey,
                             "code": credentials["auth_code"],
                             "grant_type": "authorization_code",
                             "redirect_uri": redir_url,
                         },
-                        headers={"x-access-key": app_secret, "sys_code": "901", "Content-Type": "application/json"},
-                        timeout=4,
+                        headers={"x-access-key": app_secret, "Content-Type": "application/json"},
+                        timeout=5,
                     )
                     if t_resp.status_code == 200:
                         t_cand = t_resp.json().get("access_token") or t_resp.json().get("token")
                         if not t_cand and isinstance(t_resp.json().get("result_data"), dict):
-                            t_cand = t_resp.json()["result_data"].get("access_token")
+                            t_cand = t_resp.json()["result_data"].get("access_token") or t_resp.json()["result_data"].get("token")
                         if t_cand:
                             token = t_cand
                             credentials["token"] = token
                             if t_resp.json().get("refresh_token"):
                                 credentials["refresh_token"] = t_resp.json()["refresh_token"]
+                            elif isinstance(t_resp.json().get("result_data"), dict) and t_resp.json()["result_data"].get("refresh_token"):
+                                credentials["refresh_token"] = t_resp.json()["result_data"]["refresh_token"]
                             break
                 except Exception as ex_err:
                     logger.debug("Auto token exchange failed on %s: %s", gw, ex_err)
 
         if not token:
-            # Letzter Versuch: Token via Developer Client Credentials
+            # Letzter Versuch: Token via Developer Refresh
             if not _refresh_openapi_token():
                 err_msg = "Kein gültiger Sungrow OpenAPI Token vorhanden. Bitte autorisiere die Anlage über 'iSolarCloud 1-Klick verbinden'."
                 return AdapterTestResult(status="error", error=err_msg, message=err_msg)
@@ -400,7 +405,6 @@ class SungrowAdapter(BaseInverterAdapter):
         # 2. Automatische Anlagen-ID (ps_id) Erkennung
         if not ps_id or str(ps_id) in ("default_ps", "12345", ""):
             for list_ep, list_body in [
-                ("openapi/platform/queryPowerStationList", {"page": 1, "size": 100, "lang": "_de_DE"}),
                 ("openapi/getPowerStationList", {"curPage": 1, "size": 10, "lang": "_de_DE"}),
                 ("openapi/getDeviceListByUser", {"curPage": 1, "size": 10, "lang": "_de_DE"}),
             ]:
@@ -429,34 +433,26 @@ class SungrowAdapter(BaseInverterAdapter):
 
         raw_data: Dict[str, Any] = {"result_code": "1", "result_data": {}}
 
-        # 3. Echtzeit-Messpunkte abfragen (getPowerStationRealTimeData & getDeviceRealTimeData)
+        # 3. Echtzeit-Messpunkte abfragen (getDeviceRealTimeData)
         try:
-            ps_list = [str(ps_id or "")] if (ps_id and str(ps_id) not in ("default_ps", "")) else []
-            rt_resp = _post_with_auth(
-                "openapi/platform/getPowerStationRealTimeData",
-                {
-                    "ps_id_list": ps_list,
-                    "point_id_list": self.MEASURE_POINTS,
-                    "is_get_point_dict": "1",
-                    "lang": "_de_DE",
-                },
-            )
-            if not rt_resp or rt_resp.status_code != 200 or not (rt_resp.json().get("result_data") or rt_resp.json().get("data")):
-                ps_keys = []
-                if ps_id and str(ps_id) not in ("default_ps", ""):
-                    ps_keys.extend([f"{ps_id}_11_0_0", f"{ps_id}_1_0_0", str(ps_id)])
-                sn_val = credentials.get("sn") or credentials.get("device_sn") or credentials.get("inverter_sn")
-                
-                rt_payload = {
-                    "device_type": 11,
-                    "point_id_list": self.MEASURE_POINTS,
-                    "lang": "_de_DE",
-                }
-                if ps_keys:
-                    rt_payload["ps_key_list"] = ps_keys
-                if sn_val:
-                    rt_payload["sn_list"] = [str(sn_val)]
+            ps_keys = []
+            if ps_id and str(ps_id) not in ("default_ps", ""):
+                ps_keys.extend([f"{ps_id}_11_0_0", f"{ps_id}_1_0_0", str(ps_id)])
+            sn_val = credentials.get("sn") or credentials.get("device_sn") or credentials.get("inverter_sn")
+            
+            rt_payload = {
+                "device_type": 11,
+                "point_id_list": self.MEASURE_POINTS,
+                "lang": "_de_DE",
+            }
+            if ps_keys:
+                rt_payload["ps_key_list"] = ps_keys
+            if sn_val:
+                rt_payload["sn_list"] = [str(sn_val)]
 
+            rt_resp = _post_with_auth("openapi/getDeviceRealTimeData", rt_payload)
+            if not rt_resp or rt_resp.status_code != 200 or not (rt_resp.json().get("result_data") or rt_resp.json().get("data")):
+                rt_payload["device_type"] = 1
                 rt_resp = _post_with_auth("openapi/getDeviceRealTimeData", rt_payload)
             if rt_resp and rt_resp.status_code == 200:
                 rt_json = rt_resp.json()

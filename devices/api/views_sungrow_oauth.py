@@ -237,9 +237,8 @@ def sungrow_oauth_callback(request):
         }
         for base in ["https://gateway.isolarcloud.eu"]:
             for list_ep, list_body in [
-                (f"{base}/openapi/platform/queryPowerStationList", {"appkey": SUNGROW_APPKEY, "page": 1, "size": 100, "lang": "_de_DE"}),
-                (f"{base}/openapi/getPowerStationList", {"appkey": SUNGROW_APPKEY, "curPage": 1, "size": 10, "lang": "_de_DE"}),
-                (f"{base}/openapi/getDeviceListByUser", {"appkey": SUNGROW_APPKEY, "curPage": 1, "size": 10, "lang": "_de_DE"}),
+                (f"{base}/openapi/getPowerStationList", {"appkey": SUNGROW_APPKEY, "token": token, "curPage": 1, "size": 10, "lang": "_de_DE"}),
+                (f"{base}/openapi/getDeviceListByUser", {"appkey": SUNGROW_APPKEY, "token": token, "curPage": 1, "size": 10, "lang": "_de_DE"}),
             ]:
                 try:
                     list_resp = requests.post(list_ep, json=list_body, headers=headers_query, timeout=4)
