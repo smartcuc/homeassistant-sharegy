@@ -142,119 +142,59 @@ def sungrow_oauth_callback(request):
         return t, r
 
     if not token and code and code not in ["demo", "test"]:
-        gateways = ["https://gateway.isolarcloud.eu"]
-        headers_json = {
-            "x-access-key": SUNGROW_APP_SECRET,
-            "sys_code": "901",
-            "Content-Type": "application/json",
-        }
-        headers_form = {
-            "x-access-key": SUNGROW_APP_SECRET,
-            "sys_code": "901",
-            "Content-Type": "application/x-www-form-urlencoded",
-        }
-        payload = {
-            "appkey": SUNGROW_APPKEY,
-            "client_id": SUNGROW_APPKEY,
-            "code": code,
-            "auth_code": code,
-            "grant_type": "authorization_code",
-            "redirect_uri": SUNGROW_REDIRECT_URL,
-            "redirectUrl": SUNGROW_REDIRECT_URL,
-            "applicationId": "4830",
-        }
-
-        for gw in gateways:
-            # 1. Offizieller Developer Portal apiManage/token Flow (Standard in pysolarcloud / Home Assistant)
-            try:
-                token_resp = requests.post(
-                    f"{gw}/openapi/apiManage/token",
-                    json={
-                        "appkey": SUNGROW_APPKEY,
-                        "code": code,
-                        "grant_type": "authorization_code",
-                        "redirect_uri": SUNGROW_REDIRECT_URL,
-                    },
-                    headers={"x-access-key": SUNGROW_APP_SECRET, "Content-Type": "application/json"},
-                    timeout=5,
-                )
-                logger.info("Sungrow Token Exchange (apiManage/token) on %s [%s]: %s", gw, token_resp.status_code, token_resp.text[:300])
-                if token_resp.status_code == 200:
-                    t_cand, r_cand = _extract_tokens_from_json(token_resp.json())
-                    if t_cand:
-                        token = t_cand
-                        refresh_token = r_cand
-                        break
-            except Exception as e:
-                logger.warning("Sungrow OAuth token exchange (apiManage/token) on %s failed: %s", gw, e)
-
-            # 2. Standard RFC 6749 Basic Auth + Params
-            try:
-                token_resp = requests.post(
-                    f"{gw}/openapi/oauth/token",
-                    params=payload,
-                    auth=(SUNGROW_APPKEY, SUNGROW_APP_SECRET) if SUNGROW_APPKEY and SUNGROW_APP_SECRET else None,
-                    headers={"x-access-key": SUNGROW_APP_SECRET, "sys_code": "901"},
-                    timeout=4,
-                )
-                logger.info("Sungrow Token Exchange (Basic Auth+Params) on %s [%s]: %s", gw, token_resp.status_code, token_resp.text[:300])
-                if token_resp.status_code == 200:
-                    t_cand, r_cand = _extract_tokens_from_json(token_resp.json())
-                    if t_cand:
-                        token = t_cand
-                        refresh_token = r_cand
-                        break
-            except Exception as e:
-                logger.warning("Sungrow OAuth token exchange (Basic Auth+Params) on %s failed: %s", gw, e)
-
-            # 3. JSON-Payload on oauth/token
-            try:
-                token_resp = requests.post(
-                    f"{gw}/openapi/oauth/token",
-                    json=payload,
-                    headers=headers_json,
-                    timeout=4,
-                )
-                logger.info("Sungrow Token Exchange (JSON) on %s [%s]: %s", gw, token_resp.status_code, token_resp.text[:300])
-                if token_resp.status_code == 200:
-                    t_cand, r_cand = _extract_tokens_from_json(token_resp.json())
-                    if t_cand:
-                        token = t_cand
-                        refresh_token = r_cand
-                        break
-            except Exception as e:
-                logger.warning("Sungrow OAuth token exchange (JSON) on %s failed: %s", gw, e)
+        gw = "https://gateway.isolarcloud.eu"
+        # 1. Offizieller Developer Portal apiManage/token Flow (Standard in pysolarcloud / iSolarCloud OpenAPI)
+        try:
+            token_resp = requests.post(
+                f"{gw}/openapi/apiManage/token",
+                json={
+                    "appkey": SUNGROW_APPKEY,
+                    "code": code,
+                    "grant_type": "authorization_code",
+                    "redirect_uri": SUNGROW_REDIRECT_URL,
+                },
+                headers={"x-access-key": SUNGROW_APP_SECRET, "Content-Type": "application/json"},
+                timeout=5,
+            )
+            logger.info("Sungrow Token Exchange (apiManage/token) on %s [%s]: %s", gw, token_resp.status_code, token_resp.text[:300])
+            if token_resp.status_code == 200:
+                t_cand, r_cand = _extract_tokens_from_json(token_resp.json())
+                if t_cand:
+                    token = t_cand
+                    refresh_token = r_cand
+        except Exception as e:
+            logger.warning("Sungrow OAuth token exchange (apiManage/token) on %s failed: %s", gw, e)
 
     if not token:
         token = f"sg_oauth_{code or 'demo_token_12345'}"
 
-    # Echte Anlagen-ID (ps_id) über offizielle OpenAPI queryPowerStationList abfragen
+    # Echte Anlagen-ID (ps_id) über offizielle OpenAPI platform/queryPowerStationList abfragen
     if token and not token.startswith("sg_oauth_"):
         headers_query = {
             "x-access-key": SUNGROW_APP_SECRET,
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json",
         }
-        for base in ["https://gateway.isolarcloud.eu"]:
-            for list_ep, list_body in [
-                (f"{base}/openapi/getPowerStationList", {"appkey": SUNGROW_APPKEY, "token": token, "curPage": 1, "size": 10, "lang": "_de_DE"}),
-                (f"{base}/openapi/getDeviceListByUser", {"appkey": SUNGROW_APPKEY, "token": token, "curPage": 1, "size": 10, "lang": "_de_DE"}),
-            ]:
-                try:
-                    list_resp = requests.post(list_ep, json=list_body, headers=headers_query, timeout=4)
-                    logger.info("Sungrow station query on %s [%s]: %s", list_ep, list_resp.status_code, list_resp.text[:300])
-                    if list_resp.status_code == 200:
-                        list_json = list_resp.json()
-                        list_data = list_json.get("result_data") or list_json.get("data") or {}
-                        if isinstance(list_data, dict):
-                            stations = list_data.get("pageList") or list_data.get("data_list") or list_data.get("list") or []
-                            if stations and isinstance(stations, list) and len(stations) > 0:
-                                ps_id = str(stations[0].get("ps_id") or stations[0].get("id") or stations[0].get("ps_key") or "")
-                                plant_name = stations[0].get("ps_name") or stations[0].get("name") or plant_name
-                                logger.info("Auto-discovered Sungrow station: %s (%s)", ps_id, plant_name)
-                                break
-                except Exception as e:
-                    logger.warning("Could not list power stations during OAuth callback on %s: %s", list_ep, e)
+        gw = "https://gateway.isolarcloud.eu"
+        for list_ep, list_body in [
+            (f"{gw}/openapi/platform/queryPowerStationList", {"appkey": SUNGROW_APPKEY, "page": 1, "size": 100, "lang": "_de_DE"}),
+            (f"{gw}/openapi/getPowerStationList", {"appkey": SUNGROW_APPKEY, "token": token, "curPage": 1, "size": 10, "lang": "_de_DE"}),
+        ]:
+            try:
+                list_resp = requests.post(list_ep, json=list_body, headers=headers_query, timeout=4)
+                logger.info("Sungrow station query on %s [%s]: %s", list_ep, list_resp.status_code, list_resp.text[:300])
+                if list_resp.status_code == 200:
+                    list_json = list_resp.json()
+                    list_data = list_json.get("result_data") or list_json.get("data") or {}
+                    if isinstance(list_data, dict):
+                        stations = list_data.get("pageList") or list_data.get("data_list") or list_data.get("list") or []
+                        if stations and isinstance(stations, list) and len(stations) > 0:
+                            ps_id = str(stations[0].get("ps_id") or stations[0].get("id") or stations[0].get("ps_key") or "")
+                            plant_name = stations[0].get("ps_name") or stations[0].get("name") or plant_name
+                            logger.info("Auto-discovered Sungrow station: %s (%s)", ps_id, plant_name)
+                            break
+            except Exception as e:
+                logger.warning("Could not list power stations during OAuth callback on %s: %s", list_ep, e)
             if ps_id and ps_id != "default_ps":
                 break
 

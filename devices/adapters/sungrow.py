@@ -402,9 +402,10 @@ class SungrowAdapter(BaseInverterAdapter):
                 err_msg = "Kein gültiger Sungrow OpenAPI Token vorhanden. Bitte autorisiere die Anlage über 'iSolarCloud 1-Klick verbinden'."
                 return AdapterTestResult(status="error", error=err_msg, message=err_msg)
 
-        # 2. Automatische Anlagen-ID (ps_id) Erkennung
+        # 2. Automatische Anlagen-ID (ps_id) Erkennung über offizielle OpenAPI
         if not ps_id or str(ps_id) in ("default_ps", "12345", ""):
             for list_ep, list_body in [
+                ("openapi/platform/queryPowerStationList", {"page": 1, "size": 100, "lang": "_de_DE"}),
                 ("openapi/getPowerStationList", {"curPage": 1, "size": 10, "lang": "_de_DE"}),
                 ("openapi/getDeviceListByUser", {"curPage": 1, "size": 10, "lang": "_de_DE"}),
             ]:
@@ -427,33 +428,57 @@ class SungrowAdapter(BaseInverterAdapter):
                                     ps_id = str(first_st.get("ps_id") or first_st.get("id") or first_st.get("ps_key") or first_st.get("power_station_id") or "")
                                     credentials["ps_id"] = ps_id
                                     credentials["ps_name"] = first_st.get("ps_name") or first_st.get("name", "Sungrow PV-Anlage")
+                                    logger.info("[SUNGROW_OPENAPI] Auto-discovered plant ps_id: %s (%s)", ps_id, credentials["ps_name"])
                                     break
                 except Exception as e:
                     logger.debug("Fetch ps_id via %s failed: %s", list_ep, e)
 
         raw_data: Dict[str, Any] = {"result_code": "1", "result_data": {}}
 
-        # 3. Echtzeit-Messpunkte abfragen (getDeviceRealTimeData)
+        # 3. Echtzeit-Messpunkte abfragen (getPowerStationRealTimeData / getDeviceRealTimeData)
         try:
-            ps_keys = []
-            if ps_id and str(ps_id) not in ("default_ps", ""):
-                ps_keys.extend([f"{ps_id}_11_0_0", f"{ps_id}_1_0_0", str(ps_id)])
-            sn_val = credentials.get("sn") or credentials.get("device_sn") or credentials.get("inverter_sn")
+            ps_id_str = str(ps_id) if ps_id and str(ps_id) not in ("default_ps", "") else ""
+            ps_list = [ps_id_str] if ps_id_str else []
             
-            rt_payload = {
-                "device_type": 11,
-                "point_id_list": self.MEASURE_POINTS,
-                "lang": "_de_DE",
-            }
-            if ps_keys:
-                rt_payload["ps_key_list"] = ps_keys
-            if sn_val:
-                rt_payload["sn_list"] = [str(sn_val)]
+            # Versuch A: Offizieller getPowerStationRealTimeData Endpunkt
+            rt_endpoints = [
+                ("openapi/platform/getPowerStationRealTimeData", {
+                    "ps_id_list": ps_list,
+                    "point_id_list": self.MEASURE_POINTS,
+                    "is_get_point_dict": "1",
+                    "lang": "_de_DE",
+                }),
+                ("openapi/getPowerStationRealTimeData", {
+                    "ps_id_list": ps_list,
+                    "point_id_list": self.MEASURE_POINTS,
+                    "is_get_point_dict": "1",
+                    "lang": "_de_DE",
+                }),
+                ("openapi/platform/getDeviceRealTimeData", {
+                    "device_type": 11,
+                    "ps_key_list": [f"{ps_id_str}_11_0_0"] if ps_id_str else [],
+                    "point_id_list": self.MEASURE_POINTS,
+                    "lang": "_de_DE",
+                }),
+                ("openapi/getDeviceRealTimeData", {
+                    "device_type": 11,
+                    "ps_key_list": [f"{ps_id_str}_11_0_0"] if ps_id_str else [],
+                    "point_id_list": self.MEASURE_POINTS,
+                    "lang": "_de_DE",
+                }),
+            ]
 
-            rt_resp = _post_with_auth("openapi/getDeviceRealTimeData", rt_payload)
-            if not rt_resp or rt_resp.status_code != 200 or not (rt_resp.json().get("result_data") or rt_resp.json().get("data")):
-                rt_payload["device_type"] = 1
-                rt_resp = _post_with_auth("openapi/getDeviceRealTimeData", rt_payload)
+            rt_resp = None
+            for ep_name, ep_payload in rt_endpoints:
+                resp = _post_with_auth(ep_name, ep_payload)
+                if resp and resp.status_code == 200:
+                    rj = resp.json()
+                    rd = rj.get("result_data") or rj.get("data")
+                    if rd and isinstance(rd, dict) and (rd.get("device_point_list") or rd.get("point_dict")):
+                        rt_resp = resp
+                        logger.info("[SUNGROW_OPENAPI] Received live points from %s", ep_name)
+                        break
+
             if rt_resp and rt_resp.status_code == 200:
                 rt_json = rt_resp.json()
                 rt_res_data = rt_json.get("result_data") or rt_json.get("data") or {}
@@ -489,9 +514,9 @@ class SungrowAdapter(BaseInverterAdapter):
                                             pass
                             return None
 
-                        pv = _get_pt("83033", "83067", "83329") or 0.0
+                        pv = _get_pt("83033", "83067", "83329", "83002") or 0.0
                         load = _get_pt("83052", "83106", "83330") or 0.0
-                        grid = _get_pt("83051", "83549", "83328") or 0.0
+                        grid = _get_pt("83051", "83549", "83328", "83032") or 0.0
                         bat_pwr = _get_pt("83104", "83238", "83111", "83112", "83326") or 0.0
                         soc_raw = _get_pt("83129", "83252", "83334")
 
@@ -535,7 +560,7 @@ class SungrowAdapter(BaseInverterAdapter):
                                 grid = -abs(grid)
                             load = max(0.0, round(pv + grid + bat_pwr, 1))
 
-                        today_kwh = _get_pt("83013", "83021", "83049", "83050", "83012", "today_energy")
+                        today_kwh = _get_pt("83022", "83013", "83021", "83049", "83050", "83012", "83009", "83331")
                         if today_kwh is None:
                             res_d = raw_data.get("result_data", {})
                             if isinstance(res_d, dict):
@@ -557,12 +582,12 @@ class SungrowAdapter(BaseInverterAdapter):
                             "daily_generation_kwh": today_kwh,
                         }
         except Exception as e:
-            logger.warning("getDeviceRealTimeData / getPowerStationRealTimeData query failed: %s", e)
+            logger.warning("getPowerStationRealTimeData / getDeviceRealTimeData query failed: %s", e)
 
         # 4. Details abfragen als Ergänzung (getPowerStationDetail)
         for det_ep, det_body in [
-            ("openapi/getPowerStationDetail", {"appkey": appkey, "token": token, "sn": str(credentials.get("sn") or ps_id or ""), "is_get_ps_remarks": "1"}),
-            ("openapi/platform/getPowerStationDetail", {"appkey": appkey, "token": token, "ps_ids": str(ps_id or ""), "lang": "_de_DE"}),
+            ("openapi/platform/getPowerStationDetail", {"ps_ids": str(ps_id or ""), "lang": "_de_DE"}),
+            ("openapi/getPowerStationDetail", {"sn": str(credentials.get("sn") or ps_id or ""), "is_get_ps_remarks": "1"}),
         ]:
             try:
                 resp = _post_with_auth(det_ep, det_body)
