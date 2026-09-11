@@ -291,7 +291,12 @@ def sungrow_oauth_callback(request):
         dev_cfg.role = role_both
         dev_cfg.save()
 
+    old_creds = existing_cdi.credentials if (existing_cdi and isinstance(existing_cdi.credentials, dict)) else {}
+    if (not ps_id or ps_id == "default_ps") and old_creds.get("ps_id") and old_creds.get("ps_id") != "default_ps":
+        ps_id = old_creds["ps_id"]
+
     new_credentials = {
+        **old_creds,
         "appkey": SUNGROW_APPKEY,
         "user_account": user_account,
         "token": token,
@@ -299,7 +304,7 @@ def sungrow_oauth_callback(request):
         "ps_id": ps_id,
         "ps_name": plant_name,
         "auth_type": "oauth2",
-        "battery_capacity_kwh": 22.0,
+        "battery_capacity_kwh": old_creds.get("battery_capacity_kwh", 22.0),
     }
 
     # Cloud Integration anlegen oder aktualisieren

@@ -520,16 +520,23 @@ class SungrowAdapter(BaseInverterAdapter):
 
         # 3. Echtzeit-Messpunkte abfragen (getDeviceRealTimeData & getPowerStationRealTimeData)
         try:
-            rt_resp = _post_with_auth(
-                "openapi/getDeviceRealTimeData",
-                {
-                    "appkey": appkey,
-                    "token": token,
-                    "device_type": 11,
-                    "point_id_list": self.MEASURE_POINTS,
-                    "ps_key_list": [str(ps_id or "")],
-                },
-            )
+            ps_keys = []
+            if ps_id and str(ps_id) not in ("default_ps", ""):
+                ps_keys.extend([f"{ps_id}_11_0_0", f"{ps_id}_1_0_0", str(ps_id)])
+            sn_val = credentials.get("sn") or credentials.get("device_sn") or credentials.get("inverter_sn")
+            
+            rt_payload = {
+                "appkey": appkey,
+                "token": token,
+                "device_type": 11,
+                "point_id_list": self.MEASURE_POINTS,
+            }
+            if ps_keys:
+                rt_payload["ps_key_list"] = ps_keys
+            if sn_val:
+                rt_payload["sn_list"] = [str(sn_val)]
+
+            rt_resp = _post_with_auth("openapi/getDeviceRealTimeData", rt_payload)
             if not rt_resp or rt_resp.status_code != 200 or not (rt_resp.json().get("result_data") or rt_resp.json().get("data")):
                 rt_resp = _post_with_auth(
                     "openapi/platform/getPowerStationRealTimeData",
@@ -553,16 +560,18 @@ class SungrowAdapter(BaseInverterAdapter):
                         p_data = {}
                         for item in pts:
                             if isinstance(item, dict):
-                                if "point_id" in item and "point_value" in item:
-                                    pid = str(item["point_id"])
-                                    p_data[pid] = item["point_value"]
-                                    p_data[f"p{pid}"] = item["point_value"]
-                                else:
-                                    for k, v in item.items():
-                                        ks = str(k)
-                                        p_data[ks] = v
-                                        if not ks.startswith("p"):
-                                            p_data[f"p{ks}"] = v
+                                pt_item = item.get("device_point") or item
+                                if isinstance(pt_item, dict):
+                                    if "point_id" in pt_item and "point_value" in pt_item:
+                                        pid = str(pt_item["point_id"])
+                                        p_data[pid] = pt_item["point_value"]
+                                        p_data[f"p{pid}"] = pt_item["point_value"]
+                                    else:
+                                        for k, v in pt_item.items():
+                                            ks = str(k)
+                                            p_data[ks] = v
+                                            if not ks.startswith("p"):
+                                                p_data[f"p{ks}"] = v
 
                         def _get_pt(*keys):
                             for k in keys:
