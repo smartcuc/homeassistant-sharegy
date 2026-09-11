@@ -488,45 +488,59 @@ class SungrowAdapter(BaseInverterAdapter):
 
         # 2. Automatische Anlagen-ID (ps_id) Erkennung
         if not ps_id or str(ps_id) in ("default_ps", "12345", ""):
-            try:
-                list_resp = _post_with_auth(
-                    "openapi/platform/queryPowerStationList",
-                    {"page": 1, "size": 20, "lang": "_de_DE"},
-                )
-                if list_resp and list_resp.status_code == 200:
-                    list_json = list_resp.json()
-                    list_data = list_json.get("result_data") or list_json.get("data") or {}
-                    if isinstance(list_data, dict):
-                        stations = (
-                            list_data.get("pageList")
-                            or list_data.get("data_list")
-                            or list_data.get("list")
-                            or list_data.get("result_list")
-                            or []
-                        )
-                        if stations and isinstance(stations, list) and len(stations) > 0:
-                            first_st = stations[0]
-                            if isinstance(first_st, dict):
-                                ps_id = str(first_st.get("ps_id") or first_st.get("id") or first_st.get("ps_key") or first_st.get("power_station_id") or "")
-                                credentials["ps_id"] = ps_id
-                                credentials["ps_name"] = first_st.get("ps_name") or first_st.get("name", "Sungrow PV-Anlage")
-            except Exception as e:
-                logger.warning("Auto-fetch ps_id via OpenAPI failed: %s", e)
+            for list_ep, list_body in [
+                ("openapi/getPowerStationList", {"curPage": 1, "size": 10, "lang": "_de_DE"}),
+                ("openapi/getDeviceListByUser", {"curPage": 1, "size": 10, "lang": "_de_DE"}),
+                ("openapi/platform/queryPowerStationList", {"page": 1, "size": 20, "lang": "_de_DE"}),
+            ]:
+                try:
+                    list_resp = _post_with_auth(list_ep, list_body)
+                    if list_resp and list_resp.status_code == 200:
+                        list_json = list_resp.json()
+                        list_data = list_json.get("result_data") or list_json.get("data") or {}
+                        if isinstance(list_data, dict):
+                            stations = (
+                                list_data.get("pageList")
+                                or list_data.get("data_list")
+                                or list_data.get("list")
+                                or list_data.get("result_list")
+                                or []
+                            )
+                            if stations and isinstance(stations, list) and len(stations) > 0:
+                                first_st = stations[0]
+                                if isinstance(first_st, dict):
+                                    ps_id = str(first_st.get("ps_id") or first_st.get("id") or first_st.get("ps_key") or first_st.get("power_station_id") or "")
+                                    credentials["ps_id"] = ps_id
+                                    credentials["ps_name"] = first_st.get("ps_name") or first_st.get("name", "Sungrow PV-Anlage")
+                                    break
+                except Exception as e:
+                    logger.debug("Fetch ps_id via %s failed: %s", list_ep, e)
 
         raw_data: Dict[str, Any] = {"result_code": "1", "result_data": {}}
 
-        # 3. Echtzeit-Messpunkte abfragen (getPowerStationRealTimeData)
+        # 3. Echtzeit-Messpunkte abfragen (getDeviceRealTimeData & getPowerStationRealTimeData)
         try:
             rt_resp = _post_with_auth(
-                "openapi/platform/getPowerStationRealTimeData",
+                "openapi/getDeviceRealTimeData",
                 {
                     "appkey": appkey,
                     "token": token,
-                    "ps_id_list": [str(ps_id or "")],
+                    "device_type": 11,
                     "point_id_list": self.MEASURE_POINTS,
-                    "is_get_point_dict": "1",
+                    "ps_key_list": [str(ps_id or "")],
                 },
             )
+            if not rt_resp or rt_resp.status_code != 200 or not (rt_resp.json().get("result_data") or rt_resp.json().get("data")):
+                rt_resp = _post_with_auth(
+                    "openapi/platform/getPowerStationRealTimeData",
+                    {
+                        "appkey": appkey,
+                        "token": token,
+                        "ps_id_list": [str(ps_id or "")],
+                        "point_id_list": self.MEASURE_POINTS,
+                        "is_get_point_dict": "1",
+                    },
+                )
             if rt_resp and rt_resp.status_code == 200:
                 rt_json = rt_resp.json()
                 rt_res_data = rt_json.get("result_data") or rt_json.get("data") or {}
@@ -628,34 +642,26 @@ class SungrowAdapter(BaseInverterAdapter):
                             "daily_generation_kwh": today_kwh,
                         }
         except Exception as e:
-            logger.warning("getPowerStationRealTimeData query failed: %s", e)
+            logger.warning("getDeviceRealTimeData / getPowerStationRealTimeData query failed: %s", e)
 
         # 4. Details abfragen als Ergänzung (getPowerStationDetail)
-        try:
-            resp = _post_with_auth(
-                "openapi/platform/getPowerStationDetail",
-                {"appkey": appkey, "token": token, "ps_ids": str(ps_id or ""), "lang": "_de_DE"},
-            )
-            if resp and resp.status_code == 200:
-                det_json = resp.json()
-                det_res_data = det_json.get("result_data") or det_json.get("data") or {}
-                if isinstance(det_res_data, dict) and det_res_data.get("data_list"):
-                    d_list = det_res_data["data_list"]
-                    if isinstance(d_list, list) and d_list:
-                        raw_data["result_data"].update(d_list[0])
-                        if "_direct_metrics" in raw_data and raw_data["_direct_metrics"].get("daily_generation_kwh") is None:
-                            d_item = d_list[0]
-                            t_en = d_item.get("today_energy") or d_item.get("todayEnergy") or d_item.get("today_yield") or d_item.get("eToday")
-                            if t_en is not None:
-                                try:
-                                    f_en = float(t_en)
-                                    if f_en > 1000.0:
-                                        f_en = f_en / 1000.0
-                                    raw_data["_direct_metrics"]["daily_generation_kwh"] = f_en
-                                except (ValueError, TypeError):
-                                    pass
-        except Exception as e:
-            logger.warning("getPowerStationDetail query failed: %s", e)
+        for det_ep, det_body in [
+            ("openapi/getPowerStationDetail", {"appkey": appkey, "token": token, "sn": str(credentials.get("sn") or ps_id or ""), "is_get_ps_remarks": "1"}),
+            ("openapi/platform/getPowerStationDetail", {"appkey": appkey, "token": token, "ps_ids": str(ps_id or ""), "lang": "_de_DE"}),
+        ]:
+            try:
+                resp = _post_with_auth(det_ep, det_body)
+                if resp and resp.status_code == 200:
+                    det_json = resp.json()
+                    det_res_data = det_json.get("result_data") or det_json.get("data") or {}
+                    if isinstance(det_res_data, dict):
+                        if det_res_data.get("data_list") and isinstance(det_res_data["data_list"], list) and det_res_data["data_list"]:
+                            raw_data["result_data"].update(det_res_data["data_list"][0])
+                        elif "ps_id" in det_res_data or "curr_power" in det_res_data:
+                            raw_data["result_data"].update(det_res_data)
+                        break
+            except Exception as e:
+                logger.debug("getPowerStationDetail on %s failed: %s", det_ep, e)
 
         telemetry = self.parse_payload(raw_data)
 
