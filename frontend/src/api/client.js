@@ -2,11 +2,27 @@
 # src/api/client.js
 */
 
+import { Capacitor } from "@capacitor/core";
 import { getCSRFToken } from "../lib/csrf";
 
-export async function apiFetch(url, options = {}) {
+// 🌐 Automatische Auflösung der API Base-URL für Native Apps (Android/Capacitor) und Web
+export const API_BASE_URL =
+    import.meta.env.VITE_API_URL ||
+    (Capacitor.isNativePlatform() || (typeof window !== "undefined" && window.location.protocol === "capacitor:")
+        ? "https://sharegy.de"
+        : "");
 
-    // const isDemo = window.location.pathname.startsWith("/demo");
+export function getApiUrl(url) {
+    if (!url) return "";
+    if (url.startsWith("http://") || url.startsWith("https://")) {
+        return url;
+    }
+    const cleanUrl = url.startsWith("/") ? url : `/${url}`;
+    return `${API_BASE_URL}${cleanUrl}`;
+}
+
+export async function apiFetch(url, options = {}) {
+    const fullUrl = getApiUrl(url);
 
     // Standard-Header definieren
     const defaultHeaders = {
@@ -14,15 +30,23 @@ export async function apiFetch(url, options = {}) {
         "X-CSRFToken": getCSRFToken(),
     };
 
-    const res = await fetch(url, {
-        ...options,
-        credentials: "include",
-        // Kombiniert Standard-Header mit benutzerdefinierten Headern aus options
-        headers: {
-            ...defaultHeaders,
-            ...(options.headers || {}),
-        },
-    });
+    let res;
+    try {
+        res = await fetch(fullUrl, {
+            ...options,
+            credentials: "include",
+            // Kombiniert Standard-Header mit benutzerdefinierten Headern aus options
+            headers: {
+                ...defaultHeaders,
+                ...(options.headers || {}),
+            },
+        });
+    } catch (networkErr) {
+        throw {
+            type: "network",
+            message: networkErr?.message || "Netzwerkfehler – Server nicht erreichbar",
+        };
+    }
 
     // ✅ 401 / 403 → Session weg → Logout
     if (res.status === 401 || res.status === 403) {
@@ -32,8 +56,6 @@ export async function apiFetch(url, options = {}) {
         sessionStorage.clear();
 
         throw { type: "auth" };
-        // Abbrechen, da der Redirect läuft
-        //        return new Promise(() => { });
     }
 
     // ✅ 400 → Validierungsfehler
@@ -42,7 +64,7 @@ export async function apiFetch(url, options = {}) {
         try {
             data = await res.json();
         } catch {
-            data = { error: "Bad Request" };
+            data = { error: "Ungültige Anfrage (400)" };
         }
 
         throw {
@@ -53,10 +75,25 @@ export async function apiFetch(url, options = {}) {
 
     // ✅ Andere Server-Fehler (500, 404, etc.)
     if (!res.ok) {
-        const text = await res.text();
+        let errorMsg = `Serverfehler (${res.status})`;
+        try {
+            const errorJson = await res.json();
+            errorMsg = errorJson.error || errorJson.detail || errorJson.message || errorMsg;
+        } catch {
+            try {
+                const text = await res.text();
+                // Falls HTML zurückkommt (z.B. Nginx 502/404), saubere Fehlermeldung statt HTML-SyntaxError
+                if (text && !text.trim().startsWith("<")) {
+                    errorMsg = text;
+                }
+            } catch {
+                // ignore
+            }
+        }
+
         throw {
             type: "server",
-            message: text || "Server error",
+            message: errorMsg,
         };
     }
 
@@ -65,6 +102,16 @@ export async function apiFetch(url, options = {}) {
         return null;
     }
 
-    // ✅ Erfolg
-    return res.json();
+    // ✅ Erfolg: Sicheres JSON-Parsen
+    try {
+        const text = await res.text();
+        if (!text || !text.trim()) return null;
+        return JSON.parse(text);
+    } catch (parseErr) {
+        console.error("JSON parse error on response:", fullUrl, parseErr);
+        throw {
+            type: "parse",
+            message: "Ungültige Serverantwort (kein valides JSON)",
+        };
+    }
 }

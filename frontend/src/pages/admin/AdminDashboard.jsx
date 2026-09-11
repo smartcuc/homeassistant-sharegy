@@ -1,12 +1,9 @@
-/*
-# src/pages/admin/AdminDashboard.jsx
-*/
-
 import { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import ReactECharts from "echarts-for-react";
 import { KpiCard } from "../../components/admin/KpiCard";
+import { apiFetch } from "../../api/client";
 
 export default function AdminDashboard() {
     const { t } = useTranslation();
@@ -14,10 +11,7 @@ export default function AdminDashboard() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch("/api/stats/dashboard/", {
-            credentials: "include",
-        })
-            .then((res) => res.json())
+        apiFetch("/api/stats/dashboard/")
             .then((d) => {
                 setData(d);
                 setLoading(false);

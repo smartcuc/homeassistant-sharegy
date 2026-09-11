@@ -1,3 +1,5 @@
+import { apiFetch } from "../api/client"
+
 let queue = []
 
 function getOrCreateId(key) {
@@ -26,12 +28,8 @@ function flushQueue() {
     const payload = [...queue]
     queue = []
 
-    fetch("/api/tracking/track/batch/", {
+    apiFetch("/api/tracking/track/batch/", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        credentials: "include",
         body: JSON.stringify({ events: payload }),
     }).catch(() => { })
 }

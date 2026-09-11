@@ -1,11 +1,8 @@
-/*
-# src/pages/MagicLogin.jsx
-*/
-
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { trackEvent } from "../lib/track";
 import { useQueryClient } from "@tanstack/react-query";
+import { apiFetch } from "../api/client";
 
 export default function MagicLogin() {
     const navigate = useNavigate();
@@ -25,50 +22,33 @@ export default function MagicLogin() {
                 trackEvent("magic_login_attempt");
 
                 // ✅ STEP 1 — Login
-                const loginRes = await fetch(`/api/magic-login/?token=${token}`, {
-                    credentials: "include",
-                });
-
-                if (!loginRes.ok) {
-                    throw new Error("Login failed");
-                }
+                await apiFetch(`/api/magic-login/?token=${encodeURIComponent(token)}`);
 
                 // ✅ STEP 2 — Session sicherstellen
-                let meRes;
-
+                let meUser = null;
                 for (let i = 0; i < 6; i++) {
-                    meRes = await fetch("/api/auth/me/", {
-                        credentials: "include",
-                    });
-
-                    if (meRes.ok) break;
-
+                    try {
+                        meUser = await apiFetch("/api/auth/me/");
+                        if (meUser) break;
+                    } catch {
+                        // wait and retry
+                    }
                     await new Promise(r => setTimeout(r, 250));
                 }
 
-                if (!meRes || !meRes.ok) {
+                if (!meUser) {
                     throw new Error("Session not ready");
                 }
 
                 // ✅ 🔥 PREFETCH (DAS MACHT DEN UNTERSCHIED)
                 await queryClient.prefetchQuery({
                     queryKey: ["user"],
-                    queryFn: async () => {
-                        const res = await fetch("/api/auth/me/", {
-                            credentials: "include",
-                        });
-                        return res.json();
-                    }
+                    queryFn: () => apiFetch("/api/auth/me/"),
                 });
 
                 await queryClient.prefetchQuery({
                     queryKey: ["settings"],
-                    queryFn: async () => {
-                        const res = await fetch("/api/settings/", {
-                            credentials: "include",
-                        });
-                        return res.json();
-                    }
+                    queryFn: () => apiFetch("/api/settings/"),
                 });
 
                 trackEvent("magic_login_success");
