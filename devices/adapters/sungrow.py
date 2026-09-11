@@ -659,8 +659,45 @@ class SungrowAdapter(BaseInverterAdapter):
 
         telemetry = self.parse_payload(raw_data)
 
-        # Validitätsprüfung
+        # Validitätsprüfung & Fallback auf Direkt-Account
         if "_direct_metrics" not in raw_data and not raw_data.get("result_data"):
+            # Fallback auf iSolarCloud Direkt-Account (Login mit user_account & user_password)
+            if credentials.get("user_account") and credentials.get("user_password"):
+                try:
+                    logger.info("Falling back to Sungrow Legacy/Direct REST Login...")
+                    token_info = self._execute_login(
+                        base_url=base_url,
+                        appkey=appkey,
+                        account=credentials.get("user_account"),
+                        password=credentials.get("user_password"),
+                    )
+                    leg_token = token_info["token"]
+                    credentials["token"] = leg_token
+                    credentials["user_id"] = token_info["user_id"]
+                    legacy_headers = {
+                        "Content-Type": "application/json",
+                        "sys_code": "901",
+                        "token": leg_token,
+                    }
+                    legacy_resp = requests.post(
+                        f"{base_url.rstrip('/')}/v1/powerStationService/getPowerStationDetail",
+                        headers=legacy_headers,
+                        json={"appkey": appkey, "ps_id": str(ps_id or "")},
+                        timeout=10,
+                    )
+                    if legacy_resp.status_code == 200:
+                        raw_data = legacy_resp.json()
+                        telemetry = self.parse_payload(raw_data)
+                        return AdapterTestResult(
+                            status="success",
+                            message=f"Live-Verbindung zu {self.name} (Direct REST) erfolgreich!",
+                            live_metrics=telemetry.to_metrics_dict(),
+                            raw_sample=raw_data,
+                            simulated=False,
+                        )
+                except Exception as leg_err:
+                    logger.warning("Sungrow direct account login fallback failed: %s", leg_err)
+
             err_msg = "Sungrow OpenAPI-Sitzung ist abgelaufen oder ungültig. Bitte Autorisierung über 'iSolarCloud 1-Klick verbinden' erneuern."
             logger.warning(err_msg)
             return AdapterTestResult(
@@ -679,3 +716,27 @@ class SungrowAdapter(BaseInverterAdapter):
             raw_sample=raw_data,
             simulated=False,
         )
+
+    def _execute_login(self, base_url: str, appkey: str, account: str, password: str) -> dict:
+        headers = {
+            "Content-Type": "application/json",
+            "sys_code": "901",
+        }
+        body = {
+            "appkey": appkey,
+            "user_account": account,
+            "user_password": password,
+        }
+        gateways = [base_url, "https://gateway.isolarcloud.eu", "https://gateway.isolarcloud.com.hk"]
+        for gw in gateways:
+            if not gw:
+                continue
+            try:
+                resp = requests.post(f"{gw.rstrip('/')}/v1/userService/login", headers=headers, json=body, timeout=8)
+                if resp.status_code == 200:
+                    data = resp.json().get("result_data", {})
+                    if isinstance(data, dict) and data.get("token"):
+                        return {"token": data["token"], "user_id": data.get("user_id")}
+            except Exception:
+                pass
+        raise ValueError("Sungrow Account-Login fehlgeschlagen.")
