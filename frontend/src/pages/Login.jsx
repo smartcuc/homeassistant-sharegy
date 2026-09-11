@@ -7,12 +7,13 @@ import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "../api/client";
 import { trackEvent } from "../lib/track";
-import { triggerHapticFeedback } from "../utils/nativeBridge";
+import { isNativePlatform, getPlatform, triggerHapticFeedback } from "../utils/nativeBridge";
 
 export default function Login() {
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const queryClient = useQueryClient();
+    const isApp = isNativePlatform();
 
     const [email, setEmail] = useState("");
     const [code, setCode] = useState("");
@@ -29,21 +30,37 @@ export default function Login() {
         setStatus("");
 
         try {
-            trackEvent("magic_link_requested");
+            trackEvent("magic_link_requested", { client: isApp ? "app" : "web" });
             await apiFetch("/api/request-magic-link/", {
                 method: "POST",
-                body: JSON.stringify({ email: email.trim(), lang: i18n.language }),
+                body: JSON.stringify({
+                    email: email.trim(),
+                    lang: i18n.language,
+                    client: isApp ? "app" : "web",
+                    platform: isApp ? getPlatform() : "web",
+                }),
             });
 
             triggerHapticFeedback();
             setStatusType("success");
-            setStatus(
-                t(
-                    "auth.magic_link_sent",
-                    "✅ Check deine E-Mails! Klicke auf den Link in der E-Mail oder gib den 6-stelligen Code unten ein."
-                )
-            );
-            setShowCodeInput(true);
+
+            if (isApp) {
+                setStatus(
+                    t(
+                        "auth.magic_code_sent_app",
+                        "✅ Code gesendet! Gib den 6-stelligen Code aus deiner E-Mail hier ein oder tippe in der E-Mail auf 'In der App öffnen'."
+                    )
+                );
+                setShowCodeInput(true);
+            } else {
+                setStatus(
+                    t(
+                        "auth.magic_link_sent_web",
+                        "✅ Wir haben dir deinen Anmelde-Link per E-Mail geschickt! Klicke einfach auf den Link in der E-Mail, um dich direkt anzumelden."
+                    )
+                );
+                setShowCodeInput(false);
+            }
 
             // Cooldown 15s
             let seconds = 15;
@@ -153,7 +170,9 @@ export default function Login() {
                 <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm text-center mb-6">
                     {showCodeInput
                         ? t("auth.enter_code_desc", "Gib den 6-stelligen Code aus deiner E-Mail ein:")
-                        : t("auth.enter_email_desc", "Gib deine E-Mail ein – wir schicken dir deinen Login-Link & Code.")}
+                        : isApp
+                        ? t("auth.enter_email_desc_app", "Gib deine E-Mail ein – wir schicken dir deinen Login-Code für die App.")
+                        : t("auth.enter_email_desc_web", "Gib deine E-Mail ein – wir schicken dir deinen direkten Anmelde-Link.")}
                 </p>
 
                 {/* EMAIL FORM */}
@@ -185,7 +204,9 @@ export default function Login() {
                                 ? t("auth.sending_link", "Sende Login-Link…")
                                 : cooldown > 0
                                 ? t("auth.resend_in", { sec: cooldown, defaultValue: `Erneut anfordern (${cooldown}s)` })
-                                : t("auth.get_link_btn", "🔐 Login-Link erhalten")}
+                                : isApp
+                                ? t("auth.get_code_btn_app", "📱 Login-Code & Link erhalten")
+                                : t("auth.get_link_btn_web", "🔐 Anmelde-Link erhalten")}
                         </button>
                     </div>
                 )}

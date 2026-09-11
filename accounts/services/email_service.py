@@ -62,123 +62,205 @@ def send_email(template, subject, user, context):
     email.send()
 
 
-def send_magic_link_email(user, link, token, code=None, language=None):
+def send_magic_link_email(user, link, token, code=None, language=None, is_app=False):
     lang = get_user_language(user, language)
 
     app_link = f"sharegy://magic?token={token}"
 
-    I18N = {
+    I18N_APP = {
         "de": {
-            "subject": "Dein Login-Link & Code für Sharegy ⚡",
+            "subject": "Dein Sharegy Login-Code für die App ⚡",
             "headline": "Willkommen zurück 👋",
-            "intro_text": "Hier ist dein persönlicher Einmal-Login-Link und Code für <strong>Sharegy</strong>:",
-            "button_text": "🔐 Im Browser einloggen",
+            "intro_text": "Hier ist dein 6-stelliger Einmal-Code für die <strong>Sharegy App</strong>:",
             "app_button_text": "📱 In der Sharegy App öffnen",
+            "browser_fallback_text": "🌐 Alternativ im Webbrowser öffnen",
             "code_title": "Dein 6-stelliger Login-Code für die App",
             "code_desc": "Diesen Code kannst du direkt in der Sharegy Smartphone-App eingeben:",
-            "fallback_label": "Alternativer Direktlink für Web:",
+            "fallback_label": "Alternativer Direktlink:",
             "validity_label": "Gültigkeit:",
-            "validity_text": "Dieser Login-Link & Code sind 15 Minuten gültig und können einmalig verwendet werden.",
+            "validity_text": "Dieser Code & Link sind 15 Minuten gültig und können einmalig verwendet werden.",
             "ignore_text": "Falls du diese Anfrage nicht selbst gestellt hast, kannst du diese E-Mail ignorieren. Dein Account bleibt vollständig geschützt.",
-            "plain_intro": "Schön, dass du wieder da bist bei Sharegy.",
-            "plain_link_label": "Im Browser einloggen:",
+            "plain_intro": "Hier ist dein 6-stelliger Login-Code für die Sharegy App.",
+            "plain_link_label": "Im Browser öffnen:",
             "plain_app_label": "In der App öffnen:",
             "plain_code_label": "Dein 6-stelliger Login-Code für die App:",
-            "plain_expiry": "Der Link & Code sind 15 Minuten gültig.",
+            "plain_expiry": "Der Code & Link sind 15 Minuten gültig.",
         },
         "en": {
-            "subject": "Your login link & code for Sharegy ⚡",
+            "subject": "Your Sharegy App Login Code ⚡",
             "headline": "Welcome back 👋",
-            "intro_text": "Here is your personal one-time login link and code for <strong>Sharegy</strong>:",
-            "button_text": "🔐 Sign in via Browser",
+            "intro_text": "Here is your 6-digit one-time code for the <strong>Sharegy app</strong>:",
             "app_button_text": "📱 Open in Sharegy App",
+            "browser_fallback_text": "🌐 Alternatively open in web browser",
             "code_title": "Your 6-digit App Login Code",
             "code_desc": "You can enter this code directly in the Sharegy mobile app:",
-            "fallback_label": "Alternative direct web link:",
+            "fallback_label": "Alternative direct link:",
             "validity_label": "Validity:",
-            "validity_text": "This login link & code are valid for 15 minutes and can be used once.",
-            "ignore_text": "If you did not request this login link, you can safely ignore this email. Your account remains completely secure.",
-            "plain_intro": "Welcome back to Sharegy.",
-            "plain_link_label": "Sign in via browser:",
+            "validity_text": "This code & link are valid for 15 minutes and can be used once.",
+            "ignore_text": "If you did not request this code, you can safely ignore this email. Your account remains completely secure.",
+            "plain_intro": "Here is your 6-digit login code for the Sharegy app.",
+            "plain_link_label": "Open in browser:",
             "plain_app_label": "Open in mobile app:",
             "plain_code_label": "Your 6-digit app login code:",
-            "plain_expiry": "This link & code are valid for 15 minutes.",
+            "plain_expiry": "The code & link are valid for 15 minutes.",
         },
         "pl": {
-            "subject": "Twój link i kod logowania do Sharegy ⚡",
+            "subject": "Twój kod logowania do aplikacji Sharegy ⚡",
             "headline": "Witaj ponownie 👋",
-            "intro_text": "Oto Twój osobisty jednorazowy link i kod do logowania w <strong>Sharegy</strong>:",
-            "button_text": "🔐 Zaloguj się w przeglądarce",
+            "intro_text": "Oto Twój 6-cyfrowy jednorazowy kod do <strong>aplikacji Sharegy</strong>:",
             "app_button_text": "📱 Otwórz w aplikacji Sharegy",
+            "browser_fallback_text": "🌐 Otwórz w przeglądarce",
             "code_title": "Twój 6-cyfrowy kod do aplikacji",
             "code_desc": "W aplikacji mobilnej Sharegy możesz wpisać ten kod:",
             "fallback_label": "Alternatywny link bezpośredni:",
             "validity_label": "Ważność:",
-            "validity_text": "Ten link i kod są ważne przez 15 minut i mogą być użyte tylko raz.",
-            "ignore_text": "Jeśli to nie Ty żądałeś tego linku, możesz zignorować tę wiadomość. Twoje konto pozostaje w pełni bezpieczne.",
-            "plain_intro": "Witaj ponownie w Sharegy.",
-            "plain_link_label": "Zaloguj się w przeglądarce:",
+            "validity_text": "Ten kod i link są ważne przez 15 minut i mogą być użyte tylko raz.",
+            "ignore_text": "Jeśli to nie Ty żądałeś tego kodu, możesz zignorować tę wiadomość. Twoje konto pozostaje w pełni bezpieczne.",
+            "plain_intro": "Oto Twój 6-cyfrowy kod logowania do aplikacji Sharegy.",
+            "plain_link_label": "Otwórz w przeglądarce:",
             "plain_app_label": "Otwórz w aplikacji:",
             "plain_code_label": "Twój 6-cyfrowy kod logowania:",
-            "plain_expiry": "Link i kod są ważne przez 15 minut.",
+            "plain_expiry": "Kod i link są ważne przez 15 minut.",
         },
         "ro": {
-            "subject": "Linkul și codul tău de conectare pentru Sharegy ⚡",
+            "subject": "Codul tău de conectare pentru aplicația Sharegy ⚡",
             "headline": "Bine ai revenit 👋",
-            "intro_text": "Iată linkul și codul tău personal de conectare unică pentru <strong>Sharegy</strong>:",
-            "button_text": "🔐 Conectează-te în browser",
+            "intro_text": "Iată codul tău de 6 cifre pentru <strong>aplicația Sharegy</strong>:",
             "app_button_text": "📱 Deschide în aplicația Sharegy",
+            "browser_fallback_text": "🌐 Deschide în browser",
             "code_title": "Codul tău de 6 cifre pentru aplicație",
             "code_desc": "Poți introduce acest cod direct în aplicația mobilă Sharegy:",
             "fallback_label": "Link direct alternativ:",
             "validity_label": "Valabilitate:",
-            "validity_text": "Acest link și cod sunt valabile 15 minute și pot fi folosite o singură dată.",
-            "ignore_text": "Dacă nu ai solicitat acest link, poți ignora acest e-mail. Contul tău rămâne în deplină siguranță.",
-            "plain_intro": "Bine ai revenit la Sharegy.",
-            "plain_link_label": "Conectează-te în browser:",
+            "validity_text": "Acest cod și link sunt valabile 15 minute și pot fi folosite o singură dată.",
+            "ignore_text": "Dacă nu ai solicitat acest cod, poți ignora acest e-mail. Contul tău rămâne în deplină siguranță.",
+            "plain_intro": "Iată codul tău de conectare pentru aplicația Sharegy.",
+            "plain_link_label": "Deschide în browser:",
             "plain_app_label": "Deschide în aplicație:",
             "plain_code_label": "Codul tău de conectare:",
-            "plain_expiry": "Linkul și codul sunt valabile 15 minute.",
+            "plain_expiry": "Codul și linkul sunt valabile 15 minute.",
         },
         "tr": {
-            "subject": "Sharegy Giriş Bağlantınız ve Kodunuz ⚡",
+            "subject": "Sharegy Uygulaması Giriş Kodunuz ⚡",
             "headline": "Tekrar Hoş Geldiniz 👋",
-            "intro_text": "İşte <strong>Sharegy</strong> için kişisel tek seferlik giriş bağlantınız ve kodunuz:",
-            "button_text": "🔐 Tarayıcıda Giriş Yap",
+            "intro_text": "İşte <strong>Sharegy uygulaması</strong> için 6 haneli tek seferlik kodunuz:",
             "app_button_text": "📱 Sharegy Uygulamasında Aç",
+            "browser_fallback_text": "🌐 Tarayıcıda Aç",
             "code_title": "6 Haneli Uygulama Giriş Kodunuz",
             "code_desc": "Bu kodu doğrudan Sharegy mobil uygulamasında girebilirsiniz:",
             "fallback_label": "Alternatif doğrudan bağlantı:",
             "validity_label": "Geçerlilik:",
-            "validity_text": "Bu giriş bağlantısı ve kodu 15 dakika geçerlidir ve tek seferliktir.",
+            "validity_text": "Bu kod ve bağlantı 15 dakika geçerlidir ve tek seferliktir.",
             "ignore_text": "Bu talebi siz yapmadıysanız bu e-postayı güvenle yok sayabilirsiniz. Hesabınız tamamen güvendedir.",
-            "plain_intro": "Sharegy'ye tekrar hoş geldiniz.",
-            "plain_link_label": "Tarayıcıda giriş yapın:",
+            "plain_intro": "İşte Sharegy uygulaması için 6 haneli giriş kodunuz.",
+            "plain_link_label": "Tarayıcıda açın:",
             "plain_app_label": "Uygulamada açın:",
             "plain_code_label": "Uygulama giriş kodunuz:",
-            "plain_expiry": "Bağlantı ve kod 15 dakika geçerlidir.",
+            "plain_expiry": "Kod ve bağlantı 15 dakika geçerlidir.",
         },
         "ru": {
-            "subject": "Ваша ссылка и код для входа в Sharegy ⚡",
+            "subject": "Ваш код для входа в приложение Sharegy ⚡",
             "headline": "С возвращением 👋",
-            "intro_text": "Вот ваша персональная одноразовая ссылка и код для входа в <strong>Sharegy</strong>:",
-            "button_text": "🔐 Войти через браузер",
+            "intro_text": "Вот ваш 6-значный одноразовый код для <strong>приложения Sharegy</strong>:",
             "app_button_text": "📱 Открыть в приложении Sharegy",
+            "browser_fallback_text": "🌐 Открыть в браузере",
             "code_title": "Ваш 6-значный код для приложения",
             "code_desc": "Вы можете ввести этот код прямо в мобильном приложении Sharegy:",
             "fallback_label": "Прямая ссылка:",
             "validity_label": "Срок действия:",
-            "validity_text": "Эта ссылка и код действительны в течение 15 минут и могут быть использованы один раз.",
-            "ignore_text": "Если вы не запрашивали эту ссылку, просто проигнорируйте письмо. Ваш аккаунт в безопасности.",
-            "plain_intro": "С возвращением в Sharegy.",
-            "plain_link_label": "Войти через браузер:",
+            "validity_text": "Этот код и ссылка действительны в течение 15 минут и могут быть использованы один раз.",
+            "ignore_text": "Если вы не запрашивали этот код, просто проигнорируйте письмо. Ваш аккаунт в безопасности.",
+            "plain_intro": "Вот ваш 6-значный код для приложения Sharegy.",
+            "plain_link_label": "Открыть в браузере:",
             "plain_app_label": "Открыть в приложении:",
             "plain_code_label": "Код для входа:",
-            "plain_expiry": "Ссылка и код действительны 15 минут.",
+            "plain_expiry": "Код и ссылка действительны 15 минут.",
         },
     }
 
-    t = I18N.get(lang, I18N["de"])
+    I18N_WEB = {
+        "de": {
+            "subject": "Dein Anmelde-Link für Sharegy ⚡",
+            "headline": "Willkommen zurück 👋",
+            "intro_text": "Hier ist dein persönlicher Einmal-Anmelde-Link für <strong>Sharegy</strong>:",
+            "button_text": "⚡ Jetzt bei Sharegy einloggen",
+            "fallback_label": "Falls der Button nicht funktioniert, kopiere diesen Link:",
+            "validity_label": "Gültigkeit:",
+            "validity_text": "Dieser Anmelde-Link ist 15 Minuten gültig und kann einmalig verwendet werden.",
+            "ignore_text": "Falls du diese Anfrage nicht selbst gestellt hast, kannst du diese E-Mail ignorieren. Dein Account bleibt vollständig geschützt.",
+            "plain_intro": "Schön, dass du wieder da bist bei Sharegy.",
+            "plain_link_label": "Klicke auf den folgenden Link, um dich direkt anzumelden:",
+            "plain_expiry": "Dieser Link ist 15 Minuten gültig.",
+        },
+        "en": {
+            "subject": "Your sign-in link for Sharegy ⚡",
+            "headline": "Welcome back 👋",
+            "intro_text": "Here is your personal one-time sign-in link for <strong>Sharegy</strong>:",
+            "button_text": "⚡ Sign in to Sharegy now",
+            "fallback_label": "If the button does not work, copy this link into your browser:",
+            "validity_label": "Validity:",
+            "validity_text": "This sign-in link is valid for 15 minutes and can be used once.",
+            "ignore_text": "If you did not request this link, you can safely ignore this email. Your account remains completely secure.",
+            "plain_intro": "Welcome back to Sharegy.",
+            "plain_link_label": "Click the following link to sign in directly:",
+            "plain_expiry": "This link is valid for 15 minutes.",
+        },
+        "pl": {
+            "subject": "Twój link logowania do Sharegy ⚡",
+            "headline": "Witaj ponownie 👋",
+            "intro_text": "Oto Twój osobisty jednorazowy link do logowania w <strong>Sharegy</strong>:",
+            "button_text": "⚡ Zaloguj się w Sharegy",
+            "fallback_label": "Jeśli przycisk nie działa, skopiuj ten link do przeglądarki:",
+            "validity_label": "Ważność:",
+            "validity_text": "Ten link jest ważny przez 15 minut i może być użyty tylko raz.",
+            "ignore_text": "Jeśli to nie Ty żądałeś tego linku, możesz zignorować tę wiadomość. Twoje konto pozostaje w pełni bezpieczne.",
+            "plain_intro": "Witaj ponownie w Sharegy.",
+            "plain_link_label": "Kliknij poniższy link, aby się zalogować:",
+            "plain_expiry": "Link jest ważny przez 15 minut.",
+        },
+        "ro": {
+            "subject": "Linkul tău de conectare pentru Sharegy ⚡",
+            "headline": "Bine ai revenit 👋",
+            "intro_text": "Iată linkul tău personal de conectare unică pentru <strong>Sharegy</strong>:",
+            "button_text": "⚡ Conectează-te acum la Sharegy",
+            "fallback_label": "Dacă butonul nu funcționează, copiază acest link în browser:",
+            "validity_label": "Valabilitate:",
+            "validity_text": "Acest link este valabil 15 minute și poate fi folosit o singură dată.",
+            "ignore_text": "Dacă nu ai solicitat acest link, poți ignora acest e-mail. Contul tău rămâne în deplină siguranță.",
+            "plain_intro": "Bine ai revenit la Sharegy.",
+            "plain_link_label": "Fă clic pe linkul următor pentru a te conecta direct:",
+            "plain_expiry": "Linkul este valabil 15 minute.",
+        },
+        "tr": {
+            "subject": "Sharegy Giriş Bağlantınız ⚡",
+            "headline": "Tekrar Hoş Geldiniz 👋",
+            "intro_text": "İşte <strong>Sharegy</strong> için kişisel tek seferlik giriş bağlantınız:",
+            "button_text": "⚡ Şimdi Sharegy'de Giriş Yap",
+            "fallback_label": "Düğme çalışmazsa bu bağlantıyı tarayıcınıza kopyalayın:",
+            "validity_label": "Geçerlilik:",
+            "validity_text": "Bu giriş bağlantısı 15 dakika geçerlidir ve tek seferliktir.",
+            "ignore_text": "Bu talebi siz yapmadıysanız bu e-postayı güvenle yok sayabilirsiniz. Hesabınız tamamen güvendedir.",
+            "plain_intro": "Sharegy'ye tekrar hoş geldiniz.",
+            "plain_link_label": "Doğrudan giriş yapmak için aşağıdaki bağlantıya tıklayın:",
+            "plain_expiry": "Bağlantı 15 dakika geçerlidir.",
+        },
+        "ru": {
+            "subject": "Ваша ссылка для входа в Sharegy ⚡",
+            "headline": "С возвращением 👋",
+            "intro_text": "Вот ваша персональная одноразовая ссылка для входа в <strong>Sharegy</strong>:",
+            "button_text": "⚡ Войти в Sharegy сейчас",
+            "fallback_label": "Если кнопка не работает, скопируйте эту ссылку в браузер:",
+            "validity_label": "Срок действия:",
+            "validity_text": "Эта ссылка действительна в течение 15 минут и может быть использована один раз.",
+            "ignore_text": "Если вы не запрашивали эту ссылку, просто проигнорируйте письмо. Ваш аккаунт в безопасности.",
+            "plain_intro": "С возвращением в Sharegy.",
+            "plain_link_label": "Нажмите на следующую ссылку, чтобы войти:",
+            "plain_expiry": "Ссылка действительна 15 минут.",
+        },
+    }
+
+    t_dict = I18N_APP if is_app else I18N_WEB
+    t = t_dict.get(lang, t_dict["de"])
     subject = t["subject"]
     tracking_url = getattr(settings, "TRACKING_BASE_URL", getattr(settings, "BACKEND_URL", "https://api.sharegy.de"))
     from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "Sharegy <invite@sharegy.cloud>")
@@ -192,22 +274,30 @@ def send_magic_link_email(user, link, token, code=None, language=None):
         "token": token,
         "code": code,
         "formatted_code": formatted_code,
+        "is_app": is_app,
         "tracking_base_url": tracking_url,
         **t,
     }
 
     html_message = render_to_string("emails/magic_login.html", context)
 
-    code_txt_section = f"\n\n{t['plain_code_label']}\n👉 {formatted_code} 👈\n" if code else ""
-    plain_message = (
-        f"Hallo 👋\n\n{t['plain_intro']}\n"
-        f"{code_txt_section}\n"
-        f"{t['plain_app_label']}\n{app_link}\n\n"
-        f"{t['plain_link_label']}\n{link}\n\n"
-        f"{t['plain_expiry']}\n\nSharegy ⚡\nhttps://sharegy.de"
-    )
+    if is_app:
+        code_txt_section = f"\n\n{t['plain_code_label']}\n👉 {formatted_code} 👈\n" if code else ""
+        plain_message = (
+            f"Hallo 👋\n\n{t['plain_intro']}\n"
+            f"{code_txt_section}\n"
+            f"{t['plain_app_label']}\n{app_link}\n\n"
+            f"{t['plain_link_label']}\n{link}\n\n"
+            f"{t['plain_expiry']}\n\nSharegy ⚡\nhttps://sharegy.de"
+        )
+    else:
+        plain_message = (
+            f"Hallo 👋\n\n{t['plain_intro']}\n\n"
+            f"{t['plain_link_label']}\n{link}\n\n"
+            f"{t['plain_expiry']}\n\nSharegy ⚡\nhttps://sharegy.de"
+        )
 
-    logger.info("Sending magic link email to %s via %s (Language: %s, Code: %s)", user.email, from_email, lang, code)
+    logger.info("Sending %s magic link email to %s via %s (Language: %s, Code: %s)", "app" if is_app else "web", user.email, from_email, lang, code)
 
     send_mail(
         subject,

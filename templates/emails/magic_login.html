@@ -6,10 +6,11 @@
 </h2>
 
 <p style="color:#475569; line-height:1.6; margin-top:0; margin-bottom:20px;">
-  {{ intro_text|default:"Hier ist dein persönlicher Einmal-Login-Link und Code für <strong>Sharegy</strong>:"|safe }}
+  {{ intro_text|default:"Hier ist dein persönlicher Anmelde-Link für <strong>Sharegy</strong>:"|safe }}
 </p>
 
-<!-- 📱 6-DIGIT APP CODE CARD (FOR DIRECT MOBILE APP INPUT) -->
+{% if is_app %}
+<!-- 📱 APP MODE: 6-DIGIT CODE & DEEP LINK -->
 {% if formatted_code or code %}
 <div style="background:linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%); border:2px solid #cbd5e1; border-radius:14px; padding:20px 16px; margin:20px 0 24px 0; text-align:center;">
   <div style="font-size:12px; font-weight:700; text-transform:uppercase; color:#475569; letter-spacing:0.8px; margin-bottom:8px;">
@@ -24,7 +25,7 @@
 </div>
 {% endif %}
 
-<!-- CTA BUTTONS (Email-Safe Table) -->
+<!-- CTA BUTTONS FOR APP -->
 <table align="center" role="presentation" cellspacing="0" cellpadding="0" style="margin:20px auto 24px auto; width:100%; max-width:360px;">
   {% if app_link %}
   <tr>
@@ -52,17 +53,41 @@
       <a href="{{ magic_link }}"
          style="
           display:block;
-          padding:12px 24px;
-          border-radius:12px;
+          padding:10px 20px;
+          border-radius:10px;
           text-decoration:none;
           font-weight:600;
-          font-size:14px;
-          color:#4f46e5;
-          background:#eef2ff;
-          border:1px solid #c7d2fe;
+          font-size:13px;
+          color:#64748b;
+          background:#f8fafc;
+          border:1px solid #e2e8f0;
           text-align:center;
          ">
-        {{ button_text|default:"🌐 Im Browser einloggen" }}
+        {{ browser_fallback_text|default:"🌐 Alternativ im Webbrowser öffnen" }}
+      </a>
+    </td>
+  </tr>
+</table>
+
+{% else %}
+<!-- 🌐 WEB/BROWSER MODE: PURE CLEAN DIRECT LOGIN BUTTON -->
+<table align="center" role="presentation" cellspacing="0" cellpadding="0" style="margin:24px auto 28px auto; width:100%; max-width:320px;">
+  <tr>
+    <td align="center">
+      <a href="{{ magic_link }}"
+         style="
+          display:block;
+          padding:15px 28px;
+          border-radius:12px;
+          text-decoration:none;
+          font-weight:700;
+          font-size:16px;
+          color:#ffffff;
+          background:linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+          box-shadow:0 4px 14px rgba(79, 70, 229, 0.35);
+          text-align:center;
+         ">
+        {{ button_text|default:"⚡ Jetzt bei Sharegy einloggen" }}
       </a>
     </td>
   </tr>
@@ -71,12 +96,13 @@
 <!-- URL FALLBACK BOX -->
 <div style="background-color:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:12px 14px; margin:24px 0 16px 0;">
   <div style="font-size:11px; font-weight:700; text-transform:uppercase; color:#64748b; letter-spacing:0.5px; margin-bottom:4px;">
-    {{ fallback_label|default:"Alternativer Direktlink:" }}
+    {{ fallback_label|default:"Falls der Button nicht funktioniert, kopiere diesen Link:" }}
   </div>
   <p style="font-size:12px; color:#6366f1; word-break:break-all; margin:0; line-height:1.4;">
     <a href="{{ magic_link }}" style="color:#6366f1; text-decoration:underline;">{{ magic_link }}</a>
   </p>
 </div>
+{% endif %}
 
 <!-- SECURITY & EXPIRATION NOTICE -->
 <div style="margin-top:24px; padding-top:16px; border-top:1px solid #f1f5f9; color:#64748b; font-size:12px; line-height:1.5;">

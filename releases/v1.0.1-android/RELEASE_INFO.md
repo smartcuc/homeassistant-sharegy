@@ -13,12 +13,16 @@
 
 | Datei | Größe | SHA-256 Prüfsumme |
 | :--- | :--- | :--- |
-| `app-release.aab` / `sharegy-v1.0.1-release.aab` | 4.176.168 B (~4.18 MB) | `19D9CBDB056D85B34E3F3555B2F45AA536FE9C09649E27F72813FBCA3FEF8F87` |
-| `app-release.apk` / `sharegy-v1.0.1-release.apk` | 4.310.995 B (~4.31 MB) | `FFD71DB19964BCB052C162A076FC7B0A6B12A1DC4BE65B42C57781C113162269` |
+| `app-release.aab` / `sharegy-v1.0.1-release.aab` | 4.176.398 B (~4.18 MB) | `E912A509280A4220E3A1EDE2A5E8A0FF6EBB336CB52FC5C6D3E5D361F6227A29` |
+| `app-release.apk` / `sharegy-v1.0.1-release.apk` | 4.311.227 B (~4.31 MB) | `0B92E3556EF02FD67A1EC7E087F0D37D2C4E3C03947F9F64430B51CA20790FEC` |
 
 ---
 
 ## ✨ Neue Features & Fehlerbehebungen in v1.0.1
+- **Intelligente Magic-Link & Code-Erkennung (Web vs. App)**:
+  - **Browser / Web-Anforderung**: Sendet die klassische, saubere und minimalistische Magic-Link-E-Mail mit einem einzigen prominenten Login-Button (*„⚡ Jetzt bei Sharegy einloggen“*) ohne störende App-Codes oder Buttons.
+  - **Smartphone App-Anforderung**: Sendet eine speziell für die mobile App optimierte E-Mail mit großem 6-stelligen Login-Code (*zum schnellen Eintippen in der App*) und direktem Deep-Link-Button (*„📱 In der Sharegy App öffnen“*).
+  - **Automatische Client-Erkennung**: Das Backend und Frontend erkennen über native Plattform-Flags (`client: "app" | "web"`) und Header automatisch die Quelle der Anfrage.
 - **Mobile Responsive Layout & Topbar Fix**:
   - **Topbar User-Menü / Profil sichtbar**: Der Live-Ticker wird auf Smartphone-Bildschirmen kompakt ausgeblendet bzw. auf Tablets/Desktop verlagert, Abstände wurden mobiloptimiert, sodass Profil und Benachrichtigungs-Glocke auf keinem Bildschirm mehr rechts abgeschnitten werden.
   - **Smart Energy Optimizer Timeline Overflow Fix**: Das Verlaufsdiagramm im Smart Energy Optimizer bricht auf Smartphones nicht mehr rechts über die Kachelkante hinaus, sondern ist mit butterweichem horizontalem Scrollen und responsiven Mindestbreiten sauber gekapselt.

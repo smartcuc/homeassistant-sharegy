@@ -580,13 +580,26 @@ class RequestMagicLinkView(APIView):
         link = f"{frontend_url}/t/{token.token}"
         req_lang = request.data.get("language") or request.data.get("lang") or request.GET.get("lang")
 
+        # 📱 App vs. Browser Erkennung
+        client = str(request.data.get("client") or request.headers.get("X-Client-Type") or "").strip().lower()
+        platform = str(request.data.get("platform") or "").strip().lower()
+        user_agent = (request.META.get("HTTP_USER_AGENT") or "").lower()
+
+        if not client:
+            if "capacitor" in user_agent or "sharegy-app" in user_agent or "android" in user_agent and "wv" in user_agent:
+                client = "app"
+            else:
+                client = "web"
+
+        is_app = (client == "app" or platform in ["android", "ios", "capacitor"])
+
         try:
-            send_magic_link_email(user, link, token.token, code=code, language=req_lang)
+            send_magic_link_email(user, link, token.token, code=code, language=req_lang, is_app=is_app)
         except Exception as exc:
             logger.exception("Failed to send magic link email to %s: %s", user.email, exc)
             return Response({"error": f"Mailversand fehlgeschlagen: {str(exc)}"}, status=400)
 
-        return Response({"status": "sent"})
+        return Response({"status": "sent", "client": "app" if is_app else "web"})
 
 
 class MagicLoginView(APIView):
