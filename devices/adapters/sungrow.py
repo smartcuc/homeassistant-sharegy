@@ -233,14 +233,9 @@ class SungrowAdapter(BaseInverterAdapter):
             or os.getenv("SUNGROW_REDIRECT_URL", "https://sharegy.de/api/v1/integrations/sungrow/callback")
         )
 
-        gateway_list = list(dict.fromkeys([
-            base_url,
-            getattr(settings, "SUNGROW_GATEWAY_URL", ""),
-            "https://gateway.isolarcloud.eu",
-            "https://gateway.isolarcloud.com.hk",
-            "https://gateway.isolarcloud.com",
-        ]))
-        gateway_list = [g.rstrip("/") for g in gateway_list if g]
+        gateway_list = ["https://gateway.isolarcloud.eu", "https://gateway.isolarcloud.com.hk"]
+        if base_url and base_url.rstrip("/") not in gateway_list:
+            gateway_list.insert(0, base_url.rstrip("/"))
 
         def _refresh_openapi_token() -> bool:
             nonlocal token
@@ -262,7 +257,7 @@ class SungrowAdapter(BaseInverterAdapter):
                             "refresh_token": r_token,
                             "redirect_uri": redir_url,
                         }
-                        r_resp = requests.post(f"{gw}/openapi/oauth/token", json=payload, headers=headers, timeout=10)
+                        r_resp = requests.post(f"{gw}/openapi/oauth/token", json=payload, headers=headers, timeout=4)
                         if r_resp.status_code == 200:
                             rj = r_resp.json()
                             nt = rj.get("access_token") or rj.get("token")
@@ -285,7 +280,7 @@ class SungrowAdapter(BaseInverterAdapter):
                             "sys_code": "901",
                             "Content-Type": "application/x-www-form-urlencoded",
                         }
-                        r_resp = requests.post(f"{gw}/openapi/oauth/token", data=payload, headers=form_headers, timeout=10)
+                        r_resp = requests.post(f"{gw}/openapi/oauth/token", data=payload, headers=form_headers, timeout=4)
                         if r_resp.status_code == 200:
                             rj = r_resp.json()
                             nt = rj.get("access_token") or rj.get("token")
@@ -301,29 +296,6 @@ class SungrowAdapter(BaseInverterAdapter):
                     except Exception as e:
                         logger.debug("OAuth token refresh (Form) on %s failed: %s", gw, e)
 
-                    # Versuch C: /openapi/apiManage/refreshToken
-                    try:
-                        r_resp = requests.post(
-                            f"{gw}/openapi/apiManage/refreshToken",
-                            json={"appkey": appkey, "refresh_token": r_token},
-                            headers={"x-access-key": app_secret, "sys_code": "901", "Content-Type": "application/json"},
-                            timeout=10,
-                        )
-                        if r_resp.status_code == 200:
-                            rj = r_resp.json()
-                            nt = rj.get("access_token") or rj.get("token")
-                            if not nt and isinstance(rj.get("result_data"), dict):
-                                nt = rj["result_data"].get("access_token") or rj["result_data"].get("token")
-                                if rj["result_data"].get("refresh_token"):
-                                    credentials["refresh_token"] = rj["result_data"]["refresh_token"]
-                            if nt:
-                                token = nt
-                                credentials["token"] = token
-                                logger.info("[SUNGROW_OPENAPI] Token successfully refreshed via %s/openapi/apiManage/refreshToken", gw)
-                                return True
-                    except Exception as e:
-                        logger.debug("apiManage refreshToken on %s failed: %s", gw, e)
-
             # 2. Versuch: Wenn Developer AppKey & AppSecret vorliegen (Zentraler Developer-Account)
             if appkey and app_secret:
                 for gw in gateway_list:
@@ -336,7 +308,7 @@ class SungrowAdapter(BaseInverterAdapter):
                                 "redirect_uri": redir_url,
                             },
                             headers={"x-access-key": app_secret, "sys_code": "901", "Content-Type": "application/json"},
-                            timeout=10,
+                            timeout=4,
                         )
                         if cc_resp.status_code == 200:
                             rj = cc_resp.json()
@@ -350,26 +322,6 @@ class SungrowAdapter(BaseInverterAdapter):
                                 return True
                     except Exception as e:
                         logger.debug("client_credentials token request on %s failed: %s", gw, e)
-
-                    try:
-                        am_resp = requests.post(
-                            f"{gw}/openapi/apiManage/token",
-                            json={"appkey": appkey},
-                            headers={"x-access-key": app_secret, "sys_code": "901", "Content-Type": "application/json"},
-                            timeout=10,
-                        )
-                        if am_resp.status_code == 200:
-                            rj = am_resp.json()
-                            nt = rj.get("access_token") or rj.get("token")
-                            if not nt and isinstance(rj.get("result_data"), dict):
-                                nt = rj["result_data"].get("access_token") or rj["result_data"].get("token")
-                            if nt:
-                                token = nt
-                                credentials["token"] = token
-                                logger.info("[SUNGROW_OPENAPI] Token successfully created via apiManage/token on %s", gw)
-                                return True
-                    except Exception as e:
-                        logger.debug("apiManage token request on %s failed: %s", gw, e)
 
             return False
 
@@ -391,7 +343,7 @@ class SungrowAdapter(BaseInverterAdapter):
                     "Content-Type": "application/json",
                 }
                 try:
-                    resp = requests.post(url, json=payload, headers=headers, timeout=12)
+                    resp = requests.post(url, json=payload, headers=headers, timeout=4)
                     is_auth_err = resp.status_code in (401, 403)
                     if resp.status_code == 200:
                         try:
@@ -409,7 +361,7 @@ class SungrowAdapter(BaseInverterAdapter):
                             payload["token"] = token
                             headers["token"] = str(token or "")
                             headers["Authorization"] = f"Bearer {token}"
-                            resp = requests.post(url, json=payload, headers=headers, timeout=12)
+                            resp = requests.post(url, json=payload, headers=headers, timeout=4)
                             if resp.status_code == 200:
                                 return resp
                     elif resp.status_code == 200:
@@ -432,7 +384,7 @@ class SungrowAdapter(BaseInverterAdapter):
                             "redirect_uri": redir_url,
                         },
                         headers={"x-access-key": app_secret, "sys_code": "901", "Content-Type": "application/json"},
-                        timeout=10,
+                        timeout=4,
                     )
                     if t_resp.status_code == 200 and t_resp.json().get("access_token"):
                         token = t_resp.json()["access_token"]

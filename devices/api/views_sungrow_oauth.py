@@ -117,17 +117,16 @@ def sungrow_oauth_callback(request):
     plant_name = "Sungrow iSolarCloud Hybrid-Anlage"
 
     if code and code not in ["demo", "test"]:
-        endpoints = [
-            f"{SUNGROW_GATEWAY_URL}/openapi/oauth/token",
-            f"{SUNGROW_GATEWAY_URL}/openapi/apiManage/token",
-            "https://gateway.isolarcloud.eu/openapi/oauth/token",
-            "https://gateway.isolarcloud.eu/openapi/apiManage/token",
-            "https://gateway.isolarcloud.com.hk/openapi/oauth/token",
-        ]
-        headers = {
+        gateways = ["https://gateway.isolarcloud.eu", "https://gateway.isolarcloud.com.hk"]
+        headers_json = {
             "x-access-key": SUNGROW_APP_SECRET,
             "sys_code": "901",
             "Content-Type": "application/json",
+        }
+        headers_form = {
+            "x-access-key": SUNGROW_APP_SECRET,
+            "sys_code": "901",
+            "Content-Type": "application/x-www-form-urlencoded",
         }
         payload = {
             "appkey": SUNGROW_APPKEY,
@@ -136,53 +135,62 @@ def sungrow_oauth_callback(request):
             "redirect_uri": SUNGROW_REDIRECT_URL,
         }
 
-        for ep in endpoints:
-            for use_form in [False, True]:
-                try:
-                    if use_form:
-                        token_resp = requests.post(
-                            ep,
-                            data=payload,
-                            headers={
-                                "x-access-key": SUNGROW_APP_SECRET,
-                                "sys_code": "901",
-                                "Content-Type": "application/x-www-form-urlencoded",
-                            },
-                            timeout=10,
-                        )
-                    else:
-                        token_resp = requests.post(
-                            ep,
-                            json=payload,
-                            headers=headers,
-                            timeout=10,
-                        )
-                    logger.info("Sungrow Token Exchange on %s (form=%s) [%s]: %s", ep, use_form, token_resp.status_code, token_resp.text[:300])
-                    if token_resp.status_code == 200:
-                        resp_json = token_resp.json()
-                        t_cand = resp_json.get("access_token") or resp_json.get("token")
-                        r_cand = resp_json.get("refresh_token", "")
-                        if not t_cand and isinstance(resp_json.get("result_data"), dict):
-                            t_cand = resp_json["result_data"].get("access_token") or resp_json["result_data"].get("token")
-                            r_cand = resp_json["result_data"].get("refresh_token", "")
-                        if t_cand:
-                            token = t_cand
-                            refresh_token = r_cand
-                            break
-                except Exception as e:
-                    logger.warning("Sungrow OAuth token exchange on %s failed: %s", ep, e)
-            if token and not token.startswith("sg_oauth_"):
-                break
+        for gw in gateways:
+            # 1. JSON-Payload
+            try:
+                token_resp = requests.post(
+                    f"{gw}/openapi/oauth/token",
+                    json=payload,
+                    headers=headers_json,
+                    timeout=4,
+                )
+                logger.info("Sungrow Token Exchange (JSON) on %s [%s]: %s", gw, token_resp.status_code, token_resp.text[:300])
+                if token_resp.status_code == 200:
+                    resp_json = token_resp.json()
+                    t_cand = resp_json.get("access_token") or resp_json.get("token")
+                    r_cand = resp_json.get("refresh_token", "")
+                    if not t_cand and isinstance(resp_json.get("result_data"), dict):
+                        t_cand = resp_json["result_data"].get("access_token") or resp_json["result_data"].get("token")
+                        r_cand = resp_json["result_data"].get("refresh_token", "")
+                    if t_cand:
+                        token = t_cand
+                        refresh_token = r_cand
+                        break
+            except Exception as e:
+                logger.warning("Sungrow OAuth token exchange (JSON) on %s failed: %s", gw, e)
+
+            # 2. Form-Urlencoded Fallback
+            try:
+                token_resp = requests.post(
+                    f"{gw}/openapi/oauth/token",
+                    data=payload,
+                    headers=headers_form,
+                    timeout=4,
+                )
+                logger.info("Sungrow Token Exchange (Form) on %s [%s]: %s", gw, token_resp.status_code, token_resp.text[:300])
+                if token_resp.status_code == 200:
+                    resp_json = token_resp.json()
+                    t_cand = resp_json.get("access_token") or resp_json.get("token")
+                    r_cand = resp_json.get("refresh_token", "")
+                    if not t_cand and isinstance(resp_json.get("result_data"), dict):
+                        t_cand = resp_json["result_data"].get("access_token") or resp_json["result_data"].get("token")
+                        r_cand = resp_json["result_data"].get("refresh_token", "")
+                    if t_cand:
+                        token = t_cand
+                        refresh_token = r_cand
+                        break
+            except Exception as e:
+                logger.warning("Sungrow OAuth token exchange (Form) on %s failed: %s", gw, e)
 
     if not token:
         token = f"sg_oauth_{code or 'demo_token_12345'}"
 
     # Echte Anlagen-ID (ps_id) über offizielle OpenAPI queryPowerStationList abfragen
     if token and not token.startswith("sg_oauth_"):
-        for base in [SUNGROW_GATEWAY_URL, "https://gateway.isolarcloud.eu", "https://gateway.isolarcloud.com.hk"]:
+        for base in ["https://gateway.isolarcloud.eu", "https://gateway.isolarcloud.com.hk"]:
             try:
                 list_resp = requests.post(
-                    f"{base.rstrip('/')}/openapi/platform/queryPowerStationList",
+                    f"{base}/openapi/platform/queryPowerStationList",
                     json={"appkey": SUNGROW_APPKEY, "token": token, "page": 1, "size": 20, "lang": "_de_DE"},
                     headers={
                         "x-access-key": SUNGROW_APP_SECRET,
@@ -191,7 +199,7 @@ def sungrow_oauth_callback(request):
                         "Authorization": f"Bearer {token}",
                         "Content-Type": "application/json",
                     },
-                    timeout=12,
+                    timeout=3,
                 )
                 logger.info("Sungrow queryPowerStationList response [%s]: %s", list_resp.status_code, list_resp.text[:300])
                 if list_resp.status_code == 200:
@@ -204,7 +212,6 @@ def sungrow_oauth_callback(request):
                         break
             except Exception as e:
                 logger.warning("Could not list power stations during OAuth callback on %s: %s", base, e)
-
 
     # Bestehendes Sungrow-Gerät finden (z. B. ID 1256) oder neues anlegen
     existing_cdi = CloudDeviceIntegration.objects.filter(
@@ -270,15 +277,19 @@ def sungrow_oauth_callback(request):
         device__home=home,
     ).update(credentials=new_credentials, is_active=True)
 
+    # Initialer Poll asynchron im Hintergrund, damit Weiterleitung sofort erfolgt
+    import threading
+    def _async_initial_poll(integ_id):
+        try:
+            from devices.models import CloudDeviceIntegration as CDI
+            i = CDI.objects.filter(id=integ_id).first()
+            if i:
+                execute_cloud_poll(i)
+        except Exception as poll_e:
+            logger.info("Async initial Sungrow cloud poll: %s", poll_e)
 
+    threading.Thread(target=_async_initial_poll, args=(integration.id,), daemon=True).start()
 
-
-    # Initialen Poll ausführen
-    try:
-        execute_cloud_poll(integration)
-    except Exception as e:
-        logger.info("Initial cloud poll executed: %s", e)
-
-    # Nach erfolgreichem OAuth-Login zurückleiten
+    # Nach erfolgreichem OAuth-Login unmittelbar zurückleiten
     frontend_redirect_url = "/app/interfaces?sungrow_connected=true&device_id=" + str(device.id)
     return HttpResponseRedirect(frontend_redirect_url)
