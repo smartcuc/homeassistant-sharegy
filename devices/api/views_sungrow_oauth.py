@@ -102,7 +102,7 @@ def sungrow_oauth_callback(request):
     )
     state_raw = request.GET.get("state") or request.POST.get("state")
 
-    logger.info("Sungrow OAuth Callback received: code=%s, direct_token=%s, state=%s", bool(code), bool(direct_token), state_raw)
+    logger.info("Sungrow OAuth Callback received: code_prefix=%s..., direct_token=%s, state=%s", (code[:10] if code else "None"), bool(direct_token), state_raw)
 
     user = None
     home = None
@@ -156,7 +156,7 @@ def sungrow_oauth_callback(request):
                 headers={"x-access-key": SUNGROW_APP_SECRET, "Content-Type": "application/json"},
                 timeout=5,
             )
-            logger.info("Sungrow Token Exchange (apiManage/token) on %s [%s]: %s", gw, token_resp.status_code, token_resp.text[:300])
+            logger.info("Sungrow Token Exchange (apiManage/token) on %s [%s]: %s", gw, token_resp.status_code, token_resp.text)
             if token_resp.status_code == 200:
                 t_cand, r_cand = _extract_tokens_from_json(token_resp.json())
                 if t_cand:
