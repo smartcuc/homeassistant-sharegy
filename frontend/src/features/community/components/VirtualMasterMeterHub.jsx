@@ -12,6 +12,7 @@ export default function VirtualMasterMeterHub({ tenant }) {
     const { t } = useTranslation();
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().slice(0, 10));
     const [allocationModel, setAllocationModel] = useState("dynamic");
+    const [showGlossary, setShowGlossary] = useState(false);
 
     const virtualMeterQuery = useQuery({
         queryKey: ["community-virtual-meter", tenant?.id, selectedDate, allocationModel],
@@ -52,18 +53,30 @@ export default function VirtualMasterMeterHub({ tenant }) {
                     <div className="flex items-center gap-2">
                         <span className="text-2xl">🏢</span>
                         <h2 className="text-base font-black text-slate-900 dark:text-white">
-                            Virtueller Summenzähler am Netzanschlusspunkt (NAP)
+                            Gemeinsamer Hausanschluss & Virtueller Summenzähler
                         </h2>
                         <span className="bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-indigo-500/20">
-                            § 42a / § 42b EnWG
+                            § 42b EnWG Mieterstrom
                         </span>
                     </div>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                        Rechnerische 15-Minuten-Intervallsaldierung aller Erzeuger- und Verbrauchszähler ohne physische Kaskadierung.
+                        Automatische Viertelstunden-Abrechnung von Sonnenstrom auf dem Dach für alle Parteien im Gebäude.
                     </p>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3">
+                    <button
+                        onClick={() => setShowGlossary(!showGlossary)}
+                        className={`text-xs font-bold px-3 py-1.5 rounded-xl border transition cursor-pointer flex items-center gap-1.5 ${
+                            showGlossary
+                                ? "bg-amber-500/20 border-amber-500/40 text-amber-700 dark:text-amber-300"
+                                : "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200"
+                        }`}
+                    >
+                        <span>💡</span>
+                        <span>{showGlossary ? "Erklärungen ausblenden" : "Einfache Erklärung"}</span>
+                    </button>
+
                     <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
                         <span className="text-xs text-slate-500">📅 Tag:</span>
                         <input
@@ -75,19 +88,58 @@ export default function VirtualMasterMeterHub({ tenant }) {
                     </div>
 
                     <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
-                        <span className="text-xs text-slate-500">⚙️ Allokation:</span>
+                        <span className="text-xs text-slate-500">⚖️ Verteilung:</span>
                         <select
                             value={allocationModel}
                             onChange={(e) => setAllocationModel(e.target.value)}
                             className="bg-transparent text-xs font-semibold text-slate-800 dark:text-slate-200 focus:outline-hidden cursor-pointer"
                         >
-                            <option value="dynamic">Dynamisch (15m Echtzeit)</option>
-                            <option value="static">Statisch (Feste MEA-Quoten)</option>
-                            <option value="hybrid">Hybrid (Quote + Überlauf)</option>
+                            <option value="dynamic">⚡ Dynamisch (Wer gerade Strom braucht)</option>
+                            <option value="static">📐 Statisch (Nach Wohnungsgröße MEA)</option>
+                            <option value="hybrid">🤝 Hybrid (Feste Quote + Rest teilen)</option>
                         </select>
                     </div>
                 </div>
             </div>
+
+            {/* LAIEN-GLOSSAR & BEGRIFFS-ÜBERSETZER */}
+            {showGlossary && (
+                <div className="bg-amber-500/10 border border-amber-500/20 p-5 rounded-2xl animate-fade-in space-y-3">
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-xs font-black uppercase tracking-wider text-amber-900 dark:text-amber-200 flex items-center gap-1.5">
+                            <span>📖</span> Fachbegriffe einfach erklärt (für Vermieter, WEG-Eigentümer & Mieter)
+                        </h3>
+                        <button
+                            onClick={() => setShowGlossary(false)}
+                            className="text-amber-700 dark:text-amber-300 text-xs font-bold hover:underline"
+                        >
+                            Schließen ✕
+                        </button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                        <div className="p-3 bg-white/80 dark:bg-slate-900/80 rounded-xl border border-amber-500/10">
+                            <div className="font-bold text-slate-900 dark:text-white mb-1">🏢 Hausanschluss (NAP) & Virtueller Zähler</div>
+                            <p className="text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">
+                                Statt für tausende Euro extra Zählerschränke umzubauen, rechnet Sharegy die Zählerstände der einzelnen Wohnungen alle 15 Minuten digital zusammen. So weiß man genau, ob das Gebäude gerade Solarstrom ins Netz einspeist oder Strom zukaufen muss.
+                            </p>
+                        </div>
+                        <div className="p-3 bg-white/80 dark:bg-slate-900/80 rounded-xl border border-amber-500/10">
+                            <div className="font-bold text-slate-900 dark:text-white mb-1">⏱️ 15-Minuten-Takt (§ 42b EnWG)</div>
+                            <p className="text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">
+                                Das Gesetz schreibt vor, dass Erzeugung und Verbrauch in Viertelstunden-Blöcken verrechnet werden müssen. Wer zur Mittagszeit wäscht oder das E-Auto lädt, bekommt den günstigen Sonnenstrom sofort centgenau gutgeschrieben.
+                            </p>
+                        </div>
+                        <div className="p-3 bg-white/80 dark:bg-slate-900/80 rounded-xl border border-amber-500/10">
+                            <div className="font-bold text-slate-900 dark:text-white mb-1">⚖️ Verteilungs-Modelle (Dynamisch vs. MEA)</div>
+                            <p className="text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">
+                                <strong>Dynamisch:</strong> Wer gerade Strom verbraucht, bekommt ihn (höchste Fairness).<br />
+                                <strong>Statisch (MEA):</strong> Jeder bekommt einen festen Prozentsatz nach Wohnungsgröße laut Grundbuch.<br />
+                                <strong>Hybrid:</strong> Fester Grundanteil, Überschüsse gehen an Nachbarn.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* KPI METRICS GRID */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

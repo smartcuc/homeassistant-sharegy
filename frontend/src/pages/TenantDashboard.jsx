@@ -9,6 +9,7 @@ import MsbSmartMeterHub from "../features/community/components/MsbSmartMeterHub"
 import CommunityShareModal from "../features/community/components/CommunityShareModal";
 import VirtualMasterMeterHub from "../features/community/components/VirtualMasterMeterHub";
 import VppAggregatorCockpit from "../features/energy/components/VppAggregatorCockpit";
+import TenantSetupWizardModal from "../features/community/components/TenantSetupWizardModal";
 
 export default function TenantDashboard() {
     const { t } = useTranslation();
@@ -24,6 +25,7 @@ export default function TenantDashboard() {
     const [activeTab, setActiveTab] = useState("cockpit"); // 'cockpit' | 'settlement' | 'members' | 'audit'
     const [loading, setLoading] = useState(true);
     const [shareModalOpen, setShareModalOpen] = useState(false);
+    const [wizardOpen, setWizardOpen] = useState(false);
     const [settling, setSettling] = useState(false);
     const [downloadingId, setDownloadingId] = useState(null);
     const [exportingFormat, setExportingFormat] = useState(null);
@@ -269,8 +271,16 @@ export default function TenantDashboard() {
                         </span>
                         <button
                             type="button"
+                            onClick={() => setWizardOpen(true)}
+                            className="ml-2 px-3 py-1 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-all shadow-xs flex items-center gap-1.5 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                        >
+                            <span>✨</span>
+                            <span>Gebäude-Assistent (3 Schritte)</span>
+                        </button>
+                        <button
+                            type="button"
                             onClick={() => setShareModalOpen(true)}
-                            className="ml-2 px-3 py-1 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all shadow-xs flex items-center gap-1.5 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                            className="ml-1 px-3 py-1 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all shadow-xs flex items-center gap-1.5 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                         >
                             <span>📢</span>
                             <span>Erfolge teilen</span>
@@ -985,6 +995,14 @@ export default function TenantDashboard() {
                     </div>
                 </div>
             )}
+
+            {/* TENANT SETUP WIZARD MODAL */}
+            <TenantSetupWizardModal
+                isOpen={wizardOpen}
+                onClose={() => setWizardOpen(false)}
+                onComplete={() => loadData()}
+                existingTenant={tenant}
+            />
 
             {/* COMMUNITY SHARE MODAL */}
             <CommunityShareModal

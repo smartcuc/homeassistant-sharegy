@@ -17,6 +17,7 @@ export default function VppAggregatorCockpit() {
     const [durationMinutes, setDurationMinutes] = useState(15);
     const [dispatchType, setDispatchType] = useState("positive_flex");
     const [dispatchResult, setDispatchResult] = useState(null);
+    const [showVppGlossary, setShowVppGlossary] = useState(false);
 
     // 1. VPP Summary Query
     const summaryQuery = useQuery({
@@ -94,31 +95,82 @@ export default function VppAggregatorCockpit() {
                     <div className="flex items-center gap-2">
                         <span className="text-2xl">⚡</span>
                         <h2 className="text-base font-black text-slate-900 dark:text-white">
-                            Virtual Power Plant (VPP) & Flexibilitäts-Aggregator
+                            Virtuelles Kraftwerk (VPP) & Netzstabilitäts-Pool
                         </h2>
                         <span className="bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-amber-500/20">
-                            aFRR / SRL & Redispatch 2.0
+                            Netzdienlichkeit & § 14a EnWG
                         </span>
                     </div>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                        Bündelung dezentraler Heimspeicher, § 14a EnWG SteuVE-Lasten und Erzeuger zur Sekundärregelung.
+                        Bündelung unserer Hausspeicher und steuerbaren Lasten (Wallboxen, Wärmepumpen) zur Stabilisierung des Stromnetzes.
                     </p>
                 </div>
 
-                <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
-                    <span className="text-xs text-slate-500 font-medium">Netzbetreiber (ÜNB):</span>
-                    <select
-                        value={selectedTso}
-                        onChange={(e) => setSelectedTso(e.target.value)}
-                        className="bg-transparent text-xs font-bold text-slate-900 dark:text-white focus:outline-hidden cursor-pointer"
+                <div className="flex flex-wrap items-center gap-2">
+                    <button
+                        onClick={() => setShowVppGlossary(!showVppGlossary)}
+                        className={`text-xs font-bold px-3 py-1.5 rounded-xl border transition cursor-pointer flex items-center gap-1.5 ${
+                            showVppGlossary
+                                ? "bg-amber-500/20 border-amber-500/40 text-amber-700 dark:text-amber-300"
+                                : "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200"
+                        }`}
                     >
-                        <option value="50hertz">50Hertz Transmission</option>
-                        <option value="tennet">TenneT TSO</option>
-                        <option value="amprion">Amprion</option>
-                        <option value="transnetbw">TransnetBW</option>
-                    </select>
+                        <span>💡</span>
+                        <span>{showVppGlossary ? "Erklärungen ausblenden" : "Einfache Erklärung"}</span>
+                    </button>
+
+                    <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <span className="text-xs text-slate-500 font-medium">Netzbetreiber (ÜNB):</span>
+                        <select
+                            value={selectedTso}
+                            onChange={(e) => setSelectedTso(e.target.value)}
+                            className="bg-transparent text-xs font-bold text-slate-900 dark:text-white focus:outline-hidden cursor-pointer"
+                        >
+                            <option value="50hertz">50Hertz Transmission</option>
+                            <option value="tennet">TenneT TSO</option>
+                            <option value="amprion">Amprion</option>
+                            <option value="transnetbw">TransnetBW</option>
+                        </select>
+                    </div>
                 </div>
             </div>
+
+            {/* LAIEN-GLOSSAR FÜR VPP & REGELLEISTUNG */}
+            {showVppGlossary && (
+                <div className="bg-amber-500/10 border border-amber-500/20 p-5 rounded-2xl animate-fade-in space-y-3">
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-xs font-black uppercase tracking-wider text-amber-900 dark:text-amber-200 flex items-center gap-1.5">
+                            <span>📖</span> Was bedeuten diese Begriffe im Alltag?
+                        </h3>
+                        <button
+                            onClick={() => setShowVppGlossary(false)}
+                            className="text-amber-700 dark:text-amber-300 text-xs font-bold hover:underline"
+                        >
+                            Schließen ✕
+                        </button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                        <div className="p-3 bg-white/80 dark:bg-slate-900/80 rounded-xl border border-amber-500/10">
+                            <div className="font-bold text-slate-900 dark:text-white mb-1">🔋 Virtuelles Kraftwerk (VPP)</div>
+                            <p className="text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">
+                                Einzelne Heimbatterien sind zu klein für den großen Strommarkt. Sharegy bündelt 50 oder 500 Speicher digital zu einem großen "virtuellen Großspeicher", der bei Stromknappheit einspringen kann.
+                            </p>
+                        </div>
+                        <div className="p-3 bg-white/80 dark:bg-slate-900/80 rounded-xl border border-amber-500/10">
+                            <div className="font-bold text-slate-900 dark:text-white mb-1">🚗 § 14a EnWG Steuerbare Lasten</div>
+                            <p className="text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">
+                                Wenn das örtliche Stromnetz droht zu überlasten, darf der Netzbetreiber Wallboxen und Wärmepumpen kurzzeitig auf 4,2 kW drosseln. Als Belohnung erhält jeder Haushalt einen pauschalen Netzentgelt-Rabatt von ca. 160 € pro Jahr.
+                            </p>
+                        </div>
+                        <div className="p-3 bg-white/80 dark:bg-slate-900/80 rounded-xl border border-amber-500/10">
+                            <div className="font-bold text-slate-900 dark:text-white mb-1">📈 96-Viertelstunden-Fahrplan (Redispatch)</div>
+                            <p className="text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">
+                                Der Netzbetreiber bekommt für den nächsten Tag 96 Planwerte (alle 15 Minuten einen), wie viel Strom unsere Gemeinschaft einspeist oder puffern kann. So werden teure Blackouts und Stromstaus verhindert.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* FLEXIBILITÄTS-KAPAZITÄTEN GRID */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
