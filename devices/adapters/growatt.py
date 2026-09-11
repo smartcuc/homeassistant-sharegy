@@ -28,9 +28,22 @@ class GrowattAdapter(BaseInverterAdapter):
     category = "inverter_hybrid"
 
     @staticmethod
+    def _hash_password(password: str) -> str:
+        """
+        MD5-Hash mit 'c'-Ersetzung an geraden Positionen für 0-Nibbles (Growatt-Standard).
+        Entspricht der Growatt Web/App Authentifizierung (PyPi_GrowattServer).
+        """
+        password_md5 = hashlib.md5(str(password).encode("utf-8")).hexdigest()
+        res = list(password_md5)
+        for i in range(0, len(res), 2):
+            if res[i] == "0":
+                res[i] = "c"
+        return "".join(res)
+
+    @staticmethod
     def _hash_password_std_md5(password: str) -> str:
         """
-        Standard MD5-Hash (PyPi_GrowattServer).
+        Standard MD5-Hash (Fallback).
         """
         return hashlib.md5(str(password).encode("utf-8")).hexdigest()
 
@@ -187,24 +200,44 @@ class GrowattAdapter(BaseInverterAdapter):
         # 4. Hausverbrauch (pactouser / pLocalLoad / pload)
         load = _get_val("pactouser", "pLocalLoad", "pToUser", "pload", "use_power", "useEnergy", "familyLoadPower", "load_power", "loadPower", "use_power_w", "home_load", "consumption", is_power=True)
 
-        # 5. Physikalische Plausibilisierung für Grid & Load
+        # 5. Physikalische Plausibilisierung für Grid, Battery & Load
         pv_val = max(0.0, float(pv or 0.0))
         bat_val = float(bat_pwr or 0.0)
-        eff_load = float(load) if (load is not None and load > 0) else 0.0
+        soc_val = float(soc) if soc is not None else None
+        eff_load = float(load) if (load is not None and load > 0) else None
+
+        # Batterie Leistung aus Leistungsbilanz ableiten falls Inverter keine direkte Leistung meldet
+        if abs(bat_val) < 1.0 and soc_val is not None and eff_load is not None:
+            deficit = eff_load - pv_val - max(0.0, float(grid or 0.0))
+            if deficit > 10.0 and soc_val > 5.0:
+                bat_val = round(deficit, 1)  # Entladen (+W)
+                bat_pwr = bat_val
+            elif (pv_val - eff_load + min(0.0, float(grid or 0.0))) > 10.0 and soc_val < 98.0:
+                surplus = pv_val - eff_load + min(0.0, float(grid or 0.0))
+                bat_val = -round(surplus, 1) # Laden (-W)
+                bat_pwr = bat_val
+        elif soc_val is not None:
+            if soc_val >= 98.0 and bat_val < 0:
+                bat_val = 0.0
+                bat_pwr = 0.0
+            elif soc_val <= 5.0 and bat_val > 0:
+                bat_val = 0.0
+                bat_pwr = 0.0
 
         if grid is not None:
             grid_val = float(grid)
             bat_charging = abs(min(0.0, bat_val))
             bat_discharging = max(0.0, bat_val)
+            eff_load_val = eff_load or 0.0
 
             if pv_val > 50.0:
-                surplus = pv_val + bat_discharging - eff_load - bat_charging
+                surplus = pv_val + bat_discharging - eff_load_val - bat_charging
                 if surplus > 30.0:
                     if grid_val > 0:
                         grid = -abs(grid_val)
                     elif grid_val == 0.0 and surplus > 50.0 and load is not None:
                         grid = -round(surplus, 1)
-                elif eff_load > (pv_val + bat_discharging + 30.0):
+                elif eff_load_val > (pv_val + bat_discharging + 30.0):
                     if grid_val < 0:
                         grid = abs(grid_val)
 
@@ -280,14 +313,16 @@ class GrowattAdapter(BaseInverterAdapter):
 
         # PFAD A: Growatt OpenAPI (Token vorhanden)
         if token and not is_mock:
+            token_clean = str(token).strip()
             api_headers = {
-                "token": str(token).strip(),
+                "token": token_clean,
+                "Authorization": f"Bearer {token_clean}",
                 "Content-Type": "application/x-www-form-urlencoded",
             }
 
             if not plant_id:
                 try:
-                    plist_resp = session.get("https://openapi.growatt.com/v1/plant/list", headers={"token": token}, timeout=10)
+                    plist_resp = session.get("https://openapi.growatt.com/v1/plant/list", headers=api_headers, timeout=10)
                     if plist_resp.status_code == 200:
                         p_json = plist_resp.json()
                         plants = p_json.get("data", {}).get("plants", []) if isinstance(p_json.get("data"), dict) else []
@@ -301,7 +336,7 @@ class GrowattAdapter(BaseInverterAdapter):
                 try:
                     dlist_resp = session.get(
                         "https://openapi.growatt.com/v1/device/list",
-                        headers={"token": token},
+                        headers=api_headers,
                         params={"plant_id": plant_id},
                         timeout=10,
                     )
@@ -320,10 +355,28 @@ class GrowattAdapter(BaseInverterAdapter):
                     "https://openapi.growatt.com/v1/device/tlx/tlx_last_data",
                     "https://openapi.growatt.com/v1/device/mix/mix_last_data",
                     "https://openapi.growatt.com/v1/device/storage/storage_last_data",
+                    "https://openapi.growatt.com/v1/device/spa/spa_last_data",
+                    "https://openapi.growatt.com/v1/device/sph/sph_last_data",
+                    "https://openapi.growatt.com/v1/device/min/min_last_data",
                     "https://openapi.growatt.com/v1/device/noah/noah_last_data",
                 ]:
                     try:
-                        dev_resp = session.get(endpoint, headers={"token": token}, params={"device_sn": device_sn, "inverter_sn": device_sn, "tlx_sn": device_sn, "mix_sn": device_sn, "storage_sn": device_sn}, timeout=8)
+                        dev_resp = session.get(
+                            endpoint,
+                            headers=api_headers,
+                            params={
+                                "device_sn": device_sn,
+                                "inverter_sn": device_sn,
+                                "tlx_sn": device_sn,
+                                "mix_sn": device_sn,
+                                "storage_sn": device_sn,
+                                "spa_sn": device_sn,
+                                "sph_sn": device_sn,
+                                "min_sn": device_sn,
+                                "noah_sn": device_sn,
+                            },
+                            timeout=8,
+                        )
                         if dev_resp.status_code == 200:
                             d_json = dev_resp.json()
                             d_data = d_json.get("data")
@@ -333,17 +386,23 @@ class GrowattAdapter(BaseInverterAdapter):
                         pass
 
             if plant_id:
-                try:
-                    p_resp = session.get(
-                        "https://openapi.growatt.com/v1/plant/data",
-                        headers={"token": token},
-                        params={"plant_id": plant_id},
-                        timeout=10,
-                    )
-                    if p_resp.status_code == 200 and p_resp.json().get("data"):
-                        raw_data["data"].update(p_resp.json()["data"])
-                except Exception as e:
-                    logger.warning("Growatt plant/data failed: %s", e)
+                for p_ep in [
+                    "https://openapi.growatt.com/v1/plant/data",
+                    "https://openapi.growatt.com/v1/plant/data/overview",
+                ]:
+                    try:
+                        p_resp = session.get(
+                            p_ep,
+                            headers=api_headers,
+                            params={"plant_id": plant_id},
+                            timeout=10,
+                        )
+                        if p_resp.status_code == 200 and p_resp.json().get("data"):
+                            p_d = p_resp.json()["data"]
+                            if isinstance(p_d, dict):
+                                raw_data["data"].update(p_d)
+                    except Exception as e:
+                        logger.warning("Growatt plant/data endpoint %s failed: %s", p_ep, e)
 
             telemetry = self.parse_payload(raw_data)
             return AdapterTestResult(
