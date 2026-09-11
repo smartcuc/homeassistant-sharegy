@@ -591,6 +591,9 @@ class GrowattAdapter(BaseInverterAdapter):
                             raw_sample=raw_data,
                             simulated=False,
                         )
-                    raise ValueError(f"Growatt Datenabfrage fehlgeschlagen: {e}")
+                    err_msg = f"Growatt Datenabfrage fehlgeschlagen: {e}"
+                    return AdapterTestResult(status="error", error=err_msg, message=err_msg)
 
-        raise ValueError("Growatt Login fehlgeschlagen: Bitte prüfe Benutzername, Passwort oder API-Token.")
+        err_msg = "Growatt Login fehlgeschlagen: Bitte prüfe Benutzername, Passwort oder API-Token."
+        return AdapterTestResult(status="error", error=err_msg, message=err_msg)
+

@@ -180,33 +180,42 @@ class SungrowAdapter(BaseInverterAdapter):
         # In Sharegy gilt kanonisch: Positiv = Netzbezug (Import), Negativ = Netzeinspeisung (Export).
         pv_val = max(0.0, float(pv or 0.0))
         bat_val = float(battery or 0.0)
-        load_val = float(load) if load is not None else None
+        bat_charging = abs(min(0.0, bat_val))
+        bat_discharging = max(0.0, bat_val)
+
+        if soc is not None and float(soc) >= 98.0 and bat_val < 0:
+            bat_val = 0.0
+            bat_charging = 0.0
+            battery = 0.0
 
         if grid is not None:
             grid_val = float(grid)
-            bat_charging = abs(min(0.0, bat_val))
-            bat_discharging = max(0.0, bat_val)
-            eff_load = load_val if (load_val is not None and load_val > 0) else 0.0
+            load_val = float(load) if (load is not None and float(load) > 0) else None
 
-            if pv_val > 50.0:
-                surplus = pv_val + bat_discharging - eff_load - bat_charging
-                if surplus > 30.0:
-                    # Echter PV-Überschuss -> Netzeinspeisung muss negativ sein
-                    if grid_val > 0:
+            # Fall A: Inverter meldet grid_power > 0, aber PV liefert signifikante Erzeugung
+            if pv_val > 50.0 and abs(grid_val) > 10.0:
+                # Wenn load_val fehlt oder verdächtig gleich pv_val ist (häufiger Inverter-FW-Effekt):
+                if load_val is None or abs(load_val - pv_val) < 50.0 or (grid_val > 0 and grid_val >= (pv_val * 0.6)):
+                    # Eindeutige Netzeinspeisung: grid muss negativ sein
+                    grid = -abs(grid_val)
+                    # Hausverbrauch ist physisch die verbleibende Restleistung:
+                    load = max(0.0, round(pv_val + float(grid) - bat_charging + bat_discharging, 1))
+                else:
+                    # load_val ist plausibel unabhängig gemessen:
+                    surplus = pv_val + bat_discharging - load_val - bat_charging
+                    if surplus > 30.0:
                         grid = -abs(grid_val)
-                    elif grid_val == 0.0 and surplus > 50.0 and load_val is not None:
-                        grid = -round(surplus, 1)
-                elif eff_load > (pv_val + bat_discharging + 30.0):
-                    # PV-Defizit -> Netzbezug ist positiv
-                    if grid_val < 0:
+                    elif load_val > (pv_val + bat_discharging + 30.0):
                         grid = abs(grid_val)
 
-            if (load_val is None or load_val <= 0.0) and pv_val > 50.0 and grid is not None:
-                if grid_val > 0 and abs(grid_val - pv_val) < (pv_val * 0.5 + 500):
-                    grid = -abs(grid_val)
-                computed_load = round(pv_val + float(grid) + bat_val, 1)
-                if load_val is None or load_val <= 0:
-                    load = max(0.0, computed_load)
+            # Fall B: Keine PV (Nacht / < 20W) -> grid_power > 0 ist echter Netzbezug
+            elif pv_val < 20.0 and grid_val < 0 and (load_val is None or load_val > 20.0) and bat_discharging < 20.0:
+                grid = abs(grid_val)
+
+            # Fall C: Load berechnen falls noch leer
+            if (load is None or float(load) <= 0.0) and (pv_val > 0 or float(grid or 0) != 0):
+                computed_load = round(pv_val + float(grid or 0.0) + bat_val, 1)
+                load = max(0.0, computed_load)
 
         telemetry = CanonicalTelemetry(
             pv_power_w=pv,
@@ -262,7 +271,7 @@ class SungrowAdapter(BaseInverterAdapter):
 
         is_oauth = credentials.get("auth_type") == "oauth2" or bool(token and not credentials.get("user_password"))
 
-        if is_oauth and token:
+        if is_oauth and (token or credentials.get("auth_code")):
             def _refresh_openapi_token() -> bool:
                 nonlocal token
                 r_token = credentials.get("refresh_token")
@@ -503,7 +512,7 @@ class SungrowAdapter(BaseInverterAdapter):
 
             telemetry = self.parse_payload(raw_data)
 
-            # Validitätsprüfung (Kein Option B Fallback für offizielle OAuth OpenAPI)
+            # Validitätsprüfung
             if "_direct_metrics" not in raw_data and not raw_data.get("result_data"):
                 if is_mock:
                     return AdapterTestResult(
@@ -534,34 +543,74 @@ class SungrowAdapter(BaseInverterAdapter):
             )
 
         else:
-            # Legacy Login Modus
-            if not token:
-                token_info = self._execute_login(
-                    base_url=base_url,
-                    appkey=appkey,
-                    account=credentials.get("user_account"),
-                    password=credentials.get("user_password"),
-                )
-                token = token_info["token"]
-                credentials["token"] = token
-                credentials["user_id"] = token_info["user_id"]
+            # Legacy Login Modus (Benutzername & Passwort)
+            user_acc = credentials.get("user_account")
+            user_pw = credentials.get("user_password")
 
-            headers = {
-                "Content-Type": "application/json",
-                "sys_code": "901",
-                "token": token,
-            }
-            body = {
-                "appkey": appkey,
-                "ps_id": str(ps_id or ""),
-            }
-            resp = requests.post(
-                f"{base_url.rstrip('/')}/v1/powerStationService/getPowerStationDetail",
-                headers=headers,
-                json=body,
-                timeout=12,
-            )
-            raw_data = resp.json() if resp.status_code == 200 else {}
+            if not user_acc or not user_pw:
+                err_msg = "Sungrow Zugangsdaten unvollständig (Benutzername oder Passwort fehlt)."
+                return AdapterTestResult(status="error", error=err_msg, message=err_msg)
+
+            # 1. Login Handshake mit Cache-Invalidierung bei Fehler
+            def _fetch_legacy_data(force_fresh_login: bool = False) -> dict:
+                nonlocal token
+                cache_key = f"sungrow_token_{appkey}_{user_acc}"
+                if force_fresh_login:
+                    cache.delete(cache_key)
+                    token = None
+
+                if not token:
+                    t_data = self._execute_login(
+                        base_url=base_url,
+                        appkey=appkey,
+                        account=user_acc,
+                        password=user_pw,
+                    )
+                    token = t_data["token"]
+                    credentials["token"] = token
+                    credentials["user_id"] = t_data.get("user_id")
+
+                headers = {
+                    "Content-Type": "application/json",
+                    "sys_code": "901",
+                    "token": str(token),
+                }
+                body = {
+                    "appkey": appkey,
+                    "ps_id": str(ps_id or ""),
+                }
+
+                # Station Detail abfragen
+                resp = requests.post(
+                    f"{base_url.rstrip('/')}/v1/powerStationService/getPowerStationDetail",
+                    headers=headers,
+                    json=body,
+                    timeout=12,
+                )
+                if resp.status_code == 200:
+                    res_j = resp.json()
+                    # Prüfen ob Token ungültig / abgelaufen war
+                    c_code = str(res_j.get("result_code", ""))
+                    c_msg = str(res_j.get("result_msg", "")).lower()
+                    if c_code not in ("1", "0", "0000") or ("token" in c_msg and ("invalid" in c_msg or "expired" in c_msg)):
+                        if not force_fresh_login:
+                            logger.info("Sungrow Legacy token expired, retrying with fresh login...")
+                            return _fetch_legacy_data(force_fresh_login=True)
+                    return res_j
+                elif resp.status_code in (401, 403) and not force_fresh_login:
+                    return _fetch_legacy_data(force_fresh_login=True)
+                return {}
+
+            try:
+                raw_data = _fetch_legacy_data(force_fresh_login=False)
+            except Exception as leg_err:
+                logger.warning("Sungrow Legacy execution failed: %s", leg_err)
+                return AdapterTestResult(
+                    status="error",
+                    error=str(leg_err),
+                    message=f"Fehler bei Sungrow Verbindung: {leg_err}",
+                )
+
             telemetry = self.parse_payload(raw_data)
 
             return AdapterTestResult(
@@ -571,3 +620,4 @@ class SungrowAdapter(BaseInverterAdapter):
                 raw_sample=raw_data,
                 simulated=False,
             )
+

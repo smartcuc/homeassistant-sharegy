@@ -164,3 +164,36 @@ class BatteryDirectionHandlingTest(TestCase):
         self.assertEqual(signals["battery"]["charge"], 3000.0)
         self.assertEqual(signals["battery"]["discharge"], 0.0)
 
+    def test_sungrow_feedin_not_treated_as_consumption(self):
+        from devices.adapters.sungrow import SungrowAdapter
+        from energy.flow_engine import calculate_energy_flow
+
+        adapter = SungrowAdapter()
+        raw_payload = {
+            "result_code": "1",
+            "result_data": {
+                "curr_power": "4.2",      # 4.2 kW PV
+                "grid_power": "4.0",      # 4.0 kW Feed-in (positive in Sungrow API)
+                "load_power": "0.2",      # 0.2 kW Household Load
+                "battery_power": "0.0",
+                "battery_soc": "100.0",
+            }
+        }
+        telemetry = adapter.parse_payload(raw_payload)
+        self.assertEqual(telemetry.pv_power_w, 4200.0)
+        self.assertEqual(telemetry.grid_power_w, -4000.0)
+        self.assertEqual(telemetry.load_power_w, 200.0)
+
+        signals = {
+            "pv": {"production": telemetry.pv_power_w},
+            "grid": {"import": 0.0, "export": abs(telemetry.grid_power_w)},
+            "load": {"consumption": telemetry.load_power_w},
+            "battery": {"charge": 0.0, "discharge": 0.0},
+        }
+        flow = calculate_energy_flow(signals)
+        self.assertEqual(flow["pv_to_load"], 200.0)
+        self.assertEqual(flow["pv_to_grid"], 4000.0)
+        self.assertEqual(flow["total_consumption"], 200.0)
+        self.assertEqual(flow["total_production"], 4200.0)
+
+
