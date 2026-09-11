@@ -375,10 +375,14 @@ export default function CloudInverterIntegrationCard({
                                                         ⏱️ {t("cloud_inverter.last_polled", "Zuletzt synchronisiert")}:{" "}
                                                         <strong className="text-gray-700">{formatRelativeTime(item.last_polled_at)}</strong>
                                                     </span>
-                                                    <span>•</span>
-                                                    <span>
-                                                        Intervall: <strong className="text-gray-700">{item.polling_interval_seconds}s</strong>
-                                                    </span>
+                                                    {item.profile_id !== "sungrow_isolarcloud" && item.vendor !== "sungrow" && (
+                                                        <>
+                                                            <span>•</span>
+                                                            <span>
+                                                                Intervall: <strong className="text-gray-700">{item.polling_interval_seconds}s</strong>
+                                                            </span>
+                                                        </>
+                                                    )}
                                                     {item.last_error_message && (
                                                         <span className="text-rose-600 truncate max-w-xs" title={item.last_error_message}>
                                                             ⚠️ {item.last_error_message}

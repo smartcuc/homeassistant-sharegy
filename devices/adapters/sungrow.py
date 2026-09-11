@@ -450,7 +450,7 @@ class SungrowAdapter(BaseInverterAdapter):
                 return AdapterTestResult(status="error", error=err_msg, message=err_msg)
 
         # 2. Automatische Anlagen-ID (ps_id) Erkennung
-        if not ps_id or ps_id in ("default_ps", "12345", ""):
+        if not ps_id or str(ps_id) in ("default_ps", "12345", ""):
             try:
                 list_resp = _post_with_auth(
                     "openapi/platform/queryPowerStationList",
@@ -458,11 +458,19 @@ class SungrowAdapter(BaseInverterAdapter):
                 )
                 if list_resp and list_resp.status_code == 200:
                     list_data = list_resp.json().get("result_data", {})
-                    stations = list_data.get("pageList", []) if isinstance(list_data, dict) else []
-                    if stations:
-                        ps_id = str(stations[0].get("ps_id") or stations[0].get("id"))
-                        credentials["ps_id"] = ps_id
-                        credentials["ps_name"] = stations[0].get("ps_name", "Sungrow PV-Anlage")
+                    stations = (
+                        list_data.get("pageList")
+                        or list_data.get("data_list")
+                        or list_data.get("list")
+                        or list_data.get("result_list")
+                        or []
+                    )
+                    if stations and isinstance(stations, list) and len(stations) > 0:
+                        first_st = stations[0]
+                        if isinstance(first_st, dict):
+                            ps_id = str(first_st.get("ps_id") or first_st.get("id") or first_st.get("ps_key") or first_st.get("power_station_id") or "")
+                            credentials["ps_id"] = ps_id
+                            credentials["ps_name"] = first_st.get("ps_name") or first_st.get("name", "Sungrow PV-Anlage")
             except Exception as e:
                 logger.warning("Auto-fetch ps_id via OpenAPI failed: %s", e)
 
