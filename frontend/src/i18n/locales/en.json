@@ -2509,7 +2509,14 @@
     "faq_5_a": "Simply click 'Launch Live Demo' at the top or use the interactive simulator on this page. You can instantly test all control modes and scenarios – no registration needed.",
     "final_cta_title": "Ready for your smart Energy OS?",
     "final_cta_desc": "Connect your solar system, wallbox & battery storage in a few clicks – or test the interactive live demo immediately.",
-    "final_cta_btn": "Get Started for Free →"
+    "final_cta_btn": "Get Started for Free →",
+    "demo_role_label": "Select demo role:",
+    "demo_role_ems": "⚡ Single Home (HEMS)",
+    "demo_role_admin": "🏢 Building & District Admin",
+    "demo_role_user": "👤 Tenant & Member Portal",
+    "p1_demo_btn": "⚡ Test HEMS Pro Live Demo (Single Home)",
+    "p2_demo_admin_btn": "🏢 Building & District Admin Demo",
+    "p2_demo_user_btn": "👤 Tenant Electricity & Member Demo"
   },
   "interfaces.diagnostics_title": "Live Interface Status & Diagnostics",
   "interfaces.diagnostics_desc": "Real-time detection of active telemetry via Home Assistant, ioBroker, Shelly WSS, Sungrow Cloud, and MQTT.",

@@ -84,7 +84,7 @@ export default function LandingPage() {
         },
         {
             q: t("landing.faq_5_q", "Wie kann ich die Live-Demo testen?"),
-            a: t("landing.faq_5_a", "Klicke einfach oben auf 'Live-Demo ansehen' oder nutze den interaktiven Simulator direkt auf dieser Seite. Du kannst sofort alle Steuerungsmodi und Szenarien interaktiv ausprobieren – ganz ohne Registrierung.")
+            a: t("landing.faq_5_a", "Klicke einfach oben auf 'Live-Demo' oder wähle deine gewünschte Rolle: ⚡ Einfamilienhaus (HEMS Pro), 🏢 WEG & Quartiers-Admin oder 👤 Mieterstrom & Teilnehmer. Alle Demos sind 100% interaktiv und ohne Registrierung sofort einsatzbereit.")
         }
     ];
 
@@ -248,6 +248,39 @@ export default function LandingPage() {
                         </Link>
                     </div>
 
+                    {/* 🎭 Schnell-Auswahl nach Rolle */}
+                    <div className="pt-2 flex flex-wrap items-center justify-center gap-2 text-xs">
+                        <span className="text-slate-400 text-[11px] uppercase tracking-wider font-bold mr-1">
+                            {t("landing.demo_role_label", "Rolle wählen:")}
+                        </span>
+                        <a
+                            href="/api/demo/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3 py-1.5 rounded-xl bg-white/90 border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/60 text-slate-700 hover:text-indigo-700 font-semibold transition shadow-2xs flex items-center gap-1.5"
+                        >
+                            <Zap className="w-3.5 h-3.5 text-amber-500" />
+                            <span>{t("landing.demo_role_ems", "⚡ Einfamilienhaus (HEMS)")}</span>
+                        </a>
+                        <a
+                            href="/api/demo/admin/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3 py-1.5 rounded-xl bg-white/90 border border-slate-200 hover:border-emerald-400 hover:bg-emerald-50/60 text-slate-700 hover:text-emerald-700 font-semibold transition shadow-2xs flex items-center gap-1.5"
+                        >
+                            <Users className="w-3.5 h-3.5 text-emerald-600" />
+                            <span>{t("landing.demo_role_admin", "🏢 WEG & Quartiers-Admin")}</span>
+                        </a>
+                        <a
+                            href="/api/demo/user/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3 py-1.5 rounded-xl bg-white/90 border border-slate-200 hover:border-teal-400 hover:bg-teal-50/60 text-slate-700 hover:text-teal-700 font-semibold transition shadow-2xs flex items-center gap-1.5"
+                        >
+                            <span>{t("landing.demo_role_user", "👤 Mieterstrom & Teilnehmer")}</span>
+                        </a>
+                    </div>
+
                     {/* Feature Highlights Badges */}
                     <div className="pt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-xs text-slate-600 font-medium">
                         <div className="flex items-center gap-2">
@@ -356,96 +389,135 @@ export default function LandingPage() {
 
                 {/* Pillar 1 Content */}
                 {activePillarTab === "pillar1" && (
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fade-in">
-                        {/* Feature 1 */}
-                        <div className="bg-white border border-slate-200 rounded-3xl p-7 hover:border-indigo-400 hover:shadow-lg transition">
-                            <div className="w-12 h-12 rounded-2xl bg-amber-100 border border-amber-200 flex items-center justify-center text-2xl mb-5">
-                                ☀️
+                    <>
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fade-in">
+                            {/* Feature 1 */}
+                            <div className="bg-white border border-slate-200 rounded-3xl p-7 hover:border-indigo-400 hover:shadow-lg transition">
+                                <div className="w-12 h-12 rounded-2xl bg-amber-100 border border-amber-200 flex items-center justify-center text-2xl mb-5">
+                                    ☀️
+                                </div>
+                                <h3 className="text-lg font-bold text-slate-900">{t("landing.p1_f1_title", "Sub-Sekunden PV-Überschussregelung")}</h3>
+                                <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                                    {t("landing.p1_f1_desc", "Dynamische Anpassung von Wallbox und Heizstab in Echtzeit. Dein Auto lädt genau mit der Sonnenenergie, die vom Dach kommt – ohne teuren Netzstrom.")}
+                                </p>
+                                <div className="mt-4 pt-4 border-t border-slate-100 text-xs text-amber-700 font-bold">
+                                    {t("landing.p1_f1_badge", "✓ Automatische Phasen-Umschaltung (1p/3p)")}
+                                </div>
                             </div>
-                            <h3 className="text-lg font-bold text-slate-900">{t("landing.p1_f1_title", "Sub-Sekunden PV-Überschussregelung")}</h3>
-                            <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                                {t("landing.p1_f1_desc", "Dynamische Anpassung von Wallbox und Heizstab in Echtzeit. Dein Auto lädt genau mit der Sonnenenergie, die vom Dach kommt – ohne teuren Netzstrom.")}
-                            </p>
-                            <div className="mt-4 pt-4 border-t border-slate-100 text-xs text-amber-700 font-bold">
-                                {t("landing.p1_f1_badge", "✓ Automatische Phasen-Umschaltung (1p/3p)")}
+
+                            {/* Feature 2 */}
+                            <div className="bg-white border border-slate-200 rounded-3xl p-7 hover:border-indigo-400 hover:shadow-lg transition">
+                                <div className="w-12 h-12 rounded-2xl bg-indigo-100 border border-indigo-200 flex items-center justify-center text-2xl mb-5">
+                                    📈
+                                </div>
+                                <h3 className="text-lg font-bold text-slate-900">{t("landing.p1_f2_title", "Dynamischer Strompreis-Radar")}</h3>
+                                <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                                    {t("landing.p1_f2_desc", "Integration von Börsenstrompreisen (EPEX Spot / Awattar / Tibber). Der Heimspeicher lädt vollautomatisch in Niedrigpreisphasen und puffert Spitzenpreise ab.")}
+                                </p>
+                                <div className="mt-4 pt-4 border-t border-slate-100 text-xs text-indigo-700 font-bold">
+                                    {t("landing.p1_f2_badge", "✓ Bis zu 35% geringere Netzstromkosten")}
+                                </div>
+                            </div>
+
+                            {/* Feature 3 */}
+                            <div className="bg-white border border-slate-200 rounded-3xl p-7 hover:border-indigo-400 hover:shadow-lg transition">
+                                <div className="w-12 h-12 rounded-2xl bg-cyan-100 border border-cyan-200 flex items-center justify-center text-2xl mb-5">
+                                    🛡️
+                                </div>
+                                <h3 className="text-lg font-bold text-slate-900">{t("landing.p1_f3_title", "§ 14a EnWG Netzentgelt-Bonus")}</h3>
+                                <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                                    {t("landing.p1_f3_desc", "Gesetzliche Steuerung für Wallboxen und Wärmepumpen (SteuVE). Sharegy garantiert netzdienliche Dimmung auf 4,2 kW und sichert dir die volle Jahrespauschale.")}
+                                </p>
+                                <div className="mt-4 pt-4 border-t border-slate-100 text-xs text-cyan-700 font-bold">
+                                    {t("landing.p1_f3_badge", "✓ Modul 1 Pauschale (+160 € / Jahr)")}
+                                </div>
                             </div>
                         </div>
 
-                        {/* Feature 2 */}
-                        <div className="bg-white border border-slate-200 rounded-3xl p-7 hover:border-indigo-400 hover:shadow-lg transition">
-                            <div className="w-12 h-12 rounded-2xl bg-indigo-100 border border-indigo-200 flex items-center justify-center text-2xl mb-5">
-                                📈
-                            </div>
-                            <h3 className="text-lg font-bold text-slate-900">{t("landing.p1_f2_title", "Dynamischer Strompreis-Radar")}</h3>
-                            <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                                {t("landing.p1_f2_desc", "Integration von Börsenstrompreisen (EPEX Spot / Awattar / Tibber). Der Heimspeicher lädt vollautomatisch in Niedrigpreisphasen und puffert Spitzenpreise ab.")}
-                            </p>
-                            <div className="mt-4 pt-4 border-t border-slate-100 text-xs text-indigo-700 font-bold">
-                                {t("landing.p1_f2_badge", "✓ Bis zu 35% geringere Netzstromkosten")}
-                            </div>
+                        <div className="mt-8 text-center">
+                            <a
+                                href="/api/demo/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-lg shadow-indigo-600/20 hover:scale-[1.02] transition cursor-pointer"
+                            >
+                                <Zap className="w-4 h-4 text-amber-300" />
+                                <span>{t("landing.p1_demo_btn", "⚡ HEMS Pro Live-Demo testen (Einfamilienhaus)")}</span>
+                                <ArrowRight className="w-3.5 h-3.5" />
+                            </a>
                         </div>
-
-                        {/* Feature 3 */}
-                        <div className="bg-white border border-slate-200 rounded-3xl p-7 hover:border-indigo-400 hover:shadow-lg transition">
-                            <div className="w-12 h-12 rounded-2xl bg-cyan-100 border border-cyan-200 flex items-center justify-center text-2xl mb-5">
-                                🛡️
-                            </div>
-                            <h3 className="text-lg font-bold text-slate-900">{t("landing.p1_f3_title", "§ 14a EnWG Netzentgelt-Bonus")}</h3>
-                            <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                                {t("landing.p1_f3_desc", "Gesetzliche Steuerung für Wallboxen und Wärmepumpen (SteuVE). Sharegy garantiert netzdienliche Dimmung auf 4,2 kW und sichert dir die volle Jahrespauschale.")}
-                            </p>
-                            <div className="mt-4 pt-4 border-t border-slate-100 text-xs text-cyan-700 font-bold">
-                                {t("landing.p1_f3_badge", "✓ Modul 1 Pauschale (+160 € / Jahr)")}
-                            </div>
-                        </div>
-                    </div>
+                    </>
                 )}
 
                 {/* Pillar 2 Content */}
                 {activePillarTab === "pillar2" && (
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fade-in">
-                        {/* Feature 1 */}
-                        <div className="bg-white border border-slate-200 rounded-3xl p-7 hover:border-emerald-400 hover:shadow-lg transition">
-                            <div className="w-12 h-12 rounded-2xl bg-emerald-100 border border-emerald-200 flex items-center justify-center text-2xl mb-5">
-                                🏘️
+                    <>
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fade-in">
+                            {/* Feature 1 */}
+                            <div className="bg-white border border-slate-200 rounded-3xl p-7 hover:border-emerald-400 hover:shadow-lg transition">
+                                <div className="w-12 h-12 rounded-2xl bg-emerald-100 border border-emerald-200 flex items-center justify-center text-2xl mb-5">
+                                    🏘️
+                                </div>
+                                <h3 className="text-lg font-bold text-slate-900">{t("landing.p2_f1_title", "Quartiers-Strompool (§ 42b EnWG)")}</h3>
+                                <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                                    {t("landing.p2_f1_desc", "Überschussstrom nicht für 8 Cent verschenken: Teile deinen Solarstrom direkt mit Nachbarn, Mietern oder Familienmitgliedern im selben Quartier.")}
+                                </p>
+                                <div className="mt-4 pt-4 border-t border-slate-100 text-xs text-emerald-700 font-bold">
+                                    {t("landing.p2_f1_badge", "✓ Mehr Ertrag für Erzeuger, günstiger für Nachbarn")}
+                                </div>
                             </div>
-                            <h3 className="text-lg font-bold text-slate-900">{t("landing.p2_f1_title", "Quartiers-Strompool (§ 42b EnWG)")}</h3>
-                            <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                                {t("landing.p2_f1_desc", "Überschussstrom nicht für 8 Cent verschenken: Teile deinen Solarstrom direkt mit Nachbarn, Mietern oder Familienmitgliedern im selben Quartier.")}
-                            </p>
-                            <div className="mt-4 pt-4 border-t border-slate-100 text-xs text-emerald-700 font-bold">
-                                {t("landing.p2_f1_badge", "✓ Mehr Ertrag für Erzeuger, günstiger für Nachbarn")}
+
+                            {/* Feature 2 */}
+                            <div className="bg-white border border-slate-200 rounded-3xl p-7 hover:border-emerald-400 hover:shadow-lg transition">
+                                <div className="w-12 h-12 rounded-2xl bg-teal-100 border border-teal-200 flex items-center justify-center text-2xl mb-5">
+                                    📊
+                                </div>
+                                <h3 className="text-lg font-bold text-slate-900">{t("landing.p2_f2_title", "100% Automatisierte Abrechnung")}</h3>
+                                <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                                    {t("landing.p2_f2_desc", "Keine manuellen Excel-Tabellen oder Zählerablesungen. Sharegy saldiert alle kWh sub-sekundengenau und generiert automatische monatliche Abrechnungsbelege.")}
+                                </p>
+                                <div className="mt-4 pt-4 border-t border-slate-100 text-xs text-teal-700 font-bold">
+                                    {t("landing.p2_f2_badge", "✓ Rechtssicher & Mieterstrom-konform")}
+                                </div>
+                            </div>
+
+                            {/* Feature 3 */}
+                            <div className="bg-white border border-slate-200 rounded-3xl p-7 hover:border-emerald-400 hover:shadow-lg transition">
+                                <div className="w-12 h-12 rounded-2xl bg-teal-100 border border-teal-200 flex items-center justify-center text-2xl mb-5">
+                                    🏆
+                                </div>
+                                <h3 className="text-lg font-bold text-slate-900">{t("landing.p2_f3_title", "Community Autarkie & Social Proof")}</h3>
+                                <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                                    {t("landing.p2_f3_desc", "Verfolge den gemeinsamen Autarkiegrad deines Quartiers, teile Erfolge und mache dein Viertel gemeinsam CO₂-neutral.")}
+                                </p>
+                                <div className="mt-4 pt-4 border-t border-slate-100 text-xs text-teal-700 font-bold">
+                                    {t("landing.p2_f3_badge", "✓ Gamification & Quartiers-Rangliste")}
+                                </div>
                             </div>
                         </div>
 
-                        {/* Feature 2 */}
-                        <div className="bg-white border border-slate-200 rounded-3xl p-7 hover:border-emerald-400 hover:shadow-lg transition">
-                            <div className="w-12 h-12 rounded-2xl bg-teal-100 border border-teal-200 flex items-center justify-center text-2xl mb-5">
-                                📊
-                            </div>
-                            <h3 className="text-lg font-bold text-slate-900">{t("landing.p2_f2_title", "100% Automatisierte Abrechnung")}</h3>
-                            <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                                {t("landing.p2_f2_desc", "Keine manuellen Excel-Tabellen oder Zählerablesungen. Sharegy saldiert alle kWh sub-sekundengenau und generiert automatische monatliche Abrechnungsbelege.")}
-                            </p>
-                            <div className="mt-4 pt-4 border-t border-slate-100 text-xs text-teal-700 font-bold">
-                                {t("landing.p2_f2_badge", "✓ Rechtssicher & Mieterstrom-konform")}
-                            </div>
+                        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+                            <a
+                                href="/api/demo/admin/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-lg shadow-emerald-600/20 hover:scale-[1.02] transition cursor-pointer"
+                            >
+                                <Users className="w-4 h-4 text-teal-200" />
+                                <span>{t("landing.p2_demo_admin_btn", "🏢 WEG & Quartiers-Admin Demo")}</span>
+                                <ArrowRight className="w-3.5 h-3.5" />
+                            </a>
+                            <a
+                                href="/api/demo/user/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-white hover:bg-teal-50 text-teal-900 border border-teal-300 text-xs font-bold shadow-sm hover:scale-[1.02] transition cursor-pointer"
+                            >
+                                <span>{t("landing.p2_demo_user_btn", "👤 Mieterstrom & Teilnehmer Demo")}</span>
+                                <ArrowRight className="w-3.5 h-3.5" />
+                            </a>
                         </div>
-
-                        {/* Feature 3 */}
-                        <div className="bg-white border border-slate-200 rounded-3xl p-7 hover:border-emerald-400 hover:shadow-lg transition">
-                            <div className="w-12 h-12 rounded-2xl bg-teal-100 border border-teal-200 flex items-center justify-center text-2xl mb-5">
-                                🏆
-                            </div>
-                            <h3 className="text-lg font-bold text-slate-900">{t("landing.p2_f3_title", "Community Autarkie & Social Proof")}</h3>
-                            <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                                {t("landing.p2_f3_desc", "Verfolge den gemeinsamen Autarkiegrad deines Quartiers, teile Erfolge und mache dein Viertel gemeinsam CO₂-neutral.")}
-                            </p>
-                            <div className="mt-4 pt-4 border-t border-slate-100 text-xs text-teal-700 font-bold">
-                                {t("landing.p2_f3_badge", "✓ Gamification & Quartiers-Rangliste")}
-                            </div>
-                        </div>
-                    </div>
+                    </>
                 )}
             </section>
 
