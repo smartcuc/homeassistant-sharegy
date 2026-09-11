@@ -14,19 +14,7 @@ connection:
   auth_type: "oauth2"
   default_base_url: "https://gateway.isolarcloud.eu"
   polling_interval_seconds: 15
-  fields:
-    - key: "appkey"
-      label: "Sungrow AppKey"
-      type: "string"
-      required: false
-      description: "Dein iSolarCloud Developer AppKey (optional, falls ein eigener Schlüssel genutzt werden soll)"
-      placeholder: "z. B. 988713D7D057090474AEC9584CBA1AAD"
-    - key: "ps_id"
-      label: "Anlagen-ID (Power Station ID)"
-      type: "string"
-      required: false
-      description: "Wird bei der Autorisierung automatisch ermittelt (oder manuell aus der URL eintragen)"
-      placeholder: "z. B. 1234567"
+  fields: []
 
 # HTTP API Endpoints (Offizielle OpenAPI)
 requests:

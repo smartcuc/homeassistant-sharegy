@@ -64,9 +64,8 @@ class ProfileRunnerTestCase(TestCase):
         self.assertIn("growatt_server", profile_ids)
 
         sungrow = next(p for p in profiles if p["id"] == "sungrow_isolarcloud")
-        field_keys = [f["key"] for f in sungrow["fields"]]
-        self.assertIn("appkey", field_keys)
-        self.assertIn("ps_id", field_keys)
+        # Sungrow nutzt zentrales 1-Klick OAuth2 (keine manuellen Formularfelder)
+        self.assertEqual(len(sungrow["fields"]), 0)
 
 
         kostal = next(p for p in profiles if p["id"] == "kostal_solar_portal")

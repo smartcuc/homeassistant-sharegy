@@ -225,115 +225,229 @@ class SungrowAdapter(BaseInverterAdapter):
                 simulated=True,
             )
 
+        redir_url = (
+            credentials.get("redirect_uri")
+            or credentials.get("redirect_url")
+            or getattr(settings, "SUNGROW_REDIRECT_URL", "")
+            or getattr(settings, "SUNGROW_REDIRECT_URI", "")
+            or os.getenv("SUNGROW_REDIRECT_URL", "https://sharegy.de/api/v1/integrations/sungrow/callback")
+        )
+
+        gateway_list = list(dict.fromkeys([
+            base_url,
+            getattr(settings, "SUNGROW_GATEWAY_URL", ""),
+            "https://gateway.isolarcloud.eu",
+            "https://gateway.isolarcloud.com.hk",
+            "https://gateway.isolarcloud.com",
+        ]))
+        gateway_list = [g.rstrip("/") for g in gateway_list if g]
+
         def _refresh_openapi_token() -> bool:
             nonlocal token
             r_token = credentials.get("refresh_token")
-            if not r_token:
-                return False
-            try:
-                redir_url = credentials.get("redirect_uri") or getattr(settings, "SUNGROW_REDIRECT_URI", "")
-                headers = {
-                    "x-access-key": app_secret,
-                    "sys_code": "901",
-                    "Content-Type": "application/json",
-                }
-                for ref_ep, ref_payload in [
-                    (
-                        f"{base_url.rstrip('/')}/openapi/oauth/token",
-                        {
+
+            # 1. Wenn refresh_token vorhanden ist: Standard OAuth2 / OpenAPI Refresh
+            if r_token:
+                for gw in gateway_list:
+                    # Versuch A: /openapi/oauth/token (JSON)
+                    try:
+                        headers = {
+                            "x-access-key": app_secret,
+                            "sys_code": "901",
+                            "Content-Type": "application/json",
+                        }
+                        payload = {
                             "appkey": appkey,
                             "grant_type": "refresh_token",
                             "refresh_token": r_token,
                             "redirect_uri": redir_url,
-                        },
-                    ),
-                    (
-                        f"{base_url.rstrip('/')}/openapi/apiManage/refreshToken",
-                        {"appkey": appkey, "refresh_token": r_token},
-                    ),
-                ]:
-                    t_resp = requests.post(ref_ep, json=ref_payload, headers=headers, timeout=10)
-                    if t_resp.status_code == 200:
-                        resp_j = t_resp.json()
-                        new_tok = resp_j.get("access_token") or resp_j.get("token")
-                        if not new_tok and isinstance(resp_j.get("result_data"), dict):
-                            new_tok = resp_j["result_data"].get("access_token") or resp_j["result_data"].get("token")
-                            if resp_j["result_data"].get("refresh_token"):
-                                credentials["refresh_token"] = resp_j["result_data"]["refresh_token"]
-                        if new_tok:
-                            token = new_tok
-                            credentials["token"] = token
-                            logger.info("Successfully refreshed Sungrow OpenAPI token on %s.", ref_ep)
-                            return True
-            except Exception as e:
-                logger.warning("Auto token refresh failed: %s", e)
+                        }
+                        r_resp = requests.post(f"{gw}/openapi/oauth/token", json=payload, headers=headers, timeout=10)
+                        if r_resp.status_code == 200:
+                            rj = r_resp.json()
+                            nt = rj.get("access_token") or rj.get("token")
+                            if not nt and isinstance(rj.get("result_data"), dict):
+                                nt = rj["result_data"].get("access_token") or rj["result_data"].get("token")
+                                if rj["result_data"].get("refresh_token"):
+                                    credentials["refresh_token"] = rj["result_data"]["refresh_token"]
+                            if nt:
+                                token = nt
+                                credentials["token"] = token
+                                logger.info("[SUNGROW_OPENAPI] Token successfully refreshed via %s/openapi/oauth/token (JSON)", gw)
+                                return True
+                    except Exception as e:
+                        logger.debug("OAuth token refresh (JSON) on %s failed: %s", gw, e)
+
+                    # Versuch B: /openapi/oauth/token (Form-URL-Encoded)
+                    try:
+                        form_headers = {
+                            "x-access-key": app_secret,
+                            "sys_code": "901",
+                            "Content-Type": "application/x-www-form-urlencoded",
+                        }
+                        r_resp = requests.post(f"{gw}/openapi/oauth/token", data=payload, headers=form_headers, timeout=10)
+                        if r_resp.status_code == 200:
+                            rj = r_resp.json()
+                            nt = rj.get("access_token") or rj.get("token")
+                            if not nt and isinstance(rj.get("result_data"), dict):
+                                nt = rj["result_data"].get("access_token") or rj["result_data"].get("token")
+                                if rj["result_data"].get("refresh_token"):
+                                    credentials["refresh_token"] = rj["result_data"]["refresh_token"]
+                            if nt:
+                                token = nt
+                                credentials["token"] = token
+                                logger.info("[SUNGROW_OPENAPI] Token successfully refreshed via %s/openapi/oauth/token (Form)", gw)
+                                return True
+                    except Exception as e:
+                        logger.debug("OAuth token refresh (Form) on %s failed: %s", gw, e)
+
+                    # Versuch C: /openapi/apiManage/refreshToken
+                    try:
+                        r_resp = requests.post(
+                            f"{gw}/openapi/apiManage/refreshToken",
+                            json={"appkey": appkey, "refresh_token": r_token},
+                            headers={"x-access-key": app_secret, "sys_code": "901", "Content-Type": "application/json"},
+                            timeout=10,
+                        )
+                        if r_resp.status_code == 200:
+                            rj = r_resp.json()
+                            nt = rj.get("access_token") or rj.get("token")
+                            if not nt and isinstance(rj.get("result_data"), dict):
+                                nt = rj["result_data"].get("access_token") or rj["result_data"].get("token")
+                                if rj["result_data"].get("refresh_token"):
+                                    credentials["refresh_token"] = rj["result_data"]["refresh_token"]
+                            if nt:
+                                token = nt
+                                credentials["token"] = token
+                                logger.info("[SUNGROW_OPENAPI] Token successfully refreshed via %s/openapi/apiManage/refreshToken", gw)
+                                return True
+                    except Exception as e:
+                        logger.debug("apiManage refreshToken on %s failed: %s", gw, e)
+
+            # 2. Versuch: Wenn Developer AppKey & AppSecret vorliegen (Zentraler Developer-Account)
+            if appkey and app_secret:
+                for gw in gateway_list:
+                    try:
+                        cc_resp = requests.post(
+                            f"{gw}/openapi/oauth/token",
+                            json={
+                                "appkey": appkey,
+                                "grant_type": "client_credentials",
+                                "redirect_uri": redir_url,
+                            },
+                            headers={"x-access-key": app_secret, "sys_code": "901", "Content-Type": "application/json"},
+                            timeout=10,
+                        )
+                        if cc_resp.status_code == 200:
+                            rj = cc_resp.json()
+                            nt = rj.get("access_token") or rj.get("token")
+                            if not nt and isinstance(rj.get("result_data"), dict):
+                                nt = rj["result_data"].get("access_token") or rj["result_data"].get("token")
+                            if nt:
+                                token = nt
+                                credentials["token"] = token
+                                logger.info("[SUNGROW_OPENAPI] Token successfully created via client_credentials on %s", gw)
+                                return True
+                    except Exception as e:
+                        logger.debug("client_credentials token request on %s failed: %s", gw, e)
+
+                    try:
+                        am_resp = requests.post(
+                            f"{gw}/openapi/apiManage/token",
+                            json={"appkey": appkey},
+                            headers={"x-access-key": app_secret, "sys_code": "901", "Content-Type": "application/json"},
+                            timeout=10,
+                        )
+                        if am_resp.status_code == 200:
+                            rj = am_resp.json()
+                            nt = rj.get("access_token") or rj.get("token")
+                            if not nt and isinstance(rj.get("result_data"), dict):
+                                nt = rj["result_data"].get("access_token") or rj["result_data"].get("token")
+                            if nt:
+                                token = nt
+                                credentials["token"] = token
+                                logger.info("[SUNGROW_OPENAPI] Token successfully created via apiManage/token on %s", gw)
+                                return True
+                    except Exception as e:
+                        logger.debug("apiManage token request on %s failed: %s", gw, e)
+
             return False
 
         def _post_with_auth(endpoint: str, json_data: dict) -> Optional[requests.Response]:
             nonlocal token
-            url = f"{base_url.rstrip('/')}/{endpoint.lstrip('/')}"
             payload = dict(json_data)
             if token and "token" not in payload:
                 payload["token"] = token
             if appkey and "appkey" not in payload:
                 payload["appkey"] = appkey
 
-            headers = {
-                "x-access-key": app_secret,
-                "sys_code": "901",
-                "token": str(token or ""),
-                "Authorization": f"Bearer {token}",
-                "Content-Type": "application/json",
-            }
-            try:
-                resp = requests.post(url, json=payload, headers=headers, timeout=12)
-                is_auth_err = resp.status_code in (401, 403)
-                if resp.status_code == 200:
-                    try:
-                        body = resp.json()
-                        code_str = str(body.get("result_code", ""))
-                        msg_str = str(body.get("result_msg", "")).lower()
-                        if code_str in ("2", "000", "0000", "401") or ("token" in msg_str and ("invalid" in msg_str or "expired" in msg_str or "fail" in msg_str)):
-                            is_auth_err = True
-                    except Exception:
-                        pass
-
-                if is_auth_err and _refresh_openapi_token():
-                    payload["token"] = token
-                    headers["token"] = str(token or "")
-                    headers["Authorization"] = f"Bearer {token}"
+            for gw in gateway_list:
+                url = f"{gw}/{endpoint.lstrip('/')}"
+                headers = {
+                    "x-access-key": app_secret,
+                    "sys_code": "901",
+                    "token": str(token or ""),
+                    "Authorization": f"Bearer {token}",
+                    "Content-Type": "application/json",
+                }
+                try:
                     resp = requests.post(url, json=payload, headers=headers, timeout=12)
-                return resp
-            except Exception as req_err:
-                logger.warning("Sungrow OpenAPI request to %s failed: %s", endpoint, req_err)
-                return None
+                    is_auth_err = resp.status_code in (401, 403)
+                    if resp.status_code == 200:
+                        try:
+                            body = resp.json()
+                            code_str = str(body.get("result_code", ""))
+                            msg_str = str(body.get("result_msg", "")).lower()
+                            if code_str in ("2", "000", "0000", "401") or ("token" in msg_str and ("invalid" in msg_str or "expired" in msg_str or "fail" in msg_str)):
+                                is_auth_err = True
+                        except Exception:
+                            pass
+
+                    if is_auth_err:
+                        logger.info("[SUNGROW_OPENAPI] Auth error on %s, attempting automatic token refresh...", url)
+                        if _refresh_openapi_token():
+                            payload["token"] = token
+                            headers["token"] = str(token or "")
+                            headers["Authorization"] = f"Bearer {token}"
+                            resp = requests.post(url, json=payload, headers=headers, timeout=12)
+                            if resp.status_code == 200:
+                                return resp
+                    elif resp.status_code == 200:
+                        return resp
+                except Exception as req_err:
+                    logger.debug("Sungrow request to %s failed: %s", url, req_err)
+
+            return None
 
         # 1. Automatischer Auth-Code Austausch bei Neu-Kopplung
         if credentials.get("auth_code") and not token:
-            try:
-                redir_url = credentials.get("redirect_uri") or getattr(settings, "SUNGROW_REDIRECT_URI", "")
-                t_resp = requests.post(
-                    f"{base_url.rstrip('/')}/openapi/oauth/token",
-                    json={
-                        "appkey": appkey,
-                        "code": credentials["auth_code"],
-                        "grant_type": "authorization_code",
-                        "redirect_uri": redir_url,
-                    },
-                    headers={"x-access-key": app_secret, "sys_code": "901", "Content-Type": "application/json"},
-                    timeout=10,
-                )
-                if t_resp.status_code == 200 and t_resp.json().get("access_token"):
-                    token = t_resp.json()["access_token"]
-                    credentials["token"] = token
-                    if t_resp.json().get("refresh_token"):
-                        credentials["refresh_token"] = t_resp.json()["refresh_token"]
-            except Exception as ex_err:
-                logger.warning("Auto token exchange failed: %s", ex_err)
+            for gw in gateway_list:
+                try:
+                    t_resp = requests.post(
+                        f"{gw}/openapi/oauth/token",
+                        json={
+                            "appkey": appkey,
+                            "code": credentials["auth_code"],
+                            "grant_type": "authorization_code",
+                            "redirect_uri": redir_url,
+                        },
+                        headers={"x-access-key": app_secret, "sys_code": "901", "Content-Type": "application/json"},
+                        timeout=10,
+                    )
+                    if t_resp.status_code == 200 and t_resp.json().get("access_token"):
+                        token = t_resp.json()["access_token"]
+                        credentials["token"] = token
+                        if t_resp.json().get("refresh_token"):
+                            credentials["refresh_token"] = t_resp.json()["refresh_token"]
+                        break
+                except Exception as ex_err:
+                    logger.debug("Auto token exchange failed on %s: %s", gw, ex_err)
 
         if not token:
-            err_msg = "Kein gültiger Sungrow OpenAPI Token vorhanden. Bitte autorisiere die Anlage über 'iSolarCloud 1-Klick verbinden'."
-            return AdapterTestResult(status="error", error=err_msg, message=err_msg)
+            # Letzter Versuch: Token via Developer Client Credentials
+            if not _refresh_openapi_token():
+                err_msg = "Kein gültiger Sungrow OpenAPI Token vorhanden. Bitte autorisiere die Anlage über 'iSolarCloud 1-Klick verbinden'."
+                return AdapterTestResult(status="error", error=err_msg, message=err_msg)
 
         # 2. Automatische Anlagen-ID (ps_id) Erkennung
         if not ps_id or ps_id in ("default_ps", "12345", ""):

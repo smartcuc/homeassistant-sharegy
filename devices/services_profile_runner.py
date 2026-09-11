@@ -253,46 +253,6 @@ def _render_template(template_val, context: dict):
     return template_val
 
 
-def _execute_sungrow_login(base_url: str, appkey: str, account: str, password: str) -> dict:
-    """
-    Führt den Sungrow iSolarCloud Login-Handshake durch.
-    Cached den Token für 2 Stunden.
-    """
-    cache_key = f"sungrow_token_{appkey}_{account}"
-    cached_token = cache.get(cache_key)
-    if cached_token:
-        return cached_token
-
-    login_url = f"{base_url.rstrip('/')}/v1/userService/login"
-    payload = {
-        "appkey": appkey,
-        "user_account": account,
-        "user_password": password,
-    }
-    headers = {
-        "Content-Type": "application/json",
-        "sys_code": "901",
-    }
-
-    try:
-        resp = requests.post(login_url, json=payload, headers=headers, timeout=10)
-        resp.raise_for_status()
-        res_json = resp.json()
-
-        if res_json.get("result_code") == "1" or res_json.get("result_data", {}).get("token"):
-            token_data = {
-                "token": res_json["result_data"]["token"],
-                "user_id": res_json["result_data"].get("user_id"),
-            }
-            cache.set(cache_key, token_data, timeout=7000)
-            return token_data
-        else:
-            msg = res_json.get("result_msg") or "Ungültige iSolarCloud Zugangsdaten"
-            raise ValueError(f"Sungrow Login fehlgeschlagen: {msg}")
-    except requests.RequestException as e:
-        logger.warning("Sungrow Login Request Error: %s", e)
-        raise ValueError(f"Verbindungsfehler zu Sungrow iSolarCloud: {e}")
-
 
 def _generate_mock_payload(profile_id: str, credentials: dict) -> dict:
     """

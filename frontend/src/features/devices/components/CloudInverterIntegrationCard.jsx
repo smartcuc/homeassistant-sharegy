@@ -403,15 +403,30 @@ export default function CloudInverterIntegrationCard({
                                                 </span>
                                             </button>
 
-                                            <button
-                                                type="button"
-                                                onClick={() => handleStartEdit(item)}
-                                                className="px-2.5 py-1.5 bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 text-xs font-semibold rounded-lg shadow-2xs transition flex items-center gap-1 cursor-pointer"
-                                                title={t("cloud_inverter.edit_btn", "Bearbeiten")}
-                                            >
-                                                <span>⚙️</span>
-                                                <span className="hidden sm:inline">{t("cloud_inverter.edit_btn", "Bearbeiten")}</span>
-                                            </button>
+                                            {/* Sungrow: Kein manuelles Bearbeiten, bei Fehler Re-Auth Button */}
+                                            {item.profile_id === "sungrow_isolarcloud" || item.vendor === "sungrow" ? (
+                                                isErr && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={handleSungrowOAuth}
+                                                        className="px-2.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-lg shadow-2xs transition flex items-center gap-1 cursor-pointer"
+                                                        title={t("cloud_inverter.sungrow_reauth_btn", "iSolarCloud Autorisierung erneuern")}
+                                                    >
+                                                        <span>🔑</span>
+                                                        <span className="hidden sm:inline">{t("cloud_inverter.sungrow_reauth_short", "Neu autorisieren")}</span>
+                                                    </button>
+                                                )
+                                            ) : (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleStartEdit(item)}
+                                                    className="px-2.5 py-1.5 bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 text-xs font-semibold rounded-lg shadow-2xs transition flex items-center gap-1 cursor-pointer"
+                                                    title={t("cloud_inverter.edit_btn", "Bearbeiten")}
+                                                >
+                                                    <span>⚙️</span>
+                                                    <span className="hidden sm:inline">{t("cloud_inverter.edit_btn", "Bearbeiten")}</span>
+                                                </button>
+                                            )}
 
                                             <button
                                                 type="button"

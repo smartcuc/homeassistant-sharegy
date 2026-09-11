@@ -28,18 +28,14 @@ class GrowattAdapter(BaseInverterAdapter):
     category = "inverter_hybrid"
 
     @staticmethod
-    def _hash_password(password: str) -> str:
+    def _hash_password_std_md5(password: str) -> str:
         """
-        MD5-Hash mit 'c'-Ersetzung an ungeraden Positionen für 0-Nibbles (Growatt-Standard).
+        Standard MD5-Hash (PyPi_GrowattServer).
         """
-        password_md5 = hashlib.md5(str(password).encode("utf-8")).hexdigest()
-        res = list(password_md5)
-        for i in range(0, len(res), 2):
-            if res[i] == "0":
-                res[i] = "c"
-        return "".join(res)
+        return hashlib.md5(str(password).encode("utf-8")).hexdigest()
 
     def generate_mock_payload(self) -> dict:
+
         """
         Generiert realistische Live-Messdaten für Growatt-Systeme.
         """
