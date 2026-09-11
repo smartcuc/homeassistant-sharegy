@@ -339,8 +339,8 @@ class GrowattAdapter(BaseInverterAdapter):
                 "Content-Type": "application/x-www-form-urlencoded",
             }
 
-            # 1. Plant ID ermitteln
-            if not plant_id:
+            # 1. Plant ID ermitteln / auflösen
+            if not plant_id or not plant_id.isdigit():
                 try:
                     plist_resp = session.get("https://openapi.growatt.com/v1/plant/list", headers=api_headers, timeout=10)
                     if plist_resp.status_code == 200:
@@ -352,11 +352,20 @@ class GrowattAdapter(BaseInverterAdapter):
                         elif isinstance(p_data, dict):
                             plants = p_data.get("plants") or p_data.get("plant_list") or p_data.get("data") or [p_data]
                         if plants and isinstance(plants, list) and len(plants) > 0:
-                            first_p = plants[0]
-                            if isinstance(first_p, dict):
-                                plant_id = str(first_p.get("plant_id") or first_p.get("id") or first_p.get("plantId") or "")
+                            matched = None
+                            for p_item in plants:
+                                if isinstance(p_item, dict):
+                                    p_name = str(p_item.get("plant_name") or p_item.get("name") or p_item.get("plantName") or "").strip().lower()
+                                    p_id_str = str(p_item.get("plant_id") or p_item.get("id") or p_item.get("plantId") or "").strip()
+                                    if plant_id and (plant_id.lower() in (p_name, p_id_str)):
+                                        matched = p_item
+                                        break
+                            if not matched:
+                                matched = plants[0]
+                            if isinstance(matched, dict):
+                                plant_id = str(matched.get("plant_id") or matched.get("id") or matched.get("plantId") or "")
                                 credentials["plant_id"] = plant_id
-                                logger.info("Growatt auto-discovered plant_id: %s", plant_id)
+                                logger.info("Growatt auto-discovered plant_id: %s (Name: %s)", plant_id, matched.get("plant_name"))
                 except Exception as e:
                     logger.warning("Growatt OpenAPI plant list discovery failed: %s", e)
 
@@ -551,14 +560,26 @@ class GrowattAdapter(BaseInverterAdapter):
                             raw_data["data"].update(plants_info["totalData"])
                         plant_arr = plants_info.get("data", [])
                         if plant_arr and isinstance(plant_arr, list):
-                            first_plant = plant_arr[0]
-                            if isinstance(first_plant, dict):
-                                raw_data["data"].update(first_plant)
-                                if isinstance(first_plant.get("plantData"), dict):
-                                    raw_data["data"].update(first_plant["plantData"])
-                            if not plant_id:
-                                plant_id = str(first_plant.get("plantId") or first_plant.get("id") or "")
-                                credentials["plant_id"] = plant_id
+                            matched_plant = None
+                            for p_item in plant_arr:
+                                if isinstance(p_item, dict):
+                                    p_name = str(p_item.get("plantName") or p_item.get("name") or "").strip().lower()
+                                    p_id_str = str(p_item.get("plantId") or p_item.get("id") or "").strip()
+                                    if plant_id and (plant_id.lower() in (p_name, p_id_str)):
+                                        matched_plant = p_item
+                                        break
+                            if not matched_plant and plant_arr:
+                                matched_plant = plant_arr[0]
+
+                            if matched_plant and isinstance(matched_plant, dict):
+                                raw_data["data"].update(matched_plant)
+                                if isinstance(matched_plant.get("plantData"), dict):
+                                    raw_data["data"].update(matched_plant["plantData"])
+                                real_num_id = str(matched_plant.get("plantId") or matched_plant.get("id") or "")
+                                if real_num_id:
+                                    plant_id = real_num_id
+                                    credentials["plant_id"] = plant_id
+                                    logger.info("Growatt Web Login resolved plant_id: %s (Name: %s)", plant_id, matched_plant.get("plantName"))
 
                     # 2. Plant Detail API (Primary Plant Telemetry Endpoint in Home Assistant)
                     if plant_id:
