@@ -259,37 +259,44 @@ export default function TenantDashboard() {
         <div className="p-6 max-w-7xl mx-auto space-y-6">
 
             {/* ✅ TITLE & HEADER */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
-                <div>
-                    <div className="flex items-center gap-2.5">
-                        <span className="text-2xl">⚡</span>
-                        <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
-                            {tenant.name}
-                        </h1>
-                        <span className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-500/20">
-                            Community Aktiv
-                        </span>
-                        <button
-                            type="button"
-                            onClick={() => setWizardOpen(true)}
-                            className="ml-2 px-3 py-1 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-all shadow-xs flex items-center gap-1.5 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-                        >
-                            <span>✨</span>
-                            <span>Gebäude-Assistent (3 Schritte)</span>
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setShareModalOpen(true)}
-                            className="ml-1 px-3 py-1 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all shadow-xs flex items-center gap-1.5 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-                        >
-                            <span>📢</span>
-                            <span>Erfolge teilen</span>
-                        </button>
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
+                <div className="flex items-start gap-3">
+                    <span className="text-2xl shrink-0 mt-0.5">⚡</span>
+                    <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                            <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
+                                {tenant.name}
+                            </h1>
+                            <span className="shrink-0 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+                                Community Aktiv
+                            </span>
+                        </div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                            Eichrechtskonformes 15-Minuten Energy Sharing & Prädiktive KI-Steuerung
+                        </p>
                     </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                        Eichrechtskonformes 15-Minuten Energy Sharing & Prädiktive KI-Steuerung
-                    </p>
                 </div>
+
+                {/* Quick Action Buttons */}
+                <div className="flex flex-wrap items-center gap-2">
+                    <button
+                        type="button"
+                        onClick={() => setWizardOpen(true)}
+                        className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-all shadow-xs flex items-center gap-1.5 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                    >
+                        <span>✨</span>
+                        <span>Gebäude-Assistent (3 Schritte)</span>
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setShareModalOpen(true)}
+                        className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all shadow-xs flex items-center gap-1.5 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                    >
+                        <span>📢</span>
+                        <span>Erfolge teilen</span>
+                    </button>
+                </div>
+            </div>
 
                 {/* TAB SWITCHER */}
                 <div className="flex flex-wrap bg-slate-100 dark:bg-slate-800/70 p-1 rounded-xl text-xs font-semibold gap-1">
@@ -364,7 +371,6 @@ export default function TenantDashboard() {
                         📜 Audit
                     </button>
                 </div>
-            </div>
 
             {/* ======================================================== */}
             {/* 1. COCKPIT TAB */}
@@ -625,19 +631,21 @@ export default function TenantDashboard() {
                         <div className="bg-gradient-to-br from-indigo-900 to-slate-900 text-white rounded-2xl p-6 border border-indigo-700/50 shadow-md space-y-6">
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                 <div>
-                                    <div className="flex flex-wrap items-center gap-2">
-                                        <span className="text-xl">🏷️</span>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xl shrink-0">🏷️</span>
                                         <h2 className="text-lg font-black tracking-tight">{activeTariff.name}</h2>
-                                        <span className="bg-emerald-400/20 text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-400/30">
+                                        <span className="shrink-0 bg-emerald-400/20 text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-400/30">
                                             Aktiv
                                         </span>
-                                        <span className="bg-indigo-400/20 text-indigo-200 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-indigo-400/30">
+                                    </div>
+                                    <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                                        <span className="shrink-0 bg-indigo-400/20 text-indigo-200 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-indigo-400/30">
                                             Allokation: {activeTariff.allocation_model === "dynamic" ? "🟢 Dynamisch (15m Lastgang)" : activeTariff.allocation_model === "static" ? "🔵 Statisch (MEA-Quote)" : "🟣 Hybrid (Vorrang + Überlauf)"}
                                         </span>
+                                        <span className="text-xs text-indigo-200/80">
+                                            Gültige Konditionen für alle Teilnehmer gem. § 42b EnWG
+                                        </span>
                                     </div>
-                                    <p className="text-xs text-indigo-200/80 mt-1">
-                                        Gültige Konditionen für alle Teilnehmer dieser Energy Sharing Community gem. § 42b EnWG
-                                    </p>
                                 </div>
 
                                 {statementsData?.is_admin && (

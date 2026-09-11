@@ -48,20 +48,22 @@ export default function VirtualMasterMeterHub({ tenant }) {
         <div className="space-y-6">
 
             {/* HEADER & FILTER */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
-                <div>
-                    <div className="flex items-center gap-2">
-                        <span className="text-2xl">🏢</span>
-                        <h2 className="text-base font-black text-slate-900 dark:text-white">
-                            Gemeinsamer Hausanschluss & Virtueller Summenzähler
-                        </h2>
-                        <span className="bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-indigo-500/20">
-                            § 42b EnWG Mieterstrom
-                        </span>
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+                <div className="flex items-start gap-3">
+                    <span className="text-2xl shrink-0 mt-0.5">🏢</span>
+                    <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                            <h2 className="text-base font-black text-slate-900 dark:text-white">
+                                Gemeinsamer Hausanschluss & Virtueller Summenzähler
+                            </h2>
+                            <span className="shrink-0 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-indigo-500/20">
+                                § 42b EnWG Mieterstrom
+                            </span>
+                        </div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                            Automatische Viertelstunden-Abrechnung von Sonnenstrom auf dem Dach für alle Parteien im Gebäude.
+                        </p>
                     </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                        Automatische Viertelstunden-Abrechnung von Sonnenstrom auf dem Dach für alle Parteien im Gebäude.
-                    </p>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">

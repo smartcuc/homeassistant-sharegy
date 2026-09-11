@@ -90,20 +90,22 @@ export default function VppAggregatorCockpit() {
         <div className="space-y-6">
 
             {/* HEADER */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
-                <div>
-                    <div className="flex items-center gap-2">
-                        <span className="text-2xl">⚡</span>
-                        <h2 className="text-base font-black text-slate-900 dark:text-white">
-                            Virtuelles Kraftwerk (VPP) & Netzstabilitäts-Pool
-                        </h2>
-                        <span className="bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-amber-500/20">
-                            Netzdienlichkeit & § 14a EnWG
-                        </span>
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+                <div className="flex items-start gap-3">
+                    <span className="text-2xl shrink-0 mt-0.5">⚡</span>
+                    <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                            <h2 className="text-base font-black text-slate-900 dark:text-white">
+                                Virtuelles Kraftwerk (VPP) & Netzstabilitäts-Pool
+                            </h2>
+                            <span className="shrink-0 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-amber-500/20">
+                                Netzdienlichkeit & § 14a EnWG
+                            </span>
+                        </div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                            Bündelung unserer Hausspeicher und steuerbaren Lasten (Wallboxen, Wärmepumpen) zur Stabilisierung des Stromnetzes.
+                        </p>
                     </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                        Bündelung unserer Hausspeicher und steuerbaren Lasten (Wallboxen, Wärmepumpen) zur Stabilisierung des Stromnetzes.
-                    </p>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
