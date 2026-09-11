@@ -46,6 +46,11 @@ def process_canonical_telemetry(
         )
         DeviceLatestMetric.objects.update_or_create(
             device=device,
+            metric_key="pv_power",
+            defaults={"value": val, "timestamp": now},
+        )
+        DeviceLatestMetric.objects.update_or_create(
+            device=device,
             metric_key="power",
             defaults={"value": val, "timestamp": now},
         )
@@ -55,7 +60,47 @@ def process_canonical_telemetry(
         except Exception as e:
             logger.warning("Cache write failed for pv_power: %s", e)
 
-    # 3. Batterie SoC & Leistung
+        # GeneratorSystem Verknüpfung
+        if device.home:
+            try:
+                from producer.models import GeneratorSystem
+                gen = GeneratorSystem.objects.filter(home=device.home).first()
+                if not gen:
+                    GeneratorSystem.objects.create(
+                        home=device.home,
+                        name=device_name or f"{device.identifier} PV-Anlage",
+                        device=device,
+                        peak_power_kw=10.0,
+                        active=True,
+                    )
+                elif not gen.device:
+                    gen.device = device
+                    gen.active = True
+                    gen.save(update_fields=["device", "active"])
+            except Exception as gen_err:
+                logger.warning("Could not auto-link GeneratorSystem: %s", gen_err)
+
+    # 3. Tagesertrag (Daily Yield)
+    if telemetry.daily_yield_kwh is not None:
+        yield_val = float(telemetry.daily_yield_kwh)
+        DeviceMetric.objects.create(
+            device=device,
+            metric_key="daily_yield",
+            unit="kWh",
+            value=yield_val,
+            timestamp=now,
+        )
+        DeviceLatestMetric.objects.update_or_create(
+            device=device,
+            metric_key="daily_yield",
+            defaults={"value": yield_val, "timestamp": now},
+        )
+        try:
+            cache.set(f"device:{device.id}:daily_yield", yield_val, timeout=3600)
+        except Exception as e:
+            logger.warning("Cache write failed for daily_yield: %s", e)
+
+    # 4. Batterie SoC & Leistung
     has_battery = False
     if telemetry.battery_soc is not None:
         has_battery = True
@@ -98,7 +143,7 @@ def process_canonical_telemetry(
         except Exception as e:
             logger.warning("Cache write failed for battery_power: %s", e)
 
-    # 4. Hausverbrauch & Netzleistung
+    # 5. Hausverbrauch & Netzleistung
     if telemetry.load_power_w is not None:
         load_val = float(telemetry.load_power_w)
         DeviceMetric.objects.create(
@@ -137,7 +182,7 @@ def process_canonical_telemetry(
         except Exception as e:
             logger.warning("Cache write failed for grid_power: %s", e)
 
-    # 5. DeviceConfig Rollen- und Namenszuordnung
+    # 6. DeviceConfig Rollen- und Namenszuordnung
     try:
         role_key = "both" if has_battery else "producer"
         target_role = DeviceRole.objects.filter(key=role_key).first() or DeviceRole.objects.filter(key="producer").first()

@@ -71,7 +71,7 @@
   },
   "metrics_mapping": {
     "pv_power_w": {
-      "jsonpath": "$.data.pac",
+      "jsonpath": "$.data.ppv",
       "scale": 1.0,
       "type": "float",
       "min": 0.0,
