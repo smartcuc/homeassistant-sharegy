@@ -138,18 +138,30 @@ class SungrowAdapter(BaseInverterAdapter):
         if daily is not None and daily > 1000.0:
             daily = daily / 1000.0 # Falls in Wh geliefert
 
-        # Physikalische Plausibilisierung der Netzeinspeisung / des Hausverbrauchs:
-        # In Sungrow OpenAPI wird 'grid_power' bei Netzeinspeisung als positiver Betrag geliefert.
-        # In Sharegy gilt kanonisch: Positiv = Netzbezug (Import), Negativ = Netzeinspeisung (Export).
         pv_val = max(0.0, float(pv or 0.0))
         bat_val = float(battery or 0.0)
+        soc_val = float(soc) if soc is not None else None
+
+        # Batterie Leistung & Richtung plausibilisieren / ableiten falls nicht direkt gemeldet:
+        if abs(bat_val) < 1.0 and soc_val is not None and load is not None:
+            deficit = float(load) - pv_val - max(0.0, float(grid or 0.0))
+            if deficit > 10.0 and soc_val > 5.0:
+                bat_val = round(deficit, 1)  # Positiv = Entladen (Discharge ins Haus)
+                battery = bat_val
+            elif (pv_val - float(load) + min(0.0, float(grid or 0.0))) > 10.0 and soc_val < 98.0:
+                surplus = pv_val - float(load) + min(0.0, float(grid or 0.0))
+                bat_val = -round(surplus, 1)  # Negativ = Laden (Charge aus PV)
+                battery = bat_val
+        elif soc_val is not None:
+            if soc_val >= 98.0 and bat_val < 0:
+                bat_val = 0.0
+                battery = 0.0
+            elif soc_val <= 5.0 and bat_val > 0:
+                bat_val = 0.0
+                battery = 0.0
+
         bat_charging = abs(min(0.0, bat_val))
         bat_discharging = max(0.0, bat_val)
-
-        if soc is not None and float(soc) >= 98.0 and bat_val < 0:
-            bat_val = 0.0
-            bat_charging = 0.0
-            battery = 0.0
 
         if grid is not None:
             grid_val = float(grid)
@@ -483,19 +495,22 @@ class SungrowAdapter(BaseInverterAdapter):
                             else:
                                 soc_val = round(soc_raw, 1)
 
-                        # Batterie Lade-/Entladerichtung standardisieren
-                        if soc_val is not None and soc_val >= 98.0:
-                            if bat_pwr < 0:
+                        # 1. Batterie Leistung & Richtung plausibilisieren
+                        if abs(bat_pwr) < 1.0 and soc_val is not None:
+                            # Wenn Sungrow keinen direkten Batterieleistungswert meldet, aus Bilanz ableiten:
+                            deficit = load - pv - max(0.0, grid)
+                            if deficit > 10.0 and soc_val > 5.0:
+                                bat_pwr = round(deficit, 1)  # Positiv = Entladen (Discharge ins Haus)
+                            elif (pv - load + min(0.0, grid)) > 10.0 and soc_val < 98.0:
+                                surplus = pv - load + min(0.0, grid)
+                                bat_pwr = -round(surplus, 1)  # Negativ = Laden (Charge aus PV)
+                        elif soc_val is not None:
+                            if soc_val >= 98.0 and bat_pwr < 0:
                                 bat_pwr = 0.0
-                        elif pv > (load + 30) and (soc_val is None or soc_val < 98.0) and abs(bat_pwr) > 10:
-                            bat_pwr = -abs(bat_pwr)
-                        elif pv < 20 and soc_val is not None and soc_val > 5.0 and load > 20:
-                            if abs(bat_pwr) < 0.1 and abs(grid) < 60:
-                                bat_pwr = load
-                            else:
-                                bat_pwr = abs(bat_pwr)
+                            elif soc_val <= 5.0 and bat_pwr > 0:
+                                bat_pwr = 0.0
 
-                        # Netzeinspeisung / Grid Plausibilisierung vorzeichengenau:
+                        # 2. Netzeinspeisung / Grid Plausibilisierung vorzeichengenau:
                         # Negativ = Netzeinspeisung (Export), Positiv = Netzbezug (Import)
                         bat_charge = abs(min(0.0, bat_pwr))
                         bat_discharge = max(0.0, bat_pwr)
@@ -511,9 +526,7 @@ class SungrowAdapter(BaseInverterAdapter):
                                 if grid < 0:
                                     grid = abs(grid)
 
-                        if load <= 0.0 and pv > 50.0:
-                            if grid > 0 and abs(grid - pv) < (pv * 0.5 + 500):
-                                grid = -abs(grid)
+                        if load <= 0.0 or (pv > 50.0 and abs(load - pv) < 5.0):
                             load = max(0.0, round(pv + grid + bat_pwr, 1))
 
                         today_kwh = _get_pt("83022", "83331", "83009", "83072", "83119", "83013", "83021", "83049", "83050", "83012")
@@ -530,10 +543,10 @@ class SungrowAdapter(BaseInverterAdapter):
                                 today_kwh = None
 
                         raw_data["_direct_metrics"] = {
-                            "pv_power_w": max(0.0, pv),
-                            "load_power_w": max(0.0, load),
-                            "grid_power_w": grid,
-                            "battery_power_w": bat_pwr,
+                            "pv_power_w": max(0.0, round(pv, 1)),
+                            "load_power_w": max(0.0, round(load, 1)),
+                            "grid_power_w": round(grid, 1),
+                            "battery_power_w": round(bat_pwr, 1),
                             "battery_soc": soc_val,
                             "daily_generation_kwh": today_kwh,
                         }
