@@ -259,10 +259,38 @@ class SungrowAdapter(BaseInverterAdapter):
             nonlocal token
             r_token = credentials.get("refresh_token")
 
-            # 1. Wenn refresh_token vorhanden ist: Standard OAuth2 Refresh (RFC 6749)
+            # 1. Wenn refresh_token vorhanden ist: apiManage/refreshToken (pysolarcloud Standard) & oauth/token
             if r_token:
                 for gw in gateway_list:
-                    # Versuch A: /openapi/oauth/token (Basic Auth + Params)
+                    # Versuch A: /openapi/apiManage/refreshToken (JSON)
+                    try:
+                        r_resp = requests.post(
+                            f"{gw}/openapi/apiManage/refreshToken",
+                            json={
+                                "appkey": appkey,
+                                "refresh_token": r_token,
+                            },
+                            headers={"x-access-key": app_secret, "Content-Type": "application/json"},
+                            timeout=5,
+                        )
+                        logger.info("[SUNGROW_OPENAPI] apiManage/refreshToken on %s [%s]: %s", gw, r_resp.status_code, r_resp.text[:300])
+                        if r_resp.status_code == 200:
+                            rj = r_resp.json()
+                            nt = _extract_token_from_response(rj)
+                            if nt:
+                                token = nt
+                                credentials["token"] = token
+                                rd = rj.get("result_data") or rj.get("data")
+                                if isinstance(rd, dict) and rd.get("refresh_token"):
+                                    credentials["refresh_token"] = rd["refresh_token"]
+                                elif rj.get("refresh_token"):
+                                    credentials["refresh_token"] = rj["refresh_token"]
+                                logger.info("[SUNGROW_OPENAPI] Token successfully refreshed via %s/openapi/apiManage/refreshToken", gw)
+                                return True
+                    except Exception as e:
+                        logger.debug("apiManage/refreshToken on %s failed: %s", gw, e)
+
+                    # Versuch B: /openapi/oauth/token (Basic Auth + Params)
                     try:
                         r_resp = requests.post(
                             f"{gw}/openapi/oauth/token",
@@ -286,139 +314,25 @@ class SungrowAdapter(BaseInverterAdapter):
                                 rd = rj.get("result_data") or rj.get("data")
                                 if isinstance(rd, dict) and rd.get("refresh_token"):
                                     credentials["refresh_token"] = rd["refresh_token"]
-                                logger.info("[SUNGROW_OPENAPI] Token successfully refreshed via %s/openapi/oauth/token (Basic Auth + Params)", gw)
+                                logger.info("[SUNGROW_OPENAPI] Token successfully refreshed via %s/openapi/oauth/token", gw)
                                 return True
                     except Exception as e:
-                        logger.debug("OAuth token refresh (Params) on %s failed: %s", gw, e)
-
-                    # Versuch B: /openapi/oauth/token (JSON)
-                    try:
-                        headers = {
-                            "x-access-key": app_secret,
-                            "sys_code": "901",
-                            "Content-Type": "application/json",
-                        }
-                        payload = {
-                            "appkey": appkey,
-                            "app_secret": app_secret,
-                            "client_id": appkey,
-                            "grant_type": "refresh_token",
-                            "refresh_token": r_token,
-                            "redirect_uri": redir_url,
-                            "redirectUrl": redir_url,
-                            "applicationId": "4830",
-                        }
-                        r_resp = requests.post(f"{gw}/openapi/oauth/token", json=payload, headers=headers, timeout=4)
-                        if r_resp.status_code == 200:
-                            rj = r_resp.json()
-                            nt = _extract_token_from_response(rj)
-                            if nt:
-                                token = nt
-                                credentials["token"] = token
-                                rd = rj.get("result_data") or rj.get("data")
-                                if isinstance(rd, dict) and rd.get("refresh_token"):
-                                    credentials["refresh_token"] = rd["refresh_token"]
-                                logger.info("[SUNGROW_OPENAPI] Token successfully refreshed via %s/openapi/oauth/token (JSON)", gw)
-                                return True
-                    except Exception as e:
-                        logger.debug("OAuth token refresh (JSON) on %s failed: %s", gw, e)
-
-            # 2. Wenn Developer AppKey & AppSecret vorliegen: Direkt über oauth/token client_credentials
-            if appkey and app_secret:
-                for gw in gateway_list:
-                    # Versuch A: /openapi/oauth/token (Standard RFC 6749 Basic Auth + Params)
-                    try:
-                        cc_params = {
-                            "grant_type": "client_credentials",
-                            "client_id": appkey,
-                            "client_secret": app_secret,
-                        }
-                        cc_resp = requests.post(
-                            f"{gw}/openapi/oauth/token",
-                            params=cc_params,
-                            auth=(appkey, app_secret),
-                            headers={"x-access-key": app_secret, "sys_code": "901"},
-                            timeout=4,
-                        )
-                        logger.info("[SUNGROW_OPENAPI] oauth/token client_credentials on %s [%s]: %s", gw, cc_resp.status_code, cc_resp.text[:300])
-                        if cc_resp.status_code == 200:
-                            nt = _extract_token_from_response(cc_resp.json())
-                            if nt:
-                                token = nt
-                                credentials["token"] = token
-                                logger.info("[SUNGROW_OPENAPI] Token successfully created via client_credentials (Basic Auth) on %s", gw)
-                                return True
-                    except Exception as e:
-                        logger.debug("client_credentials (Basic Auth) on %s failed: %s", gw, e)
-
-                    # Versuch B: /openapi/oauth/token (JSON client_credentials)
-                    try:
-                        cc_payload = {
-                            "appkey": appkey,
-                            "app_secret": app_secret,
-                            "appSecret": app_secret,
-                            "client_id": appkey,
-                            "client_secret": app_secret,
-                            "grant_type": "client_credentials",
-                            "redirect_uri": redir_url,
-                            "redirectUrl": redir_url,
-                            "applicationId": "4830",
-                        }
-                        cc_resp = requests.post(
-                            f"{gw}/openapi/oauth/token",
-                            json=cc_payload,
-                            headers={"x-access-key": app_secret, "sys_code": "901", "Content-Type": "application/json"},
-                            timeout=4,
-                        )
-                        if cc_resp.status_code == 200:
-                            nt = _extract_token_from_response(cc_resp.json())
-                            if nt:
-                                token = nt
-                                credentials["token"] = token
-                                logger.info("[SUNGROW_OPENAPI] Token successfully created via client_credentials (JSON) on %s", gw)
-                                return True
-                    except Exception as e:
-                        logger.debug("client_credentials (JSON) token request on %s failed: %s", gw, e)
-
-                    # Versuch C: /openapi/apiManage/token (Params)
-                    try:
-                        am_params = {
-                            "appkey": appkey,
-                            "app_secret": app_secret,
-                            "grant_type": "client_credentials",
-                        }
-                        am_resp = requests.post(
-                            f"{gw}/openapi/apiManage/token",
-                            params=am_params,
-                            headers={"x-access-key": app_secret, "sys_code": "901"},
-                            timeout=4,
-                        )
-                        if am_resp.status_code == 200:
-                            nt = _extract_token_from_response(am_resp.json())
-                            if nt:
-                                token = nt
-                                credentials["token"] = token
-                                logger.info("[SUNGROW_OPENAPI] Token successfully created via apiManage/token on %s", gw)
-                                return True
-                    except Exception as e:
-                        logger.debug("apiManage/token request on %s failed: %s", gw, e)
+                        logger.debug("OAuth token refresh on %s failed: %s", gw, e)
 
             return False
 
         def _post_with_auth(endpoint: str, json_data: dict) -> Optional[requests.Response]:
             nonlocal token
             payload = dict(json_data)
-            if token and "token" not in payload:
-                payload["token"] = token
             if appkey and "appkey" not in payload:
                 payload["appkey"] = appkey
+            if "lang" not in payload:
+                payload["lang"] = "_de_DE"
 
             for gw in gateway_list:
                 url = f"{gw}/{endpoint.lstrip('/')}"
                 headers = {
                     "x-access-key": app_secret,
-                    "sys_code": "901",
-                    "token": str(token or ""),
                     "Authorization": f"Bearer {token}",
                     "Content-Type": "application/json",
                 }
@@ -430,7 +344,6 @@ class SungrowAdapter(BaseInverterAdapter):
                             body = resp.json()
                             code_str = str(body.get("result_code", ""))
                             msg_str = str(body.get("result_msg", "")).lower()
-                            # Offizielle Sungrow OpenAPI Auth-Fehlercodes: E00003 (Token ungültig/abgelaufen), E900 (Unauthorized), E00000 (Invalid AppKey)
                             if code_str in ("E00003", "E900", "E00000", "E911", "E912", "E914", "401", "403") or ("token" in msg_str and ("invalid" in msg_str or "expired" in msg_str)):
                                 is_auth_err = True
                         except Exception:
@@ -439,8 +352,6 @@ class SungrowAdapter(BaseInverterAdapter):
                     if is_auth_err:
                         logger.info("[SUNGROW_OPENAPI] Auth error on %s, attempting automatic token refresh...", url)
                         if _refresh_openapi_token():
-                            payload["token"] = token
-                            headers["token"] = str(token or "")
                             headers["Authorization"] = f"Bearer {token}"
                             resp = requests.post(url, json=payload, headers=headers, timeout=4)
                             if resp.status_code == 200:
@@ -489,9 +400,9 @@ class SungrowAdapter(BaseInverterAdapter):
         # 2. Automatische Anlagen-ID (ps_id) Erkennung
         if not ps_id or str(ps_id) in ("default_ps", "12345", ""):
             for list_ep, list_body in [
+                ("openapi/platform/queryPowerStationList", {"page": 1, "size": 100, "lang": "_de_DE"}),
                 ("openapi/getPowerStationList", {"curPage": 1, "size": 10, "lang": "_de_DE"}),
                 ("openapi/getDeviceListByUser", {"curPage": 1, "size": 10, "lang": "_de_DE"}),
-                ("openapi/platform/queryPowerStationList", {"page": 1, "size": 20, "lang": "_de_DE"}),
             ]:
                 try:
                     list_resp = _post_with_auth(list_ep, list_body)
@@ -518,36 +429,35 @@ class SungrowAdapter(BaseInverterAdapter):
 
         raw_data: Dict[str, Any] = {"result_code": "1", "result_data": {}}
 
-        # 3. Echtzeit-Messpunkte abfragen (getDeviceRealTimeData & getPowerStationRealTimeData)
+        # 3. Echtzeit-Messpunkte abfragen (getPowerStationRealTimeData & getDeviceRealTimeData)
         try:
-            ps_keys = []
-            if ps_id and str(ps_id) not in ("default_ps", ""):
-                ps_keys.extend([f"{ps_id}_11_0_0", f"{ps_id}_1_0_0", str(ps_id)])
-            sn_val = credentials.get("sn") or credentials.get("device_sn") or credentials.get("inverter_sn")
-            
-            rt_payload = {
-                "appkey": appkey,
-                "token": token,
-                "device_type": 11,
-                "point_id_list": self.MEASURE_POINTS,
-            }
-            if ps_keys:
-                rt_payload["ps_key_list"] = ps_keys
-            if sn_val:
-                rt_payload["sn_list"] = [str(sn_val)]
-
-            rt_resp = _post_with_auth("openapi/getDeviceRealTimeData", rt_payload)
+            ps_list = [str(ps_id or "")] if (ps_id and str(ps_id) not in ("default_ps", "")) else []
+            rt_resp = _post_with_auth(
+                "openapi/platform/getPowerStationRealTimeData",
+                {
+                    "ps_id_list": ps_list,
+                    "point_id_list": self.MEASURE_POINTS,
+                    "is_get_point_dict": "1",
+                    "lang": "_de_DE",
+                },
+            )
             if not rt_resp or rt_resp.status_code != 200 or not (rt_resp.json().get("result_data") or rt_resp.json().get("data")):
-                rt_resp = _post_with_auth(
-                    "openapi/platform/getPowerStationRealTimeData",
-                    {
-                        "appkey": appkey,
-                        "token": token,
-                        "ps_id_list": [str(ps_id or "")],
-                        "point_id_list": self.MEASURE_POINTS,
-                        "is_get_point_dict": "1",
-                    },
-                )
+                ps_keys = []
+                if ps_id and str(ps_id) not in ("default_ps", ""):
+                    ps_keys.extend([f"{ps_id}_11_0_0", f"{ps_id}_1_0_0", str(ps_id)])
+                sn_val = credentials.get("sn") or credentials.get("device_sn") or credentials.get("inverter_sn")
+                
+                rt_payload = {
+                    "device_type": 11,
+                    "point_id_list": self.MEASURE_POINTS,
+                    "lang": "_de_DE",
+                }
+                if ps_keys:
+                    rt_payload["ps_key_list"] = ps_keys
+                if sn_val:
+                    rt_payload["sn_list"] = [str(sn_val)]
+
+                rt_resp = _post_with_auth("openapi/getDeviceRealTimeData", rt_payload)
             if rt_resp and rt_resp.status_code == 200:
                 rt_json = rt_resp.json()
                 rt_res_data = rt_json.get("result_data") or rt_json.get("data") or {}

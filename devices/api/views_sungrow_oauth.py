@@ -165,7 +165,30 @@ def sungrow_oauth_callback(request):
         }
 
         for gw in gateways:
-            # 1. Standard RFC 6749 Basic Auth + Params
+            # 1. Offizieller Developer Portal apiManage/token Flow (Standard in pysolarcloud / Home Assistant)
+            try:
+                token_resp = requests.post(
+                    f"{gw}/openapi/apiManage/token",
+                    json={
+                        "appkey": SUNGROW_APPKEY,
+                        "code": code,
+                        "grant_type": "authorization_code",
+                        "redirect_uri": SUNGROW_REDIRECT_URL,
+                    },
+                    headers={"x-access-key": SUNGROW_APP_SECRET, "Content-Type": "application/json"},
+                    timeout=5,
+                )
+                logger.info("Sungrow Token Exchange (apiManage/token) on %s [%s]: %s", gw, token_resp.status_code, token_resp.text[:300])
+                if token_resp.status_code == 200:
+                    t_cand, r_cand = _extract_tokens_from_json(token_resp.json())
+                    if t_cand:
+                        token = t_cand
+                        refresh_token = r_cand
+                        break
+            except Exception as e:
+                logger.warning("Sungrow OAuth token exchange (apiManage/token) on %s failed: %s", gw, e)
+
+            # 2. Standard RFC 6749 Basic Auth + Params
             try:
                 token_resp = requests.post(
                     f"{gw}/openapi/oauth/token",
@@ -184,7 +207,7 @@ def sungrow_oauth_callback(request):
             except Exception as e:
                 logger.warning("Sungrow OAuth token exchange (Basic Auth+Params) on %s failed: %s", gw, e)
 
-            # 2. JSON-Payload
+            # 3. JSON-Payload on oauth/token
             try:
                 token_resp = requests.post(
                     f"{gw}/openapi/oauth/token",
@@ -202,24 +225,6 @@ def sungrow_oauth_callback(request):
             except Exception as e:
                 logger.warning("Sungrow OAuth token exchange (JSON) on %s failed: %s", gw, e)
 
-            # 3. Form-Urlencoded Fallback
-            try:
-                token_resp = requests.post(
-                    f"{gw}/openapi/oauth/token",
-                    data=payload,
-                    headers=headers_form,
-                    timeout=4,
-                )
-                logger.info("Sungrow Token Exchange (Form) on %s [%s]: %s", gw, token_resp.status_code, token_resp.text[:300])
-                if token_resp.status_code == 200:
-                    t_cand, r_cand = _extract_tokens_from_json(token_resp.json())
-                    if t_cand:
-                        token = t_cand
-                        refresh_token = r_cand
-                        break
-            except Exception as e:
-                logger.warning("Sungrow OAuth token exchange (Form) on %s failed: %s", gw, e)
-
     if not token:
         token = f"sg_oauth_{code or 'demo_token_12345'}"
 
@@ -227,19 +232,17 @@ def sungrow_oauth_callback(request):
     if token and not token.startswith("sg_oauth_"):
         headers_query = {
             "x-access-key": SUNGROW_APP_SECRET,
-            "sys_code": "901",
-            "token": token,
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json",
         }
         for base in ["https://gateway.isolarcloud.eu", "https://gateway.isolarcloud.com.hk"]:
             for list_ep, list_body in [
-                (f"{base}/openapi/getPowerStationList", {"appkey": SUNGROW_APPKEY, "token": token, "curPage": 1, "size": 10, "lang": "_de_DE"}),
-                (f"{base}/openapi/getDeviceListByUser", {"appkey": SUNGROW_APPKEY, "token": token, "curPage": 1, "size": 10, "lang": "_de_DE"}),
-                (f"{base}/openapi/platform/queryPowerStationList", {"appkey": SUNGROW_APPKEY, "token": token, "page": 1, "size": 20, "lang": "_de_DE"}),
+                (f"{base}/openapi/platform/queryPowerStationList", {"appkey": SUNGROW_APPKEY, "page": 1, "size": 100, "lang": "_de_DE"}),
+                (f"{base}/openapi/getPowerStationList", {"appkey": SUNGROW_APPKEY, "curPage": 1, "size": 10, "lang": "_de_DE"}),
+                (f"{base}/openapi/getDeviceListByUser", {"appkey": SUNGROW_APPKEY, "curPage": 1, "size": 10, "lang": "_de_DE"}),
             ]:
                 try:
-                    list_resp = requests.post(list_ep, json=list_body, headers=headers_query, timeout=3)
+                    list_resp = requests.post(list_ep, json=list_body, headers=headers_query, timeout=4)
                     logger.info("Sungrow station query on %s [%s]: %s", list_ep, list_resp.status_code, list_resp.text[:300])
                     if list_resp.status_code == 200:
                         list_json = list_resp.json()
