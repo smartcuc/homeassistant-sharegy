@@ -203,10 +203,12 @@ def spot_price_chart(request):
     current_effective = None
 
     if current_price:
-
         current_effective = calculate_effective_price(
             home=home,
             timestamp=timezone.now(),
+            spot_price_ct=current_price["price_ct"],
+        )
+
     active_tariff = get_home_tariff(home, today_start.date()) if home else None
     tariff_type = active_tariff.tariff_type if active_tariff else "dynamic"
     static_price_ct = (
