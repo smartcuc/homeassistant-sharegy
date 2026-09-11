@@ -270,8 +270,8 @@ export default function EnergyOptimizerCard() {
                 </div>
 
                 {/* Timeline Grid */}
-                <div className="bg-slate-950/60 border border-indigo-900/50 rounded-2xl p-4 overflow-visible">
-                    <div className="min-w-[650px] flex items-end gap-1.5 h-36 pt-8 pb-1 relative">
+                <div className="bg-slate-950/60 border border-indigo-900/50 rounded-2xl p-3 sm:p-4 overflow-x-auto scrollbar-thin max-w-full">
+                    <div className="min-w-[540px] sm:min-w-[650px] flex items-end gap-1 sm:gap-1.5 h-36 pt-8 pb-1 relative">
                         {timeline.map((pt, idx) => {
                             const isInsideBest = (
                                 best.start_idx !== undefined &&

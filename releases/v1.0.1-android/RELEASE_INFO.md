@@ -13,12 +13,16 @@
 
 | Datei | Größe | SHA-256 Prüfsumme |
 | :--- | :--- | :--- |
-| `app-release.aab` / `sharegy-v1.0.1-release.aab` | 4.175.958 B (~4.18 MB) | `1F2BD292EA0C0018B5459804D2501690CE391C03443D297058ECEA20739714DE` |
-| `app-release.apk` / `sharegy-v1.0.1-release.apk` | 4.310.739 B (~4.31 MB) | `BD446E0A56F370BAA020F65FA0B6761371C03FE7259DA50A24DBA821208B7DDD` |
+| `app-release.aab` / `sharegy-v1.0.1-release.aab` | 4.176.168 B (~4.18 MB) | `19D9CBDB056D85B34E3F3555B2F45AA536FE9C09649E27F72813FBCA3FEF8F87` |
+| `app-release.apk` / `sharegy-v1.0.1-release.apk` | 4.310.995 B (~4.31 MB) | `FFD71DB19964BCB052C162A076FC7B0A6B12A1DC4BE65B42C57781C113162269` |
 
 ---
 
 ## ✨ Neue Features & Fehlerbehebungen in v1.0.1
+- **Mobile Responsive Layout & Topbar Fix**:
+  - **Topbar User-Menü / Profil sichtbar**: Der Live-Ticker wird auf Smartphone-Bildschirmen kompakt ausgeblendet bzw. auf Tablets/Desktop verlagert, Abstände wurden mobiloptimiert, sodass Profil und Benachrichtigungs-Glocke auf keinem Bildschirm mehr rechts abgeschnitten werden.
+  - **Smart Energy Optimizer Timeline Overflow Fix**: Das Verlaufsdiagramm im Smart Energy Optimizer bricht auf Smartphones nicht mehr rechts über die Kachelkante hinaus, sondern ist mit butterweichem horizontalem Scrollen und responsiven Mindestbreiten sauber gekapselt.
+  - **Transparenz bei Festpreis-Tarifen im Börsenpreis-Modal**: Nutzer mit fixen Stromtarifen (flache Endpreis-Linie) sehen nun einen erklärenden Hinweis mit direkter Wechselmöglichkeit zu dynamischen Tarifen.
 - **Frictionless Mobile App Login (Magic Link & 6-Digit OTP Code)**:
   - **6-stelliger Login-Code**: In der E-Mail wird neben dem Link ein 6-stelliger Einmal-Code prominent dargestellt, der direkt in der Sharegy App eingegeben oder eingefügt werden kann.
   - **Deep-Linking & Custom Scheme (`sharegy://`)**: Direkter Start der Android App beim Klick auf *"In der Sharegy App öffnen"* aus E-Mails oder Browser.

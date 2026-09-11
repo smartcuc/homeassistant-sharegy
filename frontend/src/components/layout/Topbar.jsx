@@ -165,15 +165,15 @@ export default function AppTopbar({ onOpenMobileMenu }) {
 
     return (
         <>
-            <header className="h-14 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 sticky top-0 z-30 flex items-center justify-between px-3 sm:px-4 transition-colors">
+            <header className="h-14 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 sticky top-0 z-30 flex items-center justify-between px-2 sm:px-4 transition-colors w-full">
                 {/* LEFT: 🏡 Gebäude- / Liegenschafts-Kontext & Mobile Drawer Button */}
-                <div className="flex items-center gap-1.5 sm:gap-3 min-w-0 shrink-0">
+                <div className="flex items-center gap-1 sm:gap-2.5 min-w-0 shrink-0">
                     {onOpenMobileMenu && (
                         <button
                             type="button"
                             onClick={onOpenMobileMenu}
                             aria-label="Menü öffnen"
-                            className="md:hidden p-1.5 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition shrink-0 cursor-pointer"
+                            className="md:hidden p-1 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition shrink-0 cursor-pointer"
                         >
                             <Menu className="w-5 h-5" />
                         </button>
@@ -184,7 +184,7 @@ export default function AppTopbar({ onOpenMobileMenu }) {
                             <button
                                 type="button"
                                 onClick={() => setHomeDropdownOpen(!homeDropdownOpen)}
-                                className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100/90 dark:bg-slate-800/90 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200/90 dark:border-slate-700 px-2.5 sm:px-3 py-1 rounded-xl shadow-2xs transition cursor-pointer group max-w-[140px] sm:max-w-[200px]"
+                                className="flex items-center gap-1 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100/90 dark:bg-slate-800/90 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200/90 dark:border-slate-700 px-2 sm:px-3 py-1 rounded-xl shadow-2xs transition cursor-pointer group max-w-[115px] xs:max-w-[140px] sm:max-w-[200px]"
                                 title={t("homes.switcher_title", "Liegenschaft wechseln")}
                             >
                                 <span className="text-sm shrink-0">🏡</span>
@@ -242,7 +242,7 @@ export default function AppTopbar({ onOpenMobileMenu }) {
                         <Link
                             to="/app/structure"
                             title={t("homes.single_badge_title", "Gebäude- & Raumstruktur verwalten")}
-                            className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100/90 dark:bg-slate-800/90 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200/90 dark:border-slate-700 px-2.5 sm:px-3 py-1 rounded-xl shadow-2xs truncate max-w-[140px] sm:max-w-[200px] transition group cursor-pointer"
+                            className="flex items-center gap-1 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100/90 dark:bg-slate-800/90 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200/90 dark:border-slate-700 px-2 sm:px-3 py-1 rounded-xl shadow-2xs truncate max-w-[115px] xs:max-w-[140px] sm:max-w-[200px] transition group cursor-pointer"
                         >
                             <span className="text-sm shrink-0">🏡</span>
                             <span className="truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
@@ -252,9 +252,9 @@ export default function AppTopbar({ onOpenMobileMenu }) {
                     )}
                 </div>
 
-                {/* CENTER: ⚡ Live Energy-Pulse / Kompakt-Ticker (Echte Echtzeit-Leistung aller Komponenten) */}
+                {/* CENTER: ⚡ Live Energy-Pulse / Kompakt-Ticker (Auf Desktop & Tablets sichtbar) */}
                 {hasAnyLiveMetric && (
-                    <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                    <div className="hidden md:flex items-center gap-1.5 sm:gap-2 min-w-0">
                         <Link
                             to="/app/energy"
                             title={t("dashboard.live_energy_ticker_title", "Live-Energiefluss & Dashboard öffnen")}
@@ -330,7 +330,7 @@ export default function AppTopbar({ onOpenMobileMenu }) {
                 )}
 
                 {/* RIGHT: Actions & User Menu */}
-                <div className="flex items-center gap-1.5 sm:gap-2.5">
+                <div className="flex items-center gap-1 sm:gap-2 shrink-0">
 
                 {/* 💰 Börsenstrompreis Spot-Preis */}
                 {spotPrice && (
@@ -345,7 +345,7 @@ export default function AppTopbar({ onOpenMobileMenu }) {
                             text-xs
                             font-bold
                             font-mono
-                            px-2 sm:px-2.5
+                            px-1.5 sm:px-2.5
                             py-1
                             rounded-xl
                             border
@@ -371,7 +371,7 @@ export default function AppTopbar({ onOpenMobileMenu }) {
                     type="button"
                     onClick={() => setAlertsModalOpen(true)}
                     title={t("alerts.open_notifications_title", "Alarm- & Notifikationszentrale öffnen")}
-                    className="relative p-2 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
+                    className="relative p-1.5 sm:p-2 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
                 >
                     <Bell className="w-4 h-4" />
                     {activeAlertsCount > 0 && (
@@ -388,7 +388,7 @@ export default function AppTopbar({ onOpenMobileMenu }) {
                     type="button"
                     onClick={toggleTheme}
                     title={isDark ? t("theme.light_mode", "Zu hellem Design wechseln") : t("theme.dark_mode", "Zu dunklem Design wechseln")}
-                    className="p-2 text-slate-600 dark:text-slate-300 hover:text-amber-500 dark:hover:text-amber-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
+                    className="p-1.5 sm:p-2 text-slate-600 dark:text-slate-300 hover:text-amber-500 dark:hover:text-amber-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
                 >
                     {isDark ? (
                         <Sun className="w-4 h-4 text-amber-400 hover:rotate-45 transition-transform" />
@@ -403,10 +403,10 @@ export default function AppTopbar({ onOpenMobileMenu }) {
                         type="button"
                         onClick={() => setLangDropdownOpen(!langDropdownOpen)}
                         title={t("settings.language", "Sprache wählen")}
-                        className="flex items-center gap-1.5 px-2 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
+                        className="flex items-center gap-1 px-1.5 py-1 sm:px-2 sm:py-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
                         aria-expanded={langDropdownOpen}
                     >
-                        <FlagIcon code={currentLang} className="w-5 h-5" />
+                        <FlagIcon code={currentLang} className="w-4 h-4 sm:w-5 sm:h-5" />
                         <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform duration-200 ${langDropdownOpen ? "rotate-180" : ""}`} />
                     </button>
 
@@ -442,15 +442,15 @@ export default function AppTopbar({ onOpenMobileMenu }) {
                     )}
                 </div>
 
-                {/* 🛟 Hilfe & Support Trigger */}
+                {/* 🛟 Hilfe & Support Trigger (auf Desktop sichtbar; mobil im Drawer/BottomNav) */}
                 <button
                     type="button"
                     onClick={() => setSupportOpen(true)}
                     title={t("support.open_drawer_title", "Hilfe, Wissensportal & Support-Tickets")}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl transition cursor-pointer shadow-2xs"
+                    className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl transition cursor-pointer shadow-2xs"
                 >
                     <LifeBuoy className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
-                    <span className="hidden lg:inline">{t("support.btn_unified_label", "Hilfe & Support")}</span>
+                    <span>{t("support.btn_unified_label", "Hilfe & Support")}</span>
                 </button>
 
                 <UserMenu user={user} />

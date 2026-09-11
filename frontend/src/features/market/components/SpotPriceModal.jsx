@@ -544,6 +544,18 @@ function SpotPriceModal({
                             </div>
                         </div>
                     )}
+
+                    {/* ℹ️ TARIF-HINWEIS BEI FESTPREIS */}
+                    {data?.tariff_type === "static" && (
+                        <div className="mt-2.5 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 flex flex-wrap items-center justify-between text-xs text-amber-700 dark:text-amber-300 gap-2">
+                            <span>
+                                ℹ️ <strong>Festpreis-Tarif aktiv:</strong> Der Endpreis ist mit {(data.static_price_ct ?? data.current_effective ?? 0).toFixed(2)} ct/kWh vertraglich fixiert (flache Linie).
+                            </span>
+                            <a href="/app/tariff" className="font-semibold underline hover:text-amber-900 dark:hover:text-amber-100 shrink-0">
+                                {t("spot_price.change_tariff", "Zu dynamischem Tarif wechseln →")}
+                            </a>
+                        </div>
+                    )}
                 </div>
 
                 {/* CHART CONTAINER */}
