@@ -89,8 +89,8 @@ class GrowattAdapter(BaseInverterAdapter):
             if isinstance(item, dict):
                 for k, v in item.items():
                     if isinstance(v, (int, float, str, bool)) or v is None:
-                        # Bevorzuge nicht-leere und nicht-null Werte
-                        if k not in flat or (flat[k] in (None, 0, 0.0, "0", "0 W", "", "0.0") and v not in (None, 0, 0.0, "0", "0 W", "", "0.0")):
+                        is_empty_or_zero = v in (None, "", "-", "--", "null", "none", "0", "0.0", "0.00", "0 W", "0W", "0 kW", "0kW", 0, 0.0, False)
+                        if k not in flat or (flat[k] in (None, "", "-", "--", "null", "none", "0", "0.0", "0.00", "0 W", "0W", "0 kW", "0kW", 0, 0.0, False) and not is_empty_or_zero):
                             flat[k] = v
                     elif isinstance(v, (dict, list)):
                         _walk(v)
@@ -123,12 +123,12 @@ class GrowattAdapter(BaseInverterAdapter):
                         try:
                             val = float(match.group(0)) * factor
                             # Wenn es ein Leistungswert ist und factor == 1.0 war (keine explizite Einheit):
-                            # Bei Growatt sind 'currentPower', 'nominalPower', 'currPower', 'total_power', 'invPac'
+                            # Bei Growatt sind 'currentPower', 'nominalPower', 'currPower', 'total_power', 'invPac', 'plantPower'
                             # bei Werten < 100.0 standardmäßig in kW angegeben!
                             if is_power and not has_w and not has_kw:
                                 if k in ("currentPower", "current_power", "currPower", "curr_power", "nominalPower", "total_power", "plantPower", "invPac") and 0.0 < abs(val) <= 100.0:
                                     val = val * 1000.0
-                                elif 0.0 < abs(val) <= 30.0 and k in ("pac", "pact", "p_pv", "pv_power", "pgrid", "pload"):
+                                elif 0.0 < abs(val) <= 30.0 and k in ("pac", "pact", "p_pv", "pv_power", "pgrid", "pload", "ppv", "power"):
                                     val = val * 1000.0
                             return val
                         except (ValueError, TypeError):
@@ -136,7 +136,7 @@ class GrowattAdapter(BaseInverterAdapter):
             return None
 
         # 1. PV Erzeugung (DC Solar Input & AC Output & Plant Totals)
-        ppv_direct = _get_val("ppv", "ppvTotal", "p_pv", "pv_power", "pvPower", "pAct", "pact", is_power=True)
+        ppv_direct = _get_val("ppv", "ppvTotal", "p_pv", "pv_power", "pvPower", "pAct", "pact", "invTodayPpv", is_power=True)
         curr_power = _get_val("currentPower", "current_power", "currPower", "curr_power", "total_power", "nominalPower", "plantPower", is_power=True)
         pac_direct = _get_val("pac", "invPac", "pactouser", "pacToUserTotal", "pac1", "power", is_power=True)
 
@@ -166,11 +166,15 @@ class GrowattAdapter(BaseInverterAdapter):
 
         # 3. Hausverbrauch
         load = _get_val("pload", "use_power", "useEnergy", "familyLoadPower", "load_power", "loadPower", "use_power_w", "pLocalLoad", "home_load", "consumption", is_power=True)
+        if (load is None or load == 0.0) and (pv > 0 or grid is not None):
+            computed_load = round(pv + (grid or 0.0) - (bat_dis - bat_chg if "bat_dis" in locals() else 0.0), 1)
+            if computed_load > 0:
+                load = computed_load
 
         # 4. Batterie Leistung (+ Entladung, - Ladung)
         bat_dis = _get_val("pdisCharge", "pdisCharge1", "pDisCharge", "pDischarge", is_power=True) or 0.0
         bat_chg = _get_val("pcharge", "pcharge1", "pCharge", is_power=True) or 0.0
-        bat_generic = _get_val("battery_power", "pactostorage", "pstorage", "battery_power_w", "batteryPower", is_power=True)
+        bat_generic = _get_val("battery_power", "pactostorage", "pstorage", "battery_power_w", "batteryPower", "batPower", is_power=True)
 
         if bat_generic is not None and bat_dis == 0.0 and bat_chg == 0.0:
             bat_pwr = bat_generic
@@ -178,7 +182,7 @@ class GrowattAdapter(BaseInverterAdapter):
             bat_pwr = bat_dis - bat_chg
 
         # 5. Batterie SoC
-        soc = _get_val("soc", "batterySoc", "battery_soc", "batteryPercent", "chargeLevel", "capacity", "SOC", "storageSoc")
+        soc = _get_val("soc", "batterySoc", "battery_soc", "batteryPercent", "chargeLevel", "capacity", "SOC", "storageSoc", "bmsSoc")
 
         # 6. Tagesertrag
         daily = _get_val("eToday", "etoday", "todayEnergy", "today_energy", "e_today", "eTodayTotal", "eAcChargeToday", "todayYield", "daily_generation", "solar_yield")
@@ -402,10 +406,15 @@ class GrowattAdapter(BaseInverterAdapter):
                             ),
                             (f"{active_host}/newPlantAPI.do", {"op": "getPlantList"}, {"plantId": plant_id}),
                             (f"{active_host}/panel/getPlantData", None, {"plantId": plant_id}),
+                            (f"{active_host}/panel/getPlantData", {"plantId": plant_id}, None),
+                            (f"{active_host}/newPlantAPI.do", {"op": "getPlantData", "plantId": plant_id}, None),
                             (f"{active_host}/indexLogAPI.do", {"op": "getPlantData"}, {"plantId": plant_id}),
                         ]:
                             try:
-                                inv_list_resp = session.post(plant_ep, params=params, data=post_data, timeout=8)
+                                if post_data is not None:
+                                    inv_list_resp = session.post(plant_ep, params=params, data=post_data, timeout=8)
+                                else:
+                                    inv_list_resp = session.get(plant_ep, params=params, timeout=8)
                                 if inv_list_resp.status_code == 200:
                                     inv_data = inv_list_resp.json()
                                     if isinstance(inv_data, dict):

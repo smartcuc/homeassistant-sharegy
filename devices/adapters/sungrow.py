@@ -230,51 +230,6 @@ class SungrowAdapter(BaseInverterAdapter):
         is_oauth = credentials.get("auth_type") == "oauth2" or bool(token and not credentials.get("user_password"))
 
         if is_oauth and token:
-            # OpenAPI Modus
-            if credentials.get("auth_code") and not token:
-                try:
-                    redir_url = credentials.get("redirect_uri") or getattr(settings, "SUNGROW_REDIRECT_URI", "")
-                    t_resp = requests.post(
-                        f"{base_url.rstrip('/')}/openapi/oauth/token",
-                        json={
-                            "appkey": appkey,
-                            "code": credentials["auth_code"],
-                            "grant_type": "authorization_code",
-                            "redirect_uri": redir_url,
-                        },
-                        headers={"x-access-key": app_secret, "Content-Type": "application/json"},
-                        timeout=10,
-                    )
-                    if t_resp.status_code == 200 and t_resp.json().get("access_token"):
-                        token = t_resp.json()["access_token"]
-                        credentials["token"] = token
-                        if t_resp.json().get("refresh_token"):
-                            credentials["refresh_token"] = t_resp.json()["refresh_token"]
-                except Exception as ex_err:
-                    logger.warning("Auto token exchange failed: %s", ex_err)
-
-            if not ps_id or ps_id in ("default_ps", "12345", ""):
-                try:
-                    list_resp = requests.post(
-                        f"{base_url.rstrip('/')}/openapi/platform/queryPowerStationList",
-                        json={"appkey": appkey, "page": 1, "size": 20, "lang": "_de_DE"},
-                        headers={
-                            "x-access-key": app_secret,
-                            "Authorization": f"Bearer {token}",
-                            "Content-Type": "application/json",
-                        },
-                        timeout=12,
-                    )
-                    if list_resp.status_code == 200:
-                        list_data = list_resp.json().get("result_data", {})
-                        stations = list_data.get("pageList", []) if isinstance(list_data, dict) else []
-                        if stations:
-                            ps_id = str(stations[0].get("ps_id") or stations[0].get("id"))
-                            credentials["ps_id"] = ps_id
-                            credentials["ps_name"] = stations[0].get("ps_name", "Sungrow PV-Anlage")
-                except Exception as e:
-                    logger.warning("Auto-fetch ps_id via OpenAPI failed: %s", e)
-
             def _refresh_openapi_token() -> bool:
                 nonlocal token
                 r_token = credentials.get("refresh_token")
@@ -357,6 +312,45 @@ class SungrowAdapter(BaseInverterAdapter):
                 except Exception as req_err:
                     logger.warning("Sungrow OpenAPI request to %s failed: %s", endpoint, req_err)
                     return None
+
+            # OpenAPI Modus
+            if credentials.get("auth_code") and not token:
+                try:
+                    redir_url = credentials.get("redirect_uri") or getattr(settings, "SUNGROW_REDIRECT_URI", "")
+                    t_resp = requests.post(
+                        f"{base_url.rstrip('/')}/openapi/oauth/token",
+                        json={
+                            "appkey": appkey,
+                            "code": credentials["auth_code"],
+                            "grant_type": "authorization_code",
+                            "redirect_uri": redir_url,
+                        },
+                        headers={"x-access-key": app_secret, "sys_code": "901", "Content-Type": "application/json"},
+                        timeout=10,
+                    )
+                    if t_resp.status_code == 200 and t_resp.json().get("access_token"):
+                        token = t_resp.json()["access_token"]
+                        credentials["token"] = token
+                        if t_resp.json().get("refresh_token"):
+                            credentials["refresh_token"] = t_resp.json()["refresh_token"]
+                except Exception as ex_err:
+                    logger.warning("Auto token exchange failed: %s", ex_err)
+
+            if not ps_id or ps_id in ("default_ps", "12345", ""):
+                try:
+                    list_resp = _post_with_auth(
+                        "openapi/platform/queryPowerStationList",
+                        {"page": 1, "size": 20, "lang": "_de_DE"},
+                    )
+                    if list_resp and list_resp.status_code == 200:
+                        list_data = list_resp.json().get("result_data", {})
+                        stations = list_data.get("pageList", []) if isinstance(list_data, dict) else []
+                        if stations:
+                            ps_id = str(stations[0].get("ps_id") or stations[0].get("id"))
+                            credentials["ps_id"] = ps_id
+                            credentials["ps_name"] = stations[0].get("ps_name", "Sungrow PV-Anlage")
+                except Exception as e:
+                    logger.warning("Auto-fetch ps_id via OpenAPI failed: %s", e)
 
             raw_data: Dict[str, Any] = {"result_code": "1", "result_data": {}}
 

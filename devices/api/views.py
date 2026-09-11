@@ -672,34 +672,30 @@ def device_dashboard_values(request):
         lead_val = None
         top_unit = _infer_canonical_unit(matched_key or configured_lead or "power", metric.unit if metric else "", config=config)
 
-        # 1. Höchste Priorität: Letzter Punkt aus der echten Live-Zeitreihe (exakt wie DeviceChartModal)
-        if sparkline_pts:
+        # 1. Höchste Priorität: Match über Candidate Keys in dev_metrics / Redis-Live-Cache
+        for c_k in candidate_keys:
+            cached_v = cache.get(f"device:{d.id}:{c_k}")
+            if cached_v is not None:
+                try:
+                    lead_val = round(float(cached_v), 2)
+                    top_unit = dev_metrics.get(c_k, {}).get("unit") or top_unit
+                    break
+                except (ValueError, TypeError):
+                    pass
+            if c_k in dev_metrics and dev_metrics[c_k]["value"] is not None:
+                lead_val = dev_metrics[c_k]["value"]
+                top_unit = dev_metrics[c_k]["unit"] or top_unit
+                break
+
+        # 2. Fallback auf jüngsten Sparkline-Punkt
+        if lead_val is None and sparkline_pts:
             lead_val = sparkline_pts[-1]
 
-        # 2. Redis-Live-Cache Check
-        if lead_val is None:
-            for c_k in candidate_keys:
-                cached_v = cache.get(f"device:{d.id}:{c_k}")
-                if cached_v is not None:
-                    try:
-                        lead_val = round(float(cached_v), 2)
-                        break
-                    except (ValueError, TypeError):
-                        pass
-
-        # 3. Match über Candidate Keys in dev_metrics
-        if lead_val is None:
-            for c_k in candidate_keys:
-                if c_k in dev_metrics and dev_metrics[c_k]["value"] is not None:
-                    lead_val = dev_metrics[c_k]["value"]
-                    top_unit = dev_metrics[c_k]["unit"] or top_unit
-                    break
-
-        # 4. Fallback auf get_latest_values
+        # 3. Fallback auf get_latest_values
         if lead_val is None and values.get(d.id) is not None:
             lead_val = values.get(d.id)
 
-        # 5. Fallback auf erste verfügbare Metrik
+        # 4. Fallback auf erste verfügbare Metrik
         if lead_val is None and dev_metrics:
             first_m = next((m for m in dev_metrics.values() if m.get("value") is not None), None)
             if first_m:

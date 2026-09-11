@@ -137,22 +137,42 @@ def sungrow_oauth_callback(request):
         }
 
         for ep in endpoints:
-            try:
-                token_resp = requests.post(ep, json=payload, headers=headers, timeout=12)
-                logger.info("Sungrow Token Exchange on %s [%s]: %s", ep, token_resp.status_code, token_resp.text[:300])
-                if token_resp.status_code == 200:
-                    resp_json = token_resp.json()
-                    t_cand = resp_json.get("access_token") or resp_json.get("token")
-                    r_cand = resp_json.get("refresh_token", "")
-                    if not t_cand and isinstance(resp_json.get("result_data"), dict):
-                        t_cand = resp_json["result_data"].get("access_token") or resp_json["result_data"].get("token")
-                        r_cand = resp_json["result_data"].get("refresh_token", "")
-                    if t_cand:
-                        token = t_cand
-                        refresh_token = r_cand
-                        break
-            except Exception as e:
-                logger.warning("Sungrow OAuth token exchange on %s failed: %s", ep, e)
+            for use_form in [False, True]:
+                try:
+                    if use_form:
+                        token_resp = requests.post(
+                            ep,
+                            data=payload,
+                            headers={
+                                "x-access-key": SUNGROW_APP_SECRET,
+                                "sys_code": "901",
+                                "Content-Type": "application/x-www-form-urlencoded",
+                            },
+                            timeout=10,
+                        )
+                    else:
+                        token_resp = requests.post(
+                            ep,
+                            json=payload,
+                            headers=headers,
+                            timeout=10,
+                        )
+                    logger.info("Sungrow Token Exchange on %s (form=%s) [%s]: %s", ep, use_form, token_resp.status_code, token_resp.text[:300])
+                    if token_resp.status_code == 200:
+                        resp_json = token_resp.json()
+                        t_cand = resp_json.get("access_token") or resp_json.get("token")
+                        r_cand = resp_json.get("refresh_token", "")
+                        if not t_cand and isinstance(resp_json.get("result_data"), dict):
+                            t_cand = resp_json["result_data"].get("access_token") or resp_json["result_data"].get("token")
+                            r_cand = resp_json["result_data"].get("refresh_token", "")
+                        if t_cand:
+                            token = t_cand
+                            refresh_token = r_cand
+                            break
+                except Exception as e:
+                    logger.warning("Sungrow OAuth token exchange on %s failed: %s", ep, e)
+            if token and not token.startswith("sg_oauth_"):
+                break
 
     if not token:
         token = f"sg_oauth_{code or 'demo_token_12345'}"

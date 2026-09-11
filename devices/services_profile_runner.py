@@ -698,7 +698,8 @@ def _flatten_payload_dict(payload) -> dict:
         if isinstance(item, dict):
             for k, v in item.items():
                 if isinstance(v, (int, float, str, bool)) or v is None:
-                    if k not in flat or flat[k] in (None, 0, 0.0, "0", "0 W", "", "0.0"):
+                    is_empty_or_zero = v in (None, "", "-", "--", "null", "none", "0", "0.0", "0.00", "0 W", "0W", "0 kW", "0kW", 0, 0.0, False)
+                    if k not in flat or (flat[k] in (None, "", "-", "--", "null", "none", "0", "0.0", "0.00", "0 W", "0W", "0 kW", "0kW", 0, 0.0, False) and not is_empty_or_zero):
                         flat[k] = v
                 elif isinstance(v, (dict, list)):
                     _walk(v)
@@ -754,6 +755,9 @@ def _parse_metrics_from_payload(profile: dict, raw_payload: dict) -> dict:
                             unit_already_converted = True
                         clean_v = _clean_numeric_value(data_dict[k], target_unit="W")
                         if clean_v is not None:
+                            if not unit_already_converted and k in ("currentPower", "current_power", "currPower", "curr_power", "nominalPower", "total_power", "invPac", "plantPower") and 0.0 < abs(clean_v) <= 100.0:
+                                clean_v = clean_v * 1000.0
+                                unit_already_converted = True
                             raw_val = clean_v
                             if k not in ("curr_power", "currPower", "power", "currentPower"):
                                 unit_already_converted = True
