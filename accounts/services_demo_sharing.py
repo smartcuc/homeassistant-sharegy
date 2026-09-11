@@ -349,6 +349,70 @@ def seed_sharing_demo_environment():
         },
     )
 
+    # 10. VIRTUAL POWER PLANT (VPP) DEMO POOLS & DISPATCH ORDERS
+    try:
+        from vpp.models import VPPFlexibilityPool, VPPDispatchOrder
+
+        vpp_pool_50hertz, _ = VPPFlexibilityPool.objects.update_or_create(
+            name="50Hertz Heimspeicher- & Flexibilitäts-Pool Sonnenfeld",
+            defaults={
+                "tso_operator": "50hertz",
+                "market_product": "afrr_positive",
+                "grid_region": "Regelzone 50Hertz (Nord-Ost)",
+                "postal_code_prefix": "10,12,13,14",
+                "min_activation_power_kw": Decimal("5.00"),
+                "max_activation_power_kw": Decimal("250.00"),
+                "is_active": True,
+            }
+        )
+
+        VPPFlexibilityPool.objects.update_or_create(
+            name="TenneT Redispatch 2.0 Pool Amselweg",
+            defaults={
+                "tso_operator": "tennet",
+                "market_product": "redispatch_2_0",
+                "grid_region": "Regelzone TenneT",
+                "postal_code_prefix": "20,21,22,23",
+                "min_activation_power_kw": Decimal("10.00"),
+                "max_activation_power_kw": Decimal("500.00"),
+                "is_active": True,
+            }
+        )
+
+        # Letzte Dispatch Orders für Demo-Historie
+        VPPDispatchOrder.objects.update_or_create(
+            requested_by="50Hertz Automated Leitsystem (Demo)",
+            target_power_kw=Decimal("45.00"),
+            defaults={
+                "pool": vpp_pool_50hertz,
+                "dispatch_type": "positive_flex",
+                "duration_minutes": 15,
+                "status": "completed",
+                "start_time": timezone.now() - timedelta(hours=2),
+                "end_time": timezone.now() - timedelta(hours=1, minutes=45),
+                "delivered_power_kw": Decimal("44.80"),
+                "energy_delivered_kwh": Decimal("11.200"),
+                "remuneration_eur": Decimal("18.50"),
+            }
+        )
+    except Exception as e:
+        logger.warning("VPP demo seeding skipped: %s", e)
+
+    # 11. DEMO HOUSEHOLDS FÜR ADMIN & USER (OHNE EXTERNE SYSTEMVERBINDUNG)
+    try:
+        from demo.services.data_generator import setup_demo_household, generate_demo_telemetry
+        if not member_user.homes.exists() or member_user.homes.first().devices.count() == 0:
+            setup_demo_household(member_user)
+        if not admin_user.homes.exists() or admin_user.homes.first().devices.count() == 0:
+            setup_demo_household(admin_user)
+        generate_demo_telemetry()
+    except Exception as e:
+        logger.warning("Demo household generation warning: %s", e)
+
+    # 12. FRISCHE BENUTZER-INSTANZEN AUS DB HOLEN (GARANTIERT SAUBERE DB-SYNC FÜR LOGIN)
+    admin_user.refresh_from_db()
+    member_user.refresh_from_db()
+
     return {
         "admin_user": admin_user,
         "member_user": member_user,

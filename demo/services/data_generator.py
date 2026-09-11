@@ -171,9 +171,10 @@ def setup_demo_household(target_user=None):
     MetricDefinition.objects.get_or_create(key="battery_soc", defaults={"name": "Batterieladestand", "unit": "%"})
 
     devices = {}
+    user_suffix = str(target_user.id)[:6] if hasattr(target_user.id, 'hex') else str(target_user.id)
 
     # A. PV-Dachanlage (10 kWp)
-    d_pv = Device.objects.create(home=demo_home, identifier="demo_pv_inverter", configured=True, active=True)
+    d_pv = Device.objects.create(home=demo_home, identifier=f"demo_pv_inverter_{user_suffix}", configured=True, active=True)
     DeviceConfig.objects.create(
         device=d_pv,
         home=demo_home,
@@ -217,7 +218,7 @@ def setup_demo_household(target_user=None):
         logger.warning("Forecast-Initialisierung für Demo-Haus übersprungen: %s", e)
 
     # B. Batteriespeicher (10 kWh) & Sungrow Cloud Integration
-    d_bat = Device.objects.create(home=demo_home, identifier="demo_battery_storage", configured=True, active=True)
+    d_bat = Device.objects.create(home=demo_home, identifier=f"demo_battery_storage_{user_suffix}", configured=True, active=True)
     DeviceConfig.objects.create(
         device=d_bat,
         home=demo_home,
@@ -257,7 +258,7 @@ def setup_demo_household(target_user=None):
     )
 
     # C. Smart Meter / Netzzähler
-    d_grid = Device.objects.create(home=demo_home, identifier="demo_smart_meter", configured=True, active=True)
+    d_grid = Device.objects.create(home=demo_home, identifier=f"demo_smart_meter_{user_suffix}", configured=True, active=True)
     DeviceConfig.objects.create(
         device=d_grid,
         home=demo_home,
@@ -271,7 +272,7 @@ def setup_demo_household(target_user=None):
     devices["grid"] = d_grid
 
     # D. Wärmepumpe
-    d_hp = Device.objects.create(home=demo_home, identifier="demo_heatpump", configured=True, active=True)
+    d_hp = Device.objects.create(home=demo_home, identifier=f"demo_heatpump_{user_suffix}", configured=True, active=True)
     DeviceConfig.objects.create(
         device=d_hp,
         home=demo_home,
@@ -285,7 +286,7 @@ def setup_demo_household(target_user=None):
     devices["heatpump"] = d_hp
 
     # E. Wallbox (OCPP 1.6-J EV Charger)
-    d_wb = Device.objects.create(home=demo_home, identifier="demo_wallbox_ev", configured=True, active=True)
+    d_wb = Device.objects.create(home=demo_home, identifier=f"demo_wallbox_ev_{user_suffix}", configured=True, active=True)
     DeviceConfig.objects.create(
         device=d_wb,
         home=demo_home,
@@ -299,29 +300,31 @@ def setup_demo_household(target_user=None):
     devices["wallbox"] = d_wb
 
     # OCPP ChargingStation Instanz
-    ChargingStation.objects.create(
-        home=demo_home,
-        charge_point_id="DEMO-WALLBOX-01",
-        name="Easee Charge (Garage)",
-        vendor="Easee",
-        model="Easee Charge 11kW",
-        serial_number="EAS-DEMO-98214",
-        firmware_version="v2.4.1",
-        status="Charging",
-        is_online=True,
-        last_heartbeat=timezone.now(),
-        connectors_count=1,
-        phases=3,
-        max_current_a=16.0,
-        min_current_a=6.0,
-        smart_charging_mode="pv_surplus",
-        active_power_w=4200.0,
-        target_current_a=10.0,
-        total_energy_kwh=1450.5,
+    ChargingStation.objects.update_or_create(
+        charge_point_id=f"DEMO-WALLBOX-{user_suffix}",
+        defaults={
+            "home": demo_home,
+            "name": "Easee Charge (Garage)",
+            "vendor": "Easee",
+            "model": "Easee Charge 11kW",
+            "serial_number": f"EAS-DEMO-{user_suffix}",
+            "firmware_version": "v2.4.1",
+            "status": "Charging",
+            "is_online": True,
+            "last_heartbeat": timezone.now(),
+            "connectors_count": 1,
+            "phases": 3,
+            "max_current_a": 16.0,
+            "min_current_a": 6.0,
+            "smart_charging_mode": "pv_surplus",
+            "active_power_w": 4200.0,
+            "target_current_a": 10.0,
+            "total_energy_kwh": 1450.5,
+        }
     )
 
     # F. Haushalt Grundlast / Wohnbereich
-    d_house = Device.objects.create(home=demo_home, identifier="demo_household_load", configured=True, active=True)
+    d_house = Device.objects.create(home=demo_home, identifier=f"demo_household_load_{user_suffix}", configured=True, active=True)
     DeviceConfig.objects.create(
         device=d_house,
         home=demo_home,

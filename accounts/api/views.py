@@ -993,13 +993,15 @@ class DemoSharingAdminLoginView(View):
         logger = logging.getLogger(__name__)
         try:
             data = seed_sharing_demo_environment()
-            admin_user = data["admin_user"]
+            admin_user = data.get("admin_user")
         except Exception as e:
             logger.exception("Demo seeding error in DemoSharingAdminLoginView: %s", e)
-            admin_user = (
-                User.objects.filter(email="sharing-admin@sharegy.de").first()
-                or User.objects.filter(is_staff=True).first()
-                or User.objects.first()
+            admin_user = None
+
+        if not admin_user or not isinstance(admin_user, User):
+            admin_user, _ = User.objects.get_or_create(
+                email="sharing-admin@sharegy.de",
+                defaults={"username": "sharing-admin@sharegy.de", "first_name": "Alexander", "last_name": "Quartiermanager", "is_staff": True, "is_active": True}
             )
 
         login(
@@ -1023,13 +1025,15 @@ class DemoSharingUserLoginView(View):
         logger = logging.getLogger(__name__)
         try:
             data = seed_sharing_demo_environment()
-            member_user = data["member_user"]
+            member_user = data.get("member_user")
         except Exception as e:
             logger.exception("Demo seeding error in DemoSharingUserLoginView: %s", e)
-            member_user = (
-                User.objects.filter(email="sharing-user@sharegy.de").first()
-                or User.objects.filter(email="demo@sharegy.de").first()
-                or User.objects.first()
+            member_user = None
+
+        if not member_user or not isinstance(member_user, User):
+            member_user, _ = User.objects.get_or_create(
+                email="sharing-user@sharegy.de",
+                defaults={"username": "sharing-user@sharegy.de", "first_name": "Julia", "last_name": "Sonnenschein", "is_active": True}
             )
 
         login(
