@@ -203,6 +203,9 @@ class SungrowAdapter(BaseInverterAdapter):
         app_secret = getattr(settings, "SUNGROW_APP_SECRET", "") or os.getenv("SUNGROW_APP_SECRET", "")
         token = credentials.get("token")
         ps_id = credentials.get("ps_id") or credentials.get("ps_ids") or ""
+        if (not ps_id or str(ps_id) in ("default_ps", "12345", "")) and credentials.get("auth_ps_list") and isinstance(credentials["auth_ps_list"], list) and credentials["auth_ps_list"]:
+            ps_id = str(credentials["auth_ps_list"][0])
+            credentials["ps_id"] = ps_id
 
         # Sandbox- / Simulator-Modus prüfen
         is_mock = (
@@ -326,8 +329,6 @@ class SungrowAdapter(BaseInverterAdapter):
             payload = dict(json_data)
             if appkey and "appkey" not in payload:
                 payload["appkey"] = appkey
-            if token and "token" not in payload:
-                payload["token"] = token
             if "lang" not in payload:
                 payload["lang"] = "_de_DE"
 
@@ -355,7 +356,6 @@ class SungrowAdapter(BaseInverterAdapter):
                         logger.info("[SUNGROW_OPENAPI] Auth error on %s, attempting automatic token refresh...", url)
                         if _refresh_openapi_token():
                             headers["Authorization"] = f"Bearer {token}"
-                            payload["token"] = token
                             resp = requests.post(url, json=payload, headers=headers, timeout=4)
                             if resp.status_code == 200:
                                 return resp

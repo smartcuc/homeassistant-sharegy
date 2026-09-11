@@ -162,6 +162,13 @@ def sungrow_oauth_callback(request):
                 if t_cand:
                     token = t_cand
                     refresh_token = r_cand
+                rd = token_resp.json().get("result_data") or {}
+                if isinstance(rd, dict):
+                    if rd.get("auth_ps_list") and isinstance(rd["auth_ps_list"], list) and rd["auth_ps_list"]:
+                        ps_id = str(rd["auth_ps_list"][0])
+                        logger.info("Auto-discovered Sungrow station ID from OAuth response: %s", ps_id)
+                    if rd.get("auth_user"):
+                        user_account = str(rd["auth_user"])
         except Exception as e:
             logger.warning("Sungrow OAuth token exchange (apiManage/token) on %s failed: %s", gw, e)
 
