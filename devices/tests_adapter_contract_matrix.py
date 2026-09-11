@@ -154,6 +154,21 @@ class AdapterContractMatrixTest(TestCase):
         self.assertIsNone(tel4.battery_soc)
         self.assertEqual(tel4.daily_yield_kwh, 4.1)
 
+        # Test 5: Reale Growatt ShineServer Webdaten mit Dämmerungsleistung
+        raw_live_web = {
+            "Device Serial Number": "PYHFD8R0GC",
+            "Plant Name": "smartEvo",
+            "Current Power(kW)": "0.01",
+            "Generation Today(kWh)": "1.6",
+            "Total Power Generation(kWh)": "2202.4",
+            "Rated Power(kW)": "1.5",
+        }
+        tel5 = adapter.parse_payload(raw_live_web)
+        self.assertEqual(tel5.pv_power_w, 10.0) # 0.01 kW -> 10.0 W
+        self.assertIsNone(tel5.battery_soc)
+        self.assertEqual(tel5.daily_yield_kwh, 1.6)
+        self.assertEqual(tel5.total_yield_kwh, 2202.4)
+
     def test_04_standard_ingest_core_pipeline(self):
         """Testet die herstellerunabhängige Standard-Ingest-Core Pipeline."""
         tel = CanonicalTelemetry(

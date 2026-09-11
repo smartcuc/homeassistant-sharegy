@@ -101,6 +101,13 @@ class GrowattAdapter(BaseInverterAdapter):
                         is_empty_or_zero = v in (None, "", "-", "--", "null", "none", "0", "0.0", "0.00", "0 W", "0W", "0 kW", "0kW", 0, 0.0, False)
                         if k not in flat or (flat[k] in (None, "", "-", "--", "null", "none", "0", "0.0", "0.00", "0 W", "0W", "0 kW", "0kW", 0, 0.0, False) and not is_empty_or_zero):
                             flat[k] = v
+                        # Normalisierte Schlüssel (z. B. 'Current Power(kW)' -> 'current_power', 'currentpower')
+                        clean_k = str(k).lower().replace(" ", "_").replace("(", "_").replace(")", "").replace("：", "").replace(":", "").strip()
+                        if clean_k not in flat or (flat[clean_k] in (None, "", "0", 0, 0.0) and not is_empty_or_zero):
+                            flat[clean_k] = v
+                        clean_k2 = str(k).lower().replace(" ", "").replace("(", "").replace(")", "").replace("_", "").replace("：", "").replace(":", "").strip()
+                        if clean_k2 not in flat or (flat[clean_k2] in (None, "", "0", 0, 0.0) and not is_empty_or_zero):
+                            flat[clean_k2] = v
                     elif isinstance(v, (dict, list)):
                         _walk(v)
             elif isinstance(item, list):
@@ -118,7 +125,7 @@ class GrowattAdapter(BaseInverterAdapter):
                         continue
                     factor = 1.0
                     low = raw.lower()
-                    has_kw = "kw" in low
+                    has_kw = "kw" in low or "kw" in str(k).lower()
                     has_w = "w" in low and not has_kw
                     if has_kw:
                         factor = 1000.0
@@ -136,7 +143,7 @@ class GrowattAdapter(BaseInverterAdapter):
                             # Bei Growatt sind 'currentPower', 'nominalPower', 'currPower', 'total_power', 'plantPower'
                             # bei Werten < 100.0 standardmäßig in kW angegeben!
                             if is_power and not has_w and not has_kw:
-                                if k in ("currentPower", "current_power", "currPower", "curr_power", "nominalPower", "total_power", "plantPower") and 0.0 < abs(val) <= 100.0:
+                                if any(pk in str(k).lower() for pk in ["currentpower", "current_power", "currpower", "curr_power", "nominalpower", "plantpower"]) and 0.0 < abs(val) <= 100.0:
                                     val = val * 1000.0
                             vals.append(val)
                         except (ValueError, TypeError):
@@ -147,8 +154,8 @@ class GrowattAdapter(BaseInverterAdapter):
             return vals[0] if vals else None
 
         # 1. PV Erzeugung (DC Solar Input & AC Output & Plant Totals)
-        ppv_direct = _get_val("ppv", "ppvTotal", "p_pv", "pv_power", "pvPower", "pAct", "pact", "invTodayPpv", is_power=True)
-        curr_power = _get_val("currentPower", "current_power", "currPower", "curr_power", "total_power", "nominalPower", "plantPower", is_power=True)
+        ppv_direct = _get_val("ppv", "ppvTotal", "p_pv", "pv_power", "pvPower", "pAct", "pact", "invTodayPpv", "current_power", "currentpower", "current_power_kw", "currentpowerkw", is_power=True)
+        curr_power = _get_val("currentPower", "current_power", "currPower", "curr_power", "total_power", "nominalPower", "plantPower", "current_power_kw", "currentpowerkw", is_power=True)
         pac_direct = _get_val("pac", "invPac", "pacToUserTotal", "pac1", "power", is_power=True)
 
         # Multi-String PV Summe (z. B. String 1 + String 2 + String 3 + String 4)
@@ -253,8 +260,17 @@ class GrowattAdapter(BaseInverterAdapter):
             if pv_val > 0 or bat_val != 0:
                 load = max(0.0, round(pv_val + bat_val, 1))
 
-        # 6. Tagesertrag
-        daily = _get_val("eToday", "etoday", "todayEnergy", "today_energy", "e_today", "eTodayTotal", "eAcChargeToday", "todayYield", "daily_generation", "solar_yield")
+        # 6. Tagesertrag & Gesamtertrag
+        daily = _get_val(
+            "eToday", "etoday", "todayEnergy", "today_energy", "e_today", "eTodayTotal",
+            "eAcChargeToday", "todayYield", "daily_generation", "solar_yield",
+            "generationToday", "generation_today", "generation_today_kwh", "generationtodaykwh",
+            "generationtoday"
+        )
+        total = _get_val(
+            "eTotal", "etotal", "total_energy", "totalEnergy", "total_power_generation",
+            "total_power_generation_kwh", "totalpowergenerationkwh", "totalpowergeneration"
+        )
 
         telemetry = CanonicalTelemetry(
             pv_power_w=pv,
@@ -263,6 +279,7 @@ class GrowattAdapter(BaseInverterAdapter):
             battery_power_w=bat_pwr,
             battery_soc=soc,
             daily_yield_kwh=daily,
+            total_yield_kwh=total,
             raw_payload=raw_data,
         )
         return telemetry.validate()
