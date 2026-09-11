@@ -260,6 +260,40 @@ class SungrowAdapter(BaseInverterAdapter):
 
         refresh_attempted = False
 
+        def _login_openapi() -> bool:
+            nonlocal token
+            user_acc = credentials.get("user_account") or credentials.get("email") or credentials.get("username")
+            user_pw = credentials.get("user_password") or credentials.get("password")
+            if not user_acc or not user_pw:
+                return False
+            for gw in gateway_list:
+                try:
+                    l_resp = requests.post(
+                        f"{gw}/openapi/login",
+                        json={
+                            "appkey": appkey,
+                            "user_account": str(user_acc).strip(),
+                            "user_password": str(user_pw).strip(),
+                        },
+                        headers={"sys_code": "901", "x-access-key": app_secret, "Content-Type": "application/json;charset=UTF-8"},
+                        timeout=5,
+                    )
+                    logger.info("[SUNGROW_OPENAPI] /openapi/login on %s [%s]: %s", gw, l_resp.status_code, l_resp.text[:300])
+                    if l_resp.status_code == 200:
+                        lj = l_resp.json()
+                        rd = lj.get("result_data") or {}
+                        nt = _extract_token_from_response(lj)
+                        if nt:
+                            token = nt
+                            credentials["token"] = token
+                            if isinstance(rd, dict) and rd.get("user_id"):
+                                credentials["auth_user"] = str(rd["user_id"])
+                            logger.info("[SUNGROW_OPENAPI] Login successful via %s/openapi/login, token acquired.", gw)
+                            return True
+                except Exception as e:
+                    logger.debug("OpenAPI login on %s failed: %s", gw, e)
+            return False
+
         def _refresh_openapi_token() -> bool:
             nonlocal token, refresh_attempted
             if refresh_attempted:
@@ -327,7 +361,8 @@ class SungrowAdapter(BaseInverterAdapter):
                     except Exception as e:
                         logger.debug("OAuth token refresh on %s failed: %s", gw, e)
 
-            return False
+            # 2. Fallback: Re-Login über OpenAPI falls Anmeldedaten vorhanden
+            return _login_openapi()
 
         def _post_with_auth(endpoint: str, json_data: dict) -> Optional[requests.Response]:
             nonlocal token
@@ -336,6 +371,10 @@ class SungrowAdapter(BaseInverterAdapter):
                 payload["appkey"] = appkey
             if "lang" not in payload:
                 payload["lang"] = "_de_DE"
+
+            # Residential Endpoints (/openapi/get... /datasubscribe/...) benötigen 'token' im Body
+            if not endpoint.startswith("openapi/platform") and not endpoint.startswith("/openapi/platform") and token and "token" not in payload:
+                payload["token"] = token
 
             for gw in gateway_list:
                 url = f"{gw}/{endpoint.lstrip('/')}"
@@ -362,6 +401,8 @@ class SungrowAdapter(BaseInverterAdapter):
                         logger.info("[SUNGROW_OPENAPI] Auth error on %s, attempting automatic token refresh...", url)
                         if _refresh_openapi_token():
                             headers["Authorization"] = f"Bearer {token}"
+                            if not endpoint.startswith("openapi/platform") and not endpoint.startswith("/openapi/platform"):
+                                payload["token"] = token
                             resp = requests.post(url, json=payload, headers=headers, timeout=4)
                             if resp.status_code == 200:
                                 return resp
@@ -384,7 +425,7 @@ class SungrowAdapter(BaseInverterAdapter):
                             "grant_type": "authorization_code",
                             "redirect_uri": redir_url,
                         },
-                        headers={"x-access-key": app_secret, "Content-Type": "application/json"},
+                        headers={"sys_code": "901", "x-access-key": app_secret, "Content-Type": "application/json"},
                         timeout=5,
                     )
                     if t_resp.status_code == 200:
@@ -401,6 +442,9 @@ class SungrowAdapter(BaseInverterAdapter):
                             break
                 except Exception as ex_err:
                     logger.debug("Auto token exchange failed on %s: %s", gw, ex_err)
+
+        if not token and (credentials.get("user_account") or credentials.get("email")):
+            _login_openapi()
 
         if not token:
             # Letzter Versuch: Token via Developer Refresh
