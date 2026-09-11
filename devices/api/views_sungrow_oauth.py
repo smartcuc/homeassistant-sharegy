@@ -85,10 +85,24 @@ def sungrow_oauth_callback(request):
     Empfängt den Auth-Code von Sungrow, tauscht ihn gegen Access-Tokens und legt das Gerät an.
     GET /api/v1/integrations/sungrow/callback?code=...&state=...
     """
-    code = request.GET.get("code") or request.POST.get("code") or request.GET.get("auth_code")
+    direct_token = (
+        request.GET.get("token")
+        or request.GET.get("access_token")
+        or request.GET.get("accessToken")
+        or request.POST.get("token")
+        or request.POST.get("access_token")
+    )
+    code = (
+        request.GET.get("code")
+        or request.POST.get("code")
+        or request.GET.get("auth_code")
+        or request.GET.get("authCode")
+        or request.GET.get("ticket")
+        or direct_token
+    )
     state_raw = request.GET.get("state") or request.POST.get("state")
 
-    logger.info("Sungrow OAuth Callback received: code=%s, state=%s", bool(code), state_raw)
+    logger.info("Sungrow OAuth Callback received: code=%s, direct_token=%s, state=%s", bool(code), bool(direct_token), state_raw)
 
     user = None
     home = None
@@ -110,13 +124,24 @@ def sungrow_oauth_callback(request):
         home = Home.objects.first()
 
     # Offizieller OAuth2.0 Token-Austausch über OpenAPI
-    token = None
+    token = direct_token
     refresh_token = ""
     user_account = "sungrow_oauth_user"
     ps_id = "default_ps"
     plant_name = "Sungrow iSolarCloud Hybrid-Anlage"
 
-    if code and code not in ["demo", "test"]:
+    def _extract_tokens_from_json(resp_json: dict):
+        if not isinstance(resp_json, dict):
+            return None, None
+        t = resp_json.get("access_token") or resp_json.get("token") or resp_json.get("accessToken")
+        r = resp_json.get("refresh_token") or resp_json.get("refreshToken") or ""
+        rd = resp_json.get("result_data") or resp_json.get("data")
+        if not t and isinstance(rd, dict):
+            t = rd.get("access_token") or rd.get("token") or rd.get("accessToken")
+            r = rd.get("refresh_token") or rd.get("refreshToken") or r
+        return t, r
+
+    if not token and code and code not in ["demo", "test"]:
         gateways = ["https://gateway.isolarcloud.eu", "https://gateway.isolarcloud.com.hk"]
         headers_json = {
             "x-access-key": SUNGROW_APP_SECRET,
@@ -130,9 +155,13 @@ def sungrow_oauth_callback(request):
         }
         payload = {
             "appkey": SUNGROW_APPKEY,
+            "client_id": SUNGROW_APPKEY,
             "code": code,
+            "auth_code": code,
             "grant_type": "authorization_code",
             "redirect_uri": SUNGROW_REDIRECT_URL,
+            "redirectUrl": SUNGROW_REDIRECT_URL,
+            "applicationId": "4830",
         }
 
         for gw in gateways:
@@ -146,12 +175,7 @@ def sungrow_oauth_callback(request):
                 )
                 logger.info("Sungrow Token Exchange (JSON) on %s [%s]: %s", gw, token_resp.status_code, token_resp.text[:300])
                 if token_resp.status_code == 200:
-                    resp_json = token_resp.json()
-                    t_cand = resp_json.get("access_token") or resp_json.get("token")
-                    r_cand = resp_json.get("refresh_token", "")
-                    if not t_cand and isinstance(resp_json.get("result_data"), dict):
-                        t_cand = resp_json["result_data"].get("access_token") or resp_json["result_data"].get("token")
-                        r_cand = resp_json["result_data"].get("refresh_token", "")
+                    t_cand, r_cand = _extract_tokens_from_json(token_resp.json())
                     if t_cand:
                         token = t_cand
                         refresh_token = r_cand
@@ -169,18 +193,31 @@ def sungrow_oauth_callback(request):
                 )
                 logger.info("Sungrow Token Exchange (Form) on %s [%s]: %s", gw, token_resp.status_code, token_resp.text[:300])
                 if token_resp.status_code == 200:
-                    resp_json = token_resp.json()
-                    t_cand = resp_json.get("access_token") or resp_json.get("token")
-                    r_cand = resp_json.get("refresh_token", "")
-                    if not t_cand and isinstance(resp_json.get("result_data"), dict):
-                        t_cand = resp_json["result_data"].get("access_token") or resp_json["result_data"].get("token")
-                        r_cand = resp_json["result_data"].get("refresh_token", "")
+                    t_cand, r_cand = _extract_tokens_from_json(token_resp.json())
                     if t_cand:
                         token = t_cand
                         refresh_token = r_cand
                         break
             except Exception as e:
                 logger.warning("Sungrow OAuth token exchange (Form) on %s failed: %s", gw, e)
+
+            # 3. Query-Params Fallback
+            try:
+                token_resp = requests.post(
+                    f"{gw}/openapi/oauth/token",
+                    params=payload,
+                    headers=headers_json,
+                    timeout=4,
+                )
+                logger.info("Sungrow Token Exchange (Params) on %s [%s]: %s", gw, token_resp.status_code, token_resp.text[:300])
+                if token_resp.status_code == 200:
+                    t_cand, r_cand = _extract_tokens_from_json(token_resp.json())
+                    if t_cand:
+                        token = t_cand
+                        refresh_token = r_cand
+                        break
+            except Exception as e:
+                logger.warning("Sungrow OAuth token exchange (Params) on %s failed: %s", gw, e)
 
     if not token:
         token = f"sg_oauth_{code or 'demo_token_12345'}"
@@ -203,13 +240,15 @@ def sungrow_oauth_callback(request):
                 )
                 logger.info("Sungrow queryPowerStationList response [%s]: %s", list_resp.status_code, list_resp.text[:300])
                 if list_resp.status_code == 200:
-                    list_data = list_resp.json().get("result_data", {})
-                    stations = list_data.get("pageList", []) if isinstance(list_data, dict) else []
-                    if stations:
-                        ps_id = str(stations[0].get("ps_id") or stations[0].get("id"))
-                        plant_name = stations[0].get("ps_name") or plant_name
-                        logger.info("Auto-discovered Sungrow station: %s (%s)", ps_id, plant_name)
-                        break
+                    list_json = list_resp.json()
+                    list_data = list_json.get("result_data") or list_json.get("data") or {}
+                    if isinstance(list_data, dict):
+                        stations = list_data.get("pageList") or list_data.get("data_list") or list_data.get("list") or []
+                        if stations and isinstance(stations, list) and len(stations) > 0:
+                            ps_id = str(stations[0].get("ps_id") or stations[0].get("id") or stations[0].get("ps_key") or "")
+                            plant_name = stations[0].get("ps_name") or stations[0].get("name") or plant_name
+                            logger.info("Auto-discovered Sungrow station: %s (%s)", ps_id, plant_name)
+                            break
             except Exception as e:
                 logger.warning("Could not list power stations during OAuth callback on %s: %s", base, e)
 

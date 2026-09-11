@@ -253,9 +253,12 @@ class SungrowAdapter(BaseInverterAdapter):
                         }
                         payload = {
                             "appkey": appkey,
+                            "client_id": appkey,
                             "grant_type": "refresh_token",
                             "refresh_token": r_token,
                             "redirect_uri": redir_url,
+                            "redirectUrl": redir_url,
+                            "applicationId": "4830",
                         }
                         r_resp = requests.post(f"{gw}/openapi/oauth/token", json=payload, headers=headers, timeout=4)
                         if r_resp.status_code == 200:
@@ -304,8 +307,10 @@ class SungrowAdapter(BaseInverterAdapter):
                             f"{gw}/openapi/oauth/token",
                             json={
                                 "appkey": appkey,
+                                "client_id": appkey,
                                 "grant_type": "client_credentials",
                                 "redirect_uri": redir_url,
+                                "applicationId": "4830",
                             },
                             headers={"x-access-key": app_secret, "sys_code": "901", "Content-Type": "application/json"},
                             timeout=4,
@@ -409,20 +414,22 @@ class SungrowAdapter(BaseInverterAdapter):
                     {"page": 1, "size": 20, "lang": "_de_DE"},
                 )
                 if list_resp and list_resp.status_code == 200:
-                    list_data = list_resp.json().get("result_data", {})
-                    stations = (
-                        list_data.get("pageList")
-                        or list_data.get("data_list")
-                        or list_data.get("list")
-                        or list_data.get("result_list")
-                        or []
-                    )
-                    if stations and isinstance(stations, list) and len(stations) > 0:
-                        first_st = stations[0]
-                        if isinstance(first_st, dict):
-                            ps_id = str(first_st.get("ps_id") or first_st.get("id") or first_st.get("ps_key") or first_st.get("power_station_id") or "")
-                            credentials["ps_id"] = ps_id
-                            credentials["ps_name"] = first_st.get("ps_name") or first_st.get("name", "Sungrow PV-Anlage")
+                    list_json = list_resp.json()
+                    list_data = list_json.get("result_data") or list_json.get("data") or {}
+                    if isinstance(list_data, dict):
+                        stations = (
+                            list_data.get("pageList")
+                            or list_data.get("data_list")
+                            or list_data.get("list")
+                            or list_data.get("result_list")
+                            or []
+                        )
+                        if stations and isinstance(stations, list) and len(stations) > 0:
+                            first_st = stations[0]
+                            if isinstance(first_st, dict):
+                                ps_id = str(first_st.get("ps_id") or first_st.get("id") or first_st.get("ps_key") or first_st.get("power_station_id") or "")
+                                credentials["ps_id"] = ps_id
+                                credentials["ps_name"] = first_st.get("ps_name") or first_st.get("name", "Sungrow PV-Anlage")
             except Exception as e:
                 logger.warning("Auto-fetch ps_id via OpenAPI failed: %s", e)
 
