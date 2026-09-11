@@ -302,6 +302,29 @@ class SungrowAdapter(BaseInverterAdapter):
             # 2. Versuch: Wenn Developer AppKey & AppSecret vorliegen (Zentraler Developer-Account)
             if appkey and app_secret:
                 for gw in gateway_list:
+                    # Versuch A: /openapi/apiManage/token
+                    try:
+                        am_resp = requests.post(
+                            f"{gw}/openapi/apiManage/token",
+                            json={"appkey": appkey, "app_secret": app_secret},
+                            headers={"x-access-key": app_secret, "sys_code": "901", "Content-Type": "application/json"},
+                            timeout=4,
+                        )
+                        if am_resp.status_code == 200:
+                            rj = am_resp.json()
+                            nt = rj.get("access_token") or rj.get("token")
+                            rd = rj.get("result_data") or rj.get("data")
+                            if not nt and isinstance(rd, dict):
+                                nt = rd.get("access_token") or rd.get("token")
+                            if nt:
+                                token = nt
+                                credentials["token"] = token
+                                logger.info("[SUNGROW_OPENAPI] Token successfully created via apiManage/token on %s", gw)
+                                return True
+                    except Exception as e:
+                        logger.debug("apiManage/token request on %s failed: %s", gw, e)
+
+                    # Versuch B: /openapi/oauth/token (client_credentials)
                     try:
                         cc_resp = requests.post(
                             f"{gw}/openapi/oauth/token",
@@ -318,8 +341,9 @@ class SungrowAdapter(BaseInverterAdapter):
                         if cc_resp.status_code == 200:
                             rj = cc_resp.json()
                             nt = rj.get("access_token") or rj.get("token")
-                            if not nt and isinstance(rj.get("result_data"), dict):
-                                nt = rj["result_data"].get("access_token") or rj["result_data"].get("token")
+                            rd = rj.get("result_data") or rj.get("data")
+                            if not nt and isinstance(rd, dict):
+                                nt = rd.get("access_token") or rd.get("token")
                             if nt:
                                 token = nt
                                 credentials["token"] = token
@@ -391,12 +415,16 @@ class SungrowAdapter(BaseInverterAdapter):
                         headers={"x-access-key": app_secret, "sys_code": "901", "Content-Type": "application/json"},
                         timeout=4,
                     )
-                    if t_resp.status_code == 200 and t_resp.json().get("access_token"):
-                        token = t_resp.json()["access_token"]
-                        credentials["token"] = token
-                        if t_resp.json().get("refresh_token"):
-                            credentials["refresh_token"] = t_resp.json()["refresh_token"]
-                        break
+                    if t_resp.status_code == 200:
+                        t_cand = t_resp.json().get("access_token") or t_resp.json().get("token")
+                        if not t_cand and isinstance(t_resp.json().get("result_data"), dict):
+                            t_cand = t_resp.json()["result_data"].get("access_token")
+                        if t_cand:
+                            token = t_cand
+                            credentials["token"] = token
+                            if t_resp.json().get("refresh_token"):
+                                credentials["refresh_token"] = t_resp.json()["refresh_token"]
+                            break
                 except Exception as ex_err:
                     logger.debug("Auto token exchange failed on %s: %s", gw, ex_err)
 
@@ -449,102 +477,104 @@ class SungrowAdapter(BaseInverterAdapter):
             )
             if rt_resp and rt_resp.status_code == 200:
                 rt_json = rt_resp.json()
-                point_dict = rt_json.get("result_data", {}).get("point_dict", {})
-                if point_dict:
-                    logger.info("[SUNGROW_OPENAPI] Discovered Point Dictionary: %s", point_dict)
-                pts = rt_json.get("result_data", {}).get("device_point_list", [])
-                if pts:
-                    p_data = {}
-                    for item in pts:
-                        if isinstance(item, dict):
-                            if "point_id" in item and "point_value" in item:
-                                pid = str(item["point_id"])
-                                p_data[pid] = item["point_value"]
-                                p_data[f"p{pid}"] = item["point_value"]
+                rt_res_data = rt_json.get("result_data") or rt_json.get("data") or {}
+                if isinstance(rt_res_data, dict):
+                    point_dict = rt_res_data.get("point_dict") or {}
+                    if point_dict:
+                        logger.info("[SUNGROW_OPENAPI] Discovered Point Dictionary: %s", point_dict)
+                    pts = rt_res_data.get("device_point_list") or []
+                    if pts:
+                        p_data = {}
+                        for item in pts:
+                            if isinstance(item, dict):
+                                if "point_id" in item and "point_value" in item:
+                                    pid = str(item["point_id"])
+                                    p_data[pid] = item["point_value"]
+                                    p_data[f"p{pid}"] = item["point_value"]
+                                else:
+                                    for k, v in item.items():
+                                        ks = str(k)
+                                        p_data[ks] = v
+                                        if not ks.startswith("p"):
+                                            p_data[f"p{ks}"] = v
+
+                        def _get_pt(*keys):
+                            for k in keys:
+                                for variant in [str(k), f"p{k}", f"P{k}"]:
+                                    if variant in p_data and p_data[variant] is not None:
+                                        try:
+                                            return float(p_data[variant])
+                                        except (ValueError, TypeError):
+                                            pass
+                            return None
+
+                        pv = _get_pt("83033", "83067", "83329") or 0.0
+                        load = _get_pt("83052", "83106", "83330") or 0.0
+                        grid = _get_pt("83051", "83549", "83328") or 0.0
+                        bat_pwr = _get_pt("83104", "83238", "83111", "83112", "83326") or 0.0
+                        soc_raw = _get_pt("83129", "83252", "83334")
+
+                        soc_val = None
+                        if soc_raw is not None:
+                            if 0.0 <= soc_raw <= 1.0:
+                                soc_val = round(soc_raw * 100.0, 1)
                             else:
-                                for k, v in item.items():
-                                    ks = str(k)
-                                    p_data[ks] = v
-                                    if not ks.startswith("p"):
-                                        p_data[f"p{ks}"] = v
+                                soc_val = round(soc_raw, 1)
 
-                    def _get_pt(*keys):
-                        for k in keys:
-                            for variant in [str(k), f"p{k}", f"P{k}"]:
-                                if variant in p_data and p_data[variant] is not None:
-                                    try:
-                                        return float(p_data[variant])
-                                    except (ValueError, TypeError):
-                                        pass
-                        return None
+                        # Batterie Lade-/Entladerichtung standardisieren
+                        if soc_val is not None and soc_val >= 98.0:
+                            if bat_pwr < 0:
+                                bat_pwr = 0.0
+                        elif pv > (load + 30) and (soc_val is None or soc_val < 98.0) and abs(bat_pwr) > 10:
+                            bat_pwr = -abs(bat_pwr)
+                        elif pv < 20 and soc_val is not None and soc_val > 5.0 and load > 20:
+                            if abs(bat_pwr) < 0.1 and abs(grid) < 60:
+                                bat_pwr = load
+                            else:
+                                bat_pwr = abs(bat_pwr)
 
-                    pv = _get_pt("83033", "83067", "83329") or 0.0
-                    load = _get_pt("83052", "83106", "83330") or 0.0
-                    grid = _get_pt("83051", "83549", "83328") or 0.0
-                    bat_pwr = _get_pt("83104", "83238", "83111", "83112", "83326") or 0.0
-                    soc_raw = _get_pt("83129", "83252", "83334")
+                        # Netzeinspeisung / Grid Plausibilisierung vorzeichengenau:
+                        # Negativ = Netzeinspeisung (Export), Positiv = Netzbezug (Import)
+                        bat_charge = abs(min(0.0, bat_pwr))
+                        bat_discharge = max(0.0, bat_pwr)
 
-                    soc_val = None
-                    if soc_raw is not None:
-                        if 0.0 <= soc_raw <= 1.0:
-                            soc_val = round(soc_raw * 100.0, 1)
-                        else:
-                            soc_val = round(soc_raw, 1)
+                        if pv > 50.0:
+                            surplus = pv + bat_discharge - load - bat_charge
+                            if surplus > 15.0:
+                                if grid > 0:
+                                    grid = -abs(grid)
+                                elif grid == 0.0:
+                                    grid = -round(surplus, 1)
+                            elif load > (pv + bat_discharge + 15.0):
+                                if grid < 0:
+                                    grid = abs(grid)
 
-                    # Batterie Lade-/Entladerichtung standardisieren
-                    if soc_val is not None and soc_val >= 98.0:
-                        if bat_pwr < 0:
-                            bat_pwr = 0.0
-                    elif pv > (load + 30) and (soc_val is None or soc_val < 98.0) and abs(bat_pwr) > 10:
-                        bat_pwr = -abs(bat_pwr)
-                    elif pv < 20 and soc_val is not None and soc_val > 5.0 and load > 20:
-                        if abs(bat_pwr) < 0.1 and abs(grid) < 60:
-                            bat_pwr = load
-                        else:
-                            bat_pwr = abs(bat_pwr)
-
-                    # Netzeinspeisung / Grid Plausibilisierung vorzeichengenau:
-                    # Negativ = Netzeinspeisung (Export), Positiv = Netzbezug (Import)
-                    bat_charge = abs(min(0.0, bat_pwr))
-                    bat_discharge = max(0.0, bat_pwr)
-
-                    if pv > 50.0:
-                        surplus = pv + bat_discharge - load - bat_charge
-                        if surplus > 15.0:
-                            if grid > 0:
+                        if load <= 0.0 and pv > 50.0:
+                            if grid > 0 and abs(grid - pv) < (pv * 0.5 + 500):
                                 grid = -abs(grid)
-                            elif grid == 0.0:
-                                grid = -round(surplus, 1)
-                        elif load > (pv + bat_discharge + 15.0):
-                            if grid < 0:
-                                grid = abs(grid)
+                            load = max(0.0, round(pv + grid + bat_pwr, 1))
 
-                    if load <= 0.0 and pv > 50.0:
-                        if grid > 0 and abs(grid - pv) < (pv * 0.5 + 500):
-                            grid = -abs(grid)
-                        load = max(0.0, round(pv + grid + bat_pwr, 1))
+                        today_kwh = _get_pt("83013", "83021", "83049", "83050", "83012", "today_energy")
+                        if today_kwh is None:
+                            res_d = raw_data.get("result_data", {})
+                            if isinstance(res_d, dict):
+                                today_kwh = res_d.get("today_energy") or res_d.get("todayEnergy") or res_d.get("today_yield") or res_d.get("eToday")
+                        if today_kwh is not None:
+                            try:
+                                today_kwh = float(today_kwh)
+                                if today_kwh > 1000.0:
+                                    today_kwh = today_kwh / 1000.0
+                            except (ValueError, TypeError):
+                                today_kwh = None
 
-                    today_kwh = _get_pt("83013", "83021", "83049", "83050", "83012", "today_energy")
-                    if today_kwh is None:
-                        res_d = raw_data.get("result_data", {})
-                        if isinstance(res_d, dict):
-                            today_kwh = res_d.get("today_energy") or res_d.get("todayEnergy") or res_d.get("today_yield") or res_d.get("eToday")
-                    if today_kwh is not None:
-                        try:
-                            today_kwh = float(today_kwh)
-                            if today_kwh > 1000.0:
-                                today_kwh = today_kwh / 1000.0
-                        except (ValueError, TypeError):
-                            today_kwh = None
-
-                    raw_data["_direct_metrics"] = {
-                        "pv_power_w": max(0.0, pv),
-                        "load_power_w": max(0.0, load),
-                        "grid_power_w": grid,
-                        "battery_power_w": bat_pwr,
-                        "battery_soc": soc_val,
-                        "daily_generation_kwh": today_kwh,
-                    }
+                        raw_data["_direct_metrics"] = {
+                            "pv_power_w": max(0.0, pv),
+                            "load_power_w": max(0.0, load),
+                            "grid_power_w": grid,
+                            "battery_power_w": bat_pwr,
+                            "battery_soc": soc_val,
+                            "daily_generation_kwh": today_kwh,
+                        }
         except Exception as e:
             logger.warning("getPowerStationRealTimeData query failed: %s", e)
 
@@ -556,8 +586,9 @@ class SungrowAdapter(BaseInverterAdapter):
             )
             if resp and resp.status_code == 200:
                 det_json = resp.json()
-                if det_json.get("result_data", {}).get("data_list"):
-                    d_list = det_json["result_data"]["data_list"]
+                det_res_data = det_json.get("result_data") or det_json.get("data") or {}
+                if isinstance(det_res_data, dict) and det_res_data.get("data_list"):
+                    d_list = det_res_data["data_list"]
                     if isinstance(d_list, list) and d_list:
                         raw_data["result_data"].update(d_list[0])
                         if "_direct_metrics" in raw_data and raw_data["_direct_metrics"].get("daily_generation_kwh") is None:
