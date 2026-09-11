@@ -142,7 +142,7 @@ def sungrow_oauth_callback(request):
         return t, r
 
     if not token and code and code not in ["demo", "test"]:
-        gateways = ["https://gateway.isolarcloud.eu", "https://gateway.isolarcloud.com.hk"]
+        gateways = ["https://gateway.isolarcloud.eu"]
         headers_json = {
             "x-access-key": SUNGROW_APP_SECRET,
             "sys_code": "901",
@@ -235,7 +235,7 @@ def sungrow_oauth_callback(request):
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json",
         }
-        for base in ["https://gateway.isolarcloud.eu", "https://gateway.isolarcloud.com.hk"]:
+        for base in ["https://gateway.isolarcloud.eu"]:
             for list_ep, list_body in [
                 (f"{base}/openapi/platform/queryPowerStationList", {"appkey": SUNGROW_APPKEY, "page": 1, "size": 100, "lang": "_de_DE"}),
                 (f"{base}/openapi/getPowerStationList", {"appkey": SUNGROW_APPKEY, "curPage": 1, "size": 10, "lang": "_de_DE"}),

@@ -233,7 +233,7 @@ class SungrowAdapter(BaseInverterAdapter):
             or os.getenv("SUNGROW_REDIRECT_URL", "https://sharegy.de/api/v1/integrations/sungrow/callback")
         )
 
-        gateway_list = ["https://gateway.isolarcloud.eu", "https://gateway.isolarcloud.com.hk"]
+        gateway_list = ["https://gateway.isolarcloud.eu"]
         if base_url and base_url.rstrip("/") not in gateway_list:
             gateway_list.insert(0, base_url.rstrip("/"))
 
