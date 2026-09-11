@@ -17,12 +17,13 @@ User = get_user_model()
 # ============================================================
 
 def _base_queryset(tenant=None, context="global"):
-    qs = EventLog.objects.filter(context=context)
-
     if context == "tenant" and tenant:
-        qs = qs.filter(tenant=tenant)
-
-    return qs
+        return EventLog.objects.filter(tenant=tenant)
+    if tenant:
+        return EventLog.objects.filter(tenant=tenant)
+    if context == "global":
+        return EventLog.objects.all()
+    return EventLog.objects.all()
 
 
 def _unique_users(queryset):

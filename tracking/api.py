@@ -6,8 +6,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
+from django.db import models
+from django.utils import timezone
+from datetime import timedelta
+
 from .services import track_event
-from .analytics import get_kpis, get_funnel
+from .analytics import get_kpis, get_funnel, _base_queryset
+from .models import EventLog
 
 
 # ============================================================
@@ -70,31 +75,70 @@ class TrackEventBatchView(APIView):
 
 
 # ============================================================
-# ✅ KPI VIEW
+# ✅ KPI & STATS VIEW
 # ============================================================
 
 class KPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        # 1. Tenant ermitteln falls vorhanden (z.B. User-Mitgliedschaft)
         tenant = getattr(request.user, "tenant", None)
+        if not tenant and hasattr(request.user, "memberships"):
+            first_m = request.user.memberships.select_related("tenant").first()
+            if first_m:
+                tenant = first_m.tenant
 
-        if not tenant:
-            return Response({"error": "no tenant"}, status=400)
+        context = "tenant" if tenant and not (request.user.is_staff or request.user.is_superuser) else "global"
 
-        # ✅ flexibel über Query Param
         try:
             days = int(request.GET.get("days", 7))
-        except ValueError:
-            return Response({"error": "invalid days parameter"}, status=400)
+        except (TypeError, ValueError):
+            days = 7
 
-        return Response(
-            get_kpis(
-                tenant=tenant,
-                context="tenant",
-                days=days
-            )
+        now = timezone.now()
+        window_start = now - timedelta(days=days)
+
+        # Base QuerySet
+        base_qs = _base_queryset(tenant=tenant, context=context)
+
+        # 1. KPIs
+        kpis = get_kpis(tenant=tenant, context=context, days=days)
+
+        # 2. Stats gruppiert nach Event-Name
+        stats_qs = (
+            base_qs.filter(created_at__gte=window_start)
+            .values("name")
+            .annotate(count=models.Count("id"))
+            .order_by("-count")
         )
+        stats = [{"event": item["name"], "count": item["count"]} for item in stats_qs]
+
+        # 3. Daily Events (für 7-Tage Timeline)
+        daily_qs = (
+            base_qs.filter(created_at__gte=window_start)
+            .annotate(date=models.functions.TruncDate("created_at"))
+            .values("date")
+            .annotate(count=models.Count("id"))
+            .order_by("date")
+        )
+        daily = [
+            {
+                "date": item["date"].strftime("%Y-%m-%d") if hasattr(item["date"], "strftime") else str(item["date"]),
+                "count": item["count"]
+            }
+            for item in daily_qs
+        ]
+
+        funnel_data = get_funnel(tenant=tenant, context=context, days=days)
+
+        return Response({
+            **kpis,
+            "stats": stats,
+            "daily": daily,
+            "funnel": funnel_data.get("steps", []),
+            "total_events": sum(s["count"] for s in stats),
+        })
 
 
 # ============================================================
@@ -106,20 +150,22 @@ class FunnelView(APIView):
 
     def get(self, request):
         tenant = getattr(request.user, "tenant", None)
+        if not tenant and hasattr(request.user, "memberships"):
+            first_m = request.user.memberships.select_related("tenant").first()
+            if first_m:
+                tenant = first_m.tenant
 
-        if not tenant:
-            return Response({"error": "no tenant"}, status=400)
+        context = "tenant" if tenant and not (request.user.is_staff or request.user.is_superuser) else "global"
 
         try:
             days = int(request.GET.get("days", 7))
-        except ValueError:
-            return Response({"error": "invalid days parameter"}, status=400)
+        except (TypeError, ValueError):
+            days = 7
 
         return Response(
             get_funnel(
                 tenant=tenant,
-                context="tenant",
+                context=context,
                 days=days
             )
         )
-    

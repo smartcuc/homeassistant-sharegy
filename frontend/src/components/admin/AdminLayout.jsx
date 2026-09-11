@@ -1,23 +1,63 @@
-/*
-# components/admin/AdminLayout.jsx
-*/
-
 import { NavLink, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useEffect } from "react";
 
 export default function AdminLayout({ children }) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+
+    const currentLang = (i18n.resolvedLanguage || i18n.language || "de").substring(0, 2);
+
+    useEffect(() => {
+        if (currentLang !== "de" && currentLang !== "en") {
+            i18n.changeLanguage("de");
+        }
+    }, [currentLang, i18n]);
+
+    const handleLanguageToggle = (lang) => {
+        i18n.changeLanguage(lang);
+        localStorage.setItem("i18nextLng", lang);
+    };
 
     return (
         <div className="flex h-screen bg-slate-50/50">
             {/* Admin Sidebar */}
             <aside className="w-64 bg-white border-r border-gray-200 p-5 flex flex-col justify-between hidden md:flex">
                 <div className="space-y-6">
-                    <div className="flex items-center gap-2.5 px-2">
-                        <span className="text-2xl">🛡️</span>
-                        <div>
-                            <div className="font-black text-sm text-gray-900 tracking-tight">Staff Portal</div>
-                            <div className="text-[10px] text-gray-400 font-medium">Administration & Control</div>
+                    <div className="flex items-center justify-between px-2">
+                        <div className="flex items-center gap-2.5">
+                            <span className="text-2xl">🛡️</span>
+                            <div>
+                                <div className="font-black text-sm text-gray-900 tracking-tight">Staff Portal</div>
+                                <div className="text-[10px] text-gray-400 font-medium">Administration & Control</div>
+                            </div>
+                        </div>
+
+                        {/* DE / EN Language Toggle */}
+                        <div className="flex items-center bg-slate-100 rounded-lg p-0.5 text-[11px] font-bold">
+                            <button
+                                type="button"
+                                onClick={() => handleLanguageToggle("de")}
+                                className={`px-1.5 py-0.5 rounded-md transition ${
+                                    currentLang === "de"
+                                        ? "bg-white text-indigo-700 shadow-xs"
+                                        : "text-gray-500 hover:text-gray-900"
+                                }`}
+                                title="Deutsch"
+                            >
+                                DE
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => handleLanguageToggle("en")}
+                                className={`px-1.5 py-0.5 rounded-md transition ${
+                                    currentLang === "en"
+                                        ? "bg-white text-indigo-700 shadow-xs"
+                                        : "text-gray-500 hover:text-gray-900"
+                                }`}
+                                title="English"
+                            >
+                                EN
+                            </button>
                         </div>
                     </div>
 

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState, useRef, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import { apiFetch } from "../../api/client";
@@ -18,6 +18,7 @@ export default function AppTopbar({ onOpenMobileMenu }) {
     const { t, i18n } = useTranslation();
     const { user } = useUser();
     const navigate = useNavigate();
+    const location = useLocation();
     const { homes = [], primaryHome } = useHomes();
     const { isDark, toggleTheme } = useTheme();
 
@@ -27,21 +28,38 @@ export default function AppTopbar({ onOpenMobileMenu }) {
     const [homeDropdownOpen, setHomeDropdownOpen] = useState(false);
     const homeDropdownRef = useRef(null);
 
-    // Sprach-Dropdown State (DE, EN, PL, TR, RU, RO)
+    // 🛡️ Admin-Routen (/app/admin/* und /admin/*) nur auf Deutsch und Englisch beschränken
+    const isAdminRoute = location.pathname.startsWith("/app/admin") || location.pathname.startsWith("/admin");
+
+    // Sprach-Dropdown State (DE, EN für Admin; DE, EN, PL, TR, RU, RO für Standard-App)
     const [langDropdownOpen, setLangDropdownOpen] = useState(false);
     const langDropdownRef = useRef(null);
 
-    const languages = [
-        { code: "de", label: "Deutsch", flag: "🇩🇪" },
-        { code: "en", label: "English", flag: "🇬🇧" },
-        { code: "pl", label: "Polski", flag: "🇵🇱" },
-        { code: "tr", label: "Türkçe", flag: "🇹🇷" },
-        { code: "ru", label: "Русский", flag: "🇷🇺" },
-        { code: "ro", label: "Română", flag: "🇷🇴" },
-    ];
+    const languages = isAdminRoute
+        ? [
+            { code: "de", label: "Deutsch", flag: "🇩🇪" },
+            { code: "en", label: "English", flag: "🇬🇧" },
+        ]
+        : [
+            { code: "de", label: "Deutsch", flag: "🇩🇪" },
+            { code: "en", label: "English", flag: "🇬🇧" },
+            { code: "pl", label: "Polski", flag: "🇵🇱" },
+            { code: "tr", label: "Türkçe", flag: "🇹🇷" },
+            { code: "ru", label: "Русский", flag: "🇷🇺" },
+            { code: "ro", label: "Română", flag: "🇷🇴" },
+        ];
 
     const currentLang = (i18n.resolvedLanguage || i18n.language || "de").substring(0, 2);
     const currentLangObj = languages.find((l) => l.code === currentLang) || languages[0];
+
+    useEffect(() => {
+        if (isAdminRoute) {
+            const lang = (i18n.resolvedLanguage || i18n.language || "de").substring(0, 2);
+            if (lang !== "de" && lang !== "en") {
+                i18n.changeLanguage("de");
+            }
+        }
+    }, [isAdminRoute, i18n.language]);
 
     const handleLanguageChange = async (langCode) => {
         setLangDropdownOpen(false);
