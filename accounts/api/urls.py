@@ -113,6 +113,10 @@ urlpatterns += [
     path("demo/sharing-user/", DemoSharingUserLoginView.as_view(), name="demo-sharing-user"),
     path("demo/admin/", DemoSharingAdminLoginView.as_view(), name="demo-admin"),
     path("demo/community/", DemoSharingUserLoginView.as_view(), name="demo-community"),
+    path("demo/user/", DemoSharingUserLoginView.as_view(), name="demo-user"),
+    # Aliases for demo-sharing/...
+    path("demo-sharing/admin/", DemoSharingAdminLoginView.as_view(), name="demo-sharing-admin-alias"),
+    path("demo-sharing/user/", DemoSharingUserLoginView.as_view(), name="demo-sharing-user-alias"),
     path("gdpr/export/", GDPRExportView.as_view(), name="gdpr-export"),
     path("gdpr/delete-account/", GDPRDeleteAccountView.as_view(), name="gdpr-delete-account"),
 ]
