@@ -141,6 +141,19 @@ class AdapterContractMatrixTest(TestCase):
         self.assertEqual(tel3.pv_power_w, 2330.0) # 1350 + 980 = 2330 W
         self.assertEqual(tel3.battery_soc, 82.0)
 
+        # Test 4: Reiner PV-Wechselrichter ohne Batterie (Growatt MIC / MIN / MOD)
+        raw_pure_pv = {
+            "data": {
+                "pac": 620.0,
+                "ppv": 625.0,
+                "eToday": 4.1,
+            }
+        }
+        tel4 = adapter.parse_payload(raw_pure_pv)
+        self.assertEqual(tel4.pv_power_w, 625.0)
+        self.assertIsNone(tel4.battery_soc)
+        self.assertEqual(tel4.daily_yield_kwh, 4.1)
+
     def test_04_standard_ingest_core_pipeline(self):
         """Testet die herstellerunabhängige Standard-Ingest-Core Pipeline."""
         tel = CanonicalTelemetry(
