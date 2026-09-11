@@ -1,11 +1,9 @@
 """
 devices/adapters/sungrow.py
 
-Isolierter Adapter für Sungrow iSolarCloud (Hybrid-Wechselrichter SH5.0-25T/RT und SBR-Speicher).
-Unterstützt:
-1. Offizielle OpenAPI mit OAuth2 / Bearer Token & Messpunkt-Wörterbüchern
-2. Legacy iSolarCloud API mit Benutzername & Passwort
-3. Standardisierte Transformation in CanonicalTelemetry
+Offizieller, isolierter OpenAPI-Adapter für Sungrow iSolarCloud (Hybrid-Wechselrichter SH-Serie und SBR-Speicher).
+Ausschließliche Nutzung der offiziellen iSolarCloud OpenAPI mit OAuth 2.0 / Bearer Token & Messpunkt-Wörterbüchern.
+Standardisierte Transformation in CanonicalTelemetry mit physikalisch exakter Einspeisungs- und Lastbilanz.
 """
 
 import os
@@ -14,7 +12,6 @@ import requests
 from typing import Dict, Any, Optional
 from django.conf import settings
 from django.utils import timezone
-from django.core.cache import cache
 
 from devices.adapters.contracts import BaseInverterAdapter, CanonicalTelemetry, AdapterTestResult
 
@@ -33,46 +30,6 @@ class SungrowAdapter(BaseInverterAdapter):
         "83129", "83252", "83238", "83104", "83111", "83112", "83326",
         "83328", "83329", "83330", "83334"
     ]
-
-    def _execute_login(self, base_url: str, appkey: str, account: str, password: str) -> dict:
-        """
-        Führt den Sungrow iSolarCloud Login-Handshake für die Legacy-API durch.
-        """
-        cache_key = f"sungrow_token_{appkey}_{account}"
-        cached_token = cache.get(cache_key)
-        if cached_token:
-            return cached_token
-
-        login_url = f"{base_url.rstrip('/')}/v1/userService/login"
-        payload = {
-            "appkey": appkey,
-            "user_account": account,
-            "user_password": password,
-        }
-        headers = {
-            "Content-Type": "application/json",
-            "sys_code": "901",
-        }
-
-        try:
-            resp = requests.post(login_url, json=payload, headers=headers, timeout=10)
-            resp.raise_for_status()
-            res_json = resp.json()
-
-            res_data = res_json.get("result_data") or {}
-            if res_json.get("result_code") == "1" and res_data.get("token"):
-                token_data = {
-                    "token": res_data["token"],
-                    "user_id": res_data.get("user_id"),
-                }
-                cache.set(cache_key, token_data, timeout=7000)
-                return token_data
-            else:
-                msg = res_json.get("result_msg") or "Ungültige iSolarCloud Zugangsdaten"
-                raise ValueError(f"Sungrow Login fehlgeschlagen: {msg}")
-        except requests.RequestException as e:
-            logger.warning("Sungrow Login Request Error: %s", e)
-            raise ValueError(f"Verbindungsfehler zu Sungrow iSolarCloud: {e}")
 
     def generate_mock_payload(self) -> dict:
         """
@@ -176,7 +133,7 @@ class SungrowAdapter(BaseInverterAdapter):
             daily = daily / 1000.0 # Falls in Wh geliefert
 
         # Physikalische Plausibilisierung der Netzeinspeisung / des Hausverbrauchs:
-        # In Sungrow OpenAPI / iSolarCloud wird 'grid_power' bei Netzeinspeisung als positiver Betrag geliefert.
+        # In Sungrow OpenAPI wird 'grid_power' bei Netzeinspeisung als positiver Betrag geliefert.
         # In Sharegy gilt kanonisch: Positiv = Netzbezug (Import), Negativ = Netzeinspeisung (Export).
         pv_val = max(0.0, float(pv or 0.0))
         bat_val = float(battery or 0.0)
@@ -230,7 +187,7 @@ class SungrowAdapter(BaseInverterAdapter):
 
     def fetch_telemetry(self, credentials: Dict[str, Any]) -> CanonicalTelemetry:
         """
-        Fragt die Live-Telemetrie vom Sungrow Server ab.
+        Fragt die Live-Telemetrie von der offiziellen Sungrow OpenAPI ab.
         """
         res = self.test_connection(credentials)
         if res.status == "success":
@@ -239,21 +196,20 @@ class SungrowAdapter(BaseInverterAdapter):
 
     def test_connection(self, credentials: Dict[str, Any]) -> AdapterTestResult:
         """
-        Führt einen Verbindungstest gegen iSolarCloud oder die OpenAPI durch.
+        Führt einen Verbindungstest gegen die offizielle Sungrow OpenAPI durch (OAuth2 / Token-basiert).
         """
-        base_url = credentials.get("base_url") or "https://gateway.isolarcloud.eu"
+        base_url = credentials.get("base_url") or getattr(settings, "SUNGROW_GATEWAY_URL", "https://gateway.isolarcloud.eu")
         appkey = credentials.get("appkey") or getattr(settings, "SUNGROW_APPKEY", "") or os.getenv("SUNGROW_APPKEY", "")
         app_secret = getattr(settings, "SUNGROW_APP_SECRET", "") or os.getenv("SUNGROW_APP_SECRET", "")
         token = credentials.get("token")
         ps_id = credentials.get("ps_id") or credentials.get("ps_ids") or ""
 
-        # Sandbox-Modus prüfen
+        # Sandbox- / Simulator-Modus prüfen
         is_mock = (
             bool(credentials.get("is_mock"))
             or str(appkey).lower() in ("mock", "fake", "demo", "test")
             or not credentials
-            or (not appkey and not token and not credentials.get("user_account"))
-            or str(credentials.get("user_account", "")).lower() in ("tester@sharegy.de", "demo@sharegy.de", "sungrow@sharegy.de")
+            or (not appkey and not token and not credentials.get("auth_code"))
             or str(credentials.get("token", "")).lower() in ("demo", "test", "mock")
             or str(credentials.get("token", "")).startswith("sg_oauth_demo")
         )
@@ -269,355 +225,268 @@ class SungrowAdapter(BaseInverterAdapter):
                 simulated=True,
             )
 
-        is_oauth = credentials.get("auth_type") == "oauth2" or bool(token and not credentials.get("user_password"))
-
-        if is_oauth and (token or credentials.get("auth_code")):
-            def _refresh_openapi_token() -> bool:
-                nonlocal token
-                r_token = credentials.get("refresh_token")
-                if not r_token:
-                    return False
-                try:
-                    redir_url = credentials.get("redirect_uri") or getattr(settings, "SUNGROW_REDIRECT_URI", "")
-                    headers = {
-                        "x-access-key": app_secret,
-                        "sys_code": "901",
-                        "Content-Type": "application/json",
-                    }
-                    for ref_ep, ref_payload in [
-                        (
-                            f"{base_url.rstrip('/')}/openapi/oauth/token",
-                            {
-                                "appkey": appkey,
-                                "grant_type": "refresh_token",
-                                "refresh_token": r_token,
-                                "redirect_uri": redir_url,
-                            },
-                        ),
-                        (
-                            f"{base_url.rstrip('/')}/openapi/apiManage/refreshToken",
-                            {"appkey": appkey, "refresh_token": r_token},
-                        ),
-                    ]:
-                        t_resp = requests.post(ref_ep, json=ref_payload, headers=headers, timeout=10)
-                        if t_resp.status_code == 200:
-                            resp_j = t_resp.json()
-                            new_tok = resp_j.get("access_token") or resp_j.get("token")
-                            if not new_tok and isinstance(resp_j.get("result_data"), dict):
-                                new_tok = resp_j["result_data"].get("access_token") or resp_j["result_data"].get("token")
-                                if resp_j["result_data"].get("refresh_token"):
-                                    credentials["refresh_token"] = resp_j["result_data"]["refresh_token"]
-                            if new_tok:
-                                token = new_tok
-                                credentials["token"] = token
-                                logger.info("Successfully refreshed Sungrow OpenAPI token on %s.", ref_ep)
-                                return True
-                except Exception as e:
-                    logger.warning("Auto token refresh failed: %s", e)
+        def _refresh_openapi_token() -> bool:
+            nonlocal token
+            r_token = credentials.get("refresh_token")
+            if not r_token:
                 return False
-
-            def _post_with_auth(endpoint: str, json_data: dict) -> Optional[requests.Response]:
-                nonlocal token
-                url = f"{base_url.rstrip('/')}/{endpoint.lstrip('/')}"
-                payload = dict(json_data)
-                if token and "token" not in payload:
-                    payload["token"] = token
-                if appkey and "appkey" not in payload:
-                    payload["appkey"] = appkey
-
+            try:
+                redir_url = credentials.get("redirect_uri") or getattr(settings, "SUNGROW_REDIRECT_URI", "")
                 headers = {
                     "x-access-key": app_secret,
                     "sys_code": "901",
-                    "token": str(token or ""),
-                    "Authorization": f"Bearer {token}",
                     "Content-Type": "application/json",
                 }
-                try:
-                    resp = requests.post(url, json=payload, headers=headers, timeout=12)
-                    is_auth_err = resp.status_code in (401, 403)
-                    if resp.status_code == 200:
-                        try:
-                            body = resp.json()
-                            code_str = str(body.get("result_code", ""))
-                            msg_str = str(body.get("result_msg", "")).lower()
-                            if code_str in ("2", "000", "0000", "401") or ("token" in msg_str and ("invalid" in msg_str or "expired" in msg_str or "fail" in msg_str)):
-                                is_auth_err = True
-                        except Exception:
-                            pass
-
-                    if is_auth_err and _refresh_openapi_token():
-                        payload["token"] = token
-                        headers["token"] = str(token or "")
-                        headers["Authorization"] = f"Bearer {token}"
-                        resp = requests.post(url, json=payload, headers=headers, timeout=12)
-                    return resp
-                except Exception as req_err:
-                    logger.warning("Sungrow OpenAPI request to %s failed: %s", endpoint, req_err)
-                    return None
-
-            # OpenAPI Modus
-            if credentials.get("auth_code") and not token:
-                try:
-                    redir_url = credentials.get("redirect_uri") or getattr(settings, "SUNGROW_REDIRECT_URI", "")
-                    t_resp = requests.post(
+                for ref_ep, ref_payload in [
+                    (
                         f"{base_url.rstrip('/')}/openapi/oauth/token",
-                        json={
+                        {
                             "appkey": appkey,
-                            "code": credentials["auth_code"],
-                            "grant_type": "authorization_code",
+                            "grant_type": "refresh_token",
+                            "refresh_token": r_token,
                             "redirect_uri": redir_url,
                         },
-                        headers={"x-access-key": app_secret, "sys_code": "901", "Content-Type": "application/json"},
-                        timeout=10,
-                    )
-                    if t_resp.status_code == 200 and t_resp.json().get("access_token"):
-                        token = t_resp.json()["access_token"]
-                        credentials["token"] = token
-                        if t_resp.json().get("refresh_token"):
-                            credentials["refresh_token"] = t_resp.json()["refresh_token"]
-                except Exception as ex_err:
-                    logger.warning("Auto token exchange failed: %s", ex_err)
-
-            if not ps_id or ps_id in ("default_ps", "12345", ""):
-                try:
-                    list_resp = _post_with_auth(
-                        "openapi/platform/queryPowerStationList",
-                        {"page": 1, "size": 20, "lang": "_de_DE"},
-                    )
-                    if list_resp and list_resp.status_code == 200:
-                        list_data = list_resp.json().get("result_data", {})
-                        stations = list_data.get("pageList", []) if isinstance(list_data, dict) else []
-                        if stations:
-                            ps_id = str(stations[0].get("ps_id") or stations[0].get("id"))
-                            credentials["ps_id"] = ps_id
-                            credentials["ps_name"] = stations[0].get("ps_name", "Sungrow PV-Anlage")
-                except Exception as e:
-                    logger.warning("Auto-fetch ps_id via OpenAPI failed: %s", e)
-
-            raw_data: Dict[str, Any] = {"result_code": "1", "result_data": {}}
-
-            try:
-                rt_resp = _post_with_auth(
-                    "openapi/platform/getPowerStationRealTimeData",
-                    {
-                        "appkey": appkey,
-                        "token": token,
-                        "ps_id_list": [str(ps_id or "")],
-                        "point_id_list": self.MEASURE_POINTS,
-                        "is_get_point_dict": "1",
-                    },
-                )
-                if rt_resp and rt_resp.status_code == 200:
-                    rt_json = rt_resp.json()
-                    point_dict = rt_json.get("result_data", {}).get("point_dict", {})
-                    if point_dict:
-                        logger.info("[SUNGROW_OPENAPI] Discovered Point Dictionary: %s", point_dict)
-                    pts = rt_json.get("result_data", {}).get("device_point_list", [])
-                    if pts:
-                        p_data = {}
-                        for item in pts:
-                            if isinstance(item, dict):
-                                if "point_id" in item and "point_value" in item:
-                                    pid = str(item["point_id"])
-                                    p_data[pid] = item["point_value"]
-                                    p_data[f"p{pid}"] = item["point_value"]
-                                else:
-                                    for k, v in item.items():
-                                        ks = str(k)
-                                        p_data[ks] = v
-                                        if not ks.startswith("p"):
-                                            p_data[f"p{ks}"] = v
-
-                        def _get_pt(*keys):
-                            for k in keys:
-                                for variant in [str(k), f"p{k}", f"P{k}"]:
-                                    if variant in p_data and p_data[variant] is not None:
-                                        try:
-                                            return float(p_data[variant])
-                                        except (ValueError, TypeError):
-                                            pass
-                            return None
-
-                        pv = _get_pt("83033", "83067", "83329") or 0.0
-                        load = _get_pt("83052", "83106", "83330") or 0.0
-                        grid = _get_pt("83051", "83549", "83328") or 0.0
-                        bat_pwr = _get_pt("83104", "83238", "83111", "83112", "83326") or 0.0
-                        soc_raw = _get_pt("83129", "83252", "83334")
-
-                        soc_val = None
-                        if soc_raw is not None:
-                            if 0.0 <= soc_raw <= 1.0:
-                                soc_val = round(soc_raw * 100.0, 1)
-                            else:
-                                soc_val = round(soc_raw, 1)
-
-                        # Batterie Lade-/Entladerichtung standardisieren (Sharegy-Konvention: Negativ = Laden, Positiv = Entladen)
-                        if soc_val is not None and soc_val >= 98.0:
-                            if bat_pwr < 0:
-                                bat_pwr = 0.0
-                        elif pv > (load + 30) and (soc_val is None or soc_val < 98.0) and abs(bat_pwr) > 10:
-                            bat_pwr = -abs(bat_pwr)
-                        elif pv < 20 and soc_val is not None and soc_val > 5.0 and load > 20:
-                            if abs(bat_pwr) < 0.1 and abs(grid) < 60:
-                                bat_pwr = load
-                            else:
-                                bat_pwr = abs(bat_pwr)
-
-                        # Netzeinspeisung / Grid Plausibilisierung vorzeichengenau:
-                        # Sharegy-Standard: Negativ = Netzeinspeisung (Export), Positiv = Netzbezug (Import)
-                        bat_charge = abs(min(0.0, bat_pwr))
-                        bat_discharge = max(0.0, bat_pwr)
-
-                        if pv > 50.0:
-                            surplus = pv + bat_discharge - load - bat_charge
-                            if surplus > 30.0:
-                                if grid > 0:
-                                    grid = -abs(grid)
-                                elif grid == 0.0 and surplus > 50.0 and load > 0:
-                                    grid = -round(surplus, 1)
-                            elif load > (pv + bat_discharge + 30.0):
-                                if grid < 0:
-                                    grid = abs(grid)
-
-                        # Falls Load nicht als eigener Punkt geliefert wurde (oder 0):
-                        if load <= 0.0 and pv > 50.0:
-                            if grid > 0 and abs(grid - pv) < (pv * 0.5 + 500):
-                                grid = -abs(grid)
-                            load = max(0.0, round(pv + grid + bat_pwr, 1))
-
-                        raw_data["_direct_metrics"] = {
-                            "pv_power_w": max(0.0, pv),
-                            "load_power_w": max(0.0, load),
-                            "grid_power_w": grid,
-                            "battery_power_w": bat_pwr,
-                            "battery_soc": soc_val,
-                        }
+                    ),
+                    (
+                        f"{base_url.rstrip('/')}/openapi/apiManage/refreshToken",
+                        {"appkey": appkey, "refresh_token": r_token},
+                    ),
+                ]:
+                    t_resp = requests.post(ref_ep, json=ref_payload, headers=headers, timeout=10)
+                    if t_resp.status_code == 200:
+                        resp_j = t_resp.json()
+                        new_tok = resp_j.get("access_token") or resp_j.get("token")
+                        if not new_tok and isinstance(resp_j.get("result_data"), dict):
+                            new_tok = resp_j["result_data"].get("access_token") or resp_j["result_data"].get("token")
+                            if resp_j["result_data"].get("refresh_token"):
+                                credentials["refresh_token"] = resp_j["result_data"]["refresh_token"]
+                        if new_tok:
+                            token = new_tok
+                            credentials["token"] = token
+                            logger.info("Successfully refreshed Sungrow OpenAPI token on %s.", ref_ep)
+                            return True
             except Exception as e:
-                logger.warning("getPowerStationRealTimeData query failed: %s", e)
+                logger.warning("Auto token refresh failed: %s", e)
+            return False
 
-            # Details abfragen als Ergänzung
+        def _post_with_auth(endpoint: str, json_data: dict) -> Optional[requests.Response]:
+            nonlocal token
+            url = f"{base_url.rstrip('/')}/{endpoint.lstrip('/')}"
+            payload = dict(json_data)
+            if token and "token" not in payload:
+                payload["token"] = token
+            if appkey and "appkey" not in payload:
+                payload["appkey"] = appkey
+
+            headers = {
+                "x-access-key": app_secret,
+                "sys_code": "901",
+                "token": str(token or ""),
+                "Authorization": f"Bearer {token}",
+                "Content-Type": "application/json",
+            }
             try:
-                resp = _post_with_auth(
-                    "openapi/platform/getPowerStationDetail",
-                    {"appkey": appkey, "token": token, "ps_ids": str(ps_id or ""), "lang": "_de_DE"},
-                )
-                if resp and resp.status_code == 200:
-                    det_json = resp.json()
-                    if det_json.get("result_data", {}).get("data_list"):
-                        d_list = det_json["result_data"]["data_list"]
-                        if isinstance(d_list, list) and d_list:
-                            raw_data["result_data"].update(d_list[0])
-            except Exception as e:
-                logger.warning("getPowerStationDetail query failed: %s", e)
-
-            telemetry = self.parse_payload(raw_data)
-
-            # Validitätsprüfung
-            if "_direct_metrics" not in raw_data and not raw_data.get("result_data"):
-                if is_mock:
-                    return AdapterTestResult(
-                        status="success",
-                        message=f"Verbindung zu {self.name} erfolgreich (Simulator).",
-                        live_metrics=telemetry.to_metrics_dict(),
-                        raw_sample=raw_data,
-                        simulated=True,
-                    )
-                else:
-                    err_msg = "Sungrow OpenAPI-Sitzung ist abgelaufen oder ungültig. Bitte Autorisierung unter Schnittstellen erneuern."
-                    logger.warning(err_msg)
-                    return AdapterTestResult(
-                        status="error",
-                        error=err_msg,
-                        message=err_msg,
-                        live_metrics=telemetry.to_metrics_dict(),
-                        raw_sample=raw_data,
-                        simulated=False,
-                    )
-
-            return AdapterTestResult(
-                status="success",
-                message=f"Live-Verbindung zu {self.name} erfolgreich!",
-                live_metrics=telemetry.to_metrics_dict(),
-                raw_sample=raw_data,
-                simulated=False,
-            )
-
-        else:
-            # Legacy Login Modus (Benutzername & Passwort)
-            user_acc = credentials.get("user_account")
-            user_pw = credentials.get("user_password")
-
-            if not user_acc or not user_pw:
-                err_msg = "Sungrow Zugangsdaten unvollständig (Benutzername oder Passwort fehlt)."
-                return AdapterTestResult(status="error", error=err_msg, message=err_msg)
-
-            # 1. Login Handshake mit Cache-Invalidierung bei Fehler
-            def _fetch_legacy_data(force_fresh_login: bool = False) -> dict:
-                nonlocal token
-                cache_key = f"sungrow_token_{appkey}_{user_acc}"
-                if force_fresh_login:
-                    cache.delete(cache_key)
-                    token = None
-
-                if not token:
-                    t_data = self._execute_login(
-                        base_url=base_url,
-                        appkey=appkey,
-                        account=user_acc,
-                        password=user_pw,
-                    )
-                    token = t_data["token"]
-                    credentials["token"] = token
-                    credentials["user_id"] = t_data.get("user_id")
-
-                headers = {
-                    "Content-Type": "application/json",
-                    "sys_code": "901",
-                    "token": str(token),
-                }
-                body = {
-                    "appkey": appkey,
-                    "ps_id": str(ps_id or ""),
-                }
-
-                # Station Detail abfragen
-                resp = requests.post(
-                    f"{base_url.rstrip('/')}/v1/powerStationService/getPowerStationDetail",
-                    headers=headers,
-                    json=body,
-                    timeout=12,
-                )
+                resp = requests.post(url, json=payload, headers=headers, timeout=12)
+                is_auth_err = resp.status_code in (401, 403)
                 if resp.status_code == 200:
-                    res_j = resp.json()
-                    # Prüfen ob Token ungültig / abgelaufen war
-                    c_code = str(res_j.get("result_code", ""))
-                    c_msg = str(res_j.get("result_msg", "")).lower()
-                    if c_code not in ("1", "0", "0000") or ("token" in c_msg and ("invalid" in c_msg or "expired" in c_msg)):
-                        if not force_fresh_login:
-                            logger.info("Sungrow Legacy token expired, retrying with fresh login...")
-                            return _fetch_legacy_data(force_fresh_login=True)
-                    return res_j
-                elif resp.status_code in (401, 403) and not force_fresh_login:
-                    return _fetch_legacy_data(force_fresh_login=True)
-                return {}
+                    try:
+                        body = resp.json()
+                        code_str = str(body.get("result_code", ""))
+                        msg_str = str(body.get("result_msg", "")).lower()
+                        if code_str in ("2", "000", "0000", "401") or ("token" in msg_str and ("invalid" in msg_str or "expired" in msg_str or "fail" in msg_str)):
+                            is_auth_err = True
+                    except Exception:
+                        pass
 
+                if is_auth_err and _refresh_openapi_token():
+                    payload["token"] = token
+                    headers["token"] = str(token or "")
+                    headers["Authorization"] = f"Bearer {token}"
+                    resp = requests.post(url, json=payload, headers=headers, timeout=12)
+                return resp
+            except Exception as req_err:
+                logger.warning("Sungrow OpenAPI request to %s failed: %s", endpoint, req_err)
+                return None
+
+        # 1. Automatischer Auth-Code Austausch bei Neu-Kopplung
+        if credentials.get("auth_code") and not token:
             try:
-                raw_data = _fetch_legacy_data(force_fresh_login=False)
-            except Exception as leg_err:
-                logger.warning("Sungrow Legacy execution failed: %s", leg_err)
-                return AdapterTestResult(
-                    status="error",
-                    error=str(leg_err),
-                    message=f"Fehler bei Sungrow Verbindung: {leg_err}",
+                redir_url = credentials.get("redirect_uri") or getattr(settings, "SUNGROW_REDIRECT_URI", "")
+                t_resp = requests.post(
+                    f"{base_url.rstrip('/')}/openapi/oauth/token",
+                    json={
+                        "appkey": appkey,
+                        "code": credentials["auth_code"],
+                        "grant_type": "authorization_code",
+                        "redirect_uri": redir_url,
+                    },
+                    headers={"x-access-key": app_secret, "sys_code": "901", "Content-Type": "application/json"},
+                    timeout=10,
                 )
+                if t_resp.status_code == 200 and t_resp.json().get("access_token"):
+                    token = t_resp.json()["access_token"]
+                    credentials["token"] = token
+                    if t_resp.json().get("refresh_token"):
+                        credentials["refresh_token"] = t_resp.json()["refresh_token"]
+            except Exception as ex_err:
+                logger.warning("Auto token exchange failed: %s", ex_err)
 
-            telemetry = self.parse_payload(raw_data)
+        if not token:
+            err_msg = "Kein gültiger Sungrow OpenAPI Token vorhanden. Bitte autorisiere die Anlage über 'iSolarCloud 1-Klick verbinden'."
+            return AdapterTestResult(status="error", error=err_msg, message=err_msg)
 
+        # 2. Automatische Anlagen-ID (ps_id) Erkennung
+        if not ps_id or ps_id in ("default_ps", "12345", ""):
+            try:
+                list_resp = _post_with_auth(
+                    "openapi/platform/queryPowerStationList",
+                    {"page": 1, "size": 20, "lang": "_de_DE"},
+                )
+                if list_resp and list_resp.status_code == 200:
+                    list_data = list_resp.json().get("result_data", {})
+                    stations = list_data.get("pageList", []) if isinstance(list_data, dict) else []
+                    if stations:
+                        ps_id = str(stations[0].get("ps_id") or stations[0].get("id"))
+                        credentials["ps_id"] = ps_id
+                        credentials["ps_name"] = stations[0].get("ps_name", "Sungrow PV-Anlage")
+            except Exception as e:
+                logger.warning("Auto-fetch ps_id via OpenAPI failed: %s", e)
+
+        raw_data: Dict[str, Any] = {"result_code": "1", "result_data": {}}
+
+        # 3. Echtzeit-Messpunkte abfragen (getPowerStationRealTimeData)
+        try:
+            rt_resp = _post_with_auth(
+                "openapi/platform/getPowerStationRealTimeData",
+                {
+                    "appkey": appkey,
+                    "token": token,
+                    "ps_id_list": [str(ps_id or "")],
+                    "point_id_list": self.MEASURE_POINTS,
+                    "is_get_point_dict": "1",
+                },
+            )
+            if rt_resp and rt_resp.status_code == 200:
+                rt_json = rt_resp.json()
+                point_dict = rt_json.get("result_data", {}).get("point_dict", {})
+                if point_dict:
+                    logger.info("[SUNGROW_OPENAPI] Discovered Point Dictionary: %s", point_dict)
+                pts = rt_json.get("result_data", {}).get("device_point_list", [])
+                if pts:
+                    p_data = {}
+                    for item in pts:
+                        if isinstance(item, dict):
+                            if "point_id" in item and "point_value" in item:
+                                pid = str(item["point_id"])
+                                p_data[pid] = item["point_value"]
+                                p_data[f"p{pid}"] = item["point_value"]
+                            else:
+                                for k, v in item.items():
+                                    ks = str(k)
+                                    p_data[ks] = v
+                                    if not ks.startswith("p"):
+                                        p_data[f"p{ks}"] = v
+
+                    def _get_pt(*keys):
+                        for k in keys:
+                            for variant in [str(k), f"p{k}", f"P{k}"]:
+                                if variant in p_data and p_data[variant] is not None:
+                                    try:
+                                        return float(p_data[variant])
+                                    except (ValueError, TypeError):
+                                        pass
+                        return None
+
+                    pv = _get_pt("83033", "83067", "83329") or 0.0
+                    load = _get_pt("83052", "83106", "83330") or 0.0
+                    grid = _get_pt("83051", "83549", "83328") or 0.0
+                    bat_pwr = _get_pt("83104", "83238", "83111", "83112", "83326") or 0.0
+                    soc_raw = _get_pt("83129", "83252", "83334")
+
+                    soc_val = None
+                    if soc_raw is not None:
+                        if 0.0 <= soc_raw <= 1.0:
+                            soc_val = round(soc_raw * 100.0, 1)
+                        else:
+                            soc_val = round(soc_raw, 1)
+
+                    # Batterie Lade-/Entladerichtung standardisieren
+                    if soc_val is not None and soc_val >= 98.0:
+                        if bat_pwr < 0:
+                            bat_pwr = 0.0
+                    elif pv > (load + 30) and (soc_val is None or soc_val < 98.0) and abs(bat_pwr) > 10:
+                        bat_pwr = -abs(bat_pwr)
+                    elif pv < 20 and soc_val is not None and soc_val > 5.0 and load > 20:
+                        if abs(bat_pwr) < 0.1 and abs(grid) < 60:
+                            bat_pwr = load
+                        else:
+                            bat_pwr = abs(bat_pwr)
+
+                    # Netzeinspeisung / Grid Plausibilisierung vorzeichengenau:
+                    # Negativ = Netzeinspeisung (Export), Positiv = Netzbezug (Import)
+                    bat_charge = abs(min(0.0, bat_pwr))
+                    bat_discharge = max(0.0, bat_pwr)
+
+                    if pv > 50.0:
+                        surplus = pv + bat_discharge - load - bat_charge
+                        if surplus > 30.0:
+                            if grid > 0:
+                                grid = -abs(grid)
+                            elif grid == 0.0 and surplus > 50.0 and load > 0:
+                                grid = -round(surplus, 1)
+                        elif load > (pv + bat_discharge + 30.0):
+                            if grid < 0:
+                                grid = abs(grid)
+
+                    if load <= 0.0 and pv > 50.0:
+                        if grid > 0 and abs(grid - pv) < (pv * 0.5 + 500):
+                            grid = -abs(grid)
+                        load = max(0.0, round(pv + grid + bat_pwr, 1))
+
+                    raw_data["_direct_metrics"] = {
+                        "pv_power_w": max(0.0, pv),
+                        "load_power_w": max(0.0, load),
+                        "grid_power_w": grid,
+                        "battery_power_w": bat_pwr,
+                        "battery_soc": soc_val,
+                    }
+        except Exception as e:
+            logger.warning("getPowerStationRealTimeData query failed: %s", e)
+
+        # 4. Details abfragen als Ergänzung (getPowerStationDetail)
+        try:
+            resp = _post_with_auth(
+                "openapi/platform/getPowerStationDetail",
+                {"appkey": appkey, "token": token, "ps_ids": str(ps_id or ""), "lang": "_de_DE"},
+            )
+            if resp and resp.status_code == 200:
+                det_json = resp.json()
+                if det_json.get("result_data", {}).get("data_list"):
+                    d_list = det_json["result_data"]["data_list"]
+                    if isinstance(d_list, list) and d_list:
+                        raw_data["result_data"].update(d_list[0])
+        except Exception as e:
+            logger.warning("getPowerStationDetail query failed: %s", e)
+
+        telemetry = self.parse_payload(raw_data)
+
+        # Validitätsprüfung
+        if "_direct_metrics" not in raw_data and not raw_data.get("result_data"):
+            err_msg = "Sungrow OpenAPI-Sitzung ist abgelaufen oder ungültig. Bitte Autorisierung über 'iSolarCloud 1-Klick verbinden' erneuern."
+            logger.warning(err_msg)
             return AdapterTestResult(
-                status="success",
-                message=f"Live-Verbindung zu {self.name} erfolgreich hergestellt!",
+                status="error",
+                error=err_msg,
+                message=err_msg,
                 live_metrics=telemetry.to_metrics_dict(),
                 raw_sample=raw_data,
                 simulated=False,
             )
 
+        return AdapterTestResult(
+            status="success",
+            message=f"Live-Verbindung zu {self.name} (OpenAPI) erfolgreich!",
+            live_metrics=telemetry.to_metrics_dict(),
+            raw_sample=raw_data,
+            simulated=False,
+        )

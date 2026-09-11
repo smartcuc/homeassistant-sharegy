@@ -66,8 +66,8 @@ class ProfileRunnerTestCase(TestCase):
         sungrow = next(p for p in profiles if p["id"] == "sungrow_isolarcloud")
         field_keys = [f["key"] for f in sungrow["fields"]]
         self.assertIn("appkey", field_keys)
-        self.assertIn("user_account", field_keys)
         self.assertIn("ps_id", field_keys)
+
 
         kostal = next(p for p in profiles if p["id"] == "kostal_solar_portal")
         self.assertEqual(kostal["vendor"], "Kostal")

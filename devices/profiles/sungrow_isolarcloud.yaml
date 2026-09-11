@@ -3,72 +3,67 @@ name: "Sungrow iSolarCloud"
 vendor: "Sungrow"
 category: "inverter_hybrid"
 protocol: "http_cloud"
-description: "Cloud-Schnittstelle für alle Sungrow Hybrid-Wechselrichter (SH-Serie wie SH5.0RT, SH10RT, SH15T, SH25T) und SBR-Batteriespeicher."
+description: "Offizielle OpenAPI & OAuth 2.0 Schnittstelle für alle Sungrow Hybrid-Wechselrichter (SH-Serie wie SH5.0RT, SH10RT, SH15T, SH25T) und SBR-Batteriespeicher."
 
 help:
-  de: "1. Logge dich in iSolarCloud (isolarcloud.eu) ein.\n2. Deine Anlagen-ID (Power Station ID / ps_id) findest du in der URL deiner Anlage oder in den Anlagen-Details.\n3. Verwende deine gewohnten iSolarCloud Zugangsdaten (E-Mail und Passwort) sowie deinen Developer/Gateway AppKey."
-  en: "1. Log in to iSolarCloud (isolarcloud.eu).\n2. Find your Power Station ID (ps_id) in the browser URL of your plant or under plant settings.\n3. Enter your iSolarCloud login credentials (email and password) along with your Developer/Gateway AppKey."
+  de: "1. Klicke auf 'iSolarCloud 1-Klick verbinden', um deine Anlage direkt über das offizielle Sungrow Portal zu autorisieren.\n2. Deine Anlagen-ID (ps_id) und alle Wechselrichter & Heimspeicher werden automatisch erkannt und verknüpft."
+  en: "1. Click 'Connect iSolarCloud 1-Click' to authorize your solar plant directly via the official Sungrow portal.\n2. Your plant ID (ps_id) and all inverters & batteries will be automatically discovered."
 
 # Verbindungskonfiguration & UI-Formularfelder
 connection:
-  auth_type: "sungrow_token"     # sungrow_token, bearer_token, api_key_header, basic_auth
+  auth_type: "oauth2"
   default_base_url: "https://gateway.isolarcloud.eu"
   polling_interval_seconds: 15
   fields:
     - key: "appkey"
       label: "Sungrow AppKey"
       type: "string"
-      required: true
-      description: "Dein iSolarCloud Developer AppKey (oder Gateway AppKey)"
-      placeholder: "z. B. B4A5F7... oder 998811"
-    - key: "user_account"
-      label: "iSolarCloud Benutzername / E-Mail"
-      type: "string"
-      required: true
-      placeholder: "nutzer@example.de"
-    - key: "user_password"
-      label: "iSolarCloud Passwort"
-      type: "password"
-      required: true
+      required: false
+      description: "Dein iSolarCloud Developer AppKey (optional, falls ein eigener Schlüssel genutzt werden soll)"
+      placeholder: "z. B. 988713D7D057090474AEC9584CBA1AAD"
     - key: "ps_id"
       label: "Anlagen-ID (Power Station ID)"
       type: "string"
-      required: true
-      description: "Die ID deiner Anlage in iSolarCloud (aus der URL oder den Anlageneinstellungen)"
+      required: false
+      description: "Wird bei der Autorisierung automatisch ermittelt (oder manuell aus der URL eintragen)"
       placeholder: "z. B. 1234567"
 
-# HTTP API Endpoints & Request-Templates
+# HTTP API Endpoints (Offizielle OpenAPI)
 requests:
-  # 1. Login zur Beschaffung des User-Tokens
-  login:
-    method: "POST"
-    endpoint: "/v1/userService/login"
-    headers:
-      "Content-Type": "application/json"
-      "sys_code": "901"
-    body:
-      appkey: "{{appkey}}"
-      user_account: "{{user_account}}"
-      user_password: "{{user_password}}"
-    token_extraction:
-      token_path: "$.result_data.token"
-      user_id_path: "$.result_data.user_id"
-
-  # 2. Abruf der aktuellen Echtzeit-Leistungsdaten der Anlage
   telemetry:
     method: "POST"
-    endpoint: "/v1/powerStationService/getPowerStationDetail"
+    endpoint: "/openapi/platform/getPowerStationRealTimeData"
     headers:
       "Content-Type": "application/json"
       "sys_code": "901"
       "token": "{{token}}"
     body:
       appkey: "{{appkey}}"
-      ps_id: "{{ps_id}}"
+      token: "{{token}}"
+      ps_id_list:
+        - "{{ps_id}}"
+      point_id_list:
+        - "83033"
+        - "83067"
+        - "83052"
+        - "83106"
+        - "83051"
+        - "83549"
+        - "83129"
+        - "83252"
+        - "83238"
+        - "83104"
+        - "83111"
+        - "83112"
+        - "83326"
+        - "83328"
+        - "83329"
+        - "83330"
+        - "83334"
+      is_get_point_dict: "1"
 
 # Mappings: Sungrow-JSON -> Sharegy Canonical Energy Metrics
 metrics_mapping:
-  # 1. Aktuelle PV-Erzeugung (in kW geliefert -> Faktor 1000 = Watt)
   pv_power_w:
     jsonpath: "$.result_data.curr_power"
     scale: 1000.0
@@ -77,7 +72,6 @@ metrics_mapping:
     max: 100000.0
     fallback: 0.0
 
-  # 2. Netzbezug (+) / Netzeinspeisung (-) in Watt
   grid_power_w:
     jsonpath: "$.result_data.grid_power"
     scale: 1000.0
@@ -86,7 +80,6 @@ metrics_mapping:
     max: 100000.0
     fallback: 0.0
 
-  # 3. Hausverbrauch (Last) in Watt
   load_power_w:
     jsonpath: "$.result_data.load_power"
     scale: 1000.0
@@ -95,7 +88,6 @@ metrics_mapping:
     max: 100000.0
     fallback: 0.0
 
-  # 4. Batterie-Leistung (Entladung (+) / Ladung (-) in Watt)
   battery_power_w:
     jsonpath: "$.result_data.battery_power"
     scale: 1000.0
@@ -104,7 +96,6 @@ metrics_mapping:
     max: 50000.0
     fallback: 0.0
 
-  # 5. Batterie-Ladestand (SoC in %)
   battery_soc:
     jsonpath: "$.result_data.battery_soc"
     scale: 1.0
