@@ -12,15 +12,17 @@ import DashboardHybrid from "./DashboardHybrid";
 
 export default function Dashboard({ user }) {
 
+    // ✅ TRACK
+    useEffect(() => {
+        if (user) {
+            trackEvent("dashboard_view", {
+                usage_mode: user.usage_mode
+            });
+        }
+    }, [user]);
+
     // ✅ wichtig
     if (!user) return null;
-
-    // ✅ TRACK (HIER FEHLT ES OFT!)
-    useEffect(() => {
-        trackEvent("dashboard_view", {
-            usage_mode: user.usage_mode
-        });
-    }, []);
 
     if (user.usage_mode === "hybrid") {
         return <DashboardHybrid />;
