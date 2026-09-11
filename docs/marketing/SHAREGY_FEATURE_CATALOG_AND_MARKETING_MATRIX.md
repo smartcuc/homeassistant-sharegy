@@ -238,3 +238,44 @@ Sharegy ist die **erste ganzheitliche Energie-Plattform**, die hochperformantes 
 * **Interaktiver Transparenz-Rechner**: Schieberegler für PV (kWp), Speicher (kWh), Wallbox, Wärmepumpe und Sharing zur Ermittlung des Vorteils.
 * **1-Klick-Gast-Zugang (`/api/demo/`)**: Sofortiger Einstieg ins echte Dashboard im neuen Tab ohne Registrierung.
 * **Symmetrisches 12-Hersteller Grid**: Vollständige Hersteller-Übersicht inklusive ioBroker & Home Assistant mit § 23 MarkenG Disclaimer.
+
+---
+
+### 18. 🏢 Virtueller Summenzähler für Mehrfamilienhäuser & Nachbarschaften
+* **15-Minuten-Intervall-Saldierung am Netzanschlusspunkt (NAP)**: Mathematisch exakte, eichrechtskonforme Zeitreihenberechnung ($P_\text{NAP} = \sum P_\text{Mieter} - P_\text{PV}$) für alle 96 Viertelstunden des Tages.
+* **3 Aufteilungsmodelle nach § 42b EnWG**:
+  * *Dynamisch (zeitgleich)*: Strom wird in Echtzeit proportional zum Viertelstunden-Bedarf der Parteien verteilt.
+  * *Statisch (Miteigentumsanteile MEA)*: Feste Zuteilungsquoten je Wohneinheit.
+  * *Hybrid*: Vorrangige Eigenbedarfsdeckung mit dynamischer Nachbarschafts-Überschussverteilung.
+* **Automatisierte PDF-Monatsabrechnungen**: Vollautomatischer Celery-Task erzeugt monatlich rechtssichere Einzelabrechnungs-PDFs mit persönlichem Verbrauchs-, Solar- und Reststrom-Nachweis sowie Cent-genauer Abrechnung.
+* **Multi-Format Export für Hausverwaltungen**: 1-Klick Export aller Abrechnungs- und Lastgangdaten als Excel (`.xlsx`), CSV (Semikolon/UTF-8 BOM für DATEV) und XML für gängige ERP- und Hausverwaltungssysteme.
+
+---
+
+### 19. 🔌 Virtual Power Plant (VPP) Aggregator & Leitsystem API
+* **Aggregierte Flexibilitätsbereitstellung**: REST-API (`/api/vpp/flexibility/`) zur Echtzeit-Bereitstellung aggregierter positiver und negativer Regelleistung (+kW / -kW) aus Heimspeichern, Wallboxen und Wärmepumpen für Übertragungsnetzbetreiber (ÜNB) und Verteilnetzbetreiber (VNB).
+* **Sekundärregelleistung (aFRR / SRL) & Primärregelleistung (FCR)**: Hochperformante Pooling- und Aktivierungslogik für Systemdienstleistungen im Übertragungsnetz.
+* **Redispatch 2.0 / Connect+ 96-Viertelstunden-Fahrpläne**: Fahrplan-Generierung im standardisierten `PT15M`-Raster für den Day-Ahead- und Intraday-Fahrplanaustausch mit Netzbetreibern.
+* **§ 14a EnWG SteuVE-Modul**: Dimmbare Verbrauchseinrichtungen (Wallboxen, Wärmepumpen) mit Angabe des netzdienlich abregelbaren Potentials.
+* **Leitsystem Dispatch & Telemetrie**: Direkte Annahme und Ausführung von Schaltsignalen (`UP` / `DOWN` / `CURTAIL`) via REST/JSON mit sub-sekündlicher Quittierung und Latenz-Tracking.
+
+---
+
+### 20. ☀️ Multi-Hersteller Inverter Cloud-Ökosystem & Global Polling Management
+* **Zero-Hardware Cloud Anbindung in unter 60 Sekunden**:
+  * **Victron Energy**: Volle VRM API v2 Integration (Installations-IDs, Live-Erzeugung, AC-Out Last, Batterie-SoC & Stromnetz-Status).
+  * **Sungrow**: Offizielle iSolarCloud OpenAPI v2 Integration (Power Status, Realtime Metrics & Inverter Arbitrage Control).
+  * **Fronius**: Solarweb REST & ioBroker Bridge.
+  * **SMA, SolarEdge, Kostal, Growatt, Deye, Huawei, GoodWe, Solis**: Cloud-Token & Modbus-Protokoll-Unterstützung.
+* **Globales & Individuelles Polling-Management**:
+  * Zentrale Konfiguration der Abfrageintervalle je Hersteller im Django-Systemverwaltung Backend zur Vermeidung von Cloud-Rate-Limits.
+  * Individuelle Überschreibung je Einzelwechselrichter bei Bedarf.
+
+---
+
+### 21. 📱 Native Android App (Capacitor 7) & Google Play Store Suite
+* **Native Android App**: Vollständig integriertes Capacitor 7 Projekt mit Material Design Statusleiste, Pull-to-Refresh und nativer Haptik.
+* **Google Play Store Ready**: Signierter Release-Build (`.aab`), ProGuard/R8 Obfuscation & Fastlane Automatisierung.
+* **Firebase Cloud Messaging (FCM)**: Native Push-Benachrichtigungen für Ertragsalarme, Tiefentladeschutz und Spitzenstrompreise.
+* **In-App Updates**: Automatischer Prüfdialog für neue Versionen direkt aus dem Play Store.
+

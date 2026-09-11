@@ -2551,6 +2551,79 @@ The official **Sharegy Home Assistant Integration** streams all your local smart
                 "is_featured": True,
                 "sort_order": 1,
             },
+            # ---------------------------------------------------------------------
+            # 10. BILLING & TENANT ADMIN: DER GROSSE LEITFADEN FÜR VERWALTER
+            # ---------------------------------------------------------------------
+            {
+                "category": cats["billing"],
+                "slug": "tenant-admin-leitfaden-mieterstrom-und-vpp",
+                "context_key": "tenant_admin_guide",
+                "title_de": "Tenant-Admin Leitfaden: Virtueller Summenzähler, § 42b Mieterstrom & PDF-Abrechnungen",
+                "title_en": "Tenant-Admin Guide: Virtual Master Meter, Multi-Tenant Allocation & PDF Invoices",
+                "summary_de": "Der vollständige Leitfaden für Liegenschafts-Admins, Vermieter und WEGs: 15m NAP-Saldierung, MEA-Aufteilungsschlüssel, PDF-Abrechnungen und VPP-Flexibilität.",
+                "summary_en": "Comprehensive guide for property managers and communities: 15-minute grid settlement, allocation keys, automated PDF billing, and VPP flexibility.",
+                "content_de": r"""# 🏢 Tenant-Admin Leitfaden: Virtueller Summenzähler, Mieterstrom & Monatsabrechnungen
+
+Als **Liegenschafts- oder Quartiers-Administrator (Tenant-Admin)** verwaltest du die energiewirtschaftlichen Prozesse deines Gebäudes oder deiner Nachbarschaftsgemeinschaft.
+
+---
+
+## 🌟 Die Kernfunktionen im Liegenschafts-Dashboard (`/app/tenant`)
+
+### 1. 🏢 Virtueller Summenzähler & NAP-Saldierung
+* **Eichrechtskonforme 15-Minuten-Saldierung**: Sharegy berechnet für alle 96 Viertelstunden des Tages den exakten Netzeinspeise- und Bezugssaldo am Netzanschlusspunkt (NAP).
+* **3 Aufteilungsmodelle (§ 42b EnWG)**:
+  1. *Dynamisch (zeitgleich)*: Zuteilung proportional zum Echtzeit-Verbrauch im selben 15m-Intervall (Maximale Fairness).
+  2. *Statisch (nach MEA-Schlüssel)*: Feste Zuteilungsquote nach Miteigentumsanteilen je Wohnung.
+  3. *Hybrid*: Vorrangige Eigenversorgung + dynamisches Überschuss-Sharing.
+
+### 2. 💰 Tarife & Monatliche PDF-Abrechnungen
+* **Tarifkonfiguration**: Einstellen von Solarstrompreis (ct/kWh), Reststrombezug (ct/kWh) und monatlicher Grundgebühr (€).
+* **Monatliches Clearing**: 1-Klick Auslösung der Monatsabrechnung erzeugt für jeden Mieter einen rechtssicheren PDF-Abrechnungsnachweis mit Einzelnachweis.
+* **Exporte für Hausverwaltung & Steuerberater**: Excel (`.xlsx`), CSV (DATEV-kompatibel, Semikolon/UTF-8 BOM) und XML für ERP-Software (Haufe, DOMUS etc.).
+
+### 3. 🔌 VPP Kraftwerk & § 14a EnWG Flexibilitäts-Pool
+* **Aggregierte Flexibilität**: Übersicht des steuerbaren Leistungsbandes (+kW / -kW) aller Heimspeicher und Lasten.
+* **§ 14a SteuVE Modul**: Dimmbare Wallboxen und Wärmepumpen zur Sicherung des pauschalen Netzentgelt-Rabatts (~160 € / Anlage / Jahr).
+* **Redispatch 2.0 / Connect+ 96-Fahrplan**: Automatische Fahrplangenerierung (`PT15M`) für Netzbetreiber.
+
+### 4. 👥 Mitglieder & Rollenverwaltung
+* Rollenbasierte Rechtevergabe: *Admin* 🏛️, *Energy-Userverwaltung* 👥, *Auditor / Kassenprüfer* 📊, *Helpdesk* 🛟 und *Mitglied* ⚡.
+* Datenschutzkonformität: Mieter sehen ausschließlich den eigenen Verbrauch und die eigene Abrechnung.
+""",
+                "content_en": r"""# 🏢 Tenant-Admin Guide: Virtual Master Meter, Sub-Metering & PDF Invoices
+
+As a **Tenant Administrator (Property Manager / Community Admin)**, you manage all energy flows, billing, and flexibility across your multi-family building or energy community.
+
+---
+
+## 🌟 Key Capabilities in the Tenant Dashboard (`/app/tenant`)
+
+### 1. 🏢 Virtual Master Meter & Grid Connection (NAP) Settlement
+* **15-Minute Interval Settlement**: Exact calculation of grid feed-in and import balances across all 96 quarter-hours per day.
+* **3 Allocation Keys (§ 42b EnWG)**:
+  1. *Dynamic (Concurrent)*: Allocated in real-time based on 15m energy demand (Max fairness).
+  2. *Static (Ownership Share / MEA)*: Fixed percentage allocated per apartment.
+  3. *Hybrid*: Priority self-consumption with dynamic excess sharing.
+
+### 2. 💰 Tariffs & Automated Monthly PDF Statements
+* **Tariff Setup**: Configure Solar sharing rates (ct/kWh), Grid import rates (ct/kWh), and base fees (€/mo).
+* **Monthly Clearing**: 1-click settlement generates compliant, itemized PDF statements for every resident.
+* **Multi-Format Exports**: Excel (`.xlsx`), CSV (DATEV-ready), and XML for property ERP systems.
+
+### 3. 🔌 Virtual Power Plant (VPP) & Grid Flexibility
+* **Aggregated Fleet Capacity**: Real-time positive (+kW) and negative (-kW) active power flexibility.
+* **Controllable Loads (§ 14a EnWG)**: Dimmable wallboxes and heat pumps qualifying for grid fee rebates.
+* **Redispatch 2.0 / Connect+ 96 Schedule**: Standardized `PT15M` schedules for transmission system operators.
+
+### 4. 👥 Member & RBAC Management
+* Assign roles: *Admin* 🏛️, *User Manager* 👥, *Auditor* 📊, *Helpdesk* 🛟, and *Member* ⚡.
+* Strict GDPR compliance: Residents only see their own private energy usage and invoices.
+""",
+                "tags": ["tenant admin", "mieterstrom", "virtual master meter", "pdf abrechnung", "vpp", "§ 42b EnWG", "hausverwaltung"],
+                "is_featured": True,
+                "sort_order": 2,
+            },
         ]
         for adata in articles_data:
             HelpArticle.objects.update_or_create(
@@ -2559,4 +2632,5 @@ The official **Sharegy Home Assistant Integration** streams all your local smart
             )
 
         self.stdout.write(self.style.SUCCESS(f"[OK] Erfolgreich {len(categories_data)} Kategorien und {len(articles_data)} Handbuch-Artikel in DE & EN initialisiert!"))
+
 

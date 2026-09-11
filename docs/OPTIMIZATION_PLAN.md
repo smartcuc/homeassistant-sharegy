@@ -16,6 +16,7 @@
 | **Phase 6** | Säule 2: Energy Sharing & Clearing | 🟢 ESC & Multi-Community Hub | 🟢 100% Abgeschlossen | 6.1 – 6.12 | – |
 | **Phase 7** | Go-To-Market & PLG Engine | 🟢 Landingpage 2.0 & Simulator | 🟢 100% Abgeschlossen | 7.1 – 7.5 | – |
 | **Phase 8** | Energie-Profil, Rechner & Help 2.0 | 🟢 Matrix A.1–F.1 & Adaptives UI | 🟢 100% Abgeschlossen | 8.1 – 8.7 | – |
+| **Phase 9** | Virtueller Summenzähler, VPP & Cloud Inverter | 🟢 NAP 15m, aFRR/SRL, VRM, Android | 🟢 100% Abgeschlossen | 9.1 – 9.6 | – |
 
 
 
@@ -924,6 +925,45 @@
 ### [x] 8.7 Bereinigung von Marketing- und Fachbegriffen (Kein "Ökostrom")
 - **Dateien**: Gesamte Codebasis, Locales (`de.json`, `en.json`) & Services
 - **Status**: ✅ **Erledigt**. Vollständige Bereinigung: Nur noch neutrale, präzise Fachbegriffe (*"Strom"*, *"Stromtarif"*, *"Klassischer Festpreis-Tarif"*, *"Dynamischer Börsenstromtarif"*).
+
+---
+
+## Phase 9 — Virtueller Summenzähler, VPP Aggregator & Inverter Cloud Ökosystem
+
+### [x] 9.1 Virtueller Summenzähler für Mehrfamilienhäuser & Liegenschaften
+- **Dateien**: [`billing/services_virtual_meter.py`](file:///c:/Users/Public/Dev/eswes/billing/services_virtual_meter.py), [`billing/api/views_community.py`](file:///c:/Users/Public/Dev/eswes/billing/api/views_community.py), [`billing/urls.py`](file:///c:/Users/Public/Dev/eswes/billing/urls.py), [`billing/test_virtual_master_meter.py`](file:///c:/Users/Public/Dev/eswes/billing/test_virtual_master_meter.py)
+- **Status**: ✅ **Erledigt**. 15-Minuten-Zeitreihensaldierung am Netzanschlusspunkt (NAP), 3 gesetzliche Aufteilungsmodelle (§ 42b EnWG: Dynamisch zeitgleich, Statisch nach MEA-Schlüssel, Hybrid).
+
+---
+
+### [x] 9.2 Automatisierte monatliche PDF-Abrechnungs-Engine
+- **Dateien**: [`billing/tasks.py`](file:///c:/Users/Public/Dev/eswes/billing/tasks.py), [`billing/services_pdf.py`](file:///c:/Users/Public/Dev/eswes/billing/services_pdf.py), [`billing/admin.py`](file:///c:/Users/Public/Dev/eswes/billing/admin.py)
+- **Status**: ✅ **Erledigt**. Celery Task `generate_monthly_community_settlements_and_pdfs` erzeugt monatlich rechtssichere Mieter-Abrechnungsnachweise mit PDF-Download und Excel/CSV/XML-Export für Hausverwaltungen.
+
+---
+
+### [x] 9.3 Virtual Power Plant (VPP) Aggregator & Leitsystem API
+- **Dateien**: [`vpp/models.py`](file:///c:/Users/Public/Dev/eswes/vpp/models.py), [`vpp/services_vpp.py`](file:///c:/Users/Public/Dev/eswes/vpp/services_vpp.py), [`vpp/views.py`](file:///c:/Users/Public/Dev/eswes/vpp/views.py), [`vpp/urls.py`](file:///c:/Users/Public/Dev/eswes/vpp/urls.py), [`vpp/admin.py`](file:///c:/Users/Public/Dev/eswes/vpp/admin.py), [`vpp/test_vpp_aggregator.py`](file:///c:/Users/Public/Dev/eswes/vpp/test_vpp_aggregator.py)
+- **Status**: ✅ **Erledigt**. REST-API (`/api/vpp/flexibility/`) für Sekundärregelleistung (aFRR/SRL) & FCR, Redispatch 2.0 / Connect+ 96-Viertelstunden-Fahrpläne (`PT15M`), § 14a EnWG SteuVE-Aggregation und Leitsystem-Dispatch-Steuerung.
+
+---
+
+### [x] 9.4 Multi-Hersteller Cloud Inverter Hub & Globales Polling
+- **Dateien**: [`devices/services_victron.py`](file:///c:/Users/Public/Dev/eswes/devices/services_victron.py), [`devices/services_sungrow_cloud.py`](file:///c:/Users/Public/Dev/eswes/devices/services_sungrow_cloud.py), [`devices/admin.py`](file:///c:/Users/Public/Dev/eswes/devices/admin.py)
+- **Status**: ✅ **Erledigt**. Zero-Hardware Cloud-Anbindung für Victron Energy VRM v2, Sungrow iSolarCloud v2, Fronius Solarweb, SMA, SolarEdge, Kostal, Growatt, Deye, Huawei Cloud. Zentrales Polling-Rate Management im Django Admin zur Vermeidung von Cloud-Rate-Limits.
+
+---
+
+### [x] 9.5 Frontend UIs im Tenant Dashboard (`/app/tenant`)
+- **Dateien**: [`frontend/src/features/community/components/VirtualMasterMeterHub.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/community/components/VirtualMasterMeterHub.jsx), [`frontend/src/features/energy/components/VppAggregatorCockpit.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/features/energy/components/VppAggregatorCockpit.jsx), [`frontend/src/pages/TenantDashboard.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/pages/TenantDashboard.jsx)
+- **Status**: ✅ **Erledigt**. 2 neue Tabs: Virtueller Summenzähler (15m-Zeitreihe, MEA-Tabelle, Autarkie-KPIs) und VPP Kraftwerk (Flottenflexibilität, § 14a SteuVE, 96-Fahrplan, Dispatch-Simulator).
+
+---
+
+### [x] 9.6 Native Android App & Google Play Store Suite
+- **Dateien**: [`frontend/capacitor.config.ts`](file:///c:/Users/Public/Dev/eswes/frontend/capacitor.config.ts), [`releases/v1.0.0-android/`](file:///c:/Users/Public/Dev/eswes/releases/v1.0.0-android), [`docs/PLAY_STORE_RELEASE_AND_ACCOUNT_GUIDE.md`](file:///c:/Users/Public/Dev/eswes/docs/PLAY_STORE_RELEASE_AND_ACCOUNT_GUIDE.md)
+- **Status**: ✅ **Erledigt**. Capacitor 7 Native Build, signiertes `.aab` Release, Firebase Cloud Messaging (FCM) Push-Benachrichtigungen und In-App Version Update Check.
+
 
 
 

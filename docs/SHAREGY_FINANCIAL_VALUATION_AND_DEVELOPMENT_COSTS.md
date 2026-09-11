@@ -50,17 +50,20 @@ Sharegy ist keine einfache CRUD-Webanwendung, sondern eine **hochkomplexe, verte
 | **4. KI-Forecasts & Anomalieerkennung**<br>• 48h Hybrid Physics + ML PV-Ertragsprognose<br>• Haushalts-Lastprognose & Netto-Überschuss<br>• 7-Tage Auto-ML Baseline (Predictive Maintenance)<br>• Smarte EPEX-Ladefenster & Peak-Shaving Analyse | Senior ML Engineer<br>Data Scientist | 65 PT<br>*(~3,2 PM)* | 52.000 € – 68.000 € | 78.000 € – 105.000 € |
 | **5. Säule 2: Energy Sharing, Clearing & § 14a EnWG**<br>• 15-Minuten OBIS-Bilanzierung & Resiliente Ingestion<br>• 3 Allokationsmodelle (§ 42b EnWG: Dyn, Stat, Hyb)<br>• 🛡️ § 14a EnWG Summenleistungs-Dimmung (4,2 kW Kontingent)<br>• Discovergy/inexogy wMSB REST Hub & Tarife<br>• PDF-, Excel-, CSV- & ERP-XML-Abrechnungsengine | Senior FinTech Eng.<br>Regulatory Energy Eng. | 135 PT<br>*(~6,8 PM)* | 108.000 € – 140.000 € | 160.000 € – 215.000 € |
 | **6. Frontend UI/UX, Sankey, Pro Gating & Native Apps**<br>• Responsive React SPA mit Live-Pulse Ticker & Dark/Light Theme<br>• 👑 Standardisierte Pro-Freemium Gating-UX mit interaktiver Demo-Vorschau<br>• Multistring AC-Erkennung (2. Wechselrichter / BKW)<br>• Capacitor 7 Android App & W3C Web-Push VAPID<br>• Multi-Language i18n (6 EU-Sprachen: DE, EN, PL, TR, RU, RO) | Senior Frontend Eng.<br>Mobile App Eng.<br>UI/UX Designer | 125 PT<br>*(~6,2 PM)* | 95.000 € – 120.000 € | 140.000 € – 185.000 € |
-| **7. QA, Testabdeckung, Security & Compliance**<br>• 100% automatisierte Test Suite (170+ Unit- & Integrationstests)<br>• Multi-Tenant RBAC, Audit-Logging & DSGVO-Consent<br>• System-Health-Monitoring Engine & Auto-Watchdog | QA / Test Engineer<br>Security Specialist | 55 PT<br>*(~2,8 PM)* | 42.000 € – 55.000 € | 60.000 € – 82.000 € |
+| **7. QA, Testabdeckung, Security & Compliance**<br>• 100% automatisierte Test Suite (180+ Unit- & Integrationstests)<br>• Multi-Tenant RBAC, Audit-Logging & DSGVO-Consent<br>• System-Health-Monitoring Engine & Auto-Watchdog | QA / Test Engineer<br>Security Specialist | 55 PT<br>*(~2,8 PM)* | 42.000 € – 55.000 € | 60.000 € – 82.000 € |
 | **8. Architektur, Projektleitung & Regulatory**<br>• Technische Gesamtarchitektur & Systemdesign<br>• BNetzA / § 42b EnWG / MsbG / § 14a EnWG Normenabgleich<br>• Handbuch- & Dokumentationserstellung | Lead Architect<br>Product Owner | 65 PT<br>*(~3,2 PM)* | 60.000 € – 78.000 € | 85.000 € – 118.000 € |
-| **9. Energie-Profil Matrix, Rechner & Wissensportal 2.0**<br>• Mathematische Klassifikation A.1–F.1 mit Hardware-Erkennung<br>• 4-Kanal Sparpotenzial- & Lastverschiebungskalkulation<br>• Profil-Adaptives UI-System & Hero Quick-Actions<br>• 9 Kategorien & 20 Handbuch-Artikel (DE & EN) | Senior Algorithm Eng.<br>Fullstack & Technical Writer | 50 PT<br>*(~2,5 PM)* | 40.000 € – 52.000 € | 57.000 € – 75.000 € |
-| **GESAMT-ENTWICKLUNGSAUFWAND** | **Team: 4–6 Experten** | **795 PT**<br>*(~40 PM)* | **630.000 € – 805.000 €** | **925.000 € – 1.230.000 €** |
+| **9. Energie-Profil Matrix, Rechner & Wissensportal 2.0**<br>• Mathematische Klassifikation A.1–F.1 mit Hardware-Erkennung<br>• 4-Kanal Sparpotenzial- & Lastverschiebungskalkulation<br>• Profil-Adaptives UI-System & Hero Quick-Actions<br>• 9 Kategorien & 25 Handbuch-Artikel (DE & EN) | Senior Algorithm Eng.<br>Fullstack & Technical Writer | 50 PT<br>*(~2,5 PM)* | 40.000 € – 52.000 € | 57.000 € – 75.000 € |
+| **10. Virtueller Summenzähler & 15m-Saldierungs-Engine**<br>• 15-Minuten-NAP-Zeitreihensaldierung ($P_\text{NAP}$)<br>• 3 Aufteilungsschlüssel (§ 42b EnWG: Dyn, Stat, Hyb)<br>• Automatisierte Celery Monatsabrechnungs- & PDF-Generierung<br>• Excel-, CSV- (DATEV) & ERP-XML-Exporte für Hausverwaltungen | Senior FinTech Eng.<br>Regulatory Energy Eng. | 45 PT<br>*(~2,3 PM)* | 36.000 € – 48.000 € | 54.000 € – 72.000 € |
+| **11. Virtual Power Plant (VPP) Aggregator & Leitsystem API**<br>• REST-Schnittstellen für Sekundärregelleistung (aFRR/SRL) & FCR<br>• Redispatch 2.0 / Connect+ 96-Viertelstunden-Fahrplan (`PT15M`)<br>• § 14a EnWG SteuVE Aggregation & netzdienliche Dimmung<br>• Leitsystem Dispatch-Steuerung & Telemetrie mit Sub-Sekunden Quittierung | Senior Energy Systems Eng.<br>Grid Telecom Specialist | 50 PT<br>*(~2,5 PM)* | 42.000 € – 55.000 € | 62.000 € – 85.000 € |
+| **12. Multi-Hersteller Cloud Inverter Hub & Native Android Suite**<br>• Victron Energy VRM API v2 & Sungrow iSolarCloud OpenAPI v2<br>• Fronius Solarweb, SMA, SolarEdge, Kostal, Growatt, Deye, Huawei Cloud<br>• Zentrales Polling-Rate-Management im Django Admin<br>• Capacitor 7 Android App (.aab), Fastlane Pipeline & FCM Push | Senior Cloud & Mobile Eng.<br>IoT Protocol Eng. | 45 PT<br>*(~2,3 PM)* | 35.000 € – 46.000 € | 52.000 € – 70.000 € |
+| **GESAMT-ENTWICKLUNGSAUFWAND** | **Team: 4–6 Experten** | **950 PT**<br>*(~48 PM)* | **755.000 € – 965.000 €** | **1.115.000 € – 1.480.000 €** |
 
 ---
 
 ### 1.4 Gesamtfazit der Entwicklungskosten
 
-* **Inhouse-Softwareteam**: Bei Aufbau eines eigenen spezialisierten Entwicklungsteams (4–6 Senior Engineers über eine Laufzeit von **18 bis 22 Monaten**) belaufen sich die reinen Lohn- und Arbeitgeber-Vollkosten auf **ca. 630.000 € bis 805.000 €**.
-* **Beauftragung einer Digitalagentur / IT-Dienstleisters**: Bei Vergabe an eine spezialisierte IoT- und Cloud-Agentur im DACH-Raum (inkl. Agentur-Marge, PM-Overhead und Risikopuffer) lägen die Entwicklungskosten bei **ca. 925.000 € bis 1.230.000 € netto**.
+* **Inhouse-Softwareteam**: Bei Aufbau eines eigenen spezialisierten Entwicklungsteams (4–6 Senior Engineers über eine Laufzeit von **20 bis 24 Monaten**) belaufen sich die reinen Lohn- und Arbeitgeber-Vollkosten auf **ca. 755.000 € bis 965.000 €**.
+* **Beauftragung einer Digitalagentur / IT-Dienstleisters**: Bei Vergabe an eine spezialisierte IoT- und Cloud-Agentur im DACH-Raum (inkl. Agentur-Marge, PM-Overhead und Risikopuffer) lägen die Entwicklungskosten bei **ca. 1.115.000 € bis 1.480.000 € netto**.
 
 ---
 
@@ -79,8 +82,8 @@ Zur Ermittlung des Unternehmens- und Asset-Werts werden in der Praxis drei anerk
    │ 1. Substanzwert   │             │ 2. SaaS Multiple  │             │ 3. Strategischer  │
    │ (Cost-to-Duplicate)│            │ (ARR / DCF)       │             │ Transaktionswert  │
    ├───────────────────┤             ├───────────────────┤             ├───────────────────┤
-   │ 930.000 € –       │             │ 2.200.000 € –     │             │ 3.000.000 € –     │
-   │ 1.230.000 €       │             │ 3.800.000 €       │             │ 5.000.000 €       │
+   │ 1.120.000 € –     │             │ 2.800.000 € –     │             │ 3.500.000 € –     │
+   │ 1.480.000 €       │             │ 4.500.000 €       │             │ 5.800.000 €       │
    └───────────────────┘             └───────────────────┘             └───────────────────┘
 ```
 
@@ -89,34 +92,39 @@ Zur Ermittlung des Unternehmens- und Asset-Werts werden in der Praxis drei anerk
 ### 2.1 Methode 1: Substanz- & Wiederbeschaffungswert (Cost-to-Duplicate)
 Der Substanzwert bewertet den Wert des geistigen Eigentums (IP), des Source-Codes, der Architektur und der Dokumentation, wenn ein Dritter diesen Stand heute exakt nachbauen müsste.
 
-* **Reine Software- & Codebasis (795 PT)**: 800.000 € – 1.050.000 €
-* **Architektur-Know-how & regulatorische Schnittstellen (§ 42b EnWG, § 14a EnWG, OBIS, wMSB)**: 90.000 € – 120.000 €
-* **Produktionsreife Dokumentation & Wissensportal (20 Artikel DE/EN, Matrix A.1–F.1)**: 40.000 € – 60.000 €
-* 👉 **Substanzwert (Minimum Asset Value)**: **930.000 € – 1.230.000 €**
+* **Reine Software- & Codebasis (950 PT)**: 960.000 € – 1.250.000 €
+* **Architektur-Know-how & regulatorische Schnittstellen (§ 42b EnWG, VPP, § 14a EnWG, OBIS, wMSB)**: 120.000 € – 160.000 €
+* **Produktionsreife Dokumentation & Wissensportal (25 Artikel DE/EN, Matrix A.1–F.1)**: 40.000 € – 70.000 €
+* 👉 **Substanzwert (Minimum Asset Value)**: **1.120.000 € – 1.480.000 €**
 
 ---
 
 ### 2.2 Methode 2: SaaS-Ertragswert & Multiple-Verfahren (Markt-Bewertung)
-Im Bereich Green-Tech SaaS und Energy Management (B2C Prosumer + B2B Energy Sharing) werden Wachstums-Multiples auf Basis des jährlich wiederkehrenden Umsatzes (**ARR - Annual Recurring Revenue**) angewendet.
+Im Bereich Green-Tech SaaS und Energy Management (B2C Prosumer + B2B Energy Sharing + VPP Flexibilität) werden Wachstums-Multiples auf Basis des jährlich wiederkehrenden Umsatzes (**ARR - Annual Recurring Revenue**) angewendet.
 
 #### Erlöspotenzial-Modellierung (Konservatives Szenario Jahr 1–2):
 1. **Säule 1: EMS Pro (B2C / Prosumer)**:
-   * 3.000 Pro-Abonnenten à 7,99 € / Monat (bzw. 79,90 € / Jahr) = **~240.000 € ARR**
+   * 3.500 Pro-Abonnenten à 7,99 € / Monat (bzw. 79,90 € / Jahr) = **~280.000 € ARR**
 2. **Säule 2: Energy Sharing Communities & Quartiere (B2B)**:
-   * 20 Energiegenossenschaften / WEGs mit durchschnittlich 35 Zählern (700 Zähler à 10 € / Monat Zähler-Clearing) = **84.000 € ARR**
-   * Transaktions-/Clearing-Fee (0,5 Cent / geteilte kWh bei 5 GWh Durchsatz) = **25.000 € p.a.**
-3. **Gesamter ARR-Ansatz**: **ca. 349.000 € ARR**
+   * 25 Energiegenossenschaften / WEGs mit durchschnittlich 35 Zählern (875 Zähler à 10 € / Monat Zähler-Clearing) = **105.000 € ARR**
+   * Transaktions-/Clearing-Fee (0,5 Cent / geteilte kWh bei 6 GWh Durchsatz) = **30.000 € p.a.**
+3. **Säule 3: VPP Flexibilitäts-Aggregation & Regelleistung**:
+   * Pooling-Fee für 500 aggregierte Heimspeicher & steuerbare Lasten = **45.000 € ARR**
+4. **Gesamter ARR-Ansatz**: **ca. 460.000 € ARR**
 
 #### Bewertung über Green-Tech SaaS Multiples:
 * Im europäischen Energy-Tech Sektor liegen SaaS-Multiples für hochgradig skalierbare Cloud-Plattformen (Software-Only, Zero-Lock-in) typischerweise bei **8x bis 14x ARR**:
-  * Konservativ (8x ARR): `349.000 € × 8` = **~2.790.000 €**
-  * Moderat (11x ARR): `349.000 € × 11` = **~3.840.000 €**
-* 👉 **SaaS-Marktwert (Jahr 1–2 Traktion)**: **2,5 Mio. € – 3,8 Mio. €**
+  * Konservativ (8x ARR): `460.000 € × 8` = **~3.680.000 €**
+  * Moderat (11x ARR): `460.000 € × 11` = **~5.060.000 €**
+* 👉 **SaaS-Marktwert (Jahr 1–2 Traktion)**: **2,8 Mio. € – 4,5 Mio. €**
 
 ---
 
 ### 2.3 Methode 3: Strategischer Wert / M&A-Transaktionswert (Corporate Acquirer)
 Für strategische Käufer (Stadtwerke, große Energieversorger wie E.ON, EnBW, Vattenfall oder Hardware-Konzerne wie Sungrow, Shelly, SMA, Viessmann) hat Sharegy einen deutlich höheren Wert als der reine Ertragswert:
+* **Time-to-Market Vorteil**: 24 Monate Vorsprung gegenüber Inhouse-Neuentwicklungen.
+* **Dual-Core Synergie**: Einzige Plattform im Markt, die privates HEMS mit § 42b EnWG Quartiersabrechnung und VPP-Schnittstelle vereint.
+* **Strategischer Akquisitionswert**: **3,5 Mio. € – 5,8 Mio. €**.
 
 1. **Massiver Time-to-Market Vorteil (18–24 Monate Vorsprung)**:
    * Ein Energieversorger spart 1,5 bis 2 Jahre Entwicklungszeit, um ein marktfertiges EMS und Energy-Sharing Produkt nach § 42b EnWG anzubieten.

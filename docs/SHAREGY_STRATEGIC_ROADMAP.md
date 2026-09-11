@@ -194,25 +194,55 @@
              • 9 Kategorien & 20 fundierte Handbuch-Artikel in DE & EN
              • Kontextuelle Leitfaden-Empfehlung direkt für das eigene Profil
 
+┌───────────────────────────────────────────────────────────────────────────────┐
+│ MEILENSTEIN 6: VIRTUALE SUMMENZÄHLER & VPP AGGREGATOR (✅ 100% LIVE)          │
+└───────────────────────────────────────────────────────────────────────────────┘
+  ├── 6.1 ✅ **Virtueller Summenzähler für Mehrfamilienhäuser (§ 42b EnWG)**:
+  │          • 15-Minuten NAP-Zeitreihensaldierung ($P_\text{NAP} = \sum P_\text{Mieter} - P_\text{PV}$)
+  │          • 3 Aufteilungsmodelle (Dynamisch zeitgleich, Statisch nach MEA-Schlüssel, Hybrid)
+  │          • Automatisierte monatliche PDF-Abrechnungsbescheide für alle Parteien
+  │          • Excel-, CSV- (DATEV) und XML-Export für Hausverwaltungen & WEG-Beiräte
+  ├── 6.2 ✅ **Virtual Power Plant (VPP) Aggregator Engine**:
+  │          • REST API (`/api/vpp/flexibility/`) für Sekundärregelleistung (aFRR/SRL) und FCR
+  │          • Redispatch 2.0 / Connect+ 96-Viertelstunden-Fahrpläne (`PT15M`)
+  │          • § 14a EnWG SteuVE Aggregation & netzdienliche Dimmung
+  │          • Leitsystem Dispatch-Steuerung mit sub-sekündlicher Quittierung & Telemetrie
+  └── 6.3 ✅ **Interaktive UIs im Liegenschafts-Dashboard (`/app/tenant`)**:
+             • Virtueller Summenzähler Hub mit 15m-Zeitreihentabelle & MEA-Aufteilung
+             • VPP Aggregator Cockpit mit 96-Fahrplan & Dispatch-Simulator
+
+┌───────────────────────────────────────────────────────────────────────────────┐
+│ MEILENSTEIN 7: MULTI-HERSTELLER CLOUD-INVERTER ÖKOSYSTEM (✅ 100% LIVE)       │
+└───────────────────────────────────────────────────────────────────────────────┘
+  ├── 7.1 ✅ **Victron Energy VRM API v2 Integration**:
+  │          • Zero-Hardware Anbindung mit Installation-ID & Token
+  │          • Erfassung von Solar-Erzeugung, AC-Out Last, Batterie-SoC & Netzstatus
+  ├── 7.2 ✅ **Sungrow iSolarCloud OpenAPI v2 Integration**:
+  │          • Multi-Region Authentication, Token-Management, Live-Metriken & Inverter Arbitrage
+  ├── 7.3 ✅ **Fronius Solarweb, SMA, SolarEdge, Kostal, Growatt, Deye, Huawei, GoodWe, Solis**:
+  │          • Cloud-Token & Modbus-Protokoll-Anbindung
+  └── 7.4 ✅ **Globales Cloud-Polling-Management**:
+             • Zentrale Steuerung der Abfrageintervalle im Django-Admin zur Vermeidung von Cloud-Rate-Limits
+             • Individuelle Überschreibbarkeit je Wechselrichter
+
+┌───────────────────────────────────────────────────────────────────────────────┐
+│ MEILENSTEIN 8: NATIVE ANDROID APP & PLAY STORE READY (✅ 100% LIVE)           │
+└───────────────────────────────────────────────────────────────────────────────┘
+  ├── 8.1 ✅ **Capacitor 7 Native Shell & Performance-Optimierung**
+  ├── 8.2 ✅ **Google Play Store Release Suite (Signiertes .aab, Fastlane Pipeline)**
+  ├── 8.3 ✅ **Firebase Cloud Messaging (FCM) Push-Benachrichtigungen**
+  └── 8.4 ✅ **In-App Version Update Check & Store-Absprung**
+
 ---
 
-## 📋 4. Konkreter Action-Plan (Roadmap zu 100% abgeschlossen)
+## 🔮 5. Zukünftige Strategische Horizonte (Post-v5.2)
 
-| Schritt | Modul | Maßnahme | Status | Ziel & Umsetzung |
-|---|---|---|:---:|---|
-| **Prio 1** | `mobility/radar/` | **⛽ Mobilitäts- & Spritpreis-Radar**: Integration der Tankerkönig-API / MTS-K für die 3 günstigsten Tankstellen (Diesel, E5, E10) & 100km-EV-Vergleich | ✅ **100% Fertig** | Alltags-Mehrwert & Kostenvergleich für gemischte Haushalte |
-| **Prio 2** | `energy/hvac/` | **🌡️ Fußbodenheizungs-Steuerung & Prädiktives MPC**: Wettergeführte Vorlauftemperatur & thermische Estrich-Vorladung | ✅ **100% Fertig** | 100% Eigenverbrauch & Peak-Shaving im HEMS Dispatch-Hub |
-| **Prio 3** | `devices/ocpp/` | **🔌 Multi-Protocol CSMS Gateway**: OCPP 1.6-J, OCPP 2.0.1 & OCPP 2.1 (Subprotocol Negotiation, TransactionEvents, Device Model Variables, Local Auth List, Diagnostics) | ✅ **100% Fertig** | Normkonforme Anbindung aller modernen & kommenden Ladestationen |
-| **Prio 4** | `energy/v2g/` | **🚗 ISO 15118-20 V2G & V2H Bidirektionales Laden**: Fahrzeugakku als Heimspeicher-Ersatz, Spitzenlast-Pufferung & dynamic Börsen-Arbitrage | ✅ **100% Fertig** | Bidirektionales Laden & Netzentlastung bei 100% Batterieschutz |
+| Phase | Bereich | Strategische Stoßrichtung | Zeithorizont |
+|---|---|---|:---:|
+| **Horizont 1** | **B2B Whitelabel EVU-Portal** | Mandantenfähiges Portal für Stadtwerke und Energieversorger zur Eigenvermarktung von dynamischen Tarifen und Energy Sharing Communities unter eigener Marke. | Q1 2027 |
+| **Horizont 2** | **BNetzA CLS-Kanal & SMGW Kopplung** | Direkte Zertifizierung und Anbindung an Smart-Meter-Gateways über den Controllable Local System (CLS) Kanal zur gesetzlichen Fernsteuerung nach § 14a EnWG ohne Internet-Cloud. | Q2 2027 |
+| **Horizont 3** | **Automatisierter Flexibilitäts-Handel** | Direkte automatisierte Vermarktung von Heimspeicher-Pools an den Regelleistungs- und Intraday-Märkten (EPEX Spot / aFRR Auktionen) mit automatischer Erlösausschüttung an Endkunden. | Q3 2027 |
 
-> 🏆 **Vollständiger Funktionsumfang verifiziert & produktionsreif**:
-> - ⛽ **Mobilitäts- & Spritpreis-Radar** (`energy/services/tankerkoenig.py`, `views_fuel_radar.py`, `FuelRadarCard.jsx`)
-> - 🌡️ **Fußbodenheizungs-Steuerung & thermische Estrich-Vorladung** (`energy/models.py`, `floor_heating_manager.py`, `FloorHeatingLoadCard.jsx`)
-> - 🔌 **Multi-Protocol CSMS Gateway (OCPP 1.6-J, 2.0.1 & 2.1)** (`devices/consumers_ocpp.py`, `devices/models_ocpp.py`, `devices/tests_ocpp.py`, `devices/tests_ocpp_v2.py`)
-> - 🚗 **ISO 15118-20 V2G & V2H Bidirektionales Entlademanagement** (`energy/services/services_v2g.py`, `WallboxToolsModal.jsx`, `WallboxCard.jsx`)
-> - 🛡️ **§ 14a EnWG Dimmung & Summenleistungsmodell** (`energy/services_dimming.py`, `energy/test_grid_dimming.py`, `ControlPage.jsx`)
-> - ⚡ **Dynamische Börsenpreis-Sharingtarife (EPEX Spot, Cap, Floor)** (`billing/services_sharing_settlement.py`, `billing/test_mscons_and_dynamic_tariffs.py`)
-> - 📜 **VNB Marktkommunikations-Bridge (EDIFACT / MSCONS Export & Import D:04B)** (`billing/services_mscons.py`, `CommunitiesManagementHub.jsx`, `MsbSmartMeterHub.jsx`)
 
 
 

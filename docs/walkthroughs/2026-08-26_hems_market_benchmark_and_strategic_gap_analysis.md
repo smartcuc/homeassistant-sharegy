@@ -1,8 +1,12 @@
 # 🏆 HEMS Markt-Benchmark & Strategische Lückenanalyse (v3 Live-Status)
 
-**Datum**: 26. August 2026  
-**Status**: Aktualisierter Benchmark nach Fertigstellung von OCPP 2.0.1, HA/Grafana-Plugins, Batterie-Arbitrage, Live-CO₂-Signal, Multi-Format-Exporten & Submeter-Trends  
-**Ziel**: Umfassender Leistungsvergleich gegenüber 1KOMMA5°, SMA, Sonnen, evcc, Tibber und Home Assistant sowie Definition der verbleibenden Roadmap-Schritte.
+> 📌 **KONSOLIDIERTER MASTER-BENCHMARK**:  
+> Dieses Dokument dokumentiert den historischen Meilenstein v3. Die aktuelle, fortlaufend gepflegte Gesamtevaluation inklusive **Virtueller Summenzähler (§ 42b EnWG)**, **VPP Aggregator API (Redispatch 2.0 / Connect+)**, **Cloud-Inverter Ökosystem** und **Android App** befindet sich im Master-Dokument:  
+> 👉 [`docs/SHAREGY_COMPETITOR_BENCHMARK_AND_EVALUATION.md`](file:///c:/Users/Public/Dev/eswes/docs/SHAREGY_COMPETITOR_BENCHMARK_AND_EVALUATION.md)
+
+**Datum**: September 2026 (Live Release v5.2)  
+**Status**: Historischer Meilenstein v3 / Vollständig konsolidiert in Master-Benchmark  
+**Ziel**: Leistungsvergleich gegenüber 1KOMMA5°, SMA, Sonnen, evcc, Tibber, Exnaton und Home Assistant.
 
 ---
 
