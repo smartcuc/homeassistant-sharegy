@@ -135,9 +135,7 @@ class GrowattAdapter(BaseInverterAdapter):
                             # Bei Growatt sind 'currentPower', 'nominalPower', 'currPower', 'total_power', 'invPac', 'plantPower'
                             # bei Werten < 100.0 standardmäßig in kW angegeben!
                             if is_power and not has_w and not has_kw:
-                                if k in ("currentPower", "current_power", "currPower", "curr_power", "nominalPower", "total_power", "plantPower", "invPac") and 0.0 < abs(val) <= 100.0:
-                                    val = val * 1000.0
-                                elif 0.0 < abs(val) <= 30.0 and k in ("pac", "pact", "p_pv", "pv_power", "pgrid", "pload", "ppv", "power"):
+                                if k in ("currentPower", "current_power", "currPower", "curr_power", "nominalPower", "total_power", "plantPower") and 0.0 < abs(val) <= 100.0:
                                     val = val * 1000.0
                             return val
                         except (ValueError, TypeError):
