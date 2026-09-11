@@ -100,7 +100,7 @@ class GrowattAdapter(BaseInverterAdapter):
 
         _walk(raw_data)
 
-        def _get_val(*keys) -> Optional[float]:
+        def _get_val(*keys, is_power: bool = False) -> Optional[float]:
             for k in keys:
                 if k in flat and flat[k] is not None:
                     raw = str(flat[k]).strip().replace(",", ".")
@@ -108,32 +108,43 @@ class GrowattAdapter(BaseInverterAdapter):
                         continue
                     factor = 1.0
                     low = raw.lower()
-                    if "kw" in low:
+                    has_kw = "kw" in low
+                    has_w = "w" in low and not has_kw
+                    if has_kw:
                         factor = 1000.0
-                        low = low.replace("kw", "").strip()
-                    elif "w" in low:
-                        low = low.replace("w", "").strip()
+                        low = low.replace("kwh", "").replace("kw", "").strip()
+                    elif has_w:
+                        low = low.replace("wh", "").replace("w", "").strip()
                     elif "%" in low:
                         low = low.replace("%", "").strip()
                     import re
                     match = re.search(r"[-+]?\d*\.?\d+", low)
                     if match:
                         try:
-                            return float(match.group(0)) * factor
+                            val = float(match.group(0)) * factor
+                            # Wenn es ein Leistungswert ist und factor == 1.0 war (keine explizite Einheit):
+                            # Bei Growatt sind 'currentPower', 'nominalPower', 'currPower', 'total_power', 'invPac'
+                            # bei Werten < 100.0 standardmäßig in kW angegeben!
+                            if is_power and not has_w and not has_kw:
+                                if k in ("currentPower", "current_power", "currPower", "curr_power", "nominalPower", "total_power", "plantPower", "invPac") and 0.0 < abs(val) <= 100.0:
+                                    val = val * 1000.0
+                                elif 0.0 < abs(val) <= 30.0 and k in ("pac", "pact", "p_pv", "pv_power", "pgrid", "pload"):
+                                    val = val * 1000.0
+                            return val
                         except (ValueError, TypeError):
                             pass
             return None
 
         # 1. PV Erzeugung (DC Solar Input & AC Output & Plant Totals)
-        ppv_direct = _get_val("ppv", "ppvTotal", "p_pv", "pv_power", "pvPower", "pAct", "pact")
-        curr_power = _get_val("currentPower", "current_power", "currPower", "curr_power", "total_power", "nominalPower")
-        pac_direct = _get_val("pac", "invPac", "pactouser", "pacToUserTotal", "pac1", "power")
+        ppv_direct = _get_val("ppv", "ppvTotal", "p_pv", "pv_power", "pvPower", "pAct", "pact", is_power=True)
+        curr_power = _get_val("currentPower", "current_power", "currPower", "curr_power", "total_power", "nominalPower", "plantPower", is_power=True)
+        pac_direct = _get_val("pac", "invPac", "pactouser", "pacToUserTotal", "pac1", "power", is_power=True)
 
         # Multi-String PV Summe (z. B. String 1 + String 2 + String 3 + String 4)
-        ppv1 = _get_val("ppv1", "pPv1", "p_pv1") or 0.0
-        ppv2 = _get_val("ppv2", "pPv2", "p_pv2") or 0.0
-        ppv3 = _get_val("ppv3", "pPv3", "p_pv3") or 0.0
-        ppv4 = _get_val("ppv4", "pPv4", "p_pv4") or 0.0
+        ppv1 = _get_val("ppv1", "pPv1", "p_pv1", is_power=True) or 0.0
+        ppv2 = _get_val("ppv2", "pPv2", "p_pv2", is_power=True) or 0.0
+        ppv3 = _get_val("ppv3", "pPv3", "p_pv3", is_power=True) or 0.0
+        ppv4 = _get_val("ppv4", "pPv4", "p_pv4", is_power=True) or 0.0
         ppv_string_sum = ppv1 + ppv2 + ppv3 + ppv4
 
         # Volt * Ampere Strings (falls nur Spannungen und Ströme geliefert werden)
@@ -151,15 +162,15 @@ class GrowattAdapter(BaseInverterAdapter):
             pv = ppv_direct or curr_power or pac_direct or 0.0
 
         # 2. Netzleistung (+ Bezug, - Einspeisung)
-        grid = _get_val("pgrid", "pactogrid", "grid_power", "gridPower", "toGridPower", "to_grid_power", "pGrid", "pToGrid", "pToUser", "feed_in_power", "gridPurchasedPower")
+        grid = _get_val("pgrid", "pactogrid", "grid_power", "gridPower", "toGridPower", "to_grid_power", "pGrid", "pToGrid", "pToUser", "feed_in_power", "gridPurchasedPower", is_power=True)
 
         # 3. Hausverbrauch
-        load = _get_val("pload", "use_power", "useEnergy", "familyLoadPower", "load_power", "loadPower", "use_power_w", "pLocalLoad", "home_load", "consumption")
+        load = _get_val("pload", "use_power", "useEnergy", "familyLoadPower", "load_power", "loadPower", "use_power_w", "pLocalLoad", "home_load", "consumption", is_power=True)
 
         # 4. Batterie Leistung (+ Entladung, - Ladung)
-        bat_dis = _get_val("pdisCharge", "pdisCharge1", "pDisCharge", "pDischarge") or 0.0
-        bat_chg = _get_val("pcharge", "pcharge1", "pCharge") or 0.0
-        bat_generic = _get_val("battery_power", "pactostorage", "pstorage", "battery_power_w", "batteryPower")
+        bat_dis = _get_val("pdisCharge", "pdisCharge1", "pDisCharge", "pDischarge", is_power=True) or 0.0
+        bat_chg = _get_val("pcharge", "pcharge1", "pCharge", is_power=True) or 0.0
+        bat_generic = _get_val("battery_power", "pactostorage", "pstorage", "battery_power_w", "batteryPower", is_power=True)
 
         if bat_generic is not None and bat_dis == 0.0 and bat_chg == 0.0:
             bat_pwr = bat_generic
@@ -223,7 +234,7 @@ class GrowattAdapter(BaseInverterAdapter):
         raw_data: Dict[str, Any] = {"data": {}}
         session = requests.Session()
         session.headers.update({
-            "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 12; Sharegy EMS GrowattConnector)",
+            "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 12; https://github.com/indykoning/PyPi_GrowattServer)",
         })
 
         # PFAD A: Growatt OpenAPI (Token vorhanden)
@@ -332,6 +343,8 @@ class GrowattAdapter(BaseInverterAdapter):
 
             if logged_in and user_id:
                 try:
+                    today_str = timezone.now().strftime("%Y-%m-%d")
+
                     # 1. Plant List & Übersicht
                     p_list_resp = session.get(f"{active_host}/PlantListAPI.do", params={"userId": user_id}, timeout=10)
                     if p_list_resp.status_code == 200:
@@ -350,14 +363,43 @@ class GrowattAdapter(BaseInverterAdapter):
                                 plant_id = str(first_plant.get("plantId") or first_plant.get("id") or "")
                                 credentials["plant_id"] = plant_id
 
-                    # 2. Inverter Device Discovery für die Anlage
+                    # 2. Plant Detail API (Primary Plant Telemetry Endpoint in Home Assistant)
+                    if plant_id:
+                        try:
+                            p_det_resp = session.get(
+                                f"{active_host}/PlantDetailAPI.do",
+                                params={"plantId": plant_id, "type": "1", "date": today_str},
+                                timeout=10,
+                            )
+                            if p_det_resp.status_code == 200:
+                                det_data = p_det_resp.json().get("back") or p_det_resp.json()
+                                if isinstance(det_data, dict):
+                                    raw_data["data"].update(det_data)
+                                    if isinstance(det_data.get("plantData"), dict):
+                                        raw_data["data"].update(det_data["plantData"])
+                        except Exception as p_det_err:
+                            logger.debug("PlantDetailAPI query failed: %s", p_det_err)
+
+                    # 3. Inverter Device Discovery für die Anlage
                     discovered_devices = []
                     if device_sn:
                         discovered_devices.append(device_sn)
 
                     if plant_id:
                         for plant_ep, params, post_data in [
-                            (f"{active_host}/newTwoPlantAPI.do", {"op": "getAllPlantListTwo"}, {"plantId": plant_id, "language": "1"}),
+                            (
+                                f"{active_host}/newTwoPlantAPI.do",
+                                {"op": "getAllPlantListTwo"},
+                                {
+                                    "language": "1",
+                                    "nominalPower": "",
+                                    "order": "1",
+                                    "pageSize": "15",
+                                    "plantName": "",
+                                    "plantStatus": "",
+                                    "toPageNum": "1",
+                                },
+                            ),
                             (f"{active_host}/newPlantAPI.do", {"op": "getPlantList"}, {"plantId": plant_id}),
                             (f"{active_host}/panel/getPlantData", None, {"plantId": plant_id}),
                             (f"{active_host}/indexLogAPI.do", {"op": "getPlantData"}, {"plantId": plant_id}),
@@ -369,7 +411,7 @@ class GrowattAdapter(BaseInverterAdapter):
                                     if isinstance(inv_data, dict):
                                         raw_data["data"].update(inv_data)
                                         # Serial-Numbers aus allen Geräte-Listen extrahieren
-                                        for list_key in ["obj", "deviceList", "data", "invList", "storageList", "minList", "tlxList", "mixList", "spaList", "sphList"]:
+                                        for list_key in ["PlantList", "obj", "deviceList", "data", "invList", "storageList", "minList", "tlxList", "mixList", "spaList", "sphList"]:
                                             items = inv_data.get(list_key)
                                             if isinstance(items, list):
                                                 for d in items:
@@ -385,8 +427,7 @@ class GrowattAdapter(BaseInverterAdapter):
                     if discovered_devices and not device_sn:
                         credentials["device_sn"] = discovered_devices[0]
 
-                    # 3. Detaillierte Live-Abfragen für alle erkannten Wechselrichter & Speicher
-                    today_str = timezone.now().strftime("%Y-%m-%d")
+                    # 4. Detaillierte Live-Abfragen für alle erkannten Wechselrichter & Speicher
                     target_sn_list = discovered_devices if discovered_devices else ([device_sn] if device_sn else [])
 
                     for sn in target_sn_list:
@@ -397,8 +438,11 @@ class GrowattAdapter(BaseInverterAdapter):
                             (f"{active_host}/newTlxApi.do", {"op": "getEnergyOverview"}, {"plantId": plant_id, "id": sn}),
                             (f"{active_host}/newTlxApi.do", {"op": "getSystemStatus_KW"}, {"plantId": plant_id, "id": sn}),
                             (f"{active_host}/newMinApi.do", {"op": "getEnergyOverview"}, {"plantId": plant_id, "id": sn}),
+                            (f"{active_host}/newMinApi.do", {"op": "getSystemStatus_KW"}, {"plantId": plant_id, "id": sn}),
                             (f"{active_host}/newMixApi.do", {"op": "getEnergyOverview"}, {"plantId": plant_id, "id": sn}),
+                            (f"{active_host}/newMixApi.do", {"op": "getSystemStatus_KW"}, {"plantId": plant_id, "id": sn}),
                             (f"{active_host}/newSphApi.do", {"op": "getEnergyOverview"}, {"plantId": plant_id, "id": sn}),
+                            (f"{active_host}/newSphApi.do", {"op": "getSystemStatus_KW"}, {"plantId": plant_id, "id": sn}),
                             (f"{active_host}/newMaxApi.do", {"op": "getEnergyOverview"}, {"plantId": plant_id, "id": sn}),
                             (f"{active_host}/newSpaApi.do", {"op": "getEnergyOverview"}, {"plantId": plant_id, "id": sn}),
                             (f"{active_host}/newNoahApi.do", {"op": "getNoahDetailData"}, {"noahSn": sn}),
@@ -417,7 +461,7 @@ class GrowattAdapter(BaseInverterAdapter):
                             except Exception:
                                 pass
 
-                    # 4. Speicher- & Gesamtstatus der Anlage
+                    # 5. Speicher- & Gesamtstatus der Anlage
                     if plant_id:
                         for stor_ep, params, p_data in [
                             (f"{active_host}/newStorageAPI.do", {"op": "getStorageTotalData"}, {"plantId": plant_id}),

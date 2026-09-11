@@ -107,6 +107,40 @@ class AdapterContractMatrixTest(TestCase):
         self.assertEqual(tel.battery_soc, 75.0)
         self.assertEqual(tel.daily_yield_kwh, 19.8)
 
+        # Test 2: Growatt PlantListAPI / PlantDetailAPI mit currentPower in kW (ohne 'kW' String)
+        raw_plant_kw = {
+            "back": {
+                "totalData": {
+                    "currentPower": 2.45,
+                    "todayEnergy": 14.2,
+                },
+                "data": [
+                    {
+                        "plantId": "194820",
+                        "plantData": {
+                            "currentPower": "2.45",
+                            "nominalPower": "5.0",
+                        }
+                    }
+                ]
+            }
+        }
+        tel2 = adapter.parse_payload(raw_plant_kw)
+        self.assertEqual(tel2.pv_power_w, 2450.0) # 2.45 kW -> 2450.0 W
+        self.assertEqual(tel2.daily_yield_kwh, 14.2)
+
+        # Test 3: Growatt Multi-String PV (ppv1 + ppv2)
+        raw_strings = {
+            "data": {
+                "ppv1": 1350.0,
+                "ppv2": 980.0,
+                "soc": 82.0,
+            }
+        }
+        tel3 = adapter.parse_payload(raw_strings)
+        self.assertEqual(tel3.pv_power_w, 2330.0) # 1350 + 980 = 2330 W
+        self.assertEqual(tel3.battery_soc, 82.0)
+
     def test_04_standard_ingest_core_pipeline(self):
         """Testet die herstellerunabhängige Standard-Ingest-Core Pipeline."""
         tel = CanonicalTelemetry(

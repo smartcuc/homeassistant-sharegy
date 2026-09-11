@@ -282,38 +282,39 @@ class SungrowAdapter(BaseInverterAdapter):
                     return False
                 try:
                     redir_url = credentials.get("redirect_uri") or getattr(settings, "SUNGROW_REDIRECT_URI", "")
-                    t_resp = requests.post(
-                        f"{base_url.rstrip('/')}/openapi/oauth/token",
-                        json={
-                            "appkey": appkey,
-                            "grant_type": "refresh_token",
-                            "refresh_token": r_token,
-                            "redirect_uri": redir_url,
-                        },
-                        headers={"x-access-key": app_secret, "Content-Type": "application/json"},
-                        timeout=10,
-                    )
-                    if t_resp.status_code == 200 and t_resp.json().get("access_token"):
-                        token = t_resp.json()["access_token"]
-                        credentials["token"] = token
-                        if t_resp.json().get("refresh_token"):
-                            credentials["refresh_token"] = t_resp.json()["refresh_token"]
-                        logger.info("Successfully refreshed Sungrow OpenAPI access_token via OAuth.")
-                        return True
-
-                    ref_resp = requests.post(
-                        f"{base_url.rstrip('/')}/openapi/apiManage/refreshToken",
-                        json={"appkey": appkey, "refresh_token": r_token},
-                        headers={"x-access-key": app_secret, "Content-Type": "application/json"},
-                        timeout=10,
-                    )
-                    if ref_resp.status_code == 200 and ref_resp.json().get("result_data", {}).get("token"):
-                        token = ref_resp.json()["result_data"]["token"]
-                        credentials["token"] = token
-                        if ref_resp.json().get("result_data", {}).get("refresh_token"):
-                            credentials["refresh_token"] = ref_resp.json()["result_data"]["refresh_token"]
-                        logger.info("Successfully refreshed Sungrow OpenAPI token via apiManage.")
-                        return True
+                    headers = {
+                        "x-access-key": app_secret,
+                        "sys_code": "901",
+                        "Content-Type": "application/json",
+                    }
+                    for ref_ep, ref_payload in [
+                        (
+                            f"{base_url.rstrip('/')}/openapi/oauth/token",
+                            {
+                                "appkey": appkey,
+                                "grant_type": "refresh_token",
+                                "refresh_token": r_token,
+                                "redirect_uri": redir_url,
+                            },
+                        ),
+                        (
+                            f"{base_url.rstrip('/')}/openapi/apiManage/refreshToken",
+                            {"appkey": appkey, "refresh_token": r_token},
+                        ),
+                    ]:
+                        t_resp = requests.post(ref_ep, json=ref_payload, headers=headers, timeout=10)
+                        if t_resp.status_code == 200:
+                            resp_j = t_resp.json()
+                            new_tok = resp_j.get("access_token") or resp_j.get("token")
+                            if not new_tok and isinstance(resp_j.get("result_data"), dict):
+                                new_tok = resp_j["result_data"].get("access_token") or resp_j["result_data"].get("token")
+                                if resp_j["result_data"].get("refresh_token"):
+                                    credentials["refresh_token"] = resp_j["result_data"]["refresh_token"]
+                            if new_tok:
+                                token = new_tok
+                                credentials["token"] = token
+                                logger.info("Successfully refreshed Sungrow OpenAPI token on %s.", ref_ep)
+                                return True
                 except Exception as e:
                     logger.warning("Auto token refresh failed: %s", e)
                 return False
@@ -321,27 +322,37 @@ class SungrowAdapter(BaseInverterAdapter):
             def _post_with_auth(endpoint: str, json_data: dict) -> Optional[requests.Response]:
                 nonlocal token
                 url = f"{base_url.rstrip('/')}/{endpoint.lstrip('/')}"
+                payload = dict(json_data)
+                if token and "token" not in payload:
+                    payload["token"] = token
+                if appkey and "appkey" not in payload:
+                    payload["appkey"] = appkey
+
                 headers = {
                     "x-access-key": app_secret,
+                    "sys_code": "901",
+                    "token": str(token or ""),
                     "Authorization": f"Bearer {token}",
                     "Content-Type": "application/json",
                 }
                 try:
-                    resp = requests.post(url, json=json_data, headers=headers, timeout=12)
-                    is_auth_err = resp.status_code == 401
+                    resp = requests.post(url, json=payload, headers=headers, timeout=12)
+                    is_auth_err = resp.status_code in (401, 403)
                     if resp.status_code == 200:
                         try:
                             body = resp.json()
                             code_str = str(body.get("result_code", ""))
                             msg_str = str(body.get("result_msg", "")).lower()
-                            if code_str in ("2", "000", "0000", "401") or ("token" in msg_str and ("invalid" in msg_str or "expired" in msg_str)):
+                            if code_str in ("2", "000", "0000", "401") or ("token" in msg_str and ("invalid" in msg_str or "expired" in msg_str or "fail" in msg_str)):
                                 is_auth_err = True
                         except Exception:
                             pass
 
                     if is_auth_err and _refresh_openapi_token():
+                        payload["token"] = token
+                        headers["token"] = str(token or "")
                         headers["Authorization"] = f"Bearer {token}"
-                        resp = requests.post(url, json=json_data, headers=headers, timeout=12)
+                        resp = requests.post(url, json=payload, headers=headers, timeout=12)
                     return resp
                 except Exception as req_err:
                     logger.warning("Sungrow OpenAPI request to %s failed: %s", endpoint, req_err)
@@ -354,6 +365,7 @@ class SungrowAdapter(BaseInverterAdapter):
                     "openapi/platform/getPowerStationRealTimeData",
                     {
                         "appkey": appkey,
+                        "token": token,
                         "ps_id_list": [str(ps_id or "")],
                         "point_id_list": self.MEASURE_POINTS,
                         "is_get_point_dict": "1",
@@ -438,7 +450,7 @@ class SungrowAdapter(BaseInverterAdapter):
             try:
                 resp = _post_with_auth(
                     "openapi/platform/getPowerStationDetail",
-                    {"appkey": appkey, "ps_ids": str(ps_id or ""), "lang": "_de_DE"},
+                    {"appkey": appkey, "token": token, "ps_ids": str(ps_id or ""), "lang": "_de_DE"},
                 )
                 if resp and resp.status_code == 200:
                     det_json = resp.json()
@@ -450,13 +462,47 @@ class SungrowAdapter(BaseInverterAdapter):
                 logger.warning("getPowerStationDetail query failed: %s", e)
 
             telemetry = self.parse_payload(raw_data)
-            has_valid = any(v is not None and v != 0.0 for v in telemetry.to_metrics_dict().values())
 
-            if not has_valid:
-                if bool(credentials.get("is_mock")):
-                    sim_data = self.generate_mock_payload()
-                    telemetry = self.parse_payload(sim_data)
-                    raw_data = sim_data
+            # Validitätsprüfung
+            if "_direct_metrics" not in raw_data and not raw_data.get("result_data"):
+                # Fallback auf Legacy Login falls Benutzername & Passwort vorliegen
+                if credentials.get("user_account") and credentials.get("user_password"):
+                    try:
+                        logger.info("Falling back to Sungrow Legacy Login...")
+                        token_info = self._execute_login(
+                            base_url=base_url,
+                            appkey=appkey,
+                            account=credentials.get("user_account"),
+                            password=credentials.get("user_password"),
+                        )
+                        token = token_info["token"]
+                        credentials["token"] = token
+                        credentials["user_id"] = token_info["user_id"]
+                        legacy_headers = {
+                            "Content-Type": "application/json",
+                            "sys_code": "901",
+                            "token": token,
+                        }
+                        legacy_resp = requests.post(
+                            f"{base_url.rstrip('/')}/v1/powerStationService/getPowerStationDetail",
+                            headers=legacy_headers,
+                            json={"appkey": appkey, "ps_id": str(ps_id or "")},
+                            timeout=12,
+                        )
+                        if legacy_resp.status_code == 200:
+                            raw_data = legacy_resp.json()
+                            telemetry = self.parse_payload(raw_data)
+                            return AdapterTestResult(
+                                status="success",
+                                message=f"Live-Verbindung zu {self.name} erfolgreich!",
+                                live_metrics=telemetry.to_metrics_dict(),
+                                raw_sample=raw_data,
+                                simulated=False,
+                            )
+                    except Exception as leg_err:
+                        logger.warning("Sungrow Legacy login fallback failed: %s", leg_err)
+
+                if is_mock:
                     return AdapterTestResult(
                         status="success",
                         message=f"Verbindung zu {self.name} erfolgreich (Simulator).",
