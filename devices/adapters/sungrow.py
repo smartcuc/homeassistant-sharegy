@@ -129,7 +129,20 @@ class SungrowAdapter(BaseInverterAdapter):
                             pass
             return None
 
-        pv = _get_val("curr_power", "curr_pac", "currPower", "pac", "pv_power", "p_pv")
+        def _get_val_pos(*keys) -> Optional[float]:
+            for k in keys:
+                v = _get_val(k)
+                if v is not None and v > 0.0:
+                    return v
+            return None
+
+        pv_direct = _get_val_pos("curr_power", "curr_pac", "currPower", "pac", "pv_power", "p_pv", "total_power", "p_dc")
+        ppv1 = _get_val_pos("ppv1", "pPv1", "p_pv1", "mppt1_power", "p1") or 0.0
+        ppv2 = _get_val_pos("ppv2", "pPv2", "p_pv2", "mppt2_power", "p2") or 0.0
+        ppv_sum = ppv1 + ppv2
+
+        pv_candidates = [v for v in [pv_direct, ppv_sum if ppv_sum > 0 else None, _get_val("curr_power", "curr_pac", "currPower", "pac", "pv_power", "p_pv")] if v is not None]
+        pv = max(pv_candidates) if pv_candidates else 0.0
         grid = _get_val("grid_power", "curr_grid_power", "gridPower", "p_grid", "pgrid")
         load = _get_val("load_power", "curr_load_power", "loadPower", "p_load", "pload", "use_power")
         battery = _get_val("battery_power", "curr_battery_power", "batteryPower", "p_battery", "pdisCharge", "pcharge")
@@ -482,7 +495,32 @@ class SungrowAdapter(BaseInverterAdapter):
                                             pass
                             return None
 
-                        pv = _get_pt("83067", "83329", "83033", "83002") or 0.0
+                        def _get_pt_pos(*keys):
+                            for k in keys:
+                                for variant in [str(k), f"p{k}", f"P{k}"]:
+                                    if variant in p_data and p_data[variant] is not None:
+                                        try:
+                                            v = float(p_data[variant])
+                                            if v > 0.0:
+                                                return v
+                                        except (ValueError, TypeError):
+                                            pass
+                            return None
+
+                        # PV Power: Prüfe Haupt-Messpunkte sowie String- & MPPT-Summen
+                        pv_direct = _get_pt_pos("83067", "83329", "83033", "83002", "83020", "83006")
+                        mppt1 = _get_pt_pos("83011") or 0.0
+                        mppt2 = _get_pt_pos("83012") or 0.0
+                        mppt3 = _get_pt_pos("83046") or 0.0
+                        mppt_sum = mppt1 + mppt2 + mppt3
+
+                        str1 = _get_pt_pos("83016") or 0.0
+                        str2 = _get_pt_pos("83017") or 0.0
+                        str3 = _get_pt_pos("83018") or 0.0
+                        str_sum = str1 + str2 + str3
+
+                        pv_candidates = [v for v in [pv_direct, mppt_sum if mppt_sum > 0 else None, str_sum if str_sum > 0 else None, _get_pt("83067", "83329", "83033", "83002")] if v is not None]
+                        pv = max(pv_candidates) if pv_candidates else 0.0
                         load = _get_pt("83052", "83330", "83106") or 0.0
                         grid = _get_pt("83549", "83328", "83032", "83051") or 0.0
                         bat_pwr = _get_pt("83238", "83326", "83104", "83111", "83112") or 0.0
