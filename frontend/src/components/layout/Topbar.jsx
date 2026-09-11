@@ -13,6 +13,7 @@ import SpotPriceModal from "../../features/market/components/SpotPriceModal";
 import SupportDrawer from "../../features/support/components/SupportDrawer";
 import AlertCenterModal from "../../features/alerts/components/AlertCenterModal";
 import { LifeBuoy, Bell, Sun, Moon, Check, ChevronDown, Building2, Home, Menu } from "lucide-react";
+import FlagIcon from "../common/FlagIcon";
 
 export default function AppTopbar({ onOpenMobileMenu }) {
     const { t, i18n } = useTranslation();
@@ -37,16 +38,16 @@ export default function AppTopbar({ onOpenMobileMenu }) {
 
     const languages = isAdminRoute
         ? [
-            { code: "de", label: "Deutsch", flag: "🇩🇪" },
-            { code: "en", label: "English", flag: "🇬🇧" },
+            { code: "de", label: "Deutsch" },
+            { code: "en", label: "English" },
         ]
         : [
-            { code: "de", label: "Deutsch", flag: "🇩🇪" },
-            { code: "en", label: "English", flag: "🇬🇧" },
-            { code: "pl", label: "Polski", flag: "🇵🇱" },
-            { code: "tr", label: "Türkçe", flag: "🇹🇷" },
-            { code: "ru", label: "Русский", flag: "🇷🇺" },
-            { code: "ro", label: "Română", flag: "🇷🇴" },
+            { code: "de", label: "Deutsch" },
+            { code: "en", label: "English" },
+            { code: "pl", label: "Polski" },
+            { code: "tr", label: "Türkçe" },
+            { code: "ru", label: "Русский" },
+            { code: "ro", label: "Română" },
         ];
 
     const currentLang = (i18n.resolvedLanguage || i18n.language || "de").substring(0, 2);
@@ -396,17 +397,16 @@ export default function AppTopbar({ onOpenMobileMenu }) {
                     )}
                 </button>
 
-                {/* 🌐 Sprach-Wähler (DE, EN, PL, TR, RU, RO) */}
+                {/* 🌐 Sprach-Wähler (DE, EN, PL, TR, RU, RO mit SVG-Flaggen) */}
                 <div className="relative" ref={langDropdownRef}>
                     <button
                         type="button"
                         onClick={() => setLangDropdownOpen(!langDropdownOpen)}
                         title={t("settings.language", "Sprache wählen")}
-                        className="flex items-center gap-1 px-2 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
+                        className="flex items-center gap-1.5 px-2 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
                         aria-expanded={langDropdownOpen}
                     >
-                        <span className="text-base leading-none">{currentLangObj.flag}</span>
-                        <span className="hidden sm:inline font-mono uppercase text-[11px]">{currentLangObj.code}</span>
+                        <FlagIcon code={currentLang} className="w-5 h-5" />
                         <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform duration-200 ${langDropdownOpen ? "rotate-180" : ""}`} />
                     </button>
 
@@ -423,14 +423,14 @@ export default function AppTopbar({ onOpenMobileMenu }) {
                                             key={lang.code}
                                             type="button"
                                             onClick={() => handleLanguageChange(lang.code)}
-                                            className={`w-full px-3 py-1.5 text-xs text-left flex items-center justify-between transition cursor-pointer ${
+                                            className={`w-full px-3 py-2 text-xs text-left flex items-center justify-between transition cursor-pointer ${
                                                 isActive
                                                     ? "bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 font-bold"
                                                     : "text-gray-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-slate-800/60"
                                             }`}
                                         >
-                                            <span className="flex items-center gap-2">
-                                                <span className="text-base">{lang.flag}</span>
+                                            <span className="flex items-center gap-2.5">
+                                                <FlagIcon code={lang.code} className="w-4 h-4" />
                                                 <span>{lang.label}</span>
                                             </span>
                                             {isActive && <Check className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />}

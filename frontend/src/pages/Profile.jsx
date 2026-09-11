@@ -15,6 +15,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import i18n from "../i18n";
 import { AVATAR_PRESETS, getAvatarConfig } from "../utils/avatars";
+import FlagIcon from "../components/common/FlagIcon";
 
 export default function Profile() {
     const { user } = useUser();
@@ -531,12 +532,12 @@ export default function Profile() {
 
                                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                                     {[
-                                        { id: "de", label: "Deutsch", flag: "🇩🇪", sub: "Standard" },
-                                        { id: "en", label: "English", flag: "🇬🇧", sub: "International" },
-                                        { id: "pl", label: "Polski", flag: "🇵🇱", sub: "Regional" },
-                                        { id: "tr", label: "Türkçe", flag: "🇹🇷", sub: "Regional" },
-                                        { id: "ru", label: "Русский", flag: "🇷🇺", sub: "Regional" },
-                                        { id: "ro", label: "Română", flag: "🇷🇴", sub: "Regional" },
+                                        { id: "de", label: "Deutsch", sub: "Standard" },
+                                        { id: "en", label: "English", sub: "International" },
+                                        { id: "pl", label: "Polski", sub: "Regional" },
+                                        { id: "tr", label: "Türkçe", sub: "Regional" },
+                                        { id: "ru", label: "Русский", sub: "Regional" },
+                                        { id: "ro", label: "Română", sub: "Regional" },
                                     ].map((lang) => {
                                         const isSelected = currentLang === lang.id;
                                         return (
@@ -544,13 +545,13 @@ export default function Profile() {
                                                 key={lang.id}
                                                 type="button"
                                                 onClick={() => handleLanguageChange(lang.id)}
-                                                className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex items-center gap-2 ${
+                                                className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex items-center gap-2.5 ${
                                                     isSelected
                                                         ? "bg-indigo-50/80 dark:bg-indigo-950/60 border-indigo-500 text-indigo-900 dark:text-indigo-200 ring-2 ring-indigo-500/20 shadow-xs"
                                                         : "bg-white dark:bg-slate-800/80 border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-slate-600"
                                                 }`}
                                             >
-                                                <span className="text-xl shrink-0">{lang.flag}</span>
+                                                <FlagIcon code={lang.id} className="w-6 h-6" />
                                                 <div className="min-w-0">
                                                     <div className="font-bold text-xs truncate">{lang.label}</div>
                                                     <div className="text-[9px] text-gray-400 dark:text-gray-500 truncate">{lang.sub}</div>

@@ -1,6 +1,7 @@
 import { NavLink, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useEffect } from "react";
+import FlagIcon from "../common/FlagIcon";
 
 export default function AdminLayout({ children }) {
     const { t, i18n } = useTranslation();
@@ -32,31 +33,31 @@ export default function AdminLayout({ children }) {
                             </div>
                         </div>
 
-                        {/* DE / EN Language Toggle */}
-                        <div className="flex items-center bg-slate-100 rounded-lg p-0.5 text-[11px] font-bold">
+                        {/* DE / EN Flag Toggle */}
+                        <div className="flex items-center bg-slate-100 rounded-xl p-1 gap-1">
                             <button
                                 type="button"
                                 onClick={() => handleLanguageToggle("de")}
-                                className={`px-1.5 py-0.5 rounded-md transition ${
+                                className={`p-1 rounded-lg transition cursor-pointer flex items-center justify-center ${
                                     currentLang === "de"
-                                        ? "bg-white text-indigo-700 shadow-xs"
-                                        : "text-gray-500 hover:text-gray-900"
+                                        ? "bg-white shadow-xs ring-1 ring-indigo-500/20"
+                                        : "opacity-60 hover:opacity-100"
                                 }`}
                                 title="Deutsch"
                             >
-                                DE
+                                <FlagIcon code="de" className="w-4 h-4" />
                             </button>
                             <button
                                 type="button"
                                 onClick={() => handleLanguageToggle("en")}
-                                className={`px-1.5 py-0.5 rounded-md transition ${
+                                className={`p-1 rounded-lg transition cursor-pointer flex items-center justify-center ${
                                     currentLang === "en"
-                                        ? "bg-white text-indigo-700 shadow-xs"
-                                        : "text-gray-500 hover:text-gray-900"
+                                        ? "bg-white shadow-xs ring-1 ring-indigo-500/20"
+                                        : "opacity-60 hover:opacity-100"
                                 }`}
                                 title="English"
                             >
-                                EN
+                                <FlagIcon code="en" className="w-4 h-4" />
                             </button>
                         </div>
                     </div>
