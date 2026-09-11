@@ -62,6 +62,14 @@ export default function CloudInverterIntegrationCard({
         }
     }
 
+    const isSungrowIntegration = (item) => {
+        if (!item) return false;
+        const pId = (item.profile_id || "").toLowerCase();
+        const vendor = (item.vendor || "").toLowerCase();
+        const name = (item.device_name || item.profile_name || "").toLowerCase();
+        return pId.includes("sungrow") || vendor.includes("sungrow") || name.includes("sungrow") || pId === "sungrow_isolarcloud";
+    };
+
     async function loadActiveIntegrations() {
         if (!primaryHome?.id) return;
         setIsLoadingIntegrations(true);
@@ -70,9 +78,9 @@ export default function CloudInverterIntegrationCard({
             if (data?.integrations) {
                 let list = data.integrations;
                 if (filterVendor === "sungrow") {
-                    list = list.filter((item) => item.vendor === "sungrow" || (item.profile_id && item.profile_id.includes("sungrow")));
+                    list = list.filter((item) => isSungrowIntegration(item));
                 } else if (filterVendor === "others") {
-                    list = list.filter((item) => item.vendor !== "sungrow" && (!item.profile_id || !item.profile_id.includes("sungrow")));
+                    list = list.filter((item) => !isSungrowIntegration(item));
                 }
                 setActiveIntegrations(list);
             }
@@ -92,11 +100,12 @@ export default function CloudInverterIntegrationCard({
     }
 
     function handleStartAdd() {
+        if (filterVendor === "sungrow") return;
         setEditingIntegrationId(null);
-        setDeviceName(filterVendor === "sungrow" ? "Sungrow Hybrid Inverter" : "");
+        setDeviceName("");
         setCredentials({});
         setPollingInterval(60);
-        setSelectedProfileId(filterVendor === "sungrow" ? "sungrow_isolarcloud" : null);
+        setSelectedProfileId(null);
         setTestResult(null);
         setSaveSuccess(null);
         setErrorMsg(null);
@@ -104,6 +113,7 @@ export default function CloudInverterIntegrationCard({
     }
 
     function handleStartEdit(integration) {
+        if (isSungrowIntegration(integration) || filterVendor === "sungrow") return;
         setEditingIntegrationId(integration.id);
         setDeviceName(integration.device_name || "");
         setSelectedProfileId(integration.profile_id);
@@ -375,7 +385,7 @@ export default function CloudInverterIntegrationCard({
                                                         ⏱️ {t("cloud_inverter.last_polled", "Zuletzt synchronisiert")}:{" "}
                                                         <strong className="text-gray-700">{formatRelativeTime(item.last_polled_at)}</strong>
                                                     </span>
-                                                    {item.profile_id !== "sungrow_isolarcloud" && item.vendor !== "sungrow" && (
+                                                    {!isSungrow && (
                                                         <>
                                                             <span>•</span>
                                                             <span>
@@ -408,7 +418,7 @@ export default function CloudInverterIntegrationCard({
                                             </button>
 
                                             {/* Sungrow: Kein manuelles Bearbeiten, bei Fehler Re-Auth Button */}
-                                            {item.profile_id === "sungrow_isolarcloud" || item.vendor === "sungrow" ? (
+                                            {isSungrow ? (
                                                 isErr && (
                                                     <button
                                                         type="button"
@@ -492,8 +502,8 @@ export default function CloudInverterIntegrationCard({
                     </div>
                 )}
 
-                {/* 4. FORMULAR: BEARBEITEN / NEU ANLEGEN (FÜR WEITERE WRs ODER DETAILS) */}
-                {isFormOpen && (
+                {/* 4. FORMULAR: BEARBEITEN / NEU ANLEGEN (NUR FÜR WEITERE WRs ODER DETAILS) */}
+                {isFormOpen && filterVendor !== "sungrow" && (
                     <div className="p-5 rounded-2xl bg-slate-50/80 border border-slate-200/80 space-y-6 animate-in fade-in duration-200">
                         <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                             <div className="flex items-center gap-2">
