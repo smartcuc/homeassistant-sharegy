@@ -335,14 +335,17 @@ class GrowattAdapter(BaseInverterAdapter):
                     # 1. Plant List & Übersicht
                     p_list_resp = session.get(f"{active_host}/PlantListAPI.do", params={"userId": user_id}, timeout=10)
                     if p_list_resp.status_code == 200:
-                        plants_info = p_list_resp.json().get("back", {})
-                        if plants_info.get("totalData"):
+                        p_j = p_list_resp.json()
+                        plants_info = p_j.get("back") if isinstance(p_j.get("back"), dict) else p_j
+                        if isinstance(plants_info.get("totalData"), dict):
                             raw_data["data"].update(plants_info["totalData"])
                         plant_arr = plants_info.get("data", [])
                         if plant_arr and isinstance(plant_arr, list):
                             first_plant = plant_arr[0]
                             if isinstance(first_plant, dict):
                                 raw_data["data"].update(first_plant)
+                                if isinstance(first_plant.get("plantData"), dict):
+                                    raw_data["data"].update(first_plant["plantData"])
                             if not plant_id:
                                 plant_id = str(first_plant.get("plantId") or first_plant.get("id") or "")
                                 credentials["plant_id"] = plant_id
@@ -356,6 +359,8 @@ class GrowattAdapter(BaseInverterAdapter):
                         for plant_ep, params, post_data in [
                             (f"{active_host}/newTwoPlantAPI.do", {"op": "getAllPlantListTwo"}, {"plantId": plant_id, "language": "1"}),
                             (f"{active_host}/newPlantAPI.do", {"op": "getPlantList"}, {"plantId": plant_id}),
+                            (f"{active_host}/panel/getPlantData", None, {"plantId": plant_id}),
+                            (f"{active_host}/indexLogAPI.do", {"op": "getPlantData"}, {"plantId": plant_id}),
                         ]:
                             try:
                                 inv_list_resp = session.post(plant_ep, params=params, data=post_data, timeout=8)
@@ -381,7 +386,7 @@ class GrowattAdapter(BaseInverterAdapter):
                         credentials["device_sn"] = discovered_devices[0]
 
                     # 3. Detaillierte Live-Abfragen für alle erkannten Wechselrichter & Speicher
-                    today_str = datetime.date.today().strftime("%Y-%m-%d")
+                    today_str = timezone.now().strftime("%Y-%m-%d")
                     target_sn_list = discovered_devices if discovered_devices else ([device_sn] if device_sn else [])
 
                     for sn in target_sn_list:

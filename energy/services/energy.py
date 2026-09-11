@@ -2,6 +2,10 @@
 # energy/services/energy.py
 ###########################
 
+import logging
+from django.utils import timezone
+from django.core.cache import cache
+
 from energy.services.signals import get_ems_signals
 from energy.flow_engine import calculate_energy_flow
 from energy.services.sankey import build_live_sankey
@@ -11,8 +15,35 @@ from energy.ems.models import (EMSSignalSource,)
 
 from user_settings.models import UserPreference
 
+logger = logging.getLogger(__name__)
+
 
 def get_energy_data(user):
+    # 0. Opportunistischer Cloud-Poll falls Cloud-Geräte vorhanden und letzter Poll > Intervall ist
+    try:
+        from devices.models import CloudDeviceIntegration
+        from devices.services_profile_runner import execute_cloud_poll
+        active_clouds = list(
+            CloudDeviceIntegration.objects.filter(
+                device__home__user=user,
+                is_active=True,
+                device__active=True,
+            ).select_related("device")
+        )
+        for cdi in active_clouds:
+            now = timezone.now()
+            interval = cdi.polling_interval_seconds or 15
+            elapsed = (now - cdi.last_polled_at).total_seconds() if cdi.last_polled_at else 9999
+            if elapsed >= interval:
+                lock_key = f"cloud_poll_dash_lock_{cdi.id}"
+                if cache.add(lock_key, "1", timeout=8):
+                    try:
+                        execute_cloud_poll(cdi)
+                    finally:
+                        cache.delete(lock_key)
+    except Exception as poll_err:
+        logger.debug("Opportunistic cloud poll skipped: %s", poll_err)
+
     # 1. Usereinstellungen laden (Sehr schlank)
     preference, _ = UserPreference.objects.get_or_create(
         user=user,

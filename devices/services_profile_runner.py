@@ -615,7 +615,7 @@ def _execute_growatt_query(base_url: str, credentials: dict) -> dict:
                                 if sn and str(sn) not in inverter_ids:
                                     inverter_ids.append(str(sn))
 
-                    today_str = datetime.date.today().strftime("%Y-%m-%d")
+                    today_str = timezone.now().strftime("%Y-%m-%d")
                     for inv_id in inverter_ids:
                         for inv_ep, params, data_payload in [
                             (f"{active_host}/newInverterAPI.do", {"op": "getInverterDetailData", "inverterId": inv_id}, None),

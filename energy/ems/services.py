@@ -157,6 +157,11 @@ def build_device_signals(user):
                     p_val = 0.0
                 else:
                     p_val = float(m.value)
+            elif dev.id in pv_device_ids or (getattr(dev, "config", None) and getattr(dev.config, "role", None) and dev.config.role.key in ["producer", "both"]):
+                pow_m = DeviceLatestMetric.objects.filter(device=dev, metric_key="power").first()
+                if pow_m and pow_m.value is not None and float(pow_m.value) > 0:
+                    if not (pow_m.timestamp and pow_m.timestamp < metric_cutoff):
+                        p_val = float(pow_m.value)
 
         # Wenn dedizierter PV-Kanal existiert (auch bei 0.0 W nachts!), ist dieser Wert verbindlich!
         if p_val is not None:
