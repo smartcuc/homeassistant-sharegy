@@ -110,6 +110,7 @@ class GrowattAdapter(BaseInverterAdapter):
         _walk(raw_data)
 
         def _get_val(*keys, is_power: bool = False) -> Optional[float]:
+            vals = []
             for k in keys:
                 if k in flat and flat[k] is not None:
                     raw = str(flat[k]).strip().replace(",", ".")
@@ -132,15 +133,18 @@ class GrowattAdapter(BaseInverterAdapter):
                         try:
                             val = float(match.group(0)) * factor
                             # Wenn es ein Leistungswert ist und factor == 1.0 war (keine explizite Einheit):
-                            # Bei Growatt sind 'currentPower', 'nominalPower', 'currPower', 'total_power', 'invPac', 'plantPower'
+                            # Bei Growatt sind 'currentPower', 'nominalPower', 'currPower', 'total_power', 'plantPower'
                             # bei Werten < 100.0 standardmäßig in kW angegeben!
                             if is_power and not has_w and not has_kw:
                                 if k in ("currentPower", "current_power", "currPower", "curr_power", "nominalPower", "total_power", "plantPower") and 0.0 < abs(val) <= 100.0:
                                     val = val * 1000.0
-                            return val
+                            vals.append(val)
                         except (ValueError, TypeError):
                             pass
-            return None
+            pos_vals = [v for v in vals if v > 0]
+            if pos_vals:
+                return max(pos_vals)
+            return vals[0] if vals else None
 
         # 1. PV Erzeugung (DC Solar Input & AC Output & Plant Totals)
         ppv_direct = _get_val("ppv", "ppvTotal", "p_pv", "pv_power", "pvPower", "pAct", "pact", "invTodayPpv", is_power=True)
@@ -374,12 +378,17 @@ class GrowattAdapter(BaseInverterAdapter):
             for sn_val in (discovered_sn_list if discovered_sn_list else ([device_sn] if device_sn else [])):
                 for endpoint in [
                     "https://openapi.growatt.com/v1/device/inverter/inverter_last_data",
+                    "https://openapi.growatt.com/v1/device/tlx/tlx_last_data",
+                    "https://openapi.growatt.com/v1/device/min/min_last_data",
+                    "https://openapi.growatt.com/v1/device/mic/mic_last_data",
+                    "https://openapi.growatt.com/v1/device/mod/mod_last_data",
+                    "https://openapi.growatt.com/v1/device/mid/mid_last_data",
+                    "https://openapi.growatt.com/v1/device/mac/mac_last_data",
+                    "https://openapi.growatt.com/v1/device/max/max_last_data",
                     "https://openapi.growatt.com/v1/device/storage/storage_last_data",
                     "https://openapi.growatt.com/v1/device/mix/mix_last_data",
                     "https://openapi.growatt.com/v1/device/sph/sph_last_data",
                     "https://openapi.growatt.com/v1/device/spa/spa_last_data",
-                    "https://openapi.growatt.com/v1/device/min/min_last_data",
-                    "https://openapi.growatt.com/v1/device/tlx/tlx_last_data",
                     "https://openapi.growatt.com/v1/device/noah/noah_last_data",
                 ]:
                     try:
@@ -389,12 +398,17 @@ class GrowattAdapter(BaseInverterAdapter):
                             params={
                                 "device_sn": sn_val,
                                 "inverter_sn": sn_val,
+                                "tlx_sn": sn_val,
+                                "min_sn": sn_val,
+                                "mic_sn": sn_val,
+                                "mod_sn": sn_val,
+                                "mid_sn": sn_val,
+                                "mac_sn": sn_val,
+                                "max_sn": sn_val,
                                 "storage_sn": sn_val,
                                 "mix_sn": sn_val,
                                 "sph_sn": sn_val,
                                 "spa_sn": sn_val,
-                                "min_sn": sn_val,
-                                "tlx_sn": sn_val,
                                 "noah_sn": sn_val,
                             },
                             timeout=8,
