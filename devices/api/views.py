@@ -455,6 +455,23 @@ from django.core.cache import cache
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def device_dashboard_values(request):
+    user = request.user
+    # Opportunistisches Cloud-Polling: Falls Inverter-Integrationen aktiv sind, im Hintergrund auffrischen
+    try:
+        from devices.models import CloudDeviceIntegration
+        from devices.services_profile_runner import execute_cloud_poll
+        for integration in CloudDeviceIntegration.objects.filter(device__home__user=user, is_active=True):
+            if not integration.last_polled_at or (timezone.now() - integration.last_polled_at).total_seconds() > 45:
+                c_key = f"cloud_poll_lock_{integration.id}"
+                if not cache.get(c_key):
+                    cache.set(c_key, True, timeout=30)
+                    try:
+                        execute_cloud_poll(integration)
+                    except Exception as poll_err:
+                        logger.warning("Opportunistischer Cloud-Poll fehlgeschlagen: %s", poll_err)
+    except Exception as e:
+        logger.debug("Cloud poll trigger failed: %s", e)
+
     devices = list(
         Device.objects.filter(
             home__user=request.user,
@@ -485,13 +502,6 @@ def device_dashboard_values(request):
     for row in all_latest:
         dev_keys_map[row["device_id"]].add(row["metric_key"].lower())
 
-    # Automatische Bereinigung redundanter veralteter 'power'/'value'/'val' Rows in DeviceLatestMetric
-    for dev_id, raw_keys in dev_keys_map.items():
-        if any(k in raw_keys for k in ["pv_power", "grid_power", "battery_power", "load_power"]):
-            DeviceLatestMetric.objects.filter(device_id=dev_id, metric_key__in=["power", "value", "val"]).delete()
-        if "battery_soc" in raw_keys:
-            DeviceLatestMetric.objects.filter(device_id=dev_id, metric_key="soc").delete()
-
     device_metrics_map = defaultdict(dict)
     for row in all_latest:
         dev_id = row["device_id"]
@@ -505,15 +515,11 @@ def device_dashboard_values(request):
         if m_k.lower() in ["soc", "battery_level"]:
             m_k = "battery_soc"
 
-        # 2. Multi-Source Inverter/Meter: generisches 'power'/'value'/'val' vollständig ignorieren
-        if is_multi_source and m_k.lower() in ["power", "value", "val"]:
-            continue
-
-        # 3. Generische Keys (value, val) auf konfigurierte Lead-Metrik mappen
+        # 2. Generische Keys (value, val) auf konfigurierte Lead-Metrik mappen
         if m_k.lower() in ["value", "val"] and configured_lead_key:
             m_k = configured_lead_key
 
-        # 4. Single-Channel Submeter / Verbraucher: generische 'power'/'temperature' mit konfigurierter Lead-Metrik zusammenführen
+        # 3. Single-Channel Submeter / Verbraucher: generische 'power'/'temperature' mit konfigurierter Lead-Metrik zusammenführen
         if not is_multi_source and configured_lead_key:
             cfg_lower = configured_lead_key.lower()
             k_lower = m_k.lower()
@@ -570,11 +576,6 @@ def device_dashboard_values(request):
         dev_id = row["device_id"]
         raw_k = (row["metric_key"] or "").lower()
         cfg = device_cfg_map.get(dev_id)
-        raw_keys = dev_keys_map[dev_id]
-        is_multi_source = any(k in raw_keys for k in ["pv_power", "grid_power", "battery_power", "load_power"])
-
-        if is_multi_source and raw_k in ["power", "value", "val"]:
-            continue
 
         if row["value"] is not None:
             val = round(float(row["value"]), 2)
@@ -613,6 +614,8 @@ def device_dashboard_values(request):
             candidate_keys.extend(["grid_power", "power_grid", "active_power", "p_total", "power"])
         elif role_key in ["producer", "pv", "solar"] or sig_key in ["pv", "solar", "producer"]:
             candidate_keys.extend(["pv_power", "solar_power", "yield_power", "power"])
+        elif role_key in ["both", "hybrid", "inverter", "storage_inverter"] or sig_key in ["both", "hybrid"]:
+            candidate_keys.extend(["pv_power", "solar_power", "yield_power", "power", "battery_soc", "battery_power", "load_power", "grid_power"])
         elif role_key in ["battery", "storage"] or sig_key in ["battery", "storage"]:
             candidate_keys.extend(["battery_soc", "soc", "battery_power", "power"])
         elif role_key in ["consumer", "load"] or sig_key in ["load", "consumer"]:
@@ -620,13 +623,13 @@ def device_dashboard_values(request):
         elif role_key == "sensor":
             candidate_keys.extend(["temperature", "temp", "humidity", "pressure", "value"])
         else:
-            candidate_keys.extend(["power", "value", "val"])
+            candidate_keys.extend(["pv_power", "solar_power", "yield_power", "power", "battery_soc", "battery_power", "load_power", "grid_power", "value", "val"])
 
         if configured_lead and configured_lead not in candidate_keys:
             candidate_keys.append(configured_lead)
 
         # Sparkline-Punkte blitzschnell aus dem In-Memory Mapping extrahieren
-        is_pwr = (configured_lead or "").lower() in POWER_KEYS or is_grid or role_key in ["producer", "consumer", "grid"]
+        is_pwr = (configured_lead or "").lower() in POWER_KEYS or is_grid or role_key in ["producer", "consumer", "grid", "both", "hybrid", ""]
         dev_sparklines = sparkline_1m_by_device.get(d.id, {})
         sparkline_pts = []
         matched_key = None

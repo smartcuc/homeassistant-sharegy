@@ -47,9 +47,16 @@ def run_device_self_test(
         # Falls CloudIntegration vorhanden ist
         integration = CloudDeviceIntegration.objects.filter(device=device, is_active=True).first()
         if integration:
-            profile_id = integration.profile_id
-            if not creds:
-                creds = integration.credentials or {}
+            profile_id = profile_id or integration.profile_id
+            saved_creds = integration.credentials or {}
+            if not creds or all(not v or str(v).startswith("••") for v in creds.values()):
+                creds = saved_creds
+            else:
+                merged = dict(saved_creds)
+                for k, v in creds.items():
+                    if v and not str(v).startswith("••"):
+                        merged[k] = v
+                creds = merged
     elif profile_id:
         try:
             prof = load_profile(profile_id)
@@ -69,6 +76,7 @@ def run_device_self_test(
             or creds.get("api_key")
             or creds.get("user_account")
             or creds.get("username")
+            or creds.get("userName")
             or creds.get("appkey")
         )
         if has_real_input:
@@ -125,7 +133,7 @@ def run_device_self_test(
         }
     else:
         if cloud_result and cloud_result.get("live_metrics"):
-            telemetry_data = cloud_result["live_metrics"]
+            telemetry_data = dict(cloud_result["live_metrics"])
             is_live = not cloud_result.get("simulated", False)
         elif device:
             latest_metrics = DeviceLatestMetric.objects.filter(device=device)
@@ -147,6 +155,25 @@ def run_device_self_test(
                 "battery_soc": 80.0,
             }
             is_live = False
+
+        # Key-Normalisierung für UI-Konsistenz
+        pv_val = telemetry_data.get("pv_power_w")
+        if pv_val is None:
+            pv_val = telemetry_data.get("pv_power")
+        if pv_val is None:
+            pv_val = telemetry_data.get("power_w")
+        if pv_val is None:
+            pv_val = telemetry_data.get("power", 0.0)
+
+        soc_val = telemetry_data.get("battery_soc") if telemetry_data.get("battery_soc") is not None else telemetry_data.get("soc")
+
+        telemetry_data["pv_power_w"] = pv_val
+        telemetry_data["power_w"] = pv_val
+        telemetry_data["pv_power"] = pv_val
+        telemetry_data["power"] = pv_val
+        if soc_val is not None:
+            telemetry_data["battery_soc"] = soc_val
+            telemetry_data["soc"] = soc_val
 
         status_txt = "Echte Live-Messwerte" if is_live else "Vorschau-Werte (Sandbox)"
         step_telemetry = {

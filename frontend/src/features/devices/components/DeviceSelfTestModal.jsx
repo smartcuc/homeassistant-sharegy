@@ -236,7 +236,10 @@ export default function DeviceSelfTestModal({
                   <div className="p-2 rounded-xl bg-white/80 dark:bg-slate-800/80 text-center">
                     <span className="text-[10px] text-slate-400 font-semibold block">PV / Leistung</span>
                     <span className="text-xs font-bold text-slate-900 dark:text-white font-mono">
-                      {result.steps[1].live_metrics.pv_power_w ?? result.steps[1].live_metrics.power_w ?? 0} W
+                      {result.steps[1].live_metrics.pv_power_w ?? 
+                       result.steps[1].live_metrics.power_w ?? 
+                       result.steps[1].live_metrics.pv_power ?? 
+                       result.steps[1].live_metrics.power ?? 0} W
                     </span>
                   </div>
                   <div className="p-2 rounded-xl bg-white/80 dark:bg-slate-800/80 text-center">
@@ -244,6 +247,8 @@ export default function DeviceSelfTestModal({
                     <span className="text-xs font-bold text-slate-900 dark:text-white font-mono">
                       {result.steps[1].live_metrics.battery_soc !== null && result.steps[1].live_metrics.battery_soc !== undefined
                         ? `${result.steps[1].live_metrics.battery_soc} %`
+                        : result.steps[1].live_metrics.soc !== null && result.steps[1].live_metrics.soc !== undefined
+                        ? `${result.steps[1].live_metrics.soc} %`
                         : "N/A"}
                     </span>
                   </div>

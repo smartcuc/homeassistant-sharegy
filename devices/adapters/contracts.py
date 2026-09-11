@@ -34,14 +34,24 @@ class CanonicalTelemetry:
         """
         Gibt ein Dictionary der Standard-Metriken zurück (kompatibel mit UI und EMS).
         """
-        return {
+        res = {
             "pv_power_w": self.pv_power_w,
+            "power_w": self.pv_power_w,
+            "pv_power": self.pv_power_w,
+            "power": self.pv_power_w,
             "grid_power_w": self.grid_power_w,
+            "grid_power": self.grid_power_w,
             "load_power_w": self.load_power_w,
+            "load_power": self.load_power_w,
             "battery_power_w": self.battery_power_w,
+            "battery_power": self.battery_power_w,
             "battery_soc": self.battery_soc,
+            "soc": self.battery_soc,
             "daily_generation_kwh": self.daily_yield_kwh,
+            "daily_yield_kwh": self.daily_yield_kwh,
+            "daily_yield": self.daily_yield_kwh,
         }
+        return res
 
     def validate(self) -> "CanonicalTelemetry":
         """

@@ -44,6 +44,13 @@ def process_canonical_telemetry(
             value=val,
             timestamp=now,
         )
+        DeviceMetric.objects.create(
+            device=device,
+            metric_key="pv_power",
+            unit="W",
+            value=val,
+            timestamp=now,
+        )
         DeviceLatestMetric.objects.update_or_create(
             device=device,
             metric_key="pv_power",
