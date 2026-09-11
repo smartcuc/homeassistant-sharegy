@@ -128,7 +128,7 @@ def sungrow_oauth_callback(request):
     refresh_token = ""
     user_account = "sungrow_oauth_user"
     ps_id = "default_ps"
-    plant_name = "Sungrow iSolarCloud Hybrid-Anlage"
+    plant_name = "Sungrow iSolarCloud"
 
     def _extract_tokens_from_json(resp_json: dict):
         if not isinstance(resp_json, dict):
