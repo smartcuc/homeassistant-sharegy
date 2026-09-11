@@ -260,40 +260,6 @@ class SungrowAdapter(BaseInverterAdapter):
 
         refresh_attempted = False
 
-        def _login_openapi() -> bool:
-            nonlocal token
-            user_acc = credentials.get("user_account") or credentials.get("email") or credentials.get("username")
-            user_pw = credentials.get("user_password") or credentials.get("password")
-            if not user_acc or not user_pw:
-                return False
-            for gw in gateway_list:
-                try:
-                    l_resp = requests.post(
-                        f"{gw}/openapi/login",
-                        json={
-                            "appkey": appkey,
-                            "user_account": str(user_acc).strip(),
-                            "user_password": str(user_pw).strip(),
-                        },
-                        headers={"sys_code": "901", "x-access-key": app_secret, "Content-Type": "application/json;charset=UTF-8"},
-                        timeout=5,
-                    )
-                    logger.info("[SUNGROW_OPENAPI] /openapi/login on %s [%s]: %s", gw, l_resp.status_code, l_resp.text[:300])
-                    if l_resp.status_code == 200:
-                        lj = l_resp.json()
-                        rd = lj.get("result_data") or {}
-                        nt = _extract_token_from_response(lj)
-                        if nt:
-                            token = nt
-                            credentials["token"] = token
-                            if isinstance(rd, dict) and rd.get("user_id"):
-                                credentials["auth_user"] = str(rd["user_id"])
-                            logger.info("[SUNGROW_OPENAPI] Login successful via %s/openapi/login, token acquired.", gw)
-                            return True
-                except Exception as e:
-                    logger.debug("OpenAPI login on %s failed: %s", gw, e)
-            return False
-
         def _refresh_openapi_token() -> bool:
             nonlocal token, refresh_attempted
             if refresh_attempted:
@@ -301,10 +267,8 @@ class SungrowAdapter(BaseInverterAdapter):
             refresh_attempted = True
             r_token = credentials.get("refresh_token")
 
-            # 1. Wenn refresh_token vorhanden ist: apiManage/refreshToken (pysolarcloud Standard) & oauth/token
             if r_token:
                 for gw in gateway_list:
-                    # Versuch A: /openapi/apiManage/refreshToken (JSON)
                     try:
                         r_resp = requests.post(
                             f"{gw}/openapi/apiManage/refreshToken",
@@ -332,37 +296,7 @@ class SungrowAdapter(BaseInverterAdapter):
                     except Exception as e:
                         logger.debug("apiManage/refreshToken on %s failed: %s", gw, e)
 
-                    # Versuch B: /openapi/oauth/token (Basic Auth + Params)
-                    try:
-                        r_resp = requests.post(
-                            f"{gw}/openapi/oauth/token",
-                            params={
-                                "grant_type": "refresh_token",
-                                "refresh_token": r_token,
-                                "client_id": appkey,
-                                "client_secret": app_secret,
-                            },
-                            auth=(appkey, app_secret) if appkey and app_secret else None,
-                            headers={"x-access-key": app_secret, "sys_code": "901"},
-                            timeout=4,
-                        )
-                        logger.info("[SUNGROW_OPENAPI] oauth/token refresh on %s [%s]: %s", gw, r_resp.status_code, r_resp.text[:300])
-                        if r_resp.status_code == 200:
-                            rj = r_resp.json()
-                            nt = _extract_token_from_response(rj)
-                            if nt:
-                                token = nt
-                                credentials["token"] = token
-                                rd = rj.get("result_data") or rj.get("data")
-                                if isinstance(rd, dict) and rd.get("refresh_token"):
-                                    credentials["refresh_token"] = rd["refresh_token"]
-                                logger.info("[SUNGROW_OPENAPI] Token successfully refreshed via %s/openapi/oauth/token", gw)
-                                return True
-                    except Exception as e:
-                        logger.debug("OAuth token refresh on %s failed: %s", gw, e)
-
-            # 2. Fallback: Re-Login über OpenAPI falls Anmeldedaten vorhanden
-            return _login_openapi()
+            return False
 
         def _post_with_auth(endpoint: str, json_data: dict) -> Optional[requests.Response]:
             nonlocal token
@@ -371,10 +305,6 @@ class SungrowAdapter(BaseInverterAdapter):
                 payload["appkey"] = appkey
             if "lang" not in payload:
                 payload["lang"] = "_de_DE"
-
-            # Residential Endpoints (/openapi/get... /datasubscribe/...) benötigen 'token' im Body
-            if not endpoint.startswith("openapi/platform") and not endpoint.startswith("/openapi/platform") and token and "token" not in payload:
-                payload["token"] = token
 
             for gw in gateway_list:
                 url = f"{gw}/{endpoint.lstrip('/')}"
@@ -401,8 +331,6 @@ class SungrowAdapter(BaseInverterAdapter):
                         logger.info("[SUNGROW_OPENAPI] Auth error on %s, attempting automatic token refresh...", url)
                         if _refresh_openapi_token():
                             headers["Authorization"] = f"Bearer {token}"
-                            if not endpoint.startswith("openapi/platform") and not endpoint.startswith("/openapi/platform"):
-                                payload["token"] = token
                             resp = requests.post(url, json=payload, headers=headers, timeout=4)
                             if resp.status_code == 200:
                                 return resp
@@ -443,9 +371,6 @@ class SungrowAdapter(BaseInverterAdapter):
                 except Exception as ex_err:
                     logger.debug("Auto token exchange failed on %s: %s", gw, ex_err)
 
-        if not token and (credentials.get("user_account") or credentials.get("email")):
-            _login_openapi()
-
         if not token:
             # Letzter Versuch: Token via Developer Refresh
             if not _refresh_openapi_token():
@@ -454,34 +379,22 @@ class SungrowAdapter(BaseInverterAdapter):
 
         # 2. Automatische Anlagen-ID (ps_id) Erkennung über offizielle OpenAPI
         if not ps_id or str(ps_id) in ("default_ps", "12345", ""):
-            for list_ep, list_body in [
-                ("openapi/platform/queryPowerStationList", {"page": 1, "size": 100, "lang": "_de_DE"}),
-                ("openapi/getPowerStationList", {"curPage": 1, "size": 10, "lang": "_de_DE"}),
-                ("openapi/getDeviceListByUser", {"curPage": 1, "size": 10, "lang": "_de_DE"}),
-            ]:
-                try:
-                    list_resp = _post_with_auth(list_ep, list_body)
-                    if list_resp and list_resp.status_code == 200:
-                        list_json = list_resp.json()
-                        list_data = list_json.get("result_data") or list_json.get("data") or {}
-                        if isinstance(list_data, dict):
-                            stations = (
-                                list_data.get("pageList")
-                                or list_data.get("data_list")
-                                or list_data.get("list")
-                                or list_data.get("result_list")
-                                or []
-                            )
-                            if stations and isinstance(stations, list) and len(stations) > 0:
-                                first_st = stations[0]
-                                if isinstance(first_st, dict):
-                                    ps_id = str(first_st.get("ps_id") or first_st.get("id") or first_st.get("ps_key") or first_st.get("power_station_id") or "")
-                                    credentials["ps_id"] = ps_id
-                                    credentials["ps_name"] = first_st.get("ps_name") or first_st.get("name", "Sungrow PV-Anlage")
-                                    logger.info("[SUNGROW_OPENAPI] Auto-discovered plant ps_id: %s (%s)", ps_id, credentials["ps_name"])
-                                    break
-                except Exception as e:
-                    logger.debug("Fetch ps_id via %s failed: %s", list_ep, e)
+            try:
+                list_resp = _post_with_auth("openapi/platform/queryPowerStationList", {"page": 1, "size": 100, "lang": "_de_DE"})
+                if list_resp and list_resp.status_code == 200:
+                    list_json = list_resp.json()
+                    list_data = list_json.get("result_data") or list_json.get("data") or {}
+                    if isinstance(list_data, dict):
+                        stations = list_data.get("pageList") or list_data.get("data_list") or []
+                        if stations and isinstance(stations, list) and len(stations) > 0:
+                            first_st = stations[0]
+                            if isinstance(first_st, dict):
+                                ps_id = str(first_st.get("ps_id") or first_st.get("id") or first_st.get("ps_key") or "")
+                                credentials["ps_id"] = ps_id
+                                credentials["ps_name"] = first_st.get("ps_name") or first_st.get("name", "Sungrow PV-Anlage")
+                                logger.info("[SUNGROW_OPENAPI] Auto-discovered plant ps_id: %s (%s)", ps_id, credentials["ps_name"])
+            except Exception as e:
+                logger.debug("Fetch ps_id via platform query failed: %s", e)
 
         raw_data: Dict[str, Any] = {"result_code": "1", "result_data": {}}
 
@@ -490,7 +403,6 @@ class SungrowAdapter(BaseInverterAdapter):
             ps_id_str = str(ps_id) if ps_id and str(ps_id) not in ("default_ps", "") else ""
             ps_list = [ps_id_str] if ps_id_str else []
             
-            # Versuch A: Offizieller getPowerStationRealTimeData Endpunkt
             rt_endpoints = [
                 ("openapi/platform/getPowerStationRealTimeData", {
                     "ps_id_list": ps_list,
@@ -498,19 +410,7 @@ class SungrowAdapter(BaseInverterAdapter):
                     "is_get_point_dict": "1",
                     "lang": "_de_DE",
                 }),
-                ("openapi/getPowerStationRealTimeData", {
-                    "ps_id_list": ps_list,
-                    "point_id_list": self.MEASURE_POINTS,
-                    "is_get_point_dict": "1",
-                    "lang": "_de_DE",
-                }),
                 ("openapi/platform/getDeviceRealTimeData", {
-                    "device_type": 11,
-                    "ps_key_list": [f"{ps_id_str}_11_0_0"] if ps_id_str else [],
-                    "point_id_list": self.MEASURE_POINTS,
-                    "lang": "_de_DE",
-                }),
-                ("openapi/getDeviceRealTimeData", {
                     "device_type": 11,
                     "ps_key_list": [f"{ps_id_str}_11_0_0"] if ps_id_str else [],
                     "point_id_list": self.MEASURE_POINTS,
@@ -635,12 +535,9 @@ class SungrowAdapter(BaseInverterAdapter):
             logger.warning("getPowerStationRealTimeData / getDeviceRealTimeData query failed: %s", e)
 
         # 4. Details abfragen als Ergänzung (getPowerStationDetail)
-        for det_ep, det_body in [
-            ("openapi/platform/getPowerStationDetail", {"ps_ids": str(ps_id or ""), "lang": "_de_DE"}),
-            ("openapi/getPowerStationDetail", {"sn": str(credentials.get("sn") or ps_id or ""), "is_get_ps_remarks": "1"}),
-        ]:
+        if ps_id and str(ps_id) not in ("default_ps", ""):
             try:
-                resp = _post_with_auth(det_ep, det_body)
+                resp = _post_with_auth("openapi/platform/getPowerStationDetail", {"ps_ids": str(ps_id), "lang": "_de_DE"})
                 if resp and resp.status_code == 200:
                     det_json = resp.json()
                     det_res_data = det_json.get("result_data") or det_json.get("data") or {}
@@ -649,9 +546,8 @@ class SungrowAdapter(BaseInverterAdapter):
                             raw_data["result_data"].update(det_res_data["data_list"][0])
                         elif "ps_id" in det_res_data or "curr_power" in det_res_data:
                             raw_data["result_data"].update(det_res_data)
-                        break
             except Exception as e:
-                logger.debug("getPowerStationDetail on %s failed: %s", det_ep, e)
+                logger.debug("getPowerStationDetail failed: %s", e)
 
         telemetry = self.parse_payload(raw_data)
 

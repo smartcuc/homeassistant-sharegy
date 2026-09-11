@@ -178,32 +178,31 @@ def sungrow_oauth_callback(request):
     # Echte Anlagen-ID (ps_id) über offizielle OpenAPI platform/queryPowerStationList abfragen
     if token and not token.startswith("sg_oauth_"):
         headers_query = {
+            "sys_code": "901",
             "x-access-key": SUNGROW_APP_SECRET,
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json",
         }
         gw = "https://gateway.isolarcloud.eu"
-        for list_ep, list_body in [
-            (f"{gw}/openapi/platform/queryPowerStationList", {"appkey": SUNGROW_APPKEY, "page": 1, "size": 100, "lang": "_de_DE"}),
-            (f"{gw}/openapi/getPowerStationList", {"appkey": SUNGROW_APPKEY, "token": token, "curPage": 1, "size": 10, "lang": "_de_DE"}),
-        ]:
-            try:
-                list_resp = requests.post(list_ep, json=list_body, headers=headers_query, timeout=4)
-                logger.info("Sungrow station query on %s [%s]: %s", list_ep, list_resp.status_code, list_resp.text[:300])
-                if list_resp.status_code == 200:
-                    list_json = list_resp.json()
-                    list_data = list_json.get("result_data") or list_json.get("data") or {}
-                    if isinstance(list_data, dict):
-                        stations = list_data.get("pageList") or list_data.get("data_list") or list_data.get("list") or []
-                        if stations and isinstance(stations, list) and len(stations) > 0:
-                            ps_id = str(stations[0].get("ps_id") or stations[0].get("id") or stations[0].get("ps_key") or "")
-                            plant_name = stations[0].get("ps_name") or stations[0].get("name") or plant_name
-                            logger.info("Auto-discovered Sungrow station: %s (%s)", ps_id, plant_name)
-                            break
-            except Exception as e:
-                logger.warning("Could not list power stations during OAuth callback on %s: %s", list_ep, e)
-            if ps_id and ps_id != "default_ps":
-                break
+        try:
+            list_resp = requests.post(
+                f"{gw}/openapi/platform/queryPowerStationList",
+                json={"appkey": SUNGROW_APPKEY, "page": 1, "size": 100, "lang": "_de_DE"},
+                headers=headers_query,
+                timeout=4,
+            )
+            logger.info("Sungrow station query on %s/openapi/platform/queryPowerStationList [%s]: %s", gw, list_resp.status_code, list_resp.text[:300])
+            if list_resp.status_code == 200:
+                list_json = list_resp.json()
+                list_data = list_json.get("result_data") or list_json.get("data") or {}
+                if isinstance(list_data, dict):
+                    stations = list_data.get("pageList") or list_data.get("data_list") or []
+                    if stations and isinstance(stations, list) and len(stations) > 0:
+                        ps_id = str(stations[0].get("ps_id") or stations[0].get("id") or stations[0].get("ps_key") or "")
+                        plant_name = stations[0].get("ps_name") or stations[0].get("name") or plant_name
+                        logger.info("Auto-discovered Sungrow station: %s (%s)", ps_id, plant_name)
+        except Exception as e:
+            logger.warning("Could not list power stations during OAuth callback on %s: %s", gw, e)
 
     # Bestehendes Sungrow-Gerät finden (z. B. ID 1256) oder neues anlegen
     existing_cdi = CloudDeviceIntegration.objects.filter(
