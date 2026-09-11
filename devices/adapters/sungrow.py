@@ -430,7 +430,8 @@ class SungrowAdapter(BaseInverterAdapter):
                             body = resp.json()
                             code_str = str(body.get("result_code", ""))
                             msg_str = str(body.get("result_msg", "")).lower()
-                            if code_str in ("2", "000", "0000", "401") or ("token" in msg_str and ("invalid" in msg_str or "expired" in msg_str or "fail" in msg_str)):
+                            # Offizielle Sungrow OpenAPI Auth-Fehlercodes: E00003 (Token ungültig/abgelaufen), E900 (Unauthorized), E00000 (Invalid AppKey)
+                            if code_str in ("E00003", "E900", "E00000", "E911", "E912", "E914", "401", "403") or ("token" in msg_str and ("invalid" in msg_str or "expired" in msg_str)):
                                 is_auth_err = True
                         except Exception:
                             pass
