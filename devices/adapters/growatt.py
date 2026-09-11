@@ -318,19 +318,30 @@ class GrowattAdapter(BaseInverterAdapter):
                 "Content-Type": "application/x-www-form-urlencoded",
             }
 
+            # 1. Plant ID ermitteln
             if not plant_id:
                 try:
                     plist_resp = session.get("https://openapi.growatt.com/v1/plant/list", headers=api_headers, timeout=10)
                     if plist_resp.status_code == 200:
                         p_json = plist_resp.json()
-                        plants = p_json.get("data", {}).get("plants", []) if isinstance(p_json.get("data"), dict) else []
-                        if plants and isinstance(plants, list):
-                            plant_id = str(plants[0].get("plant_id") or plants[0].get("id") or "")
-                            credentials["plant_id"] = plant_id
+                        p_data = p_json.get("data")
+                        plants = []
+                        if isinstance(p_data, list):
+                            plants = p_data
+                        elif isinstance(p_data, dict):
+                            plants = p_data.get("plants") or p_data.get("plant_list") or p_data.get("data") or [p_data]
+                        if plants and isinstance(plants, list) and len(plants) > 0:
+                            first_p = plants[0]
+                            if isinstance(first_p, dict):
+                                plant_id = str(first_p.get("plant_id") or first_p.get("id") or first_p.get("plantId") or "")
+                                credentials["plant_id"] = plant_id
+                                logger.info("Growatt auto-discovered plant_id: %s", plant_id)
                 except Exception as e:
                     logger.warning("Growatt OpenAPI plant list discovery failed: %s", e)
 
-            if plant_id and not device_sn:
+            # 2. Alle Geräte-Seriennummern der Anlage ermitteln
+            discovered_sn_list = [device_sn] if device_sn else []
+            if plant_id:
                 try:
                     dlist_resp = session.get(
                         "https://openapi.growatt.com/v1/device/list",
@@ -340,22 +351,35 @@ class GrowattAdapter(BaseInverterAdapter):
                     )
                     if dlist_resp.status_code == 200:
                         d_json = dlist_resp.json()
-                        devices = d_json.get("data", {}).get("devices", []) if isinstance(d_json.get("data"), dict) else []
-                        if devices and isinstance(devices, list):
-                            device_sn = str(devices[0].get("device_sn") or devices[0].get("sn") or "")
-                            credentials["device_sn"] = device_sn
+                        d_data = d_json.get("data")
+                        dev_items = []
+                        if isinstance(d_data, list):
+                            dev_items = d_data
+                        elif isinstance(d_data, dict):
+                            dev_items = d_data.get("devices") or d_data.get("device_list") or d_data.get("data") or d_data.get("obj") or []
+                        if isinstance(dev_items, list):
+                            for dev_obj in dev_items:
+                                if isinstance(dev_obj, dict):
+                                    sn = str(dev_obj.get("device_sn") or dev_obj.get("sn") or dev_obj.get("deviceSn") or dev_obj.get("inverterId") or "").strip()
+                                    if sn and sn not in discovered_sn_list:
+                                        discovered_sn_list.append(sn)
+                            if discovered_sn_list and not device_sn:
+                                device_sn = discovered_sn_list[0]
+                                credentials["device_sn"] = device_sn
+                                logger.info("Growatt auto-discovered devices: %s", discovered_sn_list)
                 except Exception as e:
                     logger.debug("Growatt device/list lookup failed: %s", e)
 
-            if device_sn:
+            # 3. Alle Detail-Endpunkte für alle erkannten Seriennummern abfragen
+            for sn_val in (discovered_sn_list if discovered_sn_list else ([device_sn] if device_sn else [])):
                 for endpoint in [
                     "https://openapi.growatt.com/v1/device/inverter/inverter_last_data",
-                    "https://openapi.growatt.com/v1/device/tlx/tlx_last_data",
-                    "https://openapi.growatt.com/v1/device/mix/mix_last_data",
                     "https://openapi.growatt.com/v1/device/storage/storage_last_data",
-                    "https://openapi.growatt.com/v1/device/spa/spa_last_data",
+                    "https://openapi.growatt.com/v1/device/mix/mix_last_data",
                     "https://openapi.growatt.com/v1/device/sph/sph_last_data",
+                    "https://openapi.growatt.com/v1/device/spa/spa_last_data",
                     "https://openapi.growatt.com/v1/device/min/min_last_data",
+                    "https://openapi.growatt.com/v1/device/tlx/tlx_last_data",
                     "https://openapi.growatt.com/v1/device/noah/noah_last_data",
                 ]:
                     try:
@@ -363,15 +387,15 @@ class GrowattAdapter(BaseInverterAdapter):
                             endpoint,
                             headers=api_headers,
                             params={
-                                "device_sn": device_sn,
-                                "inverter_sn": device_sn,
-                                "tlx_sn": device_sn,
-                                "mix_sn": device_sn,
-                                "storage_sn": device_sn,
-                                "spa_sn": device_sn,
-                                "sph_sn": device_sn,
-                                "min_sn": device_sn,
-                                "noah_sn": device_sn,
+                                "device_sn": sn_val,
+                                "inverter_sn": sn_val,
+                                "storage_sn": sn_val,
+                                "mix_sn": sn_val,
+                                "sph_sn": sn_val,
+                                "spa_sn": sn_val,
+                                "min_sn": sn_val,
+                                "tlx_sn": sn_val,
+                                "noah_sn": sn_val,
                             },
                             timeout=8,
                         )
