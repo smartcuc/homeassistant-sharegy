@@ -207,8 +207,6 @@ def build_device_signals(user):
     for dev in all_devices:
         if _is_non_power_sensor(dev):
             continue
-        if (dev.id in pv_device_ids or dev.id in grid_device_ids or dev.id in battery_device_ids) and dev.id not in load_device_ids:
-            continue
 
         l_p = cache.get(f"device:{dev.id}:load_power")
         if l_p is None:
@@ -229,8 +227,6 @@ def build_device_signals(user):
     battery_power = None
     for dev in all_devices:
         if _is_non_power_sensor(dev):
-            continue
-        if (dev.id in load_device_ids or dev.id in grid_device_ids or dev.id in pv_device_ids) and dev.id not in battery_device_ids:
             continue
 
         b_p = cache.get(f"device:{dev.id}:battery_power")
@@ -333,8 +329,6 @@ def build_device_signals(user):
     if grid_device_ids:
         grid_power = 0.0
         for d_id in grid_device_ids:
-            if d_id in pv_device_ids or d_id in battery_device_ids:
-                continue
             cfg = getattr(next((d for d in all_devices if d.id == d_id), None), "config", None)
             sig_k = cfg.energy_signal_type.key if (cfg and cfg.energy_signal_type) else None
             val = float(values.get(d_id, 0) or 0.0)
@@ -347,7 +341,7 @@ def build_device_signals(user):
     else:
         grid_power = 0.0
         for dev in all_devices:
-            if dev.id in battery_device_ids or dev.id in pv_device_ids or (dev.id in load_device_ids and dev.id not in grid_device_ids):
+            if _is_non_power_sensor(dev):
                 continue
             g_p = cache.get(f"device:{dev.id}:grid_power")
             if g_p is None:

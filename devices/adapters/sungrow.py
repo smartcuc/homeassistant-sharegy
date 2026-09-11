@@ -28,7 +28,7 @@ class SungrowAdapter(BaseInverterAdapter):
     MEASURE_POINTS = [
         "83033", "83067", "83052", "83106", "83051", "83549",
         "83129", "83252", "83238", "83104", "83111", "83112", "83326",
-        "83328", "83329", "83330", "83334"
+        "83328", "83329", "83330", "83334", "83013", "83021", "83049", "83050", "83012"
     ]
 
     def generate_mock_payload(self) -> dict:
@@ -551,12 +551,12 @@ class SungrowAdapter(BaseInverterAdapter):
 
                     if pv > 50.0:
                         surplus = pv + bat_discharge - load - bat_charge
-                        if surplus > 30.0:
+                        if surplus > 15.0:
                             if grid > 0:
                                 grid = -abs(grid)
-                            elif grid == 0.0 and surplus > 50.0 and load > 0:
+                            elif grid == 0.0:
                                 grid = -round(surplus, 1)
-                        elif load > (pv + bat_discharge + 30.0):
+                        elif load > (pv + bat_discharge + 15.0):
                             if grid < 0:
                                 grid = abs(grid)
 
@@ -565,12 +565,26 @@ class SungrowAdapter(BaseInverterAdapter):
                             grid = -abs(grid)
                         load = max(0.0, round(pv + grid + bat_pwr, 1))
 
+                    today_kwh = _get_pt("83013", "83021", "83049", "83050", "83012", "today_energy")
+                    if today_kwh is None:
+                        res_d = raw_data.get("result_data", {})
+                        if isinstance(res_d, dict):
+                            today_kwh = res_d.get("today_energy") or res_d.get("todayEnergy") or res_d.get("today_yield") or res_d.get("eToday")
+                    if today_kwh is not None:
+                        try:
+                            today_kwh = float(today_kwh)
+                            if today_kwh > 1000.0:
+                                today_kwh = today_kwh / 1000.0
+                        except (ValueError, TypeError):
+                            today_kwh = None
+
                     raw_data["_direct_metrics"] = {
                         "pv_power_w": max(0.0, pv),
                         "load_power_w": max(0.0, load),
                         "grid_power_w": grid,
                         "battery_power_w": bat_pwr,
                         "battery_soc": soc_val,
+                        "daily_generation_kwh": today_kwh,
                     }
         except Exception as e:
             logger.warning("getPowerStationRealTimeData query failed: %s", e)
@@ -587,6 +601,17 @@ class SungrowAdapter(BaseInverterAdapter):
                     d_list = det_json["result_data"]["data_list"]
                     if isinstance(d_list, list) and d_list:
                         raw_data["result_data"].update(d_list[0])
+                        if "_direct_metrics" in raw_data and raw_data["_direct_metrics"].get("daily_generation_kwh") is None:
+                            d_item = d_list[0]
+                            t_en = d_item.get("today_energy") or d_item.get("todayEnergy") or d_item.get("today_yield") or d_item.get("eToday")
+                            if t_en is not None:
+                                try:
+                                    f_en = float(t_en)
+                                    if f_en > 1000.0:
+                                        f_en = f_en / 1000.0
+                                    raw_data["_direct_metrics"]["daily_generation_kwh"] = f_en
+                                except (ValueError, TypeError):
+                                    pass
         except Exception as e:
             logger.warning("getPowerStationDetail query failed: %s", e)
 

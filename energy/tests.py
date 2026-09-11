@@ -497,6 +497,47 @@ class GrafanaAndHomeAssistantPluginTest(TestCase):
         self.assertEqual(flow["pv_to_load"], 0.0)
         self.assertEqual(flow["battery_to_load"], 770.0)
 
+    def test_sungrow_hybrid_daytime_surplus_flow(self):
+        """Testet, dass ein Sungrow Hybrid WR am Tag mit PV=2043W, Load=77W, Battery=0W (99.6%) den Hausbedarf korrekt als 77W und Einspeisung als 1966W ausweist."""
+        from devices.models import DeviceLatestMetric
+        from energy.ems.services import build_device_signals
+        from energy.flow_engine import calculate_energy_flow
+        from energy.services.energy import get_energy_data
+
+        Device.objects.filter(home=self.home).delete()
+
+        hybrid_dev = Device.objects.create(
+            home=self.home,
+            identifier="sungrow_hybrid_sh10rt_day",
+            configured=True,
+            active=True,
+        )
+        now = timezone.now()
+        DeviceLatestMetric.objects.create(device=hybrid_dev, metric_key="power", value=2043.0, timestamp=now)
+        DeviceLatestMetric.objects.create(device=hybrid_dev, metric_key="pv_power", value=2043.0, timestamp=now)
+        DeviceLatestMetric.objects.create(device=hybrid_dev, metric_key="load_power", value=77.0, timestamp=now)
+        DeviceLatestMetric.objects.create(device=hybrid_dev, metric_key="battery_power", value=0.0, timestamp=now)
+        DeviceLatestMetric.objects.create(device=hybrid_dev, metric_key="battery_soc", value=99.6, timestamp=now)
+        DeviceLatestMetric.objects.create(device=hybrid_dev, metric_key="grid_power", value=0.0, timestamp=now)
+
+        signals = build_device_signals(self.user)
+        self.assertEqual(signals["pv"]["production"], 2043.0)
+        self.assertEqual(signals["load"]["consumption"], 77.0)
+        self.assertEqual(signals["grid"]["export"], 1966.0)
+        self.assertEqual(signals["grid"]["import"], 0.0)
+
+        flow = calculate_energy_flow(signals)
+        self.assertEqual(flow["total_production"], 2043.0)
+        self.assertEqual(flow["total_consumption"], 77.0)
+        self.assertEqual(flow["pv_to_load"], 77.0)
+        self.assertEqual(flow["pv_to_grid"], 1966.0)
+
+        data = get_energy_data(self.user)
+        self.assertEqual(data["kpis"]["load"], 77.0)
+        self.assertEqual(data["kpis"]["pv"], 2043.0)
+        self.assertEqual(data["kpis"]["grid"], -1966.0)
+        self.assertEqual(data["kpis"]["battery"], 0.0)
+
 
 
 

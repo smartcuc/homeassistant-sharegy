@@ -53,14 +53,26 @@ def calculate_energy_flow(signals):
         remaining_pv = round(remaining_pv + unmeasured_pv, 2)
 
     # 2. Reinen Hausverbrauch (Bedarf) berechnen / bereinigen:
-    # Physikalische Bilanz: Wenn mehr Energie aus PV/Speicher/Netz ins Haus fließt als Submeter einzeln erfassen,
-    # ist der Gesamthausbedarf die physikalische Summe aller zufließenden Quellen abzüglich Netzeinspeisung:
-    derived_consumption = (
-        remaining_pv + battery_discharge + remaining_grid_import - grid_export
-    )
-    if consumption <= 0 or (derived_consumption > 0 and derived_consumption > consumption):
+    # Physikalische Bilanz:
+    if consumption <= 0:
+        derived_consumption = (
+            remaining_pv + battery_discharge + remaining_grid_import - grid_export
+        )
         consumption = max(0.0, derived_consumption)
     else:
+        # Wenn gemessene Last (z. B. aus Hybrid-Inverter Load-Kanal oder Submetern) vorliegt:
+        # A) Falls aktiver Netzbezug vorliegt und Inflow > Submeter-Last:
+        if remaining_grid_import > 0:
+            inflow = remaining_pv + battery_discharge + remaining_grid_import - grid_export
+            if inflow > consumption:
+                consumption = max(0.0, inflow)
+        # B) Falls PV-Überschuss über der Last vorliegt und kein Grid-Export gemeldet wurde:
+        # Der physikalische Überschuss wird als Netzeinspeisung gewertet (niemals als künstlicher Hausbedarf!)
+        elif remaining_pv > consumption and grid_export <= 0:
+            grid_export = round(remaining_pv - consumption, 2)
+            if "grid" in signals and isinstance(signals["grid"], dict):
+                signals["grid"]["export"] = grid_export
+
         # Falls die übergebene consumption fälschlicherweise die Batterieladung enthielt:
         if battery_charge > 0 and consumption >= battery_charge and abs(consumption - (remaining_grid_import + grid_to_battery)) < 30:
             consumption = max(0.0, consumption - grid_to_battery)
