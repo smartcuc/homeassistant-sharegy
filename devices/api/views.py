@@ -896,12 +896,20 @@ def device_available_metrics(request, device_id):
 
         is_primary = (k == primary_key) or (primary_key not in seen_keys and k in ["power", "value", "active_power", "temperature", "bwwp_temp", configured_lead_key])
 
+        val_to_use = lm.value
+        cached_v = cache.get(f"device:{device_id}:{k}") or cache.get(f"device:{device_id}:{lm.metric_key}")
+        if cached_v is not None:
+            try:
+                val_to_use = float(cached_v)
+            except (ValueError, TypeError):
+                pass
+
         results.append({
             "key": k,
             "name": name,
             "unit": unit,
             "icon": icon,
-            "latest_value": round(float(lm.value), 2) if lm.value is not None else None,
+            "latest_value": round(float(val_to_use), 2) if val_to_use is not None else None,
             "timestamp": lm.timestamp.isoformat() if lm.timestamp else None,
             "is_primary": is_primary,
         })
