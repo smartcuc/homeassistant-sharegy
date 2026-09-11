@@ -7,6 +7,8 @@ import { apiFetch } from "../api/client";
 import { useTranslation } from "react-i18next";
 import MsbSmartMeterHub from "../features/community/components/MsbSmartMeterHub";
 import CommunityShareModal from "../features/community/components/CommunityShareModal";
+import VirtualMasterMeterHub from "../features/community/components/VirtualMasterMeterHub";
+import VppAggregatorCockpit from "../features/energy/components/VppAggregatorCockpit";
 
 export default function TenantDashboard() {
     const { t } = useTranslation();
@@ -280,7 +282,7 @@ export default function TenantDashboard() {
                 </div>
 
                 {/* TAB SWITCHER */}
-                <div className="flex bg-slate-100 dark:bg-slate-800/70 p-1 rounded-xl text-xs font-semibold">
+                <div className="flex flex-wrap bg-slate-100 dark:bg-slate-800/70 p-1 rounded-xl text-xs font-semibold gap-1">
                     <button
                         onClick={() => setActiveTab("cockpit")}
                         className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
@@ -289,7 +291,27 @@ export default function TenantDashboard() {
                                 : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                         }`}
                     >
-                        ⚡ Energy Cockpit
+                        ⚡ Cockpit
+                    </button>
+                    <button
+                        onClick={() => setActiveTab("virtual_meter")}
+                        className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
+                            activeTab === "virtual_meter"
+                                ? "bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 font-bold shadow-xs"
+                                : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                        }`}
+                    >
+                        🏢 Virtueller Summenzähler
+                    </button>
+                    <button
+                        onClick={() => setActiveTab("vpp")}
+                        className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
+                            activeTab === "vpp"
+                                ? "bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 font-bold shadow-xs"
+                                : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                        }`}
+                    >
+                        🔌 VPP Kraftwerk
                     </button>
                     <button
                         onClick={() => setActiveTab("settlement")}
@@ -319,7 +341,7 @@ export default function TenantDashboard() {
                                 : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                         }`}
                     >
-                        ⚡ Zähler & wMSB Hub
+                        ⚡ wMSB Hub
                     </button>
                     <button
                         onClick={() => setActiveTab("audit")}
@@ -902,6 +924,20 @@ export default function TenantDashboard() {
                     </section>
 
                 </div>
+            )}
+
+            {/* ======================================================== */}
+            {/* 2. VIRTUALE SUMMENZÄHLER TAB */}
+            {/* ======================================================== */}
+            {activeTab === "virtual_meter" && (
+                <VirtualMasterMeterHub tenant={tenant} />
+            )}
+
+            {/* ======================================================== */}
+            {/* 3. VIRTUAL POWER PLANT (VPP) COCKPIT TAB */}
+            {/* ======================================================== */}
+            {activeTab === "vpp" && (
+                <VppAggregatorCockpit />
             )}
 
             {/* ======================================================== */}
