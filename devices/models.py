@@ -823,13 +823,28 @@ class CloudDeviceIntegration(models.Model):
         help_text="Konfigurations- und Zugangsdaten (z. B. appkey, user_account, password, site_id)",
     )
     polling_interval_seconds = models.IntegerField(
-        default=15,
-        help_text="Abfrageintervall in Sekunden (Standard: 15s)",
+        null=True,
+        blank=True,
+        default=None,
+        verbose_name="Individueller Lesezyklus (Sekunden)",
+        help_text="Individuelles Abfrageintervall in Sekunden. Leer lassen, um das globale Hersteller-Intervall aus den EMS-Einstellungen zu nutzen.",
     )
     is_active = models.BooleanField(
         default=True,
         help_text="Aktiviert das periodische Polling über Celery",
     )
+
+    @property
+    def effective_polling_interval(self) -> int:
+        """
+        Liefert das effektive Abfrageintervall:
+        1. Individuelle Überschreibung des spezifischen WR (falls in Django-Admin gesetzt).
+        2. Globales Hersteller-Intervall aus InverterManufacturerPollingConfig.
+        """
+        if self.polling_interval_seconds:
+            return int(self.polling_interval_seconds)
+        from energy.services.ems_settings import get_manufacturer_polling_interval
+        return get_manufacturer_polling_interval(self.profile_id, default=60)
     last_polled_at = models.DateTimeField(
         null=True,
         blank=True,

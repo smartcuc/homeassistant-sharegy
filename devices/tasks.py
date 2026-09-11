@@ -251,8 +251,7 @@ def poll_cloud_integrations_task():
     errors = 0
 
     for integration in active_integrations:
-        mfg_interval = get_manufacturer_polling_interval(integration.profile_id, default=60)
-        interval_secs = integration.polling_interval_seconds or mfg_interval
+        interval_secs = integration.effective_polling_interval
         if integration.last_polled_at:
             elapsed = (now - integration.last_polled_at).total_seconds()
             if elapsed < (interval_secs - 2):  # 2s Toleranz gegen Jitter

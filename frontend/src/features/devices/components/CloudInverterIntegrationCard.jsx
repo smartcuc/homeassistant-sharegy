@@ -22,7 +22,6 @@ export default function CloudInverterIntegrationCard({
     const [selectedProfileId, setSelectedProfileId] = useState(filterVendor === "sungrow" ? "sungrow_isolarcloud" : null);
     const [credentials, setCredentials] = useState({});
     const [deviceName, setDeviceName] = useState("");
-    const [pollingInterval, setPollingInterval] = useState(60);
 
     // Operation States
     const [isTesting, setIsTesting] = useState(false);
@@ -104,7 +103,6 @@ export default function CloudInverterIntegrationCard({
         setEditingIntegrationId(null);
         setDeviceName("");
         setCredentials({});
-        setPollingInterval(60);
         setSelectedProfileId(null);
         setTestResult(null);
         setSaveSuccess(null);
@@ -118,7 +116,6 @@ export default function CloudInverterIntegrationCard({
         setDeviceName(integration.device_name || "");
         setSelectedProfileId(integration.profile_id);
         setCredentials(integration.credentials || {});
-        setPollingInterval(integration.polling_interval_seconds || 60);
         setTestResult(null);
         setSaveSuccess(null);
         setErrorMsg(null);
@@ -178,7 +175,6 @@ export default function CloudInverterIntegrationCard({
                 name: deviceName,
                 profile_id: selectedProfileId,
                 credentials: credentials,
-                polling_interval: pollingInterval,
             };
             const data = await apiFetch("/api/devices/cloud-profiles/integrate/", {
                 method: "POST",
@@ -624,39 +620,6 @@ export default function CloudInverterIntegrationCard({
                                             </div>
                                         );
                                     })}
-                                </div>
-
-                                {/* Polling Interval */}
-                                <div className="pt-2 border-t border-gray-200 space-y-1.5">
-                                    <div className="flex items-center justify-between">
-                                        <label className="block text-xs font-medium text-gray-700">
-                                            ⏱️ {t("cloud_inverter.polling_interval_label", "Abfrage-Intervall (Cloud Polling)")}
-                                        </label>
-                                        <span className="text-[11px] font-mono text-gray-500">
-                                            {pollingInterval >= 60 ? `${pollingInterval / 60} Min.` : `${pollingInterval} Sek.`}
-                                        </span>
-                                    </div>
-                                    <div className="grid grid-cols-4 gap-2">
-                                        {[
-                                            { label: "30s (Ultra-Live)", value: 30 },
-                                            { label: "60s (Standard)", value: 60 },
-                                            { label: "2 Min.", value: 120 },
-                                            { label: "5 Min. (Schonend)", value: 300 },
-                                        ].map((opt) => (
-                                            <button
-                                                key={opt.value}
-                                                type="button"
-                                                onClick={() => setPollingInterval(opt.value)}
-                                                className={`py-1.5 px-2 rounded-lg text-xs font-semibold border transition text-center cursor-pointer ${
-                                                    pollingInterval === opt.value
-                                                        ? "bg-blue-600 text-white border-blue-600 shadow-xs"
-                                                        : "bg-white text-gray-700 border-gray-200 hover:bg-gray-100"
-                                                }`}
-                                            >
-                                                {opt.label}
-                                            </button>
-                                        ))}
-                                    </div>
                                 </div>
                             </div>
                         )}

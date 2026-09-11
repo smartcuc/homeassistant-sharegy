@@ -287,7 +287,16 @@ class CloudDeviceIntegrationAdmin(admin.ModelAdmin):
     raw_id_fields = ("device",)
 
     def polling_interval_display(self, obj):
-        return f"{obj.polling_interval_seconds}s"
+        if obj.polling_interval_seconds:
+            return format_html(
+                '<span style="background-color: #3b82f6; color: white; padding: 2px 7px; border-radius: 4px; font-weight: bold; font-size: 11px;">⏱️ {0}s (Individuell)</span>',
+                obj.polling_interval_seconds,
+            )
+        eff = obj.effective_polling_interval
+        return format_html(
+            '<span style="background-color: #64748b; color: white; padding: 2px 7px; border-radius: 4px; font-size: 11px;">⏱️ {0}s (Global)</span>',
+            eff,
+        )
     polling_interval_display.short_description = "Lesezyklus"
 
     def last_status_badge(self, obj):

@@ -70,7 +70,8 @@ def list_user_cloud_integrations_view(request):
             "profile_id": item.profile_id,
             "profile_name": prof.get("name") or item.profile_id,
             "vendor": prof.get("vendor") or ("sungrow" if "sungrow" in item.profile_id else "other"),
-            "polling_interval_seconds": item.polling_interval_seconds,
+            "polling_interval_seconds": item.effective_polling_interval,
+            "custom_polling_interval_seconds": item.polling_interval_seconds,
             "is_active": item.is_active,
             "last_status": item.last_status,
             "last_polled_at": item.last_polled_at.isoformat() if item.last_polled_at else None,
@@ -113,7 +114,8 @@ def manage_user_cloud_integration_view(request, integration_id):
                 "device_id": integration.device.id,
                 "device_name": cfg.name if (cfg and cfg.name) else integration.device.identifier,
                 "profile_id": integration.profile_id,
-                "polling_interval_seconds": integration.polling_interval_seconds,
+                "polling_interval_seconds": integration.effective_polling_interval,
+                "custom_polling_interval_seconds": integration.polling_interval_seconds,
                 "is_active": integration.is_active,
                 "last_status": integration.last_status,
                 "last_polled_at": integration.last_polled_at.isoformat() if integration.last_polled_at else None,
@@ -126,7 +128,7 @@ def manage_user_cloud_integration_view(request, integration_id):
         data = request.data
         name = data.get("name")
         credentials = data.get("credentials")
-        interval = data.get("polling_interval") or data.get("polling_interval_seconds")
+        interval_raw = data.get("polling_interval") if "polling_interval" in data else data.get("polling_interval_seconds")
         is_active = data.get("is_active")
 
         cfg = getattr(integration.device, "config", None)
@@ -141,8 +143,8 @@ def manage_user_cloud_integration_view(request, integration_id):
                     merged_creds[k] = v
             integration.credentials = merged_creds
 
-        if interval is not None:
-            integration.polling_interval_seconds = int(interval)
+        if interval_raw is not None:
+            integration.polling_interval_seconds = int(interval_raw) if str(interval_raw).strip() != "" else None
         if is_active is not None:
             integration.is_active = bool(is_active)
 
@@ -215,7 +217,8 @@ def integrate_cloud_device_view(request):
     name = request.data.get("name") or "Cloud-Wechselrichter"
     profile_id = request.data.get("profile_id")
     credentials = request.data.get("credentials") or {}
-    interval = int(request.data.get("polling_interval", 60))
+    interval_raw = request.data.get("polling_interval") if "polling_interval" in request.data else request.data.get("polling_interval_seconds")
+    interval = int(interval_raw) if (interval_raw is not None and str(interval_raw).strip() != "") else None
 
     if not profile_id:
         return Response({"status": "error", "message": "profile_id ist erforderlich."}, status=400)
@@ -237,7 +240,8 @@ def integrate_cloud_device_view(request):
                     merged_creds[k] = v
             integration.credentials = merged_creds
             integration.profile_id = profile_id
-            integration.polling_interval_seconds = interval
+            if interval is not None:
+                integration.polling_interval_seconds = interval
             integration.is_active = True
             integration.save()
             poll_res = execute_cloud_poll(integration)
@@ -301,7 +305,8 @@ def integrate_cloud_device_view(request):
     if not int_created:
         integration.profile_id = profile_id
         integration.credentials = credentials
-        integration.polling_interval_seconds = interval
+        if interval is not None:
+            integration.polling_interval_seconds = interval
         integration.is_active = True
         integration.save()
 
