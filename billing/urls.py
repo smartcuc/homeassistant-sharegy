@@ -29,6 +29,7 @@ from billing.api.views_community import (
     community_mscons_import_view,
     community_obis_ingest_view,
     community_msb_meters_view,
+    community_virtual_master_meter_view,
 )
 
 from billing.api.views_stripe import (
@@ -56,6 +57,7 @@ urlpatterns = [
     path("stripe/webhook/", StripeWebhookView.as_view(), name="stripe_webhook"),
     # ⚡ COMMUNITY & ENERGY SHARING
     path("community/cockpit/", community_cockpit_view, name="community_cockpit"),
+    path("community/virtual-meter/", community_virtual_master_meter_view, name="community_virtual_meter"),
     path("community/tariffs/", community_tariffs_view, name="community_tariffs"),
     path("community/shares/", community_member_shares_view, name="community_member_shares"),
     path("community/shares/bulk/", community_member_shares_bulk_view, name="community_member_shares_bulk"),
@@ -70,6 +72,7 @@ urlpatterns = [
     path("community/statements/", community_statements_view, name="community_statements"),
     path("communities/overview/", community_portfolio_overview_view, name="community_portfolio_overview"),
     path("communities/<uuid:tenant_id>/drilldown/", community_drilldown_view, name="community_drilldown"),
+    path("communities/<uuid:tenant_id>/virtual-meter/", community_virtual_master_meter_view, name="community_tenant_virtual_meter"),
     path("communities/<uuid:tenant_id>/announcements/", community_announcements_view, name="community_announcements"),
     path("communities/<uuid:tenant_id>/settings/", community_settings_update_view, name="community_settings_update"),
 ]

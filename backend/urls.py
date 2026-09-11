@@ -105,6 +105,7 @@ urlpatterns = [
                 path("help/", include("support_desk.api.urls_help")),
                 path("grafana/", include("energy.api.urls_grafana")),
                 path("billing/", include("billing.urls")),
+                path("vpp/", include("vpp.urls")),
 
                 path("support/", include("support_desk.api.urls")),
                 path("status/", include("operations.urls")),

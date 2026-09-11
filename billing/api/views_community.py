@@ -1275,6 +1275,64 @@ def community_msb_meters_view(request):
     })
 
 
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def community_virtual_master_meter_view(request, tenant_id=None):
+    """
+    Liefert die 15-Minuten-Zeitreihe und Gesamtkennzahlen des virtuellen Summenzählers
+    am virtuellen Netzanschlusspunkt (NAP) für Mehrfamilienhäuser und Quartiere.
+    """
+    user = request.user
+    t_id = tenant_id or request.headers.get("X-Tenant-ID") or request.GET.get("tenant_id")
+
+    if t_id:
+        membership = TenantMembership.objects.filter(user=user, tenant_id=t_id, is_active=True).first()
+        if not membership and not user.is_staff and not user.is_superuser:
+            return Response({"error": "Forbidden: No active membership in requested community."}, status=403)
+        tenant = Tenant.objects.filter(id=t_id).first()
+    else:
+        membership = TenantMembership.objects.filter(user=user, is_active=True).first()
+        tenant = membership.tenant if membership else None
+
+    if not tenant:
+        return Response({"error": "No community found for user."}, status=404)
+
+    # Zeitraum ermitteln (Standard: Heute)
+    from datetime import date, timedelta
+    date_str = request.GET.get("date")
+    start_date_str = request.GET.get("start_date")
+    end_date_str = request.GET.get("end_date")
+
+    now = timezone.now()
+    if start_date_str and end_date_str:
+        try:
+            start_date = date.fromisoformat(start_date_str)
+            end_date = date.fromisoformat(end_date_str)
+        except ValueError:
+            return Response({"error": "Invalid date format, expected YYYY-MM-DD"}, status=400)
+    elif date_str:
+        try:
+            start_date = date.fromisoformat(date_str)
+            end_date = start_date
+        except ValueError:
+            return Response({"error": "Invalid date format, expected YYYY-MM-DD"}, status=400)
+    else:
+        start_date = now.date()
+        end_date = now.date()
+
+    from billing.services_virtual_meter import calculate_virtual_master_meter_timeline
+
+    allocation_model = request.GET.get("allocation_model")
+    res = calculate_virtual_master_meter_timeline(
+        tenant=tenant,
+        start_date=start_date,
+        end_date=end_date,
+        allocation_model=allocation_model,
+    )
+    return Response(res)
+
+
+
 
 
 
