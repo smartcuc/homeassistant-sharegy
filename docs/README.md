@@ -17,6 +17,7 @@ Willkommen in der offiziellen Dokumentation der **Sharegy**-Plattform (Smart Hom
 | 📲 **[`NOTIFICATIONS_AND_MOBILE_PUSH.md`](./NOTIFICATIONS_AND_MOBILE_PUSH.md)** | Mobile Push & Notification Engine (W3C Web-Push, VAPID, Service Worker & Quiet Hours) |
 | 🎫 **[`HELPDESK_MODULE_DOCUMENTATION.md`](./HELPDESK_MODULE_DOCUMENTATION.md)** | Support Desk, Ticket-System, ITIL-Prioritäten, Deflection & Factofy-Integration |
 | 🚀 **[`OPERATIONS_AND_DEPLOYMENT.md`](./OPERATIONS_AND_DEPLOYMENT.md)** | Deployment Guide (Ubuntu/Pi), Systemd Services, Redis, Celery & Health-Checks |
+| 🏢 **[`VPP_AND_VIRTUAL_METER_GUIDE.md`](./VPP_AND_VIRTUAL_METER_GUIDE.md)** | Virtueller Summenzähler für MFH (15m-Saldierung, PDF-Monatsabrechnung) & VPP Aggregator API (aFRR/SRL, Redispatch 2.0) |
 | 🔍 **[`SHAREGY_CODEBASE_AUDIT_AND_FEATURE_EXPANSION.md`](./SHAREGY_CODEBASE_AUDIT_AND_FEATURE_EXPANSION.md)** | Codebase-Audit, Performancehebel, Bundle-Optimierung & Roadmap für neue strategische Features |
 | 🛠️ **[`OPTIMIZATION_PLAN.md`](./OPTIMIZATION_PLAN.md)** | Audit-Ergebnisse, Stabilitäts-Härtung und abgeschlossene Meilensteine |
 | 🗺️ **[`SHAREGY_STRATEGIC_ROADMAP.md`](./SHAREGY_STRATEGIC_ROADMAP.md)** | Strategische Produkt-Roadmap (EMS Pro, Smarte Laststeuerung, Energy Sharing) |
