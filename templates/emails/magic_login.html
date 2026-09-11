@@ -5,18 +5,34 @@
   {{ headline|default:"Willkommen zurück 👋" }}
 </h2>
 
-<p style="color:#475569; line-height:1.6; margin-top:0; margin-bottom:16px;">
-  {{ intro_text|default:"Hier ist dein persönlicher Einmal-Login-Link für <strong>Sharegy</strong>. Klicke einfach auf den folgenden Button, um dich sicher in dein Konto einzuloggen:"|safe }}
+<p style="color:#475569; line-height:1.6; margin-top:0; margin-bottom:20px;">
+  {{ intro_text|default:"Hier ist dein persönlicher Einmal-Login-Link und Code für <strong>Sharegy</strong>:"|safe }}
 </p>
 
-<!-- CTA BUTTON (Email-Safe Table) -->
-<table align="center" role="presentation" cellspacing="0" cellpadding="0" style="margin:28px auto;">
+<!-- 📱 6-DIGIT APP CODE CARD (FOR DIRECT MOBILE APP INPUT) -->
+{% if formatted_code or code %}
+<div style="background:linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%); border:2px solid #cbd5e1; border-radius:14px; padding:20px 16px; margin:20px 0 24px 0; text-align:center;">
+  <div style="font-size:12px; font-weight:700; text-transform:uppercase; color:#475569; letter-spacing:0.8px; margin-bottom:8px;">
+    🔢 {{ code_title|default:"Dein 6-stelliger Login-Code für die App" }}
+  </div>
+  <div style="font-family:'Courier New', Courier, monospace, sans-serif; font-size:32px; font-weight:800; letter-spacing:6px; color:#1e1b4b; background:#ffffff; border:1px dashed #6366f1; border-radius:10px; display:inline-block; padding:10px 24px; margin:6px 0;">
+    {{ formatted_code|default:code }}
+  </div>
+  <div style="font-size:12px; color:#64748b; margin-top:8px; line-height:1.4;">
+    {{ code_desc|default:"Diesen Code kannst du direkt in der Sharegy Smartphone-App eingeben." }}
+  </div>
+</div>
+{% endif %}
+
+<!-- CTA BUTTONS (Email-Safe Table) -->
+<table align="center" role="presentation" cellspacing="0" cellpadding="0" style="margin:20px auto 24px auto; width:100%; max-width:360px;">
+  {% if app_link %}
   <tr>
-    <td align="center" style="border-radius:12px; background:linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);">
-      <a href="{{ magic_link }}"
+    <td align="center" style="padding-bottom:12px;">
+      <a href="{{ app_link }}"
          style="
-          display:inline-block;
-          padding:14px 32px;
+          display:block;
+          padding:14px 24px;
           border-radius:12px;
           text-decoration:none;
           font-weight:700;
@@ -26,7 +42,27 @@
           box-shadow:0 4px 14px rgba(79, 70, 229, 0.35);
           text-align:center;
          ">
-        {{ button_text|default:"🔐 Sicher einloggen" }}
+        {{ app_button_text|default:"📱 In der Sharegy App öffnen" }}
+      </a>
+    </td>
+  </tr>
+  {% endif %}
+  <tr>
+    <td align="center">
+      <a href="{{ magic_link }}"
+         style="
+          display:block;
+          padding:12px 24px;
+          border-radius:12px;
+          text-decoration:none;
+          font-weight:600;
+          font-size:14px;
+          color:#4f46e5;
+          background:#eef2ff;
+          border:1px solid #c7d2fe;
+          text-align:center;
+         ">
+        {{ button_text|default:"🌐 Im Browser einloggen" }}
       </a>
     </td>
   </tr>
@@ -45,7 +81,7 @@
 <!-- SECURITY & EXPIRATION NOTICE -->
 <div style="margin-top:24px; padding-top:16px; border-top:1px solid #f1f5f9; color:#64748b; font-size:12px; line-height:1.5;">
   <p style="margin:4px 0;">
-    ⏳ <strong>{{ validity_label|default:"Gültigkeit:" }}</strong> {{ validity_text|default:"Dieser Login-Link ist nur 15 Minuten gültig und kann nur einmal verwendet werden." }}
+    ⏳ <strong>{{ validity_label|default:"Gültigkeit:" }}</strong> {{ validity_text|default:"Dieser Login-Link und Code sind nur 15 Minuten gültig und können nur einmal verwendet werden." }}
   </p>
   <p style="margin:4px 0; color:#94a3b8;">
     🔒 {{ ignore_text|default:"Falls du diese Anfrage nicht selbst gestellt hast, kannst du diese E-Mail ignorieren. Dein Account bleibt vollständig geschützt." }}

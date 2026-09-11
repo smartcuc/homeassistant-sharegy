@@ -286,6 +286,7 @@ class AuditLog(models.Model):
 
 class MagicLoginToken(models.Model):
     token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    code = models.CharField(max_length=12, blank=True, null=True, db_index=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -304,7 +305,7 @@ class MagicLoginToken(models.Model):
         return self.created_at < timezone.now() - timedelta(minutes=15)
 
     def __str__(self):
-        return f"{self.user} - {self.token}"
+        return f"{self.user} - {self.token} ({self.code})"
 
 
 class UserTermsConsent(models.Model):

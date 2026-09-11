@@ -39,6 +39,28 @@ from core.api.viewsets import (
 from .views import api_test, trigger_task
 from billing.api.views import consumption_view
 from accounts.api.views import track_magic_click, track_email_open
+from django.http import JsonResponse
+
+def assetlinks_view(request):
+    """
+    Android App Links Digital Asset Links verification.
+    Matches the release signing key of de.sharegy.app.
+    """
+    return JsonResponse(
+        [
+            {
+                "relation": ["delegate_permission/common.handle_all_urls"],
+                "target": {
+                    "namespace": "android_app",
+                    "package_name": "de.sharegy.app",
+                    "sha256_cert_fingerprints": [
+                        "20:78:65:60:DC:3B:1B:3D:93:A3:7C:F6:64:C4:47:FB:01:8A:E4:B2:74:BD:E7:A4:3C:52:A2:5C:B6:09:A2:F9"
+                    ],
+                },
+            }
+        ],
+        safe=False,
+    )
 
 router = DefaultRouter()
 router.register(r"meters", MeterViewSet, basename="meter")
@@ -55,6 +77,7 @@ def home(request):
 
 urlpatterns = [
     path("", home),
+    path(".well-known/assetlinks.json", assetlinks_view),
     path("admin/", admin.site.urls),
     # ✅ GLOBAL TRACKING ROUTES
     path("t/<uuid:token>/", track_magic_click),

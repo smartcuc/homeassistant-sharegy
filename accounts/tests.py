@@ -412,6 +412,55 @@ class EnterpriseRBACTest(TestCase):
         self.assertIn("🚨 Alert krytyczny", mail.outbox[0].subject)
         self.assertIn("Zalecane działanie", mail.outbox[0].body)
 
+    def test_magic_link_and_6_digit_code_login(self):
+        from django.core import mail
+        from accounts.models import MagicLoginToken
+
+        mail.outbox = []
+
+        # 1. Request magic link
+        resp_req = self.client.post(
+            "/api/request-magic-link/",
+            data={"email": "member@quartier-sonne.de", "lang": "de"},
+            content_type="application/json",
+        )
+        self.assertEqual(resp_req.status_code, 200)
+        self.assertEqual(resp_req.json()["status"], "sent")
+
+        # 2. Check token and 6-digit code in DB & email
+        token_obj = MagicLoginToken.objects.filter(user=self.community_member).first()
+        self.assertIsNotNone(token_obj)
+        self.assertIsNotNone(token_obj.code)
+        self.assertEqual(len(token_obj.code), 6)
+
+        self.assertEqual(len(mail.outbox), 1)
+        sent_email = mail.outbox[0]
+        self.assertIn(str(token_obj.token), sent_email.body)
+        self.assertIn("sharegy://magic?token=", sent_email.body)
+
+        # 3. Verify login using 6-digit code via POST
+        self.client.logout()
+        resp_login_code = self.client.post(
+            "/api/magic-login/",
+            data={"code": token_obj.code},
+            content_type="application/json",
+        )
+        self.assertEqual(resp_login_code.status_code, 200)
+        self.assertEqual(resp_login_code.json()["status"], "ok")
+
+        # Verify user is authenticated
+        resp_me = self.client.get("/api/auth/me/")
+        self.assertEqual(resp_me.status_code, 200)
+        self.assertEqual(resp_me.json()["email"], "member@quartier-sonne.de")
+
+        # 4. Verify login using full URL with token
+        self.client.logout()
+        full_url = f"https://sharegy.de/t/{token_obj.token}"
+        resp_login_url = self.client.get(f"/api/magic-login/?token={full_url}")
+        self.assertEqual(resp_login_url.status_code, 200)
+        self.assertEqual(resp_login_url.json()["status"], "ok")
+
+
 
 
 

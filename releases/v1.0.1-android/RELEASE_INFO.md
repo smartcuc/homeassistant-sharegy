@@ -13,12 +13,16 @@
 
 | Datei | Größe | SHA-256 Prüfsumme |
 | :--- | :--- | :--- |
-| `app-release.aab` | 4.172.146 B (~4.17 MB) | `F928B6C1ED9EB185A4CD3C4EFAFFE7EC7DAC6C4D147BFB3D6FF15503BE061898` |
-| `app-release.apk` | 4.306.991 B (~4.31 MB) | `C4871A245612E0AFCEE7E2CEF470744DC691C53FBFDCFB51EABB470014E535E4` |
+| `app-release.aab` / `sharegy-v1.0.1-release.aab` | 4.175.958 B (~4.18 MB) | `1F2BD292EA0C0018B5459804D2501690CE391C03443D297058ECEA20739714DE` |
+| `app-release.apk` / `sharegy-v1.0.1-release.apk` | 4.310.739 B (~4.31 MB) | `BD446E0A56F370BAA020F65FA0B6761371C03FE7259DA50A24DBA821208B7DDD` |
 
 ---
 
 ## ✨ Neue Features & Fehlerbehebungen in v1.0.1
+- **Frictionless Mobile App Login (Magic Link & 6-Digit OTP Code)**:
+  - **6-stelliger Login-Code**: In der E-Mail wird neben dem Link ein 6-stelliger Einmal-Code prominent dargestellt, der direkt in der Sharegy App eingegeben oder eingefügt werden kann.
+  - **Deep-Linking & Custom Scheme (`sharegy://`)**: Direkter Start der Android App beim Klick auf *"In der Sharegy App öffnen"* aus E-Mails oder Browser.
+  - **Digital Asset Links (`/.well-known/assetlinks.json`)**: Android App Links Unterstützung mit SHA-256 Signatur-Verifikation.
 - **Capacitor Mobile API Base URL Fix**: Automatische Auflösung aller API-Aufrufe (`/api/...`) auf `https://sharegy.de` im Android-WebView. Behebt den Fehler `Unexpected token '<'`, der auftrat, wenn lokale Asset-Server `index.html` anstelle der Backend-API auslieferten.
 - **Cross-Platform SVG Flaggen**: Vollständige, gestochen scharfe Vektorflaggen (DE, EN, PL, TR, RU, RO) ohne Abhängigkeit von Betriebssystem-Emoji-Fonts.
 - **Admin-Sprachbeschränkung**: `/app/admin/*` und `/admin/*` sind strikt auf Deutsch und Englisch fokussiert mit automatischem Fallback.

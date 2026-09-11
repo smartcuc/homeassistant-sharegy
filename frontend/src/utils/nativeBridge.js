@@ -51,16 +51,54 @@ export async function initializeNativeBridge(navigateCallback) {
                 }
             });
 
-            // Deep-Linking / App URL Open Listener (z.B. https://sharegy.de/t/<token>)
+            // Deep-Linking / App URL Open Listener (z.B. sharegy://magic?token=<token> oder https://sharegy.de/t/<token>)
             CapacitorApp.addListener("appUrlOpen", (data) => {
                 try {
-                    const url = new URL(data.url);
+                    console.log("Deep link received by App:", data?.url);
+                    if (!data || !data.url) return;
+
+                    const rawUrl = String(data.url).trim();
+
+                    // 1. Custom Scheme: sharegy://magic?token=xyz oder sharegy://t/xyz
+                    if (rawUrl.toLowerCase().startsWith("sharegy://")) {
+                        const withoutScheme = rawUrl.replace(/^sharegy:\/\//i, "");
+
+                        if (withoutScheme.includes("token=")) {
+                            const params = new URLSearchParams(withoutScheme.split("?")[1] || "");
+                            const token = params.get("token") || params.get("code");
+                            if (token && typeof navigateCallback === "function") {
+                                navigateCallback(`/t/${encodeURIComponent(token)}`);
+                                return;
+                            }
+                        }
+
+                        // Path based: sharegy://t/XYZ oder sharegy://magic/XYZ
+                        const parts = withoutScheme.split("?")[0].split("/").filter(Boolean);
+                        if (parts.length > 0) {
+                            const lastSegment = parts[parts.length - 1];
+                            if (lastSegment && typeof navigateCallback === "function") {
+                                navigateCallback(`/t/${encodeURIComponent(lastSegment)}`);
+                                return;
+                            }
+                        }
+                    }
+
+                    // 2. HTTPS standard URL: https://sharegy.de/t/xyz oder https://sharegy.de/app/...
+                    const url = new URL(rawUrl);
+                    if (url.pathname.startsWith("/t/")) {
+                        const token = url.pathname.replace(/^\/t\//, "").split("/")[0];
+                        if (token && typeof navigateCallback === "function") {
+                            navigateCallback(`/t/${encodeURIComponent(token)}`);
+                            return;
+                        }
+                    }
+
                     const path = url.pathname + url.search;
                     if (path && typeof navigateCallback === "function") {
                         navigateCallback(path);
                     }
-                } catch {
-                    // Fallback
+                } catch (deepErr) {
+                    console.warn("Deep link parse error:", deepErr);
                 }
             });
         }

@@ -546,6 +546,7 @@ class RequestMagicLinkView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
+        import secrets
         email = request.data.get("email", "")
         if isinstance(email, str):
             email = email.strip().lower()
@@ -566,8 +567,12 @@ class RequestMagicLinkView(APIView):
 
         MagicLoginToken.objects.filter(user=user, is_used=False).delete()
 
+        # 6-stelligen numerischen Code erzeugen
+        code = f"{secrets.randbelow(900000) + 100000}"
+
         token = MagicLoginToken.objects.create(
             user=user,
+            code=code,
         )
 
         # ✅ BEST PRACTICE: LINK IMMER FRONTEND / TRACKING
@@ -576,7 +581,7 @@ class RequestMagicLinkView(APIView):
         req_lang = request.data.get("language") or request.data.get("lang") or request.GET.get("lang")
 
         try:
-            send_magic_link_email(user, link, token.token, language=req_lang)
+            send_magic_link_email(user, link, token.token, code=code, language=req_lang)
         except Exception as exc:
             logger.exception("Failed to send magic link email to %s: %s", user.email, exc)
             return Response({"error": f"Mailversand fehlgeschlagen: {str(exc)}"}, status=400)
@@ -588,18 +593,45 @@ class MagicLoginView(APIView):
     authentication_classes = []
     permission_classes = [AllowAny]
 
-    def get(self, request):
-        token = request.GET.get("token")
+    def _login_with_token_or_code(self, request, token_or_code):
+        import uuid
+        token_str = str(token_or_code or "").strip()
 
-        if not token:
-            return Response({"error": "missing token"}, status=400)
+        if not token_str:
+            return Response({"error": "Bitte einen gültigen Login-Code oder Link angeben."}, status=400)
 
-        magic = get_object_or_404(MagicLoginToken, token=token)
+        # Falls ein vollständiger Link (https://.../t/UUID oder sharegy://magic?token=UUID) eingefügt wurde:
+        if "/t/" in token_str:
+            token_str = token_str.split("/t/")[-1].split("?")[0].split("/")[0].strip()
+        elif "token=" in token_str:
+            token_str = token_str.split("token=")[-1].split("&")[0].strip()
+
+        cleaned_digits = token_str.replace(" ", "").replace("-", "")
+
+        magic = None
+
+        # 1. Versuch: UUID Token Lookup
+        try:
+            val_uuid = uuid.UUID(token_str)
+            magic = MagicLoginToken.objects.filter(token=val_uuid).first()
+        except (ValueError, TypeError):
+            pass
+
+        # 2. Versuch: 6-Stelliger Code Lookup
+        if not magic and cleaned_digits:
+            magic = MagicLoginToken.objects.filter(code=cleaned_digits).order_by("-created_at").first()
+
+        # 3. Fallback: Lookup als String
+        if not magic:
+            magic = MagicLoginToken.objects.filter(code=token_str).order_by("-created_at").first()
+
+        if not magic:
+            return Response({"error": "Ungültiger oder abgelaufener Login-Code."}, status=400)
 
         if magic.is_expired():
-            return Response({"error": "expired"}, status=400)
+            return Response({"error": "Dieser Login-Code ist abgelaufen (Gültigkeit: 15 Minuten). Bitte fordere einen neuen an."}, status=400)
 
-        # ✅ WICHTIG: idempotent (mehrfach erlaubt!)
+        # ✅ Idempotent (mehrfach erlaubt solange nicht abgelaufen)
         user = magic.user
         login(request, user)
 
@@ -612,20 +644,15 @@ class MagicLoginView(APIView):
                 timezone="Europe/Berlin"
             )
 
-        # ✅ LOGIN TRACKING (NEU)
-        magic.last_login_at = timezone.now()
-        
+        # ✅ LOGIN TRACKING
+        magic.last_login_at = timezone.now() if hasattr(magic, "last_login_at") else None
         magic.last_login_ip = request.META.get("REMOTE_ADDR")
         magic.user_agent = request.headers.get("User-Agent", "")
 
-        # nur speichern wenn neu oder leer (optional)
-        magic.save()
-
-        # ✅ Token nur einmal markieren
         if not magic.is_used:
             magic.is_used = True
             magic.used_at = timezone.now()
-            magic.save()
+        magic.save()
 
         # ✅ Session Dauer zentral aus Settings
         request.session.set_expiry(
@@ -633,6 +660,14 @@ class MagicLoginView(APIView):
         )
 
         return Response({"status": "ok"})
+
+    def get(self, request):
+        token = request.GET.get("token") or request.GET.get("code")
+        return self._login_with_token_or_code(request, token)
+
+    def post(self, request):
+        token = request.data.get("token") or request.data.get("code") or request.GET.get("token")
+        return self._login_with_token_or_code(request, token)
 
 
 # ---------------- EMAIL CHANGE (ENTERPRISE VERIFICATION) ---------------- #
