@@ -237,11 +237,50 @@ class SungrowAdapter(BaseInverterAdapter):
         if base_url and base_url.rstrip("/") not in gateway_list:
             gateway_list.insert(0, base_url.rstrip("/"))
 
+        def _extract_token_from_response(rj: Any) -> Optional[str]:
+            if not isinstance(rj, dict):
+                return None
+            for k in ("token", "access_token", "accessToken", "app_token", "token_value", "tokenValue", "auth_token"):
+                v = rj.get(k)
+                if isinstance(v, str) and len(v.strip()) > 5:
+                    return v.strip()
+            for sub in ("result_data", "data", "resultData", "result"):
+                rd = rj.get(sub)
+                if isinstance(rd, str) and len(rd.strip()) > 5:
+                    return rd.strip()
+                if isinstance(rd, dict):
+                    for k in ("token", "access_token", "accessToken", "app_token", "token_value", "tokenValue", "auth_token", "ticket"):
+                        v = rd.get(k)
+                        if isinstance(v, str) and len(v.strip()) > 5:
+                            return v.strip()
+            return None
+
         def _refresh_openapi_token() -> bool:
             nonlocal token
             r_token = credentials.get("refresh_token")
 
-            # 1. Wenn refresh_token vorhanden ist: Standard OAuth2 / OpenAPI Refresh
+            # 1. Wenn Developer AppKey & AppSecret vorliegen: Direkt über apiManage/token
+            if appkey and app_secret:
+                for gw in gateway_list:
+                    try:
+                        am_resp = requests.post(
+                            f"{gw}/openapi/apiManage/token",
+                            json={"appkey": appkey, "app_secret": app_secret},
+                            headers={"x-access-key": app_secret, "sys_code": "901", "Content-Type": "application/json"},
+                            timeout=4,
+                        )
+                        logger.info("[SUNGROW_OPENAPI] apiManage/token on %s [%s]: %s", gw, am_resp.status_code, am_resp.text[:300])
+                        if am_resp.status_code == 200:
+                            nt = _extract_token_from_response(am_resp.json())
+                            if nt:
+                                token = nt
+                                credentials["token"] = token
+                                logger.info("[SUNGROW_OPENAPI] Token successfully created via apiManage/token on %s", gw)
+                                return True
+                    except Exception as e:
+                        logger.debug("apiManage/token request on %s failed: %s", gw, e)
+
+            # 2. Wenn refresh_token vorhanden ist: Standard OAuth2 Refresh
             if r_token:
                 for gw in gateway_list:
                     # Versuch A: /openapi/oauth/token (JSON)
@@ -261,16 +300,16 @@ class SungrowAdapter(BaseInverterAdapter):
                             "applicationId": "4830",
                         }
                         r_resp = requests.post(f"{gw}/openapi/oauth/token", json=payload, headers=headers, timeout=4)
+                        logger.info("[SUNGROW_OPENAPI] oauth/token refresh on %s [%s]: %s", gw, r_resp.status_code, r_resp.text[:300])
                         if r_resp.status_code == 200:
                             rj = r_resp.json()
-                            nt = rj.get("access_token") or rj.get("token")
-                            if not nt and isinstance(rj.get("result_data"), dict):
-                                nt = rj["result_data"].get("access_token") or rj["result_data"].get("token")
-                                if rj["result_data"].get("refresh_token"):
-                                    credentials["refresh_token"] = rj["result_data"]["refresh_token"]
+                            nt = _extract_token_from_response(rj)
                             if nt:
                                 token = nt
                                 credentials["token"] = token
+                                rd = rj.get("result_data") or rj.get("data")
+                                if isinstance(rd, dict) and rd.get("refresh_token"):
+                                    credentials["refresh_token"] = rd["refresh_token"]
                                 logger.info("[SUNGROW_OPENAPI] Token successfully refreshed via %s/openapi/oauth/token (JSON)", gw)
                                 return True
                     except Exception as e:
@@ -286,45 +325,21 @@ class SungrowAdapter(BaseInverterAdapter):
                         r_resp = requests.post(f"{gw}/openapi/oauth/token", data=payload, headers=form_headers, timeout=4)
                         if r_resp.status_code == 200:
                             rj = r_resp.json()
-                            nt = rj.get("access_token") or rj.get("token")
-                            if not nt and isinstance(rj.get("result_data"), dict):
-                                nt = rj["result_data"].get("access_token") or rj["result_data"].get("token")
-                                if rj["result_data"].get("refresh_token"):
-                                    credentials["refresh_token"] = rj["result_data"]["refresh_token"]
+                            nt = _extract_token_from_response(rj)
                             if nt:
                                 token = nt
                                 credentials["token"] = token
+                                rd = rj.get("result_data") or rj.get("data")
+                                if isinstance(rd, dict) and rd.get("refresh_token"):
+                                    credentials["refresh_token"] = rd["refresh_token"]
                                 logger.info("[SUNGROW_OPENAPI] Token successfully refreshed via %s/openapi/oauth/token (Form)", gw)
                                 return True
                     except Exception as e:
                         logger.debug("OAuth token refresh (Form) on %s failed: %s", gw, e)
 
-            # 2. Versuch: Wenn Developer AppKey & AppSecret vorliegen (Zentraler Developer-Account)
+            # 3. Client Credentials Versuch
             if appkey and app_secret:
                 for gw in gateway_list:
-                    # Versuch A: /openapi/apiManage/token
-                    try:
-                        am_resp = requests.post(
-                            f"{gw}/openapi/apiManage/token",
-                            json={"appkey": appkey, "app_secret": app_secret},
-                            headers={"x-access-key": app_secret, "sys_code": "901", "Content-Type": "application/json"},
-                            timeout=4,
-                        )
-                        if am_resp.status_code == 200:
-                            rj = am_resp.json()
-                            nt = rj.get("access_token") or rj.get("token")
-                            rd = rj.get("result_data") or rj.get("data")
-                            if not nt and isinstance(rd, dict):
-                                nt = rd.get("access_token") or rd.get("token")
-                            if nt:
-                                token = nt
-                                credentials["token"] = token
-                                logger.info("[SUNGROW_OPENAPI] Token successfully created via apiManage/token on %s", gw)
-                                return True
-                    except Exception as e:
-                        logger.debug("apiManage/token request on %s failed: %s", gw, e)
-
-                    # Versuch B: /openapi/oauth/token (client_credentials)
                     try:
                         cc_resp = requests.post(
                             f"{gw}/openapi/oauth/token",
@@ -339,11 +354,7 @@ class SungrowAdapter(BaseInverterAdapter):
                             timeout=4,
                         )
                         if cc_resp.status_code == 200:
-                            rj = cc_resp.json()
-                            nt = rj.get("access_token") or rj.get("token")
-                            rd = rj.get("result_data") or rj.get("data")
-                            if not nt and isinstance(rd, dict):
-                                nt = rd.get("access_token") or rd.get("token")
+                            nt = _extract_token_from_response(cc_resp.json())
                             if nt:
                                 token = nt
                                 credentials["token"] = token
