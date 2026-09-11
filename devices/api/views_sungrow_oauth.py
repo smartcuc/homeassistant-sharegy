@@ -165,7 +165,26 @@ def sungrow_oauth_callback(request):
         }
 
         for gw in gateways:
-            # 1. JSON-Payload
+            # 1. Standard RFC 6749 Basic Auth + Params
+            try:
+                token_resp = requests.post(
+                    f"{gw}/openapi/oauth/token",
+                    params=payload,
+                    auth=(SUNGROW_APPKEY, SUNGROW_APP_SECRET) if SUNGROW_APPKEY and SUNGROW_APP_SECRET else None,
+                    headers={"x-access-key": SUNGROW_APP_SECRET, "sys_code": "901"},
+                    timeout=4,
+                )
+                logger.info("Sungrow Token Exchange (Basic Auth+Params) on %s [%s]: %s", gw, token_resp.status_code, token_resp.text[:300])
+                if token_resp.status_code == 200:
+                    t_cand, r_cand = _extract_tokens_from_json(token_resp.json())
+                    if t_cand:
+                        token = t_cand
+                        refresh_token = r_cand
+                        break
+            except Exception as e:
+                logger.warning("Sungrow OAuth token exchange (Basic Auth+Params) on %s failed: %s", gw, e)
+
+            # 2. JSON-Payload
             try:
                 token_resp = requests.post(
                     f"{gw}/openapi/oauth/token",
@@ -183,7 +202,7 @@ def sungrow_oauth_callback(request):
             except Exception as e:
                 logger.warning("Sungrow OAuth token exchange (JSON) on %s failed: %s", gw, e)
 
-            # 2. Form-Urlencoded Fallback
+            # 3. Form-Urlencoded Fallback
             try:
                 token_resp = requests.post(
                     f"{gw}/openapi/oauth/token",
@@ -200,24 +219,6 @@ def sungrow_oauth_callback(request):
                         break
             except Exception as e:
                 logger.warning("Sungrow OAuth token exchange (Form) on %s failed: %s", gw, e)
-
-            # 3. Query-Params Fallback
-            try:
-                token_resp = requests.post(
-                    f"{gw}/openapi/oauth/token",
-                    params=payload,
-                    headers=headers_json,
-                    timeout=4,
-                )
-                logger.info("Sungrow Token Exchange (Params) on %s [%s]: %s", gw, token_resp.status_code, token_resp.text[:300])
-                if token_resp.status_code == 200:
-                    t_cand, r_cand = _extract_tokens_from_json(token_resp.json())
-                    if t_cand:
-                        token = t_cand
-                        refresh_token = r_cand
-                        break
-            except Exception as e:
-                logger.warning("Sungrow OAuth token exchange (Params) on %s failed: %s", gw, e)
 
     if not token:
         token = f"sg_oauth_{code or 'demo_token_12345'}"
