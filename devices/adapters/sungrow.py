@@ -258,8 +258,13 @@ class SungrowAdapter(BaseInverterAdapter):
                             return v.strip()
             return None
 
+        refresh_attempted = False
+
         def _refresh_openapi_token() -> bool:
-            nonlocal token
+            nonlocal token, refresh_attempted
+            if refresh_attempted:
+                return False
+            refresh_attempted = True
             r_token = credentials.get("refresh_token")
 
             # 1. Wenn refresh_token vorhanden ist: apiManage/refreshToken (pysolarcloud Standard) & oauth/token
@@ -273,7 +278,7 @@ class SungrowAdapter(BaseInverterAdapter):
                                 "appkey": appkey,
                                 "refresh_token": r_token,
                             },
-                            headers={"x-access-key": app_secret, "Content-Type": "application/json"},
+                            headers={"sys_code": "901", "x-access-key": app_secret, "Content-Type": "application/json"},
                             timeout=5,
                         )
                         logger.info("[SUNGROW_OPENAPI] apiManage/refreshToken on %s [%s]: %s", gw, r_resp.status_code, r_resp.text[:300])
@@ -335,6 +340,7 @@ class SungrowAdapter(BaseInverterAdapter):
             for gw in gateway_list:
                 url = f"{gw}/{endpoint.lstrip('/')}"
                 headers = {
+                    "sys_code": "901",
                     "x-access-key": app_secret,
                     "Authorization": f"Bearer {token}",
                     "Content-Type": "application/json",
