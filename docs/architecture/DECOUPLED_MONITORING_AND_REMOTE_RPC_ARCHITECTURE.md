@@ -1,23 +1,30 @@
 # 🌐 Decoupled Monitoring, Control Plane & In-Flight Backup Architecture
 
 **Dokument-Status:** Enterprise Architektur-Blueprint & Infrastruktur-Spezifikation  
-**Plattformen:** Sharegy (Energy HEMS SaaS) & Factofy (Industrial IoT SaaS)  
-**Version:** 2.0 (Dual-Plane & Disaster Recovery Update)  
+**Plattformen:** 
+- **Sharegy** (Energy HEMS SaaS & Smart Grid Platform – Django/PostgreSQL/React)
+- **Factofy** (Digitaler Zwilling für Kommunen, Städte & Liegenschaften – Next.js/PostgreSQL)  
+**Version:** 2.1 (Brain vs. Carrier Clarification & Git Repo Strategy)  
 **Datum:** 12. September 2026  
 **Zielgruppe:** System-Architekten, DevOps, Backend- & Edge-Entwickler  
 
 ---
 
-## 🏛️ 1. Motivation & Grundprinzip: Strikte Trennung von Data Plane & Control Plane
+## 🏛️ 1. Motivation & Grundprinzip: Strikte Trennung von Steuerungs-Logik ("Brain") und Verbindungs-Schicht ("Carrier")
 
-Um maximale Ausfallsicherheit, Sicherheit und Wiederverwendbarkeit zwischen **Sharegy** (Balkonkraftwerke, HEMS, Mieterstrom, Wallboxen) und **Factofy** (Industrie-IoT, Maschinenüberwachung, OEE) zu gewährleisten, trennen wir die Systeme in zwei voneinander vollkommen unabhängige Schichten:
+Um maximale Ausfallsicherheit, Sicherheit und Wiederverwendbarkeit zwischen **Sharegy** (Balkonkraftwerke, HEMS, Mieterstrom, Wallboxen) und **Factofy** (Digitaler Zwilling für Kommunen, Gebäude, CO₂-Bilanzierung, Liegenschaften) zu gewährleisten, trennen wir die Systeme in zwei voneinander vollkommen unabhängige Schichten:
 
-1. **Business Data Plane (Fachdomänen-SaaS)**:
-   - Separate Instanzen, getrennte Datenbanken (`sharegy_prod_db` vs. `factofy_prod_db`), eigene URLs (`app.sharegy.de` vs. `app.factofy.io`).
-   - Verarbeitet reine Anwendungslogik: Abrechnungen, Stripe, Mieterverträge, § 42b EnWG, Maschinenaufträge, OEE-Kalkulationen.
-2. **Control & Monitoring Plane (Zentraler Flotten- & Admin-Knoten)**:
-   - Eigenständiges, hochverfügbares Monitoring-SaaS mit eigener Datenbank (`mon_core_db`) und dedizierten URLs (`mon.sharegy.de`, `mon.factofy.io`).
-   - Hält permanente WebSockets, überwacht System-Health (CPU, RAM, Uptime), tunnelt **Zero-Trust Reverse-RPC Befehle** und empfängt **kontinuierliche 5-Minuten In-Flight DB-Backups**.
+1. **Business & Decision Plane (Fachdomänen-SaaS – "Das Gehirn"):**
+   - **Sharegy SaaS (`app.sharegy.de`):** Eigene Instanz, eigene Datenbank (`sharegy_prod_db`). **100 % Hoheit über alle Steuerungs- und Optimierungsentscheidungen**:
+     - Dynamische EMS-Optimierung (PV-Überschussladen, Batteriespeicher-Management)
+     - Börsenstrompreise (Tibber / EPEX Spot) & automatische Schaltzeiten
+     - § 14a EnWG Netzdienliche Abregelung auf 4,2 kW bei Netzüberlastung
+     - § 42b EnWG Mieterstromzuteilung & Stripe-Abrechnung
+   - **Factofy SaaS (`app.factofy.io` - Next.js):** Eigene Instanz, eigene Datenbank (`factofy_prod_db`). **100 % Hoheit über kommunale Zwillingsdaten**:
+     - Liegenschafts-Monitoring, Quartiersanalysen, CO₂-Zertifikate, kommunale Wärmeplanung
+2. **Stateless Connection & Control Plane (Zentraler Flotten- & Admin-Knoten – "Die Telefonleitung"):**
+   - **`mon.sharegy.de` / `mon.factofy.io`:** Eigenständiges, hochverfügbares Monitoring-SaaS mit eigener Datenbank (`mon_core_db`).
+   - **Keine Business-Logik / Kein Gehirn:** Dient rein als hochstabiler **Verbindungs-Carrier (Reverse-RPC Tunnel)**, Uptime-/Hardware-Monitor und **In-Flight 5-Minuten-DB-Backup Vault**.
 
 ---
 
@@ -25,7 +32,7 @@ Um maximale Ausfallsicherheit, Sicherheit und Wiederverwendbarkeit zwischen **Sh
 
 ```
                         ┌────────────────────────────────────────────────────────┐
-                        │         EDGE-GERÄT (z. B. ioBroker / Factofy IPC)      │
+                        │      EDGE-GERÄT (z. B. ioBroker / Factofy Sensor-Box)  │
                         └───────────┬────────────────────────────────┬───────────┘
                                     │                                │
                [ 1. BUSINESS DATA PLANE ]               [ 2. CONTROL & ADMIN PLANE ]
@@ -38,12 +45,12 @@ Um maximale Ausfallsicherheit, Sicherheit und Wiederverwendbarkeit zwischen **Sh
                                     ▼                                ▼
      ┌──────────────────────────────────────────┐    ┌──────────────────────────────────────────┐
      │             SHAREGY APPLIKATION          │    │         ZENTRALES MONITORING & ADMIN     │
-     │             (app.sharegy.de)             │    │         (mon.sharegy.de / mon.factofy)   │
+     │        (app.sharegy.de - Django)         │    │         (mon.sharegy.de / mon.factofy)   │
      ├──────────────────────────────────────────┤    ├──────────────────────────────────────────┤
-     │ • Eigene Datenbank: sharegy_prod_db      │    │ • Eigene Datenbank: mon_core_db          │
-     │ • Abrechnung, § 42b EnWG, Mieterportal   │    │ • Flottenstatus (CPU, RAM, Uptime, FW)   │
-     │ • Dynamische Stromtarife, EMS            │    │ • Zero-Trust Remote-RPC Tunnel           │
-     │ • Port 8000 (Gunicorn WSGI)              │    │ • Port 8001 (Daphne ASGI Cluster)        │
+     │ • Steuerungs-Gehirn: EMS-Optimizer       │    │ • Eigene Datenbank: mon_core_db          │
+     │ • § 14a EnWG Dimmung & § 42b Abrechnung  │    │ • Flottenstatus (CPU, RAM, Uptime, FW)   │
+     │ • Eigene Datenbank: sharegy_prod_db      │    │ • Reiner Reverse-RPC Transport-Tunnel    │
+     │ • Port 8000 (Gunicorn WSGI)              │    │ • Port 8001 (FastAPI / ASGI Cluster)     │
      └────────────────────┬─────────────────────┘    └────────────────────▲─────────────────────┘
                           │                                               │
                           │   5-Minuten In-Flight Delta-Backup            │
@@ -52,10 +59,10 @@ Um maximale Ausfallsicherheit, Sicherheit und Wiederverwendbarkeit zwischen **Sh
                              [ FACTOFY DATA PLANE ]                       │
                            ┌─────────────────────────┐                    │
                            │   FACTOFY APPLIKATION   │                    │
-                           │   (app.factofy.io)      │────────────────────┘
+                           │ (app.factofy.io Next.js)│────────────────────┘
                            ├─────────────────────────┤  5-Minuten In-Flight
-                           │ • Eigene DB: factofy_db │  Delta-Backup
-                           │ • Maschinen-OEE, Takt   │
+                           │ • Kommunaler Zwilling   │  Delta-Backup
+                           │ • Eigene DB: factofy_db │
                            └─────────────────────────┘
 ```
 
@@ -63,103 +70,48 @@ Um maximale Ausfallsicherheit, Sicherheit und Wiederverwendbarkeit zwischen **Sh
 
 ## 🔌 3. Dual-Socket Edge-Architektur (ioBroker & Factofy IPC)
 
-Auf dem Edge-Gerät (z. B. Raspberry Pi, HEMS-Gateway oder Industrie-IPC) laufen **zwei separate, leichtgewichtige Verbindungen**:
+Auf dem Edge-Gerät (z. B. ioBroker im Haushalt oder Factofy-Knoten im Rathaus) laufen **zwei separate, leichtgewichtige Verbindungen**:
 
-### A. Data-Socket (`wss://app.sharegy.de/ws/telemetry/`)
-* **Verantwortung:** Streaming hochfrequenter Messwerte (aktuelle Watt, PV-Erzeugung, SoC, Zählerstände).
-* **Ausfall-Verhalten:** Bei einem Release oder Neustart des Business-Portals puffert der Edge-Client die Messwerte lokal im RAM/Flash-Ringbuffer und sendet sie nach Reconnect gebatcht nach.
+### A. Data-Socket (`wss://app.sharegy.de/ws/telemetry/` bzw. Factofy Data)
+* **Verantwortung:** Streaming hochfrequenter Messdaten (aktuelle Watt, PV-Erzeugung, SoC, Zählerstände, Temperatur/Sensorwerte).
+* **Ausfall-Verhalten:** Bei einem Release des Fachportals puffert der Edge-Client die Messwerte lokal im RAM/Flash und sendet sie nach Reconnect gebatcht nach.
 
 ### B. Admin- & Monitoring-Socket (`wss://mon.sharegy.de/ws/agent/`)
 * **Verantwortung:**
-  1. **Health-Heartbeat (alle 30–60s):** Sendet Telemetrie zu CPU-Last, RAM, Uptime, Adapterversion und lokaler Bus-Konnektivität (Modbus/CAN).
+  1. **Health-Heartbeat (alle 30–60s):** Sendet Telemetrie zu CPU-Last, RAM, Uptime, Adapterversion und lokaler Bus-Konnektivität (Modbus/CAN/EEBus).
   2. **Bidirektionaler Reverse-RPC Tunnel:** Empfängt Diagnose-, Log- und Konfigurationsbefehle aus der Cloud **ohne Port-Forwarding, DynDNS oder VPN**.
-* **Ausfall-Verhalten:** Völlig unabhängig vom Webportal. Auch wenn `app.sharegy.de` gewartet wird, bleibt die Fernwartung der Boxen zu 100 % online.
+* **Ausfall-Verhalten:** Völlig unabhängig vom Webportal. Auch wenn `app.sharegy.de` oder `app.factofy.io` gewartet werden, bleibt die Fernwartung der Boxen zu 100 % online.
 
 ---
 
 ## ⚡ 4. Zero-Trust WSS Reverse-RPC Protokoll (JSON-RPC 2.0)
 
-### Ablauf eines Remote-Befehls (z. B. Fachpartner startet Diagnose)
+### Ablauf eines Steuerungs- oder Diagnosebefehls:
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Partner as Fachpartner / Operator (Web-Cockpit)
-    participant Core as app.sharegy.de (Core API)
-    participant Mon as mon.sharegy.de (Monitoring Cluster)
-    participant Edge as Edge-Agent (ioBroker / Factofy IPC)
+    participant App as Sharegy EMS / Factofy Core ("Das Gehirn")
+    participant Mon as mon.sharegy.de ("Die Leitung")
+    participant Edge as Edge-Agent (ioBroker / Factofy Box)
+    participant HW as Lokales Gerät (Wärmepumpe, Wallbox, Sensor)
 
     Note over Edge,Mon: 1. Permanente Admin-WSS-Verbindung aktiv
-    Partner->>Core: Klick "Diagnose starten" (Asset: SN-PYHFD8R0GC)
-    Core->>Core: Berechtigung & DSGVO-Consent prüfen
-    Core->>Mon: POST /api/v1/devices/{sn}/rpc (Server-to-Server Auth)
-    Mon->>Edge: WSS Frame: JSON-RPC 2.0 Request {"id": "req_101", "method": "edge.getDiagnostics"}
-    Edge->>Edge: Lokale Erfassung (Modbus-Status, Logs, System)
-    Edge->>Mon: WSS Frame: JSON-RPC 2.0 Response {"id": "req_101", "result": {...}}
-    Mon->>Core: HTTP 200 Response mit RPC-Result
-    Core-->>Partner: Live-Ergebnis im Diagnose-Cockpit gerendert
-```
-
-### Standardisierte JSON-RPC 2.0 Methoden
-
-#### 1. System-Health & Diagnostik
-```json
-// Request (Cloud -> Edge)
-{
-  "jsonrpc": "2.0",
-  "id": "diag_001",
-  "method": "edge.healthCheck",
-  "params": {}
-}
-
-// Response (Edge -> Cloud)
-{
-  "jsonrpc": "2.0",
-  "id": "diag_001",
-  "result": {
-    "status": "healthy",
-    "uptime_seconds": 124800,
-    "adapter_version": "1.5.0",
-    "cpu_load_pct": 14.2,
-    "free_memory_mb": 620,
-    "bus_devices_online": 4
-  }
-}
-```
-
-#### 2. Log-Extraktion bei Störungen
-```json
-// Request (Cloud -> Edge)
-{
-  "jsonrpc": "2.0",
-  "id": "diag_002",
-  "method": "edge.getRecentLogs",
-  "params": {
-    "severity": "error",
-    "max_lines": 50
-  }
-}
-```
-
-#### 3. Remote-Konfiguration & Neustart
-```json
-// Request (Cloud -> Edge)
-{
-  "jsonrpc": "2.0",
-  "id": "cmd_003",
-  "method": "edge.restartService",
-  "params": {
-    "service_name": "modbus_driver",
-    "graceful": true
-  }
-}
+    App->>App: EMS-Optimierung: "Dimme Wärmepumpe Müller auf 4.2 kW (§ 14a)"
+    App->>Mon: POST /api/v1/devices/{sn}/rpc (Befehl zur Weiterleitung übergeben)
+    Mon->>Edge: WSS Frame: JSON-RPC 2.0 Request {"id": "cmd_99", "method": "edge.setPowerLimit", "params": {"watts": 4200}}
+    Edge->>HW: Lokaler EEBus / Modbus-Write (SPINE Frame an Wärmepumpe)
+    HW-->>Edge: OK (Abregelung aktiv)
+    Edge->>Mon: WSS Frame: JSON-RPC 2.0 Response {"id": "cmd_99", "result": {"status": "dimmed", "actual_w": 4180}}
+    Mon->>App: HTTP 200 Response mit Bestätigung
+    App->>App: Protokolliere § 14a EnWG Nachweis in sharegy_prod_db
 ```
 
 ---
 
 ## 🛡️ 5. In-Flight Continuous Database Backup Engine (5-Minuten Delta-RPO)
 
-Um bei einem Totalausfall oder Datenverlust des Hauptsystems sofortige Wiederherstellung zu garantieren, fungiert das Monitoring-System zusätzlich als **isolierter Disaster-Recovery-Tresor**:
+Um bei einem Totalausfall oder Datenverlust eines Hauptsystems sofortige Wiederherstellung zu garantieren, fungiert das Monitoring-System zusätzlich als **isolierter Disaster-Recovery-Tresor**:
 
 ```
  ┌──────────────────────────────────────┐                ┌──────────────────────────────────────┐
@@ -173,33 +125,30 @@ Um bei einem Totalausfall oder Datenverlust des Hauptsystems sofortige Wiederher
                                                          └──────────────────────────────────────┘
 ```
 
-### Eigenschaften des In-Flight Backups:
-1. **5-Minuten Delta-Sync:** Über kontinuierliche PostgreSQL WAL-Replikation (z. B. via `pg_receivewal` oder leichtgewichtige Streaming-Deltas) werden alle Transaktionen im 5-Minuten-Takt in den Monitoring-Tresor übertragen.
-2. **Kryptografische Isolation:** Die Backup-Daten werden vor der Übertragung mit einem dedizierten Key verschlüsselt (AES-256) und liegen auf einem physisch/logisch getrennten Speicherbereich.
-3. **Automatisches Audit im Monitoring-Cockpit:** Das Monitoring-System prüft und visualisiert den Backup-Status in Echtzeit:
-   - 🟢 *Sharegy DB:* Letzter Delta-Snapshot vor 2 Min. (Integrität OK)
-   - 🟢 *Factofy DB:* Letzter Delta-Snapshot vor 4 Min. (Integrität OK)
-4. **Instant Standby Recovery:** Im Katastrophenfall kann die Datenbank direkt aus dem Monitoring-Cluster mit einem maximalen Datenverlust von unter 5 Minuten (RPO < 5 Min.) wiederhergestellt werden.
+---
+
+## 🗂️ 6. Repository- & Projekt-Strategie (Eigenes Git-Projekt)
+
+### Empfehlung: `smartcuc/mon-nexus` (Eigenes Repository)
+
+Das Monitoring- & Admin-System wird als **eigenständiges Git-Projekt** (`smartcuc/mon-nexus` oder `smartcuc/edge-control-plane`) aufgesetzt:
+
+#### Vorteile eines separaten Repositories:
+1. **Technologische Unabhängigkeit:** 
+   - Das Monitoring-Backend kann als schlanker **FastAPI-Microservice** (Python Async) aufgesetzt werden – völlig frei vom Ballast von Django oder Next.js.
+2. **Entkoppeltes Deployment (CI/CD):** 
+   - Deployments an Sharegy oder Factofy lösen keinen Re-Deploy des Monitoring-Gateways aus.
+   - `mon` hat eigene Release-Zyklen (extrem selten, maximale Stabilität).
+3. **Universelle SDKs für Edge & Apps:**
+   - Im `mon-nexus` Repository liegt der schlanke `edge-agent-client` (Python & TypeScript/Node), der sowohl in den **ioBroker-Adapter (`iobroker.sharegy`)** als auch in die **Factofy-Kommunalbox** importiert wird.
+   - Ein kleiner Python-Client `mon_nexus_client` wird in Sharegy (Django) und Factofy (Next.js/Node API) eingebunden, um mit einer Zeile Code RPC-Befehle abzusetzen.
 
 ---
 
-## 🗄️ 6. Instanzen-, Domain- & Datenbank-Matrix
+## 🗄️ 7. Instanzen-, Domain- & Datenbank-Matrix
 
-| System / Rolle | Subdomain | Datenbank | Verantwortung |
-|---|---|---|---|
-| **Sharegy Core SaaS** | `app.sharegy.de` | `sharegy_prod_db` | Verträge, Mieterstrom, Abrechnung, § 42b EnWG, Stripe |
-| **Factofy Core SaaS** | `app.factofy.io` | `factofy_prod_db` | Fertigungsdaten, Maschinenaufträge, OEE-Kennzahlen |
-| **Control Plane SaaS** | `mon.sharegy.de`<br>`mon.factofy.io` | `mon_core_db` | Flottenübersicht, WSS-Sockets, Remote-RPC, **In-Flight 5m Backups** |
-
----
-
-## 🚀 7. Roadmap & Umsetzungsphasen
-
-1. **Phase 1: Dual-Socket Definition & WSS-Ingress**
-   - Aufsetzen des isolierten WSS-Endpunkts `/ws/agent/` für den Admin- & Health-Kanal.
-2. **Phase 2: Bidirektionaler JSON-RPC 2.0 Dispatcher**
-   - Implementierung des `RemoteRPCClient` und der WSS-Bridge für Live-Befehle (Diagnose, Logs).
-3. **Phase 3: ioBroker & Factofy Edge-Agent SDK**
-   - Integration des dualen Verbindungsmodells in `iobroker.sharegy` und den Factofy Linux-Agenten.
-4. **Phase 4: In-Flight 5-Minuten Delta-Backup Vault**
-   - Konfiguration der kontinuierlichen PostgreSQL-Delta-Replikation in das Monitoring-System mit Dashboard-Status.
+| System / Rolle | Subdomain | Technologie | Datenbank | Verantwortung |
+|---|---|---|---|---|
+| **Sharegy Core SaaS** | `app.sharegy.de` | Django / React | `sharegy_prod_db` | **Steuerungs-Gehirn:** EMS, § 14a EnWG, § 42b Mieterstrom, Tarife, Billing |
+| **Factofy Core SaaS** | `app.factofy.io` | Next.js / Node | `factofy_prod_db` | **Kommunal-Gehirn:** Digitaler Zwilling, Quartiere, Liegenschaften |
+| **Control Plane SaaS** | `mon.sharegy.de`<br>`mon.factofy.io` | FastAPI (Async) | `mon_core_db` | **Carrier-Leitung & Vault:** WSS-Sockets, Remote-RPC Tunnel, **5m DB-Backups** |
