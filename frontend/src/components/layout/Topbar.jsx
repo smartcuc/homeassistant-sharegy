@@ -9,6 +9,7 @@ import { useHomes } from "../../hooks/useHomes";
 import { useDeviceStatus } from "../../hooks/useDevices";
 import { useTheme } from "../../theme/ThemeContext";
 import UserMenu from "../UserMenu";
+import ContextSwitcher from "./ContextSwitcher";
 import SpotPriceModal from "../../features/market/components/SpotPriceModal";
 import SupportDrawer from "../../features/support/components/SupportDrawer";
 import AlertCenterModal from "../../features/alerts/components/AlertCenterModal";
@@ -250,6 +251,9 @@ export default function AppTopbar({ onOpenMobileMenu }) {
                             </span>
                         </Link>
                     )}
+
+                    {/* 🧭 Rollen- & Kontext-Umschalter */}
+                    <ContextSwitcher />
                 </div>
 
                 {/* CENTER: ⚡ Live Energy-Pulse / Kompakt-Ticker (Auf Desktop & Tablets sichtbar) */}

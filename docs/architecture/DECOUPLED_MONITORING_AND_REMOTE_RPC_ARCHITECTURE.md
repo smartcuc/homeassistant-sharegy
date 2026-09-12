@@ -131,16 +131,15 @@ Um bei einem Totalausfall oder Datenverlust eines Hauptsystems sofortige Wiederh
 
 ### Empfehlung: `smartcuc/mon-nexus` (Eigenes Repository)
 
-Das Monitoring- & Admin-System wird als **eigenständiges Git-Projekt** (`smartcuc/mon-nexus` oder `smartcuc/edge-control-plane`) aufgesetzt:
+### Empfehlung: `smartcuc/moniy` (Eigenes Repository)
 
-#### Vorteile eines separaten Repositories:
-1. **Technologische Unabhängigkeit:** 
-   - Das Monitoring-Backend kann als schlanker **FastAPI-Microservice** (Python Async) aufgesetzt werden – völlig frei vom Ballast von Django oder Next.js.
-2. **Entkoppeltes Deployment (CI/CD):** 
-   - Deployments an Sharegy oder Factofy lösen keinen Re-Deploy des Monitoring-Gateways aus.
-   - `mon` hat eigene Release-Zyklen (extrem selten, maximale Stabilität).
-3. **Universelle SDKs für Edge & Apps:**
-   - Im `mon-nexus` Repository liegt der schlanke `edge-agent-client` (Python & TypeScript/Node), der sowohl in den **ioBroker-Adapter (`iobroker.sharegy`)** als auch in die **Factofy-Kommunalbox** importiert wird.
+Das Monitoring- & Admin-System ist als **eigenständiges Git-Projekt** (`smartcuc/moniy` – *Monitor our Y's: Sharegy & Factofy*) aufgesetzt:
+
+1. **Vollständige Entkopplung:**
+   - Eigene `pyproject.toml`, `requirements.txt`, eigenes FastAPI-Backend.
+   - Eigenständige CI/CD-Pipelines und getrennter Lebenszyklus.
+2. **Wiederverwendbare Edge-Bibliothek:**
+   - Im `moniy` Repository liegt der schlanke `edge-agent-client` (Python & TypeScript/Node), der sowohl in den **ioBroker-Adapter (`iobroker.sharegy`)** als auch in die **Factofy-Kommunalbox** importiert wird.
    - Ein kleiner Python-Client `mon_nexus_client` wird in Sharegy (Django) und Factofy (Next.js/Node API) eingebunden, um mit einer Zeile Code RPC-Befehle abzusetzen.
 
 ---

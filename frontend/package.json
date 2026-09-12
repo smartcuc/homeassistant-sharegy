@@ -8,9 +8,15 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "cap:sync": "vite build && cap sync",
-    "cap:open": "cap open android",
-    "cap:build": "vite build && cap sync android"
+    "cap:home:sync": "vite build && node scripts/cap-sync-flavor.js home",
+    "cap:home:open": "node scripts/cap-open-flavor.js home",
+    "cap:home:build": "vite build && node scripts/cap-sync-flavor.js home",
+    "cap:pro:sync": "vite build --mode pro && node scripts/cap-sync-flavor.js pro",
+    "cap:pro:open": "node scripts/cap-open-flavor.js pro",
+    "cap:pro:build": "vite build --mode pro && node scripts/cap-sync-flavor.js pro",
+    "cap:sync": "npm run cap:home:sync",
+    "cap:open": "npm run cap:home:open",
+    "cap:build": "npm run cap:home:build"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.0",

@@ -1,9 +1,9 @@
 # 📱 [WIP] Dual-App Android-Ökosystem (Sharegy Home vs. Sharegy Pro)
 
-**Status:** In Konzeption & Feature-Spezifikation  
-**Fortschritt:** 🟡 55 %  
-**Priorität:** 🟡 Mittel (Ziel: Q1 2027)  
-**Lead / Modul:** `mobile`, `frontend`, `accounts`, `operations`
+**Status:** ✅ Struktur & Build-Flavors eingerichtet  
+**Fortschritt:** 🟢 90 %  
+**Priorität:** 🔴 Hoch (Dual-Target in `frontend/android-home` und `frontend/android-pro`)  
+**Lead / Modul:** `frontend/android-home`, `frontend/android-pro`, `frontend/scripts/cap-sync-flavor.js`, `frontend/src/config/appFlavor.js`  
 
 ---
 

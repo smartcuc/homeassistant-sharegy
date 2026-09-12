@@ -1,42 +1,37 @@
+/*
+# frontend/src/components/layout/MobileMenuDrawer.jsx
+*/
+
 import { NavLink, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useUser } from "../../hooks/useUser";
+import { useUserNavigation } from "../../hooks/useUserNavigation";
+import { getNavigationSections } from "../../config/navigationConfig";
 import { useSubscription } from "../../hooks/useSubscription";
 import { useTheme } from "../../theme/ThemeContext";
-import { X, Sun, Moon, LogOut, ShieldCheck, User, CreditCard, LifeBuoy, Sparkles } from "lucide-react";
+import { X, Sun, Moon, LogOut, User, CreditCard, LifeBuoy } from "lucide-react";
 import ProBadge from "../common/ProBadge";
+import ContextSwitcher from "./ContextSwitcher";
+import { useMemo } from "react";
 
 export default function MobileMenuDrawer({ isOpen, onClose }) {
     const { t } = useTranslation();
     const { user, isStaffOrAdmin, hasCommunityAdminAccess } = useUser();
     const { isPro } = useSubscription();
     const { isDark, toggleTheme } = useTheme();
+    const { activeMode, isMultiMode } = useUserNavigation();
+
+    const sections = useMemo(() => {
+        return getNavigationSections({
+            activeMode,
+            t,
+            isPro,
+            isStaffOrAdmin,
+            hasCommunityAdminAccess,
+        });
+    }, [activeMode, t, isPro, isStaffOrAdmin, hasCommunityAdminAccess]);
 
     if (!isOpen) return null;
-
-    const navLinks = [
-        { name: t("nav.dashboard", "Dashboard"), path: "/app/dashboard", icon: "🏠" },
-        { name: t("energy.energy_balance", "Energiebilanz"), path: "/app/energy", icon: "⚡" },
-        { name: t("nav.energy_control", "Energiesteuerung"), path: "/app/control", icon: "🎛️", isProGated: true },
-        { name: t("nav.mobility", "E-Mobilität"), path: "/app/mobility", icon: "🚗", isProGated: true },
-        { name: t("nav.heating_climate", "Wärme & Klima"), path: "/app/heating", icon: "🌡️", isProGated: true },
-        { name: t("nav.alerts", "Alarmzentrale"), path: "/app/alerts", icon: "🚨", isProGated: true },
-        { name: t("nav.solar_forecast", "Solar-Prognose"), path: "/app/solarforecast", icon: "☀️" },
-        { name: t("nav.metrics", "Messwert-Explorer"), path: "/app/metrics", icon: "📈" },
-        { name: t("nav.all_devices", "Geräteübersicht"), path: "/app/devices", icon: "📟" },
-        { name: t("nav.producers", "Erzeuger & Speicher"), path: "/app/producers", icon: "🔋" },
-        ...(hasCommunityAdminAccess
-            ? [{ name: t("nav.tenant_management", "Community & Mieter"), path: "/app/tenant", icon: "👥" }]
-            : []),
-        { name: t("nav.energy_profile", "Energie-Profil"), path: "/app/energy-profile", icon: "🏡" },
-        { name: t("nav.tariff", "Dynamischer Tarif"), path: "/app/tariff", icon: "💶" },
-        { name: t("nav.system_status", "Systemstatus & Live-Sync"), path: "/app/status", icon: "📶" },
-
-        { name: t("nav.help_center", "Hilfe & Knowledge Base"), path: "/app/help", icon: "📚" },
-        ...(isStaffOrAdmin
-            ? [{ name: t("nav.admin_dashboard", "Admin Dashboard"), path: "/app/admin/dashboard", icon: "🛡️" }]
-            : []),
-    ];
 
     const handleLogout = () => {
         onClose();
@@ -69,14 +64,14 @@ export default function MobileMenuDrawer({ isOpen, onClose }) {
                     <button
                         type="button"
                         onClick={onClose}
-                        className="p-2 rounded-xl text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                        className="p-2 rounded-xl text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
                     >
                         <X className="w-5 h-5" />
                     </button>
                 </div>
 
-                {/* User Info & Pro Status */}
-                <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-indigo-50/40 dark:bg-indigo-950/20">
+                {/* User Info & Role Switcher */}
+                <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-indigo-50/40 dark:bg-indigo-950/20 space-y-3">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-2xl bg-indigo-600 text-white font-bold flex items-center justify-center text-sm shadow-sm">
                             {user?.first_name ? user.first_name[0].toUpperCase() : user?.email ? user.email[0].toUpperCase() : "U"}
@@ -98,65 +93,119 @@ export default function MobileMenuDrawer({ isOpen, onClose }) {
                             </div>
                         </div>
                     </div>
+
+                    {isMultiMode && (
+                        <div className="pt-1">
+                            <ContextSwitcher />
+                        </div>
+                    )}
                 </div>
 
-                {/* Navigation Items List */}
-                <div className="flex-1 overflow-y-auto p-3 space-y-1">
-                    {navLinks.map((link) => (
-                        <NavLink
-                            key={link.path}
-                            to={link.path}
-                            onClick={onClose}
-                            className={({ isActive }) =>
-                                `flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition ${
-                                    isActive
-                                        ? "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-bold border border-indigo-200 dark:border-indigo-900/50 shadow-2xs"
-                                        : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
-                                }`
-                            }
-                        >
-                            <div className="flex items-center gap-3">
-                                <span className="text-base">{link.icon}</span>
-                                <span>{link.name}</span>
+                {/* Dynamic Grouped Navigation List */}
+                <div className="flex-1 overflow-y-auto p-3 space-y-4">
+                    {sections.map((section, sIdx) => (
+                        <div key={sIdx}>
+                            {section.title && (
+                                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-3 mb-1">
+                                    {section.title}
+                                </div>
+                            )}
+                            <div className="space-y-1">
+                                {section.items.map((link, idx) => {
+                                    if (link.isExternal) {
+                                        return (
+                                            <a
+                                                key={link.path || idx}
+                                                href={link.path}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                onClick={onClose}
+                                                className="flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <span className="text-base">{link.icon}</span>
+                                                    <span>{link.name}</span>
+                                                </div>
+                                                <span className="text-xs text-slate-400">↗</span>
+                                            </a>
+                                        );
+                                    }
+
+                                    return (
+                                        <NavLink
+                                            key={link.path}
+                                            to={link.path}
+                                            onClick={onClose}
+                                            className={({ isActive }) =>
+                                                `flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition ${
+                                                    isActive
+                                                        ? "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-bold border border-indigo-100 dark:border-indigo-900/50"
+                                                        : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                                                }`
+                                            }
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-base">{link.icon}</span>
+                                                <span>{link.name}</span>
+                                                {link.isProGated && !isPro && <ProBadge size="xs" />}
+                                            </div>
+                                        </NavLink>
+                                    );
+                                })}
                             </div>
-                            {link.isProGated && !isPro && <ProBadge size="xs" />}
-                        </NavLink>
+                        </div>
                     ))}
                 </div>
 
-                {/* Footer Controls (Theme, Profile, Logout) */}
-                <div className="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 space-y-2">
-                    <div className="flex items-center justify-between px-2 py-1">
-                        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Design</span>
+                {/* Footer Controls */}
+                <div className="p-4 border-t border-slate-200 dark:border-slate-800 space-y-2 bg-slate-50 dark:bg-slate-950/50">
+                    <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Design</span>
                         <button
                             type="button"
                             onClick={toggleTheme}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 shadow-2xs cursor-pointer"
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs cursor-pointer"
                         >
-                            {isDark ? <Moon className="w-3.5 h-3.5 text-indigo-400" /> : <Sun className="w-3.5 h-3.5 text-amber-500" />}
-                            <span>{isDark ? "Dark" : "Light"}</span>
+                            {isDark ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5 text-slate-600" />}
+                            <span>{isDark ? "Hell" : "Dunkel"}</span>
                         </button>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 pt-1">
+                    <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
                         <Link
                             to="/app/profile"
                             onClick={onClose}
-                            className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 shadow-2xs"
+                            className="flex flex-col items-center justify-center p-2 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800 transition"
                         >
-                            <User className="w-3.5 h-3.5" />
-                            <span>Profil</span>
+                            <User className="w-4 h-4 mb-1" />
+                            <span className="text-[10px] font-medium">Profil</span>
                         </Link>
-
-                        <button
-                            type="button"
-                            onClick={handleLogout}
-                            className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 text-xs font-bold text-rose-700 dark:text-rose-300 shadow-2xs cursor-pointer"
+                        <Link
+                            to="/app/billing"
+                            onClick={onClose}
+                            className="flex flex-col items-center justify-center p-2 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800 transition"
                         >
-                            <LogOut className="w-3.5 h-3.5" />
-                            <span>Abmelden</span>
-                        </button>
+                            <CreditCard className="w-4 h-4 mb-1" />
+                            <span className="text-[10px] font-medium">Tarif</span>
+                        </Link>
+                        <Link
+                            to="/app/support-hub"
+                            onClick={onClose}
+                            className="flex flex-col items-center justify-center p-2 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800 transition"
+                        >
+                            <LifeBuoy className="w-4 h-4 mb-1" />
+                            <span className="text-[10px] font-medium">Hilfe</span>
+                        </Link>
                     </div>
+
+                    <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="w-full flex items-center justify-center gap-2 p-2.5 mt-2 rounded-xl text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 transition cursor-pointer"
+                    >
+                        <LogOut className="w-4 h-4" />
+                        <span>Abmelden</span>
+                    </button>
                 </div>
             </div>
         </div>

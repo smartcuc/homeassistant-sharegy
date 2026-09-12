@@ -41,14 +41,8 @@ class VictronAdapter(BaseInverterAdapter):
         Generiert realistische Live-Messdaten für Victron MultiPlus-II / Cerbo GX Systeme.
         """
         import random
-        now = timezone.now()
-        hour = now.hour
-
-        if 6 <= hour <= 20:
-            pv_factor = max(0.0, 1.0 - ((hour - 13.0) / 7.0) ** 2)
-            pv_w = round(random.uniform(2500.0, 6800.0) * pv_factor, 1)
-        else:
-            pv_w = 0.0
+        # Realistische PV-Leistung für Simulation/Sandbox
+        pv_w = round(random.uniform(2500.0, 6800.0), 1)
 
         load_w = round(random.uniform(450.0, 1800.0), 1)
         diff = pv_w - load_w

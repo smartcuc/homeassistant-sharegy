@@ -176,10 +176,8 @@ def run_device_self_test(
                 is_live = True
 
         if not telemetry_data:
-            # Fallback wenn keine Zugangsdaten übergeben wurden
-            hour = now.hour
-            is_day = 6 <= hour <= 20
-            pv_w = round(random.uniform(1200.0, 6800.0), 1) if is_day else 0.0
+            # Fallback wenn keine Zugangsdaten übergeben wurden (Simulation / Test)
+            pv_w = round(random.uniform(1200.0, 6800.0), 1)
             load_w = round(random.uniform(450.0, 2400.0), 1)
             telemetry_data = {
                 "pv_power_w": pv_w,

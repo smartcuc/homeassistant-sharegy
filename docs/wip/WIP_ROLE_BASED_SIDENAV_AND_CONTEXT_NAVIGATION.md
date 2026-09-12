@@ -1,9 +1,9 @@
 # 🧭 [WIP] Rollen- & Kontextbasierte Sidenav-Aufteilung
 
-**Status:** In Konzeption / UI-Refactoring Vorbereitung  
-**Fortschritt:** 🟡 40 %  
-**Priorität:** 🔴 Hoch (Ziel: Q4 2026 / Q1 2027)  
-**Lead / Modul:** `frontend/src/components/AppShell.jsx`, `frontend/src/context/AuthContext.jsx`
+**Status:** ✅ Vollständig umgesetzt & aktiv  
+**Fortschritt:** 🟢 100 %  
+**Priorität:** 🔴 Hoch (Produktiv im Frontend)  
+**Lead / Modul:** `frontend/src/config/navigationConfig.js`, `frontend/src/hooks/useUserNavigation.js`, `frontend/src/components/layout/ContextSwitcher.jsx`, `Sidebar.jsx`, `Topbar.jsx`  
 
 ---
 

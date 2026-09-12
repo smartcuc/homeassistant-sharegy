@@ -5,6 +5,8 @@
 import { NavLink } from "react-router-dom";
 import { useUnconfiguredDevices } from "../../hooks/useUnconfiguredDevices";
 import { useUser } from "../../hooks/useUser";
+import { useUserNavigation } from "../../hooks/useUserNavigation";
+import { getNavigationSections } from "../../config/navigationConfig";
 import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
@@ -12,12 +14,13 @@ import { apiFetch } from "../../api/client";
 import DeviceSetupModal from "../device/DeviceSetupModal";
 import { useSubscription } from "../../hooks/useSubscription";
 import ProBadge from "../common/ProBadge";
+import ContextSwitcher from "./ContextSwitcher";
 
 export default function Sidebar() {
     const { t } = useTranslation();
     const { isPro } = useSubscription();
-    const { user, isStaffOrAdmin, hasCommunityAdminAccess } = useUser();
-    const hasTenantAccess = hasCommunityAdminAccess;
+    const { isStaffOrAdmin, hasCommunityAdminAccess } = useUser();
+    const { activeMode, activeMetadata, isMultiMode } = useUserNavigation();
     const query = useUnconfiguredDevices();
 
     const isLoaded = query?.isSuccess;
@@ -40,103 +43,22 @@ export default function Sidebar() {
             : "bg-emerald-100 text-emerald-800 border-emerald-200";
 
     const sections = useMemo(() => {
-        const sec = [
-            {
-                title: null,
-                items: [
-                    { name: t("nav.dashboard", "Dashboard"), path: "/app/dashboard", icon: "🏠" },
-                ],
-            },
-            {
-                title: `📊 ${t("nav.analytics", "Analysen & Monitoring")}`,
-                items: [
-                    { name: t("energy.energy_balance", "Energiebilanz"), path: "/app/energy", icon: "⚡" },
-                    { name: t("nav.solar_forecast", "Solar-Prognose"), path: "/app/solarforecast", icon: "☀️" },
-                    {
-                        name: t("nav.alerts", "Alarmzentrale"),
-                        path: "/app/alerts",
-                        icon: "🚨",
-                        isProGated: true,
-                        badge: isPro && alertCount > 0 ? alertCount : null,
-                        badgeClass: alertBadgeClass,
-                    },
-                    { name: t("nav.metrics", "Messwert-Explorer"), path: "/app/metrics", icon: "📈" },
-                ],
-            },
-            {
-                title: `🎛️ ${t("nav.assets_group", "Steuerung & Geräte")}`,
-                items: [
-                    {
-                        name: t("nav.energy_control", "Energiesteuerung (EMS)"),
-                        path: "/app/control",
-                        icon: "🎛️",
-                        isProGated: true,
-                    },
-                    {
-                        name: t("nav.mobility", "E-Mobilität & Fuhrpark"),
-                        path: "/app/mobility",
-                        icon: "🚗",
-                        isProGated: true,
-                    },
-                    {
-                        name: t("nav.heating_climate", "Wärme & Raumklima"),
-                        path: "/app/heating",
-                        icon: "🌡️",
-                        isProGated: true,
-                    },
-                    {
-                        name: t("nav.all_devices", "Geräteübersicht"),
-                        path: "/app/devices",
-                        icon: "📟",
-                        badge: count > 0 ? count : null,
-                        isDeviceSetupBadge: true,
-                    },
-                    { name: t("nav.producers", "Erzeuger & Speicher"), path: "/app/producers", icon: "🔋" },
-                    ...(hasTenantAccess && !isStaffOrAdmin
-                        ? [{ name: t("nav.tenant_management", "Community & Mieter"), path: "/app/tenant", icon: "👥" }]
-                        : []),
-                ],
-            },
-            {
-                title: `⚙️ ${t("nav.settings_group", "Systemeinstellungen")}`,
-                items: [
-                    { name: t("nav.energy_profile", "Energie-Profil"), path: "/app/energy-profile", icon: "🏡" },
-                    { name: t("nav.tariffs", "Strompreise & Tarife"), path: "/app/tariff", icon: "💶" },
-                    { name: t("nav.mqtt_interfaces", "Schnittstellen"), path: "/app/interfaces", icon: "📡" },
-                    { name: t("nav.system_status", "Systemstatus (Server)"), path: "/app/status", icon: "🌐" },
-                ],
-            },
-
-
-        ];
-
-        // 🛡️ ADMIN & STAFF SECTION
-        if (isStaffOrAdmin) {
-            sec.push({
-                title: `🛡️ ${t("nav.admin_group", "Administration & Staff")}`,
-                items: [
-                    { name: t("nav.agent_support_hub", "Support-Zentrale (Triage)"), path: "/app/support-hub", icon: "🛟" },
-                    { name: t("nav.partner_fleet", "Partner & Flotten-Cockpit"), path: "/app/partner", icon: "🔧" },
-                    { name: t("nav.admin_dashboard", "Admin Dashboard"), path: "/app/admin/dashboard", icon: "📊" },
-                    { name: t("nav.admin_tracking", "Event & Tracking"), path: "/app/admin/tracking", icon: "📈" },
-                    { name: t("nav.tenant_management", "Mandanten & Mieter"), path: "/app/tenant", icon: "👥" },
-                    {
-                        name: "Django Backend",
-                        path: "/admin/",
-                        icon: "⚙️",
-                        isExternal: true,
-                    },
-                ],
-            });
-        }
-
-        return sec;
-    }, [t, count, alertCount, alertBadgeClass, isStaffOrAdmin, hasTenantAccess, isPro]);
+        return getNavigationSections({
+            activeMode,
+            t,
+            isPro,
+            alertCount,
+            alertBadgeClass,
+            unconfiguredDevicesCount: count,
+            isStaffOrAdmin,
+            hasCommunityAdminAccess,
+        });
+    }, [activeMode, t, isPro, alertCount, alertBadgeClass, count, isStaffOrAdmin, hasCommunityAdminAccess]);
 
     return (
         <div className="hidden md:flex w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex-col shrink-0 transition-colors">
-            {/* ✅ Logo -> Link zur Homepage */}
-            <div className="h-14 flex items-center px-4 border-b border-slate-200 dark:border-slate-800">
+            {/* ✅ Logo -> Link zur Homepage & Context Switcher */}
+            <div className="h-16 flex items-center justify-between px-4 border-b border-slate-200 dark:border-slate-800">
                 <NavLink
                     to="/"
                     title="Zur sharegy Startseite & Info"
@@ -144,6 +66,12 @@ export default function Sidebar() {
                 >
                     <span>⚡</span> <span className="font-mono tracking-tight lowercase">sharegy</span>
                 </NavLink>
+
+                {isMultiMode && (
+                    <div className="scale-90 origin-right">
+                        <ContextSwitcher compact />
+                    </div>
+                )}
             </div>
 
             {/* ✅ Navigation */}
@@ -152,7 +80,7 @@ export default function Sidebar() {
                     <div key={idx}>
                         {/* Section Title */}
                         {section.title && (
-                            <div className="text-[11px] font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wider px-2.5 mb-1.5">
+                            <div className="text-[11px] font-semibold text-gray-600 dark:text-slate-300 uppercase tracking-wider px-2.5 mb-1.5">
                                 {section.title}
                             </div>
                         )}

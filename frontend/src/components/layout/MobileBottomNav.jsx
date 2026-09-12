@@ -1,9 +1,13 @@
 import { NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Home, Zap, Sliders, Car, Menu } from "lucide-react";
+import { useUserNavigation } from "../../hooks/useUserNavigation";
+import { NAV_MODES } from "../../config/navigationConfig";
+import { Home, Zap, Sliders, Car, Building2, FileText, Wrench, Shield, Menu } from "lucide-react";
+import { useMemo } from "react";
 
 export default function MobileBottomNav({ onOpenMenu }) {
     const { t } = useTranslation();
+    const { activeMode } = useUserNavigation();
 
     const triggerHaptic = () => {
         if (window.navigator?.vibrate) {
@@ -11,32 +15,94 @@ export default function MobileBottomNav({ onOpenMenu }) {
         }
     };
 
-    const navItems = [
-        {
-            name: t("nav.dashboard", "Home"),
-            path: "/app/dashboard",
-            icon: Home,
-            color: "text-indigo-600 dark:text-indigo-400",
-        },
-        {
-            name: t("energy.energy_balance", "Energie"),
-            path: "/app/energy",
-            icon: Zap,
-            color: "text-amber-500 dark:text-amber-400",
-        },
-        {
-            name: t("nav.energy_control", "Steuerung"),
-            path: "/app/control",
-            icon: Sliders,
-            color: "text-indigo-600 dark:text-indigo-400",
-        },
-        {
-            name: t("nav.mobility", "Mobilität"),
-            path: "/app/mobility",
-            icon: Car,
-            color: "text-cyan-600 dark:text-cyan-400",
-        },
-    ];
+    const navItems = useMemo(() => {
+        // 🏢 User 2: Nur Energy-Sharing / Mieter
+        if (activeMode === NAV_MODES.SHARING_ONLY) {
+            return [
+                {
+                    name: t("nav.community", "Community"),
+                    path: "/app/tenant",
+                    icon: Building2,
+                },
+                {
+                    name: t("energy.energy_balance", "Energie"),
+                    path: "/app/energy",
+                    icon: Zap,
+                },
+                {
+                    name: t("nav.billing", "Belege"),
+                    path: "/app/billing",
+                    icon: FileText,
+                },
+            ];
+        }
+
+        // 🔧 Partner / Installateur
+        if (activeMode === NAV_MODES.PARTNER) {
+            return [
+                {
+                    name: t("nav.partner_fleet", "Flotte"),
+                    path: "/app/partner",
+                    icon: Wrench,
+                },
+                {
+                    name: t("nav.devices", "Geräte"),
+                    path: "/app/devices",
+                    icon: Sliders,
+                },
+                {
+                    name: t("nav.system_status", "Status"),
+                    path: "/app/status",
+                    icon: Zap,
+                },
+            ];
+        }
+
+        // 🛡️ Admin
+        if (activeMode === NAV_MODES.ADMIN) {
+            return [
+                {
+                    name: t("nav.admin_dashboard", "Admin"),
+                    path: "/app/admin/dashboard",
+                    icon: Shield,
+                },
+                {
+                    name: t("nav.tenant_management", "Mandanten"),
+                    path: "/app/tenant",
+                    icon: Building2,
+                },
+                {
+                    name: t("nav.partner_fleet", "Flotte"),
+                    path: "/app/partner",
+                    icon: Wrench,
+                },
+            ];
+        }
+
+        // 🏠 User 1 (EMS) & User 3 (Hybrid)
+        return [
+            {
+                name: t("nav.dashboard", "Home"),
+                path: "/app/dashboard",
+                icon: Home,
+            },
+            {
+                name: t("energy.energy_balance", "Energie"),
+                path: "/app/energy",
+                icon: Zap,
+            },
+            {
+                name: t("nav.energy_control", "Steuerung"),
+                path: "/app/control",
+                icon: Sliders,
+            },
+            {
+                name: t("nav.mobility", "Mobilität"),
+                path: "/app/mobility",
+                icon: Car,
+            },
+        ];
+    }, [activeMode, t]);
 
     return (
         <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-2 py-1 flex items-center justify-around shadow-lg transition-colors">

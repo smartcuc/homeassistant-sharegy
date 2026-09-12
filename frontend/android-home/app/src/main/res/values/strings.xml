@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Sharegy</string>
-    <string name="title_activity_main">Sharegy</string>
+    <string name="app_name">Sharegy Home</string>
+    <string name="title_activity_main">Sharegy Home</string>
     <string name="package_name">de.sharegy.app</string>
     <string name="custom_url_scheme">de.sharegy.app</string>
 </resources>

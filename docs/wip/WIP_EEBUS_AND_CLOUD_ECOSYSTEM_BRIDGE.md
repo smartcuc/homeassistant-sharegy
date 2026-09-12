@@ -3,7 +3,7 @@
 **Status:** In Konzeption / Phase 1 & 2 in Vorbereitung  
 **Fortschritt:** 🟡 45 %  
 **Priorität:** 🔴 Hoch (Ziel: Q4 2026 / Q1 2027)  
-**Lead / Modul:** `energy`, `devices`, `adapters`, `mon-nexus`  
+**Lead / Modul:** `energy`, `devices`, `adapters`, `moniy`  
 **Referenz-Architektur:** [`DECOUPLED_MONITORING_AND_REMOTE_RPC_ARCHITECTURE.md`](file:///c:/Users/Public/Dev/eswes/docs/architecture/DECOUPLED_MONITORING_AND_REMOTE_RPC_ARCHITECTURE.md)  
 
 ---

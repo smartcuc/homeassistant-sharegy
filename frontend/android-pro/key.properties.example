@@ -1,0 +1,5 @@
+# Android Release Signing Configuration (Keep secure and do not commit key.properties to git)
+storePassword=YOUR_STORE_PASSWORD
+keyPassword=YOUR_KEY_PASSWORD
+keyAlias=sharegy
+storeFile=app/sharegy-release-key.jks
