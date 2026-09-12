@@ -39,6 +39,8 @@ from .views_ocpp import (
     WallboxDetailView,
     WallboxRemoteActionView,
     WallboxSessionsView,
+    RfidTagListCreateView,
+    RfidTagDetailView,
 )
 
 from .views_bwwp import (
@@ -106,5 +108,8 @@ urlpatterns += [
     path("wallboxes/<uuid:pk>/", WallboxDetailView.as_view()),
     path("wallboxes/<uuid:pk>/<str:action>/", WallboxRemoteActionView.as_view()),
     path("wallboxes/<uuid:pk>/sessions/", WallboxSessionsView.as_view()),
+    # 💳 RFID-Tag Management Endpunkte
+    path("rfid-tags/", RfidTagListCreateView.as_view()),
+    path("rfid-tags/<uuid:pk>/", RfidTagDetailView.as_view()),
 ]
 

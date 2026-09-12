@@ -515,3 +515,33 @@ class OcppRestApiTests(TestCase):
         )
         self.assertEqual(res_diag.status_code, 200)
 
+    def test_rfid_tag_crud_endpoints(self):
+        # 1. List Tags
+        res_list = self.client.get("/api/energy/rfid-tags/")
+        self.assertEqual(res_list.status_code, 200)
+        self.assertEqual(len(res_list.json()["rfid_tags"]), 1)
+
+        # 2. Create Tag
+        res_create = self.client.post(
+            "/api/energy/rfid-tags/",
+            {"name": "Zweitwagen Chip", "id_tag": "TAG-998877", "is_active": True},
+            format="json"
+        )
+        self.assertEqual(res_create.status_code, 201)
+        tag_id = res_create.json()["rfid_tag"]["id"]
+
+        # 3. Patch Tag (Toggle active)
+        res_patch = self.client.patch(
+            f"/api/energy/rfid-tags/{tag_id}/",
+            {"is_active": False, "name": "Gesperrter Chip"},
+            format="json"
+        )
+        self.assertEqual(res_patch.status_code, 200)
+        self.assertFalse(res_patch.json()["rfid_tag"]["is_active"])
+        self.assertEqual(res_patch.json()["rfid_tag"]["name"], "Gesperrter Chip")
+
+        # 4. Delete Tag
+        res_del = self.client.delete(f"/api/energy/rfid-tags/{tag_id}/")
+        self.assertEqual(res_del.status_code, 200)
+        self.assertFalse(ChargingRfidTag.objects.filter(id=tag_id).exists())
+

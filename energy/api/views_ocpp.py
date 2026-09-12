@@ -676,3 +676,117 @@ class WallboxSessionsView(APIView):
         ]
 
         return Response({"sessions": data})
+
+
+class RfidTagListCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        home = Home.objects.filter(user=user).first()
+        if not home:
+            return Response({"rfid_tags": []})
+        tags = ChargingRfidTag.objects.filter(home=home).order_by("-created_at")
+        data = [
+            {
+                "id": str(t.id),
+                "id_tag": t.id_tag,
+                "name": t.name,
+                "is_active": t.is_active,
+                "expiry_date": t.expiry_date.isoformat() if t.expiry_date else None,
+                "created_at": t.created_at.isoformat() if t.created_at else None,
+            }
+            for t in tags
+        ]
+        return Response({"rfid_tags": data})
+
+    def post(self, request):
+        user = request.user
+        home = Home.objects.filter(user=user).first()
+        if not home:
+            return Response({"error": "Kein Smart Home Profil gefunden."}, status=status.HTTP_400_BAD_REQUEST)
+
+        id_tag = request.data.get("id_tag", "").strip()
+        name = request.data.get("name", "Mein RFID-Chip").strip() or "Mein RFID-Chip"
+        is_active = bool(request.data.get("is_active", True))
+
+        if not id_tag:
+            return Response({"error": "RFID-Kennung (Tag ID / UID) ist erforderlich."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Prüfen ob bereits vorhanden
+        existing = ChargingRfidTag.objects.filter(id_tag=id_tag).first()
+        if existing:
+            if existing.home == home:
+                existing.name = name
+                existing.is_active = is_active
+                existing.save()
+                return Response({
+                    "success": True,
+                    "message": "RFID-Chip aktualisiert.",
+                    "rfid_tag": {
+                        "id": str(existing.id),
+                        "id_tag": existing.id_tag,
+                        "name": existing.name,
+                        "is_active": existing.is_active,
+                        "created_at": existing.created_at.isoformat() if existing.created_at else None,
+                    }
+                })
+            else:
+                return Response({"error": "Dieser RFID-Tag ist bereits einem anderen Haushalt zugeordnet."}, status=status.HTTP_400_BAD_REQUEST)
+
+        tag = ChargingRfidTag.objects.create(
+            home=home,
+            id_tag=id_tag,
+            name=name,
+            user=user,
+            is_active=is_active
+        )
+        return Response({
+            "success": True,
+            "message": "RFID-Chip erfolgreich hinzugefügt.",
+            "rfid_tag": {
+                "id": str(tag.id),
+                "id_tag": tag.id_tag,
+                "name": tag.name,
+                "is_active": tag.is_active,
+                "created_at": tag.created_at.isoformat() if tag.created_at else None,
+            }
+        }, status=status.HTTP_201_CREATED)
+
+
+class RfidTagDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, pk):
+        user = request.user
+        home = Home.objects.filter(user=user).first()
+        tag = get_object_or_404(ChargingRfidTag, id=pk, home=home)
+        tag.delete()
+        return Response({"success": True, "message": "RFID-Chip gelöscht."})
+
+    def patch(self, request, pk):
+        user = request.user
+        home = Home.objects.filter(user=user).first()
+        tag = get_object_or_404(ChargingRfidTag, id=pk, home=home)
+        if "name" in request.data:
+            tag.name = request.data.get("name", "").strip() or tag.name
+        if "is_active" in request.data:
+            tag.is_active = bool(request.data.get("is_active"))
+        if "id_tag" in request.data:
+            new_id_tag = request.data.get("id_tag", "").strip()
+            if new_id_tag and new_id_tag != tag.id_tag:
+                if ChargingRfidTag.objects.filter(id_tag=new_id_tag).exclude(id=tag.id).exists():
+                    return Response({"error": "Diese RFID-Kennung ist bereits vergeben."}, status=status.HTTP_400_BAD_REQUEST)
+                tag.id_tag = new_id_tag
+        tag.save()
+        return Response({
+            "success": True,
+            "message": "RFID-Chip aktualisiert.",
+            "rfid_tag": {
+                "id": str(tag.id),
+                "id_tag": tag.id_tag,
+                "name": tag.name,
+                "is_active": tag.is_active,
+                "created_at": tag.created_at.isoformat() if tag.created_at else None,
+            }
+        })
