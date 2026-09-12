@@ -294,7 +294,15 @@ class WallboxRemoteActionView(APIView):
         channel_layer = get_channel_layer()
 
         if action == "remote-start":
-            id_tag = request.data.get("id_tag", "APP_USER")
+            id_tag = request.data.get("id_tag")
+            if not id_tag or str(id_tag).strip().upper() in ["APP_USER", ""]:
+                # Primary RFID Tag des Nutzers ermitteln
+                first_rfid = ChargingRfidTag.objects.filter(home=home, is_active=True).first()
+                if first_rfid:
+                    id_tag = first_rfid.id_tag
+                else:
+                    id_tag = "APP_USER"
+
             if station.status in ["Available", "Preparing", "SuspendedEV", "SuspendedEVSE"]:
                 station.status = "Charging"
                 target_a = station.max_current_a or 16.0
@@ -325,7 +333,7 @@ class WallboxRemoteActionView(APIView):
                     f"ocpp_{station.charge_point_id}",
                     {"type": "ocpp_remote_start", "connector_id": 1, "id_tag": id_tag}
                 )
-            return Response({"success": True, "message": f"Start-Befehl an {station.name} gesendet."})
+            return Response({"success": True, "id_tag": id_tag, "message": f"Start-Befehl an {station.name} (Tag: {id_tag}) gesendet."})
 
         elif action == "remote-stop":
             tx_id = station.active_transaction_id

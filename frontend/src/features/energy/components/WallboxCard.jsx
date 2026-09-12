@@ -84,7 +84,7 @@ export default function WallboxCard({ onOpenAddModal }) {
     };
 
     // 4. Remote Aktionen (Start, Stop, Unlock)
-    const handleRemoteAction = async (action) => {
+    const handleRemoteAction = async (action, params = {}) => {
         if (!activeStation) return;
         setActionPending(action);
         setFeedback({ text: null, type: null });
@@ -92,6 +92,7 @@ export default function WallboxCard({ onOpenAddModal }) {
         try {
             const res = await apiFetch(`/api/energy/wallboxes/${activeStation.id}/${action}/`, {
                 method: "POST",
+                body: Object.keys(params).length > 0 ? JSON.stringify(params) : undefined,
             });
             setFeedback({ text: res.message || `Aktion "${action}" erfolgreich ausgeführt.`, type: "success" });
             queryClient.invalidateQueries({ queryKey: ["wallboxes"] });

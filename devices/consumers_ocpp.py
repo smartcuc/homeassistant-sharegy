@@ -636,6 +636,11 @@ class OcppConsumer(AsyncWebsocketConsumer):
         """Startet den Ladevorgang aus der Sharegy App heraus."""
         connector_id = int(event.get("connector_id", 1))
         id_tag = event.get("id_tag", "APP_USER")
+        if not id_tag or str(id_tag).strip().upper() == "APP_USER":
+            primary_tag = await self.get_primary_rfid_tag(self.cp_id)
+            if primary_tag:
+                id_tag = primary_tag
+
         if self.ocpp_version in ["ocpp2.0.1", "ocpp2.1"]:
             payload = {
                 "evseId": connector_id,
@@ -950,6 +955,16 @@ class OcppConsumer(AsyncWebsocketConsumer):
             "active_power_w", "v2g_discharge_power_w", "current_l1", "current_l2", "current_l3",
             "voltage_v", "status", "total_energy_kwh", "session_energy_kwh", "ev_soc_pct", "last_heartbeat"
         ])
+
+    @database_sync_to_async
+    def get_primary_rfid_tag(self, cp_id):
+        from .models_ocpp import ChargingRfidTag, ChargingStation
+        station = ChargingStation.objects.filter(charge_point_id__iexact=cp_id).first()
+        if station and station.home:
+            first_rfid = ChargingRfidTag.objects.filter(home=station.home, is_active=True).first()
+            if first_rfid:
+                return first_rfid.id_tag
+        return None
 
     @database_sync_to_async
     def validate_rfid_tag(self, cp_id, id_tag):
