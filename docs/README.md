@@ -28,6 +28,7 @@ docs/
 | Dokument | Beschreibung |
 |---|---|
 | 🌐 **[`DECOUPLED_MONITORING_AND_REMOTE_RPC_ARCHITECTURE.md`](./architecture/DECOUPLED_MONITORING_AND_REMOTE_RPC_ARCHITECTURE.md)** | **NEU:** Entkoppelte Monitoring-Subdomain (`mon.sharegy.de`), WSS Reverse-RPC Fernwartung & Edge-Isolation |
+| 🔌 **[`API_REFERENCE_AND_ENDPOINTS.md`](./architecture/API_REFERENCE_AND_ENDPOINTS.md)** | Vollständige REST- & WebSocket-API-Referenz, Authentifizierung (JWT/API-Keys) & Endpunktkatalog |
 | 🏛️ **[`ARCHITECTURE.md`](./architecture/ARCHITECTURE.md)** | Gesamtsystem-Architektur, Dual-Core Konzept, Tech-Stack, Subdomains & Datenflüsse |
 | 🧭 **[`SHAREGY_STRATEGIC_HORIZONS_AND_IMPLEMENTATION_BLUEPRINT.md`](./architecture/SHAREGY_STRATEGIC_HORIZONS_AND_IMPLEMENTATION_BLUEPRINT.md)** | Strategische Handlungsempfehlungen, Umsetzungs-Statusmatrix & Realisierungspläne |
 | 🗺️ **[`SHAREGY_STRATEGIC_ROADMAP.md`](./architecture/SHAREGY_STRATEGIC_ROADMAP.md)** | Strategische Produkt-Roadmap (Meilensteine 1 bis 9 inkl. Whitelabel & Mako) |
@@ -47,6 +48,7 @@ docs/
 | Dokument | Beschreibung |
 |---|---|
 | 🚀 **[`OPERATIONS_AND_DEPLOYMENT.md`](./operations/OPERATIONS_AND_DEPLOYMENT.md)** | Server-Deployment (Ubuntu/Debian), Systemd Services, Redis, Celery & Health-Checks |
+| 🛡️ **[`DATA_PRIVACY_AND_GDPR_COMPLIANCE.md`](./operations/DATA_PRIVACY_AND_GDPR_COMPLIANCE.md)** | DSGVO-Konzept, Technische und Organisatorische Maßnahmen (TOMs), AVV-Muster & Löschfristen |
 | ✅ **[`PRODUCTION_DEPLOYMENT_CHECKLIST.md`](./operations/PRODUCTION_DEPLOYMENT_CHECKLIST.md)** | Checkliste für Produktiv-Rollouts, SSL-Zertifikate, Umgebungsvariablen & DNS |
 | 💾 **[`DATABASE_BACKUP_AND_RESTORE.md`](./operations/DATABASE_BACKUP_AND_RESTORE.md)** | PostgreSQL & TimescaleDB Backup-/Restore-Prozeduren und Desaster Recovery |
 | 📦 **[`SERVER_LEAN_DEPLOYMENT_SPARSE_CHECKOUT.md`](./operations/SERVER_LEAN_DEPLOYMENT_SPARSE_CHECKOUT.md)** | Lean Deployment via Git Sparse-Checkout für ressourcenschonende Server |
