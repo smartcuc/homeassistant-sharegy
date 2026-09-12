@@ -103,6 +103,8 @@ class SungrowAdapter(BaseInverterAdapter):
                         continue
                     factor = 1.0
                     low = raw.lower()
+                    if "kwh" in low:
+                        continue  # Energiewert (kWh) ignorieren
                     if "kw" in low:
                         factor = 1000.0
                         low = low.replace("kw", "").strip()

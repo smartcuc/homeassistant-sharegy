@@ -147,14 +147,14 @@ class GrowattAdapter(BaseInverterAdapter):
                             flat_all[clean_k2].append(v)
                             flat_all[clean_no_unit].append(v)
 
-                        is_empty_or_zero = v in (None, "", "-", "--", "null", "none", "0", "0.0", "0.00", "0 W", "0W", "0 kW", "0kW", 0, 0.0, False)
-                        if k not in flat or (flat[k] in (None, "", "-", "--", "null", "none", "0", "0.0", "0.00", "0 W", "0W", "0 kW", "0kW", 0, 0.0, False) and not is_empty_or_zero):
+                        is_empty = v in (None, "", "-", "--", "null", "none", "n/a", "nan", "undefined")
+                        if k not in flat or (flat[k] in (None, "", "-", "--", "null", "none", "n/a", "nan", "undefined") and not is_empty):
                             flat[k] = v
-                        if clean_k not in flat or (flat[clean_k] in (None, "", "0", 0, 0.0) and not is_empty_or_zero):
+                        if clean_k not in flat or (flat[clean_k] in (None, "", "-", "--", "null", "none") and not is_empty):
                             flat[clean_k] = v
-                        if clean_k2 not in flat or (flat[clean_k2] in (None, "", "0", 0, 0.0) and not is_empty_or_zero):
+                        if clean_k2 not in flat or (flat[clean_k2] in (None, "", "-", "--", "null", "none") and not is_empty):
                             flat[clean_k2] = v
-                        if clean_no_unit not in flat or (flat[clean_no_unit] in (None, "", "0", 0, 0.0) and not is_empty_or_zero):
+                        if clean_no_unit not in flat or (flat[clean_no_unit] in (None, "", "-", "--", "null", "none") and not is_empty):
                             flat[clean_no_unit] = v
                     elif isinstance(v, (dict, list)):
                         _walk(v)
@@ -193,9 +193,16 @@ class GrowattAdapter(BaseInverterAdapter):
                                 factor = 1.0
                                 low = raw.lower()
                                 k_low = str(k).lower()
-                                has_kw = "kw" in low or "kw" in k_low or "(kw)" in k_low or "_kw" in k_low
-                                has_w = ("w" in low and not has_kw) or ("_w" in k_low and not has_kw)
+                                has_kwh = "kwh" in low or "_kwh" in k_low or "(kwh)" in k_low
+                                has_wh = ("wh" in low and not has_kwh) or ("_wh" in k_low and not has_kwh)
+                                has_kw = ("kw" in low and not has_kwh) or ("(kw)" in k_low and not has_kwh) or ("_kw" in k_low and not has_kwh)
+                                has_w = ("w" in low and not has_kw and not has_kwh and not has_wh) or ("_w" in k_low and not has_kw and not has_kwh and not has_wh)
+
                                 if is_power:
+                                    if has_kwh or has_wh:
+                                        continue  # Energiewert (kWh/Wh) nicht als Leistung (W) werten
+                                    if any(ek in k_low for ek in ["currentenergy", "current_energy", "currenergy", "curr_energy"]) and not has_kw:
+                                        continue  # currentEnergy ohne explizite 'kW'-Einheit ist Energie
                                     if has_kw:
                                         factor = 1000.0
                                     elif has_w:
@@ -205,6 +212,7 @@ class GrowattAdapter(BaseInverterAdapter):
                                         factor = 0.001
                                     elif has_kw:
                                         factor = 1.0
+
                                 low = low.replace("kwh", "").replace("wh", "").replace("kw", "").replace("w", "").replace("%", "").strip()
                                 import re
                                 match = re.search(r"[-+]?\d*\.?\d+", low)
@@ -214,25 +222,23 @@ class GrowattAdapter(BaseInverterAdapter):
                                         if is_power and not has_w and not has_kw:
                                             is_kw_field = any(pk in k_low for pk in [
                                                 "currentpower", "current_power", "currpower", "curr_power",
-                                                "currentenergy", "current_energy", "currenergy", "curr_energy",
                                                 "plantpower", "plant_power", "total_power", "totalpower",
                                                 "pact", "p_act", "pvpower", "pv_power"
                                             ])
                                             if is_kw_field and 0.0 < abs(val) <= 100.0:
                                                 val = val * 1000.0
-                                            elif not has_large_watts and 0.0 < abs(val) <= 50.0:
+                                            elif not has_large_watts and 0.0 < abs(val) <= 50.0 and "." in raw:
                                                 val = val * 1000.0
                                         return val
                                     except (ValueError, TypeError):
                                         pass
 
-            vals = []
             for k in keys:
                 raw_list = flat_all.get(k, [])
                 if k in flat and flat[k] not in raw_list:
                     raw_list = list(raw_list) + [flat[k]]
 
-                for raw_item in raw_list:
+                for raw_item in reversed(raw_list):
                     if raw_item is None:
                         continue
                     raw = str(raw_item).strip().replace(",", ".")
@@ -241,9 +247,16 @@ class GrowattAdapter(BaseInverterAdapter):
                     factor = 1.0
                     low = raw.lower()
                     k_low = str(k).lower()
-                    has_kw = "kw" in low or "kw" in k_low or "(kw)" in k_low or "_kw" in k_low
-                    has_w = ("w" in low and not has_kw) or ("_w" in k_low and not has_kw)
+                    has_kwh = "kwh" in low or "_kwh" in k_low or "(kwh)" in k_low
+                    has_wh = ("wh" in low and not has_kwh) or ("_wh" in k_low and not has_kwh)
+                    has_kw = ("kw" in low and not has_kwh) or ("(kw)" in k_low and not has_kwh) or ("_kw" in k_low and not has_kwh)
+                    has_w = ("w" in low and not has_kw and not has_kwh and not has_wh) or ("_w" in k_low and not has_kw and not has_kwh and not has_wh)
+
                     if is_power:
+                        if has_kwh or has_wh:
+                            continue  # Energiewert (kWh/Wh) nicht als Leistung (W) werten
+                        if any(ek in k_low for ek in ["currentenergy", "current_energy", "currenergy", "curr_energy"]) and not has_kw:
+                            continue  # currentEnergy ohne explizite 'kW'-Einheit ist Energie
                         if has_kw:
                             factor = 1000.0
                         elif has_w:
@@ -254,6 +267,7 @@ class GrowattAdapter(BaseInverterAdapter):
                             factor = 0.001
                         elif has_kw:
                             factor = 1.0
+
                     low = low.replace("kwh", "").replace("wh", "").replace("kw", "").replace("w", "").replace("%", "").strip()
                     import re
                     match = re.search(r"[-+]?\d*\.?\d+", low)
@@ -264,30 +278,25 @@ class GrowattAdapter(BaseInverterAdapter):
                             if is_power and not has_w and not has_kw:
                                 is_kw_field = any(pk in k_low for pk in [
                                     "currentpower", "current_power", "currpower", "curr_power",
-                                    "currentenergy", "current_energy", "currenergy", "curr_energy",
                                     "plantpower", "plant_power", "total_power", "totalpower",
                                     "pact", "p_act", "pvpower", "pv_power"
                                 ])
                                 if is_kw_field and 0.0 < abs(val) <= 100.0:
                                     val = val * 1000.0
-                                elif not has_large_watts and 0.0 < abs(val) <= 50.0:
-                                    # Bei Growatt _KW Endpunkten sind alle Dezimalwerte in kW
+                                elif not has_large_watts and 0.0 < abs(val) <= 50.0 and "." in raw:
                                     val = val * 1000.0
-                            vals.append(val)
+                            return val  # Sobald der prioritäre Key gefunden wurde, sofort zurückliefern!
                         except (ValueError, TypeError):
                             pass
-            pos_vals = [v for v in vals if v > 0]
-            if pos_vals:
-                return max(pos_vals)
-            return vals[0] if vals else None
+            return None
 
         # 1. PV Erzeugung (DC Solar Input & AC Output & Plant Totals)
         ppv_direct = _get_val(
+            "solar_power", "solarpower", "solarPower",
             "ppv", "ppvTotal", "ppv_total", "p_pv", "pv_power", "pvPower", "pvpower", "pv_power_w", "pvPowerW", "pPv",
-            "pAct", "pact", "p_act", "invTodayPpv", "inv_today_ppv", "solar_power", "solarpower", "solarPower",
+            "pAct", "pact", "p_act",
             "output_power", "outputpower", "outputPower", "outPutPower", "active_power", "activePower",
             "real_power", "realPower", "inverter_power", "inverterPower", "current_power", "currentpower",
-            "currentEnergy", "current_energy", "currentenergy", "currEnergy", "curr_energy",
             "current_power_kw", "currentpowerkw", "plantPower", "plant_power", "total_power", "totalpower",
             "sys_power", "syspower", "powerOfPhotovoltaic",
             is_power=True
@@ -325,21 +334,21 @@ class GrowattAdapter(BaseInverterAdapter):
                 va_sum += (v_s * i_s)
         va_string_sum = round(va_sum, 1) if va_sum > 0 else 0.0
 
-        # Prioritätsauswahl für PV Erzeugung: Bevorzuge den höchsten plausiblen Messwert
-        candidates = [
-            v for v in [
-                ppv_direct,
-                ppv_string_sum if ppv_string_sum > 0 else None,
-                pac_3phase_sum if pac_3phase_sum > 0 else None,
-                curr_power,
-                pac_direct,
-                va_string_sum if va_string_sum > 0 else None
-            ] if v is not None and v > 0
-        ]
-        if candidates:
-            pv = max(candidates)
+        # Prioritätsauswahl für PV Erzeugung:
+        if ppv_direct is not None:
+            pv = ppv_direct
+        elif pac_direct is not None:
+            pv = pac_direct
+        elif ppv_string_sum > 0:
+            pv = ppv_string_sum
+        elif pac_3phase_sum > 0:
+            pv = pac_3phase_sum
+        elif curr_power is not None:
+            pv = curr_power
+        elif va_string_sum > 0:
+            pv = va_string_sum
         else:
-            pv = ppv_direct or curr_power or pac_direct or 0.0
+            pv = 0.0
 
         # 2. Batterie Leistung (+ Entladung, - Ladung) & SoC
         bat_dis = _get_val("pdisCharge", "pdisCharge1", "pDisCharge", "pDischarge", "discharge_power", "dischargePower", "disChargePowerOfBattery", is_power=True) or 0.0
@@ -392,10 +401,12 @@ class GrowattAdapter(BaseInverterAdapter):
         eff_load_calc = eff_load or 0.0
 
         if pv_val <= 1.0:
-            reconstructed_pv = eff_load_calc + bat_charging + grid_export - bat_discharging - grid_import
-            if reconstructed_pv > 30.0:
-                pv_val = round(reconstructed_pv, 1)
-                pv = pv_val
+            # PV-Rekonstruktion nur wenn physisch Erzeugung nachweisbar ist (Batterieladung oder Netzeinspeisung)
+            if bat_charging > 30.0 or grid_export > 30.0:
+                reconstructed_pv = eff_load_calc + bat_charging + grid_export - bat_discharging - grid_import
+                if reconstructed_pv > 30.0:
+                    pv_val = round(reconstructed_pv, 1)
+                    pv = pv_val
 
         # Batterie Leistung aus Leistungsbilanz ableiten falls Inverter keine direkte Leistung meldet
         if abs(bat_val) < 1.0 and soc_val is not None and eff_load is not None:
@@ -527,8 +538,8 @@ class GrowattAdapter(BaseInverterAdapter):
                 if isinstance(item, dict):
                     for k, v in item.items():
                         if isinstance(v, (int, float, str, bool)) or v is None:
-                            is_empty_or_zero = v in (None, "", "-", "--", "null", "none", "0", "0.0", "0.00", "0 W", "0W", "0 kW", "0kW", 0, 0.0, False)
-                            if k not in raw_data["data"] or (raw_data["data"][k] in (None, "", "-", "--", "null", "none", "0", "0.0", "0.00", "0 W", "0W", "0 kW", "0kW", 0, 0.0, False) and not is_empty_or_zero):
+                            is_empty = v in (None, "", "-", "--", "null", "none", "n/a", "nan", "undefined")
+                            if not is_empty or k not in raw_data["data"]:
                                 raw_data["data"][k] = v
                         elif isinstance(item, (dict, list)):
                             _walk_merge(v)

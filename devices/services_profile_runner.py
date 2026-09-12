@@ -207,13 +207,15 @@ def _clean_numeric_value(raw_val, target_unit="W"):
     factor = 1.0
 
     if target_unit == "W":
+        if "kwh" in lower_s:
+            return None  # Energiewert (kWh) niemals als Leistung (W) werten
         if "kw" in lower_s:
             factor = 1000.0
             lower_s = lower_s.replace("kw", "").strip()
-        elif "mw" in lower_s:
+        elif "mw" in lower_s and "mwh" not in lower_s:
             factor = 1000000.0
             lower_s = lower_s.replace("mw", "").strip()
-        elif "w" in lower_s:
+        elif "w" in lower_s and "wh" not in lower_s:
             lower_s = lower_s.replace("w", "").strip()
     elif target_unit == "kWh":
         if "mwh" in lower_s:
@@ -795,8 +797,8 @@ def _flatten_payload_dict(payload) -> dict:
         if isinstance(item, dict):
             for k, v in item.items():
                 if isinstance(v, (int, float, str, bool)) or v is None:
-                    is_empty_or_zero = v in (None, "", "-", "--", "null", "none", "0", "0.0", "0.00", "0 W", "0W", "0 kW", "0kW", 0, 0.0, False)
-                    if k not in flat or (flat[k] in (None, "", "-", "--", "null", "none", "0", "0.0", "0.00", "0 W", "0W", "0 kW", "0kW", 0, 0.0, False) and not is_empty_or_zero):
+                    is_empty = v in (None, "", "-", "--", "null", "none", "n/a", "nan", "undefined")
+                    if k not in flat or (flat[k] in (None, "", "-", "--", "null", "none", "n/a", "nan", "undefined") and not is_empty):
                         flat[k] = v
                 elif isinstance(v, (dict, list)):
                     _walk(v)
@@ -873,7 +875,7 @@ def _parse_metrics_from_payload(profile: dict, raw_payload: dict) -> dict:
                 else:
                     for k in [
                         "curr_power", "curr_pac", "currPower", "currPac", "currentPower", "current_power",
-                        "currentEnergy", "current_energy", "currenergy", "curr_energy", "pac", "ppv",
+                        "pac", "ppv",
                         "ppv1", "ppv2", "pPv1", "pPv2", "solar_power", "solarpower", "solarPower",
                         "output_power", "outputpower", "outputPower", "invPac", "power", "pv_power",
                         "p_act", "pvPower", "pAct", "pact", "pac1", "ppvTotal", "p_pv", "p_pv1", "p_pv2",
