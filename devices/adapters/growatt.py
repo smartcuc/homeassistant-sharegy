@@ -100,6 +100,44 @@ class GrowattAdapter(BaseInverterAdapter):
         from collections import defaultdict
         flat_all: Dict[str, list] = defaultdict(list)
         flat: Dict[str, Any] = {}
+        flat_latest: Dict[str, Any] = {}
+
+        # 1. Neuesten Zeitreihen-Eintrag finden (z. B. aus 'datas', 'tlx', 'min', 'max' Arrays)
+        latest_record = None
+        if isinstance(raw_data, dict):
+            responses = raw_data.get("responses", [])
+            for r_item in reversed(responses):
+                if isinstance(r_item, dict):
+                    d_obj = r_item.get("data") if isinstance(r_item.get("data"), dict) else r_item
+                    for candidate_key in ["datas", "tlx", "min", "max", "inv", "storage", "mix", "sph", "spa", "noah", "devices"]:
+                        item_list = d_obj.get(candidate_key)
+                        if isinstance(item_list, list) and item_list:
+                            latest_record = item_list[-1]
+                            break
+                    if latest_record:
+                        break
+
+            if not latest_record:
+                d_obj = raw_data.get("data") if isinstance(raw_data.get("data"), dict) else raw_data
+                for candidate_key in ["datas", "tlx", "min", "max", "inv", "storage", "mix", "sph", "spa", "noah", "devices"]:
+                    item_list = d_obj.get(candidate_key)
+                    if isinstance(item_list, list) and item_list:
+                        latest_record = item_list[-1]
+                        break
+
+        def _populate_dict(d: dict, target_dict: dict):
+            for k, v in d.items():
+                if isinstance(v, (int, float, str, bool)) or v is None:
+                    clean_k = str(k).lower().replace(" ", "_").replace("(", "_").replace(")", "").replace("：", "").replace(":", "").replace("-", "_").strip()
+                    clean_k2 = str(k).lower().replace(" ", "").replace("(", "").replace(")", "").replace("_", "").replace("：", "").replace(":", "").replace("-", "").strip()
+                    clean_no_unit = clean_k.replace("_kw", "").replace("_kwh", "").replace("_w", "").replace("_wh", "")
+                    target_dict[k] = v
+                    target_dict[clean_k] = v
+                    target_dict[clean_k2] = v
+                    target_dict[clean_no_unit] = v
+
+        if isinstance(latest_record, dict):
+            _populate_dict(latest_record, flat_latest)
 
         def _walk(item):
             if isinstance(item, dict):
@@ -148,7 +186,52 @@ class GrowattAdapter(BaseInverterAdapter):
                 if has_large_watts:
                     break
 
-        def _get_val(*keys, is_power: bool = False) -> Optional[float]:
+        def _get_val(*keys, is_power: bool = False, prefer_latest: bool = True) -> Optional[float]:
+            # Zuerst aus flat_latest prüfen falls vorhanden
+            if prefer_latest and flat_latest:
+                for k in keys:
+                    clean_k = str(k).lower().replace(" ", "_").replace("(", "_").replace(")", "").replace("：", "").replace(":", "").replace("-", "_").strip()
+                    clean_k2 = str(k).lower().replace(" ", "").replace("(", "").replace(")", "").replace("_", "").replace("：", "").replace(":", "").replace("-", "").strip()
+                    for cand_k in [k, clean_k, clean_k2]:
+                        if cand_k in flat_latest and flat_latest[cand_k] is not None:
+                            raw = str(flat_latest[cand_k]).strip().replace(",", ".")
+                            if raw.lower() not in ("-", "--", "null", "none", "n/a", ""):
+                                factor = 1.0
+                                low = raw.lower()
+                                k_low = str(k).lower()
+                                has_kw = "kw" in low or "kw" in k_low or "(kw)" in k_low or "_kw" in k_low
+                                has_w = ("w" in low and not has_kw) or ("_w" in k_low and not has_kw)
+                                if is_power:
+                                    if has_kw:
+                                        factor = 1000.0
+                                    elif has_w:
+                                        factor = 1.0
+                                else:
+                                    if has_w and not has_kw and "wh" in low:
+                                        factor = 0.001
+                                    elif has_kw:
+                                        factor = 1.0
+                                low = low.replace("kwh", "").replace("wh", "").replace("kw", "").replace("w", "").replace("%", "").strip()
+                                import re
+                                match = re.search(r"[-+]?\d*\.?\d+", low)
+                                if match:
+                                    try:
+                                        val = float(match.group(0)) * factor
+                                        if is_power and not has_w and not has_kw:
+                                            is_kw_field = any(pk in k_low for pk in [
+                                                "currentpower", "current_power", "currpower", "curr_power",
+                                                "currentenergy", "current_energy", "currenergy", "curr_energy",
+                                                "plantpower", "plant_power", "total_power", "totalpower",
+                                                "pact", "p_act", "pvpower", "pv_power"
+                                            ])
+                                            if is_kw_field and 0.0 < abs(val) <= 100.0:
+                                                val = val * 1000.0
+                                            elif not has_large_watts and 0.0 < abs(val) <= 50.0:
+                                                val = val * 1000.0
+                                        return val
+                                    except (ValueError, TypeError):
+                                        pass
+
             vals = []
             for k in keys:
                 raw_list = flat_all.get(k, [])
@@ -212,7 +295,7 @@ class GrowattAdapter(BaseInverterAdapter):
             "real_power", "realPower", "inverter_power", "inverterPower", "current_power", "currentpower",
             "currentEnergy", "current_energy", "currentenergy", "currEnergy", "curr_energy",
             "current_power_kw", "currentpowerkw", "plantPower", "plant_power", "total_power", "totalpower",
-            "sys_power", "syspower",
+            "sys_power", "syspower", "powerOfPhotovoltaic",
             is_power=True
         )
         curr_power = _get_val(
@@ -248,7 +331,7 @@ class GrowattAdapter(BaseInverterAdapter):
                 va_sum += (v_s * i_s)
         va_string_sum = round(va_sum, 1) if va_sum > 0 else 0.0
 
-        # Prioritätsauswahl für PV Erzeugung: Bevorzuge den höchsten plausiblen positiven Messwert
+        # Prioritätsauswahl für PV Erzeugung: Bevorzuge den höchsten plausiblen Messwert
         candidates = [
             v for v in [
                 ppv_direct,
@@ -265,8 +348,8 @@ class GrowattAdapter(BaseInverterAdapter):
             pv = ppv_direct or curr_power or pac_direct or 0.0
 
         # 2. Batterie Leistung (+ Entladung, - Ladung) & SoC
-        bat_dis = _get_val("pdisCharge", "pdisCharge1", "pDisCharge", "pDischarge", "discharge_power", "dischargePower", is_power=True) or 0.0
-        bat_chg = _get_val("pcharge", "pcharge1", "pCharge", "charge_power", "chargePower", is_power=True) or 0.0
+        bat_dis = _get_val("pdisCharge", "pdisCharge1", "pDisCharge", "pDischarge", "discharge_power", "dischargePower", "disChargePowerOfBattery", is_power=True) or 0.0
+        bat_chg = _get_val("pcharge", "pcharge1", "pCharge", "charge_power", "chargePower", "chargePowerOfBattery", is_power=True) or 0.0
         bat_to_storage = _get_val("pactostorage", "pstorage", "p_storage", "storage_power", is_power=True) or 0.0
         bat_generic = _get_val("battery_power", "battery_power_w", "batteryPower", "batPower", "B_P1", "bms_power", is_power=True)
 
@@ -279,16 +362,16 @@ class GrowattAdapter(BaseInverterAdapter):
 
         # Batterie Volt * Ampere falls keine Watt geliefert wurden
         if abs(bat_pwr or 0.0) < 1.0:
-            v_bat = _get_val("vbat", "v_bat", "vBat", "batteryVoltage", "battery_voltage") or 0.0
-            i_bat = _get_val("ibat", "i_bat", "iBat", "batteryCurrent", "battery_current") or 0.0
+            v_bat = _get_val("vbat", "v_bat", "vBat", "batteryVoltage", "battery_voltage", "bmsVbat", "bdc1Vbat") or 0.0
+            i_bat = _get_val("ibat", "i_bat", "iBat", "batteryCurrent", "battery_current", "bmsIbat", "bdc1Ibat") or 0.0
             if v_bat > 0 and abs(i_bat) > 0.1:
                 bat_pwr = round(v_bat * i_bat, 1)
 
-        soc = _get_val("soc", "batterySoc", "battery_soc", "batteryPercent", "chargeLevel", "capacity", "SOC", "storageSoc", "bmsSoc", "battery_level")
+        soc = _get_val("soc", "batterySoc", "battery_soc", "batteryPercent", "chargeLevel", "capacity", "SOC", "storageSoc", "bmsSoc", "bdc1Soc", "battery_level")
 
         # 3. Netzleistung (+ Bezug, - Einspeisung)
-        grid_export_val = _get_val("pactogrid", "toGridPower", "to_grid_power", "pToGrid", "feed_in_power", "p_feed_in", "feedInPower", is_power=True)
-        grid_import_val = _get_val("pfromgrid", "fromGridPower", "gridPurchasedPower", "pFromGrid", "p_import", "import_power", "gridImportPower", is_power=True)
+        grid_export_val = _get_val("pactogrid", "toGridPower", "to_grid_power", "pToGrid", "feed_in_power", "p_feed_in", "feedInPower", "powerOfGridFeed", "pacToGridTotal", is_power=True)
+        grid_import_val = _get_val("pfromgrid", "fromGridPower", "gridPurchasedPower", "pFromGrid", "p_import", "import_power", "gridImportPower", "powerOfGridTake", is_power=True)
         grid_net = _get_val("pgrid", "pGrid", "grid_power", "gridPower", "grid_power_w", is_power=True)
 
         if grid_export_val is not None or grid_import_val is not None:
@@ -299,7 +382,7 @@ class GrowattAdapter(BaseInverterAdapter):
             grid = None
 
         # 4. Hausverbrauch (pactouser / pLocalLoad / pload)
-        load = _get_val("pactouser", "pLocalLoad", "pToUser", "pload", "p_load", "use_power", "useEnergy", "familyLoadPower", "load_power", "loadPower", "use_power_w", "home_load", "consumption", is_power=True)
+        load = _get_val("pactouser", "pLocalLoad", "pToUser", "pload", "p_load", "use_power", "useEnergy", "familyLoadPower", "load_power", "loadPower", "use_power_w", "home_load", "consumption", "powerOfLoad", "pacToLocalLoad", "pacToUserTotal", is_power=True)
 
         # 5. Physikalische Plausibilisierung für Grid, Battery, Load & PV-Rekonstruktion
         pv_val = max(0.0, float(pv or 0.0))
@@ -367,12 +450,16 @@ class GrowattAdapter(BaseInverterAdapter):
 
         # 6. Tagesertrag & Gesamtertrag
         daily = _get_val(
+            "epv1Today", "epv1today", "epvtoday", "epvToday", "eacToday", "eactoday",
+            "esystemToday", "esystemtoday", "elocalLoadToday", "etoUserToday",
             "eToday", "etoday", "todayEnergy", "today_energy", "e_today", "eTodayTotal",
             "eAcChargeToday", "todayYield", "daily_generation", "solar_yield",
             "generationToday", "generation_today", "generation_today_kwh", "generationtodaykwh",
             "generationtoday"
         )
         total = _get_val(
+            "epvTotal", "epvtotal", "epv1Total", "epv1total", "eacTotal", "eactotal",
+            "esystemTotal", "esystemtotal", "etoUserTotal", "elocalLoadTotal",
             "eTotal", "etotal", "total_energy", "totalEnergy", "total_power_generation",
             "total_power_generation_kwh", "totalpowergenerationkwh", "totalpowergeneration"
         )
@@ -486,210 +573,133 @@ class GrowattAdapter(BaseInverterAdapter):
 
         # PFAD A: Growatt OpenAPI (Token / API-Key vorhanden)
         if token and not is_mock:
+            from datetime import datetime
             token_clean = str(token).strip()
             api_headers = {
                 "token": token_clean,
-                "Token": token_clean,
-                "token_id": token_clean,
-                "Authorization": f"Bearer {token_clean}",
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
                 "Accept": "application/json, text/javascript, */*; q=0.01",
             }
-            common_params = {
-                "token": token_clean,
-                "token_id": token_clean,
-            }
-
-            openapi_hosts = [
-                "https://openapi.growatt.com",
-                "https://openapi-us.growatt.com",
-                "https://server.growatt.com/openapi",
-                "https://server-api.growatt.com/openapi",
-            ]
+            today_str = datetime.now().strftime("%Y-%m-%d")
 
             discovered_sn_list = [device_sn] if device_sn else []
+            device_types: Dict[str, int] = {}
             api_call_succeeded = False
             last_openapi_err = None
+            rate_limited = False
+            base_host = "https://openapi.growatt.com"
 
-            for base_host in openapi_hosts:
-                # 1. Plant ID ermitteln / auflösen
-                if not plant_id or not plant_id.isdigit():
-                    for plant_list_path in ["/v1/plant/user_plant_list", "/v1/plant/list", "/v1/plant/plant_list"]:
-                        try:
-                            # GET
-                            plist_resp = session.get(f"{base_host}{plant_list_path}", headers=api_headers, params=common_params, timeout=8)
-                            if plist_resp.status_code == 200:
-                                p_json = plist_resp.json()
-                                if isinstance(p_json, dict) and p_json.get("error_code") == 0:
+            # 1. Falls device_sn noch nicht bekannt ist: Geräteliste abfragen
+            if not device_sn and plant_id:
+                try:
+                    d_resp = session.get(f"{base_host}/v1/device/list", headers=api_headers, params={"token": token_clean, "plant_id": plant_id}, timeout=8)
+                    if d_resp.status_code == 200:
+                        d_json = d_resp.json()
+                        if isinstance(d_json, dict) and d_json.get("error_code") == 0:
+                            api_call_succeeded = True
+                            _merge_payload_item(d_json)
+                            devices = d_json.get("data", {}).get("devices", [])
+                            for d in devices:
+                                sn_item = str(d.get("device_sn") or "").strip()
+                                if sn_item:
+                                    if sn_item not in discovered_sn_list:
+                                        discovered_sn_list.append(sn_item)
+                                    device_types[sn_item] = d.get("type", 7)
+                        elif d_json.get("error_code") == 10012:
+                            rate_limited = True
+                        elif d_json.get("error_msg"):
+                            last_openapi_err = d_json.get("error_msg")
+                except Exception as e:
+                    logger.debug("Growatt device/list lookup failed: %s", e)
+
+            # 2. Spezifische Inverter-Detail-Endpunkte für die Seriennummer abfragen
+            if device_sn:
+                target_sns = [device_sn]
+            else:
+                target_sns = discovered_sn_list if discovered_sn_list else []
+
+            # Priorisierte Liste von Telemetrie-Endpunkten (TLX / Balkonkraftwerk zuerst)
+            default_endpoints = [
+                ("/v1/device/tlx/tlx_data", "tlx_sn"),
+                ("/v1/device/min/min_data", "min_sn"),
+                ("/v1/device/max/max_data", "max_sn"),
+                ("/v1/device/storage/storage_data", "storage_sn"),
+                ("/v1/device/sph/sph_data", "sph_sn"),
+                ("/v1/device/mix/mix_data", "mix_sn"),
+            ]
+            type_to_endpoints = {
+                7: [("/v1/device/tlx/tlx_data", "tlx_sn"), ("/v1/device/noah/noah_data", "noah_sn"), ("/v1/device/sph/sph_data", "sph_sn")],
+                6: [("/v1/device/min/min_data", "min_sn"), ("/v1/device/tlx/tlx_data", "tlx_sn")],
+                5: [("/v1/device/mid/mid_data", "mid_sn"), ("/v1/device/tlx/tlx_data", "tlx_sn")],
+                4: [("/v1/device/max/max_data", "max_sn"), ("/v1/device/tlx/tlx_data", "tlx_sn")],
+                2: [("/v1/device/storage/storage_data", "storage_sn"), ("/v1/device/spa/spa_data", "spa_sn"), ("/v1/device/mix/mix_data", "mix_sn")],
+                1: [("/v1/device/inverter/inverter_data", "inverter_sn"), ("/v1/device/tlx/tlx_data", "tlx_sn")],
+            }
+
+            for sn_val in target_sns:
+                dev_type = device_types.get(sn_val, 7)
+                endpoints_to_try = type_to_endpoints.get(dev_type, [
+                    ("/v1/device/tlx/tlx_data", "tlx_sn"),
+                    ("/v1/device/min/min_data", "min_sn"),
+                    ("/v1/device/max/max_data", "max_sn"),
+                    ("/v1/device/storage/storage_data", "storage_sn"),
+                    ("/v1/device/sph/sph_data", "sph_sn"),
+                    ("/v1/device/mix/mix_data", "mix_sn"),
+                ])
+
+                for ep_path, sn_key in endpoints_to_try:
+                    try:
+                        post_data = {
+                            "token": token_clean,
+                            sn_key: sn_val,
+                            "device_sn": sn_val,
+                            "start_date": today_str,
+                            "end_date": today_str,
+                            "page": 1,
+                            "perpage": 50,
+                        }
+                        if plant_id:
+                            post_data["plant_id"] = plant_id
+
+                        inv_resp = session.post(f"{base_host}{ep_path}", headers=api_headers, data=post_data, timeout=8)
+                        if inv_resp.status_code == 200:
+                            inv_json = inv_resp.json()
+                            if isinstance(inv_json, dict):
+                                err_code = inv_json.get("error_code")
+                                if err_code == 0:
                                     api_call_succeeded = True
-                                    _merge_payload_item(p_json)
-                                elif isinstance(p_json, dict) and p_json.get("error_msg"):
-                                    last_openapi_err = p_json.get("error_msg")
-                            # POST
-                            plist_post = session.post(f"{base_host}{plant_list_path}", headers=api_headers, data=common_params, timeout=8)
-                            if plist_post.status_code == 200:
-                                p_json2 = plist_post.json()
-                                if isinstance(p_json2, dict) and p_json2.get("error_code") == 0:
-                                    api_call_succeeded = True
-                                    _merge_payload_item(p_json2)
-                        except Exception as e:
-                            logger.debug("Growatt OpenAPI plant list lookup on %s failed: %s", base_host, e)
+                                    _merge_payload_item(inv_json)
+                                    # Wenn wir Daten gefunden haben, direkt abbrechen um Rate-Limits zu schonen
+                                    break
+                                elif err_code == 10012:
+                                    rate_limited = True
+                                elif inv_json.get("error_msg"):
+                                    last_openapi_err = inv_json.get("error_msg")
+                    except Exception as e:
+                        logger.debug("Growatt %s lookup failed: %s", ep_path, e)
 
-                # 2. Geräte-Seriennummern der Anlage ermitteln
-                if plant_id:
-                    for dlist_path in ["/v1/device/list", "/v1/device/query_device_list", "/v1/device/device_list"]:
-                        try:
-                            p_args = dict(common_params)
-                            p_args.update({"plant_id": plant_id, "plantId": plant_id})
-                            d_resp = session.get(f"{base_host}{dlist_path}", headers=api_headers, params=p_args, timeout=8)
-                            if d_resp.status_code == 200:
-                                d_json = d_resp.json()
-                                if isinstance(d_json, dict) and d_json.get("error_code") == 0:
-                                    api_call_succeeded = True
-                                    _merge_payload_item(d_json)
-                                    for sn in _extract_all_sns(d_json):
-                                        if sn not in discovered_sn_list:
-                                            discovered_sn_list.append(sn)
-                            d_post = session.post(f"{base_host}{dlist_path}", headers=api_headers, data=p_args, timeout=8)
-                            if d_post.status_code == 200:
-                                d_json2 = d_post.json()
-                                if isinstance(d_json2, dict) and d_json2.get("error_code") == 0:
-                                    api_call_succeeded = True
-                                    _merge_payload_item(d_json2)
-                                    for sn in _extract_all_sns(d_json2):
-                                        if sn not in discovered_sn_list:
-                                            discovered_sn_list.append(sn)
-                        except Exception as e:
-                            logger.debug("Growatt device/list lookup failed: %s", e)
+            # 3. Anlagen-Übersicht als Fallback abfragen falls noch keine Telemetrie gefunden wurde
+            if not api_call_succeeded and plant_id:
+                try:
+                    p_resp = session.get(f"{base_host}/v1/plant/energy", headers=api_headers, params={"token": token_clean, "plant_id": plant_id, "date": today_str}, timeout=8)
+                    if p_resp.status_code == 200:
+                        p_json = p_resp.json()
+                        if isinstance(p_json, dict) and p_json.get("error_code") == 0:
+                            api_call_succeeded = True
+                            _merge_payload_item(p_json)
+                except Exception:
+                    pass
 
-                # 3. Alle Detail-Endpunkte für alle erkannten Seriennummern abfragen
-                target_sns = discovered_sn_list if discovered_sn_list else ([device_sn] if device_sn else [""])
-                for sn_val in target_sns:
-                    sn_params = dict(common_params)
-                    sn_params.update({
-                        "device_sn": sn_val,
-                        "inverter_sn": sn_val,
-                        "tlx_sn": sn_val,
-                        "min_sn": sn_val,
-                        "mic_sn": sn_val,
-                        "mod_sn": sn_val,
-                        "mid_sn": sn_val,
-                        "mac_sn": sn_val,
-                        "max_sn": sn_val,
-                        "storage_sn": sn_val,
-                        "mix_sn": sn_val,
-                        "sph_sn": sn_val,
-                        "spa_sn": sn_val,
-                        "spf_sn": sn_val,
-                        "hps_sn": sn_val,
-                        "noah_sn": sn_val,
-                        "deviceSn": sn_val,
-                        "inverterId": sn_val,
-                        "sn": sn_val,
-                    })
-                    if plant_id:
-                        sn_params["plant_id"] = plant_id
-                        sn_params["plantId"] = plant_id
+            if rate_limited and not raw_data["data"] and not raw_data["responses"]:
+                err_msg = "Growatt OpenAPI Rate-Limit erreicht (error_frequently_access). Bitte warte 30 Sekunden vor der nächsten Abfrage."
+                return AdapterTestResult(status="error", error=err_msg, message=err_msg)
 
-                    for endpoint_path in [
-                        "/v1/device/inverter/inverter_last_data",
-                        "/v1/device/inverter/inverter_data",
-                        "/v1/device/tlx/tlx_last_data",
-                        "/v1/device/min/min_last_data",
-                        "/v1/device/mic/mic_last_data",
-                        "/v1/device/mod/mod_last_data",
-                        "/v1/device/mid/mid_last_data",
-                        "/v1/device/mac/mac_last_data",
-                        "/v1/device/max/max_last_data",
-                        "/v1/device/storage/storage_last_data",
-                        "/v1/device/mix/mix_last_data",
-                        "/v1/device/sph/sph_last_data",
-                        "/v1/device/spa/spa_last_data",
-                        "/v1/device/spf/spf_last_data",
-                        "/v1/device/hps/hps_last_data",
-                        "/v1/device/noah/noah_last_data",
-                        "/v4/new-api/queryLastData",
-                        "/v4/device/query_device_data",
-                    ]:
-                        try:
-                            # GET Abfrage
-                            dev_resp = session.get(f"{base_host}{endpoint_path}", headers=api_headers, params=sn_params, timeout=8)
-                            if dev_resp.status_code == 200:
-                                d_body = dev_resp.json()
-                                if isinstance(d_body, dict):
-                                    if d_body.get("error_code") == 0:
-                                        api_call_succeeded = True
-                                        _merge_payload_item(d_body)
-                                    elif d_body.get("error_msg"):
-                                        last_openapi_err = d_body.get("error_msg")
-                            # POST Form Abfrage
-                            dev_post = session.post(f"{base_host}{endpoint_path}", headers=api_headers, data=sn_params, timeout=8)
-                            if dev_post.status_code == 200:
-                                d_body2 = dev_post.json()
-                                if isinstance(d_body2, dict):
-                                    if d_body2.get("error_code") == 0:
-                                        api_call_succeeded = True
-                                        _merge_payload_item(d_body2)
-                                    elif d_body2.get("error_msg"):
-                                        last_openapi_err = d_body2.get("error_msg")
-                            # POST JSON Abfrage
-                            json_headers = dict(api_headers)
-                            json_headers["Content-Type"] = "application/json"
-                            dev_json = session.post(f"{base_host}{endpoint_path}", headers=json_headers, json=sn_params, timeout=8)
-                            if dev_json.status_code == 200:
-                                d_body3 = dev_json.json()
-                                if isinstance(d_body3, dict):
-                                    if d_body3.get("error_code") == 0:
-                                        api_call_succeeded = True
-                                        _merge_payload_item(d_body3)
-                                    elif d_body3.get("error_msg"):
-                                        last_openapi_err = d_body3.get("error_msg")
-                        except Exception:
-                            pass
-
-                # 4. Plant Übersichtsendpunkte abfragen
-                if plant_id:
-                    p_params = dict(common_params)
-                    p_params.update({"plant_id": plant_id, "plantId": plant_id})
-                    for p_path in [
-                        "/v1/plant/data",
-                        "/v1/plant/data/overview",
-                        "/v1/plant/energy",
-                        "/v1/plant/plant_data",
-                    ]:
-                        try:
-                            p_resp = session.get(f"{base_host}{p_path}", headers=api_headers, params=p_params, timeout=8)
-                            if p_resp.status_code == 200:
-                                p_body = p_resp.json()
-                                if isinstance(p_body, dict):
-                                    if p_body.get("error_code") == 0:
-                                        api_call_succeeded = True
-                                        _merge_payload_item(p_body)
-                                    elif p_body.get("error_msg"):
-                                        last_openapi_err = p_body.get("error_msg")
-                            p_post = session.post(f"{base_host}{p_path}", headers=api_headers, data=p_params, timeout=8)
-                            if p_post.status_code == 200:
-                                p_body2 = p_post.json()
-                                if isinstance(p_body2, dict):
-                                    if p_body2.get("error_code") == 0:
-                                        api_call_succeeded = True
-                                        _merge_payload_item(p_body2)
-                                    elif p_body2.get("error_msg"):
-                                        last_openapi_err = p_body2.get("error_msg")
-                        except Exception as e:
-                            logger.debug("Growatt plant/data endpoint %s failed: %s", p_path, e)
-
-                if api_call_succeeded:
-                    break
-
-            if not api_call_succeeded and (last_openapi_err or not raw_data["data"]):
+            if not api_call_succeeded and (last_openapi_err or (not raw_data["data"] and not raw_data["responses"])):
                 if "permission" in str(last_openapi_err).lower():
                     err_msg = (
                         f"Growatt OpenAPI Fehler: '{last_openapi_err}'. "
                         "Dieser Growatt API-Token besitzt keine Leseberechtigung für die Cloud-Endpunkte "
-                        "(oder ist im Growatt-Entwicklerportal noch nicht für Datenabfragen freigeschaltet). "
-                        "Empfohlene Lösung: Nutze einfach Option B (ShinePhone / ShineServer Benutzername & Passwort) – dieser Direkt-Login "
-                        "funktioniert für alle Growatt-Anlagen sofort und ohne OpenAPI-Beschränkung!"
+                        "(oder ist im Growatt-Entwicklerportal noch nicht für Datenabfragen freigeschaltet)."
                     )
                 else:
                     err_msg = f"Growatt OpenAPI Fehler: {last_openapi_err or 'Ungültiger API-Token oder Wechselrichter offline'}"
