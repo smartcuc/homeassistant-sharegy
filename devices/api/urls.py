@@ -87,7 +87,7 @@ urlpatterns = [
     path("<int:device_id>/cloud/poll-now/", poll_cloud_device_now_view, name="device_cloud_poll_now"),
     path("<int:device_id>/cloud/status/", get_cloud_integration_status_view, name="device_cloud_status"),
     # 🧪 1-KLICK HARDWARE-SELBSTTEST & DIAGNOSE
-    path("<int:device_id>/self-test/", device_self_test_view, name="device_self_test"),
+    path("<str:device_id>/self-test/", device_self_test_view, name="device_self_test"),
     path("self-test/simulate/", device_self_test_simulate_view, name="device_self_test_simulate"),
     # ⚡ SHELLY CLOUD 1-KLICK AUTO-DISCOVERY
     path("shelly-cloud/test/", ShellyCloudTestView.as_view(), name="shelly_cloud_test"),

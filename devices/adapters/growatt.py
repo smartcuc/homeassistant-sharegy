@@ -441,20 +441,48 @@ class GrowattAdapter(BaseInverterAdapter):
             if not resp_json:
                 return
             raw_data["responses"].append(resp_json)
-            if isinstance(resp_json, dict):
-                raw_data["data"].update(resp_json)
-                for sub_key in ["obj", "back", "data", "plantData", "totalData", "deviceList", "invList", "storageList", "datas", "PlantList"]:
-                    sub_val = resp_json.get(sub_key)
-                    if isinstance(sub_val, dict):
-                        raw_data["data"].update(sub_val)
-                    elif isinstance(sub_val, list):
-                        for el in sub_val:
-                            if isinstance(el, dict):
-                                raw_data["data"].update(el)
-            elif isinstance(resp_json, list):
-                for el in resp_json:
-                    if isinstance(el, dict):
-                        raw_data["data"].update(el)
+            
+            def _walk_merge(item):
+                if isinstance(item, dict):
+                    for k, v in item.items():
+                        if isinstance(v, (int, float, str, bool)) or v is None:
+                            is_empty_or_zero = v in (None, "", "-", "--", "null", "none", "0", "0.0", "0.00", "0 W", "0W", "0 kW", "0kW", 0, 0.0, False)
+                            if k not in raw_data["data"] or (raw_data["data"][k] in (None, "", "-", "--", "null", "none", "0", "0.0", "0.00", "0 W", "0W", "0 kW", "0kW", 0, 0.0, False) and not is_empty_or_zero):
+                                raw_data["data"][k] = v
+                        elif isinstance(item, (dict, list)):
+                            _walk_merge(v)
+                elif isinstance(item, list):
+                    for el in item:
+                        _walk_merge(el)
+
+            _walk_merge(resp_json)
+
+        def _extract_all_sns(data) -> list:
+            found = []
+            sn_target_keys = {
+                "sn", "devicesn", "device_sn", "inverterid", "inverter_id", "invsn", "inv_sn",
+                "tlxsn", "tlx_sn", "minsn", "min_sn", "mixsn", "mix_sn", "sphsn", "sph_sn",
+                "spasn", "spa_sn", "spfsn", "spf_sn", "maxsn", "max_sn", "midsn", "mid_sn",
+                "micsn", "mic_sn", "hpssn", "hps_sn", "noahsn", "noah_sn", "storagesn", "storage_sn",
+                "groboostsn", "groboost_sn", "datalogsn", "datalog_sn", "serialnum", "serial_num"
+            }
+
+            def _walk_sn(item):
+                if isinstance(item, dict):
+                    for k, v in item.items():
+                        k_clean = str(k).lower().replace(" ", "").replace("_", "").replace("-", "")
+                        if k_clean in sn_target_keys and v:
+                            s = str(v).strip()
+                            if len(s) >= 5 and s.lower() not in ("null", "none", "false", "true", "undefined", "default"):
+                                if s not in found:
+                                    found.append(s)
+                        _walk_sn(v)
+                elif isinstance(item, list):
+                    for el in item:
+                        _walk_sn(el)
+
+            _walk_sn(data)
+            return found
 
         # PFAD A: Growatt OpenAPI (Token vorhanden)
         if token and not is_mock:
@@ -509,22 +537,13 @@ class GrowattAdapter(BaseInverterAdapter):
                     if dlist_resp.status_code == 200:
                         d_json = dlist_resp.json()
                         _merge_payload_item(d_json)
-                        d_data = d_json.get("data")
-                        dev_items = []
-                        if isinstance(d_data, list):
-                            dev_items = d_data
-                        elif isinstance(d_data, dict):
-                            dev_items = d_data.get("devices") or d_data.get("device_list") or d_data.get("data") or d_data.get("obj") or []
-                        if isinstance(dev_items, list):
-                            for dev_obj in dev_items:
-                                if isinstance(dev_obj, dict):
-                                    sn = str(dev_obj.get("device_sn") or dev_obj.get("sn") or dev_obj.get("deviceSn") or dev_obj.get("inverterId") or "").strip()
-                                    if sn and sn not in discovered_sn_list:
-                                        discovered_sn_list.append(sn)
-                            if discovered_sn_list and not device_sn:
-                                device_sn = discovered_sn_list[0]
-                                credentials["device_sn"] = device_sn
-                                logger.info("Growatt auto-discovered devices: %s", discovered_sn_list)
+                        for sn in _extract_all_sns(d_json):
+                            if sn not in discovered_sn_list:
+                                discovered_sn_list.append(sn)
+                        if discovered_sn_list and not device_sn:
+                            device_sn = discovered_sn_list[0]
+                            credentials["device_sn"] = device_sn
+                            logger.info("Growatt auto-discovered devices: %s", discovered_sn_list)
                 except Exception as e:
                     logger.debug("Growatt device/list lookup failed: %s", e)
 
@@ -546,6 +565,7 @@ class GrowattAdapter(BaseInverterAdapter):
                     "https://openapi.growatt.com/v1/device/spf/spf_last_data",
                     "https://openapi.growatt.com/v1/device/hps/hps_last_data",
                     "https://openapi.growatt.com/v1/device/noah/noah_last_data",
+                    "https://openapi.growatt.com/v4/new-api/queryLastData",
                 ]:
                     try:
                         dev_resp = session.get(
@@ -568,6 +588,8 @@ class GrowattAdapter(BaseInverterAdapter):
                                 "spf_sn": sn_val,
                                 "hps_sn": sn_val,
                                 "noah_sn": sn_val,
+                                "deviceSn": sn_val,
+                                "inverterId": sn_val,
                             },
                             timeout=8,
                         )
@@ -718,16 +740,16 @@ class GrowattAdapter(BaseInverterAdapter):
                         except Exception as p_det_err:
                             logger.debug("PlantDetailAPI query failed: %s", p_det_err)
 
-                    # 3. Inverter Device Discovery für die Anlage
+                    # 3. Inverter Device Discovery für die Anlage (Rekursiv über alle Servlets)
                     discovered_devices = []
                     if device_sn:
                         discovered_devices.append(device_sn)
 
                     if plant_id:
-                        for plant_ep, params, post_data in [
+                        device_discovery_endpoints = [
                             (
                                 f"{active_host}/newTwoPlantAPI.do",
-                                {"op": "getAllPlantListTwo"},
+                                {"op": "getAllPlantListTwo", "plantId": plant_id, "userName": username},
                                 {
                                     "language": "1",
                                     "nominalPower": "",
@@ -736,14 +758,35 @@ class GrowattAdapter(BaseInverterAdapter):
                                     "plantName": "",
                                     "plantStatus": "",
                                     "toPageNum": "1",
+                                    "plantId": plant_id,
+                                    "userName": username,
                                 },
                             ),
                             (f"{active_host}/newPlantAPI.do", {"op": "getPlantList"}, {"plantId": plant_id}),
+                            (f"{active_host}/newPlantAPI.do", {"op": "getPlantDevice", "plantId": plant_id}, {"plantId": plant_id}),
+                            (f"{active_host}/newPlantAPI.do", {"op": "getDeviceList", "plantId": plant_id}, {"plantId": plant_id}),
+                            (f"{active_host}/newPlantAPI.do", {"op": "getInverterList", "plantId": plant_id}, {"plantId": plant_id}),
+                            (f"{active_host}/newPlantAPI.do", {"op": "getStorageList", "plantId": plant_id}, {"plantId": plant_id}),
+                            (f"{active_host}/newPlantAPI.do", {"op": "getMinList", "plantId": plant_id}, {"plantId": plant_id}),
+                            (f"{active_host}/newPlantAPI.do", {"op": "getMixList", "plantId": plant_id}, {"plantId": plant_id}),
+                            (f"{active_host}/newPlantAPI.do", {"op": "getTlxList", "plantId": plant_id}, {"plantId": plant_id}),
+                            (f"{active_host}/newPlantAPI.do", {"op": "getSphList", "plantId": plant_id}, {"plantId": plant_id}),
+                            (f"{active_host}/newPlantAPI.do", {"op": "getSpaList", "plantId": plant_id}, {"plantId": plant_id}),
+                            (f"{active_host}/newPlantAPI.do", {"op": "getSpfList", "plantId": plant_id}, {"plantId": plant_id}),
+                            (f"{active_host}/newPlantAPI.do", {"op": "getMaxList", "plantId": plant_id}, {"plantId": plant_id}),
+                            (f"{active_host}/newPlantAPI.do", {"op": "getMidList", "plantId": plant_id}, {"plantId": plant_id}),
+                            (f"{active_host}/newPlantAPI.do", {"op": "getMicList", "plantId": plant_id}, {"plantId": plant_id}),
+                            (f"{active_host}/newPlantAPI.do", {"op": "getNoahList", "plantId": plant_id}, {"plantId": plant_id}),
+                            (f"{active_host}/device/getDeviceList", None, {"plantId": plant_id}),
+                            (f"{active_host}/device/getInverterList", None, {"plantId": plant_id}),
+                            (f"{active_host}/device/getStorageList", None, {"plantId": plant_id}),
                             (f"{active_host}/panel/getPlantData", None, {"plantId": plant_id}),
                             (f"{active_host}/panel/getPlantData", {"plantId": plant_id}, None),
                             (f"{active_host}/newPlantAPI.do", {"op": "getPlantData", "plantId": plant_id}, None),
                             (f"{active_host}/indexLogAPI.do", {"op": "getPlantData"}, {"plantId": plant_id}),
-                        ]:
+                        ]
+
+                        for plant_ep, params, post_data in device_discovery_endpoints:
                             try:
                                 if post_data is not None:
                                     inv_list_resp = session.post(plant_ep, params=params, data=post_data, timeout=8)
@@ -752,15 +795,10 @@ class GrowattAdapter(BaseInverterAdapter):
                                 if inv_list_resp.status_code == 200:
                                     inv_data = inv_list_resp.json()
                                     _merge_payload_item(inv_data)
-                                    # Serial-Numbers aus allen Geräte-Listen extrahieren
-                                    for list_key in ["PlantList", "obj", "deviceList", "data", "invList", "storageList", "minList", "tlxList", "mixList", "spaList", "sphList", "spfList", "hpsList"]:
-                                        items = inv_data.get(list_key) if isinstance(inv_data, dict) else None
-                                        if isinstance(items, list):
-                                            for d in items:
-                                                if isinstance(d, dict):
-                                                    sn = str(d.get("sn") or d.get("deviceSn") or d.get("inverterId") or d.get("datalogSn") or "").strip()
-                                                    if sn and sn not in discovered_devices:
-                                                        discovered_devices.append(sn)
+                                    # Rekursiv alle Seriennummern extrahieren
+                                    for sn in _extract_all_sns(inv_data):
+                                        if sn and sn not in discovered_devices:
+                                            discovered_devices.append(sn)
                             except Exception:
                                 pass
 
@@ -768,6 +806,7 @@ class GrowattAdapter(BaseInverterAdapter):
                     if discovered_devices and not device_sn:
                         device_sn = discovered_devices[0]
                         credentials["device_sn"] = device_sn
+                        logger.info("Growatt Web Login resolved inverter SNs: %s", discovered_devices)
 
                     # 4. Detaillierte Live-Abfragen für alle erkannten Wechselrichter & Speicher
                     target_sn_list = discovered_devices if discovered_devices else ([device_sn] if device_sn else [""])
@@ -790,40 +829,56 @@ class GrowattAdapter(BaseInverterAdapter):
                             "spfSn": sn,
                             "hpsSn": sn,
                             "noahSn": sn,
+                            "storageSn": sn,
+                            "groBoostSn": sn,
                             "date": today_str,
                             "type": "1",
                         }
 
-                        for inv_ep, params, data_payload in [
-                            (f"{active_host}/newInverterAPI.do", {"op": "getInverterDetailData", "inverterId": sn, "id": sn}, common_payload),
-                            (f"{active_host}/newInverterAPI.do", {"op": "getInverterDetailData_two", "inverterId": sn, "id": sn}, common_payload),
-                            (f"{active_host}/newInverterAPI.do", {"op": "getInverterData", "id": sn, "type": "1", "date": today_str}, common_payload),
-                            (f"{active_host}/newInverterAPI.do", {"op": "getInverterTotalData", "inverterId": sn, "plantId": plant_id}, common_payload),
-                            (f"{active_host}/panel/getInverterData", {"inverterId": sn, "plantId": plant_id}, common_payload),
-                            (f"{active_host}/newTlxApi.do", {"op": "getEnergyOverview"}, common_payload),
-                            (f"{active_host}/newTlxApi.do", {"op": "getSystemStatus_KW"}, common_payload),
-                            (f"{active_host}/newMinApi.do", {"op": "getEnergyOverview"}, common_payload),
-                            (f"{active_host}/newMinApi.do", {"op": "getSystemStatus_KW"}, common_payload),
-                            (f"{active_host}/newMixApi.do", {"op": "getEnergyOverview"}, common_payload),
-                            (f"{active_host}/newMixApi.do", {"op": "getSystemStatus_KW"}, common_payload),
-                            (f"{active_host}/newSphApi.do", {"op": "getEnergyOverview"}, common_payload),
-                            (f"{active_host}/newSphApi.do", {"op": "getSystemStatus_KW"}, common_payload),
-                            (f"{active_host}/newSpaApi.do", {"op": "getEnergyOverview"}, common_payload),
-                            (f"{active_host}/newMaxApi.do", {"op": "getEnergyOverview"}, common_payload),
-                            (f"{active_host}/newMidApi.do", {"op": "getEnergyOverview"}, common_payload),
-                            (f"{active_host}/newMicApi.do", {"op": "getEnergyOverview"}, common_payload),
-                            (f"{active_host}/newSpfApi.do", {"op": "getEnergyOverview"}, common_payload),
-                            (f"{active_host}/newSpfApi.do", {"op": "getSystemStatus_KW"}, common_payload),
-                            (f"{active_host}/newHpsApi.do", {"op": "getEnergyOverview"}, common_payload),
-                            (f"{active_host}/newGroBoostApi.do", {"op": "getEnergyOverview"}, common_payload),
-                            (f"{active_host}/newNoahApi.do", {"op": "getNoahDetailData", "noahSn": sn}, common_payload),
+                        for inv_ep, params in [
+                            (f"{active_host}/newInverterAPI.do", {"op": "getInverterDetailData", "inverterId": sn, "id": sn}),
+                            (f"{active_host}/newInverterAPI.do", {"op": "getInverterDetailData_two", "inverterId": sn, "id": sn}),
+                            (f"{active_host}/newInverterAPI.do", {"op": "getInverterData", "id": sn, "type": "1", "date": today_str}),
+                            (f"{active_host}/newInverterAPI.do", {"op": "getInverterTotalData", "inverterId": sn, "plantId": plant_id}),
+                            (f"{active_host}/panel/getInverterData", {"inverterId": sn, "plantId": plant_id}),
+                            (f"{active_host}/newTlxApi.do", {"op": "getEnergyOverview", "tlxSn": sn, "id": sn, "plantId": plant_id}),
+                            (f"{active_host}/newTlxApi.do", {"op": "getSystemStatus_KW", "tlxSn": sn, "id": sn, "plantId": plant_id}),
+                            (f"{active_host}/newTlxApi.do", {"op": "getTlxDetailData", "tlxSn": sn, "id": sn}),
+                            (f"{active_host}/newMinApi.do", {"op": "getEnergyOverview", "minSn": sn, "id": sn, "plantId": plant_id}),
+                            (f"{active_host}/newMinApi.do", {"op": "getSystemStatus_KW", "minSn": sn, "id": sn, "plantId": plant_id}),
+                            (f"{active_host}/newMinApi.do", {"op": "getMinDetailData", "minSn": sn, "id": sn}),
+                            (f"{active_host}/newMixApi.do", {"op": "getEnergyOverview", "mixSn": sn, "id": sn, "plantId": plant_id}),
+                            (f"{active_host}/newMixApi.do", {"op": "getSystemStatus_KW", "mixSn": sn, "id": sn, "plantId": plant_id}),
+                            (f"{active_host}/newMixApi.do", {"op": "getMixDetailData", "mixSn": sn, "id": sn}),
+                            (f"{active_host}/newSphApi.do", {"op": "getEnergyOverview", "sphSn": sn, "id": sn, "plantId": plant_id}),
+                            (f"{active_host}/newSphApi.do", {"op": "getSystemStatus_KW", "sphSn": sn, "id": sn, "plantId": plant_id}),
+                            (f"{active_host}/newSphApi.do", {"op": "getSphDetailData", "sphSn": sn, "id": sn}),
+                            (f"{active_host}/newSpaApi.do", {"op": "getEnergyOverview", "spaSn": sn, "id": sn, "plantId": plant_id}),
+                            (f"{active_host}/newSpaApi.do", {"op": "getSystemStatus_KW", "spaSn": sn, "id": sn, "plantId": plant_id}),
+                            (f"{active_host}/newSpaApi.do", {"op": "getSpaDetailData", "spaSn": sn, "id": sn}),
+                            (f"{active_host}/newMaxApi.do", {"op": "getEnergyOverview", "maxSn": sn, "id": sn, "plantId": plant_id}),
+                            (f"{active_host}/newMaxApi.do", {"op": "getMaxDetailData", "maxSn": sn, "id": sn}),
+                            (f"{active_host}/newMidApi.do", {"op": "getEnergyOverview", "midSn": sn, "id": sn, "plantId": plant_id}),
+                            (f"{active_host}/newMidApi.do", {"op": "getMidDetailData", "midSn": sn, "id": sn}),
+                            (f"{active_host}/newMicApi.do", {"op": "getEnergyOverview", "micSn": sn, "id": sn, "plantId": plant_id}),
+                            (f"{active_host}/newMicApi.do", {"op": "getMicDetailData", "micSn": sn, "id": sn}),
+                            (f"{active_host}/newSpfApi.do", {"op": "getEnergyOverview", "spfSn": sn, "id": sn, "plantId": plant_id}),
+                            (f"{active_host}/newSpfApi.do", {"op": "getSystemStatus_KW", "spfSn": sn, "id": sn, "plantId": plant_id}),
+                            (f"{active_host}/newSpfApi.do", {"op": "getSpfDetailData", "spfSn": sn, "id": sn}),
+                            (f"{active_host}/newHpsApi.do", {"op": "getEnergyOverview", "hpsSn": sn, "id": sn, "plantId": plant_id}),
+                            (f"{active_host}/newGroBoostApi.do", {"op": "getEnergyOverview", "groBoostSn": sn, "plantId": plant_id}),
+                            (f"{active_host}/newNoahApi.do", {"op": "getNoahDetailData", "noahSn": sn}),
+                            (f"{active_host}/newNoahApi.do", {"op": "getNoahEnergyOverview", "noahSn": sn}),
                         ]:
                             try:
-                                r = session.post(inv_ep, params=params, data=data_payload, timeout=8)
+                                merged_data = dict(common_payload)
+                                if params:
+                                    merged_data.update(params)
+                                r = session.post(inv_ep, data=merged_data, timeout=8)
                                 if r.status_code == 200:
                                     _merge_payload_item(r.json())
                                 else:
-                                    r_get = session.get(inv_ep, params=params, timeout=8)
+                                    r_get = session.get(inv_ep, params=merged_data, timeout=8)
                                     if r_get.status_code == 200:
                                         _merge_payload_item(r_get.json())
                             except Exception:
