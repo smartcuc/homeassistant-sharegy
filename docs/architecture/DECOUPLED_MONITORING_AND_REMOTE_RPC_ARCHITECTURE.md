@@ -1,119 +1,113 @@
-# 🌐 Decoupled Monitoring, Edge Ingestion & Remote RPC Architecture (`mon.sharegy.de`)
+# 🌐 Decoupled Monitoring, Control Plane & In-Flight Backup Architecture
 
-**Dokument-Status:** Architektur-Blueprint & Infrastruktur-Spezifikation  
-**Version:** 1.0  
+**Dokument-Status:** Enterprise Architektur-Blueprint & Infrastruktur-Spezifikation  
+**Plattformen:** Sharegy (Energy HEMS SaaS) & Factofy (Industrial IoT SaaS)  
+**Version:** 2.0 (Dual-Plane & Disaster Recovery Update)  
 **Datum:** 12. September 2026  
 **Zielgruppe:** System-Architekten, DevOps, Backend- & Edge-Entwickler  
 
 ---
 
-## 🏛️ 1. Motivation & Problemstellung
+## 🏛️ 1. Motivation & Grundprinzip: Strikte Trennung von Data Plane & Control Plane
 
-Mit dem Wachstum von Sharegy zu einer **hochfrequenten IoT- und Energy-Sharing-Plattform** steigt die Anzahl permanenter Client- und Edge-Verbindungen (ioBroker-Adapter, Shelly-Messgeräte, Wallboxen, Wechselrichter-Gateways) rasant an.
+Um maximale Ausfallsicherheit, Sicherheit und Wiederverwendbarkeit zwischen **Sharegy** (Balkonkraftwerke, HEMS, Mieterstrom, Wallboxen) und **Factofy** (Industrie-IoT, Maschinenüberwachung, OEE) zu gewährleisten, trennen wir die Systeme in zwei voneinander vollkommen unabhängige Schichten:
 
-### Herausforderungen eines monolithischen Ingress-Modells:
-1. **Verbindungsabbrüche bei Deployments:** Jedes Rollout an der Webanwendung (`app.sharegy.de`) trennt tausende persistente WebSocket-Verbindungen (Thundering-Herd-Problem bei gleichzeitigem Reconnect).
-2. **Blast-Radius & Ressourcenteilung:** Fehlerhafte Edge-Clients (z. B. fehlerhafte Polling-Schleifen im Kunden-Netzwerk) können Web-Worker und relationale Datenbankpools überlasten und das Endkundenportal verlangsamen.
-3. **Sicherheitsisolation (Least Privilege):** Edge-Geräte im Heimnetzwerk sollten ausschließlich mit isolierten Ingest-Endpunkten kommunizieren und keinen Zugriff auf sensible Business- und Abrechnungs-APIs haben.
-4. **Bidirektionale Fernwartung:** Wartungsbefehle an HEMS-Geräte hinter Routern/Firewalls (NAT) müssen ohne Port-Forwarding, VPN oder DynDNS in Echtzeit ausgeführt werden können.
-
----
-
-## 🏗️ 2. Ziel-Architektur & Subdomain-Taxonomie
-
-```
-                               ┌──────────────────────────────────────────────┐
-                               │             DNS & INGRESS ROUTING            │
-                               └───────┬──────────────────────────────┬───────┘
-                                       │                              │
-                ┌──────────────────────▼───────┐      ┌───────────────▼────────────────────────┐
-                │   app.sharegy.de / Portal    │      │    mon.sharegy.de / Ingest & Edge      │
-                │   (Business, User, Billing)  │      │    (WSS, Reverse-RPC, Telemetrie)      │
-                ├──────────────────────────────┤      ├────────────────────────────────────────┤
-                │ • Django Web / React Frontend│      │ • High-Concurrency Async Gateway       │
-                │ • PostgreSQL (Core / Billing)│      │ • TimescaleDB / Redis Streams          │
-                │ • Stripe, § 42b EnWG, Auth   │      │ • Millionen Datensätze / Sekunde       │
-                │ • Geringe Last, hohe ACID-   │      │ • 10.000e offene WSS-Sockets           │
-                │   Konsistenz                 │      │ • Keine Downtime bei Portal-Updates    │
-                └──────────────┬───────────────┘      └────────────────┬───────────────────────┘
-                               │                                       │
-                               └───────────────► REDIS ◄───────────────┘
-                                           (Message Broker /
-                                            Events / JWT Sync)
-```
-
-### Subdomain-Übersicht
-
-| Domäne / Subdomain | Verantwortung & Workload | Protokolle | Auth-Methode |
-|---|---|---|---|
-| **`sharegy.de`** / **`www`** | Öffentliche Website, Landing Page, SEO, Preiskalkulator, Dokumentation | HTTPS | Öffentlich |
-| **`app.sharegy.de`** | Endkunden- & Mieter-Portal, Dashboard, Abrechnungen, Einstellungen, Native WebView | HTTPS, WSS (UI-Livefeed) | Session / JWT (User) |
-| **`mon.sharegy.de`** | **Edge-Telemetrie, High-Throughput Ingestion & Reverse-RPC Wartung** | WSS, HTTPS, MQTT | Device-Token / HMAC |
-| **`partner.sharegy.de`** | Fachpartner- & Installateurs-Cockpit (Flottenübersicht, Schnell-Inbetriebnahme) | HTTPS | JWT (Partner-Rolle) |
-| **`cname.sharegy.de`** | Ingress-Proxy für B2B-Whitelabel Custom-Domains (Stadtwerke, Hausverwaltungen) | HTTPS (SNI) | Tenant-Resolver |
+1. **Business Data Plane (Fachdomänen-SaaS)**:
+   - Separate Instanzen, getrennte Datenbanken (`sharegy_prod_db` vs. `factofy_prod_db`), eigene URLs (`app.sharegy.de` vs. `app.factofy.io`).
+   - Verarbeitet reine Anwendungslogik: Abrechnungen, Stripe, Mieterverträge, § 42b EnWG, Maschinenaufträge, OEE-Kalkulationen.
+2. **Control & Monitoring Plane (Zentraler Flotten- & Admin-Knoten)**:
+   - Eigenständiges, hochverfügbares Monitoring-SaaS mit eigener Datenbank (`mon_core_db`) und dedizierten URLs (`mon.sharegy.de`, `mon.factofy.io`).
+   - Hält permanente WebSockets, überwacht System-Health (CPU, RAM, Uptime), tunnelt **Zero-Trust Reverse-RPC Befehle** und empfängt **kontinuierliche 5-Minuten In-Flight DB-Backups**.
 
 ---
 
-## ⚡ 3. Endpunkt-Spezifikation für `mon.sharegy.de`
-
-Die Monitoring-Instanz exponiert spezialisierte, zustandslose und hochperformante Schnittstellen:
+## 🏗️ 2. Gesamtarchitektur & Systemübersicht
 
 ```
-wss://mon.sharegy.de
- ├── /ws/edge/v1/          → Universeller WSS-Kanal für ioBroker, Home Assistant & Custom Edge HEMS
- ├── /ws/shelly/v1/        → Direktes WSS-Outbound-Protokoll für Shelly Gen2/Gen3/Pro
- ├── /ws/ocpp/v1/          → OCPP 1.6-J & 2.0.1 Ingress für vernetzte Wallboxen
- └── /ws/gateway/v1/       → Virtuelle Summenzähler & Gateway-Ingress
-
-https://mon.sharegy.de
- ├── /api/v1/ingest/push   → Hochleistungs-REST-Ingress für Batch-Telemetrie
- ├── /api/v1/health        → Liveness & Readiness Probes
- └── /api/v1/metrics       → Prometheus / OpenTelemetry Telemetrie-Exporter
+                        ┌────────────────────────────────────────────────────────┐
+                        │         EDGE-GERÄT (z. B. ioBroker / Factofy IPC)      │
+                        └───────────┬────────────────────────────────┬───────────┘
+                                    │                                │
+               [ 1. BUSINESS DATA PLANE ]               [ 2. CONTROL & ADMIN PLANE ]
+               Reine Nutz- & Messdaten                  Flotten-Management & Fernwartung
+                                    │                                │
+                   WSS / HTTPS      │               WSS (Admin)      │
+             (Messwerte, Zähler,    │             (Heartbeat, Logs,  │
+              Leistung, Energie)    │              Reverse-RPC, OTA) │
+                                    │                                │
+                                    ▼                                ▼
+     ┌──────────────────────────────────────────┐    ┌──────────────────────────────────────────┐
+     │             SHAREGY APPLIKATION          │    │         ZENTRALES MONITORING & ADMIN     │
+     │             (app.sharegy.de)             │    │         (mon.sharegy.de / mon.factofy)   │
+     ├──────────────────────────────────────────┤    ├──────────────────────────────────────────┤
+     │ • Eigene Datenbank: sharegy_prod_db      │    │ • Eigene Datenbank: mon_core_db          │
+     │ • Abrechnung, § 42b EnWG, Mieterportal   │    │ • Flottenstatus (CPU, RAM, Uptime, FW)   │
+     │ • Dynamische Stromtarife, EMS            │    │ • Zero-Trust Remote-RPC Tunnel           │
+     │ • Port 8000 (Gunicorn WSGI)              │    │ • Port 8001 (Daphne ASGI Cluster)        │
+     └────────────────────┬─────────────────────┘    └────────────────────▲─────────────────────┘
+                          │                                               │
+                          │   5-Minuten In-Flight Delta-Backup            │
+                          └───────────────────────────────────────────────┤
+                                                                          │
+                             [ FACTOFY DATA PLANE ]                       │
+                           ┌─────────────────────────┐                    │
+                           │   FACTOFY APPLIKATION   │                    │
+                           │   (app.factofy.io)      │────────────────────┘
+                           ├─────────────────────────┤  5-Minuten In-Flight
+                           │ • Eigene DB: factofy_db │  Delta-Backup
+                           │ • Maschinen-OEE, Takt   │
+                           └─────────────────────────┘
 ```
 
 ---
 
-## 🔌 4. Zero-Trust WSS Reverse-RPC Fernwartung
+## 🔌 3. Dual-Socket Edge-Architektur (ioBroker & Factofy IPC)
 
-### Ablauf eines Wartungs- & Diagnosebefehls
+Auf dem Edge-Gerät (z. B. Raspberry Pi, HEMS-Gateway oder Industrie-IPC) laufen **zwei separate, leichtgewichtige Verbindungen**:
+
+### A. Data-Socket (`wss://app.sharegy.de/ws/telemetry/`)
+* **Verantwortung:** Streaming hochfrequenter Messwerte (aktuelle Watt, PV-Erzeugung, SoC, Zählerstände).
+* **Ausfall-Verhalten:** Bei einem Release oder Neustart des Business-Portals puffert der Edge-Client die Messwerte lokal im RAM/Flash-Ringbuffer und sendet sie nach Reconnect gebatcht nach.
+
+### B. Admin- & Monitoring-Socket (`wss://mon.sharegy.de/ws/agent/`)
+* **Verantwortung:**
+  1. **Health-Heartbeat (alle 30–60s):** Sendet Telemetrie zu CPU-Last, RAM, Uptime, Adapterversion und lokaler Bus-Konnektivität (Modbus/CAN).
+  2. **Bidirektionaler Reverse-RPC Tunnel:** Empfängt Diagnose-, Log- und Konfigurationsbefehle aus der Cloud **ohne Port-Forwarding, DynDNS oder VPN**.
+* **Ausfall-Verhalten:** Völlig unabhängig vom Webportal. Auch wenn `app.sharegy.de` gewartet wird, bleibt die Fernwartung der Boxen zu 100 % online.
+
+---
+
+## ⚡ 4. Zero-Trust WSS Reverse-RPC Protokoll (JSON-RPC 2.0)
+
+### Ablauf eines Remote-Befehls (z. B. Fachpartner startet Diagnose)
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Installateur as Fachpartner (Partner-Cockpit)
-    participant App as app.sharegy.de (Business Core)
-    participant Redis as Redis Event Broker
-    participant Mon as mon.sharegy.de (Edge Gateway)
-    participant ioBroker as ioBroker / Edge Adapter (Heimnetzwerk)
+    participant Partner as Fachpartner / Operator (Web-Cockpit)
+    participant Core as app.sharegy.de (Core API)
+    participant Mon as mon.sharegy.de (Monitoring Cluster)
+    participant Edge as Edge-Agent (ioBroker / Factofy IPC)
 
-    Note over ioBroker,Mon: 1. Dauerhafte WSS-Verbindung (Heartbeat alle 30s)
-    ioBroker->>Mon: WSS Connect (Authorization: Bearer <Device-JWT>)
-    Mon-->>ioBroker: Connection Accepted (Socket ID: sock_9876)
-
-    Note over Installateur,App: 2. Wartungsanfrage im Partner-Cockpit
-    Installateur->>App: Klick "Diagnose starten" (Home ID: home_42)
-    App->>App: Prüfe MaintenanceConsent (DSGVO & Berechtigung)
-    App->>Redis: Publish Event "edge:rpc:request" {home_id: 42, cmd: "inspect_adapter"}
-
-    Note over Redis,Mon: 3. Dispatch an aktive WSS-Session
-    Redis->>Mon: Route zu Socket sock_9876
-    Mon->>ioBroker: WSS Frame: JSON-RPC 2.0 Request {"id": "req_1", "method": "getSystemStatus"}
-
-    Note over ioBroker: 4. Lokale Datenerfassung (RAM, Logs, Version)
-    ioBroker->>Mon: WSS Frame: JSON-RPC 2.0 Response {"id": "req_1", "result": {...}}
-    Mon->>Redis: Publish Event "edge:rpc:response" {result: {...}}
-    Redis->>App: Push Event an Frontend-WebSocket
-    App-->>Installateur: Live-Ergebnis in Diagnose-Konsole gerendert
+    Note over Edge,Mon: 1. Permanente Admin-WSS-Verbindung aktiv
+    Partner->>Core: Klick "Diagnose starten" (Asset: SN-PYHFD8R0GC)
+    Core->>Core: Berechtigung & DSGVO-Consent prüfen
+    Core->>Mon: POST /api/v1/devices/{sn}/rpc (Server-to-Server Auth)
+    Mon->>Edge: WSS Frame: JSON-RPC 2.0 Request {"id": "req_101", "method": "edge.getDiagnostics"}
+    Edge->>Edge: Lokale Erfassung (Modbus-Status, Logs, System)
+    Edge->>Mon: WSS Frame: JSON-RPC 2.0 Response {"id": "req_101", "result": {...}}
+    Mon->>Core: HTTP 200 Response mit RPC-Result
+    Core-->>Partner: Live-Ergebnis im Diagnose-Cockpit gerendert
 ```
 
-### JSON-RPC 2.0 Protokoll-Spezifikation (WSS-Payload)
+### Standardisierte JSON-RPC 2.0 Methoden
 
-#### 1. Ping & Health-Check
+#### 1. System-Health & Diagnostik
 ```json
 // Request (Cloud -> Edge)
 {
   "jsonrpc": "2.0",
-  "id": "diag_101",
+  "id": "diag_001",
   "method": "edge.healthCheck",
   "params": {}
 }
@@ -121,14 +115,14 @@ sequenceDiagram
 // Response (Edge -> Cloud)
 {
   "jsonrpc": "2.0",
-  "id": "diag_101",
+  "id": "diag_001",
   "result": {
     "status": "healthy",
-    "uptime_seconds": 864200,
-    "adapter_version": "1.4.2",
-    "cpu_load_pct": 8.4,
-    "free_memory_mb": 512,
-    "local_devices_online": 6
+    "uptime_seconds": 124800,
+    "adapter_version": "1.5.0",
+    "cpu_load_pct": 14.2,
+    "free_memory_mb": 620,
+    "bus_devices_online": 4
   }
 }
 ```
@@ -138,47 +132,74 @@ sequenceDiagram
 // Request (Cloud -> Edge)
 {
   "jsonrpc": "2.0",
-  "id": "diag_102",
+  "id": "diag_002",
   "method": "edge.getRecentLogs",
   "params": {
-    "severity": "warn",
-    "max_entries": 50
+    "severity": "error",
+    "max_lines": 50
   }
 }
 ```
 
-#### 3. Push von Optimierungs-Konfigurationen
+#### 3. Remote-Konfiguration & Neustart
 ```json
 // Request (Cloud -> Edge)
 {
   "jsonrpc": "2.0",
-  "id": "cfg_201",
-  "method": "edge.updateConfig",
+  "id": "cmd_003",
+  "method": "edge.restartService",
   "params": {
-    "polling_interval_ms": 2000,
-    "grid_export_limit_w": 0,
-    "battery_charge_override_w": 3000
+    "service_name": "modbus_driver",
+    "graceful": true
   }
 }
 ```
 
 ---
 
-## 🔒 5. Sicherheits- & Datenschutz-Konzept
+## 🛡️ 5. In-Flight Continuous Database Backup Engine (5-Minuten Delta-RPO)
 
-1. **Kein offenes Inbound-Interface beim Kunden:** Die Verbindung erfolgt **ausschließlich ausgehend (Outbound TLS)** von Port 443 des Kunden-Routers. Keine Portweiterleitung oder Firewall-Freigaben erforderlich.
-2. **Kryptografische Token-Signierung:** Jeder Edge-Client erhält ein kryptografisches `Device-JWT` mit strikt beschränkten Scopes (`scope: ["telemetry:push", "rpc:respond"]`).
-3. **DSGVO & § 14a EnWG Consent:** Fernwartungsbefehle werden im Backend blockiert, sofern kein aktiver `MaintenanceConsent` des Anlageninhabers vorliegt.
-4. **Audit-Logging:** Jeder ausgeführte RPC-Befehl wird manipulationssicher mit Timestamp, ausführendem Partner-Benutzer und Ergebnis im Audit-Log protokolliert.
+Um bei einem Totalausfall oder Datenverlust des Hauptsystems sofortige Wiederherstellung zu garantieren, fungiert das Monitoring-System zusätzlich als **isolierter Disaster-Recovery-Tresor**:
+
+```
+ ┌──────────────────────────────────────┐                ┌──────────────────────────────────────┐
+ │       PRODUKTIONS-DB (SHAREGY)       │                │      MONITORING & BACKUP VAULT       │
+ │       PostgreSQL (sharegy_prod_db)   │                │      (mon.sharegy.de / mon_core_db)  │
+ ├──────────────────────────────────────┤                ├──────────────────────────────────────┤
+ │ • Primärer Schreib-/Lese-Workload    │  Alle 5 Min.   │ • Getrennter Server / Storage-Volume │
+ │ • WAL-Archivierung (Write-Ahead-Log) ├───────────────►│ • Verschlüsselte Delta-WAL Replikation│
+ │ • Schneller SSD / NVMe Cache         │  (Encrypted)   │ • Snapshot-Prüfung & Checksum-Audit  │
+ └──────────────────────────────────────┘                │ • RPO (Recovery Point): < 5 Minuten  │
+                                                         └──────────────────────────────────────┘
+```
+
+### Eigenschaften des In-Flight Backups:
+1. **5-Minuten Delta-Sync:** Über kontinuierliche PostgreSQL WAL-Replikation (z. B. via `pg_receivewal` oder leichtgewichtige Streaming-Deltas) werden alle Transaktionen im 5-Minuten-Takt in den Monitoring-Tresor übertragen.
+2. **Kryptografische Isolation:** Die Backup-Daten werden vor der Übertragung mit einem dedizierten Key verschlüsselt (AES-256) und liegen auf einem physisch/logisch getrennten Speicherbereich.
+3. **Automatisches Audit im Monitoring-Cockpit:** Das Monitoring-System prüft und visualisiert den Backup-Status in Echtzeit:
+   - 🟢 *Sharegy DB:* Letzter Delta-Snapshot vor 2 Min. (Integrität OK)
+   - 🟢 *Factofy DB:* Letzter Delta-Snapshot vor 4 Min. (Integrität OK)
+4. **Instant Standby Recovery:** Im Katastrophenfall kann die Datenbank direkt aus dem Monitoring-Cluster mit einem maximalen Datenverlust von unter 5 Minuten (RPO < 5 Min.) wiederhergestellt werden.
 
 ---
 
-## 📈 6. Skalierungs- & Migrationsplan
+## 🗄️ 6. Instanzen-, Domain- & Datenbank-Matrix
 
-* **Phase 1 (Monolith-optimiert - Ist-Zustand):**
-  * WSS-Endpunkte laufen im bestehenden Django Channels / Daphne Container unter `/ws/energy/`, `/ws/edge/`, `/ws/ocpp/`.
-* **Phase 2 (Subdomain-Split - Empfohlener nächster Schritt):**
-  * Nginx / Traefik Ingress-Router leitet `mon.sharegy.de` auf einen dedizierten ASGI-Worker-Pool weiter.
-  * Trennung der TimescaleDB Hypertables in einen separaten I/O-optimierten Storage-Pool.
-* **Phase 3 (High-Scale Microservice):**
-  * Ausgliederung des WSS-Gateways in einen eigenständigen Go- oder Rust-basierten WebSocket-Broker bei > 50.000 parallelen Edge-Sockets.
+| System / Rolle | Subdomain | Datenbank | Verantwortung |
+|---|---|---|---|
+| **Sharegy Core SaaS** | `app.sharegy.de` | `sharegy_prod_db` | Verträge, Mieterstrom, Abrechnung, § 42b EnWG, Stripe |
+| **Factofy Core SaaS** | `app.factofy.io` | `factofy_prod_db` | Fertigungsdaten, Maschinenaufträge, OEE-Kennzahlen |
+| **Control Plane SaaS** | `mon.sharegy.de`<br>`mon.factofy.io` | `mon_core_db` | Flottenübersicht, WSS-Sockets, Remote-RPC, **In-Flight 5m Backups** |
+
+---
+
+## 🚀 7. Roadmap & Umsetzungsphasen
+
+1. **Phase 1: Dual-Socket Definition & WSS-Ingress**
+   - Aufsetzen des isolierten WSS-Endpunkts `/ws/agent/` für den Admin- & Health-Kanal.
+2. **Phase 2: Bidirektionaler JSON-RPC 2.0 Dispatcher**
+   - Implementierung des `RemoteRPCClient` und der WSS-Bridge für Live-Befehle (Diagnose, Logs).
+3. **Phase 3: ioBroker & Factofy Edge-Agent SDK**
+   - Integration des dualen Verbindungsmodells in `iobroker.sharegy` und den Factofy Linux-Agenten.
+4. **Phase 4: In-Flight 5-Minuten Delta-Backup Vault**
+   - Konfiguration der kontinuierlichen PostgreSQL-Delta-Replikation in das Monitoring-System mit Dashboard-Status.
