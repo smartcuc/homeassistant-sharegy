@@ -792,6 +792,12 @@ def device_available_metrics(request, device_id):
 
     KEY_METADATA = {
         "power": {"name": "Wirkleistung", "unit": "W", "icon": "⚡"},
+        "pv_power": {"name": "PV-Erzeugung", "unit": "W", "icon": "☀️"},
+        "battery_power": {"name": "Batterieleistung", "unit": "W", "icon": "🔋"},
+        "grid_power": {"name": "Netzleistung", "unit": "W", "icon": "🔌"},
+        "load_power": {"name": "Hausverbrauch", "unit": "W", "icon": "⚡"},
+        "daily_yield": {"name": "Tagesertrag", "unit": "kWh", "icon": "📊"},
+        "total_yield": {"name": "Gesamtertrag", "unit": "kWh", "icon": "📊"},
         "active_power": {"name": "Wirkleistung", "unit": "W", "icon": "⚡"},
         "apparent_power": {"name": "Scheinleistung", "unit": "VA", "icon": "⚡"},
         "reactive_power": {"name": "Blindleistung", "unit": "var", "icon": "⚡"},

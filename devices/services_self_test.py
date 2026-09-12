@@ -102,6 +102,22 @@ def run_device_self_test(
                 live_latency = round((time.time() - t0) * 1000, 1)
                 if isinstance(cloud_result, dict) and cloud_result.get("status") == "error":
                     cloud_error = cloud_result.get("error") or cloud_result.get("message") or "Authentifizierung fehlgeschlagen."
+                elif device and cloud_result and cloud_result.get("status") == "success" and not cloud_result.get("simulated"):
+                    try:
+                        from devices.adapters.ingest_core import process_canonical_telemetry
+                        from devices.adapters.registry import get_adapter
+                        adapter = get_adapter(profile_id)
+                        if adapter and cloud_result.get("raw_sample"):
+                            telemetry = adapter.parse_payload(cloud_result["raw_sample"])
+                            process_canonical_telemetry(
+                                device=device,
+                                telemetry=telemetry,
+                                source="self_test",
+                                device_name=creds.get("ps_name"),
+                                battery_capacity_kwh=creds.get("battery_capacity_kwh"),
+                            )
+                    except Exception as persist_err:
+                        logger.warning("Could not persist self-test telemetry into DB: %s", persist_err)
             except Exception as e:
                 cloud_error = str(e)
                 logger.warning("Selbsttest Cloud-Call fehlgeschlagen: %s", e)
