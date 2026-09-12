@@ -96,11 +96,11 @@ docs/
 
 ### 🔌 7. Integrationen & Hardware ([`docs/integrations/`](./integrations/))
 
-| Dokument / Bereich | Beschreibung |
-|---|---|
-| ☀️ **`inverters/`** | Multi-Cloud-Inverter Anbindung (Sungrow, Fronius, SMA, SolarEdge, Huawei, Deye, Hoymiles, GoodWe, Kostal) |
-| ⚡ **`shelly/`** | Direkte WSS-Anbindung für Shelly Gen2/Gen3/Pro Messrelais |
-| 📡 **`homeassistant/`** | Custom Component & Push-Service für Home Assistant |
+| Dokument | Bereich | Beschreibung |
+|---|---|---|
+| ☀️ **[`FACTOFY_SUPPORT_INTEGRATION_GUIDE.md`](./integrations/FACTOFY_SUPPORT_INTEGRATION_GUIDE.md)** | Support & Ticketing | Deep-Integration von Factofy Support-Tools & Remote-Diagnostik |
+| 🌐 **[`PUBLIC_ADAPTER_DEPLOYMENT_GUIDE.md`](./integrations/PUBLIC_ADAPTER_DEPLOYMENT_GUIDE.md)** | Public Adapter / ioBroker | Deployment & Anbindung externer Open-Source Home-Automation Adapter |
+| ⚡ **[`SHELLY_LOCAL_NON_CLOUD_SETUP_GUIDE.md`](./integrations/SHELLY_LOCAL_NON_CLOUD_SETUP_GUIDE.md)** | Shelly Local / Non-Cloud | Lokale WSS & Outbound WebSocket Konfiguration für Shelly Gen2/Gen3/Pro |
 
 ---
 
