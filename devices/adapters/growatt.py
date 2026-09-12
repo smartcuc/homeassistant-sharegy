@@ -683,7 +683,16 @@ class GrowattAdapter(BaseInverterAdapter):
                     break
 
             if not api_call_succeeded and (last_openapi_err or not raw_data["data"]):
-                err_msg = f"Growatt OpenAPI Fehler: {last_openapi_err or 'Ungültiger API-Token oder Wechselrichter offline'}"
+                if "permission" in str(last_openapi_err).lower():
+                    err_msg = (
+                        f"Growatt OpenAPI Fehler: '{last_openapi_err}'. "
+                        "Dieser Growatt API-Token besitzt keine Leseberechtigung für die Cloud-Endpunkte "
+                        "(oder ist im Growatt-Entwicklerportal noch nicht für Datenabfragen freigeschaltet). "
+                        "Empfohlene Lösung: Nutze einfach Option B (ShinePhone / ShineServer Benutzername & Passwort) – dieser Direkt-Login "
+                        "funktioniert für alle Growatt-Anlagen sofort und ohne OpenAPI-Beschränkung!"
+                    )
+                else:
+                    err_msg = f"Growatt OpenAPI Fehler: {last_openapi_err or 'Ungültiger API-Token oder Wechselrichter offline'}"
                 return AdapterTestResult(status="error", error=err_msg, message=err_msg)
 
             telemetry = self.parse_payload(raw_data)
