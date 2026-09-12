@@ -87,9 +87,14 @@ class GrowattAdapter(BaseInverterAdapter):
     def parse_payload(self, raw_data: Dict[str, Any]) -> CanonicalTelemetry:
         """
         Wandelt ein Growatt API JSON-Objekt in CanonicalTelemetry um.
-        Growatt liefert Leistungen standardmäßig in Watt und Energien in kWh.
-        Unterstützt Multi-String-Ertragsberechnung (ppv1 + ppv2 + ...), DC/AC-Hybrid-Erkennung
-        und aggregierte Plant-Metriken (currentPower).
+        Growatt liefert Leistungen in Watt oder kW und Energien in kWh.
+        Unterstützt:
+        - Multi-String-Ertragsberechnung (ppv1..ppv8, p_pv1..p_pv8, mppt1..mppt4)
+        - 3-Phasen-Summierung (pac1 + pac2 + pac3)
+        - Balkonkraftwerk & Noah 2000 Speicher (solarPower, outputPower)
+        - DC Volt * Ampere Ertragsberechnung (vpv * ipv)
+        - Automatische kW -> W Erkennung für Dezimalwerte (z. B. 2.45 kW -> 2450 W)
+        - Physikalische Ertrags-Rekonstruktion aus Batterieladung + Netzeinspeisung
         """
         # Flaches Wörterbuch aus verschachtelten Objekten aufbauen
         flat: Dict[str, Any] = {}
@@ -102,12 +107,16 @@ class GrowattAdapter(BaseInverterAdapter):
                         if k not in flat or (flat[k] in (None, "", "-", "--", "null", "none", "0", "0.0", "0.00", "0 W", "0W", "0 kW", "0kW", 0, 0.0, False) and not is_empty_or_zero):
                             flat[k] = v
                         # Normalisierte Schlüssel (z. B. 'Current Power(kW)' -> 'current_power', 'currentpower')
-                        clean_k = str(k).lower().replace(" ", "_").replace("(", "_").replace(")", "").replace("：", "").replace(":", "").strip()
+                        clean_k = str(k).lower().replace(" ", "_").replace("(", "_").replace(")", "").replace("：", "").replace(":", "").replace("-", "_").strip()
                         if clean_k not in flat or (flat[clean_k] in (None, "", "0", 0, 0.0) and not is_empty_or_zero):
                             flat[clean_k] = v
-                        clean_k2 = str(k).lower().replace(" ", "").replace("(", "").replace(")", "").replace("_", "").replace("：", "").replace(":", "").strip()
+                        clean_k2 = str(k).lower().replace(" ", "").replace("(", "").replace(")", "").replace("_", "").replace("：", "").replace(":", "").replace("-", "").strip()
                         if clean_k2 not in flat or (flat[clean_k2] in (None, "", "0", 0, 0.0) and not is_empty_or_zero):
                             flat[clean_k2] = v
+                        # Zusätzlicher Alias ohne 'kw' / 'kwh' / 'w' im Key
+                        clean_no_unit = clean_k.replace("_kw", "").replace("_kwh", "").replace("_w", "").replace("_wh", "")
+                        if clean_no_unit not in flat or (flat[clean_no_unit] in (None, "", "0", 0, 0.0) and not is_empty_or_zero):
+                            flat[clean_no_unit] = v
                     elif isinstance(v, (dict, list)):
                         _walk(v)
             elif isinstance(item, list):
@@ -115,6 +124,19 @@ class GrowattAdapter(BaseInverterAdapter):
                     _walk(elem)
 
         _walk(raw_data)
+
+        # Prüfen ob der Payload bereits Werte im Watt-Bereich (> 100 W) enthält
+        has_large_watts = False
+        for k_item, v_item in flat.items():
+            if any(pk in str(k_item).lower() for pk in ["pac", "ppv", "pload", "pcharge", "pdischarge", "pactogrid", "pfromgrid"]):
+                try:
+                    import re as _re
+                    _m = _re.search(r"[-+]?\d*\.?\d+", str(v_item).replace(",", "."))
+                    if _m and abs(float(_m.group(0))) >= 100.0:
+                        has_large_watts = True
+                        break
+                except Exception:
+                    pass
 
         def _get_val(*keys, is_power: bool = False) -> Optional[float]:
             vals = []
@@ -125,8 +147,9 @@ class GrowattAdapter(BaseInverterAdapter):
                         continue
                     factor = 1.0
                     low = raw.lower()
-                    has_kw = "kw" in low or "kw" in str(k).lower()
-                    has_w = "w" in low and not has_kw
+                    k_low = str(k).lower()
+                    has_kw = "kw" in low or "kw" in k_low or "(kw)" in k_low or "_kw" in k_low
+                    has_w = ("w" in low and not has_kw) or ("_w" in k_low and not has_kw)
                     if is_power:
                         if has_kw:
                             factor = 1000.0
@@ -144,11 +167,13 @@ class GrowattAdapter(BaseInverterAdapter):
                     if match:
                         try:
                             val = float(match.group(0)) * factor
-                            # Wenn es ein Leistungswert ist und factor == 1.0 war (keine explizite Einheit):
-                            # Bei Growatt sind 'currentPower', 'nominalPower', 'currPower', 'total_power', 'plantPower'
-                            # bei Werten < 100.0 standardmäßig in kW angegeben!
+                            # Wenn es ein Leistungswert ist und keine explizite Watt-Einheit vorlag:
                             if is_power and not has_w and not has_kw:
-                                if any(pk in str(k).lower() for pk in ["currentpower", "current_power", "currpower", "curr_power", "nominalpower", "plantpower"]) and 0.0 < abs(val) <= 100.0:
+                                is_kw_field = any(pk in k_low for pk in [
+                                    "currentpower", "current_power", "currpower", "curr_power",
+                                    "plantpower", "plant_power", "total_power", "totalpower"
+                                ])
+                                if is_kw_field and 0.0 < abs(val) <= 100.0:
                                     val = val * 1000.0
                             vals.append(val)
                         except (ValueError, TypeError):
@@ -159,36 +184,63 @@ class GrowattAdapter(BaseInverterAdapter):
             return vals[0] if vals else None
 
         # 1. PV Erzeugung (DC Solar Input & AC Output & Plant Totals)
-        ppv_direct = _get_val("ppv", "ppvTotal", "p_pv", "pv_power", "pvPower", "pAct", "pact", "invTodayPpv", "current_power", "currentpower", "current_power_kw", "currentpowerkw", is_power=True)
-        curr_power = _get_val("currentPower", "current_power", "currPower", "curr_power", "total_power", "plantPower", "current_power_kw", "currentpowerkw", is_power=True)
-        pac_direct = _get_val("pac", "invPac", "pacToUserTotal", "pac1", "power", is_power=True)
+        ppv_direct = _get_val(
+            "ppv", "ppvTotal", "ppv_total", "p_pv", "pv_power", "pvPower", "pvpower", "pv_power_w", "pvPowerW",
+            "pAct", "pact", "p_act", "invTodayPpv", "inv_today_ppv", "solar_power", "solarpower", "solarPower",
+            "output_power", "outputpower", "outputPower", "outPutPower", "active_power", "activePower",
+            "real_power", "realPower", "inverter_power", "inverterPower", "current_power", "currentpower",
+            "current_power_kw", "currentpowerkw", is_power=True
+        )
+        curr_power = _get_val(
+            "currentPower", "current_power", "currPower", "curr_power", "total_power", "plantPower",
+            "plant_power", "current_power_kw", "currentpowerkw", is_power=True
+        )
+        pac_direct = _get_val("pac", "invPac", "inv_pac", "pacToUserTotal", "power", "ac_power", "acPower", is_power=True)
 
-        # Multi-String PV Summe (z. B. String 1 + String 2 + String 3 + String 4)
-        ppv1 = _get_val("ppv1", "pPv1", "p_pv1", is_power=True) or 0.0
-        ppv2 = _get_val("ppv2", "pPv2", "p_pv2", is_power=True) or 0.0
-        ppv3 = _get_val("ppv3", "pPv3", "p_pv3", is_power=True) or 0.0
-        ppv4 = _get_val("ppv4", "pPv4", "p_pv4", is_power=True) or 0.0
-        ppv_string_sum = ppv1 + ppv2 + ppv3 + ppv4
+        # Multi-String PV Summe (String 1 bis String 8)
+        string_powers = []
+        for s_idx in range(1, 9):
+            s_val = _get_val(f"ppv{s_idx}", f"pPv{s_idx}", f"p_pv{s_idx}", f"pv{s_idx}_power", f"mppt{s_idx}_power", is_power=True)
+            if s_val and s_val > 0:
+                string_powers.append(s_val)
+        ppv_string_sum = sum(string_powers) if string_powers else 0.0
+
+        # 3-Phasen AC Summe (pac1 + pac2 + pac3)
+        pac1 = _get_val("pac1", "invPac1", "inv_pac1", "power1", is_power=True) or 0.0
+        pac2 = _get_val("pac2", "invPac2", "inv_pac2", "power2", is_power=True) or 0.0
+        pac3 = _get_val("pac3", "invPac3", "inv_pac3", "power3", is_power=True) or 0.0
+        pac_3phase_sum = (pac1 + pac2 + pac3) if (pac1 + pac2 + pac3) > 0 else 0.0
 
         # Volt * Ampere Strings (falls nur Spannungen und Ströme geliefert werden)
-        vpv1 = _get_val("vpv1", "vPv1") or 0.0
-        ipv1 = _get_val("ipv1", "iPv1") or 0.0
-        vpv2 = _get_val("vpv2", "vPv2") or 0.0
-        ipv2 = _get_val("ipv2", "iPv2") or 0.0
-        va_string_sum = round((vpv1 * ipv1) + (vpv2 * ipv2), 1)
+        va_sum = 0.0
+        for s_idx in range(1, 5):
+            v_s = _get_val(f"vpv{s_idx}", f"vPv{s_idx}", f"v_pv{s_idx}") or 0.0
+            i_s = _get_val(f"ipv{s_idx}", f"iPv{s_idx}", f"i_pv{s_idx}") or 0.0
+            if v_s > 0 and i_s > 0:
+                va_sum += (v_s * i_s)
+        va_string_sum = round(va_sum, 1) if va_sum > 0 else 0.0
 
         # Prioritätsauswahl für PV Erzeugung: Bevorzuge den höchsten plausiblen positiven Messwert
-        candidates = [v for v in [ppv_direct, ppv_string_sum if ppv_string_sum > 0 else None, curr_power, pac_direct, va_string_sum if va_string_sum > 0 else None] if v is not None and v > 0]
+        candidates = [
+            v for v in [
+                ppv_direct,
+                ppv_string_sum if ppv_string_sum > 0 else None,
+                pac_3phase_sum if pac_3phase_sum > 0 else None,
+                curr_power,
+                pac_direct,
+                va_string_sum if va_string_sum > 0 else None
+            ] if v is not None and v > 0
+        ]
         if candidates:
             pv = max(candidates)
         else:
             pv = ppv_direct or curr_power or pac_direct or 0.0
 
         # 2. Batterie Leistung (+ Entladung, - Ladung) & SoC
-        bat_dis = _get_val("pdisCharge", "pdisCharge1", "pDisCharge", "pDischarge", is_power=True) or 0.0
-        bat_chg = _get_val("pcharge", "pcharge1", "pCharge", is_power=True) or 0.0
-        bat_to_storage = _get_val("pactostorage", "pstorage", is_power=True) or 0.0
-        bat_generic = _get_val("battery_power", "battery_power_w", "batteryPower", "batPower", "B_P1", is_power=True)
+        bat_dis = _get_val("pdisCharge", "pdisCharge1", "pDisCharge", "pDischarge", "discharge_power", "dischargePower", is_power=True) or 0.0
+        bat_chg = _get_val("pcharge", "pcharge1", "pCharge", "charge_power", "chargePower", is_power=True) or 0.0
+        bat_to_storage = _get_val("pactostorage", "pstorage", "p_storage", "storage_power", is_power=True) or 0.0
+        bat_generic = _get_val("battery_power", "battery_power_w", "batteryPower", "batPower", "B_P1", "bms_power", is_power=True)
 
         if bat_generic is not None and bat_dis == 0.0 and bat_chg == 0.0 and bat_to_storage == 0.0:
             bat_pwr = bat_generic
@@ -197,12 +249,12 @@ class GrowattAdapter(BaseInverterAdapter):
         else:
             bat_pwr = bat_dis - (bat_chg or bat_to_storage)
 
-        soc = _get_val("soc", "batterySoc", "battery_soc", "batteryPercent", "chargeLevel", "capacity", "SOC", "storageSoc", "bmsSoc")
+        soc = _get_val("soc", "batterySoc", "battery_soc", "batteryPercent", "chargeLevel", "capacity", "SOC", "storageSoc", "bmsSoc", "battery_level")
 
         # 3. Netzleistung (+ Bezug, - Einspeisung)
-        grid_export_val = _get_val("pactogrid", "toGridPower", "to_grid_power", "pToGrid", "feed_in_power", "p_feed_in", is_power=True)
-        grid_import_val = _get_val("pfromgrid", "fromGridPower", "gridPurchasedPower", "pFromGrid", "p_import", is_power=True)
-        grid_net = _get_val("pgrid", "pGrid", "grid_power", "gridPower", is_power=True)
+        grid_export_val = _get_val("pactogrid", "toGridPower", "to_grid_power", "pToGrid", "feed_in_power", "p_feed_in", "feedInPower", is_power=True)
+        grid_import_val = _get_val("pfromgrid", "fromGridPower", "gridPurchasedPower", "pFromGrid", "p_import", "import_power", "gridImportPower", is_power=True)
+        grid_net = _get_val("pgrid", "pGrid", "grid_power", "gridPower", "grid_power_w", is_power=True)
 
         if grid_export_val is not None or grid_import_val is not None:
             grid = float(grid_import_val or 0.0) - float(grid_export_val or 0.0)
@@ -212,13 +264,26 @@ class GrowattAdapter(BaseInverterAdapter):
             grid = None
 
         # 4. Hausverbrauch (pactouser / pLocalLoad / pload)
-        load = _get_val("pactouser", "pLocalLoad", "pToUser", "pload", "use_power", "useEnergy", "familyLoadPower", "load_power", "loadPower", "use_power_w", "home_load", "consumption", is_power=True)
+        load = _get_val("pactouser", "pLocalLoad", "pToUser", "pload", "p_load", "use_power", "useEnergy", "familyLoadPower", "load_power", "loadPower", "use_power_w", "home_load", "consumption", is_power=True)
 
-        # 5. Physikalische Plausibilisierung für Grid, Battery & Load
+        # 5. Physikalische Plausibilisierung für Grid, Battery, Load & PV-Rekonstruktion
         pv_val = max(0.0, float(pv or 0.0))
         bat_val = float(bat_pwr or 0.0)
         soc_val = float(soc) if soc is not None else None
         eff_load = float(load) if (load is not None and load > 0) else None
+
+        # PV-Rekonstruktion aus Bilanz (falls Inverter 0W meldet, aber Batterie lädt oder ins Netz gespeist wird)
+        bat_charging = abs(min(0.0, bat_val))
+        bat_discharging = max(0.0, bat_val)
+        grid_export = abs(min(0.0, float(grid or 0.0)))
+        grid_import = max(0.0, float(grid or 0.0))
+        eff_load_calc = eff_load or 0.0
+
+        if pv_val <= 1.0:
+            reconstructed_pv = eff_load_calc + bat_charging + grid_export - bat_discharging - grid_import
+            if reconstructed_pv > 30.0:
+                pv_val = round(reconstructed_pv, 1)
+                pv = pv_val
 
         # Batterie Leistung aus Leistungsbilanz ableiten falls Inverter keine direkte Leistung meldet
         if abs(bat_val) < 1.0 and soc_val is not None and eff_load is not None:

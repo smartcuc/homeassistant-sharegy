@@ -169,6 +169,67 @@ class AdapterContractMatrixTest(TestCase):
         self.assertEqual(tel5.daily_yield_kwh, 1.6)
         self.assertEqual(tel5.total_yield_kwh, 2202.4)
 
+        # Test 6: Growatt Noah 2000 / Balkonkraftwerk (solarPower & outputPower)
+        raw_noah = {
+            "data": {
+                "solarPower": 780.0,
+                "outputPower": 600.0,
+                "batteryPower": -180.0,
+                "soc": 92.0,
+                "todayEnergy": 3.8,
+            }
+        }
+        tel6 = adapter.parse_payload(raw_noah)
+        self.assertEqual(tel6.pv_power_w, 780.0)
+        self.assertEqual(tel6.battery_power_w, -180.0)
+        self.assertEqual(tel6.battery_soc, 92.0)
+        self.assertEqual(tel6.daily_yield_kwh, 3.8)
+
+        # Test 7: Growatt 3-Phasen Wechselrichter (pac1 + pac2 + pac3)
+        raw_3phase = {
+            "data": {
+                "pac1": 1500.0,
+                "pac2": 1400.0,
+                "pac3": 1600.0,
+                "pactogrid": -4000.0,
+                "pload": 500.0,
+                "eToday": 22.4,
+            }
+        }
+        tel7 = adapter.parse_payload(raw_3phase)
+        self.assertEqual(tel7.pv_power_w, 4500.0) # 1500 + 1400 + 1600 = 4500 W
+        self.assertEqual(tel7.grid_power_w, -4000.0)
+        self.assertEqual(tel7.daily_yield_kwh, 22.4)
+
+        # Test 8: Growatt pac als kW mit Einheit (z. B. pac: "3.45 kW")
+        raw_pac_kw = {
+            "data": {
+                "pac": "3.45 kW",
+                "pload": 650.0,
+                "eToday": 11.2,
+            }
+        }
+        tel8 = adapter.parse_payload(raw_pac_kw)
+        self.assertEqual(tel8.pv_power_w, 3450.0) # 3.45 kW -> 3450 W
+        self.assertEqual(tel8.load_power_w, 650.0)
+
+        # Test 9: Physikalische PV-Ertragsrekonstruktion wenn Inverter ppv=0 meldet aber Energie fließt
+        raw_pv_reconstruct = {
+            "data": {
+                "ppv": 0.0,
+                "pac": 0.0,
+                "pcharge": 2200.0,
+                "pactogrid": 1300.0,
+                "pload": 450.0,
+                "soc": 65.0,
+                "eToday": 8.9,
+            }
+        }
+        tel9 = adapter.parse_payload(raw_pv_reconstruct)
+        self.assertEqual(tel9.pv_power_w, 3950.0) # 450 load + 2200 bat_chg + 1300 grid_export = 3950 W
+        self.assertEqual(tel9.battery_power_w, -2200.0)
+        self.assertEqual(tel9.battery_soc, 65.0)
+
     def test_04_standard_ingest_core_pipeline(self):
         """Testet die herstellerunabhängige Standard-Ingest-Core Pipeline."""
         tel = CanonicalTelemetry(

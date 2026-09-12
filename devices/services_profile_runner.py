@@ -819,6 +819,19 @@ def _parse_metrics_from_payload(profile: dict, raw_payload: dict) -> dict:
     # Vollständiger Fallback-Pool inklusive aller verschachtelten Listen & Dictionaries
     data_dict = _flatten_payload_dict(raw_payload)
 
+    # Prüfen ob der Payload bereits Werte im Watt-Bereich (> 100 W) enthält
+    has_large_watts = False
+    for k_item, v_item in data_dict.items():
+        if any(pk in str(k_item).lower() for pk in ["pac", "ppv", "pload", "pcharge", "pdischarge", "pactogrid", "pfromgrid"]):
+            try:
+                import re as _re
+                _m = _re.search(r"[-+]?\d*\.?\d+", str(v_item).replace(",", "."))
+                if _m and abs(float(_m.group(0))) >= 100.0:
+                    has_large_watts = True
+                    break
+            except Exception:
+                pass
+
     for metric_name, rule in mapping.items():
         jsonpath = rule.get("jsonpath")
         rule_scale = float(rule.get("scale", 1.0))
@@ -841,29 +854,50 @@ def _parse_metrics_from_payload(profile: dict, raw_payload: dict) -> dict:
         # Intelligente Multi-Key Fallbacks falls JSONPath keinen Treffer liefert
         if raw_val is None:
             if metric_name == "pv_power_w":
-                for k in [
-                    "curr_power", "curr_pac", "currPower", "currPac", "currentPower", "current_power",
-                    "currentEnergy", "current_energy", "pac", "ppv", "ppv1", "ppv2", "pPv1", "pPv2",
-                    "nominalPower", "invPac", "power", "pv_power",
-                    "pvPower", "pAct", "pact", "pac1", "ppvTotal", "p_pv", "p_pv1", "p_pv2", "total_power"
-                ]:
-                    if k in data_dict and data_dict[k] is not None:
-                        if isinstance(data_dict[k], str) and any(u in data_dict[k].lower() for u in ["kw", "mw", "w"]):
-                            unit_already_converted = True
-                        clean_v = _clean_numeric_value(data_dict[k], target_unit="W")
-                        if clean_v is not None:
-                            if not unit_already_converted and k in ("currentPower", "current_power", "currPower", "curr_power", "nominalPower", "total_power", "invPac", "plantPower") and 0.0 < abs(clean_v) <= 100.0:
-                                clean_v = clean_v * 1000.0
+                # Multi-String Summen prüfen (ppv1..ppv8, pv1_power..pv8_power)
+                str_sum = 0.0
+                has_str = False
+                for s_i in range(1, 9):
+                    for sk in [f"ppv{s_i}", f"pPv{s_i}", f"p_pv{s_i}", f"pv{s_i}_power", f"mppt{s_i}_power"]:
+                        if sk in data_dict and data_dict[sk] is not None:
+                            s_clean = _clean_numeric_value(data_dict[sk], target_unit="W")
+                            if s_clean and s_clean > 0:
+                                if not has_large_watts and 0.0 < s_clean <= 50.0 and "." in str(data_dict[sk]):
+                                    s_clean = s_clean * 1000.0
+                                str_sum += s_clean
+                                has_str = True
+                                break
+                if has_str and str_sum > 0:
+                    raw_val = str_sum
+                    unit_already_converted = True
+                else:
+                    for k in [
+                        "curr_power", "curr_pac", "currPower", "currPac", "currentPower", "current_power",
+                        "currentEnergy", "current_energy", "pac", "ppv", "ppv1", "ppv2", "pPv1", "pPv2",
+                        "solar_power", "solarpower", "solarPower", "output_power", "outputpower", "outputPower",
+                        "invPac", "power", "pv_power", "p_act",
+                        "pvPower", "pAct", "pact", "pac1", "ppvTotal", "p_pv", "p_pv1", "p_pv2", "total_power",
+                        "active_power", "activePower", "real_power", "realPower", "inverter_power", "inverterPower"
+                    ]:
+                        if k in data_dict and data_dict[k] is not None:
+                            if isinstance(data_dict[k], str) and any(u in data_dict[k].lower() for u in ["kw", "mw", "w"]):
                                 unit_already_converted = True
-                            raw_val = clean_v
-                            if k not in ("curr_power", "currPower", "power", "currentPower"):
-                                unit_already_converted = True
-                            break
+                            clean_v = _clean_numeric_value(data_dict[k], target_unit="W")
+                            if clean_v is not None:
+                                if not unit_already_converted and (
+                                    (k in ("currentPower", "current_power", "currPower", "curr_power", "plantPower", "plant_power", "total_power", "invPac") and 0.0 < abs(clean_v) <= 100.0)
+                                ):
+                                    clean_v = clean_v * 1000.0
+                                    unit_already_converted = True
+                                raw_val = clean_v
+                                if k not in ("curr_power", "currPower", "power", "currentPower"):
+                                    unit_already_converted = True
+                                break
 
             elif metric_name == "battery_soc":
                 for k in [
                     "curr_soc", "curr_battery_soc", "soc", "batterySoc", "battery_soc",
-                    "batteryPercent", "chargeLevel", "capacity", "SOC", "storageSoc", "battery_level"
+                    "batteryPercent", "chargeLevel", "capacity", "SOC", "storageSoc", "bmsSoc", "battery_level"
                 ]:
                     if k in data_dict and data_dict[k] is not None:
                         clean_v = _clean_numeric_value(data_dict[k], target_unit="%")
@@ -875,7 +909,7 @@ def _parse_metrics_from_payload(profile: dict, raw_payload: dict) -> dict:
                 for k in [
                     "curr_battery_power", "battery_power", "batteryPower", "p_battery",
                     "pdisCharge", "pcharge", "pdisCharge1", "pcharge1", "pactostorage", "pstorage",
-                    "pDisCharge", "pCharge", "battery_power_w", "batteryPowerW", "B_P1"
+                    "pDisCharge", "pCharge", "battery_power_w", "batteryPowerW", "B_P1", "discharge_power", "charge_power"
                 ]:
                     if k in data_dict and data_dict[k] is not None:
                         if isinstance(data_dict[k], str) and any(u in data_dict[k].lower() for u in ["kw", "mw", "w"]):
@@ -891,7 +925,7 @@ def _parse_metrics_from_payload(profile: dict, raw_payload: dict) -> dict:
                 for k in [
                     "curr_grid_power", "grid_power", "gridPower", "p_grid", "pgrid", "pactogrid",
                     "toGridPower", "to_grid_power", "pGrid", "feed_in_power", "p_feed_in",
-                    "gridPurchasedPower", "grid_power_w", "gridPowerW"
+                    "gridPurchasedPower", "grid_power_w", "gridPowerW", "pfromgrid", "fromGridPower", "pFromGrid"
                 ]:
                     if k in data_dict and data_dict[k] is not None:
                         if isinstance(data_dict[k], str) and any(u in data_dict[k].lower() for u in ["kw", "mw", "w"]):
@@ -908,7 +942,7 @@ def _parse_metrics_from_payload(profile: dict, raw_payload: dict) -> dict:
                     "pactouser", "pacToUserTotal", "pLocalLoad", "pToUser",
                     "curr_load_power", "load_power", "loadPower", "p_load", "pload", "use_power",
                     "use_power_w", "useEnergy", "familyLoadPower", "consumption",
-                    "loadPowerW", "home_load"
+                    "loadPowerW", "home_load", "house_load"
                 ]:
                     if k in data_dict and data_dict[k] is not None:
                         if isinstance(data_dict[k], str) and any(u in data_dict[k].lower() for u in ["kw", "mw", "w"]):
@@ -924,7 +958,7 @@ def _parse_metrics_from_payload(profile: dict, raw_payload: dict) -> dict:
                 for k in [
                     "today_energy", "todayEnergy", "today_yield", "todayYield", "eToday",
                     "etoday", "e_today", "eTodayTotal", "eAcChargeToday", "daily_generation",
-                    "solar_yield", "daily_yield"
+                    "solar_yield", "daily_yield", "generationToday", "generation_today"
                 ]:
                     if k in data_dict and data_dict[k] is not None:
                         clean_v = _clean_numeric_value(data_dict[k], target_unit="kWh")
