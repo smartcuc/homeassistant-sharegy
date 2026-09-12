@@ -245,6 +245,94 @@ class OcppConsumerTests(TransactionTestCase):
 
         await communicator.disconnect()
 
+    async def test_ocpp16_remote_start_and_stop_flow(self):
+        """Testet RemoteStartTransaction und RemoteStopTransaction in OCPP 1.6."""
+        from channels.layers import get_channel_layer
+        channel_layer = get_channel_layer()
+
+        communicator = WebsocketCommunicator(
+            application,
+            "/ocpp/TEST-CP-01",
+            subprotocols=["ocpp1.6"]
+        )
+        connected, _ = await communicator.connect()
+        self.assertTrue(connected)
+
+        # 1. Server sendet ocpp_remote_start
+        await channel_layer.group_send(
+            "ocpp_TEST-CP-01",
+            {"type": "ocpp_remote_start", "connector_id": 1, "id_tag": "APP_USER_16"}
+        )
+        msg_start = await communicator.receive_json_from()
+        self.assertEqual(msg_start[0], 2)
+        self.assertEqual(msg_start[2], "RemoteStartTransaction")
+        self.assertEqual(msg_start[3]["connectorId"], 1)
+        self.assertEqual(msg_start[3]["idTag"], "APP_USER_16")
+        call_id = msg_start[1]
+
+        # 2. Station antwortet Accepted
+        await communicator.send_json_to([3, call_id, {"status": "Accepted"}])
+
+        # 3. Station sendet StartTransaction
+        start_msg = [
+            2,
+            "tx-16-start",
+            "StartTransaction",
+            {
+                "connectorId": 1,
+                "idTag": "APP_USER_16",
+                "meterStart": 1000,
+                "timestamp": "2026-09-03T05:00:00Z"
+            }
+        ]
+        await communicator.send_json_to(start_msg)
+        res_start = await communicator.receive_json_from()
+        self.assertEqual(res_start[0], 3)
+        tx_id = res_start[2]["transactionId"]
+        self.assertTrue(tx_id > 0)
+        self.assertEqual(res_start[2]["idTagInfo"]["status"], "Accepted")
+
+        station = await database_sync_to_async(ChargingStation.objects.get)(charge_point_id="TEST-CP-01")
+        self.assertEqual(station.status, "Charging")
+        self.assertTrue(station.is_charging)
+
+        # 4. Server sendet ocpp_remote_stop
+        await channel_layer.group_send(
+            "ocpp_TEST-CP-01",
+            {"type": "ocpp_remote_stop", "transaction_id": tx_id}
+        )
+        msg_stop = await communicator.receive_json_from()
+        self.assertEqual(msg_stop[0], 2)
+        self.assertEqual(msg_stop[2], "RemoteStopTransaction")
+        self.assertEqual(msg_stop[3]["transactionId"], tx_id)
+        call_stop_id = msg_stop[1]
+
+        # 5. Station antwortet Accepted
+        await communicator.send_json_to([3, call_stop_id, {"status": "Accepted"}])
+
+        # 6. Station sendet StopTransaction
+        stop_msg = [
+            2,
+            "tx-16-stop",
+            "StopTransaction",
+            {
+                "transactionId": tx_id,
+                "meterStop": 6000,
+                "timestamp": "2026-09-03T05:30:00Z",
+                "reason": "Remote",
+                "idTag": "APP_USER_16"
+            }
+        ]
+        await communicator.send_json_to(stop_msg)
+        res_stop = await communicator.receive_json_from()
+        self.assertEqual(res_stop[0], 3)
+
+        station_done = await database_sync_to_async(ChargingStation.objects.get)(charge_point_id="TEST-CP-01")
+        self.assertEqual(station_done.status, "Available")
+        self.assertFalse(station_done.is_charging)
+
+        await communicator.disconnect()
+
     async def test_ocpp_diagnostics_and_firmware_notifications(self):
         """Testet DiagnosticsStatusNotification & FirmwareStatusNotification Handling."""
         communicator = WebsocketCommunicator(

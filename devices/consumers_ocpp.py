@@ -4,6 +4,7 @@
 
 import json
 import logging
+import random
 import uuid
 from decimal import Decimal
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -54,6 +55,10 @@ class OcppConsumer(AsyncWebsocketConsumer):
 
         self.ocpp_version = selected_subprotocol
         await self.channel_layer.group_add(self.group_name, self.channel_name)
+        if self.cp_id.lower() != self.cp_id:
+            await self.channel_layer.group_add(f"ocpp_{self.cp_id.lower()}", self.channel_name)
+        if self.cp_id.upper() != self.cp_id:
+            await self.channel_layer.group_add(f"ocpp_{self.cp_id.upper()}", self.channel_name)
         await self.accept(subprotocol=selected_subprotocol)
 
         # Station in DB online setzen und Protokollversion speichern
@@ -69,6 +74,10 @@ class OcppConsumer(AsyncWebsocketConsumer):
         if self.home_group:
             await self.channel_layer.group_discard(self.home_group, self.channel_name)
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
+        if self.cp_id.lower() != self.cp_id:
+            await self.channel_layer.group_discard(f"ocpp_{self.cp_id.lower()}", self.channel_name)
+        if self.cp_id.upper() != self.cp_id:
+            await self.channel_layer.group_discard(f"ocpp_{self.cp_id.upper()}", self.channel_name)
         logger.info(f"🔌 OCPP-Wallbox getrennt: {self.cp_id} (Code: {close_code})")
 
     async def receive(self, text_data=None, bytes_data=None):
@@ -601,14 +610,14 @@ class OcppConsumer(AsyncWebsocketConsumer):
     async def ocpp_remote_start(self, event):
         """Startet den Ladevorgang aus der Sharegy App heraus."""
         connector_id = int(event.get("connector_id", 1))
-        id_tag = event.get("id_tag", "SHAREGY_APP")
+        id_tag = event.get("id_tag", "APP_USER")
         if self.ocpp_version in ["ocpp2.0.1", "ocpp2.1"]:
             payload = {
                 "evseId": connector_id,
-                "remoteStartId": 1,
+                "remoteStartId": random.randint(1000, 999999),
                 "idToken": {
-                    "idToken": id_tag,
-                    "type": "Central"
+                    "idToken": str(id_tag),
+                    "type": "ISO14443"
                 }
             }
             await self.send_call("RequestStartTransaction", payload)
@@ -616,7 +625,7 @@ class OcppConsumer(AsyncWebsocketConsumer):
         else:
             payload = {
                 "connectorId": connector_id,
-                "idTag": id_tag
+                "idTag": str(id_tag)
             }
             await self.send_call("RemoteStartTransaction", payload)
             logger.info(f"▶️ RemoteStartTransaction an {self.cp_id} (Tag: {id_tag})")
@@ -921,6 +930,14 @@ class OcppConsumer(AsyncWebsocketConsumer):
             return "Accepted"
         if station.status in ["Unavailable", "Faulted"]:
             return "Blocked"
+        is_remote_or_app = (
+            not id_tag or
+            str(id_tag).upper() in ["APP_USER", "SHAREGY_APP", "REMOTE", "REMOTE_USER", "CENTRAL", "DEFAULT"] or
+            str(id_tag).startswith("APP_") or
+            str(id_tag).startswith("SHAREGY")
+        )
+        if is_remote_or_app:
+            return "Accepted"
         tags_count = ChargingRfidTag.objects.filter(home=station.home).count()
         if tags_count == 0:
             return "Accepted"
@@ -951,9 +968,15 @@ class OcppConsumer(AsyncWebsocketConsumer):
             station.reservation_expiry = None
 
         # 3. RFID Autorisierung prüfen
+        is_remote_or_app = (
+            not id_tag or
+            str(id_tag).upper() in ["APP_USER", "SHAREGY_APP", "REMOTE", "REMOTE_USER", "CENTRAL", "DEFAULT"] or
+            str(id_tag).startswith("APP_") or
+            str(id_tag).startswith("SHAREGY")
+        )
         tags_count = ChargingRfidTag.objects.filter(home=station.home).count()
         user = None
-        if tags_count > 0:
+        if tags_count > 0 and not is_remote_or_app:
             tag = ChargingRfidTag.objects.filter(home=station.home, id_tag=id_tag, is_active=True).first()
             if not tag:
                 logger.warning(f"🚫 StartTransaction abgelehnt für {cp_id}: Unbekannter RFID Tag '{id_tag}'")

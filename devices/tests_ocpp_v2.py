@@ -331,6 +331,139 @@ class Ocpp2ProtocolTests(TransactionTestCase):
 
         await communicator.disconnect()
 
+    async def test_ocpp201_remote_start_and_stop_flow(self):
+        """Testet den kompletten Remote-Start und Remote-Stop Workflow in OCPP 2.0.1."""
+        from channels.layers import get_channel_layer
+        channel_layer = get_channel_layer()
+
+        communicator = WebsocketCommunicator(
+            application,
+            "/ocpp/CP-OCPP2-01",
+            subprotocols=["ocpp2.0.1"]
+        )
+        connected, _ = await communicator.connect()
+        self.assertTrue(connected)
+
+        # 1. Server sendet ocpp_remote_start über Channel Layer
+        await channel_layer.group_send(
+            "ocpp_CP-OCPP2-01",
+            {"type": "ocpp_remote_start", "connector_id": 1, "id_tag": "APP_USER_TEST"}
+        )
+        msg_start = await communicator.receive_json_from()
+        self.assertEqual(msg_start[0], 2)
+        self.assertEqual(msg_start[2], "RequestStartTransaction")
+        self.assertEqual(msg_start[3]["evseId"], 1)
+        self.assertEqual(msg_start[3]["idToken"]["idToken"], "APP_USER_TEST")
+        self.assertTrue(msg_start[3]["remoteStartId"] > 0)
+        call_id = msg_start[1]
+
+        # 2. Station antwortet mit CallResult Accepted
+        await communicator.send_json_to([3, call_id, {"status": "Accepted"}])
+
+        # 3. Station sendet TransactionEvent(Started)
+        tx_start = [
+            2,
+            "tx-start-flow-1",
+            "TransactionEvent",
+            {
+                "eventType": "Started",
+                "timestamp": "2026-09-08T22:00:00Z",
+                "triggerReason": "RemoteStart",
+                "seqNo": 0,
+                "transactionInfo": {
+                    "transactionId": "TX-REMOTE-001",
+                    "chargingState": "Charging"
+                },
+                "idToken": {
+                    "idToken": "APP_USER_TEST",
+                    "type": "ISO14443"
+                },
+                "evse": {"id": 1, "connectorId": 1},
+                "meterValue": [
+                    {
+                        "timestamp": "2026-09-08T22:00:00Z",
+                        "sampledValue": [
+                            {"value": "5000", "measurand": "Energy.Active.Import.Register"}
+                        ]
+                    }
+                ]
+            }
+        ]
+        await communicator.send_json_to(tx_start)
+        res_tx = await communicator.receive_json_from()
+        self.assertEqual(res_tx[0], 3)
+        self.assertEqual(res_tx[2]["idTokenInfo"]["status"], "Accepted")
+
+        # Prüfen, ob Status in DB 'Charging' ist und Session existiert
+        station = await database_sync_to_async(ChargingStation.objects.get)(charge_point_id="CP-OCPP2-01")
+        self.assertEqual(station.status, "Charging")
+        self.assertTrue(station.is_charging)
+        self.assertIsNotNone(station.active_transaction_id)
+
+        session = await database_sync_to_async(
+            lambda: ChargingSession.objects.filter(station=station, status="active").first()
+        )()
+        self.assertIsNotNone(session)
+        self.assertEqual(session.id_tag, "APP_USER_TEST")
+
+        # 4. Server sendet ocpp_remote_stop
+        await channel_layer.group_send(
+            "ocpp_CP-OCPP2-01",
+            {"type": "ocpp_remote_stop", "transaction_id": station.active_transaction_id}
+        )
+        msg_stop = await communicator.receive_json_from()
+        self.assertEqual(msg_stop[0], 2)
+        self.assertEqual(msg_stop[2], "RequestStopTransaction")
+        self.assertEqual(msg_stop[3]["transactionId"], "TX-REMOTE-001")
+        call_stop_id = msg_stop[1]
+
+        # 5. Station antwortet mit CallResult Accepted
+        await communicator.send_json_to([3, call_stop_id, {"status": "Accepted"}])
+
+        # 6. Station beendet Transaction mit TransactionEvent(Ended)
+        tx_end = [
+            2,
+            "tx-end-flow-1",
+            "TransactionEvent",
+            {
+                "eventType": "Ended",
+                "timestamp": "2026-09-08T22:45:00Z",
+                "triggerReason": "RemoteStop",
+                "seqNo": 1,
+                "transactionInfo": {
+                    "transactionId": "TX-REMOTE-001",
+                    "chargingState": "Idle",
+                    "stoppedReason": "Remote"
+                },
+                "evse": {"id": 1, "connectorId": 1},
+                "meterValue": [
+                    {
+                        "timestamp": "2026-09-08T22:45:00Z",
+                        "sampledValue": [
+                            {"value": "15000", "measurand": "Energy.Active.Import.Register"}
+                        ]
+                    }
+                ]
+            }
+        ]
+        await communicator.send_json_to(tx_end)
+        res_end = await communicator.receive_json_from()
+        self.assertEqual(res_end[0], 3)
+
+        # Prüfen, ob DB Status wieder 'Available' ist und Session 'completed' mit 10 kWh
+        station_end = await database_sync_to_async(ChargingStation.objects.get)(charge_point_id="CP-OCPP2-01")
+        self.assertEqual(station_end.status, "Available")
+        self.assertFalse(station_end.is_charging)
+        self.assertIsNone(station_end.active_transaction_id)
+
+        session_completed = await database_sync_to_async(
+            lambda: ChargingSession.objects.filter(station=station_end, status="completed").first()
+        )()
+        self.assertIsNotNone(session_completed)
+        self.assertEqual(session_completed.total_energy_kwh, 10.0)
+
+        await communicator.disconnect()
+
 
 class V2GDispatchEngineTests(TestCase):
     def setUp(self):
