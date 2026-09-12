@@ -48,6 +48,11 @@ Jedes anstehende Feature wird in einer eigenständigen Spezifikation im Ordner `
    * **Status & Prio**: 🟡 60 % | 🟡 Mittel (Q2 / Q3 2027)
 
 6. 📱 **[`WIP_DUAL_APP_ECOSYSTEM_USER_VS_PARTNER.md`](./WIP_DUAL_APP_ECOSYSTEM_USER_VS_PARTNER.md)**
-   * **Ziel**: Evaluierung und Roadmap für das Two-App Ökosystem (`Sharegy Home` für Endkunden vs. `Sharegy Pro` für Installateure/Admins).
-   * **Status & Prio**: 🟡 50 % | 🟡 Mittel (Q1 2027)
+   * **Ziel**: Evaluierung und Roadmap für das Two-App Ökosystem (`Sharegy Home` für Endkunden vs. `Sharegy Pro` für Installateure/Admins mit QR-Scanner & Offline-Puffer).
+   * **Status & Prio**: 🟡 55 % | 🟡 Mittel (Q1 2027)
+
+7. 🧭 **[`WIP_ROLE_BASED_SIDENAV_AND_CONTEXT_NAVIGATION.md`](./WIP_ROLE_BASED_SIDENAV_AND_CONTEXT_NAVIGATION.md)**
+   * **Ziel**: Rollen- und kontextbasierte Aufteilung der Side-Navigation für EMS-Prosumer, Mieterstrom-Nutzer, Installateure und Liegenschafts-Admins inkl. Multi-Role Switcher.
+   * **Status & Prio**: 🟡 40 % | 🔴 Hoch (Q4 2026)
+
 

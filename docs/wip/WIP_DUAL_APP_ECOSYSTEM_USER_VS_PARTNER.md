@@ -1,53 +1,78 @@
-# 🛠️ [WIP] Dual-App Android-Ökosystem (Consumer App vs. Partner & Liegenschafts-Pro App)
+# 📱 [WIP] Dual-App Android-Ökosystem (Sharegy Home vs. Sharegy Pro)
 
-**Status:** In Konzeption / Strategische Evaluierung  
-**Fortschritt:** 🟡 50 %  
+**Status:** In Konzeption & Feature-Spezifikation  
+**Fortschritt:** 🟡 55 %  
 **Priorität:** 🟡 Mittel (Ziel: Q1 2027)  
-**Lead / Modul:** `mobile`, `frontend`, `accounts`  
+**Lead / Modul:** `mobile`, `frontend`, `accounts`, `operations`
 
 ---
 
 ## 🎯 1. Strategische Motivation
 
-Mit der Einführung des **Installateurs- & Flotten-Cockpits** und der **Liegenschafts-Administration (WEGs / Hausverwaltungen)** stellt sich die Frage nach der optimalen Mobile-App-Strategie:
+Mit dem Ausbau der B2B2C-Partnerstrategie (Installateure, Solar-Fachbetriebe, Wohnungsbaugesellschaften und Stadtwerke) entstehen zwei völlig unterschiedliche Nutzerprofile auf mobilen Endgeräten:
 
-### Die 2 Zielgruppen mit stark unterschiedlichen Bedürfnissen:
-1. **Endanwender & Mieter (Consumer)**:
-   * **Fokus**: Maximale Einfachheit, schlankes Design, Live-Energiefluss, Solarprognose, Wallbox-Quickboost, Monatsersparnis.
-   * **Ziel**: Schnelles Laden, minimale kognitive Last, Zero-B2B-Clutter.
-2. **Installateure, Hausverwalter & Tenant-Admins (Pro / B2B)**:
-   * **Fokus**: Flottenübersicht, Multiliegenschafts-Verwaltung, Zuweisung von Zählpunkten, 1-Klick-Inbetriebnahme, Fernwartung, AS4-Übertragungsprotokolle.
-   * **Ziel**: Produktivitäts-Werkzeug für den Arbeitsalltag vor Ort beim Kunden.
+```mermaid
+graph LR
+    subgraph B2C["📱 Sharegy Home (Consumer)"]
+        H1["Echtzeit-Energiefluss"]
+        H2["PV-Überschuss Wallbox"]
+        H3["Börsentarif-Fahrplan"]
+        H4["Monatliche Stromkosten"]
+    end
 
----
-
-## 📱 2. Vergleich der Ansätze
-
-| Kriterium | Option A: Einheitliche All-in-One App (RBAC-gesteuert) | Option B: Zwei getrennte Play-Store-Apps |
-|---|---|---|
-| **App 1 (Consumer)** | `Sharegy` (Endanwender, Mieter, Haushalte) | `Sharegy Home` (`de.sharegy.app`) |
-| **App 2 (B2B Pro)** | Identische App (zeigt Pro-Tabs nur bei Admin/Partner-Rolle) | `Sharegy Pro & Partner` (`de.sharegy.pro`) |
-| **Download-Größe** | ~14 MB (Vollständig) | ~8 MB (Home) / ~12 MB (Pro) |
-| **Play Store Positionierung** | Gemischte Zielgruppenansprache | Glasklare Trennung in B2C & B2B Keywords |
-| **Wartungsaufwand** | 🟢 **Sehr gering** (Eine Codebase, ein Build) | 🟡 Zwei Play-Store-Einträge, 2 Builds |
-| **Empfehlung** | **Phase 1 (Jetzt)**: Einheitliche App mit dynamischem RBAC-Switching | **Phase 2 (Skalierung)**: Eigener Store-Release für Partner |
+    subgraph B2B["🔧 Sharegy Pro (Techniker / Admin)"]
+        P1["Flotten-Status & Alarmierung"]
+        P2["Kamera QR-Scan Inbetriebnahme"]
+        P3["WSS Remote-RPC Diagnose"]
+        P4["Offline-Messpuffer vor Ort"]
+        P5["Mieterstrom-Zählerablesung"]
+    end
+```
 
 ---
 
-## 🏗️ 3. Architektur der Implementierung (Phase 1 vs. Phase 2)
+## 📱 2. Feature-Vergleich der beiden Android Apps
 
-### Phase 1: Dynamisches UI-Switching in der bestehenden App (Bereits Live ✅)
-* Wenn ein Benutzer sich anmeldet, prüft [`AppShell.jsx`](file:///c:/Users/Public/Dev/eswes/frontend/src/components/AppShell.jsx) die Rollen `isStaffOrAdmin` und `hasCommunityAdminAccess` sowie `PartnerMembership`.
-* Normale Nutzer sehen ausschließlich das aufgeräumte Home-Dashboard.
-* Installateure sehen zusätzlich das **Flotten-Cockpit (`/app/partner`)** und Hausverwalter den **Liegenschafts-Hub (`/app/tenant`)**.
-
-### Phase 2: Getrennter Build für `Sharegy Pro` (Geplant für Q1 2027)
-* Ein zweites Capacitor-Target `frontend/android-pro/` mit eigenem App-Icon (Dunkles Gold/Schwarz Pro-Branding), eigenem Package-Namen `de.sharegy.pro` und direktem Start im Flotten-Cockpit.
+| Kriterium | 🏠 `Sharegy Home` (Consumer & Mieter) | 🔧 `Sharegy Pro` (Installateur & Verwalter) |
+| :--- | :--- | :--- |
+| **Package Name** | `de.sharegy.app` | `de.sharegy.pro` |
+| **Zielgruppe** | Eigenheimbesitzer, Mieter, Wohnungseigentümer | PV-Installateure, Servicetechniker, Hausverwalter |
+| **Startbildschirm** | Live-Energiefluss & Autarkiegrad | Flotten-Health-Dashboard & Fehlertickets |
+| **Hardware-Features** | Standard Web-Push, Lokale Benachrichtigung | **Kamera-Barcode/QR-Scanner** für Inverter & Zähler, Bluetooth BLE (lokale Inbetriebnahme) |
+| **Offline-Fähigkeit** | Standard PWA Caching | **Offline-Inbetriebnahme-Puffer** (Speichert Anlagendaten im Keller ohne Mobilfunk und synct bei Netzempfang) |
+| **Diagnose-Tools** | Keine (Einfachheit steht im Vordergrund) | **WSS Remote-RPC Konsole**, Ping-Tests, Inverter-Modbus Register-Dump |
+| **Branding / UI** | Helles/Dunkles Theme, Akzentfarben des Stadtwerks | Technisches "Pro Dark"-Design mit Hochkontrast-Indikatoren |
 
 ---
 
-## 🚀 4. Nächste Umsetzungsschritte
+## 🏗️ 3. Technische Umsetzung mit Capacitor & Android Studio
 
-1. **Sprint 1**: Optimierung des mobilen Tabs-Switchers im Partner-Dashboard für Smartphones.
-2. **Sprint 2**: Evaluierung der Google Play Store Richtlinien für eigenständige B2B-Begleit-Apps.
-3. **Sprint 3**: Bereitstellung von Fastlane-Lanes für `bundleProRelease`.
+Um maximale Code-Wiederverwendung zu gewährleisten, nutzen beide Apps dieselbe React-Codebase mit unterschiedlichen Build-Flavors:
+
+```mermaid
+graph TD
+    ReactCode["Gemeinsame React/Vite Codebase<br>(frontend/src)"]
+    
+    ReactCode -->|Flavor: Home| CapHome["Capacitor Target: Home<br>• App ID: de.sharegy.app<br>• Entry: /app/home<br>• Asset-Set: Consumer Icons"]
+    ReactCode -->|Flavor: Pro| CapPro["Capacitor Target: Pro<br>• App ID: de.sharegy.pro<br>• Entry: /app/partner<br>• Asset-Set: Pro Gold/Dark Icons<br>• Native Plugins: Barcode Scanner, BLE"]
+    
+    CapHome --> APKHome["Sharegy Home APK / AAB"]
+    CapPro --> APKPro["Sharegy Pro APK / AAB"]
+```
+
+### 3.1 Native Capacitor-Plugins für `Sharegy Pro`
+1. `@capacitor-community/barcode-scanner`:
+   * Ermöglicht das direkte Scannen von Wechselrichter-Typenschildern, Sungrow/SMA QR-Codes und Smart-Meter Barcodes im Zählerschrank.
+2. `@capacitor/network` & `@capacitor/preferences`:
+   * Zuverlässige Erkennung von Offline-Zuständen in Zählerräumen und automatischer Synchronisations-Queue.
+3. `@capacitor-community/bluetooth-le` (*Optional Q2 2027*):
+   * Direkte lokale Konfiguration von Shelly- und Edge-Gateways ohne Kunden-WLAN.
+
+---
+
+## 🚀 4. Meilensteine & Roadmap
+
+* **Phase 1 (Live ✅)**: Responsive Web-App mit integriertem Partner-Cockpit und dynamischem Rollenfilter.
+* **Phase 2 (Q4 2026)**: Fertigstellung des Rollen- & Kontext-Sidenav-Splittings ([`WIP_ROLE_BASED_SIDENAV_AND_CONTEXT_NAVIGATION.md`](./WIP_ROLE_BASED_SIDENAV_AND_CONTEXT_NAVIGATION.md)).
+* **Phase 3 (Q1 2027)**: Einrichtung des separaten Capacitor Build-Flavors `android-pro/` mit QR-Scanner-Integration.
+* **Phase 4 (Q2 2027)**: Eigener Google Play Store Release für `Sharegy Pro: Installateur & Flotte`.

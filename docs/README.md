@@ -116,7 +116,8 @@ docs/
 | ⚡ **[`WIP_BNETZA_CLS_SMART_METER_GATEWAY.md`](./wip/WIP_BNETZA_CLS_SMART_METER_GATEWAY.md)** | § 14a EnWG / SMGW | 🟡 40% / 🔴 Hoch | Direkte Kopplung an Smart-Meter-Gateways über den CLS-Kanal |
 | 🔒 **[`WIP_DYNAMIC_WHITELABEL_SSL_PROVISIONING.md`](./wip/WIP_DYNAMIC_WHITELABEL_SSL_PROVISIONING.md)** | Whitelabel / TLS | 🟡 70% / 🟡 Mittel | Automatisierte Let's Encrypt SSL-Provisionierung für CNAME-Domains |
 | 📈 **[`WIP_AUTOMATED_FLEXIBILITY_AND_VPP_MARKET_CLEARING.md`](./wip/WIP_AUTOMATED_FLEXIBILITY_AND_VPP_MARKET_CLEARING.md)** | VPP & Regelenergie | 🟡 60% / 🟡 Mittel | Direkte Kopplung an Flex-Aggregatoren & Erlösausschüttungs-Clearing |
-| 📱 **[`WIP_DUAL_APP_ECOSYSTEM_USER_VS_PARTNER.md`](./wip/WIP_DUAL_APP_ECOSYSTEM_USER_VS_PARTNER.md)** | Mobile App | 🟡 50% / 🟡 Mittel | Evaluierung der Two-App Strategie (Sharegy Home vs. Sharegy Pro) |
+| 📱 **[`WIP_DUAL_APP_ECOSYSTEM_USER_VS_PARTNER.md`](./wip/WIP_DUAL_APP_ECOSYSTEM_USER_VS_PARTNER.md)** | Mobile App | 🟡 55% / 🟡 Mittel | Evaluierung der Two-App Strategie (Sharegy Home vs. Sharegy Pro mit QR-Inbetriebnahme) |
+| 🧭 **[`WIP_ROLE_BASED_SIDENAV_AND_CONTEXT_NAVIGATION.md`](./wip/WIP_ROLE_BASED_SIDENAV_AND_CONTEXT_NAVIGATION.md)** | Frontend UX | 🟡 40% / 🔴 Hoch | Rollen- & kontextbasierte Aufteilung der Side-Navigation für EMS, Mieter, Partner & Admins |
 
 ---
 
