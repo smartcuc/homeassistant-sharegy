@@ -295,6 +295,31 @@ class WallboxRemoteActionView(APIView):
 
         if action == "remote-start":
             id_tag = request.data.get("id_tag", "APP_USER")
+            if station.status in ["Available", "Preparing", "SuspendedEV", "SuspendedEVSE"]:
+                station.status = "Charging"
+                target_a = station.max_current_a or 16.0
+                station.target_current_a = target_a
+                p_phases = station.phases or 3
+                if station.active_power_w <= 0.0:
+                    station.active_power_w = round(target_a * 230.0 * p_phases, 1)
+                    station.current_l1 = target_a
+                    station.current_l2 = target_a if p_phases >= 2 else 0.0
+                    station.current_l3 = target_a if p_phases >= 3 else 0.0
+                active_sess = ChargingSession.objects.filter(station=station, status="active").first()
+                if not active_sess:
+                    import random
+                    new_tx = random.randint(100000, 999999)
+                    ChargingSession.objects.create(
+                        station=station,
+                        transaction_id=new_tx,
+                        id_tag=id_tag,
+                        user=station.home.user if station.home else user,
+                        start_time=timezone.now(),
+                        meter_start_wh=float(station.total_energy_kwh or 0.0) * 1000.0,
+                        status="active"
+                    )
+                    station.active_transaction_id = new_tx
+                station.save()
             if channel_layer:
                 async_to_sync(channel_layer.group_send)(
                     f"ocpp_{station.charge_point_id}",
@@ -308,6 +333,20 @@ class WallboxRemoteActionView(APIView):
                 active_sess = ChargingSession.objects.filter(station=station, status="active").order_by("-start_time").first()
                 if active_sess:
                     tx_id = active_sess.transaction_id
+            station.status = "Available"
+            station.active_power_w = 0.0
+            station.target_current_a = 0.0
+            station.current_l1 = 0.0
+            station.current_l2 = 0.0
+            station.current_l3 = 0.0
+            station.active_transaction_id = None
+            station.save()
+            active_sess = ChargingSession.objects.filter(station=station, status="active").first()
+            if active_sess:
+                active_sess.status = "completed"
+                active_sess.stop_time = timezone.now()
+                active_sess.stop_reason = "Remote"
+                active_sess.save()
             if channel_layer:
                 async_to_sync(channel_layer.group_send)(
                     f"ocpp_{station.charge_point_id}",

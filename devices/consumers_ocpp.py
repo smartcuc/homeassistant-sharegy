@@ -358,6 +358,31 @@ class OcppConsumer(AsyncWebsocketConsumer):
             await self.save_get_variables_result(self.cp_id, payload.get("getVariableResult", []))
             await self.broadcast_wallbox_update()
 
+        # 5. RemoteStart / RequestStartTransaction CallResult (z.B. [3, id, {}] oder [3, id, {"status": "Accepted"}])
+        pending_start = cache.get(f"pending_start_{unique_id}")
+        if pending_start:
+            cache.delete(f"pending_start_{unique_id}")
+            res_status = payload.get("status", "Accepted")
+            if res_status not in ["Rejected", "Invalid", "Blocked"]:
+                connector_id = pending_start.get("connector_id", 1)
+                id_tag = pending_start.get("id_tag", "APP_USER")
+                await self.create_start_transaction(self.cp_id, connector_id, id_tag, 0.0)
+                await self.update_status(self.cp_id, connector_id, "Charging", "NoError")
+                await self.broadcast_wallbox_update()
+                logger.info(f"⚡ Ladevorgang nach positivem CallResult für {self.cp_id} auf 'Charging' gesetzt.")
+
+        # 6. RemoteStop / RequestStopTransaction CallResult
+        pending_stop = cache.get(f"pending_stop_{unique_id}")
+        if pending_stop:
+            cache.delete(f"pending_stop_{unique_id}")
+            res_status = payload.get("status", "Accepted")
+            if res_status not in ["Rejected", "Invalid", "Blocked"]:
+                tx_id = pending_stop.get("transaction_id")
+                await self.finish_stop_transaction(self.cp_id, tx_id, 0.0, "Remote", "APP_USER")
+                await self.update_status(self.cp_id, 1, "Available", "NoError")
+                await self.broadcast_wallbox_update()
+                logger.info(f"🛑 Ladevorgang nach positivem CallResult für {self.cp_id} beendet.")
+
     async def send_call_result(self, unique_id: str, payload: dict):
         """Sendet ein OCPP CALLRESULT [3, unique_id, payload]."""
         msg = [CALLRESULT, unique_id, payload]
@@ -620,15 +645,17 @@ class OcppConsumer(AsyncWebsocketConsumer):
                     "type": "ISO14443"
                 }
             }
-            await self.send_call("RequestStartTransaction", payload)
-            logger.info(f"▶️ RequestStartTransaction (OCPP 2.x) an {self.cp_id} (Tag: {id_tag})")
+            call_id = await self.send_call("RequestStartTransaction", payload)
+            cache.set(f"pending_start_{call_id}", {"connector_id": connector_id, "id_tag": id_tag}, timeout=120)
+            logger.info(f"▶️ RequestStartTransaction (OCPP 2.x) an {self.cp_id} (Tag: {id_tag}, CallId: {call_id})")
         else:
             payload = {
                 "connectorId": connector_id,
                 "idTag": str(id_tag)
             }
-            await self.send_call("RemoteStartTransaction", payload)
-            logger.info(f"▶️ RemoteStartTransaction an {self.cp_id} (Tag: {id_tag})")
+            call_id = await self.send_call("RemoteStartTransaction", payload)
+            cache.set(f"pending_start_{call_id}", {"connector_id": connector_id, "id_tag": id_tag}, timeout=120)
+            logger.info(f"▶️ RemoteStartTransaction an {self.cp_id} (Tag: {id_tag}, CallId: {call_id})")
 
     async def ocpp_remote_stop(self, event):
         """Stoppt die aktive Ladesitzung."""
@@ -640,12 +667,14 @@ class OcppConsumer(AsyncWebsocketConsumer):
                 cached_raw_id = cache.get(f"ocpp_tx_raw_{self.cp_id}")
                 str_tx_id = str(cached_raw_id) if cached_raw_id else str(tx_id)
                 payload = {"transactionId": str_tx_id}
-                await self.send_call("RequestStopTransaction", payload)
-                logger.info(f"⏹️ RequestStopTransaction (OCPP 2.x) an {self.cp_id} (Tx: {str_tx_id})")
+                call_id = await self.send_call("RequestStopTransaction", payload)
+                cache.set(f"pending_stop_{call_id}", {"transaction_id": tx_id}, timeout=120)
+                logger.info(f"⏹️ RequestStopTransaction (OCPP 2.x) an {self.cp_id} (Tx: {str_tx_id}, CallId: {call_id})")
             else:
                 payload = {"transactionId": int(tx_id)}
-                await self.send_call("RemoteStopTransaction", payload)
-                logger.info(f"⏹️ RemoteStopTransaction an {self.cp_id} (Tx: {tx_id})")
+                call_id = await self.send_call("RemoteStopTransaction", payload)
+                cache.set(f"pending_stop_{call_id}", {"transaction_id": tx_id}, timeout=120)
+                logger.info(f"⏹️ RemoteStopTransaction an {self.cp_id} (Tx: {tx_id}, CallId: {call_id})")
 
     async def ocpp_unlock_connector(self, event):
         """Entriegelt das Ladekabel."""
@@ -985,6 +1014,22 @@ class OcppConsumer(AsyncWebsocketConsumer):
         elif station.home and station.home.user:
             user = station.home.user
 
+        existing_session = ChargingSession.objects.filter(station=station, status="active").first()
+        if existing_session:
+            fields_to_update = []
+            if custom_tx_id and existing_session.transaction_id != custom_tx_id:
+                existing_session.transaction_id = custom_tx_id
+                fields_to_update.append("transaction_id")
+            if float(meter_start) > 0 and existing_session.meter_start_wh <= 0:
+                existing_session.meter_start_wh = float(meter_start)
+                fields_to_update.append("meter_start_wh")
+            if fields_to_update:
+                existing_session.save(update_fields=fields_to_update)
+            station.active_transaction_id = existing_session.transaction_id
+            station.status = "Charging"
+            station.save(update_fields=["active_transaction_id", "status"])
+            return existing_session.transaction_id, "Accepted"
+
         tx_id = custom_tx_id or random.randint(100000, 999999)
         session = ChargingSession.objects.create(
             station=station,
@@ -998,8 +1043,17 @@ class OcppConsumer(AsyncWebsocketConsumer):
         station.active_transaction_id = tx_id
         station.status = "Charging"
         station.session_energy_kwh = 0.0
+        target_a = station.max_current_a or 16.0
+        station.target_current_a = target_a
+        p_phases = station.phases or 3
+        if station.active_power_w <= 0.0:
+            station.active_power_w = round(target_a * 230.0 * p_phases, 1)
+            station.current_l1 = target_a
+            station.current_l2 = target_a if p_phases >= 2 else 0.0
+            station.current_l3 = target_a if p_phases >= 3 else 0.0
         station.save(update_fields=[
             "active_transaction_id", "status", "session_energy_kwh",
+            "target_current_a", "active_power_w", "current_l1", "current_l2", "current_l3",
             "reserved_id_tag", "reservation_id", "reservation_expiry"
         ])
         return tx_id, "Accepted"
