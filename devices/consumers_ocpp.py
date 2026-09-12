@@ -145,7 +145,14 @@ class OcppConsumer(AsyncWebsocketConsumer):
 
         elif action == "StatusNotification":
             # Unterstützt OCPP 1.6 (`status`) & OCPP 2.0.1/2.1 (`connectorStatus`)
-            connector_id = payload.get("connectorId", 1)
+            raw_cid = payload.get("connectorId")
+            if raw_cid is None:
+                raw_cid = payload.get("evseId", 1)
+            try:
+                connector_id = int(raw_cid)
+            except (ValueError, TypeError):
+                connector_id = 1
+
             status = payload.get("status") or payload.get("connectorStatus", "Available")
             if status == "Occupied":
                 status = "Preparing"
@@ -827,10 +834,23 @@ class OcppConsumer(AsyncWebsocketConsumer):
         from .models_ocpp import ChargingStation
         station = ChargingStation.objects.filter(charge_point_id__iexact=cp_id).first()
         if station:
-            station.status = status
-            station.error_code = error_code
             station.is_online = True
             station.last_heartbeat = timezone.now()
+
+            # connector_id == 0 repräsentiert den Haupt-Controller / die Gesamtbox
+            if connector_id == 0:
+                if status in ["Faulted", "Unavailable"]:
+                    station.status = status
+                    station.error_code = error_code
+                    station.active_power_w = 0.0
+                    station.save(update_fields=["status", "error_code", "is_online", "last_heartbeat", "active_power_w"])
+                else:
+                    station.save(update_fields=["is_online", "last_heartbeat"])
+                return
+
+            # connector_id >= 1 (Ladestecker / EVSE)
+            station.status = status
+            station.error_code = error_code
             # Wenn Station nicht aktiv lädt oder blockiert/reserviert ist, Live-Leistung nullen
             if status in ["Available", "Faulted", "Unavailable", "Reserved"]:
                 station.active_power_w = 0.0
