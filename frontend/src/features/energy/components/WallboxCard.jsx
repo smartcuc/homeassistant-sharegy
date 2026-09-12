@@ -241,7 +241,7 @@ export default function WallboxCard({ onOpenAddModal }) {
                             <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                                 {t("wallbox.empty_title", "E-Auto & Wallbox Smart-Charging")}
                                 <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                                    OCPP 1.6-J
+                                    OCPP 1.6 / 2.0.1 / 2.1
                                 </span>
                             </h3>
                             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">

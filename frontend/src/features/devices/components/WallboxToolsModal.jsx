@@ -220,7 +220,7 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                                     {t("wallbox.tools_title", "OCPP 1.6 / 2.0.1 / 2.1 & V2G Experte")}
                                 </h3>
                                 <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 border border-indigo-300/80 dark:border-indigo-800/80">
-                                    {station.ocpp_version?.toUpperCase() || "OCPP 1.6-J"}
+                                    {station.ocpp_version ? station.ocpp_version.replace("ocpp", "OCPP ") : "OCPP (1.6 / 2.0.1 / 2.1)"}
                                 </span>
                                 {station.supports_bidirectional && (
                                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 border border-emerald-300/80 dark:border-emerald-800/80">
@@ -523,7 +523,7 @@ export default function WallboxToolsModal({ isOpen, onClose, station }) {
                     {activeTab === "trigger" && (
                         <div className="space-y-4">
                             <p className="text-xs text-slate-500 dark:text-slate-400">
-                                {t("ocpp.trigger_desc", "Sende einen OCPP 1.6 / 2.0.1 TriggerMessage Befehl, um die Wallbox zur sofortigen Übertragung von Messwerten oder Statusnachrichten zu zwingen.")}
+                                {t("ocpp.trigger_desc", "Sende einen OCPP 1.6 / 2.0.1 / 2.1 TriggerMessage Befehl, um die Wallbox zur sofortigen Übertragung von Messwerten oder Statusnachrichten zu zwingen.")}
                             </p>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

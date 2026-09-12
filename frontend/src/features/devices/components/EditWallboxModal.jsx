@@ -234,7 +234,7 @@ export default function EditWallboxModal({ isOpen, onClose, station }) {
                     <div className="p-3.5 bg-slate-50 dark:bg-slate-850 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-1.5">
                         <div className="flex items-center justify-between">
                             <span className="font-bold text-slate-700 dark:text-slate-300">
-                                {t("wallbox.ocpp_url_label", "OCPP 1.6-J Server URL")}
+                                {t("wallbox.ocpp_url_label", "OCPP Server URL (1.6 / 2.0.1 / 2.1)")}
                             </span>
                             <button
                                 type="button"

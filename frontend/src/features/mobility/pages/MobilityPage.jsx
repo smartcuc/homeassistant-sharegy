@@ -123,7 +123,7 @@ export default function MobilityPage() {
 
                         <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
                             <div className="text-2xl">⚡</div>
-                            <h3 className="text-sm font-bold text-white">OCPP 1.6-J & Shelly Support</h3>
+                            <h3 className="text-sm font-bold text-white">OCPP (1.6 / 2.0.1 / 2.1) & Shelly Support</h3>
                             <p className="text-xs text-indigo-200/70 leading-relaxed">
                                 Kompatibel mit allen gängigen Wallboxen (go-e, Easee, Heidelberg, Webasto, Wallbe, Keba u.v.m.).
                             </p>

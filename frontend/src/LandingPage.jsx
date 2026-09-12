@@ -68,7 +68,7 @@ export default function LandingPage() {
     const FAQS = [
         {
             q: t("landing.faq_1_q", "Brauche ich eine zusätzliche teure Hardware-Box im Zählerschrank?"),
-            a: t("landing.faq_1_a", "Nein! Sharegy ist 100% Cloud- & Protokoll-basiert. Wir verbinden uns direkt über die Standard-Schnittstellen deiner vorhandenen Geräte (Modbus TCP, OCPP 1.6-J, SunSpec, Cloud-APIs). Du sparst dir Anschaffungs- und Installationskosten von 800 € bis 1.500 € für proprietäre Hardware.")
+            a: t("landing.faq_1_a", "Nein! Sharegy ist 100% Cloud- & Protokoll-basiert. Wir verbinden uns direkt über die Standard-Schnittstellen deiner vorhandenen Geräte (Modbus TCP, OCPP 1.6 / 2.0.1 / 2.1, SunSpec, Cloud-APIs). Du sparst dir Anschaffungs- und Installationskosten von 800 € bis 1.500 € für proprietäre Hardware.")
         },
         {
             q: t("landing.faq_2_q", "Wie funktioniert die § 14a EnWG Netzentgelt-Reduzierung?"),
@@ -324,7 +324,7 @@ export default function LandingPage() {
 
                     <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-xs font-mono text-slate-600">
                         <span className="px-3 py-1 rounded-lg bg-slate-100 border border-slate-200 font-semibold">Modbus TCP</span>
-                        <span className="px-3 py-1 rounded-lg bg-slate-100 border border-slate-200 font-semibold">OCPP 1.6-J</span>
+                        <span className="px-3 py-1 rounded-lg bg-slate-100 border border-slate-200 font-semibold">OCPP 1.6 / 2.0.1 / 2.1</span>
                         <span className="px-3 py-1 rounded-lg bg-slate-100 border border-slate-200 font-semibold">SunSpec</span>
                         <span className="px-3 py-1 rounded-lg bg-slate-100 border border-slate-200 font-semibold">SG-Ready</span>
                         <span className="px-3 py-1 rounded-lg bg-slate-100 border border-slate-200 font-semibold">REST API & MQTT</span>
