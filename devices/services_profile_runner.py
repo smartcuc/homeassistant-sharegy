@@ -854,11 +854,11 @@ def _parse_metrics_from_payload(profile: dict, raw_payload: dict) -> dict:
         # Intelligente Multi-Key Fallbacks falls JSONPath keinen Treffer liefert
         if raw_val is None:
             if metric_name == "pv_power_w":
-                # Multi-String Summen prüfen (ppv1..ppv8, pv1_power..pv8_power)
+                # Multi-String Summen prüfen (ppv1..ppv16, pv1_power..pv16_power)
                 str_sum = 0.0
                 has_str = False
-                for s_i in range(1, 9):
-                    for sk in [f"ppv{s_i}", f"pPv{s_i}", f"p_pv{s_i}", f"pv{s_i}_power", f"mppt{s_i}_power"]:
+                for s_i in range(1, 17):
+                    for sk in [f"ppv{s_i}", f"pPv{s_i}", f"p_pv{s_i}", f"pv{s_i}_power", f"mppt{s_i}_power", f"mppt{s_i}"]:
                         if sk in data_dict and data_dict[sk] is not None:
                             s_clean = _clean_numeric_value(data_dict[sk], target_unit="W")
                             if s_clean and s_clean > 0:
@@ -873,10 +873,11 @@ def _parse_metrics_from_payload(profile: dict, raw_payload: dict) -> dict:
                 else:
                     for k in [
                         "curr_power", "curr_pac", "currPower", "currPac", "currentPower", "current_power",
-                        "currentEnergy", "current_energy", "pac", "ppv", "ppv1", "ppv2", "pPv1", "pPv2",
-                        "solar_power", "solarpower", "solarPower", "output_power", "outputpower", "outputPower",
-                        "invPac", "power", "pv_power", "p_act",
-                        "pvPower", "pAct", "pact", "pac1", "ppvTotal", "p_pv", "p_pv1", "p_pv2", "total_power",
+                        "currentEnergy", "current_energy", "currenergy", "curr_energy", "pac", "ppv",
+                        "ppv1", "ppv2", "pPv1", "pPv2", "solar_power", "solarpower", "solarPower",
+                        "output_power", "outputpower", "outputPower", "invPac", "power", "pv_power",
+                        "p_act", "pvPower", "pAct", "pact", "pac1", "ppvTotal", "p_pv", "p_pv1", "p_pv2",
+                        "total_power", "sys_power", "syspower",
                         "active_power", "activePower", "real_power", "realPower", "inverter_power", "inverterPower"
                     ]:
                         if k in data_dict and data_dict[k] is not None:

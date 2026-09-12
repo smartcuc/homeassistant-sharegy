@@ -230,6 +230,57 @@ class AdapterContractMatrixTest(TestCase):
         self.assertEqual(tel9.battery_power_w, -2200.0)
         self.assertEqual(tel9.battery_soc, 65.0)
 
+        # Test 10: Growatt PlantDetailAPI mit currentEnergy (z. B. "2.45 kW")
+        raw_plant_detail = {
+            "back": {
+                "plantData": {
+                    "currentEnergy": "2.45 kW",
+                    "todayEnergy": "15.4 kWh",
+                    "totalEnergy": "3450.2 kWh",
+                }
+            }
+        }
+        tel10 = adapter.parse_payload(raw_plant_detail)
+        self.assertEqual(tel10.pv_power_w, 2450.0)
+        self.assertEqual(tel10.daily_yield_kwh, 15.4)
+
+        # Test 11: Multi-String Summe über 4 MPPT Strings
+        raw_multi_string = {
+            "data": {
+                "ppv1": 1200.0,
+                "ppv2": 1400.0,
+                "ppv3": 950.0,
+                "ppv4": 850.0,
+                "eToday": 18.2,
+            }
+        }
+        tel11 = adapter.parse_payload(raw_multi_string)
+        self.assertEqual(tel11.pv_power_w, 4400.0)
+
+        # Test 12: DC Volt * Ampere Ertragsberechnung
+        raw_va_calc = {
+            "data": {
+                "vpv1": 340.0,
+                "ipv1": 5.0,
+                "vpv2": 320.0,
+                "ipv2": 4.0,
+                "eToday": 12.0,
+            }
+        }
+        tel12 = adapter.parse_payload(raw_va_calc)
+        self.assertEqual(tel12.pv_power_w, 2980.0) # (340*5) + (320*4) = 1700 + 1280 = 2980 W
+
+        # Test 13: Verschachtelte Listen in Multimap Responses
+        raw_nested_responses = {
+            "responses": [
+                {"PlantList": [{"plantId": "12345"}]},
+                {"obj": [{"deviceSn": "INV001", "pac": 3150.0, "eToday": 14.2}]},
+            ]
+        }
+        tel13 = adapter.parse_payload(raw_nested_responses)
+        self.assertEqual(tel13.pv_power_w, 3150.0)
+        self.assertEqual(tel13.daily_yield_kwh, 14.2)
+
     def test_04_standard_ingest_core_pipeline(self):
         """Testet die herstellerunabhängige Standard-Ingest-Core Pipeline."""
         tel = CanonicalTelemetry(
