@@ -98,6 +98,36 @@ Struktur der PV-Erzeugungsanlagen.
 
 ### `SolarForecast`
 96-Stunden PV-Erzeugungsprognose in 15-Minuten-Schritten.
+- `home`, `timestamp`, `expected_power_w`, `confidence_interval_low`, `confidence_interval_high`.
+
+---
+
+## 5. `core` & `accounts` Apps (Multi-Tenancy, B2B Whitelabel & Partner-Flotte)
+
+### `Tenant`
+Repräsentiert eine Liegenschaft, WEG oder ein B2B-Stadtwerk/EVU.
+- `name`, `slug`, `created_at`.
+- **Whitelabel-Branding**: `primary_color`, `secondary_color`, `accent_color`, `button_color`, `logo_url`, `favicon_url`, `company_legal_name`, `support_email`, `custom_domain`, `is_whitelabel_active`.
+
+### `TenantMembership`
+Verknüpfung von Benutzern mit Liegenschaften.
+- `user`, `tenant`, `role` (`admin`, `member`, `installer`, `auditor`, `helpdesk`).
+
+### `PartnerCompany`
+Installateursbetrieb / Fachpartner für Flottenmanagement.
+- `name`, `slug`, `partner_tier` (`standard`, `pro`, `premium`, `enterprise`), `contact_email`, `phone`, `city`, `postal_code`.
+
+### `PartnerMembership`
+Mitarbeiter des Installateursbetriebs.
+- `user`, `partner_company`, `role` (`admin`, `technician`, `support`).
+
+### `MaintenanceConsent`
+DSGVO- und § 14a-konforme Kundenfreigabe für Fernwartung & Ferndiagnose.
+- `home`, `partner_company`, `status` (`active`, `revoked`, `pending`), `allow_remote_control`, `valid_until`, `notes`.
+
+### `Meter` & `BalanceSlot`
+Eichrechtskonforme Zählpunkte und 15-Minuten-Lastgangsaldierung nach § 42b EnWG (Gemeinschaftliche Gebäudeversorgung).
+
 - `generator_string` (ForeignKey $ightarrow$ `GeneratorString`).
 - `timestamp` (DateTimeField): Prognosezeitpunkt.
 - `power_w` (FloatField): Physikalisch/ML-berechnete prognostizierte Leistung.

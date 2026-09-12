@@ -1,6 +1,8 @@
 # ⚡ Sharegy Documentation & Knowledge Base Index
 
-Willkommen in der offiziellen Dokumentation der **Sharegy**-Plattform (Smart Home Energy Management & Community Energy Sharing).
+**Stand:** 12. September 2026 (v5.3 / Milestone 9 Live)
+
+Willkommen im offiziellen Wissens- und Dokumentations-Hub der **Sharegy**-Plattform (Smart Home Energy Management & Community Energy Sharing).
 
 ---
 
@@ -16,7 +18,7 @@ docs/
  ├── 🔌 integrations/    → Cloud-Inverter, Smart-Meter, Home Assistant & MQTT Guides
  ├── 📢 marketing/       → B2B-Vertriebsmaterialien, Pitch-Kits, Leistungsmatrizen & Teaser
  ├── 📋 walkthroughs/    → Historische Meilenstein- und Entwicklungs-Protokolle
- └── 🧪 wip/             → Entwürfe, Optimierungspläne, Code-Audits & Refactorings
+ └── 🧪 wip/             → Aktiver Entwicklungs-Backlog & Optimierungs-Masterplan
 ```
 
 ---
@@ -26,19 +28,16 @@ docs/
 | Dokument | Beschreibung |
 |---|---|
 | 🌐 **[`DECOUPLED_MONITORING_AND_REMOTE_RPC_ARCHITECTURE.md`](./architecture/DECOUPLED_MONITORING_AND_REMOTE_RPC_ARCHITECTURE.md)** | **NEU:** Entkoppelte Monitoring-Subdomain (`mon.sharegy.de`), WSS Reverse-RPC Fernwartung & Edge-Isolation |
-| 🏛️ **[`ARCHITECTURE.md`](./architecture/ARCHITECTURE.md)** | Gesamtsystem-Architektur, Dual-Core Konzept, Tech-Stack & Datenflüsse |
+| 🏛️ **[`ARCHITECTURE.md`](./architecture/ARCHITECTURE.md)** | Gesamtsystem-Architektur, Dual-Core Konzept, Tech-Stack, Subdomains & Datenflüsse |
 | 🧭 **[`SHAREGY_STRATEGIC_HORIZONS_AND_IMPLEMENTATION_BLUEPRINT.md`](./architecture/SHAREGY_STRATEGIC_HORIZONS_AND_IMPLEMENTATION_BLUEPRINT.md)** | Strategische Handlungsempfehlungen, Umsetzungs-Statusmatrix & Realisierungspläne |
 | 🗺️ **[`SHAREGY_STRATEGIC_ROADMAP.md`](./architecture/SHAREGY_STRATEGIC_ROADMAP.md)** | Strategische Produkt-Roadmap (Meilensteine 1 bis 9 inkl. Whitelabel & Mako) |
-| 🗄️ **[`DATA_MODEL.md`](./architecture/DATA_MODEL.md)** | Vollständige Datenmodell-Referenz (EMS, Forecast, Market, Metering, Core) |
-| 🏢 **[`VPP_AND_VIRTUAL_METER_GUIDE.md`](./architecture/VPP_AND_VIRTUAL_METER_GUIDE.md)** | Virtueller Summenzähler (§ 42b EnWG) & VPP Aggregator Engine (aFRR/SRL, Redispatch 2.0) |
-| ⚡ **[`EMS_SYSTEM_GUIDE.md`](./architecture/EMS_SYSTEM_GUIDE.md)** | Home Energy Management System: Telemetrie, Deadband-Filter, Flow-Engine & Sankey |
+| 🗄️ **[`DATA_MODEL.md`](./architecture/DATA_MODEL.md)** | Vollständige Datenmodell-Referenz (EMS, Forecast, Market, Metering, Core, Partner) |
+| 🏢 **[`VPP_AND_VIRTUAL_METER_GUIDE.md`](./architecture/VPP_AND_VIRTUAL_METER_GUIDE.md)** | Virtueller Summenzähler (§ 42b EnWG), 15m-Lastgänge & VPP Aggregator Engine (aFRR/SRL, Redispatch 2.0) |
+| ⚡ **[`EMS_SYSTEM_GUIDE.md`](./architecture/EMS_SYSTEM_GUIDE.md)** | Home Energy Management System: Telemetrie, Deadband-Filter, Flow-Engine, Tarife, Tibber & 96h Solar-Forecast |
 | 🚗 **[`SHAREGY_V2G_V2H_BIDIRECTIONAL_CHARGING_ARCHITECTURE.md`](./architecture/SHAREGY_V2G_V2H_BIDIRECTIONAL_CHARGING_ARCHITECTURE.md)** | Bidirektionales Laden (V2G/V2H), ISO 15118-20, OCPP 2.0.1 & dynamische Entladestrategien |
-| 📊 **[`ENERGY_SHARING_METER_INGEST_GUIDE.md`](./architecture/ENERGY_SHARING_METER_INGEST_GUIDE.md)** | Ingestion-Architektur für 15-Minuten-Lastgänge & Zählpunkte |
-| 🎯 **[`SHAREGY_STRATEGIC_EVALUATION_AND_GAP_ANALYSIS.md`](./architecture/SHAREGY_STRATEGIC_EVALUATION_AND_GAP_ANALYSIS.md)** | Gesamtevaluation: Stärken, Schwachstellen & Masterplan |
+| 🎯 **[`SHAREGY_STRATEGIC_EVALUATION_AND_GAP_ANALYSIS.md`](./architecture/SHAREGY_STRATEGIC_EVALUATION_AND_GAP_ANALYSIS.md)** | Gesamtevaluation: Stärken, Marktlücken & strategischer Masterplan |
 | 🏆 **[`SHAREGY_COMPETITOR_BENCHMARK_AND_EVALUATION.md`](./architecture/SHAREGY_COMPETITOR_BENCHMARK_AND_EVALUATION.md)** | Mitbewerber-Vergleich (1KOMMA5°, Tibber, evcc, Exnaton, Clever-PV) & Matrix |
 | 💰 **[`SHAREGY_FINANCIAL_VALUATION_AND_DEVELOPMENT_COSTS.md`](./architecture/SHAREGY_FINANCIAL_VALUATION_AND_DEVELOPMENT_COSTS.md)** | Finanzielle Bewertung, Substanzwert (Cost-to-Duplicate) & ARR-Multiples |
-| 💶 **[`TARIFF_AND_MARKET.md`](./architecture/TARIFF_AND_MARKET.md)** | Stromtarife (Statisch / Dynamisch), EPEX Spot Börsenpreise & Tibber API |
-| ☀️ **[`SOLAR_FORECAST.md`](./architecture/SOLAR_FORECAST.md)** | 96h Hybrid-Prognose (Open-Meteo Wetter, Physik-Modell & Random Forest ML) |
 | 📈 **[`STRESS_TEST_REPORT_200U_4000D.md`](./architecture/STRESS_TEST_REPORT_200U_4000D.md)** | Lasttest-Bericht (200 parallele Nutzer, 4.000 simulierte IoT-Geräte) |
 
 ---
@@ -59,8 +58,7 @@ docs/
 
 | Dokument | Beschreibung |
 |---|---|
-| 📱 **[`ANDROID_APP_BUILD_AND_RELEASE.md`](./mobile/ANDROID_APP_BUILD_AND_RELEASE.md)** | Native Android App (Capacitor 7, Gradle Build, Deep Linking & Signing) |
-| 🛠️ **[`ANDROID_STUDIO_SETUP_GUIDE.md`](./mobile/ANDROID_STUDIO_SETUP_GUIDE.md)** | Schritt-für-Schritt Anleitung: Android Studio, SDKs & Emulator |
+| 📱 **[`ANDROID_APP_DEVELOPMENT_AND_RELEASE_GUIDE.md`](./mobile/ANDROID_APP_DEVELOPMENT_AND_RELEASE_GUIDE.md)** | **Konsolidiert:** Native Android App (Capacitor 7, Android Studio Setup, Emulatoren, Gradle Build & Signing) |
 | 🛒 **[`PLAY_STORE_RELEASE_AND_ACCOUNT_GUIDE.md`](./mobile/PLAY_STORE_RELEASE_AND_ACCOUNT_GUIDE.md)** | Google Play Console Setup, D-U-N-S Verifikation & Release-Pipeline |
 | 🔔 **[`NOTIFICATIONS_AND_MOBILE_PUSH.md`](./mobile/NOTIFICATIONS_AND_MOBILE_PUSH.md)** | Mobile Push & Notification Engine (W3C Web-Push, VAPID, Service Worker & Quiet Hours) |
 
@@ -106,14 +104,11 @@ docs/
 
 ---
 
-### 🧪 8. Work-in-Progress & Audits ([`docs/wip/`](./wip/))
+### 🧪 8. Entwicklungs-Backlog & Masterplan ([`docs/wip/`](./wip/))
 
 | Dokument | Beschreibung |
 |---|---|
-| 🛠️ **[`OPTIMIZATION_PLAN.md`](./wip/OPTIMIZATION_PLAN.md)** | Umfassender Optimierungs- und Härtungsplan |
-| 🔍 **[`SHAREGY_CODEBASE_AUDIT_AND_FEATURE_EXPANSION.md`](./wip/SHAREGY_CODEBASE_AUDIT_AND_FEATURE_EXPANSION.md)** | Codebase-Audit, Performancehebel & Bundle-Optimierung |
-| 🌐 **[`CODE_REVIEW_I18N_AUDIT_AND_FEATURE_PROPOSALS.md`](./wip/CODE_REVIEW_I18N_AUDIT_AND_FEATURE_PROPOSALS.md)** | i18n Übersetzungsaudit & Feature-Vorschläge |
-| 🎨 **[`UI_AUDIT_AND_IMPROVEMENT_PROPOSALS.md`](./wip/UI_AUDIT_AND_IMPROVEMENT_PROPOSALS.md)** | UI/UX-Audit und Gestaltungsverbesserungen |
+| 🛠️ **[`OPTIMIZATION_AND_AUDIT_MASTERPLAN.md`](./wip/OPTIMIZATION_AND_AUDIT_MASTERPLAN.md)** | **Konsolidiert:** Vollständiger Audit-Status (M1–M9 erledigt) & aktiver strategischer Entwicklungs-Backlog (EEBUS, CLS-Kanal, Flex-Handel) |
 
 ---
 

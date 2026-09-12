@@ -1,9 +1,11 @@
 # 🏛️ System-Architektur & Technologie-Stack
 
+**Stand:** 12. September 2026 (v5.3 / Milestone 9 Live)
+
 **Sharegy** basiert auf einer hochgradig performanten, modular erweiterbaren und asynchronen **Dual-Core-Architektur**:
 
-1. **Säule 1: Home Energy Management System (EMS Free & Pro)** — Hochfrequente IoT-Telemetrie (1–15s), Echtzeit-Energiefluss (Sankey), PV-/Last-/Batterie-Prognosen, Börsenpreis- & Arbitrage-Optimierung, Live-CO₂-Signale, AI-Alerting und Multi-Format-Reporting für Privathaushalte und Gewerbe.
-2. **Säule 2: Energy Sharing Communities (ESC)** — Viertelstündliche iMSys-Zähler-Bilanzierung (OBIS 1.8.0 / 2.8.0), lokale Peer-to-Peer Stromallokation, Mieterstrom-Clearing & automatisierte Quartiersabrechnung.
+1. **Säule 1: Home Energy Management System (EMS Free & Pro)** — Hochfrequente IoT-Telemetrie (1–15s), Echtzeit-Energiefluss (Sankey), PV-/Last-/Batterie-Prognosen, Börsenpreis- & Arbitrage-Optimierung, Live-CO₂-Signale, AI-Alerting und Multi-Format-Reporting für Privathaushalte, Installateure und Gewerbe.
+2. **Säule 2: Energy Sharing Communities & B2B Whitelabel (ESC)** — Viertelstündliche iMSys-Zähler-Bilanzierung (§ 42b EnWG), virtueller Summenzähler, BNetzA AS4/EDIFACT Marktkommunikation, Multi-Tenant Theming-Engine & Partner-Flottenmanagement.
 
 ---
 
@@ -13,7 +15,7 @@
                            ┌────────────────────────────────────────────────────────┐
                            │                    Client-Schicht                      │
                            │   React 19 • Vite • TailwindCSS • Apache ECharts       │
-                           │   PWA • Capacitor Mobile • i18next (DE / EN / PL)      │
+                           │   PWA • Capacitor 7 Android • i18n (DE/EN/PL/FR/IT/ES) │
                            └───────────────────────────┬────────────────────────────┘
                                                        │ HTTPS / REST / WebSockets
                                                        ▼
@@ -21,6 +23,7 @@
                            │                 API- & Gateway-Schicht                 │
                            │      Django 5.x ASGI (Daphne) • Django REST Framework  │
                            │      Token-Auth • API-Keys • Session • Rate-Limiting   │
+                           │      Dynamic Theming • B2B Whitelabel Resolution       │
                            └─────────────┬───────────────────────────┬──────────────┘
                                          │                           │
           ┌──────────────────────────────┼───────────────────────────┴──────────────────────────────┐
@@ -30,20 +33,32 @@
 ├───────────────────┤          ├───────────────────┤                                      ├───────────────────┤
 │ • MQTT Broker     │          │ • TimescaleDB     │                                      │ • Hybrid PV-Model │
 │ • OCPP CSMS 2.0.1 │          │   (Hypertables)   │                                      │   (Physics + ML)  │
-│ • Shelly WSS Relais│         │ • Continuous Aggr.│                                      │ • WAPE Treffer-   │
-│ • Home Assistant  │          │ • DeviceLatest-   │                                      │   quoten-Prüfung  │
-│   REST-Bridge     │          │   Metric Snapshot │                                      │ • 48h Last- & SoC-│
-│ • OpenTelemetry   │          │ • Redis Pub/Sub   │                                      │   Simulation      │
-│   OTLP Ingest     │          │ • Deadband-Filter │                                      │ • Multi-Window    │
+│ • Shelly WSS      │          │ • Continuous Aggr.│                                      │ • WAPE Treffer-   │
+│ • ioBroker WSS RPC│          │ • DeviceLatest-   │                                      │   quoten-Prüfung  │
+│ • Cloud Inverter  │          │   Metric Snapshot │                                      │ • 48h Last- & SoC-│
+│   OpenAPIs (10+)  │          │ • Redis Pub/Sub   │                                      │   Simulation      │
+│ • AS4 Mako Gateway│          │ • Deadband-Filter │                                      │ • Merit-Order     │
 │ • Tibber GraphQL  │          │ • Celery Broker   │                                      │   Spot-Optimizer  │
-│ • SMARD / EPEX    │          │                   │                                      │ • Battery-        │
-│   Spot Pipeline   │          │                   │                                      │   Arbitrage & CO2 │
+│ • EPEX Spot Feed  │          │                   │                                      │ • Battery-        │
+│                   │          │                   │                                      │   Arbitrage & VPP │
 └───────────────────┘          └───────────────────┘                                      └───────────────────┘
 ```
 
 ---
 
-## 🛠️ 2. Detaillierter Technologie-Stack
+## 🌐 2. Subdomain- & Service-Taxonomie
+
+| Subdomain | Zweck & Workload | Protokolle | Zielgruppe |
+|---|---|---|---|
+| **`sharegy.de`** | Marketing, Landing Page, SEO, Preiskalkulator, Dokumentation | HTTPS | Öffentlichkeit |
+| **`app.sharegy.de`** | Endkunden- & Mieterportal (HEMS Cockpit, Dashboard, Billing) | HTTPS, WSS | Endnutzer / Mieter |
+| **`mon.sharegy.de`** | **Telemetrie-Ingress, WSS & Zero-Trust Reverse-RPC Fernwartung** | WSS, HTTPS, MQTT | Edge-Geräte / ioBroker / Shelly |
+| **`partner.sharegy.de`** | Installateurs- & Fachpartner-Portal (Flotten-Telemetrie, Diagnose) | HTTPS | Installateure / EVUs |
+| **`cname.sharegy.de`** | Ingress-Proxy für B2B-Whitelabel Custom Domains (z. B. Stadtwerke) | HTTPS (SNI) | Whitelabel-Mandanten |
+
+---
+
+## 🛠️ 3. Detaillierter Technologie-Stack
 
 ### A. Backend & API Core
 * **Framework**: Django 5.x / Python 3.12 (ASGI & WSGI via Daphne / Gunicorn).
@@ -62,9 +77,10 @@
 * **Visualisierungs-Engines**:
   * **Apache ECharts** via `echarts-for-react`: Interaktives Live-Sankey-Diagramm (Etagen-/Raum-Aggregation), historische Verbrauchs-Sparklines, Submeter-Trends und 48h-Prognosecharts.
   * **SVG-Vektor-Charts**: Hochperformante Donut- und Flussmatrix-Visualisierungen.
-* **Internationalisierung (i18n)**: `i18next` & `react-i18next` mit nativer Multi-Language Unterstützung (🇩🇪 Deutsch, 🇬🇧 English, 🇵🇱 Polski).
-* **Styling & UI**: Tailwind CSS 4.x, Lucide-Icons, Headless UI, modale Dialoge und dynamische Benachrichtigungs-Banner.
-* **Exporte & Reporting**: Client-seitige Download-Trigger für formatierte Excel-Dateien (`.xlsx`), druckfähige A4-PDFs (ReportLab), CSV (UTF-8 BOM) und JSON-Payloads.
+* **Internationalisierung (i18n)**: `i18next` & `react-i18next` mit 6 Sprachen (🇩🇪 DE, 🇬🇧 EN, 🇵🇱 PL, 🇫🇷 FR, 🇮🇹 IT, 🇪🇸 ES).
+* **Styling & UI**: Tailwind CSS, Dynamic CSS Theming (`--brand-primary`), Lucide-Icons, Headless UI, modale Dialoge.
+* **Exporte & Reporting**: Client-seitige Download-Trigger für formatierte Excel-Dateien (`.xlsx`), druckfähige A4-PDFs (ReportLab), EDIFACT (`.edi`), CSV (UTF-8 BOM) und JSON-Payloads.
+
 
 ---
 

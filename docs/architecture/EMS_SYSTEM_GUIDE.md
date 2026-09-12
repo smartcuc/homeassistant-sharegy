@@ -186,7 +186,28 @@ Monatliche Gegenüberstellung des wirtschaftlichen Mehrwerts:
 
 ---
 
+## 💶 13. Dynamische Stromtarife, EPEX Spot Börsenpreise & Tibber API
+
+Sharegy bewertet Stromkosten und PV-Einsparungen in Echtzeit:
+- **Dynamischer Börsenstromtarif**: Stündliche/15-minütige EPEX Spot Day-Ahead Börsenstrompreise.
+  $$\text{Bruttopreis (ct/kWh)} = (P_\text{spot} + \sum \text{Nebenkosten}_\text{netto}) \times (1 + \frac{\text{MwSt}\%}{100})$$
+- **Feste Nebenkosten**: Netzentgelte (~9,50 ct), Stromsteuer (2,05 ct), Konzessionsabgabe (1,66 ct), Umlagen (~1,57 ct) = ~14,78 ct/kWh netto (~17,59 ct/kWh brutto).
+- **Tibber API-Integration**: Direkte GraphQL-Abfrage (`https://api.tibber.com/v1-beta/gql`) zur Zähler- und Preisermittlung sowie Live-Streaming über Tibber Pulse.
+- **Klassischer Festpreis-Tarif**: Konstanter Brutto-Arbeitspreis rund um die Uhr.
+
+---
+
+## ☀️ 14. Solar- & Lastprognose (Physics + Random Forest Hybrid)
+
+Sharegy kombiniert hochauflösende Wetterdaten mit Machine-Learning-Korrektur für eine 96-Stunden-Vorhersage:
+1. **Open-Meteo Wetter- & Strahlungsdaten**: Automatisches Geocoding über die Postleitzahl der Liegenschaft.
+2. **Physikalisches Einstrahlungsmodell**: Berücksichtigt Dachneigung, Azimut-Ausrichtung und installierte kWp-Leistung.
+3. **Random Forest ML-Feinjustierung**: Lernt standortspezifische Verschattungen, diffuse Reflexionen und Temperatur-Derating anhand historischer Ist-Erzeugungsdaten.
+4. **Qualitätsmetrik (WAPE)**: Fortlaufender Abgleich von Prognose vs. realer Erzeugung (Weighted Absolute Percentage Error).
+
+---
+
 ## 📖 Detaillierte Anwenderdokumentation
 
-Das vollständige Anwenderhandbuch mit Schritt-für-Schritt-Anleitungen zu allen Schnittstellen (1–7) und EMS-Funktionen ist in [`docs/SHAREGY_USER_MANUAL_EMS_EXTENSIONS.md`](file:///c:/Users/Public/Dev/eswes/docs/SHAREGY_USER_MANUAL_EMS_EXTENSIONS.md) verfügbar.
+Das vollständige Anwenderhandbuch mit Schritt-für-Schritt-Anleitungen zu allen Schnittstellen und EMS-Funktionen ist in [`docs/user/SHAREGY_USER_MANUAL_EMS_EXTENSIONS.md`](file:///c:/Users/Public/Dev/eswes/docs/user/SHAREGY_USER_MANUAL_EMS_EXTENSIONS.md) verfügbar.
 
