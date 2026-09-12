@@ -25,9 +25,16 @@ class Tenant(models.Model):
     is_public = models.BooleanField(default=False)
 
     # Theme & Branding Felder (aus tenants.models konsolidiert)
-    primary_color = models.CharField(max_length=50, default="from-orange-400")
-    secondary_color = models.CharField(max_length=50, default="to-orange-600")
-    button_color = models.CharField(max_length=50, default="bg-orange-500")
+    primary_color = models.CharField(max_length=50, default="#10B981")
+    secondary_color = models.CharField(max_length=50, default="#059669")
+    accent_color = models.CharField(max_length=50, default="#6366F1")
+    button_color = models.CharField(max_length=50, default="bg-emerald-600")
+    logo_url = models.CharField(max_length=500, blank=True, default="")
+    favicon_url = models.CharField(max_length=500, blank=True, default="")
+    company_legal_name = models.CharField(max_length=255, blank=True, default="")
+    support_email = models.EmailField(blank=True, default="")
+    custom_domain = models.CharField(max_length=255, blank=True, default="")
+    is_whitelabel_active = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         if not self.slug:

@@ -116,6 +116,7 @@ export default function Sidebar() {
                 title: `🛡️ ${t("nav.admin_group", "Administration & Staff")}`,
                 items: [
                     { name: t("nav.agent_support_hub", "Support-Zentrale (Triage)"), path: "/app/support-hub", icon: "🛟" },
+                    { name: t("nav.partner_fleet", "Partner & Flotten-Cockpit"), path: "/app/partner", icon: "🔧" },
                     { name: t("nav.admin_dashboard", "Admin Dashboard"), path: "/app/admin/dashboard", icon: "📊" },
                     { name: t("nav.admin_tracking", "Event & Tracking"), path: "/app/admin/tracking", icon: "📈" },
                     { name: t("nav.tenant_management", "Mandanten & Mieter"), path: "/app/tenant", icon: "👥" },

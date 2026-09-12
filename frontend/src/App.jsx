@@ -7,6 +7,7 @@ import { useEffect, lazy, Suspense } from "react";
 
 import { ThemeProvider } from "./theme/ThemeContext";
 import { defaultTheme } from "./theme/themes";
+import { TenantThemingProvider } from "./context/TenantThemingContext";
 
 import CookieConsentBanner from "./components/legal/CookieConsentBanner";
 import ScrollToTop from "./components/common/ScrollToTop";
@@ -38,9 +39,10 @@ function GlobalRouteFallback() {
 export default function App() {
 
   return (
-    <ThemeProvider theme={defaultTheme}>
+    <TenantThemingProvider>
+      <ThemeProvider theme={defaultTheme}>
 
-      <BrowserRouter>
+        <BrowserRouter>
         {/* 🔄 AUTOMATISCHER SCROLL-TO-TOP BEI JEDEM ROUTENWECHSEL */}
         <ScrollToTop />
         {/* 📱 NATIVE ANDROID/CAPACITOR BRIDGE LIFECYCLE */}
@@ -67,5 +69,6 @@ export default function App() {
       </BrowserRouter>
 
     </ThemeProvider>
+    </TenantThemingProvider>
   );
 }

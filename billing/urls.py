@@ -77,6 +77,11 @@ urlpatterns = [
     path("communities/<uuid:tenant_id>/settings/", community_settings_update_view, name="community_settings_update"),
 ]
 
+# BNetzA AS4 Marktkommunikation
+from billing.views_mako import MarketCommunicationExportView, MarketCommunicationLogsView
 
-
+urlpatterns += [
+    path("mako/export/", MarketCommunicationExportView.as_view(), name="mako_export"),
+    path("mako/logs/", MarketCommunicationLogsView.as_view(), name="mako_logs"),
+]
 

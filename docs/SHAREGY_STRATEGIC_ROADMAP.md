@@ -233,13 +233,27 @@
   ├── 8.3 ✅ **Firebase Cloud Messaging (FCM) Push-Benachrichtigungen**
   └── 8.4 ✅ **In-App Version Update Check & Store-Absprung**
 
+┌───────────────────────────────────────────────────────────────────────────────┐
+│ MEILENSTEIN 9: B2B PARTNER, WHITELABEL THEMING & MAKO ADAPTER (✅ 100% LIVE)   │
+└───────────────────────────────────────────────────────────────────────────────┘
+  ├── 9.1 ✅ **Installateurs- & Partner-Hebel (Flotten-Cockpit)**:
+  │          • `PartnerCompany`, `PartnerMembership`, `MaintenanceConsent` Datenmodell
+  │          • Partner Fleet Dashboard (`/app/partner`), Störungsampel, 1-Klick-Inbetriebnahme & Fernwartung
+  ├── 9.2 ✅ **Horizont 1: B2B Whitelabel EVU-Portal & Dynamic Theming Engine**:
+  │          • Dynamic CSS Variable Injection (`--brand-primary`, `--brand-accent`)
+  │          • Custom CNAME Domain Lookup (`/api/core/tenant/by-domain/`) & Whitelabel Settings Editor
+  └── 9.3 ✅ **BNetzA AS4 Marktkommunikations-Adapter**:
+             • BNetzA-konformer EDIFACT MSCONS 2.2b (15m-Lastgänge für § 42b EnWG) & UTILMD 2.4 Generator
+             • AS4-Gateway Dispatcher (powercloud, Schleupen, SAP IS-U, Wilken, direct AS4 PKI)
+             • Übertragungsprotokolle & Rohdaten-Download im Liegenschafts-Dashboard
+
 ---
 
 ## 🔮 5. Zukünftige Strategische Horizonte (Post-v5.2)
 
 | Phase | Bereich | Strategische Stoßrichtung | Zeithorizont |
 |---|---|---|:---:|
-| **Horizont 1** | **B2B Whitelabel EVU-Portal** | Mandantenfähiges Portal für Stadtwerke und Energieversorger zur Eigenvermarktung von dynamischen Tarifen und Energy Sharing Communities unter eigener Marke. | Q1 2027 |
+| **Horizont 1** | **B2B Whitelabel EVU-Portal** | 🟢 **Erfolgreich realisiert**: Dynamic Theming, Custom Domains, Whitelabel-Engine & Partner-Flotten-Management. | Live |
 | **Horizont 2** | **BNetzA CLS-Kanal & SMGW Kopplung** | Direkte Zertifizierung und Anbindung an Smart-Meter-Gateways über den Controllable Local System (CLS) Kanal zur gesetzlichen Fernsteuerung nach § 14a EnWG ohne Internet-Cloud. | Q2 2027 |
 | **Horizont 3** | **Automatisierter Flexibilitäts-Handel** | Direkte automatisierte Vermarktung von Heimspeicher-Pools an den Regelleistungs- und Intraday-Märkten (EPEX Spot / aFRR Auktionen) mit automatischer Erlösausschüttung an Endkunden. | Q3 2027 |
 

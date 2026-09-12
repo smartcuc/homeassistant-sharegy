@@ -120,3 +120,13 @@ urlpatterns += [
     path("gdpr/export/", GDPRExportView.as_view(), name="gdpr-export"),
     path("gdpr/delete-account/", GDPRDeleteAccountView.as_view(), name="gdpr-delete-account"),
 ]
+
+# Partner & Installateur API
+from ..api_partner import PartnerFleetView, PartnerQuickOnboardView, PartnerAssetDiagnosticsView
+
+urlpatterns += [
+    path("partner/fleet/", PartnerFleetView.as_view(), name="partner-fleet"),
+    path("partner/quick-onboard/", PartnerQuickOnboardView.as_view(), name="partner-quick-onboard"),
+    path("partner/diagnostics/<uuid:asset_id>/", PartnerAssetDiagnosticsView.as_view(), name="partner-asset-diagnostics"),
+]
+

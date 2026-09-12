@@ -106,6 +106,7 @@ urlpatterns = [
                 path("grafana/", include("energy.api.urls_grafana")),
                 path("billing/", include("billing.urls")),
                 path("vpp/", include("vpp.urls")),
+                path("core/", include("core.urls")),
 
                 path("support/", include("support_desk.api.urls")),
                 path("status/", include("operations.urls")),

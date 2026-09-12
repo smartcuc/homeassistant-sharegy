@@ -1,0 +1,404 @@
+import React, { useState, useEffect } from "react";
+import { apiFetch } from "../../../api/client";
+import {
+  Palette,
+  Globe,
+  Upload,
+  CheckCircle2,
+  AlertCircle,
+  RefreshCw,
+  X,
+  Sparkles,
+  Eye,
+  Building,
+  Mail,
+  ExternalLink,
+  ShieldCheck,
+  Zap
+} from "lucide-react";
+import { useTenantTheming } from "../../../context/TenantThemingContext";
+
+const PRESET_THEMES = [
+  {
+    name: "Azure Cloud (Standard)",
+    primary: "#0284c7",
+    secondary: "#0f172a",
+    accent: "#38bdf8",
+    button: "#0284c7",
+  },
+  {
+    name: "Clean Emerald (Green Energy)",
+    primary: "#059669",
+    secondary: "#064e3b",
+    accent: "#34d399",
+    button: "#059669",
+  },
+  {
+    name: "Solar Amber (PV Pro)",
+    primary: "#d97706",
+    secondary: "#1c1917",
+    accent: "#fbbf24",
+    button: "#d97706",
+  },
+  {
+    name: "Royal Indigo (Stadtwerke)",
+    primary: "#4f46e5",
+    secondary: "#1e1b4b",
+    accent: "#818cf8",
+    button: "#4f46e5",
+  },
+];
+
+export default function WhitelabelSettingsModal({ isOpen, onClose }) {
+  const { theming, updatePreviewTheme, reloadTheming } = useTenantTheming();
+
+  const [formData, setFormData] = useState({
+    company_legal_name: "",
+    support_email: "",
+    custom_domain: "",
+    primary_color: "#0284c7",
+    secondary_color: "#0f172a",
+    accent_color: "#38bdf8",
+    button_color: "#0284c7",
+    logo_url: "",
+    favicon_url: "",
+    is_whitelabel_active: false,
+  });
+
+  const [saving, setSaving] = useState(false);
+  const [successMsg, setSuccessMsg] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
+
+  useEffect(() => {
+    if (theming && isOpen) {
+      setFormData({
+        company_legal_name: theming.companyLegalName || "",
+        support_email: theming.supportEmail || "",
+        custom_domain: theming.customDomain || "",
+        primary_color: theming.primaryColor || "#0284c7",
+        secondary_color: theming.secondaryColor || "#0f172a",
+        accent_color: theming.accentColor || "#38bdf8",
+        button_color: theming.buttonColor || "#0284c7",
+        logo_url: theming.logoUrl || "",
+        favicon_url: theming.faviconUrl || "",
+        is_whitelabel_active: theming.isWhitelabelActive || false,
+      });
+    }
+  }, [theming, isOpen]);
+
+  if (!isOpen) return null;
+
+  const handleColorChange = (key, value) => {
+    const updated = { ...formData, [key]: value };
+    setFormData(updated);
+    updatePreviewTheme({
+      primaryColor: updated.primary_color,
+      secondaryColor: updated.secondary_color,
+      accentColor: updated.accent_color,
+      buttonColor: updated.button_color,
+      companyLegalName: updated.company_legal_name,
+      supportEmail: updated.support_email,
+      logoUrl: updated.logo_url,
+    });
+  };
+
+  const applyPreset = (preset) => {
+    const updated = {
+      ...formData,
+      primary_color: preset.primary,
+      secondary_color: preset.secondary,
+      accent_color: preset.accent,
+      button_color: preset.button,
+    };
+    setFormData(updated);
+    updatePreviewTheme({
+      primaryColor: preset.primary,
+      secondaryColor: preset.secondary,
+      accentColor: preset.accent,
+      buttonColor: preset.button,
+    });
+  };
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    try {
+      setSaving(true);
+      setErrorMsg(null);
+      setSuccessMsg(null);
+      await apiFetch("/api/core/tenant/theming/", {
+        method: "PATCH",
+        body: JSON.stringify(formData),
+      });
+      setSuccessMsg("Branding & Whitelabel-Einstellungen erfolgreich gespeichert!");
+      await reloadTheming();
+    } catch (err) {
+      setErrorMsg(err?.message || "Speichern fehlgeschlagen.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md overflow-y-auto">
+      <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-4xl w-full p-6 md:p-8 space-y-6 shadow-2xl my-8">
+        
+        {/* Header */}
+        <div className="flex justify-between items-start border-b border-slate-800 pb-5">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 bg-sky-500/10 border border-sky-500/30 rounded-xl text-sky-400">
+                <Palette className="w-5 h-5" />
+              </div>
+              <h2 className="text-xl md:text-2xl font-bold text-white">
+                B2B Whitelabel & Dynamic Theming Engine
+              </h2>
+            </div>
+            <p className="text-xs md:text-sm text-slate-400">
+              Passen Sie Farben, Logos, Firmennamen und Custom-Domains für Ihre EVU-, WEG- oder Stadtwerke-Kunden an.
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-1.5 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {errorMsg && (
+          <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <span>{errorMsg}</span>
+          </div>
+        )}
+
+        {successMsg && (
+          <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+            <span>{successMsg}</span>
+          </div>
+        )}
+
+        <form onSubmit={handleSave} className="space-y-6">
+          
+          {/* Preset Palettes */}
+          <div className="space-y-2">
+            <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              Schnell-Farbprofile
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              {PRESET_THEMES.map((p) => (
+                <button
+                  key={p.name}
+                  type="button"
+                  onClick={() => applyPreset(p)}
+                  className="p-2.5 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-slate-700 text-left transition flex items-center gap-2.5"
+                >
+                  <div className="flex -space-x-1.5">
+                    <span className="w-4 h-4 rounded-full border border-slate-900" style={{ backgroundColor: p.primary }} />
+                    <span className="w-4 h-4 rounded-full border border-slate-900" style={{ backgroundColor: p.accent }} />
+                  </div>
+                  <span className="text-xs font-medium text-slate-300 truncate">{p.name.split(" ")[0]}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            {/* Left Column: Theme Details */}
+            <div className="space-y-4">
+              <div className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                Markenauftritt & Corporate Design
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-300 mb-1">Unternehmensname (EVU / Stadtwerk)</label>
+                <div className="relative">
+                  <Building className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <input
+                    type="text"
+                    value={formData.company_legal_name}
+                    onChange={(e) => setFormData({ ...formData, company_legal_name: e.target.value })}
+                    placeholder="z.B. Stadtwerke Sonnenstadt GmbH"
+                    className="w-full bg-slate-950 border border-slate-800 pl-9 pr-3.5 py-2 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-sky-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-300 mb-1">Support E-Mail-Adresse</label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <input
+                    type="email"
+                    value={formData.support_email}
+                    onChange={(e) => setFormData({ ...formData, support_email: e.target.value })}
+                    placeholder="kundenservice@stadtwerke-sonnenstadt.de"
+                    className="w-full bg-slate-950 border border-slate-800 pl-9 pr-3.5 py-2 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-sky-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-slate-300 mb-1">Primärfarbe</label>
+                  <div className="flex items-center gap-2 bg-slate-950 border border-slate-800 p-1.5 rounded-xl">
+                    <input
+                      type="color"
+                      value={formData.primary_color}
+                      onChange={(e) => handleColorChange("primary_color", e.target.value)}
+                      className="w-7 h-7 rounded-lg cursor-pointer bg-transparent border-0"
+                    />
+                    <span className="text-xs font-mono text-slate-300">{formData.primary_color}</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-slate-300 mb-1">Akzentfarbe</label>
+                  <div className="flex items-center gap-2 bg-slate-950 border border-slate-800 p-1.5 rounded-xl">
+                    <input
+                      type="color"
+                      value={formData.accent_color}
+                      onChange={(e) => handleColorChange("accent_color", e.target.value)}
+                      className="w-7 h-7 rounded-lg cursor-pointer bg-transparent border-0"
+                    />
+                    <span className="text-xs font-mono text-slate-300">{formData.accent_color}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-300 mb-1">Logo URL (SVG / PNG)</label>
+                <input
+                  type="url"
+                  value={formData.logo_url}
+                  onChange={(e) => handleColorChange("logo_url", e.target.value)}
+                  placeholder="https://cdn.ihredomain.de/logo.svg"
+                  className="w-full bg-slate-950 border border-slate-800 px-3.5 py-2 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-sky-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-300 mb-1">Eigene Subdomain / Domain (CNAME)</label>
+                <div className="relative">
+                  <Globe className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <input
+                    type="text"
+                    value={formData.custom_domain}
+                    onChange={(e) => setFormData({ ...formData, custom_domain: e.target.value })}
+                    placeholder="portal.stadtwerke-sonnenstadt.de"
+                    className="w-full bg-slate-950 border border-slate-800 pl-9 pr-3.5 py-2 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-sky-500"
+                  />
+                </div>
+                <p className="text-[11px] text-slate-500 mt-1">
+                  Setzen Sie bei Ihrem DNS-Provider einen CNAME-Eintrag auf <span className="font-mono text-sky-400">cname.sharegy.de</span>.
+                </p>
+              </div>
+
+              <div className="flex items-center justify-between p-3.5 bg-slate-950 border border-slate-800 rounded-2xl">
+                <div>
+                  <div className="text-xs font-semibold text-slate-200">Whitelabel-Modus aktivieren</div>
+                  <div className="text-[11px] text-slate-400">Sharegy-Branding in Kopf- & Fußzeile ausblenden</div>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.is_whitelabel_active}
+                    onChange={(e) => setFormData({ ...formData, is_whitelabel_active: e.target.checked })}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"></div>
+                </label>
+              </div>
+            </div>
+
+            {/* Right Column: Live Preview */}
+            <div className="space-y-4">
+              <div className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                <Eye className="w-3.5 h-3.5 text-sky-400" />
+                Live-Vorschau Kundenportal
+              </div>
+
+              <div className="bg-slate-950 border border-slate-800 rounded-2xl p-5 space-y-4 shadow-inner">
+                {/* Header Preview */}
+                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                  <div className="flex items-center gap-2">
+                    {formData.logo_url ? (
+                      <img src={formData.logo_url} alt="Logo" className="h-6 object-contain" />
+                    ) : (
+                      <div
+                        className="w-6 h-6 rounded-lg flex items-center justify-center text-white text-xs font-bold"
+                        style={{ backgroundColor: formData.primary_color }}
+                      >
+                        ⚡
+                      </div>
+                    )}
+                    <span className="font-bold text-sm text-slate-200">
+                      {formData.company_legal_name || "Mein Energieportal"}
+                    </span>
+                  </div>
+                  <span
+                    className="text-[11px] px-2 py-0.5 rounded-full font-medium"
+                    style={{ backgroundColor: `${formData.primary_color}25`, color: formData.accent_color }}
+                  >
+                    PRO Live
+                  </span>
+                </div>
+
+                {/* Card Preview */}
+                <div className="bg-slate-900/90 border border-slate-800 p-4 rounded-xl space-y-3">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-slate-400">Gemeinschaftliche Gebäudeversorgung</span>
+                    <span className="text-emerald-400 font-semibold">§ 42b EnWG</span>
+                  </div>
+                  <div className="text-xl font-extrabold text-white">4.820 kWh</div>
+                  <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all duration-300"
+                      style={{ width: "72%", backgroundColor: formData.primary_color }}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    className="w-full py-2 rounded-lg text-xs font-semibold text-white shadow transition"
+                    style={{ backgroundColor: formData.button_color }}
+                  >
+                    Monatsabrechnung einsehen
+                  </button>
+                </div>
+
+                <div className="text-[11px] text-slate-500 text-center">
+                  Support: {formData.support_email || "support@sharegy.de"}
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Footer Actions */}
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium rounded-xl transition"
+            >
+              Abbrechen
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="flex items-center gap-2 px-6 py-2.5 bg-sky-500 hover:bg-sky-400 text-white text-sm font-semibold rounded-xl shadow-lg shadow-sky-500/25 transition"
+            >
+              {saving && <RefreshCw className="w-4 h-4 animate-spin" />}
+              <span>Branding übernehmen</span>
+            </button>
+          </div>
+
+        </form>
+
+      </div>
+    </div>
+  );
+}

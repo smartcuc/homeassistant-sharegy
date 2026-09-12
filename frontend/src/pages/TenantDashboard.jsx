@@ -10,6 +10,8 @@ import CommunityShareModal from "../features/community/components/CommunityShare
 import VirtualMasterMeterHub from "../features/community/components/VirtualMasterMeterHub";
 import VppAggregatorCockpit from "../features/energy/components/VppAggregatorCockpit";
 import TenantSetupWizardModal from "../features/community/components/TenantSetupWizardModal";
+import WhitelabelSettingsModal from "../features/tenant/components/WhitelabelSettingsModal";
+import MarketCommunicationModal from "../features/billing/components/MarketCommunicationModal";
 
 export default function TenantDashboard() {
     const { t } = useTranslation();
@@ -26,6 +28,8 @@ export default function TenantDashboard() {
     const [loading, setLoading] = useState(true);
     const [shareModalOpen, setShareModalOpen] = useState(false);
     const [wizardOpen, setWizardOpen] = useState(false);
+    const [whitelabelModalOpen, setWhitelabelModalOpen] = useState(false);
+    const [makoModalOpen, setMakoModalOpen] = useState(false);
     const [settling, setSettling] = useState(false);
     const [downloadingId, setDownloadingId] = useState(null);
     const [exportingFormat, setExportingFormat] = useState(null);
@@ -279,6 +283,22 @@ export default function TenantDashboard() {
 
                 {/* Quick Action Buttons */}
                 <div className="flex flex-wrap items-center gap-2">
+                    <button
+                        type="button"
+                        onClick={() => setWhitelabelModalOpen(true)}
+                        className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-sky-600 hover:bg-sky-500 text-white transition-all shadow-xs flex items-center gap-1.5 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                    >
+                        <span>🎨</span>
+                        <span>Whitelabel & Branding</span>
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setMakoModalOpen(true)}
+                        className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-teal-600 hover:bg-teal-500 text-white transition-all shadow-xs flex items-center gap-1.5 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                    >
+                        <span>📄</span>
+                        <span>Marktkommunikation (AS4)</span>
+                    </button>
                     <button
                         type="button"
                         onClick={() => setWizardOpen(true)}
@@ -1021,6 +1041,19 @@ export default function TenantDashboard() {
                     community_shared_kwh: cockpit?.shared_kwh || 160,
                     self_consumption_pct: cockpit?.self_consumption_pct || 94,
                 }}
+            />
+
+            {/* WHITELABEL & BRANDING MODAL */}
+            <WhitelabelSettingsModal
+                isOpen={whitelabelModalOpen}
+                onClose={() => setWhitelabelModalOpen(false)}
+            />
+
+            {/* MARKTKOMMUNIKATION AS4 / EDIFACT MODAL */}
+            <MarketCommunicationModal
+                isOpen={makoModalOpen}
+                onClose={() => setMakoModalOpen(false)}
+                tenantId={tenant?.id}
             />
         </div>
     );

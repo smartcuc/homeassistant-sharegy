@@ -185,6 +185,7 @@ class TenantMembership(models.Model):
     ROLE_USER_ADMIN = "user_admin"          # Energy-Userverwaltung (Einladungen & Rollenzuweisung)
     ROLE_HELPDESK = "helpdesk"              # Energy-Helpdesk (1st-Level Quartierssupport)
     ROLE_AUDITOR = "auditor"                # Kassenprüfer / Beirat (Read-only Bilanzen & Berichte)
+    ROLE_INSTALLER = "installer"            # Fachpartner / Elektro-Installateur (Asset-Diagnostik & Flotten-Support)
     ROLE_MEMBER = "member"                  # Standard Community-Mitglied (Consumer/Producer/Prosumer)
     ROLE_EDITOR = "editor"                  # Legacy Alias -> user_admin / admin
     ROLE_VIEWER = "viewer"                  # Legacy Alias -> member / auditor
@@ -194,6 +195,7 @@ class TenantMembership(models.Model):
         (ROLE_USER_ADMIN, "Energy Userverwaltung"),
         (ROLE_HELPDESK, "Energy Helpdesk"),
         (ROLE_AUDITOR, "Kassenprüfer / Auditor"),
+        (ROLE_INSTALLER, "Fachpartner / Installateur"),
         (ROLE_MEMBER, "Mitglied"),
         (ROLE_EDITOR, "Editor (Legacy)"),
         (ROLE_VIEWER, "Viewer (Legacy)"),
@@ -340,4 +342,82 @@ class UserTermsConsent(models.Model):
 
     def __str__(self):
         return f"{self.user.email} - {self.consent_type} ({self.terms_version}) am {self.created_at}"
+
+
+# -----------------------------------------------------
+# 🛠️ FACHPARTNER & INSTALLATEURS-FLOTTE (B2B2C)
+# -----------------------------------------------------
+
+class PartnerCompany(models.Model):
+    """
+    Installateursbetrieb / Fachpartner für PV, Speicher, Wallboxen & Wärmepumpen.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=255)
+    slug = models.SlugField(unique=True)
+    contact_email = models.EmailField()
+    phone = models.CharField(max_length=50, blank=True, default="")
+    street = models.CharField(max_length=255, blank=True, default="")
+    city = models.CharField(max_length=100, blank=True, default="")
+    postal_code = models.CharField(max_length=20, blank=True, default="")
+    website = models.URLField(blank=True, default="")
+    logo_url = models.CharField(max_length=500, blank=True, default="")
+    partner_tier = models.CharField(
+        max_length=30,
+        choices=[("certified", "Zertifizierter Fachpartner"), ("gold", "Gold Partner"), ("premium", "Premium Fachbetrieb")],
+        default="certified"
+    )
+    is_verified = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.get_partner_tier_display()})"
+
+
+class PartnerMembership(models.Model):
+    """
+    Zugehörigkeit von Installateuren/Technikern zu einem Partnerbetrieb.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="partner_memberships")
+    partner_company = models.ForeignKey(PartnerCompany, on_delete=models.CASCADE, related_name="members")
+    role = models.CharField(
+        max_length=30,
+        choices=[("admin", "Betriebsleiter / Admin"), ("technician", "Monteur / Servicetechniker"), ("viewer", "Viewer")],
+        default="technician"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "partner_company")
+
+    def __str__(self):
+        return f"{self.user.email} -> {self.partner_company.name} ({self.role})"
+
+
+class MaintenanceConsent(models.Model):
+    """
+    Revisionssichere Kundenfreigabe für den Installateur zur Fernwartung & Diagnostik (DSGVO-konform).
+    """
+    STATUS_CHOICES = [
+        ("active", "Aktiv"),
+        ("pending", "Ausstehend"),
+        ("revoked", "Widerrufen"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    home = models.ForeignKey("devices.Home", on_delete=models.CASCADE, related_name="maintenance_consents")
+    partner_company = models.ForeignKey(PartnerCompany, on_delete=models.CASCADE, related_name="managed_homes")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="active")
+    allow_remote_control = models.BooleanField(default=True)
+    allow_telemetry_history = models.BooleanField(default=True)
+    notes = models.CharField(max_length=255, blank=True, default="")
+    granted_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ("home", "partner_company")
+
+    def __str__(self):
+        return f"{self.partner_company.name} -> {self.home.name} ({self.status})"
 
