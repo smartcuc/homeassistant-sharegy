@@ -9,7 +9,7 @@ Sharegy ist in fachlich abgegrenzte Django-Apps unterteilt:
 ### `Home`
 Repräsentiert ein Kunden-Zuhause / Gebäude.
 - `id` (AutoField): Primärschlüssel.
-- `user` (ForeignKey $ightarrow$ `accounts.User`): Eigentümer.
+- `user` (ForeignKey -> `accounts.User`): Eigentümer.
 - `name` (CharField): Name (z. B. „Musterstraße 12“).
 - `timezone` (CharField): Zeitzone (z. B. `Europe/Berlin`).
 - `postal_code`, `city`, `latitude`, `longitude`: Standortkoordinaten für Wetter- & PV-Prognosen.
@@ -27,14 +27,14 @@ Physisches oder virtuelles Smart-Home-Gerät (z. B. Shelly Plug, Wechselrichter,
 
 ### `DeviceConfig`
 Steuerungskonfiguration und Signaltyp für das EMS.
-- `device` (OneToOneField $ightarrow$ `Device`).
-- `energy_signal_type`: `"pv"` \| `"battery"` \| `"grid"` \| `"load"`.
+- `device` (OneToOneField -> `Device`).
+- `energy_signal_type`: `"pv"` | `"battery"` | `"grid"` | `"load"`.
 - `metric_key`: Schlüssel der Haupt-Leistungsmetrik (z. B. `power`, `power_w`, `active_power`).
 - `deadband_w`: Schwellenwert in Watt für die Datenbank-Deduplizierung (Standard: `1.0 W`).
 
 ### `DeviceMetric` (TimescaleDB Hypertable)
 Historische Zeitreihendaten der Gerätemessungen.
-- `device` (ForeignKey $ightarrow$ `Device`).
+- `device` (ForeignKey -> `Device`).
 - `timestamp` (DateTimeField): Messzeitpunkt (UTC).
 - `metric_key` (CharField): Metrik-Identifikator (z. B. `power`, `voltage`, `current`, `energy_total`).
 - `value` (FloatField): Numerischer Messwert.
@@ -56,8 +56,8 @@ Garantierte $O(1)$ Schnappschuss-Tabelle für den aktuellen Gerätezustand (1 Ze
 
 ### `EMSSignalSource`
 Virtuelle Aggregationsquelle für den Haushalt.
-- `home` (ForeignKey $ightarrow$ `Home`).
-- `device` (ForeignKey $ightarrow$ `Device`).
+- `home` (ForeignKey -> `Home`).
+- `device` (ForeignKey -> `Device`).
 - `energy_signal_type`: `"pv"`, `"battery"`, `"grid"`, `"load"`.
 
 ---
@@ -67,14 +67,14 @@ Virtuelle Aggregationsquelle für den Haushalt.
 ### `SpotPrice` (TimescaleDB Hypertable)
 Stündliche und 15-minütige EPEX Spot Day-Ahead Börsenstrompreise.
 - `timestamp` (DateTimeField): Gültigkeitszeitpunkt (UTC).
-- `price_eur_per_kwh` (DecimalField): Börsenpreis in €/kWh (bzw. Cent/kWh $	imes 100$).
+- `price_eur_per_kwh` (DecimalField): Börsenpreis in €/kWh (bzw. Cent/kWh / 100).
 - `source`: `"energy-charts"`, `"smard"`, `"epex"`.
 
 ### `HomeTariff`
 Vom Nutzer gewählter Stromtarif pro Haushalt.
-- `home` (ForeignKey $ightarrow$ `Home`).
+- `home` (ForeignKey -> `Home`).
 - `valid_from` (DateField): Gültigkeitsbeginn.
-- `tariff_type`: `"dynamic"` (Börsenstrom) \| `"static"` (Festpreis).
+- `tariff_type`: `"dynamic"` (Börsenstrom) | `"static"` (Festpreis).
 - `static_price_eur_per_kwh`: Fester Arbeitspreis (nur bei `static`).
 - **Constraint**: `UniqueConstraint(fields=["home", "valid_from"])`.
 

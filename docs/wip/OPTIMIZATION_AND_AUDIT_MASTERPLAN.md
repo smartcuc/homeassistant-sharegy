@@ -23,23 +23,31 @@ Alle wesentlichen Härtungs-, Skalierungs- und Feature-Erweiterungen aus den vor
 
 ---
 
-## 🔮 2. Aktives Strategie- & Entwicklungs-Backlog (Next Horizons)
+## 🔮 2. Aktives Strategie- & Entwicklungs-Backlog (Dedicated WIP Specs)
 
-Folgende zukunftsorientierte Handlungsfelder sind für die kommenden Releases eingeplant:
+Jedes anstehende Feature wird in einer eigenständigen Spezifikation im Ordner `docs/wip/` geführt:
 
-### 1. 🏠 EEBUS & Cloud Ecosystem Bridge (Horizont 2)
-* **Ziel**: Direkte Anbindung von Wärmepumpen (myVAILLANT, ViCare) und BSH Home Connect Haushaltsgeräten über die EEBUS Cloud API.
-* **Architektur**: Stufe 1 (Cloud-to-Cloud Bridge) $\rightarrow$ Stufe 2 (Lokaler EEBUS SHIP/SPINE Stack).
-* **Referenz**: [`docs/architecture/SHAREGY_STRATEGIC_HORIZONS_AND_IMPLEMENTATION_BLUEPRINT.md`](file:///c:/Users/Public/Dev/eswes/docs/architecture/SHAREGY_STRATEGIC_HORIZONS_AND_IMPLEMENTATION_BLUEPRINT.md).
+1. 🔌 **[`WIP_DECOUPLED_MONITORING_CLUSTER_AND_REVERSE_RPC.md`](./WIP_DECOUPLED_MONITORING_CLUSTER_AND_REVERSE_RPC.md)**
+   * **Ziel**: Physische Ausgliederung des WSS-Ingress- und Reverse-RPC-Gateways auf `mon.sharegy.de` für unterbrechungsfreie Deployments und Zero-Trust Edge-Wartung.
+   * **Status & Prio**: 🟡 50 % | 🔴 Hoch (Nächster Sprint)
 
-### 2. ⚡ BNetzA CLS-Kanal & Smart Meter Gateway Kopplung (Horizont 2)
-* **Ziel**: Gesetzeskonforme Dimm- und Steuerbefehle nach § 14a EnWG direkt über den Controllable Local System (CLS) Kanal des SMGW empfangen.
-* **Architektur**: Lokaler CLS-Proxy-Dienst für HAN-Kommunikation nach BSI TR-03109-1.
+2. 🏠 **[`WIP_EEBUS_AND_CLOUD_ECOSYSTEM_BRIDGE.md`](./WIP_EEBUS_AND_CLOUD_ECOSYSTEM_BRIDGE.md)**
+   * **Ziel**: Anbindung von Wärmepumpen (myVAILLANT, ViCare) und Haushaltsgeräten (BSH Home Connect) über Cloud-APIs und EEBUS SHIP/SPINE Stack.
+   * **Status & Prio**: 🟡 40 % | 🔴 Hoch (Q4 2026 / Q1 2027)
 
-### 3. 📈 Automatisierter Flexibilitäts- & Regelenergie-Handel (Horizont 3)
-* **Ziel**: Vollautomatisierte Vermarktung gepoolter Heimspeicher an den aFRR/SRL- und Intraday-Märkten über Schnittstellen zu Aggregatoren (Next Kraftwerke, Entelios).
-* **Architektur**: Integration der bestehenden VPP Aggregator Engine (`/api/vpp/flexibility/`) mit automatischem Erlösausschüttungs-Clearing.
+3. ⚡ **[`WIP_BNETZA_CLS_SMART_METER_GATEWAY.md`](./WIP_BNETZA_CLS_SMART_METER_GATEWAY.md)**
+   * **Ziel**: Gesetzeskonforme Dimm- und Steuerbefehle nach § 14a EnWG direkt über den Controllable Local System (CLS) Kanal des SMGW empfangen.
+   * **Status & Prio**: 🟡 40 % | 🔴 Hoch (Q1 / Q2 2027)
 
-### 4. 🌐 Dedizierte Monitoring-Subdomain (`mon.sharegy.de`)
-* **Ziel**: Physische Ausgliederung des WSS-Ingress- und Reverse-RPC-Gateways für > 50.000 parallele Edge-Verbindungen.
-* **Referenz**: [`docs/architecture/DECOUPLED_MONITORING_AND_REMOTE_RPC_ARCHITECTURE.md`](file:///c:/Users/Public/Dev/eswes/docs/architecture/DECOUPLED_MONITORING_AND_REMOTE_RPC_ARCHITECTURE.md).
+4. 🔒 **[`WIP_DYNAMIC_WHITELABEL_SSL_PROVISIONING.md`](./WIP_DYNAMIC_WHITELABEL_SSL_PROVISIONING.md)**
+   * **Ziel**: Automatische Let's Encrypt SSL-Zertifikatsausstellung für B2B Custom Domains (CNAME) via Caddy/Traefik On-Demand TLS.
+   * **Status & Prio**: 🟡 70 % | 🟡 Mittel (Q4 2026)
+
+5. 📈 **[`WIP_AUTOMATED_FLEXIBILITY_AND_VPP_MARKET_CLEARING.md`](./WIP_AUTOMATED_FLEXIBILITY_AND_VPP_MARKET_CLEARING.md)**
+   * **Ziel**: Vollautomatisierte Vermarktung gepoolter Heimspeicher an den aFRR/SRL- und Intraday-Märkten über Aggregatoren mit automatischem Erlös-Clearing.
+   * **Status & Prio**: 🟡 60 % | 🟡 Mittel (Q2 / Q3 2027)
+
+6. 📱 **[`WIP_DUAL_APP_ECOSYSTEM_USER_VS_PARTNER.md`](./WIP_DUAL_APP_ECOSYSTEM_USER_VS_PARTNER.md)**
+   * **Ziel**: Evaluierung und Roadmap für das Two-App Ökosystem (`Sharegy Home` für Endkunden vs. `Sharegy Pro` für Installateure/Admins).
+   * **Status & Prio**: 🟡 50 % | 🟡 Mittel (Q1 2027)
+

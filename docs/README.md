@@ -104,11 +104,17 @@ docs/
 
 ---
 
-### 🧪 8. Entwicklungs-Backlog & Masterplan ([`docs/wip/`](./wip/))
+### 🧪 8. Entwicklungs-Backlog & WIP Features ([`docs/wip/`](./wip/))
 
-| Dokument | Beschreibung |
-|---|---|
-| 🛠️ **[`OPTIMIZATION_AND_AUDIT_MASTERPLAN.md`](./wip/OPTIMIZATION_AND_AUDIT_MASTERPLAN.md)** | **Konsolidiert:** Vollständiger Audit-Status (M1–M9 erledigt) & aktiver strategischer Entwicklungs-Backlog (EEBUS, CLS-Kanal, Flex-Handel) |
+| Dokument | Bereich | Status & Priorität | Beschreibung |
+|---|---|:---:|---|
+| 🛠️ **[`OPTIMIZATION_AND_AUDIT_MASTERPLAN.md`](./wip/OPTIMIZATION_AND_AUDIT_MASTERPLAN.md)** | Masterplan | 🟢 M1–M9 Live | Gesamter Audit-Status & strategischer Gesamt-Backlog |
+| 🔌 **[`WIP_DECOUPLED_MONITORING_CLUSTER_AND_REVERSE_RPC.md`](./wip/WIP_DECOUPLED_MONITORING_CLUSTER_AND_REVERSE_RPC.md)** | Edge & WSS | 🟡 50% / 🔴 Hoch | Auslagerung auf `mon.sharegy.de` & Zero-Trust WSS Reverse-RPC Wartung |
+| 🏠 **[`WIP_EEBUS_AND_CLOUD_ECOSYSTEM_BRIDGE.md`](./wip/WIP_EEBUS_AND_CLOUD_ECOSYSTEM_BRIDGE.md)** | HEMS / Wärmepumpe | 🟡 40% / 🔴 Hoch | EEBUS SHIP/SPINE Stack & Cloud-APIs (myVAILLANT, Home Connect) |
+| ⚡ **[`WIP_BNETZA_CLS_SMART_METER_GATEWAY.md`](./wip/WIP_BNETZA_CLS_SMART_METER_GATEWAY.md)** | § 14a EnWG / SMGW | 🟡 40% / 🔴 Hoch | Direkte Kopplung an Smart-Meter-Gateways über den CLS-Kanal |
+| 🔒 **[`WIP_DYNAMIC_WHITELABEL_SSL_PROVISIONING.md`](./wip/WIP_DYNAMIC_WHITELABEL_SSL_PROVISIONING.md)** | Whitelabel / TLS | 🟡 70% / 🟡 Mittel | Automatisierte Let's Encrypt SSL-Provisionierung für CNAME-Domains |
+| 📈 **[`WIP_AUTOMATED_FLEXIBILITY_AND_VPP_MARKET_CLEARING.md`](./wip/WIP_AUTOMATED_FLEXIBILITY_AND_VPP_MARKET_CLEARING.md)** | VPP & Regelenergie | 🟡 60% / 🟡 Mittel | Direkte Kopplung an Flex-Aggregatoren & Erlösausschüttungs-Clearing |
+| 📱 **[`WIP_DUAL_APP_ECOSYSTEM_USER_VS_PARTNER.md`](./wip/WIP_DUAL_APP_ECOSYSTEM_USER_VS_PARTNER.md)** | Mobile App | 🟡 50% / 🟡 Mittel | Evaluierung der Two-App Strategie (Sharegy Home vs. Sharegy Pro) |
 
 ---
 
