@@ -296,19 +296,18 @@ class GrowattAdapter(BaseInverterAdapter):
             "ppv", "ppvTotal", "ppv_total", "p_pv", "pv_power", "pvPower", "pvpower", "pv_power_w", "pvPowerW", "pPv",
             "pAct", "pact", "p_act",
             "output_power", "outputpower", "outputPower", "outPutPower", "active_power", "activePower",
-            "real_power", "realPower", "inverter_power", "inverterPower", "current_power", "currentpower",
-            "current_power_kw", "currentpowerkw", "plantPower", "plant_power", "total_power", "totalpower",
+            "real_power", "realPower", "inverter_power", "inverterPower",
             "sys_power", "syspower", "powerOfPhotovoltaic",
             is_power=True
         )
         curr_power = _get_val(
-            "currentPower", "current_power", "currPower", "curr_power", "total_power", "plantPower",
+            "currentPower", "current_power", "currPower", "curr_power", "plantPower",
             "plant_power", "current_power_kw", "currentpowerkw", "currentEnergy", "current_energy",
             is_power=True
         )
         pac_direct = _get_val(
-            "pac", "invPac", "inv_pac", "pacToUserTotal", "power", "ac_power", "acPower", "dc_power", "dcPower",
-            "pacToLocal", "pactolocal", "pLocalLoad", "plocalload", is_power=True
+            "pac", "invPac", "inv_pac", "ac_power", "acPower", "dc_power", "dcPower",
+            is_power=True
         )
 
         # Multi-String PV Summe (String 1 bis String 16)
