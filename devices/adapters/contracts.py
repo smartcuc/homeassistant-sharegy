@@ -94,7 +94,7 @@ class AdapterTestResult:
     """
     status: str                         # 'success' oder 'error'
     message: str
-    live_metrics: Dict[str, Any]
+    live_metrics: Dict[str, Any] = field(default_factory=dict)
     raw_sample: Dict[str, Any] = field(default_factory=dict)
     simulated: bool = False
     error: Optional[str] = None

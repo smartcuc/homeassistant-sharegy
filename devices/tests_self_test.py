@@ -90,3 +90,18 @@ class DeviceSelfTestTestCase(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.data["status"], "success")
         self.assertGreaterEqual(resp.data["health_score"], 90)
+
+    def test_05_growatt_self_test_with_integration(self):
+        """Testet den Selbsttest mit einer Growatt CloudDeviceIntegration."""
+        from devices.models import CloudDeviceIntegration
+        CloudDeviceIntegration.objects.create(
+            device=self.device,
+            profile_id="growatt_server",
+            credentials={"username": "mock_growatt_user", "password": "mockpassword"},
+            is_active=True,
+        )
+        res = run_device_self_test(device=None, mock_profile_id="growatt_server", credentials={"password": "••••••••"})
+        self.assertEqual(res["status"], "success")
+        self.assertIn("live_metrics", res["steps"][1])
+        self.assertGreater(res["steps"][1]["live_metrics"]["pv_power_w"], 0.0)
+        self.assertGreater(res["steps"][1]["live_metrics"]["battery_soc"], 0.0)

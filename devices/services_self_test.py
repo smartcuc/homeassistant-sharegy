@@ -64,6 +64,22 @@ def run_device_self_test(
         except Exception:
             dev_name = profile_id
 
+        # Prüfe ob eine aktive Integration für dieses Profil in der DB existiert
+        integration = CloudDeviceIntegration.objects.filter(profile_id=profile_id, is_active=True).first()
+        if integration:
+            if not device and integration.device:
+                device = integration.device
+                dev_name = getattr(device.config, "name", None) or dev_name
+            saved_creds = integration.credentials or {}
+            if not creds or all(not v or str(v).startswith("••") for v in creds.values()):
+                creds = saved_creds
+            else:
+                merged = dict(saved_creds)
+                for k, v in creds.items():
+                    if v and not str(v).startswith("••"):
+                        merged[k] = v
+                creds = merged
+
     # -------------------------------------------------------------
     # LIVE-TEST GEGEN CLOUD-API (falls profile_id & Zugangsdaten da sind)
     # -------------------------------------------------------------
@@ -84,6 +100,8 @@ def run_device_self_test(
                 t0 = time.time()
                 cloud_result = test_cloud_credentials(profile_id, creds)
                 live_latency = round((time.time() - t0) * 1000, 1)
+                if isinstance(cloud_result, dict) and cloud_result.get("status") == "error":
+                    cloud_error = cloud_result.get("error") or cloud_result.get("message") or "Authentifizierung fehlgeschlagen."
             except Exception as e:
                 cloud_error = str(e)
                 logger.warning("Selbsttest Cloud-Call fehlgeschlagen: %s", e)

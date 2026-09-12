@@ -31,11 +31,26 @@ export default function CloudInverterIntegrationCard({
     const [saveSuccess, setSaveSuccess] = useState(null);
     const [errorMsg, setErrorMsg] = useState(null);
     const [selfTestOpen, setSelfTestOpen] = useState(false);
+    const [selfTestTarget, setSelfTestTarget] = useState(null);
     const [showFieldValues, setShowFieldValues] = useState({});
 
     const toggleFieldVisibility = (key) => {
         setShowFieldValues((prev) => ({ ...prev, [key]: !prev[key] }));
     };
+
+    function handleStartSelfTest(item) {
+        if (item) {
+            setSelfTestTarget({
+                deviceId: item.device_id || item.device || item.id,
+                profileId: item.profile_id,
+                deviceName: item.device_name || item.profile_name,
+                credentials: item.credentials || {},
+            });
+        } else {
+            setSelfTestTarget(null);
+        }
+        setSelfTestOpen(true);
+    }
 
     useEffect(() => {
         loadProfiles();
@@ -403,6 +418,16 @@ export default function CloudInverterIntegrationCard({
                                         <div className="flex items-center gap-1.5 shrink-0">
                                             <button
                                                 type="button"
+                                                onClick={() => handleStartSelfTest(item)}
+                                                className="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-700 text-xs font-semibold rounded-lg shadow-2xs transition flex items-center gap-1 cursor-pointer"
+                                                title={t("cloud_inverter.self_test_btn", "1-Klick Selbsttest")}
+                                            >
+                                                <span>⚡</span>
+                                                <span className="hidden sm:inline">Selbsttest</span>
+                                            </button>
+
+                                            <button
+                                                type="button"
                                                 onClick={() => handlePollNow(item)}
                                                 disabled={isCurrentlyPolling}
                                                 className="px-2.5 py-1.5 bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 text-xs font-semibold rounded-lg shadow-2xs transition flex items-center gap-1 cursor-pointer"
@@ -649,7 +674,15 @@ export default function CloudInverterIntegrationCard({
                         <div className="flex flex-wrap items-center justify-end gap-3 pt-2">
                             <button
                                 type="button"
-                                onClick={() => setSelfTestOpen(true)}
+                                onClick={() => {
+                                    setSelfTestTarget({
+                                        deviceId: editingIntegrationId || null,
+                                        profileId: selectedProfileId,
+                                        deviceName: currentProfile?.name || deviceName,
+                                        credentials: credentials || {},
+                                    });
+                                    setSelfTestOpen(true);
+                                }}
                                 className="px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold rounded-xl transition cursor-pointer flex items-center gap-1.5"
                             >
                                 ⚡ {t("cloud_inverter.self_test_btn", "1-Klick Selbsttest")}
@@ -684,10 +717,14 @@ export default function CloudInverterIntegrationCard({
             {/* 1-Klick Hardware-Selbsttest Modal */}
             <DeviceSelfTestModal
                 open={selfTestOpen}
-                onClose={() => setSelfTestOpen(false)}
-                profileId={selectedProfileId}
-                deviceName={currentProfile?.name || deviceName || t("devices.inverter", "Wechselrichter")}
-                credentials={credentials}
+                onClose={() => {
+                    setSelfTestOpen(false);
+                    setSelfTestTarget(null);
+                }}
+                deviceId={selfTestTarget?.deviceId || editingIntegrationId || null}
+                profileId={selfTestTarget?.profileId || selectedProfileId}
+                deviceName={selfTestTarget?.deviceName || currentProfile?.name || deviceName || t("devices.inverter", "Wechselrichter")}
+                credentials={selfTestTarget?.credentials || credentials}
             />
         </div>
     );

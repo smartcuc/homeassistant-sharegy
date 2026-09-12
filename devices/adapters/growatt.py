@@ -411,7 +411,9 @@ class GrowattAdapter(BaseInverterAdapter):
         is_mock = (
             str(token).startswith("test_")
             or str(token).startswith("mock_")
-            or username.lower() in ("test", "demo", "mock", "test_growatt_user")
+            or username.lower() in ("test", "demo", "mock", "test_growatt_user", "mock_growatt_user")
+            or username.lower().startswith("test_")
+            or username.lower().startswith("mock_")
             or (not token and not username)
         )
 
