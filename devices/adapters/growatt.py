@@ -574,6 +574,7 @@ class GrowattAdapter(BaseInverterAdapter):
         # PFAD A: Growatt OpenAPI (Token / API-Key vorhanden)
         if token and not is_mock:
             from datetime import datetime
+            from django.core.cache import cache
             token_clean = str(token).strip()
             api_headers = {
                 "token": token_clean,
@@ -581,6 +582,7 @@ class GrowattAdapter(BaseInverterAdapter):
                 "Accept": "application/json, text/javascript, */*; q=0.01",
             }
             today_str = datetime.now().strftime("%Y-%m-%d")
+            cache_key = f"growatt:telemetry:{plant_id}:{device_sn or 'all'}"
 
             discovered_sn_list = [device_sn] if device_sn else []
             device_types: Dict[str, int] = {}
@@ -638,14 +640,7 @@ class GrowattAdapter(BaseInverterAdapter):
 
             for sn_val in target_sns:
                 dev_type = device_types.get(sn_val, 7)
-                endpoints_to_try = type_to_endpoints.get(dev_type, [
-                    ("/v1/device/tlx/tlx_data", "tlx_sn"),
-                    ("/v1/device/min/min_data", "min_sn"),
-                    ("/v1/device/max/max_data", "max_sn"),
-                    ("/v1/device/storage/storage_data", "storage_sn"),
-                    ("/v1/device/sph/sph_data", "sph_sn"),
-                    ("/v1/device/mix/mix_data", "mix_sn"),
-                ])
+                endpoints_to_try = type_to_endpoints.get(dev_type, default_endpoints)
 
                 for ep_path, sn_key in endpoints_to_try:
                     try:
@@ -679,7 +674,7 @@ class GrowattAdapter(BaseInverterAdapter):
                         logger.debug("Growatt %s lookup failed: %s", ep_path, e)
 
             # 3. Anlagen-Übersicht als Fallback abfragen falls noch keine Telemetrie gefunden wurde
-            if not api_call_succeeded and plant_id:
+            if not api_call_succeeded and plant_id and not rate_limited:
                 try:
                     p_resp = session.get(f"{base_host}/v1/plant/energy", headers=api_headers, params={"token": token_clean, "plant_id": plant_id, "date": today_str}, timeout=8)
                     if p_resp.status_code == 200:
@@ -690,8 +685,25 @@ class GrowattAdapter(BaseInverterAdapter):
                 except Exception:
                     pass
 
+            # 4. Cache-Handling: Bei Erfolg cachen (TTL: 5 Min.), bei Rate-Limit Cache nutzen
+            if api_call_succeeded and (raw_data["data"] or raw_data["responses"]):
+                try:
+                    cache.set(cache_key, raw_data, timeout=300)
+                except Exception:
+                    pass
+            elif rate_limited or (not api_call_succeeded and not raw_data["data"]):
+                try:
+                    cached_raw = cache.get(cache_key)
+                    if cached_raw and isinstance(cached_raw, dict) and (cached_raw.get("data") or cached_raw.get("responses")):
+                        logger.info("Growatt rate-limited (error_frequently_access). Using cached live telemetry snapshot.")
+                        raw_data = cached_raw
+                        api_call_succeeded = True
+                        rate_limited = False
+                except Exception as c_err:
+                    logger.debug("Cache lookup failed: %s", c_err)
+
             if rate_limited and not raw_data["data"] and not raw_data["responses"]:
-                err_msg = "Growatt OpenAPI Rate-Limit erreicht (error_frequently_access). Bitte warte 30 Sekunden vor der nächsten Abfrage."
+                err_msg = "Growatt OpenAPI Rate-Limit erreicht (error_frequently_access). Growatt beschränkt Abfragen auf 60s. Bitte kurz warten."
                 return AdapterTestResult(status="error", error=err_msg, message=err_msg)
 
             if not api_call_succeeded and (last_openapi_err or (not raw_data["data"] and not raw_data["responses"])):

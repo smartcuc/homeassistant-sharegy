@@ -65,8 +65,8 @@ DEFAULT_MANUFACTURER_POLLING_INTERVALS = {
     "growatt": {
         "name": "Growatt (ShineServer)",
         "interval": 60,
-        "min_interval": 30,
-        "notes": "Growatt OpenAPI v1.",
+        "min_interval": 60,
+        "notes": "Growatt OpenAPI v1 (Rate-Limit Schutz: mind. 60s Intervall empfohlen).",
     },
     "victron": {
         "name": "Victron Energy (VRM API)",
