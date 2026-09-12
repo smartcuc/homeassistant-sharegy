@@ -484,137 +484,207 @@ class GrowattAdapter(BaseInverterAdapter):
             _walk_sn(data)
             return found
 
-        # PFAD A: Growatt OpenAPI (Token vorhanden)
+        # PFAD A: Growatt OpenAPI (Token / API-Key vorhanden)
         if token and not is_mock:
             token_clean = str(token).strip()
             api_headers = {
                 "token": token_clean,
+                "Token": token_clean,
+                "token_id": token_clean,
                 "Authorization": f"Bearer {token_clean}",
-                "Content-Type": "application/x-www-form-urlencoded",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+                "Accept": "application/json, text/javascript, */*; q=0.01",
+            }
+            common_params = {
+                "token": token_clean,
+                "token_id": token_clean,
             }
 
-            # 1. Plant ID ermitteln / auflösen
-            if not plant_id or not plant_id.isdigit():
-                try:
-                    plist_resp = session.get("https://openapi.growatt.com/v1/plant/list", headers=api_headers, timeout=10)
-                    if plist_resp.status_code == 200:
-                        p_json = plist_resp.json()
-                        _merge_payload_item(p_json)
-                        p_data = p_json.get("data")
-                        plants = []
-                        if isinstance(p_data, list):
-                            plants = p_data
-                        elif isinstance(p_data, dict):
-                            plants = p_data.get("plants") or p_data.get("plant_list") or p_data.get("data") or [p_data]
-                        if plants and isinstance(plants, list) and len(plants) > 0:
-                            matched = None
-                            for p_item in plants:
-                                if isinstance(p_item, dict):
-                                    p_name = str(p_item.get("plant_name") or p_item.get("name") or p_item.get("plantName") or "").strip().lower()
-                                    p_id_str = str(p_item.get("plant_id") or p_item.get("id") or p_item.get("plantId") or "").strip()
-                                    if plant_id and (plant_id.lower() in (p_name, p_id_str)):
-                                        matched = p_item
-                                        break
-                            if not matched:
-                                matched = plants[0]
-                            if isinstance(matched, dict):
-                                plant_id = str(matched.get("plant_id") or matched.get("id") or matched.get("plantId") or "")
-                                credentials["plant_id"] = plant_id
-                                logger.info("Growatt auto-discovered plant_id: %s (Name: %s)", plant_id, matched.get("plant_name"))
-                except Exception as e:
-                    logger.warning("Growatt OpenAPI plant list discovery failed: %s", e)
+            openapi_hosts = [
+                "https://openapi.growatt.com",
+                "https://openapi-us.growatt.com",
+                "https://server.growatt.com/openapi",
+                "https://server-api.growatt.com/openapi",
+            ]
 
-            # 2. Alle Geräte-Seriennummern der Anlage ermitteln
             discovered_sn_list = [device_sn] if device_sn else []
-            if plant_id:
-                try:
-                    dlist_resp = session.get(
-                        "https://openapi.growatt.com/v1/device/list",
-                        headers=api_headers,
-                        params={"plant_id": plant_id},
-                        timeout=10,
-                    )
-                    if dlist_resp.status_code == 200:
-                        d_json = dlist_resp.json()
-                        _merge_payload_item(d_json)
-                        for sn in _extract_all_sns(d_json):
-                            if sn not in discovered_sn_list:
-                                discovered_sn_list.append(sn)
-                        if discovered_sn_list and not device_sn:
-                            device_sn = discovered_sn_list[0]
-                            credentials["device_sn"] = device_sn
-                            logger.info("Growatt auto-discovered devices: %s", discovered_sn_list)
-                except Exception as e:
-                    logger.debug("Growatt device/list lookup failed: %s", e)
+            api_call_succeeded = False
+            last_openapi_err = None
 
-            # 3. Alle Detail-Endpunkte für alle erkannten Seriennummern abfragen
-            for sn_val in (discovered_sn_list if discovered_sn_list else ([device_sn] if device_sn else [])):
-                for endpoint in [
-                    "https://openapi.growatt.com/v1/device/inverter/inverter_last_data",
-                    "https://openapi.growatt.com/v1/device/tlx/tlx_last_data",
-                    "https://openapi.growatt.com/v1/device/min/min_last_data",
-                    "https://openapi.growatt.com/v1/device/mic/mic_last_data",
-                    "https://openapi.growatt.com/v1/device/mod/mod_last_data",
-                    "https://openapi.growatt.com/v1/device/mid/mid_last_data",
-                    "https://openapi.growatt.com/v1/device/mac/mac_last_data",
-                    "https://openapi.growatt.com/v1/device/max/max_last_data",
-                    "https://openapi.growatt.com/v1/device/storage/storage_last_data",
-                    "https://openapi.growatt.com/v1/device/mix/mix_last_data",
-                    "https://openapi.growatt.com/v1/device/sph/sph_last_data",
-                    "https://openapi.growatt.com/v1/device/spa/spa_last_data",
-                    "https://openapi.growatt.com/v1/device/spf/spf_last_data",
-                    "https://openapi.growatt.com/v1/device/hps/hps_last_data",
-                    "https://openapi.growatt.com/v1/device/noah/noah_last_data",
-                    "https://openapi.growatt.com/v4/new-api/queryLastData",
-                ]:
-                    try:
-                        dev_resp = session.get(
-                            endpoint,
-                            headers=api_headers,
-                            params={
-                                "device_sn": sn_val,
-                                "inverter_sn": sn_val,
-                                "tlx_sn": sn_val,
-                                "min_sn": sn_val,
-                                "mic_sn": sn_val,
-                                "mod_sn": sn_val,
-                                "mid_sn": sn_val,
-                                "mac_sn": sn_val,
-                                "max_sn": sn_val,
-                                "storage_sn": sn_val,
-                                "mix_sn": sn_val,
-                                "sph_sn": sn_val,
-                                "spa_sn": sn_val,
-                                "spf_sn": sn_val,
-                                "hps_sn": sn_val,
-                                "noah_sn": sn_val,
-                                "deviceSn": sn_val,
-                                "inverterId": sn_val,
-                            },
-                            timeout=8,
-                        )
-                        if dev_resp.status_code == 200:
-                            _merge_payload_item(dev_resp.json())
-                    except Exception:
-                        pass
+            for base_host in openapi_hosts:
+                # 1. Plant ID ermitteln / auflösen
+                if not plant_id or not plant_id.isdigit():
+                    for plant_list_path in ["/v1/plant/user_plant_list", "/v1/plant/list", "/v1/plant/plant_list"]:
+                        try:
+                            # GET
+                            plist_resp = session.get(f"{base_host}{plant_list_path}", headers=api_headers, params=common_params, timeout=8)
+                            if plist_resp.status_code == 200:
+                                p_json = plist_resp.json()
+                                if isinstance(p_json, dict) and p_json.get("error_code") == 0:
+                                    api_call_succeeded = True
+                                    _merge_payload_item(p_json)
+                                elif isinstance(p_json, dict) and p_json.get("error_msg"):
+                                    last_openapi_err = p_json.get("error_msg")
+                            # POST
+                            plist_post = session.post(f"{base_host}{plant_list_path}", headers=api_headers, data=common_params, timeout=8)
+                            if plist_post.status_code == 200:
+                                p_json2 = plist_post.json()
+                                if isinstance(p_json2, dict) and p_json2.get("error_code") == 0:
+                                    api_call_succeeded = True
+                                    _merge_payload_item(p_json2)
+                        except Exception as e:
+                            logger.debug("Growatt OpenAPI plant list lookup on %s failed: %s", base_host, e)
 
-            if plant_id:
-                for p_ep in [
-                    "https://openapi.growatt.com/v1/plant/data",
-                    "https://openapi.growatt.com/v1/plant/data/overview",
-                    "https://openapi.growatt.com/v1/plant/energy",
-                ]:
-                    try:
-                        p_resp = session.get(
-                            p_ep,
-                            headers=api_headers,
-                            params={"plant_id": plant_id},
-                            timeout=10,
-                        )
-                        if p_resp.status_code == 200:
-                            _merge_payload_item(p_resp.json())
-                    except Exception as e:
-                        logger.warning("Growatt plant/data endpoint %s failed: %s", p_ep, e)
+                # 2. Geräte-Seriennummern der Anlage ermitteln
+                if plant_id:
+                    for dlist_path in ["/v1/device/list", "/v1/device/query_device_list", "/v1/device/device_list"]:
+                        try:
+                            p_args = dict(common_params)
+                            p_args.update({"plant_id": plant_id, "plantId": plant_id})
+                            d_resp = session.get(f"{base_host}{dlist_path}", headers=api_headers, params=p_args, timeout=8)
+                            if d_resp.status_code == 200:
+                                d_json = d_resp.json()
+                                if isinstance(d_json, dict) and d_json.get("error_code") == 0:
+                                    api_call_succeeded = True
+                                    _merge_payload_item(d_json)
+                                    for sn in _extract_all_sns(d_json):
+                                        if sn not in discovered_sn_list:
+                                            discovered_sn_list.append(sn)
+                            d_post = session.post(f"{base_host}{dlist_path}", headers=api_headers, data=p_args, timeout=8)
+                            if d_post.status_code == 200:
+                                d_json2 = d_post.json()
+                                if isinstance(d_json2, dict) and d_json2.get("error_code") == 0:
+                                    api_call_succeeded = True
+                                    _merge_payload_item(d_json2)
+                                    for sn in _extract_all_sns(d_json2):
+                                        if sn not in discovered_sn_list:
+                                            discovered_sn_list.append(sn)
+                        except Exception as e:
+                            logger.debug("Growatt device/list lookup failed: %s", e)
+
+                # 3. Alle Detail-Endpunkte für alle erkannten Seriennummern abfragen
+                target_sns = discovered_sn_list if discovered_sn_list else ([device_sn] if device_sn else [""])
+                for sn_val in target_sns:
+                    sn_params = dict(common_params)
+                    sn_params.update({
+                        "device_sn": sn_val,
+                        "inverter_sn": sn_val,
+                        "tlx_sn": sn_val,
+                        "min_sn": sn_val,
+                        "mic_sn": sn_val,
+                        "mod_sn": sn_val,
+                        "mid_sn": sn_val,
+                        "mac_sn": sn_val,
+                        "max_sn": sn_val,
+                        "storage_sn": sn_val,
+                        "mix_sn": sn_val,
+                        "sph_sn": sn_val,
+                        "spa_sn": sn_val,
+                        "spf_sn": sn_val,
+                        "hps_sn": sn_val,
+                        "noah_sn": sn_val,
+                        "deviceSn": sn_val,
+                        "inverterId": sn_val,
+                        "sn": sn_val,
+                    })
+                    if plant_id:
+                        sn_params["plant_id"] = plant_id
+                        sn_params["plantId"] = plant_id
+
+                    for endpoint_path in [
+                        "/v1/device/inverter/inverter_last_data",
+                        "/v1/device/inverter/inverter_data",
+                        "/v1/device/tlx/tlx_last_data",
+                        "/v1/device/min/min_last_data",
+                        "/v1/device/mic/mic_last_data",
+                        "/v1/device/mod/mod_last_data",
+                        "/v1/device/mid/mid_last_data",
+                        "/v1/device/mac/mac_last_data",
+                        "/v1/device/max/max_last_data",
+                        "/v1/device/storage/storage_last_data",
+                        "/v1/device/mix/mix_last_data",
+                        "/v1/device/sph/sph_last_data",
+                        "/v1/device/spa/spa_last_data",
+                        "/v1/device/spf/spf_last_data",
+                        "/v1/device/hps/hps_last_data",
+                        "/v1/device/noah/noah_last_data",
+                        "/v4/new-api/queryLastData",
+                        "/v4/device/query_device_data",
+                    ]:
+                        try:
+                            # GET Abfrage
+                            dev_resp = session.get(f"{base_host}{endpoint_path}", headers=api_headers, params=sn_params, timeout=8)
+                            if dev_resp.status_code == 200:
+                                d_body = dev_resp.json()
+                                if isinstance(d_body, dict):
+                                    if d_body.get("error_code") == 0:
+                                        api_call_succeeded = True
+                                        _merge_payload_item(d_body)
+                                    elif d_body.get("error_msg"):
+                                        last_openapi_err = d_body.get("error_msg")
+                            # POST Form Abfrage
+                            dev_post = session.post(f"{base_host}{endpoint_path}", headers=api_headers, data=sn_params, timeout=8)
+                            if dev_post.status_code == 200:
+                                d_body2 = dev_post.json()
+                                if isinstance(d_body2, dict):
+                                    if d_body2.get("error_code") == 0:
+                                        api_call_succeeded = True
+                                        _merge_payload_item(d_body2)
+                                    elif d_body2.get("error_msg"):
+                                        last_openapi_err = d_body2.get("error_msg")
+                            # POST JSON Abfrage
+                            json_headers = dict(api_headers)
+                            json_headers["Content-Type"] = "application/json"
+                            dev_json = session.post(f"{base_host}{endpoint_path}", headers=json_headers, json=sn_params, timeout=8)
+                            if dev_json.status_code == 200:
+                                d_body3 = dev_json.json()
+                                if isinstance(d_body3, dict):
+                                    if d_body3.get("error_code") == 0:
+                                        api_call_succeeded = True
+                                        _merge_payload_item(d_body3)
+                                    elif d_body3.get("error_msg"):
+                                        last_openapi_err = d_body3.get("error_msg")
+                        except Exception:
+                            pass
+
+                # 4. Plant Übersichtsendpunkte abfragen
+                if plant_id:
+                    p_params = dict(common_params)
+                    p_params.update({"plant_id": plant_id, "plantId": plant_id})
+                    for p_path in [
+                        "/v1/plant/data",
+                        "/v1/plant/data/overview",
+                        "/v1/plant/energy",
+                        "/v1/plant/plant_data",
+                    ]:
+                        try:
+                            p_resp = session.get(f"{base_host}{p_path}", headers=api_headers, params=p_params, timeout=8)
+                            if p_resp.status_code == 200:
+                                p_body = p_resp.json()
+                                if isinstance(p_body, dict):
+                                    if p_body.get("error_code") == 0:
+                                        api_call_succeeded = True
+                                        _merge_payload_item(p_body)
+                                    elif p_body.get("error_msg"):
+                                        last_openapi_err = p_body.get("error_msg")
+                            p_post = session.post(f"{base_host}{p_path}", headers=api_headers, data=p_params, timeout=8)
+                            if p_post.status_code == 200:
+                                p_body2 = p_post.json()
+                                if isinstance(p_body2, dict):
+                                    if p_body2.get("error_code") == 0:
+                                        api_call_succeeded = True
+                                        _merge_payload_item(p_body2)
+                                    elif p_body2.get("error_msg"):
+                                        last_openapi_err = p_body2.get("error_msg")
+                        except Exception as e:
+                            logger.debug("Growatt plant/data endpoint %s failed: %s", p_path, e)
+
+                if api_call_succeeded:
+                    break
+
+            if not api_call_succeeded and (last_openapi_err or not raw_data["data"]):
+                err_msg = f"Growatt OpenAPI Fehler: {last_openapi_err or 'Ungültiger API-Token oder Wechselrichter offline'}"
+                return AdapterTestResult(status="error", error=err_msg, message=err_msg)
 
             telemetry = self.parse_payload(raw_data)
             return AdapterTestResult(
