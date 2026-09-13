@@ -505,11 +505,11 @@ export default function InterfacesPage() {
                         </div>
                         <div>
                             <h2 className="text-base font-bold text-gray-900">
-                                {t("interfaces.mqtt_title", "7. MQTT Broker Schnittstelle (ioBroker, Node-RED, OTel, OpenDTU)")}
+                                {t("interfaces.mqtt_title", "7. MQTT Broker Schnittstelle")}
                             </h2>
 
                             <p className="text-xs text-gray-500">
-                                {t("interfaces.mqtt_desc", "Standard-IoT-Protokoll zur universellen Anbindung von Smart-Home-Servern, Tasmota und OpenTelemetry")}
+                                {t("interfaces.mqtt_desc", "Standard-IoT-Protokoll zur universellen Anbindung von OpenTelemetry, Node-RED, Tasmota, OpenDTU & Smart-Home-Zentralen")}
                             </p>
                         </div>
                     </div>
