@@ -1,7 +1,7 @@
 # 🛡️ [WIP] Cloudflare Pro Integration, Edge Caching & API Security
 
-**Status:** In Konzeption / Vorbereitung  
-**Fortschritt:** 🟡 20 %  
+**Status:** In Umsetzung / DNS & Edge-Caching aktiv  
+**Fortschritt:** 🟢 80 %  
 **Priorität:** 🔴 Hoch (Ziel: Q4 2026 / Go-To-Market)  
 **Lead / Modul:** `infra`, `security`, `frontend`, `api`  
 
@@ -9,7 +9,7 @@
 
 ## 🎯 1. Feature-Beschreibung & Zielsetzung
 
-Integration der bestehenden **Cloudflare Pro Lizenz** in das Sharegy-Ökosystem (`sharegy.de`, `mon.sharegy.de`, Whitelabel-Domains). 
+Integration der bestehenden **Cloudflare Pro Lizenz** (smartEvo.de) & **Free Tier** (sharegy.de) in das Gesamtsystem. 
 Ziel ist es, das Backend maximal zu entlasten, Ladezeiten für Web & native Apps (Android/iOS) durch Edge-Caching drastisch zu senken und die API sowie Auth-Endpunkte mit Enterprise-Sicherheitsregeln abzusichern.
 
 ### Kernziele:
@@ -104,8 +104,8 @@ Ziel ist es, das Backend maximal zu entlasten, Ladezeiten für Web & native Apps
 
 | Phase | Aufgabenbereich | Status | Ziel-Termin |
 |---|---|:---:|---|
-| **Phase 1** | DNS-Delegation & Domain-Setup in Cloudflare Pro | ⚪ Ausstehend | Sprint 1 (Q4 2026) |
-| **Phase 2** | Konfiguration der 3 Cache Rules & WAF Rate Limiting | ⚪ Ausstehend | Sprint 1 (Q4 2026) |
+| **Phase 1** | DNS-Delegation & Domain-Setup in Cloudflare | 🟢 **Live & Aktiv** | Abgeschlossen (13.09.2026) |
+| **Phase 2** | Konfiguration der 3 Cache Rules (Assets, API, WebSockets) | 🟢 **Live & Aktiv** | Abgeschlossen (13.09.2026) |
 | **Phase 3** | Nginx `real_ip_header CF-Connecting-IP` & Django Headers | ⚪ Ausstehend | Sprint 2 (Q4 2026) |
 | **Phase 4** | WebSocket-Stresstest über Cloudflare Edge Proxy | ⚪ Ausstehend | Sprint 2 (Q4 2026) |
 | **Phase 5** | Evaluierung von Cloudflare for SaaS für Whitelabel CNAMEs | ⚪ Ausstehend | Q1 2027 |
