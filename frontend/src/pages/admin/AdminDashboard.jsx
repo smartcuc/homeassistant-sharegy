@@ -220,7 +220,7 @@ export default function AdminDashboard() {
                                             <td className="py-2.5 font-bold text-gray-900 flex items-center gap-2">
                                                 <span>
                                                     {item.key === "homeassistant" ? "🏠" :
-                                                     item.key === "iobroker" ? "🔴" :
+                                                     item.key === "iobroker" ? "🔵" :
                                                      item.key === "shelly_wss" ? "⚡" :
                                                      item.key === "cloud_inverter" ? "☁️" : "📡"}
                                                 </span>

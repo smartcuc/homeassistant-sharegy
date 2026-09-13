@@ -169,7 +169,7 @@ export default function InterfacesPage() {
 
                     {/* ioBroker Card */}
                     {renderInterfaceStatusCard({
-                        icon: "🔴",
+                        icon: "🔵",
                         name: "ioBroker",
                         key: "iobroker",
                         status: primaryHome?.interface_status?.iobroker,
