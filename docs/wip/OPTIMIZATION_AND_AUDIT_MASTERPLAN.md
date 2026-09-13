@@ -55,4 +55,9 @@ Jedes anstehende Feature wird in einer eigenständigen Spezifikation im Ordner `
    * **Ziel**: Rollen- und kontextbasierte Aufteilung der Side-Navigation für EMS-Prosumer, Mieterstrom-Nutzer, Installateure und Liegenschafts-Admins inkl. Multi-Role Switcher.
    * **Status & Prio**: 🟡 40 % | 🔴 Hoch (Q4 2026)
 
+8. 🛡️ **[`WIP_CLOUDFLARE_PRO_INFRASTRUCTURE_AND_SECURITY.md`](./WIP_CLOUDFLARE_PRO_INFRASTRUCTURE_AND_SECURITY.md)**
+   * **Ziel**: Nutzung der Cloudflare Pro Lizenz für Edge-Caching von Frontend-Assets, WAF & Bot-Schutz für Auth-APIs, WebSocket-Stabilität und Whitelabel SSL (Cloudflare for SaaS).
+   * **Status & Prio**: 🟡 20 % | 🔴 Hoch (Q4 2026)
+
+
 
