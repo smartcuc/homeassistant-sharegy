@@ -2516,7 +2516,8 @@
     "demo_role_user": "👤 Mieterstrom & Teilnehmer",
     "p1_demo_btn": "⚡ HEMS Pro Live-Demo testen (Einfamilienhaus)",
     "p2_demo_admin_btn": "🏢 WEG & Quartiers-Admin Demo",
-    "p2_demo_user_btn": "👤 Mieterstrom & Teilnehmer Demo"
+    "p2_demo_user_btn": "👤 Mieterstrom & Teilnehmer Demo",
+    "faq_5_a_intro": "Simply click on one of the following 1-click demo access points to test your desired role interactively in the browser – no registration required:"
   },
   "interfaces.diagnostics_title": "Live Schnittstellen-Status & Verbindungstest",
   "interfaces.diagnostics_desc": "Echtzeit-Erkennung aktiver Telemetrie über Home Assistant, ioBroker, Shelly WSS, Sungrow Cloud und MQTT.",

@@ -2516,7 +2516,8 @@
     "demo_role_user": "👤 Tenant & Member Portal",
     "p1_demo_btn": "⚡ Test HEMS Pro Live Demo (Single Home)",
     "p2_demo_admin_btn": "🏢 Building & District Admin Demo",
-    "p2_demo_user_btn": "👤 Tenant Electricity & Member Demo"
+    "p2_demo_user_btn": "👤 Tenant Electricity & Member Demo",
+    "faq_5_a_intro": "Simply click on one of the following 1-click demo access points to test your desired role interactively in the browser – no registration required:"
   },
   "interfaces.diagnostics_title": "Live Interface Status & Diagnostics",
   "interfaces.diagnostics_desc": "Real-time detection of active telemetry via Home Assistant, ioBroker, Shelly WSS, Sungrow Cloud, and MQTT.",

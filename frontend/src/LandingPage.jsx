@@ -84,7 +84,54 @@ export default function LandingPage() {
         },
         {
             q: t("landing.faq_5_q", "Wie kann ich die Live-Demo testen?"),
-            a: t("landing.faq_5_a", "Klicke einfach oben auf 'Live-Demo' oder wähle deine gewünschte Rolle: ⚡ Einfamilienhaus (HEMS Pro), 🏢 WEG & Quartiers-Admin oder 👤 Mieterstrom & Teilnehmer. Alle Demos sind 100% interaktiv und ohne Registrierung sofort einsatzbereit.")
+            a: (
+                <div className="space-y-3">
+                    <p>
+                        {t(
+                            "landing.faq_5_a_intro",
+                            "Klicke einfach auf einen der folgenden 1-Klick-Zugänge, um die gewünschte Rolle sofort und ohne Registrierung interaktiv im Browser auszuprobieren:"
+                        )}
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
+                        <a
+                            href="/api/demo/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2.5 p-3 rounded-xl bg-slate-50 hover:bg-amber-50/80 border border-slate-200 hover:border-amber-300 text-slate-900 transition-all shadow-2xs group hover:-translate-y-0.5"
+                        >
+                            <span className="text-xl group-hover:scale-110 transition-transform">⚡</span>
+                            <div className="flex flex-col text-left">
+                                <span className="font-bold text-xs text-slate-900 group-hover:text-amber-900">{t("landing.demo_role_ems", "Einfamilienhaus (HEMS)")}</span>
+                                <span className="text-[10px] text-slate-500 font-medium">Smart EMS & dynamische Tarife</span>
+                            </div>
+                        </a>
+                        <a
+                            href="/api/demo/admin/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2.5 p-3 rounded-xl bg-slate-50 hover:bg-indigo-50/80 border border-slate-200 hover:border-indigo-300 text-slate-900 transition-all shadow-2xs group hover:-translate-y-0.5"
+                        >
+                            <span className="text-xl group-hover:scale-110 transition-transform">🏢</span>
+                            <div className="flex flex-col text-left">
+                                <span className="font-bold text-xs text-slate-900 group-hover:text-indigo-900">{t("landing.demo_role_admin", "WEG & Quartiers-Admin")}</span>
+                                <span className="text-[10px] text-slate-500 font-medium">Summenzähler & Abrechnung</span>
+                            </div>
+                        </a>
+                        <a
+                            href="/api/demo/user/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2.5 p-3 rounded-xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-200 hover:border-emerald-300 text-slate-900 transition-all shadow-2xs group hover:-translate-y-0.5"
+                        >
+                            <span className="text-xl group-hover:scale-110 transition-transform">👤</span>
+                            <div className="flex flex-col text-left">
+                                <span className="font-bold text-xs text-slate-900 group-hover:text-emerald-900">{t("landing.demo_role_user", "Mieterstrom & Teilnehmer")}</span>
+                                <span className="text-[10px] text-slate-500 font-medium">Verbraucher & Sharing-Pool</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            )
         }
     ];
 

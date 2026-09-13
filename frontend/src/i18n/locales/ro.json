@@ -2529,7 +2529,8 @@
     "faq_5_a": "Simply click 'Launch Live Demo' at the top or use the interactive simulator on this page. You can instantly test all control modes and scenarios – no registration needed.",
     "final_cta_title": "Ready for your smart Energy OS?",
     "final_cta_desc": "Connect your solar system, wallbox & battery storage in a few clicks – or test the interactive live demo immediately.",
-    "final_cta_btn": "Get Started for Free →"
+    "final_cta_btn": "Get Started for Free →",
+    "faq_5_a_intro": "Simply click on one of the following 1-click demo access points to test your desired role interactively in the browser – no registration required:"
   },
   "interfaces.diagnostics_title": "Stare interfețe în timp real și diagnosticare",
   "interfaces.diagnostics_desc": "Detectarea telemetriei active în timp real prin Home Assistant, ioBroker, Shelly WSS, Sungrow Cloud și MQTT.",
