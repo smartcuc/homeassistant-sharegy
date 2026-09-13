@@ -33,13 +33,24 @@ jobs:
           rsync -av --delete --exclude=".git" integrations/iobroker.sharegy/ /tmp/ioBroker.sharegy/
 
           cd /tmp/ioBroker.sharegy
+          VERSION=$(grep -o '"version": "[^"]*' package.json | cut -d'"' -f4)
           if [ -n "$(git status --porcelain)" ]; then
             git add .
-            git commit -m "sync: update ioBroker adapter from smartcuc/eswes (${{ github.sha }})"
+            git commit -m "sync: release v${VERSION:-1.0.0} (${{ github.sha }})"
             git push origin main
+            if [ -n "$VERSION" ] && ! git rev-parse "v${VERSION}" >/dev/null 2>&1; then
+              git tag "v${VERSION}"
+              git push origin "v${VERSION}"
+              echo "Created and pushed git tag v${VERSION}"
+            fi
             echo "Successfully synced ioBroker.sharegy!"
           else
-            echo "No changes detected in ioBroker adapter."
+            echo "No changes detected in ioBroker adapter. Checking tag v${VERSION}..."
+            if [ -n "$VERSION" ] && ! git rev-parse "v${VERSION}" >/dev/null 2>&1; then
+              git tag "v${VERSION}"
+              git push origin "v${VERSION}"
+              echo "Created and pushed git tag v${VERSION}"
+            fi
           fi
 
   sync-homeassistant:
@@ -65,11 +76,22 @@ jobs:
           rsync -av --delete --exclude=".git" integrations/homeassistant/ /tmp/homeassistant-sharegy/
 
           cd /tmp/homeassistant-sharegy
+          VERSION=$(grep -o '"version": "[^"]*' custom_components/sharegy/manifest.json | cut -d'"' -f4)
           if [ -n "$(git status --porcelain)" ]; then
             git add .
-            git commit -m "sync: update Home Assistant component from smartcuc/eswes (${{ github.sha }})"
+            git commit -m "sync: release v${VERSION:-2.2.0} (${{ github.sha }})"
             git push origin main
+            if [ -n "$VERSION" ] && ! git rev-parse "v${VERSION}" >/dev/null 2>&1; then
+              git tag "v${VERSION}"
+              git push origin "v${VERSION}"
+              echo "Created and pushed git tag v${VERSION}"
+            fi
             echo "Successfully synced homeassistant-sharegy!"
           else
-            echo "No changes detected in Home Assistant integration."
+            echo "No changes detected in Home Assistant integration. Checking tag v${VERSION}..."
+            if [ -n "$VERSION" ] && ! git rev-parse "v${VERSION}" >/dev/null 2>&1; then
+              git tag "v${VERSION}"
+              git push origin "v${VERSION}"
+              echo "Created and pushed git tag v${VERSION}"
+            fi
           fi
