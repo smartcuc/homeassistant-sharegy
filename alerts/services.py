@@ -44,15 +44,40 @@ def evaluate_home_alerts(home) -> list[AlertEvent]:
                 # je nach Zählpfeil positiv (+1074 W) oder negativ (-1074 W).
                 latest_pv_w += abs(float(lm.value))
 
-        # Sonnenzeit: Zwischen 10:00 und 17:00 Uhr
-        is_daylight_peak = (10 <= hour <= 17)
-        if is_daylight_peak and latest_pv_w < 50.0:
+        month = now.month
+        # Jahreszeiten-Fenster für echte Sonnen-Kernzeiten:
+        # Winter (Nov-Feb): Kein Ausfall-Alarm (Schnee, Nebel, Dämmerung)
+        # Frühjahr / Herbst (März, April, Sept, Okt): 11:30 bis 14:00 Uhr
+        # Sommer (Mai bis Aug): 11:00 bis 15:00 Uhr
+        if month in (11, 12, 1, 2):
+            is_daylight_peak = False
+        elif month in (3, 4, 9, 10):
+            is_daylight_peak = (11 <= hour <= 13) or (hour == 14 and now.minute <= 0)
+        else:
+            is_daylight_peak = (11 <= hour <= 14) or (hour == 15 and now.minute <= 0)
+
+        # Wetter-Prüfung: Falls Bewölkung > 70% oder Globalstrahlung < 150 W/m² vorliegt, scheint die Sonne nicht
+        is_bad_weather = False
+        weather = WeatherForecast.objects.filter(
+            home=home,
+            ts__gte=now - timedelta(hours=1),
+            ts__lte=now + timedelta(hours=1),
+        ).first()
+
+        if weather:
+            if weather.cloud_cover_pct is not None and weather.cloud_cover_pct > 70.0:
+                is_bad_weather = True
+            elif weather.shortwave_radiation_wm2 is not None and weather.shortwave_radiation_wm2 < 150.0:
+                is_bad_weather = True
+
+        # Ausfall-Kriterium: Echter Ausfall (<= 10 W) mitten am Tag bei gutem Wetter
+        if is_daylight_peak and not is_bad_weather and latest_pv_w <= 10.0:
             _upsert_alert(
                 home=home,
                 alert_type="no_pv",
-                severity=AlertEvent.SEVERITY_CRITICAL,
-                title="Keine PV-Erzeugung erkannt (Ertragsausfall)",
-                message=f"Die Sonne scheint ({hour:02d}:00 Uhr), aber deine Solaranlage meldet aktuell nur {latest_pv_w:.0f} W Erzeugung. Bitte Sicherungen und DC-Schalter am Wechselrichter prüfen.",
+                severity=AlertEvent.SEVERITY_WARNING,
+                title="Keine PV-Erzeugung erkannt (Möglicher Ertragsausfall)",
+                message=f"Zur Mittagszeit ({hour:02d}:{now.minute:02d} Uhr) meldet deine Solaranlage trotz hellem Tageslicht nur {latest_pv_w:.0f} W Erzeugung. Bitte Sicherungen und DC-Schalter am Wechselrichter prüfen.",
                 action_hint="Wechselrichter-Status & Sicherung prüfen",
                 action_type="check_inverter",
                 details={"latest_pv_w": latest_pv_w, "hour": hour},
@@ -271,7 +296,15 @@ def _upsert_alert(home, alert_type, severity, title, message, action_hint="", ac
                 logging.getLogger(__name__).warning("Fehler beim Push-Dispatch für Alert %s: %s", event.id, str(ex))
 
         # Sofortige E-Mail-Warnung bei kritischen Alarmen (sofern vom Nutzer aktiviert)
-        if severity == AlertEvent.SEVERITY_CRITICAL and home and getattr(home, "user", None):
+        # Anti-Spam / Anti-Flapping Schutz: Maximal 1 E-Mail alle 24 Stunden pro (home, alert_type)!
+        email_cooldown = timezone.now() - timedelta(hours=24)
+        recent_email_exists = AlertEvent.objects.filter(
+            home=home,
+            alert_type=alert_type,
+            created_at__gte=email_cooldown,
+        ).exclude(id=event.id).exists()
+
+        if severity == AlertEvent.SEVERITY_CRITICAL and not recent_email_exists and home and getattr(home, "user", None):
             user = home.user
             user_settings = getattr(user, "settings", None)
             if user_settings is None or getattr(user_settings, "notify_critical_alerts", True):
