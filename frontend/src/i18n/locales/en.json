@@ -1246,8 +1246,14 @@
     "send_error": "❌ Error sending login link. Please check your email address.",
     "code_error": "❌ Invalid or expired code. Please try again.",
     "already_have_code": "Already received a code or link? 👉 Enter code",
+    "already_have_code_app": "Already received a code? 👉 Enter code",
+    "already_have_code_web": "Have a code from the app? 👉 Enter code here",
     "back_to_email": "← Request another login link by email",
+    "back_to_email_app": "← Request another login code by email",
+    "back_to_email_web": "← Back to email login",
     "no_password_needed": "🔒 No password needed – secure via magic link & one-time code",
+    "no_password_needed_app": "🔒 No password needed – secure via magic link & one-time code",
+    "no_password_needed_web": "🔒 No password needed – secure & direct via magic link",
     "back_to_home": "← Back to Home"
   },
   "onboarding": {

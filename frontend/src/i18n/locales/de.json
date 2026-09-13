@@ -1246,8 +1246,14 @@
     "send_error": "❌ Fehler beim Senden. Bitte prüfe deine E-Mail-Adresse.",
     "code_error": "❌ Ungültiger oder abgelaufener Code. Bitte erneut versuchen.",
     "already_have_code": "Bereits einen Code oder Link erhalten? 👉 Code eingeben",
+    "already_have_code_app": "Bereits einen Code erhalten? 👉 Code eingeben",
+    "already_have_code_web": "Code aus der App vorliegen? 👉 Hier eingeben",
     "back_to_email": "← Anderen Login-Link per E-Mail anfordern",
+    "back_to_email_app": "← Anderen Login-Code per E-Mail anfordern",
+    "back_to_email_web": "← Zurück zur E-Mail-Anmeldung",
     "no_password_needed": "🔒 Kein Passwort nötig – sicher per Magic Link & Einmalcode",
+    "no_password_needed_app": "🔒 Kein Passwort nötig – sicher per Magic Link & Einmalcode",
+    "no_password_needed_web": "🔒 Kein Passwort nötig – sicher & direkt per Magic Link",
     "back_to_home": "← Zurück zur Startseite"
   },
   "onboarding": {

@@ -276,17 +276,23 @@ export default function Login() {
                             setShowCodeInput(!showCodeInput);
                             setStatus("");
                         }}
-                        className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline inline-flex items-center gap-1"
+                        className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline inline-flex items-center gap-1 cursor-pointer"
                     >
                         {showCodeInput
-                            ? t("auth.back_to_email", "← Anderen Login-Link per E-Mail anfordern")
-                            : t("auth.already_have_code", "Bereits einen Code oder Link erhalten? 👉 Code eingeben")}
+                            ? isApp
+                                ? t("auth.back_to_email_app", "← Anderen Login-Code per E-Mail anfordern")
+                                : t("auth.back_to_email_web", "← Zurück zur E-Mail-Anmeldung")
+                            : isApp
+                                ? t("auth.already_have_code_app", "Bereits einen Code erhalten? 👉 Code eingeben")
+                                : t("auth.already_have_code_web", "Code aus der App vorliegen? 👉 Hier eingeben")}
                     </button>
                 </div>
 
                 {/* FOOTER */}
                 <div className="mt-4 text-[11px] text-slate-400 dark:text-slate-500 text-center">
-                    {t("auth.no_password_needed", "🔒 Kein Passwort nötig – sicher per Magic Link & Einmalcode")}
+                    {isApp
+                        ? t("auth.no_password_needed_app", "🔒 Kein Passwort nötig – sicher per Magic Link & Einmalcode")
+                        : t("auth.no_password_needed_web", "🔒 Kein Passwort nötig – sicher & direkt per Magic Link")}
                 </div>
 
                 <div className="mt-3 text-xs text-center">
