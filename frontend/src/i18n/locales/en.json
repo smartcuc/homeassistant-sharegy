@@ -564,7 +564,9 @@
     "iobroker_install_step_1": "Open ioBroker web UI → Adapters → Enable expert mode (GitHub icon) and install \"iobroker.sharegy\" (or via npm: npm i iobroker.sharegy).",
     "iobroker_install_step_2": "Create an instance (sharegy.0) and enter your personal Home Token.",
     "iobroker_install_step_3": "Select your meter, solar PV and inverter datapoints → Live sync begins immediately.",
-    "card_wmsb": "Smart Meter / wMSB"
+    "card_wmsb": "Smart Meter / wMSB",
+    "ha_mqtt_step_1": "If you prefer using the native Home Assistant MQTT integration instead of the HACS plugin:",
+    "ha_mqtt_step_2": "Send sensor metrics automatically via MQTT publish action to your base topic:"
   },
   "profile": {
     "title": "User Profile",

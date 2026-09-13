@@ -16,7 +16,7 @@ export default function InterfacesPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [copiedKey, setCopiedKey] = useState(null);
     const [showQR, setShowQR] = useState(false);
-    const [guideTab, setGuideTab] = useState("iobroker");
+    const [guideTab, setGuideTab] = useState("otel");
 
     function safeCopy(text, key) {
         if (navigator.clipboard) {
@@ -647,9 +647,10 @@ export default function InterfacesPage() {
                             <div className="border border-slate-200 rounded-xl overflow-hidden">
                                 <div className="flex bg-slate-50 border-b border-slate-200 text-xs font-semibold overflow-x-auto">
                                     {[
-                                        { id: "iobroker", label: "🔵 ioBroker MQTT" },
                                         { id: "otel", label: "🔭 OpenTelemetry (OTel)" },
                                         { id: "nodered", label: "🟢 Node-RED / Tasmota" },
+                                        { id: "iobroker", label: "🔵 ioBroker MQTT" },
+                                        { id: "ha_mqtt", label: "🏠 Home Assistant" },
                                     ].map((tab) => (
                                         <button
                                             key={tab.id}
@@ -665,22 +666,6 @@ export default function InterfacesPage() {
                                 </div>
 
                                 <div className="p-4 text-xs text-gray-700 leading-relaxed bg-white">
-                                    {guideTab === "iobroker" && (
-                                        <div className="space-y-2">
-                                            <p className="text-gray-600">
-                                                {t("interfaces.iobroker_step_1", "1. Installiere den MQTT Client Adapter (mqtt-client).")}<br />
-                                                {t("interfaces.iobroker_step_2", "2. Wähle Typ Client / Abonnent, trage URL, Port sowie Benutzer & Kennwort ein.")}<br />
-                                                {t("interfaces.iobroker_step_3", "3. Sende Messwerte an dein Topic:")}
-                                            </p>
-                                            <pre className="bg-slate-900 text-green-400 p-2.5 rounded-lg font-mono text-[11px] overflow-x-auto">
-                                                {`sendTo('mqtt-client.0', 'sendMessage', {
-    topic: 'h/${primaryHome?.mqtt_token || "<TOKEN>"}/balkonkraftwerk',
-    message: JSON.stringify({ power: 450.0 })
-});`}
-                                            </pre>
-                                        </div>
-                                    )}
-
                                     {guideTab === "otel" && (
                                         <div className="space-y-2">
                                             <div className="font-bold text-gray-900 text-sm flex items-center justify-between">
@@ -709,10 +694,58 @@ exporters:
                                     )}
 
                                     {guideTab === "nodered" && (
-                                        <div className="space-y-1.5 text-gray-600">
-                                            <p>{t("interfaces.nodered_step_1", "1. Verwende in Node-RED oder Tasmota einen standardmäßigen MQTT Out Node.")}</p>
-                                            <p>{t("interfaces.nodered_step_2", "2. Konfiguriere den Broker mit deinen Zugangsdaten.")}</p>
-                                            <p>{t("interfaces.nodered_step_3", "3. Sende JSON-Nutzdaten an dein Basis-Topic.")}</p>
+                                        <div className="space-y-2 text-gray-600">
+                                            <p>
+                                                {t("interfaces.nodered_step_1", "1. Verwende in Node-RED einen standardmäßigen MQTT Out Node (oder in Tasmota die integrierte MQTT Telemetrie).")}<br />
+                                                {t("interfaces.nodered_step_2", "2. Konfiguriere den Broker mit deinen Zugangsdaten (Host, Port, User & Kennwort).")}<br />
+                                                {t("interfaces.nodered_step_3", "3. Sende JSON-Nutzdaten an dein Basis-Topic:")}
+                                            </p>
+                                            <pre className="bg-slate-900 text-green-400 p-2.5 rounded-lg font-mono text-[11px] overflow-x-auto">
+                                                {`// Node-RED Function Node Beispiel:
+msg.topic = "h/${primaryHome?.mqtt_token || "<TOKEN>"}/balkonkraftwerk";
+msg.payload = {
+    power: 450.0,
+    voltage: 230.1,
+    daily_yield_kwh: 2.35
+};
+return msg;`}
+                                            </pre>
+                                        </div>
+                                    )}
+
+                                    {guideTab === "iobroker" && (
+                                        <div className="space-y-2">
+                                            <p className="text-gray-600">
+                                                {t("interfaces.iobroker_step_1", "1. Installiere den MQTT Client Adapter (mqtt-client).")}<br />
+                                                {t("interfaces.iobroker_step_2", "2. Wähle Typ Client / Abonnent, trage URL, Port sowie Benutzer & Kennwort ein.")}<br />
+                                                {t("interfaces.iobroker_step_3", "3. Sende Messwerte an dein Topic:")}
+                                            </p>
+                                            <pre className="bg-slate-900 text-green-400 p-2.5 rounded-lg font-mono text-[11px] overflow-x-auto">
+                                                {`sendTo('mqtt-client.0', 'sendMessage', {
+    topic: 'h/${primaryHome?.mqtt_token || "<TOKEN>"}/balkonkraftwerk',
+    message: JSON.stringify({ power: 450.0 })
+});`}
+                                            </pre>
+                                        </div>
+                                    )}
+
+                                    {guideTab === "ha_mqtt" && (
+                                        <div className="space-y-2">
+                                            <p className="text-gray-600">
+                                                {t("interfaces.ha_mqtt_step_1", "Falls du statt des HACS-Plugins die native Home Assistant MQTT-Integration nutzen möchtest:")}<br />
+                                                {t("interfaces.ha_mqtt_step_2", "Sende Sensorwerte automatisiert per MQTT Publish Aktion an dein Basis-Topic:")}
+                                            </p>
+                                            <pre className="bg-slate-900 text-green-400 p-2.5 rounded-lg font-mono text-[11px] overflow-x-auto">
+                                                {`# In Home Assistant Automation (Aktion / Action):
+action: mqtt.publish
+data:
+  topic: "h/${primaryHome?.mqtt_token || "<TOKEN>"}/hausverbrauch"
+  payload: >
+    {
+      "power": {{ states('sensor.power_consumption') | float(0) }},
+      "total_kwh": {{ states('sensor.total_energy_import') | float(0) }}
+    }`}
+                                            </pre>
                                         </div>
                                     )}
                                 </div>
