@@ -59,5 +59,10 @@ Jedes anstehende Feature wird in einer eigenständigen Spezifikation im Ordner `
    * **Ziel**: Nutzung der Cloudflare Pro Lizenz für Edge-Caching von Frontend-Assets, WAF & Bot-Schutz für Auth-APIs, WebSocket-Stabilität und Whitelabel SSL (Cloudflare for SaaS).
    * **Status & Prio**: 🟡 20 % | 🔴 Hoch (Q4 2026)
 
+9. 🌐 **[`WIP_SMARTEVO_WEBSITE_PRODUCT_INTEGRATION.md`](./WIP_SMARTEVO_WEBSITE_PRODUCT_INTEGRATION.md)**
+   * **Ziel**: Nahtlose Integration von Sharegy und Factofy in das smartEvo.de Design-System (Cyan/Petrol Look), Bereinigung obsoleter Sektionen (Bildung) und Ausbau der Dachmarken-Architektur.
+   * **Status & Prio**: 🟡 25 % | 🔴 Hoch (Q4 2026)
+
+
 
 
