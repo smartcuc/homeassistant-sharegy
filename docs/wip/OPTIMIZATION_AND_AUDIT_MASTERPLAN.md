@@ -20,6 +20,7 @@ Alle wesentlichen Härtungs-, Skalierungs- und Feature-Erweiterungen aus den vor
 | **M7: Multi-Cloud-Inverter Ökosystem** | 🔴 Offen | 🟢 **100% Live** | Sungrow, Fronius, SMA, SolarEdge, Huawei, Deye, Hoymiles, GoodWe, Kostal, Victron API v2. |
 | **M8: Native Android App & Store Ready** | 🔴 Offen | 🟢 **100% Live** | Capacitor 7 Native Shell, Fastlane Release Pipeline, FCM Push, Deep Linking. |
 | **M9: B2B Whitelabel & AS4 Mako Hub** | 🔴 Offen | 🟢 **100% Live** | Partner-Flottencockpit, Dynamic Theming Engine, BNetzA EDIFACT MSCONS/UTILMD Generator. |
+| **M10: Cloudflare Edge CDN & Security** | 🔴 Offen | 🟢 **100% Live** | Full Strict Universal SSL, 3x Edge Cache Rules, WebSockets Anycast, Sub-10ms DNS ([Doku](../operations/CLOUDFLARE_INFRASTRUCTURE_AND_EDGE_SECURITY.md)). |
 
 ---
 
@@ -55,13 +56,10 @@ Jedes anstehende Feature wird in einer eigenständigen Spezifikation im Ordner `
    * **Ziel**: Rollen- und kontextbasierte Aufteilung der Side-Navigation für EMS-Prosumer, Mieterstrom-Nutzer, Installateure und Liegenschafts-Admins inkl. Multi-Role Switcher.
    * **Status & Prio**: 🟡 40 % | 🔴 Hoch (Q4 2026)
 
-8. 🛡️ **[`WIP_CLOUDFLARE_PRO_INFRASTRUCTURE_AND_SECURITY.md`](./WIP_CLOUDFLARE_PRO_INFRASTRUCTURE_AND_SECURITY.md)**
-   * **Ziel**: Nutzung der Cloudflare Pro Lizenz für Edge-Caching von Frontend-Assets, WAF & Bot-Schutz für Auth-APIs, WebSocket-Stabilität und Whitelabel SSL (Cloudflare for SaaS).
-   * **Status & Prio**: 🟡 20 % | 🔴 Hoch (Q4 2026)
-
-9. 🌐 **[`WIP_SMARTEVO_WEBSITE_PRODUCT_INTEGRATION.md`](./WIP_SMARTEVO_WEBSITE_PRODUCT_INTEGRATION.md)**
+8. 🌐 **[`WIP_SMARTEVO_WEBSITE_PRODUCT_INTEGRATION.md`](./WIP_SMARTEVO_WEBSITE_PRODUCT_INTEGRATION.md)**
    * **Ziel**: Nahtlose Integration von Sharegy und Factofy in das smartEvo.de Design-System (Cyan/Petrol Look), Bereinigung obsoleter Sektionen (Bildung) und Ausbau der Dachmarken-Architektur.
    * **Status & Prio**: 🟡 25 % | 🔴 Hoch (Q4 2026)
+
 
 
 
