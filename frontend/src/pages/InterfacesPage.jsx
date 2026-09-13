@@ -51,7 +51,7 @@ export default function InterfacesPage() {
 
     const wsUrl = `wss://${window.location.host || "sharegy.de"}/ws/energy/${primaryHome?.mqtt_token || "<TOKEN>"}/`;
 
-    function renderInterfaceStatusCard({ icon, name, status, guideTab: targetTab }) {
+    function renderInterfaceStatusCard({ icon, name, key, status, guideTab: targetTab }) {
         const isOnline = status?.online || status?.connected;
         const isConfigured = status?.configured;
         const secondsAgo = status?.seconds_ago;
