@@ -638,6 +638,7 @@ def community_drilldown_view(request, tenant_id):
         "active_tariff": {
             "id": str(active_tariff.id),
             "name": active_tariff.name,
+            "allocation_model": getattr(active_tariff, "allocation_model", "dynamic") or "dynamic",
             "sharing_price_ct_kwh": float(active_tariff.sharing_price_ct_kwh),
             "producer_payout_ct_kwh": float(active_tariff.producer_payout_ct_kwh),
             "community_fee_ct_kwh": float(active_tariff.community_fee_ct_kwh),

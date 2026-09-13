@@ -898,25 +898,25 @@ export default function CommunitiesManagementHub() {
                                     <div className="flex justify-between items-center">
                                         <h3 className="font-bold text-sm">{drilldownData.active_tariff.name}</h3>
                                         <span className="bg-white/10 text-indigo-200 text-xs font-semibold px-2.5 py-1 rounded-lg">
-                                            Modell: {drilldownData.active_tariff.allocation_model.toUpperCase()}
+                                            Modell: {(drilldownData.active_tariff.allocation_model || "dynamic").toUpperCase()}
                                         </span>
                                     </div>
                                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 text-xs">
                                         <div>
                                             <span className="text-indigo-300 text-[10px]">Bezugspreis (Sharing)</span>
-                                            <div className="text-lg font-black">{drilldownData.active_tariff.sharing_price_ct_kwh.toFixed(2)} Ct/kWh</div>
+                                            <div className="text-lg font-black">{Number(drilldownData.active_tariff.sharing_price_ct_kwh || 0).toFixed(2)} Ct/kWh</div>
                                         </div>
                                         <div>
                                             <span className="text-indigo-300 text-[10px]">Einspeisevergütung</span>
-                                            <div className="text-lg font-black text-emerald-300">{drilldownData.active_tariff.producer_payout_ct_kwh.toFixed(2)} Ct/kWh</div>
+                                            <div className="text-lg font-black text-emerald-300">{Number(drilldownData.active_tariff.producer_payout_ct_kwh || 0).toFixed(2)} Ct/kWh</div>
                                         </div>
                                         <div>
                                             <span className="text-indigo-300 text-[10px]">Community-Umlage</span>
-                                            <div className="text-lg font-black text-amber-300">{drilldownData.active_tariff.community_fee_ct_kwh.toFixed(2)} Ct/kWh</div>
+                                            <div className="text-lg font-black text-amber-300">{Number(drilldownData.active_tariff.community_fee_ct_kwh || 0).toFixed(2)} Ct/kWh</div>
                                         </div>
                                         <div>
                                             <span className="text-indigo-300 text-[10px]">Netzentgelt-Reduktion</span>
-                                            <div className="text-lg font-black text-cyan-300">{drilldownData.active_tariff.grid_fee_saved_ct_kwh.toFixed(2)} Ct/kWh</div>
+                                            <div className="text-lg font-black text-cyan-300">{Number(drilldownData.active_tariff.grid_fee_saved_ct_kwh || 0).toFixed(2)} Ct/kWh</div>
                                         </div>
                                     </div>
                                 </div>
