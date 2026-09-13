@@ -92,10 +92,23 @@ export default function InterfacesPage() {
             }
         }
 
+        const targetId = 
+            key === "homeassistant" ? "section-ha" :
+            key === "iobroker" ? "section-iobroker" :
+            key === "shelly_wss" ? "section-shelly" :
+            key === "cloud_inverter" ? "section-cloud-inverter" :
+            key === "mqtt_direct" ? "section-mqtt" :
+            key === "wmsb" ? "section-wmsb" : null;
+
         return (
             <div
                 key={name}
-                className={`p-3.5 rounded-2xl border transition-all ${
+                onClick={() => {
+                    if (targetId) {
+                        document.getElementById(targetId)?.scrollIntoView({ behavior: "smooth" });
+                    }
+                }}
+                className={`p-3.5 rounded-2xl border transition-all cursor-pointer hover:shadow-md hover:-translate-y-0.5 ${
                     isOnline
                         ? "bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-200/80 dark:border-emerald-800/60"
                         : isConfigured
@@ -147,7 +160,7 @@ export default function InterfacesPage() {
                                 {t("interfaces.diagnostics_title", "Live Schnittstellen-Status & Verbindungstest")}
                             </h2>
                             <p className="text-xs text-gray-500 dark:text-gray-400">
-                                {t("interfaces.diagnostics_desc", "Echtzeit-Erkennung aktiver Telemetrie über Home Assistant, ioBroker, Shelly WSS, Sungrow Cloud und MQTT.")}
+                                {t("interfaces.diagnostics_desc", "Echtzeit-Erkennung aktiver Telemetrie über Home Assistant, ioBroker, Shelly WSS, Sungrow Cloud, Smart Meter und MQTT.")}
                             </p>
                         </div>
                     </div>
@@ -201,11 +214,19 @@ export default function InterfacesPage() {
                         status: primaryHome?.interface_status?.mqtt_direct,
                         guideTab: "mqtt",
                     })}
+
+                    {/* Smart Meter / wMSB */}
+                    {renderInterfaceStatusCard({
+                        icon: "🏢",
+                        name: t("interfaces.card_wmsb", "Smart Meter / wMSB"),
+                        key: "wmsb",
+                        status: primaryHome?.interface_status?.wmsb,
+                    })}
                 </div>
             </div>
 
             {/* 1. SECTION: WEBSOCKET INTERFACE (SHELLY WSS - EMPFOHLEN) */}
-            <div className="bg-white border border-amber-200/80 rounded-2xl shadow-xs overflow-hidden ring-1 ring-amber-100">
+            <div id="section-shelly" className="bg-white border border-amber-200/80 rounded-2xl shadow-xs overflow-hidden ring-1 ring-amber-100">
                 <div className="p-5 bg-gradient-to-r from-amber-50/80 via-orange-50/30 to-white border-b border-amber-200/80 flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center text-xl shadow-xs">
@@ -306,23 +327,101 @@ export default function InterfacesPage() {
             <ShellyCloudIntegrationCard primaryHome={primaryHome} />
 
             {/* 3. SECTION: SUNGROW DIREKT-KOPPLUNG (1-KLICK OAUTH & ISOLARCLOUD) */}
-            <CloudInverterIntegrationCard 
-                primaryHome={primaryHome} 
-                filterVendor="sungrow" 
-                sectionNumber={3} 
-                cardTitle={t("interfaces.sungrow_title", "3. Sungrow Wechselrichter & Batteriespeicher (SH-Serie)")} 
-            />
+            <div id="section-cloud-inverter" className="space-y-8">
+                <CloudInverterIntegrationCard 
+                    primaryHome={primaryHome} 
+                    filterVendor="sungrow" 
+                    sectionNumber={3} 
+                    cardTitle={t("interfaces.sungrow_title", "3. Sungrow Wechselrichter & Batteriespeicher (SH-Serie)")} 
+                />
 
-            {/* 4. SECTION: WEITERE WECHSELRICHTER & CLOUD-DIENSTE */}
-            <CloudInverterIntegrationCard 
-                primaryHome={primaryHome} 
-                filterVendor="others" 
-                sectionNumber={4} 
-                cardTitle={t("interfaces.other_inverters_title", "4. Weitere Wechselrichter (SolarEdge, Fronius, Kostal, Growatt)")} 
-            />
+                {/* 4. SECTION: WEITERE WECHSELRICHTER & CLOUD-DIENSTE */}
+                <CloudInverterIntegrationCard 
+                    primaryHome={primaryHome} 
+                    filterVendor="others" 
+                    sectionNumber={4} 
+                    cardTitle={t("interfaces.other_inverters_title", "4. Weitere Wechselrichter (SolarEdge, Fronius, Kostal, Growatt)")} 
+                />
+            </div>
 
-            {/* 5. SECTION: NATIVE HOME ASSISTANT INTEGRATION (HACS / CUSTOM COMPONENT) */}
-            <div className="bg-white border border-cyan-200/80 rounded-2xl shadow-xs overflow-hidden ring-1 ring-cyan-100">
+            {/* 5. SECTION: NATIVE IOBROKER ADAPTER (IOBROKER.SHAREGY) */}
+            <div id="section-iobroker" className="bg-white border border-blue-200/80 rounded-2xl shadow-xs overflow-hidden ring-1 ring-blue-100">
+                <div className="p-5 bg-gradient-to-r from-blue-50/80 via-sky-50/30 to-white border-b border-blue-200/80 flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center text-xl shadow-xs">
+                            🔵
+                        </div>
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <h2 className="text-base font-bold text-gray-900">
+                                    {t("interfaces.iobroker_adapter_title", "5. Nativer ioBroker Adapter (iobroker.sharegy)")}
+                                </h2>
+                                <span className="text-[10px] font-bold px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full border border-blue-200">
+                                    {t("interfaces.iobroker_adapter_badge", "Offizieller Adapter & State-Tree")}
+                                </span>
+                            </div>
+                            <p className="text-xs text-gray-500">
+                                {t("interfaces.iobroker_adapter_desc", "Direkte 2-Wege-Integration in den ioBroker Objektbaum — inklusive automatischer Geräteerkennung und Sub-Sekunden-Aktorik.")}
+                            </p>
+                        </div>
+                    </div>
+
+                    <button
+                        onClick={() => safeCopy(primaryHome?.mqtt_token || "", "iobroker_token")}
+                        className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
+                    >
+                        {copiedKey === "iobroker_token" ? `✅ ${t("common.copied", "Kopiert!")}` : `📋 ${t("interfaces.copy_home_token", "Home Token kopieren")}`}
+                    </button>
+                </div>
+
+                <div className="p-6 space-y-5">
+                    {/* FEATURES BADGES */}
+                    <div className="grid sm:grid-cols-3 gap-3 text-xs">
+                        <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-start gap-2.5">
+                            <span className="text-base">🌳</span>
+                            <div>
+                                <div className="font-bold text-gray-900">{t("interfaces.iobroker_tree", "Automatischer State-Baum")}</div>
+                                <div className="text-gray-500 text-[11px]">{t("interfaces.iobroker_tree_desc", "Erstellt sharegy.0.* mit allen PV-, Speicher-, Wallbox- & Zähler-Objekten.")}</div>
+                            </div>
+                        </div>
+                        <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-start gap-2.5">
+                            <span className="text-base">⚡</span>
+                            <div>
+                                <div className="font-bold text-gray-900">{t("interfaces.iobroker_stream", "Live WebSocket Stream")}</div>
+                                <div className="text-gray-500 text-[11px]">{t("interfaces.iobroker_stream_desc", "Permanenter, latenzarmer Datenkanal über verschlüsseltes TLS/WSS.")}</div>
+                            </div>
+                        </div>
+                        <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-start gap-2.5">
+                            <span className="text-base">🎛️</span>
+                            <div>
+                                <div className="font-bold text-gray-900">{t("interfaces.iobroker_control", "Bidirektionale Aktorik")}</div>
+                                <div className="text-gray-500 text-[11px]">{t("interfaces.iobroker_control_desc", "Schaltet Relais, setzt Dimm-Stufen nach § 14a EnWG und steuert Ladevorgänge.")}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* SETUP STEPS */}
+                    <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl text-xs space-y-3">
+                        <div className="font-bold text-gray-900 text-sm flex items-center gap-1.5">
+                            <span>📦</span> {t("interfaces.iobroker_install_title", "Installation im ioBroker Admin:")}
+                        </div>
+                        <ol className="list-decimal list-inside space-y-2 text-gray-700 leading-relaxed">
+                            <li>
+                                {t("interfaces.iobroker_install_step_1", "Öffne die ioBroker Weboberfläche → Adapter → Aktiviere das Experten-Icon (GitHub-Katze) und installiere 'iobroker.sharegy' (oder via npm: npm i iobroker.sharegy).")}
+                            </li>
+                            <li>
+                                {t("interfaces.iobroker_install_step_2", "Erstelle eine Instanz (sharegy.0) und trage dein persönliches Home Token ein.")}
+                            </li>
+                            <li>
+                                {t("interfaces.iobroker_install_step_3", "Wähle deine Zähler-, PV- und Wechselrichter-Datenpunkte aus → Der Live-Sync startet sofort automatisch.")}
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            {/* 6. SECTION: NATIVE HOME ASSISTANT INTEGRATION (HACS / CUSTOM COMPONENT) */}
+            <div id="section-ha" className="bg-white border border-cyan-200/80 rounded-2xl shadow-xs overflow-hidden ring-1 ring-cyan-100">
                 <div className="p-5 bg-gradient-to-r from-cyan-50/80 via-blue-50/30 to-white border-b border-cyan-200/80 flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-cyan-600 text-white flex items-center justify-center text-xl shadow-xs">
@@ -331,7 +430,7 @@ export default function InterfacesPage() {
                         <div>
                             <div className="flex items-center gap-2">
                                 <h2 className="text-base font-bold text-gray-900">
-                                    {t("interfaces.ha_title", "5. Natives Home Assistant Plugin (HACS / Custom Component)")}
+                                    {t("interfaces.ha_title", "6. Natives Home Assistant Plugin (HACS / Custom Component)")}
                                 </h2>
                                 <span className="text-[10px] font-bold px-2 py-0.5 bg-cyan-100 text-cyan-800 rounded-full border border-cyan-200">
                                     {t("interfaces.ha_badge", "Neu & Store-and-Forward")}
@@ -397,8 +496,8 @@ export default function InterfacesPage() {
                 </div>
             </div>
 
-            {/* 6. SECTION: MQTT INTERFACE CARD */}
-            <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+            {/* 7. SECTION: MQTT INTERFACE CARD */}
+            <div id="section-mqtt" className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
                 <div className="p-5 bg-gradient-to-r from-slate-50 via-indigo-50/30 to-white border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xl shadow-xs">
@@ -406,11 +505,11 @@ export default function InterfacesPage() {
                         </div>
                         <div>
                             <h2 className="text-base font-bold text-gray-900">
-                                {t("interfaces.mqtt_title", "6. MQTT Broker Schnittstelle (ioBroker, Node-RED, OTel)")}
+                                {t("interfaces.mqtt_title", "7. MQTT Broker Schnittstelle (ioBroker, Node-RED, OTel, OpenDTU)")}
                             </h2>
 
                             <p className="text-xs text-gray-500">
-                                {t("interfaces.mqtt_desc", "Standard-IoT-Protokoll zur universellen Anbindung von Smart-Home-Servern und OpenTelemetry")}
+                                {t("interfaces.mqtt_desc", "Standard-IoT-Protokoll zur universellen Anbindung von Smart-Home-Servern, Tasmota und OpenTelemetry")}
                             </p>
                         </div>
                     </div>
@@ -548,7 +647,7 @@ export default function InterfacesPage() {
                             <div className="border border-slate-200 rounded-xl overflow-hidden">
                                 <div className="flex bg-slate-50 border-b border-slate-200 text-xs font-semibold overflow-x-auto">
                                     {[
-                                        { id: "iobroker", label: "🔧 ioBroker" },
+                                        { id: "iobroker", label: "🔵 ioBroker MQTT" },
                                         { id: "otel", label: "🔭 OpenTelemetry (OTel)" },
                                         { id: "nodered", label: "🟢 Node-RED / Tasmota" },
                                     ].map((tab) => (
@@ -623,8 +722,8 @@ exporters:
                 </div>
             </div>
 
-            {/* 7. SECTION: SMART METER GATEWAYS & WMSB INGEST (§ 42B ENWG) */}
-            <div className="bg-white border border-emerald-200/80 rounded-2xl shadow-xs overflow-hidden ring-1 ring-emerald-100">
+            {/* 8. SECTION: SMART METER GATEWAYS & WMSB INGEST (§ 42B ENWG & MSBG) */}
+            <div id="section-wmsb" className="bg-white border border-emerald-200/80 rounded-2xl shadow-xs overflow-hidden ring-1 ring-emerald-100">
                 <div className="p-5 bg-gradient-to-r from-emerald-50/80 via-teal-50/30 to-white border-b border-emerald-200/80 flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-xl shadow-xs">
@@ -633,7 +732,7 @@ exporters:
                         <div>
                             <div className="flex items-center gap-2">
                                 <h2 className="text-base font-bold text-gray-900">
-                                    {t("interfaces.wmsb_title", "7. Smart Meter Gateways, wMSB & Eichrechtliches Messwesen")}
+                                    {t("interfaces.wmsb_title", "8. Smart Meter Gateways, wMSB & Eichrechtliches Messwesen")}
                                 </h2>
                                 <span className="text-[10px] font-bold px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full border border-emerald-200">
                                     {t("interfaces.wmsb_badge", "§ 42b EnWG & MsbG Konform")}
@@ -667,7 +766,7 @@ exporters:
                             <span className="text-base">⚡</span>
                             <div>
                                 <div className="font-bold text-gray-900">{t("interfaces.gmsb_han", "gMSB HAN / BSI iMSys")}</div>
-                                <div className="text-gray-500 text-[11px]">{t("interfaces.gmsb_han_desc", "BSI TR-03109-1 konforme Erfassung lokaler Smart Meter Gateways.")}</div>
+                                <div className="text-gray-500 text-[11px]">{t("interfaces.gmsb_han_desc", "BSI TR-03109-1 konforme Erfassung lokaler Smart Meter Gateways & CLS.")}</div>
                             </div>
                         </div>
                         <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-start gap-2.5">
