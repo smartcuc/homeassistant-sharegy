@@ -120,14 +120,14 @@ export default function LiveEnergySankeyECharts({ data }) {
             series: [
                 {
                     type: "sankey",
-                    left: 120,
-                    right: 60,
-                    top: 20,
-                    bottom: 20,
+                    left: 40,
+                    right: 40,
+                    top: 25,
+                    bottom: 25,
                     data: nodes,
                     links,
-                    nodeWidth: 18,
-                    nodeGap: 24,
+                    nodeWidth: 16,
+                    nodeGap: 18,
                     draggable: false,
                     layoutIterations: 0,
                     emphasis: {
@@ -135,12 +135,13 @@ export default function LiveEnergySankeyECharts({ data }) {
                     },
                     lineStyle: {
                         color: "gradient",
-                        opacity: 0.35,
+                        opacity: 0.4,
                         curveness: 0.5,
                     },
                     label: {
-                        color: "#374151",
-                        fontSize: 12,
+                        color: "#334155",
+                        fontSize: 11,
+                        fontWeight: "600",
                         formatter: (params) => {
                             if (!params) return "";
                             const node = validNodeMap.get(String(params.name));
@@ -158,25 +159,34 @@ export default function LiveEnergySankeyECharts({ data }) {
     }, [data]);
 
     if (!data || !Array.isArray(data.nodes) || !Array.isArray(data.links)) {
-        return <div className="text-gray-400">Keine Energiedaten</div>;
+        return <div className="text-slate-600 dark:text-slate-300 text-sm p-4 text-center">Keine Energiedaten</div>;
     }
 
     if (data.nodes.length === 0 || data.links.length === 0) {
-        return <div className="text-gray-400">Warten auf Live-Daten…</div>;
+        return <div className="text-slate-600 dark:text-slate-300 text-sm p-4 text-center">Warten auf Live-Daten…</div>;
     }
 
     if (!option) {
-        return <div className="text-gray-400 p-8 text-center">Keine aktiven Energieflüsse im Moment</div>;
+        return <div className="text-slate-600 dark:text-slate-300 p-8 text-center text-sm">Keine aktiven Energieflüsse im Moment</div>;
     }
 
     return (
-        <div style={{ height: 550 }}>
-            <ReactECharts
-                option={option}
-                style={{ height: "100%", width: "100%" }}
-                notMerge={true}
-                lazyUpdate={false}
-            />
+        <div className="w-full space-y-1">
+            {/* Mobile Scroll Hint */}
+            <div className="sm:hidden flex items-center justify-end gap-1.5 text-[11px] text-slate-600 dark:text-slate-300 font-medium pr-2">
+                <span className="animate-pulse">↔️</span> Wischen für Vollansicht
+            </div>
+
+            <div className="w-full overflow-x-auto pb-2 -mx-2 px-2 touch-pan-x">
+                <div className="min-w-[580px] sm:min-w-0" style={{ height: 480 }}>
+                    <ReactECharts
+                        option={option}
+                        style={{ height: "100%", width: "100%" }}
+                        notMerge={true}
+                        lazyUpdate={false}
+                    />
+                </div>
+            </div>
         </div>
     );
 }

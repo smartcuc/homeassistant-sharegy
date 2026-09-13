@@ -15,36 +15,56 @@ export function useUserNavigation() {
     const { user, isStaffOrAdmin, hasCommunityAdminAccess } = useUser();
     const { homes = [] } = useHomes();
 
+    const isDemoUser = Boolean(
+        user?.is_demo ||
+        user?.email?.includes("demo") ||
+        user?.username?.includes("demo") ||
+        isStaffOrAdmin ||
+        user?.is_superuser
+    );
+
     // 1. Erkennung der Fähigkeiten & Berechtigungen
     const hasEms = useMemo(() => {
-        // Hat EMS wenn er mindestens 1 Home/Liegenschaft besitzt oder ein Prosumer-/EMS-Profil hat
+        if (isDemoUser) return true;
         if (homes.length > 0) return true;
         if (user?.usage_mode && ["private", "prosumer", "hybrid", "commercial"].includes(user.usage_mode)) return true;
         if (isStaffOrAdmin) return true;
         // Standardmäßig bei registrierten Nutzern aktiv, es sei denn sie sind reiner Mieter
         return user?.customer_type !== "tenant_only";
-    }, [homes, user, isStaffOrAdmin]);
+    }, [homes, user, isStaffOrAdmin, isDemoUser]);
 
     const hasEnergySharing = useMemo(() => {
-        // Hat Energy-Sharing wenn er Mitgliedschaften in Communities / Mieterstrom hat
+        if (isDemoUser) return true;
         if (user?.memberships && user.memberships.length > 0) return true;
         if (hasCommunityAdminAccess) return true;
         if (user?.usage_mode && ["tenant", "sharing", "hybrid", "landlord"].includes(user.usage_mode)) return true;
         return false;
-    }, [user, hasCommunityAdminAccess]);
+    }, [user, hasCommunityAdminAccess, isDemoUser]);
 
     const isPartner = useMemo(() => {
+        if (isDemoUser) return true;
         return Boolean(
             user?.is_partner ||
             user?.platform_role === "partner" ||
             user?.memberships?.some((m) => m.role === "partner_admin" || m.role === "technician")
         );
-    }, [user]);
+    }, [user, isDemoUser]);
 
-    const isAdmin = Boolean(isStaffOrAdmin || user?.is_superuser || user?.is_platform_admin);
+    const isAdmin = Boolean(isDemoUser || isStaffOrAdmin || user?.is_superuser || user?.is_platform_admin);
 
     // 2. Verfügbare Modi für diesen Benutzer ermitteln
     const availableModes = useMemo(() => {
+        if (isDemoUser) {
+            // Im Demo-Modus oder für Admins/Tester stehen ALLE 5 Modi für interaktive Tests zur Verfügung!
+            return [
+                NAV_MODES.HYBRID,
+                NAV_MODES.EMS_ONLY,
+                NAV_MODES.SHARING_ONLY,
+                NAV_MODES.PARTNER,
+                NAV_MODES.ADMIN,
+            ];
+        }
+
         const modes = [];
 
         if (hasEms && !hasEnergySharing) {
@@ -73,7 +93,7 @@ export function useUserNavigation() {
 
         // Duplikate entfernen
         return Array.from(new Set(modes));
-    }, [hasEms, hasEnergySharing, isPartner, isAdmin]);
+    }, [isDemoUser, hasEms, hasEnergySharing, isPartner, isAdmin]);
 
     // Standard-Modus bestimmen
     const defaultMode = useMemo(() => {

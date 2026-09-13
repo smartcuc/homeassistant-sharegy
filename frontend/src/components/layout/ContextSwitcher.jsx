@@ -4,12 +4,15 @@
 */
 
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useUserNavigation } from "../../hooks/useUserNavigation";
+import { NAV_MODES } from "../../config/navigationConfig";
 import { ChevronDown, Check, Sparkles } from "lucide-react";
 
 export default function ContextSwitcher({ compact = false }) {
     const { t } = useTranslation();
+    const navigate = useNavigate();
     const { activeMode, availableModes, switchMode, activeMetadata, allMetadata, isMultiMode } = useUserNavigation();
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
@@ -24,6 +27,20 @@ export default function ContextSwitcher({ compact = false }) {
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
+
+    const handleSelectMode = (modeKey) => {
+        switchMode(modeKey);
+        setIsOpen(false);
+        if (modeKey === NAV_MODES.PARTNER) {
+            navigate("/app/partner/dashboard");
+        } else if (modeKey === NAV_MODES.ADMIN) {
+            navigate("/app/admin/communities");
+        } else if (modeKey === NAV_MODES.SHARING_ONLY) {
+            navigate("/app/tenants");
+        } else if (modeKey === NAV_MODES.EMS_ONLY || modeKey === NAV_MODES.HYBRID) {
+            navigate("/app/energy");
+        }
+    };
 
     // Wenn der Nutzer nur 1 Modus hat, zeigen wir nur ein dezentes Label oder gar kein Dropdown
     if (!isMultiMode) {
@@ -83,10 +100,7 @@ export default function ContextSwitcher({ compact = false }) {
                                 <button
                                     key={modeKey}
                                     type="button"
-                                    onClick={() => {
-                                        switchMode(modeKey);
-                                        setIsOpen(false);
-                                    }}
+                                    onClick={() => handleSelectMode(modeKey)}
                                     className={`w-full flex items-start gap-2.5 p-2 rounded-xl text-left transition-colors cursor-pointer ${
                                         isCurrent
                                             ? "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-900 dark:text-indigo-200 border border-indigo-200 dark:border-indigo-800"
