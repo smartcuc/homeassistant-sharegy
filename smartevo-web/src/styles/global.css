@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    font-family: 'Work Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    letter-spacing: -0.02em;
+  }
+}
+
+/* Custom Utilities for smartEvo Theme */
+.text-cyan-brand {
+  color: #1CC5D9;
+}
+
+.bg-cyan-brand {
+  background-color: #1CC5D9;
+}
+
+.border-cyan-brand {
+  border-color: #1CC5D9;
+}
+
+.bg-petrol-dark {
+  background-color: #062F32;
+}
+
+.bg-petrol-deep {
+  background-color: #042022;
+}
+
+.bg-charcoal-dark {
+  background-color: #171717;
+}
+
+/* Glowing effects */
+.glow-cyan {
+  box-shadow: 0 0 35px -5px rgba(28, 197, 217, 0.35);
+}
+
+.glow-cyan-sm {
+  box-shadow: 0 4px 14px 0 rgba(28, 197, 217, 0.25);
+}

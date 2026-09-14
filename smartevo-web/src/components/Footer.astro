@@ -1,0 +1,119 @@
+---
+const year = new Date().getFullYear();
+---
+
+<footer class="bg-[#171717] text-slate-300 border-t border-white/10 pt-16 pb-12">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
+      
+      <!-- Column 1: Brand & Mission -->
+      <div class="lg:col-span-2 space-y-4">
+        <a href="/" class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-[#1CC5D9] flex items-center justify-center font-black text-[#062F32] text-lg">
+            ⚡
+          </div>
+          <span class="font-bold text-2xl tracking-tight text-white font-['Poppins']">
+            smart<span class="text-[#1CC5D9]">Evo</span>
+          </span>
+        </a>
+        <p class="text-sm text-slate-400 max-w-sm leading-relaxed">
+          smartEvo GmbH – Ihr Partner für Premium-Photovoltaik, dezentrale Energiewende, intelligente HEMS-Technologie und faktenbasierte Unternehmens- & Liegenschaftsführung.
+        </p>
+        <div class="flex items-center gap-3 pt-2">
+          <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-[#062F32] text-[#1CC5D9] border border-[#1CC5D9]/30">
+            🇩🇪 Made in Germany
+          </span>
+          <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-white/5 text-slate-300 border border-white/10">
+            KRITIS & ISO 37120
+          </span>
+        </div>
+      </div>
+
+      <!-- Column 2: Solarenergie & Produkte -->
+      <div>
+        <h4 class="text-white font-bold text-sm uppercase tracking-wider mb-4 font-['Poppins']">
+          ☀️ Energie & Produkte
+        </h4>
+        <ul class="space-y-2.5 text-sm">
+          <li>
+            <a href="/solarenergie" class="hover:text-[#1CC5D9] transition-colors flex items-center gap-1.5">
+              <span>PV-Komplettanlagen</span>
+            </a>
+          </li>
+          <li>
+            <a href="/solarenergie#speicher" class="hover:text-[#1CC5D9] transition-colors">
+              Batteriespeicher & Wallbox
+            </a>
+          </li>
+          <li>
+            <a href="https://sharegy.de" target="_blank" rel="noopener noreferrer" class="text-emerald-400 hover:text-emerald-300 transition-colors font-medium flex items-center gap-1">
+              <span>⚡ Sharegy HEMS & Sharing</span>
+              <span class="text-[10px]">↗</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://factofy.io" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300 transition-colors font-medium flex items-center gap-1">
+              <span>📊 Factofy Monitoring</span>
+              <span class="text-[10px]">↗</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Column 3: Dienstleistungen -->
+      <div>
+        <h4 class="text-white font-bold text-sm uppercase tracking-wider mb-4 font-['Poppins']">
+          🏛️ Consulting & Smart City
+        </h4>
+        <ul class="space-y-2.5 text-sm">
+          <li>
+            <a href="/dienstleistungen/kritische-infrastrukturen" class="hover:text-[#1CC5D9] transition-colors">
+              Kritische Infrastrukturen (KRITIS)
+            </a>
+          </li>
+          <li>
+            <a href="/dienstleistungen/smart-city" class="hover:text-[#1CC5D9] transition-colors">
+              Smart City & Stadtentwicklung
+            </a>
+          </li>
+          <li>
+            <a href="/dienstleistungen/kritische-infrastrukturen#it-sicherheit" class="hover:text-[#1CC5D9] transition-colors">
+              IT-Sicherheitsgesetz & Compliance
+            </a>
+          </li>
+          <li>
+            <a href="/dienstleistungen/smart-city#iso37120" class="hover:text-[#1CC5D9] transition-colors">
+              ISO 37120 Indikatoren
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Column 4: Unternehmen & Kontakt -->
+      <div>
+        <h4 class="text-white font-bold text-sm uppercase tracking-wider mb-4 font-['Poppins']">
+          🏢 Unternehmen
+        </h4>
+        <ul class="space-y-2.5 text-sm">
+          <li><a href="/ueber-uns" class="hover:text-[#1CC5D9] transition-colors">Über Uns</a></li>
+          <li><a href="/kontakt" class="hover:text-[#1CC5D9] transition-colors">Kontakt & Anfahrt</a></li>
+          <li><a href="/impressum" class="hover:text-[#1CC5D9] transition-colors">Impressum</a></li>
+          <li><a href="/datenschutz" class="hover:text-[#1CC5D9] transition-colors">Datenschutz</a></li>
+        </ul>
+      </div>
+
+    </div>
+
+    <!-- Bottom Copyright & Legal -->
+    <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+      <div>
+        © {year} smartEvo GmbH · Alle Rechte vorbehalten.
+      </div>
+      <div class="flex items-center gap-6">
+        <a href="/impressum" class="hover:text-slate-300 transition-colors">Impressum</a>
+        <a href="/datenschutz" class="hover:text-slate-300 transition-colors">Datenschutz</a>
+        <a href="/kontakt" class="hover:text-slate-300 transition-colors">Kontakt</a>
+      </div>
+    </div>
+  </div>
+</footer>
