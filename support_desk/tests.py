@@ -401,3 +401,157 @@ class KnowledgeBaseApiTests(TestCase):
         self.assertEqual(patch_ok.status_code, 200)
         self.article.refresh_from_db()
         self.assertEqual(self.article.title_de, "Aktualisierter Titel Durch Staff")
+
+
+class MultiTenantSupportIsolationTest(TestCase):
+    def setUp(self):
+        from core.models import Tenant
+        from accounts.models import TenantMembership
+
+        self.client = APIClient()
+
+        # Tenants
+        self.tenant_a = Tenant.objects.create(name="Stadtwerke Alpha", slug="sw-alpha")
+        self.tenant_b = Tenant.objects.create(name="Elektro Beta GmbH", slug="elektro-beta")
+
+        # Global Platform Superadmin
+        self.global_admin = User.objects.create_user(
+            username="global_admin",
+            email="admin@sharegy.de",
+            password="testpassword123",
+            is_staff=True,
+            is_superuser=True,
+        )
+
+        # Partner A Admin
+        self.partner_a = User.objects.create_user(
+            username="partner_a",
+            email="partner_a@alpha.de",
+            password="testpassword123",
+        )
+        TenantMembership.objects.create(
+            user=self.partner_a,
+            tenant=self.tenant_a,
+            role=TenantMembership.ROLE_ADMIN,
+            is_active=True,
+        )
+
+        # Partner B Admin
+        self.partner_b = User.objects.create_user(
+            username="partner_b",
+            email="partner_b@beta.de",
+            password="testpassword123",
+        )
+        TenantMembership.objects.create(
+            user=self.partner_b,
+            tenant=self.tenant_b,
+            role=TenantMembership.ROLE_ADMIN,
+            is_active=True,
+        )
+
+        # Customer A (belongs to Tenant A)
+        self.customer_a = User.objects.create_user(
+            username="customer_a",
+            email="customer_a@gmail.com",
+            password="testpassword123",
+        )
+        TenantMembership.objects.create(
+            user=self.customer_a,
+            tenant=self.tenant_a,
+            role=TenantMembership.ROLE_MEMBER,
+            is_active=True,
+        )
+
+        # Customer B (belongs to Tenant B)
+        self.customer_b = User.objects.create_user(
+            username="customer_b",
+            email="customer_b@gmail.com",
+            password="testpassword123",
+        )
+        TenantMembership.objects.create(
+            user=self.customer_b,
+            tenant=self.tenant_b,
+            role=TenantMembership.ROLE_MEMBER,
+            is_active=True,
+        )
+
+        # Tickets
+        self.ticket_a = create_ticket(
+            project_key="sharegy",
+            subject="Problem bei Stadtwerke Alpha",
+            user=self.customer_a,
+            tenant=self.tenant_a,
+            initial_message="Hilfe bei Zähler A",
+        )
+        self.ticket_b = create_ticket(
+            project_key="sharegy",
+            subject="Problem bei Elektro Beta",
+            user=self.customer_b,
+            tenant=self.tenant_b,
+            initial_message="Hilfe bei Wallbox B",
+        )
+
+    def test_partner_a_sees_only_tenant_a_tickets(self):
+        self.client.force_login(self.partner_a)
+        response = self.client.get("/api/support/agent/tickets/")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        
+        ticket_ids = [t["id"] for t in data["tickets"]]
+        self.assertIn(str(self.ticket_a.id), ticket_ids)
+        self.assertNotIn(str(self.ticket_b.id), ticket_ids)
+        self.assertEqual(data["kpis"]["total"], 1)
+
+    def test_partner_b_sees_only_tenant_b_tickets(self):
+        self.client.force_login(self.partner_b)
+        response = self.client.get("/api/support/agent/tickets/")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+
+        ticket_ids = [t["id"] for t in data["tickets"]]
+        self.assertIn(str(self.ticket_b.id), ticket_ids)
+        self.assertNotIn(str(self.ticket_a.id), ticket_ids)
+        self.assertEqual(data["kpis"]["total"], 1)
+
+    def test_partner_cannot_access_other_tenant_ticket_detail(self):
+        # Partner A tries to access Ticket B
+        self.client.force_login(self.partner_a)
+        resp = self.client.get(f"/api/support/tickets/{self.ticket_b.id}/")
+        self.assertEqual(resp.status_code, 403)
+
+    def test_partner_cannot_patch_other_tenant_ticket(self):
+        # Partner A tries to patch Ticket B
+        self.client.force_login(self.partner_a)
+        resp = self.client.patch(
+            f"/api/support/agent/tickets/{self.ticket_b.id}/",
+            data={"status": "resolved"},
+            format="json",
+        )
+        self.assertEqual(resp.status_code, 403)
+
+    def test_global_admin_sees_all_tenant_tickets(self):
+        self.client.force_login(self.global_admin)
+        response = self.client.get("/api/support/agent/tickets/")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+
+        ticket_ids = [t["id"] for t in data["tickets"]]
+        self.assertIn(str(self.ticket_a.id), ticket_ids)
+        self.assertIn(str(self.ticket_b.id), ticket_ids)
+        self.assertEqual(data["kpis"]["total"], 2)
+
+    def test_customer_ticket_creation_auto_assigns_tenant(self):
+        self.client.force_login(self.customer_a)
+        resp = self.client.post(
+            "/api/support/tickets/",
+            data={
+                "subject": "Neues Ticket von Kunde A",
+                "message": "Mein Zähler spinnt",
+                "category": "hardware",
+            },
+            format="json",
+        )
+        self.assertEqual(resp.status_code, 201)
+        created_data = resp.json()
+        self.assertEqual(created_data["tenant_id"], str(self.tenant_a.id))
+        self.assertEqual(created_data["tenant_name"], "Stadtwerke Alpha")

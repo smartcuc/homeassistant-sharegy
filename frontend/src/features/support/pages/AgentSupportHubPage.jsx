@@ -19,6 +19,7 @@ export default function AgentSupportHubPage() {
 
     const [kpis, setKpis] = useState({ total: 0, open: 0, in_progress: 0, waiting_customer: 0, resolved: 0, sharegy_count: 0, factofy_count: 0 });
     const [tickets, setTickets] = useState([]);
+    const [isGlobalAdmin, setIsGlobalAdmin] = useState(true);
     const [loading, setLoading] = useState(true);
 
     // Filters
@@ -53,6 +54,9 @@ export default function AgentSupportHubPage() {
                 if (!cancelled) {
                     setKpis(data.kpis);
                     setTickets(data.tickets);
+                    if (data.is_global_admin !== undefined) {
+                        setIsGlobalAdmin(data.is_global_admin);
+                    }
                 }
             } catch (err) {
                 console.error("Error loading agent tickets:", err);
@@ -128,19 +132,24 @@ export default function AgentSupportHubPage() {
                 {/* Header & Project Switcher */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
                     <div>
-                        <div className="flex items-center gap-2.5 mb-1">
+                        <div className="flex items-center gap-2.5 mb-1 flex-wrap">
                             <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-sm">
                                 <LifeBuoy className="w-5 h-5" />
                             </div>
                             <h1 className="text-xl font-bold text-slate-900 dark:text-white">
                                 Support & Incident Hub
                             </h1>
-                            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300">
-                                Multi-Project Triage
+                            <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${isGlobalAdmin
+                                ? "bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300"
+                                : "bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300"
+                                }`}>
+                                {isGlobalAdmin ? "🛡️ Global Triage (All Projects & Tenants)" : "🔧 Partner Support (Eigene Kunden & Flotte)"}
                             </span>
                         </div>
                         <p className="text-xs text-slate-500 dark:text-slate-400">
-                            Zentrale Bearbeitung aller Kunden- & Systemtickets aus Sharegy EMS und Factofy Digital Twin
+                            {isGlobalAdmin
+                                ? "Zentrale Bearbeitung aller Kunden- & Systemtickets aus Sharegy EMS und Factofy Digital Twin"
+                                : "Bearbeitung und Störungsanalyse für deine betreuten Kunden und Liegenschaften"}
                         </p>
                     </div>
 
@@ -286,6 +295,11 @@ export default function AgentSupportHubPage() {
                                                     <span className="font-mono text-xs font-bold text-slate-800 dark:text-slate-200">
                                                         #{t.ticket_number}
                                                     </span>
+                                                    {t.tenant_name && (
+                                                        <span className="text-[10px] font-medium px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 truncate max-w-[130px]">
+                                                            🏢 {t.tenant_name}
+                                                        </span>
+                                                    )}
                                                 </div>
                                                 <span className="text-[10px] text-slate-400">
                                                     {new Date(t.created_at).toLocaleDateString("de-DE", {
@@ -368,6 +382,7 @@ export default function AgentSupportHubPage() {
                                     <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-3 flex-wrap">
                                         <span>Kunde: <b>{activeTicket.contact_name || activeTicket.contact_email}</b></span>
                                         {activeTicket.contact_email && <span>E-Mail: <b>{activeTicket.contact_email}</b></span>}
+                                        {activeTicket.tenant_name && <span>Mandant: <b>🏢 {activeTicket.tenant_name}</b></span>}
                                         <span>Kategorie: <b>{activeTicket.category}</b></span>
                                     </div>
 

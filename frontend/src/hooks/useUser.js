@@ -51,6 +51,13 @@ export function useUser() {
         user?.usage_mode === "hybrid" ||
         user?.usage_mode === "landlord"
     );
+    const isPartner = Boolean(
+        isStaffOrAdmin ||
+        user?.is_partner ||
+        user?.platform_role === "partner" ||
+        user?.memberships?.some((m) => ["admin", "installer", "helpdesk", "user_admin"].includes(m.role))
+    );
+    const canAccessSupportHub = Boolean(isStaffOrAdmin || isHelpdesk || isPartner);
 
     return {
         user,
@@ -66,5 +73,7 @@ export function useUser() {
         isFinanceAdmin,
         isGlobalUserAdmin,
         hasCommunityAdminAccess,
+        isPartner,
+        canAccessSupportHub,
     };
 }

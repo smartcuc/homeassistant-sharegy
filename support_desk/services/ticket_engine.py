@@ -48,6 +48,7 @@ def create_ticket(
     priority: str = Ticket.PRIORITY_MEDIUM,
     initial_message: str = "",
     user = None,
+    tenant = None,
     external_user_id: str = "",
     contact_name: str = "",
     contact_email: str = "",
@@ -67,12 +68,17 @@ def create_ticket(
             contact_email = user.email
         if not contact_name:
             contact_name = f"{user.first_name} {user.last_name}".strip() or user.username
+        if not tenant and hasattr(user, "memberships"):
+            active_m = user.memberships.filter(is_active=True).select_related("tenant").first()
+            if active_m:
+                tenant = active_m.tenant
 
     with transaction.atomic():
         ticket = Ticket.objects.create(
             ticket_number=ticket_num,
             project_key=project_key,
             user=user if user and user.is_authenticated else None,
+            tenant=tenant,
             external_user_id=str(external_user_id or ""),
             contact_name=contact_name,
             contact_email=contact_email,

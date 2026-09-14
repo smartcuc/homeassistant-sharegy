@@ -91,7 +91,27 @@ def _resolve_requester(request):
     )
 
 
+def _get_user_managed_tenant_ids(user):
+    """
+    Returns set of tenant UUIDs where the user is an active partner admin, helpdesk, or installer.
+    """
+    if not user or not user.is_authenticated:
+        return set()
+    try:
+        return set(
+            user.memberships.filter(
+                is_active=True,
+                role__in=["admin", "helpdesk", "installer", "user_admin"]
+            ).values_list("tenant_id", flat=True)
+        )
+    except Exception:
+        return set()
+
+
 def _is_staff_or_helpdesk(user) -> bool:
+    """
+    Global platform staff or global platform helpdesk.
+    """
     if not user or not user.is_authenticated:
         return False
     return bool(
@@ -102,9 +122,16 @@ def _is_staff_or_helpdesk(user) -> bool:
     )
 
 
+def _can_manage_support(user) -> bool:
+    """
+    Allowed to access Agent/Partner Support Hub (either global staff or partner/tenant admin).
+    """
+    return _is_staff_or_helpdesk(user) or bool(_get_user_managed_tenant_ids(user))
+
+
 class IsStaffOrPlatformHelpdesk(permissions.BasePermission):
     def has_permission(self, request, view):
-        return _is_staff_or_helpdesk(request.user)
+        return _can_manage_support(request.user)
 
 
 def _can_set_custom_priority(user, ext_id=None) -> bool:
@@ -250,8 +277,13 @@ def ticket_detail(request, ticket_id):
     user, ext_id, name, email, project_key = _resolve_requester(request)
     ticket = get_object_or_404(Ticket, id=ticket_id)
 
+    is_global = _is_staff_or_helpdesk(user)
+    managed_tenants = _get_user_managed_tenant_ids(user)
+    is_tenant_agent = bool(user and ticket.tenant_id and ticket.tenant_id in managed_tenants)
+
     is_authorized = (
-        _is_staff_or_helpdesk(user)
+        is_global
+        or is_tenant_agent
         or (user and ticket.user_id == user.id)
         or (ext_id and ticket.external_user_id == ext_id and ticket.project_key == project_key)
     )
@@ -286,7 +318,11 @@ def ticket_add_message(request, ticket_id):
     user, ext_id, name, email, project_key = _resolve_requester(request)
     ticket = get_object_or_404(Ticket, id=ticket_id)
 
-    is_staff = _is_staff_or_helpdesk(user)
+    is_global = _is_staff_or_helpdesk(user)
+    managed_tenants = _get_user_managed_tenant_ids(user)
+    is_tenant_agent = bool(user and ticket.tenant_id and ticket.tenant_id in managed_tenants)
+    is_staff = is_global or is_tenant_agent
+
     is_authorized = (
         is_staff
         or (user and ticket.user_id == user.id)
@@ -333,13 +369,19 @@ def deflection_suggest(request):
 @permission_classes([IsStaffOrPlatformHelpdesk])
 def agent_ticket_management(request, ticket_id=None):
     """
-    Agent Support Hub management endpoints (staff & platform helpdesk):
-    GET: List / filter all tickets across projects (sharegy & factofy) with KPI summary.
+    Agent Support Hub management endpoints (staff & partner helpdesk):
+    GET: List / filter tickets (global or scoped to partner tenants) with KPI summary.
     PATCH <id>: Reassign agent or change status / priority.
     POST <id>/note: Add internal note.
     """
+    is_global = _is_staff_or_helpdesk(request.user)
+    managed_tenants = _get_user_managed_tenant_ids(request.user)
+
     if ticket_id:
         ticket = get_object_or_404(Ticket, id=ticket_id)
+        if not is_global and (not ticket.tenant_id or ticket.tenant_id not in managed_tenants):
+            return Response({"detail": "Kein Zugriff auf dieses Ticket eines fremden Mandanten."}, status=status.HTTP_403_FORBIDDEN)
+
         if request.method == "PATCH":
             new_status = request.data.get("status")
             new_priority = request.data.get("priority")
@@ -372,12 +414,23 @@ def agent_ticket_management(request, ticket_id=None):
             )
             return Response(TicketMessageSerializer(msg).data, status=status.HTTP_201_CREATED)
 
-    # List all tickets for Support Hub
-    qs = Ticket.objects.all().order_by("-created_at")
+    # Scoped QuerySet for listing tickets
+    if is_global:
+        base_qs = Ticket.objects.all()
+    elif managed_tenants:
+        base_qs = Ticket.objects.filter(tenant_id__in=managed_tenants)
+    else:
+        base_qs = Ticket.objects.none()
+
+    qs = base_qs.order_by("-created_at")
 
     project_key = request.query_params.get("project_key")
     if project_key and project_key != "all":
         qs = qs.filter(project_key=project_key)
+
+    req_tenant = request.query_params.get("tenant_id")
+    if req_tenant and req_tenant != "all":
+        qs = qs.filter(tenant_id=req_tenant)
 
     req_status = request.query_params.get("status")
     if req_status and req_status != "all":
@@ -397,19 +450,19 @@ def agent_ticket_management(request, ticket_id=None):
             | Q(messages__body__icontains=search_q)
         ).distinct()
 
-    # KPI Summary
+    # KPI Summary (scoped)
     kpis = {
-        "total": Ticket.objects.count(),
-        "open": Ticket.objects.filter(status=Ticket.STATUS_OPEN).count(),
-        "in_progress": Ticket.objects.filter(status=Ticket.STATUS_IN_PROGRESS).count(),
-        "waiting_customer": Ticket.objects.filter(status=Ticket.STATUS_WAITING_CUSTOMER).count(),
-        "resolved": Ticket.objects.filter(status=Ticket.STATUS_RESOLVED).count(),
-        "sharegy_count": Ticket.objects.filter(project_key="sharegy").count(),
-        "factofy_count": Ticket.objects.filter(project_key="factofy").count(),
+        "total": base_qs.count(),
+        "open": base_qs.filter(status=Ticket.STATUS_OPEN).count(),
+        "in_progress": base_qs.filter(status=Ticket.STATUS_IN_PROGRESS).count(),
+        "waiting_customer": base_qs.filter(status=Ticket.STATUS_WAITING_CUSTOMER).count(),
+        "resolved": base_qs.filter(status=Ticket.STATUS_RESOLVED).count(),
+        "sharegy_count": base_qs.filter(project_key="sharegy").count(),
+        "factofy_count": base_qs.filter(project_key="factofy").count(),
     }
 
     serializer = TicketListSerializer(qs, many=True)
-    return Response({"kpis": kpis, "tickets": serializer.data})
+    return Response({"kpis": kpis, "tickets": serializer.data, "is_global_admin": is_global})
 
 
 @api_view(["GET", "POST"])

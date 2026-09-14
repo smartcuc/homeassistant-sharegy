@@ -178,6 +178,7 @@ class TicketActivityLogSerializer(serializers.ModelSerializer):
 class TicketListSerializer(serializers.ModelSerializer):
     status_display = serializers.CharField(source="get_status_display", read_only=True)
     priority_display = serializers.CharField(source="get_priority_display", read_only=True)
+    tenant_name = serializers.CharField(source="tenant.name", read_only=True, default=None)
     message_count = serializers.SerializerMethodField()
     assigned_agent_name = serializers.SerializerMethodField()
 
@@ -187,6 +188,8 @@ class TicketListSerializer(serializers.ModelSerializer):
             "id",
             "ticket_number",
             "project_key",
+            "tenant_id",
+            "tenant_name",
             "subject",
             "category",
             "priority",
@@ -213,6 +216,7 @@ class TicketListSerializer(serializers.ModelSerializer):
 class TicketDetailSerializer(serializers.ModelSerializer):
     status_display = serializers.CharField(source="get_status_display", read_only=True)
     priority_display = serializers.CharField(source="get_priority_display", read_only=True)
+    tenant_name = serializers.CharField(source="tenant.name", read_only=True, default=None)
     messages = serializers.SerializerMethodField()
     attachments = TicketAttachmentSerializer(many=True, read_only=True)
     activity_logs = TicketActivityLogSerializer(many=True, read_only=True)
@@ -224,6 +228,8 @@ class TicketDetailSerializer(serializers.ModelSerializer):
             "id",
             "ticket_number",
             "project_key",
+            "tenant_id",
+            "tenant_name",
             "subject",
             "category",
             "priority",
@@ -248,7 +254,8 @@ class TicketDetailSerializer(serializers.ModelSerializer):
     def get_messages(self, obj):
         request = self.context.get("request")
         user = request.user if request and request.user and request.user.is_authenticated else None
-        is_staff = bool(
+        
+        is_global_staff = bool(
             user and (
                 user.is_staff or 
                 user.is_superuser or 
@@ -256,12 +263,22 @@ class TicketDetailSerializer(serializers.ModelSerializer):
                 getattr(user, "is_platform_helpdesk", False)
             )
         )
+        is_tenant_agent = False
+        if user and obj.tenant_id and hasattr(user, "memberships"):
+            is_tenant_agent = user.memberships.filter(
+                tenant_id=obj.tenant_id,
+                is_active=True,
+                role__in=["admin", "helpdesk", "installer", "user_admin"]
+            ).exists()
         
-        # Non-staff users do not see internal notes
-        if is_staff:
-            qs = obj.messages.all().order_by("created_at")
+        can_view_internal = is_global_staff or is_tenant_agent
+
+        # Non-agent users do not see internal notes
+        if can_view_internal:
+            qs = obj.messages.all()
         else:
-            qs = obj.messages.filter(is_internal_note=False).order_by("created_at")
+            qs = obj.messages.filter(is_internal_note=False)
+
         return TicketMessageSerializer(qs, many=True).data
 
     def get_assigned_agent_name(self, obj):

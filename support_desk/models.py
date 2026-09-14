@@ -161,6 +161,15 @@ class Ticket(models.Model):
         on_delete=models.SET_NULL,
         related_name="support_tickets",
     )
+    tenant = models.ForeignKey(
+        "core.Tenant",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="support_tickets",
+        db_index=True,
+        help_text="Zugeordneter Mandant / Partner-Community",
+    )
     external_user_id = models.CharField(
         max_length=100,
         blank=True,

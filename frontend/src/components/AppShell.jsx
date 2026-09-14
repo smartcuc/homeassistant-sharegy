@@ -56,7 +56,7 @@ function PageSuspenseLoader() {
 
 export default function AppShell() {
 
-    const { user, loading, isStaffOrAdmin, hasCommunityAdminAccess } = useUser();
+    const { user, loading, isStaffOrAdmin, hasCommunityAdminAccess, canAccessSupportHub } = useUser();
     const location = useLocation();
     const contentRef = useRef(null);
     const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
@@ -131,14 +131,14 @@ export default function AppShell() {
                             <Route path="help" element={<HelpCenterPage />} />
                             <Route path="help/:slug" element={<HelpArticleDetailPage />} />
 
-                            {/* 🛟 SUPPORT & INCIDENT HUB (STAFF ONLY) */}
+                            {/* 🛟 SUPPORT & INCIDENT HUB (STAFF & PARTNER) */}
                             <Route 
                                 path="support" 
-                                element={isStaffOrAdmin ? <AgentSupportHubPage /> : <Navigate to="/app/dashboard" replace />} 
+                                element={canAccessSupportHub ? <AgentSupportHubPage /> : <Navigate to="/app/help" replace />} 
                             />
                             <Route 
                                 path="support-hub" 
-                                element={isStaffOrAdmin ? <AgentSupportHubPage /> : <Navigate to="/app/dashboard" replace />} 
+                                element={canAccessSupportHub ? <AgentSupportHubPage /> : <Navigate to="/app/help" replace />} 
                             />
 
                             {/* 🛡️ ADMIN & TENANT MANAGEMENT */}
