@@ -1,42 +1,45 @@
-# 🌐 [WIP] smartEvo.de Produkt- & Markenintegration: Sharegy & Factofy
+﻿# 🌐 smartEvo Produkt- & Markenintegration: Sharegy & Factofy
 
-**Status:** In Konzeption / Freigegeben  
-**Fortschritt:** 🟡 25 %  
-**Priorität:** 🔴 Hoch (Ziel: Q4 2026 / Go-To-Market)  
-**Lead / Modul:** `branding`, `marketing`, `ui/ux`, `cms`  
+**Status:** 🟢 Vollständig implementiert & verifiziert (Staging Live auf Cloudflare Pages)  
+**Fortschritt:** 🟢 100 % (Frontend & Architektur fertig / Go-Live via DNS-Switch auf smartevo.de vorbereitet)  
+**Lead / Modul:** randing, marketing, ui/ux, stro5, cloudflare-pages  
+**Repository:** [https://github.com/smartcuc/smartevo-web](https://github.com/smartcuc/smartevo-web)  
+**Live Staging URL:** [https://sharegy.eu](https://sharegy.eu)  
 
 ---
 
 ## 🎯 1. Zielsetzung & Ausgangslage
 
-Strategische und visuelle Integration der beiden Kernprodukte **Sharegy** (Energiemanagement, HEMS & Energy-Sharing) und **Factofy** (Faktenbasierte B2B-Daten- & Monitoring-Plattform) auf der Unternehmens-Website **[www.smartEvo.de](https://www.smartevo.de)**.
+Strategische, visuelle und technische Migration der Unternehmens-Website **smartEvo** von einem veralteten Joomla-CMS auf ein modernes, ultra-performantes statisches Framework (**Astro 5 + Tailwind CSS**), gehostet auf **Cloudflare Pages**.
 
-### Leitprinzipien:
-* **Zero Design-Bruch**: 100 % nahtlose Fortführung des bestehenden smartEvo Design-Systems (Shaper Wayne Corp / SP PageBuilder, Farbschema Cyan `#1CC5D9` & Deep Petrol `#062F32`, Typografie Poppins & Work Sans).
-* **Entrümpelung & Schärfung**: Vollständige Entfernung des obsoleten Bereichs *„Bildung / Corona-Schulungsangebote“* und Zusammenfassung redundanter Stadtentwicklungs-Blöcke.
-* **Klarer Dreiklang**:
-  1. **smartEvo** als etablierte B2B-Dachmarke (Strategie, KRITIS, IT-Sicherheitsgesetz, Smart City).
-  2. **Sharegy** als dezentrale Energie-, HEMS- & Mieterstrom-Plattform.
-  3. **Factofy** als faktenbasierte Monitoring-, Audit- & Entscheidungsplattform (Nachfolger von smartVAL).
+### Erreichte Kernziele:
+* **Radikale Entrümpelung & Performance**: Ladezeiten unter **800 ms**, Wegfall des obsoleten Bereichs *„Bildung / Corona-Schulungsangebote / JFK-Zitat“*, Eliminierung von Tracking-Bloat und Cookie-Bannern.
+* **Klarer Fokus auf das Kerngeschäft**:
+  1. **smartEvo**: Etablierte B2B-Dachmarke für Technologie, KRITIS-Sicherheitsberatung und nachhaltige Stadtentwicklung.
+  2. **Sharegy**: Dezentrale Energieplattform für EMS, dynamische Börsenstromtarife, § 14a EnWG und **Peer-to-Peer Energy Sharing** (50-km-Radius & Doppel-Ertrag).
+  3. **Factofy**: Faktenbasierte Daten- und Digital-Twin-Plattform für Kommunen nach dem **ISO 37120 Standard** (Nachfolger von smartVAL).
+  4. **Solarenergie**: Schlüsselfertige PV-Komplettsysteme mit interaktivem Ertragsrechner als Hardware-Fundament.
+* **Flache, moderne URL-Architektur**: Vollständige Abschaffung des alten Joomla-Präfixes /dienstleistungen/.
 
 ---
 
-## 🎨 2. Design-System & Styleguide-Konformität
+## 🎨 2. Design-System & CI-Konformität
 
-| Design-Element | Wert / Spezifikation | Verwendung auf smartEvo.de |
+| Design-Element | Spezifikation | Verwendung |
 |---|---|---|
-| **Primary Accent** | `#1CC5D9` (Electric Cyan / Teal) | CTA-Buttons, Icons, Feature-Highlights, Badges |
-| **Dark Primary** | `#062F32` (Deep Petrol Slate) | Dunkle Hero-Hintergründe, Header-Akzente, Primary Cards |
-| **Dark Secondary** | `#252A35` / `#171717` (Charcoal) | Footer, Top-Bar, Secondary Cards |
-| **Text Primary** | `#FFFFFF` (White) / `#252525` (Off-Black) | Kontraststarke Überschriften & Fließtexte |
-| **Headings Font** | `Poppins, sans-serif` | H1–H4 Überschriften, Banner-Texte, Navigation |
-| **Body Font** | `Work Sans, sans-serif` | Paragraphen, Leistungsbeschreibungen, Tooltips |
+| **Primary Accent** | #1CC5D9 (Electric Cyan / Teal) | CTA-Buttons, Icons, Feature-Highlights, Badges |
+| **Dark Primary** | #062F32 (Deep Petrol Slate) | Dunkle Hero-Hintergründe, Header-Akzente, Primary Cards |
+| **Dark Secondary** | #042022 / #0A474D (Deep Teal Dark) | Footer, Sektions-Hintergründe, Contrast Cards |
+| **Success / Energy Accent** | #10B981 / #34D399 (Emerald) | Sharegy Plattform-Highlights, Ertrags-Badges |
+| **Headings Font** | Poppins, sans-serif (700 / 800) | H1–H4 Überschriften, Brand-Logo, Buttons |
+| **Body Font** | Work Sans, sans-serif (400 / 500) | Fließtexte, Leistungsbeschreibungen, Tabellen |
+| **Favicon** | Custom Vector SVG (#062F32 Squircle + sE. Monogramm) | Gestochen scharf auf allen Geräten & Apple Touch |
 
 ---
 
 ## 🏗️ 3. Marken- & Navigations-Architektur
 
-```
+`
                        ┌──────────────────────────────┐
                        │           smartEvo           │
                        │   (Dachmarke & Consulting)   │
@@ -46,92 +49,46 @@ Strategische und visuelle Integration der beiden Kernprodukte **Sharegy** (Energ
             ▼                                                   ▼
 ┌──────────────────────────────┐            ┌──────────────────────────────┐
 │           Sharegy            │            │           Factofy            │
-│  Die Energie- & Sharing-     │            │   Die faktenbasierte Daten-  │
-│  Plattform (HEMS, Solar,     │            │   & Monitoring-Plattform     │
-│  § 14a, Mieterstrom, Pro)    │            │   (B2B, Smart City, Audits)  │
+│  Die Energie- & Sharing-     │            │   Der Kommunale Digitale     │
+│  Plattform (EMS, Börsentarif,│            │   Zwilling & 17 ISO 37120    │
+│  § 14a, P2P Energy Sharing)  │            │   Indikatoren (ex smartVAL)  │
 └──────────────────────────────┘            └──────────────────────────────┘
-```
+`
 
-### Menüstruktur im Header (Desktop & Mobile Drawer):
-1. **Home** (`/`)
-2. **Sharegy** (`/sharegy` $\rightarrow$ Teaser & Weiterleitung zu `sharegy.de`)
-3. **Factofy** (`/factofy` $\rightarrow$ Teaser & Nachfolger von smartVAL)
-4. **Kritische Infrastrukturen** (`/dienstleistungen/kritische-infrastrukturen`)
-5. **Smart City & Quartiere** (`/dienstleistungen/smart-city`)
-6. **Über Uns** (`/ueber-uns`)
-7. **Kontakt** (`/kontakt`)
-
----
-
-## 📄 4. Detaillierter Seitenaufbau (Homepage Sektion für Sektion)
-
-### Sektion 1: Hero Banner (Top of Page)
-* **Überschrift (H1)**: `Business re-defined`
-* **Sub-Headline (H2)**: *„Premiumlösungen für Unternehmenserfolg, Dekarbonisierung & faktenbasierte Transformation.“*
-* **Call-to-Action Buttons (Duo)**:
-  * `[⚡ Sharegy entdecken]` (Button: Leuchtendes Cyan `#1CC5D9`, Text: `#062F32`)
-  * `[📊 Factofy kennenlernen]` (Button: Outlined Border Weiß / Cyan Hover)
+### Finale Menüstruktur in der TopNav:
+1. **Home** (/)
+2. **⚡ Sharegy** (/sharegy $\rightarrow$ Interne Produktseite & Link zu sharegy.de)
+3. **🌐 Factofy** (/factofy $\rightarrow$ Interne Produktseite & Link zu actofy.de)
+4. **🛡️ KRITIS** (/kritische-infrastrukturen $\rightarrow$ NIS-2 & BSI IT-Grundschutz)
+5. **🏙️ Stadtentwicklung** (/stadtentwicklung $\rightarrow$ Strategie & ISO 37120)
+6. **📡 Smart City** (/smart-city $\rightarrow$ LoRaWAN & Urbane Datenräume)
+7. **☀️ Solarenergie** (/solarenergie $\rightarrow$ PV-Pakete & Rechner)
+8. **Über Uns** (/ueber-uns)
+9. **Erstberatung vereinbaren →** (/kontakt $\rightarrow$ Rechter CTA-Button)
 
 ---
 
-### Sektion 2: 3-Spalten-Vorteilsmatrix („Nur das Beste für Ihren Erfolg“)
-*Ersetzt die alte Aufteilung Stadtentwicklung / Bildung / Unternehmen:*
+## 📄 4. Struktur der 11 statischen Routen
 
-1. **⚡ Kachel 1: Sharegy (Energie & HEMS)**
-   * *Icon*: Flash / Solar / Energy Flow (`#1CC5D9`)
-   * *Text*: *„Dezentrale Energiewende, intelligentes HEMS, dynamische Tarife und lokales Energy-Sharing für Ein- & Mehrfamilienhäuser sowie Gewerbe.“*
-   * *Link*: `Zu Sharegy →`
-2. **📊 Kachel 2: Factofy (Fakten & Monitoring)**
-   * *Icon*: Chart-Line / Data / Analytics (`#1CC5D9`)
-   * *Text*: *„Das smarte Cockpit für faktenbasierte Unternehmens- und Liegenschaftsführung. Visualisierung, Trendanalysen und automatisierte Berichte.“*
-   * *Link*: `Zu Factofy →`
-3. **🔒 Kachel 3: smartEvo Consulting (KRITIS & IT-Sicherheit)**
-   * *Icon*: Shield-Check / Server / Lock (`#1CC5D9`)
-   * *Text*: *„Ganzheitliche Absicherung und Beratung für Betreiber kritischer Infrastrukturen nach IT-Sicherheitsgesetz & ISO 37120.“*
-   * *Link*: `Zu den Dienstleistungen →`
-
----
-
-### Sektion 3: Factofy Produkt-Spotlight (Ersetzt smartVAL)
-* **Layout**: 2-Spaltig (Links: Interaktive Dashboard-Mockup-Grafik / Rechts: Leistungsmerkmale)
-* **Titel (H2)**: `Factofy – Fakten statt Bauchgefühl`
-* **Text**: *„Verlässliche Entscheidungen auf Basis von Echzeitdaten. Factofy vereint heterogene Datenquellen in einem zentralen Managementsystem – inklusive automatisierter Berechnungen, Trendprognosen und Audit-Reports.“*
-* **USPs**:
-  * ✅ Live-Visualisierung von KPIs & Betriebsparametern
-  * ✅ Automatisierte Auswertungen & Berichterstellung
-  * ✅ Nahtlose API- & Sensor-Integration (IoT, Modbus, MQTT)
+| Route | Inhalt & Highlights | Status |
+|---|---|:---:|
+| / | Hero mit Real-Image-Overlay, 6 interaktive 3D-FlipCards, Spotlights für Sharegy & Factofy, Partnerlogos | ✅ Live |
+| /sharegy | EMS, dynamische Börsentarife, § 14a EnWG und **Energy-Sharing Deep-Dive** mit Doppel-Ertragsmodell | ✅ Live |
+| /factofy | 6 Kernmodule für Kommunen, 17 ISO 37120 Themenkatalog, Digitaler Zwilling | ✅ Live |
+| /kritische-infrastrukturen | NIS-2 Betreiberpflichten, BSI IT-Grundschutz, IEC 62443 OT-Sicherheit | ✅ Live |
+| /stadtentwicklung | Strategische Stadtentwicklungsberatung harmonisiert mit den 17 ISO 37120 Indikatoren | ✅ Live |
+| /smart-city | LoRaWAN Funknetzwerke, Sensorik, FIWARE Urbane Datenplattformen | ✅ Live |
+| /solarenergie | 3 Komplettpakete (5 / 10 / 20+ kWp), interaktiver Solar- & Ersparnisrechner, Lead-Formular | ✅ Live |
+| /ueber-uns | Unternehmensprofil, Wesseling am Rhein, Vision & Werte | ✅ Live |
+| /kontakt | Ansprechpartner, optimiertes Dropdown (Sharegy/Factofy oben), Terminanfrage | ✅ Live |
+| /impressum | Rechtskonformes Impressum der smartEvo UG (haftungsbeschränkt), Wesseling | ✅ Live |
+| /datenschutz | DSGVO-konforme Datenschutzerklärung (cookiefrei, ohne Drittanbieter-Tracker) | ✅ Live |
 
 ---
 
-### Sektion 4: Sharegy Produkt-Spotlight (Ersetzt Solarenergie)
-* **Layout**: 2-Spaltig (Links: Leistungsmerkmale / Rechts: Sharegy Glassmorphism HEMS App Mockup)
-* **Titel (H2)**: `Sharegy – Die vernetzte Energiezukunft`
-* **Text**: *„Verbinden Sie Photovoltaik, Speicher, Wärmepumpen und Wallboxen zu einem intelligenten, autarken Gesamtsystem. Mit dynamischen Stromtarifen, § 14a EnWG Sektorkopplung und dezentralem Energy-Sharing.“*
-* **USPs**:
-  * ✅ Multi-Hersteller-Unterstützung (Sungrow, Growatt, Fronius, SMA, Victron u.v.m.)
-  * ✅ Intelligenter Autopilot für Börsenstrom-Tiefstpreise & Peak-Shaving
-  * ✅ Mieterstrom & P2P-Sharing für Quartiere und Liegenschaften
+## 🚀 5. Nächster Schritt: Finale Domain-Aufschaltung (Go-Live)
 
----
-
-### Sektion 5: Kritische Infrastrukturen & Smart City
-* **Status**: Beibehalten und als Fundament für Großkunden & Stadtwerke positionieren.
-* **Inhalt**: IT-Sicherheitsgesetz, BSI-Konformität, ISO 37120 Smart City Zertifizierung.
-
----
-
-### Sektion 6: Streichliste (Was entfällt)
-* ❌ **Bildungswesen-Block** (*„John F. Kennedy Zitat / Es gibt nur eine Sache auf der Welt, die teurer ist als Bildung...“*) $\rightarrow$ **Vollständig entfernen**.
-* ❌ **smartVAL Einzelmodul** $\rightarrow$ Geht nahtlos in **Factofy** auf.
-
----
-
-## 📊 5. Roadmap & Umsetzungsschritte
-
-| Schritt | Maßnahme | Tool / Ort | Status |
-|---|---|---|:---:|
-| **1. Text- & Bild-Assets** | Erstellung der Screenshots & Mockups für Sharegy & Factofy im smartEvo Cyan-Look | Figma / Photoshop | ⚪ Ausstehend |
-| **2. Header-Navigation** | Umbenennung & Verlinkung der Menüpunkte im Joomla MegaMenu | Joomla Backend | ⚪ Ausstehend |
-| **3. Home-Layout Update** | Austausch der PageBuilder-Zeilen (Factofy & Sharegy rein, Bildung raus) | SP PageBuilder | ⚪ Ausstehend |
-| **4. Landingpages** | Bereitstellung der Sub-Pages `/sharegy` und `/factofy` mit Produktübersicht | SP PageBuilder | ⚪ Ausstehend |
-| **5. Cross-Linking** | Verlinkung von Sharegy.de & Factofy.de zurück auf smartEvo UG als Betreiber | Frontend Config | ⚪ Ausstehend |
+Sobald der offizielle Wechsel der Hauptdomain **smartevo.de** erfolgen soll:
+1. In Cloudflare Pages unter *Custom Domains* smartevo.de und www.smartevo.de hinterlegen.
+2. DNS-Einträge (CNAME / ALIAS) beim Domain-Registrar auf Cloudflare Pages zeigen lassen.
+3. Die Seite schaltet sofort ohne Ausfallzeit auf das neue System um.
