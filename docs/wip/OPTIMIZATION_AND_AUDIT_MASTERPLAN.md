@@ -30,13 +30,13 @@ Alle wesentlichen Härtungs-, Skalierungs- und Feature-Erweiterungen aus den vor
 
 Jedes anstehende Feature wird in einer eigenständigen Spezifikation im Ordner `docs/wip/` geführt:
 
-1. 📧 **E-Mail-Zustellbarkeit & SMTP-Härtung (`accounts/services/email_service.py`)**
-   * **Ziel**: Überprüfung und Härtung des SMTP-Transports (Port 465 SSL vs 587 TLS), SPF/DKIM-Zertifizierung der Domain `sharegy.cloud` und Sicherstellung von 100% Zustellbarkeit für Magic Login & Einladungen.
-   * **Status & Prio**: 🟡 In Bearbeitung | 🔴 Kritisch für B2C Launch
+1. 📧 **E-Mail-Zustellbarkeit & MS Graph Integration (`backend/email_backends/msgraph.py`)**
+   * **Ziel**: Vollständige Ablösung unzuverlässiger SMTP-Relays durch die offizielle Microsoft Graph REST-API (M365 Exchange Online) mit dediziertem `noreply@smartevo.de` Postfach für 100% Posteingangs-Garantie bei Gmail, GMX, WEB.DE & Outlook.
+   * **Status & Prio**: 🟢 **100 % Live** | 🔴 Kritisch für B2C Launch (Erfolgreich verifiziert)
 
-2. 🚨 **Alert- & Benachrichtigungs-Engine (`alerts/services.py`)**
-   * **Ziel**: End-to-End Validierung aller Trigger-Regeln (Ertragsausfall, Tiefentladeschutz, Dauerlast, Solarpeak-Nudge) über WebPush, E-Mail und In-App Benachrichtigungen.
-   * **Status & Prio**: 🟡 In Bearbeitung | 🔴 Kritisch für B2C Launch
+2. 🚨 **Alert- & Benachrichtigungs-Engine (`alerts/views.py` & `AlertsPage.jsx`)**
+   * **Ziel**: Saubere Trennung von Telemetrie-Alarmen (`AlertEvent`) und Helpdesk-Tickets (`Ticket`), Schutz vor automatischem Incident-Spam im Support-Desk und bedarfsgesteuerte Hilfe-Eskalation über den `SupportDrawer`.
+   * **Status & Prio**: 🟢 **100 % Live** | 🔴 Kritisch für B2C Launch (Erfolgreich verifiziert)
 
 3. ⚡ **[`WIP_BNETZA_CLS_SMART_METER_GATEWAY.md`](./WIP_BNETZA_CLS_SMART_METER_GATEWAY.md)**
    * **Ziel**: Gesetzeskonforme Dimm- und Steuerbefehle nach § 14a EnWG direkt über den Controllable Local System (CLS) Kanal des SMGW empfangen inkl. VNB Dispatch-Quittierung.
