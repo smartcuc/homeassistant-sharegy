@@ -132,7 +132,7 @@ EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", _default_tls).lower() in ("true", "1"
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
 
-DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "smartEvo <noreply@smartevo.de>")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "Sharegy <noreply@sharegy.de>")
 SERVER_EMAIL = os.getenv("SERVER_EMAIL", DEFAULT_FROM_EMAIL)
 EMAIL_TIMEOUT = int(os.getenv("EMAIL_TIMEOUT", 10))
 
@@ -140,7 +140,7 @@ EMAIL_TIMEOUT = int(os.getenv("EMAIL_TIMEOUT", 10))
 MS_GRAPH_TENANT_ID = os.getenv("MS_GRAPH_TENANT_ID", "")
 MS_GRAPH_CLIENT_ID = os.getenv("MS_GRAPH_CLIENT_ID", "")
 MS_GRAPH_CLIENT_SECRET = os.getenv("MS_GRAPH_CLIENT_SECRET", "")
-MS_GRAPH_DEFAULT_SENDER = os.getenv("MS_GRAPH_DEFAULT_SENDER", "noreply@smartevo.de")
+MS_GRAPH_DEFAULT_SENDER = os.getenv("MS_GRAPH_DEFAULT_SENDER", "noreply@sharegy.de")
 
 
 # =============================
