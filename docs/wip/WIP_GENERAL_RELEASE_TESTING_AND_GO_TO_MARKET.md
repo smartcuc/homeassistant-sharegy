@@ -1,131 +1,139 @@
-# 🚀 [WIP] General Release Testen, Qualitätssicherung & Markteintritt (Go-to-Market)
+# 🚀 General Release Testen, Qualitätssicherung & Markteintritt (Go-to-Market Masterplan)
 
-**Status:** 🟡 In Ausarbeitung / Launch-Vorbereitung  
-**Fortschritt:** 🟢 85 %  
-**Priorität:** 🔴 Kritisch (Ziel: Q4 2026 / Q1 2027)  
-**Lead / Module:** `release`, `devops`, `compliance`, `frontend`, `billing`, `devices`  
-
----
-
-## 🎯 1. Executive Summary & Zielsetzung
-
-Dieses Dokument definiert den verbindlichen Ablauf für das **General Release Testing (E2E / QA)**, die regulatorische Zertifizierung sowie den **strukturierten Markteintritt (Go-to-Market)** von **Sharegy** im DACH-Raum.
-
-### Kernziele:
-1. **Dual-App Ökosystem Launch**: Zeitgleicher Rollout von **Sharegy Home** (`de.sharegy.app`) für Privatnutzer/Mieter und **Sharegy Pro** (`de.sharegy.pro`) für Installateure, Stadtwerke & Hausverwaltungen.
-2. **Zero-Defect Telemetrie-Pipeline**: Garantierte Ingestion von 10.000+ parallelen IoT-Streams (Shelly WSS, Inverter Cloud APIs, MQTT, wMSB/SMGW) mit Sub-Sekunden Latenz.
-3. **Regulatorische Konformität**: Vollständige Erfüllung von **§ 14a EnWG** (netzdienliche Dimmung & Kaskadierung) und **§ 42b EnWG / MsbG** (15-Minuten-Lastgänge & eichrechtskonforme Abrechnung).
-4. **Partner- & Vertriebs-Skalierung**: Automatisierter Onboarding-Trichter für Solarteure und White-Label-Mandanten mit Instant-Provisioning.
+**Status:** 🟢 Freigegeben zur Umsetzung (Release-Fahrplan & GTM-Strategie)  
+**Version:** 2.0.0 (GTM & QA Master Edition)  
+**Ziel:** Verbindlicher Qualitäts-, Test- und Rollout-Plan für den schrittweisen Markteintritt von Sharegy (Consumer, Prosumer, Fachpartner & Liegenschaften).
 
 ---
 
-## 🏗️ 2. Dual-App Release Architektur
-
-```
-                            ┌────────────────────────────────────────┐
-                            │        Sharegy Cloud Backend           │
-                            │   (Django 5, PostgreSQL, TimescaleDB,  │
-                            │    Redis Pub/Sub, Mosquitto MQTT)      │
-                            └──────────────────┬─────────────────────┘
-                                               │
-                     ┌─────────────────────────┴─────────────────────────┐
-                     ▼                                                   ▼
-┌──────────────────────────────────────────┐    ┌──────────────────────────────────────────┐
-│      Sharegy Home (B2C & Prosumer)       │    │       Sharegy Pro (B2B & Partner)        │
-│   • App ID: de.sharegy.app               │    │   • App ID: de.sharegy.pro               │
-│   • Rollen: HEMS Prosumer, Mieterstrom   │    │   • Rollen: Installateur, Admin, wMSB    │
-│   • UI: EMS Live-Flow, Einsparungen,     │    │   • UI: Flottenüberwachung, 1-Klick WSS  │
-│     Batteriesteuerung, § 14a Status      │    │     Diagnose, Mandanten-Billing, EDIFACT │
-└──────────────────────────────────────────┘    └──────────────────────────────────────────┘
-```
+## 🧭 Inhaltsverzeichnis
+1. [Executive Summary & Markteintritts-Philosophie](#1-executive-summary--markteintritts-philosophie)
+2. [Die 4-Phasen-Markteintritts-Roadmap](#2-die-4-phasen-markteintritts-roadmap)
+3. [E2E-Qualitätssicherung & Test-Matrix](#3-e2e-qualitaetssicherung--test-matrix)
+4. [Hardware- & Wechselrichter-Zertifizierung](#4-hardware--wechselrichter-zertifizierung)
+5. [App Store & Google Play Launch-Voraussetzungen](#5-app-store--google-play-launch-voraussetzungen)
+6. [Sicherheits-Audit, DSGVO & Eichrecht](#6-sicherheits-audit-dsgvo--eichrecht)
+7. [Detaillierte Go-To-Market Playbooks](#7-detaillierte-go-to-market-playbooks)
 
 ---
 
-## 🧪 3. Umfassende Test- & QA-Matrix
+## 🎯 1. Executive Summary & Markteintritts-Philosophie
 
-### 3.1 Backend & Automatisierte Test-Suites
+Der Erfolg von Sharegy basiert auf einem **praxisnahen, 2-stufigen Markteintritt**:
+1. **Stufe 1 (Bodenhaftung & Traktion):** Fokus auf das, was **heute sofort funktioniert**:
+   * **Private Prosumer & Haushalte:** Kostenloses HEMS-Monitoring, PV-Überschussladen, dynamische Stromtarife und Autarkie-Optimierung.
+   * **Fachpartner & Solarteure:** Kostenloses Flottenmanagement, 3-Sekunden-Inbetriebnahmetest mit PDF-Protokoll und dauerhafter Kunden-Wartungszugang.
+   * **Mehrfamilienhäuser & WEGs:** Gemeinschaftliche Gebäudeversorgung (§ 42b EnWG) und Mieterstrom-Abrechnungen ohne Großkraftwerks-Zertifizierung.
+2. **Stufe 2 (Skalierung & Flexibilitätsmärkte):** Sobald eine installierte Basis von **100+ aktiven Speichern** im Feld erprobt ist, wird die Schwarm-Vermarktung (VPP / Flex-Bonus) mit Master-Aggregatoren (Next Kraftwerke / Statkraft) aktiviert.
 
-| Test-Kategorie | Prüfumfang | Tooling / Framework | Erfolgs-Kriterium |
-|---|---|---|---|
-| **Core & Ingestion** | Adapter-Parsing (Growatt, Sungrow, Fronius, Shelly, Victron) | `pytest`, `devices.tests_self_test` | 100% Pass, 0 Fehlinterpretationen bei 0 W Nachtwerten |
-| **Billing & Quoten** | Dynamische Tarife, $Ct/\text{kWh}$ Aufteilung, Mieterstrom | `billing.test_multi_community_management` | Cent-genaue Abrechnung, 0 Rundungsfehler |
-| **EMS Merit-Order** | PV-Überschuss, Batterieladung, § 14a Drosselung auf $4{,}2\,\text{kW}$ | `energy.tests_flow_engine` | Einhaltung der Leistungsbegrenzung in $< 200\,\text{ms}$ |
-| **Multi-Tenancy** | Datenisolation zwischen WEGs & White-Label Mandanten | Django Tenant Test Runner | Keine Datenlecks zwischen Tenants (Mandanten-Sicherheit) |
+---
 
-### 3.2 Last-, Stress- & Latenz-Tests
-
-* **Szenario A (Lastspitze)**: Simulation von $5.000$ zeitgleichen Shelly Pro 3EM WebSocket-Verbindungen (Push-Intervall: $1\,\text{s}$).
-  * *Ziel:* CPU-Auslastung $< 60\,\%$, Redis-Queue $< 50\,\text{ms}$ Latenz, 0 Verbindungsabbrüche.
-* **Szenario B (Offline-Resilienz)**: Unterbrechung der Internetverbindung eines Smart Homes für $48\,\text{h}$.
-  * *Ziel:* Reibungsloser Reconnect und lückenlose Store-and-Forward Nachübertragung ohne Duplikate.
-
-### 3.3 Hardware- & Hersteller-Kompatibilitäts-Audit
+## 🗺️ 2. Die 4-Phasen-Markteintritts-Roadmap
 
 ```
-┌─────────────────┬──────────────────┬─────────────────┬──────────────────┐
-│ Hersteller / Typ│ Schnittstelle    │ Protokoll / Auth│ Status / Freigabe│
-├─────────────────┼──────────────────┼─────────────────┼──────────────────┤
-│ Shelly Gen2/3   │ WSS Outbound     │ TLS (Port 443)  │ 🟢 Zertifiziert  │
-│ Sungrow SH-Serie│ Cloud API / OAuth│ REST Bearer     │ 🟢 Zertifiziert  │
-│ Growatt SPH/MIN │ ShineServer / V2 │ OpenAPI MD5/Sign│ 🟢 Zertifiziert  │
-│ Fronius Gen24   │ Solar.web REST   │ API-Key         │ 🟢 Zertifiziert  │
-│ SolarEdge SE    │ Monitoring API   │ HTTP API-Key    │ 🟢 Zertifiziert  │
-│ Kostal Plentic. │ Kostal Solar App │ REST Digest     │ 🟢 Zertifiziert  │
-│ Victron Cerbo GX│ VRM Portal / MQTT│ Token / TLS     │ 🟢 Zertifiziert  │
-│ Deye Hybrid     │ Solarman Cloud   │ REST Bearer     │ 🟢 Zertifiziert  │
-│ wMSB Gateways   │ BSI TR-03109-1   │ CLS / HAN WSS   │ 🟡 In Validierung│
-└─────────────────┴──────────────────┴─────────────────┴──────────────────┘
++───────────────────────────────────────────────────────────────────────────────────────────+
+| PHASEN-ROADMAP ZUM REGULATORISCH & WIRTSCHAFTLICH SICHEREN MARKTEINTRITT                 |
++───────────────────────────────────────────────────────────────────────────────────────────+
+
+[ Phase 1: Closed Beta (Monat 1-2) ]
+  • 10 befreundete Solarteure / Elektro-Fachbetriebe
+  • 50 Pilot-Haushalte (Sungrow, SMA, Fronius, Deye, Shelly)
+  • E2E-Härtung der Latenz, Push-Telemetrie und Fehler-Triage
+                                 │
+                                 ▼
+[ Phase 2: Partner- & Prosumer-Launch (Monat 3-4) ]
+  • Freigabe von Sharegy Pro für Fachpartner & Installateure
+  • B2C-Rollout über PV-Communities & Social Proof
+  • Launch von Energy Sharing (§ 42b EnWG) für Mehrfamilienhäuser & WEGs
+                                 │
+                                 ▼
+[ Phase 3: Feld-Stresstest für Speichersteuerung (Monat 5-6) ]
+  • Flottengröße: 100 bis 300 Heimspeicher im Feld
+  • Geschlossene Testabrufe (Interne Netz- und Ladelasttests)
+  • Vorbereitung des VPP-Audits & Präqualifikation
+                                 │
+                                 ▼
+[ Phase 4: Kommerzieller VPP- & Flexibilitäts-Start (Monat 7+) ]
+  • Aufschaltung an Master-Aggregator (Next Kraftwerke / Statkraft)
+  • Aktivierung des 80/20 Flexibilitäts-Bonus für Endkunden
+  • bundesweite Skalierung über Stadtwerke- & Whitelabel-Partner
 ```
 
 ---
 
-## 📱 4. App Store & Google Play Store Launch-Checkliste
+## 🧪 3. E2E-Qualitätssicherung & Test-Matrix
 
-### 4.1 iOS App Store (Apple)
-* [x] Bundle IDs registriert: `de.sharegy.app` und `de.sharegy.pro`
-* [x] **Account Deletion Flow**: DSGVO-konforme Selbstlöschung direkt im Nutzerprofil (`/app/profile`) implementiert.
-* [x] **App Privacy Details (Nutrition Labels)**: Deklaration von Telemetrie- und Verbrauchsdaten ohne Tracking Dritter.
-* [x] **Sign in with Apple / Magic Login**: Passwortloser Login ohne Drittanbieter-Zwang.
-* [x] **iPad / Tablet Responsive Layouts**: Split-Screen und responsive Navigation validiert.
-
-### 4.2 Google Play Store (Android)
-* [x] Package Names konfiguriert: `de.sharegy.app` und `de.sharegy.pro`
-* [x] **Target SDK Level**: Android 14 / 15 (API 34/35) Kompatibilität.
-* [x] **App-Berechtigungen minimiert**: Keine unnötigen Hintergrund-Standort- oder Kamera-Rechte.
-* [x] **Keystore & Signing**: Release-Keystores in CI/CD Secret Store hinterlegt.
+| Test-Kategorie | Prüfumfang & Test-Szenarien | Tooling & Automatisierung | Akzeptanz-Kriterium |
+| :--- | :--- | :--- | :--- |
+| **1. Telemetrie & Ingestion** | Ingestion von Sungrow, Fronius, SMA, Deye, Shelly Pro 3EM, Home Assistant WSS | `devices.tests_self_test`, WebSocket Stress-Runner | Latenz $< 2\,\text{s}$, 0 Datenverlust bei 24h Dauerbetrieb |
+| **2. Billing & 15m-Clearing** | § 42b EnWG Allokationsmodelle (Dynamisch, MEA-Schlüssel, Hybrid), DATEV-Export | `billing.test_multi_community_management` | 100% cent-genaue Übereinstimmung der Saldierung |
+| **3. Optimizer & Merit-Order** | PV-Überschussladung Wallbox, Wärmepumpen-SG-Ready, § 14a Drosselung auf $4{,}2\,\text{kW}$ | `energy.tests_flow_engine` | Reaktionszeit $< 5\,\text{s}$, Einhaltung der Netzkontingente |
+| **4. Offline-Resilienz** | 48-Stunden Internet-Ausfall des lokalen HEMS | SQLite Store & Forward Buffer Test | Lückenlose Nachübertragung nach Reconnect ohne Duplikate |
+| **5. Multi-Tenancy & RBAC** | Rollentrennung: Private EMS vs. Partner vs. Tenant-Admin vs. Support-Agent | Django Auth Test Suites | Strikte Datenisolation, keine Mandanten-Lecks |
 
 ---
 
-## 🛡️ 5. Sicherheits-Audit & DSGVO-Compliance
-
-1. **Penetration Testing**:
-   * Überprüfung aller REST- und WebSocket-Endpunkte auf IDOR (Insecure Direct Object References).
-   * Rate-Limiting gegen Brute-Force auf Login- und Token-Endpunkten.
-2. **Eichrecht & Revisionssicherheit**:
-   * Unveränderbarkeit von 15-Minuten-Zählerständen in der Datenbank (TimescaleDB Chunk-Signierung).
-   * Exportformate nach BNetzA-Standard (MSCONS, EDIFACT, CSV).
-3. **Datensparsamkeit**:
-   * Anonymisierte Telemetrie-Speicherung für Machine-Learning-Prognosen.
-   * Automatische Löschfristen für Roh-Telemetriedaten nach 24 Monaten (Aggregierung zu Monatswerten).
-
----
-
-## 📈 6. Go-To-Market (GTM) Strategie & Rollout-Phasen
+## 🔌 4. Hardware- & Wechselrichter-Zertifizierung
 
 ```
-Phase 1: Closed Beta (Q3 2026)      ──► 50 Pionier-Installateure & 500 Test-Haushalte (HEMS & Mieterstrom)
-Phase 2: Partner Onboarding (Q4 2026)──► Freigabe Sharegy Pro für Stadtwerke, Hausverwaltungen & Solarteure
-Phase 3: Public General Release      ──► Bundesweiter Launch in App Store & Google Play mit Whitelabel-Mandanten
++───────────────────+────────────────────+───────────────────+────────────────────+
+| Hersteller / Typ  | Schnittstelle      | Protokoll / Auth  | Freigabe-Status    |
++───────────────────+────────────────────+───────────────────+────────────────────+
+| Shelly Gen2/3/Pro | WSS Outbound       | TLS (Port 443)    | 🟢 Voll zertifiziert|
+| Sungrow SH-Serie  | Modbus TCP / Cloud | Port 502 / REST   | 🟢 Voll zertifiziert|
+| SMA Tripower/SB   | Speedwire / Modbus | Port 502 (Unit 3) | 🟢 Voll zertifiziert|
+| Fronius Gen24/Symo| SolarAPI / Modbus  | Port 502 / JSON   | 🟢 Voll zertifiziert|
+| SolarEdge SE      | Modbus TCP SunSpec | Port 1502 / 502   | 🟢 Voll zertifiziert|
+| Deye Hybrid       | Modbus TCP / RTU   | Port 502 SunSpec  | 🟢 Voll zertifiziert|
+| Huawei SUN2000    | Modbus TCP Bridge  | Port 502          | 🟢 Voll zertifiziert|
+| Wallboxen (OCPP)  | OCPP 1.6-J CSMS    | WSS (Port 443)    | 🟢 Voll zertifiziert|
+| Home Assistant    | Native HACS Bridge | Outbound WSS      | 🟢 Voll zertifiziert|
+| SMGW CLS-Kanal    | BSI TR-03109-1     | TLS CLS Proxy     | 🟡 In Phase 3 Test |
++───────────────────+────────────────────+───────────────────+────────────────────+
 ```
-
-### 6.1 Partner-Akquise & Onboarding-Trichter:
-* **Self-Service Partner-Registrierung**: Installateure können unter `/pro` in $< 3$ Minuten ihren Partner-Account anlegen und Kunden-Anlagen via QR-Code verknüpfen.
-* **White-Label Mandantenfähigkeit**: Stadtwerke und Energieversorger erhalten ihr eigenes Branding (Custom Logo, Farbwelt, eigene Domain & SSL-Zertifikat) innerhalb von 24 Stunden.
 
 ---
 
-## 🚨 7. Incident Response & 24/7 SLA Playbook
+## 📱 5. App Store & Google Play Launch-Voraussetzungen
 
-* **Monitoring & Tracing**: Sentry (Frontend Crash-Reporting), Prometheus & Grafana (Server-Health & Ingestion Latenz).
-* **Alerting**: PagerDuty-Kopplung bei Ingestion-Ausfällen $> 0{,}5\,\%$ über 5 Minuten.
-* **Disaster Recovery**: Tägliche verschlüsselte Backups auf georedundanten Cloud-Storage mit $< 15\,\text{min}$ RPO (Recovery Point Objective).
+### 🍏 Apple App Store (`de.sharegy.app` & `de.sharegy.pro`)
+* [x] **Account Deletion Flow:** DSGVO-konforme Selbstlöschung im Profil (`/app/profile`) implementiert.
+* [x] **App Privacy Labels:** Transparente Deklaration aller Telemetrie- und Energiedaten.
+* [x] **Passwortloser Login:** Magic Login per E-Mail und Sign-in with Apple.
+* [x] **Responsive Layouts:** Optimiert für iOS, iPadOS und Web-App (PWA).
+
+### 🤖 Google Play Store (`de.sharegy.app` & `de.sharegy.pro`)
+* [x] **Target SDK Level:** Android 14/15 (API 34/35) Kompatibilität.
+* [x] **Rechte-Minimierung:** Keine unnötigen Standort-, Kamera- oder Speicherberechtigungen.
+* [x] **Keystore & Signierung:** Release-Keys im sicheren Secrets-Vault hinterlegt.
+
+---
+
+## 🛡️ 6. Sicherheits-Audit, DSGVO & Eichrecht
+
+1. **Penetration Testing & API-Sicherheit:**
+   * Schutz aller REST- und WebSocket-Endpunkte gegen IDOR und Brute-Force via Rate-Limiting.
+2. **Revisionssicherheit nach BNetzA-Standard:**
+   * 15-Minuten-Zeitreihen in TimescaleDB manipulationssicher archiviert.
+   * Exportfähig nach DATEV-, EDIFACT- und MSCONS-Standards.
+3. **Datensparsamkeit:**
+   * Anonymisierte Telemetrie für Prognose-Algorithmen; automatische Verdichtung von 1-Sekunden-Rohdaten nach 30 Tagen zu 15-Minuten-Werten.
+
+---
+
+## 📚 7. Detaillierte Go-To-Market Playbooks
+
+Für die operative Markteinführung wurden zwei hochdetaillierte, schrittweise Playbooks erstellt:
+
+1. **👨‍👩‍👧‍👦 [Consumer & Prosumer GTM Playbook](file:///c:/Users/Public/Dev/sharegy/docs/marketing/GTM_PLAYBOOK_CONSUMER_AND_PROSUMER.md):**
+   * Zielgruppen (Dach-PV, Balkonkraftwerk, E-Auto, Mieter).
+   * 0-zu-Aha Onboarding-Trichter ($< 120\,\text{Sekunden}$).
+   * Virale Sharing-Schleifen & Community-Akquise.
+   * Freemium-zu-Pro Conversion Strategie.
+
+2. **🔧 [Partner & Solarteure GTM Playbook](file:///c:/Users/Public/Dev/sharegy/docs/marketing/GTM_PLAYBOOK_PARTNERS_AND_INSTALLERS.md):**
+   * Zielgruppen (Solarteure, Elektro-Fachbetriebe, Stadtwerke, Hausverwaltungen).
+   * Nutzenversprechen: Kostenloses Flottenmanagement, 3-Sekunden-Inbetriebnahmetest mit PDF-Protokoll.
+   * Kaltakquise-Skripte, Partner-Schulung & Zertifizierungsprogramm.
+   * Partner-Incentives & wiederkehrende Service-Erlöse.
+
