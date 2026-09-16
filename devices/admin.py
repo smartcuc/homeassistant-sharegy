@@ -339,3 +339,65 @@ class DeviceBaselineProfileAdmin(admin.ModelAdmin):
     list_filter = ("appliance_type", "current_health_status", "is_active")
     search_fields = ("device__identifier", "device__config__name")
     raw_id_fields = ("device",)
+
+
+@admin.register(DeviceResource)
+class DeviceResourceAdmin(admin.ModelAdmin):
+    list_display = ("device", "updated_at", "created_at")
+    search_fields = ("device__identifier", "device__config__name")
+    raw_id_fields = ("device",)
+
+
+@admin.register(DeviceMetric1m)
+class DeviceMetric1mAdmin(admin.ModelAdmin):
+    list_display = ("device", "metric_key", "bucket", "avg", "min", "max", "count", "energy_wh")
+    list_filter = ("metric_key",)
+    search_fields = ("device__identifier", "metric_key")
+    raw_id_fields = ("device",)
+    date_hierarchy = "bucket"
+    ordering = ("-bucket",)
+
+    def has_add_permission(self, request):
+        return False
+
+
+@admin.register(DeviceMetric5m)
+class DeviceMetric5mAdmin(admin.ModelAdmin):
+    list_display = ("device", "metric_key", "bucket", "avg", "min", "max", "count", "energy_wh")
+    list_filter = ("metric_key",)
+    search_fields = ("device__identifier", "metric_key")
+    raw_id_fields = ("device",)
+    date_hierarchy = "bucket"
+    ordering = ("-bucket",)
+
+    def has_add_permission(self, request):
+        return False
+
+
+@admin.register(DeviceMetric15m)
+class DeviceMetric15mAdmin(admin.ModelAdmin):
+    list_display = ("device", "metric_key", "bucket", "avg", "min", "max", "count", "energy_wh")
+    list_filter = ("metric_key",)
+    search_fields = ("device__identifier", "metric_key")
+    raw_id_fields = ("device",)
+    date_hierarchy = "bucket"
+    ordering = ("-bucket",)
+
+    def has_add_permission(self, request):
+        return False
+
+
+@admin.register(DeviceMetric1h)
+class DeviceMetric1hAdmin(admin.ModelAdmin):
+    list_display = ("device", "metric_key", "bucket", "avg", "min", "max", "count", "energy_wh")
+    list_filter = ("metric_key",)
+    search_fields = ("device__identifier", "metric_key")
+    raw_id_fields = ("device",)
+    date_hierarchy = "bucket"
+    ordering = ("-bucket",)
+
+    def has_add_permission(self, request):
+        return False
+
+
+

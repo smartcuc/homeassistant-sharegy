@@ -136,8 +136,9 @@ class MeterAdmin(admin.ModelAdmin):
 @admin.register(MeterRegister)
 class MeterRegisterAdmin(admin.ModelAdmin):
     list_display = ("id", "meter", "obis_code", "description")
-    search_fields = ("meter__serial_number", "obis_code")
+    search_fields = ("meter__serial_number", "obis_code", "description")
     raw_id_fields = ("meter",)
+
 
 
 # ============================================================
@@ -246,5 +247,18 @@ class TenantAdmin(admin.ModelAdmin):
         ("Theme & Farben", {"fields": ("primary_color", "secondary_color", "button_color")}),
     )
     inlines = [TenantMembershipInline]
+
+
+from core.models import MemberEnergyProfile
+
+
+@admin.register(MemberEnergyProfile)
+class MemberEnergyProfileAdmin(admin.ModelAdmin):
+    list_display = ("member", "energy_role", "grid_connection_id", "created_at")
+    list_filter = ("energy_role",)
+    search_fields = ("member__user__email", "grid_connection_id")
+    raw_id_fields = ("member",)
+
+
 
 

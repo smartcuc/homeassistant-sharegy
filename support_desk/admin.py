@@ -136,3 +136,22 @@ class CannedResponseAdmin(admin.ModelAdmin):
     list_display = ["shortcut", "title", "project_key", "category", "created_at"]
     list_filter = ["project_key", "category"]
     search_fields = ["shortcut", "title", "body_de", "body_en"]
+
+
+@admin.register(TicketAttachment)
+class TicketAttachmentAdmin(admin.ModelAdmin):
+    list_display = ["filename", "ticket", "file_size", "mime_type", "created_at"]
+    list_filter = ["mime_type", "created_at"]
+    search_fields = ["filename", "ticket__ticket_number"]
+    raw_id_fields = ["ticket", "message", "uploaded_by"]
+    readonly_fields = ["created_at"]
+
+
+@admin.register(TicketActivityLog)
+class TicketActivityLogAdmin(admin.ModelAdmin):
+    list_display = ["ticket", "action", "actor_name", "created_at"]
+    list_filter = ["action", "created_at"]
+    search_fields = ["ticket__ticket_number", "actor_name", "details"]
+    raw_id_fields = ["ticket", "user"]
+    readonly_fields = ["created_at"]
+

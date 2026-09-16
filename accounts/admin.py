@@ -143,3 +143,85 @@ class MagicLoginTokenAdmin(admin.ModelAdmin):
         }
 
         return super().changelist_view(request, extra_context=extra_context)
+
+
+# =====================================================================
+# 🛡️ DSGVO-Zustimmungen & B2B2C Fachpartner-Flotte
+# =====================================================================
+
+from .models import (
+    UserTermsConsent,
+    PartnerCompany,
+    PartnerMembership,
+    MaintenanceConsent,
+)
+
+
+@admin.register(UserTermsConsent)
+class UserTermsConsentAdmin(admin.ModelAdmin):
+    list_display = ("user_email", "consent_type", "terms_version", "privacy_version", "ip_address", "created_at")
+    list_filter = ("consent_type", "terms_version", "created_at")
+    search_fields = ("user__email", "user__username", "ip_address")
+    readonly_fields = ("id", "user", "terms_version", "privacy_version", "consent_type", "ip_address", "user_agent", "created_at")
+
+    def user_email(self, obj):
+        return obj.user.email if obj.user else "–"
+    user_email.short_description = "Nutzer"
+
+
+class PartnerMembershipInline(admin.TabularInline):
+    model = PartnerMembership
+    extra = 0
+    raw_id_fields = ("user",)
+
+
+class MaintenanceConsentInline(admin.TabularInline):
+    model = MaintenanceConsent
+    extra = 0
+    raw_id_fields = ("home",)
+
+
+@admin.register(PartnerCompany)
+class PartnerCompanyAdmin(admin.ModelAdmin):
+    list_display = ("name", "partner_tier", "contact_email", "phone", "city", "is_verified", "members_count", "created_at")
+    list_filter = ("partner_tier", "is_verified", "city")
+    search_fields = ("name", "slug", "contact_email", "city")
+    prepopulated_fields = {"slug": ("name",)}
+    inlines = [PartnerMembershipInline, MaintenanceConsentInline]
+
+    def members_count(self, obj):
+        return obj.members.count()
+    members_count.short_description = "Techniker"
+
+
+@admin.register(PartnerMembership)
+class PartnerMembershipAdmin(admin.ModelAdmin):
+    list_display = ("user_email", "partner_name", "role", "created_at")
+    list_filter = ("role", "partner_company")
+    search_fields = ("user__email", "user__username", "partner_company__name")
+    raw_id_fields = ("user", "partner_company")
+
+    def user_email(self, obj):
+        return obj.user.email if obj.user else "–"
+    user_email.short_description = "Techniker"
+
+    def partner_name(self, obj):
+        return obj.partner_company.name if obj.partner_company else "–"
+    partner_name.short_description = "Fachbetrieb"
+
+
+@admin.register(MaintenanceConsent)
+class MaintenanceConsentAdmin(admin.ModelAdmin):
+    list_display = ("partner_name", "home_name", "status", "allow_remote_control", "allow_telemetry_history", "granted_at")
+    list_filter = ("status", "allow_remote_control", "allow_telemetry_history")
+    search_fields = ("partner_company__name", "home__name")
+    raw_id_fields = ("home", "partner_company")
+
+    def partner_name(self, obj):
+        return obj.partner_company.name if obj.partner_company else "–"
+    partner_name.short_description = "Fachbetrieb"
+
+    def home_name(self, obj):
+        return obj.home.name if obj.home else "–"
+    home_name.short_description = "Haushalt / Anlage"
+

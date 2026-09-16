@@ -448,3 +448,163 @@ class InverterManufacturerPollingConfigAdmin(admin.ModelAdmin):
         count = queryset.update(polling_interval_seconds=60)
         self.message_user(request, f"{count} Hersteller auf 60s Standard-Zyklus gesetzt.")
 
+
+# =====================================================================
+# SG-Ready / Intelligentes Lastmanagement (BWWP, Load Priority, Estrich)
+# =====================================================================
+
+from energy.models import (
+    BWWPLoadManagementConfig,
+    LoadPriorityConfig,
+    LoadConsumerConfig,
+    FloorHeatingConfig,
+)
+
+
+@admin.register(BWWPLoadManagementConfig)
+class BWWPLoadManagementConfigAdmin(admin.ModelAdmin):
+    list_display = (
+        "device_name",
+        "home_name",
+        "control_mode_badge",
+        "sg_state_badge",
+        "temp_thresholds_display",
+        "min_pv_surplus_display",
+        "active_badge",
+        "last_switched_at",
+    )
+    list_filter = ("active", "control_mode", "current_sg_state")
+    search_fields = ("device__name", "home__name", "last_decision_reason")
+    raw_id_fields = ("home", "device")
+
+    def device_name(self, obj):
+        return obj.device.name if obj.device else "–"
+    device_name.short_description = "BWWP / Wärmepumpe"
+
+    def home_name(self, obj):
+        return obj.home.name if obj.home else "–"
+    home_name.short_description = "Haushalt"
+
+    def control_mode_badge(self, obj):
+        colors = {
+            "hybrid": "#2563eb",
+            "pv_surplus": "#10b981",
+            "spot_price": "#d97706",
+            "manual": "#64748b",
+        }
+        color = colors.get(obj.control_mode, "#64748b")
+        return format_html('<span style="background-color: {}; color: white; padding: 2px 7px; border-radius: 4px; font-weight: 600; font-size: 11px;">{}</span>', color, obj.get_control_mode_display())
+    control_mode_badge.short_description = "Modus"
+
+    def sg_state_badge(self, obj):
+        colors = {
+            "3_boost": ("#10b981", "🔥 SG-Ready Boost"),
+            "2_normal": ("#2563eb", "⚡ Normalbetrieb"),
+            "1_lock": ("#ef4444", "🔒 Sperre / Standby"),
+            "4_force": ("#d97706", "⚠️ Zwangsanlauf"),
+        }
+        color, label = colors.get(obj.current_sg_state, ("#64748b", obj.current_sg_state))
+        return format_html('<span style="color: {}; font-weight: bold;">{}</span>', color, label)
+    sg_state_badge.short_description = "SG-Zustand"
+
+    def temp_thresholds_display(self, obj):
+        return f"{obj.min_temp_c:.0f}°C ➔ {obj.target_temp_c:.0f}°C (Boost: {obj.boost_temp_c:.0f}°C)"
+    temp_thresholds_display.short_description = "Temperaturen"
+
+    def min_pv_surplus_display(self, obj):
+        return f"{obj.min_pv_surplus_w:.0f} W"
+    min_pv_surplus_display.short_description = "Min PV"
+
+    def active_badge(self, obj):
+        if obj.active:
+            return mark_safe('<span style="color: #10b981; font-weight: bold;">🟢 Aktiv</span>')
+        return mark_safe('<span style="color: #ef4444; font-weight: bold;">🔴 Inaktiv</span>')
+    active_badge.short_description = "Aktiv"
+
+
+@admin.register(LoadPriorityConfig)
+class LoadPriorityConfigAdmin(admin.ModelAdmin):
+    list_display = ("home_name", "master_mode_badge", "min_pv_headroom_w", "auto_dispatch_badge", "updated_at")
+    list_filter = ("master_mode", "auto_dispatch_enabled")
+    search_fields = ("home__name",)
+    raw_id_fields = ("home",)
+
+    def home_name(self, obj):
+        return obj.home.name if obj.home else "–"
+    home_name.short_description = "Haushalt"
+
+    def master_mode_badge(self, obj):
+        colors = {
+            "autopilot": "#10b981",
+            "pv_only": "#2563eb",
+            "price_saver": "#d97706",
+            "manual": "#64748b",
+        }
+        color = colors.get(obj.master_mode, "#64748b")
+        return format_html('<span style="background-color: {}; color: white; padding: 2px 7px; border-radius: 4px; font-weight: 600; font-size: 11px;">{}</span>', color, obj.get_master_mode_display())
+    master_mode_badge.short_description = "Master Modus"
+
+    def auto_dispatch_badge(self, obj):
+        if obj.auto_dispatch_enabled:
+            return mark_safe('<span style="color: #10b981; font-weight: bold;">🟢 Aktiv</span>')
+        return mark_safe('<span style="color: #ef4444; font-weight: bold;">🔴 Aus</span>')
+    auto_dispatch_badge.short_description = "Dispatch"
+
+
+@admin.register(LoadConsumerConfig)
+class LoadConsumerConfigAdmin(admin.ModelAdmin):
+    list_display = ("name_display", "home_name", "category_badge", "rated_power_display", "mode_badge", "is_active_badge", "created_at")
+    list_filter = ("category", "mode", "is_active")
+    search_fields = ("name", "device__name", "home__name")
+    raw_id_fields = ("home", "device")
+
+    def name_display(self, obj):
+        return obj.name or (obj.device.name if obj.device else "–")
+    name_display.short_description = "Verbraucher"
+
+    def home_name(self, obj):
+        return obj.home.name if obj.home else "–"
+    home_name.short_description = "Haushalt"
+
+    def category_badge(self, obj):
+        return format_html('<span style="background-color: #f1f5f9; color: #0f172a; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 11px;">{}</span>', obj.get_category_display())
+    category_badge.short_description = "Kategorie"
+
+    def rated_power_display(self, obj):
+        return f"{obj.rated_power_w:.0f} W"
+    rated_power_display.short_description = "Nennleistung"
+
+    def mode_badge(self, obj):
+        return obj.get_mode_display()
+    mode_badge.short_description = "Modus"
+
+    def is_active_badge(self, obj):
+        if obj.is_active:
+            return mark_safe('<span style="color: #10b981; font-weight: bold;">🟢 Aktiv</span>')
+        return mark_safe('<span style="color: #ef4444; font-weight: bold;">🔴 Inaktiv</span>')
+    is_active_badge.short_description = "Aktiv"
+
+
+@admin.register(FloorHeatingConfig)
+class FloorHeatingConfigAdmin(admin.ModelAdmin):
+    list_display = ("home_name", "controller_device", "control_mode", "active_badge", "target_room_temp_c", "boost_delta_k", "is_preheating_active", "predictive_mpc_enabled")
+    list_filter = ("active", "control_mode", "is_preheating_active", "predictive_mpc_enabled")
+    search_fields = ("home__name", "device__identifier")
+    raw_id_fields = ("home", "device", "temp_sensor_device")
+
+    def home_name(self, obj):
+        return obj.home.name if obj.home else "–"
+    home_name.short_description = "Haushalt"
+
+    def controller_device(self, obj):
+        return obj.device.identifier if obj.device else "–"
+    controller_device.short_description = "Aktor"
+
+    def active_badge(self, obj):
+        if obj.active:
+            return mark_safe('<span style="color: #10b981; font-weight: bold;">🟢 Aktiv</span>')
+        return mark_safe('<span style="color: #ef4444; font-weight: bold;">🔴 Inaktiv</span>')
+    active_badge.short_description = "Aktiv"
+
+
+

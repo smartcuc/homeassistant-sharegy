@@ -18,3 +18,13 @@ class TenantPageAdmin(admin.ModelAdmin):
     list_filter = ("tenant", "is_public")
     prepopulated_fields = {"slug": ("title",)}
     inlines = [PageBlockInline]
+
+
+@admin.register(PageBlock)
+class PageBlockAdmin(admin.ModelAdmin):
+    list_display = ("page", "block_type", "order")
+    list_filter = ("block_type", "page__tenant")
+    search_fields = ("page__title", "content")
+    raw_id_fields = ("page",)
+    ordering = ("page", "order")
+

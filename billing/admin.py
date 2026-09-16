@@ -228,3 +228,13 @@ class ContractAdmin(admin.ModelAdmin):
     list_filter = ("contract_type", "tenant")
     search_fields = ("supplier_name",)
     raw_id_fields = ("tenant", "owner_user", "owner_membership")
+
+
+@admin.register(CommunityAnnouncement)
+class CommunityAnnouncementAdmin(admin.ModelAdmin):
+    list_display = ("title", "tenant", "author", "category", "is_active", "created_at")
+    list_filter = ("tenant", "category", "is_active")
+    search_fields = ("title", "message", "tenant__name", "author__email")
+    raw_id_fields = ("tenant", "author")
+
+

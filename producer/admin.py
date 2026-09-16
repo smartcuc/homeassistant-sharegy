@@ -90,3 +90,13 @@ class StorageSystemAdmin(admin.ModelAdmin):
     )
     list_filter = ("active", "is_auto_detected")
     search_fields = ("name", "home__name")
+
+
+@admin.register(GeneratorString)
+class GeneratorStringAdmin(admin.ModelAdmin):
+    list_display = ("name", "generator", "peak_power_kwp", "module_count", "orientation", "tilt_deg", "shading_percent")
+    list_filter = ("orientation", "generator")
+    search_fields = ("name", "generator__name")
+    raw_id_fields = ("generator", "orientation")
+
+
