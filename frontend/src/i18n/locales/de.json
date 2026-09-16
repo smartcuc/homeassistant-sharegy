@@ -104,7 +104,7 @@
     "mqtt_interfaces": "Schnittstellen",
     "system_status": "Systemstatus",
     "app_settings": "App-Einstellungen",
-    "admin_group": "Administration & Staff",
+    "admin_group": "Administration",
     "admin_dashboard": "Admin Dashboard",
     "admin_tracking": "Event & Tracking",
     "tenant_management": "Community & Mieter",

@@ -134,7 +134,7 @@ export function getNavigationSections({
     if (activeMode === NAV_MODES.ADMIN) {
         sections.push(
             {
-                title: `🛡️ ${t("nav.admin_group", "Administration & Staff")}`,
+                title: `🛡️ ${t("nav.admin_group", "Administration")}`,
                 items: [
                     { name: t("nav.communities_hub", "Energiegemeinschaften"), path: "/app/admin/communities", icon: "🏘️" },
                     { name: t("nav.admin_vpp", "VPP & Flex-Zentrale"), path: "/app/admin/vpp", icon: "⚡" },
@@ -243,7 +243,7 @@ export function getNavigationSections({
     // Admin & Staff Bereich (falls eingeloggt und im Hybrid/EMS-Modus aktiv)
     if (isStaffOrAdmin) {
         sections.push({
-            title: `🛡️ ${t("nav.admin_group", "Administration & Staff")}`,
+            title: `🛡️ ${t("nav.admin_group", "Administration")}`,
             items: [
                 { name: t("nav.communities_hub", "Energiegemeinschaften"), path: "/app/admin/communities", icon: "🏘️" },
                 { name: t("nav.admin_vpp", "VPP & Flex-Zentrale"), path: "/app/admin/vpp", icon: "⚡" },
