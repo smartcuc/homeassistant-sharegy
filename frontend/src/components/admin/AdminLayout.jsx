@@ -66,7 +66,7 @@ export default function AdminLayout({ children }) {
                         <NavLink
                             to="/admin/communities"
                             className={({ isActive }) =>
-                                `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${isActive ? "bg-indigo-50 text-indigo-700 shadow-2xs" : "text-gray-600 hover:bg-gray-50"
+                                `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${isActive ? "bg-indigo-50 text-indigo-700 shadow-2xs font-bold" : "text-gray-600 hover:bg-gray-50"
                                 }`
                             }
                         >
@@ -74,10 +74,20 @@ export default function AdminLayout({ children }) {
                         </NavLink>
 
                         <NavLink
+                            to="/admin/vpp"
+                            className={({ isActive }) =>
+                                `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${isActive ? "bg-emerald-50 text-emerald-700 shadow-2xs font-bold" : "text-gray-600 hover:bg-gray-50"
+                                }`
+                            }
+                        >
+                            <span className="text-sm">⚡</span> VPP & Flex-Zentrale
+                        </NavLink>
+
+                        <NavLink
                             to="/admin/dashboard"
                             end
                             className={({ isActive }) =>
-                                `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${isActive ? "bg-indigo-50 text-indigo-700 shadow-2xs" : "text-gray-600 hover:bg-gray-50"
+                                `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${isActive ? "bg-indigo-50 text-indigo-700 shadow-2xs font-bold" : "text-gray-600 hover:bg-gray-50"
                                 }`
                             }
                         >
@@ -87,7 +97,7 @@ export default function AdminLayout({ children }) {
                         <NavLink
                             to="/admin/tracking"
                             className={({ isActive }) =>
-                                `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${isActive ? "bg-indigo-50 text-indigo-700 shadow-2xs" : "text-gray-600 hover:bg-gray-50"
+                                `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${isActive ? "bg-indigo-50 text-indigo-700 shadow-2xs font-bold" : "text-gray-600 hover:bg-gray-50"
                                 }`
                             }
                         >
@@ -97,11 +107,31 @@ export default function AdminLayout({ children }) {
                         <NavLink
                             to="/admin/tenants"
                             className={({ isActive }) =>
-                                `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${isActive ? "bg-indigo-50 text-indigo-700 shadow-2xs" : "text-gray-600 hover:bg-gray-50"
+                                `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${isActive ? "bg-indigo-50 text-indigo-700 shadow-2xs font-bold" : "text-gray-600 hover:bg-gray-50"
                                 }`
                             }
                         >
                             <span className="text-sm">👥</span> Community Cockpit
+                        </NavLink>
+
+                        <NavLink
+                            to="/admin/partners"
+                            className={({ isActive }) =>
+                                `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${isActive ? "bg-indigo-50 text-indigo-700 shadow-2xs font-bold" : "text-gray-600 hover:bg-gray-50"
+                                }`
+                            }
+                        >
+                            <span className="text-sm">🔧</span> Partner-Flotten
+                        </NavLink>
+
+                        <NavLink
+                            to="/admin/support"
+                            className={({ isActive }) =>
+                                `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${isActive ? "bg-indigo-50 text-indigo-700 shadow-2xs font-bold" : "text-gray-600 hover:bg-gray-50"
+                                }`
+                            }
+                        >
+                            <span className="text-sm">🛟</span> Support Triage Hub
                         </NavLink>
 
                         <a

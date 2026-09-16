@@ -1,13 +1,12 @@
-/*
-# src/AdminApp.jsx
-*/
-
 import { Routes, Route, Navigate } from "react-router-dom";
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import TrackingDashboard from "./pages/admin/TrackingDashboard";
 import TenantDashboard from "./pages/TenantDashboard";
 import CommunitiesManagementHub from "./pages/admin/CommunitiesManagementHub";
+import VppFleetAdminPage from "./pages/admin/VppFleetAdminPage";
+import AgentSupportHubPage from "./features/support/pages/AgentSupportHubPage";
+import PartnerDashboard from "./features/partner/PartnerDashboard";
 import { useUser } from "./hooks/useUser";
 
 export default function AdminApp() {
@@ -29,12 +28,16 @@ export default function AdminApp() {
             <Routes>
                 <Route index element={<Navigate to="communities" replace />} />
                 <Route path="communities" element={<CommunitiesManagementHub />} />
+                <Route path="vpp" element={<VppFleetAdminPage />} />
                 <Route path="dashboard" element={<AdminDashboard />} />
                 <Route path="tracking" element={<TrackingDashboard />} />
                 <Route path="tenants" element={<TenantDashboard />} />
+                <Route path="partners" element={<PartnerDashboard />} />
+                <Route path="support" element={<AgentSupportHubPage />} />
                 <Route path="*" element={<Navigate to="communities" replace />} />
             </Routes>
         </AdminLayout>
     );
 }
+
 

@@ -39,6 +39,7 @@ const TrackingDashboard = lazy(() => import("../pages/admin/TrackingDashboard"))
 const TenantDashboard = lazy(() => import("../pages/TenantDashboard"));
 const CommunitiesManagementHub = lazy(() => import("../pages/admin/CommunitiesManagementHub"));
 const PartnerDashboard = lazy(() => import("../features/partner/PartnerDashboard"));
+const VppFleetAdminPage = lazy(() => import("../pages/admin/VppFleetAdminPage"));
 
 function PageSuspenseLoader() {
     return (
@@ -148,6 +149,14 @@ export default function AppShell() {
                                 element={isStaffOrAdmin ? <AdminDashboard /> : <Navigate to="/app/dashboard" replace />} 
                             />
                             <Route 
+                                path="admin/vpp" 
+                                element={isStaffOrAdmin ? <VppFleetAdminPage /> : <Navigate to="/app/dashboard" replace />} 
+                            />
+                            <Route 
+                                path="vpp" 
+                                element={isStaffOrAdmin ? <VppFleetAdminPage /> : <Navigate to="/app/dashboard" replace />} 
+                            />
+                            <Route 
                                 path="admin/tracking" 
                                 element={isStaffOrAdmin ? <TrackingDashboard /> : <Navigate to="/app/dashboard" replace />} 
                             />
@@ -164,6 +173,7 @@ export default function AppShell() {
                             <Route path="community" element={<TenantDashboard />} />
                             <Route path="partner" element={<PartnerDashboard />} />
                             <Route path="installer" element={<PartnerDashboard />} />
+
 
 
                             {/* ✅ FALLBACK IMMER UNTEN */}
