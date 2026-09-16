@@ -83,13 +83,31 @@ export default function LiveEnergySankeyECharts({ data }) {
         });
 
         // Garantieren, dass für JEDEN in links vorhandenen Endpunkt auch ein Node existiert
+        // und richtungsabhängige Label-Positionen vergeben (links / oben / rechts)
         const nodes = Array.from(connectedNodeIds).map((nodeId) => {
             const originalNode = validNodeMap.get(nodeId) || { id: nodeId, label: nodeId };
+            const isSource = ["pv", "battery", "grid"].includes(nodeId) || originalNode.type === "producer";
+            const isMiddle = ["sum", "house"].includes(nodeId) || ["sum", "floor", "room"].includes(originalNode.type);
+
+            let labelPosition = "right";
+            let labelDistance = 8;
+
+            if (isSource) {
+                labelPosition = "left";
+            } else if (isMiddle) {
+                labelPosition = "top";
+                labelDistance = 6;
+            }
+
             return {
                 name: nodeId,
                 itemStyle: {
                     color: getNodeColor(originalNode),
                     borderRadius: 3,
+                },
+                label: {
+                    position: labelPosition,
+                    distance: labelDistance,
                 },
                 rawLabel: originalNode.label || nodeId,
                 nodeType: originalNode.type,
@@ -139,16 +157,19 @@ export default function LiveEnergySankeyECharts({ data }) {
                     type: "sankey",
                     orient: "horizontal",
                     nodeAlign: "justify",
-                    left: 30,
-                    right: 110,
-                    top: 20,
-                    bottom: 20,
+                    left: 90,
+                    right: 130,
+                    top: 25,
+                    bottom: 25,
                     data: nodes,
                     links,
-                    nodeWidth: 18,
-                    nodeGap: 16,
+                    nodeWidth: 16,
+                    nodeGap: 24,
                     draggable: false,
                     layoutIterations: 32,
+                    labelLayout: {
+                        hideOverlap: true,
+                    },
                     emphasis: {
                         focus: "adjacency",
                         lineStyle: {
@@ -161,9 +182,9 @@ export default function LiveEnergySankeyECharts({ data }) {
                         curveness: 0.5,
                     },
                     label: {
-                        position: "right",
                         color: isDark ? "#f8fafc" : "#1e293b",
                         fontSize: 11,
+                        fontFamily: "Inter, system-ui, -apple-system, sans-serif",
                         lineHeight: 14,
                         fontWeight: "600",
                         formatter: (params) => {
@@ -199,6 +220,7 @@ export default function LiveEnergySankeyECharts({ data }) {
             <div className="w-full h-[340px] sm:h-[400px] lg:h-[450px]">
                 <ReactECharts
                     option={option}
+                    opts={{ renderer: "svg" }}
                     style={{ height: "100%", width: "100%" }}
                     notMerge={true}
                     lazyUpdate={false}
@@ -207,4 +229,5 @@ export default function LiveEnergySankeyECharts({ data }) {
         </div>
     );
 }
+
 
