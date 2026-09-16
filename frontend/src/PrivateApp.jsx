@@ -6,6 +6,8 @@ import { Navigate } from "react-router-dom";
 import { useEffect } from "react";
 import i18n from "./i18n";
 
+import { UserNavigationProvider } from "./context/UserNavigationContext";
+
 export default function PrivateApp() {
 
     const { user, loading: userLoading } = useUser();
@@ -41,5 +43,9 @@ export default function PrivateApp() {
         return <Onboarding />;
     }
 
-    return <AppShell />;
+    return (
+        <UserNavigationProvider>
+            <AppShell />
+        </UserNavigationProvider>
+    );
 }

@@ -14,13 +14,12 @@ import { apiFetch } from "../../api/client";
 import DeviceSetupModal from "../device/DeviceSetupModal";
 import { useSubscription } from "../../hooks/useSubscription";
 import ProBadge from "../common/ProBadge";
-import ContextSwitcher from "./ContextSwitcher";
 
 export default function Sidebar() {
     const { t } = useTranslation();
     const { isPro } = useSubscription();
     const { isStaffOrAdmin, hasCommunityAdminAccess } = useUser();
-    const { activeMode, activeMetadata, isMultiMode } = useUserNavigation();
+    const { activeMode } = useUserNavigation();
     const query = useUnconfiguredDevices();
 
     const isLoaded = query?.isSuccess;
@@ -57,8 +56,8 @@ export default function Sidebar() {
 
     return (
         <div className="hidden lg:flex w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex-col shrink-0 transition-colors">
-            {/* ✅ Logo -> Link zur Homepage & Context Switcher */}
-            <div className="h-16 flex items-center justify-between px-4 border-b border-slate-200 dark:border-slate-800">
+            {/* ✅ Logo -> Link zur Homepage */}
+            <div className="h-16 flex items-center px-4 border-b border-slate-200 dark:border-slate-800">
                 <NavLink
                     to="/"
                     title="Zur sharegy Startseite & Info"
@@ -66,12 +65,6 @@ export default function Sidebar() {
                 >
                     <span>⚡</span> <span className="font-mono tracking-tight lowercase">sharegy</span>
                 </NavLink>
-
-                {isMultiMode && (
-                    <div className="scale-90 origin-right">
-                        <ContextSwitcher compact />
-                    </div>
-                )}
             </div>
 
             {/* ✅ Navigation */}

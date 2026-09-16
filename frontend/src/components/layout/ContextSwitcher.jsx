@@ -31,15 +31,8 @@ export default function ContextSwitcher({ compact = false }) {
     const handleSelectMode = (modeKey) => {
         switchMode(modeKey);
         setIsOpen(false);
-        if (modeKey === NAV_MODES.PARTNER) {
-            navigate("/app/partner/dashboard");
-        } else if (modeKey === NAV_MODES.ADMIN) {
-            navigate("/app/admin/communities");
-        } else if (modeKey === NAV_MODES.SHARING_ONLY) {
-            navigate("/app/tenants");
-        } else if (modeKey === NAV_MODES.EMS_ONLY || modeKey === NAV_MODES.HYBRID) {
-            navigate("/app/energy");
-        }
+        const targetPath = allMetadata[modeKey]?.defaultPath || "/app/dashboard";
+        navigate(targetPath);
     };
 
     // Wenn der Nutzer nur 1 Modus hat, zeigen wir nur ein dezentes Label oder gar kein Dropdown
