@@ -55,11 +55,13 @@ def run_health_checks():
                 check.__name__,
             )
 
-    # 🚨 Automatische Ticket-Erstellung bei Abweichungen / Erholungen
-    try:
-        check_and_create_incident_tickets()
-    except Exception:
-        logger.exception("Fehler bei automatischer Incident-Triage")
+    # 🚨 Automatische Ticket-Erstellung bei Abweichungen / Erholungen (nur wenn explizit aktiviert)
+    from django.conf import settings
+    if getattr(settings, "ENABLE_AUTO_INCIDENT_TICKETS", False):
+        try:
+            check_and_create_incident_tickets()
+        except Exception:
+            logger.exception("Fehler bei automatischer Incident-Triage")
 
 
 def check_server_resources():

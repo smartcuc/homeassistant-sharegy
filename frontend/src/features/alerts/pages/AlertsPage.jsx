@@ -10,6 +10,8 @@ import { useSubscription } from "../../../hooks/useSubscription";
 import PushNotificationSettings from "../components/PushNotificationSettings";
 import ProBadge from "../../../components/common/ProBadge";
 import ProUpgradeModal from "../../../components/common/ProUpgradeModal";
+import SupportDrawer from "../../support/components/SupportDrawer";
+import { LifeBuoy } from "lucide-react";
 
 const DEMO_PREVIEW_ALERTS = [
     {
@@ -48,6 +50,20 @@ export default function AlertsPage() {
     const [filterSeverity, setFilterSeverity] = useState("all");
     const [showPushSettings, setShowPushSettings] = useState(false);
     const [proModalOpen, setProModalOpen] = useState(false);
+    const [supportDrawerOpen, setSupportDrawerOpen] = useState(false);
+    const [supportContext, setSupportContext] = useState(null);
+
+    const handleRequestHelp = (alert) => {
+        setSupportContext({
+            subject: `[Alarm-Hilfe] ${alert.title}`,
+            message: `Hallo Support-Team,\n\nich benötige Unterstützung zu folgendem Alarm in meiner Anlage:\n\n• **Alarm:** ${alert.title}\n• **Schweregrad:** ${alert.severity ? alert.severity.toUpperCase() : "WARNUNG"}\n• **Meldung:** ${alert.message}\n${alert.action_hint ? `• **Empfohlene Aktion:** ${alert.action_hint}\n` : ""}• **Zeitpunkt:** ${new Date(alert.created_at || Date.now()).toLocaleString()}\n\nBitte um technische Prüfung.`,
+            category: "device_issue",
+            priority: alert.severity === "critical" ? "high" : "medium",
+            contextKey: "alerts",
+            alertId: alert.id,
+        });
+        setSupportDrawerOpen(true);
+    };
 
     const query = useQuery({
         queryKey: ["alerts-list"],
@@ -415,12 +431,22 @@ export default function AlertsPage() {
                                             >
                                                 ✓ {t("alerts.mark_resolved", "Erledigt")}
                                             </button>
-                                            <button
-                                                onClick={() => ackMutation.mutate(alert.id)}
-                                                className="px-2.5 py-1 rounded-lg text-[11px] font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-100 cursor-pointer"
-                                            >
-                                                {t("alerts.mark_seen", "Quittieren")}
-                                            </button>
+                                            <div className="flex items-center gap-1.5">
+                                                <button
+                                                    onClick={() => ackMutation.mutate(alert.id)}
+                                                    className="px-2.5 py-1 rounded-lg text-[11px] font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-100 cursor-pointer"
+                                                >
+                                                    {t("alerts.mark_seen", "Quittieren")}
+                                                </button>
+                                                <button
+                                                    onClick={() => handleRequestHelp(alert)}
+                                                    title={t("alerts.request_support", "Support zu diesem Alarm anfordern")}
+                                                    className="px-2.5 py-1 rounded-lg text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition cursor-pointer flex items-center gap-1"
+                                                >
+                                                    <LifeBuoy className="w-3.5 h-3.5" />
+                                                    <span>{t("alerts.get_help", "Hilfe")}</span>
+                                                </button>
+                                            </div>
                                         </div>
                                     )}
                                 </div>
@@ -429,6 +455,14 @@ export default function AlertsPage() {
                     )}
                 </div>
             </div>
+
+            {/* Support Drawer for User-Initiated Support Requests */}
+            <SupportDrawer
+                isOpen={supportDrawerOpen}
+                onClose={() => setSupportDrawerOpen(false)}
+                defaultContext={supportContext || {}}
+                initialTab="new_ticket"
+            />
 
             {/* Pro Upgrade Modal */}
             <ProUpgradeModal
