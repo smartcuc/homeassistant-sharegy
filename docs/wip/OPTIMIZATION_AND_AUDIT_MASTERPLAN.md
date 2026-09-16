@@ -37,8 +37,8 @@ Jedes anstehende Feature wird in einer eigenständigen Spezifikation im Ordner `
    * **Status & Prio**: 🟡 40 % | 🔴 Hoch (Q4 2026 / Q1 2027)
 
 3. ⚡ **[`WIP_BNETZA_CLS_SMART_METER_GATEWAY.md`](./WIP_BNETZA_CLS_SMART_METER_GATEWAY.md)**
-   * **Ziel**: Gesetzeskonforme Dimm- und Steuerbefehle nach § 14a EnWG direkt über den Controllable Local System (CLS) Kanal des SMGW empfangen.
-   * **Status & Prio**: 🟡 40 % | 🔴 Hoch (Q1 / Q2 2027)
+   * **Ziel**: Gesetzeskonforme Dimm- und Steuerbefehle nach § 14a EnWG direkt über den Controllable Local System (CLS) Kanal des SMGW empfangen inkl. VNB Dispatch-Quittierung.
+   * **Status & Prio**: 🟢 **100 % Live** | 🔴 Hoch (Abgeschlossen)
 
 4. 🔒 **[`WIP_DYNAMIC_WHITELABEL_SSL_PROVISIONING.md`](./WIP_DYNAMIC_WHITELABEL_SSL_PROVISIONING.md)**
    * **Ziel**: Automatische Let's Encrypt SSL-Zertifikatsausstellung für B2B Custom Domains (CNAME) via Caddy/Traefik On-Demand TLS.
@@ -54,7 +54,7 @@ Jedes anstehende Feature wird in einer eigenständigen Spezifikation im Ordner `
 
 7. 🧭 **[`WIP_ROLE_BASED_SIDENAV_AND_CONTEXT_NAVIGATION.md`](./WIP_ROLE_BASED_SIDENAV_AND_CONTEXT_NAVIGATION.md)**
    * **Ziel**: Rollen- und kontextbasierte Aufteilung der Side-Navigation für EMS-Prosumer, Mieterstrom-Nutzer, Installateure und Liegenschafts-Admins inkl. Multi-Role Switcher.
-   * **Status & Prio**: 🟡 40 % | 🔴 Hoch (Q4 2026)
+   * **Status & Prio**: 🟢 **100 % Live** | 🔴 Hoch (Abgeschlossen)
 
 8. 🌐 **[`WIP_SMARTEVO_WEBSITE_PRODUCT_INTEGRATION.md`](./WIP_SMARTEVO_WEBSITE_PRODUCT_INTEGRATION.md)**
    * **Ziel**: Nahtlose Integration von Sharegy und Factofy in das smartEvo.de Design-System (Cyan/Petrol Look), Bereinigung obsoleter Sektionen (Bildung) und Ausbau der Dachmarken-Architektur.

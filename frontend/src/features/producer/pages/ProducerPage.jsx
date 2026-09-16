@@ -15,12 +15,10 @@ import StorageSystemModal from "../components/StorageSystemModal";
 export default function ProducerPage() {
     const { t } = useTranslation();
     const queryClient = useQueryClient();
-    const [activeTab, setActiveTabState] = useState(() => {
-        return localStorage.getItem("sharegy_producer_tab") || "storage";
-    });
+    // Beim Aufruf der Seite immer standardmäßig das erste Tab (Photovoltaik & Erzeuger) aktiv anzeigen
+    const [activeTab, setActiveTabState] = useState("generators");
 
     const setActiveTab = (tab) => {
-        localStorage.setItem("sharegy_producer_tab", tab);
         setActiveTabState(tab);
     };
 

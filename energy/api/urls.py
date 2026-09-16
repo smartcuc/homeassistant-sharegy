@@ -34,6 +34,11 @@ from .views_grid import (
     grid_dimming_clear_view,
     steuve_devices_config_view,
 )
+from ..views_cls import (
+    cls_dimming_signal_ingest,
+    cls_dimming_status,
+    cls_dimming_clear,
+)
 from .views_ocpp import (
     WallboxListCreateView,
     WallboxDetailView,
@@ -99,6 +104,10 @@ urlpatterns += [
     path("grid/dimming/signal/", grid_dimming_signal_webhook),
     path("grid/dimming/clear/", grid_dimming_clear_view),
     path("grid/steuve/", steuve_devices_config_view),
+    # 📡 BNetzA Smart Meter Gateway (SMGW) CLS-Kanal (§ 14a EnWG BSI TR-03109-1)
+    path("cls/signal/", cls_dimming_signal_ingest),
+    path("cls/status/", cls_dimming_status),
+    path("cls/clear/", cls_dimming_clear),
     # 🎯 Onboarding & System Readiness Check (Omi-Test)
     path("setup-status/", system_setup_status_view),
     # 🏡 Energie-Profil & Ersparnis-Kompass

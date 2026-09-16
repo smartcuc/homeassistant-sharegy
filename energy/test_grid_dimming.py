@@ -169,3 +169,42 @@ class GridDimmingEngineTestCase(TestCase):
         self.assertIsNotNone(restored_wb_log)
         self.assertEqual(restored_wb_log.commanded_power_limit_kw, Decimal("11.00"))
 
+    def test_cls_smgw_api_lifecycle(self):
+        """Prüft den BNetzA CLS-Kanal (/api/energy/cls/*) mit VNB-Quittierung und Statusabfrage."""
+        self.client.force_authenticate(user=self.user)
+
+        # 1. CLS Dimm-Befehl Ingest (BSI TR-03109-1 konform)
+        res_signal = self.client.post("/api/energy/cls/signal/", {
+            "home_id": str(self.home.id),
+            "target_max_grid_kw": "4.20",
+            "duration_minutes": 90,
+            "sender": "Netzleitstelle VNB Rheinland CLS-Proxy",
+            "signal_reason": "§ 14a EnWG Engpass-Drosselung",
+        }, format="json")
+
+        self.assertEqual(res_signal.status_code, 200)
+        self.assertEqual(res_signal.data["status"], "acknowledged")
+        self.assertEqual(res_signal.data["protocol"], "BSI-TR-03109-1 / FNN-Steuerbox CLS")
+        self.assertEqual(res_signal.data["target_max_grid_kw"], 4.2)
+        self.assertEqual(res_signal.data["steuve_affected_count"], 2)
+
+        # 2. CLS Status abrufen
+        res_status = self.client.get(f"/api/energy/cls/status/?home_id={self.home.id}")
+        self.assertEqual(res_status.status_code, 200)
+        self.assertTrue(res_status.data["is_dimmed"])
+        self.assertEqual(len(res_status.data["steuve_devices"]), 2)
+        self.assertTrue(len(res_status.data["recent_audit_log"]) > 0)
+
+        # 3. CLS Drosselung aufheben (Clear)
+        res_clear = self.client.post("/api/energy/cls/clear/", {
+            "home_id": str(self.home.id),
+            "notes": "Netzengpass behoben.",
+        }, format="json")
+
+        self.assertEqual(res_clear.status_code, 200)
+        self.assertEqual(res_clear.data["status"], "cleared")
+
+        # 4. Status nach Clear prüfen
+        res_status_after = self.client.get(f"/api/energy/cls/status/?home_id={self.home.id}")
+        self.assertFalse(res_status_after.data["is_dimmed"])
+
