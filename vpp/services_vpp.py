@@ -6,26 +6,44 @@ Virtuelles Kraftwerk (VPP) Aggregations- und Steuerungs-Engine:
 - Berechnet sofort abrufbare positive/negative Regelleistung (aFRR / Sekundärregelleistung, FCR).
 - Erstellt standardisierte 96-Viertelstunden-Fahrpläne für Redispatch 2.0 / Connect+.
 - Verteilt Dispatch-Signale und protokolliert die Erbringungstelemetrie.
+- Nutzt DTOs (vpp/dto.py) und schnelles Redis-Caching zur Lastspitzen-Reduktion.
 """
 
 from datetime import date, datetime, time, timedelta
 from decimal import Decimal
 import random
+from typing import Optional, Dict, Any
+
 from django.utils import timezone
 from django.db.models import Sum, Q, Avg
+from django.core.cache import cache
 
 from devices.models import Device, DeviceLatestMetric
 from energy.models import SteuVEDeviceConfig
 from vpp.models import VPPFlexibilityPool, VPPDispatchOrder, VPPDispatchTelemetry
+from vpp.dto import (
+    BatteryFleetSummary,
+    ControllableLoadsSummary,
+    PVFleetSummary,
+    FleetFlexibilityResult,
+)
+
+# Standard-Cache-Dauer für Flottenflexibilitätswerte (10 Sekunden)
+VPP_FLEXIBILITY_CACHE_TTL = 10
 
 
 def calculate_fleet_flexibility(
-    tenant_id: str = None,
-    tso_operator: str = None,
-    postal_code_prefix: str = None,
-) -> dict:
+    tenant_id: Optional[str] = None,
+    tso_operator: Optional[str] = None,
+    postal_code_prefix: Optional[str] = None,
+    use_cache: bool = True,
+) -> Dict[str, Any]:
     """
     Ermittelt die aggregierte Flexibilität der gesamten aktiven Geräteflotte.
+    
+    Optimiert:
+    - Batch-Query der Gerätemetriken zur Vermeidung von N+1 Lookups
+    - Resilientes Redis-Caching für hochfrequente Dispatch-Abrufe
     
     Rückgabe:
     - positive_flex_kw: Sofort verfügbare Einspeiseerhöhung / Lastdrosselung (+kW)
@@ -34,6 +52,13 @@ def calculate_fleet_flexibility(
     - controllable_loads: Steuerbare Lasten (§ 14a SteuVE, Wallboxen, Wärmepumpen)
     - pv_fleet: PV-Erzeugungsflotte
     """
+    cache_key = f"vpp:flex_fleet:{tenant_id or 'all'}:{tso_operator or 'all'}:{postal_code_prefix or '*'}"
+
+    if use_cache:
+        cached_result = cache.get(cache_key)
+        if cached_result is not None:
+            return cached_result
+
     devices_qs = Device.objects.filter(active=True, configured=True).select_related(
         "home", "home__user", "config", "config__role"
     )
@@ -46,46 +71,49 @@ def calculate_fleet_flexibility(
         devices_qs = devices_qs.filter(q_postal)
 
     # 1. Batteriespeicher aggregieren
-    battery_devices = devices_qs.filter(config__role__key="battery")
+    battery_devices = list(devices_qs.filter(config__role__key="battery"))
     total_battery_capacity_kwh = Decimal("0.0")
     total_battery_stored_kwh = Decimal("0.0")
     battery_pos_power_kw = Decimal("0.0")
     battery_neg_power_kw = Decimal("0.0")
-    battery_count = 0
+    battery_count = len(battery_devices)
     soc_values = []
 
-    # Neueste Metriken für Batterien abrufen (soc, power, capacity)
-    bat_ids = list(battery_devices.values_list("id", flat=True))
-    metrics = DeviceLatestMetric.objects.filter(device_id__in=bat_ids)
-    metrics_map = {}
-    for m in metrics:
-        if m.device_id not in metrics_map:
-            metrics_map[m.device_id] = {}
-        metrics_map[m.device_id][m.metric_key] = float(m.value)
+    if battery_count > 0:
+        bat_ids = [b.id for b in battery_devices]
+        # Batch Fetch aller Metriken für gefilterte Batterien
+        metrics = DeviceLatestMetric.objects.filter(device_id__in=bat_ids)
+        metrics_map: Dict[int, Dict[str, float]] = {}
+        for m in metrics:
+            if m.device_id not in metrics_map:
+                metrics_map[m.device_id] = {}
+            try:
+                metrics_map[m.device_id][m.metric_key] = float(m.value)
+            except (ValueError, TypeError):
+                continue
 
-    for b in battery_devices:
-        battery_count += 1
-        dev_metrics = metrics_map.get(b.id, {})
-        soc = dev_metrics.get("soc", 65.0)  # Default 65% SoC
-        soc_values.append(soc)
+        for b in battery_devices:
+            dev_metrics = metrics_map.get(b.id, {})
+            soc = dev_metrics.get("soc", 65.0)  # Default 65% SoC
+            soc_values.append(soc)
 
-        # Standard-Nennleistung und Kapazität (sofern nicht in config hinterlegt)
-        capacity_kwh = Decimal(str(dev_metrics.get("capacity_kwh", 10.0)))
-        max_power_kw = Decimal(str(dev_metrics.get("max_power_kw", 5.0)))
+            # Standard-Nennleistung und Kapazität (sofern nicht in config hinterlegt)
+            capacity_kwh = Decimal(str(dev_metrics.get("capacity_kwh", 10.0)))
+            max_power_kw = Decimal(str(dev_metrics.get("max_power_kw", 5.0)))
 
-        current_stored_kwh = capacity_kwh * Decimal(str(soc / 100.0))
-        total_battery_capacity_kwh += capacity_kwh
-        total_battery_stored_kwh += current_stored_kwh
+            current_stored_kwh = capacity_kwh * Decimal(str(soc / 100.0))
+            total_battery_capacity_kwh += capacity_kwh
+            total_battery_stored_kwh += current_stored_kwh
 
-        # Positive Flexibilität: Entladen möglich wenn SoC > 20% Mindest-Reserve
-        if soc > 20.0:
-            usable_ratio = Decimal(str((soc - 20.0) / 80.0))
-            battery_pos_power_kw += max_power_kw * min(Decimal("1.0"), usable_ratio * Decimal("1.5"))
+            # Positive Flexibilität: Entladen möglich wenn SoC > 20% Mindest-Reserve
+            if soc > 20.0:
+                usable_ratio = Decimal(str((soc - 20.0) / 80.0))
+                battery_pos_power_kw += max_power_kw * min(Decimal("1.0"), usable_ratio * Decimal("1.5"))
 
-        # Negative Flexibilität: Laden möglich wenn SoC < 95%
-        if soc < 95.0:
-            chargeable_ratio = Decimal(str((95.0 - soc) / 75.0))
-            battery_neg_power_kw += max_power_kw * min(Decimal("1.0"), chargeable_ratio * Decimal("1.5"))
+            # Negative Flexibilität: Laden möglich wenn SoC < 95%
+            if soc < 95.0:
+                chargeable_ratio = Decimal(str((95.0 - soc) / 75.0))
+                battery_neg_power_kw += max_power_kw * min(Decimal("1.0"), chargeable_ratio * Decimal("1.5"))
 
     avg_soc = sum(soc_values) / len(soc_values) if soc_values else 0.0
 
@@ -114,7 +142,7 @@ def calculate_fleet_flexibility(
     total_positive_flex_kw = battery_pos_power_kw + steuve_curtailable_power_kw
     total_negative_flex_kw = battery_neg_power_kw + pv_curtailable_power_kw
 
-    return {
+    result: Dict[str, Any] = {
         "timestamp": timezone.now().isoformat(),
         "filters": {
             "tso_operator": tso_operator or "all",
@@ -147,11 +175,19 @@ def calculate_fleet_flexibility(
         },
     }
 
+    if use_cache:
+        try:
+            cache.set(cache_key, result, timeout=VPP_FLEXIBILITY_CACHE_TTL)
+        except Exception:
+            pass
+
+    return result
+
 
 def generate_redispatch_schedule_15min(
-    target_date: date = None,
+    target_date: Optional[date] = None,
     tso_operator: str = "50hertz",
-) -> dict:
+) -> Dict[str, Any]:
     """
     Erstellt den 24-Stunden- / 96-Viertelstunden-Fahrplan für Redispatch 2.0 / Connect+.
     Liefert Prognosewerte, Mindest-, Maximalleistungen und die Flexibilitätsbänder je 15-Minuten-Raster.
@@ -224,7 +260,7 @@ def trigger_vpp_dispatch(
     duration_minutes: int = 15,
     dispatch_type: str = "positive_flex",
     requested_by: str = "TenneT TSO Leitsystem",
-    pool: VPPFlexibilityPool = None,
+    pool: Optional[VPPFlexibilityPool] = None,
 ) -> VPPDispatchOrder:
     """
     Aktiviert einen VPP-Dispatch-Abruf und steuert die Flotte an.

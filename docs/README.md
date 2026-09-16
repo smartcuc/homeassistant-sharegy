@@ -123,4 +123,6 @@ docs/
 
 ### 📋 9. Walkthroughs & Meilensteine ([`docs/walkthroughs/`](./walkthroughs/))
 
-Chronologische Entwicklungs- und Release-Protokolle.
+Chronologische Entwicklungs- und Release-Protokolle:
+* 📝 **[`2026-09-16_code_review_and_vpp_resilience_optimization.md`](./walkthroughs/2026-09-16_code_review_and_vpp_resilience_optimization.md)**: **NEU:** DTOs, Redis-Caching für Flottenaggregation & Circuit-Breaker API-Resilienz
+* 📂 **[Alle Meilenstein-Protokolle ansehen](./walkthroughs/)**

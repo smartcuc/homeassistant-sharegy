@@ -2,23 +2,21 @@
 # integrations/services_tibber.py
 #################################
 
+import logging
+from typing import Optional, Dict, Any, List
 import requests
 from django.conf import settings
 from django.utils.dateparse import parse_datetime
 
-
 from core.models import IntervalReading
+from core.resilience import resilient_http_request, CircuitBreakerOpenException
 
+logger = logging.getLogger("integrations")
 
 TIBBER_API_URL = "https://api.tibber.com/v1-beta/gql"
 
 
-import logging
-
-logger = logging.getLogger("integrations")
-
-
-def get_tibber_homes(token):
+def get_tibber_homes(token: str) -> dict:
     query = """
     {
       viewer {
@@ -35,11 +33,14 @@ def get_tibber_homes(token):
     }
     """
     try:
-        resp = requests.post(
-            TIBBER_API_URL,
+        resp = resilient_http_request(
+            method="POST",
+            url=TIBBER_API_URL,
+            circuit_name="tibber_api",
             json={"query": query},
             headers=tibber_headers(token),
-            timeout=(10, 30),
+            timeout=(5.0, 20.0),
+            max_retries=2,
         )
         data = resp.json()
         if "errors" in data and data["errors"]:
@@ -58,6 +59,9 @@ def get_tibber_homes(token):
                 "address": addr_str,
             })
         return {"status": "ok", "homes": formatted}
+    except CircuitBreakerOpenException:
+        logger.warning("[Tibber] Circuit Breaker OPEN -> schnelles Abfangen ohne Blockieren.")
+        return {"status": "error", "error": "Tibber API vorübergehend überlastet (Circuit Breaker aktiv)."}
     except requests.exceptions.Timeout:
         logger.warning("Tibber API timeout during get_tibber_homes")
         return {"status": "error", "error": "Tibber Server antwortet nicht rechtzeitig (Timeout)."}
@@ -66,18 +70,18 @@ def get_tibber_homes(token):
         return {"status": "error", "error": str(e)}
 
 
-def get_tibber_home(token):
+def get_tibber_home(token: str) -> dict:
     return get_tibber_homes(token)
 
 
-def tibber_headers(token):
+def tibber_headers(token: str) -> dict:
     return {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json",
     }
 
 
-def get_tibber_token(user=None):
+def get_tibber_token(user=None) -> Optional[str]:
     """
     DEV: Fallback aus settings/.env
     PROD: später user-spezifisch
@@ -87,10 +91,10 @@ def get_tibber_token(user=None):
         if token:
             return token
 
-    return settings.TIBBER_DEFAULT_TOKEN
+    return getattr(settings, "TIBBER_DEFAULT_TOKEN", None)
 
 
-def fetch_tibber_consumption(home_id, token, hours=24):
+def fetch_tibber_consumption(home_id: str, token: str, hours: int = 24) -> list:
     query = f"""
     {{
       viewer {{
@@ -108,19 +112,27 @@ def fetch_tibber_consumption(home_id, token, hours=24):
     """
 
     try:
-        resp = requests.post(
-            TIBBER_API_URL,
+        resp = resilient_http_request(
+            method="POST",
+            url=TIBBER_API_URL,
+            circuit_name="tibber_api",
             json={"query": query},
             headers=tibber_headers(token),
-            timeout=(10, 35),
+            timeout=(5.0, 25.0),
+            max_retries=2,
         )
-        resp.raise_for_status()
         data = resp.json()
+    except CircuitBreakerOpenException:
+        logger.warning("[Tibber] Circuit Breaker OPEN bei fetch_tibber_consumption.")
+        return []
     except requests.exceptions.Timeout as e:
         logger.warning("Tibber API timeout in fetch_tibber_consumption: %s", e)
         return []
     except requests.exceptions.RequestException as e:
         logger.warning("Tibber API request failed in fetch_tibber_consumption: %s", e)
+        return []
+    except Exception as e:
+        logger.warning("Unerwarteter Fehler bei fetch_tibber_consumption: %s", e)
         return []
 
     if "errors" in data:
@@ -134,8 +146,7 @@ def fetch_tibber_consumption(home_id, token, hours=24):
     return home["consumption"].get("nodes", [])
 
 
-
-def upsert_tibber_interval_readings(meter, home_id, user=None, hours=24, tenant=None):
+def upsert_tibber_interval_readings(meter, home_id: str, user=None, hours: int = 24, tenant=None) -> dict:
     """
     User-basierter Standard:
     - meter: Pflicht
