@@ -3237,11 +3237,22 @@ Controllable loads (> 4.2 kW) connected after Jan 1, 2024 must support grid-orie
                 "sort_order": 7,
             },
         ]
+        valid_slugs = set()
         for adata in articles_data:
+            valid_slugs.add(adata["slug"])
             HelpArticle.objects.update_or_create(
                 slug=adata["slug"],
                 defaults=adata,
             )
+
+        # Bereinige veraltete / gelöschte Artikel (z.B. frühere Entwürfe wie Matter)
+        deleted_matter, _ = HelpArticle.objects.filter(slug__icontains="matter").delete()
+        if deleted_matter > 0:
+            self.stdout.write(self.style.WARNING(f"[CLEANUP] {deleted_matter} veraltete Matter-Artikel aus der Datenbank entfernt."))
+
+        deleted_obsolete, _ = HelpArticle.objects.exclude(slug__in=valid_slugs).delete()
+        if deleted_obsolete > 0:
+            self.stdout.write(self.style.WARNING(f"[CLEANUP] {deleted_obsolete} nicht mehr im Handbuch definierte Artikel entfernt."))
 
         self.stdout.write(self.style.SUCCESS(f"[OK] Erfolgreich {len(categories_data)} Kategorien und {len(articles_data)} Handbuch-Artikel in DE & EN initialisiert!"))
 
