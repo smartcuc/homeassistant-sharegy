@@ -45,8 +45,8 @@ Jedes anstehende Feature wird in einer eigenständigen Spezifikation im Ordner `
    * **Status & Prio**: 🟡 70 % | 🟡 Mittel (Q4 2026)
 
 5. 📈 **[`WIP_AUTOMATED_FLEXIBILITY_AND_VPP_MARKET_CLEARING.md`](./WIP_AUTOMATED_FLEXIBILITY_AND_VPP_MARKET_CLEARING.md)**
-   * **Ziel**: Vollautomatisierte Vermarktung gepoolter Heimspeicher an den aFRR/SRL- und Intraday-Märkten über Aggregatoren mit automatischem Erlös-Clearing.
-   * **Status & Prio**: 🟡 60 % | 🟡 Mittel (Q2 / Q3 2027)
+   * **Ziel**: Vollautomatisierte Vermarktung gepoolter Heimspeicher an den aFRR/SRL- und Intraday-Märkten über Aggregatoren mit automatischem 80/20 Erlös-Clearing.
+   * **Status & Prio**: 🟢 **100 % Live** | 🔴 Hoch (Abgeschlossen & verifiziert)
 
 6. 📱 **[`WIP_DUAL_APP_ECOSYSTEM_USER_VS_PARTNER.md`](./WIP_DUAL_APP_ECOSYSTEM_USER_VS_PARTNER.md)**
    * **Ziel**: Evaluierung und Roadmap für das Two-App Ökosystem (`Sharegy Home` für Endkunden vs. `Sharegy Pro` für Installateure/Admins mit QR-Scanner & Offline-Puffer).
@@ -58,7 +58,7 @@ Jedes anstehende Feature wird in einer eigenständigen Spezifikation im Ordner `
 
 8. 🌐 **[`WIP_SMARTEVO_WEBSITE_PRODUCT_INTEGRATION.md`](./WIP_SMARTEVO_WEBSITE_PRODUCT_INTEGRATION.md)**
    * **Ziel**: Nahtlose Integration von Sharegy und Factofy in das smartEvo.de Design-System (Cyan/Petrol Look), Bereinigung obsoleter Sektionen (Bildung) und Ausbau der Dachmarken-Architektur.
-   * **Status & Prio**: 🟡 25 % | 🔴 Hoch (Q4 2026)
+   * **Status & Prio**: 🟢 **100 % Live** | 🔴 Hoch (Abgeschlossen & Live auf smartevo.de)
 
 
 

@@ -1,10 +1,10 @@
-﻿# 🌐 smartEvo Produkt- & Markenintegration: Sharegy & Factofy
+# 🌐 smartEvo Produkt- & Markenintegration: Sharegy & Factofy
 
-**Status:** 🟢 Vollständig implementiert & verifiziert (Staging Live auf Cloudflare Pages)  
-**Fortschritt:** 🟢 100 % (Frontend & Architektur fertig / Go-Live via DNS-Switch auf smartevo.de vorbereitet)  
-**Lead / Modul:** randing, marketing, ui/ux, stro5, cloudflare-pages  
+**Status:** 🟢 Vollständig implementiert, verifiziert & **100 % Live auf smartevo.de**  
+**Fortschritt:** 🟢 100 % (Produktiv auf Cloudflare Pages via smartevo.de)  
+**Lead / Modul:** branding, marketing, ui/ux, astro5, cloudflare-pages  
 **Repository:** [https://github.com/smartcuc/smartevo-web](https://github.com/smartcuc/smartevo-web)  
-**Live Staging URL:** [https://sharegy.eu](https://sharegy.eu)  
+**Live URL:** [https://smartevo.de](https://smartevo.de)  
 
 ---
 

@@ -374,6 +374,39 @@ export default function VppAggregatorCockpit() {
                 </div>
             </div>
 
+            {/* ⚖️ AUTOMATISCHES CLEARING & 80/20 PAYOUT SETTLEMENT */}
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                    <div className="flex items-center gap-2">
+                        <span className="text-lg">⚖️</span>
+                        <div>
+                            <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                                Automatisiertes Market Clearing & 80/20 Erlösausschüttung
+                            </h3>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                                Monatliche Gutschriften für Speicherbetreiber (80 % Kunde / 20 % Plattformmarge).
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700/60 text-xs">
+                    <div>
+                        <span className="text-slate-400 block text-[11px] font-bold">Standard-Split</span>
+                        <strong className="text-sm text-emerald-600 font-extrabold">80 % Speicher / 20 % Sharegy</strong>
+                    </div>
+                    <div>
+                        <span className="text-slate-400 block text-[11px] font-bold">Abrechnungs-Intervall</span>
+                        <strong className="text-sm text-slate-800 dark:text-slate-200 font-extrabold">Monatlich (PT1M)</strong>
+                    </div>
+                    <div>
+                        <span className="text-slate-400 block text-[11px] font-bold">Auszahlungskanal</span>
+                        <strong className="text-sm text-slate-800 dark:text-slate-200 font-extrabold">Stromrechnung / Stripe</strong>
+                    </div>
+                </div>
+            </div>
+
         </div>
     );
 }
+

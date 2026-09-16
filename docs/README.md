@@ -47,6 +47,7 @@ docs/
 
 | Dokument | Beschreibung |
 |---|---|
+| ⚡ **[`VPP_FLEXIBILITY_AND_MARKET_CLEARING_OPERATIONS.md`](./operations/VPP_FLEXIBILITY_AND_MARKET_CLEARING_OPERATIONS.md)** | **NEU:** Virtuelles Kraftwerk (VPP), Regelleistung (aFRR/FCR), 80/20 Market Clearing, Aggregator-Webhooks & Runbooks |
 | 🚀 **[`OPERATIONS_AND_DEPLOYMENT.md`](./operations/OPERATIONS_AND_DEPLOYMENT.md)** | Server-Deployment (Ubuntu/Debian), Systemd Services, Redis, Celery & Health-Checks |
 | 🛡️ **[`DATA_PRIVACY_AND_GDPR_COMPLIANCE.md`](./operations/DATA_PRIVACY_AND_GDPR_COMPLIANCE.md)** | DSGVO-Konzept, Technische und Organisatorische Maßnahmen (TOMs), AVV-Muster & Löschfristen |
 | ✅ **[`PRODUCTION_DEPLOYMENT_CHECKLIST.md`](./operations/PRODUCTION_DEPLOYMENT_CHECKLIST.md)** | Checkliste für Produktiv-Rollouts, SSL-Zertifikate, Umgebungsvariablen & DNS |

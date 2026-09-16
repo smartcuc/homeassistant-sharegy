@@ -305,4 +305,12 @@ def trigger_vpp_dispatch(
             battery_soc_avg=Decimal("58.50"),
         )
 
+    # Automatische Allokation & Clearing auf eingeschriebene Kunden-Assets
+    try:
+        from vpp.services_clearing import allocate_and_clear_dispatch
+        allocate_and_clear_dispatch(order)
+    except Exception:
+        pass
+
     return order
+

@@ -13,6 +13,7 @@ import { apiFetch } from "../../api/client";
 import LiveEnergySankeyECharts from "../../features/energy/components/LiveEnergySankeyECharts";
 import { useTranslation } from "react-i18next";
 import SystemReadinessCard from "../../features/energy/components/SystemReadinessCard";
+import VppCustomerParticipationCard from "../../features/energy/components/VppCustomerParticipationCard";
 
 export default function DashboardUser() {
 
@@ -362,6 +363,9 @@ export default function DashboardUser() {
 
                 </Card>
             </div>
+
+            {/* ⚡ VPP Flexibilitäts-Bonus & Speicher-Teilnahme */}
+            <VppCustomerParticipationCard />
 
             {/* 💡 EMS SYSTEM CHART MODAL */}
             {activeSystemChart && (
