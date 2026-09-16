@@ -1,10 +1,10 @@
 {
-  "appId": "de.sharegy.pro",
-  "appName": "Sharegy Pro",
+  "appId": "de.sharegy.app",
+  "appName": "Sharegy Home",
   "webDir": "dist",
   "bundledWebRuntime": false,
   "android": {
-    "path": "android-pro"
+    "path": "android-home"
   },
   "server": {
     "androidScheme": "https",
@@ -14,14 +14,14 @@
     "SplashScreen": {
       "launchShowDuration": 1500,
       "launchAutoHide": true,
-      "backgroundColor": "#090D16",
+      "backgroundColor": "#0F172A",
       "androidSplashResourceName": "splash",
       "androidScaleType": "CENTER_CROP",
       "showSpinner": false
     },
     "StatusBar": {
       "style": "DARK",
-      "backgroundColor": "#090D16"
+      "backgroundColor": "#0F172A"
     }
   }
 }
