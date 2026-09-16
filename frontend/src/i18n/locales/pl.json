@@ -119,7 +119,8 @@
     "tariff": "Taryfa Dynamiczna",
     "help_center": "Pomoc i Baza Wiedzy",
     "energy_balance": "Bilans Energetyczny",
-    "energy_profile": "Profil energetyczny i kalkulator"
+    "energy_profile": "Profil energetyczny i kalkulator",
+    "manual": "Podręcznik"
   },
   "dashboard": {
     "title": "Twoje Centrum Energii ⚡",
@@ -1245,8 +1246,9 @@
     "feedback_question": "War dieser Artikel hilfreich?",
     "feedback_thanks": "Dziękujemy za opinię!",
     "back_to_portal": "Powrót do portalu wiedzy",
-    "center_badge": "Podręcznik & FAQ",
-    "hero_title": "Centrum Pomocy & Baza Wiedzy",
+    "center_badge": "Podręcznik",
+    "profile_guide_title": "Zalecany przewodnik:",
+    "hero_title": "Podręcznik",
     "hero_subtitle": "Znajdź instrukcje krok po kroku dla falowników, optymalizatora energii, taryf dynamicznych i centrum powiadomień.",
     "hero_search_placeholder": "Szukaj tematu lub słowa kluczowego...",
     "categories_title": "Themenbereiche",

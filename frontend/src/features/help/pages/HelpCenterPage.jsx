@@ -8,11 +8,16 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { fetchHelpCategories, fetchHelpArticles } from "../api";
 import { useEnergyProfile } from "../../energy/hooks/useEnergyProfile";
+import SupportDrawer from "../../support/components/SupportDrawer";
 
 export default function HelpCenterPage() {
     const { t, i18n } = useTranslation();
     const [selectedCategory, setSelectedCategory] = useState("all");
     const [searchQuery, setSearchQuery] = useState("");
+
+    // Support Drawer State
+    const [supportDrawerOpen, setSupportDrawerOpen] = useState(false);
+    const [supportDrawerTab, setSupportDrawerTab] = useState("new_ticket");
 
     const isEnglish = i18n.language?.startsWith("en");
     const { profile, profileCode, helpArticleSlug } = useEnergyProfile();
@@ -58,6 +63,11 @@ export default function HelpCenterPage() {
         }, 50);
     };
 
+    const handleOpenSupport = (tab = "new_ticket") => {
+        setSupportDrawerTab(tab);
+        setSupportDrawerOpen(true);
+    };
+
     return (
         <div className="p-6 max-w-7xl mx-auto space-y-8 animate-fade-in">
             {/* Kompakter Header & Suche */}
@@ -65,15 +75,15 @@ export default function HelpCenterPage() {
                 <div>
                     <div className="flex items-center gap-2">
                         <h1 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white flex items-center gap-2">
-                            <span>📚</span>
-                            <span>{t("help.hero_title", "Hilfe & Wissensportal")}</span>
+                            <span>📖</span>
+                            <span>{t("help.hero_title", "Handbuch")}</span>
                         </h1>
                         <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
-                            {t("help.center_badge", "Handbuch & FAQ")}
+                            {t("help.center_badge", "Online-Handbuch")}
                         </span>
                     </div>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 max-w-xl">
-                        {t("help.hero_subtitle", "Finde Schritt-für-Schritt-Anleitungen für Wechselrichter, den Smart Energy Optimizer, dynamische Tarife und die Alarmzentrale.")}
+                        {t("help.hero_subtitle", "Schritt-für-Schritt-Anleitungen für Wechselrichter, Speicher, den Optimizer, dynamische Tarife und die Wallbox.")}
                     </p>
                 </div>
 
@@ -84,7 +94,7 @@ export default function HelpCenterPage() {
                     </span>
                     <input
                         type="text"
-                        placeholder={t("help.hero_search_placeholder", "Thema oder Stichwort suchen...")}
+                        placeholder={t("help.hero_search_placeholder", "Im Handbuch suchen...")}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="w-full pl-9 pr-8 py-2 bg-gray-50 dark:bg-slate-800 text-gray-900 dark:text-white placeholder-gray-400 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-medium focus:outline-hidden focus:ring-2 focus:ring-indigo-500 transition"
@@ -101,39 +111,102 @@ export default function HelpCenterPage() {
                 </div>
             </div>
 
-            {/* 🌟 EMPFOHLENER LEITFADEN FÜR DAS ENERGIE-PROFIL */}
-            {profile && (
-                <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-indigo-900 via-slate-900 to-indigo-950 text-white shadow-md border border-indigo-800/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-indigo-500/30 text-indigo-300 border border-indigo-400/30">
-                                {t("energy_profile.badge_label", "Energie-Profil")}: {profileCode}
-                            </span>
-                            <span className="text-xs font-bold text-white">
-                                {profile.profile_name}
-                            </span>
+            {/* 🌟 50/50 DUAL HEADER: HANDBUCH-LEITFADEN & PERSÖNLICHER SUPPORT */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                {/* LINKS: Empfohlener Leitfaden für das Profil oder Handbuch-Intro */}
+                {profile ? (
+                    <div className="p-5 rounded-2xl bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-900 text-white shadow-md border border-indigo-800/60 flex flex-col justify-between space-y-4">
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-indigo-500/30 text-indigo-300 border border-indigo-400/30">
+                                    {t("energy_profile.badge_label", "Energie-Profil")}: {profileCode}
+                                </span>
+                                <span className="text-xs font-bold text-white">
+                                    {profile.profile_name}
+                                </span>
+                            </div>
+                            <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-1.5">
+                                <span>📖</span>
+                                <span>{t("help.profile_guide_title", "Empfohlener Leitfaden:")} {t("energy_profile.view_matrix_guide", "Tarif- & Ersparnis-Kompass")}</span>
+                            </h3>
+                            <p className="text-xs text-indigo-200/80 leading-relaxed line-clamp-2">
+                                {profile.tariff_verdict_reason}
+                            </p>
                         </div>
-                        <h3 className="text-sm font-bold text-indigo-100 flex items-center gap-1.5">
-                            <span>📖</span>
-                            <span>{t("help.profile_guide_title", "Empfohlener Leitfaden:")} {t("energy_profile.view_matrix_guide", "Tarif- & Ersparnis-Kompass")}</span>
+                        <div>
+                            <Link
+                                to={`/app/help/${helpArticleSlug}`}
+                                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white text-indigo-950 hover:bg-indigo-50 text-xs font-bold transition shadow-sm cursor-pointer"
+                            >
+                                <span>📖</span>
+                                <span>{t("energy_profile.view_guide_btn", "Leitfaden lesen")}</span>
+                                <span>→</span>
+                            </Link>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="p-5 rounded-2xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white shadow-md border border-slate-800 flex flex-col justify-between space-y-4">
+                        <div className="space-y-2">
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-indigo-500/30 text-indigo-300 border border-indigo-400/30">
+                                {t("help.handbook_badge", "Online-Handbuch")}
+                            </span>
+                            <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-1.5">
+                                <span>📖</span>
+                                <span>{t("help.quickstart_title", "Schnellstart & Anleitungen")}</span>
+                            </h3>
+                            <p className="text-xs text-indigo-200/80 leading-relaxed line-clamp-2">
+                                {t("help.quickstart_desc", "Entdecke alle Einrichtungs-Guides für Wechselrichter, Speicher, dynamische Tarife und den Optimizer.")}
+                            </p>
+                        </div>
+                        <div>
+                            <button
+                                type="button"
+                                onClick={() => handleSelectCategory("all")}
+                                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white text-indigo-950 hover:bg-indigo-50 text-xs font-bold transition shadow-sm cursor-pointer"
+                            >
+                                <span>Zu den Kapiteln</span>
+                                <span>↓</span>
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* RECHTS: Persönlicher Support & Ticket-Erstellung */}
+                <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between space-y-4 hover:border-indigo-300 dark:hover:border-indigo-700 transition">
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                                {t("help.support_badge", "Technischer Support")}
+                            </span>
+                            <span className="text-sm">🛟</span>
+                        </div>
+                        <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+                            {t("help.support_card_title", "Frage nicht im Handbuch gefunden?")}
                         </h3>
-                        <p className="text-xs text-indigo-200/80 max-w-2xl">
-                            {profile.tariff_verdict_reason}
+                        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                            {t("help.support_card_desc", "Unser Support-Team hilft dir bei Fragen zu Geräten, Abrechnungen oder Einrichtung persönlich weiter.")}
                         </p>
                     </div>
-
-                    <div className="flex items-center gap-2 shrink-0">
-                        <Link
-                            to={`/app/help/${helpArticleSlug}`}
-                            className="px-3.5 py-2 rounded-xl bg-white text-indigo-950 hover:bg-indigo-50 text-xs font-bold transition flex items-center gap-1.5 shadow-sm cursor-pointer"
+                    <div className="flex items-center flex-wrap gap-2.5 pt-1">
+                        <button
+                            type="button"
+                            onClick={() => handleOpenSupport("new_ticket")}
+                            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shadow-sm cursor-pointer"
                         >
-                            <span>📖</span>
-                            <span>{t("energy_profile.view_guide_btn", "Leitfaden lesen")}</span>
-                            <span>→</span>
-                        </Link>
+                            <span>🎫</span>
+                            <span>{t("help.create_ticket_btn", "Ticket erstellen")}</span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => handleOpenSupport("my_tickets")}
+                            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold transition cursor-pointer"
+                        >
+                            <span>📬</span>
+                            <span>{t("help.my_tickets_btn", "Meine Anfragen")}</span>
+                        </button>
                     </div>
                 </div>
-            )}
+            </div>
 
             {/* Category Grid */}
             <div className="space-y-4">
@@ -346,6 +419,13 @@ export default function HelpCenterPage() {
                     </div>
                 )}
             </div>
+
+            {/* 🛟 Integrierter Support-Drawer für Ticket-Erstellung und Live-Hilfe */}
+            <SupportDrawer
+                isOpen={supportDrawerOpen}
+                onClose={() => setSupportDrawerOpen(false)}
+                initialTab={supportDrawerTab}
+            />
         </div>
     );
 }

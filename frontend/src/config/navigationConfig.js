@@ -92,7 +92,7 @@ export function getNavigationSections({
                 title: `⚙️ ${t("nav.account_settings", "Mein Konto")}`,
                 items: [
                     { name: t("nav.profile", "Profil & Stammdaten"), path: "/app/profile", icon: "👤" },
-                    { name: t("nav.support", "Hilfe & Support"), path: "/app/help", icon: "🛟" },
+                    { name: t("nav.manual", "Handbuch"), path: "/app/help", icon: "📖" },
                 ],
             }
         );
@@ -236,7 +236,7 @@ export function getNavigationSections({
             { name: t("nav.tariffs", "Strompreise & Tarife"), path: "/app/tariff", icon: "💶" },
             { name: t("nav.mqtt_interfaces", "Schnittstellen"), path: "/app/interfaces", icon: "📡" },
             { name: t("nav.system_status", "Systemstatus (Server)"), path: "/app/status", icon: "🌐" },
-            { name: t("nav.support", "Hilfe & Support"), path: "/app/help", icon: "🛟" },
+            { name: t("nav.manual", "Handbuch"), path: "/app/help", icon: "📖" },
         ],
     });
 
