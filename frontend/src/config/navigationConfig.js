@@ -49,7 +49,7 @@ export const MODE_METADATA = {
         labelKey: "nav.mode_admin",
         defaultLabel: "Admin-Zentrale",
         icon: "🛡️",
-        description: "Mandanten, Support-Triage & Systemverwaltung",
+        description: "Mandanten, Support-Zentrale & Systemverwaltung",
         defaultPath: "/app/admin/dashboard",
     },
 };
@@ -142,7 +142,7 @@ export function getNavigationSections({
                     { name: t("nav.admin_tracking", "Event & Tracking"), path: "/app/admin/tracking", icon: "📈" },
                     { name: t("nav.tenant_management", "Mandanten & Mieter"), path: "/app/tenant", icon: "👥" },
                     { name: t("nav.partner_fleet", "Partner-Flotten"), path: "/app/partner", icon: "🔧" },
-                    { name: t("nav.agent_support_hub", "Support Triage"), path: "/app/support-hub", icon: "🛟" },
+                    { name: t("nav.agent_support_hub", "Support-Zentrale"), path: "/app/support-hub", icon: "🛟" },
                     {
                         name: "Django Backend",
                         path: "/admin/",
@@ -249,7 +249,7 @@ export function getNavigationSections({
                 { name: t("nav.admin_vpp", "VPP & Flex-Zentrale"), path: "/app/admin/vpp", icon: "⚡" },
                 { name: t("nav.admin_dashboard", "Admin Dashboard"), path: "/app/admin/dashboard", icon: "📊" },
                 { name: t("nav.partner_fleet", "Partner-Flotten"), path: "/app/partner", icon: "🔧" },
-                { name: t("nav.agent_support_hub", "Support Triage"), path: "/app/support-hub", icon: "🛟" },
+                { name: t("nav.agent_support_hub", "Support-Zentrale"), path: "/app/support-hub", icon: "🛟" },
                 { name: t("nav.tenant_management", "Mandanten & Mieter"), path: "/app/tenant", icon: "👥" },
                 {
                     name: "Django Backend",

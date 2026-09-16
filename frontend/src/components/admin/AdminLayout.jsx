@@ -131,7 +131,7 @@ export default function AdminLayout({ children }) {
                                 }`
                             }
                         >
-                            <span className="text-sm">🛟</span> Support Triage Hub
+                            <span className="text-sm">🛟</span> Support-Zentrale
                         </NavLink>
 
                         <a
