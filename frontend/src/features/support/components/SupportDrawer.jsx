@@ -149,7 +149,12 @@ export default function SupportDrawer({ isOpen, onClose, defaultContext = {}, in
         }
     }, [isOpen, user]);
 
-    if (!isOpen) return null;
+    // Synchronize activeTab when initialTab changes or drawer opens
+    useEffect(() => {
+        if (isOpen && initialTab) {
+            setActiveTab(initialTab);
+        }
+    }, [isOpen, initialTab]);
 
     const handleCreateTicket = async (e) => {
         e.preventDefault();
