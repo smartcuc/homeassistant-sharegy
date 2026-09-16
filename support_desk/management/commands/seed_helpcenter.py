@@ -82,11 +82,29 @@ class Command(BaseCommand):
             {
                 "key": "billing",
                 "icon": "🧾",
-                "title_de": "Abrechnung, Mieterstrom & Energy Sharing",
-                "title_en": "Billing, Sub-Metering & Energy Sharing",
-                "description_de": "Virtuelle Zähler, § 42b EnWG 15m-Clearing, Kostenallokation für WEGs, PDF-Abrechnungen und EDIFACT MSCONS Export.",
-                "description_en": "Virtual meters, § 42b EnWG 15-minute clearing, multi-tenant allocation, PDF invoices, and EDIFACT MSCONS export.",
+                "title_de": "Abrechnung, Tarife & PDF-Belege",
+                "title_en": "Billing, Tariffs & Statements",
+                "description_de": "Haushaltsabrechnungen, Reststrom- und Solartarife, PDF-Belege und DATEV-Exporte.",
+                "description_en": "Household billing, grid tariffs, PDF statements, and DATEV exports.",
                 "sort_order": 8,
+            },
+            {
+                "key": "energy-sharing",
+                "icon": "🏘️",
+                "title_de": "Energy Sharing, Quartiere & Mieterstrom",
+                "title_en": "Energy Sharing, Communities & Tenant Power",
+                "description_de": "§ 42b EnWG Gemeinschaftliche Gebäudeversorgung, Liegenschafts-Verwaltung, 15m-Sharing-Matrix und Mieter-Abrechnungen.",
+                "description_en": "§ 42b EnWG collective building supply, property management, 15-minute sharing matrix, and resident settlement.",
+                "sort_order": 9,
+            },
+            {
+                "key": "partners",
+                "icon": "🔧",
+                "title_de": "Partner, Solarteure & Flottenmanagement",
+                "title_en": "Partners, Installers & Fleet Management",
+                "description_de": "Kundenanlagen-Onboarding, Inbetriebnahme, 3-Sekunden-Diagnosetests, Health-Scores und Fachpartner-Service.",
+                "description_en": "Customer onboarding, commissioning, 3-second diagnostic checks, health scores, and service workflows.",
+                "sort_order": 10,
             },
             {
                 "key": "devices-protocols",
@@ -95,7 +113,7 @@ class Command(BaseCommand):
                 "title_en": "Devices, Interfaces & Protocols",
                 "description_de": "Integration von OCPP 1.6-J CSMS, Home Assistant, Shelly WSS, wMSB Discovergy, Modbus TCP und Selbsttest.",
                 "description_en": "Integration with OCPP 1.6-J CSMS, Home Assistant, Shelly WSS, wMSB Discovergy, Modbus TCP, and Self-Test.",
-                "sort_order": 9,
+                "sort_order": 11,
             },
         ]
 
@@ -2552,10 +2570,10 @@ The official **Sharegy Home Assistant Integration** streams all your local smart
                 "sort_order": 1,
             },
             # ---------------------------------------------------------------------
-            # 10. BILLING & TENANT ADMIN: DER GROSSE LEITFADEN FÜR VERWALTER
+            # 10. ENERGY SHARING & TENANT ADMIN: DER GROSSE LEITFADEN FÜR VERWALTER
             # ---------------------------------------------------------------------
             {
-                "category": cats["billing"],
+                "category": cats["energy-sharing"],
                 "slug": "tenant-admin-leitfaden-mieterstrom-und-vpp",
                 "context_key": "tenant_admin_guide",
                 "title_de": "Tenant-Admin Leitfaden: Virtueller Summenzähler, § 42b Mieterstrom & PDF-Abrechnungen",
@@ -2737,7 +2755,7 @@ Historically, only massive industrial power plants could participate. **Sharegy 
             # 12. ENERGY SHARING & COMMUNITY COCKPIT: ANLEITUNG FÜR NUTZER & ADMINS
             # ---------------------------------------------------------------------
             {
-                "category": cats["billing"],
+                "category": cats["energy-sharing"],
                 "slug": "energy-sharing-und-community-cockpit",
                 "context_key": "energy_sharing_guide",
                 "title_de": "Energy Sharing & Community Cockpit: Strom im Quartier teilen & abrechnen",
@@ -2847,7 +2865,7 @@ As a Community Administrator, you manage meter topology, billing formulas, and a
             # 13. PARTNER-LEITFADEN: FLOTTENMANAGEMENT & ONBOARDING FÜR INSTALLATEURE
             # ---------------------------------------------------------------------
             {
-                "category": cats["devices-protocols"],
+                "category": cats["partners"],
                 "slug": "partner-cockpit-flottenmanagement-onboarding",
                 "context_key": "partner_guide",
                 "title_de": "Partner-Leitfaden: Flottenmanagement, Wechselrichter-Onboarding & Kundenservice",
@@ -2982,7 +3000,7 @@ Validate installations before leaving the site:
             # 14. MIETERSTROM-LEITFADEN: ABRECHNUNG, UNTERZÄHLER & VERWALTUNG
             # ---------------------------------------------------------------------
             {
-                "category": cats["billing"],
+                "category": cats["energy-sharing"],
                 "slug": "mieterstrom-abrechnung-und-zaehlerverwaltung",
                 "context_key": "mieterstrom_guide",
                 "title_de": "Mieterstrom & Unterzähler: Abrechnung, Transparenz & Mieterverwaltung",
