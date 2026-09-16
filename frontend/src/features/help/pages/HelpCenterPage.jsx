@@ -2,7 +2,7 @@
 # src/features/help/pages/HelpCenterPage.jsx
 */
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -26,7 +26,7 @@ export default function HelpCenterPage() {
         queryKey: ["help-articles", selectedCategory, searchQuery],
         queryFn: () =>
             fetchHelpArticles({
-                category: selectedCategory === "all" ? "" : selectedCategory,
+                category: selectedCategory === "all" ? undefined : selectedCategory,
                 search: searchQuery,
             }),
     });
@@ -34,7 +34,14 @@ export default function HelpCenterPage() {
     const categories = categoriesQuery.data || [];
     const articles = articlesQuery.data || [];
 
-    const featuredArticles = articles.filter((a) => a.is_featured);
+    // 🌟 Nur die Top 3 bis 6 am häufigsten gelesenen bzw. gefeatureten Anleitungen anzeigen
+    const featuredArticles = useMemo(() => {
+        const featured = articles.filter((a) => a.is_featured);
+        const pool = featured.length > 0 ? featured : articles;
+        return [...pool]
+            .sort((a, b) => (b.views_count || 0) - (a.views_count || 0))
+            .slice(0, 6);
+    }, [articles]);
 
     const activeCategoryObj = categories.find((c) => c.key === selectedCategory);
     const activeCategoryTitle = activeCategoryObj
