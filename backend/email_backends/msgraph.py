@@ -92,7 +92,15 @@ class MSGraphEmailBackend(BaseEmailBackend):
         body_content = html_body if html_body is not None else text_body
         content_type = "HTML" if html_body is not None else "Text"
 
-        # 2. Empfänger formatieren
+        # 2. Absender (Name & Adresse) ermitteln
+        from_raw = message.from_email or self.default_sender
+        from_name, from_addr = email.utils.parseaddr(from_raw)
+        from_addr = from_addr or self._clean_default_sender()
+        from_payload = {"emailAddress": {"address": from_addr}}
+        if from_name:
+            from_payload["emailAddress"]["name"] = from_name
+
+        # 3. Empfänger formatieren
         def format_recipients(addr_list):
             recipients = []
             for addr in addr_list or []:
@@ -101,9 +109,12 @@ class MSGraphEmailBackend(BaseEmailBackend):
                     recipients.append({"emailAddress": {"address": clean_addr}})
             return recipients
 
+        save_to_sent = "true" if getattr(settings, "MS_GRAPH_SAVE_TO_SENT", False) else "false"
+
         payload = {
             "message": {
                 "subject": message.subject or "(Kein Betreff)",
+                "from": from_payload,
                 "body": {
                     "contentType": content_type,
                     "content": body_content or "",
@@ -112,10 +123,10 @@ class MSGraphEmailBackend(BaseEmailBackend):
                 "ccRecipients": format_recipients(message.cc),
                 "bccRecipients": format_recipients(message.bcc),
             },
-            "saveToSentItems": "true",
+            "saveToSentItems": save_to_sent,
         }
 
-        # 3. Reply-To
+        # 4. Reply-To
         if message.reply_to:
             payload["message"]["replyTo"] = format_recipients(message.reply_to)
 
