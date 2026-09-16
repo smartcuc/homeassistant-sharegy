@@ -174,7 +174,7 @@ export default function AppTopbar({ onOpenMobileMenu }) {
                             type="button"
                             onClick={onOpenMobileMenu}
                             aria-label="Menü öffnen"
-                            className="md:hidden p-1 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition shrink-0 cursor-pointer"
+                            className="lg:hidden p-1 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition shrink-0 cursor-pointer"
                         >
                             <Menu className="w-5 h-5" />
                         </button>

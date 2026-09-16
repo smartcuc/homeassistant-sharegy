@@ -41,7 +41,7 @@ export default function MobileMenuDrawer({ isOpen, onClose }) {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex md:hidden">
+        <div className="fixed inset-0 z-50 flex lg:hidden">
             {/* Backdrop */}
             <div 
                 className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs animate-fade-in"

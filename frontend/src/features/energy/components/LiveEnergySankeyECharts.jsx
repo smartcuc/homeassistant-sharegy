@@ -4,6 +4,7 @@
 
 import ReactECharts from "echarts-for-react";
 import { useMemo } from "react";
+import { useTheme } from "../../../theme/ThemeContext";
 
 function getNodeColor(node) {
     switch (node.id) {
@@ -34,6 +35,8 @@ function getNodeColor(node) {
 }
 
 export default function LiveEnergySankeyECharts({ data }) {
+    const { isDark } = useTheme();
+
     const option = useMemo(() => {
         if (!data || !Array.isArray(data.nodes) || !Array.isArray(data.links)) {
             return null;
@@ -95,6 +98,12 @@ export default function LiveEnergySankeyECharts({ data }) {
             animation: false,
             tooltip: {
                 trigger: "item",
+                backgroundColor: isDark ? "rgba(15, 23, 42, 0.92)" : "rgba(255, 255, 255, 0.95)",
+                borderColor: isDark ? "#334155" : "#e2e8f0",
+                textStyle: {
+                    color: isDark ? "#f8fafc" : "#0f172a",
+                    fontSize: 12,
+                },
                 formatter: (params) => {
                     if (!params || !params.data) return "";
                     if (params.dataType === "edge") {
@@ -120,27 +129,28 @@ export default function LiveEnergySankeyECharts({ data }) {
             series: [
                 {
                     type: "sankey",
-                    left: 40,
-                    right: 40,
-                    top: 25,
-                    bottom: 25,
+                    left: 20,
+                    right: 20,
+                    top: 20,
+                    bottom: 20,
                     data: nodes,
                     links,
                     nodeWidth: 16,
-                    nodeGap: 18,
+                    nodeGap: 14,
                     draggable: false,
-                    layoutIterations: 0,
+                    layoutIterations: 32,
                     emphasis: {
                         focus: "adjacency",
                     },
                     lineStyle: {
                         color: "gradient",
-                        opacity: 0.4,
+                        opacity: isDark ? 0.45 : 0.35,
                         curveness: 0.5,
                     },
                     label: {
-                        color: "#334155",
+                        color: isDark ? "#f8fafc" : "#1e293b",
                         fontSize: 11,
+                        lineHeight: 15,
                         fontWeight: "600",
                         formatter: (params) => {
                             if (!params) return "";
@@ -156,7 +166,7 @@ export default function LiveEnergySankeyECharts({ data }) {
                 },
             ],
         };
-    }, [data]);
+    }, [data, isDark]);
 
     if (!data || !Array.isArray(data.nodes) || !Array.isArray(data.links)) {
         return <div className="text-slate-600 dark:text-slate-300 text-sm p-4 text-center">Keine Energiedaten</div>;
@@ -172,13 +182,13 @@ export default function LiveEnergySankeyECharts({ data }) {
 
     return (
         <div className="w-full space-y-1">
-            {/* Mobile Scroll Hint */}
-            <div className="sm:hidden flex items-center justify-end gap-1.5 text-[11px] text-slate-600 dark:text-slate-300 font-medium pr-2">
+            {/* Mobile / Tablet Scroll Hint (< md screens) */}
+            <div className="md:hidden flex items-center justify-end gap-1.5 text-[11px] text-slate-500 dark:text-slate-400 font-medium pr-2">
                 <span className="animate-pulse">↔️</span> Wischen für Vollansicht
             </div>
 
-            <div className="w-full overflow-x-auto pb-2 -mx-2 px-2 touch-pan-x">
-                <div className="min-w-[580px] sm:min-w-0" style={{ height: 480 }}>
+            <div className="w-full overflow-x-auto pb-2 -mx-2 px-2 touch-pan-x scrollbar-thin">
+                <div className="min-w-[620px] md:min-w-0 h-[340px] sm:h-[400px] md:h-[460px] lg:h-[480px]">
                     <ReactECharts
                         option={option}
                         style={{ height: "100%", width: "100%" }}

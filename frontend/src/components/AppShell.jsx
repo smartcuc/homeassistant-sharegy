@@ -95,7 +95,7 @@ export default function AppShell() {
                 <AppTopbar onOpenMobileMenu={() => setMobileDrawerOpen(true)} />
 
                 {/* ✅ CONTENT WITH SAFE BOTTOM PADDING ON MOBILE FOR FIXED NAV */}
-                <div ref={contentRef} className="flex-1 overflow-y-auto pb-20 md:pb-0">
+                <div ref={contentRef} className="flex-1 overflow-y-auto pb-20 lg:pb-0">
                     <Suspense fallback={<PageSuspenseLoader />}>
                         <Routes>
 

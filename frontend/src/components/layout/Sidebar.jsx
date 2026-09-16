@@ -56,7 +56,7 @@ export default function Sidebar() {
     }, [activeMode, t, isPro, alertCount, alertBadgeClass, count, isStaffOrAdmin, hasCommunityAdminAccess]);
 
     return (
-        <div className="hidden md:flex w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex-col shrink-0 transition-colors">
+        <div className="hidden lg:flex w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex-col shrink-0 transition-colors">
             {/* ✅ Logo -> Link zur Homepage & Context Switcher */}
             <div className="h-16 flex items-center justify-between px-4 border-b border-slate-200 dark:border-slate-800">
                 <NavLink
