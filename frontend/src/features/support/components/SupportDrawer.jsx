@@ -229,10 +229,10 @@ export default function SupportDrawer({ isOpen, onClose, defaultContext = {}, in
                         </div>
                         <div>
                             <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                                {t("support.title", "Hilfe & Support Desk")}
+                                {t("support.title", "Hilfe- & Support-Center")}
                             </h2>
                             <p className="text-xs text-slate-500 dark:text-slate-400">
-                                Wissensportal, FAQs & direkter Ticket-Support
+                                {t("support.subtitle", "Hilfecenter, Anleitungen & Support-Anfragen")}
                             </p>
                         </div>
                     </div>
@@ -257,7 +257,7 @@ export default function SupportDrawer({ isOpen, onClose, defaultContext = {}, in
                             }`}
                     >
                         <BookOpen className="w-3.5 h-3.5" />
-                        Wissensportal & FAQ
+                        {t("support.tab_faq", "Hilfecenter & FAQs")}
                     </button>
 
                     <button
@@ -269,7 +269,7 @@ export default function SupportDrawer({ isOpen, onClose, defaultContext = {}, in
                             }`}
                     >
                         <PlusCircle className="w-3.5 h-3.5" />
-                        Neues Ticket
+                        {t("support.new_ticket", "Neue Anfrage")}
                     </button>
 
                     <button
@@ -284,7 +284,7 @@ export default function SupportDrawer({ isOpen, onClose, defaultContext = {}, in
                             }`}
                     >
                         <Inbox className="w-3.5 h-3.5" />
-                        Meine Tickets
+                        {t("support.my_tickets", "Meine Anfragen")}
                         {tickets.length > 0 && (
                             <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300 font-bold">
                                 {tickets.length}
