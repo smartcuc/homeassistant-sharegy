@@ -21,6 +21,8 @@ Alle wesentlichen Härtungs-, Skalierungs- und Feature-Erweiterungen aus den vor
 | **M8: Native Android App & Store Ready** | 🔴 Offen | 🟢 **100% Live** | Capacitor 7 Native Shell, Fastlane Release Pipeline, FCM Push, Deep Linking. |
 | **M9: B2B Whitelabel & AS4 Mako Hub** | 🔴 Offen | 🟢 **100% Live** | Partner-Flottencockpit, Dynamic Theming Engine, BNetzA EDIFACT MSCONS/UTILMD Generator. |
 | **M10: Cloudflare Edge CDN & Security** | 🔴 Offen | 🟢 **100% Live** | Full Strict Universal SSL, 3x Edge Cache Rules, WebSockets Anycast, Sub-10ms DNS ([Doku](../operations/CLOUDFLARE_INFRASTRUCTURE_AND_EDGE_SECURITY.md)). |
+| **M11: Handbuch & Support-Desk 2.0** | 🔴 Offen | 🟢 **100% Live** | 11 Themen-Kategorien, 43 DE/EN-Artikel, 50/50 Dual-Card Header, reaktiver Support-Drawer. |
+| **M12: GTM & Rollout Masterplan** | 🔴 Offen | 🟢 **100% Live** | Consumer/Prosumer GTM Playbook, Partner/Installer GTM Playbook, Real-World VPP Playbook. |
 
 ---
 
@@ -28,37 +30,30 @@ Alle wesentlichen Härtungs-, Skalierungs- und Feature-Erweiterungen aus den vor
 
 Jedes anstehende Feature wird in einer eigenständigen Spezifikation im Ordner `docs/wip/` geführt:
 
-1. 🔌 **[`WIP_DECOUPLED_MONITORING_CLUSTER_AND_REVERSE_RPC.md`](./WIP_DECOUPLED_MONITORING_CLUSTER_AND_REVERSE_RPC.md)**
-   * **Ziel**: Physische Ausgliederung des WSS-Ingress- und Reverse-RPC-Gateways auf `mon.sharegy.de` für unterbrechungsfreie Deployments und Zero-Trust Edge-Wartung.
-   * **Status & Prio**: 🟡 50 % | 🔴 Hoch (Nächster Sprint)
+1. 📧 **E-Mail-Zustellbarkeit & SMTP-Härtung (`accounts/services/email_service.py`)**
+   * **Ziel**: Überprüfung und Härtung des SMTP-Transports (Port 465 SSL vs 587 TLS), SPF/DKIM-Zertifizierung der Domain `sharegy.cloud` und Sicherstellung von 100% Zustellbarkeit für Magic Login & Einladungen.
+   * **Status & Prio**: 🟡 In Bearbeitung | 🔴 Kritisch für B2C Launch
 
-2. 🏠 **[`WIP_EEBUS_AND_CLOUD_ECOSYSTEM_BRIDGE.md`](./WIP_EEBUS_AND_CLOUD_ECOSYSTEM_BRIDGE.md)**
-   * **Ziel**: Anbindung von Wärmepumpen (myVAILLANT, ViCare) und Haushaltsgeräten (BSH Home Connect) über Cloud-APIs und EEBUS SHIP/SPINE Stack.
-   * **Status & Prio**: 🟡 40 % | 🔴 Hoch (Q4 2026 / Q1 2027)
+2. 🚨 **Alert- & Benachrichtigungs-Engine (`alerts/services.py`)**
+   * **Ziel**: End-to-End Validierung aller Trigger-Regeln (Ertragsausfall, Tiefentladeschutz, Dauerlast, Solarpeak-Nudge) über WebPush, E-Mail und In-App Benachrichtigungen.
+   * **Status & Prio**: 🟡 In Bearbeitung | 🔴 Kritisch für B2C Launch
 
 3. ⚡ **[`WIP_BNETZA_CLS_SMART_METER_GATEWAY.md`](./WIP_BNETZA_CLS_SMART_METER_GATEWAY.md)**
    * **Ziel**: Gesetzeskonforme Dimm- und Steuerbefehle nach § 14a EnWG direkt über den Controllable Local System (CLS) Kanal des SMGW empfangen inkl. VNB Dispatch-Quittierung.
    * **Status & Prio**: 🟢 **100 % Live** | 🔴 Hoch (Abgeschlossen)
 
-4. 🔒 **[`WIP_DYNAMIC_WHITELABEL_SSL_PROVISIONING.md`](./WIP_DYNAMIC_WHITELABEL_SSL_PROVISIONING.md)**
-   * **Ziel**: Automatische Let's Encrypt SSL-Zertifikatsausstellung für B2B Custom Domains (CNAME) via Caddy/Traefik On-Demand TLS.
-   * **Status & Prio**: 🟡 70 % | 🟡 Mittel (Q4 2026)
-
-5. 📈 **[`WIP_AUTOMATED_FLEXIBILITY_AND_VPP_MARKET_CLEARING.md`](./WIP_AUTOMATED_FLEXIBILITY_AND_VPP_MARKET_CLEARING.md)**
+4. 📈 **[`WIP_AUTOMATED_FLEXIBILITY_AND_VPP_MARKET_CLEARING.md`](./WIP_AUTOMATED_FLEXIBILITY_AND_VPP_MARKET_CLEARING.md)**
    * **Ziel**: Vollautomatisierte Vermarktung gepoolter Heimspeicher an den aFRR/SRL- und Intraday-Märkten über Aggregatoren mit automatischem 80/20 Erlös-Clearing.
    * **Status & Prio**: 🟢 **100 % Live** | 🔴 Hoch (Abgeschlossen & verifiziert)
 
-6. 📱 **[`WIP_DUAL_APP_ECOSYSTEM_USER_VS_PARTNER.md`](./WIP_DUAL_APP_ECOSYSTEM_USER_VS_PARTNER.md)**
-   * **Ziel**: Evaluierung und Roadmap für das Two-App Ökosystem (`Sharegy Home` für Endkunden vs. `Sharegy Pro` für Installateure/Admins mit QR-Scanner & Offline-Puffer).
-   * **Status & Prio**: 🟡 55 % | 🟡 Mittel (Q1 2027)
-
-7. 🧭 **[`WIP_ROLE_BASED_SIDENAV_AND_CONTEXT_NAVIGATION.md`](./WIP_ROLE_BASED_SIDENAV_AND_CONTEXT_NAVIGATION.md)**
+5. 🧭 **[`WIP_ROLE_BASED_SIDENAV_AND_CONTEXT_NAVIGATION.md`](./WIP_ROLE_BASED_SIDENAV_AND_CONTEXT_NAVIGATION.md)**
    * **Ziel**: Rollen- und kontextbasierte Aufteilung der Side-Navigation für EMS-Prosumer, Mieterstrom-Nutzer, Installateure und Liegenschafts-Admins inkl. Multi-Role Switcher.
    * **Status & Prio**: 🟢 **100 % Live** | 🔴 Hoch (Abgeschlossen)
 
-8. 🌐 **[`WIP_SMARTEVO_WEBSITE_PRODUCT_INTEGRATION.md`](./WIP_SMARTEVO_WEBSITE_PRODUCT_INTEGRATION.md)**
-   * **Ziel**: Nahtlose Integration von Sharegy und Factofy in das smartEvo.de Design-System (Cyan/Petrol Look), Bereinigung obsoleter Sektionen (Bildung) und Ausbau der Dachmarken-Architektur.
+6. 🌐 **[`WIP_SMARTEVO_WEBSITE_PRODUCT_INTEGRATION.md`](./WIP_SMARTEVO_WEBSITE_PRODUCT_INTEGRATION.md)**
+   * **Ziel**: Nahtlose Integration von Sharegy und Factofy in das smartEvo.de Design-System (Cyan/Petrol Look), Bereinigung obsoleter Sektionen und Ausbau der Dachmarken-Architektur.
    * **Status & Prio**: 🟢 **100 % Live** | 🔴 Hoch (Abgeschlossen & Live auf smartevo.de)
+
 
 
 
