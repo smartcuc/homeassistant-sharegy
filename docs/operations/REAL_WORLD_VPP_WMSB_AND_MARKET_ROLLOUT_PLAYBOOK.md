@@ -1,19 +1,20 @@
 # 🚀 Real-World VPP, wMSB Gateway & Market Rollout Playbook
-## Schritt-für-Schritt-Leitfaden zur echten energiewirtschaftlichen Inbetriebnahme von VPP, Smart Meter Gateways (SMGW/CLS) und Markt-Akteuren
+## Schritt-für-Schritt-Leitfaden zur operativen Inbetriebnahme von VPP, Smart Meter Gateways (SMGW/CLS) und Markt-Akteuren
 
-**Version:** 1.0.0 (Produktions- & Rollout-Leitfaden)  
-**Ziel:** Konkrete Handlungsanleitung, Kontakte, Anträge, Fragenkataloge und Verträge zur operativen Anbindung des Sharegy Virtuellen Kraftwerks (VPP) und Flexibilitäts-Pools an den deutschen Strommarkt.
+**Version:** 1.1.0 (Human-Readable & Executive Edition)  
+**Ziel:** Konkrete Handlungsanleitung, Ansprechpartner, Anträge, Fragenkataloge und Verträge zur echten Anbindung des Sharegy Virtuellen Kraftwerks (VPP) und Flexibilitäts-Pools an den deutschen Strommarkt.
 
 ---
 
 ## 🧭 Inhaltsverzeichnis
 1. [Strategische Grundsatzentscheidung: Sub-Aggregator vs. Eigener BKV](#1-strategische-grundsatzentscheidung)
 2. [Die Akteure & konkrete Ansprechpartner im deutschen Energiemarkt](#2-die-akteure--konkrete-ansprechpartner)
-3. [Schritt-für-Schritt-Ablaufplan (Phase 1 bis 5)](#3-schritt-für-schritt-ablaufplan)
+3. [Schritt-für-Schritt-Ablaufplan (Phasen 1 bis 4)](#3-schritt-für-schritt-ablaufplan)
 4. [Notwendige Verträge, Anträge & regulatorische Registrierungen](#4-notwendige-vertraege-antraege--registrierungen)
 5. [Fragen- & Antwortkatalog für Erstgespräche mit Marktpartnern](#5-fragen--antwortkatalog-fuer-erstgespraeche)
-6. [Technische Integrationsarchitektur (SMGW, CLS, OpenADR, Connect+)](#6-technische-integrationsarchitektur)
+6. [Technische Integrationsarchitektur (Ablauf eines Flexibilitäts-Abrufs)](#6-technische-integrationsarchitektur)
 7. [Muster-Anschreiben & Gesprächsleitfäden](#7-muster-anschreiben--gespraechsleitfaeden)
+8. [Sofort-Aktionsliste](#8-sofort-aktionsliste)
 
 ---
 
@@ -21,32 +22,36 @@
 
 Bevor Anträge gestellt werden, muss der regulatorische Pfad für Sharegy festgelegt werden:
 
-```mermaid
-graph TD
-    Start[Sharegy VPP Rollout] --> Decision{Welcher Marktzugang?}
-    
-    Decision -->|Option A: Empfohlen| SubAgg[Option A: White-Label / Sub-Aggregator Modell]
-    Decision -->|Option B: Später| FullBKV[Option B: Eigener Voll-BKV & wMSB]
-    
-    SubAgg --> A1[Partnerschaft mit bestehendem Direktvermarkter/BKV]
-    SubAgg --> A2[Time-to-Market: 3 bis 6 Monate]
-    SubAgg --> A3[Geringes Investitionsrisiko, keine 24/7 Leitwarte nötig]
-    
-    FullBKV --> B1[Eigene Bilanzkreis-Zulassung & BNetzA-Lizenz]
-    FullBKV --> B2[Time-to-Market: 12 bis 18 Monate]
-    FullBKV --> B3[Hohe Sicherheitsleistungen bei ÜNBs + AS4/EDIFACT 1:1 Mako]
+```
++-----------------------------------------------------------------------------------------+
+|                                SHAREGY VPP MARKTEINTRITT                                |
++-----------------------------------------------------------------------------------------+
+                                             |
+                   +-------------------------+-------------------------+
+                   |                                                   |
+                   v                                                   v
+  +---------------------------------+                 +---------------------------------+
+  |    OPTION A: SUB-AGGREGATOR     |                 |     OPTION B: EIGENER BKV       |
+  |     (DRINGEND EMPFOHLEN)        |                 |      (SPÄTERER SCHRITT)         |
+  +---------------------------------+                 +---------------------------------+
+  | * Kooperation mit bestehendem   |                 | * Eigene BNetzA-Versorgerlizenz |
+  |   Direktvermarkter / BKV        |                 | * Eigener Bilanzkreis bei 4 ÜNB |
+  | * Time-to-Market: 3 bis 6 Monate|                 | * Time-to-Market: 12-18 Monate  |
+  | * Keine Millionen-Bürgschaften  |                 | * 24/7 Leitwarte + AS4/EDIFACT  |
+  | * Geringes finanzielles Risiko  |                 | * Hohe Bürgschaften & Fixkosten |
+  +---------------------------------+                 +---------------------------------+
 ```
 
-### 🏆 Empfohlener Weg: **Option A (Sub-Aggregator / Technologie- & Flotten-Provider)**
-* **Sharegy agiert als:** Virtueller Flottenmanager, HEMS-Entwickler und Customer-Frontend mit 80/20-Clearing.
-* **Der Vermarktungspartner agiert als:** Bilanzkreisverantwortlicher (BKV), Börsenhändler (EPEX Spot / Intraday) und präqualifizierter Regelleistungs-Anbieter (aFRR/mFRR).
-* **Vorteil:** Keine Bürgschaften in Millionenhöhe bei den 4 ÜNBs, keine eigene 24/7 energiewirtschaftliche Leitstelle, sofortige Vermarktung ab dem ersten Kunden möglich.
+### 🏆 Empfohlener Weg: Option A (Sub-Aggregator / Technologie- & Flotten-Provider)
+* **Sharegy agiert als:** Virtueller Flottenmanager, HEMS-Entwickler und Customer-Frontend mit automatischer 80/20-Erlösverteilung.
+* **Der Vermarktungspartner (z. B. Next Kraftwerke / Statkraft) agiert als:** Bilanzkreisverantwortlicher (BKV), Börsenhändler (EPEX Spot / Intraday) und präqualifizierter Regelleistungs-Anbieter (aFRR/mFRR).
+* **Vorteil:** Sofortige Vermarktung ab den ersten 20 Kundenanlagen ohne Millionen-Bürgschaften bei den Übertragungsnetzbetreibern.
 
 ---
 
 ## 2. Die Akteure & konkrete Ansprechpartner
 
-| Marktrolle | Funktion im VPP-Ökosystem | Führende Akteure in Deutschland | Zuständige Abteilung / Kontaktweg |
+| Marktrolle | Funktion im VPP-Ökosystem | Führende Akteure in Deutschland | Zuständige Abteilung & Kontakt |
 | :--- | :--- | :--- | :--- |
 | **1. Direktvermarkter / VPP-Aggregator** | Vermarktet die Flexibilität an EPEX Spot, Intraday und Regelleistungsmärkten; schüttet Erlöse an Sharegy aus. | • **Next Kraftwerke** (Köln)<br>• **Statkraft** (Düsseldorf)<br>• **Entelios** (München)<br>• **Energy2Market / e2m** (Leipzig)<br>• **sonnen eServices** (Wildpoldsried)<br>• **Lumenaza** (Berlin) | *Business Development / Flexible Assets / Energy Trading Partnerships*<br>E-Mail: `partnerships@...` / `flexibility@...` |
 | **2. Wettbewerblicher Messstellenbetreiber (wMSB)** | Installiert Smart Meter Gateways (SMGW), betreibt CLS-Kanäle und liefert 15-Minuten-Lastgänge. | • **Discovergy / inexogy** (Aachen/Heidelberg)<br>• **Solandeo** (Berlin)<br>• **co.met** (Saarbrücken)<br>• **Theben Smart Energy** (Haigerloch)<br>• **PPC** (Mannheim) | *Vertrieb Messwesen / Kooperationen & CLS-Services*<br>E-Mail: `partner@solandeo.com`, `vertrieb@inexogy.com` |
@@ -59,31 +64,17 @@ graph TD
 
 ## 3. Schritt-für-Schritt Ablaufplan
 
-```mermaid
-gantt
-    title VPP & wMSB Rollout Roadmap (Sharegy)
-    dateFormat  YYYY-MM
-    section 1. Partnering & Verträge
-    Aggregator-Auswahl & NDA/Termsheet       :2026-10, 1M
-    wMSB-Kooperation & CLS-Schnittstelle     :2026-10, 1.5M
-    Rahmenvertrag BKV / Erlös-Clearing       :2026-11, 1M
-    section 2. Technische Integration
-    API/OpenADR-Anbindung Aggregator        :2026-11, 1.5M
-    CLS-Tunnel / SMGW Test-Prüfstand        :2026-12, 1M
-    Connect+ / Redispatch 2.0 Schnittstelle  :2026-12, 1M
-    section 3. Feldtest & Präqualifikation
-    Pilot-Flotte (20–50 Heimspeicher)        :2027-01, 1.5M
-    PQ-Test Regelleistung / aFRR             :2027-02, 1M
-    section 4. Go-Live & Skalierung
-    Kommerzieller Start 80/20 Clearing      :2027-03, 2M
+```
+[ Phase 1: Monat 1-2 ] ──> [ Phase 2: Monat 2-3 ] ──> [ Phase 3: Monat 3-4 ] ──> [ Phase 4: Monat 5+ ]
+  Partnering & Verträge      Schnittstellen & CLS       Feldtest & PQ-Test         Go-Live & Clearing
 ```
 
-### Phase 1: Partnering & Regulatorik (Monat 1–2)
+### 🔹 Phase 1: Partnering & Regulatorik (Monat 1–2)
 1. **Aggregator-Gespräche führen:** Kontaktaufnahme mit Next Kraftwerke, Statkraft oder Solandeo bzgl. Sub-Pool-Vermarktung für Heimspeicher und steuerbare Lasten (§ 14a EnWG).
 2. **wMSB-Partnerschaft schließen:** Rahmenvereinbarung mit Discovergy/inexogy oder Solandeo für Hardware-Lieferung, Zählertausch und API-Zugriff auf die 15m-Messwerte.
 3. **Marktstammdatenregister (MaStR):** Registrierung von Sharegy als Marktakteur (Dienstleister / Aggregator / Softwareplattform).
 
-### Phase 2: Technische Schnittstellen-Kopplung (Monat 2–3)
+### 🔹 Phase 2: Technische Schnittstellen-Kopplung (Monat 2–3)
 1. **Aggregator-Schnittstelle aktivieren:**
    * Anbindung der Sharegy Cloud an das Dispatching-Gateway des Aggregators via **OpenADR 2.0b**, **IEC 60870-5-104** oder **REST-Webhook**.
    * Testen des Sollwert-Empfangs (+kW Einspeisung, -kW Laden, Ramp-Rate in Sekunden).
@@ -93,14 +84,14 @@ gantt
 3. **Connect+ / Redispatch 2.0:**
    * Test der automatischen Erstellung und Übertragung der 96-Viertelstunden-Fahrpläne (`PT15M`).
 
-### Phase 3: Feldtest & Präqualifikation (Monat 3–4)
+### 🔹 Phase 3: Feldtest & Präqualifikation (Monat 3–4)
 1. **Pilotflotte ausrollen:** 20 bis 50 Test-Heimspeicher (z. B. Sungrow, SMA, Fronius, Deye) mit aktiver VPP-Einwilligung im Feld aufsetzen.
 2. **Abruf-Simulation:** Testen von Lastabwürfen und Schnelllade-Impulsen unter Einhaltung des **20 % Mindest-SoC-Reserveschutzes**.
 3. **Doppel-Prüfung (Audit Trail):** Vergleich der Soll-Abrufe mit den gemessenen wMSB-Zählerwerten (Soll vs. Ist).
 
-### Phase 4: Kommerzieller Go-Live (Monat 5+)
+### 🔹 Phase 4: Kommerzieller Go-Live (Monat 5+)
 1. **Freischaltung im Dashboard:** Alle Endkunden können den Flex-Bonus mit 1 Klick im [Smart Energy Optimizer](file:///c:/Users/Public/Dev/sharegy/frontend/src/pages/ControlPage.jsx) aktivieren.
-2. **Automatischer Monatsabschluss:** Sharegy zieht die Erlösabrechnung des Aggregators, berechnet den 80/20 Split und stellt Gutschrift-Gutschriften bereit.
+2. **Automatischer Monatsabschluss:** Sharegy zieht die Erlösabrechnung des Aggregators, berechnet den 80/20 Split und stellt Gutschriften bereit.
 
 ---
 
@@ -169,38 +160,49 @@ gantt
 
 ## 6. Technische Integrationsarchitektur
 
-```mermaid
-sequenceDiagram
-    autonumber
-    participant ÜNB as Übertragungsnetzbetreiber (ÜNB)
-    participant AGG as VPP-Aggregator / BKV (z. B. Next Kraftwerke)
-    participant SHAR as Sharegy Cloud Fleet Dispatcher
-    participant SMGW as wMSB Smart Meter Gateway (CLS)
-    participant HEMS as Sharegy HEMS Edge Controller
-    participant BAT as Heimspeicher / Wallbox
+Der genaue Ablauf eines Flexibilitäts-Abrufs vom Übertragungsnetzbetreiber bis zur Kundenbatterie:
 
-    Note over ÜNB,AGG: 1. Fahrplan & Regelleistungs-Ausschreibung (Day-Ahead / Intraday)
-    ÜNB->>AGG: Regelleistungs-Abruf: +500 kW für 15 Minuten
-    AGG->>SHAR: OpenADR Dispatch Event (Target: +500 kW, Duration: 15m)
-    
-    Note over SHAR: 2. Schwarm-Kalkulation & Flotten-Allokation
-    SHAR->>SHAR: Prüfe verfügbare Speicher (SoC > 20%, C-Rate <= 0.5C)
-    
-    par Paralleler Dispatch an 100 Speicher
-        SHAR->>SMGW: CLS-Steuerbefehl (Signed TLS)
-        SMGW->>HEMS: Lokale Sollwert-Vorgabe (+5.0 kW)
-        HEMS->>BAT: Modbus TCP Register Set (Discharge 5000 W)
-    end
-    
-    Note over BAT,HEMS: 3. Einspeisung & Telemetrie-Validierung
-    BAT-->>HEMS: Ist-Leistung: 4.980 W
-    HEMS-->>SHAR: Telemetrie-Push (1-Sekunden-Takt via WSS)
-    SHAR-->>AGG: Aggregierte Ist-Einspeisung (+498 kW Bestätigung)
-    AGG-->>ÜNB: Erfüllungsnachweis Regelleistung
-    
-    Note over SHAR: 4. Automatisches 80/20 Clearing am Monatsende
-    AGG->>SHAR: Erlösgutschrift (z. B. 10.000 €)
-    SHAR->>SHAR: 80% Pool-Gutschrift (8.000 € auf Kundenkonten) + 20% Plattform-Fee
+```
+[1. ÜNB (TenneT/Amprion)]
+        |
+        |  Bedarf: +500 kW Regelleistung (15 min)
+        v
+[2. VPP-Aggregator / BKV (z. B. Next Kraftwerke)]
+        |
+        |  OpenADR 2.0b Dispatch-Event (Target: +500 kW)
+        v
+[3. Sharegy Cloud Fleet Dispatcher]
+        |
+        |-- Schwarm-Kalkulation: Prüfe aktive Speicher (SoC > 20%, C-Rate <= 0.5C)
+        |-- Verteilung auf 100 Kundenspeicher (je 5,0 kW Sollwert)
+        |
+        +-----------------------------------------------+
+        |                                               |
+        v (TLS / CLS-Kanal)                             v (TLS / CLS-Kanal)
+[4a. Smart Meter Gateway Kunde A]              [4b. Smart Meter Gateway Kunde B]
+        |                                               |
+        | Modbus TCP (Set: Discharge 5000 W)            | Modbus TCP (Set: Discharge 5000 W)
+        v                                               v
+[5a. Heimspeicher Kunde A (5 kW)]              [5b. Heimspeicher Kunde B (5 kW)]
+        |                                               |
+        +───────────────────────┬───────────────────────+
+                                |
+                                |  1-Sekunden Telemetrie-Push (Ist: +498 kW)
+                                v
+                [6. Sharegy Aggregated Proof]
+                                |
+                                |  Erfüllungsnachweis Regelleistung
+                                v
+                    [7. Aggregator / ÜNB]
+                                |
+                                |  Monatsabschluss: Erlösgutschrift
+                                v
+                [8. Sharegy 80/20 Clearing Engine]
+                                |
+                    +-----------+-----------+
+                    |                       |
+                    v (80 % Gutschrift)     v (20 % Marge)
+              Kunden-Konto            Sharegy Plattform
 ```
 
 ---
@@ -209,48 +211,52 @@ sequenceDiagram
 
 ### ✉️ Vorlage: Erstkontakt an Direktvermarkter / Aggregatoren
 
-> **Betreff:** Kooperationsanfrage: Flexibilitäts-Aggregator & VPP-Vermarktung für dezentrale Heimspeicher-Flotte (Sharegy)  
->  
-> Sehr geehrte Damen und Herren,  
-> sehr geehrtes Flexibilitäts- & Partnering-Team,  
->  
-> Sharegy betreibt eine modulare Smart Energy Management Plattform (HEMS) für private und gewerbliche Prosumer mit stark wachsender installierter Basis in Deutschland und Österreich.  
->  
-> Wir bündeln Heimspeicher (Sungrow, SMA, Fronius, Deye u. a.), steuerbare Verbrauchseinrichtungen gem. § 14a EnWG sowie dezentrale PV-Anlagen zu einem hochreaktiven, virtuellen Schwarmkraftwerk (VPP). Unsere Plattform unterstützt Sub-Sekunden-Telemetrie, OpenADR 2.0b und standardisierte Dispatching-Schnittstellen.  
->  
-> Für die kommerzielle Vermarktung unseres Flexibilitäts-Pools (Spotmarkt-Arbitrage, aFRR/mFRR und Redispatch 2.0) suchen wir einen erfahrenen Direktvermarktungs- und Bilanzkreispartner (BKV).  
->  
-> Wir möchten Ihnen gerne unser System, die Schnittstellen-Architektur sowie unsere Flotten-Roadmap in einem 30-minütigen Gespräch vorstellen.  
->  
-> Bitte teilen Sie uns mit, welcher Ansprechpartner aus Ihrem Hause für ein kurzes Kennenlernen zur Verfügung steht.  
->  
-> Mit freundlichen Grüßen,  
-> **Geschäftsführung Sharegy**  
-> Web: [sharegy.de](https://sharegy.de) | E-Mail: `kontakt@sharegy.de`
+```text
+Betreff: Kooperationsanfrage: Flexibilitäts-Aggregator & VPP-Vermarktung für dezentrale Heimspeicher-Flotte (Sharegy)
+
+Sehr geehrte Damen und Herren,
+sehr geehrtes Flexibilitäts- & Partnering-Team,
+
+Sharegy betreibt eine modulare Smart Energy Management Plattform (HEMS) für private und gewerbliche Prosumer mit stark wachsender installierter Basis in Deutschland und Österreich.
+
+Wir bündeln Heimspeicher (Sungrow, SMA, Fronius, Deye u. a.), steuerbare Verbrauchseinrichtungen gem. § 14a EnWG sowie dezentrale PV-Anlagen zu einem hochreaktiven, virtuellen Schwarmkraftwerk (VPP). Unsere Plattform unterstützt Sub-Sekunden-Telemetrie, OpenADR 2.0b und standardisierte Dispatching-Schnittstellen.
+
+Für die kommerzielle Vermarktung unseres Flexibilitäts-Pools (Spotmarkt-Arbitrage, aFRR/mFRR und Redispatch 2.0) suchen wir einen erfahrenen Direktvermarktungs- und Bilanzkreispartner (BKV).
+
+Wir möchten Ihnen gerne unser System, die Schnittstellen-Architektur sowie unsere Flotten-Roadmap in einem 30-minütigen Gespräch vorstellen.
+
+Bitte teilen Sie uns mit, welcher Ansprechpartner aus Ihrem Hause für ein kurzes Kennenlernen zur Verfügung steht.
+
+Mit freundlichen Grüßen,
+Geschäftsführung Sharegy
+Web: https://sharegy.de | E-Mail: kontakt@sharegy.de
+```
 
 ---
 
 ### ✉️ Vorlage: Erstkontakt an wettbewerbliche Messstellenbetreiber (wMSB)
 
-> **Betreff:** Kooperationsanfrage Smart Meter Rollout & CLS-Gateway Integration (Sharegy / wMSB)  
->  
-> Sehr geehrte Damen und Herren,  
->  
-> im Rahmen unseres Rollouts für ganzheitliches Home Energy Management und Mieterstrom gem. § 42b EnWG binden wir Smart Meter Gateways (iMSys) und CLS-Steuerboxen in Mehrfamilienhäusern und Einfamilienhäusern ein.  
->  
-> Wir suchen einen leistungsstarken Messstellenbetreiber-Partner für:  
-> 1. Die zuverlässige Zählersetzung und den Rollout von Smart Meter Gateways bei unseren Kunden.  
-> 2. Die Bereitstellung von 15-Minuten-Lastgängen via standardisierter REST-API / Cloud-Bridge.  
-> 3. Die Nutzung des CLS-Kanals zur netzdienlichen Steuerung nach § 14a EnWG.  
->  
-> Gerne möchten wir die Rahmenbedingungen für eine Kooperationsvereinbarung und technische Schnittstellen mit Ihnen besprechen.  
->  
-> Mit freundlichen Grüßen,  
-> **Sharegy Team**
+```text
+Betreff: Kooperationsanfrage Smart Meter Rollout & CLS-Gateway Integration (Sharegy / wMSB)
+
+Sehr geehrte Damen und Herren,
+
+im Rahmen unseres Rollouts für ganzheitliches Home Energy Management und Mieterstrom gem. § 42b EnWG binden wir Smart Meter Gateways (iMSys) und CLS-Steuerboxen in Mehrfamilienhäusern und Einfamilienhäusern ein.
+
+Wir suchen einen leistungsstarken Messstellenbetreiber-Partner für:
+1. Die zuverlässige Zählersetzung und den Rollout von Smart Meter Gateways bei unseren Kunden.
+2. Die Bereitstellung von 15-Minuten-Lastgängen via standardisierter REST-API / Cloud-Bridge.
+3. Die Nutzung des CLS-Kanals zur netzdienlichen Steuerung nach § 14a EnWG.
+
+Gerne möchten wir die Rahmenbedingungen für eine Kooperationsvereinbarung und technische Schnittstellen mit Ihnen besprechen.
+
+Mit freundlichen Grüßen,
+Sharegy Team
+```
 
 ---
 
-## 📌 Zusammenfassung & Nächste Sofort-Aktionen
+## 8. Sofort-Aktionsliste
 
 1. **Top 3 Aggregatoren anschreiben:** Next Kraftwerke, Statkraft und Solandeo mit dem Muster-Anschreiben kontaktieren.
 2. **Marktstammdatenregister:** Stammdaten und Unternehmensprofil von Sharegy als Dienstleister verifizieren.
