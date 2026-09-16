@@ -2624,6 +2624,618 @@ As a **Tenant Administrator (Property Manager / Community Admin)**, you manage a
                 "is_featured": True,
                 "sort_order": 2,
             },
+            # ---------------------------------------------------------------------
+            # 11. VPP & FLEXIBILITÄTS-BONUS: DER LEITFADEN FÜR EMS-USER
+            # ---------------------------------------------------------------------
+            {
+                "category": cats["optimizer"],
+                "slug": "vpp-flexibilitaets-bonus-heimspeicher",
+                "context_key": "vpp_ems_guide",
+                "title_de": "VPP & Flexibilitäts-Bonus: Heimspeicher im Schwarm vernetzen & monetarisieren",
+                "title_en": "VPP & Flexibility Bonus: Monetize Home Batteries in the Swarm Network",
+                "summary_de": "Was ist ein Virtuelles Kraftwerk (VPP)? Wie private Heimspeicherbetreiber durch intelligente Schwarmsteuerung Zusatzerlöse erzielen, 80% Erlösbeteiligung erhalten und durch 20% Mindest-SoC-Reserven volle Eigenverbrauchs-Sicherheit behalten.",
+                "summary_en": "What is a Virtual Power Plant (VPP)? How home battery owners generate extra income through intelligent swarm pooling, receive an 80/20 revenue share, and maintain 100% self-consumption reliability with a guaranteed 20% min-SoC reserve.",
+                "content_de": r"""# 🔋 VPP & Flexibilitäts-Bonus: Dein Heimspeicher als Kraftwerk
+
+Ein **Virtuelles Kraftwerk (Virtual Power Plant, VPP)** ist ein intelligenter, digital vernetzter Verbund tausender dezentraler Energieanlagen – wie deiner Photovoltaikanlage, deinem Batteriespeicher, deiner Wärmepumpe oder deiner Wallbox.
+
+Durch die Vernetzung mit Sharegy wird dein privater Heimspeicher Teil eines leistungsstarken Schwarmspeichers, der das öffentliche Stromnetz stabilisiert und dir zusätzliche finanzielle Erträge einbringt.
+
+---
+
+## 🌟 Was ist der Flexibilitäts-Bonus und wie funktioniert er?
+
+Stromnetze geraten durch schwankende Wind- und Sonnenenergie immer häufiger in Ungleichgewichte (Über- oder Unterdeckung). Übertragungsnetzbetreiber (ÜNB) zahlen hohe Prämien für sekundenschnelle Ausgleichsenergie (Regelleistung wie **aFRR/mFRR**) und Engpassmanagement (**Redispatch 2.0**).
+
+Bislang konnten nur Großkraftwerke oder industrielle Megawatt-Batterien an diesen lukrativen Energiemärkten teilnehmen. **Sharegy demokratisiert diesen Markt:**
+1. **Schwarm-Bündelung**: Sharegy bündelt die freie Speicherkapazität vieler privater Heimspeicher zu einem virtuellen Großspeicher.
+2. **KI-gestützte Vermarktung**: Unser Algorithmus analysiert Wetterprognosen, Börsenstrompreise (Day-Ahead & Intraday) sowie deinen individuellen Haushaltsbedarf.
+3. **Automatisierte Bereitstellung**: Wenn das Stromnetz Flexibilität anfordert, lädt oder entlädt der Speicher für wenige Minuten gezielt Strom – vollautomatisch und unbemerkt im Hintergrund.
+
+---
+
+## 💰 Deine Vorteile als EMS-Nutzer
+
+### 1. 💶 80/20 Erlösaufteilung (Maximaler Gewinn für dich)
+* **80 % der erwirtschafteten Markterlöse** fließen direkt als **Flexibilitäts-Bonus** auf dein Konto oder werden mit deiner Stromrechnung gutgeschrieben.
+* **20 % Plattform- & Clearinggebühr** deckt die regulatorische Marktteilnahme, den Bilanzkreis und die automatisierte Abrechnung ab.
+* In typischen Haushalten mit 10 kWh Speicher entspricht dies einem jährlichen Zusatzerlös von **120 € bis 350 €**, ohne zusätzliche Investition.
+
+### 2. 🛡️ 100% Eigenverbrauchs-Sicherheit & 20% Mindest-SoC
+* **Vorrang für deinen Haushalt**: Dein Eigenbedarf hat stets oberste Priorität. Sharegy greift niemals auf Energie zu, die du für deinen eigenen Abend- oder Nachtverbrauch benötigst.
+* **Garantierte Mindest-Reserve**: Im EMS ist ein Mindestladezustand (Standard: **20 % min-SoC**) fest verankert. Diese Notstrom- und Basiskapazität bleibt für externe Abrufe gesperrt.
+* Du kannst diesen Mindest-SoC im Einstellungsmenü jederzeit individuell nach deinen Wünschen anpassen (z. B. auf 30% im Winter).
+
+### 3. 🔋 Schonung der Batterie-Lebensdauer
+* **Sanfte C-Raten**: Lade- und Entladeimpulse werden auf schonende Raten limitiert (max. 0,5C), um thermischen Stress zu vermeiden.
+* **Keine Tiefentladung**: Das Batteriemanagementsystem (BMS) deines Wechselrichters behält stets die physikalische Hoheit.
+* **Zyklenschutz**: Das VPP führt maximal 0,3 bis 0,8 zusätzliche Teilzyklen pro Tag aus – weit innerhalb der Hersteller-Garantiegrenzen.
+
+---
+
+## 🚀 So aktivierst du das VPP in deinem Dashboard
+
+1. Öffne im linken Menü den Bereich **Smart Energy Optimizer** (`/app/optimizer`).
+2. Scrolle zum Bereich **VPP & Flexibilitäts-Vermarktung**.
+3. Aktiviere den Schalter **"Am Schwarm-VPP teilnehmen (Flex-Bonus aktivieren)"**.
+4. Wähle deinen gewünschten **Mindest-Reserve-SoC** (z. B. 20%).
+5. Bestätige die Aktivierung. Ab der nächsten Viertelstunde optimiert Sharegy deinen Speicher automatisch für das Stromnetz!
+
+Im Dashboard siehst du unter *Abrechnung & Erträge* live deine aufgelaufenen Boni und kannst monatliche Abrechnungsnachweise jederzeit als PDF herunterladen.
+""",
+                "content_en": r"""# 🔋 VPP & Flexibility Bonus: Turn Your Home Battery into a Virtual Power Plant
+
+A **Virtual Power Plant (VPP)** is an intelligent, cloud-connected network of distributed energy resources – such as your rooftop solar system, home battery, heat pump, or EV charger.
+
+By connecting to Sharegy, your home battery joins a high-performance swarm that helps balance the public power grid while generating passive income for you.
+
+---
+
+## 🌟 What is the Flexibility Bonus and How Does It Work?
+
+As renewable energy expands, grid operators face frequent supply-demand imbalances. Transmission System Operators (TSOs) pay substantial premiums for fast balancing power (**aFRR / mFRR**) and congestion management (**Redispatch 2.0**).
+
+Historically, only massive industrial power plants could participate. **Sharegy opens this revenue stream to homeowners:**
+1. **Swarm Aggregation**: Sharegy pools idle capacity from thousands of residential batteries into a unified megawatt-scale battery swarm.
+2. **AI-Driven Market Optimization**: Our algorithms evaluate solar forecasts, dynamic electricity prices, and your household consumption habits.
+3. **Automated Grid Support**: When the grid needs balancing, your battery charges or discharges briefly and automatically without disturbing your routine.
+
+---
+
+## 💰 Key Benefits for EMS Owners
+
+### 1. 💶 80/20 Revenue Share (Maximum Payout for You)
+* **80% of all generated market earnings** are credited directly to you as a **Flexibility Bonus** (bank transfer or bill credit).
+* **20% platform fee** covers market certification, balancing group management, and settlement.
+* For a typical 10 kWh battery, this yields **€120 to €350 per year** in pure extra cash flow.
+
+### 2. 🛡️ 100% Self-Consumption Priority & 20% Min-SoC Reserve
+* **Your Household Comes First**: Local solar self-consumption always takes precedence over grid services.
+* **Guaranteed Reserve**: A configurable minimum state of charge (default: **20% min-SoC**) is strictly locked for household and backup needs.
+* You can adjust this threshold anytime in your optimizer settings (e.g. increase to 30% in winter).
+
+### 3. 🔋 Battery Health & Longevity Protection
+* **Gentle C-Rates**: Charge/discharge power is capped at conservative levels (max 0.5C) to minimize heat and cell wear.
+* **BMS Safety**: Your inverter's physical Battery Management System maintains ultimate safety override.
+* **Cycle Guard**: VPP operations typically add only 0.3 to 0.8 partial cycles per day, well within manufacturer warranty limits.
+
+---
+
+## 🚀 How to Enable VPP in Your Dashboard
+
+1. Navigate to **Smart Energy Optimizer** (`/app/optimizer`).
+2. Scroll to the **VPP & Flexibility Markets** section.
+3. Toggle the switch **"Participate in Swarm VPP (Enable Flex Bonus)"**.
+4. Set your preferred **Minimum Reserve SoC** (e.g. 20%).
+5. Save changes. Starting with the next 15-minute interval, your storage actively participates in the balancing market!
+""",
+                "tags": ["vpp", "virtuelles kraftwerk", "flexibilitaets bonus", "heimspeicher", "schwarmbatterie", "aFRR", "redispatch 2.0", "optimizer", "ertrag"],
+                "is_featured": True,
+                "sort_order": 3,
+            },
+            # ---------------------------------------------------------------------
+            # 12. ENERGY SHARING & COMMUNITY COCKPIT: ANLEITUNG FÜR NUTZER & ADMINS
+            # ---------------------------------------------------------------------
+            {
+                "category": cats["billing"],
+                "slug": "energy-sharing-und-community-cockpit",
+                "context_key": "energy_sharing_guide",
+                "title_de": "Energy Sharing & Community Cockpit: Strom im Quartier teilen & abrechnen",
+                "title_en": "Energy Sharing & Community Cockpit: Local Energy Sharing & Administration",
+                "summary_de": "Durchgängige Anleitung für Energy Sharing gem. § 42b EnWG: Gemeinschaftliche Gebäudeversorgung, 15-Minuten-Echtzeit-Clearing, Verteilschlüssel und das Community-Cockpit für Administratoren.",
+                "summary_en": "End-to-end guide for Energy Sharing under § 42b EnWG: Local multi-party sharing, 15-minute real-time clearing, allocation keys, and community admin management.",
+                "content_de": r"""# 🤝 Energy Sharing & Community Cockpit: Strom in der Nachbarschaft teilen
+
+Mit dem **Sharegy Energy Sharing Modul** können Mehrfamilienhäuser, Eigentümergemeinschaften (WEGs), Gewerbeparks und Nachbarschaftsquartiere lokal erzeugten Solarstrom gemeinschaftlich nutzen und rechtssicher abrechnen (**Gemeinschaftliche Gebäudeversorgung gem. § 42b EnWG**).
+
+---
+
+## 👥 Teil 1: Anleitung für Teilnehmer & Bewohner (Community-Mitglieder)
+
+### 1. Beitritt zu einer Energy Community
+1. Du erhältst von deiner Hausverwaltung oder dem Quartiers-Admin einen **Einladungslink oder QR-Code**.
+2. Registriere dich bei Sharegy oder verknüpfe deinen bestehenden Account.
+3. Bestätige deine Wohneinheit (z. B. *Wohnung 4, 1. OG*) und trage bei Bedarf deine Zählernummer ein.
+
+### 2. Das Bewohner-Dashboard (`/app/community`)
+* **Live-Sharing-Matrix**: Sieh in Echtzeit, wie viel Solarstrom die Dachanlage gerade produziert, wie viel in deiner Wohnung ankommt und wer im Haus gerade versorgt wird.
+* **Deine Ersparnis**: Jeder Kilowattstunde Solarstrom aus der Community ersetzt teuren Netzbezug (Ersparnis i. d. R. 10 bis 20 Cent pro kWh).
+* **Monatliche Abrechnungsübersicht**: Lade deine persönlichen Monatsnachweise als transparente PDF-Rechnung herunter.
+
+---
+
+## 🏛️ Teil 2: Anleitung für Community-Administratoren & Hausverwaltungen
+
+Als Community-Admin verwaltest du die energiewirtschaftlichen Parameter, die Zählerzuordnung und die monatliche Abrechnung.
+
+### 1. Community anlegen & Zählerstruktur einrichten
+* Navigiere im Menü zur **Administration → Community Cockpit** (`/app/tenant` bzw. `/app/admin`).
+* Klicke auf **"Neue Community anlegen"** und definiere den Namen sowie die Postleitzahl.
+* Hinterlege den **Netzanschlusspunkt (NAP)**: Wähle den Hauptzähler oder erstelle einen **Virtuellen Summenzähler**, der die Erzeugung und den Netzbezug aggregiert.
+
+### 2. Verteilschlüssel (§ 42b EnWG) wählen
+Sharegy unterstützt alle gesetzlich anerkannten Allokationsmodelle:
+1. **Dynamisch (Zeitgleich nach 15-Minuten-Intervall - Empfohlen)**:
+   * Der in einer Viertelstunde erzeugte Solarstrom wird exakt im Verhältnis des tatsächlichen gleichzeitigen Verbrauchs auf alle aktiven Wohnungen aufgeteilt.
+   * *Vorteil*: Höchste Gerechtigkeit – wer Strom verbraucht wenn die Sonne scheint, profitiert am meisten.
+2. **Statisch (nach Miteigentumsanteilen / MEA oder qm)**:
+   * Jede Partei erhält einen festen prozentualen Anteil der Erzeugung.
+3. **Hybrid (Prioritär + Überschuss)**:
+   * Basis-Kontingent je Wohneinheit, Überschüsse werden dynamisch geteilt.
+
+### 3. Mitglieder einladen & Zähler zuweisen
+* Klicke auf **"Mitglied einladen"** und gib die E-Mail-Adresse sowie die Wohnungsnummer an.
+* Weise der Wohneinheit den entsprechenden Unterzähler (Shelly Pro 3EM, Modbus Zähler, Discovergy wMSB oder Smart Meter Gateway) zu.
+
+### 4. Tarife festlegen & 1-Klick Monatsabrechnung
+* **Solarstrom-Tarif**: z. B. `18,50 ct/kWh` (brutto).
+* **Reststrom-Tarif**: z. B. `32,00 ct/kWh` (vom Versorger durchgeleitet).
+* **Grundgebühr / Messstellenbetrieb**: z. B. `4,50 € / Monat`.
+* **Monatsabschluss ausführen**: Am Monatsende klickst du auf **"Abrechnungslauf starten"**. Sharegy saldiert alle 2.880 bis 2.976 Viertelstundenwerte, generiert eichrechtskonforme PDF-Abrechnungen für jedes Mitglied und stellt DATEV/CSV-Exporte für deine Buchhaltung bereit.
+""",
+                "content_en": r"""# 🤝 Energy Sharing & Community Cockpit: Local Power Sharing & Administration
+
+With the **Sharegy Energy Sharing Module**, multi-family residences, homeowner associations (HOAs), commercial buildings, and local quarters share rooftop solar power compliant with **§ 42b EnWG (Collective Building Supply)**.
+
+---
+
+## 👥 Part 1: Guide for Residents & Community Members
+
+### 1. Joining an Energy Community
+1. Receive an **Invitation Link or QR Code** from your property manager.
+2. Sign up or log into your Sharegy account.
+3. Confirm your apartment unit (e.g. *Apt 4, 1st Floor*) and verify your sub-meter number.
+
+### 2. Member Dashboard Features (`/app/community`)
+* **Live Sharing Matrix**: View in real time how much solar power is produced on the roof, how much flows into your home, and how much is shared across neighbors.
+* **Direct Cost Savings**: Every shared solar kWh replaces expensive grid electricity, typically saving 10 to 20 cents per kWh.
+* **Monthly Invoices**: Download transparent, itemized PDF statements showing your exact solar vs. grid consumption.
+
+---
+
+## 🏛️ Part 2: Guide for Community Admins & Property Managers
+
+As a Community Administrator, you manage meter topology, billing formulas, and automated settlement runs.
+
+### 1. Setting Up Community & Meter Hierarchy
+* Navigate to **Administration → Community Cockpit** (`/app/tenant`).
+* Click **"Create Community"** and specify the site name and address.
+* Connect the **Grid Connection Point (NAP)**: Bind your main utility meter or set up a **Virtual Master Meter**.
+
+### 2. Selecting Allocation Schemes (§ 42b EnWG)
+1. **Dynamic (Concurrent 15-Minute Intervals - Recommended)**:
+   * Solar generation is allocated proportionally to residents consuming power in the exact same 15-minute window.
+   * Maximizes fairness and economic utilization.
+2. **Static (Ownership Shares / MEA / Area-based)**:
+   * Fixed percentage of solar output assigned to each unit.
+3. **Hybrid**:
+   * Priority self-consumption quota plus dynamic surplus sharing.
+
+### 3. Inviting Members & Mapping Sub-Meters
+* Click **"Invite Member"** with the tenant email and apartment ID.
+* Map the resident's physical sub-meter (Shelly Pro 3EM, Modbus meter, wMSB Discovergy, or Smart Meter Gateway).
+
+### 4. Tariff Setup & 1-Click Monthly Billing Run
+* Configure Community Solar Rate (e.g. `18.50 ct/kWh`), Grid Backup Rate (e.g. `32.00 ct/kWh`), and Base Fee.
+* At the end of each billing cycle, trigger **"Run Settlement"**. Sharegy calculates all 2,900+ 15-minute intervals, renders audit-ready PDF invoices, and generates DATEV/CSV exports for ERP systems.
+""",
+                "tags": ["energy sharing", "community", "§ 42b EnWG", "gemeinschaftliche gebaeudeversorgung", "quartiersstrom", "admin", "abrechnung", "verteilschluessel"],
+                "is_featured": True,
+                "sort_order": 4,
+            },
+            # ---------------------------------------------------------------------
+            # 13. PARTNER-LEITFADEN: FLOTTENMANAGEMENT & ONBOARDING FÜR INSTALLATEURE
+            # ---------------------------------------------------------------------
+            {
+                "category": cats["devices-protocols"],
+                "slug": "partner-cockpit-flottenmanagement-onboarding",
+                "context_key": "partner_guide",
+                "title_de": "Partner-Leitfaden: Flottenmanagement, Wechselrichter-Onboarding & Kundenservice",
+                "title_en": "Partner & Installer Guide: Fleet Management, Inverter Onboarding & Service",
+                "summary_de": "Die durchgängige Anleitung für Solarteure, Elektroinstallateure und Partnerbetriebe: Kundenanlagen per QR-Code anlegen, Wechselrichter & Speicher via Modbus/WSS koppeln, 3-Sekunden-Selbsttests durchführen und Kundenservice effizient managen.",
+                "summary_en": "Complete guide for solar installers, electricians, and partner businesses: Onboarding customer systems via QR code, connecting inverters via Modbus/WSS, running 3-second self-tests, and managing fleet health.",
+                "content_de": r"""# 🔧 Partner-Leitfaden: Flottenmanagement, Wechselrichter-Onboarding & Kundenservice
+
+Das **Sharegy Partner Cockpit** (`/app/partner`) wurde speziell für Solarteure, Elektro-Fachbetriebe, Stadtwerke und Energieberater entwickelt, um Hunderte Kundenanlagen zentral zu überwachen, schnell in Betrieb zu nehmen und perfekten After-Sales-Service zu bieten.
+
+---
+
+## 📊 1. Flotten-Dashboard & Health-Monitoring
+
+Im Partner-Cockpit behältst du den Überblick über dein gesamtes Kundenportfolio:
+* **Flotten-Status**: Aktive Anlagen, Gesamterzeugung (kW / MWh), Speicher-Füllstände und Warnmeldungen.
+* **Health-Score (0 - 100%)**: Erkennt sofort Leistungsabfälle, defekte Strings, Kommunikationsabbrüche oder Phasenasymmetrien.
+* **Priorisierte Ticket- & Fehlerliste**: Sortiert Störungen nach Dringlichkeit (z. B. *Wechselrichter Offline > 2h*, *Isolationsfehler String 2*).
+
+---
+
+## ⚡ 2. Schritt-für-Schritt Onboarding einer neuen Kundenanlage
+
+### Schritt 1: Kundenanlage im Partner-Portal anlegen
+1. Klicke im Partner-Cockpit auf **"+ Neue Kundenanlage anlegen"**.
+2. Gib den Kundennamen, die Adresse sowie die installierte PV-Leistung (kWp) und Speicherkapazität (kWh) ein.
+3. Sharegy generiert automatisch einen **Kunden-Einladungslink und QR-Code** für die spätere Übergabe.
+
+### Schritt 2: Wechselrichter & Smart Meter anbinden
+Sharegy unterstützt alle marktführenden Hersteller ohne proprietäre Zusatzboxen:
+
+| Hersteller / System | Schnittstelle | Standard-Port & Einstellungen |
+| :--- | :--- | :--- |
+| **Sungrow** (SHxxRT, SGxx) | Modbus TCP | Port `502`, Unit ID `1` |
+| **Fronius** (Gen24, Symo) | SolarAPI / Modbus TCP | Port `502`, SolarAPI JSON aktiviert |
+| **SMA** (Tripower, Sunny Boy) | Speedwire / Modbus TCP | Port `502`, Unit ID `3` |
+| **SolarEdge** (SE-Serie) | Modbus TCP (SunSpec) | Port `1502` oder `502`, Unit ID `1` |
+| **Deye / Growatt / Huawei** | Modbus TCP / RTU Bridge | Port `502`, Register-Map SunSpec |
+| **Shelly Pro 3EM / Pro 4PM** | WebSocket (WSS) Outbound | Port `443` (Verschlüsseltes Push-Protokoll) |
+| **Home Assistant** | Native HACS Bridge | 1-Klick Entity Picker |
+
+*Tipp für Vor-Ort-Installateure*: Bei gesicherten Routern genügt die Installation eines **Shelly Pro 3EM** auf der Hutschiene mit Outbound-WSS oder die Aktivierung von Modbus TCP im Wechselrichter-Menü.
+
+### Schritt 3: Wallboxen & Wärmepumpen einbinden
+* **Wallbox (OCPP 1.6-J)**: Trage in der Wallbox (z. B. ABL, Mennekes, Alfen, go-e) einfach die WebSocket-URL `wss://sharegy.de/ocpp/<ANLAGEN_ID>` ein.
+* **Wärmepumpe (SG Ready / Modbus)**: Verbinde das SG-Ready-Relais mit einem Shelly Plus 1 oder steuere modulierende Wärmepumpen via Modbus TCP.
+
+---
+
+## 🧪 3. Der 3-Sekunden-Selbsttest & Telemetrie-Validierung
+
+Vor der Abreise von der Baustelle führst du den integrierten **Inbetriebnahmetest** durch:
+1. Öffne die Anlagendetails im Partner-Cockpit und klicke auf **"3-Sekunden-Diagnosetest starten"**.
+2. Sharegy prüft automatisiert:
+   * ✅ **Phasenfolge & Vorzeichen**: Misst der Zähler Einspeisung positiv und Bezug negativ? (Verhindert verdrehte Stromwandler-Klemmen).
+   * ✅ **Latenz & Update-Frequenz**: Treffen Telemetriewerte im 1-Sekunden- bis 5-Sekunden-Takt ein?
+   * ✅ **Speicher-Ansprechbarkeit**: Reagiert das BMS auf Sollwert-Vorgaben?
+3. Nach erfolgreichem Test wird ein **digitales Inbetriebnahmeprotokoll (PDF)** mit Zeitstempel erzeugt.
+
+---
+
+## 🤝 4. Übergabe an den Kunden (Owner Handover)
+
+1. Lass den Kunden den **Übergabe-QR-Code** mit seinem Smartphone scannen.
+2. Der Kunde erstellt sein persönliches Passwort und hat sofort Zugriff auf sein **Private EMS Dashboard**.
+3. **Dauerhafter Wartungszugang**: Deine Firma bleibt als betreuender Fachpartner hinterlegt. Bei Fehlern wirst du automatisch benachrichtigt und kannst Ferndiagnosen ohne Anfahrt durchführen.
+""",
+                "content_en": r"""# 🔧 Partner & Installer Guide: Fleet Management, Inverter Onboarding & Service
+
+The **Sharegy Partner Cockpit** (`/app/partner`) is engineered for solar installers, master electricians, and municipal utilities to manage hundreds of customer installations from a unified dashboard.
+
+---
+
+## 📊 1. Fleet Dashboard & Health Monitoring
+
+Monitor your entire customer portfolio at a glance:
+* **Fleet Overview**: Total live generation (kW / MWh), storage states, and active fleet capacity.
+* **Health Score (0 - 100%)**: Automatically detects underperforming strings, reversed CT clamps, or communication losses.
+* **Smart Alert Queue**: Prioritizes issues by severity (e.g. *Inverter Offline > 2h*, *Isolation Fault String 2*).
+
+---
+
+## ⚡ 2. Step-by-Step Customer Plant Onboarding
+
+### Step 1: Create Plant in Partner Portal
+1. Navigate to the Partner Cockpit and click **"+ Onboard New Plant"**.
+2. Enter the customer details, installed solar capacity (kWp), and battery size (kWh).
+3. Sharegy generates an instant **Handover QR Code & Activation Link**.
+
+### Step 2: Connect Inverters & Smart Meters
+Sharegy integrates with all major hardware protocols out of the box:
+
+| Manufacturer | Interface | Default Port & Settings |
+| :--- | :--- | :--- |
+| **Sungrow** (SHxxRT, SGxx) | Modbus TCP | Port `502`, Unit ID `1` |
+| **Fronius** (Gen24, Symo) | SolarAPI / Modbus TCP | Port `502`, SunSpec Enabled |
+| **SMA** (Tripower, Sunny Boy) | Speedwire / Modbus TCP | Port `502`, Unit ID `3` |
+| **SolarEdge** (SE Series) | Modbus TCP | Port `1502` / `502`, Unit ID `1` |
+| **Deye / Growatt / Huawei** | Modbus TCP / RTU | Port `502`, SunSpec register map |
+| **Shelly Pro 3EM / 4PM** | WebSocket (WSS) Outbound | Port `443` (Encrypted Push) |
+| **Home Assistant** | Native HACS Bridge | 1-Click Entity Picker |
+
+### Step 3: Add EV Wallboxes & Heat Pumps
+* **OCPP 1.6-J Chargers**: Set the charger's Central System URL to `wss://sharegy.de/ocpp/<PLANT_ID>`.
+* **SG-Ready Heat Pumps**: Trigger thermal storage boosts using dry contacts or Modbus TCP registers.
+
+---
+
+## 🧪 3. The 3-Second Diagnostics Test
+
+Validate installations before leaving the site:
+1. Open the plant view and click **"Run 3-Second Diagnostics"**.
+2. Automated checks verify:
+   * ✅ **Phase Direction & CT Orientation**: Verifies correct sign (+/-) on grid import and feed-in.
+   * ✅ **Telemetry Stream Health**: Ensures sub-5-second update intervals.
+   * ✅ **Inverter & Battery Control Loop**: Confirms remote setpoint response.
+3. Automatically generates an **Audit-Ready Commissioning Certificate (PDF)**.
+
+---
+
+## 🤝 4. Seamless Customer Handover
+
+1. Have the homeowner scan the **Handover QR Code**.
+2. The customer activates their **Private EMS Dashboard**.
+3. Your installer account retains remote maintenance access for proactive servicing and warranty support.
+""",
+                "tags": ["partner", "solarteur", "installateur", "flottenmanagement", "inbetriebnahme", "modbus tcp", "shelly", "ocpp", "health score", "selbsttest"],
+                "is_featured": True,
+                "sort_order": 5,
+            },
+            # ---------------------------------------------------------------------
+            # 14. MIETERSTROM-LEITFADEN: ABRECHNUNG, UNTERZÄHLER & VERWALTUNG
+            # ---------------------------------------------------------------------
+            {
+                "category": cats["billing"],
+                "slug": "mieterstrom-abrechnung-und-zaehlerverwaltung",
+                "context_key": "mieterstrom_guide",
+                "title_de": "Mieterstrom & Unterzähler: Abrechnung, Transparenz & Mieterverwaltung",
+                "title_en": "Tenant Power & Sub-Metering: Billing, Resident Transparency & Management",
+                "summary_de": "Der umfassende Leitfaden für Mieter und Vermieter: Günstiger Vor-Ort-Solarstrom ohne Netzentgelte, eichrechtskonforme Unterzähler, automatisches Monats-Clearing und reibungslose Mieterwechsel.",
+                "summary_en": "Comprehensive guide for tenants and landlords: Cost-effective local solar power without grid fees, certified sub-metering, automated monthly clearing, and effortless tenant transitions.",
+                "content_de": r"""# 🏘️ Mieterstrom & Unterzähler: Transparente Solarstrom-Versorgung im Mehrfamilienhaus
+
+**Mieterstrom** ermöglicht es Mieterinnen und Mietern in Mehrfamilienhäusern, sauberen Solarstrom direkt vom Dach ihres Wohnhauses zu beziehen – ohne Netzentgelte, Konzessionsabgaben und Stromsteuer auf den erzeugten Solaranteil.
+
+Sharegy automatisiert die komplette Messung, 15-Minuten-Saldierung und Abrechnung zwischen Vermieter, Hausverwaltung und Mieter.
+
+---
+
+## 💡 Warum lohnt sich Mieterstrom für alle Beteiligten?
+
+* **Für Mieter**:
+  * **20 % bis 35 % Ersparnis** gegenüber dem örtlichen Grundversorger.
+  * Reiner Ökostrom direkt vom eigenen Hausdach.
+  * Volle Transparenz über das Smartphone-Dashboard (`/app/community`).
+* **Für Vermieter & Eigentümer**:
+  * Attraktive Rendite auf die PV-Investition (höhere Erlöse als die reine EEG-Einspeisevergütung).
+  * Wertsteigerung der Immobilie und Erfüllung von ESG- und Effizienzhaus-Kriterien.
+  * Vollautomatisierte Abrechnung ohne manuelles Zählerablesen.
+
+---
+
+## 📐 Die Zählerarchitektur im Mieterstrom-Modell
+
+Um Mieterstrom rechtssicher abzurechnen, setzt Sharegy auf zwei bewährte Messkonzepte:
+
+### Modell A: Virtueller Summenzähler mit Unterzählern (Hutschienen-Zähler)
+* **Netzanschlusspunkt (NAP)**: Ein offizieller Zweirichtungszähler des Messstellenbetreibers misst den Gesamtbezug und die Gesamteinspeisung des Gebäudes.
+* **Wohnungs-Unterzähler**: In jeder Wohnungsverteilung sitzt ein digitaler MID-konformer Zähler (z. B. Shelly Pro 3EM, Modbus TCP Drehstromzähler oder M-Bus Zähler).
+* **Sharegy Cloud Engine**: Berechnet im 15-Minuten-Takt, wie viel Solarstrom in welcher Wohnung verbraucht wurde und wie viel Reststrom aus dem öffentlichen Netz zugekauft werden musste.
+
+### Modell B: Intelligente Messsysteme (iMSys / wMSB)
+* Jede Wohnung und die PV-Anlage verfügen über ein Smart Meter Gateway (SMGW).
+* Sharegy ruft die 15-Minuten-Lastgänge über gesicherte Schnittstellen ab.
+
+---
+
+## 📱 1. Anleitung für Mieter
+
+1. **Einladungs-Link annehmen**: Öffne die Einladung deines Vermieters und erstelle dein Sharegy-Profil.
+2. **Dashboard-Überblick**:
+   * Sieh live deinen aktuellen Stromverbrauch und die aktuelle Solar-Deckungsquote.
+   * Historie: Wie viel Prozent deines Monatsstroms stammten vom Dach?
+3. **Monatliche Abrechnung**: Du erhältst jeden Monat eine transparente PDF-Abrechnung mit genauer Trennung von:
+   * *Verbrauchter Solarstrom (z. B. 20 ct/kWh)*
+   * *Verbrauchter Netzstrom (z. B. 33 ct/kWh)*
+   * *Monatliche Zähler- und Grundgebühr*
+
+---
+
+## 🏛️ 2. Anleitung für Vermieter & Hausverwaltungen
+
+### Tarifstruktur konfigurieren
+1. Gehe in der Navigation auf **Administration → Liegenschaften & Mieterstrom** (`/app/tenant`).
+2. Lege die Tarife fest:
+   * **Solarstrompreis**: Der günstige Vor-Ort-Preis für Mieter (muss mind. 10% unter dem Grundversorger liegen).
+   * **Reststrom-Einkaufspreis**: Der Arbeitspreis deines gewählten Gewerbe-Stromliefervertrags für das Gesamtgebäude.
+   * **Grundpreis je Wohneinheit**: Zur Deckung von Messstellenbetrieb und Verwaltung.
+
+### Mieterwechsel & Zwischenabrechnung (Stichtagsgenau)
+* Zieht ein Mieter aus, klickst du in der Wohnungsübersicht auf **"Mieterwechsel erfassen"**.
+* Wähle das Auszugsdatum: Sharegy generiert sekundengenau eine **Schlussabrechnung** für den ausziehenden Mieter.
+* Trage die E-Mail des Nachmieters ein – die Zählerhistorie bleibt für die Hausverwaltung lückenlos archiviert.
+
+### Export für Hausverwaltungssoftware (Haufe, DOMUS, Winline, DATEV)
+* Alle Monatsabschlüsse können mit einem Klick als strukturierte CSV-, Excel- oder XML-Datei exportiert werden, sodass Zählerstände und Beträge ohne Abtippen in die Betriebskostenabrechnung übernommen werden.
+""",
+                "content_en": r"""# 🏘️ Tenant Power & Sub-Metering: Multi-Family Solar Supply & Billing
+
+**Tenant Power (Mieterstrom)** allows apartment residents to consume clean, low-cost solar electricity generated directly on their building's roof – exempt from grid fees, concession levies, and electricity taxes on the solar portion.
+
+Sharegy automates interval metering, 15-minute grid settlement, and monthly tenant invoices for property managers and landlords.
+
+---
+
+## 💡 Win-Win for Tenants and Landlords
+
+* **For Tenants**:
+  * **20% to 35% cost savings** compared to standard utility default tariffs.
+  * 100% green solar energy straight from the roof.
+  * Real-time transparency on the mobile dashboard (`/app/community`).
+* **For Landlords & Building Owners**:
+  * Higher yield on solar investment compared to feed-in tariffs.
+  * Enhanced ESG property value and modern tenant amenities.
+  * Zero-touch automated billing without manual meter readings.
+
+---
+
+## 📐 Metering Topologies
+
+### Model A: Virtual Master Meter with Sub-Meters
+* **Grid Connection (NAP)**: Main bi-directional utility meter records aggregate import and export.
+* **Sub-Meters**: Standard MID-compliant sub-meters (Shelly Pro 3EM, Modbus TCP, M-Bus) in each apartment sub-distribution box.
+* **Sharegy Clearing Engine**: Reconciles every 15-minute interval to allocate solar self-consumption vs. grid import per apartment.
+
+### Model B: Smart Meter Gateways (iMSys)
+* Certified Smart Meter Gateways deliver synchronized 15-minute load profiles directly to the Sharegy clearing backend.
+
+---
+
+## 📱 1. Guide for Residents
+
+1. **Accept Invitation**: Sign up via the property manager's link.
+2. **Track Energy & Solar Share**: Check real-time rooftop solar coverage and historic monthly savings.
+3. **Monthly PDF Statements**: Automated statements clearly break down solar power kWh, grid power kWh, and base fees.
+
+---
+
+## 🏛️ 2. Guide for Property Managers & Landlords
+
+### Setting Up Tariffs
+1. Open **Administration → Properties & Tenant Power** (`/app/tenant`).
+2. Set your rates:
+   * **Solar Tariff**: Affordable on-site rate.
+   * **Grid Backup Rate**: Pass-through rate from building power contract.
+   * **Base Fee**: Sub-metering and admin service fee.
+
+### Tenant Move-In / Move-Out
+* Click **"Log Tenant Change"** on any unit.
+* Set effective date: Sharegy generates an instant final settlement PDF.
+* Add the incoming tenant email to initialize new billing cycles.
+
+### ERP & DATEV Exports
+* Export monthly settlements directly to Excel, DATEV-ready CSV, or XML for property management suites (Haufe, DOMUS, etc.).
+""",
+                "tags": ["mieterstrom", "unterzaehler", "abrechnung", "vermieter", "hausverwaltung", "pdf abrechnung", "shelly pro 3em", "datev"],
+                "is_featured": True,
+                "sort_order": 6,
+            },
+            # ---------------------------------------------------------------------
+            # 15. NETZBETREIBER & EVUS: § 14A ENWG, CLS-GATEWAY & REDISPATCH 2.0
+            # ---------------------------------------------------------------------
+            {
+                "category": cats["grid-enwg"],
+                "slug": "netzbetreiber-redispatch-cls-14a-enwg",
+                "context_key": "grid_operator_guide",
+                "title_de": "Netzbetreiber & EVUs: § 14a EnWG Steuerung, CLS-Gateway & Redispatch 2.0 Clearing",
+                "title_en": "Grid Operators & Utilities: § 14a EnWG Control, CLS Gateway & Redispatch 2.0 Clearing",
+                "summary_de": "Das Handbuch für Verteilnetzbetreiber (VNB), Übertragungsnetzbetreiber (ÜNB) und Stadtwerke: Dimmvorgaben gem. § 14a EnWG (4,2 kW SteuVE), CLS-Kanal über Smart Meter Gateway, 96-Viertelstunden-Fahrpläne und revisionssicherer Audit-Trail.",
+                "summary_en": "Handbook for DSOs, TSOs, and municipal utilities: § 14a EnWG dimming controls (4.2 kW SteuVE), SMGW CLS channel integration, 96 quarter-hour day-ahead schedules, and audit trails.",
+                "content_de": r"""# 🛡️ Netzbetreiber & EVUs: § 14a EnWG Steuerung, CLS-Gateway & Redispatch 2.0 Clearing
+
+Als **Verteilnetzbetreiber (VNB)**, **Übertragungsnetzbetreiber (ÜNB)** oder **Energieversorger (EVU)** nutzen Sie Sharegy als Schnittstelle zur netzdienlichen Steuerung dezentraler Flexibilitäten und Erzeuger im Niederspannungsnetz.
+
+Sharegy setzt die Vorgaben der **Bundesnetzagentur (BNetzA BK6-22-300 / BK8-22/010-A)** sowie die Standards für **Redispatch 2.0** und **Connect+** vollständig und automatisiert um.
+
+---
+
+## ⚡ 1. § 14a EnWG: Steuerbare Verbrauchseinrichtungen (SteuVE)
+
+Seit dem 01.01.2024 müssen Neuanlagen mit steuerbaren Verbrauchseinrichtungen (> 4,2 kW elektrische Leistung) netzdienlich steuerbar sein:
+* **Betroffene Geräte**: Private Wallboxen (Ladeeinrichtungen für E-Fahrzeuge), Wärmepumpen, Klimageräte und Heimspeicher (beim Laden aus dem Netz).
+* **Mindestbezugsleistung**: Bei einer netzorientierten Steuerung (Dimmung) muss dem Haushalt stets eine Mindestleistung von **4,2 kW je SteuVE** (bzw. nach dem BNetzA-Gleichzeitigkeitsfaktor) zur Verfügung stehen. Ein vollständiges Abschalten ist unzulässig.
+
+### Dimm-Modi in Sharegy:
+1. **Statische Einzelsteuerung**: Direkte Drosselung der jeweiligen SteuVE auf 4,2 kW über Modbus / Relais / OCPP.
+2. **Dynamische Summenleistungssteuerung (EMS-Modell)**:
+   * Das Sharegy EMS überwacht den Netzanschlusspunkt (NAP).
+   * Der Netzbetreiber gibt eine maximale Netzbezugsgrenze vor (z. B. `Max_Import = 4,2 kW + Hausgrundlast`).
+   * Das EMS steuert Wallbox, Wärmepumpe und Speicher intelligent so aus, dass die Grenze exakt eingehalten wird – eigener Solarstrom kann weiterhin ungedrosselt genutzt werden!
+
+---
+
+## 🔌 2. Technische Anbindung: Smart Meter Gateway & CLS-Kanal
+
+Sharegy unterstützt alle modernen Kommunikationspfade der FNN-Leitfäden:
+
+```mermaid
+graph LR
+    VNB[Verteilnetzbetreiber VNB / Leitstelle] -->|Befehl: Dimmung 4.2 kW| SMGW[Smart Meter Gateway BSI-konform]
+    SMGW -->|CLS-Kanal / EEBUS / IEC 61850| STEUERBOX[FNN-Steuerbox / Sharegy Bridge]
+    STEUERBOX -->|Modbus TCP / REST / Relais| EMS[Sharegy Smart EMS Core]
+    EMS --> WB[Wallbox OCPP 1.6-J]
+    EMS --> WP[Wärmepumpe SG Ready]
+    EMS --> BAT[Batteriespeicher Modbus]
+```
+
+* **CLS-Kanal (Controllable Local System)**: Sichere TLS-verschlüsselte Kommunikation über das Smart Meter Gateway (SMGW) nach BSI TR-03109-1.
+* **EEBUS (SPINE / SHIP)**: Standardisiertes Datenmodell für netzdienliche Leistungsanforderungen (`LimitPowerConsumption`).
+* **Fallback / Relais**: Unterstützung klassischer 4-Stufen-Relaiskontakte (0%, 30%, 60%, 100%) über FNN-konforme Steuerboxen.
+
+---
+
+## 📈 3. Redispatch 2.0 & 96-Viertelstunden-Fahrpläne (`PT15M`)
+
+Zur Engpassvermeidung im Verteilnetz stellt Sharegy Netzbetreibern standardisierte Schnittstellen bereit:
+* **Day-Ahead Prognose-Fahrpläne**: Automatische Übermittlung von 96 Viertelstundenwerten (`PT15M`) für Erzeugung, Grundlast und abrufbare Flexibilität (+kW / -kW) je Netzbezirk/Transformatorstation.
+* **Revisionssicherer Audit-Trail**: Jeder Dimmbefehl, jede Steuerungshandlung und jede Sollwertänderung wird mit Zeitstempel (Millisekundengenau), Wirkleistungsvorher/-nachher und Netzspannung protokolliert.
+* **Bilanzkreis-Clearing**: Automatische Bereitstellung von Abrechnungsdaten zur bilanziellen und energetischen Ausgleichsberechnung gem. BNetzA-Beschlüssen.
+
+---
+
+## 🧪 4. Netzbetreiber-Testschaltung & Diagnose im Dashboard
+
+Im Netzbetreiber-Cockpit (`/app/grid-operator` bzw. via API):
+1. **Verbindungstest ausführen**: Prüft die Latenz zum SMGW und der lokalen Steuerbox.
+2. **Test-Dimmung anfordern**: Simuliert einen 15-minütigen Dimmbefehl zur Abnahme nach VDE-AR-N 4100 / 4105.
+3. **Abnahmeprotokoll generieren**: Erstellt automatisch ein signiertes PDF-Prüfprotokoll für den Netzanschlussvertrag.
+""",
+                "content_en": r"""# 🛡️ Grid Operators & Utilities: § 14a EnWG Control, CLS Gateway & Redispatch 2.0
+
+As a **Distribution System Operator (DSO)**, **Transmission System Operator (TSO)**, or **Energy Utility**, Sharegy provides your digital gateway to aggregate, schedule, and control distributed energy flexibility in the low-voltage grid.
+
+Fully compliant with **German Federal Network Agency (BNetzA BK6-22-300 / BK8-22/010-A)** mandates, **§ 14a EnWG**, and **Redispatch 2.0** standards.
+
+---
+
+## ⚡ 1. § 14a EnWG: Controllable Consumer Units (SteuVE)
+
+Controllable loads (> 4.2 kW) connected after Jan 1, 2024 must support grid-oriented dimming:
+* **Applicable Assets**: EV Wallboxes, heat pumps, air conditioning systems, and stationary battery storage systems.
+* **Guaranteed Minimum Import**: Under dimming commands, customers are legally guaranteed a minimum active power of **4.2 kW per SteuVE** (or adjusted by concurrency factors). Complete disconnects are strictly prohibited.
+
+### Control Modes in Sharegy:
+1. **Direct Device Dimming**: Throttles individual devices to 4.2 kW via Modbus, Relays, or OCPP.
+2. **Dynamic Aggregate Grid-Limit (EMS Mode - Preferred)**:
+   * Sharegy EMS manages the Grid Connection Point (NAP).
+   * The DSO sends an active power ceiling.
+   * The EMS dynamically throttles loads while allowing unrestricted local solar self-consumption.
+
+---
+
+## 🔌 2. Smart Meter Gateway & CLS Channel Integration
+
+* **CLS (Controllable Local System)**: End-to-end encrypted TLS tunnel through the Smart Meter Gateway (SMGW) adhering to BSI TR-03109.
+* **EEBUS Protocol**: Native SPINE/SHIP data model supporting standardized `LimitPowerConsumption` payloads.
+* **Hardware Relays**: Compatibility with 4-contact FNN relay Steuerboxen.
+
+---
+
+## 📈 3. Redispatch 2.0 & 96 Quarter-Hour Day-Ahead Schedules
+
+* **96 Quarter-Hour Forecasts (`PT15M`)**: Aggregated day-ahead generation, baseline load, and controllable flexibility (+kW / -kW) per feeder transformer.
+* **Immutable Audit Trail**: Millisecond-accurate logging of all dispatch orders, actual power responses, and voltage telemetry.
+* **Balancing Group Settlement**: Automated export for financial and physical energy compensation.
+
+---
+
+## 🧪 4. DSO Verification & Test Dispatching
+
+1. **Ping & Latency Check**: Test communication to SMGW and on-site controller.
+2. **Simulate Test Dimming**: Execute 15-minute compliance tests required under VDE-AR-N 4100 / 4105.
+3. **Generate Compliance Certificate**: Instant PDF report documenting grid-compliance readiness.
+""",
+                "tags": ["netzbetreiber", "vnb", "uenb", "evu", "§ 14a EnWG", "steuve", "cls gateway", "smgw", "redispatch 2.0", "dimmung 4.2 kw", "eebus"],
+                "is_featured": True,
+                "sort_order": 7,
+            },
         ]
         for adata in articles_data:
             HelpArticle.objects.update_or_create(

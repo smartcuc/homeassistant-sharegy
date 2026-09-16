@@ -5,13 +5,28 @@
   "fields": {
     "key": "billing",
     "icon": "🧾",
-    "title_de": "Abrechnung & Mieterstrom",
-    "title_en": "Billing & Sub-Metering",
-    "description_de": "Virtuelle Zähler, Sub-Metering, Kostenallokation für WEGs und monatliche PDF-Reports.",
-    "description_en": "Virtual meters, sub-metering, multi-tenant cost allocation, and monthly PDF exports.",
-    "sort_order": 7,
+    "title_de": "Abrechnung, Mieterstrom & Energy Sharing",
+    "title_en": "Billing, Sub-Metering & Energy Sharing",
+    "description_de": "Virtuelle Zähler, § 42b EnWG 15m-Clearing, Kostenallokation für WEGs, PDF-Abrechnungen und EDIFACT MSCONS Export.",
+    "description_en": "Virtual meters, § 42b EnWG 15-minute clearing, multi-tenant allocation, PDF invoices, and EDIFACT MSCONS export.",
+    "sort_order": 8,
     "created_at": "2026-08-25T11:23:37.142Z",
-    "updated_at": "2026-08-30T19:19:34.108Z"
+    "updated_at": "2026-09-16T15:29:13.380Z"
+  }
+},
+{
+  "model": "support_desk.helpcategory",
+  "pk": "20c3a97e-7aa1-451e-9cef-7cb6fa67829d",
+  "fields": {
+    "key": "grid-enwg",
+    "icon": "🛡️",
+    "title_de": "§ 14a EnWG, Steuerbox & Netzdienlichkeit",
+    "title_en": "§ 14a EnWG Grid Regulation & SteuVE Control",
+    "description_de": "Gesetzliche Pflichtdrosselung auf 4,2 kW, BNetzA-Summenleistungsmodell, Steuerbox-Kopplung (Relais/Modbus) und Netzentgelt-Reduktion.",
+    "description_en": "Mandatory 4.2 kW grid dimming, BNetzA sum power formula, physical relay / Modbus connection, and grid fee discounts.",
+    "sort_order": 5,
+    "created_at": "2026-09-03T05:22:21.696Z",
+    "updated_at": "2026-09-16T15:29:13.364Z"
   }
 },
 {
@@ -22,11 +37,11 @@
     "icon": "🔌",
     "title_de": "Geräte, Schnittstellen & Protokolle",
     "title_en": "Devices, Interfaces & Protocols",
-    "description_de": "Integration von Home Assistant, Shelly WSS, Tasmota, OpenDTU, Modbus TCP und MQTT Gateways.",
-    "description_en": "Integration with Home Assistant, Shelly WSS, Tasmota, OpenDTU, Modbus TCP, and MQTT gateways.",
-    "sort_order": 8,
+    "description_de": "Integration von OCPP 1.6-J CSMS, Home Assistant, Shelly WSS, wMSB Discovergy, Modbus TCP und Selbsttest.",
+    "description_en": "Integration with OCPP 1.6-J CSMS, Home Assistant, Shelly WSS, wMSB Discovergy, Modbus TCP, and Self-Test.",
+    "sort_order": 9,
     "created_at": "2026-08-25T16:38:13.525Z",
-    "updated_at": "2026-08-30T19:19:34.112Z"
+    "updated_at": "2026-09-16T15:29:13.384Z"
   }
 },
 {
@@ -41,7 +56,7 @@
     "description_en": "Hybrid forecasting, weather models, accuracy score (%), and actual vs. forecast tracking.",
     "sort_order": 3,
     "created_at": "2026-08-25T11:23:36.980Z",
-    "updated_at": "2026-08-30T19:19:34.091Z"
+    "updated_at": "2026-09-16T15:29:13.358Z"
   }
 },
 {
@@ -54,9 +69,9 @@
     "title_en": "Alert & Notification Center",
     "description_de": "Echtzeit-Regeln für Ertragsausfälle, Tiefentladeschutz, Dauerlasten und Spar-Chancen.",
     "description_en": "Real-time health rules for yield losses, battery protection, baseload alerts, and savings tips.",
-    "sort_order": 6,
+    "sort_order": 7,
     "created_at": "2026-08-25T11:23:37.108Z",
-    "updated_at": "2026-08-30T19:19:34.104Z"
+    "updated_at": "2026-09-16T15:29:13.370Z"
   }
 },
 {
@@ -71,7 +86,7 @@
     "description_en": "Quickstart guides, onboarding, dashboard navigation, and core energy KPIs.",
     "sort_order": 1,
     "created_at": "2026-08-25T11:23:36.940Z",
-    "updated_at": "2026-08-30T19:19:34.080Z"
+    "updated_at": "2026-09-16T15:29:13.350Z"
   }
 },
 {
@@ -84,9 +99,9 @@
     "title_en": "Electricity Tariffs & Dynamic Pricing",
     "description_de": "Dynamische Tarife, Tibber API, Day-Ahead-Preise, Formeln und stichtagsgenaue Tarifhistorie.",
     "description_en": "Dynamic tariffs, Tibber API, spot market prices, pricing formulas, and historical rates.",
-    "sort_order": 5,
+    "sort_order": 6,
     "created_at": "2026-08-25T11:23:37.074Z",
-    "updated_at": "2026-08-30T19:19:34.101Z"
+    "updated_at": "2026-09-16T15:29:13.367Z"
   }
 },
 {
@@ -97,11 +112,11 @@
     "icon": "☀️",
     "title_de": "Erzeuger, Speicher & Wechselrichter",
     "title_en": "Inverters, Storage & PV",
-    "description_de": "Anbindung von SMA, Sungrow, Fronius, Deye, Huawei, Batteriespeichern und Zählern.",
-    "description_en": "Setup guides for SMA, Sungrow, Fronius, Deye, Huawei, home batteries, and meters.",
+    "description_de": "Anbindung von Sungrow, Fronius, SolarEdge, Kostal, Growatt, Deye, Huawei, GoodWe, Solis, Victron und Speichern.",
+    "description_en": "Setup guides for Sungrow, Fronius, SolarEdge, Kostal, Growatt, Deye, Huawei, GoodWe, Solis, Victron, and batteries.",
     "sort_order": 2,
     "created_at": "2026-08-25T11:23:36.961Z",
-    "updated_at": "2026-08-30T19:19:34.085Z"
+    "updated_at": "2026-09-16T15:29:13.354Z"
   }
 },
 {
@@ -116,7 +131,7 @@
     "description_en": "Automated schedules for EV wallboxes, home batteries, heat pumps, and appliances.",
     "sort_order": 4,
     "created_at": "2026-08-25T11:23:37.024Z",
-    "updated_at": "2026-08-30T19:19:34.097Z"
+    "updated_at": "2026-09-16T15:29:13.361Z"
   }
 },
 {
@@ -142,12 +157,79 @@
     ],
     "is_published": true,
     "is_featured": false,
-    "sort_order": 7,
+    "sort_order": 1,
     "views_count": 0,
     "helpful_yes": 0,
     "helpful_no": 0,
     "created_at": "2026-08-25T11:23:37.264Z",
-    "updated_at": "2026-08-30T19:19:34.165Z"
+    "updated_at": "2026-09-16T15:29:13.499Z"
+  }
+},
+{
+  "model": "support_desk.helparticle",
+  "pk": "16d2f4ac-3dbb-4e23-b6cb-7894bc76855d",
+  "fields": {
+    "category": "20c3a97e-7aa1-451e-9cef-7cb6fa67829d",
+    "slug": "netzbetreiber-redispatch-cls-14a-enwg",
+    "context_key": "grid_operator_guide",
+    "title_de": "Netzbetreiber & EVUs: § 14a EnWG Steuerung, CLS-Gateway & Redispatch 2.0 Clearing",
+    "title_en": "Grid Operators & Utilities: § 14a EnWG Control, CLS Gateway & Redispatch 2.0 Clearing",
+    "summary_de": "Das Handbuch für Verteilnetzbetreiber (VNB), Übertragungsnetzbetreiber (ÜNB) und Stadtwerke: Dimmvorgaben gem. § 14a EnWG (4,2 kW SteuVE), CLS-Kanal über Smart Meter Gateway, 96-Viertelstunden-Fahrpläne und revisionssicherer Audit-Trail.",
+    "summary_en": "Handbook for DSOs, TSOs, and municipal utilities: § 14a EnWG dimming controls (4.2 kW SteuVE), SMGW CLS channel integration, 96 quarter-hour day-ahead schedules, and audit trails.",
+    "content_de": "# 🛡️ Netzbetreiber & EVUs: § 14a EnWG Steuerung, CLS-Gateway & Redispatch 2.0 Clearing\n\nAls **Verteilnetzbetreiber (VNB)**, **Übertragungsnetzbetreiber (ÜNB)** oder **Energieversorger (EVU)** nutzen Sie Sharegy als Schnittstelle zur netzdienlichen Steuerung dezentraler Flexibilitäten und Erzeuger im Niederspannungsnetz.\n\nSharegy setzt die Vorgaben der **Bundesnetzagentur (BNetzA BK6-22-300 / BK8-22/010-A)** sowie die Standards für **Redispatch 2.0** und **Connect+** vollständig und automatisiert um.\n\n---\n\n## ⚡ 1. § 14a EnWG: Steuerbare Verbrauchseinrichtungen (SteuVE)\n\nSeit dem 01.01.2024 müssen Neuanlagen mit steuerbaren Verbrauchseinrichtungen (> 4,2 kW elektrische Leistung) netzdienlich steuerbar sein:\n* **Betroffene Geräte**: Private Wallboxen (Ladeeinrichtungen für E-Fahrzeuge), Wärmepumpen, Klimageräte und Heimspeicher (beim Laden aus dem Netz).\n* **Mindestbezugsleistung**: Bei einer netzorientierten Steuerung (Dimmung) muss dem Haushalt stets eine Mindestleistung von **4,2 kW je SteuVE** (bzw. nach dem BNetzA-Gleichzeitigkeitsfaktor) zur Verfügung stehen. Ein vollständiges Abschalten ist unzulässig.\n\n### Dimm-Modi in Sharegy:\n1. **Statische Einzelsteuerung**: Direkte Drosselung der jeweiligen SteuVE auf 4,2 kW über Modbus / Relais / OCPP.\n2. **Dynamische Summenleistungssteuerung (EMS-Modell)**:\n   * Das Sharegy EMS überwacht den Netzanschlusspunkt (NAP).\n   * Der Netzbetreiber gibt eine maximale Netzbezugsgrenze vor (z. B. `Max_Import = 4,2 kW + Hausgrundlast`).\n   * Das EMS steuert Wallbox, Wärmepumpe und Speicher intelligent so aus, dass die Grenze exakt eingehalten wird – eigener Solarstrom kann weiterhin ungedrosselt genutzt werden!\n\n---\n\n## 🔌 2. Technische Anbindung: Smart Meter Gateway & CLS-Kanal\n\nSharegy unterstützt alle modernen Kommunikationspfade der FNN-Leitfäden:\n\n```mermaid\ngraph LR\n    VNB[Verteilnetzbetreiber VNB / Leitstelle] -->|Befehl: Dimmung 4.2 kW| SMGW[Smart Meter Gateway BSI-konform]\n    SMGW -->|CLS-Kanal / EEBUS / IEC 61850| STEUERBOX[FNN-Steuerbox / Sharegy Bridge]\n    STEUERBOX -->|Modbus TCP / REST / Relais| EMS[Sharegy Smart EMS Core]\n    EMS --> WB[Wallbox OCPP 1.6-J]\n    EMS --> WP[Wärmepumpe SG Ready]\n    EMS --> BAT[Batteriespeicher Modbus]\n```\n\n* **CLS-Kanal (Controllable Local System)**: Sichere TLS-verschlüsselte Kommunikation über das Smart Meter Gateway (SMGW) nach BSI TR-03109-1.\n* **EEBUS (SPINE / SHIP)**: Standardisiertes Datenmodell für netzdienliche Leistungsanforderungen (`LimitPowerConsumption`).\n* **Fallback / Relais**: Unterstützung klassischer 4-Stufen-Relaiskontakte (0%, 30%, 60%, 100%) über FNN-konforme Steuerboxen.\n\n---\n\n## 📈 3. Redispatch 2.0 & 96-Viertelstunden-Fahrpläne (`PT15M`)\n\nZur Engpassvermeidung im Verteilnetz stellt Sharegy Netzbetreibern standardisierte Schnittstellen bereit:\n* **Day-Ahead Prognose-Fahrpläne**: Automatische Übermittlung von 96 Viertelstundenwerten (`PT15M`) für Erzeugung, Grundlast und abrufbare Flexibilität (+kW / -kW) je Netzbezirk/Transformatorstation.\n* **Revisionssicherer Audit-Trail**: Jeder Dimmbefehl, jede Steuerungshandlung und jede Sollwertänderung wird mit Zeitstempel (Millisekundengenau), Wirkleistungsvorher/-nachher und Netzspannung protokolliert.\n* **Bilanzkreis-Clearing**: Automatische Bereitstellung von Abrechnungsdaten zur bilanziellen und energetischen Ausgleichsberechnung gem. BNetzA-Beschlüssen.\n\n---\n\n## 🧪 4. Netzbetreiber-Testschaltung & Diagnose im Dashboard\n\nIm Netzbetreiber-Cockpit (`/app/grid-operator` bzw. via API):\n1. **Verbindungstest ausführen**: Prüft die Latenz zum SMGW und der lokalen Steuerbox.\n2. **Test-Dimmung anfordern**: Simuliert einen 15-minütigen Dimmbefehl zur Abnahme nach VDE-AR-N 4100 / 4105.\n3. **Abnahmeprotokoll generieren**: Erstellt automatisch ein signiertes PDF-Prüfprotokoll für den Netzanschlussvertrag.\n",
+    "content_en": "# 🛡️ Grid Operators & Utilities: § 14a EnWG Control, CLS Gateway & Redispatch 2.0\n\nAs a **Distribution System Operator (DSO)**, **Transmission System Operator (TSO)**, or **Energy Utility**, Sharegy provides your digital gateway to aggregate, schedule, and control distributed energy flexibility in the low-voltage grid.\n\nFully compliant with **German Federal Network Agency (BNetzA BK6-22-300 / BK8-22/010-A)** mandates, **§ 14a EnWG**, and **Redispatch 2.0** standards.\n\n---\n\n## ⚡ 1. § 14a EnWG: Controllable Consumer Units (SteuVE)\n\nControllable loads (> 4.2 kW) connected after Jan 1, 2024 must support grid-oriented dimming:\n* **Applicable Assets**: EV Wallboxes, heat pumps, air conditioning systems, and stationary battery storage systems.\n* **Guaranteed Minimum Import**: Under dimming commands, customers are legally guaranteed a minimum active power of **4.2 kW per SteuVE** (or adjusted by concurrency factors). Complete disconnects are strictly prohibited.\n\n### Control Modes in Sharegy:\n1. **Direct Device Dimming**: Throttles individual devices to 4.2 kW via Modbus, Relays, or OCPP.\n2. **Dynamic Aggregate Grid-Limit (EMS Mode - Preferred)**:\n   * Sharegy EMS manages the Grid Connection Point (NAP).\n   * The DSO sends an active power ceiling.\n   * The EMS dynamically throttles loads while allowing unrestricted local solar self-consumption.\n\n---\n\n## 🔌 2. Smart Meter Gateway & CLS Channel Integration\n\n* **CLS (Controllable Local System)**: End-to-end encrypted TLS tunnel through the Smart Meter Gateway (SMGW) adhering to BSI TR-03109.\n* **EEBUS Protocol**: Native SPINE/SHIP data model supporting standardized `LimitPowerConsumption` payloads.\n* **Hardware Relays**: Compatibility with 4-contact FNN relay Steuerboxen.\n\n---\n\n## 📈 3. Redispatch 2.0 & 96 Quarter-Hour Day-Ahead Schedules\n\n* **96 Quarter-Hour Forecasts (`PT15M`)**: Aggregated day-ahead generation, baseline load, and controllable flexibility (+kW / -kW) per feeder transformer.\n* **Immutable Audit Trail**: Millisecond-accurate logging of all dispatch orders, actual power responses, and voltage telemetry.\n* **Balancing Group Settlement**: Automated export for financial and physical energy compensation.\n\n---\n\n## 🧪 4. DSO Verification & Test Dispatching\n\n1. **Ping & Latency Check**: Test communication to SMGW and on-site controller.\n2. **Simulate Test Dimming**: Execute 15-minute compliance tests required under VDE-AR-N 4100 / 4105.\n3. **Generate Compliance Certificate**: Instant PDF report documenting grid-compliance readiness.\n",
+    "tags": [
+      "netzbetreiber",
+      "vnb",
+      "uenb",
+      "evu",
+      "§ 14a EnWG",
+      "steuve",
+      "cls gateway",
+      "smgw",
+      "redispatch 2.0",
+      "dimmung 4.2 kw",
+      "eebus"
+    ],
+    "is_published": true,
+    "is_featured": true,
+    "sort_order": 7,
+    "views_count": 0,
+    "helpful_yes": 0,
+    "helpful_no": 0,
+    "created_at": "2026-09-16T15:29:13.544Z",
+    "updated_at": "2026-09-16T15:29:13.545Z"
+  }
+},
+{
+  "model": "support_desk.helparticle",
+  "pk": "24d46043-9664-4765-9b0c-43a675e72135",
+  "fields": {
+    "category": "34745af8-0e4e-4d2f-a386-36f4fe5a8c0f",
+    "slug": "iobroker-sharegy-adapter-guide",
+    "context_key": "interfaces",
+    "title_de": "Offizieller ioBroker Adapter für Sharegy Cloud (ioBroker.sharegy) 📡🟢",
+    "title_en": "Official ioBroker Adapter for Sharegy Cloud (ioBroker.sharegy) 📡🟢",
+    "summary_de": "Einrichtung des nativen ioBroker-Adapters mit verschlüsseltem WebSocket-Stream, Telemetrie-Mapping, BWWP-Bündelung und bidirektionaler Relais-Schaltung.",
+    "summary_en": "Step-by-step setup for ioBroker.sharegy with encrypted Outbound WebSocket streaming, multi-sensor bundling, and closed-loop relay control.",
+    "content_de": "# Offizieller ioBroker Adapter (ioBroker.sharegy) 📡🟢\n\nDer offizielle **ioBroker Adapter** verbindet deine lokale ioBroker-Installation verschlüsselt und in Echtzeit mit der Sharegy Cloud.\n\n---\n\n## 1. Installation & Konfiguration\n1. Installiere den Adapter `iobroker.sharegy` aus dem offiziellen Repository.\n2. Kopiere deine persönliche **WSS-Server-Adresse** aus Sharegy unter **⚙️ Einstellungen ➔ Schnittstellen**.\n3. Füge die URL im ioBroker-Instanz-Setup ein (Token wird automatisch erkannt).\n4. Speichern – der Adapter baut sofort eine sichere TLS-Verbindung über Port 443 auf.\n\n---\n\n## 2. Multi-Sensor Gerätebündelung (z. B. BWWP)\nIm ioBroker-Adapter kannst du verschiedene Datenpunkte einem logischen Gerät zuordnen:\n* **Leistungssensor**: Wirkleistung (W)\n* **Temperatursensor**: Wassertemperatur (°C)\n* **Schaltzustand & Aktorik**: SG-Ready Schalter / Shelly-Relais\n\n---\n\n## 3. Bidirektionaler Closed-Loop Rückkanal\nSobald Sharegy einen Steuerbefehl (z. B. BWWP-Boost oder Lastabwurf) an ioBroker sendet, wird das lokale Relais betätigt und der bestätigte Schaltzustand sofort an das Sharegy Dashboard zurückgemeldet.\n",
+    "content_en": "# Official ioBroker Adapter (ioBroker.sharegy) 📡🟢\n\nThe official **ioBroker.sharegy** adapter streams local telemetry and accepts bidirectional actuation commands from Sharegy Cloud over secure WebSockets.\n",
+    "tags": [
+      "iobroker",
+      "adapter",
+      "websocket",
+      "bwwp",
+      "relais",
+      "telemetrie"
+    ],
+    "is_published": true,
+    "is_featured": true,
+    "sort_order": 15,
+    "views_count": 0,
+    "helpful_yes": 0,
+    "helpful_no": 0,
+    "created_at": "2026-09-04T04:39:47.540Z",
+    "updated_at": "2026-09-16T15:29:13.446Z"
   }
 },
 {
@@ -174,12 +256,47 @@
     ],
     "is_published": true,
     "is_featured": true,
-    "sort_order": 13,
+    "sort_order": 1,
     "views_count": 0,
     "helpful_yes": 0,
     "helpful_no": 0,
     "created_at": "2026-08-25T22:33:36.287Z",
-    "updated_at": "2026-08-30T19:19:34.198Z"
+    "updated_at": "2026-09-16T15:29:13.518Z"
+  }
+},
+{
+  "model": "support_desk.helparticle",
+  "pk": "30d99d5d-af73-4bd9-8551-7dab684a507b",
+  "fields": {
+    "category": "34745af8-0e4e-4d2f-a386-36f4fe5a8c0f",
+    "slug": "partner-cockpit-flottenmanagement-onboarding",
+    "context_key": "partner_guide",
+    "title_de": "Partner-Leitfaden: Flottenmanagement, Wechselrichter-Onboarding & Kundenservice",
+    "title_en": "Partner & Installer Guide: Fleet Management, Inverter Onboarding & Service",
+    "summary_de": "Die durchgängige Anleitung für Solarteure, Elektroinstallateure und Partnerbetriebe: Kundenanlagen per QR-Code anlegen, Wechselrichter & Speicher via Modbus/WSS koppeln, 3-Sekunden-Selbsttests durchführen und Kundenservice effizient managen.",
+    "summary_en": "Complete guide for solar installers, electricians, and partner businesses: Onboarding customer systems via QR code, connecting inverters via Modbus/WSS, running 3-second self-tests, and managing fleet health.",
+    "content_de": "# 🔧 Partner-Leitfaden: Flottenmanagement, Wechselrichter-Onboarding & Kundenservice\n\nDas **Sharegy Partner Cockpit** (`/app/partner`) wurde speziell für Solarteure, Elektro-Fachbetriebe, Stadtwerke und Energieberater entwickelt, um Hunderte Kundenanlagen zentral zu überwachen, schnell in Betrieb zu nehmen und perfekten After-Sales-Service zu bieten.\n\n---\n\n## 📊 1. Flotten-Dashboard & Health-Monitoring\n\nIm Partner-Cockpit behältst du den Überblick über dein gesamtes Kundenportfolio:\n* **Flotten-Status**: Aktive Anlagen, Gesamterzeugung (kW / MWh), Speicher-Füllstände und Warnmeldungen.\n* **Health-Score (0 - 100%)**: Erkennt sofort Leistungsabfälle, defekte Strings, Kommunikationsabbrüche oder Phasenasymmetrien.\n* **Priorisierte Ticket- & Fehlerliste**: Sortiert Störungen nach Dringlichkeit (z. B. *Wechselrichter Offline > 2h*, *Isolationsfehler String 2*).\n\n---\n\n## ⚡ 2. Schritt-für-Schritt Onboarding einer neuen Kundenanlage\n\n### Schritt 1: Kundenanlage im Partner-Portal anlegen\n1. Klicke im Partner-Cockpit auf **\"+ Neue Kundenanlage anlegen\"**.\n2. Gib den Kundennamen, die Adresse sowie die installierte PV-Leistung (kWp) und Speicherkapazität (kWh) ein.\n3. Sharegy generiert automatisch einen **Kunden-Einladungslink und QR-Code** für die spätere Übergabe.\n\n### Schritt 2: Wechselrichter & Smart Meter anbinden\nSharegy unterstützt alle marktführenden Hersteller ohne proprietäre Zusatzboxen:\n\n| Hersteller / System | Schnittstelle | Standard-Port & Einstellungen |\n| :--- | :--- | :--- |\n| **Sungrow** (SHxxRT, SGxx) | Modbus TCP | Port `502`, Unit ID `1` |\n| **Fronius** (Gen24, Symo) | SolarAPI / Modbus TCP | Port `502`, SolarAPI JSON aktiviert |\n| **SMA** (Tripower, Sunny Boy) | Speedwire / Modbus TCP | Port `502`, Unit ID `3` |\n| **SolarEdge** (SE-Serie) | Modbus TCP (SunSpec) | Port `1502` oder `502`, Unit ID `1` |\n| **Deye / Growatt / Huawei** | Modbus TCP / RTU Bridge | Port `502`, Register-Map SunSpec |\n| **Shelly Pro 3EM / Pro 4PM** | WebSocket (WSS) Outbound | Port `443` (Verschlüsseltes Push-Protokoll) |\n| **Home Assistant** | Native HACS Bridge | 1-Klick Entity Picker |\n\n*Tipp für Vor-Ort-Installateure*: Bei gesicherten Routern genügt die Installation eines **Shelly Pro 3EM** auf der Hutschiene mit Outbound-WSS oder die Aktivierung von Modbus TCP im Wechselrichter-Menü.\n\n### Schritt 3: Wallboxen & Wärmepumpen einbinden\n* **Wallbox (OCPP 1.6-J)**: Trage in der Wallbox (z. B. ABL, Mennekes, Alfen, go-e) einfach die WebSocket-URL `wss://sharegy.de/ocpp/<ANLAGEN_ID>` ein.\n* **Wärmepumpe (SG Ready / Modbus)**: Verbinde das SG-Ready-Relais mit einem Shelly Plus 1 oder steuere modulierende Wärmepumpen via Modbus TCP.\n\n---\n\n## 🧪 3. Der 3-Sekunden-Selbsttest & Telemetrie-Validierung\n\nVor der Abreise von der Baustelle führst du den integrierten **Inbetriebnahmetest** durch:\n1. Öffne die Anlagendetails im Partner-Cockpit und klicke auf **\"3-Sekunden-Diagnosetest starten\"**.\n2. Sharegy prüft automatisiert:\n   * ✅ **Phasenfolge & Vorzeichen**: Misst der Zähler Einspeisung positiv und Bezug negativ? (Verhindert verdrehte Stromwandler-Klemmen).\n   * ✅ **Latenz & Update-Frequenz**: Treffen Telemetriewerte im 1-Sekunden- bis 5-Sekunden-Takt ein?\n   * ✅ **Speicher-Ansprechbarkeit**: Reagiert das BMS auf Sollwert-Vorgaben?\n3. Nach erfolgreichem Test wird ein **digitales Inbetriebnahmeprotokoll (PDF)** mit Zeitstempel erzeugt.\n\n---\n\n## 🤝 4. Übergabe an den Kunden (Owner Handover)\n\n1. Lass den Kunden den **Übergabe-QR-Code** mit seinem Smartphone scannen.\n2. Der Kunde erstellt sein persönliches Passwort und hat sofort Zugriff auf sein **Private EMS Dashboard**.\n3. **Dauerhafter Wartungszugang**: Deine Firma bleibt als betreuender Fachpartner hinterlegt. Bei Fehlern wirst du automatisch benachrichtigt und kannst Ferndiagnosen ohne Anfahrt durchführen.\n",
+    "content_en": "# 🔧 Partner & Installer Guide: Fleet Management, Inverter Onboarding & Service\n\nThe **Sharegy Partner Cockpit** (`/app/partner`) is engineered for solar installers, master electricians, and municipal utilities to manage hundreds of customer installations from a unified dashboard.\n\n---\n\n## 📊 1. Fleet Dashboard & Health Monitoring\n\nMonitor your entire customer portfolio at a glance:\n* **Fleet Overview**: Total live generation (kW / MWh), storage states, and active fleet capacity.\n* **Health Score (0 - 100%)**: Automatically detects underperforming strings, reversed CT clamps, or communication losses.\n* **Smart Alert Queue**: Prioritizes issues by severity (e.g. *Inverter Offline > 2h*, *Isolation Fault String 2*).\n\n---\n\n## ⚡ 2. Step-by-Step Customer Plant Onboarding\n\n### Step 1: Create Plant in Partner Portal\n1. Navigate to the Partner Cockpit and click **\"+ Onboard New Plant\"**.\n2. Enter the customer details, installed solar capacity (kWp), and battery size (kWh).\n3. Sharegy generates an instant **Handover QR Code & Activation Link**.\n\n### Step 2: Connect Inverters & Smart Meters\nSharegy integrates with all major hardware protocols out of the box:\n\n| Manufacturer | Interface | Default Port & Settings |\n| :--- | :--- | :--- |\n| **Sungrow** (SHxxRT, SGxx) | Modbus TCP | Port `502`, Unit ID `1` |\n| **Fronius** (Gen24, Symo) | SolarAPI / Modbus TCP | Port `502`, SunSpec Enabled |\n| **SMA** (Tripower, Sunny Boy) | Speedwire / Modbus TCP | Port `502`, Unit ID `3` |\n| **SolarEdge** (SE Series) | Modbus TCP | Port `1502` / `502`, Unit ID `1` |\n| **Deye / Growatt / Huawei** | Modbus TCP / RTU | Port `502`, SunSpec register map |\n| **Shelly Pro 3EM / 4PM** | WebSocket (WSS) Outbound | Port `443` (Encrypted Push) |\n| **Home Assistant** | Native HACS Bridge | 1-Click Entity Picker |\n\n### Step 3: Add EV Wallboxes & Heat Pumps\n* **OCPP 1.6-J Chargers**: Set the charger's Central System URL to `wss://sharegy.de/ocpp/<PLANT_ID>`.\n* **SG-Ready Heat Pumps**: Trigger thermal storage boosts using dry contacts or Modbus TCP registers.\n\n---\n\n## 🧪 3. The 3-Second Diagnostics Test\n\nValidate installations before leaving the site:\n1. Open the plant view and click **\"Run 3-Second Diagnostics\"**.\n2. Automated checks verify:\n   * ✅ **Phase Direction & CT Orientation**: Verifies correct sign (+/-) on grid import and feed-in.\n   * ✅ **Telemetry Stream Health**: Ensures sub-5-second update intervals.\n   * ✅ **Inverter & Battery Control Loop**: Confirms remote setpoint response.\n3. Automatically generates an **Audit-Ready Commissioning Certificate (PDF)**.\n\n---\n\n## 🤝 4. Seamless Customer Handover\n\n1. Have the homeowner scan the **Handover QR Code**.\n2. The customer activates their **Private EMS Dashboard**.\n3. Your installer account retains remote maintenance access for proactive servicing and warranty support.\n",
+    "tags": [
+      "partner",
+      "solarteur",
+      "installateur",
+      "flottenmanagement",
+      "inbetriebnahme",
+      "modbus tcp",
+      "shelly",
+      "ocpp",
+      "health score",
+      "selbsttest"
+    ],
+    "is_published": true,
+    "is_featured": true,
+    "sort_order": 5,
+    "views_count": 0,
+    "helpful_yes": 0,
+    "helpful_no": 0,
+    "created_at": "2026-09-16T15:29:13.536Z",
+    "updated_at": "2026-09-16T15:29:13.536Z"
   }
 },
 {
@@ -204,12 +321,83 @@
     ],
     "is_published": true,
     "is_featured": false,
-    "sort_order": 5,
+    "sort_order": 1,
     "views_count": 0,
     "helpful_yes": 0,
     "helpful_no": 0,
     "created_at": "2026-08-25T16:38:13.554Z",
-    "updated_at": "2026-08-30T19:19:34.154Z"
+    "updated_at": "2026-09-16T15:29:13.493Z"
+  }
+},
+{
+  "model": "support_desk.helparticle",
+  "pk": "41cc06ed-99af-4ca3-8230-2eb7edc10b57",
+  "fields": {
+    "category": "e647af9a-8938-4ab9-af5a-0713a15f79b1",
+    "slug": "wechselrichter-cloud-anbindung-anleitung",
+    "context_key": "devices",
+    "title_de": "Wechselrichter & Speicher Cloud-Kopplung (10 Hersteller im Direktvergleich)",
+    "title_en": "Cloud Inverter & Battery Integration Guide (10 Manufacturers)",
+    "summary_de": "Schritt-für-Schritt-Anleitung zur direkten Server-zu-Server Anbindung von Sungrow, Fronius, SolarEdge, Kostal, Growatt, Deye, Huawei, GoodWe, Solis und Victron.",
+    "summary_en": "Step-by-step setup guide for connecting solar inverters and battery storage directly via cloud APIs without local hardware.",
+    "content_de": "# Direkte Cloud-Kopplung für Wechselrichter & Speicher ☁️🔌\n\nMit der **Cloud-Kopplung** bindest du deinen Wechselrichter und Batteriespeicher direkt per Server-zu-Server API an Sharegy an – **ganz ohne zusätzliche Hardware vor Ort** (wie Raspberry Pi oder Smart Dongle).\n\n---\n\n## 1. Übersicht der 10 unterstützten Hersteller\n\n| Hersteller | Unterstützte Modelle | Benötigte Zugangsdaten |\n| :--- | :--- | :--- |\n| **Sungrow** | SH5.0–SH25T Hybrid, SG-Serie, SBR-Speicher | `Anlagen-ID (ps_id)`, `E-Mail / Benutzer`, `Passwort`, `AppKey` |\n| **Fronius** | GEN24 Plus, Symo, Primo, Tauro | `Solar.web E-Mail`, `Passwort` (oder lokale IP) |\n| **SolarEdge** | SE-Serie, HD-Wave, StorEdge, Optimierer | `Standort-ID (site_id)`, `API-Schlüssel (api_key)` |\n| **Kostal** | PLENTICORE plus, PIKO IQ, PIKO MP, BYD | `Anlagen-ID (plant_id)`, `API-Schlüssel (api_key)` |\n| **Growatt** | MIN, MOD, MID, SPH, SPA, ARK-Speicher | `Benutzername / E-Mail`, `Passwort` (oder OpenAPI Token) |\n| **Deye** | SUN 3–12k Hybrid, Mikrowechselrichter | `AppID`, `AppSecret`, `E-Mail`, `Passwort`, `Geräte-SN` |\n| **Huawei** | SUN2000 3–30KTL, LUNA2000 Speicher | `SystemCode`, `SecretKey`, `Anlagencode (Plant Code)` |\n| **GoodWe** | ET, EH, BH, ES Hybrid, Lynx Home | `SEMS Account (E-Mail)`, `Passwort`, `PowerStation-ID` |\n| **Solis** | Solis RHI, S5, S6 Hybrid | `Key-ID`, `Key-Secret`, `Station-ID` |\n| **Victron** | MultiPlus-II, Quattro, Cerbo GX, SmartSolar | `VRM Personal Access Token`, `Site-ID (Installation-ID)` |\n\n---\n\n## 2. Einrichtung je Hersteller\n\n### ☀️ Fronius (Solar.web Cloud & Lokale Anbindung)\nFronius unterstützt zwei besonders komfortable Wege:\n* **Weg 1 (Direkt-Cloud via Solar.web)**: Gib einfach deine gewohnten Solar.web Zugangsdaten (**E-Mail und Passwort**) ein. Sharegy synchronisiert deine Anlage automatisch.\n* **Weg 2 (Lokal via Home Assistant oder ioBroker)**: Falls du Home Assistant oder ioBroker nutzt, binde Fronius direkt im LAN über die lokale Solar API v1 ein und leite die Sensoren per 1-Klick über die Sharegy Home Assistant / ioBroker Integration weiter.\n\n### ☀️ Sungrow (iSolarCloud OpenAPI & OAuth)\n1. Logge dich unter [isolarcloud.eu](https://www.isolarcloud.eu) ein.\n2. In der Adresszeile deines Browsers findest du die **Power Station ID (`ps_id`)** (`...stationDetail?ps_id=1234567`).\n3. Trage deine Zugangsdaten ein und klicke auf **„Verbindung testen“**.\n\n### ☀️ Growatt (ShineServer & ShinePhone)\n1. Gib deinen normalen ShineServer / ShinePhone Benutzernamen und dein Passwort ein.\n2. Sharegy ermittelt automatisch deine Anlage und liest alle Hybrid-, PV- und Speicherdaten aus.\n\n### ☀️ Deye / SolarMAN Smart API\n1. Registriere dich auf [open.solarmanpv.com](https://open.solarmanpv.com) oder nutze deinen SolarMAN Smart Account.\n2. Trage `App ID`, `App Secret` und die Seriennummer (`Device SN`) deines Deye Wechselrichters ein.\n\n### ☀️ Huawei FusionSolar OpenAPI\n1. Öffne das [Huawei FusionSolar Portal](https://eu5.fusionsolar.huawei.com).\n2. Erstelle unter *System ➔ Northbound API* einen Benutzer und trage deinen `Plant Code` ein.\n\n### ☀️ Victron Energy VRM Portal\n1. Öffne [vrm.victronenergy.com](https://vrm.victronenergy.com).\n2. Erstelle unter *Preferences ➔ Personal Access Tokens* einen Token und kopiere deine *Site ID* aus der URL.\n",
+    "content_en": "# Direct Cloud Integration for Inverters & Battery Storage ☁️🔌\n\nConnect solar inverters and home batteries directly via server-to-server APIs – **no local hardware required**.\n\n## Supported Manufacturers (10 Major Brands)\n1. **Fronius** (Solar.web Direct & Local Solar API)\n2. **Sungrow** (iSolarCloud OpenAPI & Web)\n3. **Growatt** (ShineServer & OpenAPI)\n4. **SolarEdge** (Monitoring Portal API)\n5. **Kostal** (Solar Portal API)\n6. **Deye** (SolarMAN Smart API)\n7. **Huawei** (FusionSolar OpenAPI)\n8. **GoodWe** (SEMS Portal API)\n9. **Solis** (SolisCloud OpenAPI)\n10. **Victron Energy** (VRM Portal API)\n",
+    "tags": [
+      "cloud",
+      "sungrow",
+      "kostal",
+      "solaredge",
+      "fronius",
+      "growatt",
+      "deye",
+      "huawei",
+      "goodwe",
+      "solis",
+      "victron",
+      "inverter"
+    ],
+    "is_published": true,
+    "is_featured": true,
+    "sort_order": 3,
+    "views_count": 0,
+    "helpful_yes": 0,
+    "helpful_no": 0,
+    "created_at": "2026-09-02T00:51:52.410Z",
+    "updated_at": "2026-09-16T15:29:13.400Z"
+  }
+},
+{
+  "model": "support_desk.helparticle",
+  "pk": "4632ff28-e30e-4af1-b487-0f84bf223ec1",
+  "fields": {
+    "category": "e6ddda15-7508-4ce7-a852-5fa4afee4696",
+    "slug": "smart-load-management-und-dispatch-hub",
+    "context_key": "control",
+    "title_de": "Smart Load Management & Dispatch-Zentrale (/app/control) 🎛️⚡",
+    "title_en": "Smart Load Management & Dispatch Hub (/app/control) 🎛️⚡",
+    "summary_de": "Leitfaden für die Lastmanagement-Zentrale: Prioritäten-Kaskade (Merit-Order), Master-Modi (Autopilot, Nur Solar, Sparfuchs) und 24h-Fahrplan.",
+    "summary_en": "Comprehensive guide for the Load Management Hub: Priority Cascade (Merit-Order), Master Autopilot modes, and 24h schedule preview.",
+    "content_de": "# Smart Load Management & Dispatch Hub 🎛️⚡\n\nDer **Smart Load Management & Dispatch Hub** auf `/app/control` ist die zentrale Steuerungszentrale für alle flexiblen Verbraucher und Speicher deines Haushalts.\n\n---\n\n## 1. Die 4 Master-Autopilot-Modi\n\nWähle in der Steuerungsleiste den gewünschten Betriebsmodus:\n* 🤖 **Smart Autopilot**: Maximiert vollautomatisch die Eigenverbrauchsquote und optimiert Speicher und flexible Lasten basierend auf Solarprognose und stündlichen dynamischen Strompreisen (EPEX Spot).\n* ☀️ **Nur PV-Überschuss**: Verbraucher und Heimspeicher werden ausschließlich aktiviert, wenn solarer Überschuss eingespeist werden würde ($P_\\text{grid} < 0\\,\\text{W}$). Netzbezug für flexible Lasten wird strikt vermieden.\n* 💰 **Preise-Optimiert**: Nutzt gezielt günstige und negative Strompreis-Phasen an der Strombörse zur Aufladung von Speicher und thermischen Speichern.\n* 🛑 **Manuell**: Die automatische Zuteilung ist pausiert. Alle Verbraucher können direkt per Hand geschaltet werden.\n\n---\n\n## 2. Die Prioritäten-Kaskade (Merit-Order)\n\nWenn die Sonne scheint, reicht der Überschuss nicht immer für alle Verbraucher gleichzeitig. Über die **Prioritäten-Kaskade** legst du per Klick die Zuteilungs-Reihenfolge fest:\n\n```\n[ 1. 🔋 Heimspeicher ] ➔ [ 2. ♨️ BWWP ] ➔ [ 3. 🚗 Wallbox ] ➔ [ 4. 🏊 Poolpumpe ] ➔ [ 5. ❄️ Klima ] ➔ [ 6. 🧺 Haushalt ]\n```\n\n* **Beispiel**: Zuerst wird der Heimspeicher bis zur Reserve (z. B. 80%) geladen. Danach fließt der Überschuss in die Brauchwasserwärmepumpe (Boost auf 60°C). Reicht der Strom weiterhin, starten Wallbox und Poolfilterung.\n\n---\n\n## 3. Die 7 modularen Verbraucher-Kategorien\n\n1. ♨️ **Brauchwasserwärmepumpe (BWWP) & Wärmepumpe**: SG-Ready Schaltung (State 2 / State 3 Boost bis 60°C) mit integriertem Verdichter- und Taktschutz.\n2. 🚗 **Wallbox & E-Auto**: Überschussladen (Min+PV), Börsenpreis-Laden und 1-Klick-Schnellladung.\n3. 🔋 **Heimspeicher**: Arbitrage & automatisches Grid-Charging bei negativen Strompreisen.\n4. 🏊 **Poolpumpen & Filter**: Garantiert tägliche Mindestlaufzeit (z. B. 5 Stunden) exakt in den Sonnenstunden (Peak-Shaving).\n5. ❄️ **Klimaanlagen (Pre-Cooling)**: Kühlt das Haus bei sommerlichen PV-Spitzenzeiten 1,5°C vor, um teuren Abendstrom einzusparen.\n6. 🧺 **Haushaltsgeräte (Smart Plugs)**: „Ready-to-Start“ Scharfschaltung für Waschmaschine und Geschirrspüler.\n7. ⚡ **Heizstäbe (Power-to-Heat)**: Stufenlose Pufferladung zur vollständigen Überschussverwertung vor der Netzeinspeisung.\n\n---\n\n## 4. Der 24h-Fahrplan (Dispatch-Timeline)\n\nDie horizontale Fahrplan-Vorschau visualisiert für jede Stunde des Tages:\n* Erwartete PV-Erzeugung (kW) und dynamischer Strompreis.\n* Welche Geräte voraussichtlich mit kostenlosem Solarstrom oder Tiefstpreisen betrieben werden.\n",
+    "content_en": "# Smart Load Management & Dispatch Hub 🎛️⚡\n\nThe **Smart Load Management & Dispatch Hub** on `/app/control` serves as the central orchestration engine for your home's flexible energy assets.\n\n## Key Features\n* 📊 **Live Power Budget & Master Autopilot Modes** (Autopilot, Solar Only, Price Saver, Manual)\n* 🥇 **Interactive Priority Cascade (Merit-Order)** for solar surplus allocation.\n* 📅 **24h Dispatch Schedule & Timeline** merging solar forecasts with dynamic spot prices.\n* 🎛️ **Modular Load Controllers** for Heat Pumps/DHW, EV Chargers, Home Batteries, Pool Pumps, AC Pre-Cooling, Smart Plugs, and Heating Rods.\n",
+    "tags": [
+      "lastmanagement",
+      "dispatch",
+      "prioritäten",
+      "merit order",
+      "bwwp",
+      "wallbox",
+      "pool",
+      "klima",
+      "autopilot"
+    ],
+    "is_published": true,
+    "is_featured": true,
+    "sort_order": 13,
+    "views_count": 0,
+    "helpful_yes": 0,
+    "helpful_no": 0,
+    "created_at": "2026-09-04T04:39:47.530Z",
+    "updated_at": "2026-09-16T15:29:13.438Z"
   }
 },
 {
@@ -237,12 +425,76 @@
     ],
     "is_published": true,
     "is_featured": true,
-    "sort_order": 3,
+    "sort_order": 1,
     "views_count": 0,
     "helpful_yes": 0,
     "helpful_no": 0,
     "created_at": "2026-08-25T11:23:37.250Z",
-    "updated_at": "2026-08-30T19:19:34.142Z"
+    "updated_at": "2026-09-16T15:29:13.487Z"
+  }
+},
+{
+  "model": "support_desk.helparticle",
+  "pk": "4f0064ed-cecf-4015-bafc-3186243d9556",
+  "fields": {
+    "category": "34745af8-0e4e-4d2f-a386-36f4fe5a8c0f",
+    "slug": "hardware-selbsttest-und-diagnose-assistent",
+    "context_key": "devices",
+    "title_de": "1-Klick Hardware-Selbsttest & Diagnose-Assistent (Onboarding)",
+    "title_en": "1-Click Hardware Self-Test & Diagnostic Assistant",
+    "summary_de": "Automatisierte 3-Phasen-Prüfung für Wechselrichter, Speicher und Wallboxen: Latenz-Check, Live-Telemetrie und Steuerkanal-Rücktest.",
+    "summary_en": "Automated 3-phase verification for inverters, batteries, and wallboxes: Latency ping, live telemetry ingest, and control loop verification.",
+    "content_de": "# 1-Klick Hardware-Selbsttest & Diagnose ⚡🩺\n\nDer **1-Klick Hardware-Selbsttest** prüft neu gekoppelte oder bestehende Geräte in Sekundenschnelle auf Herz und Nieren.\n\n---\n\n## Die 3 Phasen der Diagnose\n\n```\n[ Phase 1: Verbindung & Latenz ] ➔ [ Phase 2: Live-Telemetrie ] ➔ [ Phase 3: Steuerkanal ] ➔ [ Diagnose-Zertifikat ]\n```\n\n1. **⚡ Phase 1: Verbindung & Latenz-Prüfung**\n   - Prüft DNS-Auflösung, TLS-Handshake und Netzwerk-Roundtrip.\n   - Ideal-Latenz: **< 100 ms** (grünes Badge).\n2. **📊 Phase 2: Live-Telemetrie Ingestion**\n   - Prüft, ob gültige Messwerte für Leistung (W), Netzspannung (V) und Ladestand (SoC %) ankommen.\n   - Validiert die Plausibilität (z. B. keine negativen Hausverbräuche).\n3. **🔄 Phase 3: Steuerungs-Rückkanal & Heartbeat**\n   - Testet den bidirektionalen Steuerkanal (OCPP 1.6-J bei Wallboxen, OpenAPI bei Sungrow, WSS bei Shelly).\n\n---\n\n## Diagnose-Zertifikat & Health-Score\nNach Abschluss vergibt Sharegy einen **Health-Score (0–100 Punkte)** und empfiehlt bei Unregelmäßigkeiten konkrete Optimierungsschritte.\n",
+    "content_en": "# 1-Click Hardware Self-Test & Diagnostics ⚡🩺\n\nRun instant 3-phase diagnostics on any connected inverter, battery, wallbox, or smart plug:\n1. **Connectivity & Latency**: Verifies TLS handshake and latency (< 100 ms).\n2. **Telemetry Ingestion**: Validates real-time power (W), voltage (V), and SoC (%).\n3. **Bidirectional Control**: Verifies OCPP and OpenAPI command dispatch.\n",
+    "tags": [
+      "selbsttest",
+      "diagnose",
+      "latenz",
+      "health score",
+      "telemetrie",
+      "onboarding"
+    ],
+    "is_published": true,
+    "is_featured": true,
+    "sort_order": 6,
+    "views_count": 0,
+    "helpful_yes": 0,
+    "helpful_no": 0,
+    "created_at": "2026-09-03T05:22:21.766Z",
+    "updated_at": "2026-09-16T15:29:13.409Z"
+  }
+},
+{
+  "model": "support_desk.helparticle",
+  "pk": "59c4db11-6ea7-466a-a1bd-f9dd4c50866b",
+  "fields": {
+    "category": "b9285d9d-9bcf-43e8-8b95-b71a47ac13b7",
+    "slug": "energieprofil-und-baseline-assistent",
+    "context_key": "energy_profile",
+    "title_de": "Energieprofil & Haushalts-Baseline: Grundlast, Effizienz-Benchmarking & Einsparpotenziale",
+    "title_en": "Energy Profile & Home Baseline: Baseload, Efficiency Benchmarking & Savings",
+    "summary_de": "Konfiguration deines Haushalts-Energieprofils (/app/energy-profile): Haushaltsgröße, Wohnfläche, Heizungstyp, theoretische Grundlast-Berechnung und Identifikation versteckter Standby-Stromfresser.",
+    "summary_en": "Configuring your household Energy Profile (/app/energy-profile): household size, floor area, heating type, theoretical baseload calculation, and eliminating standby power leakages.",
+    "content_de": "# Energieprofil & Haushalts-Baseline: Grundlast & Effizienz 🏠📊\n\nDas **Energieprofil** unter `/app/energy-profile` ist das Herzstück zur individuellen Modellierung deines Haushalts in Sharegy. Es liefert dem Smart Energy Optimizer (EMS) und der KI-Lastprognose die mathematische Basis für präzise Berechnungen.\n\n---\n\n## 1. Warum ist das Energieprofil unverzichtbar?\n\nJeder Haushalt ist einzigartig: Ein Single in einer Altbauwohnung hat völlig andere Verbrauchsmuster als eine 4-köpfige Familie im KfW-40-Neubau mit Wärmepumpe und Elektrofahrzeug.\n\nDurch das Ausfüllen des Energieprofils erzielst du:\n* 🎯 **Präzise 24h-Lastprognosen**: Das System weiß exakt, wie viel Strom dein Haushalt zu welcher Tageszeit benötigt.\n* 🔍 **Aufdecken von Standby-Leckagen**: Automatischer Abgleich deiner echten nächtlichen Grundlast mit dem theoretischen Soll-Wert.\n* 💰 **Gezielte Optimierungsempfehlungen**: Individuelle Spartipps für Heizung, Warmwasser, Mobilität und Haushaltsgeräte.\n\n---\n\n## 2. Die Eingabeparameter im Baseline-Assistenten\n\nIm Assistenten erfasst du in wenigen Schritten deine Eckdaten:\n\n| Parameter | Beschreibung | Auswirkung auf die Optimierung |\n| :--- | :--- | :--- |\n| **Haushaltsgröße** | Anzahl der ständig im Haushalt lebenden Personen | Skaliert den personenbezogenen Grund- und Kochstrom |\n| **Wohnfläche ($m^2$)** | Beheizte Wohnfläche | Berechnet den spezifischen Heizwärmebedarf ($kWh/m^2a$) |\n| **Gebäudestandard** | Baujahr / Sanierungsstufe (z. B. KfW 40, KfW 55, Altbau) | Bestimmt die thermische Gebäudeträgheit und Vorlauftemperaturen |\n| **Heizungssystem** | Wärmepumpe, Fernwärme, Gas/Öl, Pelletheizung | Definiert flexible thermische Lastverschiebungs-Potenziale |\n| **Warmwasserbereitung** | BWWP, Durchlauferhitzer, zentral über Heizung, Boiler | Modelliert Warmwasser-Peaks am Morgen und Abend |\n| **E-Mobilität** | Anzahl Elektrofahrzeuge & jährliche Fahrleistung (km/a) | Plant Ladefenster und Akkukapazitäten im Fahrplan ein |\n| **Sonderverbraucher** | Klimaanlage, Poolpumpe, Sauna, Home-Server, Teichfilter | Erkennt planbare Großverbraucher für Solar-Dispatching |\n\n---\n\n## 3. Die theoretische Grundlast-Berechnung (Benchmark)\n\nSharegy errechnet aus deinen Profildaten eine **theoretische Referenz-Grundlast** ($P_\\text{theoretisch}$):\n\n$$P_\\text{theoretisch} = P_\\text{Basis} + (\\text{Personen} \\times P_\\text{Person}) + P_\\text{Dauerverbraucher}$$\n\n### Typische Richtwerte für die normale Haushaltsgrundlast:\n* 👤 **1-Personen-Haushalt**: ca. **60 bis 90 W**\n* 👥 **2-Personen-Haushalt**: ca. **90 bis 140 W**\n* 👨‍👩‍👧‍👦 **3–4-Personen-Haushalt**: ca. **130 bis 200 W**\n* 🏡 **Einfamilienhaus mit Komfortausstattung**: ca. **180 bis 250 W**\n\n---\n\n## 4. Standby-Leckage-Erkennung & Kostenfalle\n\nDie automatische Analyse prüft kontinuierlich deine gemessene Dauerlast in der tiefen Nacht (**02:00 bis 05:00 Uhr**):\n\n> ⚠️ **Beispiel für teure Dauerlasten:**  \n> Liegt deine gemessene Nachtlast bei **280 W**, während dein theoretischer Soll-Wert nur **120 W** beträgt, verlierst du **160 W als reine Standby-Leckage**!  \n> $$160\\,\\text{W} \\times 8.760\\,\\text{h} = 1.401{,}6\\,\\text{kWh/Jahr} \\approx \\mathbf{420\\text{ bis }490\\text{ €/Jahr}}$$\n\n### Typische versteckte Stromfresser:\n1. 🔄 **Alte ungesteuerte Heizungspumpen**: Laufen oft ganzjährig mit 60–90 W durch (**~180–270 €/a**).\n2. 📺 **Media-Receiver & HiFi-Verstärker**: Viele Altgeräte ziehen im Standby 15–30 W.\n3. ❄️ **Zweit-Kühlschrank im Keller**: Defekte Dichtungen oder Vereisung führen zu dauerhaftem Kompressorlauf.\n4. 🌐 **Ungesteuerte Netzwerk-Switches & Dauer-Netzteile**: Sammeln sich unbemerkt an.\n\n---\n\n## 5. Integration mit dem Smart Energy Optimizer\n\nSobald dein Profil vollständig konfiguriert ist:\n* Berechnet das EMS die täglichen Lade- und Entladezyklen deines Batteriespeichers millimetergenau.\n* Werden flexible Lasten (Wallbox, BWWP, Klimaanlage) so eingetaktet, dass die Grundlast nie zu ungeplantem Netzbezug führt.\n",
+    "content_en": "# Energy Profile & Home Baseline: Baseload & Efficiency 🏠📊\n\nThe **Energy Profile** at `/app/energy-profile` provides the foundational blueprint for your home in Sharegy. It equips the Smart Energy Optimizer (EMS) and AI load forecasting engine with accurate parameters for simulation and dispatch.\n\n---\n\n## 1. Why is the Energy Profile essential?\n\nEvery household exhibits distinct consumption dynamics. A single occupant in a well-insulated apartment has completely different needs than a family of four in a single-family home with a heat pump and EV.\n\nCompleting your Energy Profile delivers:\n* 🎯 **Precise 24h Load Forecasts**: Tailored expected hourly consumption patterns.\n* 🔍 **Standby Leakage Detection**: Automated benchmarking of measured nighttime baseload against theoretical targets.\n* 💰 **Targeted Savings Recommendations**: Tailored guidance for HVAC, hot water, EV charging, and smart appliances.\n\n---\n\n## 2. Input Parameters\n\n| Parameter | Description | Optimization Impact |\n| :--- | :--- | :--- |\n| **Household Size** | Number of permanent residents | Scales occupancy-driven baseload and appliance usage |\n| **Living Area ($m^2$)** | Heated floor area | Calculates specific thermal demand ($kWh/m^2a$) |\n| **Building Standard** | Year of construction / insulation rating | Determines thermal inertia and heating curve parameters |\n| **Heating System** | Heat pump, district heating, gas/oil, biomass | Defines flexible thermal shift capacity |\n| **Hot Water (DHW)** | DHW heat pump, instantaneous heater, boiler | Schedules morning and evening peak demands |\n| **EV Mobility** | Electric vehicle count and annual mileage (km/y) | Reserves charging slots in the 24h dispatch plan |\n| **Special Loads** | Air conditioning, pool pump, sauna, home servers | Pinpoints schedulable heavy loads for solar dispatch |\n\n---\n\n## 3. Theoretical Baseload Calculation\n\nSharegy computes a **theoretical benchmark baseload** ($P_\\text{theoretical}$):\n\n$$P_\\text{theoretical} = P_\\text{base} + (\\text{Occupants} \\times P_\\text{person}) + P_\\text{constant\\_loads}$$\n\n### Typical Industry Benchmarks:\n* 👤 **1-Person Household**: approx. **60 to 90 W**\n* 👥 **2-Person Household**: approx. **90 to 140 W**\n* 👨‍👩‍👧‍👦 **3–4-Person Household**: approx. **130 to 200 W**\n* 🏡 **Single-Family Home with Smart Equipment**: approx. **180 to 250 W**\n\n---\n\n## 4. Standby Leakage Alert & Cost Impact\n\nThe analytics engine continually verifies your nighttime minimum power draw (**02:00 to 05:00 AM**):\n\n> ⚠️ **Cost Example:**  \n> If measured baseload is **280 W** against a target of **120 W**, the unexplained **160 W excess standby** costs:  \n> $$160\\,\\text{W} \\times 8,760\\,\\text{h} = 1,401.6\\,\\text{kWh/year} \\approx \\mathbf{420\\text{ to }490\\text{ €/year}}$$\n",
+    "tags": [
+      "energieprofil",
+      "baseline",
+      "grundlast",
+      "standby",
+      "stromfresser",
+      "effizienz",
+      "haushalt",
+      "benchmark"
+    ],
+    "is_published": true,
+    "is_featured": true,
+    "sort_order": 3,
+    "views_count": 0,
+    "helpful_yes": 0,
+    "helpful_no": 0,
+    "created_at": "2026-09-10T14:11:15.641Z",
+    "updated_at": "2026-09-16T15:29:13.465Z"
   }
 },
 {
@@ -268,12 +520,12 @@
     ],
     "is_published": true,
     "is_featured": true,
-    "sort_order": 8,
+    "sort_order": 1,
     "views_count": 0,
     "helpful_yes": 0,
     "helpful_no": 0,
     "created_at": "2026-08-25T16:38:13.568Z",
-    "updated_at": "2026-08-30T19:19:34.169Z"
+    "updated_at": "2026-09-16T15:29:13.502Z"
   }
 },
 {
@@ -299,12 +551,77 @@
     ],
     "is_published": true,
     "is_featured": false,
-    "sort_order": 10,
+    "sort_order": 1,
     "views_count": 0,
     "helpful_yes": 0,
     "helpful_no": 0,
     "created_at": "2026-08-25T16:38:13.577Z",
-    "updated_at": "2026-08-30T19:19:34.177Z"
+    "updated_at": "2026-09-16T15:29:13.509Z"
+  }
+},
+{
+  "model": "support_desk.helparticle",
+  "pk": "5f11f94d-4428-435b-85ce-0bd6578eb801",
+  "fields": {
+    "category": "e6ddda15-7508-4ce7-a852-5fa4afee4696",
+    "slug": "ocpp-wallbox-anbindung-und-smart-charging",
+    "context_key": "wallbox",
+    "title_de": "OCPP 1.6-J CSMS Wallbox-Integration & Intelligente Lademodi",
+    "title_en": "OCPP 1.6-J CSMS Wallbox Integration & Smart Charging Modes",
+    "summary_de": "Anbindung jeder OCPP-konformen Wallbox (Easee, openWB, Webasto, Mennekes, Alfen) und Steuerung über die 5 intelligenten Lademodi.",
+    "summary_en": "Connect any OCPP 1.6-J EV charger (Easee, openWB, Webasto, Mennekes, Alfen) with 5 automated smart charging algorithms.",
+    "content_de": "# OCPP 1.6-J Wallbox-Integration & Smart Charging 🚗⚡\n\nSharegy verfügt über ein integriertes **OCPP 1.6-J Charging Station Management System (CSMS)**. Damit steuerst du jede standardkonforme Wallbox hardware-unabhängig.\n\n---\n\n## 1. Wallbox in 2 Minuten anbinden\n1. Gehe in Sharegy auf **🔌 Geräte ➔ Wallbox hinzufügen**.\n2. Vergib einen Namen und notiere dir die generierte **OCPP-Server-URL**:\n   > `wss://sharegy.de/ocpp/<DEINE_CHARGE_POINT_ID>`\n3. Öffne die Konfigurationsoberfläche deiner Wallbox (z. B. Easee, openWB, Webasto, Mennekes, Alfen, go-e) und trage diese URL als OCPP-Backend ein.\n4. Sobald sich die Wallbox verbindet, erscheint sie sofort online mit Live-Ladeleistung!\n\n---\n\n## 2. Die 5 intelligenten Lademodi\n\n* ☀️ **1. Nur Solarüberschuss (`pv_surplus`)**:\n  - Lädt ausschließlich mit Strom vom eigenen Dach.\n  - Pausiert automatisch bei Bewölkung und regelt den Ladestrom zwischen 6A und 16A/32A stufenlos nach.\n* ⛅ **2. Min + PV-Überschuss (`min_pv`)**:\n  - Garantiert eine Mindest-Ladeleistung (z. B. 6A 1-phasig) und schiebt jeden solaren Überschuss zusätzlich ins Auto.\n* 💶 **3. Börsenpreisgeführt (`spot_price`)**:\n  - Lädt nur, wenn der dynamische Börsenstrompreis (EPEX Spot) unter deiner eingestellten Preisschwelle (z. B. 15 ct/kWh) liegt.\n* ⚡ **4. Sofortladen (`instant`)**:\n  - Lädt sofort mit maximaler Ladeleistung (z. B. 11 kW oder 22 kW), unabhängig von Sonne oder Strompreis.\n* 🛑 **5. Gesperrt (`off`)**:\n  - Verriegelt die Wallbox gegen unbefugte Nutzung.\n",
+    "content_en": "# OCPP 1.6-J EV Wallbox CSMS & Smart Charging 🚗⚡\n\nSharegy operates a built-in OCPP 1.6-J CSMS gateway compatible with any open wallbox (Easee, openWB, Webasto, Mennekes, Alfen, go-e).\n\n## 5 Intelligent Charging Modes\n1. ☀️ **Pure Solar Surplus** (`pv_surplus`)\n2. ⛅ **Min + Solar Surplus** (`min_pv`)\n3. 💶 **Dynamic Spot Price Guided** (`spot_price`)\n4. ⚡ **Instant Fast Charge** (`instant`)\n5. 🛑 **Locked / Paused** (`off`)\n",
+    "tags": [
+      "wallbox",
+      "ocpp",
+      "csms",
+      "smart charging",
+      "überschussladen",
+      "eauto",
+      "easee",
+      "openwb"
+    ],
+    "is_published": true,
+    "is_featured": true,
+    "sort_order": 7,
+    "views_count": 0,
+    "helpful_yes": 0,
+    "helpful_no": 0,
+    "created_at": "2026-09-03T05:22:21.771Z",
+    "updated_at": "2026-09-16T15:29:13.413Z"
+  }
+},
+{
+  "model": "support_desk.helparticle",
+  "pk": "658ce39e-5030-443e-b09d-3aaa7ef300c9",
+  "fields": {
+    "category": "164079f1-625b-4e67-bfc3-6366fdc379d6",
+    "slug": "tenant-admin-leitfaden-mieterstrom-und-vpp",
+    "context_key": "tenant_admin_guide",
+    "title_de": "Tenant-Admin Leitfaden: Virtueller Summenzähler, § 42b Mieterstrom & PDF-Abrechnungen",
+    "title_en": "Tenant-Admin Guide: Virtual Master Meter, Multi-Tenant Allocation & PDF Invoices",
+    "summary_de": "Der vollständige Leitfaden für Liegenschafts-Admins, Vermieter und WEGs: 15m NAP-Saldierung, MEA-Aufteilungsschlüssel, PDF-Abrechnungen und VPP-Flexibilität.",
+    "summary_en": "Comprehensive guide for property managers and communities: 15-minute grid settlement, allocation keys, automated PDF billing, and VPP flexibility.",
+    "content_de": "# 🏢 Tenant-Admin Leitfaden: Virtueller Summenzähler, Mieterstrom & Monatsabrechnungen\n\nAls **Liegenschafts- oder Quartiers-Administrator (Tenant-Admin)** verwaltest du die energiewirtschaftlichen Prozesse deines Gebäudes oder deiner Nachbarschaftsgemeinschaft.\n\n---\n\n## 🌟 Die Kernfunktionen im Liegenschafts-Dashboard (`/app/tenant`)\n\n### 1. 🏢 Virtueller Summenzähler & NAP-Saldierung\n* **Eichrechtskonforme 15-Minuten-Saldierung**: Sharegy berechnet für alle 96 Viertelstunden des Tages den exakten Netzeinspeise- und Bezugssaldo am Netzanschlusspunkt (NAP).\n* **3 Aufteilungsmodelle (§ 42b EnWG)**:\n  1. *Dynamisch (zeitgleich)*: Zuteilung proportional zum Echtzeit-Verbrauch im selben 15m-Intervall (Maximale Fairness).\n  2. *Statisch (nach MEA-Schlüssel)*: Feste Zuteilungsquote nach Miteigentumsanteilen je Wohnung.\n  3. *Hybrid*: Vorrangige Eigenversorgung + dynamisches Überschuss-Sharing.\n\n### 2. 💰 Tarife & Monatliche PDF-Abrechnungen\n* **Tarifkonfiguration**: Einstellen von Solarstrompreis (ct/kWh), Reststrombezug (ct/kWh) und monatlicher Grundgebühr (€).\n* **Monatliches Clearing**: 1-Klick Auslösung der Monatsabrechnung erzeugt für jeden Mieter einen rechtssicheren PDF-Abrechnungsnachweis mit Einzelnachweis.\n* **Exporte für Hausverwaltung & Steuerberater**: Excel (`.xlsx`), CSV (DATEV-kompatibel, Semikolon/UTF-8 BOM) und XML für ERP-Software (Haufe, DOMUS etc.).\n\n### 3. 🔌 VPP Kraftwerk & § 14a EnWG Flexibilitäts-Pool\n* **Aggregierte Flexibilität**: Übersicht des steuerbaren Leistungsbandes (+kW / -kW) aller Heimspeicher und Lasten.\n* **§ 14a SteuVE Modul**: Dimmbare Wallboxen und Wärmepumpen zur Sicherung des pauschalen Netzentgelt-Rabatts (~160 € / Anlage / Jahr).\n* **Redispatch 2.0 / Connect+ 96-Fahrplan**: Automatische Fahrplangenerierung (`PT15M`) für Netzbetreiber.\n\n### 4. 👥 Mitglieder & Rollenverwaltung\n* Rollenbasierte Rechtevergabe: *Admin* 🏛️, *Energy-Userverwaltung* 👥, *Auditor / Kassenprüfer* 📊, *Helpdesk* 🛟 und *Mitglied* ⚡.\n* Datenschutzkonformität: Mieter sehen ausschließlich den eigenen Verbrauch und die eigene Abrechnung.\n",
+    "content_en": "# 🏢 Tenant-Admin Guide: Virtual Master Meter, Sub-Metering & PDF Invoices\n\nAs a **Tenant Administrator (Property Manager / Community Admin)**, you manage all energy flows, billing, and flexibility across your multi-family building or energy community.\n\n---\n\n## 🌟 Key Capabilities in the Tenant Dashboard (`/app/tenant`)\n\n### 1. 🏢 Virtual Master Meter & Grid Connection (NAP) Settlement\n* **15-Minute Interval Settlement**: Exact calculation of grid feed-in and import balances across all 96 quarter-hours per day.\n* **3 Allocation Keys (§ 42b EnWG)**:\n  1. *Dynamic (Concurrent)*: Allocated in real-time based on 15m energy demand (Max fairness).\n  2. *Static (Ownership Share / MEA)*: Fixed percentage allocated per apartment.\n  3. *Hybrid*: Priority self-consumption with dynamic excess sharing.\n\n### 2. 💰 Tariffs & Automated Monthly PDF Statements\n* **Tariff Setup**: Configure Solar sharing rates (ct/kWh), Grid import rates (ct/kWh), and base fees (€/mo).\n* **Monthly Clearing**: 1-click settlement generates compliant, itemized PDF statements for every resident.\n* **Multi-Format Exports**: Excel (`.xlsx`), CSV (DATEV-ready), and XML for property ERP systems.\n\n### 3. 🔌 Virtual Power Plant (VPP) & Grid Flexibility\n* **Aggregated Fleet Capacity**: Real-time positive (+kW) and negative (-kW) active power flexibility.\n* **Controllable Loads (§ 14a EnWG)**: Dimmable wallboxes and heat pumps qualifying for grid fee rebates.\n* **Redispatch 2.0 / Connect+ 96 Schedule**: Standardized `PT15M` schedules for transmission system operators.\n\n### 4. 👥 Member & RBAC Management\n* Assign roles: *Admin* 🏛️, *User Manager* 👥, *Auditor* 📊, *Helpdesk* 🛟, and *Member* ⚡.\n* Strict GDPR compliance: Residents only see their own private energy usage and invoices.\n",
+    "tags": [
+      "tenant admin",
+      "mieterstrom",
+      "virtual master meter",
+      "pdf abrechnung",
+      "vpp",
+      "§ 42b EnWG",
+      "hausverwaltung"
+    ],
+    "is_published": true,
+    "is_featured": true,
+    "sort_order": 2,
+    "views_count": 0,
+    "helpful_yes": 0,
+    "helpful_no": 0,
+    "created_at": "2026-09-11T22:18:47.814Z",
+    "updated_at": "2026-09-16T15:29:13.522Z"
   }
 },
 {
@@ -318,8 +635,8 @@
     "title_en": "Energy Balance, Autarky Rate & Self-Consumption",
     "summary_de": "Erklärung aller zentralen Kennzahlen im Energie-Dashboard (Autarkie, Eigenverbrauch, Solardeckung).",
     "summary_en": "Explanation of core metrics on the Energy Dashboard (autarky rate, self-consumption ratio, solar share).",
-    "content_de": "# Energiebilanz & Kennzahlen verstehen\n\nDas **Energie-Dashboard** bietet einen ganzheitlichen Überblick über deine Erzeugung, Batteriespeicher, Verbräuche und Netzflüsse.\n\n## Die wichtigsten Kennzahlen\n\n### 1. Autarkiegrad (%)\nGibt an, zu welchem prozentualen Anteil der gesamte Haushaltsstrombedarf durch deine eigene Solaranlage und den Batteriespeicher gedeckt werden konnte:\n\n> 📐 **Formel:**  \n> **Autarkiegrad (%)** = `(1 - Netzbezug / Gesamtverbrauch) × 100`  \n> *(Vereinfacht: Anteil des Eigenstroms am gesamten Hausverbrauch)*\n\n* 🟢 **≥ 75 %**: Sehr hohe Unabhängigkeit vom öffentlichen Stromnetz.\n* 🟡 **40 bis 74 %**: Solide Grunddeckung, typisch für Übergangsmonate (Frühjahr/Herbst).\n* 🔵 **Unter 40 %**: Typischer Winterwert oder Ausbaupotenzial bei Speicher/PV.\n\n---\n\n### 2. Eigenverbrauchsquote (%)\nZeigt, wie viel Prozent des von deiner Photovoltaikanlage erzeugten Stroms direkt im Haus verbraucht oder in den Akku geladen wurde (statt ins Netz eingespeist zu werden):\n\n> 📐 **Formel:**  \n> **Eigenverbrauchsquote (%)** = `(Direktverbrauch + Batterieladung) / Gesamte PV-Erzeugung × 100`\n\n> [!TIP]\n> Um die Eigenverbrauchsquote zu maximieren, nutze den **Smart Energy Optimizer**, um Großverbraucher (z. B. Wallbox, Wärmepumpe, Spülmaschine) automatisch in Phasen mit hohem Solarüberschuss zu starten.\n",
-    "content_en": "# Energy Balance & Key Performance Indicators\n\nThe **Energy Dashboard** provides a unified view of your solar generation, battery storage, household load, and grid interactions.\n\n## Core Metrics Overview\n\n### 1. Autarky / Self-Sufficiency Rate (%)\nRepresents the percentage of your total energy consumption covered directly by solar generation and your home battery:\n\n> 📐 **Formula:**  \n> **Autarky Rate (%)** = `(1 - Grid Import / Total Load) × 100`  \n> *(Simplified: Share of self-generated clean power over total consumption)*\n\n* 🟢 **≥ 75 %**: High grid independence.\n* 🟡 **40 to 74 %**: Solid baseline coverage typical for spring and autumn.\n* 🔵 **Under 40 %**: Typical winter performance or room for battery/solar expansion.\n\n---\n\n### 2. Self-Consumption Ratio (%)\nShows the percentage of generated solar energy consumed directly or stored in your home battery rather than being fed into the grid:\n\n> 📐 **Formula:**  \n> **Self-Consumption (%)** = `(Direct Consumption + Battery Charging) / Total PV Generation × 100`\n\n> [!TIP]\n> Use the **Smart Energy Optimizer** to align heavy loads (EV charging, heat pump heating cycles) with peak solar production hours.\n",
+    "content_de": "# Energiebilanz & Kennzahlen verstehen\n\nDas **Energie-Dashboard** bietet einen ganzheitlichen Überblick über deine Erzeugung, Batteriespeicher, Verbräuche und Netzflüsse.\n\n## Die wichtigsten Kennzahlen\n\n### 1. Autarkiegrad (%)\nGibt an, zu welchem prozentualen Anteil der gesamte Haushaltsstrombedarf durch deine eigene Solaranlage und den Batteriespeicher gedeckt werden konnte:\n\n> 📐 **Formel:**  \n> **Autarkiegrad (%)** = `(1 - Netzbezug / Gesamtverbrauch) × 100`\n\n* 🟢 **≥ 75 %**: Sehr hohe Unabhängigkeit vom öffentlichen Stromnetz.\n* 🟡 **40 bis 74 %**: Solide Grunddeckung, typisch für Übergangsmonate (Frühjahr/Herbst).\n* 🔵 **Unter 40 %**: Typischer Winterwert oder Ausbaupotenzial bei Speicher/PV.\n\n---\n\n### 2. Eigenverbrauchsquote (%)\nZeigt, wie viel Prozent des von deiner Photovoltaikanlage erzeugten Stroms direkt im Haus verbraucht oder in den Akku geladen wurde (statt ins Netz eingespeist zu werden):\n\n> 📐 **Formel:**  \n> **Eigenverbrauchsquote (%)** = `(Direktverbrauch + Batterieladung) / Gesamte PV-Erzeugung × 100`\n\n> [!TIP]\n> Um die Eigenverbrauchsquote zu maximieren, nutze den **Smart Energy Optimizer**, um Großverbraucher (z. B. Wallbox, Wärmepumpe, Spülmaschine) automatisch in Phasen mit hohem Solarüberschuss zu starten.\n",
+    "content_en": "# Energy Balance & Key Performance Indicators\n\nThe **Energy Dashboard** provides a unified view of your solar generation, battery storage, household load, and grid interactions.\n\n## Core Metrics Overview\n\n### 1. Autarky / Self-Sufficiency Rate (%)\nRepresents the percentage of your total energy consumption covered directly by solar generation and your home battery:\n\n> 📐 **Formula:**  \n> **Autarky Rate (%)** = `(1 - Grid Import / Total Load) × 100`\n\n* 🟢 **≥ 75 %**: High grid independence.\n* 🟡 **40 to 74 %**: Solid baseline coverage typical for spring and autumn.\n* 🔵 **Under 40 %**: Typical winter performance or room for battery/solar expansion.\n\n---\n\n### 2. Self-Consumption Ratio (%)\nShows the percentage of generated solar energy consumed directly or stored in your home battery rather than being fed into the grid:\n\n> 📐 **Formula:**  \n> **Self-Consumption (%)** = `(Direct Consumption + Battery Charging) / Total PV Generation × 100`\n\n> [!TIP]\n> Use the **Smart Energy Optimizer** to align heavy loads (EV charging, heat pump heating cycles) with peak solar production hours.\n",
     "tags": [
       "energy",
       "autarkie",
@@ -335,7 +652,40 @@
     "helpful_yes": 0,
     "helpful_no": 0,
     "created_at": "2026-08-25T11:23:37.281Z",
-    "updated_at": "2026-08-30T19:19:34.124Z"
+    "updated_at": "2026-09-16T15:29:13.393Z"
+  }
+},
+{
+  "model": "support_desk.helparticle",
+  "pk": "76f7a0d6-b836-427e-9004-e46ff2f7baf8",
+  "fields": {
+    "category": "164079f1-625b-4e67-bfc3-6366fdc379d6",
+    "slug": "energy-sharing-und-community-cockpit",
+    "context_key": "energy_sharing_guide",
+    "title_de": "Energy Sharing & Community Cockpit: Strom im Quartier teilen & abrechnen",
+    "title_en": "Energy Sharing & Community Cockpit: Local Energy Sharing & Administration",
+    "summary_de": "Durchgängige Anleitung für Energy Sharing gem. § 42b EnWG: Gemeinschaftliche Gebäudeversorgung, 15-Minuten-Echtzeit-Clearing, Verteilschlüssel und das Community-Cockpit für Administratoren.",
+    "summary_en": "End-to-end guide for Energy Sharing under § 42b EnWG: Local multi-party sharing, 15-minute real-time clearing, allocation keys, and community admin management.",
+    "content_de": "# 🤝 Energy Sharing & Community Cockpit: Strom in der Nachbarschaft teilen\n\nMit dem **Sharegy Energy Sharing Modul** können Mehrfamilienhäuser, Eigentümergemeinschaften (WEGs), Gewerbeparks und Nachbarschaftsquartiere lokal erzeugten Solarstrom gemeinschaftlich nutzen und rechtssicher abrechnen (**Gemeinschaftliche Gebäudeversorgung gem. § 42b EnWG**).\n\n---\n\n## 👥 Teil 1: Anleitung für Teilnehmer & Bewohner (Community-Mitglieder)\n\n### 1. Beitritt zu einer Energy Community\n1. Du erhältst von deiner Hausverwaltung oder dem Quartiers-Admin einen **Einladungslink oder QR-Code**.\n2. Registriere dich bei Sharegy oder verknüpfe deinen bestehenden Account.\n3. Bestätige deine Wohneinheit (z. B. *Wohnung 4, 1. OG*) und trage bei Bedarf deine Zählernummer ein.\n\n### 2. Das Bewohner-Dashboard (`/app/community`)\n* **Live-Sharing-Matrix**: Sieh in Echtzeit, wie viel Solarstrom die Dachanlage gerade produziert, wie viel in deiner Wohnung ankommt und wer im Haus gerade versorgt wird.\n* **Deine Ersparnis**: Jeder Kilowattstunde Solarstrom aus der Community ersetzt teuren Netzbezug (Ersparnis i. d. R. 10 bis 20 Cent pro kWh).\n* **Monatliche Abrechnungsübersicht**: Lade deine persönlichen Monatsnachweise als transparente PDF-Rechnung herunter.\n\n---\n\n## 🏛️ Teil 2: Anleitung für Community-Administratoren & Hausverwaltungen\n\nAls Community-Admin verwaltest du die energiewirtschaftlichen Parameter, die Zählerzuordnung und die monatliche Abrechnung.\n\n### 1. Community anlegen & Zählerstruktur einrichten\n* Navigiere im Menü zur **Administration → Community Cockpit** (`/app/tenant` bzw. `/app/admin`).\n* Klicke auf **\"Neue Community anlegen\"** und definiere den Namen sowie die Postleitzahl.\n* Hinterlege den **Netzanschlusspunkt (NAP)**: Wähle den Hauptzähler oder erstelle einen **Virtuellen Summenzähler**, der die Erzeugung und den Netzbezug aggregiert.\n\n### 2. Verteilschlüssel (§ 42b EnWG) wählen\nSharegy unterstützt alle gesetzlich anerkannten Allokationsmodelle:\n1. **Dynamisch (Zeitgleich nach 15-Minuten-Intervall - Empfohlen)**:\n   * Der in einer Viertelstunde erzeugte Solarstrom wird exakt im Verhältnis des tatsächlichen gleichzeitigen Verbrauchs auf alle aktiven Wohnungen aufgeteilt.\n   * *Vorteil*: Höchste Gerechtigkeit – wer Strom verbraucht wenn die Sonne scheint, profitiert am meisten.\n2. **Statisch (nach Miteigentumsanteilen / MEA oder qm)**:\n   * Jede Partei erhält einen festen prozentualen Anteil der Erzeugung.\n3. **Hybrid (Prioritär + Überschuss)**:\n   * Basis-Kontingent je Wohneinheit, Überschüsse werden dynamisch geteilt.\n\n### 3. Mitglieder einladen & Zähler zuweisen\n* Klicke auf **\"Mitglied einladen\"** und gib die E-Mail-Adresse sowie die Wohnungsnummer an.\n* Weise der Wohneinheit den entsprechenden Unterzähler (Shelly Pro 3EM, Modbus Zähler, Discovergy wMSB oder Smart Meter Gateway) zu.\n\n### 4. Tarife festlegen & 1-Klick Monatsabrechnung\n* **Solarstrom-Tarif**: z. B. `18,50 ct/kWh` (brutto).\n* **Reststrom-Tarif**: z. B. `32,00 ct/kWh` (vom Versorger durchgeleitet).\n* **Grundgebühr / Messstellenbetrieb**: z. B. `4,50 € / Monat`.\n* **Monatsabschluss ausführen**: Am Monatsende klickst du auf **\"Abrechnungslauf starten\"**. Sharegy saldiert alle 2.880 bis 2.976 Viertelstundenwerte, generiert eichrechtskonforme PDF-Abrechnungen für jedes Mitglied und stellt DATEV/CSV-Exporte für deine Buchhaltung bereit.\n",
+    "content_en": "# 🤝 Energy Sharing & Community Cockpit: Local Power Sharing & Administration\n\nWith the **Sharegy Energy Sharing Module**, multi-family residences, homeowner associations (HOAs), commercial buildings, and local quarters share rooftop solar power compliant with **§ 42b EnWG (Collective Building Supply)**.\n\n---\n\n## 👥 Part 1: Guide for Residents & Community Members\n\n### 1. Joining an Energy Community\n1. Receive an **Invitation Link or QR Code** from your property manager.\n2. Sign up or log into your Sharegy account.\n3. Confirm your apartment unit (e.g. *Apt 4, 1st Floor*) and verify your sub-meter number.\n\n### 2. Member Dashboard Features (`/app/community`)\n* **Live Sharing Matrix**: View in real time how much solar power is produced on the roof, how much flows into your home, and how much is shared across neighbors.\n* **Direct Cost Savings**: Every shared solar kWh replaces expensive grid electricity, typically saving 10 to 20 cents per kWh.\n* **Monthly Invoices**: Download transparent, itemized PDF statements showing your exact solar vs. grid consumption.\n\n---\n\n## 🏛️ Part 2: Guide for Community Admins & Property Managers\n\nAs a Community Administrator, you manage meter topology, billing formulas, and automated settlement runs.\n\n### 1. Setting Up Community & Meter Hierarchy\n* Navigate to **Administration → Community Cockpit** (`/app/tenant`).\n* Click **\"Create Community\"** and specify the site name and address.\n* Connect the **Grid Connection Point (NAP)**: Bind your main utility meter or set up a **Virtual Master Meter**.\n\n### 2. Selecting Allocation Schemes (§ 42b EnWG)\n1. **Dynamic (Concurrent 15-Minute Intervals - Recommended)**:\n   * Solar generation is allocated proportionally to residents consuming power in the exact same 15-minute window.\n   * Maximizes fairness and economic utilization.\n2. **Static (Ownership Shares / MEA / Area-based)**:\n   * Fixed percentage of solar output assigned to each unit.\n3. **Hybrid**:\n   * Priority self-consumption quota plus dynamic surplus sharing.\n\n### 3. Inviting Members & Mapping Sub-Meters\n* Click **\"Invite Member\"** with the tenant email and apartment ID.\n* Map the resident's physical sub-meter (Shelly Pro 3EM, Modbus meter, wMSB Discovergy, or Smart Meter Gateway).\n\n### 4. Tariff Setup & 1-Click Monthly Billing Run\n* Configure Community Solar Rate (e.g. `18.50 ct/kWh`), Grid Backup Rate (e.g. `32.00 ct/kWh`), and Base Fee.\n* At the end of each billing cycle, trigger **\"Run Settlement\"**. Sharegy calculates all 2,900+ 15-minute intervals, renders audit-ready PDF invoices, and generates DATEV/CSV exports for ERP systems.\n",
+    "tags": [
+      "energy sharing",
+      "community",
+      "§ 42b EnWG",
+      "gemeinschaftliche gebaeudeversorgung",
+      "quartiersstrom",
+      "admin",
+      "abrechnung",
+      "verteilschluessel"
+    ],
+    "is_published": true,
+    "is_featured": true,
+    "sort_order": 4,
+    "views_count": 0,
+    "helpful_yes": 0,
+    "helpful_no": 0,
+    "created_at": "2026-09-16T15:29:13.531Z",
+    "updated_at": "2026-09-16T15:29:13.531Z"
   }
 },
 {
@@ -361,12 +711,12 @@
     ],
     "is_published": true,
     "is_featured": false,
-    "sort_order": 11,
+    "sort_order": 1,
     "views_count": 0,
     "helpful_yes": 0,
     "helpful_no": 0,
     "created_at": "2026-08-25T16:38:13.585Z",
-    "updated_at": "2026-08-30T19:19:34.181Z"
+    "updated_at": "2026-09-16T15:29:13.512Z"
   }
 },
 {
@@ -397,7 +747,269 @@
     "helpful_yes": 0,
     "helpful_no": 0,
     "created_at": "2026-08-25T16:38:13.536Z",
-    "updated_at": "2026-08-30T19:19:34.131Z"
+    "updated_at": "2026-09-16T15:29:13.396Z"
+  }
+},
+{
+  "model": "support_desk.helparticle",
+  "pk": "90e2ef0c-18b6-4d93-b431-ed34d3bd78ee",
+  "fields": {
+    "category": "34745af8-0e4e-4d2f-a386-36f4fe5a8c0f",
+    "slug": "discovergy-inexogy-solandeo-wmsb-smart-meter",
+    "context_key": "devices",
+    "title_de": "wMSB Smart Meter Gateway Anbindung (Discovergy, inexogy, Solandeo)",
+    "title_en": "wMSB Smart Meter Gateway Integration (Discovergy, inexogy, Solandeo)",
+    "summary_de": "Automatische Synchronisation von 15-Minuten RLM/SLP-Zählerzeitreihen (OBIS 1.8.0 / 2.8.0) für § 42b EnWG Energy Sharing.",
+    "summary_en": "Automated synchronization of 15-minute interval readings (OBIS 1.8.0 / 2.8.0) for § 42b EnWG energy sharing.",
+    "content_de": "# wMSB Smart Meter Gateway Anbindung 📟⚡\n\nWettbewerbliche Messstellenbetreiber (**wMSB**) wie **Discovergy, inexogy und Solandeo** erfassen Zählerdaten hochpräzise im 15-Minuten-Takt.\n\n---\n\n## 1. Warum ist ein wMSB ideal für Sharegy?\n* 🎯 **15-Minuten-Intervallmessung**: Pflichtvoraussetzung für gesetzliches Energy Sharing nach § 42b EnWG.\n* 🔄 **Zwei-Richtungs-Zählung**: Exakte Erfassung von Netzbezug (OBIS `1.8.0`) und Netzeinspeisung (OBIS `2.8.0`).\n* ☁️ **Direkte REST-Schnittstelle**: Sharegy ruft Zählerstände und 15-Minuten-Lastgänge automatisch per API ab.\n\n---\n\n## 2. Einrichtung\n1. Trage deine wMSB-Zugangsdaten (E-Mail, Passwort und Zähler-ID) in Sharegy ein.\n2. Der Hintergrund-Worker synchronisiert alle 15 Minuten die validierten Lastprofile.\n",
+    "content_en": "# wMSB Smart Meter Gateway Integration 📟⚡\n\nDiscovergy, inexogy, and Solandeo provide 15-minute certified smart meter data (OBIS 1.8.0 / 2.8.0) required for legal § 42b EnWG Energy Sharing.\n",
+    "tags": [
+      "discovergy",
+      "inexogy",
+      "solandeo",
+      "wmsb",
+      "smart meter",
+      "15m",
+      "obis"
+    ],
+    "is_published": true,
+    "is_featured": true,
+    "sort_order": 8,
+    "views_count": 0,
+    "helpful_yes": 0,
+    "helpful_no": 0,
+    "created_at": "2026-09-03T05:22:21.777Z",
+    "updated_at": "2026-09-16T15:29:13.417Z"
+  }
+},
+{
+  "model": "support_desk.helparticle",
+  "pk": "980d0fb0-ea03-49aa-b35d-02cb51402d18",
+  "fields": {
+    "category": "e647af9a-8938-4ab9-af5a-0713a15f79b1",
+    "slug": "sekundaere-ac-erzeuger-und-balkonkraftwerk-erkennung",
+    "context_key": "producers",
+    "title_de": "Sekundäre AC-Erzeuger: Balkonkraftwerke & 2. Wechselrichter sauber bilanzieren",
+    "title_en": "Secondary AC Generation: Accurate Balancing for Balcony Solar & 2nd Inverters",
+    "summary_de": "Automatische Erkennung und mathematisch saubere Bilanzierung ungebundener AC-Erzeuger (Balkonkraftwerke, Mikrowechselrichter, 2. Dachanlage) zur Vermeidung von Fehlberechnungen im Hausverbrauch.",
+    "summary_en": "Automated detection and accurate mathematical balancing of independent AC generators (balcony solar, microinverters, 2nd rooftop arrays) to prevent house load distortion.",
+    "content_de": "# Sekundäre AC-Erzeuger & Balkonkraftwerke sauber bilanzieren ☀️🔌\n\nViele Haushalte erweitern ihre Photovoltaik um zusätzliche AC-Erzeuger: ein **Balkonkraftwerk (600 W / 800 W)** an der Steckdose, ein zweiter Garagen-Wechselrichter oder Mikrowechselrichter (Hoymiles, Enphase, Deye).\n\n---\n\n## 1. Das Problem ungebundener AC-Erzeuger im Hausnetz\n\nKlassische Wechselrichter-Systeme messen die Solarerzeugung nur an den eigenen DC-Strings. Speist nun ein separates Balkonkraftwerk Strom auf einer Phase ins Hausnetz ein, passiert Folgendes:\n\n* ❌ **Falsche Hausverbrauchsanzeige**: Der Smart Meter am Netzübergabepunkt sieht weniger Netzbezug und interpretiert dies fälschlicherweise als gesunkenen Hausverbrauch (oder sogar als negativen Hausverbrauch).\n* ❌ **Fehlerhafte Solarstatistik**: Die tatsächliche Gesamterzeugung der Solaranlagen wird um Hunderte Kilowattstunden pro Jahr zu niedrig ausgewiesen.\n* ❌ **Verfälschter Autarkiegrad**: Die Autarkie- und Eigenverbrauchsquoten stimmen mathematisch nicht mehr.\n\n---\n\n## 2. Die physikalische Bilanzkorrektur in Sharegy\n\nSharegy löst dieses Problem durch eine entkoppelte Energiebilanzierung:\n\n$$P_\\text{Solar, Gesamt} = P_\\text{PV, Haupt-WR} + \\sum P_\\text{Sekundär, AC}$$\n\n$$P_\\text{Haus, Real} = P_\\text{Netzbezug} + P_\\text{Solar, Gesamt} + P_\\text{Batterie, Entladung} - P_\\text{Netzeinspeisung} - P_\\text{Batterie, Ladung}$$\n\nDadurch wird der erzeugte Strom des Balkonkraftwerks physikalisch exakt als **Solarerzeugung** bilanziert und der echte Verbrauch aller Haushaltsgeräte transparent dargestellt.\n\n---\n\n## 3. Anbindungsmöglichkeiten in Sharegy\n\nUnter `/app/producers` im Bereich **„Sekundäre AC-Erzeuger“** kannst du beliebig viele zusätzliche Erzeuger anlegen:\n\n### Methode A: Smart Plug / Zwischenstecker (Empfohlen)\n* Stecke das Balkonkraftwerk an eine smarte Steckdose mit Energiemessung (z. B. **Shelly Plus 1PM**, **Shelly Plug S**, **Tasmota**, **Zigbee**).\n* Wähle das Gerät im Dropdown-Menü als Messpunkt aus.\n* Sharegy addiert die Live-Wattwerte sekundengenau zur Gesamterzeugung hinzu.\n\n### Methode B: Direkte Cloud- / API-Kopplung\n* Binde die Monitoring-Cloud des Mikrowechselrichters an (z. B. Hoymiles DTU, Enphase Envoy, SolarMAN Deye).\n\n### Methode C: Automatische Bilanzerkennung\n* Erkennt Sharegy anhand des Netzübergabepunkts und der regionalen Einstrahlungsdaten ein Einspeisemuster ohne registrierte PV-Erzeugung, schlägt das System automatisch das Anlegen eines sekundären Erzeugers vor.\n\n---\n\n## 4. Schritt-für-Schritt Einrichtung\n\n1. Öffne **Erzeuger & Speicher** (`/app/producers`).\n2. Scrolle zu **„Automatische Erkennung sekundärer AC-Erzeuger (2. Wechselrichter / BKW)“**.\n3. Klicke auf **„2. Anlage benennen & hinzufügen“**.\n4. Vergib einen Namen (z. B. *„Balkonkraftwerk Süd 800 W“*) und verknüpfe den Leistungssensor.\n5. Speichern – ab sofort stimmt deine Energiebilanz auf das Watt genau!\n",
+    "content_en": "# Secondary AC Generation: Accurate Balancing for Balcony Solar & 2nd Inverters ☀️🔌\n\nMany homes expand their solar capacity with secondary generators: **plug-in balcony solar (600 W / 800 W)**, garage inverters, or microinverter arrays (Hoymiles, Enphase, Deye).\n\n---\n\n## 1. The Challenge of Unbound AC Generation\n\nStandard hybrid inverters only measure generation on their own DC strings. When a secondary AC inverter feeds power directly into a household circuit:\n\n* ❌ **Distorted Home Consumption**: Main grid meters observe lower grid import and misinterpret generation as reduced household load (or even negative consumption).\n* ❌ **Underreported Solar Yield**: Solar statistics miss hundreds of kilowatt-hours annually.\n* ❌ **Skewed Autarky Metrics**: Self-consumption and energy independence ratios become mathematically invalid.\n\n---\n\n## 2. Physical Energy Balance Correction in Sharegy\n\nSharegy applies decoupled power-flow equations:\n\n$$P_\\text{Solar, Total} = P_\\text{PV, Main Inverter} + \\sum P_\\text{Secondary, AC}$$\n\n$$P_\\text{Home, Actual} = P_\\text{Grid Import} + P_\\text{Solar, Total} + P_\\text{Battery Discharge} - P_\\text{Grid Export} - P_\\text{Battery Charge}$$\n\nEvery watt from balcony solar is correctly categorized as clean solar generation.\n\n---\n\n## 3. Integration Methods\n\n1. **Smart Plug / Relay (Recommended)**: Connect balcony inverters via a power-measuring smart switch (e.g., Shelly Plus 1PM, Shelly Plug S, Tasmota).\n2. **Direct Cloud / Gateway Ingestion**: Link manufacturer monitoring gateways (Hoymiles DTU, Enphase Envoy).\n3. **Automated Signature Detection**: Matches unmetered daytime export signatures with regional solar irradiance telemetry.\n",
+    "tags": [
+      "balkonkraftwerk",
+      "bkw",
+      "sekundärerzeuger",
+      "wechselrichter",
+      "bilanzierung",
+      "autarkie",
+      "ac-erzeugung",
+      "mikrowechselrichter"
+    ],
+    "is_published": true,
+    "is_featured": true,
+    "sort_order": 5,
+    "views_count": 0,
+    "helpful_yes": 0,
+    "helpful_no": 0,
+    "created_at": "2026-09-10T14:11:15.676Z",
+    "updated_at": "2026-09-16T15:29:13.479Z"
+  }
+},
+{
+  "model": "support_desk.helparticle",
+  "pk": "9c54fdd3-9fd4-4836-80d4-65ad2246e355",
+  "fields": {
+    "category": "b3517643-2ffa-4db8-bf4d-3097077006f2",
+    "slug": "mobile-push-notifications",
+    "context_key": "alerts",
+    "title_de": "Mobile Push-Benachrichtigungen & Ruhezeiten einrichten 📲🔔",
+    "title_en": "Setting up Mobile Push Notifications & Quiet Hours 📲🔔",
+    "summary_de": "So aktivierst du Echtzeit-Alarme auf dem Sperrbildschirm deines Smartphones (iOS & Android) oder PCs.",
+    "summary_en": "How to enable real-time lockscreen alerts on your smartphone (iOS & Android) or PC and configure quiet hours.",
+    "content_de": "# Mobile Push-Benachrichtigungen & Ruhezeiten 📲🔔\n\nErhalte wichtige Alarme direkt auf deinen Sperrbildschirm (iOS & Android) oder PC – auch bei geschlossener App.\n\n## Features\n* 🔋 **Batterie-Notreserve Warnung**\n* 💧 **Nachtdauerlast-Leckagen (1 kW+)**\n* ☀️ **PV-Ertragsausfall bei Sonnenschein**\n* 🌙 **Konfigurierbare Ruhezeiten mit Notfall-Override**\n",
+    "content_en": "# Mobile Push Notifications & Quiet Hours 📲🔔\n\nReal-time lockscreen alerts for battery reserves, baseload leakages, and PV yields with configurable quiet hours.\n",
+    "tags": [
+      "push",
+      "benachrichtigung",
+      "alarme",
+      "sperrbildschirm",
+      "quiet hours"
+    ],
+    "is_published": true,
+    "is_featured": true,
+    "sort_order": 12,
+    "views_count": 0,
+    "helpful_yes": 0,
+    "helpful_no": 0,
+    "created_at": "2026-08-31T03:31:09.810Z",
+    "updated_at": "2026-09-16T15:29:13.434Z"
+  }
+},
+{
+  "model": "support_desk.helparticle",
+  "pk": "9c8e7451-b842-4f10-91a6-89fae0172e81",
+  "fields": {
+    "category": "b3517643-2ffa-4db8-bf4d-3097077006f2",
+    "slug": "benachrichtigungen-und-systemberichte",
+    "context_key": "notifications",
+    "title_de": "E-Mail-Zusammenfassungen, Systemberichte & Push-Benachrichtigungen",
+    "title_en": "Email Digests, System Reports & Push Notifications",
+    "summary_de": "Wöchentlicher Energie- & Autarkie-Report (jeden Montag 08:00 Uhr lokaler Benutzerzeit), Echtzeit-Warnungen bei Hardwareausfall und Push-Ruhezeiten konfigurieren.",
+    "summary_en": "Weekly energy & autarky digest (every Monday 08:00 user local time), real-time critical hardware failure alerts, and push quiet hours.",
+    "content_de": "# E-Mail-Zusammenfassungen, Systemberichte & Benachrichtigungen 📧⚡\n\nSharegy hält dich über den Zustand deiner Energieanlagen, wöchentliche Einsparungen und kritische Hardware-Ereignisse auf dem Laufenden – wahlweise per **E-Mail**, **Browser-Push** oder **Mobile Notification**.\n\n---\n\n## 1. Wöchentlicher Energie- & Autarkie-Report 📊\n\nDer wöchentliche Report fasst deine wichtigsten Energiekennzahlen der vergangenen 7 Tage übersichtlich zusammen:\n\n* ☀️ **PV-Erzeugung (kWh)**: Wie viel Solarstrom hat deine PV-Anlage in der letzten Woche erzeugt?\n* 🔄 **Eigenverbrauch (kWh)**: Wie viel deines Solarstroms wurde direkt im Haushalt, in der Batterie oder im E-Auto verbraucht?\n* 🛡️ **Autarkiegrad (%)**: Wie unabhängig warst du vom öffentlichen Stromnetz?\n* 💰 **Erzielte Ersparnis (€)**: Berechnete finanzielle Einsparung durch Eigenverbrauch und Netzeinspeisung.\n* ⚡ **Netzeinspeisung & Netzbezug**: Genaue Zählerbilanz im Vergleich.\n\n### ⏰ Versandzeitpunkt & Zeitzone\n> **Versand jeden Montag um 08:00 Uhr:**  \n> Der Versand erfolgt pünktlich zum Start der neuen Woche um **08:00 Uhr in deiner persönlichen Benutzer-Zeitzone** (standardmäßig deutsche Zeit `Europe/Berlin` bzw. MEZ/MESZ).  \n> Hast du in deinen Profileinstellungen eine abweichende Zeitzone (z. B. `Europe/Warsaw` oder `UTC`) gewählt, richtet sich der Versand nach deiner eingestellten Ortszeit.\n\n### 🌍 Mehrsprachigkeit\nDie E-Mail wird automatisch in deiner im Profil eingestellten Sprache versendet (**Deutsch**, **Englisch** oder **Polnisch**).\n\n---\n\n## 2. Kritische Hardware-Warnungen (Sofort / Echtzeit) 🚨\n\nBei schwerwiegenden Störungen deiner Energiehardware erhältst du sofort eine Benachrichtigung per E-Mail und Push, um Ertragsausfälle oder Schäden abzuwenden:\n\n* **Wechselrichter Offline / Ertragsausfall**: Die Sonne scheint, aber der Wechselrichter meldet keine Erzeugung (z. B. ausgelöster DC-Schalter oder FI-Sicherung).\n* **Batterie-Tiefentladung**: Der Ladestand (SoC) ist unter das kritische Notfall-Limit gefallen.\n* **Kommunikationsabbruch**: Smart Meter oder Wechselrichter senden seit mehr als 15 Minuten keine Telemetriedaten.\n\nJede Notfall-Meldung enthält den genauen Gerätenamen, die Fehlerursache und **konkrete Sofortmaßnahmen zur Behebung** sowie einen Direktlink ins System.\n\n---\n\n## 3. Push-Benachrichtigungen & Ruhezeiten (Quiet Hours) 🔔\n\nÜber die Push-Zentrale kannst du Desktop- und Smartphone-Benachrichtigungen aktivieren. Um in der Nacht nicht gestört zu werden, kannst du **Ruhezeiten** definieren (z. B. 22:00 bis 07:00 Uhr). In dieser Zeit werden unkritische Mitteilungen stummgeschaltet.\n\n---\n\n## 4. Wie aktiviere oder deaktiviere ich Benachrichtigungen?\n\n1. Klicke oben rechts auf dein **Profilbild** und wähle den Tab **Benachrichtigungen & Alarme**.\n2. Unter **„E-Mail-Zusammenfassungen & Systemberichte“** kannst du den wöchentlichen Report sowie kritische Hardware-Warnungen mit einem Klick aktivieren oder deaktivieren.\n3. Deine Auswahl wird sofort sicher gespeichert.\n",
+    "content_en": "# Email Digests, System Reports & Notifications 📧⚡\n\nSharegy keeps you informed about energy performance, weekly cost savings, and critical hardware health events via **Email**, **Browser Web Push**, and **Mobile Push**.\n\n---\n\n## 1. Weekly Energy & Autarky Digest 📊\n\nThe weekly digest provides a concise summary of your home's energy performance over the past 7 days:\n\n* ☀️ **Solar Generation (kWh)**: Total PV generation achieved during the previous week.\n* 🔄 **Self-Consumption (kWh)**: Solar energy utilized directly by appliances, storage, or EV charging.\n* 🛡️ **Autarky Rate (%)**: Percentage of energy independence from the public grid.\n* 💰 **Estimated Savings (€)**: Financial benefit calculated from avoided grid purchases and feed-in compensation.\n* ⚡ **Grid Feed-In vs. Grid Purchase**: Comprehensive grid exchange balance.\n\n### ⏰ Schedule & Timezone\n> **Delivered every Monday at 08:00 AM:**  \n> Reports are dispatched at **08:00 AM local user time** (defaulting to `Europe/Berlin` / CET/CEST).  \n> If you configured a different timezone in your profile (e.g., `UTC` or `Europe/Warsaw`), the report is scheduled according to your configured local clock.\n\n### 🌍 Multilingual Delivery\nEmails are rendered in your selected interface language (**German**, **English**, or **Polish**).\n\n---\n\n## 2. Real-Time Critical Hardware Alerts 🚨\n\nWhen a critical failure occurs, Sharegy immediately dispatches an urgent alert via email and push:\n\n* **Inverter Offline / Zero-Yield**: High solar irradiance detected while solar inverter reports zero output (e.g., tripped breaker or DC switch).\n* **Battery Deep Discharge**: Battery state of charge (SoC) drops below the safe reserve threshold.\n* **Telemetry Timeout**: Smart meter or gateway communication lost for more than 15 minutes.\n\nEach alert includes affected device identifiers, root-cause diagnostics, and actionable steps.\n\n---\n\n## 3. Web Push Notifications & Quiet Hours 🔔\n\nConfigure browser push notifications with customizable **Quiet Hours** (e.g., 22:00 to 07:00) to silence non-critical notifications during the night.\n\n---\n\n## 4. Managing Notification Settings\n\n1. Open your **Profile** and navigate to the **Notifications & Alerts** tab.\n2. Under **\"Email Summaries & System Reports\"**, toggle weekly reports and hardware alerts on or off.\n3. Changes are saved automatically.\n",
+    "tags": [
+      "benachrichtigungen",
+      "email",
+      "reports",
+      "wochenbericht",
+      "alarme",
+      "hardware",
+      "zeitzone",
+      "push",
+      "notifications"
+    ],
+    "is_published": true,
+    "is_featured": true,
+    "sort_order": 1,
+    "views_count": 0,
+    "helpful_yes": 0,
+    "helpful_no": 0,
+    "created_at": "2026-09-07T11:20:00Z",
+    "updated_at": "2026-09-16T15:29:13.454Z"
+  }
+},
+{
+  "model": "support_desk.helparticle",
+  "pk": "9dbe00a2-c42a-4536-beef-0791e7cfed58",
+  "fields": {
+    "category": "34745af8-0e4e-4d2f-a386-36f4fe5a8c0f",
+    "slug": "ocpp-2-0-1-smart-charging-phasenumschaltung",
+    "context_key": "ocpp",
+    "title_de": "OCPP 1.6 / 2.0.1 / 2.1 Experte: Dynamisches PV-Laden, Phasenumschaltung & Departure Ready",
+    "title_en": "OCPP 1.6 / 2.0.1 / 2.1 Expert: Dynamic PV Charging, Phase Switching & Departure Ready",
+    "summary_de": "OCPP-Protokoll-Generationen (1.6-J, 2.0.1, 2.1), automatische 1p/3p Phasenumschaltung (1,4 kW – 11/22 kW), Abfahrtszeit-Zielladen (Departure Ready) und CSMS-Konfiguration.",
+    "summary_en": "OCPP protocol generations (1.6-J, 2.0.1, 2.1), automatic 1p/3p phase switching (1.4 kW – 11/22 kW), Departure Ready schedule optimization, and CSMS setup.",
+    "content_de": "# OCPP 1.6 / 2.0.1 / 2.1 Experte: Smart Charging & Phasenumschaltung 🚗🔌\n\nDas integrierte **Sharegy OCPP Charging Station Management System (CSMS)** unterstützt alle maßgeblichen offenen Ladeprotokolle für professionelles intelligentes Laden.\n\n---\n\n## 1. Die OCPP-Protokoll-Generationen im Vergleich\n\n| Feature | OCPP 1.6-J (JSON) | OCPP 2.0.1 | OCPP 2.1 |\n| :--- | :--- | :--- | :--- |\n| **Sicherheit & Verschlüsselung** | HTTP Basic Auth / TLS (WSS) | mTLS mit Client-Zertifikaten | Fortgeschrittene Zero-Trust mTLS |\n| **Smart Charging Profiles** | `SetChargingProfile` (Composite Schedule) | Granulares Device Model & Constraints | Erweiterte dynamische Stromrampen (0,1 A) |\n| **ISO 15118 Integration** | Eingeschränkt | Vollständig (Plug & Charge) | Nativ inkl. V2G Bidirektionalität |\n| **Phasenumschaltung** | Vendor-spezifisch / Relay Trigger | Standardisierte Variablen | Nativer Phasenumschaltungs-Befehl |\n\n---\n\n## 2. Automatische 1-Phasen / 3-Phasen-Umschaltung (1p / 3p)\n\nNach der internationalen Ladungsnorm **IEC 61851** beträgt der minimale Ladestrom für Elektrofahrzeuge **6 Ampere pro Phase**.\n\n### Das Problem bei reiner 3-Phasen-Ladung:\n* $6\\,\\text{A} \\times 3\\,\\text{Phasen} \\times 230\\,\\text{V} = \\mathbf{4{,}14\\,\\text{kW Mindestleistung}}$.\n* Erzeugt deine PV-Anlage an bewölkten Tagen z. B. nur $2{,}0\\,\\text{kW}$ Überschuss, müsste bei 3 Phasen entweder $2{,}14\\,\\text{kW}$ teurer Netzstrom zugekauft werden – oder das Laden pausiert komplett!\n\n### Die Lösung: Automatische Phasenumschaltung\n* **1-phasiger Modus**: Lädt stufenlos von **$1{,}38\\,\\text{kW}$** ($6\\,\\text{A}$) bis **$3{,}68\\,\\text{kW}$** ($16\\,\\text{A}$) bzw. $7{,}36\\,\\text{kW}$ ($32\\,\\text{A}$).\n* **3-phasiger Modus**: Lädt bei starkem Sonnenschein von **$4{,}14\\,\\text{kW}$** bis **$11{,}0\\,\\text{kW}$** (oder $22{,}0\\,\\text{kW}$).\n\n```\n[ PV-Überschuss < 4,2 kW ] ➔ 1-phasig aktiv (Laden startet bereits ab 1,4 kW!)\n[ PV-Überschuss >= 4,4 kW (für > 120 s) ] ➔ Umschaltung auf 3-phasig (Volle Power bis 11 kW)\n```\n\n> [!IMPORTANT]\n> **Schütz-Schonzeit (Totzeit)**:  \n> Sharegy hält bei der Umschaltung zwischen 1 und 3 Phasen eine Sicherheits-Pause von **60 bis 120 Sekunden** ein. Dies schützt das Bordladegerät (OBC) deines Autos vor zerstörerischen Phasen-Lichtbögen.\n\n---\n\n## 3. Departure Ready (Zielladen nach Abfahrtszeit)\n\nMit **Departure Ready** stellst du sicher, dass dein Auto pünktlich zur Abfahrt den gewünschten Ladestand erreicht – zu den absolut geringsten Stromkosten:\n\n1. ⏰ **Abfahrtszeit festlegen**: z. B. morgen früh um `07:30 Uhr`.\n2. 🎯 **Ziel-SoC wählen**: z. B. `80 %` (oder gewünschte Reichweite in kWh).\n3. 🧠 **Sharegy Optimierungs-Algorithmus**:\n   - Lädt tagsüber priorisiert mit solarem Überschuss.\n   - Ermittelt die verbleibende Restenergiemenge.\n   - Berechnet anhand der Day-Ahead-Börsenstrompreise (EPEX Spot) die **günstigsten Stunden der Nacht** (z. B. 02:00 bis 04:30 Uhr) und schaltet die Wallbox exakt in diesem Preisfenster ein.\n\n---\n\n## 4. OCPP Server-Konfiguration & Einbindung\n\nTrage in der Weboberfläche deiner Wallbox (Easee, openWB, Webasto, Mennekes, Alfen, go-e, DaheimLaden, cFos, ABB etc.) folgende Verbindungsdaten ein:\n\n* **Backend-URL**: `wss://sharegy.de/ocpp/<DEINE_CHARGE_POINT_ID>`\n* **Port**: `443` (Verschlüsseltes TLS/WSS)\n* **Heartbeat-Intervall**: `60 Sekunden`\n* **MeterValues SampleInterval**: `10 bis 30 Sekunden`\n",
+    "content_en": "# OCPP 1.6 / 2.0.1 / 2.1 Expert: Smart Charging & Phase Switching 🚗🔌\n\nSharegy's built-in **OCPP Charging Station Management System (CSMS)** complies with universal open EV charging standards.\n\n---\n\n## 1. OCPP Protocol Generations Compared\n\n| Feature | OCPP 1.6-J (JSON) | OCPP 2.0.1 | OCPP 2.1 |\n| :--- | :--- | :--- | :--- |\n| **Security** | HTTP Basic / TLS (WSS) | mTLS with Client Certificates | Advanced Zero-Trust mTLS |\n| **Smart Charging Profiles** | Composite Schedules (`SetChargingProfile`) | Granular Device Variables | Dynamic current ramps in 0.1 A steps |\n| **ISO 15118** | Basic | Native Plug & Charge | Bidirectional V2G & V2X |\n| **Phase Switching** | Vendor-specific extensions | Standardized device model | Native phase control commands |\n\n---\n\n## 2. Automatic 1-Phase / 3-Phase Switching (1p / 3p)\n\nUnder standard **IEC 61851**, EV onboard chargers require a minimum current of **6 A per phase**.\n\n* **3-Phase Minimum**: $6\\,\\text{A} \\times 3 \\times 230\\,\\text{V} = \\mathbf{4.14\\,\\text{kW}}$.\n* **1-Phase Minimum**: $6\\,\\text{A} \\times 1 \\times 230\\,\\text{V} = \\mathbf{1.38\\,\\text{kW}}$.\n\nAutomatic phase switching dynamically shifts between 1-phase mode (1.4 kW to 3.7 kW) during cloudy periods and 3-phase mode (4.1 kW to 11/22 kW) under peak sunshine, incorporating a mandatory 60–120s safety dead-time to protect vehicle contactors.\n\n---\n\n## 3. Departure Ready (Target-Based Charging)\n\nSpecify departure time (e.g., `07:30 AM`) and target battery SoC (e.g., `80 %`). Sharegy maximizes solar surplus during the day and schedules remaining required kilowatt-hours into the lowest-priced nighttime spot market hours.\n\n---\n\n## 4. CSMS Connection Parameters\n\n* **CSMS Endpoint**: `wss://sharegy.de/ocpp/<CHARGE_POINT_ID>`\n* **Port**: `443` (TLS)\n* **Heartbeat Interval**: `60 seconds`\n",
+    "tags": [
+      "ocpp",
+      "ocpp 2.0.1",
+      "ocpp 2.1",
+      "phasenumschaltung",
+      "smart charging",
+      "1p3p",
+      "departure ready",
+      "wallbox"
+    ],
+    "is_published": true,
+    "is_featured": true,
+    "sort_order": 4,
+    "views_count": 0,
+    "helpful_yes": 0,
+    "helpful_no": 0,
+    "created_at": "2026-09-10T14:11:15.655Z",
+    "updated_at": "2026-09-16T15:29:13.472Z"
+  }
+},
+{
+  "model": "support_desk.helparticle",
+  "pk": "9dd5a282-1525-4518-8e1f-792929730847",
+  "fields": {
+    "category": "34745af8-0e4e-4d2f-a386-36f4fe5a8c0f",
+    "slug": "smart-home-iobroker-home-assistant-messen-steuern",
+    "context_key": "interfaces_smarthome",
+    "title_de": "ioBroker & Home Assistant Integration: Bidirektionales Messen & Steuern",
+    "title_en": "ioBroker & Home Assistant Integration: Bidirectional Monitoring & Control",
+    "summary_de": "Erklärung der bidirektionalen Schnittstelle für Home Assistant und ioBroker (Sensordaten erfassen, Thermostate und Aktoren schalten).",
+    "summary_en": "Guide to the bidirectional interface for Home Assistant and ioBroker (sensor telemetry and actuator control).",
+    "content_de": "# ioBroker & Home Assistant: Bidirektionales Messen & Steuern\n\nSharegy bietet eine universelle **MQTT- & WebSocket-Schnittstelle**, mit der du deine bestehende Smart-Home-Zentrale (**Home Assistant**, **ioBroker**, **Node-RED**, **OpenHAB**, **Homematic IP**) nahtlos einbinden kannst.\n\n---\n\n## 1. Das Konzept: Messen vs. Steuern\n\nDie Schnittstelle arbeitet **bidirektional**:\n\n```mermaid\nflowchart LR\n    subgraph HA[\"🏠 Home Assistant / ioBroker\"]\n        S[\"🌡️ Sensoren<br>(Temperatur, Smart Meter, PV)\"]\n        A[\"🔌 Aktoren<br>(Thermostate, Relais, Wallbox)\"]\n    end\n\n    subgraph Sharegy[\"⚡ Sharegy Cloud & HEMS Optimizer\"]\n        O[\"🧠 MPC-Optimierung<br>& Börsenstrom-Algorithmus\"]\n    end\n\n    S -- \"1. Messen (Inbound Telemetrie)\" --> O\n    O -- \"2. Steuern (Outbound Setpoints / Schaltsignale)\" --> A\n```\n\n---\n\n## 2. Messen (Sensordaten an Sharegy senden)\n\nHome Assistant oder ioBroker übermitteln Sensorwerte per MQTT an Sharegy (`h/<home_token>/...`):\n* `power_production` (PV-Leistung in W)\n* `power_grid` (Netzbezug/Einspeisung in W)\n* `battery_soc` (Batterieladezustand in %)\n* `temperature_room` (Ist-Temperatur des Wohnzimmers)\n\n---\n\n## 3. Steuern (Schaltbefehle & Sollwerte von Sharegy empfangen)\n\nWenn die Option **„Bidirektionale Steuerung aktivieren“** eingeschaltet ist, publiziert Sharegy optimierte Sollwerte:\n* `heating_relay` (`ON` / `OFF` für Wärmepumpe / Relais)\n* `target_temperature` ($21{,}0^\\circ\\text{C}$ bzw. $22{,}0^\\circ\\text{C}$ bei Vorlade-Boost)\n* `flow_temperature_target` (Berechnete Vorlauftemperatur nach DIN EN 12831)\n* `wallbox_max_current` (Ladefreigabe 6 bis 16 A)\n\n---\n\n## 4. Konfiguration & Ein/Aus-Schalter\n\n1. Öffne im Menü **„⚙️ Schnittstellen“** (`/app/interfaces`).\n2. Wähle den Tab **„Home Assistant“** oder **„ioBroker“**.\n3. Aktiviere den Schalter **„Bidirektionale Steuerung (Messen & Steuern)“**.\n",
+    "content_en": "# ioBroker & Home Assistant: Bidirectional Monitoring & Control\n\nSharegy provides a universal **MQTT and WebSocket interface** to connect **Home Assistant**, **ioBroker**, **Node-RED**, and other smart home platforms.\n\n---\n\n## 1. Bidirectional Concept: Monitoring vs. Control\n\n* **1. Monitoring (Inbound):** HA/ioB sends live sensors (PV power, grid meter, room temperatures) to Sharegy.\n* **2. Control (Outbound):** Sharegy computes the optimal dispatch schedule and sends setpoints (`target_temperature`, `relay_state`, `wallbox_current`) back to your actuators.\n\n---\n\n## 2. Configuration & Activation\n\n1. Navigate to **Interfaces** (`/app/interfaces`).\n2. Select the **Home Assistant** or **ioBroker** tab.\n3. Toggle **\"Bidirectional Control (Monitor & Actuate)\"** on.\n",
+    "tags": [
+      "home assistant",
+      "iobroker",
+      "mqtt",
+      "smart home",
+      "messen",
+      "steuern",
+      "aktoren",
+      "sensoren",
+      "schnittstellen"
+    ],
+    "is_published": true,
+    "is_featured": true,
+    "sort_order": 3,
+    "views_count": 0,
+    "helpful_yes": 0,
+    "helpful_no": 0,
+    "created_at": "2026-09-07T21:45:02.886Z",
+    "updated_at": "2026-09-16T15:29:13.460Z"
+  }
+},
+{
+  "model": "support_desk.helparticle",
+  "pk": "a66650d5-bb5e-4907-a3e7-b207d97e4aaa",
+  "fields": {
+    "category": "e6ddda15-7508-4ce7-a852-5fa4afee4696",
+    "slug": "vpp-flexibilitaets-bonus-heimspeicher",
+    "context_key": "vpp_ems_guide",
+    "title_de": "VPP & Flexibilitäts-Bonus: Heimspeicher im Schwarm vernetzen & monetarisieren",
+    "title_en": "VPP & Flexibility Bonus: Monetize Home Batteries in the Swarm Network",
+    "summary_de": "Was ist ein Virtuelles Kraftwerk (VPP)? Wie private Heimspeicherbetreiber durch intelligente Schwarmsteuerung Zusatzerlöse erzielen, 80% Erlösbeteiligung erhalten und durch 20% Mindest-SoC-Reserven volle Eigenverbrauchs-Sicherheit behalten.",
+    "summary_en": "What is a Virtual Power Plant (VPP)? How home battery owners generate extra income through intelligent swarm pooling, receive an 80/20 revenue share, and maintain 100% self-consumption reliability with a guaranteed 20% min-SoC reserve.",
+    "content_de": "# 🔋 VPP & Flexibilitäts-Bonus: Dein Heimspeicher als Kraftwerk\n\nEin **Virtuelles Kraftwerk (Virtual Power Plant, VPP)** ist ein intelligenter, digital vernetzter Verbund tausender dezentraler Energieanlagen – wie deiner Photovoltaikanlage, deinem Batteriespeicher, deiner Wärmepumpe oder deiner Wallbox.\n\nDurch die Vernetzung mit Sharegy wird dein privater Heimspeicher Teil eines leistungsstarken Schwarmspeichers, der das öffentliche Stromnetz stabilisiert und dir zusätzliche finanzielle Erträge einbringt.\n\n---\n\n## 🌟 Was ist der Flexibilitäts-Bonus und wie funktioniert er?\n\nStromnetze geraten durch schwankende Wind- und Sonnenenergie immer häufiger in Ungleichgewichte (Über- oder Unterdeckung). Übertragungsnetzbetreiber (ÜNB) zahlen hohe Prämien für sekundenschnelle Ausgleichsenergie (Regelleistung wie **aFRR/mFRR**) und Engpassmanagement (**Redispatch 2.0**).\n\nBislang konnten nur Großkraftwerke oder industrielle Megawatt-Batterien an diesen lukrativen Energiemärkten teilnehmen. **Sharegy demokratisiert diesen Markt:**\n1. **Schwarm-Bündelung**: Sharegy bündelt die freie Speicherkapazität vieler privater Heimspeicher zu einem virtuellen Großspeicher.\n2. **KI-gestützte Vermarktung**: Unser Algorithmus analysiert Wetterprognosen, Börsenstrompreise (Day-Ahead & Intraday) sowie deinen individuellen Haushaltsbedarf.\n3. **Automatisierte Bereitstellung**: Wenn das Stromnetz Flexibilität anfordert, lädt oder entlädt der Speicher für wenige Minuten gezielt Strom – vollautomatisch und unbemerkt im Hintergrund.\n\n---\n\n## 💰 Deine Vorteile als EMS-Nutzer\n\n### 1. 💶 80/20 Erlösaufteilung (Maximaler Gewinn für dich)\n* **80 % der erwirtschafteten Markterlöse** fließen direkt als **Flexibilitäts-Bonus** auf dein Konto oder werden mit deiner Stromrechnung gutgeschrieben.\n* **20 % Plattform- & Clearinggebühr** deckt die regulatorische Marktteilnahme, den Bilanzkreis und die automatisierte Abrechnung ab.\n* In typischen Haushalten mit 10 kWh Speicher entspricht dies einem jährlichen Zusatzerlös von **120 € bis 350 €**, ohne zusätzliche Investition.\n\n### 2. 🛡️ 100% Eigenverbrauchs-Sicherheit & 20% Mindest-SoC\n* **Vorrang für deinen Haushalt**: Dein Eigenbedarf hat stets oberste Priorität. Sharegy greift niemals auf Energie zu, die du für deinen eigenen Abend- oder Nachtverbrauch benötigst.\n* **Garantierte Mindest-Reserve**: Im EMS ist ein Mindestladezustand (Standard: **20 % min-SoC**) fest verankert. Diese Notstrom- und Basiskapazität bleibt für externe Abrufe gesperrt.\n* Du kannst diesen Mindest-SoC im Einstellungsmenü jederzeit individuell nach deinen Wünschen anpassen (z. B. auf 30% im Winter).\n\n### 3. 🔋 Schonung der Batterie-Lebensdauer\n* **Sanfte C-Raten**: Lade- und Entladeimpulse werden auf schonende Raten limitiert (max. 0,5C), um thermischen Stress zu vermeiden.\n* **Keine Tiefentladung**: Das Batteriemanagementsystem (BMS) deines Wechselrichters behält stets die physikalische Hoheit.\n* **Zyklenschutz**: Das VPP führt maximal 0,3 bis 0,8 zusätzliche Teilzyklen pro Tag aus – weit innerhalb der Hersteller-Garantiegrenzen.\n\n---\n\n## 🚀 So aktivierst du das VPP in deinem Dashboard\n\n1. Öffne im linken Menü den Bereich **Smart Energy Optimizer** (`/app/optimizer`).\n2. Scrolle zum Bereich **VPP & Flexibilitäts-Vermarktung**.\n3. Aktiviere den Schalter **\"Am Schwarm-VPP teilnehmen (Flex-Bonus aktivieren)\"**.\n4. Wähle deinen gewünschten **Mindest-Reserve-SoC** (z. B. 20%).\n5. Bestätige die Aktivierung. Ab der nächsten Viertelstunde optimiert Sharegy deinen Speicher automatisch für das Stromnetz!\n\nIm Dashboard siehst du unter *Abrechnung & Erträge* live deine aufgelaufenen Boni und kannst monatliche Abrechnungsnachweise jederzeit als PDF herunterladen.\n",
+    "content_en": "# 🔋 VPP & Flexibility Bonus: Turn Your Home Battery into a Virtual Power Plant\n\nA **Virtual Power Plant (VPP)** is an intelligent, cloud-connected network of distributed energy resources – such as your rooftop solar system, home battery, heat pump, or EV charger.\n\nBy connecting to Sharegy, your home battery joins a high-performance swarm that helps balance the public power grid while generating passive income for you.\n\n---\n\n## 🌟 What is the Flexibility Bonus and How Does It Work?\n\nAs renewable energy expands, grid operators face frequent supply-demand imbalances. Transmission System Operators (TSOs) pay substantial premiums for fast balancing power (**aFRR / mFRR**) and congestion management (**Redispatch 2.0**).\n\nHistorically, only massive industrial power plants could participate. **Sharegy opens this revenue stream to homeowners:**\n1. **Swarm Aggregation**: Sharegy pools idle capacity from thousands of residential batteries into a unified megawatt-scale battery swarm.\n2. **AI-Driven Market Optimization**: Our algorithms evaluate solar forecasts, dynamic electricity prices, and your household consumption habits.\n3. **Automated Grid Support**: When the grid needs balancing, your battery charges or discharges briefly and automatically without disturbing your routine.\n\n---\n\n## 💰 Key Benefits for EMS Owners\n\n### 1. 💶 80/20 Revenue Share (Maximum Payout for You)\n* **80% of all generated market earnings** are credited directly to you as a **Flexibility Bonus** (bank transfer or bill credit).\n* **20% platform fee** covers market certification, balancing group management, and settlement.\n* For a typical 10 kWh battery, this yields **€120 to €350 per year** in pure extra cash flow.\n\n### 2. 🛡️ 100% Self-Consumption Priority & 20% Min-SoC Reserve\n* **Your Household Comes First**: Local solar self-consumption always takes precedence over grid services.\n* **Guaranteed Reserve**: A configurable minimum state of charge (default: **20% min-SoC**) is strictly locked for household and backup needs.\n* You can adjust this threshold anytime in your optimizer settings (e.g. increase to 30% in winter).\n\n### 3. 🔋 Battery Health & Longevity Protection\n* **Gentle C-Rates**: Charge/discharge power is capped at conservative levels (max 0.5C) to minimize heat and cell wear.\n* **BMS Safety**: Your inverter's physical Battery Management System maintains ultimate safety override.\n* **Cycle Guard**: VPP operations typically add only 0.3 to 0.8 partial cycles per day, well within manufacturer warranty limits.\n\n---\n\n## 🚀 How to Enable VPP in Your Dashboard\n\n1. Navigate to **Smart Energy Optimizer** (`/app/optimizer`).\n2. Scroll to the **VPP & Flexibility Markets** section.\n3. Toggle the switch **\"Participate in Swarm VPP (Enable Flex Bonus)\"**.\n4. Set your preferred **Minimum Reserve SoC** (e.g. 20%).\n5. Save changes. Starting with the next 15-minute interval, your storage actively participates in the balancing market!\n",
+    "tags": [
+      "vpp",
+      "virtuelles kraftwerk",
+      "flexibilitaets bonus",
+      "heimspeicher",
+      "schwarmbatterie",
+      "aFRR",
+      "redispatch 2.0",
+      "optimizer",
+      "ertrag"
+    ],
+    "is_published": true,
+    "is_featured": true,
+    "sort_order": 3,
+    "views_count": 0,
+    "helpful_yes": 0,
+    "helpful_no": 0,
+    "created_at": "2026-09-16T15:29:13.526Z",
+    "updated_at": "2026-09-16T15:29:13.526Z"
+  }
+},
+{
+  "model": "support_desk.helparticle",
+  "pk": "b884b9ea-33cb-4d49-9d7f-be282920a7ad",
+  "fields": {
+    "category": "e6ddda15-7508-4ce7-a852-5fa4afee4696",
+    "slug": "brauchwasserwaermepumpe-bwwp-und-sg-ready",
+    "context_key": "bwwp",
+    "title_de": "BWWP & Wärmepumpen-Lastmanagement: SG-Ready & Verdichterschutz ♨️🛡️",
+    "title_en": "DHW Heat Pump (BWWP) Load Management: SG-Ready & Compressor Safety ♨️🛡️",
+    "summary_de": "Funktionsweise des BWWP-Lastmanagements mit SG-Ready Kontakt, Temperaturgrenzen, Solar-Boost und Verdichter-Schutzzeiten gegen Takten.",
+    "summary_en": "Domestic Hot Water Heat Pump control with SG-Ready relays, temperature thresholds, solar boost, and anti-cycling compressor protection.",
+    "content_de": "# BWWP & Wärmepumpen-Lastmanagement (SG-Ready) ♨️🛡️\n\nBrauchwasserwärmepumpen (**BWWP**) und Heizungs-Wärmepumpen bieten durch ihren Wasserspeicher eine hervorragende thermische Speicherkapazität. Sharegy steuert diese Geräte vollautomatisch über SG-Ready Kontakte (Relais / Shelly / ioBroker / Home Assistant).\n\n---\n\n## 1. Die SG-Ready Betriebszustände\n\nSharegy bildet die genormten SG-Ready Stufen ab:\n* ⚪ **Zustand 1 (Sperre / Standby)**: EVU-Sperre oder absoluter Überhitzungsschutz ($T \\ge 65^\\circ\\text{C}$).\n* 🟡 **Zustand 2 (Normalbetrieb)**: Standardbetrieb nach internem Thermostat der Wärmepumpe ($T_{soll} \\approx 52^\\circ\\text{C}$).\n* 🟢 **Zustand 3 (SG-Ready Boost / Verstärkter Betrieb)**: Relais schließt bei PV-Überschuss ($\\ge 800\\,\\text{W}$) oder Börsen-Tiefstpreisen. Die Wärmepumpe heizt den Speicher auf **$60^\\circ\\text{C}$ (Boost-Temperatur)** als thermische Batterie auf.\n* 🔥 **Zustand 4 (Zwangsanlauf / Komfort-Sicherung)**: Fällt die Wassertemperatur unter die Mindestgrenze ($T < 45^\\circ\\text{C}$), erzwingt Sharegy das Heizen zur Warmwasser- und Legionellengarantie.\n\n---\n\n## 2. Verdichter- & Taktschutz (Anti-Cycling)\n\nZum Schutz des Wärmepumpen-Verdichters vor vorzeitigem Verschleiß erzwingt Sharegy zwei essenzielle Schutzzeiten:\n1. 🔒 **Mindestlaufzeit (Standard: 20 Minuten)**: Wurde die BWWP eingeschaltet, bleibt sie mindestens 20 Minuten aktiv – selbst wenn vorübergehend eine Wolke über die PV-Anlage zieht.\n2. ⏳ **Mindestruhezeit (Standard: 15 Minuten)**: Nach dem Abschalten bleibt das Relais mindestens 15 Minuten geöffnet, um schädliches Takten zu verhindern.\n\n---\n\n## 3. Anbindung über ioBroker & Home Assistant\n\nVerbinde dein BWWP-Schaltrelais (z. B. Shelly Plus 1 / Shelly Pro 1PM oder HomeMatic-Schaltaktor):\n* **ioBroker**: Wähle im Sharegy-Adapter das zusammengestellte BWWP-Gerät aus (Leistung, Temperatur und SG-Schaltkontakt).\n* **Home Assistant**: Nutze das integrierte **BWWP-Gerätebündel** im Setup Flow.\n* **Geschlossener Regelkreis**: Sobald Sharegy den Boost-Befehl sendet, schaltet das Relais in Millisekunden per Outbound-WebSocket.\n",
+    "content_en": "# DHW Heat Pump (BWWP) & SG-Ready Load Management ♨️🛡️\n\nDomestic Hot Water (DHW) heat pumps represent ideal thermal batteries. Sharegy actuates SG-Ready relays via ioBroker, Home Assistant, and Shelly WSS.\n\n## Core Mechanisms\n* 🌡️ **Temperature Limits**: Min Comfort (45°C), Standard Target (52°C), Solar Boost (60°C), Safety Lock (65°C).\n* 🔒 **Compressor Protection**: Minimum 20-minute runtime and 15-minute cooldown between cycles to eliminate short-cycling.\n* 🔄 **Closed-Loop Actuation**: Real-time state synchronization over Outbound WebSockets.\n",
+    "tags": [
+      "bwwp",
+      "wärmepumpe",
+      "sg-ready",
+      "verdichterschutz",
+      "brauchwasser",
+      "boost",
+      "temperaturen"
+    ],
+    "is_published": true,
+    "is_featured": true,
+    "sort_order": 14,
+    "views_count": 0,
+    "helpful_yes": 0,
+    "helpful_no": 0,
+    "created_at": "2026-09-04T04:39:47.536Z",
+    "updated_at": "2026-09-16T15:29:13.442Z"
   }
 },
 {
@@ -409,29 +1021,196 @@
     "context_key": "interfaces",
     "title_de": "Shelly Outbound WebSocket & Bidirektionale Relais-Steuerung",
     "title_en": "Shelly Outbound WebSocket & Bidirectional Relay Actuation",
-    "summary_de": "Einrichtung von Shelly Gen2/Gen3/Pro Relais per Outbound WSS (Port 443) und Live-Schaltung von Verbrauchern direkt im Sharegy Dashboard.",
-    "summary_en": "Setting up Shelly Gen2/Gen3/Pro devices via Outbound WSS (Port 443) and live consumer actuation directly from the Sharegy dashboard.",
-    "content_de": "# Shelly Outbound WebSocket & Bidirektionale Relais-Steuerung 🔌⚡\n\nSharegy unterstützt die direkte, bidirektionale Steuerung von **Shelly-Geräten der 2. und 3. Generation** (Plus, Pro, Gen3, Mini) über verschlüsselte Outbound-WebSockets.\n\n## 1. Vorteile der Outbound-WSS-Technologie\n* 🔒 **Keine offenen Ports oder Portweiterleitungen**: Das Gerät baut von innen heraus eine sichere TLS-Verbindung zu Sharegy auf.\n* ⚡ **Echtzeit-Latenz (< 10 ms)**: Messwerte (W, V, A, kWh) und Schaltbefehle (Relais AN / AUS) werden ohne Verzögerung übertragen.\n* 💡 **Optimistisches Dashboard-Feedback**: Schalte smarte Zwischenstecker, Warmwasserstäbe oder Wallbox-Freigaben direkt per Klick im Dashboard.\n\n## 2. Einrichtung im Shelly Webinterface (in 2 Minuten)\n1. Öffne die IP-Adresse deines Shelly-Geräts im Webbrowser (oder in der Shelly Smart Control App).\n2. Navigiere zu **Settings → Outbound WebSocket** (oder *Advanced - Developer Settings*).\n3. Aktiviere den WebSocket-Schalter (**Enable**).\n4. Wähle als Server-Typ: **`ws`** oder **`wss`**.\n5. Trage deine persönliche Sharegy-URL ein:\n   > `wss://sharegy.de/ws/energy/<DEIN_HAUSHALTS_TOKEN>/`\n6. Klicke auf **Save Settings**.\n\nSobald der Shelly verbunden ist, wird er automatisch in deiner **Geräteliste** angelegt und der **Relais-Schalter** steht sofort bereit!\n\n## 3. Unterstützte Geräte & Protokolle\n* **Shelly Smart Plugs & Relais**: Shelly Plus 1PM, Shelly 1PM Gen3, Shelly Plus Plug S, Shelly Pro 1PM, Pro 4PM, Mini 1PM.\n* **Dreiphasige Energiemesser**: Shelly Pro 3EM, Shelly 3EM.\n* **Tasmota Smart Plugs**: Nous A1T, Gosund SP111, Sonoff POW Elite/Origin.\n* **Balkonkraftwerk-Wechselrichter**: OpenDTU / AhoyDTU für Hoymiles (inkl. Nulleinspeisung/Leistungsbegrenzung).\n* **Wallboxen**: OCPP 1.6-J über WSS für dynamisches PV-Überschussladen.\n",
-    "content_en": "# Shelly Outbound WebSocket & Bidirectional Relay Actuation 🔌⚡\n\nSharegy provides native bidirectional control for **Shelly Gen2, Gen3, and Pro series** devices over encrypted Outbound WebSockets.\n\n## 1. Outbound WSS Benefits\n* 🔒 **Zero Port Forwarding**: The device initiates an outbound TLS connection over standard Port 443.\n* ⚡ **Real-time Latency (< 10ms)**: High-speed telemetry and immediate relay actuation.\n* 💡 **Interactive UI Switches**: Toggle relays and smart plugs directly from your Sharegy dashboard.\n\n## 2. Configuration Steps\n1. Open your Shelly's local web portal.\n2. Navigate to **Settings → Outbound WebSocket**.\n3. Enable WebSockets and enter your Sharegy connection URL:\n   > `wss://sharegy.de/ws/energy/<YOUR_HOME_TOKEN>/`\n4. Click **Save Settings**.\n",
+    "summary_de": "Einrichtung von Shelly Gen2/Gen3/Pro Relais per Outbound WSS (Port 443) und Live-Schaltung von Verbrauchern direkt im Dashboard.",
+    "summary_en": "Setting up Shelly Gen2/Gen3/Pro devices via Outbound WSS (Port 443) and live consumer actuation directly from the dashboard.",
+    "content_de": "# Shelly Outbound WebSocket & Relais-Aktorik 🔌⚡\n\nSharegy unterstützt die direkte Steuerung von **Shelly Plus, Pro und Gen3** Geräten über Outbound-WebSockets.\n\n## Einrichtung\n1. Öffne das Webinterface deines Shelly.\n2. Navigiere zu **Settings ➔ Outbound WebSocket**.\n3. Trage deine Sharegy-URL ein: `wss://sharegy.de/ws/energy/<TOKEN>/`\n4. Speichern – das Gerät schaltet ab sofort live im Dashboard!\n",
+    "content_en": "# Shelly Outbound WebSocket & Bidirectional Relay Actuation 🔌⚡\n\nNative bidirectional actuation for Shelly Gen2, Gen3, and Pro series devices over Outbound WebSockets.\n",
     "tags": [
       "shelly",
       "wss",
       "relais",
-      "aktorik",
       "schalten",
-      "smart plug",
-      "tasmota",
-      "opendtu",
-      "ocpp"
+      "smart plug"
     ],
     "is_published": true,
     "is_featured": true,
-    "sort_order": 14,
+    "sort_order": 11,
     "views_count": 0,
     "helpful_yes": 0,
     "helpful_no": 0,
     "created_at": "2026-08-25T22:33:36.292Z",
-    "updated_at": "2026-08-30T19:19:34.203Z"
+    "updated_at": "2026-09-16T15:29:13.430Z"
+  }
+},
+{
+  "model": "support_desk.helparticle",
+  "pk": "b8e80d95-f0df-407f-85bb-a233d1010ce4",
+  "fields": {
+    "category": "e647af9a-8938-4ab9-af5a-0713a15f79b1",
+    "slug": "dc-dc-laden-und-speicher-zu-speicher-v2g",
+    "context_key": "dcdc_v2g",
+    "title_de": "DC-DC Laden, Speicher-zu-Speicher & Bidirektionales Laden (V2H / V2G)",
+    "title_en": "DC-DC Charging, Storage-to-Storage & Bidirectional Charging (V2H / V2G)",
+    "summary_de": "Verlustfreies DC-Koppeln (bis 95 % Wirkungsgrad), Umladung von Heimspeicher ins E-Auto und Fahrzeug-Rückspeisung (Vehicle-to-Home / Vehicle-to-Grid) bei Spitzenlasten.",
+    "summary_en": "Lossless DC-coupling (up to 95% efficiency), home battery to EV transfer, and Vehicle-to-Home / Vehicle-to-Grid (V2H / V2G) peak-shaving strategies.",
+    "content_de": "# DC-DC Laden, Speicher-zu-Speicher & Bidirektionales Laden (V2H / V2G) 🔋⚡🚗\n\nModerne PV- und Speicher-Architekturen ermöglichen direkten Gleichstrom-Transfer (**DC-DC**) sowie bidirektionale Energieflüsse zwischen Heimspeicher, Solarmodulen und Elektrofahrzeug.\n\n---\n\n## 1. DC-Kopplung vs. AC-Kopplung: Die Physik der Wirkungsgrade\n\nKlassische Wallboxen und Batteriespeicher arbeiten wechselstromseitig (AC). Dabei muss der Strom mehrfach umgewandelt werden:\n\n```\n[ Klassische AC-Kette ]\nPV (DC) ➔ Wechselrichter (AC) ➔ Hausnetz (AC) ➔ Onboard-Lader (DC) ➔ Autobatterie (DC)\nGesamtwirkungsgrad: ca. 80 % bis 85 % (15–20 % Wandlungsverlust!)\n\n[ Direkte DC-DC-Kette ]\nPV (DC) ➔ DC/DC-Zwischenkreis ➔ Fahrzeugakku (DC)\nGesamtwirkungsgrad: ca. 94 % bis 97 % (Nur 3–6 % Verlust!)\n```\n\n### Warum ist DC-DC Laden so überlegen?\n* **Minimaler Wandlungsverlust**: Keine doppelte Gleich- und Wechselrichtung ($DC \\rightarrow AC \\rightarrow DC$).\n* **Geringere Wärmeentwicklung**: Schont Elektronik, Ladeinfrastruktur und Akkuzellen.\n* **Höhere Ladeleistungen bei Schwachlicht**: Schnelleres Ansprechverhalten bereits ab geringen Solarströmen.\n\n---\n\n## 2. Speicher-zu-Speicher Umladung (Heimspeicher ➔ Elektroauto)\n\nIm Sharegy EMS kannst du definieren, ob und unter welchen Bedingungen das Elektroauto aus dem stationären Heimspeicher geladen werden darf.\n\n### Wann ist das Umladen wirtschaftlich sinnvoll?\n* ☀️ **Sommer / Hohe Solarprognose**:  \n  Wenn die Wetterprognose für den nächsten Vormittag $100\\,\\%$ Sonnenschein vorhersagt, kann der Heimspeicher abends bedenkenlos ins E-Auto entleert werden – am nächsten Morgen wird der Speicher ohnehin sofort wieder voll.\n* 🍂 **Übergangszeit / Winter**:  \n  Hier sollte die Heimspeicher-Energie primär für die nächtliche Haushaltsgrundlast und Wärmepumpe reserviert werden. Ein Umladen ins Auto würde doppelten Zyklenverschleiß bedeuten und nachts teuren Netzbezug (30+ ct/kWh) provozieren.\n\n### Zyklenkosten-Formel im Sharegy Optimizer:\n$$C_\\text{Zyklus} = \\frac{\\text{Anschaffungskosten Speicher (€)}}{\\text{Garantierte Vollzyklen} \\times \\text{Kapazität (kWh)}} \\approx 0{,}08\\text{ bis }0{,}12\\text{ €/kWh}$$\nDas EMS gibt das Umladen nur frei, wenn:\n$$\\text{Netzstrompreis} > \\text{Einspeisevergütung} + C_\\text{Zyklus} + \\text{Wandlungsverlust}$$\n\n---\n\n## 3. Bidirektionales Laden: V2H (Vehicle-to-Home) & V2G (Vehicle-to-Grid)\n\nEin modernes Elektroauto besitzt eine Batteriekapazität von **50 bis 100 kWh** – das entspricht der **5- bis 10-fachen Kapazität** eines typischen Heimspeichers!\n\n| Modus | Beschreibung | Typischer Einsatzbereich |\n| :--- | :--- | :--- |\n| **V2H (Vehicle-to-Home)** | Das E-Auto speist Energie in das private Hausnetz ein. | Versorgt Haus und Wärmepumpe über mehrere trübe Tage hinweg; Notstromversorgung bei Stromausfall. |\n| **V2G (Vehicle-to-Grid)** | Das E-Auto speist geregelt ins öffentliche Stromnetz ein. | Teilnahme am Regelenergiemarkt; Spitzenlastkappung (Peak Shaving); Arbitrage bei Börsenpreis-Spitzen. |\n\n---\n\n## 4. Schutzfunktionen & Mindest-SoC-Garantie\n\nUm sicherzustellen, dass dein Auto jederzeit abfahrbereit bleibt, setzt Sharegy strikte Sicherheitsgrenzen:\n1. 🚗 **Mobilitäts-Reserve (Fahrzeug-Mindest-SoC)**: z. B. $60\\,\\%$ oder $150\\,\\text{km}$ Restreichweite werden niemals für V2H entladen.\n2. 🔋 **Heimspeicher-Tiefentladeschutz**: Stationäre Speicher werden nie unter die Notstrom-Schwelle (z. B. $10\\,\\%$) entladen.\n3. 🌡️ **Temperatur- und Zellüberwachung**: Reduktion der Lade-/Entladeleistung bei extremen Akkutemperaturen.\n",
+    "content_en": "# DC-DC Charging, Storage-to-Storage & Bidirectional Charging (V2H / V2G) 🔋⚡🚗\n\nModern solar and storage topologies enable direct DC power transfer (**DC-DC**) and bidirectional energy exchange between stationary batteries, solar arrays, and electric vehicles.\n\n---\n\n## 1. DC vs. AC Coupling: Efficiency & Power Flow\n\nTraditional EV chargers operate on alternating current (AC), necessitating dual conversion stages:\n\n```\n[ Traditional AC Topology ]\nPV (DC) ➔ Inverter (AC) ➔ Home Grid (AC) ➔ Onboard Charger (DC) ➔ EV Battery (DC)\nOverall Efficiency: approx. 80 % to 85 %\n\n[ Direct DC-DC Coupling ]\nPV (DC) ➔ DC Bus ➔ EV Battery (DC)\nOverall Efficiency: approx. 94 % to 97 %\n```\n\n---\n\n## 2. Storage-to-Storage Energy Transfer (Home Battery ➔ EV)\n\nSharegy EMS orchestrates whether stationary battery capacity should discharge into your electric vehicle based on dynamic economics and weather forecasting:\n\n* ☀️ **High Solar Forecast**: Evening discharge into the EV is permitted if the home battery will reach full capacity early the next day.\n* ❄️ **Winter / Low Solar**: Home battery capacity is strictly prioritized for household baseload and heat pumps to avoid costly peak grid purchases.\n\n$$\\text{Cycle Cost} \\approx \\frac{\\text{Battery Investment Cost}}{\\text{Guaranteed Cycles} \\times \\text{Capacity}} \\approx 0.08\\text{ to }0.12\\text{ €/kWh}$$\n\n---\n\n## 3. Bidirectional Charging: V2H & V2G\n\nWith EV capacities ranging from **50 to 100 kWh**, vehicles represent massive distributed energy reservoirs:\n* **V2H (Vehicle-to-Home)**: Powers domestic loads, shaving grid peaks and supplying multi-day resilience.\n* **V2G (Vehicle-to-Grid)**: Injects power into the public distribution grid during extreme price events and grid stress.\n\n---\n\n## 4. Guardrails & Minimum SoC Protection\n\n* 🚗 **Vehicle Mobility Reserve**: Guaranteed minimum EV SoC (e.g., $60\\,\\%$) is never discharged to home loads.\n* 🔋 **Stationary Battery Deep Discharge Lock**: Reserves emergency backup margins.\n",
+    "tags": [
+      "dc-dc",
+      "v2g",
+      "v2h",
+      "bidirektional",
+      "speicher-zu-speicher",
+      "wirkungsgrad",
+      "peak shaving",
+      "batterie"
+    ],
+    "is_published": true,
+    "is_featured": true,
+    "sort_order": 4,
+    "views_count": 0,
+    "helpful_yes": 0,
+    "helpful_no": 0,
+    "created_at": "2026-09-10T14:11:15.648Z",
+    "updated_at": "2026-09-16T15:29:13.469Z"
+  }
+},
+{
+  "model": "support_desk.helparticle",
+  "pk": "ba7299a7-d22e-4e21-bc23-77dd20ae9ebe",
+  "fields": {
+    "category": "20c3a97e-7aa1-451e-9cef-7cb6fa67829d",
+    "slug": "paragraf-14a-enwg-pflichtdimmung-und-summenleistungsmodell",
+    "context_key": "grid",
+    "title_de": "§ 14a EnWG: Gesetzliche Drosselung auf 4,2 kW & das BNetzA-Summenleistungsmodell",
+    "title_en": "§ 14a EnWG Grid Regulation: Mandatory 4.2 kW Dimming & Sum Power Model",
+    "summary_de": "Vollständige Erklärung der BNetzA-Vorgabe (BK6-22-300) für steuerbare Verbraucher (Wallboxen, Wärmepumpen, Speicher) und wie Sharegy den Komfort durch Solar-Kompensation erhält.",
+    "summary_en": "Complete guide to the German BNetzA § 14a EnWG regulation for controllable loads (EV chargers, heat pumps, batteries) and solar compensation.",
+    "content_de": "# § 14a EnWG: Drosselung auf 4,2 kW & Summenleistungsmodell 🛡️⚡\n\nSeit dem **1. Januar 2024** gilt in Deutschland die verbindliche Festlegung der Bundesnetzagentur (BNetzA BK6-22-300 / BK8-22/010-A) zur Integration steuerbarer Verbrauchseinrichtungen (**SteuVE**).\n\n---\n\n## 1. Welche Geräte fallen unter § 14a EnWG?\nAlle neu installierten Großverbraucher mit einem netzwirksamen Leistungsbezug **über 4,2 kW**:\n* 🚗 **Private Wallboxen / Ladesäulen** (11 kW oder 22 kW).\n* ♨️ **Wärmepumpen** (inkl. Zusatzheizstab).\n* 🔋 **Batteriespeicher mit Netzbezug** (z. B. netzgekoppeltes Laden).\n* ❄️ **Klimageräte und Raumkühlung**.\n\n---\n\n## 2. Die Grundregel: *„Drosseln statt Abschalten!“*\nDroht im lokalen Niederspannungsnetz eine Überlastung, darf der Verteilnetzbetreiber (VNB) die SteuVE temporär drosseln:\n* 🛑 **Früher (Rundsteuerempfänger)**: Das Gerät wurde komplett hart abgeschaltet (0 kW).\n* 🟢 **Heute (§ 14a EnWG)**: Jedem Haushalt steht ein **garantierter Mindestnetzbezug von 4,2 kW** zu.\n\n---\n\n## 3. Das dynamische BNetzA-Summenleistungsmodell in Sharegy\n\nSharegy implementiert das offizielle **Summenleistungs-Modell** der Bundesnetzagentur. Hierbei wird nicht jedes Einzelgerät starr abgeregelt, sondern die **Gesamtleistung am Netzübergabepunkt** bilanziert:\n\n> 📐 **Formel für erlaubte SteuVE-Gesamtleistung:**  \n> $$P_{\\text{Erlaubt}} = 4{,}2\\,\\text{kW (Netzkontingent)} + P_{\\text{PV}} + P_{\\text{Batt}} - P_{\\text{Grundlast}}$$\n\n### 💡 Ein Praxis-Beispiel für maximalen Komfort:\n1. Der Netzbetreiber aktiviert eine Drosselung auf **4,2 kW**.\n2. Auf deinem Dach erzeugt die Solaranlage zeitgleich **5,0 kW** und dein Speicher liefert **2,0 kW**.\n3. Deine Haushaltsgrundlast beträgt **0,5 kW**.\n4. **Sharegy-Ergebnis**: Deine Wallbox darf mit **$4{,}2 + 5{,}0 + 2{,}0 - 0{,}5 = 10{,}7\\,\\text{kW}$** laden!\n5. **Ergebnis**: Dein Elektroauto lädt mit voller Leistung weiter, ohne das öffentliche Stromnetz um auch nur 1 Watt zu überlasten.\n\n---\n\n## 4. Finanzielle Vorteile (Netzentgelt-Reduktion)\nFür die Teilnahme an § 14a EnWG erhält der Anlagenbetreiber reduzierte Netzentgelte:\n* **Modul 1 (Pauschaler Rabatt)**: Jährliche Gutschrift von ca. **120 bis 180 €** auf der Stromrechnung (bundeslandabhängig).\n* **Modul 2 (Prozentualer Rabatt)**: Ca. 60 % Rabatt auf den Arbeitspreis der Netzentgelte für steuerbare Zähler.\n* **Modul 3 (Zeitvariable Netzentgelte ab 2025/2026)**: Zusätzliche Einsparungen durch netzdienliches Laden in Schwachlastphasen.\n",
+    "content_en": "# § 14a EnWG: Mandatory 4.2 kW Dimming & Sum Power Model 🛡️⚡\n\nSince **January 1, 2024**, German energy law (BNetzA BK6-22-300) requires controllable consumer devices (**SteuVE > 4.2 kW**) to participate in dynamic grid dimming.\n\n## 1. Affected Devices\n* 🚗 **EV Wallboxes** (11 kW / 22 kW)\n* ♨️ **Heat Pumps & Heating Rods**\n* 🔋 **Home Batteries with Grid Charging**\n* ❄️ **Air Conditioning Systems**\n\n## 2. Dynamic Sum Power Model in Sharegy\nInstead of shutting down devices, Sharegy calculates a dynamic power envelope:\n\n> $$P_{\\text{Allowed}} = 4.2\\,\\text{kW (Grid Allowance)} + P_{\\text{PV}} + P_{\\text{Battery}} - P_{\\text{Baseload}}$$\n\nIf solar power is available, your EV charges at full 11 kW speed despite active grid dimming!\n",
+    "tags": [
+      "14a",
+      "enwg",
+      "steuve",
+      "dimmung",
+      "bnetza",
+      "summenleistung",
+      "steuerbox",
+      "wallbox",
+      "wärmepumpe",
+      "netzentgelte"
+    ],
+    "is_published": true,
+    "is_featured": true,
+    "sort_order": 4,
+    "views_count": 0,
+    "helpful_yes": 0,
+    "helpful_no": 0,
+    "created_at": "2026-09-03T05:22:21.754Z",
+    "updated_at": "2026-09-16T15:29:13.403Z"
+  }
+},
+{
+  "model": "support_desk.helparticle",
+  "pk": "ba77b506-1bd4-4d7d-883e-066524885333",
+  "fields": {
+    "category": "b9285d9d-9bcf-43e8-8b95-b71a47ac13b7",
+    "slug": "tarif-und-ersparnis-kompass-matrix",
+    "context_key": "tariffs_savings_compass",
+    "title_de": "Tarif- & Ersparnis-Kompass: Welches Setup und welcher Stromtarif passt zu mir?",
+    "title_en": "Tariff & Savings Compass: Which Setup and Electricity Tariff Fits My Home?",
+    "summary_de": "Der große Ratgeber: Fester vs. Dynamischer Stromtarif, Balkonkraftwerk, Wärmepumpe, Wallbox und Ersparnis-Potenziale für alle 12 Haushalts-Profile.",
+    "summary_en": "The definitive guide: Fixed vs. Dynamic electricity tariffs, balcony solar, heat pumps, EV charging, and savings potential across all home profiles.",
+    "content_de": "# Tarif- & Ersparnis-Kompass: Welches Setup und welcher Stromtarif passt zu mir?\n\nNicht jeder Haushalt besitzt eine große Dach-Photovoltaikanlage, einen 10-kWh-Batteriespeicher oder ein Elektroauto. Sharegy ist modular aufgebaut und bietet für **jede Wohnsituation und Geräte-Ausstattung** konkrete finanzielle und ökologische Hebel.\n\n---\n\n## 1. Die goldene Grundregel der Tarif-Entscheidung\n\n| Kriterium | 🔒 Fester Stromtarif (z. B. 28–32 ct/kWh) | ⚡ Dynamischer Börsentarif (Tibber, Awattar, Ostrom etc.) |\n| :--- | :--- | :--- |\n| **Zusatzkosten** | Keine / Standard-Grundgebühr (~10 €/Mt.) | Zusätzliche Monatsgebühr (~4–6 €/Mt.) + Smart-Meter-Messentgelt |\n| **Preisrisiko** | 0 % Preisrisiko, feste Planbarkeit | Preisschwankungen; Risiko bei ungesteuertem Abend-Peak |\n| **Voraussetzung** | Keine Steuerung notwendig | **Verschiebbare Großlast (≥ 2.000 kWh/a)** (z. B. E-Auto, modulierbare WP, Heimspeicher) |\n| **Wann optimal?** | Reiner Haushaltsstrom, Mietwohnung, BKW ohne Speicher | E-Auto vorhanden, Speicher mit Winter-Netzladung, Wärmepumpe |\n\n> [!IMPORTANT]\n> **Warum lohnt sich ein dynamischer Tarif ohne Großverbraucher NICHT?**  \n> Bei normalem Haushaltsstrom fällt der Verbrauch unverschiebbar in die Morgen- (07–09 Uhr) und Abendstunden (18–22 Uhr) – genau dann, wenn Strom an der Börse am teuersten ist. Zusammen mit den Zusatzgebühren zahlt ein Mieter im Börsentarif oft mehr als bei einem günstigen Festvertrag.\n\n---\n\n## 2. Die 6 Profile & 12 Hardware-Kombinationen\n\n### 🏠 Kategorie A: Basishaushalt (Nur Haushaltsstrom)\n* **Profil A.1 (Nur Stromzähler)**: 🔒 **FESTER TARIF**.  \n  * *Hebel*: Standby-Killer (senkt 50–100 W Grundlast = **140–280 €/a**), Stromfresser-Alarme (**40–80 €/a**), P2P-Mieterstrom (**~120 €/a**).  \n  * *Gesamtersparnis*: **180 € bis 360 € / Jahr**.\n\n---\n\n### ☀️ Kategorie B: Balkonkraftwerk (Stecker-Solar 600–800 W)\n* **Profil B.1 (BKW ohne Speicher)**: 🔒 **FESTER TARIF**.  \n  * *Hebel*: BKW deckt günstige Sonnenstunden gratis ab. Einschalttipps zur Mittagszeit steigern Eigenverbrauch von 45 % auf 80 % (**+80 €/a Zusatznutzen**). Amortisation in ~2,5 Jahren. Gesamtertrag: **200–260 € / a**.\n* **Profil B.2 (BKW mit 1–2 kWh Minispeicher)**: 🔒 **FESTER TARIF**.  \n  * *Hebel*: Nulleinspeisung / bedarfsgeführte Grundlast-Abgabe nachts. Gesamtertrag: **260–340 € / a**.\n\n---\n\n### 🚗 Kategorie C: Elektromobilität (Wallbox + E-Auto)\n* **Profil C.1 (EV + Wallbox ohne PV)**: ⚡ **DYNAMISCHER TARIF + § 14a EnWG**.  \n  * *Hebel*: 3.000 kWh Fahrstrom nachts zu Tiefpreisen (15–18 ct statt 32 ct) laden (**~420 €/a**) + **160 € § 14a Netzentgeltbonus**. Gesamtersparnis: **580–680 € / Jahr**.\n* **Profil C.2 (EV + Wallbox + BKW)**: ⚡ **DYNAMISCHER TARIF** (ab 8.000 km/a). Gesamtersparnis: **720–850 € / Jahr**.\n* **Profil C.3 (EV + Wallbox + Dach-PV ohne Speicher)**: ⚡ **DYNAMISCHER TARIF**. Sommer = 100 % Solarüberschuss; Winter = Windstrom-Nachtladen. Gesamtersparnis: **730–920 € / Jahr**.\n* **Profil C.4 (EV + Dach-PV + Heimspeicher)**: ⚡ **DYNAMISCHER TARIF**. Sommer-Autarkie + Winter-Arbitrage + V2G/V2H. Gesamtersparnis: **1.400–1.900 € / Jahr**.\n\n---\n\n### 🏡 Kategorie D: Klassische Dach-PV (ohne EV/WP)\n* **Profil D.1 (Dach-PV ohne Speicher)**: 🔒 **FESTER TARIF**. Eigenverbrauchssteuerung (WaMa, Heizstab) bringt **330–480 € / Jahr**.\n* **Profil D.2 (Dach-PV mit Heimspeicher)**: 🔒 **FEST / DYN**. Festtarif für Standardbetrieb; Dynamisch nur bei aktiver Winter-Netzladung (**950–1.250 € / Jahr**).\n\n---\n\n### ♨️ Kategorie E: Wärmepumpen-Haushalt\n* **Profil E.1 (Wärmepumpe ohne PV)**: ⚡ **DYN. TARIF oder § 14a WP-TARIF**. Smart Thermal Storage (Estrich-Vorlaufüberhöhung) + § 14a Rabatt (**300–420 € / Jahr**).\n* **Profil E.2 (Wärmepumpe + Dach-PV)**: ⚡ **DYNAMISCHER TARIF**. Gesamtersparnis: **510–680 € / Jahr**.\n* **Profil E.3 (Wärmepumpe + PV + Speicher)**: ⚡ **DYNAMISCHER TARIF**. Gesamtersparnis: **1.200–1.650 € / Jahr**.\n\n---\n\n### ⚡ Kategorie F: Voll-Prosumer (All-in-One)\n* **Profil F.1 (PV + Speicher + EV + WP + V2G)**: 🚀 **DYNAMISCHER TARIF (Absolute Pflicht!)**.  \n  * *Hebel*: Maximale Sektorenkopplung, Doppelter § 14a Vorteil (Wallbox + WP = **+320 €/a**), Netzarbitrage und V2G-Lastspitzenkappung.  \n  * *Gesamtersparnis*: **1.950 € bis 2.600 € / Jahr**.\n\n---\n\n## 3. Übersichtstabelle aller Profile\n\n| Profil | Hardware-Ausstattung | Tarif-Empfehlung | Realistisches Sparpotenzial |\n| :--- | :--- | :---: | :---: |\n| **A.1** | Nur Stromzähler | 🔒 **Fest** | **180 – 360 € / a** |\n| **B.1** | BKW ohne Speicher | 🔒 **Fest** | **200 – 260 € / a** |\n| **B.2** | BKW + Minispeicher | 🔒 **Fest** | **260 – 340 € / a** |\n| **C.1** | EV + Wallbox (ohne PV) | ⚡ **Dynamisch** | **580 – 680 € / a** |\n| **C.2** | EV + Wallbox + BKW | ⚡ **Dynamisch** | **720 – 850 € / a** |\n| **C.3** | EV + Wallbox + Dach-PV | ⚡ **Dynamisch** | **730 – 920 € / a** |\n| **C.4** | EV + PV + Heimspeicher | ⚡ **Dynamisch** | **1.400 – 1.900 € / a** |\n| **D.1** | Dach-PV ohne Speicher | 🔒 **Fest** | **330 – 480 € / a** |\n| **D.2** | Dach-PV + Heimspeicher | 🔒 **Fest / Dyn.** | **950 – 1.250 € / a** |\n| **E.1** | Wärmepumpe (ohne PV) | ⚡ **Dyn. / WP** | **300 – 420 € / a** |\n| **E.2** | Wärmepumpe + Dach-PV | ⚡ **Dynamisch** | **510 – 680 € / a** |\n| **F.1** | PV + Speicher + EV + WP | 🚀 **Dynamisch** | **1.950 – 2.600 € / a** |\n",
+    "content_en": "# Tariff & Savings Compass: Which Setup and Electricity Tariff Fits My Home?\n\nNot every household owns a massive rooftop solar array, a 10 kWh battery, or an electric vehicle. Sharegy is built modularly to deliver **measurable financial and environmental savings** for every residential setup.\n\n---\n\n## 1. The Golden Rule of Electricity Tariffs\n\n| Criterion | 🔒 Fixed Tariff (e.g. 28–32 ct/kWh) | ⚡ Dynamic Tariff (Tibber, Awattar, Ostrom etc.) |\n| :--- | :--- | :--- |\n| **Extra Costs** | None / standard base fee (~10 €/mo) | Monthly service fee (~4–6 €/mo) + smart metering costs |\n| **Price Risk** | 0 % risk, full predictability | Price fluctuations; exposure to expensive evening peaks |\n| **Prerequisite** | No automation required | **Shiftable heavy load (≥ 2,000 kWh/yr)** (EV, heat pump, battery) |\n| **Best Choice** | Pure household load, rental flats, balcony solar | EV owners, winter grid battery charging, controllable heat pumps |\n\n---\n\n## 2. All 6 Profiles & 12 Hardware Combinations\n\n### 🏠 Category A: Standard Household (No PV / EV / Heat Pump)\n* **Profile A.1 (Smart Meter Only)**: 🔒 **FIXED TARIFF**.  \n  * *Lever*: Standby killer (cuts 50–100 W continuous waste = **140–280 €/yr**), appliance anomaly alerts (**40–80 €/yr**), tenant sharing (**~120 €/yr**).  \n  * *Total Savings*: **180 € to 360 € / year**.\n\n### ☀️ Category B: Balcony Solar (Plug-in Solar 600–800 W)\n* **Profile B.1 (Balcony Solar without Battery)**: 🔒 **FIXED TARIFF**. Midday appliance triggers boost self-consumption to 80 % (**+80 €/yr bonus**). Total output benefit: **200–260 € / yr**.\n* **Profile B.2 (Balcony Solar with 1–2 kWh Battery)**: 🔒 **FIXED TARIFF**. Zero-feed-in baseload coverage at night (**260–340 € / yr**).\n\n### 🚗 Category C: Electric Mobility (Wallbox + EV)\n* **Profile C.1 (EV + Wallbox without Solar)**: ⚡ **DYNAMIC TARIFF + § 14a EnWG**. Night charging at 15–18 ct instead of 32 ct (**~420 €/yr**) + **160 € § 14a grid discount**. Total savings: **580–680 € / year**.\n* **Profile C.2 (EV + Wallbox + Balcony Solar)**: ⚡ **DYNAMIC TARIFF**. Total savings: **720–850 € / year**.\n* **Profile C.3 (EV + Wallbox + Rooftop Solar)**: ⚡ **DYNAMIC TARIFF**. Summer = free solar; Winter = cheap wind power. Total savings: **730–920 € / year**.\n* **Profile C.4 (EV + Rooftop Solar + Battery)**: ⚡ **DYNAMIC TARIFF**. Full autarky + winter arbitrage + V2G/V2H (**1,400–1,900 € / year**).\n\n### 🏡 Category D: Classic Rooftop Solar (No EV / Heat Pump)\n* **Profile D.1 (Rooftop Solar without Battery)**: 🔒 **FIXED TARIFF**. Self-consumption optimization delivers **330–480 € / year**.\n* **Profile D.2 (Rooftop Solar with Battery)**: 🔒 **FIXED / DYN**. Fixed for standard use; dynamic if winter grid charging is used (**950–1,250 € / year**).\n\n### ♨️ Category E: Heat Pump Households\n* **Profile E.1 (Heat Pump without Solar)**: ⚡ **DYNAMIC / HEAT PUMP TARIFF**. Smart thermal preheating + § 14a rebate (**300–420 € / year**).\n* **Profile E.2 (Heat Pump + Rooftop Solar)**: ⚡ **DYNAMIC TARIFF** (**510–680 € / year**).\n* **Profile E.3 (Heat Pump + Solar + Battery)**: ⚡ **DYNAMIC TARIFF** (**1,200–1,650 € / year**).\n\n### ⚡ Category F: Full Prosumer (All-in-One)\n* **Profile F.1 (Solar + Battery + EV + Heat Pump + V2G)**: 🚀 **DYNAMIC TARIFF (Mandatory!)**. Dual § 14a bonus (**+320 €/yr**), grid arbitrage, and V2G peak shaving (**1,950–2,600 € / year**).\n",
+    "tags": [
+      "tarif",
+      "stromtarif",
+      "ersparnis",
+      "matrix",
+      "balkonkraftwerk",
+      "wallbox",
+      "waermepumpe",
+      "prosumer",
+      "mieter",
+      "savings",
+      "tariffs"
+    ],
+    "is_published": true,
+    "is_featured": true,
+    "sort_order": 1,
+    "views_count": 0,
+    "helpful_yes": 0,
+    "helpful_no": 0,
+    "created_at": "2026-09-09T22:27:49.678Z",
+    "updated_at": "2026-09-16T15:29:13.388Z"
+  }
+},
+{
+  "model": "support_desk.helparticle",
+  "pk": "be935103-68ca-45e5-a3dc-9c034ab7656d",
+  "fields": {
+    "category": "e6ddda15-7508-4ce7-a852-5fa4afee4696",
+    "slug": "waerme-mpc-estrich-speicher-und-pre-cooling",
+    "context_key": "heating",
+    "title_de": "Wärme, Estrich-Speicher & Solares Pre-Cooling: Thermische Bauteilaktivierung & MPC",
+    "title_en": "Heating, Screed Storage & Solar Pre-Cooling: Thermal Mass Activation & MPC",
+    "summary_de": "Prädiktives Lastmanagement für Heizung und Kühlung: Estrich als 10–25 kWh thermischer Speicher (DIN EN 12831), wettergeführte Vorlauftemperatur und solare Raumvorkühlung (Pre-Cooling).",
+    "summary_en": "Predictive HVAC load management: Building screed as 10–25 kWh thermal storage (DIN EN 12831), weather-guided flow temperature, and solar AC pre-cooling.",
+    "content_de": "# Wärme, Estrich-Speicher & Solares Pre-Cooling ♨️❄️🏠\n\nDas Heizungs- und Kühlungs-Modul auf `/app/heating` nutzt die thermische Trägheit deines Gebäudes als virtuellen Großspeicher (**Thermische Bauteilaktivierung**).\n\n---\n\n## 1. Das Konzept: Gebäude als 10–25 kWh Thermobatterie\n\nEin massiver Betonestrich besitzt enorme Wärmekapazität:\n* Durch eine gezielte Vorladung um nur **$+1{,}0\\,\\text{K}$ bis $+1{,}5\\,\\text{K}$** nimmt der Baukörper **8 bis 18 kWh thermische Energie** auf.\n* Bei einer Wärmepumpe mit Leistungszahl (COP) von 3,5 entspricht dies einer flexiblen Stromaufnahme von **2,5 bis 5,0 kWh**.\n* **Der Effekt**: Das Haus bleibt den gesamten Abend über warm, ohne dass die Wärmepumpe in den teuren Spitzenlastzeiten Strom beziehen muss.\n\n---\n\n## 2. Wettergeführte Vorlauftemperatur & Prädiktives MPC (DIN EN 12831)\n\nSharegy passt die Heizkurve vorausschauend an:\n* 📉 **Solares Absenken**: Erkennt die Wetterprognose intensive Sonneneinstrahlung auf Fensterflächen, senkt Sharegy die Vorlauftemperatur rechtzeitig ab, um ein Überhitzen der Wohnräume zu verhindern.\n* 📈 **Surplus-Boost (SG-Ready State 3)**: Bei PV-Überschuss wird die Vorlauftemperatur um $+2$ bis $+4\\,\\text{K}$ angehoben, um kostenlose Wärme im Estrich einzulagern.\n\n---\n\n## 3. Solares Pre-Cooling (Raumkühlung & Klimaanlage im Sommer)\n\nIm Sommer tritt häufig folgendes Dilemma auf:\n* Die stärkste Hitze staut sich in den späten Nachmittags- und Abendstunden (17:00–21:00 Uhr) im Gebäude.\n* Zu diesem Zeitpunkt sinkt die PV-Erzeugung bereits ab, und Strom an der Börse wird teuer.\n\n### Die Lösung mit Sharegy Pre-Cooling:\n1. ☀️ **Mittags-Kältepuffer**: Bei maximalem Solar-Peak (**12:00 bis 15:00 Uhr**) kühlt Sharegy die Räume automatisch um **$1{,}5\\,\\text{K}$ unter die Solltemperatur** vor (z. B. von $23{,}5^\\circ\\text{C}$ auf $22{,}0^\\circ\\text{C}$).\n2. 🛡️ **Abend-Entlastung**: Die abgekühlten Wände und Böden halten den Raum bis in die Nacht kühl – die Klimaanlage bleibt in der teuren Abendspitze ausgeschaltet!\n\n---\n\n## 4. Brauchwasserwärmepumpe (BWWP) & Verdichterschutz\n\n* **Solarer Heißwasser-Boost**: Aufheizung des Warmwasserspeichers auf bis zu **$60\\text{–}65^\\circ\\text{C}$** bei PV-Überschuss.\n* **Verdichterschutz (Anti-Cycling)**: Mindestlaufzeit von $20\\,\\text{Minuten}$ und Mindestruhezeit von $15\\,\\text{Minuten}$ schützen den Wärmepumpen-Kompressor vor vorzeitigem Verschleiß.\n",
+    "content_en": "# Heating, Screed Storage & Solar Pre-Cooling ♨️❄️🏠\n\nThe HVAC module on `/app/heating` leverages the building's thermal mass as a distributed virtual battery (**Thermal Mass Activation**).\n\n---\n\n## 1. The Building as a 10–25 kWh Thermal Battery\n\nConcrete floor screed holds massive thermal capacity:\n* A slight pre-charge of **$+1.0\\,\\text{K}$ to $+1.5\\,\\text{K}$** stores **8 to 18 kWh of thermal energy**.\n* With a heat pump COP of 3.5, this shifts **2.5 to 5.0 kWh of electrical load**.\n* **Benefit**: The building maintains comfort throughout the evening without requiring grid power during expensive peak hours.\n\n---\n\n## 2. Model Predictive Control (MPC) & DIN EN 12831 Flow Temperature\n\n* 📉 **Anticipatory Curtailment**: Lowers heating curve hours before solar window irradiance warms the living spaces.\n* 📈 **Surplus Boost (SG-Ready State 3)**: Raises flow setpoint by $+2$ to $+4\\,\\text{K}$ when free solar power is available.\n\n---\n\n## 3. Solar Pre-Cooling (Summer Air Conditioning)\n\n* ☀️ **Midday Cold Storage**: Pre-cools rooms by **$1.5\\,\\text{K}$ below setpoint** during peak solar production (12:00 to 15:00).\n* 🛡️ **Evening Peak Shaving**: Cooled thermal mass keeps interior temperatures comfortable into the night, preventing expensive AC grid consumption.\n\n---\n\n## 4. DHW Heat Pump & Compressor Safeguards\n\n* **Solar Thermal Boost**: Heats domestic hot water tanks up to $60\\text{–}65^\\circ\\text{C}$.\n* **Anti-Cycling Locks**: Enforces 20-minute minimum runtime and 15-minute resting intervals.\n",
+    "tags": [
+      "wärme",
+      "heizung",
+      "estrich",
+      "pre-cooling",
+      "klimaanlage",
+      "thermische bauteilaktivierung",
+      "mpc",
+      "vorlauftemperatur"
+    ],
+    "is_published": true,
+    "is_featured": true,
+    "sort_order": 5,
+    "views_count": 0,
+    "helpful_yes": 0,
+    "helpful_no": 0,
+    "created_at": "2026-09-10T14:11:15.669Z",
+    "updated_at": "2026-09-16T15:29:13.476Z"
+  }
+},
+{
+  "model": "support_desk.helparticle",
+  "pk": "c1ba2f0f-d58f-4d05-bfca-a3ec35fb1f0e",
+  "fields": {
+    "category": "e6ddda15-7508-4ce7-a852-5fa4afee4696",
+    "slug": "fussbodenheizung-und-estrich-speicher",
+    "context_key": "floor_heating",
+    "title_de": "Fußbodenheizung & Estrich-Speicher: Regelungskonzept, Mess- & Steuerwerte",
+    "title_en": "Underfloor Heating & Screed Thermal Battery: Control Logic, Metrics & Setpoints",
+    "summary_de": "Vollständige Anleitung zur wettergeführten Fußbodenheizung (DIN EN 12831), thermischen Estrich-Vorladung (MPC) und allen Schaltsignalen.",
+    "summary_en": "Complete guide to weather-guided underfloor heating (DIN EN 12831), predictive screed preheating (MPC), and control setpoints.",
+    "content_de": "# Intelligente Fußbodenheizung & Thermischer Estrich-Speicher\n\nDie **Fußbodenheizungs- & Estrich-Engine** von Sharegy verwandelt den Betonestrich deines Gebäudes in einen hocheffizienten thermischen Energiespeicher (*Thermal Battery Dispatch*).\n\n---\n\n## 1. Das physikalische Prinzip (Warum Estrich?)\n\nEin typisches Einfamilienhaus mit ca. $120\\,\\text{m}^2$ Fußbodenheizungsfläche besitzt rund **16,8 Tonnen Betonestrich** (Dicke $7\\,\\text{cm}$, Rohdichte $2.000\\,\\text{kg/m}^3$). \n\n* **Thermische Speicherkapazität:** ca. **4,67 kWh pro Kelvin** Temperaturerhöhung.\n* **Vorladepotenzial (+1,0 K bis +1,5 K):** ca. **7 bis 14 kWh thermische Energie** (entspricht bei einer Wärmepumpe mit COP 3,5 ca. **2 bis 4 kWh elektrischer Energie**).\n* **Phasenverschiebung:** Der Estrich nimmt Wärme tagsüber bei kostenlosem Solarüberschuss oder günstigen Börsenpreisen auf und gibt sie abends **über 3 bis 5 Stunden passiv an die Räume ab** – ganz ohne teuren Netzbezug in der Abendspitze!\n\n---\n\n## 2. Wo und wie wird geschaltet? (Aktorik)\n\nSharegy steuert den Heizkreis digital über einen der folgenden Wege:\n1. **SG-Ready Eingang der Wärmepumpe:** Ein Relais (z. B. Shelly Plus 1 / Pro 1) schaltet den SG-Ready-Kontakt 2 (Betriebszustand 3 = *„Empfohlene Überhöhung / Speicherladung“*).\n2. **Heizkreispumpe / FBH-Verteiler:** Ein Schaltaktor schaltet die Zirkulationspumpe des Niedertemperatur-Heizkreises direkt ein oder aus.\n3. **Smart Home Integration:** Steuerung über Home Assistant, ioBroker oder Homematic IP via MQTT / WebSocket.\n\n> [!TIP]\n> In den Einstellungen der Karte (⚙️ Zahnrad) wählst du unter **„Verknüpftes Gerät / Aktor“** einfach deinen Schalter aus.\n\n---\n\n## 3. Benötigte Messwerte (Inputs) & Steuerwerte (Outputs)\n\n### A. Benötigte Messwerte (Sensorik):\n* **Raumtemperatur ($T_\\text{ist}$):** Raumthermostat oder Temperatursensor (z. B. Shelly H&T, Zigbee, Homematic).\n* **PV-Überschuss ($P_\\text{surplus}$ in W):** Smart Meter am Netzübergabepunkt (z. B. Shelly 3EM / Pro 3EM, Wechselrichter).\n* **Börsenstrompreis (EPEX Spot):** Automatisch via Sharegy Live-Schnittstelle.\n* **Wetterdaten & Globalstrahlung (DWD / Open-Meteo):** Außentemperatur und Strahlung ($W/m^2$) der nächsten 24 Stunden.\n\n### B. Berechnete Steuerwerte (Aktorik & MPC):\n* **Relais-Schaltzustand:** `ON` (Vorheizen / Normalbetrieb) oder `OFF` (Passives Entladen / Standby).\n* **Dynamische Vorlauftemperatur ($T_\\text{flow}$):** Berechnet nach DIN EN 12831:\n  $$\\text{Vorlauf} = \\text{Basis-Heizkurve} + \\text{Vorladeboost}\\,(+1{,}5\\,\\text{K}) - \\text{Solares Absenken}\\,(-1{,}5\\,\\text{K})$$\n* **Thermischer Ladezustand (SoC in % & kWh):** Exakte Füllstandsanzeige des Estrich-Speichers.\n\n---\n\n## 4. Die 5 Betriebsmodi\n\n1. **🤖 Autopilot (Empfohlen):** Kombiniert Solarüberschuss und Börsenpreise mit 24h-Wetterprognose.\n2. **☀️ Nur PV-Überschuss:** Lädt den Estrich ausschließlich dann vor, wenn Solarstrom ins Netz fließen würde.\n3. **💰 Sparfuchs:** Nutzt die günstigsten Börsenstromstunden der Nacht zur Vorladung.\n4. **🛋️ Komfortbetrieb:** Hält konstant die eingestellte Wunschtemperatur (keine Vorladung).\n5. **🛑 Manuell:** Automatik pausiert, Steuerung ausschließlich von Hand.\n\n---\n\n## 5. Sicherheit & Schutzfunktionen\n\n* **🛡️ Überhitzungsschutz:** Bei Überschreiten der Maximaltemperatur (z. B. $24{,}5^\\circ\\text{C}$) schaltet Sharegy den Heizkreis sofort ab.\n* **❄️ Untertemperaturschutz:** Sinkt die Temperatur unter $20{,}5^\\circ\\text{C}$, heizt Sharegy sofort auf, um Wohnkomfort zu garantieren.\n* **⏳ Verdichter- & Pumpenschutz:** Anti-Cycling-Sperre (Mindestlaufzeit & Mindestruhezeit von je 10 Minuten) verhindert häufiges Takten.\n",
+    "content_en": "# Smart Underfloor Heating & Screed Thermal Battery\n\nSharegy's **Underfloor Heating & Screed Thermal Battery Engine** turns your building's concrete floor into an intelligent thermal energy storage system (*Thermal Battery Dispatch*).\n\n---\n\n## 1. Physical Principle (Why Screed?)\n\nA typical single-family home with $120\\,\\text{m}^2$ of underfloor heating contains roughly **16.8 tons of screed concrete** ($7\\,\\text{cm}$ thickness, density $2,000\\,\\text{kg/m}^3$).\n\n* **Thermal Capacity:** approx. **4.67 kWh per Kelvin** of temperature rise.\n* **Preheating Potential (+1.0 K to +1.5 K):** approx. **7 to 14 kWh of thermal energy** (approx. **2 to 4 kWh electrical** with a heat pump COP of 3.5).\n* **Load Shifting:** The screed absorbs surplus solar energy or cheap dynamic power during the day and passively releases heat over **3 to 5 hours in the evening**, completely avoiding expensive peak grid hours.\n\n---\n\n## 2. Where and How is it Switched? (Actuators)\n\n1. **Heat Pump SG-Ready Contacts:** An actuator relay switches state 3 (recommended preheating boost).\n2. **Heating Circuit Pump:** An actuator switches the circulation pump directly.\n3. **Smart Home Integration:** Controlled via Home Assistant or ioBroker via MQTT / WebSocket RPC.\n\n---\n\n## 3. Required Metrics & Output Setpoints\n\n* **Inputs:** Room temperature, live solar surplus, EPEX Spot price, 24h weather forecast.\n* **Outputs:** Relay on/off state, dynamic flow temperature (DIN EN 12831), solar gain compensation, thermal SoC (%).\n",
+    "tags": [
+      "fussbodenheizung",
+      "estrich",
+      "thermal battery",
+      "wärmepumpe",
+      "heizkurve",
+      "mpc",
+      "solarüberschuss",
+      "sg ready",
+      "heating"
+    ],
+    "is_published": true,
+    "is_featured": true,
+    "sort_order": 2,
+    "views_count": 0,
+    "helpful_yes": 0,
+    "helpful_no": 0,
+    "created_at": "2026-09-07T21:45:02.881Z",
+    "updated_at": "2026-09-16T15:29:13.457Z"
   }
 },
 {
@@ -458,12 +1237,12 @@
     ],
     "is_published": true,
     "is_featured": true,
-    "sort_order": 6,
+    "sort_order": 1,
     "views_count": 0,
     "helpful_yes": 0,
     "helpful_no": 0,
     "created_at": "2026-08-25T11:23:37.203Z",
-    "updated_at": "2026-08-30T19:19:34.160Z"
+    "updated_at": "2026-09-16T15:29:13.496Z"
   }
 },
 {
@@ -489,12 +1268,44 @@
     ],
     "is_published": true,
     "is_featured": true,
-    "sort_order": 9,
+    "sort_order": 1,
     "views_count": 0,
     "helpful_yes": 0,
     "helpful_no": 0,
     "created_at": "2026-08-25T11:23:37.231Z",
-    "updated_at": "2026-08-30T19:19:34.173Z"
+    "updated_at": "2026-09-16T15:29:13.505Z"
+  }
+},
+{
+  "model": "support_desk.helparticle",
+  "pk": "daefcf01-107c-4bb9-8167-7d327b12a802",
+  "fields": {
+    "category": "34745af8-0e4e-4d2f-a386-36f4fe5a8c0f",
+    "slug": "shelly-local-non-cloud-guide",
+    "context_key": "interfaces",
+    "title_de": "Shelly ohne Cloud einrichten: 100% lokal, kostenlos & datensparsam 🔌🛡️",
+    "title_en": "Setup Shelly without Cloud: 100% local, free & privacy-first 🔌🛡️",
+    "summary_de": "Schritt-für-Schritt-Anleitung zur Anbindung von Shelly Plus 1PM, Pro 3EM, Plugs und Gen3 über Outbound-WebSocket (WSS) oder lokales RPC ohne kostenpflichtiges Cloud-Abo.",
+    "summary_en": "Step-by-step setup guide for connecting Shelly Gen2/Gen3/Pro devices via Outbound-WebSocket (WSS) or local RPC without any paid cloud subscription.",
+    "content_de": "# Shelly ohne Cloud einrichten: 100% lokal, kostenlos & sicher 🔌🛡️\n\nDu benötigst **kein kostenpflichtiges Shelly Cloud-Abo**. Sharegy unterstützt die direkte, verschlüsselte Outbound-WebSocket (WSS) Verbindung deiner Shelly-Geräte – **100% kostenlos und mit < 50 ms Live-Reaktionszeit**.\n\n---\n\n## 1. Vorteile der lokalen WSS-Verbindung\n* **0,00 € dauerhaft**: Kein Cloud-Abonnement erforderlich.\n* **Echtzeit-Telemetrie**: Live-Werte alle 1–2 Sekunden für exaktes Smart-Charging und SG-Ready Wärmepumpensteuerung.\n* **Keine Portweiterleitung (NAT)**: Der Shelly baut die Verbindung verschlüsselt von innen nach außen über Port 443 auf.\n\n---\n\n## 2. In 3 Schritten einrichten (Shelly Plus 1PM, Pro 3EM, Gen3, Plugs)\n1. **Shelly Weboberfläche öffnen**: Gib die IP-Adresse deines Shelly im Browser ein (z. B. `http://192.168.178.50`).\n2. **Outbound WebSocket aktivieren**: Navigiere zu **Settings ➔ Outbound WebSocket** (oder *Network & Connectivity*).\n3. **WSS-Server URL eintragen**:\n   * Setze das Häkchen bei **Enable**.\n   * Wähle **SSL/TLS (WSS)**.\n   * Trage deine persönliche Sharegy WSS-Adresse ein:\n     `wss://sharegy.de/ws/energy/<DEIN_HOME_TOKEN>/`\n   * Klicke auf **Save Settings**.\n\n---\n\n## 3. Fertig!\nDer Shelly verbindet sich sofort mit Sharegy und erscheint automatisch unter **Geräte** und im **Dashboard**.\n",
+    "content_en": "# Setup Shelly without Cloud: 100% local, free & secure 🔌🛡️\n\nYou do not need a paid Shelly Cloud subscription. Sharegy supports direct, encrypted Outbound-WebSocket (WSS) connections with sub-50ms latency.\n\n1. Open your Shelly device web interface by entering its IP address in your browser.\n2. Navigate to **Settings ➔ Outbound WebSocket**.\n3. Enable WebSocket, choose SSL/TLS, enter `wss://sharegy.de/ws/energy/<YOUR_TOKEN>/` and click Save.\n",
+    "tags": [
+      "shelly",
+      "websocket",
+      "local",
+      "non-cloud",
+      "pro3em",
+      "plus1pm",
+      "kostenlos"
+    ],
+    "is_published": true,
+    "is_featured": true,
+    "sort_order": 16,
+    "views_count": 0,
+    "helpful_yes": 0,
+    "helpful_no": 0,
+    "created_at": "2026-09-06T19:21:31.573Z",
+    "updated_at": "2026-09-16T15:29:13.449Z"
   }
 },
 {
@@ -520,12 +1331,45 @@
     ],
     "is_published": true,
     "is_featured": true,
-    "sort_order": 12,
+    "sort_order": 1,
     "views_count": 0,
     "helpful_yes": 0,
     "helpful_no": 0,
     "created_at": "2026-08-25T22:33:36.282Z",
-    "updated_at": "2026-08-30T19:19:34.193Z"
+    "updated_at": "2026-09-16T15:29:13.515Z"
+  }
+},
+{
+  "model": "support_desk.helparticle",
+  "pk": "e2a044ec-7adb-457d-9505-5ce33cdd370d",
+  "fields": {
+    "category": "164079f1-625b-4e67-bfc3-6366fdc379d6",
+    "slug": "energy-sharing-und-quartiers-clearing-nach-enwg-42b",
+    "context_key": "billing",
+    "title_de": "Energy Sharing & Quartiers-Clearing gem. § 42b EnWG",
+    "title_en": "Energy Sharing & Neighborhood Clearing per § 42b EnWG",
+    "summary_de": "Revisionssichere 15-Minuten-Bilanzierung zwischen Erzeugern und Verbrauchern in Quartieren, PDF-Rechnungslegung und BNetzA MSCONS EDIFACT.",
+    "summary_en": "Compliant 15-minute interval energy sharing between producers and consumers in local communities with PDF & EDIFACT exports.",
+    "content_de": "# Energy Sharing & Quartiers-Clearing (§ 42b EnWG) 🏘️⚡\n\nMit Sharegy können Nachbarschaften, Mehrfamilienhäuser (WEGs) und Gewerbequartiere ihren lokal erzeugten Solarstrom **gemeinsam nutzen, kilowattstundengenau aufteilen und abrechnen**.\n\n---\n\n## 1. Das 15-Minuten-Clearing-Verfahren\nAlle 15 Minuten führt die Sharegy Clearing-Engine ein mathematisches Matching durch:\n1. **Erzeugungsüberschuss**: Wie viel Solarstrom speisen die Prosumer des Quartiers in diesem 15m-Slot ein?\n2. **Verbraucherbedarf**: Welche Nachbarn verbrauchen zeitgleich Strom?\n3. **Quartierspreis**: Der geteilte Strom wird zum vereinbarten Community-Tarif (z. B. 16 ct/kWh) verrechnet – günstiger als Netzstrom, aber lukrativer als die EEG-Einspeisevergütung!\n\n---\n\n## 2. Revisionssichere Abrechnungen & Exporte\n* 📄 **PDF-Monatsabrechnungen**: Aufgeschlüsselt nach Tagen und 15m-Slots.\n* 📊 **Excel-Formate mit Formeln**: Transparente mathematische Nachvollziehbarkeit.\n* 📁 **BNetzA MSCONS EDIFACT (D:04B)**: Offizielles Marktkommunikations-Format für Netzbetreiber und Energieversorger.\n",
+    "content_en": "# Energy Sharing & Neighborhood Clearing (§ 42b EnWG) 🏘️⚡\n\nSharegy enables renewable energy communities and multi-tenant buildings to share local solar power with compliant 15-minute interval clearing, monthly PDF invoices, and BNetzA MSCONS EDIFACT exports.\n",
+    "tags": [
+      "energy sharing",
+      "42b",
+      "enwg",
+      "clearing",
+      "quartier",
+      "mieterstrom",
+      "edifact",
+      "mscons"
+    ],
+    "is_published": true,
+    "is_featured": true,
+    "sort_order": 9,
+    "views_count": 0,
+    "helpful_yes": 0,
+    "helpful_no": 0,
+    "created_at": "2026-09-03T05:22:21.795Z",
+    "updated_at": "2026-09-16T15:29:13.423Z"
   }
 },
 {
@@ -551,12 +1395,75 @@
     ],
     "is_published": true,
     "is_featured": true,
-    "sort_order": 4,
+    "sort_order": 1,
     "views_count": 0,
     "helpful_yes": 0,
     "helpful_no": 0,
     "created_at": "2026-08-25T11:23:37.186Z",
-    "updated_at": "2026-08-30T19:19:34.147Z"
+    "updated_at": "2026-09-16T15:29:13.490Z"
+  }
+},
+{
+  "model": "support_desk.helparticle",
+  "pk": "ec041df7-6ed2-4cff-a057-7f0e0d4c7402",
+  "fields": {
+    "category": "34745af8-0e4e-4d2f-a386-36f4fe5a8c0f",
+    "slug": "home-assistant-integration-guide",
+    "context_key": "devices",
+    "title_de": "Offizielle Home Assistant Integration für Sharegy Cloud",
+    "title_en": "Official Home Assistant Integration for Sharegy Cloud",
+    "summary_de": "So bindest du Home Assistant über die offizielle Custom Component per verschlüsseltem Outbound-WebSocket (WSS) an.",
+    "summary_en": "Step-by-step setup for streaming local smart home sensors to Sharegy Cloud using the official Home Assistant custom component.",
+    "content_de": "# Sharegy Home Assistant Integration ⚡🏠\n\nDie offizielle **Sharegy Home Assistant Integration** streamt alle Sensoren deines Haushalts verschlüsselt und in Echtzeit in die Sharegy Cloud.\n\n## Highlights\n* **Entity Picker**: Wähle deine Zähler, Wechselrichter, Wallboxen und Smart Plugs direkt in der Home Assistant UI aus.\n* **Outbound-WSS**: Port 443, keine offenen Router-Ports erforderlich.\n* **48h Offline-Puffer**: Bei Internetausfall werden Messdaten lokal zwischengespeichert.\n",
+    "content_en": "# Sharegy Home Assistant Integration ⚡🏠\n\nStream your local smart home telemetry to Sharegy Cloud over secure Outbound WebSockets with zero firewall changes and 48h offline buffering.\n",
+    "tags": [
+      "homeassistant",
+      "custom component",
+      "hacs",
+      "websocket",
+      "shelly"
+    ],
+    "is_published": true,
+    "is_featured": true,
+    "sort_order": 10,
+    "views_count": 0,
+    "helpful_yes": 0,
+    "helpful_no": 0,
+    "created_at": "2026-09-03T05:22:21.813Z",
+    "updated_at": "2026-09-16T15:29:13.427Z"
+  }
+},
+{
+  "model": "support_desk.helparticle",
+  "pk": "f8db5007-3f5f-4b0b-a84e-9bccdaec1918",
+  "fields": {
+    "category": "164079f1-625b-4e67-bfc3-6366fdc379d6",
+    "slug": "mieterstrom-abrechnung-und-zaehlerverwaltung",
+    "context_key": "mieterstrom_guide",
+    "title_de": "Mieterstrom & Unterzähler: Abrechnung, Transparenz & Mieterverwaltung",
+    "title_en": "Tenant Power & Sub-Metering: Billing, Resident Transparency & Management",
+    "summary_de": "Der umfassende Leitfaden für Mieter und Vermieter: Günstiger Vor-Ort-Solarstrom ohne Netzentgelte, eichrechtskonforme Unterzähler, automatisches Monats-Clearing und reibungslose Mieterwechsel.",
+    "summary_en": "Comprehensive guide for tenants and landlords: Cost-effective local solar power without grid fees, certified sub-metering, automated monthly clearing, and effortless tenant transitions.",
+    "content_de": "# 🏘️ Mieterstrom & Unterzähler: Transparente Solarstrom-Versorgung im Mehrfamilienhaus\n\n**Mieterstrom** ermöglicht es Mieterinnen und Mietern in Mehrfamilienhäusern, sauberen Solarstrom direkt vom Dach ihres Wohnhauses zu beziehen – ohne Netzentgelte, Konzessionsabgaben und Stromsteuer auf den erzeugten Solaranteil.\n\nSharegy automatisiert die komplette Messung, 15-Minuten-Saldierung und Abrechnung zwischen Vermieter, Hausverwaltung und Mieter.\n\n---\n\n## 💡 Warum lohnt sich Mieterstrom für alle Beteiligten?\n\n* **Für Mieter**:\n  * **20 % bis 35 % Ersparnis** gegenüber dem örtlichen Grundversorger.\n  * Reiner Ökostrom direkt vom eigenen Hausdach.\n  * Volle Transparenz über das Smartphone-Dashboard (`/app/community`).\n* **Für Vermieter & Eigentümer**:\n  * Attraktive Rendite auf die PV-Investition (höhere Erlöse als die reine EEG-Einspeisevergütung).\n  * Wertsteigerung der Immobilie und Erfüllung von ESG- und Effizienzhaus-Kriterien.\n  * Vollautomatisierte Abrechnung ohne manuelles Zählerablesen.\n\n---\n\n## 📐 Die Zählerarchitektur im Mieterstrom-Modell\n\nUm Mieterstrom rechtssicher abzurechnen, setzt Sharegy auf zwei bewährte Messkonzepte:\n\n### Modell A: Virtueller Summenzähler mit Unterzählern (Hutschienen-Zähler)\n* **Netzanschlusspunkt (NAP)**: Ein offizieller Zweirichtungszähler des Messstellenbetreibers misst den Gesamtbezug und die Gesamteinspeisung des Gebäudes.\n* **Wohnungs-Unterzähler**: In jeder Wohnungsverteilung sitzt ein digitaler MID-konformer Zähler (z. B. Shelly Pro 3EM, Modbus TCP Drehstromzähler oder M-Bus Zähler).\n* **Sharegy Cloud Engine**: Berechnet im 15-Minuten-Takt, wie viel Solarstrom in welcher Wohnung verbraucht wurde und wie viel Reststrom aus dem öffentlichen Netz zugekauft werden musste.\n\n### Modell B: Intelligente Messsysteme (iMSys / wMSB)\n* Jede Wohnung und die PV-Anlage verfügen über ein Smart Meter Gateway (SMGW).\n* Sharegy ruft die 15-Minuten-Lastgänge über gesicherte Schnittstellen ab.\n\n---\n\n## 📱 1. Anleitung für Mieter\n\n1. **Einladungs-Link annehmen**: Öffne die Einladung deines Vermieters und erstelle dein Sharegy-Profil.\n2. **Dashboard-Überblick**:\n   * Sieh live deinen aktuellen Stromverbrauch und die aktuelle Solar-Deckungsquote.\n   * Historie: Wie viel Prozent deines Monatsstroms stammten vom Dach?\n3. **Monatliche Abrechnung**: Du erhältst jeden Monat eine transparente PDF-Abrechnung mit genauer Trennung von:\n   * *Verbrauchter Solarstrom (z. B. 20 ct/kWh)*\n   * *Verbrauchter Netzstrom (z. B. 33 ct/kWh)*\n   * *Monatliche Zähler- und Grundgebühr*\n\n---\n\n## 🏛️ 2. Anleitung für Vermieter & Hausverwaltungen\n\n### Tarifstruktur konfigurieren\n1. Gehe in der Navigation auf **Administration → Liegenschaften & Mieterstrom** (`/app/tenant`).\n2. Lege die Tarife fest:\n   * **Solarstrompreis**: Der günstige Vor-Ort-Preis für Mieter (muss mind. 10% unter dem Grundversorger liegen).\n   * **Reststrom-Einkaufspreis**: Der Arbeitspreis deines gewählten Gewerbe-Stromliefervertrags für das Gesamtgebäude.\n   * **Grundpreis je Wohneinheit**: Zur Deckung von Messstellenbetrieb und Verwaltung.\n\n### Mieterwechsel & Zwischenabrechnung (Stichtagsgenau)\n* Zieht ein Mieter aus, klickst du in der Wohnungsübersicht auf **\"Mieterwechsel erfassen\"**.\n* Wähle das Auszugsdatum: Sharegy generiert sekundengenau eine **Schlussabrechnung** für den ausziehenden Mieter.\n* Trage die E-Mail des Nachmieters ein – die Zählerhistorie bleibt für die Hausverwaltung lückenlos archiviert.\n\n### Export für Hausverwaltungssoftware (Haufe, DOMUS, Winline, DATEV)\n* Alle Monatsabschlüsse können mit einem Klick als strukturierte CSV-, Excel- oder XML-Datei exportiert werden, sodass Zählerstände und Beträge ohne Abtippen in die Betriebskostenabrechnung übernommen werden.\n",
+    "content_en": "# 🏘️ Tenant Power & Sub-Metering: Multi-Family Solar Supply & Billing\n\n**Tenant Power (Mieterstrom)** allows apartment residents to consume clean, low-cost solar electricity generated directly on their building's roof – exempt from grid fees, concession levies, and electricity taxes on the solar portion.\n\nSharegy automates interval metering, 15-minute grid settlement, and monthly tenant invoices for property managers and landlords.\n\n---\n\n## 💡 Win-Win for Tenants and Landlords\n\n* **For Tenants**:\n  * **20% to 35% cost savings** compared to standard utility default tariffs.\n  * 100% green solar energy straight from the roof.\n  * Real-time transparency on the mobile dashboard (`/app/community`).\n* **For Landlords & Building Owners**:\n  * Higher yield on solar investment compared to feed-in tariffs.\n  * Enhanced ESG property value and modern tenant amenities.\n  * Zero-touch automated billing without manual meter readings.\n\n---\n\n## 📐 Metering Topologies\n\n### Model A: Virtual Master Meter with Sub-Meters\n* **Grid Connection (NAP)**: Main bi-directional utility meter records aggregate import and export.\n* **Sub-Meters**: Standard MID-compliant sub-meters (Shelly Pro 3EM, Modbus TCP, M-Bus) in each apartment sub-distribution box.\n* **Sharegy Clearing Engine**: Reconciles every 15-minute interval to allocate solar self-consumption vs. grid import per apartment.\n\n### Model B: Smart Meter Gateways (iMSys)\n* Certified Smart Meter Gateways deliver synchronized 15-minute load profiles directly to the Sharegy clearing backend.\n\n---\n\n## 📱 1. Guide for Residents\n\n1. **Accept Invitation**: Sign up via the property manager's link.\n2. **Track Energy & Solar Share**: Check real-time rooftop solar coverage and historic monthly savings.\n3. **Monthly PDF Statements**: Automated statements clearly break down solar power kWh, grid power kWh, and base fees.\n\n---\n\n## 🏛️ 2. Guide for Property Managers & Landlords\n\n### Setting Up Tariffs\n1. Open **Administration → Properties & Tenant Power** (`/app/tenant`).\n2. Set your rates:\n   * **Solar Tariff**: Affordable on-site rate.\n   * **Grid Backup Rate**: Pass-through rate from building power contract.\n   * **Base Fee**: Sub-metering and admin service fee.\n\n### Tenant Move-In / Move-Out\n* Click **\"Log Tenant Change\"** on any unit.\n* Set effective date: Sharegy generates an instant final settlement PDF.\n* Add the incoming tenant email to initialize new billing cycles.\n\n### ERP & DATEV Exports\n* Export monthly settlements directly to Excel, DATEV-ready CSV, or XML for property management suites (Haufe, DOMUS, etc.).\n",
+    "tags": [
+      "mieterstrom",
+      "unterzaehler",
+      "abrechnung",
+      "vermieter",
+      "hausverwaltung",
+      "pdf abrechnung",
+      "shelly pro 3em",
+      "datev"
+    ],
+    "is_published": true,
+    "is_featured": true,
+    "sort_order": 6,
+    "views_count": 0,
+    "helpful_yes": 0,
+    "helpful_no": 0,
+    "created_at": "2026-09-16T15:29:13.540Z",
+    "updated_at": "2026-09-16T15:29:13.540Z"
   }
 },
 {
@@ -570,8 +1477,8 @@
     "title_en": "Which Telemetry Metrics Does Sharegy Require? (Universal Guide)",
     "summary_de": "Vom reinen Verbraucher-Tracking bis zum Hybrid-System mit Speicher: Welche physikalischen Größen für Bilanzierung, Autarkie und Sub-Metering nötig sind.",
     "summary_en": "From dynamic tariff tracking without PV to complex solar storage hybrids: What physical metrics are required for energy balance and sub-metering.",
-    "content_de": "# Welche Messwerte benötigt Sharegy? ⚡📊\n\nSharegy ist vollständig **hersteller- und hardwareunabhängig**. Egal ob du Daten über Home Assistant, MQTT, ioBroker, Shelly, REST-Webhooks oder Cloud-APIs (Sungrow, SolarEdge, Fronius) einspeist: Sharegy verarbeitet die physikalischen Standardgrößen.\n\n---\n\n## 1. Funktioniert Sharegy auch ohne PV oder Batteriespeicher?\n**Ja, absolut!** Sharegy ist modular aufgebaut:\n* **Reine Verbraucher- & Tarifoptimierung**: Auch ohne eigene Erzeugung nutzt Sharegy Börsenstrompreise (EPEX Spot), steuert schaltbare Steckdosen und berechnet den Verbrauch einzelner Geräte (Sub-Metering).\n* **Balkonkraftwerk-Setup**: Erfasst bereits mit einem einfachen Zwischenstecker an der Balkon-PV deinen erzeugten Solarstrom und berechnet, wie viel davon deine Haushaltsgeräte direkt nutzen.\n* **Vollständiges Hybrid-System**: Mit PV-Anlage, Batteriespeicher und Smart Meter schöpfst du das maximale Potenzial für Autarkie und Lastoptimierung aus.\n\n---\n\n## 2. Die physikalischen Messgrößen im Überblick\n\n| Messgröße | Einheit | Datenpunkt-Beispiele | Wofür wird der Wert genutzt? |\n| :--- | :---: | :--- | :--- |\n| **Wirkleistung** | **Watt (W)** | `power`, `pv_power`, `battery_power`, `grid_power`, `load_power` | Live-Energieflüsse, Sankey-Diagramm, Leistungsspitzen |\n| **Stromstärke** | **Ampere (A)** | `battery_current`, `current`, `phase_current` | Eindeutige **Flussrichtung** bei Speichern (negativ = Laden, positiv = Entladen) |\n| **Spannung** | **Volt (V)** | `voltage`, `battery_voltage`, `phase_voltage` | Netzstabilität, $P = U \\times I$ Ersatzberechnung |\n| **Ladestand** | **%** | `soc`, `battery_soc`, `battery_level` | Speicherstand, EMS-Ladelimits und Entladepuffer |\n| **Zählerstand** | **kWh** | `energy`, `energy_in`, `energy_out`, `total_yield` | Exakte Tages-, Monats- und Jahresbilanzierung |\n\n---\n\n## 3. Die mathematische Grundregel für das Gesamthaus: *„3 von 4 reichen aus!“*\n\nIm Haushalt gilt physikalisch immer der Knotenpunktsatz:\n$$\\text{Hausverbrauch } (P_{\\text{Load}}) = \\text{PV-Erzeugung } (P_{\\text{PV}}) + \\text{Batterieleistung } (P_{\\text{Bat}}) + \\text{Netzübergabe } (P_{\\text{Grid}})$$\n\n* Wenn du **3 dieser 4 Werte** lieferst, errechnet Sharegy den 4. Wert automatisch zu 100 % fehlerfrei.\n* Lieferst du alle 4 Werte (z. B. aus einem modernen Wechselrichter mit Smart Meter), gleicht Sharegy die Werte zusätzlich ab.\n\n---\n\n## 4. Häufige Frage: Warum habe ich 2 Datenpunkte für die Batterie (Strom in A und Leistung in W)?\nManche Wechselrichter (wie z. B. Sungrow) liefern die Batterieleistung immer als positive Zahl und die Richtung separat über den **Batteriestrom in Ampere (A)**:\n* **Batteriestrom < 0 A**: Batterie lädt aus PV/Netz.\n* **Batteriestrom > 0 A**: Batterie entlädt ins Haus.\n\nIn Sharegy wird hierfür **nur 1 virtueller Batteriespeicher** angelegt: In den Einstellungen des Speichers ordnest du die Wirkleistung (W) als *Ladeleistung* und den Strom (A) als *Batteriestrom* zu. Sharegy trennt Lade- und Entladezyklen daraufhin automatisch und physikalisch exakt!\n",
-    "content_en": "# Telemetry Metrics & Universal Device Mapping ⚡📊\n\nSharegy is completely **vendor- and hardware-agnostic**. Whether you stream data via Home Assistant, MQTT, ioBroker, Shelly, REST webhooks, or Cloud APIs (Sungrow, SolarEdge, Fronius): Sharegy processes standardized physical electrical units.\n\n---\n\n## 1. Does Sharegy work without PV or Battery Storage?\n**Yes, absolutely!** Sharegy is built modularly:\n* **Consumer & Dynamic Tariff Tracking**: Even without generation assets, Sharegy tracks spot market prices (EPEX Spot), schedules smart plugs, and provides granular sub-metering.\n* **Balcony PV (Plug-in Solar)**: Measure solar output with a simple plug and track direct consumption across household appliances.\n* **Full Solar + Storage Hybrid**: Harness maximal self-sufficiency and automated energy optimization.\n\n---\n\n## 2. Core Physical Quantities\n\n| Physical Quantity | Unit | Metric Key Examples | Primary Usage |\n| :--- | :---: | :--- | :--- |\n| **Active Power** | **Watt (W)** | `power`, `pv_power`, `battery_power`, `grid_power` | Real-time energy flow, Sankey diagrams, live load tracking |\n| **Electric Current** | **Ampere (A)** | `battery_current`, `current` | Unambiguous **flow direction** (negative = charging, positive = discharging) |\n| **Voltage** | **Volt (V)** | `voltage`, `battery_voltage` | Grid stability, backup $P = U \\times I$ power calculations |\n| **State of Charge** | **%** | `soc`, `battery_soc`, `battery_level` | Battery status, smart reserve thresholds, optimization |\n| **Energy Totals** | **kWh** | `energy`, `energy_in`, `energy_out` | Daily, monthly, and yearly fiscal energy balances |\n",
+    "content_de": "# Welche Messwerte benötigt Sharegy? ⚡📊\n\nSharegy ist vollständig **hersteller- und hardwareunabhängig**. Egal ob du Daten über Home Assistant, MQTT, ioBroker, Shelly, REST-Webhooks oder Cloud-APIs (Sungrow, SolarEdge, Fronius) einspeist: Sharegy verarbeitet die physikalischen Standardgrößen.\n\n---\n\n## 1. Funktioniert Sharegy auch ohne PV oder Batteriespeicher?\n**Ja, absolut!** Sharegy ist modular aufgebaut:\n* **Reine Verbraucher- & Tarifoptimierung**: Auch ohne eigene Erzeugung nutzt Sharegy Börsenstrompreise (EPEX Spot), steuert schaltbare Steckdosen und berechnet den Verbrauch einzelner Geräte (Sub-Metering).\n* **Balkonkraftwerk-Setup**: Erfasst bereits mit einem einfachen Zwischenstecker an der Balkon-PV deinen erzeugten Solarstrom und berechnet, wie viel davon deine Haushaltsgeräte direkt nutzen.\n* **Vollständiges Hybrid-System**: Mit PV-Anlage, Batteriespeicher und Smart Meter schöpfst du das maximale Potenzial für Autarkie und Lastoptimierung aus.\n\n---\n\n## 2. Die physikalischen Messgrößen im Überblick\n\n| Messgröße | Einheit | Datenpunkt-Beispiele | Wofür wird der Wert genutzt? |\n| :--- | :---: | :--- | :--- |\n| **Wirkleistung** | **Watt (W)** | `power`, `pv_power`, `battery_power`, `grid_power`, `load_power` | Live-Energieflüsse, Sankey-Diagramm, Leistungsspitzen |\n| **Stromstärke** | **Ampere (A)** | `battery_current`, `current`, `phase_current` | Eindeutige **Flussrichtung** bei Speichern (negativ = Laden, positiv = Entladen) |\n| **Spannung** | **Volt (V)** | `voltage`, `battery_voltage`, `phase_voltage` | Netzstabilität, $P = U \times I$ Ersatzberechnung |\n| **Ladestand** | **%** | `soc`, `battery_soc`, `battery_level` | Speicherstand, EMS-Ladelimits und Entladepuffer |\n| **Zählerstand** | **kWh** | `energy`, `energy_in`, `energy_out`, `total_yield` | Exakte Tages-, Monats- und Jahresbilanzierung |\n\n---\n\n## 3. Die mathematische Grundregel für das Gesamthaus: *„3 von 4 reichen aus!“*\n\nIm Haushalt gilt physikalisch immer der Knotenpunktsatz:\n$$\\text{Hausverbrauch } (P_{\\text{Load}}) = \\text{PV-Erzeugung } (P_{\\text{PV}}) + \\text{Batterieleistung } (P_{\\text{Bat}}) + \\text{Netzübergabe } (P_{\\text{Grid}})$$\n\n* Wenn du **3 dieser 4 Werte** lieferst, errechnet Sharegy den 4. Wert automatisch zu 100 % fehlerfrei.\n* Lieferst du alle 4 Werte (z. B. aus einem modernen Wechselrichter mit Smart Meter), gleicht Sharegy die Werte zusätzlich ab.\n\n---\n\n## 4. Häufige Frage: Warum habe ich 2 Datenpunkte für die Batterie (Strom in A und Leistung in W)?\nManche Wechselrichter (wie z. B. Sungrow) liefern die Batterieleistung immer als positive Zahl und die Richtung separat über den **Batteriestrom in Ampere (A)**:\n* **Batteriestrom < 0 A**: Batterie lädt aus PV/Netz.\n* **Batteriestrom > 0 A**: Batterie entlädt ins Haus.\n\nIn Sharegy wird hierfür **nur 1 virtueller Batteriespeicher** angelegt: In den Einstellungen des Speichers ordnest du die Wirkleistung (W) als *Ladeleistung* und den Strom (A) als *Batteriestrom* zu. Sharegy trennt Lade- und Entladezyklen daraufhin automatisch und physikalisch exakt!\n",
+    "content_en": "# Telemetry Metrics & Universal Device Mapping ⚡📊\n\nSharegy is completely **vendor- and hardware-agnostic**. Whether you stream data via Home Assistant, MQTT, ioBroker, Shelly, REST webhooks, or Cloud APIs (Sungrow, SolarEdge, Fronius): Sharegy processes standardized physical electrical units.\n\n\n---\n\n## 1. Does Sharegy work without PV or Battery Storage?\n**Yes, absolutely!** Sharegy is built modularly:\n* **Consumer & Dynamic Tariff Tracking**: Even without generation assets, Sharegy tracks spot market prices (EPEX Spot), schedules smart plugs, and provides granular sub-metering.\n* **Balcony PV (Plug-in Solar)**: Measure solar output with a simple plug and track direct consumption across household appliances.\n* **Full Solar + Storage Hybrid**: Harness maximal self-sufficiency and automated energy optimization.\n\n---\n\n## 2. Core Physical Quantities\n\n| Physical Quantity | Unit | Metric Key Examples | Primary Usage |\n| :--- | :---: | :--- | :--- |\n| **Active Power** | **Watt (W)** | `power`, `pv_power`, `battery_power`, `grid_power` | Real-time energy flow, Sankey diagrams, live load tracking |\n| **Electric Current** | **Ampere (A)** | `battery_current`, `current` | Unambiguous **flow direction** (negative = charging, positive = discharging) |\n| **Voltage** | **Volt (V)** | `voltage`, `battery_voltage` | Grid stability, backup $P = U \times I$ power calculations |\n| **State of Charge** | **%** | `soc`, `battery_soc`, `battery_level` | Battery status, smart reserve thresholds, optimization |\n| **Energy Totals** | **kWh** | `energy`, `energy_in`, `energy_out` | Daily, monthly, and yearly fiscal energy balances |\n",
     "tags": [
       "telemetry",
       "messwerte",
@@ -584,46 +1491,45 @@
     ],
     "is_published": true,
     "is_featured": true,
-    "sort_order": 3,
-    "views_count": 0,
-    "helpful_yes": 0,
-    "helpful_no": 0,
-    "created_at": "2026-08-30T19:19:34.137Z",
-    "updated_at": "2026-08-30T19:19:34.137Z"
-  }
-},
-{
-  "model": "support_desk.helparticle",
-  "pk": "9c8e7451-b842-4f10-91a6-89fae0172e81",
-  "fields": {
-    "category": "b3517643-2ffa-4db8-bf4d-3097077006f2",
-    "slug": "benachrichtigungen-und-systemberichte",
-    "context_key": "notifications",
-    "title_de": "E-Mail-Zusammenfassungen, Systemberichte & Push-Benachrichtigungen",
-    "title_en": "Email Digests, System Reports & Push Notifications",
-    "summary_de": "Wöchentlicher Energie- & Autarkie-Report (jeden Montag 08:00 Uhr lokaler Benutzerzeit), Echtzeit-Warnungen bei Hardwareausfall und Push-Ruhezeiten konfigurieren.",
-    "summary_en": "Weekly energy & autarky digest (every Monday 08:00 user local time), real-time critical hardware failure alerts, and push quiet hours.",
-    "content_de": "# E-Mail-Zusammenfassungen, Systemberichte & Benachrichtigungen 📧⚡\n\nSharegy hält dich über den Zustand deiner Energieanlagen, wöchentliche Einsparungen und kritische Hardware-Ereignisse auf dem Laufenden – wahlweise per **E-Mail**, **Browser-Push** oder **Mobile Notification**.\n\n---\n\n## 1. Wöchentlicher Energie- & Autarkie-Report 📊\n\nDer wöchentliche Report fasst deine wichtigsten Energiekennzahlen der vergangenen 7 Tage übersichtlich zusammen:\n\n* ☀️ **PV-Erzeugung (kWh)**: Wie viel Solarstrom hat deine PV-Anlage in der letzten Woche erzeugt?\n* 🔄 **Eigenverbrauch (kWh)**: Wie viel deines Solarstroms wurde direkt im Haushalt, in der Batterie oder im E-Auto verbraucht?\n* 🛡️ **Autarkiegrad (%)**: Wie unabhängig warst du vom öffentlichen Stromnetz?\n* 💰 **Erzielte Ersparnis (€)**: Berechnete finanzielle Einsparung durch Eigenverbrauch und Netzeinspeisung.\n* ⚡ **Netzeinspeisung & Netzbezug**: Genaue Zählerbilanz im Vergleich.\n\n### ⏰ Versandzeitpunkt & Zeitzone\n> **Versand jeden Montag um 08:00 Uhr:**  \n> Der Versand erfolgt pünktlich zum Start der neuen Woche um **08:00 Uhr in deiner persönlichen Benutzer-Zeitzone** (standardmäßig deutsche Zeit `Europe/Berlin` bzw. MEZ/MESZ).  \n> Hast du in deinen Profileinstellungen eine abweichende Zeitzone (z. B. `Europe/Warsaw` oder `UTC`) gewählt, richtet sich der Versand nach deiner eingestellten Ortszeit.\n\n### 🌍 Mehrsprachigkeit\nDie E-Mail wird automatisch in deiner im Profil eingestellten Sprache versendet (**Deutsch**, **Englisch** oder **Polnisch**).\n\n---\n\n## 2. Kritische Hardware-Warnungen (Sofort / Echtzeit) 🚨\n\nBei schwerwiegenden Störungen deiner Energiehardware erhältst du sofort eine Benachrichtigung per E-Mail und Push, um Ertragsausfälle oder Schäden abzuwenden:\n\n* **Wechselrichter Offline / Ertragsausfall**: Die Sonne scheint, aber der Wechselrichter meldet keine Erzeugung (z. B. ausgelöster DC-Schalter oder FI-Sicherung).\n* **Batterie-Tiefentladung**: Der Ladestand (SoC) ist unter das kritische Notfall-Limit gefallen.\n* **Kommunikationsabbruch**: Smart Meter oder Wechselrichter senden seit mehr als 15 Minuten keine Telemetriedaten.\n\nJede Notfall-Meldung enthält den genauen Gerätenamen, die Fehlerursache und **konkrete Sofortmaßnahmen zur Behebung** sowie einen Direktlink ins System.\n\n---\n\n## 3. Push-Benachrichtigungen & Ruhezeiten (Quiet Hours) 🔔\n\nÜber die Push-Zentrale kannst du Desktop- und Smartphone-Benachrichtigungen aktivieren. Um in der Nacht nicht gestört zu werden, kannst du **Ruhezeiten** definieren (z. B. 22:00 bis 07:00 Uhr). In dieser Zeit werden unkritische Mitteilungen stummgeschaltet.\n\n---\n\n## 4. Wie aktiviere oder deaktiviere ich Benachrichtigungen?\n\n1. Klicke oben rechts auf dein **Profilbild** und wähle den Tab **Benachrichtigungen & Alarme**.\n2. Unter **„E-Mail-Zusammenfassungen & Systemberichte“** kannst du den wöchentlichen Report sowie kritische Hardware-Warnungen mit einem Klick aktivieren oder deaktivieren.\n3. Deine Auswahl wird sofort sicher gespeichert.",
-    "content_en": "# Email Digests, System Reports & Notifications 📧⚡\n\nSharegy keeps you informed about energy performance, weekly cost savings, and critical hardware health events via **Email**, **Browser Web Push**, and **Mobile Push**.\n\n---\n\n## 1. Weekly Energy & Autarky Digest 📊\n\nThe weekly digest provides a concise summary of your home's energy performance over the past 7 days:\n\n* ☀️ **Solar Generation (kWh)**: Total PV generation achieved during the previous week.\n* 🔄 **Self-Consumption (kWh)**: Solar energy utilized directly by appliances, storage, or EV charging.\n* 🛡️ **Autarky Rate (%)**: Percentage of energy independence from the public grid.\n* 💰 **Estimated Savings (€)**: Financial benefit calculated from avoided grid purchases and feed-in compensation.\n* ⚡ **Grid Feed-In vs. Grid Purchase**: Comprehensive grid exchange balance.\n\n### ⏰ Schedule & Timezone\n> **Delivered every Monday at 08:00 AM:**  \n> Reports are dispatched at **08:00 AM local user time** (defaulting to `Europe/Berlin` / CET/CEST).  \n> If you configured a different timezone in your profile (e.g., `UTC` or `Europe/Warsaw`), the report is scheduled according to your configured local clock.\n\n### 🌍 Multilingual Delivery\nEmails are rendered in your selected interface language (**German**, **English**, or **Polish**).\n\n---\n\n## 2. Real-Time Critical Hardware Alerts 🚨\n\nWhen a critical failure occurs, Sharegy immediately dispatches an urgent alert via email and push:\n\n* **Inverter Offline / Zero-Yield**: High solar irradiance detected while solar inverter reports zero output (e.g., tripped breaker or DC switch).\n* **Battery Deep Discharge**: Battery state of charge (SoC) drops below the safe reserve threshold.\n* **Telemetry Timeout**: Smart meter or gateway communication lost for more than 15 minutes.\n\nEach alert includes affected device identifiers, root-cause diagnostics, and actionable steps.\n\n---\n\n## 3. Web Push Notifications & Quiet Hours 🔔\n\nConfigure browser push notifications with customizable **Quiet Hours** (e.g., 22:00 to 07:00) to silence non-critical notifications during the night.\n\n---\n\n## 4. Managing Notification Settings\n\n1. Open your **Profile** and navigate to the **Notifications & Alerts** tab.\n2. Under **\"Email Summaries & System Reports\"**, toggle weekly reports and hardware alerts on or off.\n3. Changes are saved automatically.",
-    "tags": [
-      "benachrichtigungen",
-      "email",
-      "reports",
-      "wochenbericht",
-      "alarme",
-      "hardware",
-      "zeitzone",
-      "push",
-      "notifications"
-    ],
-    "is_published": true,
-    "is_featured": true,
     "sort_order": 1,
     "views_count": 0,
     "helpful_yes": 0,
     "helpful_no": 0,
-    "created_at": "2026-09-07T11:20:00.000Z",
-    "updated_at": "2026-09-07T11:20:00.000Z"
+    "created_at": "2026-08-30T19:19:34.137Z",
+    "updated_at": "2026-09-16T15:29:13.482Z"
+  }
+},
+{
+  "model": "support_desk.helparticle",
+  "pk": "ff75b012-bde4-48ec-bb0e-cbfba003f121",
+  "fields": {
+    "category": "20c3a97e-7aa1-451e-9cef-7cb6fa67829d",
+    "slug": "steuerbox-anbindung-relais-modbus-und-cloud",
+    "context_key": "interfaces",
+    "title_de": "VNB-Steuerbox Anbindung: Physische Relais (Shelly Pro / Modbus) vs. Cloud-API",
+    "title_en": "Grid Operator Steuerbox: Physical Relays (Shelly Pro / Modbus) vs. Cloud API",
+    "summary_de": "Wie das Signal des Netzbetreibers in den Zählerschrank gelangt und wie Sharegy Relais-Schaltungen oder REST-Webhooks verarbeitet.",
+    "summary_en": "How grid operator dimming signals reach your meter cabinet via dry contacts (Shelly Pro/Modbus) or cloud REST APIs.",
+    "content_de": "# VNB-Steuerbox Anbindung & Signalketten 🔌📟\n\nUm ein Dimmsignal des Verteilnetzbetreibers (VNB) auszuführen, unterstützt Sharegy **zwei Übertragungswege**:\n\n---\n\n## Weg A: Digitaler Cloud-Webhook (Moderne SMGWs)\n* Das Smart Meter Gateway (SMGW) oder der Messstellenbetreiber (z. B. Discovergy/inexogy) sendet den Dimmbefehl per verschlüsseltem HTTPS-Webhook direkt an Sharegy:\n  > `POST https://sharegy.de/api/energy/grid/dimming/signal/`\n* **Vorteil**: Keine zusätzliche Hardware im Zählerschrank erforderlich.\n\n---\n\n## Weg B: Physische FNN-Steuerbox mit Relais-Klemmen\nBei vielen Netzbetreibern wird neben dem Zähler eine physische **Steuerbox (CLS-Modul)** mit 4 potentialfreien Relais-Ausgängen (K1–K4) montiert:\n\n### Schaltplan mit Shelly Pro auf der Hutschiene:\n1. Montiere ein **Shelly Pro 4PM** oder **Shelly Plus 1** auf der DIN-Hutschiene im Zählerschrank.\n2. Verbinde die Relais-Ausgänge der VNB-Steuerbox mit den Digitaleingängen (SW1–SW4) des Shellys.\n3. Richte im Shelly den Outbound-WebSocket zu Sharegy ein:\n   > `wss://sharegy.de/ws/energy/<DEIN_HAUSHALTS_TOKEN>/`\n4. **Funktion**: Schließt der Netzbetreiber Relais K1 (Dimmung auf 4,2 kW), erkennt der Shelly die Flanke in unter 5 Millisekunden und Sharegy aktiviert das Dimm-Profil im EMS.\n",
+    "content_en": "# Grid Operator Steuerbox Connection & Signals 🔌📟\n\nSharegy supports two pathways to ingest § 14a grid dimming signals:\n\n## Pathway A: Cloud REST Webhooks\nThe Smart Meter Gateway (SMGW) posts directly to `POST /api/energy/grid/dimming/signal/`.\n\n## Pathway B: Physical Dry Contact Relays (Shelly Pro / Modbus TCP)\nConnect the dry contact relay outputs (K1-K4) of the VNB Steuerbox to the switch inputs of a DIN-rail **Shelly Pro 4PM** or Modbus TCP digital input module. Sharegy receives the state change over Outbound-WSS within 5 ms.\n",
+    "tags": [
+      "steuerbox",
+      "cls",
+      "relais",
+      "shelly pro",
+      "modbus",
+      "fnn",
+      "zählerschrank",
+      "dimmsignal"
+    ],
+    "is_published": true,
+    "is_featured": true,
+    "sort_order": 5,
+    "views_count": 0,
+    "helpful_yes": 0,
+    "helpful_no": 0,
+    "created_at": "2026-09-03T05:22:21.760Z",
+    "updated_at": "2026-09-16T15:29:13.406Z"
   }
 }
 ]
