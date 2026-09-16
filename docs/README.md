@@ -27,6 +27,7 @@ docs/
 
 | Dokument | Beschreibung |
 |---|---|
+| ⚡ **[`VPP_FLEXIBILITY_BONUS_ECOSYSTEM_AND_PROCESS_GUIDE.md`](./architecture/VPP_FLEXIBILITY_BONUS_ECOSYSTEM_AND_PROCESS_GUIDE.md)** | **NEU:** Virtuelles Kraftwerk (VPP) Flexibilitäts-Bonus: Ökosystem, Kooperationsmatrix (Wer mit wem wo), End-to-End Prozesse & 80/20 Erlösmodelle |
 | 🌐 **[`DECOUPLED_MONITORING_AND_REMOTE_RPC_ARCHITECTURE.md`](./architecture/DECOUPLED_MONITORING_AND_REMOTE_RPC_ARCHITECTURE.md)** | **NEU:** Entkoppelte Monitoring-Subdomain (`mon.sharegy.de`), WSS Reverse-RPC Fernwartung & Edge-Isolation |
 | 🔌 **[`API_REFERENCE_AND_ENDPOINTS.md`](./architecture/API_REFERENCE_AND_ENDPOINTS.md)** | Vollständige REST- & WebSocket-API-Referenz, Authentifizierung (JWT/API-Keys) & Endpunktkatalog |
 | 🏛️ **[`ARCHITECTURE.md`](./architecture/ARCHITECTURE.md)** | Gesamtsystem-Architektur, Dual-Core Konzept, Tech-Stack, Subdomains & Datenflüsse |
