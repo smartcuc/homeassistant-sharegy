@@ -4,7 +4,7 @@
 */
 
 import { useState, useEffect } from "react";
-
+import { useTranslation } from "react-i18next";
 import { LifeBuoy, Search, RefreshCw, Send } from "lucide-react";
 import {
     fetchAgentTickets,
@@ -16,7 +16,7 @@ import {
 } from "../api";
 
 export default function AgentSupportHubPage() {
-
+    const { t } = useTranslation();
     const [kpis, setKpis] = useState({ total: 0, open: 0, in_progress: 0, waiting_customer: 0, resolved: 0, sharegy_count: 0, factofy_count: 0 });
     const [tickets, setTickets] = useState([]);
     const [isGlobalAdmin, setIsGlobalAdmin] = useState(true);
@@ -137,19 +137,19 @@ export default function AgentSupportHubPage() {
                                 <LifeBuoy className="w-5 h-5" />
                             </div>
                             <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                                Support & Incident Hub
+                                {t("agent_support.title", "Support & Incident Hub")}
                             </h1>
                             <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${isGlobalAdmin
                                 ? "bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300"
                                 : "bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300"
                                 }`}>
-                                {isGlobalAdmin ? "🛡️ Global Triage (All Projects & Tenants)" : "🔧 Partner Support (Eigene Kunden & Flotte)"}
+                                {isGlobalAdmin ? t("agent_support.badge_global", "🛡️ Global Triage (Alle Projekte & Mandanten)") : t("agent_support.badge_partner", "🔧 Partner Support (Eigene Kunden & Flotte)")}
                             </span>
                         </div>
                         <p className="text-xs text-slate-500 dark:text-slate-400">
                             {isGlobalAdmin
-                                ? "Zentrale Bearbeitung aller Kunden- & Systemtickets aus Sharegy EMS und Factofy Digital Twin"
-                                : "Bearbeitung und Störungsanalyse für deine betreuten Kunden und Liegenschaften"}
+                                ? t("agent_support.subtitle_global", "Zentrale Bearbeitung aller Kunden- & Systemtickets aus Sharegy EMS und Factofy Digital Twin")
+                                : t("agent_support.subtitle_partner", "Bearbeitung und Störungsanalyse für deine betreuten Kunden und Liegenschaften")}
                         </p>
                     </div>
 
@@ -163,7 +163,7 @@ export default function AgentSupportHubPage() {
                                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
                                 }`}
                         >
-                            🌐 Alle ({kpis.total})
+                            {t("agent_support.project_all", { count: kpis.total, defaultValue: `🌐 Alle (${kpis.total})` })}
                         </button>
                         <button
                             type="button"
@@ -173,7 +173,7 @@ export default function AgentSupportHubPage() {
                                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
                                 }`}
                         >
-                            ☀️ Sharegy ({kpis.sharegy_count})
+                            {t("agent_support.project_sharegy", { count: kpis.sharegy_count, defaultValue: `☀️ Sharegy (${kpis.sharegy_count})` })}
                         </button>
                         <button
                             type="button"
@@ -183,7 +183,7 @@ export default function AgentSupportHubPage() {
                                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
                                 }`}
                         >
-                            🏙️ Factofy ({kpis.factofy_count})
+                            {t("agent_support.project_factofy", { count: kpis.factofy_count, defaultValue: `🏙️ Factofy (${kpis.factofy_count})` })}
                         </button>
                     </div>
                 </div>
@@ -197,7 +197,7 @@ export default function AgentSupportHubPage() {
                             : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-emerald-300"
                             }`}
                     >
-                        <div className="text-xs font-medium text-emerald-700 dark:text-emerald-400 mb-1">Neu / Offen</div>
+                        <div className="text-xs font-medium text-emerald-700 dark:text-emerald-400 mb-1">{t("agent_support.kpi_open", "Neu / Offen")}</div>
                         <div className="text-2xl font-black text-slate-900 dark:text-white">{kpis.open}</div>
                     </div>
 
@@ -208,7 +208,7 @@ export default function AgentSupportHubPage() {
                             : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-blue-300"
                             }`}
                     >
-                        <div className="text-xs font-medium text-blue-700 dark:text-blue-400 mb-1">In Bearbeitung</div>
+                        <div className="text-xs font-medium text-blue-700 dark:text-blue-400 mb-1">{t("agent_support.kpi_in_progress", "In Bearbeitung")}</div>
                         <div className="text-2xl font-black text-slate-900 dark:text-white">{kpis.in_progress}</div>
                     </div>
 
@@ -219,7 +219,7 @@ export default function AgentSupportHubPage() {
                             : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-amber-300"
                             }`}
                     >
-                        <div className="text-xs font-medium text-amber-700 dark:text-amber-400 mb-1">Wartet auf Kunde</div>
+                        <div className="text-xs font-medium text-amber-700 dark:text-amber-400 mb-1">{t("agent_support.kpi_waiting_customer", "Wartet auf Kunde")}</div>
                         <div className="text-2xl font-black text-slate-900 dark:text-white">{kpis.waiting_customer}</div>
                     </div>
 
@@ -230,7 +230,7 @@ export default function AgentSupportHubPage() {
                             : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-400"
                             }`}
                     >
-                        <div className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Gelöst</div>
+                        <div className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">{t("agent_support.kpi_resolved", "Gelöst")}</div>
                         <div className="text-2xl font-black text-slate-900 dark:text-white">{kpis.resolved}</div>
                     </div>
                 </div>
@@ -247,15 +247,15 @@ export default function AgentSupportHubPage() {
                                     type="text"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    placeholder="Ticket-Nr, Kunde, Begriff..."
+                                    placeholder={t("agent_support.search_placeholder", "Ticket-Nr, Kunde, Begriff...")}
                                     className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white"
                                 />
                             </div>
                             <button
                                 type="submit"
-                                className="px-3 py-1.5 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold hover:bg-slate-300"
+                                className="px-3 py-1.5 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold hover:bg-slate-300 cursor-pointer"
                             >
-                                Suchen
+                                {t("agent_support.search_btn", "Suchen")}
                             </button>
                         </form>
 
@@ -264,19 +264,19 @@ export default function AgentSupportHubPage() {
                             {loading ? (
                                 <div className="p-12 text-center text-slate-400 text-xs">
                                     <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-indigo-600" />
-                                    Lade Tickets...
+                                    {t("agent_support.loading_tickets", "Lade Tickets...")}
                                 </div>
                             ) : tickets.length === 0 ? (
                                 <div className="p-12 text-center text-slate-400 text-xs">
-                                    Keine Tickets für diesen Filter gefunden.
+                                    {t("agent_support.empty_tickets", "Keine Tickets für diesen Filter gefunden.")}
                                 </div>
                             ) : (
-                                tickets.map((t) => {
-                                    const isSelected = activeTicket?.id === t.id;
+                                tickets.map((tItem) => {
+                                    const isSelected = activeTicket?.id === tItem.id;
                                     return (
                                         <div
-                                            key={t.id}
-                                            onClick={() => handleSelectTicket(t.id)}
+                                            key={tItem.id}
+                                            onClick={() => handleSelectTicket(tItem.id)}
                                             className={`p-3.5 transition-all cursor-pointer ${isSelected
                                                 ? "bg-indigo-50/80 dark:bg-indigo-950/40 border-l-4 border-indigo-600"
                                                 : "hover:bg-slate-50 dark:hover:bg-slate-800/40"
@@ -285,24 +285,24 @@ export default function AgentSupportHubPage() {
                                             <div className="flex items-center justify-between mb-1">
                                                 <div className="flex items-center gap-1.5">
                                                     <span
-                                                        className={`text-[9px] font-bold px-1.5 py-0.2 rounded uppercase ${t.project_key === "factofy"
+                                                        className={`text-[9px] font-bold px-1.5 py-0.2 rounded uppercase ${tItem.project_key === "factofy"
                                                             ? "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300"
                                                             : "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
                                                             }`}
                                                     >
-                                                        {t.project_key}
+                                                        {tItem.project_key}
                                                     </span>
                                                     <span className="font-mono text-xs font-bold text-slate-800 dark:text-slate-200">
-                                                        #{t.ticket_number}
+                                                        #{tItem.ticket_number}
                                                     </span>
-                                                    {t.tenant_name && (
+                                                    {tItem.tenant_name && (
                                                         <span className="text-[10px] font-medium px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 truncate max-w-[130px]">
-                                                            🏢 {t.tenant_name}
+                                                            🏢 {tItem.tenant_name}
                                                         </span>
                                                     )}
                                                 </div>
                                                 <span className="text-[10px] text-slate-400">
-                                                    {new Date(t.created_at).toLocaleDateString("de-DE", {
+                                                    {new Date(tItem.created_at).toLocaleDateString("de-DE", {
                                                         day: "2-digit",
                                                         month: "2-digit",
                                                         hour: "2-digit",
@@ -312,14 +312,14 @@ export default function AgentSupportHubPage() {
                                             </div>
 
                                             <h4 className="text-xs font-semibold text-slate-900 dark:text-white truncate">
-                                                {t.subject}
+                                                {tItem.subject}
                                             </h4>
 
                                             <div className="mt-1.5 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
                                                 <span className="truncate max-w-[180px]">
-                                                    {t.contact_name || t.contact_email || "Gast"}
+                                                    {tItem.contact_name || tItem.contact_email || t("agent_support.guest", "Gast")}
                                                 </span>
-                                                <span className="font-medium">{t.status_display}</span>
+                                                <span className="font-medium">{tItem.status_display}</span>
                                             </div>
                                         </div>
                                     );
@@ -333,16 +333,16 @@ export default function AgentSupportHubPage() {
                         {loadingDetail ? (
                             <div className="flex-1 flex flex-col items-center justify-center text-slate-400 text-xs gap-2">
                                 <RefreshCw className="w-6 h-6 animate-spin text-indigo-600" />
-                                <span>Lade Ticket-Details...</span>
+                                <span>{t("agent_support.loading_detail", "Lade Ticket-Details...")}</span>
                             </div>
                         ) : !activeTicket ? (
                             <div className="flex-1 flex flex-col items-center justify-center text-slate-400 p-8 text-center">
                                 <LifeBuoy className="w-12 h-12 opacity-30 mb-3" />
                                 <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                                    Kein Ticket ausgewählt
+                                    {t("agent_support.no_ticket_title", "Kein Ticket ausgewählt")}
                                 </h3>
                                 <p className="text-xs max-w-sm mt-1">
-                                    Wähle links ein Support-Ticket aus, um den Nachrichtenverlauf zu sehen und Antworten oder interne Notizen zu verfassen.
+                                    {t("agent_support.no_ticket_desc", "Wähle links ein Support-Ticket aus, um den Nachrichtenverlauf zu sehen und Antworten oder interne Notizen zu verfassen.")}
                                 </p>
                             </div>
                         ) : (
@@ -364,13 +364,13 @@ export default function AgentSupportHubPage() {
                                             <select
                                                 value={activeTicket.status}
                                                 onChange={(e) => handleStatusChange(e.target.value)}
-                                                className="text-xs font-semibold px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white"
+                                                className="text-xs font-semibold px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white cursor-pointer"
                                             >
-                                                <option value="open">🟢 Neu / Offen</option>
-                                                <option value="in_progress">🔵 In Bearbeitung</option>
-                                                <option value="waiting_customer">🟡 Wartet auf Kunde</option>
-                                                <option value="resolved">✅ Gelöst</option>
-                                                <option value="closed">⬛ Geschlossen</option>
+                                                <option value="open">{t("agent_support.status_open", "🟢 Neu / Offen")}</option>
+                                                <option value="in_progress">{t("agent_support.status_in_progress", "🔵 In Bearbeitung")}</option>
+                                                <option value="waiting_customer">{t("agent_support.status_waiting_customer", "🟡 Wartet auf Kunde")}</option>
+                                                <option value="resolved">{t("agent_support.status_resolved", "✅ Gelöst")}</option>
+                                                <option value="closed">{t("agent_support.status_closed", "⬛ Geschlossen")}</option>
                                             </select>
                                         </div>
                                     </div>
@@ -380,16 +380,16 @@ export default function AgentSupportHubPage() {
                                     </h2>
 
                                     <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-3 flex-wrap">
-                                        <span>Kunde: <b>{activeTicket.contact_name || activeTicket.contact_email}</b></span>
-                                        {activeTicket.contact_email && <span>E-Mail: <b>{activeTicket.contact_email}</b></span>}
-                                        {activeTicket.tenant_name && <span>Mandant: <b>🏢 {activeTicket.tenant_name}</b></span>}
-                                        <span>Kategorie: <b>{activeTicket.category}</b></span>
+                                        <span>{t("agent_support.label_customer", "Kunde:")} <b>{activeTicket.contact_name || activeTicket.contact_email}</b></span>
+                                        {activeTicket.contact_email && <span>{t("agent_support.label_email", "E-Mail:")} <b>{activeTicket.contact_email}</b></span>}
+                                        {activeTicket.tenant_name && <span>{t("agent_support.label_tenant", "Mandant:")} <b>🏢 {activeTicket.tenant_name}</b></span>}
+                                        <span>{t("agent_support.label_category", "Kategorie:")} <b>{activeTicket.category}</b></span>
                                     </div>
 
                                     {/* Context Details */}
                                     {activeTicket.context_payload && Object.keys(activeTicket.context_payload).length > 0 && (
                                         <div className="mt-2 p-2 rounded-lg bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/30 text-[11px] font-mono text-indigo-900 dark:text-indigo-300 overflow-x-auto">
-                                            <b>🔧 Kontext:</b> {JSON.stringify(activeTicket.context_payload)}
+                                            <b>{t("agent_support.label_context", "🔧 Kontext:")}</b> {JSON.stringify(activeTicket.context_payload)}
                                         </div>
                                     )}
                                 </div>
@@ -411,8 +411,8 @@ export default function AgentSupportHubPage() {
                                             >
                                                 <div className="flex items-center justify-between mb-1 font-semibold text-[11px] opacity-75">
                                                     <span>
-                                                        {isInternal && "🔒 INTERNE NOTIZ: "}
-                                                        {msg.sender_name} {isStaff && "(Support-Agent)"}
+                                                        {isInternal && t("agent_support.internal_note_prefix", "🔒 INTERNE NOTIZ: ")}
+                                                        {msg.sender_name} {isStaff && t("agent_support.support_agent_suffix", "(Support-Agent)")}
                                                     </span>
                                                     <span>
                                                         {new Date(msg.created_at).toLocaleTimeString("de-DE", {
@@ -435,38 +435,38 @@ export default function AgentSupportHubPage() {
                                             <button
                                                 type="button"
                                                 onClick={() => setIsInternalNote(false)}
-                                                className={`px-2.5 py-1 rounded-md font-semibold transition-colors ${!isInternalNote
+                                                className={`px-2.5 py-1 rounded-md font-semibold transition-colors cursor-pointer ${!isInternalNote
                                                     ? "bg-indigo-600 text-white"
                                                     : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
                                                     }`}
                                             >
-                                                Öffentliche Antwort
+                                                {t("agent_support.tab_public_reply", "Öffentliche Antwort")}
                                             </button>
                                             <button
                                                 type="button"
                                                 onClick={() => setIsInternalNote(true)}
-                                                className={`px-2.5 py-1 rounded-md font-semibold transition-colors ${isInternalNote
+                                                className={`px-2.5 py-1 rounded-md font-semibold transition-colors cursor-pointer ${isInternalNote
                                                     ? "bg-amber-500 text-white"
                                                     : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
                                                     }`}
                                             >
-                                                🔒 Interne Notiz (Gelb)
+                                                {t("agent_support.tab_internal_note", "🔒 Interne Notiz (Gelb)")}
                                             </button>
                                         </div>
 
                                         {/* Canned Snippet dropdown */}
                                         {cannedResponses.length > 0 && (
                                             <div className="flex items-center gap-1">
-                                                <span className="text-[11px] text-slate-400">Textbaustein:</span>
+                                                <span className="text-[11px] text-slate-400">{t("agent_support.canned_label", "Textbaustein:")}</span>
                                                 <select
                                                     onChange={(e) => {
                                                         const selected = cannedResponses.find((r) => r.id.toString() === e.target.value);
                                                         if (selected) insertCanned(selected.body_de);
                                                         e.target.value = "";
                                                     }}
-                                                    className="text-[11px] px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 dark:text-white"
+                                                    className="text-[11px] px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 dark:text-white cursor-pointer"
                                                 >
-                                                    <option value="">Auswählen...</option>
+                                                    <option value="">{t("agent_support.canned_select", "Auswählen...")}</option>
                                                     {cannedResponses.map((r) => (
                                                         <option key={r.id} value={r.id}>
                                                             {r.title} (!{r.shortcut})
@@ -485,8 +485,8 @@ export default function AgentSupportHubPage() {
                                             rows={3}
                                             placeholder={
                                                 isInternalNote
-                                                    ? "Interne Notiz für das Team erfassen (Kunde sieht dies nicht)..."
-                                                    : "Antwort an den Kunden verfassen..."
+                                                    ? t("agent_support.reply_placeholder_note", "Interne Notiz für das Team erfassen (Kunde sieht dies nicht)...")
+                                                    : t("agent_support.reply_placeholder_public", "Antwort an den Kunden verfassen...")
                                             }
                                             className={`flex-1 p-2.5 text-xs rounded-xl border focus:outline-none focus:ring-2 dark:text-white ${isInternalNote
                                                 ? "border-amber-300 dark:border-amber-700/60 bg-amber-50/50 dark:bg-amber-950/20 focus:ring-amber-500"
@@ -496,13 +496,13 @@ export default function AgentSupportHubPage() {
                                         <button
                                             type="submit"
                                             disabled={!replyText.trim() || submittingReply}
-                                            className={`px-4 rounded-xl text-xs font-bold text-white flex flex-col items-center justify-center gap-1 shadow-sm transition-all shrink-0 ${isInternalNote
+                                            className={`px-4 rounded-xl text-xs font-bold text-white flex flex-col items-center justify-center gap-1 shadow-sm transition-all shrink-0 cursor-pointer ${isInternalNote
                                                 ? "bg-amber-600 hover:bg-amber-700"
                                                 : "bg-indigo-600 hover:bg-indigo-700"
                                                 }`}
                                         >
                                             <Send className="w-4 h-4" />
-                                            <span>{isInternalNote ? "Notiz" : "Senden"}</span>
+                                            <span>{isInternalNote ? t("agent_support.btn_send_note", "Notiz") : t("agent_support.btn_send_reply", "Senden")}</span>
                                         </button>
                                     </div>
                                 </form>
@@ -514,4 +514,3 @@ export default function AgentSupportHubPage() {
         </div>
     );
 }
-

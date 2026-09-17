@@ -4,6 +4,7 @@
 */
 
 import { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import {
     X,
     Send,
@@ -22,6 +23,7 @@ import {
 import { fetchTicketDetail, postTicketMessage, updateTicketStatus } from "../api";
 
 export default function TicketChatModal({ ticketId, isOpen, onClose, onTicketUpdated }) {
+    const { t } = useTranslation();
     const [ticket, setTicket] = useState(null);
     const [loading, setLoading] = useState(true);
     const [replyText, setReplyText] = useState("");
@@ -106,15 +108,15 @@ export default function TicketChatModal({ ticketId, isOpen, onClose, onTicketUpd
     const getStatusBadge = (status) => {
         switch (status) {
             case "open":
-                return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">Neu / Offen</span>;
+                return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">{t("support_chat.status_open", "Neu / Offen")}</span>;
             case "in_progress":
-                return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300">In Bearbeitung</span>;
+                return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300">{t("support_chat.status_in_progress", "In Bearbeitung")}</span>;
             case "waiting_customer":
-                return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300">Wartet auf dich</span>;
+                return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300">{t("support_chat.status_waiting_you", "Wartet auf dich")}</span>;
             case "resolved":
-                return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">Gelöst ✓</span>;
+                return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">{t("support_chat.status_resolved", "Gelöst ✓")}</span>;
             case "closed":
-                return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400">Geschlossen</span>;
+                return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400">{t("support_chat.status_closed", "Geschlossen")}</span>;
             default:
                 return <span className="px-2 py-0.5 rounded text-xs bg-slate-100 dark:bg-slate-800">{status}</span>;
         }
@@ -123,11 +125,11 @@ export default function TicketChatModal({ ticketId, isOpen, onClose, onTicketUpd
     const getPriorityBadge = (priority) => {
         switch (priority) {
             case "urgent":
-                return <span className="text-rose-600 dark:text-rose-400 font-semibold text-xs flex items-center gap-0.5"><ShieldAlert className="w-3 h-3" /> Dringend</span>;
+                return <span className="text-rose-600 dark:text-rose-400 font-semibold text-xs flex items-center gap-0.5"><ShieldAlert className="w-3 h-3" /> {t("support_chat.priority_urgent", "Dringend")}</span>;
             case "high":
-                return <span className="text-orange-600 dark:text-orange-400 font-semibold text-xs flex items-center gap-0.5"><AlertTriangle className="w-3 h-3" /> Hoch</span>;
+                return <span className="text-orange-600 dark:text-orange-400 font-semibold text-xs flex items-center gap-0.5"><AlertTriangle className="w-3 h-3" /> {t("support_chat.priority_high", "Hoch")}</span>;
             default:
-                return <span className="text-slate-500 dark:text-slate-400 text-xs">Normal</span>;
+                return <span className="text-slate-500 dark:text-slate-400 text-xs">{t("support_chat.priority_normal", "Normal")}</span>;
         }
     };
 
@@ -139,7 +141,7 @@ export default function TicketChatModal({ ticketId, isOpen, onClose, onTicketUpd
                     <div className="flex-1 min-w-0 pr-4">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
                             <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-indigo-100 text-indigo-700 dark:bg-indigo-950/80 dark:text-indigo-300">
-                                {ticket?.ticket_number || "Lade..."}
+                                {ticket?.ticket_number || t("support_chat.loading", "Lade...")}
                             </span>
                             {ticket && getStatusBadge(ticket.status)}
                             {ticket && getPriorityBadge(ticket.priority)}
@@ -148,7 +150,7 @@ export default function TicketChatModal({ ticketId, isOpen, onClose, onTicketUpd
                             </span>
                         </div>
                         <h2 className="text-base font-bold text-slate-900 dark:text-white truncate">
-                            {ticket?.subject || "Support-Ticket"}
+                            {ticket?.subject || t("support_chat.default_title", "Support-Ticket")}
                         </h2>
                     </div>
 
@@ -156,19 +158,19 @@ export default function TicketChatModal({ ticketId, isOpen, onClose, onTicketUpd
                         <button
                             type="button"
                             onClick={handleToggleResolve}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 ${ticket?.status === "resolved" || ticket?.status === "closed"
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer ${ticket?.status === "resolved" || ticket?.status === "closed"
                                 ? "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200"
                                 : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
                                 }`}
                         >
                             <CheckCircle2 className="w-3.5 h-3.5" />
-                            {ticket?.status === "resolved" || ticket?.status === "closed" ? "Wiedereröffnen" : "Als gelöst markieren"}
+                            {ticket?.status === "resolved" || ticket?.status === "closed" ? t("support_chat.btn_reopen", "Wiedereröffnen") : t("support_chat.btn_resolve", "Als gelöst markieren")}
                         </button>
 
                         <button
                             type="button"
                             onClick={onClose}
-                            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+                            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
                         >
                             <X className="w-5 h-5" />
                         </button>
@@ -181,9 +183,9 @@ export default function TicketChatModal({ ticketId, isOpen, onClose, onTicketUpd
                         <button
                             type="button"
                             onClick={() => setShowContext(!showContext)}
-                            className="flex items-center justify-between w-full text-indigo-700 dark:text-indigo-300 font-medium"
+                            className="flex items-center justify-between w-full text-indigo-700 dark:text-indigo-300 font-medium cursor-pointer"
                         >
-                            <span>🔧 Technische Telemetrie & System-Kontext ({Object.keys(ticket.context_payload).length} Parameter)</span>
+                            <span>{t("support_chat.telemetry_title", { count: Object.keys(ticket.context_payload).length, defaultValue: `🔧 Technische Telemetrie & System-Kontext (${Object.keys(ticket.context_payload).length} Parameter)` })}</span>
                             {showContext ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                         </button>
                         {showContext && (
@@ -199,11 +201,11 @@ export default function TicketChatModal({ ticketId, isOpen, onClose, onTicketUpd
                     {loading ? (
                         <div className="flex flex-col items-center justify-center h-full text-slate-400 gap-2">
                             <RefreshCw className="w-6 h-6 animate-spin text-indigo-600" />
-                            <span className="text-sm">Lade Ticketverlauf...</span>
+                            <span className="text-sm">{t("support_chat.loading_history", "Lade Ticketverlauf...")}</span>
                         </div>
                     ) : ticket?.messages?.length === 0 ? (
                         <div className="text-center py-12 text-slate-400 text-sm">
-                            Keine Nachrichten vorhanden.
+                            {t("support_chat.empty_messages", "Keine Nachrichten vorhanden.")}
                         </div>
                     ) : (
                         ticket?.messages?.map((msg) => {
@@ -227,7 +229,7 @@ export default function TicketChatModal({ ticketId, isOpen, onClose, onTicketUpd
                                             }`}
                                     >
                                         <div className="flex items-center justify-between gap-4 mb-1 text-[11px] opacity-80 font-medium">
-                                            <span>{msg.sender_name} {isStaff && "(Support-Team)"}</span>
+                                            <span>{msg.sender_name} {isStaff && t("support_chat.support_team_suffix", "(Support-Team)")}</span>
                                             <span>
                                                 {new Date(msg.created_at).toLocaleString("de-DE", {
                                                     day: "2-digit",
@@ -286,7 +288,7 @@ export default function TicketChatModal({ ticketId, isOpen, onClose, onTicketUpd
                                     <button
                                         type="button"
                                         onClick={() => setSelectedFiles(selectedFiles.filter((_, idx) => idx !== i))}
-                                        className="ml-1 text-slate-400 hover:text-rose-500"
+                                        className="ml-1 text-slate-400 hover:text-rose-500 cursor-pointer"
                                     >
                                         &times;
                                     </button>
@@ -306,8 +308,8 @@ export default function TicketChatModal({ ticketId, isOpen, onClose, onTicketUpd
                         <button
                             type="button"
                             onClick={() => fileInputRef.current?.click()}
-                            title="Dateianhang hinzufügen"
-                            className="p-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors shrink-0"
+                            title={t("support_chat.add_attachment", "Dateianhang hinzufügen")}
+                            className="p-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors shrink-0 cursor-pointer"
                         >
                             <Paperclip className="w-5 h-5" />
                         </button>
@@ -316,7 +318,7 @@ export default function TicketChatModal({ ticketId, isOpen, onClose, onTicketUpd
                             type="text"
                             value={replyText}
                             onChange={(e) => setReplyText(e.target.value)}
-                            placeholder="Antwort schreiben..."
+                            placeholder={t("support_chat.input_placeholder", "Antwort schreiben...")}
                             disabled={submitting}
                             className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white"
                         />
@@ -324,10 +326,10 @@ export default function TicketChatModal({ ticketId, isOpen, onClose, onTicketUpd
                         <button
                             type="submit"
                             disabled={(!replyText.trim() && selectedFiles.length === 0) || submitting}
-                            className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-sm font-semibold transition-all flex items-center gap-1.5 shadow-sm shrink-0"
+                            className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-sm font-semibold transition-all flex items-center gap-1.5 shadow-sm shrink-0 cursor-pointer"
                         >
                             {submitting ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                            <span>Senden</span>
+                            <span>{t("support_chat.btn_send", "Senden")}</span>
                         </button>
                     </div>
                 </form>
@@ -335,4 +337,3 @@ export default function TicketChatModal({ ticketId, isOpen, onClose, onTicketUpd
         </div>
     );
 }
-
