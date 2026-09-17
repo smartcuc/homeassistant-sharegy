@@ -10,7 +10,10 @@ export default function AdminDashboard() {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
+    const isDark = typeof document !== "undefined" && document.documentElement.classList.contains("dark");
+
+    function fetchStats() {
+        setLoading(true);
         apiFetch("/api/stats/dashboard/")
             .then((d) => {
                 setData(d);
@@ -20,6 +23,10 @@ export default function AdminDashboard() {
                 console.error(err);
                 setLoading(false);
             });
+    }
+
+    useEffect(() => {
+        fetchStats();
     }, []);
 
     const chartOption = useMemo(() => {
@@ -35,9 +42,9 @@ export default function AdminDashboard() {
             tooltip: {
                 trigger: "axis",
                 axisPointer: { type: "shadow" },
-                backgroundColor: "rgba(255, 255, 255, 0.95)",
-                borderColor: "#e2e8f0",
-                textStyle: { color: "#1e293b", fontSize: 12 },
+                backgroundColor: isDark ? "#0f172a" : "rgba(255, 255, 255, 0.95)",
+                borderColor: isDark ? "#334155" : "#e2e8f0",
+                textStyle: { color: isDark ? "#f8fafc" : "#1e293b", fontSize: 12 },
             },
             grid: {
                 left: "3%",
@@ -49,13 +56,13 @@ export default function AdminDashboard() {
             xAxis: {
                 type: "category",
                 data: funnel.map((f) => f.name),
-                axisLabel: { color: "#64748b", fontSize: 12, fontWeight: "bold" },
-                axisLine: { lineStyle: { color: "#cbd5e1" } },
+                axisLabel: { color: isDark ? "#94a3b8" : "#64748b", fontSize: 12, fontWeight: "bold" },
+                axisLine: { lineStyle: { color: isDark ? "#334155" : "#cbd5e1" } },
             },
             yAxis: {
                 type: "value",
-                axisLabel: { color: "#94a3b8", fontSize: 11 },
-                splitLine: { lineStyle: { color: "#f1f5f9", type: "dashed" } },
+                axisLabel: { color: isDark ? "#94a3b8" : "#94a3b8", fontSize: 11 },
+                splitLine: { lineStyle: { color: isDark ? "#1e293b" : "#f1f5f9", type: "dashed" } },
             },
             series: [
                 {
@@ -68,7 +75,7 @@ export default function AdminDashboard() {
                 },
             ],
         };
-    }, [data, t]);
+    }, [data, t, isDark]);
 
     const interfaceChartOption = useMemo(() => {
         if (!data || !data.interface_stats || !data.interface_stats.interfaces) return null;
@@ -82,14 +89,14 @@ export default function AdminDashboard() {
             tooltip: {
                 trigger: "item",
                 formatter: "{b}: {c} Haushalte ({d}%)",
-                backgroundColor: "rgba(255, 255, 255, 0.95)",
-                borderColor: "#e2e8f0",
-                textStyle: { color: "#1e293b", fontSize: 12 },
+                backgroundColor: isDark ? "#0f172a" : "rgba(255, 255, 255, 0.95)",
+                borderColor: isDark ? "#334155" : "#e2e8f0",
+                textStyle: { color: isDark ? "#f8fafc" : "#1e293b", fontSize: 12 },
             },
             legend: {
                 bottom: "0%",
                 left: "center",
-                textStyle: { color: "#64748b", fontSize: 11 },
+                textStyle: { color: isDark ? "#94a3b8" : "#64748b", fontSize: 11 },
             },
             series: [
                 {
@@ -99,7 +106,7 @@ export default function AdminDashboard() {
                     avoidLabelOverlap: false,
                     itemStyle: {
                         borderRadius: 8,
-                        borderColor: "#fff",
+                        borderColor: isDark ? "#0f172a" : "#fff",
                         borderWidth: 2,
                     },
                     label: {
@@ -113,11 +120,11 @@ export default function AdminDashboard() {
                 },
             ],
         };
-    }, [data, t]);
+    }, [data, t, isDark]);
 
-    if (loading) {
+    if (loading && !data) {
         return (
-            <div className="p-8 max-w-7xl mx-auto flex items-center justify-center text-gray-400 text-sm animate-pulse">
+            <div className="p-12 max-w-7xl mx-auto flex items-center justify-center text-slate-400 text-sm animate-pulse">
                 {t("common.loading", "Lade Admin-Dashboard…")}
             </div>
         );
@@ -127,34 +134,47 @@ export default function AdminDashboard() {
     const ifaceStats = data?.interface_stats || { interfaces: [], total_homes: 0, total_telemetry_homes: 0 };
 
     return (
-        <div className="p-6 max-w-7xl mx-auto space-y-6">
+        <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6 animate-fade-in">
             {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-gray-200 rounded-3xl p-6 shadow-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs">
                 <div>
                     <div className="flex items-center gap-2.5">
                         <span className="text-2xl">🛡️</span>
-                        <h1 className="text-2xl font-black text-gray-900 tracking-tight">{t("admin.title", "Admin & Conversion Center")}</h1>
-                        <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
+                        <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">{t("admin.title", "Admin & Conversion Center")}</h1>
+                        <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
                             Staff Portal
                         </span>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                         {t("admin.subtitle", "Übersicht über Nutzer-Onboarding, Magic-Link-Konvertierung, Live-Aktivitäten und Systemstatus.")}
                     </p>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                    <Link
+                        to="/app/help/admin-communities-portfolio-guide"
+                        className="px-3.5 py-2 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl transition shadow-xs flex items-center gap-1.5"
+                    >
+                        <span>📖</span> {t("nav.manual", "Handbuch")}
+                    </Link>
                     <Link
                         to="/app/admin/tracking"
-                        className="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-xs rounded-xl transition flex items-center gap-1.5"
+                        className="px-3.5 py-2 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-bold text-xs rounded-xl border border-indigo-200 dark:border-indigo-800/80 transition flex items-center gap-1.5"
                     >
                         <span>📈</span> {t("admin.event_tracking", "Event-Tracking")}
                     </Link>
+                    <button
+                        onClick={fetchStats}
+                        className="p-2.5 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl transition cursor-pointer shadow-xs"
+                        title={t("common.refresh", "Aktualisieren")}
+                    >
+                        <span className={loading ? "animate-spin inline-block" : ""}>🔄</span>
+                    </button>
                     <a
                         href="/admin/"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-4 py-2 bg-slate-900 hover:bg-black text-white font-semibold text-xs rounded-xl transition flex items-center gap-1.5 shadow-xs"
+                        className="px-3.5 py-2 bg-slate-900 dark:bg-slate-800 hover:bg-black dark:hover:bg-slate-700 text-white font-bold text-xs rounded-xl transition flex items-center gap-1.5 shadow-xs"
                     >
                         <span>⚙️</span> Django Admin <span>↗</span>
                     </a>
@@ -163,24 +183,24 @@ export default function AdminDashboard() {
 
             {/* KPI Cards */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <KpiCard title={t("admin.kpi_generated_links", "🔗 Generierte Links")} value={funnelData.total} />
-                <KpiCard title={t("admin.kpi_emails_opened", "📬 E-Mail Geöffnet")} value={funnelData.opened} />
-                <KpiCard title={t("admin.kpi_links_clicked", "🖱️ Link Geklickt")} value={funnelData.clicked} />
-                <KpiCard title={t("admin.kpi_logins_success", "✅ Erfolgreiche Logins")} value={funnelData.used} />
+                <KpiCard title={t("admin.kpi_generated_links", "🔗 Generierte Links")} value={funnelData.total} icon="🔗" />
+                <KpiCard title={t("admin.kpi_emails_opened", "📬 E-Mail Geöffnet")} value={funnelData.opened} icon="📬" />
+                <KpiCard title={t("admin.kpi_links_clicked", "🖱️ Link Geklickt")} value={funnelData.clicked} icon="🖱️" />
+                <KpiCard title={t("admin.kpi_logins_success", "✅ Erfolgreiche Logins")} value={funnelData.used} icon="✅" />
             </div>
 
             {/* INTERFACE & ADAPTER ECOSYSTEM ANALYTICS */}
-            <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-xs space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-4">
+            <div className="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-4">
                     <div>
-                        <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                        <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                             <span>📡</span> {t("admin.interface_analytics_title", "Schnittstellen & Adapter-Nutzung (Ecosystem Analytics)")}
                         </h2>
-                        <p className="text-xs text-gray-500 mt-0.5">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                             {t("admin.interface_analytics_sub", "Welche Schnittstellen und Zentralen (Home Assistant, ioBroker, Shelly, Cloud-WR) werden von aktiven Nutzern verwendet?")}
                         </p>
                     </div>
-                    <span className="text-xs font-mono px-3 py-1 bg-slate-100 rounded-full text-slate-700 font-semibold self-start sm:self-auto">
+                    <span className="text-xs font-mono px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-700 dark:text-slate-300 font-semibold self-start sm:self-auto border border-slate-200 dark:border-slate-700">
                         {ifaceStats.total_telemetry_homes} / {ifaceStats.total_homes} {t("admin.homes_with_telemetry", "Haushalte aktiv")}
                     </span>
                 </div>
@@ -196,7 +216,7 @@ export default function AdminDashboard() {
                                 lazyUpdate={true}
                             />
                         ) : (
-                            <div className="h-full flex items-center justify-center text-gray-400 text-xs">
+                            <div className="h-full flex items-center justify-center text-slate-400 text-xs">
                                 {t("admin.no_interface_data", "Keine Schnittstellendaten")}
                             </div>
                         )}
@@ -207,17 +227,17 @@ export default function AdminDashboard() {
                         <div className="overflow-x-auto">
                             <table className="w-full text-left text-xs">
                                 <thead>
-                                    <tr className="border-b border-gray-100 text-gray-400 uppercase tracking-wider font-semibold">
+                                    <tr className="border-b border-slate-100 dark:border-slate-800 text-slate-400 uppercase tracking-wider font-semibold">
                                         <th className="pb-2 font-medium">{t("admin.interface_name", "Schnittstelle")}</th>
                                         <th className="pb-2 text-center font-medium">{t("admin.active_24h", "Aktiv (24h)")}</th>
                                         <th className="pb-2 text-center font-medium">{t("admin.active_7d", "Aktiv (7d)")}</th>
                                         <th className="pb-2 text-right font-medium">{t("admin.share", "Anteil")}</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-50">
+                                <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
                                     {ifaceStats.interfaces?.map((item) => (
-                                        <tr key={item.key} className="hover:bg-slate-50 transition">
-                                            <td className="py-2.5 font-bold text-gray-900 flex items-center gap-2">
+                                        <tr key={item.key} className="hover:bg-slate-50 dark:hover:bg-slate-800/60 transition">
+                                            <td className="py-2.5 font-bold text-slate-900 dark:text-slate-200 flex items-center gap-2">
                                                 <span>
                                                     {item.key === "homeassistant" ? "🏠" :
                                                      item.key === "iobroker" ? "🔵" :
@@ -226,13 +246,13 @@ export default function AdminDashboard() {
                                                 </span>
                                                 <span>{item.name}</span>
                                             </td>
-                                            <td className="py-2.5 text-center font-mono font-semibold text-emerald-600">
+                                            <td className="py-2.5 text-center font-mono font-semibold text-emerald-600 dark:text-emerald-400">
                                                 {item.active_24h}
                                             </td>
-                                            <td className="py-2.5 text-center font-mono text-gray-600">
+                                            <td className="py-2.5 text-center font-mono text-slate-600 dark:text-slate-400">
                                                 {item.active_7d}
                                             </td>
-                                            <td className="py-2.5 text-right font-mono font-bold text-indigo-600">
+                                            <td className="py-2.5 text-right font-mono font-bold text-indigo-600 dark:text-indigo-400">
                                                 {item.percentage}%
                                             </td>
                                         </tr>
@@ -242,7 +262,7 @@ export default function AdminDashboard() {
                         </div>
 
                         {/* Strategic Insight Alert */}
-                        <div className="p-3.5 bg-gradient-to-r from-indigo-50/70 via-sky-50/50 to-white rounded-2xl border border-indigo-100/80 flex items-start gap-2.5 text-xs text-indigo-950">
+                        <div className="p-3.5 bg-gradient-to-r from-indigo-50/70 via-sky-50/50 to-white dark:from-indigo-950/40 dark:via-slate-900 dark:to-slate-900 rounded-2xl border border-indigo-100/80 dark:border-indigo-900/60 flex items-start gap-2.5 text-xs text-indigo-950 dark:text-indigo-200">
                             <span className="text-base shrink-0">💡</span>
                             <div>
                                 <span className="font-bold">{t("admin.strategic_insight_title", "Entwicklungs-Fokus & Roadmap:")} </span>
@@ -254,12 +274,12 @@ export default function AdminDashboard() {
             </div>
 
             {/* Main Conversion Chart */}
-            <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-xs space-y-4">
+            <div className="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs space-y-4">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                    <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                         <span>📊</span> {t("admin.onboarding_funnel", "Onboarding & Conversion Funnel")}
                     </h2>
-                    <span className="text-xs text-gray-400 font-mono">Magic Link Conversion Rate</span>
+                    <span className="text-xs text-slate-400 font-mono">Magic Link Conversion Rate</span>
                 </div>
 
                 <div className="h-72 w-full">
@@ -271,7 +291,7 @@ export default function AdminDashboard() {
                             lazyUpdate={true}
                         />
                     ) : (
-                        <div className="h-full flex items-center justify-center text-gray-400 text-xs">
+                        <div className="h-full flex items-center justify-center text-slate-400 text-xs">
                             {t("admin.no_funnel_data", "Keine Trichterdaten vorhanden")}
                         </div>
                     )}
@@ -279,12 +299,12 @@ export default function AdminDashboard() {
             </div>
 
             {/* LIVE LOGINS & ACTIVITY */}
-            <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-xs space-y-4">
-                <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                    <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
+            <div className="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                    <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                         <span>⚡</span> {t("admin.live_user_activity", "Live Benutzer-Aktivität")}
                     </h2>
-                    <span className="text-xs text-emerald-600 font-semibold flex items-center gap-1">
+                    <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
                         <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> Live Feed
                     </span>
                 </div>
@@ -294,18 +314,18 @@ export default function AdminDashboard() {
                         data.live_logins.map((l, i) => (
                             <div
                                 key={i}
-                                className="flex items-center justify-between p-3 bg-slate-50 hover:bg-slate-100 rounded-xl text-xs text-gray-700 transition"
+                                className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl text-xs text-slate-700 dark:text-slate-300 transition"
                             >
                                 <div className="flex items-center gap-2">
                                     <span>👤</span>
-                                    <span className="font-semibold text-gray-900">{l.user}</span>
-                                    <span className="text-gray-400">{t("admin.logged_in_success", "hat sich erfolgreich eingeloggt")}</span>
+                                    <span className="font-semibold text-slate-900 dark:text-white">{l.user}</span>
+                                    <span className="text-slate-400 dark:text-slate-500">{t("admin.logged_in_success", "hat sich erfolgreich eingeloggt")}</span>
                                 </div>
-                                <span className="font-mono text-gray-400">{l.timestamp}</span>
+                                <span className="font-mono text-slate-400 dark:text-slate-500">{l.timestamp}</span>
                             </div>
                         ))
                     ) : (
-                        <div className="text-xs text-gray-400 py-4 text-center">
+                        <div className="text-xs text-slate-400 dark:text-slate-500 py-4 text-center">
                             {t("admin.no_recent_logins", "Keine aktuellen Logins verzeichnet.")}
                         </div>
                     )}

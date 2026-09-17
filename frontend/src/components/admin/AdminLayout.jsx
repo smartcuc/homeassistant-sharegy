@@ -20,27 +20,27 @@ export default function AdminLayout({ children }) {
     };
 
     return (
-        <div className="flex h-screen bg-slate-50/50">
+        <div className="flex h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
             {/* Admin Sidebar */}
-            <aside className="w-64 bg-white border-r border-gray-200 p-5 flex flex-col justify-between hidden md:flex">
+            <aside className="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 p-5 flex flex-col justify-between hidden md:flex shrink-0">
                 <div className="space-y-6">
                     <div className="flex items-center justify-between px-2">
                         <div className="flex items-center gap-2.5">
                             <span className="text-2xl">🛡️</span>
                             <div>
-                                <div className="font-black text-sm text-gray-900 tracking-tight">Staff Portal</div>
-                                <div className="text-[10px] text-gray-400 font-medium">Administration & Control</div>
+                                <div className="font-black text-sm text-slate-900 dark:text-white tracking-tight">Staff Portal</div>
+                                <div className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">Administration & Control</div>
                             </div>
                         </div>
 
                         {/* DE / EN Flag Toggle */}
-                        <div className="flex items-center bg-slate-100 rounded-xl p-1 gap-1">
+                        <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-xl p-1 gap-1">
                             <button
                                 type="button"
                                 onClick={() => handleLanguageToggle("de")}
                                 className={`p-1 rounded-lg transition cursor-pointer flex items-center justify-center ${
                                     currentLang === "de"
-                                        ? "bg-white shadow-xs ring-1 ring-indigo-500/20"
+                                        ? "bg-white dark:bg-slate-700 shadow-xs ring-1 ring-indigo-500/20"
                                         : "opacity-60 hover:opacity-100"
                                 }`}
                                 title="Deutsch"
@@ -52,7 +52,7 @@ export default function AdminLayout({ children }) {
                                 onClick={() => handleLanguageToggle("en")}
                                 className={`p-1 rounded-lg transition cursor-pointer flex items-center justify-center ${
                                     currentLang === "en"
-                                        ? "bg-white shadow-xs ring-1 ring-indigo-500/20"
+                                        ? "bg-white dark:bg-slate-700 shadow-xs ring-1 ring-indigo-500/20"
                                         : "opacity-60 hover:opacity-100"
                                 }`}
                                 title="English"
@@ -64,30 +64,91 @@ export default function AdminLayout({ children }) {
 
                     <nav className="space-y-1">
                         <NavLink
-                            to="/admin/communities"
+                            to="/app/admin/communities"
                             className={({ isActive }) =>
-                                `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${isActive ? "bg-indigo-50 text-indigo-700 shadow-2xs font-bold" : "text-gray-600 hover:bg-gray-50"
+                                `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${
+                                    isActive
+                                        ? "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-bold"
+                                        : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60"
                                 }`
                             }
                         >
-                            <span className="text-sm">🏘️</span> Energiegemeinschaften
+                            <span className="text-sm">🏘️</span> {t("nav.communities_hub", "Quartiere & Gemeinschaften")}
                         </NavLink>
 
                         <NavLink
-                            to="/admin/vpp"
+                            to="/app/admin/mieterstrom"
                             className={({ isActive }) =>
-                                `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${isActive ? "bg-emerald-50 text-emerald-700 shadow-2xs font-bold" : "text-gray-600 hover:bg-gray-50"
+                                `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${
+                                    isActive
+                                        ? "bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 font-bold"
+                                        : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60"
                                 }`
                             }
                         >
-                            <span className="text-sm">⚡</span> VPP & Flex-Zentrale
+                            <span className="text-sm">🏢</span> {t("nav.tenant_management_mieterstrom", "Mieterstrom (§ 42a)")}
                         </NavLink>
 
                         <NavLink
-                            to="/admin/dashboard"
+                            to="/app/admin/ggv"
+                            className={({ isActive }) =>
+                                `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${
+                                    isActive
+                                        ? "bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 font-bold"
+                                        : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60"
+                                }`
+                            }
+                        >
+                            <span className="text-sm">⚖️</span> {t("nav.tenant_management_ggv", "GGV-Gebäude (§ 42b)")}
+                        </NavLink>
+
+                        <NavLink
+                            to="/app/admin/sharing"
+                            className={({ isActive }) =>
+                                `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${
+                                    isActive
+                                        ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-bold"
+                                        : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60"
+                                }`
+                            }
+                        >
+                            <span className="text-sm">👥</span> {t("nav.tenant_management_sharing", "Energy Sharing (eG)")}
+                        </NavLink>
+
+                        <NavLink
+                            to="/app/admin/vpp"
+                            className={({ isActive }) =>
+                                `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${
+                                    isActive
+                                        ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-bold"
+                                        : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60"
+                                }`
+                            }
+                        >
+                            <span className="text-sm">⚡</span> {t("nav.admin_vpp", "VPP & Flex-Zentrale")}
+                        </NavLink>
+
+                        <NavLink
+                            to="/app/partner"
+                            className={({ isActive }) =>
+                                `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${
+                                    isActive
+                                        ? "bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 font-bold"
+                                        : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60"
+                                }`
+                            }
+                        >
+                            <span className="text-sm">🔧</span> {t("nav.partner_fleet", "Partner-Flotten")}
+                        </NavLink>
+
+                        <NavLink
+                            to="/app/admin/dashboard"
                             end
                             className={({ isActive }) =>
-                                `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${isActive ? "bg-indigo-50 text-indigo-700 shadow-2xs font-bold" : "text-gray-600 hover:bg-gray-50"
+                                `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${
+                                    isActive
+                                        ? "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-bold"
+                                        : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60"
                                 }`
                             }
                         >
@@ -95,9 +156,12 @@ export default function AdminLayout({ children }) {
                         </NavLink>
 
                         <NavLink
-                            to="/admin/tracking"
+                            to="/app/admin/tracking"
                             className={({ isActive }) =>
-                                `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${isActive ? "bg-indigo-50 text-indigo-700 shadow-2xs font-bold" : "text-gray-600 hover:bg-gray-50"
+                                `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${
+                                    isActive
+                                        ? "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-bold"
+                                        : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60"
                                 }`
                             }
                         >
@@ -105,53 +169,36 @@ export default function AdminLayout({ children }) {
                         </NavLink>
 
                         <NavLink
-                            to="/admin/tenants"
+                            to="/app/help"
                             className={({ isActive }) =>
-                                `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${isActive ? "bg-indigo-50 text-indigo-700 shadow-2xs font-bold" : "text-gray-600 hover:bg-gray-50"
+                                `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${
+                                    isActive
+                                        ? "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-bold"
+                                        : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60"
                                 }`
                             }
                         >
-                            <span className="text-sm">👥</span> Community Cockpit
-                        </NavLink>
-
-                        <NavLink
-                            to="/admin/partners"
-                            className={({ isActive }) =>
-                                `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${isActive ? "bg-indigo-50 text-indigo-700 shadow-2xs font-bold" : "text-gray-600 hover:bg-gray-50"
-                                }`
-                            }
-                        >
-                            <span className="text-sm">🔧</span> Partner-Flotten
-                        </NavLink>
-
-                        <NavLink
-                            to="/admin/support"
-                            className={({ isActive }) =>
-                                `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${isActive ? "bg-indigo-50 text-indigo-700 shadow-2xs font-bold" : "text-gray-600 hover:bg-gray-50"
-                                }`
-                            }
-                        >
-                            <span className="text-sm">🛟</span> Support-Zentrale
+                            <span className="text-sm">📖</span> {t("nav.manual", "Handbuch")}
                         </NavLink>
 
                         <a
                             href="/admin/"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-50 transition"
+                            className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition"
                         >
                             <div className="flex items-center gap-2.5">
                                 <span className="text-sm">⚙️</span> Django Admin
                             </div>
-                            <span className="text-[10px] text-gray-400">↗</span>
+                            <span className="text-[10px] text-slate-400">↗</span>
                         </a>
                     </nav>
                 </div>
 
-                <div className="pt-4 border-t border-gray-100">
+                <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
                     <Link
                         to="/app/dashboard"
-                        className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition shadow-2xs"
+                        className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/70 transition shadow-2xs"
                     >
                         <span>←</span> {t("admin.back_to_portal", "Zurück zum Hauptportal")}
                     </Link>
@@ -159,7 +206,7 @@ export default function AdminLayout({ children }) {
             </aside>
 
             {/* Content Area */}
-            <main className="flex-1 flex flex-col overflow-hidden">
+            <main className="flex-1 flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-950">
                 <div className="flex-1 overflow-auto">
                     {children}
                 </div>
