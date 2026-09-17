@@ -1,0 +1,7 @@
+# Sharegy Security Policy & Vulnerability Disclosure (RFC 9116)
+Contact: mailto:security@sharegy.de
+Contact: mailto:support@sharegy.de
+Expires: 2027-12-31T23:59:59.000Z
+Preferred-Languages: de, en
+Canonical: https://sharegy.de/.well-known/security.txt
+Policy: https://sharegy.de/datenschutz
