@@ -32,6 +32,10 @@ def rebuild_demo_environment():
         "home_name": home.name,
         "devices": home.devices.count(),
         "telemetry": telemetry,
-        "sharing_admin": sharing_data.get("admin_user", {}).email if hasattr(sharing_data.get("admin_user"), "email") else "sharing-admin@sharegy.de",
-        "sharing_member": sharing_data.get("member_user", {}).email if hasattr(sharing_data.get("member_user"), "email") else "sharing-user@sharegy.de",
+        "sharing_admin": getattr(sharing_data.get("admin_user"), "email", "sharing-admin@sharegy.de"),
+        "sharing_member": getattr(sharing_data.get("member_user"), "email", "sharing-user@sharegy.de"),
+        "mieterstrom_admin": getattr(sharing_data.get("mieterstrom_admin"), "email", "mieterstrom-admin@sharegy.de"),
+        "mieterstrom_user": getattr(sharing_data.get("mieterstrom_user"), "email", "mieterstrom-user@sharegy.de"),
+        "ggv_admin": getattr(sharing_data.get("ggv_admin"), "email", "ggv-admin@sharegy.de"),
+        "ggv_user": getattr(sharing_data.get("ggv_user"), "email", "ggv-user@sharegy.de"),
     }
