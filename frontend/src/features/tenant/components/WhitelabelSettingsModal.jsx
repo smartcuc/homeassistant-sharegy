@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../../api/client";
 import {
   Palette,
@@ -50,6 +51,7 @@ const PRESET_THEMES = [
 ];
 
 export default function WhitelabelSettingsModal({ isOpen, onClose }) {
+  const { t } = useTranslation();
   const { theming, updatePreviewTheme, reloadTheming } = useTenantTheming();
 
   const [formData, setFormData] = useState({
@@ -187,7 +189,7 @@ export default function WhitelabelSettingsModal({ isOpen, onClose }) {
           <div className="space-y-2">
             <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2">
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              Schnell-Farbprofile
+              {t("whitelabel.presets_title", "Schnell-Farbprofile")}
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
               {PRESET_THEMES.map((p) => (
@@ -195,7 +197,7 @@ export default function WhitelabelSettingsModal({ isOpen, onClose }) {
                   key={p.name}
                   type="button"
                   onClick={() => applyPreset(p)}
-                  className="p-2.5 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-slate-700 text-left transition flex items-center gap-2.5"
+                  className="p-2.5 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-slate-700 text-left transition flex items-center gap-2.5 cursor-pointer"
                 >
                   <div className="flex -space-x-1.5">
                     <span className="w-4 h-4 rounded-full border border-slate-900" style={{ backgroundColor: p.primary }} />
@@ -212,11 +214,11 @@ export default function WhitelabelSettingsModal({ isOpen, onClose }) {
             {/* Left Column: Theme Details */}
             <div className="space-y-4">
               <div className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                Markenauftritt & Corporate Design
+                {t("whitelabel.branding_section", "Markenauftritt & Corporate Design")}
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Unternehmensname (EVU / Stadtwerk)</label>
+                <label className="block text-xs font-medium text-slate-300 mb-1">{t("whitelabel.company_name", "Unternehmensname (EVU / Stadtwerk)")}</label>
                 <div className="relative">
                   <Building className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
                   <input
@@ -230,7 +232,7 @@ export default function WhitelabelSettingsModal({ isOpen, onClose }) {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Support E-Mail-Adresse</label>
+                <label className="block text-xs font-medium text-slate-300 mb-1">{t("whitelabel.support_email", "Support E-Mail-Adresse")}</label>
                 <div className="relative">
                   <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
                   <input
@@ -245,7 +247,7 @@ export default function WhitelabelSettingsModal({ isOpen, onClose }) {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">Primärfarbe</label>
+                  <label className="block text-xs font-medium text-slate-300 mb-1">{t("whitelabel.primary_color", "Primärfarbe")}</label>
                   <div className="flex items-center gap-2 bg-slate-950 border border-slate-800 p-1.5 rounded-xl">
                     <input
                       type="color"
@@ -258,7 +260,7 @@ export default function WhitelabelSettingsModal({ isOpen, onClose }) {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">Akzentfarbe</label>
+                  <label className="block text-xs font-medium text-slate-300 mb-1">{t("whitelabel.accent_color", "Akzentfarbe")}</label>
                   <div className="flex items-center gap-2 bg-slate-950 border border-slate-800 p-1.5 rounded-xl">
                     <input
                       type="color"
@@ -272,7 +274,7 @@ export default function WhitelabelSettingsModal({ isOpen, onClose }) {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Logo URL (SVG / PNG)</label>
+                <label className="block text-xs font-medium text-slate-300 mb-1">{t("whitelabel.logo_url", "Logo URL (SVG / PNG)")}</label>
                 <input
                   type="url"
                   value={formData.logo_url}
@@ -283,7 +285,7 @@ export default function WhitelabelSettingsModal({ isOpen, onClose }) {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Eigene Subdomain / Domain (CNAME)</label>
+                <label className="block text-xs font-medium text-slate-300 mb-1">{t("whitelabel.domain_cname", "Eigene Subdomain / Domain (CNAME)")}</label>
                 <div className="relative">
                   <Globe className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
                   <input
@@ -301,8 +303,8 @@ export default function WhitelabelSettingsModal({ isOpen, onClose }) {
 
               <div className="flex items-center justify-between p-3.5 bg-slate-950 border border-slate-800 rounded-2xl">
                 <div>
-                  <div className="text-xs font-semibold text-slate-200">Whitelabel-Modus aktivieren</div>
-                  <div className="text-[11px] text-slate-400">Sharegy-Branding in Kopf- & Fußzeile ausblenden</div>
+                  <div className="text-xs font-semibold text-slate-200">{t("whitelabel.enable_mode", "Whitelabel-Modus aktivieren")}</div>
+                  <div className="text-[11px] text-slate-400">{t("whitelabel.hide_branding", "Sharegy-Branding in Kopf- & Fußzeile ausblenden")}</div>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
@@ -316,34 +318,28 @@ export default function WhitelabelSettingsModal({ isOpen, onClose }) {
               </div>
             </div>
 
-            {/* Right Column: Live Preview */}
+            {/* Right Column: Live Card Preview */}
             <div className="space-y-4">
-              <div className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                <Eye className="w-3.5 h-3.5 text-sky-400" />
-                Live-Vorschau Kundenportal
+              <div className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                {t("whitelabel.preview_title", "Live-Vorschau")}
               </div>
 
-              <div className="bg-slate-950 border border-slate-800 rounded-2xl p-5 space-y-4 shadow-inner">
+              <div className="p-5 rounded-2xl border border-slate-800 bg-slate-950/80 space-y-4">
                 {/* Header Preview */}
-                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-800">
                   <div className="flex items-center gap-2">
                     {formData.logo_url ? (
-                      <img src={formData.logo_url} alt="Logo" className="h-6 object-contain" />
+                      <img src={formData.logo_url} alt="Logo" className="h-6 max-w-[120px] object-contain" />
                     ) : (
-                      <div
-                        className="w-6 h-6 rounded-lg flex items-center justify-center text-white text-xs font-bold"
-                        style={{ backgroundColor: formData.primary_color }}
-                      >
-                        ⚡
+                      <div className="flex items-center gap-1.5 font-bold text-sm text-white">
+                        <span style={{ color: formData.primary_color }}>⚡</span>
+                        <span>{formData.company_legal_name || "Stadtwerke Sonnenstadt"}</span>
                       </div>
                     )}
-                    <span className="font-bold text-sm text-slate-200">
-                      {formData.company_legal_name || "Mein Energieportal"}
-                    </span>
                   </div>
                   <span
-                    className="text-[11px] px-2 py-0.5 rounded-full font-medium"
-                    style={{ backgroundColor: `${formData.primary_color}25`, color: formData.accent_color }}
+                    className="text-[10px] font-bold px-2 py-0.5 rounded-full text-white"
+                    style={{ backgroundColor: formData.accent_color }}
                   >
                     PRO Live
                   </span>
@@ -387,7 +383,7 @@ export default function WhitelabelSettingsModal({ isOpen, onClose }) {
               onClick={onClose}
               className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium rounded-xl transition cursor-pointer"
             >
-              Abbrechen
+              {t("common.cancel", "Abbrechen")}
             </button>
             <button
               type="submit"
@@ -395,7 +391,7 @@ export default function WhitelabelSettingsModal({ isOpen, onClose }) {
               className="flex items-center gap-2 px-6 py-2.5 bg-sky-500 hover:bg-sky-400 text-white text-sm font-semibold rounded-xl shadow-lg shadow-sky-500/25 transition cursor-pointer"
             >
               {saving && <RefreshCw className="w-4 h-4 animate-spin" />}
-              <span>Branding übernehmen</span>
+              <span>{t("whitelabel.save_branding", "Branding übernehmen")}</span>
             </button>
           </div>
 

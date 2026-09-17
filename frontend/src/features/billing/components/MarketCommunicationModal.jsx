@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../../api/client";
 import {
   FileText,
@@ -17,6 +18,7 @@ import {
 } from "lucide-react";
 
 export default function MarketCommunicationModal({ isOpen, onClose, tenantId }) {
+    const { t } = useTranslation();
   const [makoType, setMakoType] = useState("MSCONS");
   const [provider, setProvider] = useState("powercloud");
   const [loading, setLoading] = useState(false);
@@ -145,13 +147,13 @@ export default function MarketCommunicationModal({ isOpen, onClose, tenantId }) 
             <form onSubmit={handleExport} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-2">
-                  Nachrichten-Format & Transaktionstyp
+                  {t("mako.format_type", "Nachrichten-Format & Transaktionstyp")}
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => setMakoType("MSCONS")}
-                    className={`p-3 rounded-xl border text-left transition ${
+                    className={`p-3 rounded-xl border text-left transition cursor-pointer ${
                       makoType === "MSCONS"
                         ? "bg-emerald-500/10 border-emerald-500/40 text-emerald-300"
                         : "bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700"
@@ -163,7 +165,7 @@ export default function MarketCommunicationModal({ isOpen, onClose, tenantId }) 
                   <button
                     type="button"
                     onClick={() => setMakoType("UTILMD")}
-                    className={`p-3 rounded-xl border text-left transition ${
+                    className={`p-3 rounded-xl border text-left transition cursor-pointer ${
                       makoType === "UTILMD"
                         ? "bg-emerald-500/10 border-emerald-500/40 text-emerald-300"
                         : "bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700"
@@ -177,7 +179,7 @@ export default function MarketCommunicationModal({ isOpen, onClose, tenantId }) 
 
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Ziel-Abrechnungssystem / AS4-Gateway
+                  {t("mako.target_system", "Ziel-Abrechnungssystem / AS4-Gateway")}
                 </label>
                 <select
                   value={provider}
@@ -195,10 +197,10 @@ export default function MarketCommunicationModal({ isOpen, onClose, tenantId }) 
               <div className="p-4 bg-slate-950/70 border border-slate-800/80 rounded-2xl text-xs space-y-2 text-slate-400">
                 <div className="flex items-center gap-2 text-emerald-400 font-semibold">
                   <ShieldCheck className="w-4 h-4" />
-                  <span>BNetzA GPKE / WiM Konformität</span>
+                  <span>{t("mako.compliance_title", "BNetzA GPKE / WiM Konformität")}</span>
                 </div>
                 <p>
-                  Erzeugt standardisierte EDIFACT UNA/UNB/UNH/UNT Segmente mit automatischem Prüfsummenabgleich für die Gemeinschaftliche Gebäudeversorgung nach § 42b EnWG.
+                  {t("mako.compliance_desc", "Erzeugt standardisierte EDIFACT UNA/UNB/UNH/UNT Segmente mit automatischem Prüfsummenabgleich für die Gemeinschaftliche Gebäudeversorgung nach § 42b EnWG.")}
                 </p>
               </div>
 
@@ -206,14 +208,14 @@ export default function MarketCommunicationModal({ isOpen, onClose, tenantId }) 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-sm rounded-xl shadow-lg shadow-emerald-600/20 transition"
+                  className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-sm rounded-xl shadow-lg shadow-emerald-600/20 transition cursor-pointer"
                 >
                   {loading ? (
                     <RefreshCw className="w-4 h-4 animate-spin" />
                   ) : (
                     <Send className="w-4 h-4" />
                   )}
-                  <span>EDIFACT generieren & an AS4 senden</span>
+                  <span>{t("mako.generate_send", "EDIFACT generieren & an AS4 senden")}</span>
                 </button>
               </div>
             </form>
@@ -223,15 +225,15 @@ export default function MarketCommunicationModal({ isOpen, onClose, tenantId }) 
               <div className="flex justify-between items-center text-xs">
                 <span className="font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                   <Code2 className="w-3.5 h-3.5 text-emerald-400" />
-                  EDIFACT Rohdaten-Vorschau
+                  {t("mako.raw_preview", "EDIFACT Rohdaten-Vorschau")}
                 </span>
                 {exportResult?.raw_edifact_sample && (
                   <button
                     onClick={handleDownloadEdifact}
-                    className="flex items-center gap-1 text-emerald-400 hover:text-emerald-300 font-medium"
+                    className="flex items-center gap-1 text-emerald-400 hover:text-emerald-300 font-medium cursor-pointer"
                   >
                     <Download className="w-3.5 h-3.5" />
-                    <span>Download (.edi)</span>
+                    <span>{t("mako.download_edi", "Download (.edi)")}</span>
                   </button>
                 )}
               </div>
@@ -241,7 +243,7 @@ export default function MarketCommunicationModal({ isOpen, onClose, tenantId }) 
                   exportResult.raw_edifact_sample
                 ) : (
                   <span className="text-slate-600">
-                    Klicken Sie auf 'EDIFACT generieren & an AS4 senden', um die Vorschau zu laden.
+                    {t("mako.preview_placeholder", "Klicken Sie auf 'EDIFACT generieren & an AS4 senden', um die Vorschau zu laden.")}
                   </span>
                 )}
               </div>
@@ -250,7 +252,7 @@ export default function MarketCommunicationModal({ isOpen, onClose, tenantId }) 
                 <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs space-y-1">
                   <div className="text-emerald-300 font-semibold flex items-center gap-1.5">
                     <CheckCircle2 className="w-3.5 h-3.5" />
-                    <span>AS4 Übertragung bestätigt</span>
+                    <span>{t("mako.sent_confirmed", "AS4 Übertragung bestätigt")}</span>
                   </div>
                   <div className="text-slate-400">
                     Receipt-ID: <span className="font-mono text-slate-200">{exportResult.dispatch_info.receipt_id}</span>

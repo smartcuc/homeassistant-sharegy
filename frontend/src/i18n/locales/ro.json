@@ -77,7 +77,14 @@
     "searching": "Searching...",
     "turn_on": "Porniți",
     "turn_off": "Întrerupeți",
-    "settings": "Setări"
+    "settings": "Setări",
+    "unit_hours": "ore",
+    "menu": "Meniu",
+    "calculating": "Se calculează...",
+    "click_to_configure": "Click pentru a deschide și configura",
+    "click_to_open": "Click pentru a deschide",
+    "mode": "Mod",
+    "total": "Total"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -147,7 +154,16 @@
     "mode_hybrid": "Hub EMS și partajare",
     "mode_mieterstrom": "Energie pentru chiriași (§ 42a EnWG)",
     "mode_partner": "Panou partener",
-    "mode_sharing": "Partajare energie (Cooperativă)"
+    "mode_sharing": "Partajare energie (Cooperativă)",
+    "switch_context_hint": "Schimbă spațiul de lucru",
+    "context_label": "Domeniu",
+    "select_context": "Selectează vizualizarea",
+    "select_context_desc": "Adaptează navigarea la rolul tău",
+    "mieterstrom": "Energie pentru chiriași (§ 42a EnWG)",
+    "ggv": "Alimentare clădire (§ 42b EnWG)",
+    "home_title": "Către pagina principală și informații sharegy",
+    "open_menu": "Deschide meniul",
+    "theme": "Temă"
   },
   "dashboard": {
     "title": "Your Energy Hub ⚡",
@@ -216,7 +232,9 @@
     "group_by_rooms": "Geräte nach Räumen gruppieren",
     "no_matches_title": "Keine passenden Geräte gefunden",
     "no_matches_desc": "Für die aktuelle Filterkombination oder Suche liegen keine Geräte vor.",
-    "inverter": "Wechselrichter"
+    "inverter": "Wechselrichter",
+    "add_wallbox_btn": "Crează și conectează stația 🚀",
+    "setup_unconfigured": "Configurați dispozitivele neconfigurate"
   },
   "device_add": {
     "modal_title": "Connect New Device",
@@ -502,7 +520,9 @@
     "insight_autarky_low": "High grid reliance: Only {{rate}}% of your electricity demand was covered by solar/storage.",
     "insight_top_consumer": "Top consumer: {{name}} with {{share}}% of total electricity ({{solar}}% solar share).",
     "insight_financial_benefit": "Financial benefit: Self-consumption and grid feed-in generated a net benefit of {{amount}} €.",
-    "period_yesterday": "Ieri"
+    "period_yesterday": "Ieri",
+    "understand_sharing": "Înțelegerea partajării energiei",
+    "how_distributed": "Așa este distribuită energia în comunitatea ta:"
   },
   "interfaces": {
     "title": "Interfaces",
@@ -652,7 +672,41 @@
     "timezone_default": "Implicit (Europe/Berlin)",
     "timezone_error": "Eroare la salvarea fusului orar.",
     "timezone_saved": "Fusul orar a fost salvat cu succes.",
-    "vat_id": "Cod de înregistrare fiscală (CIF / TVA)"
+    "vat_id": "Cod de înregistrare fiscală (CIF / TVA)",
+    "account_settings_heading": "Setările contului de utilizator",
+    "account_settings_title": "Cont și identificare",
+    "active_session": "Sesiune activă și dispozitive",
+    "active_session_desc": "Informații despre browserul curent și ultima autentificare.",
+    "address_title": "Adresă de domiciliu și facturare",
+    "billing_email": "E-mail pentru facturare (Diferit)",
+    "billing_email_hint": "Facturile vor fi trimise la această adresă. Dacă este gol, se folosește e-mailul de autentificare.",
+    "billing_name": "Destinatar factură / Departament",
+    "change_email_btn": "Schimbă e-mailul",
+    "city": "Oraș",
+    "company_address_desc": "Adresa oficială a companiei pentru emiterea facturilor.",
+    "company_address_title": "Adresă companie și facturare",
+    "company_details_desc": "Introdu numele oficial al companiei și codul TVA pentru facturi corecte.",
+    "company_details_title": "Datele companiei și CIF/TVA",
+    "company_name": "Numele oficial al companiei",
+    "confirm_revoke": "Șterge acum și deconectează-te",
+    "contact_title": "Informații de contact",
+    "country": "Țară",
+    "email_notifications": "Rezumate prin e-mail și rapoarte de sistem",
+    "first_name": "Prenume",
+    "header_desc": "Gestionează datele personale, datele companiei, facturile și notificările.",
+    "header_title": "Contul meu",
+    "house_number": "Nr.",
+    "landing_page_desc": "Alege pagina de start preferată la accesarea platformei.",
+    "revoke_error": "Eroare la ștergerea linkurilor Magic Link.",
+    "revoke_links_btn": "Șterge toate linkurile și deconectează-te",
+    "revoke_modal_sub": "Acțiune de securitate pentru invalidarea imediată a linkurilor deschise",
+    "revoke_modal_text": "Sigur doriți să invalidați definitiv toate linkurile Magic Link emise pentru contul dvs.?",
+    "revoke_modal_title": "Ștergeți toate linkurile Magic Link și încheiați sesiunea?",
+    "revoke_point_1": "Toate linkurile trimise anterior prin e-mail devin imediat invalide.",
+    "revoke_point_2": "Sesiunea ta activă se va încheia imediat pentru a-ți proteja contul (Auto-Logout).",
+    "revoke_point_3": "Poți solicita oricând un link nou pe pagina de autentificare.",
+    "revoke_success": "Toate linkurile Magic Link au fost șterse cu succes. Vei fi deconectat.",
+    "revoking": "Se șterge și se deconectează..."
   },
   "settings": {
     "account": "User Account & Settings",
@@ -1059,7 +1113,13 @@
       "cancel_anytime": "Cancel monthly · Instant activation",
       "later": "Later",
       "upgrade_now": "Upgrade to Pro now"
-    }
+    },
+    "manage_plan": "Gestionează abonamentul și planurile",
+    "plan_details_desc": "Prezentare generală a planului Sharegy EMS, a ciclului de facturare și a datelor de plată.",
+    "plan_details_title": "Stare plan și facturare",
+    "pro_features": "Include istoric nelimitat, prognoze multi-senzor, optimizare tarife dinamice și alerte push.",
+    "to_community_statements": "Mergi la deconturile comunității",
+    "upgrade_pro": "Treci la Pro"
   },
   "arbitrage": {
     "title": "Grid-Charging Arbitrage & Battery Simulator",
@@ -1337,7 +1397,17 @@
     "timezone_disclaimer": "Detection is based on your browser settings and may differ when using VPNs or proxies.",
     "ready_title": "Your dashboard is ready 🚀",
     "ready_subtitle": "Start managing your energy now.",
-    "to_dashboard_btn": "Go to dashboard"
+    "to_dashboard_btn": "Go to dashboard",
+    "step_1_heading": "1. Ce echipamente ai?",
+    "step_1_sub": "Selectează sistemul solar și marii consumatori.",
+    "step_1_title": "Hardware",
+    "step_2_heading": "2. Ce tarif de energie folosești în prezent?",
+    "step_2_sub": "Ne ajută să stabilim dacă un tarif dinamic de bursă este avantajos pentru tine.",
+    "step_2_title": "Tarif de energie",
+    "step_3_heading": "Profilul tău energetic personal:",
+    "step_3_sub": "Pe baza datelor tale am calculat potențialul de economisire.",
+    "step_3_title": "Profilul tău energetic",
+    "welcome_subtitle_custom": "În doar 3 pași rapizi aflăm profilul tău energetic și potențialul maxim de economisire."
   },
   "help": {
     "edit_article_title": "Edit Help Article (Staff Live Editor)",
@@ -1433,7 +1503,9 @@
     "effective_price": "Effective Price",
     "minimum": "Minimum",
     "maximum": "Maximum",
-    "average": "Average"
+    "average": "Average",
+    "change_tariff": "Comută la tarif dinamic →",
+    "epex_tooltip": "Prețul spot curent al energiei electrice (EPEX Spot)"
   },
   "legal": {
     "impressum_title": "Legal Notice",
@@ -1496,7 +1568,9 @@
     "modal_delete_in_field": ":",
     "confirm_delete": "Delete Permanently",
     "deleting": "Deleting account...",
-    "delete_failed": "Deletion failed."
+    "delete_failed": "Deletion failed.",
+    "cat_b2b": "Datele companiei și chitanțe",
+    "export_success": "Exportul de date a fost descărcat cu succes."
   },
   "support": {
     "btn_label": "Support",
@@ -1749,7 +1823,15 @@
     "feature_enwg_title": "Limitare de rețea § 14a EnWG",
     "feature_enwg_desc": "Procesare automată a semnalelor de reducere a puterii de la operatorul de rețea fără pierdere de confort.",
     "unlock_pro_btn": "Deblochează controlul energiei cu Sharegy Pro",
-    "click_to_unlock": "Faceți clic aici pentru a debloca toate opțiunile de control cu Sharegy Pro"
+    "click_to_unlock": "Faceți clic aici pentru a debloca toate opțiunile de control cu Sharegy Pro",
+    "heating_active": "Încălzire activă",
+    "master_mode": "Mod principal:",
+    "mode": "Mod de operare",
+    "mode_label": "Mod:",
+    "power_live": "Putere (Live)",
+    "preheating_badge": "Preîncărcare termică",
+    "room_temp": "Temperatura camerei",
+    "standby": "Standby / Pasiv"
   },
   "consumers": {
     "warmwasser": "Hot Water",
@@ -1886,7 +1968,8 @@
     "reserve": "Reserve",
     "efficiency": "Efficiency",
     "mode_pv_autarky": "PV Autarky",
-    "open_control_btn": "Open Energy Control"
+    "open_control_btn": "Open Energy Control",
+    "mode_forced_discharge": "🔋 Descărcare forțată"
   },
   "wallbox_boost": "⚡ Wallbox Boost 11kW (2h)",
   "battery_reserve": "🔋 Speicher-Schutz (100% Reserve)",
@@ -2223,7 +2306,9 @@
     "error_delete_failed": "Eroare la deconectarea integrării.",
     "add_inverter_btn": "Conectează invertor",
     "sungrow_reauth_btn": "Reînnoiește autorizarea iSolarCloud",
-    "sungrow_api_active": "API Sungrow iSolarCloud este autorizat și activ"
+    "sungrow_api_active": "API Sungrow iSolarCloud este autorizat și activ",
+    "sungrow_api_desc": "Toate invertoarele și bateriile Sungrow detectate din contul tău iSolarCloud sunt conectate și se sincronizează automat.",
+    "sungrow_reauth_short": "Reautorizează"
   },
   "shelly_cloud": {
     "error_no_key": "Please enter your Shelly Cloud auth key / token.",
@@ -2300,7 +2385,16 @@
     "cheapest_hours": "Cheapest Spot Hours",
     "savings_potential": "Savings Potential",
     "per_15k_km": "at 15,000 km annual mileage",
-    "vs_combustion": "-{{pct}}% vs. ICE / Combustion"
+    "vs_combustion": "-{{pct}}% vs. ICE / Combustion",
+    "pro_exclusive": "Exclusiv Sharegy Pro",
+    "hero_title": "Încărcați mașina electrică gratuit cu 100% energie solară și la cele mai ieftine ore de pe bursă",
+    "pv_surplus_title": "Încărcare exclusivă din surplusul fotovoltaic",
+    "dynamic_spot_title": "Pilot automat pentru prețuri spot dinamice",
+    "ocpp_shelly_title": "Suport OCPP (1.6 / 2.0.1 / 2.1) și Shelly",
+    "target_charge_title": "Încărcare țintă și oră de plecare",
+    "fuel_radar_title": "Radar de prețuri la combustibil în timp real MTS-K",
+    "trip_history_title": "Istoric călătorii și încărcări",
+    "unlock_pro": "Deblocați e-mobilitatea cu Sharegy Pro"
   },
   "heating": {
     "title": "Heating & Thermal Storage",
@@ -2465,7 +2559,19 @@
     "get_variables_btn": "🔍 Fetch GetVariables",
     "no_variables_data": "No stored Device Model variables available. Click \"Fetch GetVariables\".",
     "action_success": "Action executed successfully.",
-    "action_error": "Execution error."
+    "action_error": "Execution error.",
+    "rfid_active": "Activ",
+    "rfid_add_success": "Cipul RFID a fost adăugat cu succes.",
+    "rfid_add_title": "Adaugă un nou cip / card RFID",
+    "rfid_delete_confirm": "Sigur doriți să ștergeți acest tag RFID?",
+    "rfid_deleted": "Cipul RFID a fost șters.",
+    "rfid_empty": "Niciun cip RFID configurat încă. Adaugă primul tău tag mai sus.",
+    "rfid_id_label": "UID / ID tag RFID",
+    "rfid_id_placeholder": "ex. TAG-01 sau 04A1B2C3",
+    "rfid_inactive": "Blocat",
+    "rfid_list_title": "Taguri RFID înregistrate",
+    "rfid_name_label": "Denumire",
+    "rfid_name_placeholder": "ex. Mașină de serviciu / Tag 1"
   },
   "system_status": {
     "title": "System Status & Live Infrastructure",
@@ -2692,5 +2798,153 @@
     "select_role_label": "1. Selectează rolul și permisiunile:",
     "share_btn": "Împărtășește realizările",
     "whitelabel_btn": "Whitelabel și branding"
+  },
+  "admin_mieterstrom": {
+    "title": "Energie pentru chiriași (§ 42a EnWG)",
+    "badge_model": "Model de alimentare completă (T&C)",
+    "subtitle": "Model de alimentare completă: energie solară locală și curent rezidual într-o singură factură cu subvenție (§ 21 alin. 3 EEG)",
+    "btn_wizard": "Ghid energie chiriași (3 pași)",
+    "btn_share": "Distribuie cartierul",
+    "tab_cockpit": "🏢 Panou chiriași",
+    "tab_apartments": "🏠 Apartamente și chiriași",
+    "tab_settlement": "💰 Facturare completă",
+    "tab_meters": "⚡ Contoare principale și secundare",
+    "tab_vpp": "🔌 Flexibilitate cartier",
+    "tab_msb": "⚡ Contorizare inteligentă și gateway-uri",
+    "tab_audit": "📜 Jurnal de audit"
+  },
+  "admin_ggv": {
+    "title": "Alimentare comună a clădirii (§ 42b EnWG)",
+    "badge_model": "Asociație de proprietari și clădire rezidențială",
+    "subtitle": "Partajarea energiei solare locale conform cotelor de proprietate (1/1000). Fără obligație de furnizor – fiecare rezident își păstrează propriul contract de energie.",
+    "btn_wizard": "Ghid asociație de proprietari (3 pași)",
+    "btn_share": "Distribuie proprietatea",
+    "tab_cockpit": "⚖️ Panou solar comunitar",
+    "tab_units": "🏢 Proprietari și cote de proprietate",
+    "tab_settlement": "💰 Facturi solare și asociație"
+  },
+  "admin_sharing": {
+    "title": "Partajare regională de energie (Cooperativă)",
+    "badge_model": "Statut cooperativă (GenG)",
+    "subtitle": "Echilibrare smart meter la 15 minute și alocare în rețeaua publică cu comunicare de piață BNetzA AS4/MSCONS",
+    "btn_wizard": "Ghid cooperativă (3 pași)",
+    "btn_mako": "Comunicare de piață (AS4)",
+    "tab_cockpit": "⚡ Panou energie comunitară",
+    "tab_members": "👥 Membrii cooperativei",
+    "tab_applications": "📋 Cereri de aderare",
+    "tab_settlement": "💰 Decontare partajare 15 min"
+  },
+  "admin_communities": {
+    "title": "Cartiere și comunități (Portofoliu)",
+    "subtitle": "Panou central de administrare și portofoliu pentru toate cartierele de chiriași, asociații și comunități de energie.",
+    "create_community_btn": "Crează o nouă comunitate"
+  },
+  "wizard": {
+    "step1_title": "1. Model și date de bază",
+    "step2_title": "2. Tarife și termeni",
+    "step3_title": "3. Invitații și finalizare"
+  },
+  "admin_vpp": {
+    "title": "Centrală electrică virtuală (VPP) și centru de flexibilitate",
+    "subtitle": "Agregare, rezervă secundară (aFRR), Redispatch 2.0 și compensare piață 80/20",
+    "run_clearing": "Executare compensare 80/20",
+    "clearing_running": "Compensare în curs...",
+    "start_test_dispatch": "Porniți expedierea de test",
+    "pos_flex": "Putere de reglare pozitivă (+kW)",
+    "pos_flex_sub": "Flexibilitate de injecție (descărcare)",
+    "neg_flex": "Putere de reglare negativă (-kW)",
+    "neg_flex_sub": "Flexibilitate de consum (încărcare surplus)",
+    "battery_fleet": "Flotă de baterii (stocare)",
+    "reaction_time": "Timp de reacție (SLA)",
+    "schedule_title": "Program de 96 de sferturi de oră Redispatch 2.0 și aFRR",
+    "schedule_subtitle": "Putere programată raportată operatorilor de transport și sistem (Connect+)",
+    "live_active": "Activ în direct",
+    "tso_filter_title": "Filtru OTS și piață",
+    "control_area": "Zonă de control (OTS):",
+    "all_control_areas": "Toate zonele de control (la nivel național)",
+    "product_classification": "Clasificare produs:",
+    "dispatches_title": "Evenimente recente de expediere și apeluri",
+    "dispatches_subtitle": "Prezentare generală a apelurilor automate de piață și rețea",
+    "th_timestamp": "Marcaj temporal",
+    "th_order_id": "ID comandă",
+    "th_target_power": "Putere țintă",
+    "th_duration": "Durată",
+    "th_fulfillment": "Îndeplinire",
+    "th_revenue": "Venit (80/20)",
+    "modal_title": "Declanșare expediere manuală de flexibilitate",
+    "target_power_label": "Putere țintă (kW):",
+    "duration_label": "Durată (minute):",
+    "direction_label": "Direcție:",
+    "discharge_option": "Descărcare (flexibilitate pozitivă în rețea)",
+    "charge_option": "Încărcare (flexibilitate negativă din rețea)",
+    "reason_label": "Motiv / Referință comandă:"
+  },
+  "whitelabel": {
+    "presets_title": "Profiluri de culoare presetate",
+    "branding_section": "Aspectul mărcii și identitatea corporativă",
+    "company_name": "Numele companiei (furnizor de utilități)",
+    "support_email": "Adresă de e-mail pentru suport",
+    "primary_color": "Culoare primară",
+    "accent_color": "Culoare de accent",
+    "logo_url": "URL siglă (SVG / PNG)",
+    "domain_cname": "Subdomeniu / Domeniu personalizat (CNAME)",
+    "enable_mode": "Activați modul Whitelabel",
+    "hide_branding": "Ascundeți sigla Sharegy în antet și subsol",
+    "preview_title": "Previzualizare în direct",
+    "save_branding": "Aplicați identitatea vizuală"
+  },
+  "mako": {
+    "format_type": "Formatul mesajului și tipul tranzacției",
+    "target_system": "Sistem de facturare țintă / Gateway AS4",
+    "compliance_title": "Conformitate BNetzA GPKE / WiM",
+    "compliance_desc": "Generează segmente standardizate EDIFACT UNA/UNB/UNH/UNT cu verificare automată a sumei de control pentru alimentarea comună a clădirilor conform § 42b EnWG.",
+    "generate_send": "Generați EDIFACT și trimiteți la AS4",
+    "raw_preview": "Previzualizare date brute EDIFACT",
+    "download_edi": "Descărcare (.edi)",
+    "preview_placeholder": "Faceți clic pe 'Generați EDIFACT și trimiteți la AS4' pentru a încărca previzualizarea.",
+    "sent_confirmed": "Transmisie AS4 confirmată"
+  },
+  "cooperative": {
+    "open_applications": "Cereri în așteptare",
+    "approved_members": "Membri aprobați",
+    "public_join_link": "Link public de înregistrare",
+    "no_applications_found": "Nu s-au găsit cereri de înscriere pentru această selecție",
+    "share_join_link_hint": "Partajați linkul public de înscriere pentru a permite înregistrarea digitală noilor membri ai cooperativei.",
+    "applicant": "Solicitant",
+    "residence_address": "Domiciliu / Adresă",
+    "shares_amount": "Părți sociale și sumă",
+    "statute_consent": "Acord statut",
+    "status_resolution": "Status și rezoluție"
+  },
+  "master_meter": {
+    "th_tenant": "Chiriaș / Unitate",
+    "th_quota": "Cotă de participare (MEA)",
+    "th_consumption": "Consum",
+    "th_solar_coverage": "Acoperire solară",
+    "th_residual_grid": "Consum rezidual din rețea",
+    "th_autarky": "Autarhie"
+  },
+  "share": {
+    "tree_equivalent": "Echivalent cu",
+    "choose_platform": "Alegeți platforma:",
+    "text_adjusted": "Textul este adaptat automat",
+    "share_whatsapp": "Partajați pe WhatsApp",
+    "share_linkedin": "Partajați pe LinkedIn",
+    "share_x": "Partajați pe X"
+  },
+  "cooperative_join": {
+    "loading": "Se încarcă portalul de înregistrare...",
+    "not_found": "Comunitatea nu a fost găsită",
+    "success_title": "Cerere trimisă cu succes",
+    "application_id": "ID cerere:",
+    "shares_subscribed": "Părți sociale subscrise:",
+    "statute_version": "Versiunea aprobată a statutului:",
+    "waiting_board": "Așteaptă aprobarea consiliului"
+  },
+  "email_confirm": {
+    "verifying_title": "Se verifică adresa de e-mail...",
+    "verifying_desc": "Vă rugăm să așteptați, tokenul de securitate este verificat.",
+    "success_title": "Adresa de e-mail a fost modificată!",
+    "failed_title": "Verificarea a eșuat"
   }
 }

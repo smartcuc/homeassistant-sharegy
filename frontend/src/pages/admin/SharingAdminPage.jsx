@@ -283,14 +283,14 @@ export default function SharingAdminPage() {
                             </h1>
                             <span className="shrink-0 text-xs font-bold px-3 py-1 rounded-full border flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800">
                                 <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></span>
-                                ⚡ Regionales Energy Sharing (Bürgerenergie eG)
+                                {t("admin_sharing.title", "⚡ Regionales Energy Sharing (Bürgerenergie eG)")}
                             </span>
                             <span className="shrink-0 text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60">
-                                Genossenschaftssatzung (GenG)
+                                {t("admin_sharing.badge_model", "Genossenschaftssatzung (GenG)")}
                             </span>
                         </div>
                         <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-                            15-Minuten Smart-Meter-Bilanzierung & Verteilnetz-Allokation der Bürgerenergiegenossenschaft mit BNetzA AS4/MSCONS Marktkommunikation
+                            {t("admin_sharing.subtitle", "15-Minuten Smart-Meter-Bilanzierung & Verteilnetz-Allokation der Bürgerenergiegenossenschaft mit BNetzA AS4/MSCONS Marktkommunikation")}
                         </p>
                     </div>
                 </div>
@@ -311,7 +311,7 @@ export default function SharingAdminPage() {
                         className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-teal-50 dark:hover:bg-teal-950/40 text-slate-700 dark:text-slate-200 hover:text-teal-600 dark:hover:text-teal-400 border border-slate-200 dark:border-slate-800 hover:border-teal-300 transition-all shadow-xs flex items-center gap-2 cursor-pointer"
                     >
                         <span>📄</span>
-                        <span>Marktkommunikation (AS4)</span>
+                        <span>{t("admin_sharing.btn_mako", "Marktkommunikation (AS4)")}</span>
                     </button>
                     <button
                         type="button"
@@ -319,7 +319,7 @@ export default function SharingAdminPage() {
                         className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 border border-slate-200 dark:border-slate-800 hover:border-emerald-300 transition-all shadow-xs flex items-center gap-2 cursor-pointer"
                     >
                         <span>✨</span>
-                        <span>Genossenschafts-Assistent (3 Schritte)</span>
+                        <span>{t("admin_sharing.btn_wizard", "Genossenschafts-Assistent (3 Schritte)")}</span>
                     </button>
                     <button
                         type="button"
@@ -327,7 +327,7 @@ export default function SharingAdminPage() {
                         className="px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/80 transition-all shadow-xs flex items-center gap-2 cursor-pointer"
                     >
                         <span>📢</span>
-                        <span>Erfolge teilen</span>
+                        <span>{t("tenant.share_btn", "Erfolge teilen")}</span>
                     </button>
                 </div>
             </div>
@@ -340,7 +340,7 @@ export default function SharingAdminPage() {
                         activeTab === "cockpit" ? "bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 font-bold shadow-xs" : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                     }`}
                 >
-                    ⚡ Bürgerenergie-Cockpit
+                    {t("admin_sharing.tab_cockpit", "⚡ Bürgerenergie-Cockpit")}
                 </button>
                 <button
                     onClick={() => handleTabChange("members")}
@@ -348,7 +348,7 @@ export default function SharingAdminPage() {
                         activeTab === "members" ? "bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 font-bold shadow-xs" : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                     }`}
                 >
-                    👥 Genossenschaftsmitglieder ({members.length})
+                    {t("admin_sharing.tab_members", "👥 Genossenschaftsmitglieder")} ({members.length})
                 </button>
                 <button
                     onClick={() => handleTabChange("applications")}
@@ -356,7 +356,7 @@ export default function SharingAdminPage() {
                         activeTab === "applications" ? "bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 font-bold shadow-xs" : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                     }`}
                 >
-                    📋 Beitrittsanträge
+                    {t("admin_sharing.tab_applications", "📋 Beitrittsanträge")}
                 </button>
                 <button
                     onClick={() => handleTabChange("settlement")}
@@ -364,7 +364,7 @@ export default function SharingAdminPage() {
                         activeTab === "settlement" ? "bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 font-bold shadow-xs" : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                     }`}
                 >
-                    💰 15m-Sharing-Abrechnung
+                    {t("admin_sharing.tab_settlement", "💰 15m-Sharing-Abrechnung")}
                 </button>
                 <button
                     onClick={() => handleTabChange("meters")}

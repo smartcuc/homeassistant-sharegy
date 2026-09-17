@@ -183,7 +183,7 @@ export default function AppTopbar({ onOpenMobileMenu }) {
                         <button
                             type="button"
                             onClick={onOpenMobileMenu}
-                            aria-label="Menü öffnen"
+                            aria-label={t("nav.open_menu", "Menü öffnen")}
                             className="lg:hidden p-1 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition shrink-0 cursor-pointer"
                         >
                             <Menu className="w-5 h-5" />
@@ -360,7 +360,7 @@ export default function AppTopbar({ onOpenMobileMenu }) {
                     <button
                         type="button"
                         onClick={() => setSpotModalOpen(true)}
-                        title="Aktueller Börsenstrompreis (EPEX Spot)"
+                        title={t("spot_price.epex_tooltip", "Aktueller Börsenstrompreis (EPEX Spot)")}
                         className={`
                             flex
                             items-center

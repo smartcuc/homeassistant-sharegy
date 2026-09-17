@@ -84,11 +84,11 @@ export default function MobileMenuDrawer({ isOpen, onClose }) {
                             <div className="flex items-center gap-1.5 mt-0.5">
                                 {isPro ? (
                                     <span className="text-[10px] font-bold px-2 py-0.2 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
-                                        ⭐ Pro Aktiv
+                                        ⭐ {t("common.pro_active", "Pro Aktiv")}
                                     </span>
                                 ) : (
                                     <span className="text-[10px] font-medium px-2 py-0.2 rounded-full bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                                        Free Plan
+                                        {t("common.free_plan", "Free Plan")}
                                     </span>
                                 )}
                             </div>
@@ -165,14 +165,14 @@ export default function MobileMenuDrawer({ isOpen, onClose }) {
                 {/* Footer Controls */}
                 <div className="p-4 border-t border-slate-200 dark:border-slate-800 space-y-2 bg-slate-50 dark:bg-slate-950/50">
                     <div className="flex items-center justify-between">
-                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Design</span>
+                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400">{t("nav.theme", "Design")}</span>
                         <button
                             type="button"
                             onClick={toggleTheme}
                             className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs cursor-pointer"
                         >
                             {isDark ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5 text-slate-600" />}
-                            <span>{isDark ? "Hell" : "Dunkel"}</span>
+                            <span>{isDark ? t("common.light", "Hell") : t("common.dark", "Dunkel")}</span>
                         </button>
                     </div>
 
@@ -183,7 +183,7 @@ export default function MobileMenuDrawer({ isOpen, onClose }) {
                             className="flex flex-col items-center justify-center p-2 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800 transition"
                         >
                             <User className="w-4 h-4 mb-1" />
-                            <span className="text-[10px] font-medium">Profil</span>
+                            <span className="text-[10px] font-medium">{t("nav.profile", "Profil")}</span>
                         </Link>
                         <Link
                             to="/app/billing"
@@ -191,7 +191,7 @@ export default function MobileMenuDrawer({ isOpen, onClose }) {
                             className="flex flex-col items-center justify-center p-2 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800 transition"
                         >
                             <CreditCard className="w-4 h-4 mb-1" />
-                            <span className="text-[10px] font-medium">Tarif</span>
+                            <span className="text-[10px] font-medium">{t("nav.billing", "Tarif")}</span>
                         </Link>
                         <Link
                             to="/app/support-hub"
@@ -199,7 +199,7 @@ export default function MobileMenuDrawer({ isOpen, onClose }) {
                             className="flex flex-col items-center justify-center p-2 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800 transition"
                         >
                             <LifeBuoy className="w-4 h-4 mb-1" />
-                            <span className="text-[10px] font-medium">Hilfe</span>
+                            <span className="text-[10px] font-medium">{t("nav.help", "Hilfe")}</span>
                         </Link>
                     </div>
 
@@ -209,7 +209,7 @@ export default function MobileMenuDrawer({ isOpen, onClose }) {
                         className="w-full flex items-center justify-center gap-2 p-2.5 mt-2 rounded-xl text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 transition cursor-pointer"
                     >
                         <LogOut className="w-4 h-4" />
-                        <span>Abmelden</span>
+                        <span>{t("common.logout", "Abmelden")}</span>
                     </button>
                 </div>
             </div>

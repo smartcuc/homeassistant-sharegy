@@ -223,11 +223,11 @@ export default function VirtualMasterMeterHub({ tenant }) {
                     </div>
                     <div className="flex items-baseline gap-2">
                         <div className="text-base font-bold text-slate-900 dark:text-white">
-                            +{totals.total_grid_import_kwh.toFixed(1)} <span className="text-[10px] font-normal text-slate-400">Bezug</span>
+                            +{totals.total_grid_import_kwh.toFixed(1)} <span className="text-[10px] font-normal text-slate-400">{t("common.grid_import", "Bezug")}</span>
                         </div>
                         <span className="text-slate-400">/</span>
                         <div className="text-base font-bold text-emerald-600 dark:text-emerald-400">
-                            -{totals.total_grid_export_kwh.toFixed(1)} <span className="text-[10px] font-normal text-slate-400">Einspeisung</span>
+                            -{totals.total_grid_export_kwh.toFixed(1)} <span className="text-[10px] font-normal text-slate-400">{t("common.grid_export", "Einspeisung")}</span>
                         </div>
                     </div>
                     <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
@@ -246,15 +246,15 @@ export default function VirtualMasterMeterHub({ tenant }) {
                         </h3>
                     </div>
                     <div className="flex items-center gap-3 text-[11px] font-semibold text-slate-500">
-                        <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span> Erzeugung</span>
-                        <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span> Verbrauch</span>
-                        <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span> Geteilt</span>
+                        <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span> {t("common.generation", "Erzeugung")}</span>
+                        <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span> {t("common.consumption", "Verbrauch")}</span>
+                        <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span> {t("common.shared", "Geteilt")}</span>
                     </div>
                 </div>
 
                 {timeline.length === 0 ? (
                     <div className="py-12 text-center text-slate-400 text-xs">
-                        Keine 15-Minuten-Messwerte für das gewählte Datum vorhanden.
+                        {t("common.no_data", "Keine Messwerte für das gewählte Datum vorhanden.")}
                     </div>
                 ) : (
                     <div className="space-y-1.5 max-h-80 overflow-y-auto pr-1">
@@ -266,19 +266,19 @@ export default function VirtualMasterMeterHub({ tenant }) {
                                 
                                 <div className="flex-1 grid grid-cols-4 gap-2 text-right">
                                     <div>
-                                        <span className="text-[10px] text-slate-400 block">Erzeugung</span>
+                                        <span className="text-[10px] text-slate-400 block">{t("common.generation", "Erzeugung")}</span>
                                         <span className="font-bold text-amber-600 dark:text-amber-400">{slot.generation_kwh.toFixed(2)} kWh</span>
                                     </div>
                                     <div>
-                                        <span className="text-[10px] text-slate-400 block">Verbrauch</span>
+                                        <span className="text-[10px] text-slate-400 block">{t("common.consumption", "Verbrauch")}</span>
                                         <span className="font-bold text-slate-800 dark:text-slate-200">{slot.consumption_kwh.toFixed(2)} kWh</span>
                                     </div>
                                     <div>
-                                        <span className="text-[10px] text-slate-400 block">Geteilt</span>
+                                        <span className="text-[10px] text-slate-400 block">{t("common.shared", "Geteilt")}</span>
                                         <span className="font-bold text-emerald-600 dark:text-emerald-400">{slot.shared_solar_kwh.toFixed(2)} kWh</span>
                                     </div>
                                     <div>
-                                        <span className="text-[10px] text-slate-400 block">Autarkie</span>
+                                        <span className="text-[10px] text-slate-400 block">{t("common.autarky", "Autarkie")}</span>
                                         <span className="font-bold text-indigo-600 dark:text-indigo-400">{slot.self_sufficiency_rate_pct.toFixed(0)}%</span>
                                     </div>
                                 </div>
@@ -306,12 +306,12 @@ export default function VirtualMasterMeterHub({ tenant }) {
                     <table className="w-full text-left text-xs">
                         <thead>
                             <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-400 font-semibold">
-                                <th className="pb-3">Mieter / Partei</th>
-                                <th className="pb-3 text-right">Beteiligungsquote (MEA)</th>
-                                <th className="pb-3 text-right">Verbrauch</th>
-                                <th className="pb-3 text-right">Solar-Deckung</th>
-                                <th className="pb-3 text-right">Restnetzbezug</th>
-                                <th className="pb-3 text-right">Autarkie</th>
+                                <th className="pb-3">{t("master_meter.th_tenant", "Mieter / Partei")}</th>
+                                <th className="pb-3 text-right">{t("master_meter.th_quota", "Beteiligungsquote (MEA)")}</th>
+                                <th className="pb-3 text-right">{t("master_meter.th_consumption", "Verbrauch")}</th>
+                                <th className="pb-3 text-right">{t("master_meter.th_solar_coverage", "Solar-Deckung")}</th>
+                                <th className="pb-3 text-right">{t("master_meter.th_residual_grid", "Restnetzbezug")}</th>
+                                <th className="pb-3 text-right">{t("master_meter.th_autarky", "Autarkie")}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800">

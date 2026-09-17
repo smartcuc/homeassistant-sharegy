@@ -93,10 +93,10 @@ export default function MobilityPage() {
                     <div className="relative z-10 max-w-3xl space-y-4">
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 text-xs font-bold uppercase tracking-wider">
                             <span>⭐</span>
-                            <span>Sharegy Pro Exklusiv</span>
+                            <span>{t("mobility.pro_exclusive", "Sharegy Pro Exklusiv")}</span>
                         </div>
                         <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight">
-                            Lade dein E-Auto kostenlos mit 100% Sonnenstrom & günstigsten Börsenstunden
+                            {t("mobility.hero_title", "Lade dein E-Auto kostenlos mit 100% Sonnenstrom & günstigsten Börsenstunden")}
                         </h2>
                         <p className="text-indigo-200/80 text-sm sm:text-base leading-relaxed">
                             Automatische Phasenumschaltung, stufenlose Ampere-Steuerung (1,4–11 kW) und intelligentes Laden bei Negativpreisen. Spare bis zu 1.500 € Kraftstoffkosten jedes Jahr.
@@ -107,7 +107,7 @@ export default function MobilityPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 relative z-10">
                         <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
                             <div className="text-2xl">☀️</div>
-                            <h3 className="text-sm font-bold text-white">Reines PV-Überschussladen</h3>
+                            <h3 className="text-sm font-bold text-white">{t("mobility.pv_surplus_title", "Reines PV-Überschussladen")}</h3>
                             <p className="text-xs text-indigo-200/70 leading-relaxed">
                                 Startet den Ladevorgang erst, wenn echte Solar-Überschüsse anliegen – ohne teuren Netzstrom.
                             </p>
@@ -115,7 +115,7 @@ export default function MobilityPage() {
 
                         <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
                             <div className="text-2xl">💶</div>
-                            <h3 className="text-sm font-bold text-white">Dynamischer Börsenstrom-Autopilot</h3>
+                            <h3 className="text-sm font-bold text-white">{t("mobility.dynamic_spot_title", "Dynamischer Börsenstrom-Autopilot")}</h3>
                             <p className="text-xs text-indigo-200/70 leading-relaxed">
                                 Lädt nachts vollautomatisch in den günstigsten Börsenstunden oder bei negativen Strompreisen.
                             </p>
@@ -123,7 +123,7 @@ export default function MobilityPage() {
 
                         <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
                             <div className="text-2xl">⚡</div>
-                            <h3 className="text-sm font-bold text-white">OCPP (1.6 / 2.0.1 / 2.1) & Shelly Support</h3>
+                            <h3 className="text-sm font-bold text-white">{t("mobility.ocpp_shelly_title", "OCPP (1.6 / 2.0.1 / 2.1) & Shelly Support")}</h3>
                             <p className="text-xs text-indigo-200/70 leading-relaxed">
                                 Kompatibel mit allen gängigen Wallboxen (go-e, Easee, Heidelberg, Webasto, Wallbe, Keba u.v.m.).
                             </p>
@@ -131,7 +131,7 @@ export default function MobilityPage() {
 
                         <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
                             <div className="text-2xl">🎯</div>
-                            <h3 className="text-sm font-bold text-white">Zielladung & Abfahrtszeit</h3>
+                            <h3 className="text-sm font-bold text-white">{t("mobility.target_charge_title", "Zielladung & Abfahrtszeit")}</h3>
                             <p className="text-xs text-indigo-200/70 leading-relaxed">
                                 Gib an, wann du losfahren möchtest – Sharegy berechnet den optimalen, günstigsten Ladeslot.
                             </p>
@@ -139,7 +139,7 @@ export default function MobilityPage() {
 
                         <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
                             <div className="text-2xl">⛽</div>
-                            <h3 className="text-sm font-bold text-white">MTS-K Live-Spritpreisradar</h3>
+                            <h3 className="text-sm font-bold text-white">{t("mobility.fuel_radar_title", "MTS-K Live-Spritpreisradar")}</h3>
                             <p className="text-xs text-indigo-200/70 leading-relaxed">
                                 Vergleicht deine 100-km-Stromladekosten in Echtzeit mit Benzin & Diesel aller Tankstellen im Umkreis.
                             </p>
@@ -147,7 +147,7 @@ export default function MobilityPage() {
 
                         <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2">
                             <div className="text-2xl">📊</div>
-                            <h3 className="text-sm font-bold text-white">Fahrten- & Ladehistorie</h3>
+                            <h3 className="text-sm font-bold text-white">{t("mobility.trip_history_title", "Fahrten- & Ladehistorie")}</h3>
                             <p className="text-xs text-indigo-200/70 leading-relaxed">
                                 Lückenlose Aufzeichnung aller Ladevorgänge, geladener Kilowattstunden und realisierter Ersparnisse.
                             </p>
@@ -166,7 +166,7 @@ export default function MobilityPage() {
                                 className="w-full sm:w-auto px-6 py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 text-sm font-black rounded-2xl shadow-xl shadow-amber-500/20 transition cursor-pointer flex items-center justify-center gap-2"
                             >
                                 <span>⭐</span>
-                                <span>E-Mobilität mit Sharegy Pro freischalten</span>
+                                <span>{t("mobility.unlock_pro", "E-Mobilität mit Sharegy Pro freischalten")}</span>
                             </button>
                         </div>
                     </div>

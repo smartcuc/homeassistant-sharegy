@@ -1,8 +1,10 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "../../../api/client";
 
 export default function CooperativeApplicationsTab({ tenant }) {
+    const { t } = useTranslation();
     const queryClient = useQueryClient();
     const [filterStatus, setFilterStatus] = useState("all");
     const [actionModal, setActionModal] = useState(null); // { type: 'reject' | 'details', app: {...} }
@@ -54,7 +56,7 @@ export default function CooperativeApplicationsTab({ tenant }) {
             {/* STATS & QUICK BANNER */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
-                    <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Offene Anträge</div>
+                    <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">{t("cooperative.open_applications", "Offene Anträge")}</div>
                     <div className="text-2xl font-black text-amber-600 dark:text-amber-400 mt-1 flex items-center gap-2">
                         <span>⏳</span> {pendingCount}
                     </div>
@@ -64,7 +66,7 @@ export default function CooperativeApplicationsTab({ tenant }) {
                 </div>
 
                 <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
-                    <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Genehmigte Mitglieder</div>
+                    <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">{t("cooperative.approved_members", "Genehmigte Mitglieder")}</div>
                     <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1 flex items-center gap-2">
                         <span>🏛️</span> {applications.filter((a) => a.status === "approved").length}
                     </div>
@@ -75,7 +77,7 @@ export default function CooperativeApplicationsTab({ tenant }) {
 
                 <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-900 to-slate-900 text-white border border-indigo-800/60 shadow-xs flex flex-col justify-between">
                     <div>
-                        <div className="text-xs font-bold text-indigo-300 uppercase tracking-wider">Öffentlicher Beitrittslink</div>
+                        <div className="text-xs font-bold text-indigo-300 uppercase tracking-wider">{t("cooperative.public_join_link", "Öffentlicher Beitrittslink")}</div>
                         <div className="text-xs text-indigo-200 mt-1 truncate font-mono">
                             {publicJoinLink}
                         </div>
@@ -130,16 +132,16 @@ export default function CooperativeApplicationsTab({ tenant }) {
             {/* APPLICATIONS TABLE */}
             {isLoading ? (
                 <div className="p-12 text-center text-sm text-slate-400">
-                    Lade Beitrittsanträge...
+                    {t("common.loading", "Laden...")}
                 </div>
             ) : filteredApps.length === 0 ? (
                 <div className="p-12 text-center rounded-2xl bg-white dark:bg-slate-900 border border-dashed border-slate-200 dark:border-slate-800">
                     <span className="text-3xl block mb-2">📬</span>
                     <p className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                        Keine Beitrittsanträge für diese Auswahl gefunden
+                        {t("cooperative.no_applications_found", "Keine Beitrittsanträge für diese Auswahl gefunden")}
                     </p>
                     <p className="text-xs text-slate-400 mt-1">
-                        Teile den öffentlichen Beitrittslink, um neuen Genossenschaftsmitgliedern die digitale Registrierung zu ermöglichen.
+                        {t("cooperative.share_join_link_hint", "Teile den öffentlichen Beitrittslink, um neuen Genossenschaftsmitgliedern die digitale Registrierung zu ermöglichen.")}
                     </p>
                 </div>
             ) : (
@@ -147,12 +149,12 @@ export default function CooperativeApplicationsTab({ tenant }) {
                     <table className="w-full text-left text-xs text-slate-600 dark:text-slate-300">
                         <thead className="bg-slate-50 dark:bg-slate-800/80 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase border-b border-slate-200 dark:border-slate-800">
                             <tr>
-                                <th className="py-3 px-4">Antragsteller</th>
-                                <th className="py-3 px-4">Wohnort / Anschrift</th>
-                                <th className="py-3 px-4">Anteile & Betrag</th>
-                                <th className="py-3 px-4">Satzungs-Zustimmung</th>
-                                <th className="py-3 px-4">Status & Beschluss</th>
-                                <th className="py-3 px-4 text-right">Aktion</th>
+                                <th className="py-3 px-4">{t("cooperative.applicant", "Antragsteller")}</th>
+                                <th className="py-3 px-4">{t("cooperative.residence_address", "Wohnort / Anschrift")}</th>
+                                <th className="py-3 px-4">{t("cooperative.shares_amount", "Anteile & Betrag")}</th>
+                                <th className="py-3 px-4">{t("cooperative.statute_consent", "Satzungs-Zustimmung")}</th>
+                                <th className="py-3 px-4">{t("cooperative.status_resolution", "Status & Beschluss")}</th>
+                                <th className="py-3 px-4 text-right">{t("common.action", "Aktion")}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800">

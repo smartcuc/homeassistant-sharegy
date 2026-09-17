@@ -4,9 +4,11 @@
 */
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../../api/client";
 
 export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, existingTenant }) {
+    const { t } = useTranslation();
     const [step, setStep] = useState(1);
     const [saving, setSaving] = useState(false);
 
@@ -108,26 +110,40 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
 
     // Model-spezifische Texte
     const wizardTitle = isMieterstrom
-        ? "🏢 Mieterstrom-Einrichtungs-Assistent (§ 42a EnWG)"
+        ? t("wizard.mieterstrom_title", "🏢 Mieterstrom-Einrichtungs-Assistent (§ 42a EnWG)")
         : isGgv
-        ? "⚖️ GGV-Gebäude-Assistent (§ 42b EnWG)"
-        : "⚡ Bürgerenergie-Assistent (Energy Sharing)";
+        ? t("wizard.ggv_title", "⚖️ GGV-Gebäude-Assistent (§ 42b EnWG)")
+        : t("wizard.sharing_title", "⚡ Bürgerenergie-Assistent (Energy Sharing)");
 
     const wizardSubtitle = isMieterstrom
-        ? "Richte dein Mieterstrom-Objekt, die Wohneinheiten und den Vollversorgertarif in 3 einfachen Schritten ein."
+        ? t("wizard.mieterstrom_sub", "Richte dein Mieterstrom-Objekt, die Wohneinheiten und den Vollversorgertarif in 3 einfachen Schritten ein.")
         : isGgv
-        ? "Richte deine WEG / Liegenschaft, Miteigentumsanteile (MEA) und das Vor-Ort-Solarentgelt in 3 Schritten ein."
-        : "Richte deine Bürgerenergiegenossenschaft, Erzeugungsanlagen und Mitglieder in 3 Schritten ein.";
+        ? t("wizard.ggv_sub", "Richte deine WEG / Liegenschaft, Miteigentumsanteile (MEA) und das Vor-Ort-Solarentgelt in 3 Schritten ein.")
+        : t("wizard.sharing_sub", "Richte deine Bürgerenergiegenossenschaft, Erzeugungsanlagen und Mitglieder in 3 Schritten ein.");
 
-    const step1Title = isMieterstrom ? "Liegenschaft & Solaranlage" : isGgv ? "WEG-Gebäude & PV" : "Genossenschaft & Anlagen";
-    const step2Title = isMieterstrom ? `Wohnungen & Zähler (${apartments.length})` : isGgv ? `Eigentümer & MEA (${apartments.length})` : `Mitglieder & iMSys (${apartments.length})`;
-    const step3Title = isMieterstrom ? "Vollversorgertarif & Sparrechnung" : isGgv ? "Solar-Nutzungsentgelt & Umlagen" : "Sharing-Tarif & Netzentgelt";
+    const step1Title = isMieterstrom 
+        ? t("wizard.step1_mieterstrom", "Liegenschaft & Solaranlage") 
+        : isGgv 
+        ? t("wizard.step1_ggv", "WEG-Gebäude & PV") 
+        : t("wizard.step1_sharing", "Genossenschaft & Anlagen");
+
+    const step2Title = isMieterstrom 
+        ? `${t("wizard.step2_mieterstrom", "Wohnungen & Zähler")} (${apartments.length})` 
+        : isGgv 
+        ? `${t("wizard.step2_ggv", "Eigentümer & MEA")} (${apartments.length})` 
+        : `${t("wizard.step2_sharing", "Mitglieder & iMSys")} (${apartments.length})`;
+
+    const step3Title = isMieterstrom 
+        ? t("wizard.step3_mieterstrom", "Vollversorgertarif & Sparrechnung") 
+        : isGgv 
+        ? t("wizard.step3_ggv", "Solar-Nutzungsentgelt & Umlagen") 
+        : t("wizard.step3_sharing", "Sharing-Tarif & Netzentgelt");
 
     const legalExplainText = isMieterstrom
-        ? "Mieterstrom-Vollversorgung nach § 42a EnWG: Als Vermieter/Contractor belieferst du die Mieter mit Solarstrom vom Dach und Reststrom aus dem Netz in einer gemeinsamen Abrechnung inkl. Mieterstromzuschlag."
+        ? t("wizard.legal_mieterstrom", "Mieterstrom-Vollversorgung nach § 42a EnWG: Als Vermieter/Contractor belieferst du die Mieter mit Solarstrom vom Dach und Reststrom aus dem Netz in einer gemeinsamen Abrechnung inkl. Mieterstromzuschlag.")
         : isGgv
-        ? "Gemeinschaftliche Gebäudeversorgung nach § 42b EnWG: Reine Vor-Ort-Aufteilung des Solarstroms nach Miteigentumsanteilen (MEA). Die Teilnehmer behalten ihren eigenen Reststromvertrag ohne Lieferantenpflichten für die WEG."
-        : "Regionales Energy Sharing: 15-minütige Verrechnung und Allokation von Erzeugung und Verbrauch über das Verteilnetz mit Netzentgeltreduktion und automatisiertem BNetzA MSCONS Datenaustausch.";
+        ? t("wizard.legal_ggv", "Gemeinschaftliche Gebäudeversorgung nach § 42b EnWG: Reine Vor-Ort-Aufteilung des Solarstroms nach Miteigentumsanteilen (MEA). Die Teilnehmer behalten ihren eigenen Reststromvertrag ohne Lieferantenpflichten für die WEG.")
+        : t("wizard.legal_sharing", "Regionales Energy Sharing: 15-minütige Verrechnung und Allokation von Erzeugung und Verbrauch über das Verteilnetz mit Netzentgeltreduktion und automatisiertem BNetzA MSCONS Datenaustausch.");
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/75 backdrop-blur-md animate-fade-in">

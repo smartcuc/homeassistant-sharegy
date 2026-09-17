@@ -104,21 +104,21 @@ export default function CommunityShareModal({ isOpen, onClose, kpis = {}, userPr
                         {/* KPI Grid der Karte */}
                         <div className="grid grid-cols-3 gap-2.5 mb-4 text-center">
                             <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-3">
-                                <div className="text-[10px] text-slate-400 uppercase font-semibold">Autarkie</div>
+                                <div className="text-[10px] text-slate-400 uppercase font-semibold">{t("common.autarky", "Autarkie")}</div>
                                 <div className="text-2xl font-black text-emerald-400 font-mono mt-0.5">
                                     {autarkyPct}%
                                 </div>
                             </div>
 
                             <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-3">
-                                <div className="text-[10px] text-slate-400 uppercase font-semibold">Geteilt</div>
+                                <div className="text-[10px] text-slate-400 uppercase font-semibold">{t("common.shared", "Geteilt")}</div>
                                 <div className="text-2xl font-black text-amber-400 font-mono mt-0.5">
                                     {sharedKwh} <span className="text-xs font-normal">kWh</span>
                                 </div>
                             </div>
 
                             <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-3">
-                                <div className="text-[10px] text-slate-400 uppercase font-semibold">CO₂ Ersparnis</div>
+                                <div className="text-[10px] text-slate-400 uppercase font-semibold">{t("common.co2_savings", "CO₂ Ersparnis")}</div>
                                 <div className="text-2xl font-black text-cyan-400 font-mono mt-0.5">
                                     {co2SavedKg} <span className="text-xs font-normal">kg</span>
                                 </div>
@@ -128,7 +128,7 @@ export default function CommunityShareModal({ isOpen, onClose, kpis = {}, userPr
                         <div className="flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-800/80 pt-2.5">
                             <span className="flex items-center gap-1">
                                 <span>🌳</span>
-                                <span>Entspricht <strong>{treesEquivalent} gepflanzten Bäumen</strong></span>
+                                <span>{t("share.tree_equivalent", "Entspricht")} <strong>{treesEquivalent} {t("community.trees_planted", "gepflanzten Bäumen")}</strong></span>
                             </span>
                             <span className="text-slate-400 font-mono text-[10px]">sharegy.de</span>
                         </div>
@@ -138,16 +138,16 @@ export default function CommunityShareModal({ isOpen, onClose, kpis = {}, userPr
                     <div>
                         <div className="flex items-center justify-between mb-2">
                             <label className="text-xs font-semibold text-slate-300">
-                                Wähle deine Plattform:
+                                {t("share.choose_platform", "Wähle deine Plattform:")}
                             </label>
-                            <span className="text-[11px] text-slate-400 font-medium">Text wird automatisch angepasst</span>
+                            <span className="text-[11px] text-slate-400 font-medium">{t("share.text_adjusted", "Text wird automatisch angepasst")}</span>
                         </div>
 
                         <div className="grid grid-cols-3 gap-2 mb-3">
                             <button
                                 type="button"
                                 onClick={() => setActiveTab("whatsapp")}
-                                className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                                className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                                     activeTab === "whatsapp"
                                         ? "bg-emerald-600/20 border-emerald-500 text-emerald-300 ring-1 ring-emerald-500/40"
                                         : "bg-slate-950/50 border-slate-800 text-slate-400 hover:text-slate-200"
@@ -160,7 +160,7 @@ export default function CommunityShareModal({ isOpen, onClose, kpis = {}, userPr
                             <button
                                 type="button"
                                 onClick={() => setActiveTab("linkedin")}
-                                className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                                className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                                     activeTab === "linkedin"
                                         ? "bg-blue-600/20 border-blue-500 text-blue-300 ring-1 ring-blue-500/40"
                                         : "bg-slate-950/50 border-slate-800 text-slate-400 hover:text-slate-200"
@@ -173,7 +173,7 @@ export default function CommunityShareModal({ isOpen, onClose, kpis = {}, userPr
                             <button
                                 type="button"
                                 onClick={() => setActiveTab("twitter")}
-                                className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                                className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                                     activeTab === "twitter"
                                         ? "bg-cyan-600/20 border-cyan-500 text-cyan-300 ring-1 ring-cyan-500/40"
                                         : "bg-slate-950/50 border-slate-800 text-slate-400 hover:text-slate-200"
@@ -195,9 +195,9 @@ export default function CommunityShareModal({ isOpen, onClose, kpis = {}, userPr
                             <button
                                 type="button"
                                 onClick={handleCopy}
-                                className="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-all flex items-center gap-1"
+                                className="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-all flex items-center gap-1 cursor-pointer"
                             >
-                                {copied ? "✓ Kopiert!" : "📋 Kopieren"}
+                                {copied ? `✓ ${t("common.copied", "Kopiert!")}` : `📋 ${t("common.copy", "Kopieren")}`}
                             </button>
                         </div>
                     </div>
@@ -207,28 +207,28 @@ export default function CommunityShareModal({ isOpen, onClose, kpis = {}, userPr
                         <button
                             type="button"
                             onClick={handleWhatsAppClick}
-                            className="py-2.5 px-4 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20"
+                            className="py-2.5 px-4 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 cursor-pointer"
                         >
                             <span>💬</span>
-                            <span>Auf WhatsApp teilen</span>
+                            <span>{t("share.share_whatsapp", "Auf WhatsApp teilen")}</span>
                         </button>
 
                         <button
                             type="button"
                             onClick={handleLinkedInClick}
-                            className="py-2.5 px-4 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20"
+                            className="py-2.5 px-4 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20 cursor-pointer"
                         >
                             <span>💼</span>
-                            <span>Auf LinkedIn teilen</span>
+                            <span>{t("share.share_linkedin", "Auf LinkedIn teilen")}</span>
                         </button>
 
                         <button
                             type="button"
                             onClick={handleTwitterClick}
-                            className="py-2.5 px-4 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-all flex items-center justify-center gap-2"
+                            className="py-2.5 px-4 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-all flex items-center justify-center gap-2 cursor-pointer"
                         >
                             <span>🐦</span>
-                            <span>Auf X teilen</span>
+                            <span>{t("share.share_x", "Auf X teilen")}</span>
                         </button>
                     </div>
                 </div>

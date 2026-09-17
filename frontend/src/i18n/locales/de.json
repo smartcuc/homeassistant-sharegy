@@ -77,7 +77,14 @@
     "searching": "Suche...",
     "turn_on": "Einschalten",
     "turn_off": "Pausieren",
-    "settings": "Einstellungen"
+    "settings": "Einstellungen",
+    "unit_hours": "Std.",
+    "menu": "Menü",
+    "calculating": "Berechne...",
+    "click_to_configure": "Klicken zum Öffnen & Konfigurieren",
+    "click_to_open": "Klicken zum Öffnen",
+    "mode": "Modus",
+    "total": "Gesamt"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -147,7 +154,16 @@
     "mode_sharing": "Energy Sharing (Genossenschaft)",
     "mode_hybrid": "EMS & Sharing Hub",
     "mode_partner": "Partner-Cockpit",
-    "mode_admin": "Admin-Zentrale"
+    "mode_admin": "Admin-Zentrale",
+    "switch_context_hint": "Arbeitsbereich umschalten",
+    "context_label": "Bereich",
+    "select_context": "Ansicht wählen",
+    "select_context_desc": "Menüführung an Rolle anpassen",
+    "mieterstrom": "Mieterstrom (§ 42a EnWG)",
+    "ggv": "Gebäudeversorgung (§ 42b EnWG)",
+    "home_title": "Zur sharegy Startseite & Info",
+    "open_menu": "Menü öffnen",
+    "theme": "Design"
   },
   "dashboard": {
     "title": "Deine Energiezentrale ⚡",
@@ -216,7 +232,9 @@
     "group_by_rooms": "Geräte nach Räumen gruppieren",
     "no_matches_title": "Keine passenden Geräte gefunden",
     "no_matches_desc": "Für die aktuelle Filterkombination oder Suche liegen keine Geräte vor.",
-    "inverter": "Wechselrichter"
+    "inverter": "Wechselrichter",
+    "add_wallbox_btn": "Wallbox anlegen & verbinden 🚀",
+    "setup_unconfigured": "Unkonfigurierte Geräte einrichten"
   },
   "device_add": {
     "modal_title": "Neues Gerät verbinden",
@@ -502,7 +520,9 @@
     "insight_autarky_low": "Hoher Netzbezug: Nur {{rate}} % deines Strombedarfs wurden durch PV/Speicher gedeckt.",
     "insight_top_consumer": "Größter Verbraucher: {{name}} mit {{share}} % des Gesamtstroms ({{solar}}% Solaranteil).",
     "insight_financial_benefit": "Finanzieller Vorteil: Durch Eigenverbrauch und Einspeisung wurden netto {{amount}} € erzielt.",
-    "period_yesterday": "Gestern"
+    "period_yesterday": "Gestern",
+    "understand_sharing": "Energy Sharing verstehen",
+    "how_distributed": "So wird Energie in deiner Community verteilt:"
   },
   "interfaces": {
     "title": "Schnittstellen",
@@ -652,7 +672,41 @@
     "timezone_default": "Standard (Europe/Berlin)",
     "timezone_error": "Fehler beim Speichern der Zeitzone.",
     "timezone_saved": "Zeitzone wurde erfolgreich gespeichert.",
-    "vat_id": "Umsatzsteuer-Identifikationsnummer (USt-IdNr.)"
+    "vat_id": "Umsatzsteuer-Identifikationsnummer (USt-IdNr.)",
+    "account_settings_heading": "Einstellungen des Benutzerkontos",
+    "account_settings_title": "Konto & Identifikation",
+    "active_session": "Aktive Sitzung & Geräte",
+    "active_session_desc": "Informationen über deinen aktuellen Browser und die letzte Anmeldung.",
+    "address_title": "Wohnort & Rechnungsadresse",
+    "billing_email": "Rechnungs-E-Mail (Abweichend)",
+    "billing_email_hint": "Rechnungen & Belege werden an dieses Postfach gesendet. Wenn leer, wird deine Login-E-Mail genutzt.",
+    "billing_name": "Rechnungsempfänger / Abteilungszusatz",
+    "change_email_btn": "E-Mail ändern",
+    "city": "Ort",
+    "company_address_desc": "Offizielle Anschrift des Unternehmens für die Belegausstellung.",
+    "company_address_title": "Firmen- & Rechnungsanschrift",
+    "company_details_desc": "Hinterlege deinen offiziellen Firmennamen und deine USt-IdNr. für Vorsteuerabzug und korrekte Rechnungsbelege.",
+    "company_details_title": "Unternehmensdaten & USt-IdNr.",
+    "company_name": "Offizieller Firmenname",
+    "confirm_revoke": "Jetzt löschen & abmelden",
+    "contact_title": "Erreichbarkeit & Kontakt",
+    "country": "Land",
+    "email_notifications": "E-Mail-Zusammenfassungen & Systemberichte",
+    "first_name": "Vorname",
+    "header_desc": "Verwalte deine persönlichen Stammdaten, Firmendaten, Rechnungen und Benachrichtigungen.",
+    "header_title": "Mein Benutzerkonto",
+    "house_number": "Hausnr.",
+    "landing_page_desc": "Wähle deinen bevorzugten Einstiegsbereich beim Öffnen der Plattform.",
+    "revoke_error": "Fehler beim Löschen der Magic-Links.",
+    "revoke_links_btn": "Alle Links löschen & abmelden",
+    "revoke_modal_sub": "Sicherheitsaktion zur sofortigen Entwertung offener Login-Links",
+    "revoke_modal_text": "Möchtest du wirklich alle für deinen Account ausgestellten Magic-Links unwiderruflich entwerten?",
+    "revoke_modal_title": "Alle Magic-Links löschen & Sitzung beenden?",
+    "revoke_point_1": "Alle bisher per E-Mail versendeten Zugangslinks werden sofort ungültig.",
+    "revoke_point_2": "Deine aktive Sitzung wird zum Schutz deines Accounts sofort beendet (Auto-Logout).",
+    "revoke_point_3": "Du kannst jederzeit auf der Login-Seite einen neuen, frischen Magic-Link anfordern.",
+    "revoke_success": "Alle Magic-Links wurden erfolgreich gelöscht. Du wirst nun abgemeldet.",
+    "revoking": "Lösche & melde ab..."
   },
   "settings": {
     "account": "Benutzerkonto & Einstellungen",
@@ -1059,7 +1113,13 @@
       "cancel_anytime": "Monatlich kündbar · Sofortige Freischaltung",
       "later": "Später",
       "upgrade_now": "Jetzt Pro upgraden"
-    }
+    },
+    "manage_plan": "Abonnement verwalten & Tarife",
+    "plan_details_desc": "Übersicht zu deinem gebuchten Sharegy EMS-Tarif, Zahlungszyklus und Rechnungsdaten.",
+    "plan_details_title": "Tarif & Abrechnungsstatus",
+    "pro_features": "Umfasst unbegrenzte Historie, Multi-Sensor-Prognosen, Börsenstrom-Optimierung und Push-Alarme.",
+    "to_community_statements": "Zu den Community-Abrechnungen",
+    "upgrade_pro": "Auf Pro upgraden"
   },
   "arbitrage": {
     "title": "Grid-Charging Arbitrage & Speicher-Simulator",
@@ -1337,7 +1397,17 @@
     "timezone_disclaimer": "Die Erkennung basiert auf den Einstellungen deines Browsers und kann durch VPNs oder Proxys abweichen.",
     "ready_title": "Dein Dashboard ist bereit 🚀",
     "ready_subtitle": "Starte jetzt mit deinem Energiemanagement.",
-    "to_dashboard_btn": "Zum Dashboard"
+    "to_dashboard_btn": "Zum Dashboard",
+    "step_1_heading": "1. Welche Ausstattung hast du?",
+    "step_1_sub": "Wähle deine Solaranlage und vorhandene Großverbraucher aus.",
+    "step_1_title": "Hardware",
+    "step_2_heading": "2. Welchen Stromtarif nutzt du aktuell?",
+    "step_2_sub": "Dies hilft uns bei der Empfehlung, ob sich ein dynamischer Börsentarif für dich lohnt.",
+    "step_2_title": "Stromtarif",
+    "step_3_heading": "Dein persönliches Energie-Profil:",
+    "step_3_sub": "Basierend auf deinen Angaben haben wir dein Einsparpotenzial ermittelt.",
+    "step_3_title": "Dein Energie-Profil",
+    "welcome_subtitle_custom": "In nur 3 kurzen Klicks ermitteln wir dein persönliches Energie-Profil und das maximale Sparpotenzial."
   },
   "help": {
     "edit_article_title": "Hilfeartikel bearbeiten (Staff Live-Editor)",
@@ -1433,7 +1503,9 @@
     "effective_price": "Endpreis",
     "minimum": "Minimum",
     "maximum": "Maximum",
-    "average": "Durchschnitt"
+    "average": "Durchschnitt",
+    "change_tariff": "Zu dynamischem Tarif wechseln →",
+    "epex_tooltip": "Aktueller Börsenstrompreis (EPEX Spot)"
   },
   "legal": {
     "impressum_title": "Impressum",
@@ -1496,7 +1568,9 @@
     "modal_delete_in_field": "ein:",
     "confirm_delete": "Endgültig löschen",
     "deleting": "Lösche Konto...",
-    "delete_failed": "Löschung fehlgeschlagen."
+    "delete_failed": "Löschung fehlgeschlagen.",
+    "cat_b2b": "Firmendaten & Belege",
+    "export_success": "Datenexport wurde erfolgreich heruntergeladen."
   },
   "support": {
     "btn_label": "Support",
@@ -1749,7 +1823,15 @@
     "feature_enwg_title": "§ 14a EnWG Netzdrosselung",
     "feature_enwg_desc": "Automatische Abarbeitung von Drosselsignalen des Netzbetreibers ohne Komfortverlust.",
     "unlock_pro_btn": "Energiesteuerung mit Sharegy Pro freischalten",
-    "click_to_unlock": "Klicke hier, um alle Steuerungsoptionen mit Sharegy Pro freizuschalten"
+    "click_to_unlock": "Klicke hier, um alle Steuerungsoptionen mit Sharegy Pro freizuschalten",
+    "heating_active": "Heizen aktiv",
+    "master_mode": "Master-Modus:",
+    "mode": "Betriebsmodus",
+    "mode_label": "Modus:",
+    "power_live": "Leistung (Live)",
+    "preheating_badge": "Thermische Vorladung",
+    "room_temp": "Raumtemperatur",
+    "standby": "Standby / Passiv"
   },
   "consumers": {
     "warmwasser": "Warmwasser",
@@ -1886,7 +1968,8 @@
     "reserve": "Reserve",
     "efficiency": "Wirkungsgrad",
     "mode_pv_autarky": "PV-Autarkie",
-    "open_control_btn": "Energiesteuerung öffnen"
+    "open_control_btn": "Energiesteuerung öffnen",
+    "mode_forced_discharge": "🔋 Zwangsentladung"
   },
   "wallbox_boost": "⚡ Wallbox Boost 11kW (2h)",
   "battery_reserve": "🔋 Speicher-Schutz (100% Reserve)",
@@ -1919,7 +2002,16 @@
     "cheapest_hours": "Günstigste Börsenstunden",
     "savings_potential": "Ersparnis-Potenzial",
     "per_15k_km": "bei 15.000 km Fahrleistung",
-    "vs_combustion": "-{{pct}}% vs. Verbrenner"
+    "vs_combustion": "-{{pct}}% vs. Verbrenner",
+    "pro_exclusive": "Sharegy Pro Exklusiv",
+    "hero_title": "Lade dein E-Auto kostenlos mit 100% Sonnenstrom & günstigsten Börsenstunden",
+    "pv_surplus_title": "Reines PV-Überschussladen",
+    "dynamic_spot_title": "Dynamischer Börsenstrom-Autopilot",
+    "ocpp_shelly_title": "OCPP (1.6 / 2.0.1 / 2.1) & Shelly Support",
+    "target_charge_title": "Zielladung & Abfahrtszeit",
+    "fuel_radar_title": "MTS-K Live-Spritpreisradar",
+    "trip_history_title": "Fahrten- & Ladehistorie",
+    "unlock_pro": "E-Mobilität mit Sharegy Pro freischalten"
   },
   "heating": {
     "title": "Wärme & Thermische Speicher",
@@ -2271,7 +2363,9 @@
     "error_delete_failed": "Fehler beim Trennen der Verbindung.",
     "add_inverter_btn": "Wechselrichter koppeln",
     "sungrow_reauth_btn": "iSolarCloud Autorisierung erneuern",
-    "sungrow_api_active": "Sungrow iSolarCloud API ist autorisiert & aktiv"
+    "sungrow_api_active": "Sungrow iSolarCloud API ist autorisiert & aktiv",
+    "sungrow_api_desc": "Alle erkannten Sungrow Wechselrichter und Speicher deines iSolarCloud Kontos sind angebunden und synchronisieren automatisch.",
+    "sungrow_reauth_short": "Neu autorisieren"
   },
   "shelly_cloud": {
     "error_no_key": "Bitte gib deinen Shelly Cloud Auth-Key / Token ein.",
@@ -2447,7 +2541,19 @@
     "get_variables_btn": "🔍 GetVariables abfragen",
     "no_variables_data": "Keine gespeicherten Device-Model-Variablen vorhanden. Klicke auf \"GetVariables abfragen\".",
     "action_success": "Aktion erfolgreich ausgeführt.",
-    "action_error": "Fehler bei Ausführung."
+    "action_error": "Fehler bei Ausführung.",
+    "rfid_active": "Aktiv",
+    "rfid_add_success": "RFID-Chip erfolgreich hinzugefügt.",
+    "rfid_add_title": "Neuen RFID-Chip / Ladekarte anlegen",
+    "rfid_delete_confirm": "Möchtest du diesen RFID-Tag wirklich löschen?",
+    "rfid_deleted": "RFID-Chip gelöscht.",
+    "rfid_empty": "Noch keine RFID-Chips hinterlegt. Lege oben deinen ersten Chip an.",
+    "rfid_id_label": "RFID-UID / Tag-ID",
+    "rfid_id_placeholder": "z. B. TAG-01 oder 04A1B2C3",
+    "rfid_inactive": "Gesperrt",
+    "rfid_list_title": "Hinterlegte RFID-Chips",
+    "rfid_name_label": "Bezeichnung",
+    "rfid_name_placeholder": "z. B. Dienstwagen / Chip 1"
   },
   "energy_profile": {
     "page_title": "Energie-Profil & Ersparnisrechner",
@@ -2674,5 +2780,153 @@
     "select_role_label": "1. Rolle & Berechtigung auswählen:",
     "share_btn": "Erfolge teilen",
     "whitelabel_btn": "Whitelabel & Branding"
+  },
+  "admin_mieterstrom": {
+    "title": "Mieterstrom (§ 42a EnWG)",
+    "badge_model": "Vollversorgungsmodell (AGB)",
+    "subtitle": "Vollversorgungs-Modell: Vor-Ort-Solarstrom & Reststrom in einer gemeinsamen Monatsabrechnung mit Mieterstromzuschlag gem. § 21 Abs. 3 EEG",
+    "btn_wizard": "Mieterstrom-Assistent (3 Schritte)",
+    "btn_share": "Quartier teilen",
+    "tab_cockpit": "🏢 Mieterstrom-Cockpit",
+    "tab_apartments": "🏠 Wohnungen & Mieter",
+    "tab_settlement": "💰 Vollversorger-Abrechnung",
+    "tab_meters": "⚡ Summen- & Unterzähler",
+    "tab_vpp": "🔌 Quartiers-Flexibilität",
+    "tab_msb": "⚡ wMSB & Gateways",
+    "tab_audit": "📜 Audit-Protokoll"
+  },
+  "admin_ggv": {
+    "title": "Gemeinschaftliche Gebäudeversorgung (§ 42b EnWG)",
+    "badge_model": "WEG & Mehrparteienhaus",
+    "subtitle": "Vor-Ort-Solarstromaufteilung nach Miteigentumsanteilen (MEA in 1/1000). Keine Reststrom-Lieferantenpflicht – jeder Eigentümer/Nutzer behält seinen eigenen Reststromvertrag.",
+    "btn_wizard": "WEG-Gebäude-Assistent (3 Schritte)",
+    "btn_share": "Liegenschaft teilen",
+    "tab_cockpit": "⚖️ GGV-Solarcockpit",
+    "tab_units": "🏢 Eigentümer & MEA",
+    "tab_settlement": "💰 Solar- & WEG-Abrechnung"
+  },
+  "admin_sharing": {
+    "title": "Regionales Energy Sharing (Bürgerenergie eG)",
+    "badge_model": "Genossenschaftssatzung (GenG)",
+    "subtitle": "15-Minuten Smart-Meter-Bilanzierung & Verteilnetz-Allokation der Bürgerenergiegenossenschaft mit BNetzA AS4/MSCONS Marktkommunikation",
+    "btn_wizard": "Genossenschafts-Assistent (3 Schritte)",
+    "btn_mako": "Marktkommunikation (AS4)",
+    "tab_cockpit": "⚡ Bürgerenergie-Cockpit",
+    "tab_members": "👥 Genossenschaftsmitglieder",
+    "tab_applications": "📋 Beitrittsanträge",
+    "tab_settlement": "💰 15m-Sharing-Abrechnung"
+  },
+  "admin_communities": {
+    "title": "Quartiere & Gemeinschaften (Portfolio)",
+    "subtitle": "Zentrales Verwaltungs- und Portfolio-Cockpit für alle Mieterstrom-Quartiere, WEGs und Bürgerenergie-Gemeinschaften.",
+    "create_community_btn": "Neue Gemeinschaft anlegen"
+  },
+  "wizard": {
+    "step1_title": "1. Modell & Stammdaten",
+    "step2_title": "2. Tarife & Konditionen",
+    "step3_title": "3. Einladung & Abschluss"
+  },
+  "admin_vpp": {
+    "title": "Virtuelles Kraftwerk (VPP) & Flexibilitäts-Zentrale",
+    "subtitle": "Aggregation, Sekundärregelleistung (aFRR), Redispatch 2.0 & 80/20 Market Clearing",
+    "run_clearing": "80/20 Clearing ausführen",
+    "clearing_running": "Clearing läuft...",
+    "start_test_dispatch": "Test-Dispatch starten",
+    "pos_flex": "Positive Regelleistung (+kW)",
+    "pos_flex_sub": "Einspeise-Flexibilität (Entladung)",
+    "neg_flex": "Negative Regelleistung (-kW)",
+    "neg_flex_sub": "Bezugs-Flexibilität (Überschussladung)",
+    "battery_fleet": "Batterieflotte (Speicher)",
+    "reaction_time": "Reaktionszeit (SLA)",
+    "schedule_title": "Redispatch 2.0 & aFRR 96-Viertelstunden-Fahrplan",
+    "schedule_subtitle": "Gemeldete Fahrplanleistung an Übertragungsnetzbetreiber (Connect+)",
+    "live_active": "Live aktiv",
+    "tso_filter_title": "ÜNB & Markt-Filter",
+    "control_area": "Regelzone (ÜNB):",
+    "all_control_areas": "Alle Regelzonen (Bundesweit)",
+    "product_classification": "Produkt-Klassifikation:",
+    "dispatches_title": "Letzte Dispatch-Ereignisse & Abrufe",
+    "dispatches_subtitle": "Übersicht der automatisierten Markt- und Netzabrufe",
+    "th_timestamp": "Zeitstempel",
+    "th_order_id": "Order ID",
+    "th_target_power": "Soll-Leistung",
+    "th_duration": "Dauer",
+    "th_fulfillment": "Erfüllung",
+    "th_revenue": "Erlös (80/20)",
+    "modal_title": "Manuellen Flexibilitäts-Dispatch auslösen",
+    "target_power_label": "Soll-Leistung (kW):",
+    "duration_label": "Dauer (Minuten):",
+    "direction_label": "Richtung:",
+    "discharge_option": "Entladung (Positive Flexibilität ins Netz)",
+    "charge_option": "Ladung (Negative Flexibilität aus dem Netz)",
+    "reason_label": "Grund / Order-Referenz:"
+  },
+  "whitelabel": {
+    "presets_title": "Schnell-Farbprofile",
+    "branding_section": "Markenauftritt & Corporate Design",
+    "company_name": "Unternehmensname (EVU / Stadtwerk)",
+    "support_email": "Support E-Mail-Adresse",
+    "primary_color": "Primärfarbe",
+    "accent_color": "Akzentfarbe",
+    "logo_url": "Logo URL (SVG / PNG)",
+    "domain_cname": "Eigene Subdomain / Domain (CNAME)",
+    "enable_mode": "Whitelabel-Modus aktivieren",
+    "hide_branding": "Sharegy-Branding in Kopf- & Fußzeile ausblenden",
+    "preview_title": "Live-Vorschau",
+    "save_branding": "Branding übernehmen"
+  },
+  "mako": {
+    "format_type": "Nachrichten-Format & Transaktionstyp",
+    "target_system": "Ziel-Abrechnungssystem / AS4-Gateway",
+    "compliance_title": "BNetzA GPKE / WiM Konformität",
+    "compliance_desc": "Erzeugt standardisierte EDIFACT UNA/UNB/UNH/UNT Segmente mit automatischem Prüfsummenabgleich für die Gemeinschaftliche Gebäudeversorgung nach § 42b EnWG.",
+    "generate_send": "EDIFACT generieren & an AS4 senden",
+    "raw_preview": "EDIFACT Rohdaten-Vorschau",
+    "download_edi": "Download (.edi)",
+    "preview_placeholder": "Klicken Sie auf 'EDIFACT generieren & an AS4 senden', um die Vorschau zu laden.",
+    "sent_confirmed": "AS4 Übertragung bestätigt"
+  },
+  "cooperative": {
+    "open_applications": "Offene Anträge",
+    "approved_members": "Genehmigte Mitglieder",
+    "public_join_link": "Öffentlicher Beitrittslink",
+    "no_applications_found": "Keine Beitrittsanträge für diese Auswahl gefunden",
+    "share_join_link_hint": "Teile den öffentlichen Beitrittslink, um neuen Genossenschaftsmitgliedern die digitale Registrierung zu ermöglichen.",
+    "applicant": "Antragsteller",
+    "residence_address": "Wohnort / Anschrift",
+    "shares_amount": "Anteile & Betrag",
+    "statute_consent": "Satzungs-Zustimmung",
+    "status_resolution": "Status & Beschluss"
+  },
+  "master_meter": {
+    "th_tenant": "Mieter / Partei",
+    "th_quota": "Beteiligungsquote (MEA)",
+    "th_consumption": "Verbrauch",
+    "th_solar_coverage": "Solar-Deckung",
+    "th_residual_grid": "Restnetzbezug",
+    "th_autarky": "Autarkie"
+  },
+  "share": {
+    "tree_equivalent": "Entspricht",
+    "choose_platform": "Wähle deine Plattform:",
+    "text_adjusted": "Text wird automatisch angepasst",
+    "share_whatsapp": "Auf WhatsApp teilen",
+    "share_linkedin": "Auf LinkedIn teilen",
+    "share_x": "Auf X teilen"
+  },
+  "cooperative_join": {
+    "loading": "Lade Beitrittsportal...",
+    "not_found": "Gemeinschaft nicht gefunden",
+    "success_title": "Antrag erfolgreich übermittelt",
+    "application_id": "Antrags-ID:",
+    "shares_subscribed": "Gezeichnete Geschäftsanteile:",
+    "statute_version": "Anerkannte Satzungsversion:",
+    "waiting_board": "Wartet auf Vorstandsbeschluss"
+  },
+  "email_confirm": {
+    "verifying_title": "Bestätige E-Mail-Adresse...",
+    "verifying_desc": "Einen Moment bitte, dein Sicherheitstoken wird geprüft.",
+    "success_title": "E-Mail-Adresse geändert!",
+    "failed_title": "Bestätigung fehlgeschlagen"
   }
 }

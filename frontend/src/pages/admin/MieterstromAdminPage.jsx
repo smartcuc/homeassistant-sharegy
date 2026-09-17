@@ -282,14 +282,14 @@ export default function MieterstromAdminPage() {
                             </h1>
                             <span className="shrink-0 text-xs font-bold px-3 py-1 rounded-full border flex items-center gap-1.5 bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-800">
                                 <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></span>
-                                🏢 Mieterstrom (§ 42a EnWG)
+                                {t("admin_mieterstrom.title", "🏢 Mieterstrom (§ 42a EnWG)")}
                             </span>
                             <span className="shrink-0 text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60">
-                                Vollversorgungsmodell (AGB)
+                                {t("admin_mieterstrom.badge_model", "Vollversorgungsmodell (AGB)")}
                             </span>
                         </div>
                         <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-                            Vollversorgungs-Modell: Vor-Ort-Solarstrom & Reststrom in einer gemeinsamen Monatsabrechnung mit Mieterstromzuschlag gem. § 21 Abs. 3 EEG
+                            {t("admin_mieterstrom.subtitle", "Vollversorgungs-Modell: Vor-Ort-Solarstrom & Reststrom in einer gemeinsamen Monatsabrechnung mit Mieterstromzuschlag gem. § 21 Abs. 3 EEG")}
                         </p>
                     </div>
                 </div>
@@ -310,7 +310,7 @@ export default function MieterstromAdminPage() {
                         className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-teal-50 dark:hover:bg-teal-950/40 text-slate-700 dark:text-slate-200 hover:text-teal-600 dark:hover:text-teal-400 border border-slate-200 dark:border-slate-800 hover:border-teal-300 transition-all shadow-xs flex items-center gap-2 cursor-pointer"
                     >
                         <span>📄</span>
-                        <span>Zählerdaten-Export (MSCONS)</span>
+                        <span>{t("admin_mieterstrom.btn_mako", "Zählerdaten-Export (MSCONS)")}</span>
                     </button>
                     <button
                         type="button"
@@ -318,7 +318,7 @@ export default function MieterstromAdminPage() {
                         className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-sky-50 dark:hover:bg-sky-950/40 text-slate-700 dark:text-slate-200 hover:text-sky-600 dark:hover:text-sky-400 border border-slate-200 dark:border-slate-800 hover:border-sky-300 transition-all shadow-xs flex items-center gap-2 cursor-pointer"
                     >
                         <span>✨</span>
-                        <span>Mieterstrom-Assistent (3 Schritte)</span>
+                        <span>{t("admin_mieterstrom.btn_wizard", "Mieterstrom-Assistent (3 Schritte)")}</span>
                     </button>
                     <button
                         type="button"
@@ -326,7 +326,7 @@ export default function MieterstromAdminPage() {
                         className="px-3.5 py-2 rounded-xl text-xs font-bold bg-sky-50 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 text-sky-800 dark:text-sky-300 border border-sky-200 dark:border-sky-800/80 transition-all shadow-xs flex items-center gap-2 cursor-pointer"
                     >
                         <span>📢</span>
-                        <span>Quartier teilen</span>
+                        <span>{t("admin_mieterstrom.btn_share", "Quartier teilen")}</span>
                     </button>
                 </div>
             </div>
@@ -339,7 +339,7 @@ export default function MieterstromAdminPage() {
                         activeTab === "cockpit" ? "bg-white dark:bg-slate-900 text-sky-600 dark:text-sky-400 font-bold shadow-xs" : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                     }`}
                 >
-                    🏢 Mieterstrom-Cockpit
+                    {t("admin_mieterstrom.tab_cockpit", "🏢 Mieterstrom-Cockpit")}
                 </button>
                 <button
                     onClick={() => handleTabChange("apartments")}
@@ -355,7 +355,7 @@ export default function MieterstromAdminPage() {
                         activeTab === "settlement" ? "bg-white dark:bg-slate-900 text-sky-600 dark:text-sky-400 font-bold shadow-xs" : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                     }`}
                 >
-                    💰 Vollversorger-Abrechnung
+                    {t("admin_mieterstrom.tab_settlement", "💰 Vollversorger-Abrechnung")}
                 </button>
                 <button
                     onClick={() => handleTabChange("meters")}
@@ -363,7 +363,7 @@ export default function MieterstromAdminPage() {
                         activeTab === "meters" ? "bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 font-bold shadow-xs" : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                     }`}
                 >
-                    ⚡ Summen- & Unterzähler
+                    {t("admin_mieterstrom.tab_meters", "⚡ Summen- & Unterzähler")}
                 </button>
                 <button
                     onClick={() => handleTabChange("vpp")}
@@ -371,7 +371,7 @@ export default function MieterstromAdminPage() {
                         activeTab === "vpp" ? "bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 font-bold shadow-xs" : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                     }`}
                 >
-                    🔌 Quartiers-Flexibilität
+                    {t("admin_mieterstrom.tab_vpp", "🔌 Quartiers-Flexibilität")}
                 </button>
                 <button
                     onClick={() => handleTabChange("msb")}
@@ -379,7 +379,7 @@ export default function MieterstromAdminPage() {
                         activeTab === "msb" ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs font-bold" : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                     }`}
                 >
-                    ⚡ wMSB & Gateways
+                    {t("admin_mieterstrom.tab_msb", "⚡ wMSB & Gateways")}
                 </button>
                 <button
                     onClick={() => handleTabChange("audit")}
@@ -387,7 +387,7 @@ export default function MieterstromAdminPage() {
                         activeTab === "audit" ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs" : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                     }`}
                 >
-                    📜 Audit-Protokoll
+                    {t("admin_mieterstrom.tab_audit", "📜 Audit-Protokoll")}
                 </button>
             </div>
 

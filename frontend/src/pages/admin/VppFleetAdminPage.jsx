@@ -213,10 +213,10 @@ export default function VppFleetAdminPage() {
                         </div>
                         <div>
                             <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-                                Virtuelles Kraftwerk (VPP) & Flexibilitäts-Zentrale
+                                {t("admin_vpp.title", "Virtuelles Kraftwerk (VPP) & Flexibilitäts-Zentrale")}
                             </h1>
                             <p className="text-xs text-slate-500 dark:text-slate-400">
-                                Aggregation, Sekundärregelleistung (aFRR), Redispatch 2.0 & 80/20 Market Clearing
+                                {t("admin_vpp.subtitle", "Aggregation, Sekundärregelleistung (aFRR), Redispatch 2.0 & 80/20 Market Clearing")}
                             </p>
                         </div>
                     </div>
@@ -229,27 +229,27 @@ export default function VppFleetAdminPage() {
                             dispatchesQuery.refetch();
                             scheduleQuery.refetch();
                         }}
-                        className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-750 transition flex items-center gap-1.5"
+                        className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-750 transition flex items-center gap-1.5 cursor-pointer"
                     >
                         <RefreshCw className={`w-3.5 h-3.5 ${fleetQuery.isFetching ? "animate-spin" : ""}`} />
-                        Aktualisieren
+                        {t("common.refresh", "Aktualisieren")}
                     </button>
 
                     <button
                         onClick={() => clearingMutation.mutate()}
                         disabled={clearingMutation.isPending}
-                        className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center gap-1.5"
+                        className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center gap-1.5 cursor-pointer"
                     >
                         <DollarSign className="w-3.5 h-3.5" />
-                        {clearingMutation.isPending ? "Clearing läuft..." : "80/20 Clearing ausführen"}
+                        {clearingMutation.isPending ? t("admin_vpp.clearing_running", "Clearing läuft...") : t("admin_vpp.run_clearing", "80/20 Clearing ausführen")}
                     </button>
 
                     <button
                         onClick={() => setTestDispatchModal(true)}
-                        className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center gap-1.5"
+                        className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center gap-1.5 cursor-pointer"
                     >
                         <Play className="w-3.5 h-3.5" />
-                        Test-Dispatch starten
+                        {t("admin_vpp.start_test_dispatch", "Test-Dispatch starten")}
                     </button>
                 </div>
             </div>
@@ -277,7 +277,7 @@ export default function VppFleetAdminPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Card className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                     <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-medium mb-2">
-                        <span>Positive Regelleistung (+kW)</span>
+                        <span>{t("admin_vpp.pos_flex", "Positive Regelleistung (+kW)")}</span>
                         <ArrowUpRight className="w-4 h-4 text-emerald-500" />
                     </div>
                     <div className="text-2xl font-black text-slate-900 dark:text-white">
@@ -287,13 +287,13 @@ export default function VppFleetAdminPage() {
                         <span className="text-sm font-bold text-slate-500">kW</span>
                     </div>
                     <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-1">
-                        Einspeise-Flexibilität (Entladung)
+                        {t("admin_vpp.pos_flex_sub", "Einspeise-Flexibilität (Entladung)")}
                     </p>
                 </Card>
 
                 <Card className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                     <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-medium mb-2">
-                        <span>Negative Regelleistung (-kW)</span>
+                        <span>{t("admin_vpp.neg_flex", "Negative Regelleistung (-kW)")}</span>
                         <ArrowDownRight className="w-4 h-4 text-blue-500" />
                     </div>
                     <div className="text-2xl font-black text-slate-900 dark:text-white">
@@ -303,13 +303,13 @@ export default function VppFleetAdminPage() {
                         <span className="text-sm font-bold text-slate-500">kW</span>
                     </div>
                     <p className="text-[11px] text-blue-600 dark:text-blue-400 font-semibold mt-1">
-                        Bezugs-Flexibilität (Überschussladung)
+                        {t("admin_vpp.neg_flex_sub", "Bezugs-Flexibilität (Überschussladung)")}
                     </p>
                 </Card>
 
                 <Card className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                     <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-medium mb-2">
-                        <span>Batterieflotte (Speicher)</span>
+                        <span>{t("admin_vpp.battery_fleet", "Batterieflotte (Speicher)")}</span>
                         <BatteryCharging className="w-4 h-4 text-amber-500" />
                     </div>
                     <div className="text-2xl font-black text-slate-900 dark:text-white">
@@ -317,13 +317,13 @@ export default function VppFleetAdminPage() {
                         <span className="text-sm font-bold text-slate-500">/ {(Number(fleetData.battery_fleet.total_capacity_kwh) || 0).toFixed(1)} kWh</span>
                     </div>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-1">
-                        Ø SoC: <b>{(Number(fleetData.battery_fleet.average_soc_pct) || 0).toFixed(0)} %</b> ({fleetData.summary.active_participating_assets} aktive Assets)
+                        Ø SoC: <b>{(Number(fleetData.battery_fleet.average_soc_pct) || 0).toFixed(0)} %</b> ({fleetData.summary.active_participating_assets} {t("common.active", "aktiv")})
                     </p>
                 </Card>
 
                 <Card className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                     <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-medium mb-2">
-                        <span>Reaktionszeit (SLA)</span>
+                        <span>{t("admin_vpp.reaction_time", "Reaktionszeit (SLA)")}</span>
                         <Clock className="w-4 h-4 text-purple-500" />
                     </div>
                     <div className="text-2xl font-black text-slate-900 dark:text-white">
@@ -343,14 +343,14 @@ export default function VppFleetAdminPage() {
                         <div className="flex items-center justify-between mb-4">
                             <div>
                                 <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                                    Redispatch 2.0 & aFRR 96-Viertelstunden-Fahrplan
+                                    {t("admin_vpp.schedule_title", "Redispatch 2.0 & aFRR 96-Viertelstunden-Fahrplan")}
                                 </h3>
                                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                                    Gemeldete Fahrplanleistung an Übertragungsnetzbetreiber (Connect+)
+                                    {t("admin_vpp.schedule_subtitle", "Gemeldete Fahrplanleistung an Übertragungsnetzbetreiber (Connect+)")}
                                 </p>
                             </div>
                             <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-300 dark:border-emerald-800">
-                                Live aktiv
+                                {t("admin_vpp.live_active", "Live aktiv")}
                             </span>
                         </div>
 
@@ -364,19 +364,19 @@ export default function VppFleetAdminPage() {
                 <div>
                     <Card className="p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-4">
                         <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                            ÜNB & Markt-Filter
+                            {t("admin_vpp.tso_filter_title", "ÜNB & Markt-Filter")}
                         </h3>
 
                         <div>
                             <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">
-                                Regelzone (ÜNB):
+                                {t("admin_vpp.control_area", "Regelzone (ÜNB):")}
                             </label>
                             <select
                                 value={selectedTso}
                                 onChange={(e) => setSelectedTso(e.target.value)}
                                 className="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200"
                             >
-                                <option value="all">Alle Regelzonen (Bundesweit)</option>
+                                <option value="all">{t("admin_vpp.all_control_areas", "Alle Regelzonen (Bundesweit)")}</option>
                                 <option value="50hertz">50Hertz Transmission</option>
                                 <option value="tennet">TenneT TSO</option>
                                 <option value="amprion">Amprion GmbH</option>
@@ -386,7 +386,7 @@ export default function VppFleetAdminPage() {
 
                         <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
                             <div className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                                Produkt-Klassifikation:
+                                {t("admin_vpp.product_classification", "Produkt-Klassifikation:")}
                             </div>
                             <div className="flex flex-wrap gap-1.5">
                                 <span className="px-2 py-1 rounded-lg text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
@@ -416,10 +416,10 @@ export default function VppFleetAdminPage() {
                 <div className="flex items-center justify-between mb-4">
                     <div>
                         <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                            Letzte Dispatch-Ereignisse & Abrufe
+                            {t("admin_vpp.dispatches_title", "Letzte Dispatch-Ereignisse & Abrufe")}
                         </h3>
                         <p className="text-xs text-slate-500 dark:text-slate-400">
-                            Übersicht der automatisierten Markt- und Netzabrufe
+                            {t("admin_vpp.dispatches_subtitle", "Übersicht der automatisierten Markt- und Netzabrufe")}
                         </p>
                     </div>
                 </div>
@@ -428,13 +428,13 @@ export default function VppFleetAdminPage() {
                     <table className="w-full text-left text-xs">
                         <thead>
                             <tr className="border-b border-slate-100 dark:border-slate-800 text-slate-400 font-semibold">
-                                <th className="pb-2">Zeitstempel</th>
-                                <th className="pb-2">Order ID</th>
-                                <th className="pb-2">Soll-Leistung</th>
-                                <th className="pb-2">Dauer</th>
-                                <th className="pb-2">Status</th>
-                                <th className="pb-2">Erfüllung</th>
-                                <th className="pb-2 text-right">Erlös (80/20)</th>
+                                <th className="pb-2">{t("admin_vpp.th_timestamp", "Zeitstempel")}</th>
+                                <th className="pb-2">{t("admin_vpp.th_order_id", "Order ID")}</th>
+                                <th className="pb-2">{t("admin_vpp.th_target_power", "Soll-Leistung")}</th>
+                                <th className="pb-2">{t("admin_vpp.th_duration", "Dauer")}</th>
+                                <th className="pb-2">{t("common.status", "Status")}</th>
+                                <th className="pb-2">{t("admin_vpp.th_fulfillment", "Erfüllung")}</th>
+                                <th className="pb-2 text-right">{t("admin_vpp.th_revenue", "Erlös (80/20)")}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -477,7 +477,7 @@ export default function VppFleetAdminPage() {
                             ) : (
                                 <tr>
                                     <td colSpan="7" className="py-6 text-center text-slate-400">
-                                        Keine Dispatch-Events vorhanden.
+                                        {t("common.no_data", "Keine Daten vorhanden.")}
                                     </td>
                                 </tr>
                             )}
@@ -492,11 +492,11 @@ export default function VppFleetAdminPage() {
                     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
                         <div className="flex items-center justify-between">
                             <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                                ⚡ Test-Dispatch Signal senden
+                                ⚡ {t("admin_vpp.modal_title", "Manuellen Flexibilitäts-Dispatch auslösen")}
                             </h3>
                             <button
                                 onClick={() => setTestDispatchModal(false)}
-                                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-sm"
+                                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-sm cursor-pointer"
                             >
                                 ✕
                             </button>
@@ -504,7 +504,7 @@ export default function VppFleetAdminPage() {
 
                         <div className="space-y-3 text-xs">
                             <div>
-                                <label className="block font-semibold mb-1">Soll-Leistung (kW):</label>
+                                <label className="block font-semibold mb-1">{t("admin_vpp.target_power_label", "Soll-Leistung (kW):")}</label>
                                 <input
                                     type="number"
                                     value={dispatchForm.power_kw}
@@ -514,7 +514,7 @@ export default function VppFleetAdminPage() {
                             </div>
 
                             <div>
-                                <label className="block font-semibold mb-1">Dauer (Minuten):</label>
+                                <label className="block font-semibold mb-1">{t("admin_vpp.duration_label", "Dauer (Minuten):")}</label>
                                 <input
                                     type="number"
                                     value={dispatchForm.duration_minutes}
@@ -524,14 +524,14 @@ export default function VppFleetAdminPage() {
                             </div>
 
                             <div>
-                                <label className="block font-semibold mb-1">Richtung:</label>
+                                <label className="block font-semibold mb-1">{t("admin_vpp.direction_label", "Richtung:")}</label>
                                 <select
                                     value={dispatchForm.direction}
                                     onChange={(e) => setDispatchForm({ ...dispatchForm, direction: e.target.value })}
                                     className="w-full p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800"
                                 >
-                                    <option value="discharge">Entladung (Positive Flexibilität ins Netz)</option>
-                                    <option value="charge">Ladung (Negative Flexibilität aus dem Netz)</option>
+                                    <option value="discharge">{t("admin_vpp.discharge_option", "Entladung (Positive Flexibilität ins Netz)")}</option>
+                                    <option value="charge">{t("admin_vpp.charge_option", "Ladung (Negative Flexibilität aus dem Netz)")}</option>
                                 </select>
                             </div>
                         </div>
@@ -539,16 +539,16 @@ export default function VppFleetAdminPage() {
                         <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-2">
                             <button
                                 onClick={() => setTestDispatchModal(false)}
-                                className="px-3 py-2 text-slate-500 hover:text-slate-700 text-xs font-semibold"
+                                className="px-3 py-2 text-slate-500 hover:text-slate-700 text-xs font-semibold cursor-pointer"
                             >
-                                Abbrechen
+                                {t("common.cancel", "Abbrechen")}
                             </button>
                             <button
                                 onClick={() => triggerDispatchMutation.mutate(dispatchForm)}
                                 disabled={triggerDispatchMutation.isPending}
-                                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition shadow-xs"
+                                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
                             >
-                                {triggerDispatchMutation.isPending ? "Sende Befehl..." : "Dispatch ausführen"}
+                                {triggerDispatchMutation.isPending ? t("common.sending", "Sende...") : t("admin_vpp.start_test_dispatch", "Dispatch ausführen")}
                             </button>
                         </div>
                     </div>

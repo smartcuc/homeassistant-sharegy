@@ -61,7 +61,7 @@ export default function Sidebar() {
             <div className="h-16 flex items-center px-4 border-b border-slate-200 dark:border-slate-800">
                 <NavLink
                     to="/"
-                    title="Zur sharegy Startseite & Info"
+                    title={t("nav.home_title", "Zur sharegy Startseite & Info")}
                     className="font-bold text-lg bg-gradient-to-r from-indigo-500 to-purple-600 text-transparent bg-clip-text flex items-center gap-1.5 hover:opacity-80 transition cursor-pointer"
                 >
                     <span>⚡</span> <span className="font-mono tracking-tight lowercase">sharegy</span>
@@ -130,7 +130,7 @@ export default function Sidebar() {
                                                         e.stopPropagation();
                                                         setOpenSetup(true);
                                                     }}
-                                                    title="Unkonfigurierte Geräte einrichten"
+                                                    title={t("devices.setup_unconfigured", "Unkonfigurierte Geräte einrichten")}
                                                     className="text-[11px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full hover:bg-amber-200 transition shrink-0"
                                                 >
                                                     {item.badge}

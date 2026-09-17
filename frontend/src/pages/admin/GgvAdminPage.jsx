@@ -279,14 +279,14 @@ export default function GgvAdminPage() {
                             </h1>
                             <span className="shrink-0 text-xs font-bold px-3 py-1 rounded-full border flex items-center gap-1.5 bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800">
                                 <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></span>
-                                ⚖️ Gemeinschaftliche Gebäudeversorgung (§ 42b EnWG)
+                                {t("admin_ggv.title", "⚖️ Gemeinschaftliche Gebäudeversorgung (§ 42b EnWG)")}
                             </span>
                             <span className="shrink-0 text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                                WEG & Mehrparteienhaus
+                                {t("admin_ggv.badge_model", "WEG & Mehrparteienhaus")}
                             </span>
                         </div>
                         <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-                            Vor-Ort-Solarstromaufteilung nach Miteigentumsanteilen (MEA in 1/1000). Keine Reststrom-Lieferantenpflicht – jeder Eigentümer/Nutzer behält seinen eigenen Reststromvertrag.
+                            {t("admin_ggv.subtitle", "Vor-Ort-Solarstromaufteilung nach Miteigentumsanteilen (MEA in 1/1000). Keine Reststrom-Lieferantenpflicht – jeder Eigentümer/Nutzer behält seinen eigenen Reststromvertrag.")}
                         </p>
                     </div>
                 </div>
@@ -307,7 +307,7 @@ export default function GgvAdminPage() {
                         className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-purple-50 dark:hover:bg-purple-950/40 text-slate-700 dark:text-slate-200 hover:text-purple-600 dark:hover:text-purple-400 border border-slate-200 dark:border-slate-800 hover:border-purple-300 transition-all shadow-xs flex items-center gap-2 cursor-pointer"
                     >
                         <span>✨</span>
-                        <span>WEG-Gebäude-Assistent (3 Schritte)</span>
+                        <span>{t("admin_ggv.btn_wizard", "WEG-Gebäude-Assistent (3 Schritte)")}</span>
                     </button>
                     <button
                         type="button"
@@ -315,7 +315,7 @@ export default function GgvAdminPage() {
                         className="px-3.5 py-2 rounded-xl text-xs font-bold bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/60 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-800/80 transition-all shadow-xs flex items-center gap-2 cursor-pointer"
                     >
                         <span>📢</span>
-                        <span>Liegenschaft teilen</span>
+                        <span>{t("admin_ggv.btn_share", "Liegenschaft teilen")}</span>
                     </button>
                 </div>
             </div>
@@ -328,7 +328,7 @@ export default function GgvAdminPage() {
                         activeTab === "cockpit" ? "bg-white dark:bg-slate-900 text-purple-600 dark:text-purple-400 font-bold shadow-xs" : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                     }`}
                 >
-                    ⚖️ GGV-Solarcockpit
+                    {t("admin_ggv.tab_cockpit", "⚖️ GGV-Solarcockpit")}
                 </button>
                 <button
                     onClick={() => handleTabChange("units")}
@@ -336,7 +336,7 @@ export default function GgvAdminPage() {
                         activeTab === "units" ? "bg-white dark:bg-slate-900 text-purple-600 dark:text-purple-400 font-bold shadow-xs" : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                     }`}
                 >
-                    🏢 Eigentümer & MEA ({members.length})
+                    {t("admin_ggv.tab_units", "🏢 Eigentümer & MEA")} ({members.length})
                 </button>
                 <button
                     onClick={() => handleTabChange("settlement")}
@@ -344,7 +344,7 @@ export default function GgvAdminPage() {
                         activeTab === "settlement" ? "bg-white dark:bg-slate-900 text-purple-600 dark:text-purple-400 font-bold shadow-xs" : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                     }`}
                 >
-                    💰 Solar- & WEG-Abrechnung
+                    {t("admin_ggv.tab_settlement", "💰 Solar- & WEG-Abrechnung")}
                 </button>
                 <button
                     onClick={() => handleTabChange("meters")}

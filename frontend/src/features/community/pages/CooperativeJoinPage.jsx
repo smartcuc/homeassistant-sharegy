@@ -6,9 +6,11 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../../api/client";
 
 export default function CooperativeJoinPage() {
+    const { t } = useTranslation();
     const { slug } = useParams();
     const navigate = useNavigate();
 
@@ -87,7 +89,7 @@ export default function CooperativeJoinPage() {
             <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-6">
                 <div className="text-center space-y-3">
                     <div className="w-10 h-10 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-                    <p className="text-xs text-slate-500">Lade Beitrittsportal...</p>
+                    <p className="text-xs text-slate-500">{t("cooperative_join.loading", "Lade Beitrittsportal...")}</p>
                 </div>
             </div>
         );
@@ -100,13 +102,13 @@ export default function CooperativeJoinPage() {
                     <div className="w-14 h-14 rounded-2xl bg-rose-500/10 text-rose-600 flex items-center justify-center text-2xl mx-auto">
                         ⚠️
                     </div>
-                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">Gemeinschaft nicht gefunden</h2>
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">{t("cooperative_join.not_found", "Gemeinschaft nicht gefunden")}</h2>
                     <p className="text-xs text-slate-500 dark:text-slate-400">{error}</p>
                     <button
                         onClick={() => navigate("/")}
                         className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition cursor-pointer"
                     >
-                        Zur Startseite
+                        {t("common.back_to_home", "Zur Startseite")}
                     </button>
                 </div>
             </div>
@@ -122,34 +124,34 @@ export default function CooperativeJoinPage() {
                     </div>
                     <div>
                         <span className="text-[11px] font-bold text-emerald-600 uppercase tracking-wider">
-                            Antrag erfolgreich übermittelt
+                            {t("cooperative_join.success_title", "Antrag erfolgreich übermittelt")}
                         </span>
                         <h2 className="text-2xl font-black text-slate-900 dark:text-white mt-1">
-                            Willkommen bei {tenant?.name}!
+                            {t("cooperative_join.welcome_at", "Willkommen bei")} {tenant?.name}!
                         </h2>
                     </div>
 
                     <div className="bg-slate-50 dark:bg-slate-800/40 p-4 rounded-2xl text-left space-y-2 border border-slate-200/60 dark:border-slate-800 text-xs">
                         <div className="flex justify-between py-1 border-b border-slate-200 dark:border-slate-700">
-                            <span className="text-slate-500">Antrags-ID:</span>
+                            <span className="text-slate-500">{t("cooperative_join.application_id", "Antrags-ID:")}</span>
                             <span className="font-mono font-bold">{submittedData.application_id?.slice(0, 8)}...</span>
                         </div>
                         <div className="flex justify-between py-1 border-b border-slate-200 dark:border-slate-700">
-                            <span className="text-slate-500">Gezeichnete Geschäftsanteile:</span>
-                            <span className="font-bold">{submittedData.shares_count} Anteil(e) ({submittedData.total_amount_eur?.toFixed(2)} €)</span>
+                            <span className="text-slate-500">{t("cooperative_join.shares_subscribed", "Gezeichnete Geschäftsanteile:")}</span>
+                            <span className="font-bold">{submittedData.shares_count} {t("cooperative_join.shares_count", "Anteil(e)")} ({submittedData.total_amount_eur?.toFixed(2)} €)</span>
                         </div>
                         <div className="flex justify-between py-1 border-b border-slate-200 dark:border-slate-700">
-                            <span className="text-slate-500">Anerkannte Satzungsversion:</span>
+                            <span className="text-slate-500">{t("cooperative_join.statute_version", "Anerkannte Satzungsversion:")}</span>
                             <span className="font-bold">v{submittedData.statute_version} (§ 15b GenG)</span>
                         </div>
                         <div className="flex justify-between py-1">
-                            <span className="text-slate-500">Status:</span>
-                            <span className="text-amber-600 font-bold">Wartet auf Vorstandsbeschluss</span>
+                            <span className="text-slate-500">{t("common.status", "Status:")}</span>
+                            <span className="text-amber-600 font-bold">{t("cooperative_join.waiting_board", "Wartet auf Vorstandsbeschluss")}</span>
                         </div>
                     </div>
 
                     <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                        Dein digitaler Mitgliedsantrag liegt dem Vorstand von <strong>{tenant?.name}</strong> vor. Nach der formalen Beschlussfassung erhältst du deine Mitgliedsnummer und die Bestätigung per E-Mail an <strong>{form.email}</strong>.
+                        {t("cooperative_join.submitted_desc_prefix", "Dein digitaler Mitgliedsantrag liegt dem Vorstand von")} <strong>{tenant?.name}</strong> {t("cooperative_join.submitted_desc_suffix", "vor. Nach der formalen Beschlussfassung erhältst du deine Mitgliedsnummer und die Bestätigung per E-Mail an")} <strong>{form.email}</strong>.
                     </p>
 
                     <div className="pt-2">
@@ -157,7 +159,7 @@ export default function CooperativeJoinPage() {
                             onClick={() => navigate("/login")}
                             className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
                         >
-                            Zum Login
+                            {t("common.to_login", "Zum Login")}
                         </button>
                     </div>
                 </div>

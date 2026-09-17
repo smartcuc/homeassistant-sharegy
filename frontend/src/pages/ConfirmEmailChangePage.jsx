@@ -49,8 +49,8 @@ export default function ConfirmEmailChangePage() {
                 {status === "loading" && (
                     <div className="space-y-4 py-6">
                         <div className="w-12 h-12 border-3 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-                        <h2 className="text-lg font-bold">Bestätige E-Mail-Adresse...</h2>
-                        <p className="text-xs text-slate-400">Einen Moment bitte, dein Sicherheitstoken wird geprüft.</p>
+                        <h2 className="text-lg font-bold">{t("email_confirm.verifying_title", "Bestätige E-Mail-Adresse...")}</h2>
+                        <p className="text-xs text-slate-400">{t("email_confirm.verifying_desc", "Einen Moment bitte, dein Sicherheitstoken wird geprüft.")}</p>
                     </div>
                 )}
 
@@ -59,7 +59,7 @@ export default function ConfirmEmailChangePage() {
                         <div className="w-16 h-16 bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 rounded-2xl flex items-center justify-center text-3xl mx-auto">
                             ✅
                         </div>
-                        <h2 className="text-xl font-bold text-white">E-Mail-Adresse geändert!</h2>
+                        <h2 className="text-xl font-bold text-white">{t("email_confirm.success_title", "E-Mail-Adresse geändert!")}</h2>
                         <p className="text-xs text-slate-300 leading-relaxed">
                             {message}
                         </p>
@@ -73,7 +73,7 @@ export default function ConfirmEmailChangePage() {
                                 to="/app/profile"
                                 className="block w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs transition shadow-lg"
                             >
-                                Zum Profil zurückkehren →
+                                {t("profile.back_to_profile", "Zum Profil zurückkehren")} →
                             </Link>
                         </div>
                     </div>
@@ -84,7 +84,7 @@ export default function ConfirmEmailChangePage() {
                         <div className="w-16 h-16 bg-rose-500/20 text-rose-400 border border-rose-500/40 rounded-2xl flex items-center justify-center text-3xl mx-auto">
                             ⚠️
                         </div>
-                        <h2 className="text-xl font-bold text-white">Bestätigung fehlgeschlagen</h2>
+                        <h2 className="text-xl font-bold text-white">{t("email_confirm.failed_title", "Bestätigung fehlgeschlagen")}</h2>
                         <p className="text-xs text-rose-300 leading-relaxed">
                             {message}
                         </p>
@@ -93,13 +93,13 @@ export default function ConfirmEmailChangePage() {
                                 to="/app/profile"
                                 className="block w-full py-3 px-4 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl text-xs transition"
                             >
-                                Zum Profil zurück
+                                {t("profile.back_to_profile", "Zum Profil zurück")}
                             </Link>
                             <Link
                                 to="/login"
                                 className="block w-full py-2.5 px-4 text-slate-400 hover:text-white font-semibold text-xs transition"
                             >
-                                Zur Anmeldung
+                                {t("common.to_login", "Zur Anmeldung")}
                             </Link>
                         </div>
                     </div>

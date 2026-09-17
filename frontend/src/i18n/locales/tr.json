@@ -77,7 +77,14 @@
     "searching": "Searching...",
     "turn_on": "Aç",
     "turn_off": "Duraklat",
-    "settings": "Ayarlar"
+    "settings": "Ayarlar",
+    "unit_hours": "sa.",
+    "menu": "Menü",
+    "calculating": "Hesaplanıyor...",
+    "click_to_configure": "Açmak ve yapılandırmak için tıklayın",
+    "click_to_open": "Açmak için tıklayın",
+    "mode": "Mod",
+    "total": "Toplam"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -147,7 +154,16 @@
     "mode_hybrid": "EMS ve Paylaşım Merkezi",
     "mode_mieterstrom": "Kiracı Elektriği (§ 42a EnWG)",
     "mode_partner": "Partner Kokpiti",
-    "mode_sharing": "Enerji Paylaşımı (Kooperatif)"
+    "mode_sharing": "Enerji Paylaşımı (Kooperatif)",
+    "switch_context_hint": "Çalışma alanını değiştir",
+    "context_label": "Alan",
+    "select_context": "Görünüm Seç",
+    "select_context_desc": "Gezinmeyi rolünüze göre ayarlayın",
+    "mieterstrom": "Kiracı Elektriği (§ 42a EnWG)",
+    "ggv": "Bina Enerji Tedariki (§ 42b EnWG)",
+    "home_title": "sharegy ana sayfası ve bilgilerine git",
+    "open_menu": "Menüyü aç",
+    "theme": "Tema"
   },
   "dashboard": {
     "title": "Your Energy Hub ⚡",
@@ -216,7 +232,9 @@
     "group_by_rooms": "Geräte nach Räumen gruppieren",
     "no_matches_title": "Keine passenden Geräte gefunden",
     "no_matches_desc": "Für die aktuelle Filterkombination oder Suche liegen keine Geräte vor.",
-    "inverter": "Wechselrichter"
+    "inverter": "Wechselrichter",
+    "add_wallbox_btn": "Wallbox Oluştur ve Bağla 🚀",
+    "setup_unconfigured": "Yapılandırılmamış cihazları kurun"
   },
   "device_add": {
     "modal_title": "Connect New Device",
@@ -502,7 +520,9 @@
     "insight_autarky_low": "High grid reliance: Only {{rate}}% of your electricity demand was covered by solar/storage.",
     "insight_top_consumer": "Top consumer: {{name}} with {{share}}% of total electricity ({{solar}}% solar share).",
     "insight_financial_benefit": "Financial benefit: Self-consumption and grid feed-in generated a net benefit of {{amount}} €.",
-    "period_yesterday": "Dün"
+    "period_yesterday": "Dün",
+    "understand_sharing": "Enerji Paylaşımını Anlamak",
+    "how_distributed": "Topluluğunuzda enerji bu şekilde dağıtılır:"
   },
   "interfaces": {
     "title": "Interfaces",
@@ -652,7 +672,41 @@
     "timezone_default": "Varsayılan (Europe/Berlin)",
     "timezone_error": "Saat dilimi kaydedilirken hata oluştu.",
     "timezone_saved": "Saat dilimi başarıyla kaydedildi.",
-    "vat_id": "Vergi Kimlik Numarası (KDV No)"
+    "vat_id": "Vergi Kimlik Numarası (KDV No)",
+    "account_settings_heading": "Kullanıcı Hesabı Ayarları",
+    "account_settings_title": "Hesap ve Kimlik",
+    "active_session": "Aktif Oturum ve Cihazlar",
+    "active_session_desc": "Mevcut tarayıcınız ve son girişiniz hakkında bilgiler.",
+    "address_title": "İkamet ve Fatura Adresi",
+    "billing_email": "Fatura E-postası (Farklı)",
+    "billing_email_hint": "Faturalar bu adrese gönderilecektir. Boş bırakılırsa giriş e-postanız kullanılır.",
+    "billing_name": "Fatura Alıcısı / Departman",
+    "change_email_btn": "E-postayı Değiştir",
+    "city": "Şehir",
+    "company_address_desc": "Faturalandırma için şirketin resmi adresi.",
+    "company_address_title": "Şirket ve Fatura Adresi",
+    "company_details_desc": "Doğru fatura düzenlemesi için resmi şirket adınızı ve KDV numaranızı girin.",
+    "company_details_title": "Şirket Bilgileri ve Vergi No",
+    "company_name": "Resmi Şirket Adı",
+    "confirm_revoke": "Şimdi Sil ve Çıkış Yap",
+    "contact_title": "İletişim Bilgileri",
+    "country": "Ülke",
+    "email_notifications": "E-posta Özetleri ve Sistem Raporları",
+    "first_name": "Ad",
+    "header_desc": "Kişisel bilgilerinizi, şirket bilgilerinizi, faturalarınızı ve bildirimlerinizi yönetin.",
+    "header_title": "Hesabım",
+    "house_number": "Bina No",
+    "landing_page_desc": "Platforma giriş yaparken tercih ettiğiniz başlangıç sayfasını seçin.",
+    "revoke_error": "Magic Link bağlantıları silinirken hata oluştu.",
+    "revoke_links_btn": "Tüm Bağlantıları Sil ve Çıkış Yap",
+    "revoke_modal_sub": "Açık giriş bağlantılarını anında geçersiz kılmak için güvenlik eylemi",
+    "revoke_modal_text": "Hesabınız için oluşturulan tüm Magic Link bağlantılarını kalıcı olarak geçersiz kılmak istediğinizden emin misiniz?",
+    "revoke_modal_title": "Tüm Magic Link'leri sil ve oturumu sonlandır?",
+    "revoke_point_1": "Daha önce e-posta ile gönderilen tüm erişim bağlantıları anında geçersiz olur.",
+    "revoke_point_2": "Hesabınızı korumak için aktif oturumunuz anında sonlandırılacaktır (Otomatik Çıkış).",
+    "revoke_point_3": "Giriş sayfasından istediğiniz zaman yeni bir Magic Link talep edebilirsiniz.",
+    "revoke_success": "Tüm Magic Link'ler başarıyla silindi. Şimdi çıkışınız yapılıyor.",
+    "revoking": "Siliniyor ve çıkış yapılıyor..."
   },
   "settings": {
     "account": "User Account & Settings",
@@ -1059,7 +1113,13 @@
       "cancel_anytime": "Cancel monthly · Instant activation",
       "later": "Later",
       "upgrade_now": "Upgrade to Pro now"
-    }
+    },
+    "manage_plan": "Aboneliği ve Planları Yönet",
+    "plan_details_desc": "Sharegy EMS planınız, fatura döngünüz ve ödeme bilgilerinizin özeti.",
+    "plan_details_title": "Plan ve Faturalandırma Durumu",
+    "pro_features": "Sınırsız geçmiş, çoklu sensör tahminleri, dinamik tarife optimizasyonu ve anlık bildirimler içerir.",
+    "to_community_statements": "Topluluk Hesaplaşmalarına Git",
+    "upgrade_pro": "Pro'ya Yükselt"
   },
   "arbitrage": {
     "title": "Grid-Charging Arbitrage & Battery Simulator",
@@ -1337,7 +1397,17 @@
     "timezone_disclaimer": "Detection is based on your browser settings and may differ when using VPNs or proxies.",
     "ready_title": "Your dashboard is ready 🚀",
     "ready_subtitle": "Start managing your energy now.",
-    "to_dashboard_btn": "Go to dashboard"
+    "to_dashboard_btn": "Go to dashboard",
+    "step_1_heading": "1. Hangi ekipmanlara sahipsiniz?",
+    "step_1_sub": "Güneş enerjisi sisteminizi ve büyük tüketicileri seçin.",
+    "step_1_title": "Donanım",
+    "step_2_heading": "2. Şu anda hangi elektrik tarifesini kullanıyorsunuz?",
+    "step_2_sub": "Dinamik borsa tarifesinin sizin için karlı olup olmadığını belirlememize yardımcı olur.",
+    "step_2_title": "Elektrik Tarifesi",
+    "step_3_heading": "Kişisel enerji profiliniz:",
+    "step_3_sub": "Verdiğiniz bilgilere dayanarak tasarruf potansiyelinizi hesapladık.",
+    "step_3_title": "Enerji Profiliniz",
+    "welcome_subtitle_custom": "Sadece 3 kısa adımda kişisel enerji profilinizi ve maksimum tasarruf potansiyelinizi belirleyelim."
   },
   "help": {
     "edit_article_title": "Edit Help Article (Staff Live Editor)",
@@ -1433,7 +1503,9 @@
     "effective_price": "Effective Price",
     "minimum": "Minimum",
     "maximum": "Maximum",
-    "average": "Average"
+    "average": "Average",
+    "change_tariff": "Dinamik tarifeye geç →",
+    "epex_tooltip": "Güncel spot elektrik fiyatı (EPEX Spot)"
   },
   "legal": {
     "impressum_title": "Legal Notice",
@@ -1496,7 +1568,9 @@
     "modal_delete_in_field": ":",
     "confirm_delete": "Delete Permanently",
     "deleting": "Deleting account...",
-    "delete_failed": "Deletion failed."
+    "delete_failed": "Deletion failed.",
+    "cat_b2b": "Şirket Bilgileri ve Belgeler",
+    "export_success": "Veri dışa aktarımı başarıyla indirildi."
   },
   "support": {
     "btn_label": "Support",
@@ -1749,7 +1823,15 @@
     "feature_enwg_title": "§ 14a EnWG Şebeke Kısma",
     "feature_enwg_desc": "Konfor kaybı olmadan şebeke operatörünün kısma sinyallerinin otomatik işlenmesi.",
     "unlock_pro_btn": "Sharegy Pro ile Enerji Kontrolünü Açın",
-    "click_to_unlock": "Sharegy Pro ile tüm kontrol seçeneklerinin kilidini açmak için buraya tıklayın"
+    "click_to_unlock": "Sharegy Pro ile tüm kontrol seçeneklerinin kilidini açmak için buraya tıklayın",
+    "heating_active": "Isıtma Aktif",
+    "master_mode": "Ana Mod:",
+    "mode": "Çalışma Modu",
+    "mode_label": "Mod:",
+    "power_live": "Güç (Canlı)",
+    "preheating_badge": "Termal Ön Şarj",
+    "room_temp": "Oda Sıcaklığı",
+    "standby": "Bekleme / Pasif"
   },
   "consumers": {
     "warmwasser": "Hot Water",
@@ -1886,7 +1968,8 @@
     "reserve": "Reserve",
     "efficiency": "Efficiency",
     "mode_pv_autarky": "PV Autarky",
-    "open_control_btn": "Open Energy Control"
+    "open_control_btn": "Open Energy Control",
+    "mode_forced_discharge": "🔋 Zorunlu Deşarj"
   },
   "wallbox_boost": "⚡ Wallbox Boost 11kW (2h)",
   "battery_reserve": "🔋 Speicher-Schutz (100% Reserve)",
@@ -2223,7 +2306,9 @@
     "error_delete_failed": "Entegrasyon bağlantısı kesilirken hata oluştu.",
     "add_inverter_btn": "İnvertör bağla",
     "sungrow_reauth_btn": "iSolarCloud yetkilendirmesini yenile",
-    "sungrow_api_active": "Sungrow iSolarCloud API yetkilendirildi ve etkin"
+    "sungrow_api_active": "Sungrow iSolarCloud API yetkilendirildi ve etkin",
+    "sungrow_api_desc": "iSolarCloud hesabınızdaki tüm algılanan Sungrow invertörleri ve bataryaları bağlandı ve otomatik senkronize ediliyor.",
+    "sungrow_reauth_short": "Yeniden Yetkilendir"
   },
   "shelly_cloud": {
     "error_no_key": "Please enter your Shelly Cloud auth key / token.",
@@ -2300,7 +2385,16 @@
     "cheapest_hours": "Cheapest Spot Hours",
     "savings_potential": "Savings Potential",
     "per_15k_km": "at 15,000 km annual mileage",
-    "vs_combustion": "-{{pct}}% vs. ICE / Combustion"
+    "vs_combustion": "-{{pct}}% vs. ICE / Combustion",
+    "pro_exclusive": "Sharegy Pro Özel",
+    "hero_title": "Elektrikli aracınızı %100 güneş enerjisi ve en ucuz spot borsa saatleriyle ücretsiz şarj edin",
+    "pv_surplus_title": "Saf Güneş Fazlası Şarjı",
+    "dynamic_spot_title": "Dinamik Spot Fiyat Otopilotu",
+    "ocpp_shelly_title": "OCPP (1.6 / 2.0.1 / 2.1) ve Shelly Desteği",
+    "target_charge_title": "Hedef Şarj ve Kalkış Saati",
+    "fuel_radar_title": "MTS-K Canlı Yakıt Fiyatı Radarı",
+    "trip_history_title": "Sürüş ve Şarj Geçmişi",
+    "unlock_pro": "Sharegy Pro ile E-Mobilite Kilidini Açın"
   },
   "heating": {
     "title": "Heating & Thermal Storage",
@@ -2465,7 +2559,19 @@
     "get_variables_btn": "🔍 Fetch GetVariables",
     "no_variables_data": "No stored Device Model variables available. Click \"Fetch GetVariables\".",
     "action_success": "Action executed successfully.",
-    "action_error": "Execution error."
+    "action_error": "Execution error.",
+    "rfid_active": "Aktif",
+    "rfid_add_success": "RFID çipi başarıyla eklendi.",
+    "rfid_add_title": "Yeni RFID Çipi / Şarj Kartı Ekle",
+    "rfid_delete_confirm": "Bu RFID etiketini silmek istediğinizden emin misiniz?",
+    "rfid_deleted": "RFID çipi silindi.",
+    "rfid_empty": "Henüz kayıtlı RFID çipi yok. Yukarıdan ilk çipinizi ekleyin.",
+    "rfid_id_label": "RFID UID / Etiket Kimliği",
+    "rfid_id_placeholder": "örn. TAG-01 veya 04A1B2C3",
+    "rfid_inactive": "Kilitli",
+    "rfid_list_title": "Kayıtlı RFID Çipleri",
+    "rfid_name_label": "Açıklama / İsim",
+    "rfid_name_placeholder": "örn. Şirket Aracı / Çip 1"
   },
   "system_status": {
     "title": "System Status & Live Infrastructure",
@@ -2692,5 +2798,153 @@
     "select_role_label": "1. Rol ve Yetki Seçin:",
     "share_btn": "Başarıları Paylaş",
     "whitelabel_btn": "Whitelabel ve Markalama"
+  },
+  "admin_mieterstrom": {
+    "title": "Kiracı Elektriği (§ 42a EnWG)",
+    "badge_model": "Tam Tedarik Modeli (Şartlar)",
+    "subtitle": "Tam tedarik modeli: Kiracı elektrik primi ile tek bir faturada yerinde güneş ve şebeke elektriği (§ 21 fıkra 3 EEG)",
+    "btn_wizard": "Kiracı Elektriği Sihirbazı (3 Adım)",
+    "btn_share": "Mahalleyi Paylaş",
+    "tab_cockpit": "🏢 Kiracı Kokpiti",
+    "tab_apartments": "🏠 Daireler ve Kiracılar",
+    "tab_settlement": "💰 Tam Tedarik Faturalandırması",
+    "tab_meters": "⚡ Ana ve Alt Sayaçlar",
+    "tab_vpp": "🔌 Mahalle Esnekliği",
+    "tab_msb": "⚡ Akıllı Sayaç ve Ağ Geçitleri",
+    "tab_audit": "📜 Denetim Günlüğü"
+  },
+  "admin_ggv": {
+    "title": "Bina Ortak Enerji Tedariki (§ 42b EnWG)",
+    "badge_model": "Kat Malikleri ve Çok Daireli Bina",
+    "subtitle": "Mülkiyet paylarına (1/1000) göre yerinde güneş enerjisi paylaşımı. Tedarikçi yükümlülüğü yoktur – her sakin kendi elektrik sözleşmesini korur.",
+    "btn_wizard": "Bina Yönetimi Sihirbazı (3 Adım)",
+    "btn_share": "Mülkü Paylaş",
+    "tab_cockpit": "⚖️ Ortak Güneş Kokpiti",
+    "tab_units": "🏢 Malikler ve Paylar",
+    "tab_settlement": "💰 Güneş ve Yönetim Hesaplaşması"
+  },
+  "admin_sharing": {
+    "title": "Bölgesel Enerji Paylaşımı (Kooperatif)",
+    "badge_model": "Kooperatif Tüzüğü (GenG)",
+    "subtitle": "BNetzA AS4/MSCONS piyasa iletişimi ile yurttaş kooperatifleri için 15 dakikalık akıllı sayaç dengelemesi ve şebeke tahsisi",
+    "btn_wizard": "Kooperatif Sihirbazı (3 Adım)",
+    "btn_mako": "Piyasa İletişimi (AS4)",
+    "tab_cockpit": "⚡ Yurttaş Enerjisi Kokpiti",
+    "tab_members": "👥 Kooperatif Üyeleri",
+    "tab_applications": "📋 Üyelik Başvuruları",
+    "tab_settlement": "💰 15dk Paylaşım Hesaplaşması"
+  },
+  "admin_communities": {
+    "title": "Mahalleler ve Topluluklar (Portföy)",
+    "subtitle": "Tüm kiracı elektriği mahalleleri, kat mülkiyetleri ve yurttaş enerji toplulukları için merkezi yönetim ve portföy kokpiti.",
+    "create_community_btn": "Yeni Topluluk Oluştur"
+  },
+  "wizard": {
+    "step1_title": "1. Model ve Temel Bilgiler",
+    "step2_title": "2. Tarifeler ve Koşullar",
+    "step3_title": "3. Davetler ve Tamamlama"
+  },
+  "admin_vpp": {
+    "title": "Sanal Güç Santrali (VPP) ve Esneklik Merkezi",
+    "subtitle": "Toplama, İkincil Rezerv (aFRR), Redispatch 2.0 ve 80/20 Piyasa Takası",
+    "run_clearing": "80/20 Takasını Çalıştır",
+    "clearing_running": "Takas işlemi sürüyor...",
+    "start_test_dispatch": "Test Yük Dağıtımını Başlat",
+    "pos_flex": "Pozitif Kontrol Gücü (+kW)",
+    "pos_flex_sub": "Şebekeye besleme esnekliği (deşarj)",
+    "neg_flex": "Negatif Kontrol Gücü (-kW)",
+    "neg_flex_sub": "Tüketim esnekliği (fazla şarj)",
+    "battery_fleet": "Batarya Filosu (Depolama)",
+    "reaction_time": "Tepki Süresi (SLA)",
+    "schedule_title": "Redispatch 2.0 ve aFRR 96 Çeyrek Saatlik Çizelge",
+    "schedule_subtitle": "İletim Sistemi Operatörlerine (Connect+) bildirilen çizelge gücü",
+    "live_active": "Canlı Aktif",
+    "tso_filter_title": "İSO ve Piyasa Filtresi",
+    "control_area": "Kontrol Alanı (İSO):",
+    "all_control_areas": "Tüm Kontrol Alanları (Ülke Çapında)",
+    "product_classification": "Ürün Sınıflandırması:",
+    "dispatches_title": "Son Yük Dağıtım Olayları ve Çağrıları",
+    "dispatches_subtitle": "Otomatik piyasa ve şebeke çağrılarına genel bakış",
+    "th_timestamp": "Zaman Damgası",
+    "th_order_id": "Sipariş ID",
+    "th_target_power": "Hedef Güç",
+    "th_duration": "Süre",
+    "th_fulfillment": "Karşılama",
+    "th_revenue": "Gelir (80/20)",
+    "modal_title": "Manuel Esneklik Dağıtımını Tetikle",
+    "target_power_label": "Hedef Güç (kW):",
+    "duration_label": "Süre (dakika):",
+    "direction_label": "Yön:",
+    "discharge_option": "Deşarj (Şebekeye pozitif esneklik)",
+    "charge_option": "Şarj (Şebekeden negatif esneklik)",
+    "reason_label": "Neden / Sipariş Referansı:"
+  },
+  "whitelabel": {
+    "presets_title": "Hazır Renk Profilleri",
+    "branding_section": "Marka Görünümü ve Kurumsal Tasarım",
+    "company_name": "Şirket Adı (Tedarikçi / Belediye Hizmeti)",
+    "support_email": "Destek E-posta Adresi",
+    "primary_color": "Ana Renk",
+    "accent_color": "Vurgu Rengi",
+    "logo_url": "Logo URL (SVG / PNG)",
+    "domain_cname": "Özel Alt Alan Adı / Alan Adı (CNAME)",
+    "enable_mode": "Whitelabel Modunu Etkinleştir",
+    "hide_branding": "Üst ve alt bilgide Sharegy markasını gizle",
+    "preview_title": "Canlı Önizleme",
+    "save_branding": "Markayı Uygula"
+  },
+  "mako": {
+    "format_type": "Mesaj Formatı ve İşlem Türü",
+    "target_system": "Hedef Faturalama Sistemi / AS4 Ağ Geçidi",
+    "compliance_title": "BNetzA GPKE / WiM Uyumluluğu",
+    "compliance_desc": "§ 42b EnWG uyarınca ortak bina tedariki için otomatik sağlama toplamı doğrulaması ile standartlaştırılmış EDIFACT UNA/UNB/UNH/UNT segmentleri üretir.",
+    "generate_send": "EDIFACT Oluştur ve AS4'e Gönder",
+    "raw_preview": "EDIFACT Ham Veri Önizlemesi",
+    "download_edi": "İndir (.edi)",
+    "preview_placeholder": "Önizlemeyi yüklemek için 'EDIFACT Oluştur ve AS4'e Gönder'e tıklayın.",
+    "sent_confirmed": "AS4 İletimi Onaylandı"
+  },
+  "cooperative": {
+    "open_applications": "Bekleyen Başvurular",
+    "approved_members": "Onaylanan Üyeler",
+    "public_join_link": "Herkese Açık Katılım Bağlantısı",
+    "no_applications_found": "Bu seçim için katılım başvurusu bulunamadı",
+    "share_join_link_hint": "Yeni kooperatif üyelerinin dijital olarak kaydolmasını sağlamak için herkese açık katılım bağlantısını paylaşın.",
+    "applicant": "Başvuru Sahibi",
+    "residence_address": "İkamet / Adres",
+    "shares_amount": "Hisseler ve Tutar",
+    "statute_consent": "Tüzük Onayı",
+    "status_resolution": "Durum ve Karar"
+  },
+  "master_meter": {
+    "th_tenant": "Kiracı / Birim",
+    "th_quota": "Paylaşım Kotası (MEA)",
+    "th_consumption": "Tüketim",
+    "th_solar_coverage": "Güneş Karşılama Oranı",
+    "th_residual_grid": "Şebekeden Kalan Çekim",
+    "th_autarky": "Öz Yeterlilik"
+  },
+  "share": {
+    "tree_equivalent": "Eşdeğerdir",
+    "choose_platform": "Platformunuzu seçin:",
+    "text_adjusted": "Metin otomatik olarak ayarlanır",
+    "share_whatsapp": "WhatsApp'ta Paylaş",
+    "share_linkedin": "LinkedIn'de Paylaş",
+    "share_x": "X'te Paylaş"
+  },
+  "cooperative_join": {
+    "loading": "Katılım portalı yükleniyor...",
+    "not_found": "Topluluk bulunamadı",
+    "success_title": "Başvuru başarıyla gönderildi",
+    "application_id": "Başvuru ID:",
+    "shares_subscribed": "Taahhüt Edilen Hisseler:",
+    "statute_version": "Kabul Edilen Tüzük Sürümü:",
+    "waiting_board": "Yönetim kurulu onayını bekliyor"
+  },
+  "email_confirm": {
+    "verifying_title": "E-posta adresi doğrulanıyor...",
+    "verifying_desc": "Lütfen bir dakika bekleyin, güvenlik belirteciniz doğrulanıyor.",
+    "success_title": "E-posta adresi değiştirildi!",
+    "failed_title": "Doğrulama başarısız oldu"
   }
 }

@@ -4,9 +4,11 @@
 */
 
 import { useEffect, useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../api/client";
 
 export default function CommunitiesManagementHub() {
+    const { t } = useTranslation();
     const [portfolioData, setPortfolioData] = useState(null);
     const [selectedTenantId, setSelectedTenantId] = useState(null);
     const [drilldownData, setDrilldownData] = useState(null);
@@ -376,7 +378,7 @@ export default function CommunitiesManagementHub() {
                         <span className="text-3xl">🏛️</span>
                         <div>
                             <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
-                                Quartiers- & Portfolio-Verwaltung (Plattform-Admin)
+                                {t("admin_communities.title", "Quartiers- & Portfolio-Verwaltung (Plattform-Admin)")}
                             </h1>
                             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                                 Zentrale Steuerung aller Mieterstrom-Projekte (§ 42a), GGV-Gebäude (§ 42b) und Energy-Sharing-Gemeinschaften

@@ -77,7 +77,14 @@
     "searching": "Searching...",
     "turn_on": "Включить",
     "turn_off": "Приостановить",
-    "settings": "Настройки"
+    "settings": "Настройки",
+    "unit_hours": "ч",
+    "menu": "Меню",
+    "calculating": "Вычисление...",
+    "click_to_configure": "Нажмите, чтобы открыть и настроить",
+    "click_to_open": "Нажмите, чтобы открыть",
+    "mode": "Режим",
+    "total": "Всего"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -147,7 +154,16 @@
     "mode_hybrid": "Хаб EMS и шеринга",
     "mode_mieterstrom": "Электроэнергия для арендаторов (§ 42a EnWG)",
     "mode_partner": "Панель партнера",
-    "mode_sharing": "Шеринг энергии (Кооператив)"
+    "mode_sharing": "Шеринг энергии (Кооператив)",
+    "switch_context_hint": "Переключить рабочую область",
+    "context_label": "Область",
+    "select_context": "Выбрать вид",
+    "select_context_desc": "Настроить навигацию под вашу роль",
+    "mieterstrom": "Электроэнергия для арендаторов (§ 42a EnWG)",
+    "ggv": "Снабжение здания (§ 42b EnWG)",
+    "home_title": "На главную и информацию sharegy",
+    "open_menu": "Открыть меню",
+    "theme": "Тема"
   },
   "dashboard": {
     "title": "Your Energy Hub ⚡",
@@ -216,7 +232,9 @@
     "group_by_rooms": "Geräte nach Räumen gruppieren",
     "no_matches_title": "Keine passenden Geräte gefunden",
     "no_matches_desc": "Für die aktuelle Filterkombination oder Suche liegen keine Geräte vor.",
-    "inverter": "Wechselrichter"
+    "inverter": "Wechselrichter",
+    "add_wallbox_btn": "Создать и подключить станцию 🚀",
+    "setup_unconfigured": "Настроить не настроенные устройства"
   },
   "device_add": {
     "modal_title": "Connect New Device",
@@ -502,7 +520,9 @@
     "insight_autarky_low": "High grid reliance: Only {{rate}}% of your electricity demand was covered by solar/storage.",
     "insight_top_consumer": "Top consumer: {{name}} with {{share}}% of total electricity ({{solar}}% solar share).",
     "insight_financial_benefit": "Financial benefit: Self-consumption and grid feed-in generated a net benefit of {{amount}} €.",
-    "period_yesterday": "Вчера"
+    "period_yesterday": "Вчера",
+    "understand_sharing": "Понимание совместного использования энергии",
+    "how_distributed": "Вот как энергия распределяется в вашем сообществе:"
   },
   "interfaces": {
     "title": "Interfaces",
@@ -652,7 +672,41 @@
     "timezone_default": "По умолчанию (Europe/Berlin)",
     "timezone_error": "Ошибка сохранения часового пояса.",
     "timezone_saved": "Часовой пояс успешно сохранен.",
-    "vat_id": "Идентификационный номер налогоплательщика (НДС)"
+    "vat_id": "Идентификационный номер налогоплательщика (НДС)",
+    "account_settings_heading": "Настройки учетной записи",
+    "account_settings_title": "Аккаунт и идентификация",
+    "active_session": "Активная сессия и устройства",
+    "active_session_desc": "Информация о текущем браузере и последнем входе.",
+    "address_title": "Адрес проживания и счетов",
+    "billing_email": "Email для счетов (Другой)",
+    "billing_email_hint": "Счета будут отправляться на этот адрес. Если пусто, используется ваш email для входа.",
+    "billing_name": "Получатель счета / Отдел",
+    "change_email_btn": "Изменить email",
+    "city": "Город",
+    "company_address_desc": "Официальный адрес компании для выставления счетов.",
+    "company_address_title": "Юридический адрес и адрес счетов",
+    "company_details_desc": "Укажите официальное название компании и ИНН/НДС для правильного оформления счетов.",
+    "company_details_title": "Данные компании и НДС",
+    "company_name": "Официальное название компании",
+    "confirm_revoke": "Удалить сейчас и выйти",
+    "contact_title": "Контактная информация",
+    "country": "Страна",
+    "email_notifications": "Email-сводки и системные отчеты",
+    "first_name": "Имя",
+    "header_desc": "Управляйте личными данными, реквизитами компании, счетами и уведомлениями.",
+    "header_title": "Мой аккаунт",
+    "house_number": "Дом",
+    "landing_page_desc": "Выберите стартовую страницу при входе на платформу.",
+    "revoke_error": "Ошибка при удалении ссылок Magic Link.",
+    "revoke_links_btn": "Удалить все ссылки и выйти",
+    "revoke_modal_sub": "Действие безопасности для немедленного аннулирования ссылок входа",
+    "revoke_modal_text": "Вы уверены, что хотите окончательно аннулировать все ссылки Magic Link для вашего аккаунта?",
+    "revoke_modal_title": "Удалить все ссылки Magic Link и завершить сеанс?",
+    "revoke_point_1": "Все отправленные ранее по почте ссылки немедленно станут недействительными.",
+    "revoke_point_2": "Ваш текущий сеанс будет немедленно завершен для защиты аккаунта (Автовыход).",
+    "revoke_point_3": "Вы можете в любое время запросить новую ссылку на странице входа.",
+    "revoke_success": "Все ссылки Magic Link успешно удалены. Вы будете выведены из системы.",
+    "revoking": "Удаление и выход..."
   },
   "settings": {
     "account": "User Account & Settings",
@@ -1059,7 +1113,13 @@
       "cancel_anytime": "Cancel monthly · Instant activation",
       "later": "Later",
       "upgrade_now": "Upgrade to Pro now"
-    }
+    },
+    "manage_plan": "Управление подпиской и тарифами",
+    "plan_details_desc": "Обзор вашего тарифа Sharegy EMS, платежного цикла и реквизитов.",
+    "plan_details_title": "Тариф и статус расчетов",
+    "pro_features": "Включает неограниченную историю, прогнозы, оптимизацию под спотовые цены и пуш-уведомления.",
+    "to_community_statements": "Перейти к расчетам сообщества",
+    "upgrade_pro": "Перейти на Pro"
   },
   "arbitrage": {
     "title": "Grid-Charging Arbitrage & Battery Simulator",
@@ -1337,7 +1397,17 @@
     "timezone_disclaimer": "Detection is based on your browser settings and may differ when using VPNs or proxies.",
     "ready_title": "Your dashboard is ready 🚀",
     "ready_subtitle": "Start managing your energy now.",
-    "to_dashboard_btn": "Go to dashboard"
+    "to_dashboard_btn": "Go to dashboard",
+    "step_1_heading": "1. Какое оборудование у вас установлено?",
+    "step_1_sub": "Выберите солнечную станцию и ключевые потребители.",
+    "step_1_title": "Оборудование",
+    "step_2_heading": "2. Какой тариф на электроэнергию вы используете?",
+    "step_2_sub": "Это поможет определить, выгоден ли для вас динамический спотовый тариф.",
+    "step_2_title": "Тариф на энергию",
+    "step_3_heading": "Ваш личный энергетический профиль:",
+    "step_3_sub": "На основе ваших данных мы рассчитали потенциал экономии.",
+    "step_3_title": "Ваш энергетический профиль",
+    "welcome_subtitle_custom": "Всего за 3 шага мы определим ваш профиль и максимальный потенциал экономии."
   },
   "help": {
     "edit_article_title": "Edit Help Article (Staff Live Editor)",
@@ -1433,7 +1503,9 @@
     "effective_price": "Effective Price",
     "minimum": "Minimum",
     "maximum": "Maximum",
-    "average": "Average"
+    "average": "Average",
+    "change_tariff": "Перейти на динамический тариф →",
+    "epex_tooltip": "Текущая биржевая цена электроэнергии (EPEX Spot)"
   },
   "legal": {
     "impressum_title": "Legal Notice",
@@ -1496,7 +1568,9 @@
     "modal_delete_in_field": ":",
     "confirm_delete": "Delete Permanently",
     "deleting": "Deleting account...",
-    "delete_failed": "Deletion failed."
+    "delete_failed": "Deletion failed.",
+    "cat_b2b": "Данные компании и квитанции",
+    "export_success": "Экспорт данных успешно загружен."
   },
   "support": {
     "btn_label": "Support",
@@ -1749,7 +1823,15 @@
     "feature_enwg_title": "Сетевое ограничение § 14a EnWG",
     "feature_enwg_desc": "Автоматическая отработка сигналов ограничения от сетевого оператора без потери комфорта.",
     "unlock_pro_btn": "Разблокировать управление энергией с Sharegy Pro",
-    "click_to_unlock": "Нажмите здесь, чтобы разблокировать все опции управления с Sharegy Pro"
+    "click_to_unlock": "Нажмите здесь, чтобы разблокировать все опции управления с Sharegy Pro",
+    "heating_active": "Нагрев активен",
+    "master_mode": "Главный режим:",
+    "mode": "Режим работы",
+    "mode_label": "Режим:",
+    "power_live": "Мощность (Онлайн)",
+    "preheating_badge": "Термическая предзарядка",
+    "room_temp": "Температура в помещении",
+    "standby": "Ожидание / Пассивный"
   },
   "consumers": {
     "warmwasser": "Hot Water",
@@ -1886,7 +1968,8 @@
     "reserve": "Reserve",
     "efficiency": "Efficiency",
     "mode_pv_autarky": "PV Autarky",
-    "open_control_btn": "Open Energy Control"
+    "open_control_btn": "Open Energy Control",
+    "mode_forced_discharge": "🔋 Принудительный разряд"
   },
   "wallbox_boost": "⚡ Wallbox Boost 11kW (2h)",
   "battery_reserve": "🔋 Speicher-Schutz (100% Reserve)",
@@ -2223,7 +2306,9 @@
     "error_delete_failed": "Ошибка при отключении интеграции.",
     "add_inverter_btn": "Подключить инвертор",
     "sungrow_reauth_btn": "Обновить авторизацию iSolarCloud",
-    "sungrow_api_active": "API Sungrow iSolarCloud авторизован и активен"
+    "sungrow_api_active": "API Sungrow iSolarCloud авторизован и активен",
+    "sungrow_api_desc": "Все инверторы и накопители Sungrow из вашей учетной записи iSolarCloud подключены и синхронизируются автоматически.",
+    "sungrow_reauth_short": "Повторная авторизация"
   },
   "shelly_cloud": {
     "error_no_key": "Please enter your Shelly Cloud auth key / token.",
@@ -2300,7 +2385,16 @@
     "cheapest_hours": "Cheapest Spot Hours",
     "savings_potential": "Savings Potential",
     "per_15k_km": "at 15,000 km annual mileage",
-    "vs_combustion": "-{{pct}}% vs. ICE / Combustion"
+    "vs_combustion": "-{{pct}}% vs. ICE / Combustion",
+    "pro_exclusive": "Эксклюзивно для Sharegy Pro",
+    "hero_title": "Заряжайте электромобиль бесплатно на 100% от солнца и в самые дешевые биржевые часы",
+    "pv_surplus_title": "Чистая зарядка от излишков СЭС",
+    "dynamic_spot_title": "Динамический автопилот биржевых цен",
+    "ocpp_shelly_title": "Поддержка OCPP (1.6 / 2.0.1 / 2.1) и Shelly",
+    "target_charge_title": "Целевая зарядка и время отправления",
+    "fuel_radar_title": "Радар цен на топливо MTS-K в реальном времени",
+    "trip_history_title": "История поездок и зарядок",
+    "unlock_pro": "Разблокировать электромобильность с Sharegy Pro"
   },
   "heating": {
     "title": "Heating & Thermal Storage",
@@ -2465,7 +2559,19 @@
     "get_variables_btn": "🔍 Fetch GetVariables",
     "no_variables_data": "No stored Device Model variables available. Click \"Fetch GetVariables\".",
     "action_success": "Action executed successfully.",
-    "action_error": "Execution error."
+    "action_error": "Execution error.",
+    "rfid_active": "Активен",
+    "rfid_add_success": "RFID-чип успешно добавлен.",
+    "rfid_add_title": "Добавить новый RFID-чип / карту",
+    "rfid_delete_confirm": "Вы уверены, что хотите удалить этот RFID-тег?",
+    "rfid_deleted": "RFID-чип удален.",
+    "rfid_empty": "RFID-чипы еще не добавлены. Добавьте ваш первый чип выше.",
+    "rfid_id_label": "RFID UID / ID тега",
+    "rfid_id_placeholder": "напр. TAG-01 или 04A1B2C3",
+    "rfid_inactive": "Заблокирован",
+    "rfid_list_title": "Зарегистрированные RFID-чипы",
+    "rfid_name_label": "Название",
+    "rfid_name_placeholder": "напр. Служебный авто / Чип 1"
   },
   "system_status": {
     "title": "System Status & Live Infrastructure",
@@ -2692,5 +2798,153 @@
     "select_role_label": "1. Выберите роль и права доступа:",
     "share_btn": "Поделиться успехами",
     "whitelabel_btn": "Whitelabel и брендинг"
+  },
+  "admin_mieterstrom": {
+    "title": "Электроэнергия для арендаторов (§ 42a EnWG)",
+    "badge_model": "Модель полного снабжения (ОУД)",
+    "subtitle": "Модель полного снабжения: солнечная энергия и остаточная сеть в едином счете с надбавкой (§ 21 абз. 3 EEG)",
+    "btn_wizard": "Мастер арендной энергии (3 шага)",
+    "btn_share": "Поделиться кварталом",
+    "tab_cockpit": "🏢 Панель арендаторов",
+    "tab_apartments": "🏠 Квартиры и арендаторы",
+    "tab_settlement": "💰 Полный расчет снабжения",
+    "tab_meters": "⚡ Главные и поквартирные счетчики",
+    "tab_vpp": "🔌 Гибкость квартала",
+    "tab_msb": "⚡ Умный учет и шлюзы",
+    "tab_audit": "📜 Журнал аудита"
+  },
+  "admin_ggv": {
+    "title": "Коллективное энергоснабжение здания (§ 42b EnWG)",
+    "badge_model": "ТСЖ и многоквартирный дом",
+    "subtitle": "Распределение солнечной энергии по долям собственности (1/1000). Без обязательств поставщика — каждый житель сохраняет свой контракт.",
+    "btn_wizard": "Мастер здания ТСЖ (3 шага)",
+    "btn_share": "Поделиться объектом",
+    "tab_cockpit": "⚖️ Солнечная панель здания",
+    "tab_units": "🏢 Собственники и доли",
+    "tab_settlement": "💰 Расчеты по солнечной энергии и ТСЖ"
+  },
+  "admin_sharing": {
+    "title": "Региональный шеринг энергии (Кооператив)",
+    "badge_model": "Устав кооператива (GenG)",
+    "subtitle": "15-минутная балансировка по умным счетчикам и распределение в сети с рыночной связью BNetzA AS4/MSCONS",
+    "btn_wizard": "Мастер кооператива (3 шага)",
+    "btn_mako": "Связь с рынком (AS4)",
+    "tab_cockpit": "⚡ Панель управления сообществом",
+    "tab_members": "👥 Члены кооператива",
+    "tab_applications": "📋 Заявления на вступление",
+    "tab_settlement": "💰 15-минутный расчет шеринга"
+  },
+  "admin_communities": {
+    "title": "Кварталы и сообщества (Портфолио)",
+    "subtitle": "Центральная панель управления портфелем для всех арендных кварталов, ТСЖ и энергокооперативов.",
+    "create_community_btn": "Создать новое сообщество"
+  },
+  "wizard": {
+    "step1_title": "1. Модель и основные данные",
+    "step2_title": "2. Тарифы и условия",
+    "step3_title": "3. Приглашения и завершение"
+  },
+  "admin_vpp": {
+    "title": "Виртуальная электростанция (VPP) и центр гибкости",
+    "subtitle": "Агрегация, вторичный резерв (aFRR), Redispatch 2.0 и клиринг 80/20",
+    "run_clearing": "Выполнить клиринг 80/20",
+    "clearing_running": "Клиринг выполняется...",
+    "start_test_dispatch": "Запустить тестовую диспетчеризацию",
+    "pos_flex": "Положительная регулирующая мощность (+кВт)",
+    "pos_flex_sub": "Гибкость выдачи (разряд)",
+    "neg_flex": "Отрицательная регулирующая мощность (-кВт)",
+    "neg_flex_sub": "Гибкость потребления (заряд излишков)",
+    "battery_fleet": "Парк батарей (хранилища)",
+    "reaction_time": "Время реакции (SLA)",
+    "schedule_title": "96-четвертьчасовой график Redispatch 2.0 и aFRR",
+    "schedule_subtitle": "Заявленная мощность графика операторам систем передачи (Connect+)",
+    "live_active": "Активно",
+    "tso_filter_title": "Фильтр ОСП и рынка",
+    "control_area": "Зона регулирования (ОСП):",
+    "all_control_areas": "Все зоны регулирования (по всей стране)",
+    "product_classification": "Классификация продукта:",
+    "dispatches_title": "Недавние события диспетчеризации и вызовы",
+    "dispatches_subtitle": "Обзор автоматизированных рыночных и сетевых вызовов",
+    "th_timestamp": "Временная метка",
+    "th_order_id": "ID ордера",
+    "th_target_power": "Заданная мощность",
+    "th_duration": "Длительность",
+    "th_fulfillment": "Исполнение",
+    "th_revenue": "Доход (80/20)",
+    "modal_title": "Запустить ручную диспетчеризацию гибкости",
+    "target_power_label": "Заданная мощность (кВт):",
+    "duration_label": "Длительность (минуты):",
+    "direction_label": "Направление:",
+    "discharge_option": "Разряд (положительная гибкость в сеть)",
+    "charge_option": "Заряд (отрицательная гибкость из сети)",
+    "reason_label": "Причина / Номер ордера:"
+  },
+  "whitelabel": {
+    "presets_title": "Готовые цветовые профили",
+    "branding_section": "Брендинг и корпоративный дизайн",
+    "company_name": "Название компании (энергокомпания)",
+    "support_email": "Email службы поддержки",
+    "primary_color": "Основной цвет",
+    "accent_color": "Акцентный цвет",
+    "logo_url": "URL логотипа (SVG / PNG)",
+    "domain_cname": "Собственный поддомен / домен (CNAME)",
+    "enable_mode": "Включить режим Whitelabel",
+    "hide_branding": "Скрыть брендинг Sharegy в шапке и подвале",
+    "preview_title": "Предпросмотр в реальном времени",
+    "save_branding": "Применить брендинг"
+  },
+  "mako": {
+    "format_type": "Формат сообщения и тип транзакции",
+    "target_system": "Целевая биллинговая система / Шлюз AS4",
+    "compliance_title": "Соответствие стандартам BNetzA GPKE / WiM",
+    "compliance_desc": "Генерирует стандартизированные сегменты EDIFACT UNA/UNB/UNH/UNT с автоматической проверкой контрольной суммы для коллективного энергоснабжения по § 42b EnWG.",
+    "generate_send": "Сгенерировать EDIFACT и отправить в AS4",
+    "raw_preview": "Предпросмотр необработанных данных EDIFACT",
+    "download_edi": "Скачать (.edi)",
+    "preview_placeholder": "Нажмите 'Сгенерировать EDIFACT и отправить в AS4', чтобы загрузить предпросмотр.",
+    "sent_confirmed": "Передача AS4 подтверждена"
+  },
+  "cooperative": {
+    "open_applications": "Ожидающие заявки",
+    "approved_members": "Одобренные участники",
+    "public_join_link": "Публичная ссылка для вступления",
+    "no_applications_found": "Заявок на вступление по данному фильтру не найдено",
+    "share_join_link_hint": "Поделитесь публичной ссылкой для вступления, чтобы новые члены кооператива могли зарегистрироваться онлайн.",
+    "applicant": "Заявитель",
+    "residence_address": "Место жительства / Адрес",
+    "shares_amount": "Паи и сумма",
+    "statute_consent": "Согласие с уставом",
+    "status_resolution": "Статус и решение"
+  },
+  "master_meter": {
+    "th_tenant": "Арендатор / Квартира",
+    "th_quota": "Доля участия (MEA)",
+    "th_consumption": "Потребление",
+    "th_solar_coverage": "Солнечное покрытие",
+    "th_residual_grid": "Остаточный забор из сети",
+    "th_autarky": "Автономность"
+  },
+  "share": {
+    "tree_equivalent": "Эквивалентно",
+    "choose_platform": "Выберите платформу:",
+    "text_adjusted": "Текст подстраивается автоматически",
+    "share_whatsapp": "Поделиться в WhatsApp",
+    "share_linkedin": "Поделиться в LinkedIn",
+    "share_x": "Поделиться в X"
+  },
+  "cooperative_join": {
+    "loading": "Загрузка портала вступления...",
+    "not_found": "Сообщество не найдено",
+    "success_title": "Заявка успешно отправлена",
+    "application_id": "ID заявки:",
+    "shares_subscribed": "Подписанные доли:",
+    "statute_version": "Принятая версия устава:",
+    "waiting_board": "Ожидает решения правления"
+  },
+  "email_confirm": {
+    "verifying_title": "Подтверждение адреса эл. почты...",
+    "verifying_desc": "Пожалуйста, подождите, проверяется ваш токен безопасности.",
+    "success_title": "Адрес эл. почты изменен!",
+    "failed_title": "Подтверждение не удалось"
   }
 }
