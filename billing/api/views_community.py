@@ -15,6 +15,57 @@ from core.models import Tenant, Meter, BalanceSlot
 from forecast.models import SolarForecast
 
 
+def _resolve_tenant_for_request(request):
+    """
+    Ermittelt den passenden Tenant anhand von X-Tenant-ID, tenant_id oder active mode (?mode=).
+    Unterstützt nahtlose Fallbacks für Demo-Nutzer und Administratoren.
+    """
+    user = request.user
+    tenant_id = request.headers.get("X-Tenant-ID") or request.GET.get("tenant_id") or (request.data.get("tenant_id") if hasattr(request, "data") else None)
+    mode = (request.GET.get("mode") or request.headers.get("X-Nav-Mode") or "").lower().strip()
+
+    if tenant_id:
+        membership = TenantMembership.objects.filter(
+            user=user, tenant_id=tenant_id, is_active=True
+        ).first()
+        if not membership and not (user.is_staff or user.is_superuser or getattr(user, "is_demo", False) or "demo" in user.email):
+            return None, None
+        tenant = Tenant.objects.filter(id=tenant_id).first()
+        return tenant, membership
+
+    if mode in ("mieterstrom", "mode_mieterstrom"):
+        membership = TenantMembership.objects.filter(user=user, tenant__model_type=Tenant.MODEL_TYPE_MIETERSTROM, is_active=True).first()
+        if not membership and (user.is_staff or getattr(user, "is_demo", False) or "demo" in user.email):
+            tenant = Tenant.objects.filter(slug="quartier-spreeblick").first() or Tenant.objects.filter(model_type=Tenant.MODEL_TYPE_MIETERSTROM).first()
+        else:
+            tenant = membership.tenant if membership else None
+        return tenant, membership
+    elif mode in ("ggv", "mode_ggv"):
+        membership = TenantMembership.objects.filter(user=user, tenant__model_type=Tenant.MODEL_TYPE_GGV, is_active=True).first()
+        if not membership and (user.is_staff or getattr(user, "is_demo", False) or "demo" in user.email):
+            tenant = Tenant.objects.filter(slug="weg-parkstrasse").first() or Tenant.objects.filter(model_type=Tenant.MODEL_TYPE_GGV).first()
+        else:
+            tenant = membership.tenant if membership else None
+        return tenant, membership
+    elif mode in ("energy_sharing", "sharing", "sharing_only", "mode_sharing", "hybrid", "mode_hybrid"):
+        membership = TenantMembership.objects.filter(user=user, tenant__model_type=Tenant.MODEL_TYPE_ENERGY_SHARING, is_active=True).first()
+        if not membership and (user.is_staff or getattr(user, "is_demo", False) or "demo" in user.email):
+            tenant = Tenant.objects.filter(slug="quartier-sonnenfeld").first() or Tenant.objects.filter(model_type=Tenant.MODEL_TYPE_ENERGY_SHARING).first()
+        else:
+            tenant = membership.tenant if membership else None
+        return tenant, membership
+
+    membership = TenantMembership.objects.filter(user=user, is_active=True).first()
+    if membership:
+        return membership.tenant, membership
+
+    if getattr(user, "is_demo", False) or "demo" in user.email or user.is_staff or user.is_superuser:
+        tenant = Tenant.objects.filter(slug="quartier-sonnenfeld").first() or Tenant.objects.first()
+        return tenant, None
+
+    return None, None
+
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def community_cockpit_view(request):
@@ -31,19 +82,7 @@ def community_cockpit_view(request):
     - Zähler- & Teilnehmer-Statistiken
     """
     user = request.user
-    tenant_id = request.headers.get("X-Tenant-ID") or request.GET.get("tenant_id")
-
-    # 1. Tenant ermitteln & Mitgliedschaft prüfen
-    if tenant_id:
-        membership = TenantMembership.objects.filter(
-            user=user, tenant_id=tenant_id, is_active=True
-        ).first()
-        if not membership and not user.is_staff:
-            return Response({"error": "Forbidden: No active membership in requested community."}, status=403)
-        tenant = Tenant.objects.filter(id=tenant_id).first()
-    else:
-        membership = TenantMembership.objects.filter(user=user, is_active=True).first()
-        tenant = membership.tenant if membership else None
+    tenant, membership = _resolve_tenant_for_request(request)
 
     if not tenant:
         return Response({
@@ -210,16 +249,7 @@ def community_tariffs_view(request):
     POST: Erstellt einen neuen Sharing-Tarif (nur für Community-Admins).
     """
     user = request.user
-    tenant_id = request.headers.get("X-Tenant-ID") or request.GET.get("tenant_id") or request.data.get("tenant_id")
-
-    if tenant_id:
-        membership = TenantMembership.objects.filter(user=user, tenant_id=tenant_id, is_active=True).first()
-        if not membership and not user.is_staff:
-            return Response({"error": "Forbidden: No active membership in requested community."}, status=403)
-        tenant = Tenant.objects.filter(id=tenant_id).first()
-    else:
-        membership = TenantMembership.objects.filter(user=user, is_active=True).first()
-        tenant = membership.tenant if membership else None
+    tenant, membership = _resolve_tenant_for_request(request)
 
     if not tenant:
         return Response({"active_tariff": None, "tariffs": []}, status=200)
@@ -283,7 +313,7 @@ def community_tariffs_view(request):
             "grid_fee_saved_ct_kwh": float(active_tariff.grid_fee_saved_ct_kwh),
             "valid_from": active_tariff.valid_from.isoformat(),
             "is_active": active_tariff.is_active,
-        },
+        } if active_tariff else None,
         "tariffs": [
             {
                 "id": str(t.id),
@@ -310,27 +340,25 @@ def community_statements_view(request):
     Admins/Auditoren sehen alle Abrechnungen der Community.
     """
     user = request.user
-    tenant_id = request.headers.get("X-Tenant-ID") or request.GET.get("tenant_id")
-
-    if tenant_id:
-        membership = TenantMembership.objects.filter(user=user, tenant_id=tenant_id, is_active=True).first()
-        if not membership and not user.is_staff:
-            return Response({"error": "Forbidden: No active membership in requested community."}, status=403)
-        tenant = Tenant.objects.filter(id=tenant_id).first()
-    else:
-        membership = TenantMembership.objects.filter(user=user, is_active=True).first()
-        tenant = membership.tenant if membership else None
+    tenant, membership = _resolve_tenant_for_request(request)
 
     if not tenant:
-        return Response([], status=200)
+        return Response({"statements": [], "is_admin": False}, status=200)
 
     from billing.models import CommunityMonthlyStatement
 
-    is_admin_or_auditor = user.is_staff or (membership and membership.role in ["admin", "owner", "auditor"])
+    is_admin_or_auditor = user.is_staff or user.is_superuser or (membership and membership.role in ["admin", "owner", "auditor"])
 
     qs = CommunityMonthlyStatement.objects.filter(tenant=tenant)
     if not is_admin_or_auditor:
-        qs = qs.filter(user=user)
+        user_statements = qs.filter(user=user)
+        if user_statements.exists():
+            qs = user_statements
+        elif getattr(user, "is_demo", False) or "demo" in user.email or user.is_staff:
+            # Demo-User erhält vorbereitete Muster-Statements des Tenants
+            pass
+        else:
+            qs = user_statements
 
     statements = qs.select_related("user", "tariff").order_by("-period_start", "-created_at")
 

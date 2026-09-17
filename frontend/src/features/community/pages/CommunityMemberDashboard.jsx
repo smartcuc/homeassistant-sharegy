@@ -28,14 +28,15 @@ export default function CommunityMemberDashboard() {
     async function loadData() {
         setLoading(true);
         try {
-            const data = await apiFetch("/api/my-tenant/");
+            const modeParam = activeMode ? `?mode=${encodeURIComponent(activeMode)}` : "";
+            const data = await apiFetch(`/api/my-tenant/${modeParam}`);
             setTenant(data?.tenant || null);
 
             if (data?.tenant) {
                 const [cockpitRes, tariffsRes, statementsRes] = await Promise.all([
-                    apiFetch("/api/billing/community/cockpit/").catch(() => null),
-                    apiFetch("/api/billing/community/tariffs/").catch(() => null),
-                    apiFetch("/api/billing/community/statements/").catch(() => null),
+                    apiFetch(`/api/billing/community/cockpit/${modeParam}`).catch(() => null),
+                    apiFetch(`/api/billing/community/tariffs/${modeParam}`).catch(() => null),
+                    apiFetch(`/api/billing/community/statements/${modeParam}`).catch(() => null),
                 ]);
 
                 setCockpit(cockpitRes);
@@ -51,7 +52,7 @@ export default function CommunityMemberDashboard() {
 
     useEffect(() => {
         loadData();
-    }, []);
+    }, [activeMode]);
 
     // PDF Download
     async function downloadStatementPdf(statementId, statementNumber) {

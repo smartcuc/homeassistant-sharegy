@@ -229,6 +229,35 @@ def seed_sharing_demo_environment():
         defaults={"role": "member", "is_active": True},
     )
 
+    # Standard Demo User (demo@sharegy.de) mit Zugriff auf alle 3 Gemeinschaften
+    demo_user = User.objects.filter(email="demo@sharegy.de").first() or User.objects.filter(username="demo@sharegy.de").first()
+    if not demo_user:
+        demo_user = User.objects.create(
+            email="demo@sharegy.de",
+            username="demo@sharegy.de",
+            first_name="Demo",
+            last_name="User",
+            is_active=True,
+        )
+        demo_user.set_password("DemoSharegy2026!")
+        demo_user.save()
+
+    TenantMembership.objects.update_or_create(
+        tenant=tenant_sonnenfeld,
+        user=demo_user,
+        defaults={"role": "member", "is_active": True},
+    )
+    TenantMembership.objects.update_or_create(
+        tenant=tenant_mieterstrom,
+        user=demo_user,
+        defaults={"role": "member", "is_active": True},
+    )
+    TenantMembership.objects.update_or_create(
+        tenant=tenant_ggv,
+        user=demo_user,
+        defaults={"role": "member", "is_active": True},
+    )
+
     # 4. TARIFE ANLEGEN (Defensiv gegen bestehende Duplikate)
     tariff_sonnenfeld = CommunityTariff.objects.filter(tenant=tenant_sonnenfeld).first()
     if not tariff_sonnenfeld:
@@ -379,7 +408,7 @@ def seed_sharing_demo_environment():
         (tenant_mieterstrom, pv_mieterstrom_meter, user_mieterstrom_meter, Decimal("0.50")),
         (tenant_ggv, pv_ggv_meter, user_ggv_meter, Decimal("0.125")),
     ]:
-        if BalanceSlot.objects.filter(tenant=cur_tenant).count() < 50:
+        if BalanceSlot.objects.filter(tenant=cur_tenant, period_start__gte=now_slot - timedelta(days=2)).count() < 20:
             slots_to_create = []
             readings_to_create = []
 

@@ -338,13 +338,45 @@ class MyTenantView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        membership = request.user.memberships.filter(is_active=True).first()
+        user = request.user
+        mode = (request.GET.get("mode") or request.headers.get("X-Nav-Mode") or "").lower().strip()
+        tenant_id = request.headers.get("X-Tenant-ID") or request.GET.get("tenant_id")
 
-        if not membership:
+        membership = None
+        tenant = None
+
+        if tenant_id:
+            membership = user.memberships.filter(tenant_id=tenant_id, is_active=True).first()
+            tenant = Tenant.objects.filter(id=tenant_id).first()
+        elif mode in ("mieterstrom", "mode_mieterstrom"):
+            membership = user.memberships.filter(tenant__model_type=Tenant.MODEL_TYPE_MIETERSTROM, is_active=True).first()
+            if not membership and (user.is_staff or getattr(user, "is_demo", False) or "demo" in user.email):
+                tenant = Tenant.objects.filter(slug="quartier-spreeblick").first() or Tenant.objects.filter(model_type=Tenant.MODEL_TYPE_MIETERSTROM).first()
+            elif membership:
+                tenant = membership.tenant
+        elif mode in ("ggv", "mode_ggv"):
+            membership = user.memberships.filter(tenant__model_type=Tenant.MODEL_TYPE_GGV, is_active=True).first()
+            if not membership and (user.is_staff or getattr(user, "is_demo", False) or "demo" in user.email):
+                tenant = Tenant.objects.filter(slug="weg-parkstrasse").first() or Tenant.objects.filter(model_type=Tenant.MODEL_TYPE_GGV).first()
+            elif membership:
+                tenant = membership.tenant
+        elif mode in ("energy_sharing", "sharing", "sharing_only", "mode_sharing", "hybrid", "mode_hybrid"):
+            membership = user.memberships.filter(tenant__model_type=Tenant.MODEL_TYPE_ENERGY_SHARING, is_active=True).first()
+            if not membership and (user.is_staff or getattr(user, "is_demo", False) or "demo" in user.email):
+                tenant = Tenant.objects.filter(slug="quartier-sonnenfeld").first() or Tenant.objects.filter(model_type=Tenant.MODEL_TYPE_ENERGY_SHARING).first()
+            elif membership:
+                tenant = membership.tenant
+        else:
+            membership = user.memberships.filter(is_active=True).first()
+            if membership:
+                tenant = membership.tenant
+            elif user.is_staff or getattr(user, "is_demo", False) or "demo" in user.email:
+                tenant = Tenant.objects.filter(slug="quartier-sonnenfeld").first() or Tenant.objects.first()
+
+        if not tenant:
             return Response({"tenant": None})
 
-        tenant = membership.tenant
-        is_admin = bool(request.user.is_staff or (membership and membership.role in ["admin", "owner", "auditor"]))
+        is_admin = bool(user.is_staff or user.is_superuser or (membership and membership.role in ["admin", "owner", "auditor"]))
         is_manager = bool(is_admin or (membership and membership.role in ["manager", "support"]))
 
         members_data = []
@@ -381,7 +413,11 @@ class MyTenantView(APIView):
             "tenant": {
                 "id": str(tenant.id),
                 "name": tenant.name,
-                "user_role": membership.role,
+                "slug": tenant.slug,
+                "model_type": tenant.model_type,
+                "legal_form": tenant.legal_form,
+                "primary_color": tenant.primary_color,
+                "user_role": membership.role if membership else ("admin" if is_admin else "member"),
                 "is_admin": is_admin,
                 "is_manager": is_manager,
             },
