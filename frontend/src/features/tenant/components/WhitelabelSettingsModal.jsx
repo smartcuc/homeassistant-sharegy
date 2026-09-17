@@ -139,11 +139,11 @@ export default function WhitelabelSettingsModal({ isOpen, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md overflow-y-auto">
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-4xl w-full p-6 md:p-8 space-y-6 shadow-2xl my-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/75 backdrop-blur-md animate-fade-in">
+      <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
         
-        {/* Header */}
-        <div className="flex justify-between items-start border-b border-slate-800 pb-5">
+        {/* Header (Fixed) */}
+        <div className="p-6 md:p-8 pb-4 border-b border-slate-800 shrink-0 flex justify-between items-start">
           <div className="space-y-1">
             <div className="flex items-center gap-2.5">
               <div className="p-2 bg-sky-500/10 border border-sky-500/30 rounded-xl text-sky-400">
@@ -165,21 +165,23 @@ export default function WhitelabelSettingsModal({ isOpen, onClose }) {
           </button>
         </div>
 
-        {errorMsg && (
-          <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
-            <span>{errorMsg}</span>
-          </div>
-        )}
+        <form onSubmit={handleSave} className="flex-1 flex flex-col overflow-hidden">
+          
+          {/* Scrollable Form Body */}
+          <div className="p-6 md:p-8 overflow-y-auto space-y-6 flex-1">
+            {errorMsg && (
+              <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                <span>{errorMsg}</span>
+              </div>
+            )}
 
-        {successMsg && (
-          <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
-            <span>{successMsg}</span>
-          </div>
-        )}
-
-        <form onSubmit={handleSave} className="space-y-6">
+            {successMsg && (
+              <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+                <span>{successMsg}</span>
+              </div>
+            )}
           
           {/* Preset Palettes */}
           <div className="space-y-2">
@@ -376,20 +378,21 @@ export default function WhitelabelSettingsModal({ isOpen, onClose }) {
             </div>
 
           </div>
+          </div>
 
-          {/* Footer Actions */}
-          <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+          {/* Footer Actions (Fixed at bottom) */}
+          <div className="p-4 md:p-6 border-t border-slate-800 shrink-0 flex justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium rounded-xl transition"
+              className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium rounded-xl transition cursor-pointer"
             >
               Abbrechen
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="flex items-center gap-2 px-6 py-2.5 bg-sky-500 hover:bg-sky-400 text-white text-sm font-semibold rounded-xl shadow-lg shadow-sky-500/25 transition"
+              className="flex items-center gap-2 px-6 py-2.5 bg-sky-500 hover:bg-sky-400 text-white text-sm font-semibold rounded-xl shadow-lg shadow-sky-500/25 transition cursor-pointer"
             >
               {saving && <RefreshCw className="w-4 h-4 animate-spin" />}
               <span>Branding übernehmen</span>

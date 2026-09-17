@@ -111,8 +111,8 @@ export function getNavigationSections({
             sections.push({
                 title: `🛡️ ${t("nav.admin_group", "Administration")}`,
                 items: [
-                    { name: t("nav.communities_hub", "Quartiers- & Mandantenverwaltung"), path: "/app/admin/communities", icon: "🏘️" },
-                    { name: t("nav.tenant_management", "Mandanten & Mieter"), path: "/app/tenant", icon: "👥" },
+                    { name: t("nav.tenant_management_mieterstrom", "Mieter & Wohnungsverwaltung"), path: "/app/tenant", icon: "🏢" },
+                    ...(isStaffOrAdmin ? [{ name: t("nav.communities_hub", "Quartiere & Gemeinschaften (Portfolio)"), path: "/app/admin/communities", icon: "🏘️" }] : []),
                 ],
             });
         }
@@ -150,8 +150,8 @@ export function getNavigationSections({
             sections.push({
                 title: `🛡️ ${t("nav.admin_group", "Administration")}`,
                 items: [
-                    { name: t("nav.communities_hub", "Quartiers- & Mandantenverwaltung"), path: "/app/admin/communities", icon: "🏘️" },
-                    { name: t("nav.tenant_management", "Mandanten & Mieter"), path: "/app/tenant", icon: "👥" },
+                    { name: t("nav.tenant_management_ggv", "WEG & Gebäudeverwaltung"), path: "/app/tenant", icon: "⚖️" },
+                    ...(isStaffOrAdmin ? [{ name: t("nav.communities_hub", "Quartiere & Gemeinschaften (Portfolio)"), path: "/app/admin/communities", icon: "🏘️" }] : []),
                 ],
             });
         }
@@ -189,8 +189,8 @@ export function getNavigationSections({
             sections.push({
                 title: `🛡️ ${t("nav.admin_group", "Administration")}`,
                 items: [
-                    { name: t("nav.communities_hub", "Quartiers- & Mandantenverwaltung"), path: "/app/admin/communities", icon: "🏘️" },
-                    { name: t("nav.tenant_management", "Mandanten & Mieter"), path: "/app/tenant", icon: "👥" },
+                    { name: t("nav.tenant_management_sharing", "Genossenschaft & Mitglieder"), path: "/app/tenant", icon: "👥" },
+                    ...(isStaffOrAdmin ? [{ name: t("nav.communities_hub", "Quartiere & Gemeinschaften (Portfolio)"), path: "/app/admin/communities", icon: "🏘️" }] : []),
                 ],
             });
         }
@@ -242,11 +242,11 @@ export function getNavigationSections({
             {
                 title: `🛡️ ${t("nav.admin_group", "Administration")}`,
                 items: [
-                    { name: t("nav.communities_hub", "Energiegemeinschaften"), path: "/app/admin/communities", icon: "🏘️" },
+                    { name: t("nav.communities_hub", "Quartiere & Gemeinschaften (Portfolio)"), path: "/app/admin/communities", icon: "🏘️" },
+                    { name: t("nav.tenant_management_admin", "Mandanten- & Objektcockpit"), path: "/app/tenant", icon: "👥" },
                     { name: t("nav.admin_vpp", "VPP & Flex-Zentrale"), path: "/app/admin/vpp", icon: "⚡" },
                     { name: t("nav.admin_dashboard", "Admin Dashboard"), path: "/app/admin/dashboard", icon: "📊" },
                     { name: t("nav.admin_tracking", "Event & Tracking"), path: "/app/admin/tracking", icon: "📈" },
-                    { name: t("nav.tenant_management", "Mandanten & Mieter"), path: "/app/tenant", icon: "👥" },
                     { name: t("nav.partner_fleet", "Partner-Flotten"), path: "/app/partner", icon: "🔧" },
                     { name: t("nav.agent_support_hub", "Support-Zentrale"), path: "/app/support-hub", icon: "🛟" },
                     {

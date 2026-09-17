@@ -49,22 +49,50 @@ export default function VirtualMasterMeterHub({ tenant }) {
 
             {/* HEADER & FILTER */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
-                <div className="flex items-start gap-3">
-                    <span className="text-2xl shrink-0 mt-0.5">🏢</span>
-                    <div>
-                        <div className="flex flex-wrap items-center gap-2">
-                            <h2 className="text-base font-black text-slate-900 dark:text-white">
-                                Gemeinsamer Hausanschluss & Virtueller Summenzähler
-                            </h2>
-                            <span className="shrink-0 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-indigo-500/20">
-                                § 42b EnWG Mieterstrom
-                            </span>
+                {(() => {
+                    const isMieterstrom = tenant?.model_type === "mieterstrom";
+                    const isGgv = tenant?.model_type === "ggv";
+                    const headerIcon = isMieterstrom ? "🏢" : isGgv ? "⚖️" : "⚡";
+                    const headerTitle = isMieterstrom 
+                        ? "Gemeinsamer Hausanschluss & Mieterstrom-Summenzähler" 
+                        : isGgv 
+                        ? "Messkonzept & Gebäude-Solaraufteilung (GGV)" 
+                        : "15-Minuten Bilanzierung & Virtueller Summenzähler";
+                    const badgeLabel = isMieterstrom
+                        ? "🏢 § 42a EnWG Mieterstrom"
+                        : isGgv
+                        ? "⚖️ § 42b EnWG Gebäudeversorgung"
+                        : "⚡ Regionales Energy Sharing";
+                    const badgeClass = isMieterstrom
+                        ? "bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20"
+                        : isGgv
+                        ? "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20"
+                        : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20";
+                    const subtitle = isMieterstrom
+                        ? "Vollversorgungs-Messkonzept: Viertelstundengenaue Saldierung von PV-Erzeugung, Wohnungszählern und Netz-Reststrom."
+                        : isGgv
+                        ? "Vor-Ort-Aufteilung des Solarstroms nach Miteigentumsanteilen (MEA) ohne Reststrompflicht."
+                        : "Smart-Meter-Matching über das Verteilnetz: 15-Minuten Lastgang-Allokation für alle Erzeuger und Abnehmer.";
+
+                    return (
+                        <div className="flex items-start gap-3">
+                            <span className="text-2xl shrink-0 mt-0.5">{headerIcon}</span>
+                            <div>
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <h2 className="text-base font-black text-slate-900 dark:text-white">
+                                        {headerTitle}
+                                    </h2>
+                                    <span className={`shrink-0 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border ${badgeClass}`}>
+                                        {badgeLabel}
+                                    </span>
+                                </div>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                    {subtitle}
+                                </p>
+                            </div>
                         </div>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                            Automatische Viertelstunden-Abrechnung von Sonnenstrom auf dem Dach für alle Parteien im Gebäude.
-                        </p>
-                    </div>
-                </div>
+                    );
+                })()}
 
                 <div className="flex flex-wrap items-center gap-3">
                     <button

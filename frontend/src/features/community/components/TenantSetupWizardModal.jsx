@@ -1,6 +1,6 @@
 /*
 # src/features/community/components/TenantSetupWizardModal.jsx
-# Geführter 3-Schritte Gebäude-Einrichtungs-Assistent für Vermieter & WEGs (Laien-verständlich)
+# Geführter 3-Schritte Einrichtungs-Assistent (Model-Aware: Mieterstrom § 42a, GGV § 42b, Energy Sharing)
 */
 
 import { useState } from "react";
@@ -10,41 +10,51 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
     const [step, setStep] = useState(1);
     const [saving, setSaving] = useState(false);
 
-    // Schritt 1: Gebäude & Photovoltaik
+    const modelType = existingTenant?.model_type || "energy_sharing";
+    const isMieterstrom = modelType === "mieterstrom";
+    const isGgv = modelType === "ggv";
+
+    // Schritt 1: Stammdaten & Erzeugung
     const [buildingData, setBuildingData] = useState({
-        name: existingTenant?.name || "Sonnengarten Quartier 1",
+        name: existingTenant?.name || (isMieterstrom ? "Quartier Sonnenfeld 1" : isGgv ? "WEG Lindenallee 12" : "Bürgerenergie Region Nord eG"),
         address: existingTenant?.address || "Sonnenallee 42, 10115 Berlin",
         pv_capacity_kwp: existingTenant?.pv_capacity_kwp || 25,
         battery_capacity_kwh: existingTenant?.battery_capacity_kwh || 15,
-        allocation_model: existingTenant?.allocation_model || "dynamic",
+        allocation_model: existingTenant?.allocation_model || (isGgv ? "static" : "dynamic"),
     });
 
-    // Schritt 2: Wohnungen & Zähler (Schnellerfassung)
+    // Schritt 2: Parteien / Mitglieder & Zähler
     const [apartments, setApartments] = useState([
-        { id: 1, name: "Top 1 (EG links)", email: "schmidt@beispiel.de", mea_share: 25.0, meter_id: "1EMH0011223344" },
-        { id: 2, name: "Top 2 (EG rechts)", email: "weber@beispiel.de", mea_share: 25.0, meter_id: "1EMH0011223345" },
-        { id: 3, name: "Top 3 (1. OG links)", email: "mueller@beispiel.de", mea_share: 25.0, meter_id: "1EMH0011223346" },
-        { id: 4, name: "Top 4 (1. OG rechts)", email: "meier@beispiel.de", mea_share: 25.0, meter_id: "1EMH0011223347" },
+        { id: 1, name: isMieterstrom ? "Top 1 (EG links)" : isGgv ? "Wohnung 1 (EG links)" : "Mitglied 1 (Haushalt Schmidt)", email: "schmidt@beispiel.de", mea_share: 25.0, meter_id: "1EMH0011223344" },
+        { id: 2, name: isMieterstrom ? "Top 2 (EG rechts)" : isGgv ? "Wohnung 2 (EG rechts)" : "Mitglied 2 (Haushalt Weber)", email: "weber@beispiel.de", mea_share: 25.0, meter_id: "1EMH0011223345" },
+        { id: 3, name: isMieterstrom ? "Top 3 (1. OG links)" : isGgv ? "Wohnung 3 (1. OG links)" : "Mitglied 3 (Haushalt Müller)", email: "mueller@beispiel.de", mea_share: 25.0, meter_id: "1EMH0011223346" },
+        { id: 4, name: isMieterstrom ? "Top 4 (1. OG rechts)" : isGgv ? "Wohnung 4 (1. OG rechts)" : "Mitglied 4 (Haushalt Meier)", email: "meier@beispiel.de", mea_share: 25.0, meter_id: "1EMH0011223347" },
     ]);
 
-    // Schritt 3: Einfache Stromtarife
+    // Schritt 3: Tarife
     const [tariffs, setTariffs] = useState({
-        solar_rate_ct: 16.0,      // Cent je kWh Solarstrom vom Dach
-        grid_rate_ct: 32.0,       // Cent je kWh Zukauf Reststrom vom Netz
-        base_fee_monthly_eur: 8.50, // Monatliche Grundgebühr je Partei
+        solar_rate_ct: isMieterstrom ? 18.0 : isGgv ? 14.0 : 16.5,
+        grid_rate_ct: 32.0,
+        base_fee_monthly_eur: isMieterstrom ? 8.50 : isGgv ? 4.00 : 5.00,
     });
 
     if (!isOpen) return null;
 
-    // Wohnung hinzufügen
+    // Einheit hinzufügen
     function addApartment() {
         const nextId = apartments.length + 1;
         const equalShare = Number((100 / nextId).toFixed(2));
+        const defaultName = isMieterstrom 
+            ? `Top ${nextId} (Wohnung ${nextId})`
+            : isGgv 
+            ? `Wohnung ${nextId} (WEG ${nextId})`
+            : `Mitglied ${nextId}`;
+
         setApartments([
             ...apartments.map(a => ({ ...a, mea_share: equalShare })),
             {
                 id: Date.now(),
-                name: `Top ${nextId} (Wohnung ${nextId})`,
+                name: defaultName,
                 email: "",
                 mea_share: equalShare,
                 meter_id: `1EMH001122${nextId + 50}`,
@@ -52,7 +62,7 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
         ]);
     }
 
-    // Wohnung entfernen
+    // Einheit entfernen
     function removeApartment(id) {
         if (apartments.length <= 1) return;
         const remaining = apartments.filter(a => a.id !== id);
@@ -60,12 +70,12 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
         setApartments(remaining.map(a => ({ ...a, mea_share: equalShare })));
     }
 
-    // Wohnung aktualisieren
+    // Einheit aktualisieren
     function updateApartment(id, field, val) {
         setApartments(apartments.map(a => a.id === id ? { ...a, [field]: val } : a));
     }
 
-    // Gesamtersparnis grob berechnen
+    // Ersparnisberechnung
     const estimatedYearlySolarKwh = buildingData.pv_capacity_kwp * 950;
     const estimatedSharedKwh = estimatedYearlySolarKwh * 0.75;
     const priceDiffCt = Math.max(0, tariffs.grid_rate_ct - tariffs.solar_rate_ct);
@@ -75,7 +85,6 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
     async function handleFinish() {
         setSaving(true);
         try {
-            // Speichern via API
             await apiFetch("/api/billing/community/tariffs/", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -97,21 +106,41 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
         }
     }
 
+    // Model-spezifische Texte
+    const wizardTitle = isMieterstrom
+        ? "🏢 Mieterstrom-Einrichtungs-Assistent (§ 42a EnWG)"
+        : isGgv
+        ? "⚖️ GGV-Gebäude-Assistent (§ 42b EnWG)"
+        : "⚡ Bürgerenergie-Assistent (Energy Sharing)";
+
+    const wizardSubtitle = isMieterstrom
+        ? "Richte dein Mieterstrom-Objekt, die Wohneinheiten und den Vollversorgertarif in 3 einfachen Schritten ein."
+        : isGgv
+        ? "Richte deine WEG / Liegenschaft, Miteigentumsanteile (MEA) und das Vor-Ort-Solarentgelt in 3 Schritten ein."
+        : "Richte deine Bürgerenergiegenossenschaft, Erzeugungsanlagen und Mitglieder in 3 Schritten ein.";
+
+    const step1Title = isMieterstrom ? "Liegenschaft & Solaranlage" : isGgv ? "WEG-Gebäude & PV" : "Genossenschaft & Anlagen";
+    const step2Title = isMieterstrom ? `Wohnungen & Zähler (${apartments.length})` : isGgv ? `Eigentümer & MEA (${apartments.length})` : `Mitglieder & iMSys (${apartments.length})`;
+    const step3Title = isMieterstrom ? "Vollversorgertarif & Sparrechnung" : isGgv ? "Solar-Nutzungsentgelt & Umlagen" : "Sharing-Tarif & Netzentgelt";
+
+    const legalExplainText = isMieterstrom
+        ? "Mieterstrom-Vollversorgung nach § 42a EnWG: Als Vermieter/Contractor belieferst du die Mieter mit Solarstrom vom Dach und Reststrom aus dem Netz in einer gemeinsamen Abrechnung inkl. Mieterstromzuschlag."
+        : isGgv
+        ? "Gemeinschaftliche Gebäudeversorgung nach § 42b EnWG: Reine Vor-Ort-Aufteilung des Solarstroms nach Miteigentumsanteilen (MEA). Die Teilnehmer behalten ihren eigenen Reststromvertrag ohne Lieferantenpflichten für die WEG."
+        : "Regionales Energy Sharing: 15-minütige Verrechnung und Allokation von Erzeugung und Verbrauch über das Verteilnetz mit Netzentgeltreduktion und automatisiertem BNetzA MSCONS Datenaustausch.";
+
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/75 backdrop-blur-md animate-fade-in">
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-3xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
                 
                 {/* MODAL HEADER */}
-                <div className="p-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 flex items-center justify-between">
+                <div className="p-5 sm:p-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 flex items-center justify-between shrink-0">
                     <div>
-                        <div className="flex items-center gap-2">
-                            <span className="text-2xl">✨</span>
-                            <h2 className="text-lg font-black text-slate-900 dark:text-white">
-                                Gebäude-Einrichtungs-Assistent (in 3 einfachen Schritten)
-                            </h2>
-                        </div>
+                        <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
+                            {wizardTitle}
+                        </h2>
                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                            Richte dein Mehrfamilienhaus, die Parteien und den Solartarif in unter 3 Minuten ein.
+                            {wizardSubtitle}
                         </p>
                     </div>
                     <button
@@ -123,47 +152,47 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
                 </div>
 
                 {/* PROGRESS STEPPER */}
-                <div className="grid grid-cols-3 border-b border-slate-100 dark:border-slate-800 text-xs font-bold">
+                <div className="grid grid-cols-3 border-b border-slate-100 dark:border-slate-800 text-xs font-bold shrink-0">
                     <button
                         onClick={() => setStep(1)}
-                        className={`p-3.5 flex items-center justify-center gap-2 border-b-2 transition cursor-pointer ${
+                        className={`p-3 sm:p-3.5 flex items-center justify-center gap-1.5 sm:gap-2 border-b-2 transition cursor-pointer text-center ${
                             step === 1
                                 ? "border-indigo-600 text-indigo-600 dark:text-indigo-400 bg-indigo-50/30 dark:bg-indigo-950/20"
                                 : "border-transparent text-slate-400 hover:text-slate-600"
                         }`}
                     >
-                        <span className="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px]">1</span>
-                        <span>Gebäude & Solaranlage</span>
+                        <span className="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] shrink-0">1</span>
+                        <span className="truncate">{step1Title}</span>
                     </button>
                     <button
                         onClick={() => setStep(2)}
-                        className={`p-3.5 flex items-center justify-center gap-2 border-b-2 transition cursor-pointer ${
+                        className={`p-3 sm:p-3.5 flex items-center justify-center gap-1.5 sm:gap-2 border-b-2 transition cursor-pointer text-center ${
                             step === 2
                                 ? "border-indigo-600 text-indigo-600 dark:text-indigo-400 bg-indigo-50/30 dark:bg-indigo-950/20"
                                 : "border-transparent text-slate-400 hover:text-slate-600"
                         }`}
                     >
-                        <span className="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px]">2</span>
-                        <span>Wohnungen & Zähler ({apartments.length})</span>
+                        <span className="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] shrink-0">2</span>
+                        <span className="truncate">{step2Title}</span>
                     </button>
                     <button
                         onClick={() => setStep(3)}
-                        className={`p-3.5 flex items-center justify-center gap-2 border-b-2 transition cursor-pointer ${
+                        className={`p-3 sm:p-3.5 flex items-center justify-center gap-1.5 sm:gap-2 border-b-2 transition cursor-pointer text-center ${
                             step === 3
                                 ? "border-indigo-600 text-indigo-600 dark:text-indigo-400 bg-indigo-50/30 dark:bg-indigo-950/20"
                                 : "border-transparent text-slate-400 hover:text-slate-600"
                         }`}
                     >
-                        <span className="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px]">3</span>
-                        <span>Stromtarife & Sparrechnung</span>
+                        <span className="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] shrink-0">3</span>
+                        <span className="truncate">{step3Title}</span>
                     </button>
                 </div>
 
-                {/* BODY CONTENT */}
-                <div className="p-6 overflow-y-auto space-y-6 flex-1">
+                {/* BODY CONTENT (SCROLLABLE) */}
+                <div className="p-5 sm:p-6 overflow-y-auto space-y-6 flex-1">
                     
                     {/* ======================================================== */}
-                    {/* SCHRITT 1: GEBÄUDE & PV-ANLAGE */}
+                    {/* SCHRITT 1: STAMMDATEN & PV-ANLAGE */}
                     {/* ======================================================== */}
                     {step === 1 && (
                         <div className="space-y-4 animate-fade-in">
@@ -172,14 +201,14 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
                                     <span>💡</span> Wie funktioniert das?
                                 </h3>
                                 <p className="text-xs text-indigo-700/90 dark:text-indigo-300/90 mt-1 leading-relaxed">
-                                    Trage hier den Namen deines Gebäudes und die Größe der Solaranlage ein. Sharegy übernimmt automatisch die gesetzliche Aufteilung der Solarenergie nach § 42b EnWG (Gemeinschaftliche Gebäudeversorgung).
+                                    {legalExplainText}
                                 </p>
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                                        Name der Liegenschaft / WEG
+                                        {isMieterstrom ? "Name der Liegenschaft / Quartier" : isGgv ? "Name der WEG / Liegenschaft" : "Name der Energiegenossenschaft"}
                                     </label>
                                     <input
                                         type="text"
@@ -206,7 +235,7 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
                                 <div>
                                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                                        ☀️ PV-Leistung auf dem Dach
+                                        ☀️ PV-Leistung
                                     </label>
                                     <div className="relative">
                                         <input
@@ -221,7 +250,7 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
 
                                 <div>
                                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                                        🔋 Batteriespeicher im Keller
+                                        🔋 Batteriespeicher
                                     </label>
                                     <div className="relative">
                                         <input
@@ -243,9 +272,9 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
                                         onChange={(e) => setBuildingData({ ...buildingData, allocation_model: e.target.value })}
                                         className="w-full text-sm font-semibold p-3 border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 rounded-xl dark:text-white cursor-pointer"
                                     >
-                                        <option value="dynamic">⚡ Dynamisch (Wer gerade Strom braucht)</option>
-                                        <option value="static">📐 Statisch (Nach Wohnungsgröße MEA)</option>
-                                        <option value="hybrid">🤝 Hybrid (Feste Quote + Rest teilen)</option>
+                                        <option value="dynamic">⚡ Dynamisch (15m Lastgang)</option>
+                                        <option value="static">📐 Statisch (Nach MEA / Quote)</option>
+                                        <option value="hybrid">🤝 Hybrid (Quote + Überlauf)</option>
                                     </select>
                                 </div>
                             </div>
@@ -253,24 +282,24 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
                     )}
 
                     {/* ======================================================== */}
-                    {/* SCHRITT 2: WOHNUNGEN & ZÄHLER */}
+                    {/* SCHRITT 2: PARTEIEN & ZÄHLER */}
                     {/* ======================================================== */}
                     {step === 2 && (
                         <div className="space-y-4 animate-fade-in">
                             <div className="flex items-center justify-between">
                                 <div>
                                     <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                                        Wohnungen & Bewohner ({apartments.length} Einheiten)
+                                        {isMieterstrom ? "Wohnungen & Mieter" : isGgv ? "Wohnungseigentümer & Anteile" : "Genossenschaftsmitglieder"} ({apartments.length} Einheiten)
                                     </h3>
                                     <p className="text-xs text-slate-500">
-                                        Trage hier die Wohnungen und die jeweiligen Stromzähler-Nummern ein.
+                                        Trage hier die Einheiten, Zählernummern und {isGgv ? "Miteigentumsanteile (MEA %)" : "Aufteilungsquoten (%)"} ein.
                                     </p>
                                 </div>
                                 <button
                                     onClick={addApartment}
                                     className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition cursor-pointer flex items-center gap-1.5"
                                 >
-                                    <span>+</span> Wohnung hinzufügen
+                                    <span>+</span> {isMieterstrom ? "Wohnung hinzufügen" : isGgv ? "Eigentümer hinzufügen" : "Mitglied hinzufügen"}
                                 </button>
                             </div>
 
@@ -285,7 +314,7 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
                                                 type="text"
                                                 value={apt.name}
                                                 onChange={(e) => updateApartment(apt.id, "name", e.target.value)}
-                                                placeholder="Wohnungsname"
+                                                placeholder="Name"
                                                 className="w-full text-xs font-bold p-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg dark:text-white"
                                             />
                                         </div>
@@ -294,7 +323,7 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
                                                 type="email"
                                                 value={apt.email}
                                                 onChange={(e) => updateApartment(apt.id, "email", e.target.value)}
-                                                placeholder="mieter@beispiel.de"
+                                                placeholder="kontakt@beispiel.de"
                                                 className="w-full text-xs p-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg dark:text-white"
                                             />
                                         </div>
@@ -334,14 +363,14 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
                     )}
 
                     {/* ======================================================== */}
-                    {/* SCHRITT 3: STROMTARIFE & SPARSIMULATION */}
+                    {/* SCHRITT 3: TARIFE & PROGNOSE */}
                     {/* ======================================================== */}
                     {step === 3 && (
                         <div className="space-y-4 animate-fade-in">
                             <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-2xl flex items-center justify-between">
                                 <div>
                                     <div className="text-xs font-bold text-emerald-800 dark:text-emerald-300">
-                                        🎉 Prognostizierter Gemeinschaftsvorteil
+                                        🎉 Prognostizierter Kostenvorteil
                                     </div>
                                     <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5">
                                         ~{estimatedYearlyCommunitySavingsEur.toLocaleString("de-DE")} € <span className="text-xs font-normal text-slate-500">Ersparnis pro Jahr</span>
@@ -353,7 +382,7 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 <div className="p-4 bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 rounded-2xl">
                                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                                        ☀️ Solarstrom-Preis
+                                        ☀️ {isMieterstrom ? "Solarstrom-Preis" : isGgv ? "Solar-Nutzungsentgelt" : "Sharing-Bezugspreis"}
                                     </label>
                                     <div className="relative">
                                         <input
@@ -365,12 +394,14 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
                                         />
                                         <span className="absolute right-3 top-3.5 text-xs text-slate-400 font-bold">ct/kWh</span>
                                     </div>
-                                    <p className="text-[10px] text-slate-400 mt-1">Was Mieter für den Sonnenstrom zahlen.</p>
+                                    <p className="text-[10px] text-slate-400 mt-1">
+                                        {isMieterstrom ? "Mieterpreis für den Dach-Solarstrom." : isGgv ? "Umlage für die Solaranlagennutzung." : "Preis für Energie aus dem Sharing-Pool."}
+                                    </p>
                                 </div>
 
                                 <div className="p-4 bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 rounded-2xl">
                                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                                        🔌 Reststrom-Preis
+                                        🔌 {isGgv ? "Referenz-Reststrom" : "Netz-Reststrom"}
                                     </label>
                                     <div className="relative">
                                         <input
@@ -382,12 +413,14 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
                                         />
                                         <span className="absolute right-3 top-3.5 text-xs text-slate-400 font-bold">ct/kWh</span>
                                     </div>
-                                    <p className="text-[10px] text-slate-400 mt-1">Preis für Netzstrom bei Bewölkung.</p>
+                                    <p className="text-[10px] text-slate-400 mt-1">
+                                        {isGgv ? "Externer Vergleichstarif der Bewohner." : "Preis für Netzbezug bei Bewölkung."}
+                                    </p>
                                 </div>
 
                                 <div className="p-4 bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 rounded-2xl">
                                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                                        🏢 Grundgebühr je Partei
+                                        🏛️ Grundgebühr / Umlage
                                     </label>
                                     <div className="relative">
                                         <input
@@ -399,7 +432,7 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
                                         />
                                         <span className="absolute right-3 top-3.5 text-xs text-slate-400 font-bold">€/Monat</span>
                                     </div>
-                                    <p className="text-[10px] text-slate-400 mt-1">Für Messstellenbetrieb & Zähler.</p>
+                                    <p className="text-[10px] text-slate-400 mt-1">Für Messstellenbetrieb & Plattform.</p>
                                 </div>
                             </div>
                         </div>
@@ -408,7 +441,7 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
                 </div>
 
                 {/* MODAL FOOTER */}
-                <div className="p-5 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 flex items-center justify-between">
+                <div className="p-4 sm:p-5 border-t border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 flex items-center justify-between shrink-0">
                     <div>
                         {step > 1 && (
                             <button
@@ -441,7 +474,7 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
                                 disabled={saving}
                                 className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black px-6 py-2.5 rounded-xl transition shadow-md hover:shadow-lg cursor-pointer flex items-center gap-2"
                             >
-                                {saving ? "Speichere..." : "🚀 Gebäude jetzt fertigstellen & aktivieren"}
+                                {saving ? "Speichere..." : isMieterstrom ? "🚀 Mieterstrom jetzt aktivieren" : isGgv ? "🚀 GGV-Liegenschaft aktivieren" : "🚀 Bürgerenergie jetzt aktivieren"}
                             </button>
                         )}
                     </div>

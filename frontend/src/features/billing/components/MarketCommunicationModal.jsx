@@ -77,62 +77,66 @@ export default function MarketCommunicationModal({ isOpen, onClose, tenantId }) 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md overflow-y-auto">
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-4xl w-full p-6 md:p-8 space-y-6 shadow-2xl my-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/75 backdrop-blur-md animate-fade-in">
+      <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
         
-        {/* Header */}
-        <div className="flex justify-between items-start border-b border-slate-800 pb-5">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2.5">
-              <div className="p-2 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400">
-                <FileText className="w-5 h-5" />
+        {/* Header (Fixed) */}
+        <div className="p-6 md:p-8 pb-4 border-b border-slate-800 shrink-0 space-y-4">
+          <div className="flex justify-between items-start">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400">
+                  <FileText className="w-5 h-5" />
+                </div>
+                <h2 className="text-xl md:text-2xl font-bold text-white">
+                  BNetzA AS4 Marktkommunikations-Adapter
+                </h2>
               </div>
-              <h2 className="text-xl md:text-2xl font-bold text-white">
-                BNetzA AS4 Marktkommunikations-Adapter
-              </h2>
+              <p className="text-xs md:text-sm text-slate-400">
+                Automatisierte EDIFACT-Generierung & AS4-Dispatch für 15-Minuten-Lastgänge (Energy Sharing / MSCONS) und Zählpunkt-Stammdaten (UTILMD).
+              </p>
             </div>
-            <p className="text-xs md:text-sm text-slate-400">
-              Automatisierte EDIFACT-Generierung & AS4-Dispatch für 15-Minuten-Lastgänge (§ 42b EnWG) und Zählpunkt-Stammdaten.
-            </p>
+            <button
+              onClick={onClose}
+              className="p-1.5 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition"
-          >
-            <X className="w-5 h-5" />
-          </button>
+
+          {/* Tab Navigation */}
+          <div className="flex border-b border-slate-800/80">
+            <button
+              onClick={() => setActiveTab("export")}
+              className={`px-4 py-2 text-xs font-semibold uppercase tracking-wider border-b-2 transition ${
+                activeTab === "export"
+                  ? "border-emerald-500 text-emerald-400"
+                  : "border-transparent text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              EDIFACT Export & AS4 Dispatch
+            </button>
+            <button
+              onClick={() => setActiveTab("logs")}
+              className={`px-4 py-2 text-xs font-semibold uppercase tracking-wider border-b-2 transition ${
+                activeTab === "logs"
+                  ? "border-emerald-500 text-emerald-400"
+                  : "border-transparent text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              Übertragungs-Protokoll ({logs.length})
+            </button>
+          </div>
         </div>
 
-        {/* Tab Navigation */}
-        <div className="flex border-b border-slate-800">
-          <button
-            onClick={() => setActiveTab("export")}
-            className={`px-4 py-2 text-xs font-semibold uppercase tracking-wider border-b-2 transition ${
-              activeTab === "export"
-                ? "border-emerald-500 text-emerald-400"
-                : "border-transparent text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            EDIFACT Export & AS4 Dispatch
-          </button>
-          <button
-            onClick={() => setActiveTab("logs")}
-            className={`px-4 py-2 text-xs font-semibold uppercase tracking-wider border-b-2 transition ${
-              activeTab === "logs"
-                ? "border-emerald-500 text-emerald-400"
-                : "border-transparent text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            Übertragungs-Protokoll ({logs.length})
-          </button>
-        </div>
-
-        {errorMsg && (
-          <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
-            <span>{errorMsg}</span>
-          </div>
-        )}
+        {/* Scrollable Body */}
+        <div className="p-6 md:p-8 overflow-y-auto space-y-6 flex-1">
+          {errorMsg && (
+            <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              <span>{errorMsg}</span>
+            </div>
+          )}
 
         {activeTab === "export" ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -288,12 +292,13 @@ export default function MarketCommunicationModal({ isOpen, onClose, tenantId }) 
             )}
           </div>
         )}
+        </div>
 
-        {/* Footer */}
-        <div className="flex justify-end pt-4 border-t border-slate-800">
+        {/* Footer (Fixed at bottom) */}
+        <div className="p-4 md:p-6 border-t border-slate-800 shrink-0 flex justify-end">
           <button
             onClick={onClose}
-            className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium rounded-xl transition"
+            className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium rounded-xl transition cursor-pointer"
           >
             Schließen
           </button>

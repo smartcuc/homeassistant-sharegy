@@ -25,13 +25,22 @@ function getTenantModelInfo(modelType) {
                 titleIcon: "🏢",
                 badgeLabel: "🏢 Mieterstrom (§ 42a EnWG)",
                 badgeClass: "bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-800",
-                subtitle: "Vollversorgung des Gebäudes: Solarstrom & Reststrom in einer gemeinsamen Monatsabrechnung",
-                membersTabTitle: "Mieter & Parteien",
+                subtitle: "Vollversorgungs-Modell: Vor-Ort-Solarstrom & Reststrom in einer gemeinsamen Monatsabrechnung",
+                wizardBtnLabel: "✨ Mieterstrom-Assistent (3 Schritte)",
+                makoBtnLabel: "📄 Zählerdaten-Export (MSCONS)",
+                showMako: true,
+                shareBtnLabel: "Quartier teilen",
+                cockpitTabTitle: "Mieterstrom-Cockpit",
+                membersTabTitle: "Mieter & Wohneinheiten",
                 settlementTabTitle: "Mieterstrom-Abrechnungen",
                 virtualMeterTabTitle: "Wohnungs- & Summenzähler",
+                vppTabTitle: "🔌 VPP Flexibilität",
+                msbTabTitle: "⚡ wMSB & Messstellenbetrieb",
                 kpiCockpitTitle: "Mieterstrom Bilanzen & Strommix",
                 emptyMembersMsg: "Noch keine Mieter oder Wohneinheiten im Mieterstrom-Objekt registriert.",
                 inviteBtnLabel: "Neuen Mieter einladen",
+                hasApplications: false,
+                tariffLegalRef: "gem. § 42a EnWG (Mieterstrom-Vollversorgung)",
                 legalNotice: "Vollversorgung nach § 42a EnWG: Die Abrechnung umfasst sowohl den vor Ort erzeugten Solarstrom als auch den aus dem Netz bezogenen Reststrom.",
             };
         case "ggv":
@@ -39,14 +48,23 @@ function getTenantModelInfo(modelType) {
                 titleIcon: "⚖️",
                 badgeLabel: "⚖️ Gemeinschaftliche Gebäudeversorgung (§ 42b EnWG)",
                 badgeClass: "bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800",
-                subtitle: "Vor-Ort-Solarstromaufteilung nach Miteigentumsanteilen (MEA) mit externem Reststromvertrag",
-                membersTabTitle: "Eigentümer & Parteien",
+                subtitle: "Vor-Ort-Solarstromaufteilung nach Miteigentumsanteilen (MEA) mit separatem externem Reststromvertrag",
+                wizardBtnLabel: "✨ WEG-Gebäude-Assistent (3 Schritte)",
+                makoBtnLabel: null,
+                showMako: false,
+                shareBtnLabel: "Liegenschaft teilen",
+                cockpitTabTitle: "GGV-Solarcockpit",
+                membersTabTitle: "Wohnungseigentümer & Parteien",
                 settlementTabTitle: "Vor-Ort-Solarabrechnungen",
                 virtualMeterTabTitle: "Messkonzept & Zähler",
+                vppTabTitle: "🔌 VPP Flexibilität",
+                msbTabTitle: "⚡ Zählerverwaltung",
                 kpiCockpitTitle: "Gebäude-Solarbilanz & MEA-Aufteilung",
                 emptyMembersMsg: "Noch keine Wohnungseigentümer oder Parteien im GGV-Gebäude registriert.",
                 inviteBtnLabel: "Neuen Wohnungseigentümer einladen",
-                legalNotice: "Gebäudeversorgung nach § 42b EnWG: Reine Aufteilung des Solarstroms im Gebäude. Jeder Teilnehmer bezieht seinen Reststrom eigenständig über seinen bestehenden Reststromlieferanten.",
+                hasApplications: false,
+                tariffLegalRef: "gem. § 42b EnWG (Gemeinschaftliche Gebäudeversorgung)",
+                legalNotice: "Gebäudeversorgung nach § 42b EnWG: Reine Vor-Ort-Aufteilung des Solarstroms. Jeder Teilnehmer behält seinen bestehenden Reststromvertrag.",
             };
         case "energy_sharing":
         default:
@@ -55,18 +73,26 @@ function getTenantModelInfo(modelType) {
                 badgeLabel: "⚡ Regionales Energy Sharing (Genossenschaft)",
                 badgeClass: "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800",
                 subtitle: "15-Minuten Smart-Meter-Bilanzierung & Verteilnetz-Allokation der Bürgerenergie",
-                membersTabTitle: "Genossen & Teilnehmer",
+                wizardBtnLabel: "✨ Genossenschafts-Assistent (3 Schritte)",
+                makoBtnLabel: "📄 Marktkommunikation (AS4)",
+                showMako: true,
+                shareBtnLabel: "Erfolge teilen",
+                cockpitTabTitle: "Bürgerenergie-Cockpit",
+                membersTabTitle: "Genossenschaftsmitglieder",
                 settlementTabTitle: "15m-Sharing-Abrechnungen",
                 virtualMeterTabTitle: "Virtueller Summenzähler & iMSys",
+                vppTabTitle: "🔌 VPP Kraftwerk",
+                msbTabTitle: "⚡ wMSB Hub",
                 kpiCockpitTitle: "Bürgerenergie Bilanzen & Allokation",
                 emptyMembersMsg: "Noch keine Teilnehmer in der Energiegemeinschaft registriert.",
                 inviteBtnLabel: "Neues Mitglied einladen",
+                hasApplications: true,
+                tariffLegalRef: "Regionales Energy Sharing (Bürgerenergiegenossenschaft)",
                 legalNotice: "Regionales Energy Sharing: 15-minütige Verrechnung über das öffentliche Verteilnetz mit Netzentgeltreduktion und BNetzA MSCONS Export.",
             };
     }
 }
 
-const ALL_TABS = ["cockpit", "virtual_meter", "vpp", "settlement", "members", "applications", "msb", "audit"];
 const MEMBER_TABS = ["cockpit", "settlement"];
 
 export default function TenantDashboard() {
@@ -84,6 +110,10 @@ export default function TenantDashboard() {
     const [sharesData, setSharesData] = useState(null);
     const [timeRange, setTimeRange] = useState("today"); // 'today' | 'month'
 
+    const modelInfo = useMemo(() => {
+        return getTenantModelInfo(tenant?.model_type || "energy_sharing");
+    }, [tenant?.model_type]);
+
     const isCommunityAdmin = useMemo(() => {
         return Boolean(
             isStaffOrAdmin ||
@@ -94,7 +124,15 @@ export default function TenantDashboard() {
         );
     }, [isStaffOrAdmin, hasCommunityAdminAccess, tenant, statementsData]);
 
-    const allowedTabs = isCommunityAdmin ? ALL_TABS : MEMBER_TABS;
+    const allowedTabs = useMemo(() => {
+        if (!isCommunityAdmin) return MEMBER_TABS;
+        const tabs = ["cockpit", "virtual_meter", "vpp", "settlement", "members"];
+        if (modelInfo.hasApplications || tenant?.is_cooperative) {
+            tabs.push("applications");
+        }
+        tabs.push("msb", "audit");
+        return tabs;
+    }, [isCommunityAdmin, modelInfo.hasApplications, tenant?.is_cooperative]);
 
     const [activeTab, setActiveTab] = useState(
         allowedTabs.includes(initialTab) ? initialTab : "cockpit"
@@ -386,8 +424,6 @@ export default function TenantDashboard() {
     const activeTariff = tariffData ? tariffData.active_tariff : null;
     const statements = statementsData ? statementsData.statements : [];
 
-    const modelInfo = getTenantModelInfo(tenant?.model_type || "energy_sharing");
-
     return (
         <div className="p-6 max-w-7xl mx-auto space-y-6">
 
@@ -425,21 +461,23 @@ export default function TenantDashboard() {
                                 <span className="text-sm">🎨</span>
                                 <span>{t("tenant.whitelabel_btn", "Whitelabel & Branding")}</span>
                             </button>
-                            <button
-                                type="button"
-                                onClick={() => setMakoModalOpen(true)}
-                                className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-teal-50 dark:hover:bg-teal-950/40 text-slate-700 dark:text-slate-200 hover:text-teal-600 dark:hover:text-teal-400 border border-slate-200 dark:border-slate-800 hover:border-teal-300 dark:hover:border-teal-800 transition-all shadow-xs flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-                            >
-                                <span className="text-sm">📄</span>
-                                <span>{t("tenant.mako_btn", "Marktkommunikation (AS4)")}</span>
-                            </button>
+                            {modelInfo.showMako && (
+                                <button
+                                    type="button"
+                                    onClick={() => setMakoModalOpen(true)}
+                                    className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-teal-50 dark:hover:bg-teal-950/40 text-slate-700 dark:text-slate-200 hover:text-teal-600 dark:hover:text-teal-400 border border-slate-200 dark:border-slate-800 hover:border-teal-300 dark:hover:border-teal-800 transition-all shadow-xs flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                                >
+                                    <span className="text-sm">📄</span>
+                                    <span>{modelInfo.makoBtnLabel}</span>
+                                </button>
+                            )}
                             <button
                                 type="button"
                                 onClick={() => setWizardOpen(true)}
                                 className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 border border-slate-200 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-800 transition-all shadow-xs flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                             >
                                 <span className="text-sm">✨</span>
-                                <span>{t("tenant.wizard_btn", "Gebäude-Assistent (3 Schritte)")}</span>
+                                <span>{modelInfo.wizardBtnLabel}</span>
                             </button>
                         </>
                     )}
@@ -449,7 +487,7 @@ export default function TenantDashboard() {
                         className="px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/80 hover:border-emerald-300 transition-all shadow-xs flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                     >
                         <span className="text-sm">📢</span>
-                        <span>{t("tenant.share_btn", "Erfolge teilen")}</span>
+                        <span>{modelInfo.shareBtnLabel}</span>
                     </button>
                 </div>
             </div>
@@ -464,7 +502,7 @@ export default function TenantDashboard() {
                                 : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                         }`}
                     >
-                        {modelInfo.titleIcon} {isCommunityAdmin ? "Cockpit" : "Übersicht & Solarbilanz"}
+                        {modelInfo.titleIcon} {isCommunityAdmin ? (modelInfo.cockpitTabTitle || "Cockpit") : "Übersicht & Solarbilanz"}
                     </button>
 
                     {isCommunityAdmin && (
@@ -487,7 +525,7 @@ export default function TenantDashboard() {
                                         : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                                 }`}
                             >
-                                🔌 VPP Kraftwerk
+                                {modelInfo.vppTabTitle}
                             </button>
                         </>
                     )}
@@ -515,16 +553,18 @@ export default function TenantDashboard() {
                             >
                                 👥 {modelInfo.membersTabTitle} ({members.length})
                             </button>
-                            <button
-                                onClick={() => handleTabChange("applications")}
-                                className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
-                                    activeTab === "applications"
-                                        ? "bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 font-bold shadow-xs"
-                                        : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
-                                }`}
-                            >
-                                📋 Beitrittsanträge
-                            </button>
+                            {allowedTabs.includes("applications") && (
+                                <button
+                                    onClick={() => handleTabChange("applications")}
+                                    className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
+                                        activeTab === "applications"
+                                            ? "bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 font-bold shadow-xs"
+                                            : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                                    }`}
+                                >
+                                    📋 Beitrittsanträge
+                                </button>
+                            )}
                             <button
                                 onClick={() => handleTabChange("msb")}
                                 className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
@@ -533,7 +573,7 @@ export default function TenantDashboard() {
                                         : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                                 }`}
                             >
-                                ⚡ wMSB Hub
+                                {modelInfo.msbTabTitle}
                             </button>
                             <button
                                 onClick={() => handleTabChange("audit")}
@@ -558,7 +598,7 @@ export default function TenantDashboard() {
                     {/* ZEITRAUM FILTER */}
                     <div className="flex items-center justify-between">
                         <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200">
-                            Community Bilanzen & Kennzahlen
+                            {modelInfo.kpiCockpitTitle}
                         </h2>
                         <div className="flex bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg text-xs font-semibold">
                             <button
@@ -820,7 +860,7 @@ export default function TenantDashboard() {
                                             Allokation: {activeTariff.allocation_model === "dynamic" ? "🟢 Dynamisch (15m Lastgang)" : activeTariff.allocation_model === "static" ? "🔵 Statisch (MEA-Quote)" : "🟣 Hybrid (Vorrang + Überlauf)"}
                                         </span>
                                         <span className="text-xs text-indigo-200/80">
-                                            Gültige Konditionen für alle Teilnehmer gem. § 42b EnWG
+                                            Gültige Konditionen für alle Teilnehmer {modelInfo.tariffLegalRef}
                                         </span>
                                     </div>
                                 </div>

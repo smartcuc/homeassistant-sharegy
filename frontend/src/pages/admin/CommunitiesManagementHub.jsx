@@ -376,10 +376,10 @@ export default function CommunitiesManagementHub() {
                         <span className="text-3xl">🏛️</span>
                         <div>
                             <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
-                                Multi-Community Management Hub
+                                Quartiers- & Portfolio-Verwaltung (Plattform-Admin)
                             </h1>
                             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                                Zentrale Portfolio-Steuerung, Beteiligungsquoten & 15-Minuten Energy Sharing Clearing
+                                Zentrale Steuerung aller Mieterstrom-Projekte (§ 42a), GGV-Gebäude (§ 42b) und Energy-Sharing-Gemeinschaften
                             </p>
                         </div>
                     </div>
@@ -609,104 +609,108 @@ export default function CommunitiesManagementHub() {
             {selectedTenantId && drilldownData && (() => {
                 const drilldownMeta = getModelMetadata(drilldownData.community.model_type || "energy_sharing");
                 return (
-                <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-5xl w-full p-6 space-y-6 shadow-2xl my-8">
+                <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 animate-fade-in">
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-5xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
                         
-                        {/* Modal Header */}
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4 gap-3">
-                            <div className="flex items-center gap-3">
-                                <div
-                                    className="w-4 h-4 rounded-full shrink-0"
-                                    style={{ backgroundColor: drilldownData.community.primary_color || "#10b981" }}
-                                ></div>
-                                <div>
-                                    <div className="flex items-center gap-2 flex-wrap">
-                                        <h2 className="text-lg font-black text-slate-900 dark:text-white">
-                                            {drilldownData.community.name}
-                                        </h2>
-                                        <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${drilldownMeta.badgeClass}`}>
-                                            {drilldownMeta.badgeText}
-                                        </span>
+                        {/* Modal Header & Navigation (Fixed at top) */}
+                        <div className="p-5 sm:p-6 border-b border-slate-200 dark:border-slate-800 space-y-4 shrink-0 bg-slate-50/50 dark:bg-slate-900/50">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div className="flex items-center gap-3">
+                                    <div
+                                        className="w-4 h-4 rounded-full shrink-0"
+                                        style={{ backgroundColor: drilldownData.community.primary_color || "#10b981" }}
+                                    ></div>
+                                    <div>
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <h2 className="text-lg font-black text-slate-900 dark:text-white">
+                                                {drilldownData.community.name}
+                                            </h2>
+                                            <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${drilldownMeta.badgeClass}`}>
+                                                {drilldownMeta.badgeText}
+                                            </span>
+                                        </div>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                            {drilldownMeta.description}
+                                        </p>
                                     </div>
-                                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                                        {drilldownMeta.description}
-                                    </p>
+                                </div>
+
+                                <button
+                                    onClick={() => setSelectedTenantId(null)}
+                                    className="text-slate-400 hover:text-slate-600 dark:hover:text-white text-lg p-1 rounded-lg cursor-pointer self-start sm:self-center"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+
+                            {/* Model Legal Context Alert */}
+                            <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-3 text-xs text-slate-700 dark:text-slate-300 flex items-start gap-2.5">
+                                <span className="text-lg shrink-0 mt-0.5">{drilldownMeta.icon}</span>
+                                <div className="flex-1 leading-relaxed">
+                                    {drilldownMeta.alertText}
                                 </div>
                             </div>
 
-                            <button
-                                onClick={() => setSelectedTenantId(null)}
-                                className="text-slate-400 hover:text-slate-600 dark:hover:text-white text-lg p-1 rounded-lg cursor-pointer self-start sm:self-center"
-                            >
-                                ✕
-                            </button>
-                        </div>
-
-                        {/* Model Legal Context Alert */}
-                        <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-3.5 text-xs text-slate-700 dark:text-slate-300 flex items-start gap-2.5">
-                            <span className="text-lg shrink-0 mt-0.5">{drilldownMeta.icon}</span>
-                            <div className="flex-1 leading-relaxed">
-                                {drilldownMeta.alertText}
+                            {/* TAB NAVIGATION */}
+                            <div className="flex flex-wrap bg-slate-100 dark:bg-slate-800/70 p-1 rounded-xl text-xs font-semibold gap-1">
+                                <button
+                                    onClick={() => setDrilldownTab("members")}
+                                    className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
+                                        drilldownTab === "members"
+                                            ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs"
+                                            : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                                    }`}
+                                >
+                                    👥 {drilldownMeta.membersTitle} ({drilldownData.members.length})
+                                </button>
+                                <button
+                                    onClick={() => setDrilldownTab("shares")}
+                                    className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
+                                        drilldownTab === "shares"
+                                            ? "bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs"
+                                            : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                                    }`}
+                                >
+                                    ⚖️ {drilldownMeta.sharesTitle}
+                                </button>
+                                <button
+                                    onClick={() => setDrilldownTab("tariffs")}
+                                    className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
+                                        drilldownTab === "tariffs"
+                                            ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs"
+                                            : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                                    }`}
+                                >
+                                    💰 {drilldownMeta.tariffTitle}
+                                </button>
+                                <button
+                                    onClick={() => setDrilldownTab("announcements")}
+                                    className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
+                                        drilldownTab === "announcements"
+                                            ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs"
+                                            : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                                    }`}
+                                >
+                                    📢 Mitteilungen ({drilldownData.announcements.length})
+                                </button>
+                                <button
+                                    onClick={() => setDrilldownTab("settings")}
+                                    className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
+                                        drilldownTab === "settings"
+                                            ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs"
+                                            : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                                    }`}
+                                >
+                                    ⚙️ Einstellungen
+                                </button>
                             </div>
                         </div>
 
-                        {/* TAB NAVIGATION */}
-                        <div className="flex flex-wrap bg-slate-100 dark:bg-slate-800/70 p-1 rounded-xl text-xs font-semibold gap-1">
-                            <button
-                                onClick={() => setDrilldownTab("members")}
-                                className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
-                                    drilldownTab === "members"
-                                        ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs"
-                                        : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
-                                }`}
-                            >
-                                👥 {drilldownMeta.membersTitle} ({drilldownData.members.length})
-                            </button>
-                            <button
-                                onClick={() => setDrilldownTab("shares")}
-                                className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
-                                    drilldownTab === "shares"
-                                        ? "bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs"
-                                        : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
-                                }`}
-                            >
-                                ⚖️ {drilldownMeta.sharesTitle}
-                            </button>
-                            <button
-                                onClick={() => setDrilldownTab("tariffs")}
-                                className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
-                                    drilldownTab === "tariffs"
-                                        ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs"
-                                        : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
-                                }`}
-                            >
-                                💰 {drilldownMeta.tariffTitle}
-                            </button>
-                            <button
-                                onClick={() => setDrilldownTab("announcements")}
-                                className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
-                                    drilldownTab === "announcements"
-                                        ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs"
-                                        : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
-                                }`}
-                            >
-                                📢 Mitteilungen ({drilldownData.announcements.length})
-                            </button>
-                            <button
-                                onClick={() => setDrilldownTab("settings")}
-                                className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
-                                    drilldownTab === "settings"
-                                        ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs"
-                                        : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
-                                }`}
-                            >
-                                ⚙️ Einstellungen
-                            </button>
-                        </div>
-
+                        {/* TAB BODY CONTENT (SCROLLABLE) */}
+                        <div className="p-5 sm:p-6 overflow-y-auto space-y-6 flex-1">
                         {/* 1. MEMBERS DRILLDOWN */}
                         {drilldownTab === "members" && (
-                            <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
+                            <div className="space-y-3 pr-1">
                                 {drilldownData.members.map((m) => (
                                     <div
                                         key={m.membership_id}
@@ -1168,6 +1172,7 @@ export default function CommunitiesManagementHub() {
                                 </div>
                             </form>
                         )}
+                        </div>
 
                     </div>
                 </div>
