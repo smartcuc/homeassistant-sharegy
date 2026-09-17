@@ -142,6 +142,46 @@ export default function CommunityMemberDashboard() {
     // Mehrerlös Prosumer vs. reine EEG-Einspeisung (~10 Ct Sharing vs ~7 Ct EEG = 3 Ct Vorteil)
     const estimatedProducerBonusEur = myTotalSharedExportKwh * 0.03;
 
+    // Modell-spezifische Metadaten & Erklärungen
+    const modelType = tenant.model_type || "energy_sharing";
+    const modelConfig = {
+        mieterstrom: {
+            title: "Mieterstrom (§ 42a EnWG)",
+            badge: "⚡ Vollversorgung",
+            subBadge: "Mieterstromzuschlag",
+            subtitle: "Dein persönliches Cockpit für PV-Vor-Ort-Strom und Reststrom aus dem Netz",
+            desc: "Dein Vermieter/Contractor beliefert dich mit Solarstrom vom Dach und Reststrom aus dem Netz in einer gemeinsamen Abrechnung.",
+            bgClass: "bg-emerald-50/70 dark:bg-emerald-950/30 border-emerald-100 dark:border-emerald-900/50 text-emerald-950 dark:text-emerald-200",
+            icon: "🏢",
+        },
+        ggv: {
+            title: "Gemeinschaftliche Gebäudeversorgung (§ 42b EnWG)",
+            badge: "🏠 Vor-Ort-Aufteilung",
+            subBadge: "Eigenständiger Reststromvertrag",
+            subtitle: "Dein persönliches Cockpit für aufgeteilten PV-Strom im Gebäude",
+            desc: "Der erzeugte Solarstrom wird viertelstundengenau oder nach Miteigentumsanteil im Haus aufgeteilt. Deinen Reststromvertrag führst du eigenständig weiter.",
+            bgClass: "bg-cyan-50/70 dark:bg-cyan-950/30 border-cyan-100 dark:border-cyan-900/50 text-cyan-950 dark:text-cyan-200",
+            icon: "⚖️",
+        },
+        energy_sharing: {
+            title: "Regionales Energy Sharing (Bürgerenergie / Genossenschaft)",
+            badge: "🌐 15m Smart-Meter-Bilanzierung",
+            subBadge: "Genossenschaftlicher Ausgleich",
+            subtitle: "Dein persönliches Cockpit für geteilten Solarstrom im regionalen Verteilnetz",
+            desc: "Prosumer speisen überschüssigen Solarstrom in die Gemeinschaft ein – Consumer beziehen ihn bilanziell vor Ort. Reststrom beziehst du weiterhin unabhängig über deinen bestehenden Stromversorger.",
+            bgClass: "bg-indigo-50/70 dark:bg-indigo-950/30 border-indigo-100 dark:border-indigo-900/50 text-indigo-950 dark:text-indigo-200",
+            icon: "⚡",
+        },
+    }[modelType] || {
+        title: "Regionales Energy Sharing",
+        badge: "15m Bilanzierung",
+        subBadge: "Aktiv",
+        subtitle: "Dein persönliches Cockpit für geteilten Solarstrom",
+        desc: "Solarstrom-Bilanzierung über das regionale Verteilnetz.",
+        bgClass: "bg-indigo-50/70 dark:bg-indigo-950/30 border-indigo-100 dark:border-indigo-900/50 text-indigo-950 dark:text-indigo-200",
+        icon: "⚡",
+    };
+
     return (
         <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6">
 
@@ -150,7 +190,7 @@ export default function CommunityMemberDashboard() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-start gap-3.5">
                         <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 text-white flex items-center justify-center text-2xl shadow-sm shrink-0 mt-0.5">
-                            ⚡
+                            {modelConfig.icon}
                         </div>
                         <div>
                             <div className="flex flex-wrap items-center gap-2.5">
@@ -159,7 +199,7 @@ export default function CommunityMemberDashboard() {
                                 </h1>
                                 <span className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold px-3 py-1 rounded-full border border-emerald-500/20 flex items-center gap-1.5">
                                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                    {t("tenant.community_active", "Energy Sharing Aktiv")}
+                                    {modelConfig.title}
                                 </span>
                                 <span className="bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-bold px-3 py-1 rounded-full border border-indigo-500/20">
                                     {isProsumer && isConsumer
@@ -170,7 +210,7 @@ export default function CommunityMemberDashboard() {
                                 </span>
                             </div>
                             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-                                Dein persönliches Cockpit für geteilten Solarstrom im regionalen Verteilnetz
+                                {modelConfig.subtitle}
                             </p>
                         </div>
                     </div>
@@ -196,18 +236,18 @@ export default function CommunityMemberDashboard() {
                 </div>
 
                 {/* 🌟 ENERGIE-MODELL ERKLÄRBOX */}
-                <div className="p-4 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                    <div className="flex items-start gap-3 text-indigo-950 dark:text-indigo-200">
-                        <span className="text-xl shrink-0 mt-0.5">⚖️</span>
+                <div className={`p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs ${modelConfig.bgClass}`}>
+                    <div className="flex items-start gap-3">
+                        <span className="text-xl shrink-0 mt-0.5">{modelConfig.icon}</span>
                         <div className="space-y-0.5">
                             <div className="font-bold flex items-center gap-2">
-                                <span>Regionales Energy Sharing (Bürgerenergie & Verteilnetz-Allokation)</span>
-                                <span className="text-[10px] bg-indigo-200/60 dark:bg-indigo-800/60 text-indigo-900 dark:text-indigo-200 px-2 py-0.5 rounded-md font-mono font-semibold">
-                                    15m Smart-Meter-Bilanzierung
+                                <span>{modelConfig.title}</span>
+                                <span className="text-[10px] bg-white/60 dark:bg-black/40 px-2 py-0.5 rounded-md font-mono font-semibold">
+                                    {modelConfig.badge}
                                 </span>
                             </div>
-                            <div className="text-indigo-700/80 dark:text-indigo-300/80 text-[11px] leading-relaxed">
-                                Prosumer speisen überschüssigen Solarstrom in die Gemeinschaft ein – Consumer beziehen ihn bilanziell vor Ort. Reststrom beziehst du weiterhin unabhängig über deinen bestehenden Stromversorger.
+                            <div className="opacity-80 text-[11px] leading-relaxed">
+                                {modelConfig.desc}
                             </div>
                         </div>
                     </div>
