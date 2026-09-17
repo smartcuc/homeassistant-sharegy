@@ -1,3 +1,4 @@
+import useModalDismiss from "../../../hooks/useModalDismiss";
 /*
 # src/features/alerts/components/PushNotificationSettings.jsx
 */
@@ -18,6 +19,7 @@ import ProUpgradeModal from "../../../components/common/ProUpgradeModal";
 
 export default function PushNotificationSettings({ emailSlot = null }) {
     const { t } = useTranslation();
+    useModalDismiss(isOpen, onClose);
     const { isPro } = useSubscription();
     const queryClient = useQueryClient();
 
@@ -26,6 +28,7 @@ export default function PushNotificationSettings({ emailSlot = null }) {
     const [actionLoading, setActionLoading] = useState(false);
     const [feedbackMessage, setFeedbackMessage] = useState(null);
     const [showDevicesModal, setShowDevicesModal] = useState(false);
+    useModalDismiss(showDevicesModal, () => setShowDevicesModal(false));
     const [proModalOpen, setProModalOpen] = useState(false);
     const [deletingDeviceId, setDeletingDeviceId] = useState(null);
 
@@ -467,8 +470,8 @@ export default function PushNotificationSettings({ emailSlot = null }) {
             {/* MODAL: REGISTRIERTE GERÄTE MIT DATUM/UHRZEIT & AUDIT-INFOS */}
             {/* ========================================================================= */}
             {showDevicesModal && (
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-fade-in">
-                    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-gray-200 dark:border-slate-700 w-full max-w-xl overflow-hidden flex flex-col max-h-[85vh]">
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-fade-in" onClick={() => setShowDevicesModal(false)}>
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-gray-200 dark:border-slate-700 w-full max-w-xl overflow-hidden flex flex-col max-h-[85vh]" onClick={(e) => e.stopPropagation()}>
                         {/* Modal Header */}
                         <div className="p-5 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex items-center justify-between">
                             <div className="flex items-center gap-2.5">

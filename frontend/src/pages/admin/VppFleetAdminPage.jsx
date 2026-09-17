@@ -1,3 +1,4 @@
+import useModalDismiss from "../../hooks/useModalDismiss";
 /*
 # src/pages/admin/VppFleetAdminPage.jsx
 # Virtuelles Kraftwerk (VPP) Plattform-Cockpit: Flotten-Flexibilität, Redispatch 2.0, Dispatches & 80/20 Clearing
@@ -38,6 +39,7 @@ export default function VppFleetAdminPage() {
     const [selectedTso, setSelectedTso] = useState("all");
     const [selectedProduct, setSelectedProduct] = useState("all");
     const [testDispatchModal, setTestDispatchModal] = useState(false);
+    useModalDismiss(testDispatchModal, () => setTestDispatchModal(false));
     const [dispatchForm, setDispatchForm] = useState({
         power_kw: 250,
         duration_minutes: 15,
@@ -488,8 +490,8 @@ export default function VppFleetAdminPage() {
 
             {/* 🛠️ TEST DISPATCH MODAL */}
             {testDispatchModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs">
-                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs" onClick={() => setTestDispatchModal(false)}>
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-between">
                             <h3 className="text-base font-bold text-slate-900 dark:text-white">
                                 ⚡ {t("admin_vpp.modal_title", "Manuellen Flexibilitäts-Dispatch auslösen")}

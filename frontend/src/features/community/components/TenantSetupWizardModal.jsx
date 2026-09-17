@@ -1,3 +1,4 @@
+import useModalDismiss from "../../../hooks/useModalDismiss";
 /*
 # src/features/community/components/TenantSetupWizardModal.jsx
 # Geführter 3-Schritte Einrichtungs-Assistent (Model-Aware: Mieterstrom § 42a, GGV § 42b, Energy Sharing)
@@ -9,6 +10,7 @@ import { apiFetch } from "../../../api/client";
 
 export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, existingTenant }) {
     const { t } = useTranslation();
+    useModalDismiss(isOpen, onClose);
     const [step, setStep] = useState(1);
     const [saving, setSaving] = useState(false);
 
@@ -146,8 +148,8 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
         : t("wizard.legal_sharing", "Regionales Energy Sharing: 15-minütige Verrechnung und Allokation von Erzeugung und Verbrauch über das Verteilnetz mit Netzentgeltreduktion und automatisiertem BNetzA MSCONS Datenaustausch.");
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/75 backdrop-blur-md animate-fade-in">
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-3xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/75 backdrop-blur-md animate-fade-in" onClick={onClose}>
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-3xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
                 
                 {/* MODAL HEADER */}
                 <div className="p-5 sm:p-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 flex items-center justify-between shrink-0">

@@ -1,3 +1,4 @@
+import useModalDismiss from "../../../hooks/useModalDismiss";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -71,6 +72,7 @@ const BRAND_PRESETS = [
 
 export default function AddWallboxModal({ isOpen, onClose, onCreated }) {
     const { t } = useTranslation();
+    useModalDismiss(isOpen, onClose);
     const queryClient = useQueryClient();
 
     const [selectedBrand, setSelectedBrand] = useState(BRAND_PRESETS[0]);
@@ -134,8 +136,8 @@ export default function AddWallboxModal({ isOpen, onClose, onCreated }) {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in" onClick={onClose}>
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
                 {/* Modal Header */}
                 <div className="p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
                     <div className="flex items-center gap-3">

@@ -1,3 +1,4 @@
+import useModalDismiss from "../../../hooks/useModalDismiss";
 /*
 # src/features/help/components/HelpArticleEditorModal.jsx
 */
@@ -8,6 +9,7 @@ import { updateHelpArticle } from "../api";
 
 export default function HelpArticleEditorModal({ article, isOpen, onClose, onSaved }) {
     const { t } = useTranslation();
+    useModalDismiss(isOpen, onClose);
     const [activeLang, setActiveLang] = useState("de");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMsg, setErrorMsg] = useState("");
@@ -52,8 +54,8 @@ export default function HelpArticleEditorModal({ article, isOpen, onClose, onSav
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
-            <div className="bg-white rounded-3xl shadow-2xl border border-gray-200 w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in" onClick={onClose}>
+            <div className="bg-white rounded-3xl shadow-2xl border border-gray-200 w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
                 {/* Header */}
                 <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-slate-50/80">
                     <div className="flex items-center gap-3">

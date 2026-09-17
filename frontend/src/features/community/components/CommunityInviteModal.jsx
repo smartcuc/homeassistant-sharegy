@@ -1,3 +1,4 @@
+import useModalDismiss from "../../../hooks/useModalDismiss";
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { QRCodeSVG } from "qrcode.react";
@@ -53,6 +54,7 @@ export default function CommunityInviteModal({
     initialRole = "member",
 }) {
     const { t } = useTranslation();
+    useModalDismiss(isOpen, onClose);
     const [selectedRole, setSelectedRole] = useState(initialRole);
     const [createdInvite, setCreatedInvite] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -120,7 +122,7 @@ export default function CommunityInviteModal({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in" onClick={onClose}>
             <div
                 className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
                 onClick={(e) => e.stopPropagation()}

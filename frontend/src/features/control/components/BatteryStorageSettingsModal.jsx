@@ -1,9 +1,11 @@
+import useModalDismiss from "../../../hooks/useModalDismiss";
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../../api/client";
 
 export default function BatteryStorageSettingsModal({ isOpen, onClose, storage, onSaved }) {
     const { t } = useTranslation();
+    useModalDismiss(isOpen, onClose);
     const isEdit = Boolean(storage);
 
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -91,8 +93,8 @@ export default function BatteryStorageSettingsModal({ isOpen, onClose, storage, 
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-fade-in">
-            <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 max-w-lg w-full shadow-2xl space-y-4 max-h-[90vh] flex flex-col overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-fade-in" onClick={onClose}>
+            <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 max-w-lg w-full shadow-2xl space-y-4 max-h-[90vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
                 {/* Header */}
                 <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 shrink-0">
                     <div>

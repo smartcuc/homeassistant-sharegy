@@ -1,3 +1,4 @@
+import useModalDismiss from "../../../hooks/useModalDismiss";
 /*
 # src/features/producer/components/AddStringModal.jsx
 */
@@ -16,6 +17,7 @@ export default function AddStringModal({
     string = null,
 }) {
     const { t } = useTranslation();
+    useModalDismiss(open, onClose);
 
     const [name, setName] = useState("");
     const [modules, setModules] = useState("");

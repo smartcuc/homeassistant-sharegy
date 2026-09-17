@@ -1,8 +1,10 @@
+import useModalDismiss from "../../../hooks/useModalDismiss";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 export default function DateRangePickerModal({ isOpen, onClose, onApply, initialStart, initialEnd }) {
     const { t } = useTranslation();
+    useModalDismiss(isOpen, onClose);
     const [startDate, setStartDate] = useState(initialStart || new Date().toISOString().split("T")[0]);
     const [endDate, setEndDate] = useState(initialEnd || new Date().toISOString().split("T")[0]);
 
@@ -36,8 +38,8 @@ export default function DateRangePickerModal({ isOpen, onClose, onApply, initial
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
-            <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4" onClick={onClose}>
+            <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 border border-slate-200 animate-in fade-in zoom-in-95 duration-150" onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center justify-between border-b border-slate-100 pb-4">
                     <div className="flex items-center gap-2.5">
                         <span className="text-xl">📅</span>

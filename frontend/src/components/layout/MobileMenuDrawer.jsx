@@ -1,3 +1,4 @@
+import useModalDismiss from "../../hooks/useModalDismiss";
 /*
 # frontend/src/components/layout/MobileMenuDrawer.jsx
 */
@@ -16,6 +17,7 @@ import { useMemo } from "react";
 
 export default function MobileMenuDrawer({ isOpen, onClose }) {
     const { t } = useTranslation();
+    useModalDismiss(isOpen, onClose);
     const location = useLocation();
     const { user, isStaffOrAdmin, hasCommunityAdminAccess } = useUser();
     const { isPro } = useSubscription();

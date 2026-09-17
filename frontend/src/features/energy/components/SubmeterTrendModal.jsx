@@ -1,3 +1,4 @@
+import useModalDismiss from "../../../hooks/useModalDismiss";
 /*
 # src/features/energy/components/SubmeterTrendModal.jsx
 */
@@ -10,6 +11,7 @@ import { apiFetch } from "../../../api/client";
 
 export default function SubmeterTrendModal({ meter, isOpen, onClose, defaultPeriod = "30d" }) {
     const { t } = useTranslation();
+    useModalDismiss(isOpen, onClose);
     const [period, setPeriod] = useState(defaultPeriod);
     const [chartMode, setChartMode] = useState("coverage"); // 'coverage', 'consumption', 'costs'
 
@@ -232,8 +234,8 @@ export default function SubmeterTrendModal({ meter, isOpen, onClose, defaultPeri
     if (!isOpen || !meter) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs transition-opacity animate-fade-in">
-            <div className="bg-white border border-gray-200 rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto flex flex-col">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs transition-opacity animate-fade-in" onClick={onClose}>
+            <div className="bg-white border border-gray-200 rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto flex flex-col" onClick={(e) => e.stopPropagation()}>
                 {/* Header */}
                 <div className="p-6 border-b border-gray-100 flex items-center justify-between gap-4 sticky top-0 bg-white/95 backdrop-blur-xs z-10">
                     <div className="flex items-center gap-3">

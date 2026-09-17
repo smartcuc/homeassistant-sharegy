@@ -1,3 +1,4 @@
+import useModalDismiss from "../../../hooks/useModalDismiss";
 /*
 # src/features/producer/components/ProducerModal.jsx
 */
@@ -11,6 +12,7 @@ export default function ProducerModal({
     onClose,
 }) {
     const { t } = useTranslation();
+    useModalDismiss(open, onClose);
 
     const { data = [] } = useQuery({
         queryKey: ["generators"],

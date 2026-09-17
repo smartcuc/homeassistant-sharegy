@@ -1,3 +1,4 @@
+import useModalDismiss from "../../hooks/useModalDismiss";
 /*
 # src/pages/admin/CommunitiesManagementHub.jsx
 # Zentrales Multi-Community Management Hub für Energiegemeinschaften & Allokationsmodelle
@@ -611,8 +612,8 @@ export default function CommunitiesManagementHub() {
             {selectedTenantId && drilldownData && (() => {
                 const drilldownMeta = getModelMetadata(drilldownData.community.model_type || "energy_sharing");
                 return (
-                <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 animate-fade-in">
-                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-5xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+                <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 animate-fade-in" onClick={() => setDrilldownId(null)}>
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-5xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
                         
                         {/* Modal Header & Navigation (Fixed at top) */}
                         <div className="p-5 sm:p-6 border-b border-slate-200 dark:border-slate-800 space-y-4 shrink-0 bg-slate-50/50 dark:bg-slate-900/50">
@@ -1183,8 +1184,8 @@ export default function CommunitiesManagementHub() {
 
             {/* ANNOUNCEMENT CREATE MODAL */}
             {announcementModal && (
-                <div className="fixed inset-0 z-60 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+                <div className="fixed inset-0 z-60 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4" onClick={() => setAnnouncementModal(false)}>
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
                         <div className="flex justify-between items-center">
                             <h3 className="font-bold text-sm text-slate-900 dark:text-white">
                                 {t("admin_communities.modal_announcement.title", "Neue Community-Mitteilung")}

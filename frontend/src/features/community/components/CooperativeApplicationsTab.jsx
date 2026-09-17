@@ -1,3 +1,4 @@
+import useModalDismiss from "../../../hooks/useModalDismiss";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -7,7 +8,8 @@ export default function CooperativeApplicationsTab({ tenant }) {
     const { t } = useTranslation();
     const queryClient = useQueryClient();
     const [filterStatus, setFilterStatus] = useState("all");
-    const [actionModal, setActionModal] = useState(null); // { type: 'reject' | 'details', app: {...} }
+    const [actionModal, setActionModal] = useState(null);
+    useModalDismiss(Boolean(actionModal), () => setActionModal(null)); // { type: 'reject' | 'details', app: {...} }
     const [rejectReason, setRejectReason] = useState("");
 
     const { data, isLoading, error, refetch } = useQuery({
@@ -263,8 +265,8 @@ export default function CooperativeApplicationsTab({ tenant }) {
 
             {/* REJECTION MODAL */}
             {actionModal?.type === "reject" && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs" onClick={() => setActionModal(null)}>
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-between">
                             <h3 className="text-base font-bold text-slate-900 dark:text-white">
                                 Antrag ablehnen

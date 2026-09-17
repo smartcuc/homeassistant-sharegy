@@ -1,3 +1,4 @@
+import useModalDismiss from "../../../hooks/useModalDismiss";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -7,6 +8,7 @@ export default function BWWPLoadManagementCard() {
     const { t } = useTranslation();
     const queryClient = useQueryClient();
     const [settingsOpen, setSettingsOpen] = useState(false);
+    useModalDismiss(settingsOpen, () => setSettingsOpen(false));
     const [formConfig, setFormConfig] = useState(null);
 
     // 1. Live BWWP Status & Configuration from Backend
@@ -239,8 +241,8 @@ export default function BWWPLoadManagementCard() {
 
             {/* Settings Modal */}
             {settingsOpen && formConfig && (
-                <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 max-w-lg w-full shadow-2xl space-y-4 max-h-[90vh] flex flex-col overflow-hidden">
+                <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4" onClick={() => setSettingsOpen(false)}>
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 max-w-lg w-full shadow-2xl space-y-4 max-h-[90vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 shrink-0">
                             <div>
                                 <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">

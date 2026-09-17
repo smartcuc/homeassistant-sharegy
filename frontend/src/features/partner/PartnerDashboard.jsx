@@ -1,3 +1,4 @@
+import useModalDismiss from "../../hooks/useModalDismiss";
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../api/client";
@@ -35,6 +36,8 @@ export default function PartnerDashboard() {
 
   // Quick Onboard Modal State
   const [showOnboardModal, setShowOnboardModal] = useState(false);
+  useModalDismiss(Boolean(selectedAsset), () => setSelectedAsset(null));
+  useModalDismiss(showOnboardModal, () => setShowOnboardModal(false));
   const [onboardForm, setOnboardForm] = useState({
     customer_email: "",
     home_name: "",
@@ -339,8 +342,8 @@ export default function PartnerDashboard() {
 
         {/* Fernwartungs-Modal */}
         {selectedAsset && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 space-y-6 shadow-2xl animate-in fade-in zoom-in duration-150">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={() => { setSelectedAsset(null); setShowOnboardModal(false); }}>
+            <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 space-y-6 shadow-2xl animate-in fade-in zoom-in duration-150" onClick={(e) => e.stopPropagation()}>
               <div className="flex justify-between items-start">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">

@@ -1,3 +1,4 @@
+import useModalDismiss from "../../../hooks/useModalDismiss";
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -9,6 +10,7 @@ export default function FloorHeatingLoadCard() {
     const { t } = useTranslation();
     const queryClient = useQueryClient();
     const [settingsOpen, setSettingsOpen] = useState(false);
+    useModalDismiss(settingsOpen, () => setSettingsOpen(false));
     const [scheduleDrawerOpen, setScheduleDrawerOpen] = useState(false);
     const [formConfig, setFormConfig] = useState(null);
 
@@ -356,8 +358,8 @@ export default function FloorHeatingLoadCard() {
 
             {/* Settings Modal (Global Portal Pop-up) */}
             {settingsOpen && formConfig && typeof document !== "undefined" && createPortal(
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-xs overflow-y-auto">
-                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-6 w-full max-w-lg shadow-2xl animate-scale-in max-h-[88vh] flex flex-col my-auto">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-xs overflow-y-auto" onClick={() => setSettingsOpen(false)}>
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-6 w-full max-w-lg shadow-2xl animate-scale-in max-h-[88vh] flex flex-col my-auto" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-200 dark:border-slate-800 shrink-0">
                             <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                                 <span>⚙️</span> {t("control.floor_heating_settings", "Fußbodenheizung & MPC-Parameter")}

@@ -1,3 +1,4 @@
+import useModalDismiss from "../../hooks/useModalDismiss";
 import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "../../api/client";
@@ -5,6 +6,7 @@ import { useTranslation } from "react-i18next";
 
 export default function DeviceBaselineModal({ device, isOpen, onClose }) {
     const { t } = useTranslation();
+    useModalDismiss(isOpen, onClose);
     const queryClient = useQueryClient();
 
     const [applianceType, setApplianceType] = useState("generic");
@@ -93,8 +95,8 @@ export default function DeviceBaselineModal({ device, isOpen, onClose }) {
     const devName = device.config?.custom_name || device.name || device.identifier;
 
     return (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-3xl shadow-2xl max-w-xl w-full p-6 animate-in fade-in zoom-in-95 space-y-5 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4" onClick={onClose}>
+            <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-3xl shadow-2xl max-w-xl w-full p-6 animate-in fade-in zoom-in-95 space-y-5 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                 {/* MODAL HEADER */}
                 <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-slate-800">
                     <div className="flex items-center gap-2.5">

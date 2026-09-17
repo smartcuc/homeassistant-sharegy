@@ -1,3 +1,4 @@
+import useModalDismiss from "../../../hooks/useModalDismiss";
 /*
 # src/features/producer/components/StorageSystemModal.jsx
 */
@@ -9,6 +10,7 @@ import { apiFetch } from "../../../api/client";
 
 export default function StorageSystemModal({ isOpen, onClose, storage, onSaved }) {
     const { t } = useTranslation();
+    useModalDismiss(open, onClose);
     const isEdit = Boolean(storage);
 
     // Auto-Discovery und Geräteliste laden

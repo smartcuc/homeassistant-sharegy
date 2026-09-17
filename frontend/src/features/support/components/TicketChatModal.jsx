@@ -1,3 +1,4 @@
+import useModalDismiss from "../../../hooks/useModalDismiss";
 /*
 # src/features/support/components/TicketChatModal.jsx
 # Modern, real-time Ticket Chat Thread with attachments and status controls
@@ -24,6 +25,7 @@ import { fetchTicketDetail, postTicketMessage, updateTicketStatus } from "../api
 
 export default function TicketChatModal({ ticketId, isOpen, onClose, onTicketUpdated }) {
     const { t } = useTranslation();
+    useModalDismiss(isOpen, onClose);
     const [ticket, setTicket] = useState(null);
     const [loading, setLoading] = useState(true);
     const [replyText, setReplyText] = useState("");
@@ -134,8 +136,8 @@ export default function TicketChatModal({ ticketId, isOpen, onClose, onTicketUpd
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
-            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-3xl h-[85vh] flex flex-col overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in" onClick={onClose}>
+            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-3xl h-[85vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
                 {/* Header */}
                 <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/40">
                     <div className="flex-1 min-w-0 pr-4">

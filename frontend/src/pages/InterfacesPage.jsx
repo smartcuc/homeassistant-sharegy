@@ -1,3 +1,4 @@
+import useModalDismiss from "../hooks/useModalDismiss";
 /*
 # src/pages/InterfacesPage.jsx
 */
@@ -16,6 +17,7 @@ export default function InterfacesPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [copiedKey, setCopiedKey] = useState(null);
     const [showQR, setShowQR] = useState(false);
+    useModalDismiss(showQR, () => setShowQR(false));
     const [guideTab, setGuideTab] = useState("otel");
 
     function safeCopy(text, key) {

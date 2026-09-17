@@ -1,3 +1,4 @@
+import useModalDismiss from "../../../hooks/useModalDismiss";
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../../api/client";
@@ -52,6 +53,7 @@ const PRESET_THEMES = [
 
 export default function WhitelabelSettingsModal({ isOpen, onClose }) {
   const { t } = useTranslation();
+  useModalDismiss(isOpen, onClose);
   const { theming, updatePreviewTheme, reloadTheming } = useTenantTheming();
 
   const [formData, setFormData] = useState({
@@ -141,8 +143,8 @@ export default function WhitelabelSettingsModal({ isOpen, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/75 backdrop-blur-md animate-fade-in">
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/75 backdrop-blur-md animate-fade-in" onClick={onClose}>
+      <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
         
         {/* Header (Fixed) */}
         <div className="p-6 md:p-8 pb-4 border-b border-slate-800 shrink-0 flex justify-between items-start">

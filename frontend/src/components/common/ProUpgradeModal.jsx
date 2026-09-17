@@ -1,3 +1,4 @@
+import useModalDismiss from "../../hooks/useModalDismiss";
 /*
 # src/components/common/ProUpgradeModal.jsx
 */
@@ -16,6 +17,7 @@ export default function ProUpgradeModal({
 }) {
     const navigate = useNavigate();
     const { t } = useTranslation();
+    useModalDismiss(open, onClose);
     const { proYearlyMonthlyEquiv } = useSubscription();
 
     const resolvedFeatureName = featureName || t("billing.pro_modal.default_feature", "Dieses Feature");

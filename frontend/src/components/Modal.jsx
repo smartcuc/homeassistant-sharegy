@@ -1,8 +1,10 @@
+import useModalDismiss from "../hooks/useModalDismiss";
 /*
 # src/components/Modal.jsx
 */
 
 export default function Modal({ title, children, onClose }) {
+    useModalDismiss(onClose);
     return (
         <div 
             className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in duration-200"

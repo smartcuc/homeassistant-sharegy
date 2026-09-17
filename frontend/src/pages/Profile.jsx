@@ -1,3 +1,4 @@
+import useModalDismiss from "../hooks/useModalDismiss";
 /*
 # src/pages/Profile.jsx
 */
@@ -83,6 +84,10 @@ export default function Profile() {
 
     // Avatar Picker Modal State
     const [showAvatarModal, setShowAvatarModal] = useState(false);
+    useModalDismiss(showAvatarModal, () => setShowAvatarModal(false));
+    useModalDismiss(showEmailModal, () => setShowEmailModal(false));
+    useModalDismiss(showRevokeModal, () => setShowRevokeModal(false));
+    useModalDismiss(showDeleteModal, () => setShowDeleteModal(false));
 
     useEffect(() => {
         if (profileQuery.data) {
@@ -1392,8 +1397,8 @@ export default function Profile() {
             {/* AVATAR PICKER MODAL */}
             {/* ========================================================= */}
             {showAvatarModal && (
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in duration-150">
-                    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-gray-200 dark:border-slate-800 w-full max-w-xl overflow-hidden flex flex-col">
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-fade-in" onClick={() => { setShowAvatarModal(false); setShowEmailModal(false); setShowRevokeModal(false); setShowDeleteModal(false); }}>
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-gray-200 dark:border-slate-800 w-full max-w-xl overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
                         <div className="p-6 bg-slate-50 dark:bg-slate-800/80 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <span className="text-2xl p-2 bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 rounded-2xl">🎨</span>
@@ -1491,7 +1496,7 @@ export default function Profile() {
             {/* CHANGE EMAIL MODAL */}
             {showEmailModal && (
                 <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in duration-150">
-                    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-gray-200 dark:border-slate-800 w-full max-w-md overflow-hidden flex flex-col">
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-gray-200 dark:border-slate-800 w-full max-w-md overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
                         <div className="p-6 bg-slate-50 dark:bg-slate-800/80 border-b border-gray-100 dark:border-slate-800 flex items-center gap-3">
                             <span className="text-2xl p-2 bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 rounded-2xl">✉️</span>
                             <div>
@@ -1579,7 +1584,7 @@ export default function Profile() {
             {/* REVOKE MAGIC LINKS & LOGOUT MODAL */}
             {showRevokeModal && (
                 <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in duration-150">
-                    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-rose-200 dark:border-rose-900 w-full max-w-lg overflow-hidden flex flex-col">
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-rose-200 dark:border-rose-900 w-full max-w-lg overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
                         <div className="p-6 bg-rose-50 dark:bg-rose-950/50 border-b border-rose-100 dark:border-rose-900 flex items-center gap-3">
                             <span className="text-3xl p-2 bg-rose-100 dark:bg-rose-900/40 text-rose-600 rounded-2xl">🚨</span>
                             <div>

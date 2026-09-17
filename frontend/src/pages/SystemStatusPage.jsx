@@ -1,3 +1,4 @@
+import useModalDismiss from "../hooks/useModalDismiss";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -13,6 +14,7 @@ export default function SystemStatusPage() {
 
     // Störungsmeldungs-Modal / Formular State
     const [showTicketModal, setShowTicketModal] = useState(false);
+    useModalDismiss(showTicketModal, () => setShowTicketModal(false));
     const [ticketCategory, setTicketCategory] = useState("telemetry_stream");
     const [ticketSubject, setTicketSubject] = useState("");
     const [ticketDescription, setTicketDescription] = useState("");
@@ -361,8 +363,8 @@ export default function SystemStatusPage() {
 
             {/* MODAL: STÖRUNGSMELDUNG / TICKET ERSTELLUNG */}
             {showTicketModal && (
-                <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-3xl shadow-2xl max-w-lg w-full p-6 animate-in fade-in zoom-in-95">
+                <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4" onClick={() => setShowTicketModal(false)}>
+                    <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-3xl shadow-2xl max-w-lg w-full p-6 animate-in fade-in zoom-in-95" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-slate-800">
                             <div className="flex items-center gap-2">
                                 <span className="text-xl">🚨</span>

@@ -1,3 +1,4 @@
+import useModalDismiss from "../../hooks/useModalDismiss";
 /*
 # src/components/device/HomeSetupStatusModal.jsx
 */
@@ -8,11 +9,12 @@ import SystemReadinessCard from "../../features/energy/components/SystemReadines
 
 export default function HomeSetupStatusModal({ open, onClose, onOpenAddDevice }) {
     const { t } = useTranslation();
+    useModalDismiss(open, onClose);
     if (!open) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
-            <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in" onClick={onClose}>
+            <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
                 {/* Header mit Omi-Check im Text */}
                 <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
                     <div className="flex items-center gap-3">

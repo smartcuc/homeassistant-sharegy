@@ -1,3 +1,4 @@
+import useModalDismiss from "../../hooks/useModalDismiss";
 /*
 # src/components/device/AddDeviceModal.jsx
 */
@@ -249,6 +250,7 @@ export default function AddDeviceModal({ open, onClose }) {
 
 function StepPresetSelection({ presets, selectedPreset, onSelect }) {
     const { t } = useTranslation();
+    useModalDismiss(open, onClose);
 
     return (
         <div>

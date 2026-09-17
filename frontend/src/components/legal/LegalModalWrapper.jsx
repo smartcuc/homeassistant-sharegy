@@ -1,3 +1,4 @@
+import useModalDismiss from "../../hooks/useModalDismiss";
 /*
 # src/components/legal/LegalModalWrapper.jsx
 */
@@ -8,6 +9,7 @@ import { useUser } from "../../hooks/useUser";
 
 export default function LegalModalWrapper({ title, children, onClose }) {
     const { t } = useTranslation();
+    useModalDismiss(Boolean(onClose), onClose);
     const { user } = useUser();
     const navigate = useNavigate();
 
@@ -16,8 +18,8 @@ export default function LegalModalWrapper({ title, children, onClose }) {
     // Modal Mode (opened from Footer popup)
     if (onClose) {
         return (
-            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-fade-in">
-                <div className="bg-white border border-gray-200 rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-fade-in" onClick={onClose}>
+                <div className="bg-white border border-gray-200 rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
                     {/* Header */}
                     <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-slate-50/80">
                         <div className="flex items-center gap-3">

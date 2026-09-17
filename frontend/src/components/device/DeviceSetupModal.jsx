@@ -1,3 +1,4 @@
+import useModalDismiss from "../../hooks/useModalDismiss";
 import { useState, useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useUnconfiguredDevices } from "../../hooks/useUnconfiguredDevices";
@@ -14,6 +15,7 @@ export default function DeviceSetupModal({
     singleDevice = null
 }) {
     const { t } = useTranslation();
+    useModalDismiss(open, onClose);
     const queryClient = useQueryClient();
     const isBulk = mode === "bulk";
 
