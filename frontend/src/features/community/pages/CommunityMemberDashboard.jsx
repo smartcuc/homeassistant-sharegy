@@ -1,17 +1,20 @@
 /*
 # src/features/community/pages/CommunityMemberDashboard.jsx
-# Dediziertes Endnutzer-Cockpit für Teilnehmer einer Energiegemeinschaft / Mieterstrom
+# Dediziertes Endnutzer-Cockpit für Mieterstrom (§ 42a EnWG), GGV (§ 42b EnWG) und Energy Sharing
 */
 
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../../api/client";
 import { useUser } from "../../../hooks/useUser";
+import { useUserNavigation } from "../../../hooks/useUserNavigation";
+import { NAV_MODES } from "../../../config/navigationConfig";
 import CommunityShareModal from "../components/CommunityShareModal";
 
 export default function CommunityMemberDashboard() {
     const { t } = useTranslation();
     const { user } = useUser();
+    const { activeMode } = useUserNavigation();
 
     const [loading, setLoading] = useState(true);
     const [tenant, setTenant] = useState(null);
@@ -86,7 +89,7 @@ export default function CommunityMemberDashboard() {
         return (
             <div className="p-12 text-center text-slate-400 text-sm animate-pulse max-w-7xl mx-auto">
                 <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-                Lade dein Community Sharing Cockpit...
+                Lade dein Energie-Cockpit...
             </div>
         );
     }
@@ -98,10 +101,10 @@ export default function CommunityMemberDashboard() {
                     🏛️
                 </div>
                 <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                    Keine aktive Energiegemeinschaft
+                    Keine aktive Zuordnung
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                    Du bist aktuell noch keiner Energiegemeinschaft oder keinem Mieterstrom-Projekt zugewiesen. Sobald du einen Einladungslink einlöst, findest du deine Bilanzen und Nachweise hier.
+                    Du bist aktuell noch keinem Mieterstrom-Objekt, keinem GGV-Gebäude oder keiner Energiegemeinschaft zugewiesen. Sobald du einen Einladungslink einlöst, findest du deine Bilanzen und Nachweise hier.
                 </p>
                 <div className="pt-2">
                     <button
@@ -134,31 +137,80 @@ export default function CommunityMemberDashboard() {
     const isProsumer = myTotalSharedExportKwh > 0 || myTotalProducedKwh > 0;
     const isConsumer = myTotalSharedImportKwh > 0 || myTotalConsumedKwh > 0 || !isProsumer;
 
-    // Ersparnis vs. Grundversorger (~38 Ct/kWh Grundversorger vs ~18 Ct/kWh Sharing)
+    // Ersparnis vs. Grundversorger (~38 Ct/kWh Grundversorger vs ~18 Ct/kWh Sharing/Mieterstrom)
     const estimatedSavingsEur = myTotalSharedImportKwh * 0.20;
     // Mehrerlös Prosumer vs. reine EEG-Einspeisung (~10 Ct Sharing vs ~7 Ct EEG = 3 Ct Vorteil)
     const estimatedProducerBonusEur = myTotalSharedExportKwh * 0.03;
 
-    // Modell-spezifische Metadaten & Erklärungen
-    const modelType = tenant.model_type || "energy_sharing";
+    // 🌟 EFFEKTIVE MODELL-BESTIMMUNG (BERÜCKSICHTIGT AKTIVEN NAV-MODUS ODER TENANT-KONFIG)
+    const effectiveModel = (activeMode === NAV_MODES.MIETERSTROM || activeMode === "mieterstrom")
+        ? "mieterstrom"
+        : (activeMode === NAV_MODES.GGV || activeMode === "ggv")
+        ? "ggv"
+        : (activeMode === NAV_MODES.ENERGY_SHARING || activeMode === "energy_sharing" || activeMode === "sharing_only")
+        ? "energy_sharing"
+        : (tenant?.model_type || "energy_sharing");
+
     const modelConfig = {
         mieterstrom: {
             title: "Mieterstrom (§ 42a EnWG)",
             badge: "⚡ Vollversorgung",
             subBadge: "Mieterstromzuschlag",
             subtitle: "Dein persönliches Cockpit für PV-Vor-Ort-Strom und Reststrom aus dem Netz",
-            desc: "Dein Vermieter/Contractor beliefert dich mit Solarstrom vom Dach und Reststrom aus dem Netz in einer gemeinsamen Abrechnung.",
+            desc: "Dein Vermieter/Contractor beliefert dich mit Solarstrom vom Dach und Reststrom aus dem Netz in einer gemeinsamen Abrechnung mit gesetzlicher Preisdeckelung unter dem Grundversorger.",
             bgClass: "bg-emerald-50/70 dark:bg-emerald-950/30 border-emerald-100 dark:border-emerald-900/50 text-emerald-950 dark:text-emerald-200",
             icon: "🏢",
+            communityOverviewTitle: "Gebäude-Mieterstrom im Überblick",
+            communityOverviewSubtitle: "Dach-PV-Erzeugung und Gesamtstrombedarf aller Mietparteien im Gebäude",
+            kpiPoolLabel: "Dach-PV Erzeugung",
+            kpiPoolDesc: "Solarertrag der Gebäude-Dachanlage",
+            kpiSharedLabel: "Vor-Ort Mieterstrom",
+            kpiSharedDesc: "Im Gebäude direkt verbraucht",
+            kpiConsumedLabel: "Haus-Gesamtbedarf",
+            kpiConsumedDesc: "Wohnungs- & Allgemeinstrom",
+            kpiAutarkyLabel: "Solar-Deckungsquote",
+            kpiAutarkyDesc: "Vor-Ort Solarstromanteil",
+            consumerSectionTitle: "Mein Wohnungs-Strommix (Vollversorgung)",
+            consumerSolarLabel: "Mein Mieterstrom-Verbrauch",
+            consumerSolarDesc: "Günstiger Solarstrom direkt vom Dach",
+            consumerSavingsLabel: "Mieterstrom-Ersparnis",
+            consumerSavingsDesc: "Preisvorteil gegenüber Grundversorger",
+            consumerResidualLabel: "Netz-Reststrom",
+            consumerResidualDesc: "Über Vollversorger-Tarif abgerechnet",
+            tariffTitle: "Gültiger Mieterstrom-Vollversorger-Tarif",
+            tariffLegalBadge: "Aktiv nach § 42a EnWG",
+            statementsTitle: "Meine Mieterstrom-Abrechnungsbelege (§ 42a EnWG)",
+            statementsDesc: "Konsolidierte Monatsabrechnungen für Solar- & Netzstrom mit PDF-Nachweisen",
         },
         ggv: {
             title: "Gemeinschaftliche Gebäudeversorgung (§ 42b EnWG)",
             badge: "🏠 Vor-Ort-Aufteilung",
             subBadge: "Eigenständiger Reststromvertrag",
             subtitle: "Dein persönliches Cockpit für aufgeteilten PV-Strom im Gebäude",
-            desc: "Der erzeugte Solarstrom wird viertelstundengenau oder nach Miteigentumsanteil im Haus aufgeteilt. Deinen Reststromvertrag führst du eigenständig weiter.",
+            desc: "Der erzeugte Solarstrom wird viertelstundengenau oder nach Miteigentumsanteil (MEA) im Haus aufgeteilt. Deinen Reststromvertrag führst du eigenständig mit deinem gewählten Stromversorger weiter.",
             bgClass: "bg-cyan-50/70 dark:bg-cyan-950/30 border-cyan-100 dark:border-cyan-900/50 text-cyan-950 dark:text-cyan-200",
             icon: "⚖️",
+            communityOverviewTitle: "Gebäude-Solarstrom im Überblick",
+            communityOverviewSubtitle: "Gemeinschaftliche PV-Erzeugung und Vor-Ort-Zuteilung im Objekt",
+            kpiPoolLabel: "Gemeinschafts-PV",
+            kpiPoolDesc: "Erzeugung der Haus-Solaranlage",
+            kpiSharedLabel: "Aufgeteilter Solarstrom",
+            kpiSharedDesc: "Nach 15m Lastgang / MEA zugeteilt",
+            kpiConsumedLabel: "Objekt-Gesamtbedarf",
+            kpiConsumedDesc: "Gesamtverbrauch aller Einheiten",
+            kpiAutarkyLabel: "Objekt-Solaranteil",
+            kpiAutarkyDesc: "Anteil PV an Gesamtdeckung",
+            consumerSectionTitle: "Mein zugeteilter Solarstrom-Anteil",
+            consumerSolarLabel: "Mein PV-Solarbezug",
+            consumerSolarDesc: "Aus der internen Gebäude-Aufteilung",
+            consumerSavingsLabel: "Solar-Kostenvorteil",
+            consumerSavingsDesc: "Ersparnis ggü. Netzbezug",
+            consumerResidualLabel: "Eigenständiger Reststrom",
+            consumerResidualDesc: "Direkt über deinen eigenen Stromversorger",
+            tariffTitle: "Gültiger Gebäude-Solarstromtarif",
+            tariffLegalBadge: "Aktiv nach § 42b EnWG",
+            statementsTitle: "Interne PV-Aufteilungsnachweise (§ 42b EnWG)",
+            statementsDesc: "Monatliche interne Abrechnungsbelege zur Gebäude-PV (ohne externen Reststrom)",
         },
         energy_sharing: {
             title: "Regionales Energy Sharing (Bürgerenergie / Genossenschaft)",
@@ -168,8 +220,29 @@ export default function CommunityMemberDashboard() {
             desc: "Prosumer speisen überschüssigen Solarstrom in die Gemeinschaft ein – Consumer beziehen ihn bilanziell vor Ort. Reststrom beziehst du weiterhin unabhängig über deinen bestehenden Stromversorger.",
             bgClass: "bg-indigo-50/70 dark:bg-indigo-950/30 border-indigo-100 dark:border-indigo-900/50 text-indigo-950 dark:text-indigo-200",
             icon: "⚡",
+            communityOverviewTitle: "Die Energiegemeinschaft im Überblick",
+            communityOverviewSubtitle: "Gesamterzeugung der Prosumer-Anlagen und geteilter Strom aller Teilnehmer",
+            kpiPoolLabel: "Prosumer Erzeugung",
+            kpiPoolDesc: "Solarertrag aller Erzeuger im Pool",
+            kpiSharedLabel: "Geteilter Strom",
+            kpiSharedDesc: "Bilanziell im Netzgebiet geteilt",
+            kpiConsumedLabel: "Gemeinschaftsbedarf",
+            kpiConsumedDesc: "Stromverbrauch aller Teilnehmer",
+            kpiAutarkyLabel: "Community Autarkiegrad",
+            kpiAutarkyDesc: "Deckung aus eigenem Pool",
+            consumerSectionTitle: "Mein Consumer-Bezug aus der Community",
+            consumerSolarLabel: "Mein Solar-Bezug",
+            consumerSolarDesc: "Günstiger Ökostrom aus dem Verteilnetz",
+            consumerSavingsLabel: "Meine Ersparnis",
+            consumerSavingsDesc: "Ersparnis ggü. Netz-Grundversorger",
+            consumerResidualLabel: "Reststrom aus Netz",
+            consumerResidualDesc: "Über externen Lieferanten bezogen",
+            tariffTitle: "Gültiger Energy Sharing Tarif",
+            tariffLegalBadge: "Aktiv im regionalen Verteilnetz",
+            statementsTitle: "Meine 15-Minuten Bilanzierungsnachweise",
+            statementsDesc: "Monatliche Abrechnungsbelege zur internen Verrechnung und PDF-Nachweise",
         },
-    }[modelType] || {
+    }[effectiveModel] || {
         title: "Regionales Energy Sharing",
         badge: "15m Bilanzierung",
         subBadge: "Aktiv",
@@ -177,6 +250,27 @@ export default function CommunityMemberDashboard() {
         desc: "Solarstrom-Bilanzierung über das regionale Verteilnetz.",
         bgClass: "bg-indigo-50/70 dark:bg-indigo-950/30 border-indigo-100 dark:border-indigo-900/50 text-indigo-950 dark:text-indigo-200",
         icon: "⚡",
+        communityOverviewTitle: "Die Energiegemeinschaft im Überblick",
+        communityOverviewSubtitle: "Gesamterzeugung der Prosumer-Anlagen und geteilter Strom",
+        kpiPoolLabel: "Prosumer Erzeugung",
+        kpiPoolDesc: "Solarertrag im Pool",
+        kpiSharedLabel: "Geteilter Strom",
+        kpiSharedDesc: "Bilanziell geteilt",
+        kpiConsumedLabel: "Gesamtbedarf",
+        kpiConsumedDesc: "Stromverbrauch",
+        kpiAutarkyLabel: "Autarkiegrad",
+        kpiAutarkyDesc: "Deckung",
+        consumerSectionTitle: "Mein Bezug",
+        consumerSolarLabel: "Mein Solar-Bezug",
+        consumerSolarDesc: "Aus der Gemeinschaft",
+        consumerSavingsLabel: "Ersparnis",
+        consumerSavingsDesc: "ggü. Grundversorger",
+        consumerResidualLabel: "Reststrom",
+        consumerResidualDesc: "Netzbezug",
+        tariffTitle: "Gültiger Tarif",
+        tariffLegalBadge: "Aktiv",
+        statementsTitle: "Abrechnungsnachweise",
+        statementsDesc: "Monatliche Nachweise",
     };
 
     return (
@@ -243,15 +337,15 @@ export default function CommunityMemberDashboard() {
                 </div>
             </div>
 
-            {/* 2. DIE GEMEINSCHAFT IM ÜBERBLICK */}
+            {/* 2. DIE GEMEINSCHAFT / DAS GEBÄUDE IM ÜBERBLICK */}
             <div className="space-y-4">
                 <div className="flex items-center justify-between">
                     <div>
                         <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                            <span>🏘️</span> Die Energiegemeinschaft im Überblick
+                            <span>{modelConfig.icon}</span> {modelConfig.communityOverviewTitle}
                         </h2>
                         <p className="text-xs text-slate-500 dark:text-slate-400">
-                            Gesamterzeugung der Prosumer-Anlagen und geteilter Strom aller Teilnehmer
+                            {modelConfig.communityOverviewSubtitle}
                         </p>
                     </div>
 
@@ -279,13 +373,13 @@ export default function CommunityMemberDashboard() {
                     </div>
                 </div>
 
-                {/* 4 Community KPI Cards */}
+                {/* 4 Modell-angepasste KPI Cards */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-                    {/* Solar-Erzeugung Prosumer-Pool */}
+                    {/* Solar-Erzeugung */}
                     <div className="bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 flex flex-col justify-between">
                         <div className="flex items-center justify-between">
                             <span className="text-[11px] font-bold text-amber-700 dark:text-amber-300 uppercase tracking-wider">
-                                Prosumer Erzeugung
+                                {modelConfig.kpiPoolLabel}
                             </span>
                             <span className="text-lg">☀️</span>
                         </div>
@@ -294,16 +388,16 @@ export default function CommunityMemberDashboard() {
                                 {Number(currentStats?.produced_kwh ?? 0).toFixed(1)} <span className="text-xs font-normal">kWh</span>
                             </div>
                             <div className="text-[11px] text-amber-700/80 dark:text-amber-300/80 mt-0.5">
-                                Solarertrag aller Erzeuger im Pool
+                                {modelConfig.kpiPoolDesc}
                             </div>
                         </div>
                     </div>
 
-                    {/* Geteilter Strom (Sharing) */}
+                    {/* Geteilter / Zuteilungs-Strom */}
                     <div className="bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4 flex flex-col justify-between">
                         <div className="flex items-center justify-between">
                             <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 uppercase tracking-wider">
-                                Geteilter Strom
+                                {modelConfig.kpiSharedLabel}
                             </span>
                             <span className="text-lg">🤝</span>
                         </div>
@@ -312,16 +406,16 @@ export default function CommunityMemberDashboard() {
                                 {Number(currentStats?.shared_kwh ?? 0).toFixed(1)} <span className="text-xs font-normal">kWh</span>
                             </div>
                             <div className="text-[11px] text-emerald-700/80 dark:text-emerald-300/80 mt-0.5">
-                                Bilanziell im Netzgebiet geteilt
+                                {modelConfig.kpiSharedDesc}
                             </div>
                         </div>
                     </div>
 
-                    {/* Gemeinschaftsbedarf */}
+                    {/* Gesamtbedarf */}
                     <div className="bg-sky-500/5 dark:bg-sky-500/10 border border-sky-500/20 rounded-2xl p-4 flex flex-col justify-between">
                         <div className="flex items-center justify-between">
                             <span className="text-[11px] font-bold text-sky-700 dark:text-sky-300 uppercase tracking-wider">
-                                Gesamtbedarf
+                                {modelConfig.kpiConsumedLabel}
                             </span>
                             <span className="text-lg">🏠</span>
                         </div>
@@ -330,16 +424,16 @@ export default function CommunityMemberDashboard() {
                                 {Number(currentStats?.consumed_kwh ?? 0).toFixed(1)} <span className="text-xs font-normal">kWh</span>
                             </div>
                             <div className="text-[11px] text-sky-700/80 dark:text-sky-300/80 mt-0.5">
-                                Stromverbrauch aller Teilnehmer
+                                {modelConfig.kpiConsumedDesc}
                             </div>
                         </div>
                     </div>
 
-                    {/* Community Autarkiegrad */}
+                    {/* Autarkiegrad / Solar-Deckungsquote */}
                     <div className="bg-purple-500/5 dark:bg-purple-500/10 border border-purple-500/20 rounded-2xl p-4 flex flex-col justify-between">
                         <div className="flex items-center justify-between">
                             <span className="text-[11px] font-bold text-purple-700 dark:text-purple-300 uppercase tracking-wider">
-                                Autarkiegrad
+                                {modelConfig.kpiAutarkyLabel}
                             </span>
                             <span className="text-lg">🌱</span>
                         </div>
@@ -348,7 +442,7 @@ export default function CommunityMemberDashboard() {
                                 {Number(currentStats?.autarky_pct ?? 0).toFixed(0)} <span className="text-xs font-normal">%</span>
                             </div>
                             <div className="text-[11px] text-purple-700/80 dark:text-purple-300/80 mt-0.5">
-                                Deckung aus eigenem Pool
+                                {modelConfig.kpiAutarkyDesc}
                             </div>
                         </div>
                     </div>
@@ -404,7 +498,7 @@ export default function CommunityMemberDashboard() {
                             <span>👤</span> Mein persönlicher Beitrag & Nutzen
                         </h2>
                         <p className="text-xs text-slate-500 dark:text-slate-400">
-                            Deine Einspeise- und Verbrauchsdaten aus der 15-Minuten-Bilanzierung
+                            Deine Verbrauchs- und Abrechnungsdaten im {modelConfig.title}
                         </p>
                     </div>
 
@@ -418,18 +512,20 @@ export default function CommunityMemberDashboard() {
                                     : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                             }`}
                         >
-                            ⚡ Gesamtbilanz
+                            ⚡ Gesamtübersicht
                         </button>
-                        <button
-                            onClick={() => setMemberPerspective("prosumer")}
-                            className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
-                                memberPerspective === "prosumer"
-                                    ? "bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 shadow-xs font-bold"
-                                    : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
-                            }`}
-                        >
-                            ☀️ Prosumer (Einspeisung)
-                        </button>
+                        {isProsumer && (
+                            <button
+                                onClick={() => setMemberPerspective("prosumer")}
+                                className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
+                                    memberPerspective === "prosumer"
+                                        ? "bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 shadow-xs font-bold"
+                                        : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                                }`}
+                            >
+                                ☀️ Prosumer (Einspeisung)
+                            </button>
+                        )}
                         <button
                             onClick={() => setMemberPerspective("consumer")}
                             className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
@@ -438,16 +534,16 @@ export default function CommunityMemberDashboard() {
                                     : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                             }`}
                         >
-                            🔌 Consumer (Bezug)
+                            🔌 Verbraucher (Bezug)
                         </button>
                     </div>
                 </div>
 
-                {/* DYNAMISCHE KARTEN JE NACH PERSPEKTIVE */}
-                {(memberPerspective === "all" || memberPerspective === "prosumer") && (
+                {/* PROSUMER KARTEN (WENN ERLAUBT) */}
+                {isProsumer && (memberPerspective === "all" || memberPerspective === "prosumer") && (
                     <div className="space-y-2">
                         <div className="text-xs font-bold text-amber-700 dark:text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
-                            <span>☀️</span> Meine Prosumer-Einspeisung in die Community
+                            <span>☀️</span> Meine Prosumer-Einspeisung
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 border border-amber-500/20 rounded-2xl p-5">
@@ -458,19 +554,19 @@ export default function CommunityMemberDashboard() {
                                     {myTotalSharedExportKwh.toFixed(1)} <span className="text-sm font-normal">kWh</span>
                                 </div>
                                 <div className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-                                    Überschuss mit Nachbarn geteilt
+                                    Überschuss vor Ort bereitgestellt
                                 </div>
                             </div>
 
                             <div className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border border-emerald-500/20 rounded-2xl p-5">
                                 <div className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 uppercase">
-                                    Meine Sharing-Erlöse
+                                    Meine Erlöse
                                 </div>
                                 <div className="text-3xl font-black text-emerald-900 dark:text-emerald-100 mt-2">
                                     {myTotalExportCreditEur.toFixed(2)} <span className="text-sm font-normal">€</span>
                                 </div>
                                 <div className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">
-                                    Gutschrift aus Quartiers-Einspeisung
+                                    Gutschrift aus Vor-Ort-Einspeisung
                                 </div>
                             </div>
 
@@ -489,45 +585,46 @@ export default function CommunityMemberDashboard() {
                     </div>
                 )}
 
+                {/* CONSUMER KARTEN (MODELL-SPEZIFISCH) */}
                 {(memberPerspective === "all" || memberPerspective === "consumer") && (
                     <div className="space-y-2 pt-2">
                         <div className="text-xs font-bold text-indigo-700 dark:text-indigo-300 uppercase tracking-wider flex items-center gap-1.5">
-                            <span>🔌</span> Mein Consumer-Bezug aus der Community
+                            <span>🔌</span> {modelConfig.consumerSectionTitle}
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div className="bg-gradient-to-br from-indigo-500/10 to-indigo-600/5 border border-indigo-500/20 rounded-2xl p-5">
                                 <div className="text-[11px] font-bold text-indigo-700 dark:text-indigo-300 uppercase">
-                                    Mein Solar-Bezug
+                                    {modelConfig.consumerSolarLabel}
                                 </div>
                                 <div className="text-3xl font-black text-indigo-900 dark:text-indigo-100 mt-2">
                                     {myTotalSharedImportKwh.toFixed(1)} <span className="text-sm font-normal">kWh</span>
                                 </div>
                                 <div className="text-xs text-indigo-600 dark:text-indigo-400 mt-1">
-                                    Günstiger Ökostrom aus dem Verteilnetz
+                                    {modelConfig.consumerSolarDesc}
                                 </div>
                             </div>
 
                             <div className="bg-gradient-to-br from-cyan-500/10 to-cyan-600/5 border border-cyan-500/20 rounded-2xl p-5">
                                 <div className="text-[11px] font-bold text-cyan-700 dark:text-cyan-300 uppercase">
-                                    Meine Ersparnis
+                                    {modelConfig.consumerSavingsLabel}
                                 </div>
                                 <div className="text-3xl font-black text-cyan-900 dark:text-cyan-100 mt-2">
                                     ~{estimatedSavingsEur.toFixed(2)} <span className="text-sm font-normal">€</span>
                                 </div>
                                 <div className="text-xs text-cyan-600 dark:text-cyan-400 mt-1">
-                                    Ersparnis ggü. Netz-Grundversorger
+                                    {modelConfig.consumerSavingsDesc}
                                 </div>
                             </div>
 
                             <div className="bg-gradient-to-br from-slate-500/10 to-slate-600/5 border border-slate-500/20 rounded-2xl p-5">
                                 <div className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase">
-                                    Reststrom aus Netz
+                                    {modelConfig.consumerResidualLabel}
                                 </div>
                                 <div className="text-3xl font-black text-slate-900 dark:text-slate-100 mt-2">
                                     {myTotalGridResidualImportKwh.toFixed(1)} <span className="text-sm font-normal">kWh</span>
                                 </div>
                                 <div className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-                                    Über externen Lieferanten bezogen
+                                    {modelConfig.consumerResidualDesc}
                                 </div>
                             </div>
                         </div>
@@ -535,14 +632,14 @@ export default function CommunityMemberDashboard() {
                 )}
             </div>
 
-            {/* 4. SHARING-TARIF & MONATLICHE ABRECHNUNGSNACHWEISE (§ 42b EnWG) */}
+            {/* 4. MODELL-TARIF & MONATLICHE ABRECHNUNGSNACHWEISE */}
             <div className="space-y-4 pt-2">
                 <div>
                     <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                        <span>📄</span> Meine Abrechnungsnachweise & Tarifkonditionen
+                        <span>📄</span> {modelConfig.statementsTitle}
                     </h2>
                     <p className="text-xs text-slate-500 dark:text-slate-400">
-                        Monatliche Abrechnungsbelege zur internen Verrechnung und PDF-Nachweise
+                        {modelConfig.statementsDesc}
                     </p>
                 </div>
 
@@ -551,17 +648,17 @@ export default function CommunityMemberDashboard() {
                     <div className="bg-gradient-to-br from-slate-900 to-indigo-950 text-white rounded-2xl p-5 border border-indigo-800/40 shadow-sm">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
                             <div>
-                                <div className="text-xs text-indigo-300 font-semibold uppercase">Gültiger Sharing-Tarif</div>
+                                <div className="text-xs text-indigo-300 font-semibold uppercase">{modelConfig.tariffTitle}</div>
                                 <div className="text-lg font-black">{activeTariff.name}</div>
                             </div>
                             <span className="bg-emerald-400/20 text-emerald-300 text-xs font-bold px-3 py-1 rounded-full border border-emerald-400/30 self-start sm:self-auto">
-                                Aktiv nach § 42b EnWG
+                                {modelConfig.tariffLegalBadge}
                             </span>
                         </div>
 
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-3">
                             <div>
-                                <div className="text-[10px] text-indigo-300 uppercase">Bezugspreis Solar</div>
+                                <div className="text-[10px] text-indigo-300 uppercase">Solarstrom-Arbeitspreis</div>
                                 <div className="text-xl font-bold text-white mt-0.5">
                                     {Number(activeTariff?.sharing_price_ct_kwh ?? 0).toFixed(2)} <span className="text-xs font-normal">Ct/kWh</span>
                                 </div>
@@ -573,13 +670,13 @@ export default function CommunityMemberDashboard() {
                                 </div>
                             </div>
                             <div>
-                                <div className="text-[10px] text-indigo-300 uppercase">Community-Umlage</div>
+                                <div className="text-[10px] text-indigo-300 uppercase">Umlage / Aufschlag</div>
                                 <div className="text-xl font-bold text-amber-300 mt-0.5">
                                     {Number(activeTariff?.community_fee_ct_kwh ?? 0).toFixed(2)} <span className="text-xs font-normal">Ct/kWh</span>
                                 </div>
                             </div>
                             <div>
-                                <div className="text-[10px] text-indigo-300 uppercase">Ersparnis vs. Netz</div>
+                                <div className="text-[10px] text-indigo-300 uppercase">Ersparnis vs. Grundversorger</div>
                                 <div className="text-xl font-bold text-cyan-300 mt-0.5">
                                     ~20,00 <span className="text-xs font-normal">Ct/kWh</span>
                                 </div>
@@ -592,10 +689,10 @@ export default function CommunityMemberDashboard() {
                 <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-2xs space-y-3">
                     <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
                         <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                            Persönliche Monatsnachweise ({statements.length})
+                            Persönliche Nachweise ({statements.length})
                         </h3>
                         <span className="text-[11px] text-slate-400">
-                            Eichrechtskonform generiert
+                            Eichrechtskonform & revisionssicher
                         </span>
                     </div>
 
@@ -621,7 +718,7 @@ export default function CommunityMemberDashboard() {
                                         <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600 dark:text-slate-400 pt-1">
                                             {Number(stmt.shared_exported_kwh || 0) > 0 && (
                                                 <span className="text-amber-700 dark:text-amber-300">
-                                                    ☀️ Solar geteilt: <strong>{Number(stmt.shared_exported_kwh).toFixed(1)} kWh</strong>
+                                                    ☀️ Solar bereitgestellt: <strong>{Number(stmt.shared_exported_kwh).toFixed(1)} kWh</strong>
                                                 </span>
                                             )}
                                             {Number(stmt.shared_imported_kwh || 0) > 0 && (
@@ -631,7 +728,7 @@ export default function CommunityMemberDashboard() {
                                             )}
                                             {Number(stmt.grid_residual_import_kwh || 0) > 0 && (
                                                 <span>
-                                                    🏠 Netz bezogen: <strong>{Number(stmt.grid_residual_import_kwh).toFixed(1)} kWh</strong>
+                                                    🏠 Netzbezug: <strong>{Number(stmt.grid_residual_import_kwh).toFixed(1)} kWh</strong>
                                                 </span>
                                             )}
                                         </div>
