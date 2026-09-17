@@ -112,22 +112,22 @@ export default function VppCustomerParticipationCard() {
                     <div>
                         <div className="flex items-center gap-2">
                             <h3 className="text-base font-black text-slate-900 dark:text-white">
-                                Virtuelles Kraftwerk (VPP) Flexibilitäts-Bonus
+                                {t("vpp.title", "Virtuelles Kraftwerk (VPP) Flexibilitäts-Bonus")}
                             </h3>
                             {data.is_participating ? (
                                 <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
                                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                    VPP-Ready: Eingeschrieben (80 % Erlösauskehrung)
+                                    {t("vpp.status_enrolled", "VPP-Ready: Eingeschrieben (80 % Erlösauskehrung)")}
                                 </span>
                             ) : (
                                 <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
                                     <span>⚡</span>
-                                    Pilot-Pool Vorregistrierung
+                                    {t("vpp.status_pilot", "Pilot-Pool Vorregistrierung")}
                                 </span>
                             )}
                         </div>
                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                            Registriere deinen Heimspeicher kostenfrei für das Sharegy Virtuelle Kraftwerk und sichere dir deinen 80 % Erlösauskehrungs-Platz bei Netzstabilisierung & Börsenarbitrage.
+                            {t("vpp.desc", "Registriere deinen Heimspeicher kostenfrei für das Sharegy Virtuelle Kraftwerk und sichere dir deinen 80 % Erlösauskehrungs-Platz bei Netzstabilisierung & Börsenarbitrage.")}
                         </p>
                     </div>
                 </div>
@@ -142,7 +142,7 @@ export default function VppCustomerParticipationCard() {
                         className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 shrink-0"
                     >
                         <span>✨</span>
-                        <span>Speicher für VPP-Pool vorregistrieren</span>
+                        <span>{t("vpp.btn_preregister", "Speicher für VPP-Pool vorregistrieren")}</span>
                     </button>
                 )}
             </div>
@@ -152,20 +152,20 @@ export default function VppCustomerParticipationCard() {
                 <div className="p-5 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 space-y-4">
                     <div className="flex items-center justify-between">
                         <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                            Speicher für VPP-Regelenergie freischalten
+                            {t("vpp.modal_title", "Speicher für VPP-Regelenergie freischalten")}
                         </h4>
                         <button
                             onClick={() => setIsOptingIn(false)}
                             className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                         >
-                            ✕ Abbrechen
+                            {t("vpp.cancel", "✕ Abbrechen")}
                         </button>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
-                                Batteriespeicher auswählen
+                                {t("vpp.select_battery", "Batteriespeicher auswählen")}
                             </label>
                             <select
                                 value={selectedDevice}
@@ -175,18 +175,18 @@ export default function VppCustomerParticipationCard() {
                                 {batteryDevices.length > 0 ? (
                                     batteryDevices.map((d) => (
                                         <option key={d.id} value={d.id}>
-                                            {d.name || `Speicher #${d.id}`}
+                                            {d.name || t("vpp.storage_fallback_name", { id: d.id, defaultValue: `Speicher #${d.id}` })}
                                         </option>
                                     ))
                                 ) : (
-                                    <option value="">Kein Heimspeicher gefunden</option>
+                                    <option value="">{t("vpp.no_battery_found", "Kein Heimspeicher gefunden")}</option>
                                 )}
                             </select>
                         </div>
 
                         <div>
                             <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
-                                Haus-Reserve SoC: <span className="text-emerald-600 font-extrabold">{reserveSoc} %</span>
+                                {t("vpp.home_reserve_soc", "Haus-Reserve SoC:")} <span className="text-emerald-600 font-extrabold">{reserveSoc} %</span>
                             </label>
                             <input
                                 type="range"
@@ -198,7 +198,7 @@ export default function VppCustomerParticipationCard() {
                                 className="w-full accent-emerald-600 cursor-pointer mt-2"
                             />
                             <p className="text-[10px] text-slate-400 mt-1">
-                                Dieser Ladestand bleibt garantiert immer für deinen Eigenverbrauch geschützt.
+                                {t("vpp.reserve_soc_hint", "Dieser Ladestand bleibt garantiert immer für deinen Eigenverbrauch geschützt.")}
                             </p>
                         </div>
 
@@ -210,7 +210,7 @@ export default function VppCustomerParticipationCard() {
                                     onChange={(e) => setAutoSpot(e.target.checked)}
                                     className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
                                 />
-                                <span>Börsenpreis-Arbitrage (Preistiefststände)</span>
+                                <span>{t("vpp.arbitrage_spot", "Börsenpreis-Arbitrage (Preistiefststände)")}</span>
                             </label>
                             <label className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300 cursor-pointer">
                                 <input
@@ -219,21 +219,21 @@ export default function VppCustomerParticipationCard() {
                                     onChange={(e) => setAutoAfrr(e.target.checked)}
                                     className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
                                 />
-                                <span>Sekundärregelleistung (aFRR Frequenz)</span>
+                                <span>{t("vpp.secondary_reserve_afrr", "Sekundärregelleistung (aFRR Frequenz)")}</span>
                             </label>
                         </div>
                     </div>
 
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-2">
                         <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                            🛡️ <strong>Rechtlicher Hinweis:</strong> Dein Speicher wird kostenfrei für das VPP-Pilotprogramm registriert. Die automatische Erlösauszahlung startet mit Aktivierung des regionalen Aggregator-Pools. Bis dahin sparst du sofort durch PV-Überschuss & § 14a Netzentgeltpauschale.
+                            🛡️ <strong>{t("vpp.legal_notice_title", "Rechtlicher Hinweis:")}</strong> {t("vpp.legal_notice_text", "Dein Speicher wird kostenfrei für das VPP-Pilotprogramm registriert. Die automatische Erlösauszahlung startet mit Aktivierung des regionalen Aggregator-Pools. Bis dahin sparst du sofort durch PV-Überschuss & § 14a Netzentgeltpauschale.")}
                         </p>
                         <button
                             onClick={() => enrollMutation.mutate()}
                             disabled={enrollMutation.isPending || !selectedDevice}
                             className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-xs transition-all disabled:opacity-50 shrink-0"
                         >
-                            {enrollMutation.isPending ? "Wird registriert..." : "Kostenfrei vorregistrieren"}
+                            {enrollMutation.isPending ? t("vpp.btn_registering", "Wird registriert...") : t("vpp.btn_preregister_free", "Kostenfrei vorregistrieren")}
                         </button>
                     </div>
                 </div>
@@ -243,7 +243,7 @@ export default function VppCustomerParticipationCard() {
             <div className="p-5 grid grid-cols-2 lg:grid-cols-4 gap-4 bg-slate-50/50 dark:bg-slate-900/40">
                 <div className="bg-white dark:bg-slate-800/80 p-4 rounded-xl border border-slate-200/80 dark:border-slate-700/80 shadow-2xs">
                     <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
-                        Bisherige Erlöse
+                        {t("vpp.kpi_earnings", "Bisherige Erlöse")}
                     </span>
                     <div className="flex items-baseline gap-1 mt-1">
                         <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
@@ -252,13 +252,13 @@ export default function VppCustomerParticipationCard() {
                         <span className="text-xs font-bold text-slate-400">€</span>
                     </div>
                     <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold block mt-0.5">
-                        ✓ 80 % Erlösauskehrung
+                        {t("vpp.kpi_payout_share", "✓ 80 % Erlösauskehrung")}
                     </span>
                 </div>
 
                 <div className="bg-white dark:bg-slate-800/80 p-4 rounded-xl border border-slate-200/80 dark:border-slate-700/80 shadow-2xs">
                     <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
-                        Potenzial / Jahr (Prognose)
+                        {t("vpp.kpi_potential_year", "Potenzial / Jahr (Prognose)")}
                     </span>
                     <div className="flex items-baseline gap-1 mt-1">
                         <span className="text-2xl font-black text-slate-900 dark:text-white">
@@ -267,37 +267,39 @@ export default function VppCustomerParticipationCard() {
                         <span className="text-xs font-bold text-slate-400">€/a</span>
                     </div>
                     <span className="text-[10px] text-slate-400 font-medium block mt-0.5">
-                        Basierend auf aFRR-Marktpreisen
+                        {t("vpp.kpi_potential_sub", "Basierend auf aFRR-Marktpreisen")}
                     </span>
                 </div>
 
                 <div className="bg-white dark:bg-slate-800/80 p-4 rounded-xl border border-slate-200/80 dark:border-slate-700/80 shadow-2xs">
                     <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
-                        Erfolgreiche Abrufe
+                        {t("vpp.kpi_dispatches", "Erfolgreiche Abrufe")}
                     </span>
                     <div className="flex items-baseline gap-1 mt-1">
                         <span className="text-2xl font-black text-slate-900 dark:text-white">
                             {data.total_dispatches_count}
                         </span>
-                        <span className="text-xs font-bold text-slate-400">Events</span>
+                        <span className="text-xs font-bold text-slate-400">{t("vpp.kpi_events", "Events")}</span>
                     </div>
                     <span className="text-[10px] text-slate-400 font-medium block mt-0.5">
-                        Sekundärregelleistung & Arbitrage
+                        {t("vpp.kpi_dispatches_sub", "Sekundärregelleistung & Arbitrage")}
                     </span>
                 </div>
 
                 <div className="bg-white dark:bg-slate-800/80 p-4 rounded-xl border border-slate-200/80 dark:border-slate-700/80 shadow-2xs">
                     <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
-                        Eingeschriebene Geräte
+                        {t("vpp.kpi_devices", "Eingeschriebene Geräte")}
                     </span>
                     <div className="flex items-baseline gap-1 mt-1">
                         <span className="text-2xl font-black text-slate-900 dark:text-white">
                             {data.active_devices_count}
                         </span>
-                        <span className="text-xs font-bold text-slate-400">von {data.enrolled_devices_count}</span>
+                        <span className="text-xs font-bold text-slate-400">
+                            {t("vpp.kpi_devices_of", { total: data.enrolled_devices_count, defaultValue: `von ${data.enrolled_devices_count}` })}
+                        </span>
                     </div>
                     <span className="text-[10px] text-emerald-600 font-semibold block mt-0.5">
-                        🌱 {data.co2_saved_kg} kg CO₂ vermieden
+                        {t("vpp.kpi_co2_saved", { amount: data.co2_saved_kg, defaultValue: `🌱 ${data.co2_saved_kg} kg CO₂ vermieden` })}
                     </span>
                 </div>
             </div>
@@ -314,7 +316,7 @@ export default function VppCustomerParticipationCard() {
                                     : "border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
                             }`}
                         >
-                            Meine VPP-Assets ({data.enrollments.length})
+                            {t("vpp.tab_assets", { count: data.enrollments.length, defaultValue: `Meine VPP-Assets (${data.enrollments.length})` })}
                         </button>
                         <button
                             onClick={() => setActiveTab("dispatches")}
@@ -324,7 +326,7 @@ export default function VppCustomerParticipationCard() {
                                     : "border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
                             }`}
                         >
-                            Letzte Abrufe & Vergütung
+                            {t("vpp.tab_dispatches", "Letzte Abrufe & Vergütung")}
                         </button>
                         <button
                             onClick={() => setActiveTab("statements")}
@@ -334,7 +336,7 @@ export default function VppCustomerParticipationCard() {
                                     : "border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
                             }`}
                         >
-                            Monatliche Abrechnungen ({data.statements.length})
+                            {t("vpp.tab_statements", { count: data.statements.length, defaultValue: `Monatliche Abrechnungen (${data.statements.length})` })}
                         </button>
                     </div>
 
@@ -357,11 +359,11 @@ export default function VppCustomerParticipationCard() {
                                                         ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
                                                         : "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
                                                 }`}>
-                                                    {e.status === "active" ? "Bereit für Regelenergie" : "Pausiert"}
+                                                    {e.status === "active" ? t("vpp.status_ready", "Bereit für Regelenergie") : t("vpp.status_paused", "Pausiert")}
                                                 </span>
                                             </div>
                                             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                                Pool: <strong className="text-slate-700 dark:text-slate-300">{e.pool_name}</strong> | Mindest-Reserve: <strong className="text-emerald-600">{e.min_soc_reserve_pct} %</strong> | Erlös-Split: <strong className="text-slate-700 dark:text-slate-300">{e.payout_share_pct} %</strong>
+                                                {t("vpp.pool_label", "Pool:")} <strong className="text-slate-700 dark:text-slate-300">{e.pool_name}</strong> | {t("vpp.min_reserve_label", "Mindest-Reserve:")} <strong className="text-emerald-600">{e.min_soc_reserve_pct} %</strong> | {t("vpp.payout_split_label", "Erlös-Split:")} <strong className="text-slate-700 dark:text-slate-300">{e.payout_share_pct} %</strong>
                                             </p>
                                         </div>
 
@@ -374,14 +376,14 @@ export default function VppCustomerParticipationCard() {
                                                     onClick={() => updateStatusMutation.mutate({ enrollmentId: e.id, status: "paused" })}
                                                     className="px-3 py-1.5 text-xs font-semibold bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-600 transition-all"
                                                 >
-                                                    Pausieren
+                                                    {t("vpp.btn_pause", "Pausieren")}
                                                 </button>
                                             ) : (
                                                 <button
                                                     onClick={() => updateStatusMutation.mutate({ enrollmentId: e.id, status: "active" })}
                                                     className="px-3 py-1.5 text-xs font-semibold bg-emerald-600 text-white rounded-lg hover:bg-emerald-500 transition-all"
                                                 >
-                                                    Aktivieren
+                                                    {t("vpp.btn_activate", "Aktivieren")}
                                                 </button>
                                             )}
                                         </div>
@@ -396,12 +398,12 @@ export default function VppCustomerParticipationCard() {
                                 <table className="w-full text-left text-xs">
                                     <thead>
                                         <tr className="border-b border-slate-200 dark:border-slate-700 text-slate-400 uppercase text-[10px] font-bold">
-                                            <th className="pb-2">Zeitpunkt</th>
-                                            <th className="pb-2">Gerät</th>
-                                            <th className="pb-2">Abruf-Typ</th>
-                                            <th className="pb-2">Leistung</th>
-                                            <th className="pb-2">Energie</th>
-                                            <th className="pb-2 text-right">Vergütung (80%)</th>
+                                            <th className="pb-2">{t("vpp.th_time", "Zeitpunkt")}</th>
+                                            <th className="pb-2">{t("vpp.th_device", "Gerät")}</th>
+                                            <th className="pb-2">{t("vpp.th_dispatch_type", "Abruf-Typ")}</th>
+                                            <th className="pb-2">{t("vpp.th_power", "Leistung")}</th>
+                                            <th className="pb-2">{t("vpp.th_energy", "Energie")}</th>
+                                            <th className="pb-2 text-right">{t("vpp.th_payout", "Vergütung (80%)")}</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -436,7 +438,7 @@ export default function VppCustomerParticipationCard() {
                                         ) : (
                                             <tr>
                                                 <td colSpan="6" className="py-4 text-center text-slate-400">
-                                                    Noch keine Abrufe für diesen Speicher verzeichnet.
+                                                    {t("vpp.no_dispatches", "Noch keine Abrufe für diesen Speicher verzeichnet.")}
                                                 </td>
                                             </tr>
                                         )}
@@ -456,10 +458,10 @@ export default function VppCustomerParticipationCard() {
                                         >
                                             <div>
                                                 <span className="text-xs font-bold text-slate-900 dark:text-white block">
-                                                    Abrechnung {s.period}
+                                                    {t("vpp.statement_title", { period: s.period, defaultValue: `Abrechnung ${s.period}` })}
                                                 </span>
                                                 <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
-                                                    Ref: {s.payment_reference} • {s.dispatches_count} Events • {s.total_energy_kwh.toFixed(2)} kWh
+                                                    {t("vpp.statement_details", { ref: s.payment_reference, dispatches: s.dispatches_count, energy: s.total_energy_kwh.toFixed(2), defaultValue: `Ref: ${s.payment_reference} • ${s.dispatches_count} Events • ${s.total_energy_kwh.toFixed(2)} kWh` })}
                                                 </span>
                                             </div>
                                             <div className="text-right">
@@ -474,7 +476,7 @@ export default function VppCustomerParticipationCard() {
                                     ))
                                 ) : (
                                     <p className="text-xs text-slate-400 text-center py-4">
-                                        Die erste Monatsabrechnung wird zum Monatsende automatisch generiert.
+                                        {t("vpp.statements_empty", "Die erste Monatsabrechnung wird zum Monatsende automatisch generiert.")}
                                     </p>
                                 )}
                             </div>

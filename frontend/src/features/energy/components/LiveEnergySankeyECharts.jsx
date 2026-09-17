@@ -4,6 +4,7 @@
 
 import ReactECharts from "echarts-for-react";
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useTheme } from "../../../theme/ThemeContext";
 
 function getNodeColor(node) {
@@ -40,7 +41,42 @@ function getNodeColor(node) {
 }
 
 export default function LiveEnergySankeyECharts({ data }) {
+    const { t } = useTranslation();
     const { isDark } = useTheme();
+
+    const getLocalizedLabel = (nodeId, defaultLabel) => {
+        switch (nodeId) {
+            case "pv":
+                return t("energy.pv_label", "PV");
+            case "battery":
+                return t("energy.battery_label", "Batterie");
+            case "battery_charge":
+                return t("energy.battery_charge_label", "Batterieladung");
+            case "grid":
+                return t("energy.grid_label", "Netz");
+            case "grid_export":
+                return t("energy.grid_export_label", "Netzeinspeisung");
+            case "sum":
+            case "house":
+                return t("energy.house_label", "Haus");
+            case "untracked":
+                return t("energy.untracked_label", "Nicht erfasst");
+            default:
+                if (defaultLabel === "Nicht erfasst") {
+                    return t("energy.untracked_label", "Nicht erfasst");
+                }
+                if (defaultLabel === "Batterie") {
+                    return t("energy.battery_label", "Batterie");
+                }
+                if (defaultLabel === "Netz") {
+                    return t("energy.grid_label", "Netz");
+                }
+                if (defaultLabel === "Haus") {
+                    return t("energy.house_label", "Haus");
+                }
+                return defaultLabel || nodeId;
+        }
+    };
 
     const option = useMemo(() => {
         if (!data || !Array.isArray(data.nodes) || !Array.isArray(data.links)) {
@@ -118,6 +154,8 @@ export default function LiveEnergySankeyECharts({ data }) {
             return null;
         }
 
+        const flowTitle = t("energy.sankey_flow", "Energiefluss");
+
         return {
             animation: false,
             tooltip: {
@@ -135,16 +173,16 @@ export default function LiveEnergySankeyECharts({ data }) {
                     if (params.dataType === "edge") {
                         const srcNode = validNodeMap.get(String(params.data.source));
                         const tgtNode = validNodeMap.get(String(params.data.target));
-                        const srcLabel = srcNode ? srcNode.label : params.data.source;
-                        const tgtLabel = tgtNode ? tgtNode.label : params.data.target;
+                        const srcLabel = getLocalizedLabel(String(params.data.source), srcNode ? srcNode.label : params.data.source);
+                        const tgtLabel = getLocalizedLabel(String(params.data.target), tgtNode ? tgtNode.label : params.data.target);
                         const val = Number(params.data.value) || 0;
                         const valStr = val >= 1000
                             ? `${(val / 1000).toFixed(2)} kW`
                             : `${val.toFixed(0)} W`;
-                        return `<div style="font-weight:600;margin-bottom:2px;">Energiefluss</div><div>${srcLabel} ➔ ${tgtLabel}: <b style="color:${isDark ? '#38bdf8' : '#0284c7'}">${valStr}</b></div>`;
+                        return `<div style="font-weight:600;margin-bottom:2px;">${flowTitle}</div><div>${srcLabel} ➔ ${tgtLabel}: <b style="color:${isDark ? '#38bdf8' : '#0284c7'}">${valStr}</b></div>`;
                     }
                     const node = validNodeMap.get(String(params.name));
-                    const label = node ? node.label : params.name;
+                    const label = getLocalizedLabel(String(params.name), node ? node.label : params.name);
                     const val = Number(params.value) || 0;
                     const valStr = val >= 1000
                         ? `${(val / 1000).toFixed(2)} kW`
@@ -190,7 +228,7 @@ export default function LiveEnergySankeyECharts({ data }) {
                         formatter: (params) => {
                             if (!params) return "";
                             const node = validNodeMap.get(String(params.name));
-                            const label = node ? node.label : params.name;
+                            const label = getLocalizedLabel(String(params.name), node ? node.label : params.name);
                             const value = Number(params.value) || 0;
 
                             return value >= 1000
@@ -201,18 +239,18 @@ export default function LiveEnergySankeyECharts({ data }) {
                 },
             ],
         };
-    }, [data, isDark]);
+    }, [data, isDark, t]);
 
     if (!data || !Array.isArray(data.nodes) || !Array.isArray(data.links)) {
-        return <div className="text-slate-500 dark:text-slate-400 text-sm p-4 text-center">Keine Energiedaten vorhanden</div>;
+        return <div className="text-slate-500 dark:text-slate-400 text-sm p-4 text-center">{t("energy.no_data", "Keine Energiedaten vorhanden")}</div>;
     }
 
     if (data.nodes.length === 0 || data.links.length === 0) {
-        return <div className="text-slate-500 dark:text-slate-400 text-sm p-4 text-center">Warten auf Live-Daten…</div>;
+        return <div className="text-slate-500 dark:text-slate-400 text-sm p-4 text-center">{t("energy.waiting_for_live_data", "Warten auf Live-Daten…")}</div>;
     }
 
     if (!option) {
-        return <div className="text-slate-500 dark:text-slate-400 p-8 text-center text-sm">Keine aktiven Energieflüsse im Moment</div>;
+        return <div className="text-slate-500 dark:text-slate-400 p-8 text-center text-sm">{t("energy.no_active_flows", "Keine aktiven Energieflüsse im Moment")}</div>;
     }
 
     return (
@@ -229,5 +267,6 @@ export default function LiveEnergySankeyECharts({ data }) {
         </div>
     );
 }
+
 
 
