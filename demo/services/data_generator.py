@@ -73,48 +73,70 @@ def setup_demo_household(target_user=None):
     )
 
     # 1. Altes Home und alte Mappings sauber bereinigen (inkl. TimescaleDB Metrik-Tabellen)
-    from django.db import connection
     old_home_ids = list(target_user.homes.values_list("id", flat=True))
-    old_device_ids = list(Device.objects.filter(home_id__in=old_home_ids).values_list("id", flat=True))
+    old_devices_qs = Device.objects.filter(home_id__in=old_home_ids)
+    old_device_ids = list(old_devices_qs.values_list("id", flat=True))
 
     if old_device_ids or old_home_ids:
-        with connection.cursor() as cursor:
-            # A. TimescaleDB Metrik-Hypertables und Detail-Messwerte löschen
-            for tbl in [
-                "devices_devicemetric",
-                "devices_devicemetric1m",
-                "devices_devicemetric5m",
-                "devices_devicemetric15m",
-                "devices_devicemetric1h",
-                "devices_devicelatestmetric",
-                "devices_deviceconfig",
-                "devices_clouddeviceintegration",
-                "demo_demodevicemap",
-                "demo_demodevicesimulation",
-            ]:
-                try:
-                    if old_device_ids:
-                        cursor.execute(f"DELETE FROM {tbl} WHERE device_id = ANY(%s);", [old_device_ids])
-                except Exception:
-                    pass
-
-            # B. Erzeuger-, Speicher-, Wallbox- & Alarm-Verknüpfungen
+        # A. TimescaleDB Metrik-Hypertables und Detail-Messwerte über ORM löschen
+        from devices.models import (
+            DeviceMetric,
+            DeviceMetric1m,
+            DeviceMetric5m,
+            DeviceMetric15m,
+            DeviceMetric1h,
+            DeviceLatestMetric,
+            DeviceConfig,
+            CloudDeviceIntegration,
+            ChargingStation,
+        )
+        for model_cls in [
+            DeviceMetric,
+            DeviceMetric1m,
+            DeviceMetric5m,
+            DeviceMetric15m,
+            DeviceMetric1h,
+            DeviceLatestMetric,
+            DeviceConfig,
+            CloudDeviceIntegration,
+        ]:
             try:
-                if old_home_ids:
-                    cursor.execute("DELETE FROM producer_generatorstring WHERE generator_id IN (SELECT id FROM producer_generatorsystem WHERE home_id = ANY(%s));", [old_home_ids])
-                    cursor.execute("DELETE FROM producer_generatorsystem WHERE home_id = ANY(%s);", [old_home_ids])
-                    cursor.execute("DELETE FROM producer_storagesystem WHERE home_id = ANY(%s);", [old_home_ids])
-                    cursor.execute("DELETE FROM devices_chargingstation WHERE home_id = ANY(%s);", [old_home_ids])
-                    cursor.execute("DELETE FROM alerts_alertevent WHERE home_id = ANY(%s);", [old_home_ids])
+                model_cls.objects.filter(device_id__in=old_device_ids).delete()
             except Exception:
                 pass
 
-            # C. Geräte direkt löschen
-            try:
-                if old_device_ids:
-                    cursor.execute("DELETE FROM devices_device WHERE id = ANY(%s);", [old_device_ids])
-            except Exception:
-                pass
+        # B. Erzeuger-, Speicher-, Wallbox- & Alarm-Verknüpfungen
+        try:
+            from producer.models import GeneratorString, GeneratorSystem, StorageSystem
+            GeneratorString.objects.filter(generator__home_id__in=old_home_ids).delete()
+            GeneratorSystem.objects.filter(home_id__in=old_home_ids).delete()
+            StorageSystem.objects.filter(home_id__in=old_home_ids).delete()
+        except Exception:
+            pass
+
+        try:
+            ChargingStation.objects.filter(home_id__in=old_home_ids).delete()
+        except Exception:
+            pass
+
+        try:
+            from alerts.models import AlertEvent
+            AlertEvent.objects.filter(home_id__in=old_home_ids).delete()
+        except Exception:
+            pass
+
+        # C. Simulations & Device Mappings
+        try:
+            DemoDeviceMap.objects.filter(device_id__in=old_device_ids).delete()
+            DemoDeviceSimulation.objects.filter(device_id__in=old_device_ids).delete()
+        except Exception:
+            pass
+
+        # D. Geräte direkt löschen
+        try:
+            old_devices_qs.delete()
+        except Exception:
+            pass
 
     target_user.homes.all().delete()
     DemoDeviceMap.objects.all().delete()
