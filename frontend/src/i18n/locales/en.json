@@ -136,8 +136,10 @@
     "support": "Help & Support",
     "manual": "Manual",
     "mode_ems": "Private EMS",
-    "mode_sharing": "Community & Tenant Power",
-    "mode_hybrid": "EMS & Community Hub",
+    "mode_mieterstrom": "Tenant Electricity (§ 42a EnWG)",
+    "mode_ggv": "Building Energy Supply (GGV § 42b EnWG)",
+    "mode_sharing": "Energy Sharing (Community)",
+    "mode_hybrid": "EMS & Sharing Hub",
     "mode_partner": "Partner Cockpit",
     "mode_admin": "Admin Center"
   },

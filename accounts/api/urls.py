@@ -17,7 +17,15 @@ from .views import AuditLogView
 from .views import RequestMagicLinkView, MagicLoginView, MagicLinkStatsView, LiveLoginsView, TenantStatsView
 
 from .views import DashboardStatsView
-from .views import DemoLoginView, DemoSharingAdminLoginView, DemoSharingUserLoginView
+from .views import (
+    DemoLoginView,
+    DemoSharingAdminLoginView,
+    DemoSharingUserLoginView,
+    DemoMieterstromAdminLoginView,
+    DemoMieterstromUserLoginView,
+    DemoGGVAdminLoginView,
+    DemoGGVUserLoginView,
+)
 ##from .views import TrackEventView
 from rest_framework_simplejwt.views import TokenRefreshView
 
@@ -111,6 +119,10 @@ urlpatterns += [
     path("demo/", DemoLoginView.as_view(), name="demo-login"),
     path("demo/sharing-admin/", DemoSharingAdminLoginView.as_view(), name="demo-sharing-admin"),
     path("demo/sharing-user/", DemoSharingUserLoginView.as_view(), name="demo-sharing-user"),
+    path("demo/mieterstrom-admin/", DemoMieterstromAdminLoginView.as_view(), name="demo-mieterstrom-admin"),
+    path("demo/mieterstrom-user/", DemoMieterstromUserLoginView.as_view(), name="demo-mieterstrom-user"),
+    path("demo/ggv-admin/", DemoGGVAdminLoginView.as_view(), name="demo-ggv-admin"),
+    path("demo/ggv-user/", DemoGGVUserLoginView.as_view(), name="demo-ggv-user"),
     path("demo/admin/", DemoSharingAdminLoginView.as_view(), name="demo-admin"),
     path("demo/community/", DemoSharingUserLoginView.as_view(), name="demo-community"),
     path("demo/user/", DemoSharingUserLoginView.as_view(), name="demo-user"),
