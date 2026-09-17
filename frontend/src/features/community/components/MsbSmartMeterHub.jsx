@@ -300,7 +300,7 @@ export default function MsbSmartMeterHub({ tenant }) {
                             className="w-full py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5"
                         >
                             <span>➕</span>
-                            <span>{t("msb.btn_connect_submeter", "➕ MID-Submeter anbinden")}</span>
+                            <span>{t("msb.btn_connect_submeter", "MID-Submeter anbinden")}</span>
                         </a>
                     </div>
                 </div>
