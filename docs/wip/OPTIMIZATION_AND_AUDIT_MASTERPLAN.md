@@ -52,10 +52,6 @@ Jedes anstehende Feature wird in einer eigenständigen Spezifikation im Ordner `
 
 6. 🌐 **[`WIP_SMARTEVO_WEBSITE_PRODUCT_INTEGRATION.md`](./WIP_SMARTEVO_WEBSITE_PRODUCT_INTEGRATION.md)**
    * **Ziel**: Nahtlose Integration von Sharegy und Factofy in das smartEvo.de Design-System (Cyan/Petrol Look), Bereinigung obsoleter Sektionen und Ausbau der Dachmarken-Architektur.
-   * **Status & Prio**: 🟢 **100 % Live** | 🔴 Hoch (Abgeschlossen & Live auf smartevo.de)
-
-
-
-
-
-
+7. 🛡️ **[`CLOUDFLARE_INFRASTRUCTURE_AND_EDGE_SECURITY.md`](../operations/CLOUDFLARE_INFRASTRUCTURE_AND_EDGE_SECURITY.md)**
+   * **Ziel**: Vollständiges Cloudflare Edge-Security & Hardening Runbook für alle 5 Domains (`smartevo.de`, `sharegy.de`, `factofy.de`, `valofy.de`, `moniy.de`) inkl. DNSSEC, HSTS, Rate Limiting, HTTP/3, Brotli und Security-Header.
+   * **Status & Prio**: 🟢 **100 % Dokumentiert & Bereit** | 🔴 Hoch (Security & GTM Standard)

@@ -1,98 +1,180 @@
-# 🛡️ Cloudflare Infrastruktur, Edge-Caching & DNS-Setup
+# 🛡️ Cloudflare Multi-Domain Setup & Hardening Runbook
 
-**Status:** 🟢 100 % Abgeschlossen & Live  
-**Live-Schaltung:** 13. September 2026  
-**Zonen:** `sharegy.de` (Free Tier Anycast Edge), `smartevo.de` (Pro Plan)  
-**Lead / Modul:** `infra`, `security`, `operations`  
+**Gültig für alle Domains:** `smartevo.de` (Pro), `sharegy.de`, `factofy.de`, `valofy.de`, `moniy.de`  
+**Letzte Aktualisierung:** 17. September 2026  
+**Status:** 🟢 Produktiv-Standard (BSI / RFC 9116 / M365 Enterprise)
 
 ---
 
-## 🎯 1. Übersicht & Architektur
+## 🧭 Inhaltsverzeichnis & Schnell-Checkliste
 
-Die gesamte Web-, API- und Frontend-Infrastruktur von **Sharegy** (`sharegy.de`) wird über das globale Anycast-Netzwerk von Cloudflare betrieben. Dies entlastet das Backend um ~95 %, schützt vor DDoS- und Bot-Angriffen und liefert Frontend-Assets mit sub-10ms Latenz in der gesamten DACH-Region aus.
+1. [DNS & Domain-Sicherheit (DNSSEC, SPF, DKIM, DMARC, CAA)](#1-dns--domain-sicherheit)
+2. [SSL/TLS & Verschlüsselung (Full Strict, HSTS, TLS 1.3)](#2-ssltls--verschl%C3%BCsselung)
+3. [Performance & Speed (HTTP/3, 0-RTT, Brotli, Early Hints)](#3-performance--speed)
+4. [WAF, Bot-Schutz & Rate Limiting](#4-waf-bot-schutz--rate-limiting)
+5. [Transform Rules: Automatische Security-Header](#5-transform-rules-automatische-security-header)
+6. [Caching & Edge Rules (Statische Assets vs. APIs)](#6-caching--edge-rules)
+7. [Domain-spezifische Matrix](#7-domain-spezifische-matrix)
 
+---
+
+## 1. DNS & Domain-Sicherheit
+
+### A. DNSSEC (Kryptografische Signatur der DNS-Zone)
+* **Pfad im Dashboard:** `DNS` ➔ `Settings` ➔ **DNSSEC aktivieren**
+* **Aktion:** Klicke auf *Enable DNSSEC*. Cloudflare generiert den **DS-Record** (Key Tag, Algorithm, Digest).
+* **Registrar:** Trage diesen DS-Record bei deinem Domain-Registrar (z.B. INWX, Hetzner, Strato, Cloudflare Registrar) ein.
+* **Nutzen:** Schützt vor DNS-Hijacking und gefälschten IP-Umleitungen.
+
+---
+
+### B. E-Mail-Authentifizierung (Microsoft 365 Standard)
+
+Für jede Domain, die über Microsoft 365 sendet/empfängt:
+
+```dns
+# 1. SPF (TXT auf Apex @):
+v=spf1 include:spf.protection.outlook.com -all
+
+# 2. DMARC (TXT auf _dmarc):
+v=DMARC1; p=reject; sp=reject; adkim=s; aspf=s; rua=mailto:c475189356a54d618a3c8ca0d9d108bc@dmarc-reports.cloudflare.net
+
+# 3. DKIM (2x CNAME auf selector1._domainkey und selector2._domainkey):
+selector1._domainkey  CNAME  selector1-<domain-prefix>._domainkey.<tenant>.onmicrosoft.com
+selector2._domainkey  CNAME  selector2-<domain-prefix>._domainkey.<tenant>.onmicrosoft.com
+
+# 4. MX Record:
+@  MX  <domain-prefix>.mail.protection.outlook.com (Priorität 0 oder 10)
 ```
-[Endnutzer / Mobile App / Partner]
-                │
-                ▼ (HTTPS / HTTP3 / TLS 1.3)
-┌─────────────────────────────────────────────────────────────┐
-│                   CLOUDFLARE ANYCAST EDGE                   │
-├─────────────────────────────────────────────────────────────┤
-│ 1. Universal SSL (Full Strict)                              │
-│ 2. Always Use HTTPS & Automatic HTTPS Rewrites              │
-│ 3. 3x Aktive Edge Cache Rules:                              │
-│    • /assets/*  ➔ Cache Everything (1 Monat Edge & Browser) │
-│    • /api/*     ➔ Bypass Cache                              │
-│    • /ws/*      ➔ Bypass Cache & WebSocket Stream           │
-└──────────────────────────────┬──────────────────────────────┘
-                               │
-            ┌──────────────────┴──────────────────┐
-            ▼ (HTTPS Proxy)                       ▼ (Reine DNS-Auflösung)
-┌──────────────────────────────────────┐  ┌───────────────────────────────────┐
-│        Sharegy Web & API             │  │         Direkte Services          │
-│ • IP: 172.160.240.172                │  │ • mail.sharegy.de (IMAP/SMTP)     │
-│ • sharegy.de, api.sharegy.de         │  │ • mqtt.sharegy.de (MQTTS Port 8883)│
-│ • Nginx Reverse Proxy + Gunicorn     │  │ • cpanel, ftp, webmail (Nur DNS)  │
-└──────────────────────────────────────┘  └───────────────────────────────────┘
-```
 
 ---
 
-## 📋 2. DNS-Konfigurationstabelle (`sharegy.de`)
+### C. CAA Records (Certification Authority Authorization)
+Verhindert, dass unbefugte Dritte SSL-Zertifikate für eure Domains ausstellen lassen.
 
-| Hostname | Typ | Ziel / Wert | Proxy-Status | Zweck |
-|---|:---:|---|:---:|---|
-| **`sharegy.de`** | `A` | `172.160.240.172` | 🟠 **Mit Proxy** | Haupt-Frontend & Webanwendung |
-| **`api.sharegy.de`** | `A` | `172.160.240.172` | 🟠 **Mit Proxy** | Django REST API Endpunkte |
-| **`www.sharegy.de`** | `CNAME` | `sharegy.de` | 🟠 **Mit Proxy** | Web-Weiterleitung auf Apex |
-| **`demo.sharegy.de`** | `CNAME` | `sharegy.de` | 🟠 **Mit Proxy** | Demo-Portal (Weiterleitung auf `/demo`) |
-| **`mqtt.sharegy.de`** | `A` | `172.160.240.172` | 🔘 **Nur DNS** | **MQTTS Broker** (Port 8883 / TLS für Gateways & Sensoren) |
-| **`mail.sharegy.de`** | `A` | `192.250.229.161` | 🔘 **Nur DNS** | Mailserver (IMAP 993, SMTP 465/587) |
-| **`ftp.sharegy.de`** | `CNAME` | `sharegy.de` | 🔘 **Nur DNS** | FTP-Zugang (Port 21) |
-| **`cpanel`, `whm`, `webmail`** | `A` | `192.250.229.161` | 🔘 **Nur DNS** | Server-Verwaltungstools |
-| **`sharegy.de`** | `MX` | `mail.sharegy.de` (Prio 0) | 🔘 **Nur DNS** | E-Mail-Routing |
-| **`default._domainkey`** | `TXT` | *DKIM Public Key* | 🔘 **Nur DNS** | E-Mail DKIM Signatur |
-| **`_dmarc`** | `TXT` | `v=DMARC1; p=none;` | 🔘 **Nur DNS** | DMARC Richtlinie |
-| **`sharegy.de`** | `TXT` | `v=spf1 +a +mx ... ~all` | 🔘 **Nur DNS** | SPF E-Mail-Absenderschutz |
+* **Pfad im Dashboard:** `DNS` ➔ `Records` ➔ `Add record`
+* **Einträge:**
+  ```dns
+  Typ: CAA | Name: @ | Tag: Only allow specific CAs to issue certs (issue) | Value: "cloudflare.com"
+  Typ: CAA | Name: @ | Tag: Only allow specific CAs to issue certs (issue) | Value: "letsencrypt.org"
+  Typ: CAA | Name: @ | Tag: Only allow specific CAs to issue certs (issue) | Value: "digicert.com"
+  Typ: CAA | Name: @ | Tag: Send violation reports to URL (iodef)           | Value: "mailto:security@smartevo.de"
+  ```
 
 ---
 
-## 🔒 3. SSL/TLS & Sicherheitseinstellungen
+## 2. SSL/TLS & Verschlüsselung
 
-* **Verschlüsselungsmodus**: **Vollständig (strikt) / Full (Strict)**
-  * *Zertifikatsvalidierung*: Vollständige CA-Prüfung zwischen Cloudflare Edge und dem Ursprungsserver (`172.160.240.172`).
-* **Edge-Zertifikate**:
-  * Hostnames: `*.sharegy.de`, `sharegy.de`
-  * Typ: Universal SSL (Automatisch verwaltet & verlängert)
-  * **Immer HTTPS verwenden**: 🟢 Aktiv (HTTP $\rightarrow$ HTTPS 301 Redirect)
-  * **TLS-Mindestversion**: `TLS 1.2`
-  * **TLS 1.3**: 🟢 Aktiv (0-RTT Handshake für Mobilfunk/Apps)
-  * **Automatische HTTPS-Rewrites**: 🟢 Aktiv
+### A. Verschlüsselungsmodus: „Full (Strict)“
+* **Pfad:** `SSL/TLS` ➔ `Overview`
+* **Einstellung:** **Full (Strict)** *(Vollständig strikt)*
+* **Warum:** Nur hier wird das SSL-Zertifikat des Ursprungsservers echt validiert.
 
----
+### B. HSTS (HTTP Strict Transport Security)
+* **Pfad:** `SSL/TLS` ➔ `Edge Certificates` ➔ `HTTP Strict Transport Security (HSTS)`
+* **Einstellungen:**
+  * **Enable HSTS:** 🟢 On
+  * **Max-Age:** `1 year (31536000)`
+  * **Apply to subdomains:** 🟢 On
+  * **Preload:** 🟢 On
+  * **No-Sniff:** 🟢 On
 
-## ⚡ 4. Aktive Cache Rules (Edge Caching)
-
-In Cloudflare unter *Caching $\rightarrow$ Cache Rules* sind 3 Regeln in exakter Priorität aktiv:
-
-1. **`Cache Frontend Assets`**
-   * *Bedingung*: `URI-Pfad beginnt mit /assets/`
-   * *Aktion*: **Eligible for cache**, Edge TTL: `1 month`, Browser TTL: `1 month`
-   * *Nutzen*: Statische Bundles (JS, CSS, Icons, Fonts) werden zu 100 % aus dem Edge-RAM ausgeliefert.
-2. **`Bypass API`**
-   * *Bedingung*: `URI-Pfad beginnt mit /api/`
-   * *Aktion*: **Bypass cache**
-   * *Nutzen*: Echtzeit-Telemetrie und Authentifizierung gehen immer direkt an Django.
-3. **`Bypass WebSockets`**
-   * *Bedingung*: `URI-Pfad beginnt mit /ws/`
-   * *Aktion*: **Bypass cache**, WebSockets enabled
-   * *Nutzen*: Ununterbrochener Live-Stream für Daphne/Channels.
+### C. Mindest-TLS-Version & Moderne Protokolle
+* **Pfad:** `SSL/TLS` ➔ `Edge Certificates`
+* **Always Use HTTPS:** 🟢 On
+* **Minimum TLS Version:** `TLS 1.2` (oder `TLS 1.3`)
+* **Opportunistic Encryption:** 🟢 On
+* **TLS 1.3:** 🟢 On
+* **Automatic HTTPS Rewrites:** 🟢 On
 
 ---
 
-## 🌐 5. Netzwerk & WebSockets
+## 3. Performance & Speed
 
-* **WebSockets**: 🟢 **Aktiv** (Zwingend erforderlich für Daphne Channels Live-Daten)
-* **HTTP/3 (QUIC)**: 🟢 **Aktiv** (Schnellste Verbindung für Android/iOS Apps)
-* **IP-Geolokation**: 🟢 **Aktiv** (Übergibt `CF-IPCountry` für automatische Sprache & Netztarife)
-* **Max. Upload-Größe**: `100 MB`
+* **Pfad:** `Speed` ➔ `Optimization`
+
+| Feature | Einstellung | Nutzen |
+| :--- | :---: | :--- |
+| **HTTP/3 (with QUIC)** | 🟢 **On** | Drastisch schnellere Latenz bei mobilen Netzen (PWA/App). |
+| **0-RTT Connection Resumption** | 🟢 **On** | Wiederkehrende Verbindungen starten ohne Handshake-Verzögerung. |
+| **Brotli** | 🟢 **On** | Bis zu 20% bessere JS/CSS-Kompression gegenüber Standard-Gzip. |
+| **Early Hints (103)** | 🟢 **On** | Sendet CSS/Font-Links im HTTP 103 Status vor dem HTML-Rendering. |
+| **Auto Minify** | 🟢 **HTML, CSS, JS** | Entfernt überflüssige Leerzeichen & Kommentare an der Edge. |
+
+---
+
+## 4. WAF, Bot-Schutz & Rate Limiting
+
+### A. Bot Fight Mode (Kostenlos)
+* **Pfad:** `Security` ➔ `Bots` ➔ **Bot Fight Mode: On**
+* Schützt automatisch vor Credential-Stuffing, Content-Scraping und bösartigen Crawlern.
+
+---
+
+### B. Empfohlene Rate-Limiting-Regeln (`Security` ➔ `WAF` ➔ `Rate limiting rules`)
+
+#### 1. Schutz für Authentifizierung & Magic Links (Sharegy / Factofy / Moniy)
+* **Rule Name:** `Protect Auth Endpoints`
+* **When incoming requests match:**
+  ```text
+  (http.request.uri.path starts_with "/api/v1/auth/") or 
+  (http.request.uri.path starts_with "/api/auth/")
+  ```
+* **Rate:** Maximal **5 Anfragen pro 10 Minuten pro IP**
+* **Action:** `Block` oder `Managed Challenge`
+
+#### 2. Schutz für Kontakt- und Lead-Formulare (smartEvo)
+* **Rule Name:** `Protect Contact Forms`
+* **When incoming requests match:**
+  ```text
+  http.request.uri.path eq "/api/contact"
+  ```
+* **Rate:** Maximal **3 Anfragen pro 5 Minuten pro IP**
+* **Action:** `Managed Challenge` (Cloudflare Turnstile)
+
+---
+
+## 5. Transform Rules: Automatische Security-Header
+
+* **Pfad:** `Rules` ➔ `Transform Rules` ➔ `Modify Response Header` ➔ **Create Rule**
+* **Rule Name:** `Security Headers (RFC & BSI Standard)`
+* **If incoming requests match:** `All incoming requests`
+* **Headers to Modify:**
+
+| Action | Header Name | Value |
+| :--- | :--- | :--- |
+| **Set static** | `X-Frame-Options` | `SAMEORIGIN` |
+| **Set static** | `X-Content-Type-Options` | `nosniff` |
+| **Set static** | `Referrer-Policy` | `strict-origin-when-cross-origin` |
+| **Set static** | `Permissions-Policy` | `camera=(), microphone=(), geolocation=(self)` |
+| **Set static** | `X-XSS-Protection` | `1; mode=block` |
+
+---
+
+## 6. Caching & Edge Rules
+
+* **Pfad:** `Caching` ➔ `Cache Rules`
+
+### Regel 1: Statische Frontend-Assets maximal cachen
+* **If:** `http.request.uri.path starts_with "/assets/" or http.request.uri.path starts_with "/_astro/" or http.request.uri.path starts_with "/_next/"`
+* **Then:** **Eligible for cache**, Edge TTL: `1 month`, Browser TTL: `1 month`
+
+### Regel 2: API & Dynamic niemals cachen
+* **If:** `http.request.uri.path starts_with "/api/" or http.request.uri.path starts_with "/admin/"`
+* **Then:** **Bypass cache**
+
+### Regel 3: WebSockets für Live-Telemetrie durchleiten (Sharegy)
+* **If:** `http.request.uri.path starts_with "/ws/"`
+* **Then:** **Bypass cache**
+
+---
+
+## 7. Domain-spezifische Matrix
+
+| Domain | Zweck & Framework | Wichtigste Cloudflare-Besonderheit |
+| :--- | :--- | :--- |
+| **`smartevo.de`** | Dachmarke & PV-Landingpages (Astro / Pages) | Turnstile auf `/api/contact`, Early Hints für Fonts, HSTS Preload |
+| **`sharegy.de`** | EMS-, VPP- & Prosumer-Portal (React / Django) | Rate-Limiting auf `/api/v1/auth/`, WebSocket-Proxy für `/ws/` |
+| **`factofy.de`** | B2B Daten- & IoT-Aggregator (Next.js) | Caching auf `/_next/static/*`, API Bypass auf `/api/*` |
+| **`valofy.de`** | Flexibilitäts- & Asset-Bewertung | DNSSEC, Strict SSL, Security Headers |
+| **`moniy.de`** | Finanz-, Abrechnungs- & Tarif-Engine | Strict Rate Limiting, Bot Fight Mode, HSTS 1 Year |
