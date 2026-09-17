@@ -13,7 +13,7 @@ export default function SystemStatusPage() {
 
     // Störungsmeldungs-Modal / Formular State
     const [showTicketModal, setShowTicketModal] = useState(false);
-    const [ticketCategory, setTicketCategory] = useState("telemetry_issue");
+    const [ticketCategory, setTicketCategory] = useState("telemetry_stream");
     const [ticketSubject, setTicketSubject] = useState("");
     const [ticketDescription, setTicketDescription] = useState("");
     const [attachDiagnostics, setAttachDiagnostics] = useState(true);
@@ -411,12 +411,14 @@ export default function SystemStatusPage() {
                                         onChange={(e) => setTicketCategory(e.target.value)}
                                         className="w-full text-xs font-semibold p-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-800 dark:text-gray-200"
                                     >
-                                        <option value="telemetry_issue">{t("system_status.cat_telemetry", "Verzögerte / Fehlende Live-Messwerte")}</option>
-                                        <option value="relay_actuation">{t("system_status.cat_relay", "Relais / Aktorik schaltet nicht")}</option>
-                                        <option value="inverter_bridge">{t("system_status.cat_inverter", "Wechselrichter / Home Assistant Bridge")}</option>
-                                        <option value="forecast_bug">{t("system_status.cat_forecast", "Solar- oder Lastprognose fehlerhaft")}</option>
-                                        <option value="billing_question">{t("system_status.cat_billing", "Abonnement & Abrechnung")}</option>
-                                        <option value="other">{t("system_status.cat_other", "Sonstiges technisches Problem")}</option>
+                                        <option value="telemetry_stream">{t("system_status.cat_telemetry_stream", "Live-Telemetrie & Zählerstände (Verzögerte Werte / Offline)")}</option>
+                                        <option value="inverter_storage">{t("system_status.cat_inverter_storage", "Wechselrichter & Batteriespeicher (Modbus TCP / Cloud-API)")}</option>
+                                        <option value="wallbox_ocpp">{t("system_status.cat_wallbox_ocpp", "Wallbox & E-Mobilität (OCPP-Gateway / Überschussladen)")}</option>
+                                        <option value="market_tariffs">{t("system_status.cat_market_tariffs", "Dynamische Stromtarife & Börsenpreise (EPEX Spot Feed)")}</option>
+                                        <option value="grid_curtailment">{t("system_status.cat_grid_curtailment", "§ 14a EnWG Dimmung & Netzsteuerung (CLS / SMGW)")}</option>
+                                        <option value="energy_sharing">{t("system_status.cat_energy_sharing", "Energy Sharing & Quartiersbilanzierung (§ 42b EnWG)")}</option>
+                                        <option value="platform_api">{t("system_status.cat_platform_api", "Plattform, Login & WebSockets (Allgemeine Störung)")}</option>
+                                        <option value="other">{t("system_status.cat_other", "Sonstiges technisches Infrastruktur-Problem")}</option>
                                     </select>
                                 </div>
 
