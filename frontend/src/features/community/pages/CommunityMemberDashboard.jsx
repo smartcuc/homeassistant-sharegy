@@ -65,7 +65,7 @@ export default function CommunityMemberDashboard() {
             });
 
             if (!response.ok) {
-                throw new Error("Download fehlgeschlagen");
+                throw new Error(t("community_dashboard.download_failed", "Download fehlgeschlagen"));
             }
 
             const blob = await response.blob();
@@ -79,7 +79,7 @@ export default function CommunityMemberDashboard() {
             window.URL.revokeObjectURL(url);
         } catch (err) {
             console.error("PDF Download error:", err);
-            alert("Fehler beim Herunterladen des Abrechnungsnachweises als PDF.");
+            alert(t("community_dashboard.download_error", "Fehler beim Herunterladen des Abrechnungsnachweises als PDF."));
         } finally {
             setDownloadingId(null);
         }
@@ -89,7 +89,7 @@ export default function CommunityMemberDashboard() {
         return (
             <div className="p-12 text-center text-slate-400 text-sm animate-pulse max-w-7xl mx-auto">
                 <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-                Lade dein Energie-Cockpit...
+                {t("community_dashboard.loading", "Lade dein Energie-Cockpit...")}
             </div>
         );
     }
@@ -101,17 +101,17 @@ export default function CommunityMemberDashboard() {
                     🏛️
                 </div>
                 <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                    Keine aktive Zuordnung
+                    {t("community_dashboard.no_assignment_title", "Keine aktive Zuordnung")}
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                    Du bist aktuell noch keinem Mieterstrom-Objekt, keinem GGV-Gebäude oder keiner Energiegemeinschaft zugewiesen. Sobald du einen Einladungslink einlöst, findest du deine Bilanzen und Nachweise hier.
+                    {t("community_dashboard.no_assignment_desc", "Du bist aktuell noch keinem Mieterstrom-Objekt, keinem GGV-Gebäude oder keiner Energiegemeinschaft zugewiesen. Sobald du einen Einladungslink einlöst, findest du deine Bilanzen und Nachweise hier.")}
                 </p>
                 <div className="pt-2">
                     <button
                         onClick={() => window.location.href = "/app/dashboard"}
                         className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs transition cursor-pointer"
                     >
-                        Zurück zum Dashboard
+                        {t("community_dashboard.back_to_dashboard", "Zurück zum Dashboard")}
                     </button>
                 </div>
             </div>
@@ -151,128 +151,128 @@ export default function CommunityMemberDashboard() {
 
     const modelConfig = {
         mieterstrom: {
-            title: "Mieterstrom (§ 42a EnWG)",
-            badge: "⚡ Vollversorgung",
-            userBadge: "🏢 Mieterstrom-Teilnehmer",
-            subBadge: "Mieterstromzuschlag",
-            subtitle: "Dein persönliches Cockpit für PV-Vor-Ort-Strom und Reststrom aus dem Netz",
-            desc: "Dein Vermieter/Contractor beliefert dich mit Solarstrom vom Dach und Reststrom aus dem Netz in einer gemeinsamen Abrechnung mit gesetzlicher Preisdeckelung unter dem Grundversorger.",
+            title: t("community_dashboard.models.mieterstrom.title", "Mieterstrom (§ 42a EnWG)"),
+            badge: t("community_dashboard.models.mieterstrom.badge", "⚡ Vollversorgung"),
+            userBadge: t("community_dashboard.models.mieterstrom.userBadge", "🏢 Mieterstrom-Teilnehmer"),
+            subBadge: t("community_dashboard.models.mieterstrom.subBadge", "Mieterstromzuschlag"),
+            subtitle: t("community_dashboard.models.mieterstrom.subtitle", "Dein persönliches Cockpit für PV-Vor-Ort-Strom und Reststrom aus dem Netz"),
+            desc: t("community_dashboard.models.mieterstrom.desc", "Dein Vermieter/Contractor beliefert dich mit Solarstrom vom Dach und Reststrom aus dem Netz in einer gemeinsamen Abrechnung mit gesetzlicher Preisdeckelung unter dem Grundversorger."),
             bgClass: "bg-emerald-50/70 dark:bg-emerald-950/30 border-emerald-100 dark:border-emerald-900/50 text-emerald-950 dark:text-emerald-200",
             icon: "🏢",
-            communityOverviewTitle: "Gebäude-Mieterstrom im Überblick",
-            communityOverviewSubtitle: "Dach-PV-Erzeugung und Gesamtstrombedarf aller Mietparteien im Gebäude",
-            kpiPoolLabel: "Dach-PV Erzeugung",
-            kpiPoolDesc: "Solarertrag der Gebäude-Dachanlage",
-            kpiSharedLabel: "Vor-Ort Mieterstrom",
-            kpiSharedDesc: "Im Gebäude direkt verbraucht",
-            kpiConsumedLabel: "Haus-Gesamtbedarf",
-            kpiConsumedDesc: "Wohnungs- & Allgemeinstrom",
-            kpiAutarkyLabel: "Solar-Deckungsquote",
-            kpiAutarkyDesc: "Vor-Ort Solarstromanteil",
-            consumerSectionTitle: "Mein Wohnungs-Strommix & Kosten",
-            consumerSolarLabel: "Mein Mieterstrom-Verbrauch",
-            consumerSolarDesc: "Günstiger Solarstrom direkt vom Dach",
-            consumerSavingsLabel: "Mieterstrom-Ersparnis",
-            consumerSavingsDesc: "Preisvorteil gegenüber Grundversorger",
-            consumerResidualLabel: "Netz-Reststrom",
-            consumerResidualDesc: "Über Vollversorger-Tarif abgerechnet",
-            tariffTitle: "Gültiger Mieterstrom-Vollversorger-Tarif",
-            tariffLegalBadge: "Aktiv nach § 42a EnWG",
-            statementsTitle: "Meine Mieterstrom-Abrechnungsbelege (§ 42a EnWG)",
-            statementsDesc: "Konsolidierte Monatsabrechnungen für Solar- & Netzstrom mit PDF-Nachweisen",
+            communityOverviewTitle: t("community_dashboard.models.mieterstrom.communityOverviewTitle", "Gebäude-Mieterstrom im Überblick"),
+            communityOverviewSubtitle: t("community_dashboard.models.mieterstrom.communityOverviewSubtitle", "Dach-PV-Erzeugung und Gesamtstrombedarf aller Mietparteien im Gebäude"),
+            kpiPoolLabel: t("community_dashboard.models.mieterstrom.kpiPoolLabel", "Dach-PV Erzeugung"),
+            kpiPoolDesc: t("community_dashboard.models.mieterstrom.kpiPoolDesc", "Solarertrag der Gebäude-Dachanlage"),
+            kpiSharedLabel: t("community_dashboard.models.mieterstrom.kpiSharedLabel", "Vor-Ort Mieterstrom"),
+            kpiSharedDesc: t("community_dashboard.models.mieterstrom.kpiSharedDesc", "Im Gebäude direkt verbraucht"),
+            kpiConsumedLabel: t("community_dashboard.models.mieterstrom.kpiConsumedLabel", "Haus-Gesamtbedarf"),
+            kpiConsumedDesc: t("community_dashboard.models.mieterstrom.kpiConsumedDesc", "Wohnungs- & Allgemeinstrom"),
+            kpiAutarkyLabel: t("community_dashboard.models.mieterstrom.kpiAutarkyLabel", "Solar-Deckungsquote"),
+            kpiAutarkyDesc: t("community_dashboard.models.mieterstrom.kpiAutarkyDesc", "Vor-Ort Solarstromanteil"),
+            consumerSectionTitle: t("community_dashboard.models.mieterstrom.consumerSectionTitle", "Mein Wohnungs-Strommix & Kosten"),
+            consumerSolarLabel: t("community_dashboard.models.mieterstrom.consumerSolarLabel", "Mein Mieterstrom-Verbrauch"),
+            consumerSolarDesc: t("community_dashboard.models.mieterstrom.consumerSolarDesc", "Günstiger Solarstrom direkt vom Dach"),
+            consumerSavingsLabel: t("community_dashboard.models.mieterstrom.consumerSavingsLabel", "Mieterstrom-Ersparnis"),
+            consumerSavingsDesc: t("community_dashboard.models.mieterstrom.consumerSavingsDesc", "Preisvorteil gegenüber Grundversorger"),
+            consumerResidualLabel: t("community_dashboard.models.mieterstrom.consumerResidualLabel", "Netz-Reststrom"),
+            consumerResidualDesc: t("community_dashboard.models.mieterstrom.consumerResidualDesc", "Über Vollversorger-Tarif abgerechnet"),
+            tariffTitle: t("community_dashboard.models.mieterstrom.tariffTitle", "Gültiger Mieterstrom-Vollversorger-Tarif"),
+            tariffLegalBadge: t("community_dashboard.models.mieterstrom.tariffLegalBadge", "Aktiv nach § 42a EnWG"),
+            statementsTitle: t("community_dashboard.models.mieterstrom.statementsTitle", "Meine Mieterstrom-Abrechnungsbelege (§ 42a EnWG)"),
+            statementsDesc: t("community_dashboard.models.mieterstrom.statementsDesc", "Konsolidierte Monatsabrechnungen für Solar- & Netzstrom mit PDF-Nachweisen"),
         },
         ggv: {
-            title: "Gemeinschaftliche Gebäudeversorgung (§ 42b EnWG)",
-            badge: "🏠 Vor-Ort-Aufteilung",
-            userBadge: "🏠 GGV-Teilnehmer",
-            subBadge: "Eigenständiger Reststromvertrag",
-            subtitle: "Dein persönliches Cockpit für aufgeteilten PV-Strom im Gebäude",
-            desc: "Der erzeugte Solarstrom wird viertelstundengenau oder nach Miteigentumsanteil (MEA) im Haus aufgeteilt. Deinen Reststromvertrag führst du eigenständig mit deinem gewählten Stromversorger weiter.",
+            title: t("community_dashboard.models.ggv.title", "Gemeinschaftliche Gebäudeversorgung (§ 42b EnWG)"),
+            badge: t("community_dashboard.models.ggv.badge", "🏠 Vor-Ort-Aufteilung"),
+            userBadge: t("community_dashboard.models.ggv.userBadge", "🏠 GGV-Teilnehmer"),
+            subBadge: t("community_dashboard.models.ggv.subBadge", "Eigenständiger Reststromvertrag"),
+            subtitle: t("community_dashboard.models.ggv.subtitle", "Dein persönliches Cockpit für aufgeteilten PV-Strom im Gebäude"),
+            desc: t("community_dashboard.models.ggv.desc", "Der erzeugte Solarstrom wird viertelstundengenau oder nach Miteigentumsanteil (MEA) im Haus aufgeteilt. Deinen Reststromvertrag führst du eigenständig mit deinem gewählten Stromversorger weiter."),
             bgClass: "bg-cyan-50/70 dark:bg-cyan-950/30 border-cyan-100 dark:border-cyan-900/50 text-cyan-950 dark:text-cyan-200",
             icon: "⚖️",
-            communityOverviewTitle: "Gebäude-Solarstrom im Überblick",
-            communityOverviewSubtitle: "Gemeinschaftliche PV-Erzeugung und Vor-Ort-Zuteilung im Objekt",
-            kpiPoolLabel: "Gemeinschafts-PV",
-            kpiPoolDesc: "Erzeugung der Haus-Solaranlage",
-            kpiSharedLabel: "Aufgeteilter Solarstrom",
-            kpiSharedDesc: "Nach 15m Lastgang / MEA zugeteilt",
-            kpiConsumedLabel: "Objekt-Gesamtbedarf",
-            kpiConsumedDesc: "Gesamtverbrauch aller Einheiten",
-            kpiAutarkyLabel: "Objekt-Solaranteil",
-            kpiAutarkyDesc: "Anteil PV an Gesamtdeckung",
-            consumerSectionTitle: "Mein zugeteilter Solarstrom-Anteil",
-            consumerSolarLabel: "Mein PV-Solarbezug",
-            consumerSolarDesc: "Aus der internen Gebäude-Aufteilung",
-            consumerSavingsLabel: "Solar-Kostenvorteil",
-            consumerSavingsDesc: "Ersparnis ggü. Netzbezug",
-            consumerResidualLabel: "Eigenständiger Reststrom",
-            consumerResidualDesc: "Direkt über deinen eigenen Stromversorger",
-            tariffTitle: "Gültiger Gebäude-Solarstromtarif",
-            tariffLegalBadge: "Aktiv nach § 42b EnWG",
-            statementsTitle: "Interne PV-Aufteilungsnachweise (§ 42b EnWG)",
-            statementsDesc: "Monatliche interne Abrechnungsbelege zur Gebäude-PV (ohne externen Reststrom)",
+            communityOverviewTitle: t("community_dashboard.models.ggv.communityOverviewTitle", "Gebäude-Solarstrom im Überblick"),
+            communityOverviewSubtitle: t("community_dashboard.models.ggv.communityOverviewSubtitle", "Gemeinschaftliche PV-Erzeugung und Vor-Ort-Zuteilung im Objekt"),
+            kpiPoolLabel: t("community_dashboard.models.ggv.kpiPoolLabel", "Gemeinschafts-PV"),
+            kpiPoolDesc: t("community_dashboard.models.ggv.kpiPoolDesc", "Erzeugung der Haus-Solaranlage"),
+            kpiSharedLabel: t("community_dashboard.models.ggv.kpiSharedLabel", "Aufgeteilter Solarstrom"),
+            kpiSharedDesc: t("community_dashboard.models.ggv.kpiSharedDesc", "Nach 15m Lastgang / MEA zugeteilt"),
+            kpiConsumedLabel: t("community_dashboard.models.ggv.kpiConsumedLabel", "Objekt-Gesamtbedarf"),
+            kpiConsumedDesc: t("community_dashboard.models.ggv.kpiConsumedDesc", "Gesamtverbrauch aller Einheiten"),
+            kpiAutarkyLabel: t("community_dashboard.models.ggv.kpiAutarkyLabel", "Objekt-Solaranteil"),
+            kpiAutarkyDesc: t("community_dashboard.models.ggv.kpiAutarkyDesc", "Anteil PV an Gesamtdeckung"),
+            consumerSectionTitle: t("community_dashboard.models.ggv.consumerSectionTitle", "Mein zugeteilter Solarstrom-Anteil"),
+            consumerSolarLabel: t("community_dashboard.models.ggv.consumerSolarLabel", "Mein PV-Solarbezug"),
+            consumerSolarDesc: t("community_dashboard.models.ggv.consumerSolarDesc", "Aus der internalen Gebäude-Aufteilung"),
+            consumerSavingsLabel: t("community_dashboard.models.ggv.consumerSavingsLabel", "Solar-Kostenvorteil"),
+            consumerSavingsDesc: t("community_dashboard.models.ggv.consumerSavingsDesc", "Ersparnis ggü. Netzbezug"),
+            consumerResidualLabel: t("community_dashboard.models.ggv.consumerResidualLabel", "Eigenständiger Reststrom"),
+            consumerResidualDesc: t("community_dashboard.models.ggv.consumerResidualDesc", "Direkt über deinen eigenen Stromversorger"),
+            tariffTitle: t("community_dashboard.models.ggv.tariffTitle", "Gültiger Gebäude-Solarstromtarif"),
+            tariffLegalBadge: t("community_dashboard.models.ggv.tariffLegalBadge", "Aktiv nach § 42b EnWG"),
+            statementsTitle: t("community_dashboard.models.ggv.statementsTitle", "Interne PV-Aufteilungsnachweise (§ 42b EnWG)"),
+            statementsDesc: t("community_dashboard.models.ggv.statementsDesc", "Monatliche interne Abrechnungsbelege zur Gebäude-PV (ohne externen Reststrom)"),
         },
         energy_sharing: {
-            title: "Regionales Energy Sharing (Bürgerenergie / Genossenschaft)",
-            badge: "🌐 15m Smart-Meter-Bilanzierung",
-            userBadge: "⚡ Sharing-Mitglied",
-            subBadge: "Genossenschaftlicher Ausgleich",
-            subtitle: "Dein persönliches Cockpit für geteilten Solarstrom im regionalen Verteilnetz",
-            desc: "Überschüssiger Solarstrom wird in der Gemeinschaft bilanziell geteilt und viertelstundengenau verrechnet. Reststrom beziehst du weiterhin unabhängig über deinen bestehenden Stromversorger.",
+            title: t("community_dashboard.models.energy_sharing.title", "Regionales Energy Sharing (Bürgerenergie / Genossenschaft)"),
+            badge: t("community_dashboard.models.energy_sharing.badge", "🌐 15m Smart-Meter-Bilanzierung"),
+            userBadge: t("community_dashboard.models.energy_sharing.userBadge", "⚡ Sharing-Mitglied"),
+            subBadge: t("community_dashboard.models.energy_sharing.subBadge", "Genossenschaftlicher Ausgleich"),
+            subtitle: t("community_dashboard.models.energy_sharing.subtitle", "Dein persönliches Cockpit für geteilten Solarstrom im regionalen Verteilnetz"),
+            desc: t("community_dashboard.models.energy_sharing.desc", "Überschüssiger Solarstrom wird in der Gemeinschaft bilanziell geteilt und viertelstundengenau verrechnet. Reststrom beziehst du weiterhin unabhängig über deinen bestehenden Stromversorger."),
             bgClass: "bg-indigo-50/70 dark:bg-indigo-950/30 border-indigo-100 dark:border-indigo-900/50 text-indigo-950 dark:text-indigo-200",
             icon: "⚡",
-            communityOverviewTitle: "Die Energiegemeinschaft im Überblick",
-            communityOverviewSubtitle: "Gesamterzeugung der Erzeugungsanlagen und geteilter Strom aller Teilnehmer",
-            kpiPoolLabel: "Gemeinschafts-Erzeugung",
-            kpiPoolDesc: "Solarertrag aller Erzeuger im Pool",
-            kpiSharedLabel: "Geteilter Strom",
-            kpiSharedDesc: "Bilanziell im Netzgebiet geteilt",
-            kpiConsumedLabel: "Gemeinschaftsbedarf",
-            kpiConsumedDesc: "Stromverbrauch aller Teilnehmer",
-            kpiAutarkyLabel: "Community Autarkiegrad",
-            kpiAutarkyDesc: "Deckung aus eigenem Pool",
-            consumerSectionTitle: "Mein persönlicher Energiefluss & Verrechnung",
-            consumerSolarLabel: "Mein Solar-Bezug",
-            consumerSolarDesc: "Günstiger Ökostrom aus dem Verteilnetz",
-            consumerSavingsLabel: "Meine Ersparnis",
-            consumerSavingsDesc: "Ersparnis ggü. Netz-Grundversorger",
-            consumerResidualLabel: "Reststrom aus Netz",
-            consumerResidualDesc: "Über externen Lieferanten bezogen",
-            tariffTitle: "Gültiger Energy Sharing Tarif",
-            tariffLegalBadge: "Aktiv im regionalen Verteilnetz",
-            statementsTitle: "Meine 15-Minuten Bilanzierungsnachweise",
-            statementsDesc: "Monatliche Abrechnungsbelege zur internen Verrechnung und PDF-Nachweise",
+            communityOverviewTitle: t("community_dashboard.models.energy_sharing.communityOverviewTitle", "Die Energiegemeinschaft im Überblick"),
+            communityOverviewSubtitle: t("community_dashboard.models.energy_sharing.communityOverviewSubtitle", "Gesamterzeugung der Erzeugungsanlagen und geteilter Strom aller Teilnehmer"),
+            kpiPoolLabel: t("community_dashboard.models.energy_sharing.kpiPoolLabel", "Gemeinschafts-Erzeugung"),
+            kpiPoolDesc: t("community_dashboard.models.energy_sharing.kpiPoolDesc", "Solarertrag aller Erzeuger im Pool"),
+            kpiSharedLabel: t("community_dashboard.models.energy_sharing.kpiSharedLabel", "Geteilter Strom"),
+            kpiSharedDesc: t("community_dashboard.models.energy_sharing.kpiSharedDesc", "Bilanziell im Netzgebiet geteilt"),
+            kpiConsumedLabel: t("community_dashboard.models.energy_sharing.kpiConsumedLabel", "Gemeinschaftsbedarf"),
+            kpiConsumedDesc: t("community_dashboard.models.energy_sharing.kpiConsumedDesc", "Stromverbrauch aller Teilnehmer"),
+            kpiAutarkyLabel: t("community_dashboard.models.energy_sharing.kpiAutarkyLabel", "Community Autarkiegrad"),
+            kpiAutarkyDesc: t("community_dashboard.models.energy_sharing.kpiAutarkyDesc", "Deckung aus eigenem Pool"),
+            consumerSectionTitle: t("community_dashboard.models.energy_sharing.consumerSectionTitle", "Mein persönlicher Energiefluss & Verrechnung"),
+            consumerSolarLabel: t("community_dashboard.models.energy_sharing.consumerSolarLabel", "Mein Solar-Bezug"),
+            consumerSolarDesc: t("community_dashboard.models.energy_sharing.consumerSolarDesc", "Günstiger Ökostrom aus dem Verteilnetz"),
+            consumerSavingsLabel: t("community_dashboard.models.energy_sharing.consumerSavingsLabel", "Meine Ersparnis"),
+            consumerSavingsDesc: t("community_dashboard.models.energy_sharing.consumerSavingsDesc", "Ersparnis ggü. Netz-Grundversorger"),
+            consumerResidualLabel: t("community_dashboard.models.energy_sharing.consumerResidualLabel", "Reststrom aus Netz"),
+            consumerResidualDesc: t("community_dashboard.models.energy_sharing.consumerResidualDesc", "Über externen Lieferanten bezogen"),
+            tariffTitle: t("community_dashboard.models.energy_sharing.tariffTitle", "Gültiger Energy Sharing Tarif"),
+            tariffLegalBadge: t("community_dashboard.models.energy_sharing.tariffLegalBadge", "Aktiv im regionalen Verteilnetz"),
+            statementsTitle: t("community_dashboard.models.energy_sharing.statementsTitle", "Meine 15-Minuten Bilanzierungsnachweise"),
+            statementsDesc: t("community_dashboard.models.energy_sharing.statementsDesc", "Monatliche Abrechnungsbelege zur internen Verrechnung und PDF-Nachweise"),
         },
     }[effectiveModel] || {
-        title: "Regionales Energy Sharing",
-        badge: "15m Bilanzierung",
-        userBadge: "⚡ Teilnehmer",
-        subBadge: "Aktiv",
-        subtitle: "Dein persönliches Cockpit für geteilten Solarstrom",
-        desc: "Solarstrom-Bilanzierung über das regionale Verteilnetz.",
+        title: t("community_dashboard.models.energy_sharing.title", "Regionales Energy Sharing"),
+        badge: t("community_dashboard.models.energy_sharing.badge", "15m Bilanzierung"),
+        userBadge: t("community_dashboard.models.energy_sharing.userBadge", "⚡ Teilnehmer"),
+        subBadge: t("community_dashboard.models.energy_sharing.subBadge", "Aktiv"),
+        subtitle: t("community_dashboard.models.energy_sharing.subtitle", "Dein persönliches Cockpit für geteilten Solarstrom"),
+        desc: t("community_dashboard.models.energy_sharing.desc", "Solarstrom-Bilanzierung über das regionale Verteilnetz."),
         bgClass: "bg-indigo-50/70 dark:bg-indigo-950/30 border-indigo-100 dark:border-indigo-900/50 text-indigo-950 dark:text-indigo-200",
         icon: "⚡",
-        communityOverviewTitle: "Die Energiegemeinschaft im Überblick",
-        communityOverviewSubtitle: "Gesamterzeugung und geteilter Strom",
-        kpiPoolLabel: "Erzeugung Pool",
-        kpiPoolDesc: "Solarertrag im Pool",
-        kpiSharedLabel: "Geteilter Strom",
-        kpiSharedDesc: "Bilanziell geteilt",
-        kpiConsumedLabel: "Gesamtbedarf",
-        kpiConsumedDesc: "Stromverbrauch",
-        kpiAutarkyLabel: "Autarkiegrad",
-        kpiAutarkyDesc: "Deckung",
-        consumerSectionTitle: "Mein Energiefluss",
-        consumerSolarLabel: "Mein Solar-Bezug",
-        consumerSolarDesc: "Aus der Gemeinschaft",
-        consumerSavingsLabel: "Ersparnis",
-        consumerSavingsDesc: "ggü. Grundversorger",
-        consumerResidualLabel: "Reststrom",
-        consumerResidualDesc: "Netzbezug",
-        tariffTitle: "Gültiger Tarif",
-        tariffLegalBadge: "Aktiv",
-        statementsTitle: "Abrechnungsnachweise",
-        statementsDesc: "Monatliche Nachweise",
+        communityOverviewTitle: t("community_dashboard.models.energy_sharing.communityOverviewTitle", "Die Energiegemeinschaft im Überblick"),
+        communityOverviewSubtitle: t("community_dashboard.models.energy_sharing.communityOverviewSubtitle", "Gesamterzeugung und geteilter Strom"),
+        kpiPoolLabel: t("community_dashboard.models.energy_sharing.kpiPoolLabel", "Erzeugung Pool"),
+        kpiPoolDesc: t("community_dashboard.models.energy_sharing.kpiPoolDesc", "Solarertrag im Pool"),
+        kpiSharedLabel: t("community_dashboard.models.energy_sharing.kpiSharedLabel", "Geteilter Strom"),
+        kpiSharedDesc: t("community_dashboard.models.energy_sharing.kpiSharedDesc", "Bilanziell geteilt"),
+        kpiConsumedLabel: t("community_dashboard.models.energy_sharing.kpiConsumedLabel", "Gesamtbedarf"),
+        kpiConsumedDesc: t("community_dashboard.models.energy_sharing.kpiConsumedDesc", "Stromverbrauch"),
+        kpiAutarkyLabel: t("community_dashboard.models.energy_sharing.kpiAutarkyLabel", "Autarkiegrad"),
+        kpiAutarkyDesc: t("community_dashboard.models.energy_sharing.kpiAutarkyDesc", "Deckung"),
+        consumerSectionTitle: t("community_dashboard.models.energy_sharing.consumerSectionTitle", "Mein Energiefluss"),
+        consumerSolarLabel: t("community_dashboard.models.energy_sharing.consumerSolarLabel", "Mein Solar-Bezug"),
+        consumerSolarDesc: t("community_dashboard.models.energy_sharing.consumerSolarDesc", "Aus der Gemeinschaft"),
+        consumerSavingsLabel: t("community_dashboard.models.energy_sharing.consumerSavingsLabel", "Ersparnis"),
+        consumerSavingsDesc: t("community_dashboard.models.energy_sharing.consumerSavingsDesc", "ggü. Grundversorger"),
+        consumerResidualLabel: t("community_dashboard.models.energy_sharing.consumerResidualLabel", "Reststrom"),
+        consumerResidualDesc: t("community_dashboard.models.energy_sharing.consumerResidualDesc", "Netzbezug"),
+        tariffTitle: t("community_dashboard.models.energy_sharing.tariffTitle", "Gültiger Tarif"),
+        tariffLegalBadge: t("community_dashboard.models.energy_sharing.tariffLegalBadge", "Aktiv"),
+        statementsTitle: t("community_dashboard.models.energy_sharing.statementsTitle", "Abrechnungsnachweise"),
+        statementsDesc: t("community_dashboard.models.energy_sharing.statementsDesc", "Monatliche Nachweise"),
     };
 
     return (
@@ -311,7 +311,7 @@ export default function CommunityMemberDashboard() {
                             className="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/80 transition shadow-xs flex items-center gap-2 cursor-pointer"
                         >
                             <span>📢</span>
-                            <span>{t("tenant.share_btn", "Erfolge teilen")}</span>
+                            <span>{t("community_dashboard.share_btn", "Erfolge teilen")}</span>
                         </button>
                     </div>
                 </div>
@@ -356,7 +356,7 @@ export default function CommunityMemberDashboard() {
                                     : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                             }`}
                         >
-                            Heute
+                            {t("community_dashboard.today", "Heute")}
                         </button>
                         <button
                             onClick={() => setTimeRange("month")}
@@ -366,7 +366,7 @@ export default function CommunityMemberDashboard() {
                                     : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                             }`}
                         >
-                            Dieser Monat
+                            {t("community_dashboard.month", "Dieser Monat")}
                         </button>
                     </div>
                 </div>
@@ -453,11 +453,11 @@ export default function CommunityMemberDashboard() {
                             <div className="flex items-center gap-2">
                                 <span className="text-base">🌤️</span>
                                 <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                                    48h Solar-Verfügbarkeit & Wetterprognose
+                                    {t("community_dashboard.forecast_title", "48h Solar-Verfügbarkeit & Wetterprognose")}
                                 </h3>
                             </div>
                             <span className="text-[11px] text-slate-400">
-                                Günstigste Fenster für Verbraucher & flexible Lasten
+                                {t("community_dashboard.forecast_subtitle", "Günstigste Fenster für Verbraucher & flexible Lasten")}
                             </span>
                         </div>
 
@@ -479,7 +479,7 @@ export default function CommunityMemberDashboard() {
                                         <div className="text-xs font-extrabold mt-1">
                                             {slot.expected_pv_kwh.toFixed(1)} <span className="text-[9px] font-normal">kW</span>
                                         </div>
-                                        {isPeak && <div className="text-[9px] text-amber-600 dark:text-amber-400 mt-0.5">☀️ Solar-Peak</div>}
+                                        {isPeak && <div className="text-[9px] text-amber-600 dark:text-amber-400 mt-0.5">{t("community_dashboard.solar_peak", "☀️ Solar-Peak")}</div>}
                                     </div>
                                 );
                             })}
@@ -496,7 +496,7 @@ export default function CommunityMemberDashboard() {
                             <span>👤</span> {modelConfig.consumerSectionTitle}
                         </h2>
                         <p className="text-xs text-slate-500 dark:text-slate-400">
-                            Deine persönlichen Verbrauchs- und Abrechnungsdaten im {modelConfig.title}
+                            {t("community_dashboard.personal_flow_desc", { model: modelConfig.title, defaultValue: `Deine persönlichen Verbrauchs- und Abrechnungsdaten im ${modelConfig.title}` })}
                         </p>
                     </div>
                 </div>
@@ -547,25 +547,25 @@ export default function CommunityMemberDashboard() {
                         <>
                             <div className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 border border-amber-500/20 rounded-2xl p-5">
                                 <div className="text-[11px] font-bold text-amber-700 dark:text-amber-300 uppercase">
-                                    Meine Solar-Einspeisung
+                                    {t("community_dashboard.my_feedin_label", "Meine Solar-Einspeisung")}
                                 </div>
                                 <div className="text-3xl font-black text-amber-900 dark:text-amber-100 mt-2">
                                     {myTotalSharedExportKwh.toFixed(1)} <span className="text-sm font-normal">kWh</span>
                                 </div>
                                 <div className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-                                    In die Gemeinschaft eingespeister Überschuss
+                                    {t("community_dashboard.my_feedin_desc", "In die Gemeinschaft eingespeister Überschuss")}
                                 </div>
                             </div>
 
                             <div className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border border-emerald-500/20 rounded-2xl p-5">
                                 <div className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 uppercase">
-                                    Meine Einspeise-Erlöse
+                                    {t("community_dashboard.my_feedin_credit_label", "Meine Einspeise-Erlöse")}
                                 </div>
                                 <div className="text-3xl font-black text-emerald-900 dark:text-emerald-100 mt-2">
                                     {myTotalExportCreditEur.toFixed(2)} <span className="text-sm font-normal">€</span>
                                 </div>
                                 <div className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">
-                                    Gutschrift aus Vor-Ort-Einspeisung (~{estimatedProducerBonusEur.toFixed(2)} € Mehrerlös ggü. EEG)
+                                    {t("community_dashboard.my_feedin_credit_desc", { bonus: estimatedProducerBonusEur.toFixed(2), defaultValue: `Gutschrift aus Vor-Ort-Einspeisung (~${estimatedProducerBonusEur.toFixed(2)} € Mehrerlös ggü. EEG)` })}
                                 </div>
                             </div>
                         </>
@@ -599,25 +599,25 @@ export default function CommunityMemberDashboard() {
 
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-3">
                             <div>
-                                <div className="text-[10px] text-indigo-300 uppercase">Solarstrom-Arbeitspreis</div>
+                                <div className="text-[10px] text-indigo-300 uppercase">{t("community_dashboard.tariff_solar_price", "Solarstrom-Arbeitspreis")}</div>
                                 <div className="text-xl font-bold text-white mt-0.5">
                                     {Number(activeTariff?.sharing_price_ct_kwh ?? 0).toFixed(2)} <span className="text-xs font-normal">Ct/kWh</span>
                                 </div>
                             </div>
                             <div>
-                                <div className="text-[10px] text-indigo-300 uppercase">Einspeisevergütung</div>
+                                <div className="text-[10px] text-indigo-300 uppercase">{t("community_dashboard.tariff_producer_payout", "Einspeisevergütung")}</div>
                                 <div className="text-xl font-bold text-emerald-300 mt-0.5">
                                     {Number(activeTariff?.producer_payout_ct_kwh ?? 0).toFixed(2)} <span className="text-xs font-normal">Ct/kWh</span>
                                 </div>
                             </div>
                             <div>
-                                <div className="text-[10px] text-indigo-300 uppercase">Umlage / Aufschlag</div>
+                                <div className="text-[10px] text-indigo-300 uppercase">{t("community_dashboard.tariff_community_fee", "Umlage / Aufschlag")}</div>
                                 <div className="text-xl font-bold text-amber-300 mt-0.5">
                                     {Number(activeTariff?.community_fee_ct_kwh ?? 0).toFixed(2)} <span className="text-xs font-normal">Ct/kWh</span>
                                 </div>
                             </div>
                             <div>
-                                <div className="text-[10px] text-indigo-300 uppercase">Ersparnis vs. Grundversorger</div>
+                                <div className="text-[10px] text-indigo-300 uppercase">{t("community_dashboard.tariff_savings_vs_base", "Ersparnis vs. Grundversorger")}</div>
                                 <div className="text-xl font-bold text-cyan-300 mt-0.5">
                                     ~20,00 <span className="text-xs font-normal">Ct/kWh</span>
                                 </div>
@@ -630,10 +630,10 @@ export default function CommunityMemberDashboard() {
                 <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-2xs space-y-3">
                     <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
                         <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                            Persönliche Nachweise ({statements.length})
+                            {t("community_dashboard.statements_count", { count: statements.length, defaultValue: `Persönliche Nachweise (${statements.length})` })}
                         </h3>
                         <span className="text-[11px] text-slate-400">
-                            Eichrechtskonform & revisionssicher
+                            {t("community_dashboard.statements_compliance", "Eichrechtskonform & revisionssicher")}
                         </span>
                     </div>
 
@@ -650,26 +650,26 @@ export default function CommunityMemberDashboard() {
                                                 {stmt.statement_number}
                                             </span>
                                             <span className="bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-[10px] font-semibold px-2 py-0.5 rounded-md">
-                                                {stmt.period_start} bis {stmt.period_end}
+                                                {stmt.period_start} {t("community_dashboard.statement_period_to", "bis")} {stmt.period_end}
                                             </span>
                                             <span className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-md border border-emerald-500/20">
-                                                {stmt.status === "finalized" ? "Abgerechnet" : stmt.status}
+                                                {stmt.status === "finalized" ? t("community_dashboard.status_finalized", "Abgerechnet") : stmt.status}
                                             </span>
                                         </div>
                                         <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600 dark:text-slate-400 pt-1">
                                             {Number(stmt.shared_exported_kwh || 0) > 0 && (
                                                 <span className="text-amber-700 dark:text-amber-300">
-                                                    ☀️ Solar bereitgestellt: <strong>{Number(stmt.shared_exported_kwh).toFixed(1)} kWh</strong>
+                                                    {t("community_dashboard.stmt_solar_provided", "☀️ Solar bereitgestellt:")} <strong>{Number(stmt.shared_exported_kwh).toFixed(1)} kWh</strong>
                                                 </span>
                                             )}
                                             {Number(stmt.shared_imported_kwh || 0) > 0 && (
                                                 <span className="text-indigo-700 dark:text-indigo-300">
-                                                    🔌 Solar bezogen: <strong>{Number(stmt.shared_imported_kwh).toFixed(1)} kWh</strong>
+                                                    {t("community_dashboard.stmt_solar_imported", "🔌 Solar bezogen:")} <strong>{Number(stmt.shared_imported_kwh).toFixed(1)} kWh</strong>
                                                 </span>
                                             )}
                                             {Number(stmt.grid_residual_import_kwh || 0) > 0 && (
                                                 <span>
-                                                    🏠 Netzbezug: <strong>{Number(stmt.grid_residual_import_kwh).toFixed(1)} kWh</strong>
+                                                    {t("community_dashboard.stmt_grid_residual", "🏠 Netzbezug:")} <strong>{Number(stmt.grid_residual_import_kwh).toFixed(1)} kWh</strong>
                                                 </span>
                                             )}
                                         </div>
@@ -678,7 +678,7 @@ export default function CommunityMemberDashboard() {
                                     <div className="flex items-center gap-4 justify-between sm:justify-end border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-200 dark:border-slate-700">
                                         <div className="text-right">
                                             <div className="text-[10px] text-slate-400">
-                                                {stmt.is_payout ? "Gutschrift" : "Zahlbetrag Solarstrom"}
+                                                {stmt.is_payout ? t("community_dashboard.stmt_payout_credit", "Gutschrift") : t("community_dashboard.stmt_payout_charge", "Zahlbetrag Solarstrom")}
                                             </div>
                                             <div className={`text-lg font-black ${
                                                 stmt.is_payout ? "text-emerald-600 dark:text-emerald-400" : "text-slate-900 dark:text-white"
@@ -693,7 +693,7 @@ export default function CommunityMemberDashboard() {
                                             className="px-3.5 py-2 bg-white dark:bg-slate-900 hover:bg-indigo-50 dark:hover:bg-slate-800 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 shadow-2xs"
                                         >
                                             <span>📄</span>
-                                            <span>{downloadingId === stmt.id ? "Lade..." : "PDF"}</span>
+                                            <span>{downloadingId === stmt.id ? t("community_dashboard.pdf_loading", "Lade...") : t("community_dashboard.pdf_btn", "PDF")}</span>
                                         </button>
                                     </div>
                                 </div>
@@ -701,7 +701,7 @@ export default function CommunityMemberDashboard() {
                         </div>
                     ) : (
                         <div className="text-center py-8 text-xs text-slate-400 bg-slate-50 dark:bg-slate-800/30 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
-                            📜 Für deinen Account liegen für diesen Abrechnungszeitraum noch keine abgeschlossenen Monatsabrechnungen vor. Sobald der Abrechnungslauf zum Monatsende abgeschlossen ist, findest du deinen PDF-Nachweis hier.
+                            {t("community_dashboard.no_statements_msg", "📜 Für deinen Account liegen für diesen Abrechnungszeitraum noch keine abgeschlossenen Monatsabrechnungen vor. Sobald der Abrechnungslauf zum Monatsende abgeschlossen ist, findest du deinen PDF-Nachweis hier.")}
                         </div>
                     )}
                 </div>
