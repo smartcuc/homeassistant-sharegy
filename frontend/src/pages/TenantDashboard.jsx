@@ -3,6 +3,7 @@
 */
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { apiFetch } from "../api/client";
 import { useTranslation } from "react-i18next";
 import { QRCodeSVG } from "qrcode.react";
@@ -15,8 +16,12 @@ import TenantSetupWizardModal from "../features/community/components/TenantSetup
 import WhitelabelSettingsModal from "../features/tenant/components/WhitelabelSettingsModal";
 import MarketCommunicationModal from "../features/billing/components/MarketCommunicationModal";
 
+const VALID_TABS = ["cockpit", "virtual_meter", "vpp", "settlement", "members", "msb", "audit"];
+
 export default function TenantDashboard() {
     const { t } = useTranslation();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const initialTab = searchParams.get("tab");
     const [tenant, setTenant] = useState(null);
     const [members, setMembers] = useState([]);
     const [invites, setInvites] = useState([]);
@@ -26,7 +31,9 @@ export default function TenantDashboard() {
     const [statementsData, setStatementsData] = useState(null);
     const [sharesData, setSharesData] = useState(null);
     const [timeRange, setTimeRange] = useState("today"); // 'today' | 'month'
-    const [activeTab, setActiveTab] = useState("cockpit"); // 'cockpit' | 'settlement' | 'members' | 'audit'
+    const [activeTab, setActiveTab] = useState(
+        VALID_TABS.includes(initialTab) ? initialTab : "cockpit"
+    );
     const [loading, setLoading] = useState(true);
     const [shareModalOpen, setShareModalOpen] = useState(false);
     const [inviteModalOpen, setInviteModalOpen] = useState(false);
@@ -80,6 +87,29 @@ export default function TenantDashboard() {
     useEffect(() => {
         loadData();
     }, []);
+
+    useEffect(() => {
+        const tab = searchParams.get("tab");
+        if (tab && VALID_TABS.includes(tab) && tab !== activeTab) {
+            setActiveTab(tab);
+        }
+    }, [searchParams]);
+
+    function handleTabChange(newTab) {
+        setActiveTab(newTab);
+        setSearchParams(
+            (prev) => {
+                const next = new URLSearchParams(prev);
+                if (newTab === "cockpit") {
+                    next.delete("tab");
+                } else {
+                    next.set("tab", newTab);
+                }
+                return next;
+            },
+            { replace: true }
+        );
+    }
 
     // ✅ MONATLICHE ABRECHNUNG ANSTOSSEN
     async function triggerSettlement() {
@@ -346,7 +376,7 @@ export default function TenantDashboard() {
                 {/* TAB SWITCHER */}
                 <div className="flex flex-wrap bg-slate-100 dark:bg-slate-800/70 p-1 rounded-xl text-xs font-semibold gap-1">
                     <button
-                        onClick={() => setActiveTab("cockpit")}
+                        onClick={() => handleTabChange("cockpit")}
                         className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
                             activeTab === "cockpit"
                                 ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs"
@@ -356,7 +386,7 @@ export default function TenantDashboard() {
                         ⚡ Cockpit
                     </button>
                     <button
-                        onClick={() => setActiveTab("virtual_meter")}
+                        onClick={() => handleTabChange("virtual_meter")}
                         className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
                             activeTab === "virtual_meter"
                                 ? "bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 font-bold shadow-xs"
@@ -366,7 +396,7 @@ export default function TenantDashboard() {
                         🏢 Virtueller Summenzähler
                     </button>
                     <button
-                        onClick={() => setActiveTab("vpp")}
+                        onClick={() => handleTabChange("vpp")}
                         className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
                             activeTab === "vpp"
                                 ? "bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 font-bold shadow-xs"
@@ -376,7 +406,7 @@ export default function TenantDashboard() {
                         🔌 VPP Kraftwerk
                     </button>
                     <button
-                        onClick={() => setActiveTab("settlement")}
+                        onClick={() => handleTabChange("settlement")}
                         className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
                             activeTab === "settlement"
                                 ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs"
@@ -386,7 +416,7 @@ export default function TenantDashboard() {
                         💰 Tarife & Abrechnungen
                     </button>
                     <button
-                        onClick={() => setActiveTab("members")}
+                        onClick={() => handleTabChange("members")}
                         className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
                             activeTab === "members"
                                 ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs"
@@ -396,7 +426,7 @@ export default function TenantDashboard() {
                         👥 Mitglieder ({members.length})
                     </button>
                     <button
-                        onClick={() => setActiveTab("msb")}
+                        onClick={() => handleTabChange("msb")}
                         className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
                             activeTab === "msb"
                                 ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs font-bold"
@@ -406,7 +436,7 @@ export default function TenantDashboard() {
                         ⚡ wMSB Hub
                     </button>
                     <button
-                        onClick={() => setActiveTab("audit")}
+                        onClick={() => handleTabChange("audit")}
                         className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
                             activeTab === "audit"
                                 ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs"

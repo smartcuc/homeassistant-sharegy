@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useUserNavigation } from "../../hooks/useUserNavigation";
 import { NAV_MODES } from "../../config/navigationConfig";
@@ -7,6 +7,7 @@ import { useMemo } from "react";
 
 export default function MobileBottomNav({ onOpenMenu }) {
     const { t } = useTranslation();
+    const location = useLocation();
     const { activeMode } = useUserNavigation();
 
     const triggerHaptic = () => {
@@ -31,7 +32,7 @@ export default function MobileBottomNav({ onOpenMenu }) {
                 },
                 {
                     name: t("nav.billing", "Belege"),
-                    path: "/app/billing",
+                    path: "/app/tenant?tab=settlement",
                     icon: FileText,
                 },
             ];
@@ -108,14 +109,18 @@ export default function MobileBottomNav({ onOpenMenu }) {
         <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-2 py-1 flex items-center justify-around shadow-lg transition-colors">
             {navItems.map((item) => {
                 const Icon = item.icon;
+                const isCurrentActive = item.path?.includes("?")
+                    ? (location.pathname + location.search) === item.path
+                    : location.pathname === item.path && (!location.search || location.pathname !== "/app/tenant");
+
                 return (
                     <NavLink
                         key={item.path}
                         to={item.path}
                         onClick={triggerHaptic}
-                        className={({ isActive }) =>
+                        className={
                             `flex flex-col items-center justify-center py-1.5 px-3 rounded-2xl transition-all cursor-pointer min-w-[60px] ${
-                                isActive
+                                isCurrentActive
                                     ? "text-indigo-600 dark:text-indigo-400 font-bold scale-105"
                                     : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                             }`

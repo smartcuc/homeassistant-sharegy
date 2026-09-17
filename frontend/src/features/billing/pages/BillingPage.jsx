@@ -8,11 +8,14 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { apiFetch } from "../../../api/client";
 import SubscriptionPlanCard from "../components/SubscriptionPlanCard";
+import { useUserNavigation } from "../../../hooks/useUserNavigation";
+import { NAV_MODES } from "../../../config/navigationConfig";
 
 export default function BillingPage() {
     const { t } = useTranslation();
     const location = useLocation();
     const navigate = useNavigate();
+    const { activeMode } = useUserNavigation();
 
     const [statusBanner, setStatusBanner] = useState(null);
 
@@ -102,6 +105,30 @@ export default function BillingPage() {
                     </div>
                 )}
             </div>
+
+            {/* 🏢 Community Member Notice Banner */}
+            {activeMode === NAV_MODES.SHARING_ONLY && (
+                <div className="p-4 rounded-2xl bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-indigo-900 dark:text-indigo-200 shadow-xs">
+                    <div className="flex items-center gap-2.5">
+                        <span className="text-xl shrink-0">🏢</span>
+                        <div>
+                            <span className="font-bold block text-sm text-indigo-950 dark:text-indigo-100">
+                                {t("billing.community_notice_title", "Suchst du deine Strom-Abrechnungsnachweise der Gemeinschaft?")}
+                            </span>
+                            <span className="text-indigo-700/80 dark:text-indigo-300/80">
+                                {t("billing.community_notice_desc", "Deine monatlichen Abrechnungsnachweise nach § 42b EnWG (kWh Solar vs. Netz) und der aktive Sharing-Tarif werden im Community Cockpit verwaltet.")}
+                            </span>
+                        </div>
+                    </div>
+                    <Link
+                        to="/app/tenant?tab=settlement"
+                        className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-xs transition flex items-center gap-1.5 shrink-0 self-start sm:self-auto cursor-pointer"
+                    >
+                        <span>{t("billing.to_community_statements", "Zu den Community-Abrechnungen")}</span>
+                        <span>➔</span>
+                    </Link>
+                </div>
+            )}
 
             {/* Plan Selector & Checkout */}
             <SubscriptionPlanCard subscriptionData={billingData} onRefresh={refetch} />

@@ -2,7 +2,7 @@
 # src/components/layout/Sidebar.jsx
 */
 
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { useUnconfiguredDevices } from "../../hooks/useUnconfiguredDevices";
 import { useUser } from "../../hooks/useUser";
 import { useUserNavigation } from "../../hooks/useUserNavigation";
@@ -17,6 +17,7 @@ import ProBadge from "../common/ProBadge";
 
 export default function Sidebar() {
     const { t } = useTranslation();
+    const location = useLocation();
     const { isPro } = useSubscription();
     const { isStaffOrAdmin, hasCommunityAdminAccess } = useUser();
     const { activeMode } = useUserNavigation();
@@ -99,12 +100,16 @@ export default function Sidebar() {
                                     );
                                 }
 
+                                const isCurrentActive = item.path?.includes("?")
+                                    ? (location.pathname + location.search) === item.path
+                                    : location.pathname === item.path && (!location.search || location.pathname !== "/app/tenant");
+
                                 return (
                                     <NavLink
                                         key={item.path}
                                         to={item.path}
-                                        className={({ isActive }) =>
-                                            `flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium transition gap-2 ${isActive
+                                        className={
+                                            `flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium transition gap-2 ${isCurrentActive
                                                 ? "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-semibold shadow-2xs border border-indigo-100 dark:border-indigo-900/50"
                                                 : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white"
                                             }`

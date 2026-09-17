@@ -2,7 +2,7 @@
 # frontend/src/components/layout/MobileMenuDrawer.jsx
 */
 
-import { NavLink, Link } from "react-router-dom";
+import { NavLink, Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useUser } from "../../hooks/useUser";
 import { useUserNavigation } from "../../hooks/useUserNavigation";
@@ -16,6 +16,7 @@ import { useMemo } from "react";
 
 export default function MobileMenuDrawer({ isOpen, onClose }) {
     const { t } = useTranslation();
+    const location = useLocation();
     const { user, isStaffOrAdmin, hasCommunityAdminAccess } = useUser();
     const { isPro } = useSubscription();
     const { isDark, toggleTheme } = useTheme();
@@ -131,14 +132,18 @@ export default function MobileMenuDrawer({ isOpen, onClose }) {
                                         );
                                     }
 
+                                    const isCurrentActive = link.path?.includes("?")
+                                        ? (location.pathname + location.search) === link.path
+                                        : location.pathname === link.path && (!location.search || location.pathname !== "/app/tenant");
+
                                     return (
                                         <NavLink
                                             key={link.path}
                                             to={link.path}
                                             onClick={onClose}
-                                            className={({ isActive }) =>
+                                            className={
                                                 `flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition ${
-                                                    isActive
+                                                    isCurrentActive
                                                         ? "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-bold border border-indigo-100 dark:border-indigo-900/50"
                                                         : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                                                 }`

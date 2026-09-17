@@ -84,8 +84,8 @@ export function getNavigationSections({
                 title: `📊 ${t("nav.tenant_analytics", "Mein Verbrauch & Sharing")}`,
                 items: [
                     { name: t("energy.energy_balance", "Energiefluss & Solaranteil"), path: "/app/energy", icon: "⚡" },
-                    { name: t("nav.billing_statements", "Abrechnungen & Belege"), path: "/app/billing", icon: "📄" },
-                    { name: t("nav.tariffs", "Tarifinformationen"), path: "/app/tariff", icon: "💶" },
+                    { name: t("nav.billing_statements", "Abrechnungen & Belege"), path: "/app/tenant?tab=settlement", icon: "📄" },
+                    { name: t("nav.tariffs", "Tarifinformationen"), path: "/app/tenant?tab=settlement", icon: "💶" },
                 ],
             },
             {
