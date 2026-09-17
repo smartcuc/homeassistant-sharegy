@@ -254,10 +254,10 @@ export default function MieterstromAdminPage() {
         return (
             <div className="p-8 max-w-xl mx-auto text-center space-y-4 my-8 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl">
                 <div className="text-4xl">🏢</div>
-                <h2 className="text-lg font-bold text-slate-900 dark:text-white">Kein Mieterstrom-Objekt zugewiesen</h2>
-                <p className="text-xs text-slate-500">Du bist aktuell keinem Mieterstrom-Objekt zugeordnet.</p>
+                <h2 className="text-lg font-bold text-slate-900 dark:text-white">{t("admin_mieterstrom.no_tenant_assigned_title", "Kein Mieterstrom-Objekt zugewiesen")}</h2>
+                <p className="text-xs text-slate-500">{t("admin_mieterstrom.no_tenant_assigned_desc", "Du bist aktuell keinem Mieterstrom-Objekt zugeordnet.")}</p>
                 <Link to="/app/dashboard" className="inline-block px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-xs font-semibold">
-                    Zum Dashboard
+                    {t("tenant_dashboard.back_to_dashboard", "Zum Dashboard")}
                 </Link>
             </div>
         );
@@ -347,7 +347,7 @@ export default function MieterstromAdminPage() {
                         activeTab === "apartments" ? "bg-white dark:bg-slate-900 text-sky-600 dark:text-sky-400 font-bold shadow-xs" : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                     }`}
                 >
-                    🏠 Wohnungen & Mieter ({members.length})
+                    {t("admin_mieterstrom.tab_apartments_count", { count: members.length, defaultValue: `🏠 Wohnungen & Mieter (${members.length})` })}
                 </button>
                 <button
                     onClick={() => handleTabChange("settlement")}
@@ -396,20 +396,20 @@ export default function MieterstromAdminPage() {
                 <div className="space-y-6">
                     <div className="flex items-center justify-between">
                         <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200">
-                            Mieterstrom Bilanzen & Vollversorger-Strommix
+                            {t("admin_mieterstrom.balance_title", "Mieterstrom Bilanzen & Vollversorger-Strommix")}
                         </h2>
                         <div className="flex bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg text-xs font-semibold">
                             <button
                                 onClick={() => setTimeRange("today")}
                                 className={`px-2.5 py-1 rounded-md transition ${timeRange === "today" ? "bg-white dark:bg-slate-900 text-sky-600 dark:text-sky-400 shadow-xs" : "text-slate-500"}`}
                             >
-                                Heute
+                                {t("common.today", "Heute")}
                             </button>
                             <button
                                 onClick={() => setTimeRange("month")}
                                 className={`px-2.5 py-1 rounded-md transition ${timeRange === "month" ? "bg-white dark:bg-slate-900 text-sky-600 dark:text-sky-400 shadow-xs" : "text-slate-500"}`}
                             >
-                                Dieser Monat
+                                {t("common.this_month", "Dieser Monat")}
                             </button>
                         </div>
                     </div>
@@ -418,60 +418,60 @@ export default function MieterstromAdminPage() {
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
                         <div className="bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4">
                             <div className="flex items-center justify-between text-amber-700 dark:text-amber-300 text-xs font-bold uppercase">
-                                <span>Solarerzeugung</span>
+                                <span>{t("admin_mieterstrom.kpi_solar_title", "Solarerzeugung")}</span>
                                 <span>☀️</span>
                             </div>
                             <div className="mt-3 text-2xl font-black text-amber-900 dark:text-amber-100">
                                 {Number(currentStats?.produced_kwh ?? 0).toFixed(1)} <span className="text-xs font-normal">kWh</span>
                             </div>
-                            <div className="text-[11px] text-amber-700/80 dark:text-amber-300/80 mt-0.5">PV-Dachanlage</div>
+                            <div className="text-[11px] text-amber-700/80 dark:text-amber-300/80 mt-0.5">{t("admin_mieterstrom.kpi_solar_desc", "PV-Dachanlage")}</div>
                         </div>
 
                         <div className="bg-sky-500/5 dark:bg-sky-500/10 border border-sky-500/20 rounded-2xl p-4">
                             <div className="flex items-center justify-between text-sky-700 dark:text-sky-300 text-xs font-bold uppercase">
-                                <span>Mieterbedarf</span>
+                                <span>{t("admin_mieterstrom.kpi_demand_title", "Mieterbedarf")}</span>
                                 <span>🏠</span>
                             </div>
                             <div className="mt-3 text-2xl font-black text-sky-900 dark:text-sky-100">
                                 {Number(currentStats?.consumed_kwh ?? 0).toFixed(1)} <span className="text-xs font-normal">kWh</span>
                             </div>
-                            <div className="text-[11px] text-sky-700/80 dark:text-sky-300/80 mt-0.5">Alle Wohneinheiten</div>
+                            <div className="text-[11px] text-sky-700/80 dark:text-sky-300/80 mt-0.5">{t("admin_mieterstrom.kpi_demand_desc", "Alle Wohneinheiten")}</div>
                         </div>
 
                         <div className="bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4">
                             <div className="flex items-center justify-between text-emerald-700 dark:text-emerald-300 text-xs font-bold uppercase">
-                                <span>Solar vor Ort</span>
+                                <span>{t("admin_mieterstrom.kpi_onsite_solar_title", "Solar vor Ort")}</span>
                                 <span>⚡</span>
                             </div>
                             <div className="mt-3 text-2xl font-black text-emerald-900 dark:text-emerald-100">
                                 {Number(currentStats?.shared_kwh ?? 0).toFixed(1)} <span className="text-xs font-normal">kWh</span>
                             </div>
                             <div className="text-[11px] text-emerald-700/80 dark:text-emerald-300/80 mt-0.5 font-semibold">
-                                Solarquote: {currentStats?.autarky_pct ?? 0}%
+                                {t("admin_mieterstrom.kpi_onsite_solar_desc", { pct: currentStats?.autarky_pct ?? 0, defaultValue: `Solarquote: ${currentStats?.autarky_pct ?? 0}%` })}
                             </div>
                         </div>
 
                         <div className="bg-rose-500/5 dark:bg-rose-500/10 border border-rose-500/20 rounded-2xl p-4">
                             <div className="flex items-center justify-between text-rose-700 dark:text-rose-300 text-xs font-bold uppercase">
-                                <span>Reststromnetz</span>
+                                <span>{t("admin_mieterstrom.kpi_grid_title", "Reststromnetz")}</span>
                                 <span>🔌</span>
                             </div>
                             <div className="mt-3 text-2xl font-black text-rose-900 dark:text-rose-100">
                                 {Number(currentStats?.grid_import_kwh ?? 0).toFixed(1)} <span className="text-xs font-normal">kWh</span>
                             </div>
-                            <div className="text-[11px] text-rose-700/80 dark:text-rose-300/80 mt-0.5">Zugekaufter Reststrom</div>
+                            <div className="text-[11px] text-rose-700/80 dark:text-rose-300/80 mt-0.5">{t("admin_mieterstrom.kpi_grid_desc", "Zugekaufter Reststrom")}</div>
                         </div>
 
                         <div className="bg-indigo-500/5 dark:bg-indigo-500/10 border border-indigo-500/20 rounded-2xl p-4 col-span-2 sm:col-span-1">
                             <div className="flex items-center justify-between text-indigo-700 dark:text-indigo-300 text-xs font-bold uppercase">
-                                <span>Mieterersparnis</span>
+                                <span>{t("admin_mieterstrom.kpi_savings_title", "Mieterersparnis")}</span>
                                 <span>💰</span>
                             </div>
                             <div className="mt-3 text-2xl font-black text-indigo-900 dark:text-indigo-100">
                                 {Number(currentStats?.savings_eur ?? 0).toFixed(2)} <span className="text-xs font-normal">€</span>
                             </div>
                             <div className="text-[11px] text-indigo-700/80 dark:text-indigo-300/80 mt-0.5 font-semibold">
-                                vs. Grundversorgung
+                                {t("admin_mieterstrom.kpi_savings_desc", "vs. Grundversorgung")}
                             </div>
                         </div>
                     </div>
@@ -481,17 +481,17 @@ export default function MieterstromAdminPage() {
                         <div className="flex items-center justify-between mb-4">
                             <div>
                                 <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                                    🔮 48-Stunden KI-Erzeugungsprognose & Lastverschiebung
+                                    {t("admin_mieterstrom.forecast_title", "🔮 48-Stunden KI-Erzeugungsprognose & Lastverschiebung")}
                                 </h3>
                                 <p className="text-xs text-slate-500">
-                                    Prädiktive Optimierung für Wärmepumpen und Batteriespeicher im Mieterstrom-Quartier
+                                    {t("admin_mieterstrom.forecast_desc", "Prädiktive Optimierung für Wärmepumpen und Batteriespeicher im Mieterstrom-Quartier")}
                                 </p>
                             </div>
                             <div className="text-right">
                                 <div className="text-xs font-bold text-sky-600">
                                     +{cockpit.forecast_48h?.total_predicted_kwh?.toFixed(1) || 0} kWh
                                 </div>
-                                <div className="text-[10px] text-slate-400">erwarteter Ertrag</div>
+                                <div className="text-[10px] text-slate-400">{t("admin_mieterstrom.expected_yield", "erwarteter Ertrag")}</div>
                             </div>
                         </div>
 
@@ -508,7 +508,7 @@ export default function MieterstromAdminPage() {
                                     >
                                         <span className="text-[10px] font-mono">{new Date(h.timestamp).getHours()}:00</span>
                                         <span className="text-xs font-black my-1">{h.power_kw} <span className="text-[9px] font-normal">kW</span></span>
-                                        {h.is_peak_window && <span className="text-[9px] font-bold text-emerald-600">⚡ Solar</span>}
+                                        {h.is_peak_window && <span className="text-[9px] font-bold text-emerald-600">{t("admin_mieterstrom.peak_solar_badge", "⚡ Solar")}</span>}
                                     </div>
                                 ))}
                             </div>
@@ -525,10 +525,10 @@ export default function MieterstromAdminPage() {
                             <div>
                                 <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                                     <span>🏠</span>
-                                    <span>Mieter & Wohneinheiten ({members.length})</span>
+                                    <span>{t("admin_mieterstrom.tab_apartments_count", { count: members.length, defaultValue: `Mieter & Wohneinheiten (${members.length})` })}</span>
                                 </h2>
                                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                    Verwalte die Wohneinheiten, Zählerzuweisungen und AGB-Vollversorgungsverträge der Mieter.
+                                    {t("admin_mieterstrom.apartments_subtitle", "Verwalte die Wohneinheiten, Zählerzuweisungen und AGB-Vollversorgungsverträge der Mieter.")}
                                 </p>
                             </div>
                             <button
@@ -537,18 +537,18 @@ export default function MieterstromAdminPage() {
                                 className="px-4 py-2.5 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold shadow-xs transition-all flex items-center gap-2 cursor-pointer"
                             >
                                 <span>+</span>
-                                <span>Neuen Mieter einladen</span>
+                                <span>{t("admin_mieterstrom.btn_invite_tenant", "Neuen Mieter einladen")}</span>
                             </button>
                         </div>
 
                         {/* ACTIVE INVITES */}
                         <div className="space-y-3">
                             <div className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                                Offene Einladungslinks für Mieter: ({invites.length})
+                                {t("admin_mieterstrom.open_invites_count", { count: invites.length, defaultValue: `Offene Einladungslinks für Mieter: (${invites.length})` })}
                             </div>
                             {invites.length === 0 ? (
                                 <div className="p-4 text-center rounded-2xl bg-slate-50 dark:bg-slate-800/30 border border-dashed border-slate-200 dark:border-slate-800 text-xs text-slate-400">
-                                    Keine offenen Mieter-Einladungslinks. Erstelle oben einen neuen Link für den Hausfluraushang oder direkten Versand.
+                                    {t("admin_mieterstrom.no_open_invites", "Keine offenen Mieter-Einladungslinks. Erstelle oben einen neuen Link für den Hausfluraushang oder direkten Versand.")}
                                 </div>
                             ) : (
                                 invites.map((i) => {
@@ -558,7 +558,7 @@ export default function MieterstromAdminPage() {
                                     return (
                                         <div key={i.token} className="border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 p-4 rounded-2xl flex flex-col gap-3">
                                             <div className="flex items-center justify-between">
-                                                <span className="text-xs font-bold text-slate-900 dark:text-white">🏢 Mieter-Einladung</span>
+                                                <span className="text-xs font-bold text-slate-900 dark:text-white">🏢 {t("admin_mieterstrom.invite_label", "Mieter-Einladung")}</span>
                                                 <div className="flex items-center gap-2">
                                                     <button
                                                         type="button"
@@ -569,7 +569,7 @@ export default function MieterstromAdminPage() {
                                                         }}
                                                         className="px-3 py-1.5 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 text-sky-600 border border-slate-200 dark:border-slate-700 cursor-pointer"
                                                     >
-                                                        {isCopied ? "✓ Kopiert" : "📋 Link kopieren"}
+                                                        {isCopied ? t("common.copied", "✓ Kopiert") : t("common.copy_link", "📋 Link kopieren")}
                                                     </button>
                                                     <button
                                                         type="button"
@@ -583,7 +583,7 @@ export default function MieterstromAdminPage() {
                                                         onClick={() => deactivateInvite(i.token)}
                                                         className="px-2.5 py-1.5 text-xs text-rose-600 hover:bg-rose-50 rounded-lg cursor-pointer"
                                                     >
-                                                        Widerrufen
+                                                        {t("common.revoke", "Widerrufen")}
                                                     </button>
                                                 </div>
                                             </div>
@@ -591,8 +591,8 @@ export default function MieterstromAdminPage() {
                                                 <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border flex items-center gap-4">
                                                     <QRCodeSVG value={fullInviteUrl} size={110} level="M" />
                                                     <div className="text-xs">
-                                                        <h5 className="font-bold">QR-Code für Hausflur-Aushang</h5>
-                                                        <p className="text-slate-500 text-[11px]">Mieter können den Code scannen, um ihren Mieterstromvertrag digital zu aktivieren.</p>
+                                                        <h5 className="font-bold">{t("admin_mieterstrom.qr_title", "QR-Code für Hausflur-Aushang")}</h5>
+                                                        <p className="text-slate-500 text-[11px]">{t("admin_mieterstrom.qr_desc", "Mieter können den Code scannen, um ihren Mieterstromvertrag digital zu aktivieren.")}</p>
                                                     </div>
                                                 </div>
                                             )}
@@ -604,7 +604,7 @@ export default function MieterstromAdminPage() {
 
                         {/* MEMBERS LIST */}
                         <div className="space-y-2.5 pt-4 border-t border-slate-100 dark:border-slate-800">
-                            <div className="text-xs font-bold text-slate-700 dark:text-slate-300">Registrierte Mieter:</div>
+                            <div className="text-xs font-bold text-slate-700 dark:text-slate-300">{t("admin_mieterstrom.registered_tenants", "Registrierte Mieter:")}</div>
                             {members.map((m) => (
                                 <div key={m.id} className="border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 p-3.5 rounded-2xl flex items-center justify-between">
                                     <div className="flex items-center gap-2.5">
@@ -613,7 +613,7 @@ export default function MieterstromAdminPage() {
                                         </div>
                                         <div>
                                             <div className="text-xs font-semibold text-slate-900 dark:text-white">{m.email}</div>
-                                            <div className="text-[10px] text-slate-400">Vollversorgungsvertrag (AGB) aktiv</div>
+                                            <div className="text-[10px] text-slate-400">{t("admin_mieterstrom.contract_active_badge", "Vollversorgungsvertrag (AGB) aktiv")}</div>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">
@@ -622,13 +622,13 @@ export default function MieterstromAdminPage() {
                                             onChange={(e) => updateRole(m.id, e.target.value)}
                                             className="text-xs border rounded-xl px-3 py-1.5 bg-white dark:bg-slate-800 cursor-pointer"
                                         >
-                                            <option value="member">🏢 Mieter</option>
-                                            <option value="user_admin">👥 Hausverwaltung</option>
-                                            <option value="auditor">📊 Rechnungsprüfer</option>
-                                            <option value="admin">🏛️ Eigentümer / Betreiber</option>
+                                            <option value="member">🏢 {t("roles.member", "Mieter")}</option>
+                                            <option value="user_admin">👥 {t("roles.user_admin", "Hausverwaltung")}</option>
+                                            <option value="auditor">📊 {t("roles.auditor", "Rechnungsprüfer")}</option>
+                                            <option value="admin">🏛️ {t("roles.admin", "Eigentümer / Betreiber")}</option>
                                         </select>
                                         <button onClick={() => removeMember(m.id)} className="text-rose-600 text-xs px-2.5 py-1.5 cursor-pointer">
-                                            Entfernen
+                                            {t("common.delete", "Entfernen")}
                                         </button>
                                     </div>
                                 </div>
@@ -650,11 +650,11 @@ export default function MieterstromAdminPage() {
                                         <span className="text-xl">🏢</span>
                                         <h2 className="text-lg font-black">{activeTariff.name}</h2>
                                         <span className="bg-emerald-400/20 text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-400/30">
-                                            Aktiv
+                                            {t("common.active", "Aktiv")}
                                         </span>
                                     </div>
                                     <p className="text-xs text-sky-200/80 mt-1">
-                                        Mieterstrom-Vollversorgung gem. § 42a EnWG (Solarstrom + Reststrom in einer Gesamtrechnung)
+                                        {t("admin_mieterstrom.tariff_banner_sub", "Mieterstrom-Vollversorgung gem. § 42a EnWG (Solarstrom + Reststrom in einer Gesamtrechnung)")}
                                     </p>
                                 </div>
                                 <button
@@ -662,38 +662,38 @@ export default function MieterstromAdminPage() {
                                     disabled={settling}
                                     className="px-4 py-2 bg-sky-500 hover:bg-sky-600 disabled:opacity-50 text-white rounded-xl text-xs font-bold cursor-pointer"
                                 >
-                                    {settling ? "Berechne..." : "Monatsabrechnung anstoßen"}
+                                    {settling ? t("admin_mieterstrom.calculating", "Berechne...") : t("admin_mieterstrom.trigger_settlement_btn", "Monatsabrechnung anstoßen")}
                                 </button>
                             </div>
 
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-sky-800/60">
                                 <div>
-                                    <div className="text-[11px] text-sky-300 font-semibold uppercase">Solar-Arbeitspreis</div>
+                                    <div className="text-[11px] text-sky-300 font-semibold uppercase">{t("admin_mieterstrom.solar_working_price", "Solar-Arbeitspreis")}</div>
                                     <div className="text-2xl font-black mt-1 text-white">
                                         {Number(activeTariff?.sharing_price_ct_kwh ?? 0).toFixed(2)} <span className="text-xs font-normal">Ct/kWh</span>
                                     </div>
-                                    <div className="text-[10px] text-sky-300/70 mt-0.5">Vor-Ort PV-Strom</div>
+                                    <div className="text-[10px] text-sky-300/70 mt-0.5">{t("admin_mieterstrom.onsite_pv_electricity", "Vor-Ort PV-Strom")}</div>
                                 </div>
                                 <div>
-                                    <div className="text-[11px] text-sky-300 font-semibold uppercase">Reststrompreis</div>
+                                    <div className="text-[11px] text-sky-300 font-semibold uppercase">{t("admin_mieterstrom.residual_price", "Reststrompreis")}</div>
                                     <div className="text-2xl font-black mt-1 text-amber-300">
                                         ~32,50 <span className="text-xs font-normal">Ct/kWh</span>
                                     </div>
-                                    <div className="text-[10px] text-sky-300/70 mt-0.5">Netzbezug (Vollversorger)</div>
+                                    <div className="text-[10px] text-sky-300/70 mt-0.5">{t("admin_mieterstrom.residual_grid_supply", "Netzbezug (Vollversorger)")}</div>
                                 </div>
                                 <div>
-                                    <div className="text-[11px] text-sky-300 font-semibold uppercase">Grundpreis</div>
+                                    <div className="text-[11px] text-sky-300 font-semibold uppercase">{t("admin_mieterstrom.base_price", "Grundpreis")}</div>
                                     <div className="text-2xl font-black mt-1 text-emerald-300">
-                                        8,50 <span className="text-xs font-normal">€/Monat</span>
+                                        8,50 <span className="text-xs font-normal">€/{t("common.month", "Monat")}</span>
                                     </div>
-                                    <div className="text-[10px] text-sky-300/70 mt-0.5">Zähler & Abrechnung</div>
+                                    <div className="text-[10px] text-sky-300/70 mt-0.5">{t("admin_mieterstrom.meter_and_billing", "Zähler & Abrechnung")}</div>
                                 </div>
                                 <div>
-                                    <div className="text-[11px] text-sky-300 font-semibold uppercase">Mieterstromzuschlag</div>
+                                    <div className="text-[11px] text-sky-300 font-semibold uppercase">{t("admin_mieterstrom.tenant_subsidy", "Mieterstromzuschlag")}</div>
                                     <div className="text-2xl font-black mt-1 text-cyan-300">
                                         § 21 (3) EEG
                                     </div>
-                                    <div className="text-[10px] text-sky-300/70 mt-0.5">Förderung für Betreiber</div>
+                                    <div className="text-[10px] text-sky-300/70 mt-0.5">{t("admin_mieterstrom.subsidy_for_operator", "Förderung für Betreiber")}</div>
                                 </div>
                             </div>
                         </div>
@@ -704,10 +704,10 @@ export default function MieterstromAdminPage() {
                         <div className="flex items-center justify-between mb-4">
                             <div>
                                 <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                                    Monatliche Mieterstrom-Abrechnungsnachweise
+                                    {t("admin_mieterstrom.statements_title", "Monatliche Mieterstrom-Abrechnungsnachweise")}
                                 </h3>
                                 <p className="text-xs text-slate-500">
-                                    Eichrechtskonforme Vollversorgungsabrechnungen aller Mieter
+                                    {t("admin_mieterstrom.statements_desc", "Eichrechtskonforme Vollversorgungsabrechnungen aller Mieter")}
                                 </p>
                             </div>
                             <div className="flex items-center gap-1.5">
@@ -727,13 +727,13 @@ export default function MieterstromAdminPage() {
                                         <div>
                                             <div className="flex items-center gap-2">
                                                 <span className="font-mono font-bold text-xs">{stmt.statement_number}</span>
-                                                <span className="text-[10px] bg-slate-200 dark:bg-slate-700 px-2 py-0.5 rounded">{stmt.period_start} bis {stmt.period_end}</span>
+                                                <span className="text-[10px] bg-slate-200 dark:bg-slate-700 px-2 py-0.5 rounded">{stmt.period_start} {t("common.to", "bis")} {stmt.period_end}</span>
                                             </div>
-                                            <div className="text-xs text-slate-500 mt-1">Mieter: <span className="font-medium text-slate-700 dark:text-slate-300">{stmt.user_email}</span></div>
+                                            <div className="text-xs text-slate-500 mt-1">{t("roles.member", "Mieter")}: <span className="font-medium text-slate-700 dark:text-slate-300">{stmt.user_email}</span></div>
                                         </div>
                                         <div className="flex items-center gap-4">
                                             <div className="text-right">
-                                                <div className="text-xs text-slate-400">Rechnungsbetrag</div>
+                                                <div className="text-xs text-slate-400">{t("admin_mieterstrom.invoice_amount", "Rechnungsbetrag")}</div>
                                                 <div className="text-lg font-black text-slate-900 dark:text-white">{Number(stmt.net_balance_eur ?? 0).toFixed(2)} €</div>
                                             </div>
                                             <button
@@ -749,7 +749,7 @@ export default function MieterstromAdminPage() {
                             </div>
                         ) : (
                             <div className="text-center py-8 text-xs text-slate-400 bg-slate-50 dark:bg-slate-800/30 rounded-xl border border-dashed">
-                                Noch keine Mieterstromabrechnungen generiert. Klicke auf 'Monatsabrechnung anstoßen'.
+                                {t("admin_mieterstrom.no_statements", "Noch keine Mieterstromabrechnungen generiert. Klicke auf 'Monatsabrechnung anstoßen'.")}
                             </div>
                         )}
                     </div>
@@ -768,7 +768,7 @@ export default function MieterstromAdminPage() {
             {/* TAB 7: AUDIT */}
             {activeTab === "audit" && (
                 <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs">
-                    <h2 className="text-sm font-bold text-slate-900 dark:text-white mb-3">Rechtssicheres Mieterstrom-Auditprotokoll</h2>
+                    <h2 className="text-sm font-bold text-slate-900 dark:text-white mb-3">{t("admin_mieterstrom.audit_title", "Rechtssicheres Mieterstrom-Auditprotokoll")}</h2>
                     <div className="space-y-2 max-h-96 overflow-y-auto">
                         {logs.slice(0, 30).map((log, idx) => (
                             <div key={idx} className="border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30 p-3 rounded-xl text-xs flex justify-between">

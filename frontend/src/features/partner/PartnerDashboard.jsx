@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../api/client";
 import {
   Wrench,
@@ -23,6 +24,7 @@ import {
 } from "lucide-react";
 
 export default function PartnerDashboard() {
+  const { t } = useTranslation();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -101,7 +103,7 @@ export default function PartnerDashboard() {
       <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white">
         <div className="flex items-center gap-3">
           <RefreshCw className="w-6 h-6 animate-spin text-sky-400" />
-          <span className="text-lg font-medium">Lade Installateurs- & Partner-Flotte…</span>
+          <span className="text-lg font-medium">{t("partner.loading", "Lade Installateurs- & Partner-Flotte…")}</span>
         </div>
       </div>
     );
@@ -129,14 +131,14 @@ export default function PartnerDashboard() {
                 <Wrench className="w-6 h-6" />
               </div>
               <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-                {data?.partner_company?.name || "Installateurs- & Partner-Portal"}
+                {data?.partner_company?.name || t("partner.portal_title", "Installateurs- & Partner-Portal")}
               </h1>
               <span className="px-3 py-1 text-xs font-semibold uppercase tracking-wider rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300">
-                {data?.partner_company?.tier_display || "Fachpartner"}
+                {data?.partner_company?.tier_display || t("partner.tier_default", "Fachpartner")}
               </span>
             </div>
             <p className="text-sm text-slate-400">
-              Zentrale Flotten-Telemetrie, Störungsampel & 1-Klick Fernwartung betreuter Kundenanlagen.
+              {t("partner.subtitle", "Zentrale Flotten-Telemetrie, Störungsampel & 1-Klick Fernwartung betreuter Kundenanlagen.")}
             </p>
           </div>
 
@@ -146,12 +148,12 @@ export default function PartnerDashboard() {
               className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-medium text-sm rounded-xl shadow-lg shadow-sky-500/20 transition duration-200"
             >
               <PlusCircle className="w-4 h-4" />
-              <span>Schnell-Inbetriebnahme</span>
+              <span>{t("partner.quick_onboard_btn", "Schnell-Inbetriebnahme")}</span>
             </button>
             <button
               onClick={fetchFleet}
               className="p-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-slate-300 transition"
-              title="Aktualisieren"
+              title={t("common.refresh", "Aktualisieren")}
             >
               <RefreshCw className="w-4 h-4" />
             </button>
@@ -166,7 +168,7 @@ export default function PartnerDashboard() {
             </div>
             <div>
               <div className="text-2xl font-bold">{data?.summary?.total_homes || 0}</div>
-              <div className="text-xs text-slate-400">Betreute Liegenschaften</div>
+              <div className="text-xs text-slate-400">{t("partner.kpi_managed_homes", "Betreute Liegenschaften")}</div>
             </div>
           </div>
 
@@ -176,7 +178,7 @@ export default function PartnerDashboard() {
             </div>
             <div>
               <div className="text-2xl font-bold">{data?.summary?.total_pv_power_kw || 0} kW</div>
-              <div className="text-xs text-slate-400">Aktive PV-Leistung</div>
+              <div className="text-xs text-slate-400">{t("partner.kpi_pv_power", "Aktive PV-Leistung")}</div>
             </div>
           </div>
 
@@ -186,7 +188,7 @@ export default function PartnerDashboard() {
             </div>
             <div>
               <div className="text-2xl font-bold">{data?.summary?.total_wallbox_power_kw || 0} kW</div>
-              <div className="text-xs text-slate-400">Wallbox Ladeleistung</div>
+              <div className="text-xs text-slate-400">{t("partner.kpi_wallbox_power", "Wallbox Ladeleistung")}</div>
             </div>
           </div>
 
@@ -196,7 +198,7 @@ export default function PartnerDashboard() {
             </div>
             <div>
               <div className="text-2xl font-bold">{data?.summary?.active_alerts_count || 0}</div>
-              <div className="text-xs text-slate-400">Aktive Störungen / Warnungen</div>
+              <div className="text-xs text-slate-400">{t("partner.kpi_alerts", "Aktive Störungen / Warnungen")}</div>
             </div>
           </div>
         </div>
@@ -207,7 +209,7 @@ export default function PartnerDashboard() {
             <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
             <input
               type="text"
-              placeholder="Suche nach Kunde, Anlage, PLZ oder Adresse…"
+              placeholder={t("partner.search_placeholder", "Suche nach Kunde, Anlage, PLZ oder Adresse…")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full bg-slate-900/80 border border-slate-800 pl-10 pr-4 py-2.5 rounded-xl text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-sky-500"
@@ -221,7 +223,7 @@ export default function PartnerDashboard() {
                 filterHealth === "all" ? "bg-slate-700 text-white" : "bg-slate-900/80 text-slate-400 hover:text-slate-200"
               }`}
             >
-              Alle ({data?.summary?.total_homes || 0})
+              {t("partner.filter_all", { count: data?.summary?.total_homes || 0, defaultValue: `Alle (${data?.summary?.total_homes || 0})` })}
             </button>
             <button
               onClick={() => setFilterHealth("ok")}
@@ -230,7 +232,7 @@ export default function PartnerDashboard() {
               }`}
             >
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-              Optimal ({data?.summary?.status_counts?.ok || 0})
+              {t("partner.filter_ok", { count: data?.summary?.status_counts?.ok || 0, defaultValue: `Optimal (${data?.summary?.status_counts?.ok || 0})` })}
             </button>
             <button
               onClick={() => setFilterHealth("warning")}
@@ -239,7 +241,7 @@ export default function PartnerDashboard() {
               }`}
             >
               <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
-              Warnung ({data?.summary?.status_counts?.warning || 0})
+              {t("partner.filter_warning", { count: data?.summary?.status_counts?.warning || 0, defaultValue: `Warnung (${data?.summary?.status_counts?.warning || 0})` })}
             </button>
             <button
               onClick={() => setFilterHealth("error")}
@@ -248,7 +250,7 @@ export default function PartnerDashboard() {
               }`}
             >
               <XCircle className="w-3.5 h-3.5 text-rose-400" />
-              Störung ({data?.summary?.status_counts?.error || 0})
+              {t("partner.filter_error", { count: data?.summary?.status_counts?.error || 0, defaultValue: `Störung (${data?.summary?.status_counts?.error || 0})` })}
             </button>
           </div>
         </div>
@@ -259,19 +261,19 @@ export default function PartnerDashboard() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-slate-800 text-xs uppercase tracking-wider text-slate-400 bg-slate-950/40">
-                  <th className="py-4 px-6">Status</th>
-                  <th className="py-4 px-6">Anlage & Kunde</th>
-                  <th className="py-4 px-6">Standort</th>
-                  <th className="py-4 px-6">Komponenten</th>
-                  <th className="py-4 px-6">Live-Leistung</th>
-                  <th className="py-4 px-6 text-right">Aktionen</th>
+                  <th className="py-4 px-6">{t("partner.th_status", "Status")}</th>
+                  <th className="py-4 px-6">{t("partner.th_asset_customer", "Anlage & Kunde")}</th>
+                  <th className="py-4 px-6">{t("partner.th_location", "Standort")}</th>
+                  <th className="py-4 px-6">{t("partner.th_components", "Komponenten")}</th>
+                  <th className="py-4 px-6">{t("partner.th_live_power", "Live-Leistung")}</th>
+                  <th className="py-4 px-6 text-right">{t("partner.th_actions", "Aktionen")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60 text-sm">
                 {filteredHomes.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="py-12 text-center text-slate-500">
-                      Keine Kundenanlagen gefunden.
+                      {t("partner.no_assets_found", "Keine Kundenanlagen gefunden.")}
                     </td>
                   </tr>
                 ) : (
@@ -281,19 +283,19 @@ export default function PartnerDashboard() {
                         {home.health === "ok" && (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
                             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                            Online
+                            {t("partner.badge_online", "Online")}
                           </span>
                         )}
                         {home.health === "warning" && (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-500/10 border border-amber-500/20 text-amber-400">
                             <span className="w-2 h-2 rounded-full bg-amber-400"></span>
-                            Prüfen
+                            {t("partner.badge_check", "Prüfen")}
                           </span>
                         )}
                         {home.health === "error" && (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-rose-500/10 border border-rose-500/20 text-rose-400">
                             <span className="w-2 h-2 rounded-full bg-rose-400 animate-ping"></span>
-                            Störung
+                            {t("partner.badge_error", "Störung")}
                           </span>
                         )}
                       </td>
@@ -302,7 +304,7 @@ export default function PartnerDashboard() {
                         <div className="text-xs text-slate-400">{home.customer_name} ({home.customer_email})</div>
                       </td>
                       <td className="py-4 px-6 text-slate-300 text-xs">
-                        {home.address || "Keine Adresse"}
+                        {home.address || t("partner.no_address", "Keine Adresse")}
                       </td>
                       <td className="py-4 px-6">
                         <div className="flex items-center gap-2 text-xs text-slate-300">
@@ -324,7 +326,7 @@ export default function PartnerDashboard() {
                           }}
                           className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-sky-400 hover:text-sky-300 text-xs font-medium rounded-lg border border-slate-700 transition"
                         >
-                          Fernwartung
+                          {t("partner.btn_remote_maintenance", "Fernwartung")}
                         </button>
                       </td>
                     </tr>
@@ -343,9 +345,9 @@ export default function PartnerDashboard() {
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <Activity className="w-5 h-5 text-sky-400" />
-                    <h3 className="text-lg font-bold">Fernwartung: {selectedAsset.name}</h3>
+                    <h3 className="text-lg font-bold">{t("partner.modal_remote_title", { name: selectedAsset.name, defaultValue: `Fernwartung: ${selectedAsset.name}` })}</h3>
                   </div>
-                  <p className="text-xs text-slate-400">Kunde: {selectedAsset.customer_name}</p>
+                  <p className="text-xs text-slate-400">{t("partner.modal_customer_label", { name: selectedAsset.customer_name, defaultValue: `Kunde: ${selectedAsset.customer_name}` })}</p>
                 </div>
                 <button
                   onClick={() => setSelectedAsset(null)}
@@ -356,23 +358,23 @@ export default function PartnerDashboard() {
               </div>
 
               <div className="space-y-3">
-                <div className="text-xs font-medium text-slate-400">Wartungs-Aktion ausführen:</div>
+                <div className="text-xs font-medium text-slate-400">{t("partner.action_execute_label", "Wartungs-Aktion ausführen:")}</div>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => handleRunDiagnostics(selectedAsset.id, "ping")}
                     disabled={diagLoading}
                     className="p-3 bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-xl text-left transition"
                   >
-                    <div className="text-xs font-semibold text-slate-200">Live-Ping & Status</div>
-                    <div className="text-[11px] text-slate-400">Verbindung prüfen</div>
+                    <div className="text-xs font-semibold text-slate-200">{t("partner.action_ping_title", "Live-Ping & Status")}</div>
+                    <div className="text-[11px] text-slate-400">{t("partner.action_ping_desc", "Verbindung prüfen")}</div>
                   </button>
                   <button
                     onClick={() => handleRunDiagnostics(selectedAsset.id, "ocpp_trigger")}
                     disabled={diagLoading}
                     className="p-3 bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-xl text-left transition"
                   >
-                    <div className="text-xs font-semibold text-slate-200">OCPP Reset / Trigger</div>
-                    <div className="text-[11px] text-slate-400">Hard/Soft Reboot</div>
+                    <div className="text-xs font-semibold text-slate-200">{t("partner.action_ocpp_title", "OCPP Reset / Trigger")}</div>
+                    <div className="text-[11px] text-slate-400">{t("partner.action_ocpp_desc", "Hard/Soft Reboot")}</div>
                   </button>
                 </div>
               </div>
@@ -380,21 +382,21 @@ export default function PartnerDashboard() {
               {/* Diagnose-Ergebnis */}
               <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 font-mono text-xs space-y-2">
                 <div className="text-slate-400 flex items-center justify-between">
-                  <span>Diagnose-Konsole</span>
+                  <span>{t("partner.console_title", "Diagnose-Konsole")}</span>
                   {diagLoading && <RefreshCw className="w-3.5 h-3.5 animate-spin text-sky-400" />}
                 </div>
                 {diagResult ? (
                   <div className="space-y-1">
                     <div className="text-emerald-400">✓ {diagResult.message}</div>
                     {diagResult.asset_type && (
-                      <div className="text-slate-400">Asset-Typ: {diagResult.asset_type}</div>
+                      <div className="text-slate-400">{t("partner.console_asset_type", { type: diagResult.asset_type, defaultValue: `Asset-Typ: ${diagResult.asset_type}` })}</div>
                     )}
                     {diagResult.status && (
-                      <div className="text-slate-300">OCPP-Status: {diagResult.status} (Fehlercode: {diagResult.error_code})</div>
+                      <div className="text-slate-300">{t("partner.console_ocpp_status", { status: diagResult.status, code: diagResult.error_code, defaultValue: `OCPP-Status: ${diagResult.status} (Fehlercode: ${diagResult.error_code})` })}</div>
                     )}
                   </div>
                 ) : (
-                  <div className="text-slate-600">Warte auf Diagnose-Ausführung…</div>
+                  <div className="text-slate-600">{t("partner.console_waiting", "Warte auf Diagnose-Ausführung…")}</div>
                 )}
               </div>
 
@@ -403,7 +405,7 @@ export default function PartnerDashboard() {
                   onClick={() => setSelectedAsset(null)}
                   className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-medium rounded-xl transition"
                 >
-                  Schließen
+                  {t("common.close", "Schließen")}
                 </button>
               </div>
             </div>
@@ -418,10 +420,10 @@ export default function PartnerDashboard() {
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <PlusCircle className="w-5 h-5 text-sky-400" />
-                    <h3 className="text-lg font-bold">1-Klick Kunden-Inbetriebnahme</h3>
+                    <h3 className="text-lg font-bold">{t("partner.onboard_modal_title", "1-Klick Kunden-Inbetriebnahme")}</h3>
                   </div>
                   <p className="text-xs text-slate-400">
-                    Legen Sie eine neue Kundenanlage an. Die Wartungsfreigabe für Ihren Betrieb wird sofort aktiviert.
+                    {t("partner.onboard_modal_desc", "Legen Sie eine neue Kundenanlage an. Die Wartungsfreigabe für Ihren Betrieb wird sofort aktiviert.")}
                   </p>
                 </div>
                 <button
@@ -448,7 +450,7 @@ export default function PartnerDashboard() {
                 )}
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Kunden E-Mail-Adresse *</label>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">{t("partner.onboard_email_label", "Kunden E-Mail-Adresse *")}</label>
                   <input
                     type="email"
                     required
@@ -460,7 +462,7 @@ export default function PartnerDashboard() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Bezeichnung der Anlage *</label>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">{t("partner.onboard_home_name_label", "Bezeichnung der Anlage *")}</label>
                   <input
                     type="text"
                     required
@@ -473,7 +475,7 @@ export default function PartnerDashboard() {
 
                 <div className="grid grid-cols-3 gap-3">
                   <div className="col-span-2">
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">Straße & Hausnummer</label>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1">{t("partner.onboard_street_label", "Straße & Hausnummer")}</label>
                     <input
                       type="text"
                       placeholder="Sonnenallee 12"
@@ -483,7 +485,7 @@ export default function PartnerDashboard() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">PLZ</label>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1">{t("partner.onboard_zip_label", "PLZ")}</label>
                     <input
                       type="text"
                       placeholder="80331"
@@ -495,7 +497,7 @@ export default function PartnerDashboard() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Ort</label>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">{t("partner.onboard_city_label", "Ort")}</label>
                   <input
                     type="text"
                     placeholder="München"
@@ -511,7 +513,7 @@ export default function PartnerDashboard() {
                     onClick={() => setShowOnboardModal(false)}
                     className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium rounded-xl transition"
                   >
-                    Abbrechen
+                    {t("common.cancel", "Abbrechen")}
                   </button>
                   <button
                     type="submit"
@@ -519,7 +521,7 @@ export default function PartnerDashboard() {
                     className="flex items-center gap-2 px-5 py-2 bg-sky-500 hover:bg-sky-400 text-white text-sm font-semibold rounded-xl shadow-lg shadow-sky-500/20 transition"
                   >
                     {onboardSubmitting && <RefreshCw className="w-4 h-4 animate-spin" />}
-                    <span>Anlage anlegen</span>
+                    <span>{t("partner.onboard_submit_btn", "Anlage anlegen")}</span>
                   </button>
                 </div>
               </form>
@@ -531,3 +533,4 @@ export default function PartnerDashboard() {
     </div>
   );
 }
+
