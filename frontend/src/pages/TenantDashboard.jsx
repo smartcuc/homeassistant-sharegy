@@ -262,58 +262,61 @@ export default function TenantDashboard() {
     return (
         <div className="p-6 max-w-7xl mx-auto space-y-6">
 
-            {/* ✅ TITLE & HEADER */}
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
-                <div className="flex items-start gap-3">
-                    <span className="text-2xl shrink-0 mt-0.5">⚡</span>
-                    <div>
-                        <div className="flex flex-wrap items-center gap-2">
-                            <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
+            {/* ✅ TITLE & HEADER (FULL WIDTH WITH ACTION BADGES UNDERNEATH) */}
+            <div className="space-y-4 pb-4 border-b border-slate-200 dark:border-slate-800">
+                <div className="flex items-start gap-3.5">
+                    <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-xl shrink-0 mt-0.5">
+                        ⚡
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-2.5">
+                            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white truncate">
                                 {tenant.name}
                             </h1>
-                            <span className="shrink-0 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-500/20">
-                                Community Aktiv
+                            <span className="shrink-0 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold px-3 py-1 rounded-full border border-emerald-500/20 flex items-center gap-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                {t("tenant.community_active", "Community Aktiv")}
                             </span>
                         </div>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                            Eichrechtskonformes 15-Minuten Energy Sharing & Prädiktive KI-Steuerung
+                        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+                            {t("tenant.subtitle", "Eichrechtskonformes 15-Minuten Energy Sharing & Prädiktive KI-Steuerung")}
                         </p>
                     </div>
                 </div>
 
-                {/* Quick Action Buttons */}
-                <div className="flex flex-wrap items-center gap-2">
+                {/* Quick Action Badges Bar */}
+                <div className="flex flex-wrap items-center gap-2.5 pt-1">
                     <button
                         type="button"
                         onClick={() => setWhitelabelModalOpen(true)}
-                        className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-sky-600 hover:bg-sky-500 text-white transition-all shadow-xs flex items-center gap-1.5 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                        className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-sky-50 dark:hover:bg-sky-950/40 text-slate-700 dark:text-slate-200 hover:text-sky-600 dark:hover:text-sky-400 border border-slate-200 dark:border-slate-800 hover:border-sky-300 dark:hover:border-sky-800 transition-all shadow-xs flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                     >
-                        <span>🎨</span>
-                        <span>Whitelabel & Branding</span>
+                        <span className="text-sm">🎨</span>
+                        <span>{t("tenant.whitelabel_btn", "Whitelabel & Branding")}</span>
                     </button>
                     <button
                         type="button"
                         onClick={() => setMakoModalOpen(true)}
-                        className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-teal-600 hover:bg-teal-500 text-white transition-all shadow-xs flex items-center gap-1.5 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                        className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-teal-50 dark:hover:bg-teal-950/40 text-slate-700 dark:text-slate-200 hover:text-teal-600 dark:hover:text-teal-400 border border-slate-200 dark:border-slate-800 hover:border-teal-300 dark:hover:border-teal-800 transition-all shadow-xs flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                     >
-                        <span>📄</span>
-                        <span>Marktkommunikation (AS4)</span>
+                        <span className="text-sm">📄</span>
+                        <span>{t("tenant.mako_btn", "Marktkommunikation (AS4)")}</span>
                     </button>
                     <button
                         type="button"
                         onClick={() => setWizardOpen(true)}
-                        className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-all shadow-xs flex items-center gap-1.5 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                        className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 border border-slate-200 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-800 transition-all shadow-xs flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                     >
-                        <span>✨</span>
-                        <span>Gebäude-Assistent (3 Schritte)</span>
+                        <span className="text-sm">✨</span>
+                        <span>{t("tenant.wizard_btn", "Gebäude-Assistent (3 Schritte)")}</span>
                     </button>
                     <button
                         type="button"
                         onClick={() => setShareModalOpen(true)}
-                        className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all shadow-xs flex items-center gap-1.5 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                        className="px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/80 hover:border-emerald-300 transition-all shadow-xs flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                     >
-                        <span>📢</span>
-                        <span>Erfolge teilen</span>
+                        <span className="text-sm">📢</span>
+                        <span>{t("tenant.share_btn", "Erfolge teilen")}</span>
                     </button>
                 </div>
             </div>
