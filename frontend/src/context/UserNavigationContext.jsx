@@ -100,12 +100,15 @@ export function UserNavigationProvider({ children }) {
 
     const defaultMode = useMemo(() => {
         if (getAppFlavor() === "pro") return NAV_MODES.PARTNER;
+        if (user?.email?.includes("-admin") || user?.username?.includes("-admin") || user?.email === "admin@sharegy.de" || user?.email === "sysadmin@sharegy.de") {
+            return NAV_MODES.ADMIN;
+        }
         if (hasEms && hasEnergySharing) return NAV_MODES.HYBRID;
         if (hasEnergySharing && !hasEms) return userCommunityMode;
         if (isPartner && !hasEms) return NAV_MODES.PARTNER;
         if (isAdmin && !hasEms) return NAV_MODES.ADMIN;
         return NAV_MODES.EMS_ONLY;
-    }, [hasEms, hasEnergySharing, userCommunityMode, isPartner, isAdmin]);
+    }, [user, hasEms, hasEnergySharing, userCommunityMode, isPartner, isAdmin]);
 
     const [activeMode, setActiveMode] = useState(() => {
         const saved = localStorage.getItem(STORAGE_KEY);

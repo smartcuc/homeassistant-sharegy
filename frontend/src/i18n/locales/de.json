@@ -125,6 +125,8 @@
     "partner_fleet": "Partner-Flotten",
     "community": "Energiegemeinschaft",
     "community_overview": "Community Cockpit",
+    "mieterstrom_overview": "Mieterstrom-Cockpit",
+    "ggv_overview": "Gebäude-Solarcockpit",
     "tenant_analytics": "Mein Verbrauch & Sharing",
     "my_energy": "Mein Haushalt & Verbrauch",
     "billing_statements": "Abrechnungen & Belege",

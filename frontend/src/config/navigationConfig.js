@@ -104,15 +104,26 @@ export function getNavigationSections({
                 items: [
                     { name: t("energy.energy_balance", "Energiefluss & Strommix"), path: "/app/energy", icon: "⚡" },
                 ],
-            },
-            {
-                title: `⚙️ ${t("nav.account_settings", "Mein Konto")}`,
-                items: [
-                    { name: t("nav.profile", "Profil & Stammdaten"), path: "/app/profile", icon: "👤" },
-                    { name: t("nav.manual", "Handbuch"), path: "/app/help", icon: "📖" },
-                ],
             }
         );
+
+        if (isStaffOrAdmin || hasCommunityAdminAccess) {
+            sections.push({
+                title: `🛡️ ${t("nav.admin_group", "Administration")}`,
+                items: [
+                    { name: t("nav.communities_hub", "Quartiers- & Mandantenverwaltung"), path: "/app/admin/communities", icon: "🏘️" },
+                    { name: t("nav.tenant_management", "Mandanten & Mieter"), path: "/app/tenant", icon: "👥" },
+                ],
+            });
+        }
+
+        sections.push({
+            title: `⚙️ ${t("nav.account_settings", "Mein Konto")}`,
+            items: [
+                { name: t("nav.profile", "Profil & Stammdaten"), path: "/app/profile", icon: "👤" },
+                { name: t("nav.manual", "Handbuch"), path: "/app/help", icon: "📖" },
+            ],
+        });
         return sections;
     }
 
@@ -132,15 +143,26 @@ export function getNavigationSections({
                 items: [
                     { name: t("energy.energy_balance", "PV-Solaranteil & Reststrom"), path: "/app/energy", icon: "⚡" },
                 ],
-            },
-            {
-                title: `⚙️ ${t("nav.account_settings", "Mein Konto")}`,
-                items: [
-                    { name: t("nav.profile", "Profil & Stammdaten"), path: "/app/profile", icon: "👤" },
-                    { name: t("nav.manual", "Handbuch"), path: "/app/help", icon: "📖" },
-                ],
             }
         );
+
+        if (isStaffOrAdmin || hasCommunityAdminAccess) {
+            sections.push({
+                title: `🛡️ ${t("nav.admin_group", "Administration")}`,
+                items: [
+                    { name: t("nav.communities_hub", "Quartiers- & Mandantenverwaltung"), path: "/app/admin/communities", icon: "🏘️" },
+                    { name: t("nav.tenant_management", "Mandanten & Mieter"), path: "/app/tenant", icon: "👥" },
+                ],
+            });
+        }
+
+        sections.push({
+            title: `⚙️ ${t("nav.account_settings", "Mein Konto")}`,
+            items: [
+                { name: t("nav.profile", "Profil & Stammdaten"), path: "/app/profile", icon: "👤" },
+                { name: t("nav.manual", "Handbuch"), path: "/app/help", icon: "📖" },
+            ],
+        });
         return sections;
     }
 
@@ -160,15 +182,26 @@ export function getNavigationSections({
                 items: [
                     { name: t("energy.energy_balance", "15m Energiefluss & Zuteilung"), path: "/app/energy", icon: "📊" },
                 ],
-            },
-            {
-                title: `⚙️ ${t("nav.account_settings", "Mein Konto")}`,
-                items: [
-                    { name: t("nav.profile", "Profil & Stammdaten"), path: "/app/profile", icon: "👤" },
-                    { name: t("nav.manual", "Handbuch"), path: "/app/help", icon: "📖" },
-                ],
             }
         );
+
+        if (isStaffOrAdmin || hasCommunityAdminAccess) {
+            sections.push({
+                title: `🛡️ ${t("nav.admin_group", "Administration")}`,
+                items: [
+                    { name: t("nav.communities_hub", "Quartiers- & Mandantenverwaltung"), path: "/app/admin/communities", icon: "🏘️" },
+                    { name: t("nav.tenant_management", "Mandanten & Mieter"), path: "/app/tenant", icon: "👥" },
+                ],
+            });
+        }
+
+        sections.push({
+            title: `⚙️ ${t("nav.account_settings", "Mein Konto")}`,
+            items: [
+                { name: t("nav.profile", "Profil & Stammdaten"), path: "/app/profile", icon: "👤" },
+                { name: t("nav.manual", "Handbuch"), path: "/app/help", icon: "📖" },
+            ],
+        });
         return sections;
     }
 
@@ -222,6 +255,14 @@ export function getNavigationSections({
                         icon: "⚙️",
                         isExternal: true,
                     },
+                ],
+            },
+            {
+                title: `⚙️ ${t("nav.account_settings", "Mein Konto & System")}`,
+                items: [
+                    { name: t("nav.profile", "Profil & Stammdaten"), path: "/app/profile", icon: "👤" },
+                    { name: t("nav.system_status", "Systemstatus (Server)"), path: "/app/status", icon: "🌐" },
+                    { name: t("nav.manual", "Handbuch"), path: "/app/help", icon: "📖" },
                 ],
             }
         );

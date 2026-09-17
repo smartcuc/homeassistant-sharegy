@@ -125,6 +125,8 @@
     "partner_fleet": "Partner Fleets",
     "community": "Energy Community",
     "community_overview": "Community Cockpit",
+    "mieterstrom_overview": "Tenant Electricity Cockpit",
+    "ggv_overview": "Building Solar Cockpit",
     "tenant_analytics": "My Consumption & Sharing",
     "my_energy": "My Household & Consumption",
     "billing_statements": "Bills & Statements",
