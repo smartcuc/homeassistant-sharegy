@@ -260,9 +260,9 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
                                             type="number"
                                             value={buildingData.pv_capacity_kwp}
                                             onChange={(e) => setBuildingData({ ...buildingData, pv_capacity_kwp: Number(e.target.value) })}
-                                            className="w-full text-sm font-bold p-3 border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 rounded-xl dark:text-white"
+                                            className="w-full text-sm font-bold p-3 pr-14 no-spinners border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 rounded-xl dark:text-white"
                                         />
-                                        <span className="absolute right-3 top-3.5 text-xs text-slate-400 font-bold">kWp</span>
+                                        <span className="absolute right-3 top-3.5 text-xs text-slate-400 font-bold pointer-events-none">kWp</span>
                                     </div>
                                 </div>
 
@@ -275,9 +275,9 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
                                             type="number"
                                             value={buildingData.battery_capacity_kwh}
                                             onChange={(e) => setBuildingData({ ...buildingData, battery_capacity_kwh: Number(e.target.value) })}
-                                            className="w-full text-sm font-bold p-3 border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 rounded-xl dark:text-white"
+                                            className="w-full text-sm font-bold p-3 pr-14 no-spinners border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 rounded-xl dark:text-white"
                                         />
-                                        <span className="absolute right-3 top-3.5 text-xs text-slate-400 font-bold">kWh</span>
+                                        <span className="absolute right-3 top-3.5 text-xs text-slate-400 font-bold pointer-events-none">kWh</span>
                                     </div>
                                 </div>
 
@@ -362,9 +362,9 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
                                                     type="number"
                                                     value={apt.mea_share}
                                                     onChange={(e) => updateApartment(apt.id, "mea_share", Number(e.target.value))}
-                                                    className="w-full text-xs font-bold p-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg dark:text-white"
+                                                    className="w-full text-xs font-bold p-2 pr-6 no-spinners border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg dark:text-white text-right"
                                                 />
-                                                <span className="absolute right-2 top-2 text-[10px] text-slate-400 font-bold">%</span>
+                                                <span className="absolute right-2 top-2 text-[10px] text-slate-400 font-bold pointer-events-none">%</span>
                                             </div>
                                         </div>
                                         <div className="col-span-1 text-right">
@@ -410,9 +410,9 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
                                             step="0.1"
                                             value={tariffs.solar_rate_ct}
                                             onChange={(e) => setTariffs({ ...tariffs, solar_rate_ct: Number(e.target.value) })}
-                                            className="w-full text-base font-black p-3 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl dark:text-white"
+                                            className="w-full text-base font-black p-3 pr-16 no-spinners border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl dark:text-white"
                                         />
-                                        <span className="absolute right-3 top-3.5 text-xs text-slate-400 font-bold">ct/kWh</span>
+                                        <span className="absolute right-3 top-3.5 text-xs text-slate-400 font-bold pointer-events-none">ct/kWh</span>
                                     </div>
                                     <p className="text-[10px] text-slate-400 mt-1">
                                         {isMieterstrom ? t("wizard.desc_solar_mieterstrom", "Mieterpreis für den Dach-Solarstrom.") : isGgv ? t("wizard.desc_solar_ggv", "Umlage für die Solaranlagennutzung.") : t("wizard.desc_solar_sharing", "Preis für Energie aus dem Sharing-Pool.")}
@@ -429,9 +429,9 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
                                             step="0.1"
                                             value={tariffs.grid_rate_ct}
                                             onChange={(e) => setTariffs({ ...tariffs, grid_rate_ct: Number(e.target.value) })}
-                                            className="w-full text-base font-black p-3 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl dark:text-white"
+                                            className="w-full text-base font-black p-3 pr-16 no-spinners border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl dark:text-white"
                                         />
-                                        <span className="absolute right-3 top-3.5 text-xs text-slate-400 font-bold">ct/kWh</span>
+                                        <span className="absolute right-3 top-3.5 text-xs text-slate-400 font-bold pointer-events-none">ct/kWh</span>
                                     </div>
                                     <p className="text-[10px] text-slate-400 mt-1">
                                         {isGgv ? t("wizard.desc_grid_ggv", "Externer Vergleichstarif der Bewohner.") : t("wizard.desc_grid_default", "Preis für Netzbezug bei Bewölkung.")}
@@ -448,9 +448,9 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
                                             step="0.5"
                                             value={tariffs.base_fee_monthly_eur}
                                             onChange={(e) => setTariffs({ ...tariffs, base_fee_monthly_eur: Number(e.target.value) })}
-                                            className="w-full text-base font-black p-3 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl dark:text-white"
+                                            className="w-full text-base font-black p-3 pr-20 no-spinners border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl dark:text-white"
                                         />
-                                        <span className="absolute right-3 top-3.5 text-xs text-slate-400 font-bold">€/Monat</span>
+                                        <span className="absolute right-3 top-3.5 text-xs text-slate-400 font-bold pointer-events-none">€/{t("common.month", "Monat")}</span>
                                     </div>
                                     <p className="text-[10px] text-slate-400 mt-1">{t("wizard.base_fee_desc", "Für Messstellenbetrieb & Plattform.")}</p>
                                 </div>
