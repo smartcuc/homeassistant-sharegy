@@ -209,13 +209,23 @@ export default function TenantDashboard() {
         loadData();
     }
 
-    // ✅ INVITE DEAKTIVIEREN
+    // ✅ INVITE DEAKTIVIEREN / WIDERRUFEN
     async function deactivateInvite(token) {
-        await apiFetch("/api/deactivate-invite/", {
-            method: "POST",
-            body: JSON.stringify({ token }),
-        });
-        loadData();
+        if (!window.confirm("Möchtest du diesen Einladungslink wirklich widerrufen und dauerhaft löschen?")) {
+            return;
+        }
+        try {
+            await apiFetch("/api/deactivate-invite/", {
+                method: "POST",
+                body: JSON.stringify({ token }),
+            });
+            // Sofort aus der Liste entfernen
+            setInvites((prev) => prev.filter((i) => i.token !== token));
+            await loadData();
+        } catch (err) {
+            console.error("Deactivate error:", err);
+            alert("Fehler beim Widerrufen des Einladungslinks: " + (err.message || ""));
+        }
     }
 
     function formatAction(log) {

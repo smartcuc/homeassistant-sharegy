@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { QRCodeSVG } from "qrcode.react";
 
@@ -58,6 +58,15 @@ export default function CommunityInviteModal({
     const [loading, setLoading] = useState(false);
     const [copied, setCopied] = useState(false);
     const [showQr, setShowQr] = useState(false);
+
+    useEffect(() => {
+        if (isOpen) {
+            setSelectedRole(initialRole || "member");
+            setCreatedInvite(null);
+            setCopied(false);
+            setShowQr(false);
+        }
+    }, [initialRole, isOpen]);
 
     if (!isOpen) return null;
 

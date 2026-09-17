@@ -350,7 +350,7 @@ class MyTenantView(APIView):
             is_active=True
         ).select_related("user")
 
-        invites = TenantInvite.objects.filter(tenant=tenant)
+        invites = TenantInvite.objects.filter(tenant=tenant, is_active=True)
 
         return Response({
             "tenant": {
@@ -489,14 +489,7 @@ class DeactivateInviteView(APIView):
 
         invite = get_object_or_404(TenantInvite, token=token)
 
-        is_admin = TenantMembership.objects.filter(
-            user=request.user,
-            tenant=invite.tenant,
-            role="admin",
-            is_active=True
-        ).exists()
-
-        if not is_admin:
+        if not can_manage_invites(request.user, invite.tenant):
             return Response({"error": "not allowed"}, status=403)
 
         invite.is_active = False
