@@ -229,112 +229,79 @@ def seed_sharing_demo_environment():
         defaults={"role": "member", "is_active": True},
     )
 
-    # 4. TARIFE ANLEGEN
-    tariff_sonnenfeld, _ = CommunityTariff.objects.update_or_create(
-        tenant=tenant_sonnenfeld,
-        defaults={
-            "name": "Sonnenfeld Börsentarif Dynamisch (Energy Sharing)",
-            "pricing_model": CommunityTariff.PRICING_MODEL_SPOT_INDEXED,
-            "allocation_model": CommunityTariff.ALLOCATION_HYBRID,
-            "sharing_price_ct_kwh": Decimal("12.50"),
-            "producer_payout_ct_kwh": Decimal("10.00"),
-            "community_fee_ct_kwh": Decimal("2.00"),
-            "grid_fee_saved_ct_kwh": Decimal("1.50"),
-            "spot_markup_ct_kwh": Decimal("3.20"),
-            "spot_floor_price_ct_kwh": Decimal("5.00"),
-            "spot_cap_price_ct_kwh": Decimal("30.00"),
-            "feed_in_spot_share_pct": Decimal("85.00"),
-            "is_active": True,
-        },
-    )
+    # 4. TARIFE ANLEGEN (Defensiv gegen bestehende Duplikate)
+    tariff_sonnenfeld = CommunityTariff.objects.filter(tenant=tenant_sonnenfeld).first()
+    if not tariff_sonnenfeld:
+        tariff_sonnenfeld = CommunityTariff(tenant=tenant_sonnenfeld)
+    tariff_sonnenfeld.name = "Sonnenfeld Börsentarif Dynamisch (Energy Sharing)"
+    tariff_sonnenfeld.pricing_model = CommunityTariff.PRICING_MODEL_SPOT_INDEXED
+    tariff_sonnenfeld.allocation_model = CommunityTariff.ALLOCATION_HYBRID
+    tariff_sonnenfeld.sharing_price_ct_kwh = Decimal("12.50")
+    tariff_sonnenfeld.producer_payout_ct_kwh = Decimal("10.00")
+    tariff_sonnenfeld.community_fee_ct_kwh = Decimal("2.00")
+    tariff_sonnenfeld.grid_fee_saved_ct_kwh = Decimal("1.50")
+    tariff_sonnenfeld.spot_markup_ct_kwh = Decimal("3.20")
+    tariff_sonnenfeld.spot_floor_price_ct_kwh = Decimal("5.00")
+    tariff_sonnenfeld.spot_cap_price_ct_kwh = Decimal("30.00")
+    tariff_sonnenfeld.feed_in_spot_share_pct = Decimal("85.00")
+    tariff_sonnenfeld.is_active = True
+    tariff_sonnenfeld.save()
 
-    CommunityTariff.objects.update_or_create(
-        tenant=tenant_amselweg,
-        defaults={
-            "name": "Amselweg Quartierstarif Fix",
-            "pricing_model": CommunityTariff.PRICING_MODEL_STATIC,
-            "allocation_model": CommunityTariff.ALLOCATION_DYNAMIC,
-            "sharing_price_ct_kwh": Decimal("14.00"),
-            "producer_payout_ct_kwh": Decimal("11.00"),
-            "community_fee_ct_kwh": Decimal("1.50"),
-            "grid_fee_saved_ct_kwh": Decimal("1.20"),
-            "is_active": True,
-        },
-    )
+    tariff_amselweg = CommunityTariff.objects.filter(tenant=tenant_amselweg).first()
+    if not tariff_amselweg:
+        tariff_amselweg = CommunityTariff(tenant=tenant_amselweg)
+    tariff_amselweg.name = "Amselweg Quartierstarif Fix"
+    tariff_amselweg.pricing_model = CommunityTariff.PRICING_MODEL_STATIC
+    tariff_amselweg.allocation_model = CommunityTariff.ALLOCATION_DYNAMIC
+    tariff_amselweg.sharing_price_ct_kwh = Decimal("14.00")
+    tariff_amselweg.producer_payout_ct_kwh = Decimal("11.00")
+    tariff_amselweg.community_fee_ct_kwh = Decimal("1.50")
+    tariff_amselweg.grid_fee_saved_ct_kwh = Decimal("1.20")
+    tariff_amselweg.is_active = True
+    tariff_amselweg.save()
 
-    tariff_mieterstrom, _ = CommunityTariff.objects.update_or_create(
-        tenant=tenant_mieterstrom,
-        defaults={
-            "name": "Mieterstrom Vollversorgung (§ 42a EnWG)",
-            "pricing_model": CommunityTariff.PRICING_MODEL_STATIC,
-            "allocation_model": CommunityTariff.ALLOCATION_DYNAMIC,
-            "sharing_price_ct_kwh": Decimal("21.50"),
-            "producer_payout_ct_kwh": Decimal("16.00"),
-            "community_fee_ct_kwh": Decimal("0.00"),
-            "grid_fee_saved_ct_kwh": Decimal("2.80"),
-            "is_active": True,
-        },
-    )
+    tariff_mieterstrom = CommunityTariff.objects.filter(tenant=tenant_mieterstrom).first()
+    if not tariff_mieterstrom:
+        tariff_mieterstrom = CommunityTariff(tenant=tenant_mieterstrom)
+    tariff_mieterstrom.name = "Mieterstrom Vollversorgung (§ 42a EnWG)"
+    tariff_mieterstrom.pricing_model = CommunityTariff.PRICING_MODEL_STATIC
+    tariff_mieterstrom.allocation_model = CommunityTariff.ALLOCATION_DYNAMIC
+    tariff_mieterstrom.sharing_price_ct_kwh = Decimal("21.50")
+    tariff_mieterstrom.producer_payout_ct_kwh = Decimal("16.00")
+    tariff_mieterstrom.community_fee_ct_kwh = Decimal("0.00")
+    tariff_mieterstrom.grid_fee_saved_ct_kwh = Decimal("2.80")
+    tariff_mieterstrom.is_active = True
+    tariff_mieterstrom.save()
 
-    tariff_ggv, _ = CommunityTariff.objects.update_or_create(
-        tenant=tenant_ggv,
-        defaults={
-            "name": "GGV Solare Vor-Ort-Aufteilung (§ 42b EnWG)",
-            "pricing_model": CommunityTariff.PRICING_MODEL_STATIC,
-            "allocation_model": CommunityTariff.ALLOCATION_HYBRID,
-            "sharing_price_ct_kwh": Decimal("11.00"),
-            "producer_payout_ct_kwh": Decimal("10.00"),
-            "community_fee_ct_kwh": Decimal("1.00"),
-            "grid_fee_saved_ct_kwh": Decimal("0.00"),
-            "is_active": True,
-        },
-    )
+    tariff_ggv = CommunityTariff.objects.filter(tenant=tenant_ggv).first()
+    if not tariff_ggv:
+        tariff_ggv = CommunityTariff(tenant=tenant_ggv)
+    tariff_ggv.name = "GGV Solare Vor-Ort-Aufteilung (§ 42b EnWG)"
+    tariff_ggv.pricing_model = CommunityTariff.PRICING_MODEL_STATIC
+    tariff_ggv.allocation_model = CommunityTariff.ALLOCATION_HYBRID
+    tariff_ggv.sharing_price_ct_kwh = Decimal("11.00")
+    tariff_ggv.producer_payout_ct_kwh = Decimal("10.00")
+    tariff_ggv.community_fee_ct_kwh = Decimal("1.00")
+    tariff_ggv.grid_fee_saved_ct_kwh = Decimal("0.00")
+    tariff_ggv.is_active = True
+    tariff_ggv.save()
 
     # 5. MEA-BETEILIGUNGSQUOTEN ANLEGEN
-    CommunityMemberShare.objects.update_or_create(
-        tenant=tenant_sonnenfeld,
-        membership=member_membership,
-        defaults={
-            "user": member_user,
-            "share_percent": Decimal("40.00"),
-            "valid_from": timezone.make_aware(datetime(2026, 1, 1, 0, 0)),
-            "is_active": True,
-        },
-    )
-
-    CommunityMemberShare.objects.update_or_create(
-        tenant=tenant_sonnenfeld,
-        membership=neighbor_membership,
-        defaults={
-            "user": neighbor_user,
-            "share_percent": Decimal("35.00"),
-            "valid_from": timezone.make_aware(datetime(2026, 1, 1, 0, 0)),
-            "is_active": True,
-        },
-    )
-
-    CommunityMemberShare.objects.update_or_create(
-        tenant=tenant_sonnenfeld,
-        membership=admin_membership,
-        defaults={
-            "user": admin_user,
-            "share_percent": Decimal("25.00"),
-            "valid_from": timezone.make_aware(datetime(2026, 1, 1, 0, 0)),
-            "is_active": True,
-        },
-    )
-
-    # GGV MEA Anteile (125/1000 = 12.5% für Sabine)
-    CommunityMemberShare.objects.update_or_create(
-        tenant=tenant_ggv,
-        membership=ggv_user_membership,
-        defaults={
-            "user": ggv_user,
-            "share_percent": Decimal("12.50"),
-            "valid_from": timezone.make_aware(datetime(2026, 1, 1, 0, 0)),
-            "is_active": True,
-        },
-    )
+    # 5. MEA-BETEILIGUNGSQUOTEN ANLEGEN
+    for (t, m, u, pct) in [
+        (tenant_sonnenfeld, member_membership, member_user, Decimal("40.00")),
+        (tenant_sonnenfeld, neighbor_membership, neighbor_user, Decimal("35.00")),
+        (tenant_sonnenfeld, admin_membership, admin_user, Decimal("25.00")),
+        (tenant_ggv, ggv_user_membership, ggv_user, Decimal("12.50")),
+    ]:
+        share = CommunityMemberShare.objects.filter(tenant=t, membership=m).first()
+        if not share:
+            share = CommunityMemberShare(tenant=t, membership=m)
+        share.user = u
+        share.share_percent = pct
+        share.valid_from = timezone.make_aware(datetime(2026, 1, 1, 0, 0))
+        share.is_active = True
+        share.save()
 
     # 6. ZÄHLER ANLEGEN
     # Sharing
@@ -562,49 +529,45 @@ def seed_sharing_demo_environment():
     )
 
     # 9. COMMUNITY ANNOUNCEMENTS (RUNDSCHREIBEN)
-    CommunityAnnouncement.objects.update_or_create(
-        tenant=tenant_sonnenfeld,
-        title="☀️ Frühlings-Solarprognose: Höchstwerte im Quartier Sonnenfeld erwartet!",
-        defaults={
-            "author": admin_user,
-            "message": "Liebe Mitglieder, dank der optimalen Wetterlage und den dynamischen Börsenstromtarifen konnten wir die Autarkiequote im Quartier auf über 68% steigern. Die Monatsnachweise stehen im Portal als PDF bereit.",
-            "category": CommunityAnnouncement.CATEGORY_TARIFF,
-            "is_active": True,
-        },
-    )
-
-    CommunityAnnouncement.objects.update_or_create(
-        tenant=tenant_mieterstrom,
-        title="⚡ Mieterstrom-Transparenzbericht: 65% Solarstrom-Deckung im Quartier Spreeblick",
-        defaults={
-            "author": mieterstrom_admin,
-            "message": "Die Abrechnung für den Vormonat ist abgeschlossen. Durch die PV-Dachanlage konnten die Stromkosten um 28% unter dem örtlichen Grundversorgertarif gehalten werden.",
-            "category": CommunityAnnouncement.CATEGORY_INFO,
-            "is_active": True,
-        },
-    )
-
-    CommunityAnnouncement.objects.update_or_create(
-        tenant=tenant_ggv,
-        title="⚖️ GGV-Aufteilungsschlüssel (§ 42b EnWG) für die WEG Parkstraße hinterlegt",
-        defaults={
-            "author": ggv_admin,
-            "message": "Die viertelstündliche Aufteilung des PV-Solarstroms erfolgt statisch nach Miteigentumsanteilen (MEA). Der Reststrom wird separat über den eigenen Stromliefervertrag bezogen.",
-            "category": CommunityAnnouncement.CATEGORY_INFO,
-            "is_active": True,
-        },
-    )
-
-    CommunityAnnouncement.objects.update_or_create(
-        tenant=tenant_sonnenfeld,
-        title="BNetzA § 42b EnWG Meldung erfolgreich an VNB übermittelt",
-        defaults={
-            "author": admin_user,
-            "message": "Die 15-Minuten-Lastgangdaten für den abgelaufenen Abrechnungsmonat wurden über die MSCONS EDIFACT-Schnittstelle fehlerfrei an den Verteilnetzbetreiber übertragen.",
-            "category": CommunityAnnouncement.CATEGORY_INFO,
-            "is_active": True,
-        },
-    )
+    announcements_data = [
+        (
+            tenant_sonnenfeld,
+            "☀️ Frühlings-Solarprognose: Höchstwerte im Quartier Sonnenfeld erwartet!",
+            admin_user,
+            "Liebe Mitglieder, dank der optimalen Wetterlage und den dynamischen Börsenstromtarifen konnten wir die Autarkiequote im Quartier auf über 68% steigern. Die Monatsnachweise stehen im Portal als PDF bereit.",
+            CommunityAnnouncement.CATEGORY_TARIFF,
+        ),
+        (
+            tenant_mieterstrom,
+            "⚡ Mieterstrom-Transparenzbericht: 65% Solarstrom-Deckung im Quartier Spreeblick",
+            mieterstrom_admin,
+            "Die Abrechnung für den Vormonat ist abgeschlossen. Durch die PV-Dachanlage konnten die Stromkosten um 28% unter dem örtlichen Grundversorgertarif gehalten werden.",
+            CommunityAnnouncement.CATEGORY_INFO,
+        ),
+        (
+            tenant_ggv,
+            "⚖️ GGV-Aufteilungsschlüssel (§ 42b EnWG) für die WEG Parkstraße hinterlegt",
+            ggv_admin,
+            "Die viertelstündliche Aufteilung des PV-Solarstroms erfolgt statisch nach Miteigentumsanteilen (MEA). Der Reststrom wird separat über den eigenen Stromliefervertrag bezogen.",
+            CommunityAnnouncement.CATEGORY_INFO,
+        ),
+        (
+            tenant_sonnenfeld,
+            "BNetzA § 42b EnWG Meldung erfolgreich an VNB übermittelt",
+            admin_user,
+            "Die 15-Minuten-Lastgangdaten für den abgelaufenen Abrechnungsmonat wurden über die MSCONS EDIFACT-Schnittstelle fehlerfrei an den Verteilnetzbetreiber übertragen.",
+            CommunityAnnouncement.CATEGORY_INFO,
+        ),
+    ]
+    for (t, title, author, msg, cat) in announcements_data:
+        ann = CommunityAnnouncement.objects.filter(tenant=t, title=title).first()
+        if not ann:
+            ann = CommunityAnnouncement(tenant=t, title=title)
+        ann.author = author
+        ann.message = msg
+        ann.category = cat
+        ann.is_active = True
+        ann.save()
 
     # 10. VIRTUAL POWER PLANT (VPP) DEMO POOLS & DISPATCH ORDERS
     try:
