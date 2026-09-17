@@ -344,20 +344,20 @@ class MyTenantView(APIView):
             return Response({"tenant": None})
 
         tenant = membership.tenant
+        is_admin = bool(request.user.is_staff or (membership and membership.role in ["admin", "owner", "auditor"]))
+        is_manager = bool(is_admin or (membership and membership.role in ["manager", "support"]))
 
-        members = TenantMembership.objects.filter(
-            tenant=tenant,
-            is_active=True
-        ).select_related("user")
+        members_data = []
+        invites_data = []
 
-        invites = TenantInvite.objects.filter(tenant=tenant, is_active=True)
+        if is_manager:
+            members = TenantMembership.objects.filter(
+                tenant=tenant,
+                is_active=True
+            ).select_related("user")
+            invites = TenantInvite.objects.filter(tenant=tenant, is_active=True)
 
-        return Response({
-            "tenant": {
-                "id": str(tenant.id),
-                "name": tenant.name
-            },
-            "members": [
+            members_data = [
                 {
                     "id": str(m.user.id),
                     "email": m.user.email,
@@ -366,8 +366,8 @@ class MyTenantView(APIView):
                     "permissions": ROLE_PERMISSIONS.get(m.role, []),
                 }
                 for m in members
-            ],
-            "invites": [
+            ]
+            invites_data = [
                 {
                     "token": str(i.token),
                     "role": i.role,
@@ -376,6 +376,17 @@ class MyTenantView(APIView):
                 }
                 for i in invites
             ]
+
+        return Response({
+            "tenant": {
+                "id": str(tenant.id),
+                "name": tenant.name,
+                "user_role": membership.role,
+                "is_admin": is_admin,
+                "is_manager": is_manager,
+            },
+            "members": members_data,
+            "invites": invites_data,
         })
 
 

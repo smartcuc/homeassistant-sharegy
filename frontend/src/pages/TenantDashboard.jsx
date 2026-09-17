@@ -2,11 +2,12 @@
 # src/pages/TenantDashboard.jsx
 */
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { apiFetch } from "../api/client";
 import { useTranslation } from "react-i18next";
 import { QRCodeSVG } from "qrcode.react";
+import { useUser } from "../hooks/useUser";
 import MsbSmartMeterHub from "../features/community/components/MsbSmartMeterHub";
 import CommunityShareModal from "../features/community/components/CommunityShareModal";
 import CommunityInviteModal from "../features/community/components/CommunityInviteModal";
@@ -16,10 +17,12 @@ import TenantSetupWizardModal from "../features/community/components/TenantSetup
 import WhitelabelSettingsModal from "../features/tenant/components/WhitelabelSettingsModal";
 import MarketCommunicationModal from "../features/billing/components/MarketCommunicationModal";
 
-const VALID_TABS = ["cockpit", "virtual_meter", "vpp", "settlement", "members", "msb", "audit"];
+const ALL_TABS = ["cockpit", "virtual_meter", "vpp", "settlement", "members", "msb", "audit"];
+const MEMBER_TABS = ["cockpit", "settlement"];
 
 export default function TenantDashboard() {
     const { t } = useTranslation();
+    const { user, isStaffOrAdmin, hasCommunityAdminAccess } = useUser();
     const [searchParams, setSearchParams] = useSearchParams();
     const initialTab = searchParams.get("tab");
     const [tenant, setTenant] = useState(null);
@@ -31,8 +34,21 @@ export default function TenantDashboard() {
     const [statementsData, setStatementsData] = useState(null);
     const [sharesData, setSharesData] = useState(null);
     const [timeRange, setTimeRange] = useState("today"); // 'today' | 'month'
+
+    const isCommunityAdmin = useMemo(() => {
+        return Boolean(
+            isStaffOrAdmin ||
+            hasCommunityAdminAccess ||
+            tenant?.is_admin ||
+            statementsData?.is_admin ||
+            ["admin", "owner", "auditor"].includes(tenant?.user_role)
+        );
+    }, [isStaffOrAdmin, hasCommunityAdminAccess, tenant, statementsData]);
+
+    const allowedTabs = isCommunityAdmin ? ALL_TABS : MEMBER_TABS;
+
     const [activeTab, setActiveTab] = useState(
-        VALID_TABS.includes(initialTab) ? initialTab : "cockpit"
+        allowedTabs.includes(initialTab) ? initialTab : "cockpit"
     );
     const [loading, setLoading] = useState(true);
     const [shareModalOpen, setShareModalOpen] = useState(false);
@@ -57,13 +73,20 @@ export default function TenantDashboard() {
             setInvites(data.invites || []);
 
             if (data.tenant) {
-                const [logData, cockpitData, tariffsRes, statementsRes, sharesRes] = await Promise.all([
-                    apiFetch("/api/audit-log/").catch(() => []),
+                const isUserAdmin = data.tenant.is_admin || isStaffOrAdmin || hasCommunityAdminAccess;
+
+                const fetchPromises = [
                     apiFetch("/api/billing/community/cockpit/").catch(() => null),
                     apiFetch("/api/billing/community/tariffs/").catch(() => null),
                     apiFetch("/api/billing/community/statements/").catch(() => null),
                     apiFetch("/api/billing/community/shares/").catch(() => null),
-                ]);
+                ];
+
+                if (isUserAdmin) {
+                    fetchPromises.push(apiFetch("/api/audit-log/").catch(() => []));
+                }
+
+                const [cockpitData, tariffsRes, statementsRes, sharesRes, logData] = await Promise.all(fetchPromises);
 
                 setLogs(logData || []);
                 setCockpit(cockpitData);
@@ -90,20 +113,23 @@ export default function TenantDashboard() {
 
     useEffect(() => {
         const tab = searchParams.get("tab");
-        if (tab && VALID_TABS.includes(tab) && tab !== activeTab) {
+        if (tab && allowedTabs.includes(tab) && tab !== activeTab) {
             setActiveTab(tab);
+        } else if (tab && !allowedTabs.includes(tab)) {
+            setActiveTab("cockpit");
         }
-    }, [searchParams]);
+    }, [searchParams, allowedTabs]);
 
     function handleTabChange(newTab) {
-        setActiveTab(newTab);
+        const targetTab = allowedTabs.includes(newTab) ? newTab : "cockpit";
+        setActiveTab(targetTab);
         setSearchParams(
             (prev) => {
                 const next = new URLSearchParams(prev);
-                if (newTab === "cockpit") {
+                if (targetTab === "cockpit") {
                     next.delete("tab");
                 } else {
-                    next.set("tab", newTab);
+                    next.set("tab", targetTab);
                 }
                 return next;
             },
@@ -338,30 +364,34 @@ export default function TenantDashboard() {
 
                 {/* Quick Action Badges Bar */}
                 <div className="flex flex-wrap items-center gap-2.5 pt-1">
-                    <button
-                        type="button"
-                        onClick={() => setWhitelabelModalOpen(true)}
-                        className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-sky-50 dark:hover:bg-sky-950/40 text-slate-700 dark:text-slate-200 hover:text-sky-600 dark:hover:text-sky-400 border border-slate-200 dark:border-slate-800 hover:border-sky-300 dark:hover:border-sky-800 transition-all shadow-xs flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-                    >
-                        <span className="text-sm">🎨</span>
-                        <span>{t("tenant.whitelabel_btn", "Whitelabel & Branding")}</span>
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => setMakoModalOpen(true)}
-                        className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-teal-50 dark:hover:bg-teal-950/40 text-slate-700 dark:text-slate-200 hover:text-teal-600 dark:hover:text-teal-400 border border-slate-200 dark:border-slate-800 hover:border-teal-300 dark:hover:border-teal-800 transition-all shadow-xs flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-                    >
-                        <span className="text-sm">📄</span>
-                        <span>{t("tenant.mako_btn", "Marktkommunikation (AS4)")}</span>
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => setWizardOpen(true)}
-                        className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 border border-slate-200 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-800 transition-all shadow-xs flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-                    >
-                        <span className="text-sm">✨</span>
-                        <span>{t("tenant.wizard_btn", "Gebäude-Assistent (3 Schritte)")}</span>
-                    </button>
+                    {isCommunityAdmin && (
+                        <>
+                            <button
+                                type="button"
+                                onClick={() => setWhitelabelModalOpen(true)}
+                                className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-sky-50 dark:hover:bg-sky-950/40 text-slate-700 dark:text-slate-200 hover:text-sky-600 dark:hover:text-sky-400 border border-slate-200 dark:border-slate-800 hover:border-sky-300 dark:hover:border-sky-800 transition-all shadow-xs flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                            >
+                                <span className="text-sm">🎨</span>
+                                <span>{t("tenant.whitelabel_btn", "Whitelabel & Branding")}</span>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setMakoModalOpen(true)}
+                                className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-teal-50 dark:hover:bg-teal-950/40 text-slate-700 dark:text-slate-200 hover:text-teal-600 dark:hover:text-teal-400 border border-slate-200 dark:border-slate-800 hover:border-teal-300 dark:hover:border-teal-800 transition-all shadow-xs flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                            >
+                                <span className="text-sm">📄</span>
+                                <span>{t("tenant.mako_btn", "Marktkommunikation (AS4)")}</span>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setWizardOpen(true)}
+                                className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 border border-slate-200 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-800 transition-all shadow-xs flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                            >
+                                <span className="text-sm">✨</span>
+                                <span>{t("tenant.wizard_btn", "Gebäude-Assistent (3 Schritte)")}</span>
+                            </button>
+                        </>
+                    )}
                     <button
                         type="button"
                         onClick={() => setShareModalOpen(true)}
@@ -383,28 +413,34 @@ export default function TenantDashboard() {
                                 : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                         }`}
                     >
-                        ⚡ Cockpit
+                        ⚡ {isCommunityAdmin ? "Cockpit" : "Mein Verbrauch & Bilanzen"}
                     </button>
-                    <button
-                        onClick={() => handleTabChange("virtual_meter")}
-                        className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
-                            activeTab === "virtual_meter"
-                                ? "bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 font-bold shadow-xs"
-                                : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
-                        }`}
-                    >
-                        🏢 Virtueller Summenzähler
-                    </button>
-                    <button
-                        onClick={() => handleTabChange("vpp")}
-                        className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
-                            activeTab === "vpp"
-                                ? "bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 font-bold shadow-xs"
-                                : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
-                        }`}
-                    >
-                        🔌 VPP Kraftwerk
-                    </button>
+
+                    {isCommunityAdmin && (
+                        <>
+                            <button
+                                onClick={() => handleTabChange("virtual_meter")}
+                                className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
+                                    activeTab === "virtual_meter"
+                                        ? "bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 font-bold shadow-xs"
+                                        : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                                }`}
+                            >
+                                🏢 Virtueller Summenzähler
+                            </button>
+                            <button
+                                onClick={() => handleTabChange("vpp")}
+                                className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
+                                    activeTab === "vpp"
+                                        ? "bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 font-bold shadow-xs"
+                                        : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                                }`}
+                            >
+                                🔌 VPP Kraftwerk
+                            </button>
+                        </>
+                    )}
+
                     <button
                         onClick={() => handleTabChange("settlement")}
                         className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
@@ -413,38 +449,43 @@ export default function TenantDashboard() {
                                 : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                         }`}
                     >
-                        💰 Tarife & Abrechnungen
+                        💰 {isCommunityAdmin ? "Tarife & Abrechnungen" : "Meine Abrechnungen & Tarife"}
                     </button>
-                    <button
-                        onClick={() => handleTabChange("members")}
-                        className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
-                            activeTab === "members"
-                                ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs"
-                                : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
-                        }`}
-                    >
-                        👥 Mitglieder ({members.length})
-                    </button>
-                    <button
-                        onClick={() => handleTabChange("msb")}
-                        className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
-                            activeTab === "msb"
-                                ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs font-bold"
-                                : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
-                        }`}
-                    >
-                        ⚡ wMSB Hub
-                    </button>
-                    <button
-                        onClick={() => handleTabChange("audit")}
-                        className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
-                            activeTab === "audit"
-                                ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs"
-                                : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
-                        }`}
-                    >
-                        📜 Audit
-                    </button>
+
+                    {isCommunityAdmin && (
+                        <>
+                            <button
+                                onClick={() => handleTabChange("members")}
+                                className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
+                                    activeTab === "members"
+                                        ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs"
+                                        : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                                }`}
+                            >
+                                👥 Mitglieder ({members.length})
+                            </button>
+                            <button
+                                onClick={() => handleTabChange("msb")}
+                                className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
+                                    activeTab === "msb"
+                                        ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs font-bold"
+                                        : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                                }`}
+                            >
+                                ⚡ wMSB Hub
+                            </button>
+                            <button
+                                onClick={() => handleTabChange("audit")}
+                                className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
+                                    activeTab === "audit"
+                                        ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs"
+                                        : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                                }`}
+                            >
+                                📜 Audit
+                            </button>
+                        </>
+                    )}
                 </div>
 
             {/* ======================================================== */}
@@ -790,17 +831,21 @@ export default function TenantDashboard() {
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                             <div>
                                 <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                                    Monatliche Abrechnungsnachweise
+                                    {isCommunityAdmin
+                                        ? "Monatliche Abrechnungsnachweise (Gesamte Community)"
+                                        : "Meine monatlichen Abrechnungsnachweise"}
                                 </h3>
                                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                                    15-Minuten-scharfe Verrechnung von Erzeugung, Bezug und internen Gutschriften
+                                    {isCommunityAdmin
+                                        ? "15-Minuten-scharfe Verrechnung von Erzeugung, Bezug und internen Gutschriften aller Mitglieder"
+                                        : "Eichrechtskonforme Abrechnung deines Solarstrombezugs und deiner Einspeisevergütung"}
                                 </p>
                             </div>
                             <div className="flex flex-wrap items-center gap-2">
                                 <span className="text-xs font-semibold text-slate-500 mr-1">
-                                    {statements.length} Nachweise
+                                    {statements.length} {statements.length === 1 ? "Nachweis" : "Nachweise"}
                                 </span>
-                                {statements.length > 0 && (
+                                {isCommunityAdmin && statements.length > 0 && (
                                     <div className="flex items-center gap-1.5">
                                         <button
                                             onClick={() => exportCommunityStatements("xlsx")}
@@ -851,9 +896,11 @@ export default function TenantDashboard() {
                                                         {stmt.status === "finalized" ? "Abgerechnet" : stmt.status}
                                                     </span>
                                                 </div>
-                                                <div className="text-xs text-slate-500 dark:text-slate-400">
-                                                    Mitglied: <span className="font-medium text-slate-700 dark:text-slate-300">{stmt.user_email}</span>
-                                                </div>
+                                                {isCommunityAdmin && (
+                                                    <div className="text-xs text-slate-500 dark:text-slate-400">
+                                                        Mitglied: <span className="font-medium text-slate-700 dark:text-slate-300">{stmt.user_email}</span>
+                                                    </div>
+                                                )}
                                                 <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs pt-1 text-slate-600 dark:text-slate-400">
                                                     <span>☀️ Erzeugt: <strong>{Number(stmt.produced_total_kwh ?? 0).toFixed(1)} kWh</strong></span>
                                                     <span>🏠 Verbraucht: <strong>{Number(stmt.consumed_total_kwh ?? 0).toFixed(1)} kWh</strong></span>
@@ -892,7 +939,9 @@ export default function TenantDashboard() {
                             </div>
                         ) : (
                             <div className="text-center py-10 text-xs text-slate-400 bg-slate-50 dark:bg-slate-800/30 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
-                                📜 Noch keine Monatsabrechnungen erstellt. Klicke auf &quot;Monatsabrechnung anstoßen&quot;, um den aktuellen Monat abzurechnen.
+                                {isCommunityAdmin
+                                    ? "📜 Noch keine Monatsabrechnungen erstellt. Klicke auf 'Monatsabrechnung anstoßen', um den aktuellen Monat abzurechnen."
+                                    : "📜 Für deinen Account liegen aktuell noch keine abgeschlossenen Monatsabrechnungen vor. Sobald der Abrechnungslauf zum Monatsende abgeschlossen ist, kannst du deinen PDF-Nachweis hier direkt herunterladen."}
                             </div>
                         )}
                     </div>
