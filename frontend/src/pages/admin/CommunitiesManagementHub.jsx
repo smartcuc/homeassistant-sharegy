@@ -42,14 +42,14 @@ export default function CommunitiesManagementHub() {
                     sharesTitle: t("admin_communities.models.mieterstrom.sharesTitle", "Mieterstrom-Zuteilungsquoten"),
                     tariffTitle: t("admin_communities.models.mieterstrom.tariffTitle", "Mieterstrom-Vollversorgertarif"),
                     meterTitle: t("admin_communities.models.mieterstrom.meterTitle", "Summenzähler & Wohnungszähler"),
-                    alertText: t("admin_communities.models.mieterstrom.alertText", "🏢 Mieterstrom-Modell (§ 42a EnWG): Der Vermieter/Contractor übernimmt die Vollversorgung der Mieter mit PV- und Reststrom. Die Abrechnung erfolgt als Gesamtstromrechnung inklusive Mieterstromzuschlag."),
+                    alertText: t("admin_communities.models.mieterstrom.alertText", "Mieterstrom-Modell (§ 42a EnWG): Der Vermieter/Contractor übernimmt die Vollversorgung der Mieter mit PV- und Reststrom. Die Abrechnung erfolgt als Gesamtstromrechnung inklusive Mieterstromzuschlag."),
                 };
             case "ggv":
                 return {
                     id: "ggv",
                     label: t("admin_communities.models.ggv.label", "Gebäudeversorgung (GGV § 42b EnWG)"),
                     shortLabel: t("admin_communities.models.ggv.shortLabel", "GGV (§ 42b)"),
-                    badgeText: t("admin_communities.models.ggv.badgeText", "⚖️ GGV (§ 42b)"),
+                    badgeText: t("admin_communities.models.ggv.badgeText", "GGV (§ 42b)"),
                     icon: "⚖️",
                     badgeClass: "bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800",
                     description: t("admin_communities.models.ggv.description", "Vor-Ort-Solaraufteilung nach Miteigentumsanteilen (MEA /1000) ohne Reststrompflicht"),
@@ -57,7 +57,7 @@ export default function CommunitiesManagementHub() {
                     sharesTitle: t("admin_communities.models.ggv.sharesTitle", "Miteigentumsanteile (MEA /1000)"),
                     tariffTitle: t("admin_communities.models.ggv.tariffTitle", "Solar-Nutzungsentgelt (ohne Reststrom)"),
                     meterTitle: t("admin_communities.models.ggv.meterTitle", "Wohnungs- & Erzeugungszähler"),
-                    alertText: t("admin_communities.models.ggv.alertText", "⚖️ Gemeinschaftliche Gebäudeversorgung (§ 42b EnWG): Reine Vor-Ort-Aufteilung des Solarstroms nach Miteigentumsanteilen (MEA). Es besteht keine Reststromlieferpflicht; jeder Nutzer hat seinen eigenen Reststromvertrag."),
+                    alertText: t("admin_communities.models.ggv.alertText", "Gemeinschaftliche Gebäudeversorgung (§ 42b EnWG): Reine Vor-Ort-Aufteilung des Solarstroms nach Miteigentumsanteilen (MEA). Es besteht keine Reststromlieferpflicht; jeder Nutzer hat seinen eigenen Reststromvertrag."),
                 };
             case "energy_sharing":
             default:
@@ -65,7 +65,7 @@ export default function CommunitiesManagementHub() {
                     id: "energy_sharing",
                     label: t("admin_communities.models.energy_sharing.label", "Energy Sharing (Genossenschaft)"),
                     shortLabel: t("admin_communities.models.energy_sharing.shortLabel", "Energy Sharing"),
-                    badgeText: t("admin_communities.models.energy_sharing.badgeText", "⚡ Energy Sharing"),
+                    badgeText: t("admin_communities.models.energy_sharing.badgeText", "Energy Sharing"),
                     icon: "⚡",
                     badgeClass: "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800",
                     description: t("admin_communities.models.energy_sharing.description", "15-Minuten Smart-Meter-Bilanzierung & Verteilnetz-Allokation für Bürgerenergie"),
@@ -73,7 +73,7 @@ export default function CommunitiesManagementHub() {
                     sharesTitle: t("admin_communities.models.energy_sharing.sharesTitle", "15m-Allokationsschlüssel"),
                     tariffTitle: t("admin_communities.models.energy_sharing.tariffTitle", "Bürgerenergie-Sharingtarif"),
                     meterTitle: t("admin_communities.models.energy_sharing.meterTitle", "Smart Meter (iMSys / RLM)"),
-                    alertText: t("admin_communities.models.energy_sharing.alertText", "⚡ Regionales Energy Sharing: 15-minütige Bilanzierung über das öffentliche Netz gemäß EU-Richtlinie / § 42c EnWG mit Netzentgelt-Rabatt und automatisiertem BNetzA MSCONS EDIFACT Export."),
+                    alertText: t("admin_communities.models.energy_sharing.alertText", "Regionales Energy Sharing: 15-minütige Bilanzierung über das öffentliche Netz gemäß EU-Richtlinie / § 42c EnWG mit Netzentgelt-Rabatt und automatisiertem BNetzA MSCONS EDIFACT Export."),
                 };
         }
     }

@@ -3021,35 +3021,35 @@
       "mieterstrom": {
         "label": "Tenant Electricity (§ 42a EnWG)",
         "shortLabel": "Tenant Power",
-        "badgeText": "🏢 Tenant Power (§ 42a)",
+        "badgeText": "Tenant Power (§ 42a)",
         "description": "Full supply: PV generation & residual grid power in a single monthly invoice for tenants",
         "membersTitle": "Tenants & Units",
         "sharesTitle": "Tenant Power Allocation Quotas",
         "tariffTitle": "Full Supply Tenant Tariff",
         "meterTitle": "Master Meter & Unit Submeters",
-        "alertText": "🏢 Tenant Electricity Model (§ 42a EnWG): The landlord or contractor manages full power supply with rooftop solar and grid residual power under statutory tariff caps."
+        "alertText": "Tenant Electricity Model (§ 42a EnWG): The landlord or contractor manages full power supply with rooftop solar and grid residual power under statutory tariff caps."
       },
       "ggv": {
         "label": "Shared Building Supply (GGV § 42b EnWG)",
         "shortLabel": "GGV (§ 42b)",
-        "badgeText": "⚖️ GGV (§ 42b)",
+        "badgeText": "GGV (§ 42b)",
         "description": "On-site solar sharing by co-ownership shares (1/1000 MEA) without residual grid supply obligations",
         "membersTitle": "Homeowners & Units",
         "sharesTitle": "Co-Ownership Shares (1/1000 MEA)",
         "tariffTitle": "Solar Utilization Fee (No Residual Supply)",
         "meterTitle": "Unit & Generation Meters",
-        "alertText": "⚖️ Shared Building Energy Supply (§ 42b EnWG): Pure on-site solar power sharing according to ownership shares. No residual supply obligation; each resident keeps their external supplier contract."
+        "alertText": "Shared Building Energy Supply (§ 42b EnWG): Pure on-site solar power sharing according to ownership shares. No residual supply obligation; each resident keeps their external supplier contract."
       },
       "energy_sharing": {
         "label": "Energy Sharing (Cooperative)",
         "shortLabel": "Energy Sharing",
-        "badgeText": "⚡ Energy Sharing",
+        "badgeText": "Energy Sharing",
         "description": "15-minute smart meter balancing and distribution grid allocation for community energy",
         "membersTitle": "Cooperative Members",
         "sharesTitle": "15-Minute Allocation Keys",
         "tariffTitle": "Community Energy Sharing Tariff",
         "meterTitle": "Smart Meters (iMSys / RLM)",
-        "alertText": "⚡ Regional Energy Sharing: 15-minute digital balancing across public distribution grids pursuant to EU guidelines / § 42c EnWG with automated BNetzA MSCONS EDIFACT export."
+        "alertText": "Regional Energy Sharing: 15-minute digital balancing across public distribution grids pursuant to EU guidelines / § 42c EnWG with automated BNetzA MSCONS EDIFACT export."
       }
     },
     "loading_portfolio": "Loading Multi-Community Portfolio & Performance Hubs...",

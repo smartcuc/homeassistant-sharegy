@@ -3021,35 +3021,35 @@
       "mieterstrom": {
         "label": "Mieterstrom (§ 42a EnWG)",
         "shortLabel": "Mieterstrom",
-        "badgeText": "🏢 Mieterstrom (§ 42a)",
+        "badgeText": "Mieterstrom (§ 42a)",
         "description": "Vollversorgung: PV-Strom & Reststrom in einer Monatsabrechnung für Mieter",
         "membersTitle": "Mieter & Wohneinheiten",
         "sharesTitle": "Mieterstrom-Zuteilungsquoten",
         "tariffTitle": "Mieterstrom-Vollversorgertarif",
         "meterTitle": "Summenzähler & Wohnungszähler",
-        "alertText": "🏢 Mieterstrom-Modell (§ 42a EnWG): Der Vermieter/Contractor übernimmt die Vollversorgung der Mieter mit PV- und Reststrom. Die Abrechnung erfolgt als Gesamtstromrechnung inklusive Mieterstromzuschlag."
+        "alertText": "Mieterstrom-Modell (§ 42a EnWG): Der Vermieter/Contractor übernimmt die Vollversorgung der Mieter mit PV- und Reststrom. Die Abrechnung erfolgt als Gesamtstromrechnung inklusive Mieterstromzuschlag."
       },
       "ggv": {
         "label": "Gebäudeversorgung (GGV § 42b EnWG)",
         "shortLabel": "GGV (§ 42b)",
-        "badgeText": "⚖️ GGV (§ 42b)",
+        "badgeText": "GGV (§ 42b)",
         "description": "Vor-Ort-Solaraufteilung nach Miteigentumsanteilen (MEA /1000) ohne Reststrompflicht",
         "membersTitle": "Wohnungseigentümer & Parteien",
         "sharesTitle": "Miteigentumsanteile (MEA /1000)",
         "tariffTitle": "Solar-Nutzungsentgelt (ohne Reststrom)",
         "meterTitle": "Wohnungs- & Erzeugungszähler",
-        "alertText": "⚖️ Gemeinschaftliche Gebäudeversorgung (§ 42b EnWG): Reine Vor-Ort-Aufteilung des Solarstroms nach Miteigentumsanteilen (MEA). Es besteht keine Reststromlieferpflicht; jeder Nutzer hat seinen eigenen Reststromvertrag."
+        "alertText": "Gemeinschaftliche Gebäudeversorgung (§ 42b EnWG): Reine Vor-Ort-Aufteilung des Solarstroms nach Miteigentumsanteilen (MEA). Es besteht keine Reststromlieferpflicht; jeder Nutzer hat seinen eigenen Reststromvertrag."
       },
       "energy_sharing": {
         "label": "Energy Sharing (Genossenschaft)",
         "shortLabel": "Energy Sharing",
-        "badgeText": "⚡ Energy Sharing",
+        "badgeText": "Energy Sharing",
         "description": "15-Minuten Smart-Meter-Bilanzierung & Verteilnetz-Allokation für Bürgerenergie",
         "membersTitle": "Genossenschaftsmitglieder",
         "sharesTitle": "15m-Allokationsschlüssel",
         "tariffTitle": "Bürgerenergie-Sharingtarif",
         "meterTitle": "Smart Meter (iMSys / RLM)",
-        "alertText": "⚡ Regionales Energy Sharing: 15-minütige Bilanzierung über das öffentliche Netz gemäß EU-Richtlinie / § 42c EnWG mit Netzentgelt-Rabatt und automatisiertem BNetzA MSCONS EDIFACT Export."
+        "alertText": "Regionales Energy Sharing: 15-minütige Bilanzierung über das öffentliche Netz gemäß EU-Richtlinie / § 42c EnWG mit Netzentgelt-Rabatt und automatisiertem BNetzA MSCONS EDIFACT Export."
       }
     },
     "loading_portfolio": "Lade Multi-Community Portfolio & Performance-Zentralen...",
