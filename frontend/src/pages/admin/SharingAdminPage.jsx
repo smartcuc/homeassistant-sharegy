@@ -118,35 +118,35 @@ export default function SharingAdminPage() {
             const res = await apiFetch("/api/billing/community/statements/generate/", {
                 method: "POST",
                 body: JSON.stringify({
-                    tenant_id: tenant.id,
+                    tenant_id: tenant?.id,
                     year: now.getFullYear(),
                     month: now.getMonth() + 1,
                 }),
             });
-            alert(res.message || "15m-Sharing-Abrechnung erfolgreich generiert.");
-            const statementsRes = await apiFetch("/api/billing/community/statements/").catch(() => null);
-            setStatementsData(statementsRes);
+            alert(`Abrechnung erfolgreich angestoßen! ${res.generated_count || 0} Abrechnungsnachweise erzeugt.`);
+            const updated = await apiFetch("/api/billing/community/statements/");
+            setStatementsData(updated);
         } catch (err) {
-            alert("Abrechnungsfehler: " + (err.message || "Unbekannter Fehler"));
+            alert("Abrechnung fehlgeschlagen: " + (err.message || "Unbekannt"));
         } finally {
             setSettling(false);
         }
     }
 
-    async function createInvite(role) {
+    async function createInvite(e) {
+        e.preventDefault();
         try {
             const data = await apiFetch("/api/create-invite/", {
                 method: "POST",
                 body: JSON.stringify({
                     tenant_id: tenant.id,
-                    role: role,
+                    role: "member",
                 }),
             });
-            await loadData();
-            return data;
+            setInvites((prev) => [data, ...prev]);
+            setInviteModalOpen(false);
         } catch (err) {
-            alert("Fehler beim Erstellen des Mitglieds-Einladungslinks: " + (err.message || ""));
-            throw err;
+            alert("Fehler beim Erstellen des Einladungslinks.");
         }
     }
 
@@ -246,7 +246,7 @@ export default function SharingAdminPage() {
     if (loading) {
         return (
             <div className="p-12 text-center text-slate-400 text-sm animate-pulse">
-                Lade Regionales Energy Sharing & Bürgerenergie eG...
+                {t("admin_sharing.loading", "Lade Regionales Energy Sharing & Bürgerenergie eG...")}
             </div>
         );
     }
@@ -255,10 +255,14 @@ export default function SharingAdminPage() {
         return (
             <div className="p-8 max-w-xl mx-auto text-center space-y-4 my-8 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl">
                 <div className="text-4xl">⚡</div>
-                <h2 className="text-lg font-bold text-slate-900 dark:text-white">Keine Bürgerenergiegenossenschaft zugewiesen</h2>
-                <p className="text-xs text-slate-500">Du bist aktuell keiner Energiegemeinschaft zugeordnet.</p>
+                <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                    {t("admin_sharing.no_cooperative", "Keine Bürgerenergiegenossenschaft zugewiesen")}
+                </h2>
+                <p className="text-xs text-slate-500">
+                    {t("admin_sharing.no_cooperative_desc", "Du bist aktuell keiner Energiegemeinschaft zugeordnet.")}
+                </p>
                 <Link to="/app/dashboard" className="inline-block px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold">
-                    Zum Dashboard
+                    {t("common.to_dashboard", "Zum Dashboard")}
                 </Link>
             </div>
         );
@@ -340,7 +344,7 @@ export default function SharingAdminPage() {
                         activeTab === "cockpit" ? "bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 font-bold shadow-xs" : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                     }`}
                 >
-                    {t("admin_sharing.tab_cockpit", "⚡ Bürgerenergie-Cockpit")}
+                    {t("sharing_admin.tab_cockpit", "📊 Cockpit")}
                 </button>
                 <button
                     onClick={() => handleTabChange("members")}
@@ -348,7 +352,7 @@ export default function SharingAdminPage() {
                         activeTab === "members" ? "bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 font-bold shadow-xs" : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                     }`}
                 >
-                    {t("admin_sharing.tab_members", "👥 Genossenschaftsmitglieder")} ({members.length})
+                    {t("sharing_admin.tab_members", "👥 Genossen & Anteile")} ({members.length})
                 </button>
                 <button
                     onClick={() => handleTabChange("applications")}
@@ -356,7 +360,7 @@ export default function SharingAdminPage() {
                         activeTab === "applications" ? "bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 font-bold shadow-xs" : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                     }`}
                 >
-                    {t("admin_sharing.tab_applications", "📋 Beitrittsanträge")}
+                    {t("sharing_admin.tab_applications", "📋 Beitrittsanträge")}
                 </button>
                 <button
                     onClick={() => handleTabChange("settlement")}
@@ -364,7 +368,7 @@ export default function SharingAdminPage() {
                         activeTab === "settlement" ? "bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 font-bold shadow-xs" : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                     }`}
                 >
-                    {t("admin_sharing.tab_settlement", "💰 15m-Sharing-Abrechnung")}
+                    {t("sharing_admin.tab_settlement", "💰 Abrechnung (15m)")}
                 </button>
                 <button
                     onClick={() => handleTabChange("meters")}
@@ -372,7 +376,7 @@ export default function SharingAdminPage() {
                         activeTab === "meters" ? "bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 font-bold shadow-xs" : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                     }`}
                 >
-                    ⚡ Virtueller Summenzähler & iMSys
+                    {t("sharing_admin.tab_meters", "🏢 Summenzähler")}
                 </button>
                 <button
                     onClick={() => handleTabChange("vpp")}
@@ -380,7 +384,7 @@ export default function SharingAdminPage() {
                         activeTab === "vpp" ? "bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 font-bold shadow-xs" : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                     }`}
                 >
-                    🔌 VPP Kraftwerk
+                    {t("sharing_admin.tab_vpp", "🔌 VPP Kraftwerk")}
                 </button>
                 <button
                     onClick={() => handleTabChange("msb")}
@@ -388,7 +392,7 @@ export default function SharingAdminPage() {
                         activeTab === "msb" ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs font-bold" : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                     }`}
                 >
-                    ⚡ wMSB Hub
+                    {t("sharing_admin.tab_msb", "⚡ wMSB Hub")}
                 </button>
                 <button
                     onClick={() => handleTabChange("audit")}
@@ -396,7 +400,7 @@ export default function SharingAdminPage() {
                         activeTab === "audit" ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs" : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                     }`}
                 >
-                    📜 Genossenschafts-Audit
+                    {t("sharing_admin.tab_audit", "📜 Genossenschafts-Audit")}
                 </button>
             </div>
 
@@ -405,20 +409,20 @@ export default function SharingAdminPage() {
                 <div className="space-y-6">
                     <div className="flex items-center justify-between">
                         <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200">
-                            Bürgerenergie Bilanzen & Verteilnetz-Allokation
+                            {t("sharing_admin.cockpit_title", "Bürgerenergie Bilanzen & Verteilnetz-Allokation")}
                         </h2>
                         <div className="flex bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg text-xs font-semibold">
                             <button
                                 onClick={() => setTimeRange("today")}
                                 className={`px-2.5 py-1 rounded-md transition ${timeRange === "today" ? "bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-xs" : "text-slate-500"}`}
                             >
-                                Heute
+                                {t("common.today", "Heute")}
                             </button>
                             <button
                                 onClick={() => setTimeRange("month")}
                                 className={`px-2.5 py-1 rounded-md transition ${timeRange === "month" ? "bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-xs" : "text-slate-500"}`}
                             >
-                                Dieser Monat
+                                {t("common.this_month", "Dieser Monat")}
                             </button>
                         </div>
                     </div>
@@ -427,60 +431,60 @@ export default function SharingAdminPage() {
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
                         <div className="bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4">
                             <div className="flex items-center justify-between text-amber-700 dark:text-amber-300 text-xs font-bold uppercase">
-                                <span>Erzeugt (2.8.0)</span>
+                                <span>{t("sharing_admin.kpi_produced", "Erzeugt (2.8.0)")}</span>
                                 <span>☀️</span>
                             </div>
                             <div className="mt-3 text-2xl font-black text-amber-900 dark:text-amber-100">
                                 {Number(currentStats?.produced_kwh ?? 0).toFixed(1)} <span className="text-xs font-normal">kWh</span>
                             </div>
-                            <div className="text-[11px] text-amber-700/80 dark:text-amber-300/80 mt-0.5">Erzeugungsanlagen eG</div>
+                            <div className="text-[11px] text-amber-700/80 dark:text-amber-300/80 mt-0.5">{t("sharing_admin.kpi_produced_sub", "Erzeugungsanlagen eG")}</div>
                         </div>
 
                         <div className="bg-sky-500/5 dark:bg-sky-500/10 border border-sky-500/20 rounded-2xl p-4">
                             <div className="flex items-center justify-between text-sky-700 dark:text-sky-300 text-xs font-bold uppercase">
-                                <span>Bedarf (1.8.0)</span>
+                                <span>{t("sharing_admin.kpi_consumed", "Bedarf (1.8.0)")}</span>
                                 <span>🏠</span>
                             </div>
                             <div className="mt-3 text-2xl font-black text-sky-900 dark:text-sky-100">
                                 {Number(currentStats?.consumed_kwh ?? 0).toFixed(1)} <span className="text-xs font-normal">kWh</span>
                             </div>
-                            <div className="text-[11px] text-sky-700/80 dark:text-sky-300/80 mt-0.5">Alle Mitglieder</div>
+                            <div className="text-[11px] text-sky-700/80 dark:text-sky-300/80 mt-0.5">{t("sharing_admin.kpi_consumed_sub", "Alle Mitglieder")}</div>
                         </div>
 
                         <div className="bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4">
                             <div className="flex items-center justify-between text-emerald-700 dark:text-emerald-300 text-xs font-bold uppercase">
-                                <span>Geteilt (Sharing)</span>
+                                <span>{t("sharing_admin.kpi_shared", "Geteilt (Sharing)")}</span>
                                 <span>🤝</span>
                             </div>
                             <div className="mt-3 text-2xl font-black text-emerald-900 dark:text-emerald-100">
                                 {Number(currentStats?.shared_kwh ?? 0).toFixed(1)} <span className="text-xs font-normal">kWh</span>
                             </div>
                             <div className="text-[11px] text-emerald-700/80 dark:text-emerald-300/80 mt-0.5 font-semibold">
-                                Autarkiegrad: {currentStats?.autarky_pct ?? 0}%
+                                {t("sharing_admin.kpi_autarky", { rate: currentStats?.autarky_pct ?? 0, defaultValue: `Autarkiegrad: ${currentStats?.autarky_pct ?? 0}%` })}
                             </div>
                         </div>
 
                         <div className="bg-rose-500/5 dark:bg-rose-500/10 border border-rose-500/20 rounded-2xl p-4">
                             <div className="flex items-center justify-between text-rose-700 dark:text-rose-300 text-xs font-bold uppercase">
-                                <span>Netzbezug (Rest)</span>
+                                <span>{t("sharing_admin.kpi_grid_import", "Netzbezug (Rest)")}</span>
                                 <span>🔌</span>
                             </div>
                             <div className="mt-3 text-2xl font-black text-rose-900 dark:text-rose-100">
                                 {Number(currentStats?.grid_import_kwh ?? 0).toFixed(1)} <span className="text-xs font-normal">kWh</span>
                             </div>
-                            <div className="text-[11px] text-rose-700/80 dark:text-rose-300/80 mt-0.5">Externer Reststrom</div>
+                            <div className="text-[11px] text-rose-700/80 dark:text-rose-300/80 mt-0.5">{t("sharing_admin.kpi_grid_import_sub", "Externer Reststrom")}</div>
                         </div>
 
                         <div className="bg-indigo-500/5 dark:bg-indigo-500/10 border border-indigo-500/20 rounded-2xl p-4 col-span-2 sm:col-span-1">
                             <div className="flex items-center justify-between text-indigo-700 dark:text-indigo-300 text-xs font-bold uppercase">
-                                <span>Ersparnis</span>
+                                <span>{t("sharing_admin.kpi_savings", "Ersparnis")}</span>
                                 <span>💰</span>
                             </div>
                             <div className="mt-3 text-2xl font-black text-indigo-900 dark:text-indigo-100">
                                 {Number(currentStats?.savings_eur ?? 0).toFixed(2)} <span className="text-xs font-normal">€</span>
                             </div>
                             <div className="text-[11px] text-indigo-700/80 dark:text-indigo-300/80 mt-0.5 font-semibold">
-                                inkl. Netzentgelt-Rabatt
+                                {t("sharing_admin.kpi_savings_sub", "inkl. Netzentgelt-Rabatt")}
                             </div>
                         </div>
                     </div>
@@ -490,21 +494,21 @@ export default function SharingAdminPage() {
                         <div className="flex items-center justify-between mb-4">
                             <div>
                                 <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                                    15-Minuten Lastgang & Peer-to-Peer Allokation (Letzte 24 Stunden)
+                                    {t("sharing_admin.profile_title", "15-Minuten Lastgang & Peer-to-Peer Allokation (Letzte 24 Stunden)")}
                                 </h3>
                                 <p className="text-xs text-slate-500">
-                                    Eichrechtskonforme Erfassung aller 15m-Slots aus OBIS 1.8.0 & 2.8.0 über das öffentliche Verteilnetz
+                                    {t("sharing_admin.profile_sub", "Eichrechtskonforme Erfassung aller 15m-Slots aus OBIS 1.8.0 & 2.8.0 über das öffentliche Verteilnetz")}
                                 </p>
                             </div>
                             <div className="flex items-center gap-3 text-xs">
                                 <span className="flex items-center gap-1.5 text-amber-600 font-semibold">
-                                    <span className="w-2.5 h-2.5 rounded-sm bg-amber-500"></span> Erzeugung
+                                    <span className="w-2.5 h-2.5 rounded-sm bg-amber-500"></span> {t("sharing_admin.legend_gen", "Erzeugung")}
                                 </span>
                                 <span className="flex items-center gap-1.5 text-sky-600 font-semibold">
-                                    <span className="w-2.5 h-2.5 rounded-sm bg-sky-500"></span> Verbrauch
+                                    <span className="w-2.5 h-2.5 rounded-sm bg-sky-500"></span> {t("sharing_admin.legend_cons", "Verbrauch")}
                                 </span>
                                 <span className="flex items-center gap-1.5 text-emerald-600 font-semibold">
-                                    <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500"></span> Geteilt
+                                    <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500"></span> {t("sharing_admin.legend_shared", "Geteilt")}
                                 </span>
                             </div>
                         </div>
@@ -526,7 +530,7 @@ export default function SharingAdminPage() {
                             </div>
                         ) : (
                             <div className="text-center py-8 text-xs text-slate-400 bg-slate-50 dark:bg-slate-800/30 rounded-xl border border-dashed">
-                                Messwerte des MSB werden alle 15 Minuten automatisch eingelesen.
+                                {t("sharing_admin.profile_empty", "Messwerte des MSB werden alle 15 Minuten automatisch eingelesen.")}
                             </div>
                         )}
                     </div>
@@ -541,10 +545,10 @@ export default function SharingAdminPage() {
                             <div>
                                 <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                                     <span>👥</span>
-                                    <span>Genossenschaftsmitglieder & Anteile ({members.length})</span>
+                                    <span>{t("sharing_admin.members_title", { count: members.length, defaultValue: `Genossenschaftsmitglieder & Anteile (${members.length})` })}</span>
                                 </h2>
                                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                    Mitgliederregister, Geschäftsanteile und Rollen nach dem Genossenschaftsgesetz (GenG).
+                                    {t("sharing_admin.members_sub", "Mitgliederregister, Geschäftsanteile und Rollen nach dem Genossenschaftsgesetz (GenG).")}
                                 </p>
                             </div>
                             <button
@@ -553,18 +557,18 @@ export default function SharingAdminPage() {
                                 className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-xs transition-all flex items-center gap-2 cursor-pointer"
                             >
                                 <span>+</span>
-                                <span>Neues Mitglied einladen</span>
+                                <span>{t("sharing_admin.invite_member_btn", "Neues Mitglied einladen")}</span>
                             </button>
                         </div>
 
                         {/* INVITES */}
                         <div className="space-y-3">
                             <div className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                                Aktive Einladungslinks: ({invites.length})
+                                {t("sharing_admin.active_invites", { count: invites.length, defaultValue: `Aktive Einladungslinks: (${invites.length})` })}
                             </div>
                             {invites.length === 0 ? (
                                 <div className="p-4 text-center rounded-2xl bg-slate-50 dark:bg-slate-800/30 border border-dashed text-xs text-slate-400">
-                                    Keine offenen Einladungslinks vorhanden.
+                                    {t("sharing_admin.no_invites", "Keine offenen Einladungslinks vorhanden.")}
                                 </div>
                             ) : (
                                 invites.map((i) => {
@@ -574,7 +578,7 @@ export default function SharingAdminPage() {
                                     return (
                                         <div key={i.token} className="border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 p-4 rounded-2xl flex flex-col gap-3">
                                             <div className="flex items-center justify-between">
-                                                <span className="text-xs font-bold text-slate-900 dark:text-white">⚡ Genossenschafts-Einladung</span>
+                                                <span className="text-xs font-bold text-slate-900 dark:text-white">{t("sharing_admin.invite_card_title", "⚡ Genossenschafts-Einladung")}</span>
                                                 <div className="flex items-center gap-2">
                                                     <button
                                                         type="button"
@@ -585,21 +589,21 @@ export default function SharingAdminPage() {
                                                         }}
                                                         className="px-3 py-1.5 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 text-emerald-600 border border-slate-200 dark:border-slate-700 cursor-pointer"
                                                     >
-                                                        {isCopied ? "✓ Kopiert" : "📋 Link kopieren"}
+                                                        {isCopied ? t("sharing_admin.copied", "✓ Kopiert") : t("sharing_admin.copy_link", "📋 Link kopieren")}
                                                     </button>
                                                     <button
                                                         type="button"
                                                         onClick={() => setActiveQrToken(isQrOpen ? null : i.token)}
                                                         className="px-3 py-1.5 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 cursor-pointer"
                                                     >
-                                                        📱 QR-Code
+                                                        {t("sharing_admin.qr_code_btn", "📱 QR-Code")}
                                                     </button>
                                                     <button
                                                         type="button"
                                                         onClick={() => deactivateInvite(i.token)}
                                                         className="px-2.5 py-1.5 text-xs text-rose-600 hover:bg-rose-50 rounded-lg cursor-pointer"
                                                     >
-                                                        Widerrufen
+                                                        {t("sharing_admin.revoke_btn", "Widerrufen")}
                                                     </button>
                                                 </div>
                                             </div>
@@ -607,8 +611,8 @@ export default function SharingAdminPage() {
                                                 <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border flex items-center gap-4">
                                                     <QRCodeSVG value={fullInviteUrl} size={110} level="M" />
                                                     <div className="text-xs">
-                                                        <h5 className="font-bold">QR-Code für neue Mitglieder</h5>
-                                                        <p className="text-slate-500 text-[11px]">Bürger scannen den Code, um der Genossenschaft digital beizutreten.</p>
+                                                        <h5 className="font-bold">{t("sharing_admin.qr_title", "QR-Code für neue Mitglieder")}</h5>
+                                                        <p className="text-slate-500 text-[11px]">{t("sharing_admin.qr_sub", "Bürger scannen den Code, um der Genossenschaft digital beizutreten.")}</p>
                                                     </div>
                                                 </div>
                                             )}
@@ -620,7 +624,7 @@ export default function SharingAdminPage() {
 
                         {/* MEMBERS LIST */}
                         <div className="space-y-2.5 pt-4 border-t border-slate-100 dark:border-slate-800">
-                            <div className="text-xs font-bold text-slate-700 dark:text-slate-300">Genossenschaftsmitglieder:</div>
+                            <div className="text-xs font-bold text-slate-700 dark:text-slate-300">{t("sharing_admin.members_list_header", "Genossenschaftsmitglieder:")}</div>
                             {members.map((m) => (
                                 <div key={m.id} className="border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 p-3.5 rounded-2xl flex items-center justify-between">
                                     <div className="flex items-center gap-2.5">
@@ -629,7 +633,7 @@ export default function SharingAdminPage() {
                                         </div>
                                         <div>
                                             <div className="text-xs font-semibold text-slate-900 dark:text-white">{m.email}</div>
-                                            <div className="text-[10px] text-emerald-600 dark:text-emerald-400">Genossenschaftsanteil aktiv • Satzung anerkannt</div>
+                                            <div className="text-[10px] text-emerald-600 dark:text-emerald-400">{t("sharing_admin.member_status_active", "Genossenschaftsanteil aktiv • Satzung anerkannt")}</div>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">
@@ -638,13 +642,13 @@ export default function SharingAdminPage() {
                                             onChange={(e) => updateRole(m.id, e.target.value)}
                                             className="text-xs border rounded-xl px-3 py-1.5 bg-white dark:bg-slate-800 cursor-pointer"
                                         >
-                                            <option value="member">⚡ Mitglied (eG)</option>
-                                            <option value="user_admin">👥 Mitgliederverwaltung</option>
-                                            <option value="auditor">📊 Kassenprüfer / Aufsichtsrat</option>
-                                            <option value="admin">🏛️ Vorstand (eG)</option>
+                                            <option value="member">{t("sharing_admin.role_member", "⚡ Mitglied (eG)")}</option>
+                                            <option value="user_admin">{t("sharing_admin.role_user_admin", "👥 Mitgliederverwaltung")}</option>
+                                            <option value="auditor">{t("sharing_admin.role_auditor", "📊 Kassenprüfer / Aufsichtsrat")}</option>
+                                            <option value="admin">{t("sharing_admin.role_admin", "🏛️ Vorstand (eG)")}</option>
                                         </select>
                                         <button onClick={() => removeMember(m.id)} className="text-rose-600 text-xs px-2.5 py-1.5 cursor-pointer">
-                                            Entfernen
+                                            {t("sharing_admin.remove_member", "Entfernen")}
                                         </button>
                                     </div>
                                 </div>
@@ -668,11 +672,11 @@ export default function SharingAdminPage() {
                                         <span className="text-xl">⚡</span>
                                         <h2 className="text-lg font-black">{activeTariff.name}</h2>
                                         <span className="bg-emerald-400/20 text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-400/30">
-                                            Aktiv
+                                            {t("sharing_admin.tariff_active", "Aktiv")}
                                         </span>
                                     </div>
                                     <p className="text-xs text-indigo-200/80 mt-1">
-                                        Regionales Energy Sharing (15-Minuten-Bilanzierung & Netzentgeltreduktion über das Verteilnetz)
+                                        {t("sharing_admin.tariff_sub", "Regionales Energy Sharing (15-Minuten-Bilanzierung & Netzentgeltreduktion über das Verteilnetz)")}
                                     </p>
                                 </div>
                                 <button
@@ -680,38 +684,38 @@ export default function SharingAdminPage() {
                                     disabled={settling}
                                     className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white rounded-xl text-xs font-bold cursor-pointer"
                                 >
-                                    {settling ? "Berechne..." : "Monatsabrechnung anstoßen"}
+                                    {settling ? t("sharing_admin.calculating", "Berechne...") : t("sharing_admin.trigger_settlement", "Monatsabrechnung anstoßen")}
                                 </button>
                             </div>
 
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-indigo-800/60">
                                 <div>
-                                    <div className="text-[11px] text-indigo-300 font-semibold uppercase">Bezugspreis (Sharing)</div>
+                                    <div className="text-[11px] text-indigo-300 font-semibold uppercase">{t("sharing_admin.tariff_purchase_price", "Bezugspreis (Sharing)")}</div>
                                     <div className="text-2xl font-black mt-1 text-white">
                                         {Number(activeTariff?.sharing_price_ct_kwh ?? 0).toFixed(2)} <span className="text-xs font-normal">Ct/kWh</span>
                                     </div>
-                                    <div className="text-[10px] text-indigo-300/70 mt-0.5">für Solar-Abnehmer</div>
+                                    <div className="text-[10px] text-indigo-300/70 mt-0.5">{t("sharing_admin.tariff_purchase_sub", "für Solar-Abnehmer")}</div>
                                 </div>
                                 <div>
-                                    <div className="text-[11px] text-indigo-300 font-semibold uppercase">Einspeisevergütung</div>
+                                    <div className="text-[11px] text-indigo-300 font-semibold uppercase">{t("sharing_admin.tariff_producer_payout", "Einspeisevergütung")}</div>
                                     <div className="text-2xl font-black mt-1 text-emerald-300">
                                         {Number(activeTariff?.producer_payout_ct_kwh ?? 0).toFixed(2)} <span className="text-xs font-normal">Ct/kWh</span>
                                     </div>
-                                    <div className="text-[10px] text-indigo-300/70 mt-0.5">Gutschrift an Einspeiser</div>
+                                    <div className="text-[10px] text-indigo-300/70 mt-0.5">{t("sharing_admin.tariff_producer_sub", "Gutschrift an Einspeiser")}</div>
                                 </div>
                                 <div>
-                                    <div className="text-[11px] text-indigo-300 font-semibold uppercase">Community-Umlage</div>
+                                    <div className="text-[11px] text-indigo-300 font-semibold uppercase">{t("sharing_admin.tariff_community_fee", "Community-Umlage")}</div>
                                     <div className="text-2xl font-black mt-1 text-amber-300">
                                         {Number(activeTariff?.community_fee_ct_kwh ?? 0).toFixed(2)} <span className="text-xs font-normal">Ct/kWh</span>
                                     </div>
-                                    <div className="text-[10px] text-indigo-300/70 mt-0.5">Betrieb & Software</div>
+                                    <div className="text-[10px] text-indigo-300/70 mt-0.5">{t("sharing_admin.tariff_community_sub", "Betrieb & Software")}</div>
                                 </div>
                                 <div>
-                                    <div className="text-[11px] text-indigo-300 font-semibold uppercase">Ersparnis vs. Netz</div>
+                                    <div className="text-[11px] text-indigo-300 font-semibold uppercase">{t("sharing_admin.tariff_savings_vs_grid", "Ersparnis vs. Netz")}</div>
                                     <div className="text-2xl font-black mt-1 text-cyan-300">
                                         ~22,00 <span className="text-xs font-normal">Ct/kWh</span>
                                     </div>
-                                    <div className="text-[10px] text-indigo-300/70 mt-0.5">ggü. Grundversorger</div>
+                                    <div className="text-[10px] text-indigo-300/70 mt-0.5">{t("sharing_admin.tariff_savings_sub", "ggü. Grundversorger")}</div>
                                 </div>
                             </div>
                         </div>
@@ -722,17 +726,17 @@ export default function SharingAdminPage() {
                         <div className="flex items-center justify-between mb-4">
                             <div>
                                 <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                                    Monatliche Abrechnungsnachweise der Bürgerenergiegenossenschaft
+                                    {t("sharing_admin.statements_title", "Monatliche Abrechnungsnachweise der Bürgerenergiegenossenschaft")}
                                 </h3>
                                 <p className="text-xs text-slate-500">
-                                    15-Minuten-scharfe Verrechnung von Erzeugung, Bezug und internen Gutschriften
+                                    {t("sharing_admin.statements_sub", "15-Minuten-scharfe Verrechnung von Erzeugung, Bezug und internen Gutschriften")}
                                 </p>
                             </div>
                             <div className="flex items-center gap-1.5">
-                                <button onClick={() => exportStatements("xlsx")} className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-xs rounded-lg border">
+                                <button onClick={() => exportStatements("xlsx")} className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-xs rounded-lg border cursor-pointer">
                                     Excel
                                 </button>
-                                <button onClick={() => exportStatements("csv")} className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-xs rounded-lg border">
+                                <button onClick={() => exportStatements("csv")} className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-xs rounded-lg border cursor-pointer">
                                     CSV
                                 </button>
                             </div>
@@ -747,11 +751,11 @@ export default function SharingAdminPage() {
                                                 <span className="font-mono font-bold text-xs">{stmt.statement_number}</span>
                                                 <span className="text-[10px] bg-slate-200 dark:bg-slate-700 px-2 py-0.5 rounded">{stmt.period_start} bis {stmt.period_end}</span>
                                             </div>
-                                            <div className="text-xs text-slate-500 mt-1">Mitglied: <span className="font-medium text-slate-700 dark:text-slate-300">{stmt.user_email}</span></div>
+                                            <div className="text-xs text-slate-500 mt-1">{t("sharing_admin.statement_member", "Mitglied:")} <span className="font-medium text-slate-700 dark:text-slate-300">{stmt.user_email}</span></div>
                                         </div>
                                         <div className="flex items-center gap-4">
                                             <div className="text-right">
-                                                <div className="text-xs text-slate-400">{stmt.is_payout ? "Gutschrift" : "Forderung"}</div>
+                                                <div className="text-xs text-slate-400">{stmt.is_payout ? t("sharing_admin.statement_credit", "Gutschrift") : t("sharing_admin.statement_claim", "Forderung")}</div>
                                                 <div className={`text-lg font-black ${stmt.is_payout ? "text-emerald-600" : "text-rose-600"}`}>
                                                     {stmt.is_payout ? "+" : ""}{Number(stmt.net_balance_eur ?? 0).toFixed(2)} €
                                                 </div>
@@ -769,7 +773,7 @@ export default function SharingAdminPage() {
                             </div>
                         ) : (
                             <div className="text-center py-8 text-xs text-slate-400 bg-slate-50 dark:bg-slate-800/30 rounded-xl border border-dashed">
-                                Noch keine Monatsabrechnungen erstellt. Klicke auf 'Monatsabrechnung anstoßen'.
+                                {t("sharing_admin.no_statements", "Noch keine Monatsabrechnungen erstellt. Klicke auf 'Monatsabrechnung anstoßen'.")}
                             </div>
                         )}
                     </div>
@@ -788,7 +792,7 @@ export default function SharingAdminPage() {
             {/* TAB 8: AUDIT */}
             {activeTab === "audit" && (
                 <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs">
-                    <h2 className="text-sm font-bold text-slate-900 dark:text-white mb-3">Revisionssicheres Genossenschafts-Audit</h2>
+                    <h2 className="text-sm font-bold text-slate-900 dark:text-white mb-3">{t("sharing_admin.audit_title", "Revisionssicheres Genossenschafts-Audit")}</h2>
                     <div className="space-y-2 max-h-96 overflow-y-auto">
                         {logs.slice(0, 30).map((log, idx) => (
                             <div key={idx} className="border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30 p-3 rounded-xl text-xs flex justify-between">

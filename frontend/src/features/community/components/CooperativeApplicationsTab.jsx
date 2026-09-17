@@ -61,7 +61,7 @@ export default function CooperativeApplicationsTab({ tenant }) {
                         <span>⏳</span> {pendingCount}
                     </div>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                        Warten auf Vorstandsbeschluss gem. § 15b GenG
+                        {t("cooperative.open_applications_sub", "Warten auf Vorstandsbeschluss gem. § 15b GenG")}
                     </p>
                 </div>
 
@@ -71,7 +71,7 @@ export default function CooperativeApplicationsTab({ tenant }) {
                         <span>🏛️</span> {applications.filter((a) => a.status === "approved").length}
                     </div>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                        Im digitalen Mitgliederverzeichnis eingetragen
+                        {t("cooperative.approved_members_sub", "Im digitalen Mitgliederverzeichnis eingetragen")}
                     </p>
                 </div>
 
@@ -90,7 +90,7 @@ export default function CooperativeApplicationsTab({ tenant }) {
                         }}
                         className="mt-3 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
                     >
-                        <span>📋</span> Link für Neumitglieder kopieren
+                        <span>📋</span> {t("cooperative.copy_join_link", "Link für Neumitglieder kopieren")}
                     </button>
                 </div>
             </div>
@@ -99,19 +99,19 @@ export default function CooperativeApplicationsTab({ tenant }) {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-slate-50 dark:bg-slate-800/40 p-3 rounded-2xl border border-slate-200 dark:border-slate-800">
                 <div className="flex items-center gap-2">
                     <span className="text-sm font-bold text-slate-800 dark:text-slate-200">
-                        📋 Digitale Beitrittsanträge
+                        📋 {t("cooperative.applications_title", "Digitale Beitrittsanträge")}
                     </span>
                     <span className="text-xs bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-full font-bold">
-                        {filteredApps.length} von {applications.length}
+                        {filteredApps.length} {t("common.of", "von")} {applications.length}
                     </span>
                 </div>
 
                 <div className="flex items-center gap-1.5">
                     {[
-                        { id: "all", label: "Alle" },
-                        { id: "pending", label: "⏳ Ausstehend" },
-                        { id: "approved", label: "✅ Genehmigt" },
-                        { id: "rejected", label: "❌ Abgelehnt" },
+                        { id: "all", label: t("cooperative.filter_all", "Alle") },
+                        { id: "pending", label: t("cooperative.filter_pending", "⏳ Ausstehend") },
+                        { id: "approved", label: t("cooperative.filter_approved", "✅ Genehmigt") },
+                        { id: "rejected", label: t("cooperative.filter_rejected", "❌ Abgelehnt") },
                     ].map((f) => (
                         <button
                             key={f.id}

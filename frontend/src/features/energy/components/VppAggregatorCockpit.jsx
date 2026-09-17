@@ -96,14 +96,14 @@ export default function VppAggregatorCockpit() {
                     <div>
                         <div className="flex flex-wrap items-center gap-2">
                             <h2 className="text-base font-black text-slate-900 dark:text-white">
-                                Virtuelles Kraftwerk (VPP) & Netzstabilitäts-Pool
+                                {t("vpp_cockpit.title", "Virtuelles Kraftwerk (VPP) & Netzstabilitäts-Pool")}
                             </h2>
                             <span className="shrink-0 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-amber-500/20">
-                                Netzdienlichkeit & § 14a EnWG
+                                {t("vpp_cockpit.badge", "Netzdienlichkeit & § 14a EnWG")}
                             </span>
                         </div>
                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                            Bündelung unserer Hausspeicher und steuerbaren Lasten (Wallboxen, Wärmepumpen) zur Stabilisierung des Stromnetzes.
+                            {t("vpp_cockpit.subtitle", "Bündelung unserer Hausspeicher und steuerbaren Lasten (Wallboxen, Wärmepumpen) zur Stabilisierung des Stromnetzes.")}
                         </p>
                     </div>
                 </div>
@@ -118,11 +118,11 @@ export default function VppAggregatorCockpit() {
                         }`}
                     >
                         <span>💡</span>
-                        <span>{showVppGlossary ? "Erklärungen ausblenden" : "Einfache Erklärung"}</span>
+                        <span>{showVppGlossary ? t("vpp_cockpit.hide_explanation", "Erklärungen ausblenden") : t("vpp_cockpit.show_explanation", "Einfache Erklärung")}</span>
                     </button>
 
                     <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
-                        <span className="text-xs text-slate-500 font-medium">Netzbetreiber (ÜNB):</span>
+                        <span className="text-xs text-slate-500 font-medium">{t("vpp_cockpit.tso_label", "Netzbetreiber (ÜNB):")}</span>
                         <select
                             value={selectedTso}
                             onChange={(e) => setSelectedTso(e.target.value)}
@@ -146,7 +146,7 @@ export default function VppAggregatorCockpit() {
                         </h3>
                         <button
                             onClick={() => setShowVppGlossary(false)}
-                            className="text-amber-700 dark:text-amber-300 text-xs font-bold hover:underline"
+                            className="text-amber-700 dark:text-amber-300 text-xs font-bold hover:underline cursor-pointer"
                         >
                             Schließen ✕
                         </button>
@@ -179,56 +179,56 @@ export default function VppAggregatorCockpit() {
                 {/* 1. Positive Regelleistung (+kW) */}
                 <div className="bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-2xl">
                     <div className="flex items-center justify-between text-emerald-600 dark:text-emerald-400 text-xs font-bold mb-1">
-                        <span>⚡ Positive Flexibilität (+kW)</span>
+                        <span>{t("vpp_cockpit.pos_flex", "⚡ Positive Flexibilität (+kW)")}</span>
                         <span className="text-base">📈</span>
                     </div>
                     <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
                         +{summary.total_available_positive_flex_kw.toFixed(1)} <span className="text-xs font-normal text-slate-500">kW</span>
                     </div>
                     <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                        Speicher-Entladung + § 14a Lastabwurf
+                        {t("vpp_cockpit.pos_flex_sub", "Speicher-Entladung + § 14a Lastabwurf")}
                     </div>
                 </div>
 
                 {/* 2. Negative Regelleistung (-kW) */}
                 <div className="bg-blue-500/5 dark:bg-blue-500/10 border border-blue-500/20 p-4 rounded-2xl">
                     <div className="flex items-center justify-between text-blue-600 dark:text-blue-400 text-xs font-bold mb-1">
-                        <span>🔋 Negative Flexibilität (-kW)</span>
+                        <span>{t("vpp_cockpit.neg_flex", "🔋 Negative Flexibilität (-kW)")}</span>
                         <span className="text-base">📉</span>
                     </div>
                     <div className="text-2xl font-black text-blue-600 dark:text-blue-400">
                         -{summary.total_available_negative_flex_kw.toFixed(1)} <span className="text-xs font-normal text-slate-500">kW</span>
                     </div>
                     <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                        Netz-Laden + PV-Abregelung
+                        {t("vpp_cockpit.neg_flex_sub", "Netz-Laden + PV-Abregelung")}
                     </div>
                 </div>
 
                 {/* 3. Speicherflotte */}
                 <div className="bg-indigo-500/5 dark:bg-indigo-500/10 border border-indigo-500/20 p-4 rounded-2xl">
                     <div className="flex items-center justify-between text-indigo-600 dark:text-indigo-400 text-xs font-bold mb-1">
-                        <span>🔋 Heimspeicher ({battery.assets_count})</span>
+                        <span>{t("vpp_cockpit.battery_fleet", { count: battery.assets_count, defaultValue: `🔋 Heimspeicher (${battery.assets_count})` })}</span>
                         <span className="text-base">⚡</span>
                     </div>
                     <div className="text-2xl font-black text-slate-900 dark:text-white">
                         {battery.total_stored_energy_kwh.toFixed(1)} <span className="text-xs font-normal text-slate-500">/ {battery.total_capacity_kwh.toFixed(1)} kWh</span>
                     </div>
                     <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                        Mittlerer Ladestand: <strong className="text-indigo-600 dark:text-indigo-400">{battery.average_soc_pct.toFixed(0)}% SoC</strong>
+                        {t("vpp_cockpit.average_soc", { soc: battery.average_soc_pct.toFixed(0), defaultValue: `Mittlerer Ladestand: ${battery.average_soc_pct.toFixed(0)}% SoC` })}
                     </div>
                 </div>
 
                 {/* 4. § 14a EnWG Lasten */}
                 <div className="bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/20 p-4 rounded-2xl">
                     <div className="flex items-center justify-between text-amber-600 dark:text-amber-400 text-xs font-bold mb-1">
-                        <span>🚗 § 14a SteuVE ({steuve.assets_count})</span>
+                        <span>{t("vpp_cockpit.steuve_loads", { count: steuve.assets_count, defaultValue: `🚗 § 14a SteuVE (${steuve.assets_count})` })}</span>
                         <span className="text-base">🛡️</span>
                     </div>
                     <div className="text-2xl font-black text-slate-900 dark:text-white">
-                        {steuve.curtailable_power_kw.toFixed(1)} <span className="text-xs font-normal text-slate-500">kW dimmbar</span>
+                        {steuve.curtailable_power_kw.toFixed(1)} <span className="text-xs font-normal text-slate-500">{t("vpp_cockpit.steuve_dimmable", "kW dimmbar")}</span>
                     </div>
                     <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                        Wallboxen & Wärmepumpen &gt;= 4,2 kW
+                        {t("vpp_cockpit.steuve_sub", "Wallboxen & Wärmepumpen >= 4,2 kW")}
                     </div>
                 </div>
             </div>
@@ -239,29 +239,29 @@ export default function VppAggregatorCockpit() {
                     <div className="flex items-center gap-2">
                         <span className="text-lg">🎮</span>
                         <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                            Leitsystem-Simulator: Regelleistungs-Abruf (Dispatch)
+                            {t("vpp_cockpit.sim_title", "Leitsystem-Simulator: Regelleistungs-Abruf (Dispatch)")}
                         </h3>
                     </div>
                     <span className="text-xs text-slate-400">
-                        Reaktionszeit: &lt; 15s (Sekundärregelleistung konform)
+                        {t("vpp_cockpit.sim_response_time", "Reaktionszeit: < 15s (Sekundärregelleistung konform)")}
                     </span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                     <div>
-                        <label className="text-[11px] font-semibold text-slate-500 block mb-1">Produkt-Typ:</label>
+                        <label className="text-[11px] font-semibold text-slate-500 block mb-1">{t("vpp_cockpit.product_type", "Produkt-Typ:")}</label>
                         <select
                             value={dispatchType}
                             onChange={(e) => setDispatchType(e.target.value)}
-                            className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-2 rounded-xl text-xs font-semibold text-slate-900 dark:text-white"
+                            className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-2 rounded-xl text-xs font-semibold text-slate-900 dark:text-white cursor-pointer"
                         >
-                            <option value="positive_flex">⚡ Positiv (+kW Entlastung)</option>
-                            <option value="negative_flex">🔋 Negativ (-kW Speicher-Ladung)</option>
+                            <option value="positive_flex">{t("vpp_cockpit.opt_pos", "⚡ Positiv (+kW Entlastung)")}</option>
+                            <option value="negative_flex">{t("vpp_cockpit.opt_neg", "🔋 Negativ (-kW Speicher-Ladung)")}</option>
                         </select>
                     </div>
 
                     <div>
-                        <label className="text-[11px] font-semibold text-slate-500 block mb-1">Soll-Leistung (kW):</label>
+                        <label className="text-[11px] font-semibold text-slate-500 block mb-1">{t("vpp_cockpit.target_power", "Soll-Leistung (kW):")}</label>
                         <input
                             type="number"
                             min="5"
@@ -274,15 +274,15 @@ export default function VppAggregatorCockpit() {
                     </div>
 
                     <div>
-                        <label className="text-[11px] font-semibold text-slate-500 block mb-1">Dauer (Minuten):</label>
+                        <label className="text-[11px] font-semibold text-slate-500 block mb-1">{t("vpp_cockpit.duration", "Dauer (Minuten):")}</label>
                         <select
                             value={durationMinutes}
                             onChange={(e) => setDurationMinutes(e.target.value)}
-                            className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-2 rounded-xl text-xs font-semibold text-slate-900 dark:text-white"
+                            className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-2 rounded-xl text-xs font-semibold text-slate-900 dark:text-white cursor-pointer"
                         >
-                            <option value="15">15 Minuten (Standard aFRR)</option>
-                            <option value="30">30 Minuten</option>
-                            <option value="60">60 Minuten (1 Stunde)</option>
+                            <option value="15">{t("vpp_cockpit.dur_15", "15 Minuten (Standard aFRR)")}</option>
+                            <option value="30">{t("vpp_cockpit.dur_30", "30 Minuten")}</option>
+                            <option value="60">{t("vpp_cockpit.dur_60", "60 Minuten (1 Stunde)")}</option>
                         </select>
                     </div>
 
@@ -293,7 +293,7 @@ export default function VppAggregatorCockpit() {
                             disabled={dispatchMutation.isPending}
                             className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs transition disabled:opacity-50 cursor-pointer"
                         >
-                            {dispatchMutation.isPending ? "Sende Abruf..." : "🚀 Abruf aktivieren"}
+                            {dispatchMutation.isPending ? t("vpp_cockpit.btn_sending", "Sende Abruf...") : t("vpp_cockpit.btn_dispatch", "🚀 Abruf aktivieren")}
                         </button>
                     </div>
                 </div>
@@ -322,11 +322,11 @@ export default function VppAggregatorCockpit() {
                     <div className="flex items-center gap-2">
                         <span className="text-lg">📋</span>
                         <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                            Redispatch 2.0 / Connect+ 96-Viertelstunden-Fahrplan (PT15M)
+                            {t("vpp_cockpit.redispatch_title", "Redispatch 2.0 / Connect+ 96-Viertelstunden-Fahrplan (PT15M)")}
                         </h3>
                     </div>
                     <span className="font-mono text-[11px] text-slate-400">
-                        Ressource: {scheduleQuery.data?.resource_id || "DE-CONNECT-RES-001"}
+                        {t("vpp_cockpit.resource_label", { id: scheduleQuery.data?.resource_id || "DE-CONNECT-RES-001", defaultValue: `Ressource: ${scheduleQuery.data?.resource_id || "DE-CONNECT-RES-001"}` })}
                     </span>
                 </div>
 
@@ -409,4 +409,3 @@ export default function VppAggregatorCockpit() {
         </div>
     );
 }
-
