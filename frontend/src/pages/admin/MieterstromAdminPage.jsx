@@ -347,7 +347,7 @@ export default function MieterstromAdminPage() {
                         activeTab === "apartments" ? "bg-white dark:bg-slate-900 text-sky-600 dark:text-sky-400 font-bold shadow-xs" : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                     }`}
                 >
-                    {t("admin_mieterstrom.tab_apartments_count", { count: members.length, defaultValue: `🏠 Wohnungen & Mieter (${members.length})` })}
+                    🏠 {t("admin_mieterstrom.tab_apartments_count", { count: members.length, defaultValue: `Wohneinheiten & Mieter (${members.length})` })}
                 </button>
                 <button
                     onClick={() => handleTabChange("settlement")}

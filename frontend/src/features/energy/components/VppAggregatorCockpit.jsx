@@ -142,32 +142,32 @@ export default function VppAggregatorCockpit() {
                 <div className="bg-amber-500/10 border border-amber-500/20 p-5 rounded-2xl animate-fade-in space-y-3">
                     <div className="flex items-center justify-between">
                         <h3 className="text-xs font-black uppercase tracking-wider text-amber-900 dark:text-amber-200 flex items-center gap-1.5">
-                            <span>📖</span> Was bedeuten diese Begriffe im Alltag?
+                            <span>📖</span> {t("vpp_cockpit.glossary_title", "Was bedeuten diese Begriffe im Alltag?")}
                         </h3>
                         <button
                             onClick={() => setShowVppGlossary(false)}
                             className="text-amber-700 dark:text-amber-300 text-xs font-bold hover:underline cursor-pointer"
                         >
-                            Schließen ✕
+                            {t("vpp_cockpit.glossary_close", "Schließen ✕")}
                         </button>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
                         <div className="p-3 bg-white/80 dark:bg-slate-900/80 rounded-xl border border-amber-500/10">
-                            <div className="font-bold text-slate-900 dark:text-white mb-1">🔋 Virtuelles Kraftwerk (VPP)</div>
+                            <div className="font-bold text-slate-900 dark:text-white mb-1">{t("vpp_cockpit.glossary_vpp_title", "🔋 Virtuelles Kraftwerk (VPP)")}</div>
                             <p className="text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">
-                                Einzelne Heimbatterien sind zu klein für den großen Strommarkt. Sharegy bündelt 50 oder 500 Speicher digital zu einem großen "virtuellen Großspeicher", der bei Stromknappheit einspringen kann.
+                                {t("vpp_cockpit.glossary_vpp_desc", "Einzelne Heimbatterien sind zu klein für den großen Strommarkt. Sharegy bündelt 50 oder 500 Speicher digital zu einem großen 'virtuellen Großspeicher', der bei Stromknappheit einspringen kann.")}
                             </p>
                         </div>
                         <div className="p-3 bg-white/80 dark:bg-slate-900/80 rounded-xl border border-amber-500/10">
-                            <div className="font-bold text-slate-900 dark:text-white mb-1">🚗 § 14a EnWG Steuerbare Lasten</div>
+                            <div className="font-bold text-slate-900 dark:text-white mb-1">{t("vpp_cockpit.glossary_steuve_title", "🚗 § 14a EnWG Steuerbare Lasten")}</div>
                             <p className="text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">
-                                Wenn das örtliche Stromnetz droht zu überlasten, darf der Netzbetreiber Wallboxen und Wärmepumpen kurzzeitig auf 4,2 kW drosseln. Als Belohnung erhält jeder Haushalt einen pauschalen Netzentgelt-Rabatt von ca. 160 € pro Jahr.
+                                {t("vpp_cockpit.glossary_steuve_desc", "Wenn das örtliche Stromnetz droht zu überlasten, darf der Netzbetreiber Wallboxen und Wärmepumpen kurzzeitig auf 4,2 kW drosseln. Als Belohnung erhält jeder Haushalt einen pauschalen Netzentgelt-Rabatt von ca. 160 € pro Jahr.")}
                             </p>
                         </div>
                         <div className="p-3 bg-white/80 dark:bg-slate-900/80 rounded-xl border border-amber-500/10">
-                            <div className="font-bold text-slate-900 dark:text-white mb-1">📈 96-Viertelstunden-Fahrplan (Redispatch)</div>
+                            <div className="font-bold text-slate-900 dark:text-white mb-1">{t("vpp_cockpit.glossary_redispatch_title", "📈 96-Viertelstunden-Fahrplan (Redispatch)")}</div>
                             <p className="text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">
-                                Der Netzbetreiber bekommt für den nächsten Tag 96 Planwerte (alle 15 Minuten einen), wie viel Strom unsere Gemeinschaft einspeist oder puffern kann. So werden teure Blackouts und Stromstaus verhindert.
+                                {t("vpp_cockpit.glossary_redispatch_desc", "Der Netzbetreiber bekommt für den nächsten Tag 96 Planwerte (alle 15 Minuten einen), wie viel Strom unsere Gemeinschaft einspeist oder puffern kann. So werden teure Blackouts und Stromstaus verhindert.")}
                             </p>
                         </div>
                     </div>
@@ -381,10 +381,10 @@ export default function VppAggregatorCockpit() {
                         <span className="text-lg">⚖️</span>
                         <div>
                             <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                                Automatisiertes Market Clearing & 80/20 Erlösausschüttung
+                                {t("vpp_cockpit.clearing_title", "Automatisiertes Market Clearing & 80/20 Erlösausschüttung")}
                             </h3>
                             <p className="text-xs text-slate-500 dark:text-slate-400">
-                                Monatliche Gutschriften für Speicherbetreiber (80 % Kunde / 20 % Plattformmarge).
+                                {t("vpp_cockpit.clearing_subtitle", "Monatliche Gutschriften für Speicherbetreiber (80 % Kunde / 20 % Plattformmarge).")}
                             </p>
                         </div>
                     </div>
@@ -392,16 +392,16 @@ export default function VppAggregatorCockpit() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700/60 text-xs">
                     <div>
-                        <span className="text-slate-400 block text-[11px] font-bold">Standard-Split</span>
-                        <strong className="text-sm text-emerald-600 font-extrabold">80 % Speicher / 20 % Sharegy</strong>
+                        <span className="text-slate-400 block text-[11px] font-bold">{t("vpp_cockpit.clearing_split_label", "Standard-Split")}</span>
+                        <strong className="text-sm text-emerald-600 font-extrabold">{t("vpp_cockpit.clearing_split_val", "80 % Speicher / 20 % Sharegy")}</strong>
                     </div>
                     <div>
-                        <span className="text-slate-400 block text-[11px] font-bold">Abrechnungs-Intervall</span>
-                        <strong className="text-sm text-slate-800 dark:text-slate-200 font-extrabold">Monatlich (PT1M)</strong>
+                        <span className="text-slate-400 block text-[11px] font-bold">{t("vpp_cockpit.clearing_interval_label", "Abrechnungs-Intervall")}</span>
+                        <strong className="text-sm text-slate-800 dark:text-slate-200 font-extrabold">{t("vpp_cockpit.clearing_interval_val", "Monatlich (PT1M)")}</strong>
                     </div>
                     <div>
-                        <span className="text-slate-400 block text-[11px] font-bold">Auszahlungskanal</span>
-                        <strong className="text-sm text-slate-800 dark:text-slate-200 font-extrabold">Stromrechnung / Stripe</strong>
+                        <span className="text-slate-400 block text-[11px] font-bold">{t("vpp_cockpit.clearing_channel_label", "Auszahlungskanal")}</span>
+                        <strong className="text-sm text-slate-800 dark:text-slate-200 font-extrabold">{t("vpp_cockpit.clearing_channel_val", "Stromrechnung / Stripe")}</strong>
                     </div>
                 </div>
             </div>
