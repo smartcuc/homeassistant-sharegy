@@ -54,25 +54,25 @@ export default function VirtualMasterMeterHub({ tenant }) {
                     const isGgv = tenant?.model_type === "ggv";
                     const headerIcon = isMieterstrom ? "🏢" : isGgv ? "⚖️" : "⚡";
                     const headerTitle = isMieterstrom 
-                        ? "Gemeinsamer Hausanschluss & Mieterstrom-Summenzähler" 
+                        ? t("master_meter.header_mieterstrom", "Gemeinsamer Hausanschluss & Mieterstrom-Summenzähler") 
                         : isGgv 
-                        ? "Messkonzept & Gebäude-Solaraufteilung (GGV)" 
-                        : "15-Minuten Bilanzierung & Virtueller Summenzähler";
+                        ? t("master_meter.header_ggv", "Messkonzept & Gebäude-Solaraufteilung (GGV)") 
+                        : t("master_meter.header_sharing", "15-Minuten Bilanzierung & Virtueller Summenzähler");
                     const badgeLabel = isMieterstrom
-                        ? "🏢 § 42a EnWG Mieterstrom"
+                        ? t("master_meter.badge_mieterstrom", "🏢 § 42a EnWG Mieterstrom")
                         : isGgv
-                        ? "⚖️ § 42b EnWG Gebäudeversorgung"
-                        : "⚡ Regionales Energy Sharing";
+                        ? t("master_meter.badge_ggv", "⚖️ § 42b EnWG Gebäudeversorgung")
+                        : t("master_meter.badge_sharing", "⚡ Regionales Energy Sharing");
                     const badgeClass = isMieterstrom
                         ? "bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20"
                         : isGgv
                         ? "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20"
                         : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20";
                     const subtitle = isMieterstrom
-                        ? "Vollversorgungs-Messkonzept: Viertelstundengenaue Saldierung von PV-Erzeugung, Wohnungszählern und Netz-Reststrom."
+                        ? t("master_meter.sub_mieterstrom", "Vollversorgungs-Messkonzept: Viertelstundengenaue Saldierung von PV-Erzeugung, Wohnungszählern und Netz-Reststrom.")
                         : isGgv
-                        ? "Vor-Ort-Aufteilung des Solarstroms nach Miteigentumsanteilen (MEA) ohne Reststrompflicht."
-                        : "Smart-Meter-Matching über das Verteilnetz: 15-Minuten Lastgang-Allokation für alle Erzeuger und Abnehmer.";
+                        ? t("master_meter.sub_ggv", "Vor-Ort-Aufteilung des Solarstroms nach Miteigentumsanteilen (MEA) ohne Reststrompflicht.")
+                        : t("master_meter.sub_sharing", "Smart-Meter-Matching über das Verteilnetz: 15-Minuten Lastgang-Allokation für alle Erzeuger und Abnehmer.");
 
                     return (
                         <div className="flex items-start gap-3">
@@ -104,11 +104,11 @@ export default function VirtualMasterMeterHub({ tenant }) {
                         }`}
                     >
                         <span>💡</span>
-                        <span>{showGlossary ? "Erklärungen ausblenden" : "Einfache Erklärung"}</span>
+                        <span>{showGlossary ? t("master_meter.glossary_hide", "Erklärungen ausblenden") : t("master_meter.glossary_show", "Einfache Erklärung")}</span>
                     </button>
 
                     <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
-                        <span className="text-xs text-slate-500">📅 Tag:</span>
+                        <span className="text-xs text-slate-500">{t("master_meter.day_label", "📅 Tag:")}</span>
                         <input
                             type="date"
                             value={selectedDate}
@@ -118,15 +118,15 @@ export default function VirtualMasterMeterHub({ tenant }) {
                     </div>
 
                     <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
-                        <span className="text-xs text-slate-500">⚖️ Verteilung:</span>
+                        <span className="text-xs text-slate-500">{t("master_meter.distribution_label", "⚖️ Verteilung:")}</span>
                         <select
                             value={allocationModel}
                             onChange={(e) => setAllocationModel(e.target.value)}
                             className="bg-transparent text-xs font-semibold text-slate-800 dark:text-slate-200 focus:outline-hidden cursor-pointer"
                         >
-                            <option value="dynamic">⚡ Dynamisch (Wer gerade Strom braucht)</option>
-                            <option value="static">📐 Statisch (Nach Wohnungsgröße MEA)</option>
-                            <option value="hybrid">🤝 Hybrid (Feste Quote + Rest teilen)</option>
+                            <option value="dynamic">{t("master_meter.opt_dynamic", "⚡ Dynamisch (Wer gerade Strom braucht)")}</option>
+                            <option value="static">{t("master_meter.opt_static", "📐 Statisch (Nach Wohnungsgröße MEA)")}</option>
+                            <option value="hybrid">{t("master_meter.opt_hybrid", "🤝 Hybrid (Feste Quote + Rest teilen)")}</option>
                         </select>
                     </div>
                 </div>
@@ -137,34 +137,32 @@ export default function VirtualMasterMeterHub({ tenant }) {
                 <div className="bg-amber-500/10 border border-amber-500/20 p-5 rounded-2xl animate-fade-in space-y-3">
                     <div className="flex items-center justify-between">
                         <h3 className="text-xs font-black uppercase tracking-wider text-amber-900 dark:text-amber-200 flex items-center gap-1.5">
-                            <span>📖</span> Fachbegriffe einfach erklärt (für Vermieter, WEG-Eigentümer & Mieter)
+                            <span>📖</span> {t("master_meter.glossary_title", "Fachbegriffe einfach erklärt (für Vermieter, WEG-Eigentümer & Mieter)")}
                         </h3>
                         <button
                             onClick={() => setShowGlossary(false)}
                             className="text-amber-700 dark:text-amber-300 text-xs font-bold hover:underline"
                         >
-                            Schließen ✕
+                            {t("master_meter.glossary_close", "Schließen ✕")}
                         </button>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
                         <div className="p-3 bg-white/80 dark:bg-slate-900/80 rounded-xl border border-amber-500/10">
-                            <div className="font-bold text-slate-900 dark:text-white mb-1">🏢 Hausanschluss (NAP) & Virtueller Zähler</div>
+                            <div className="font-bold text-slate-900 dark:text-white mb-1">{t("master_meter.glossary_nap_title", "🏢 Hausanschluss (NAP) & Virtueller Zähler")}</div>
                             <p className="text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">
-                                Statt für tausende Euro extra Zählerschränke umzubauen, rechnet Sharegy die Zählerstände der einzelnen Wohnungen alle 15 Minuten digital zusammen. So weiß man genau, ob das Gebäude gerade Solarstrom ins Netz einspeist oder Strom zukaufen muss.
+                                {t("master_meter.glossary_nap_desc", "Statt für tausende Euro extra Zählerschränke umzubauen, rechnet Sharegy die Zählerstände der einzelnen Wohnungen alle 15 Minuten digital zusammen. So weiß man genau, ob das Gebäude gerade Solarstrom ins Netz einspeist oder Strom zukaufen muss.")}
                             </p>
                         </div>
                         <div className="p-3 bg-white/80 dark:bg-slate-900/80 rounded-xl border border-amber-500/10">
-                            <div className="font-bold text-slate-900 dark:text-white mb-1">⏱️ 15-Minuten-Takt (§ 42b EnWG)</div>
+                            <div className="font-bold text-slate-900 dark:text-white mb-1">{t("master_meter.glossary_15m_title", "⏱️ 15-Minuten-Takt (§ 42b EnWG)")}</div>
                             <p className="text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">
-                                Das Gesetz schreibt vor, dass Erzeugung und Verbrauch in Viertelstunden-Blöcken verrechnet werden müssen. Wer zur Mittagszeit wäscht oder das E-Auto lädt, bekommt den günstigen Sonnenstrom sofort centgenau gutgeschrieben.
+                                {t("master_meter.glossary_15m_desc", "Das Gesetz schreibt vor, dass Erzeugung und Verbrauch in Viertelstunden-Blöcken verrechnet werden müssen. Wer zur Mittagszeit wäscht oder das E-Auto lädt, bekommt den günstigen Sonnenstrom sofort centgenau gutgeschrieben.")}
                             </p>
                         </div>
                         <div className="p-3 bg-white/80 dark:bg-slate-900/80 rounded-xl border border-amber-500/10">
-                            <div className="font-bold text-slate-900 dark:text-white mb-1">⚖️ Verteilungs-Modelle (Dynamisch vs. MEA)</div>
-                            <p className="text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">
-                                <strong>Dynamisch:</strong> Wer gerade Strom verbraucht, bekommt ihn (höchste Fairness).<br />
-                                <strong>Statisch (MEA):</strong> Jeder bekommt einen festen Prozentsatz nach Wohnungsgröße laut Grundbuch.<br />
-                                <strong>Hybrid:</strong> Fester Grundanteil, Überschüsse gehen an Nachbarn.
+                            <div className="font-bold text-slate-900 dark:text-white mb-1">{t("master_meter.glossary_models_title", "⚖️ Verteilungs-Modelle (Dynamisch vs. MEA)")}</div>
+                            <p className="text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed whitespace-pre-line">
+                                {t("master_meter.glossary_models_desc", "Dynamisch: Wer gerade Strom verbraucht, bekommt ihn (höchste Fairness).\nStatisch (MEA): Jeder bekommt einen festen Prozentsatz nach Wohnungsgröße laut Grundbuch.\nHybrid: Fester Grundanteil, Überschüsse gehen an Nachbarn.")}
                             </p>
                         </div>
                     </div>
@@ -176,49 +174,49 @@ export default function VirtualMasterMeterHub({ tenant }) {
                 {/* 1. Gesamterzeugung */}
                 <div className="bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/20 p-4 rounded-2xl">
                     <div className="flex items-center justify-between text-amber-600 dark:text-amber-400 text-xs font-bold mb-1">
-                        <span>☀️ PV-Erzeugung</span>
+                        <span>{t("master_meter.kpi_gen", "☀️ PV-Erzeugung")}</span>
                         <span className="text-base">🔋</span>
                     </div>
                     <div className="text-2xl font-black text-slate-900 dark:text-white">
                         {totals.total_generation_kwh.toFixed(1)} <span className="text-xs font-normal text-slate-500">kWh</span>
                     </div>
                     <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                        Eigenverbrauchsquote: <strong className="text-amber-600 dark:text-amber-400">{totals.self_consumption_rate_pct.toFixed(1)}%</strong>
+                        {t("master_meter.kpi_self_consumption", "Eigenverbrauchsquote:")} <strong className="text-amber-600 dark:text-amber-400">{totals.self_consumption_rate_pct.toFixed(1)}%</strong>
                     </div>
                 </div>
 
                 {/* 2. Gesamtverbrauch */}
                 <div className="bg-rose-500/5 dark:bg-rose-500/10 border border-rose-500/20 p-4 rounded-2xl">
                     <div className="flex items-center justify-between text-rose-600 dark:text-rose-400 text-xs font-bold mb-1">
-                        <span>🔌 Gesamtverbrauch</span>
+                        <span>{t("master_meter.kpi_total_cons", "🔌 Gesamtverbrauch")}</span>
                         <span className="text-base">🏠</span>
                     </div>
                     <div className="text-2xl font-black text-slate-900 dark:text-white">
                         {totals.total_consumption_kwh.toFixed(1)} <span className="text-xs font-normal text-slate-500">kWh</span>
                     </div>
                     <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                        Autarkiegrad: <strong className="text-emerald-600 dark:text-emerald-400">{totals.self_sufficiency_rate_pct.toFixed(1)}%</strong>
+                        {t("master_meter.kpi_autarky", "Autarkiegrad:")} <strong className="text-emerald-600 dark:text-emerald-400">{totals.self_sufficiency_rate_pct.toFixed(1)}%</strong>
                     </div>
                 </div>
 
                 {/* 3. Geteilter Solarstrom */}
                 <div className="bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-2xl">
                     <div className="flex items-center justify-between text-emerald-600 dark:text-emerald-400 text-xs font-bold mb-1">
-                        <span>⚡ Geteilter Ökostrom</span>
+                        <span>{t("master_meter.kpi_shared_green", "⚡ Geteilter Ökostrom")}</span>
                         <span className="text-base">🌱</span>
                     </div>
                     <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
                         {totals.total_shared_kwh.toFixed(1)} <span className="text-xs font-normal text-slate-500">kWh</span>
                     </div>
                     <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                        Lokal vor Ort saldiert & verbraucht
+                        {t("master_meter.kpi_shared_sub", "Lokal vor Ort saldiert & verbraucht")}
                     </div>
                 </div>
 
                 {/* 4. Restnetzbezug vs. Netzeinspeisung */}
                 <div className="bg-blue-500/5 dark:bg-blue-500/10 border border-blue-500/20 p-4 rounded-2xl">
                     <div className="flex items-center justify-between text-blue-600 dark:text-blue-400 text-xs font-bold mb-1">
-                        <span>🌐 Netzanschlusspunkt NAP</span>
+                        <span>{t("master_meter.kpi_nap", "🌐 Netzanschlusspunkt NAP")}</span>
                         <span className="text-base">⚖️</span>
                     </div>
                     <div className="flex items-baseline gap-2">
@@ -231,7 +229,7 @@ export default function VirtualMasterMeterHub({ tenant }) {
                         </div>
                     </div>
                     <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                        Reststrom-Saldo über EVU
+                        {t("master_meter.kpi_nap_sub", "Reststrom-Saldo über EVU")}
                     </div>
                 </div>
             </div>
@@ -242,7 +240,7 @@ export default function VirtualMasterMeterHub({ tenant }) {
                     <div className="flex items-center gap-2">
                         <span className="text-lg">📊</span>
                         <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                            15-Minuten Last- und Erzeugungsprofil am virtuellen Summenzähler ({timeline.length} Intervalle)
+                            {t("master_meter.timeline_title", "15-Minuten Last- und Erzeugungsprofil am virtuellen Summenzähler ({{count}} Intervalle)", { count: timeline.length })}
                         </h3>
                     </div>
                     <div className="flex items-center gap-3 text-[11px] font-semibold text-slate-500">
@@ -294,11 +292,11 @@ export default function VirtualMasterMeterHub({ tenant }) {
                     <div className="flex items-center gap-2">
                         <span className="text-lg">👥</span>
                         <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                            Mieter- & Parteien-Aufschlüsselung ({members.length} Wohneinheiten)
+                            {t("master_meter.breakdown_title", "Mieter- & Parteien-Aufschlüsselung ({{count}} Wohneinheiten)", { count: members.length })}
                         </h3>
                     </div>
                     <span className="text-xs text-slate-400">
-                        Saldierte Zuteilung gem. Modell "{allocationModel}"
+                        {t("master_meter.breakdown_subtitle", "Saldierte Zuteilung gem. Modell \"{{model}}\"", { model: allocationModel })}
                     </span>
                 </div>
 

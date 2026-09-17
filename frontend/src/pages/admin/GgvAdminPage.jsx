@@ -352,7 +352,7 @@ export default function GgvAdminPage() {
                         activeTab === "meters" ? "bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 font-bold shadow-xs" : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                     }`}
                 >
-                    ⚡ Messkonzept & Zähler
+                    {t("admin_ggv.tab_meters", "⚡ Messkonzept & Zähler")}
                 </button>
                 <button
                     onClick={() => handleTabChange("msb")}
@@ -360,7 +360,7 @@ export default function GgvAdminPage() {
                         activeTab === "msb" ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs font-bold" : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                     }`}
                 >
-                    ⚡ Zählerverwaltung
+                    {t("admin_ggv.tab_msb", "⚡ Zählerverwaltung")}
                 </button>
                 <button
                     onClick={() => handleTabChange("audit")}
@@ -368,7 +368,7 @@ export default function GgvAdminPage() {
                         activeTab === "audit" ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs" : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                     }`}
                 >
-                    📜 WEG-Audit & Beschlüsse
+                    {t("admin_ggv.tab_audit", "📜 WEG-Audit & Beschlüsse")}
                 </button>
             </div>
 
@@ -377,20 +377,20 @@ export default function GgvAdminPage() {
                 <div className="space-y-6">
                     <div className="flex items-center justify-between">
                         <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200">
-                            Gebäude-Solarbilanz & MEA-Aufteilung (§ 42b EnWG)
+                            {t("admin_ggv.balance_title", "Gebäude-Solarbilanz & MEA-Aufteilung (§ 42b EnWG)")}
                         </h2>
                         <div className="flex bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg text-xs font-semibold">
                             <button
                                 onClick={() => setTimeRange("today")}
                                 className={`px-2.5 py-1 rounded-md transition ${timeRange === "today" ? "bg-white dark:bg-slate-900 text-purple-600 dark:text-purple-400 shadow-xs" : "text-slate-500"}`}
                             >
-                                Heute
+                                {t("common.today", "Heute")}
                             </button>
                             <button
                                 onClick={() => setTimeRange("month")}
                                 className={`px-2.5 py-1 rounded-md transition ${timeRange === "month" ? "bg-white dark:bg-slate-900 text-purple-600 dark:text-purple-400 shadow-xs" : "text-slate-500"}`}
                             >
-                                Dieser Monat
+                                {t("common.this_month", "Dieser Monat")}
                             </button>
                         </div>
                     </div>
@@ -399,60 +399,60 @@ export default function GgvAdminPage() {
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
                         <div className="bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4">
                             <div className="flex items-center justify-between text-amber-700 dark:text-amber-300 text-xs font-bold uppercase">
-                                <span>PV-Erzeugung</span>
+                                <span>{t("admin_ggv.kpi_pv_gen", "PV-Erzeugung")}</span>
                                 <span>☀️</span>
                             </div>
                             <div className="mt-3 text-2xl font-black text-amber-900 dark:text-amber-100">
                                 {Number(currentStats?.produced_kwh ?? 0).toFixed(1)} <span className="text-xs font-normal">kWh</span>
                             </div>
-                            <div className="text-[11px] text-amber-700/80 dark:text-amber-300/80 mt-0.5">Gemeinschaftsanlage</div>
+                            <div className="text-[11px] text-amber-700/80 dark:text-amber-300/80 mt-0.5">{t("admin_ggv.kpi_pv_gen_sub", "Gemeinschaftsanlage")}</div>
                         </div>
 
                         <div className="bg-purple-500/5 dark:bg-purple-500/10 border border-purple-500/20 rounded-2xl p-4">
                             <div className="flex items-center justify-between text-purple-700 dark:text-purple-300 text-xs font-bold uppercase">
-                                <span>Hausbedarf</span>
+                                <span>{t("admin_ggv.kpi_demand", "Hausbedarf")}</span>
                                 <span>🏢</span>
                             </div>
                             <div className="mt-3 text-2xl font-black text-purple-900 dark:text-purple-100">
                                 {Number(currentStats?.consumed_kwh ?? 0).toFixed(1)} <span className="text-xs font-normal">kWh</span>
                             </div>
-                            <div className="text-[11px] text-purple-700/80 dark:text-purple-300/80 mt-0.5">Summe aller Parteien</div>
+                            <div className="text-[11px] text-purple-700/80 dark:text-purple-300/80 mt-0.5">{t("admin_ggv.kpi_demand_sub", "Summe aller Parteien")}</div>
                         </div>
 
                         <div className="bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4">
                             <div className="flex items-center justify-between text-emerald-700 dark:text-emerald-300 text-xs font-bold uppercase">
-                                <span>Vor-Ort verteilt</span>
+                                <span>{t("admin_ggv.kpi_shared", "Vor-Ort verteilt")}</span>
                                 <span>⚖️</span>
                             </div>
                             <div className="mt-3 text-2xl font-black text-emerald-900 dark:text-emerald-100">
                                 {Number(currentStats?.shared_kwh ?? 0).toFixed(1)} <span className="text-xs font-normal">kWh</span>
                             </div>
                             <div className="text-[11px] text-emerald-700/80 dark:text-emerald-300/80 mt-0.5 font-semibold">
-                                MEA-Abdeckung: {currentStats?.autarky_pct ?? 0}%
+                                {t("admin_ggv.kpi_shared_sub", "MEA-Abdeckung: {{autarky}}%", { autarky: currentStats?.autarky_pct ?? 0 })}
                             </div>
                         </div>
 
                         <div className="bg-cyan-500/5 dark:bg-cyan-500/10 border border-cyan-500/20 rounded-2xl p-4">
                             <div className="flex items-center justify-between text-cyan-700 dark:text-cyan-300 text-xs font-bold uppercase">
-                                <span>Netzeinspeisung</span>
+                                <span>{t("admin_ggv.kpi_grid_export", "Netzeinspeisung")}</span>
                                 <span>🌐</span>
                             </div>
                             <div className="mt-3 text-2xl font-black text-cyan-900 dark:text-cyan-100">
                                 {Math.max(0, Number(currentStats?.produced_kwh ?? 0) - Number(currentStats?.shared_kwh ?? 0)).toFixed(1)} <span className="text-xs font-normal">kWh</span>
                             </div>
-                            <div className="text-[11px] text-cyan-700/80 dark:text-cyan-300/80 mt-0.5">Überschuss ins Netz</div>
+                            <div className="text-[11px] text-cyan-700/80 dark:text-cyan-300/80 mt-0.5">{t("admin_ggv.kpi_grid_export_sub", "Überschuss ins Netz")}</div>
                         </div>
 
                         <div className="bg-indigo-500/5 dark:bg-indigo-500/10 border border-indigo-500/20 rounded-2xl p-4 col-span-2 sm:col-span-1">
                             <div className="flex items-center justify-between text-indigo-700 dark:text-indigo-300 text-xs font-bold uppercase">
-                                <span>WEG-Kostenvorteil</span>
+                                <span>{t("admin_ggv.kpi_cost_benefit", "WEG-Kostenvorteil")}</span>
                                 <span>💰</span>
                             </div>
                             <div className="mt-3 text-2xl font-black text-indigo-900 dark:text-indigo-100">
                                 {Number(currentStats?.savings_eur ?? 0).toFixed(2)} <span className="text-xs font-normal">€</span>
                             </div>
                             <div className="text-[11px] text-indigo-700/80 dark:text-indigo-300/80 mt-0.5 font-semibold">
-                                Vermiedener Netzbezug
+                                {t("admin_ggv.kpi_cost_benefit_sub", "Vermiedener Netzbezug")}
                             </div>
                         </div>
                     </div>
@@ -461,7 +461,7 @@ export default function GgvAdminPage() {
                     <div className="bg-purple-50/50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800/60 rounded-2xl p-4 text-xs text-purple-900 dark:text-purple-200 flex items-start gap-3">
                         <span className="text-lg shrink-0">ℹ️</span>
                         <div>
-                            <strong>Hinweis zur Abrechnung gem. § 42b EnWG:</strong> In der Gemeinschaftlichen Gebäudeversorgung findet keine Reststromlieferung durch die Gemeinschaft oder den WEG-Verwalter statt. Jede Partei bezieht ihren darüber hinausgehenden Strombedarf über ihren individuellen Stromliefervertrag.
+                            <strong>{t("admin_ggv.legal_hint_title", "Hinweis zur Abrechnung gem. § 42b EnWG:")}</strong> {t("admin_ggv.legal_hint", "In der Gemeinschaftlichen Gebäudeversorgung findet keine Reststromlieferung durch die Gemeinschaft oder den WEG-Verwalter statt. Jede Partei bezieht ihren darüber hinausgehenden Strombedarf über ihren individuellen Stromliefervertrag.")}
                         </div>
                     </div>
                 </div>
@@ -475,10 +475,10 @@ export default function GgvAdminPage() {
                             <div>
                                 <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                                     <span>🏢</span>
-                                    <span>Wohnungseigentümer & MEA-Schlüssel ({members.length})</span>
+                                    <span>{t("admin_ggv.units_title", "Wohnungseigentümer & MEA-Schlüssel ({{count}})", { count: members.length })}</span>
                                 </h2>
                                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                    Verwalte Miteigentumsanteile (in 1/1000 MEA), Einladungslinks und Stimmberechtigungen für die Liegenschaft.
+                                    {t("admin_ggv.units_subtitle", "Verwalte Miteigentumsanteile (in 1/1000 MEA), Einladungslinks und Stimmberechtigungen für die Liegenschaft.")}
                                 </p>
                             </div>
                             <button
@@ -487,18 +487,18 @@ export default function GgvAdminPage() {
                                 className="px-4 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold shadow-xs transition-all flex items-center gap-2 cursor-pointer"
                             >
                                 <span>+</span>
-                                <span>Wohnungseigentümer einladen</span>
+                                <span>{t("admin_ggv.btn_invite_owner", "Wohnungseigentümer einladen")}</span>
                             </button>
                         </div>
 
                         {/* INVITES */}
                         <div className="space-y-3">
                             <div className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                                Offene Einladungslinks: ({invites.length})
+                                {t("admin_ggv.open_invites", "Offene Einladungslinks: ({{count}})", { count: invites.length })}
                             </div>
                             {invites.length === 0 ? (
                                 <div className="p-4 text-center rounded-2xl bg-slate-50 dark:bg-slate-800/30 border border-dashed text-xs text-slate-400">
-                                    Keine offenen Einladungslinks für Eigentümer oder Mieter vorhanden.
+                                    {t("admin_ggv.no_open_invites", "Keine offenen Einladungslinks für Eigentümer oder Mieter vorhanden.")}
                                 </div>
                             ) : (
                                 invites.map((i) => {
@@ -554,7 +554,7 @@ export default function GgvAdminPage() {
 
                         {/* MEMBERS TABLE */}
                         <div className="space-y-2.5 pt-4 border-t border-slate-100 dark:border-slate-800">
-                            <div className="text-xs font-bold text-slate-700 dark:text-slate-300">Registrierte Wohnungseigentümer / Parteien:</div>
+                            <div className="text-xs font-bold text-slate-700 dark:text-slate-300">{t("admin_ggv.registered_owners", "Registrierte Wohnungseigentümer / Parteien:")}</div>
                             {members.map((m) => (
                                 <div key={m.id} className="border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 p-3.5 rounded-2xl flex items-center justify-between">
                                     <div className="flex items-center gap-2.5">
@@ -563,7 +563,7 @@ export default function GgvAdminPage() {
                                         </div>
                                         <div>
                                             <div className="text-xs font-semibold text-slate-900 dark:text-white">{m.email}</div>
-                                            <div className="text-[10px] text-purple-600 dark:text-purple-400">§ 42b EnWG Teilnehmer</div>
+                                            <div className="text-[10px] text-purple-600 dark:text-purple-400">{t("admin_ggv.participant_badge", "§ 42b EnWG Teilnehmer")}</div>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">
@@ -578,7 +578,7 @@ export default function GgvAdminPage() {
                                             <option value="admin">🏛️ WEG-Verwalter</option>
                                         </select>
                                         <button onClick={() => removeMember(m.id)} className="text-rose-600 text-xs px-2.5 py-1.5 cursor-pointer">
-                                            Entfernen
+                                            {t("admin_ggv.remove_member", "Entfernen")}
                                         </button>
                                     </div>
                                 </div>
@@ -599,11 +599,11 @@ export default function GgvAdminPage() {
                                         <span className="text-xl">⚖️</span>
                                         <h2 className="text-lg font-black">{activeTariff.name}</h2>
                                         <span className="bg-emerald-400/20 text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-400/30">
-                                            Aktiv
+                                            {t("admin_ggv.active_badge", "Aktiv")}
                                         </span>
                                     </div>
                                     <p className="text-xs text-purple-200/80 mt-1">
-                                        Vor-Ort-Solarstromabrechnung gem. § 42b EnWG (Reine Solaraufteilung, keine Reststromabrechnung)
+                                        {t("admin_ggv.settlement_subtitle", "Vor-Ort-Solarstromabrechnung gem. § 42b EnWG (Reine Solaraufteilung, keine Reststromabrechnung)")}
                                     </p>
                                 </div>
                                 <button
@@ -611,31 +611,31 @@ export default function GgvAdminPage() {
                                     disabled={settling}
                                     className="px-4 py-2 bg-purple-500 hover:bg-purple-600 disabled:opacity-50 text-white rounded-xl text-xs font-bold cursor-pointer"
                                 >
-                                    {settling ? "Berechne..." : "Solarabrechnung anstoßen"}
+                                    {settling ? t("common.calculating", "Berechne...") : t("admin_ggv.trigger_settlement_btn", "Solarabrechnung anstoßen")}
                                 </button>
                             </div>
 
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-4 border-t border-purple-800/60">
                                 <div>
-                                    <div className="text-[11px] text-purple-300 font-semibold uppercase">Solar-Nutzungsentgelt</div>
+                                    <div className="text-[11px] text-purple-300 font-semibold uppercase">{t("admin_ggv.fee_solar_use", "Solar-Nutzungsentgelt")}</div>
                                     <div className="text-2xl font-black mt-1 text-white">
                                         {Number(activeTariff?.sharing_price_ct_kwh ?? 0).toFixed(2)} <span className="text-xs font-normal">Ct/kWh</span>
                                     </div>
-                                    <div className="text-[10px] text-purple-300/70 mt-0.5">Umlage an WEG-Rücklage</div>
+                                    <div className="text-[10px] text-purple-300/70 mt-0.5">{t("admin_ggv.fee_solar_use_sub", "Umlage an WEG-Rücklage")}</div>
                                 </div>
                                 <div>
-                                    <div className="text-[11px] text-purple-300 font-semibold uppercase">Verwaltungskosten</div>
+                                    <div className="text-[11px] text-purple-300 font-semibold uppercase">{t("admin_ggv.fee_admin", "Verwaltungskosten")}</div>
                                     <div className="text-2xl font-black mt-1 text-amber-300">
                                         {Number(activeTariff?.community_fee_ct_kwh ?? 0).toFixed(2)} <span className="text-xs font-normal">Ct/kWh</span>
                                     </div>
-                                    <div className="text-[10px] text-purple-300/70 mt-0.5">Software & Zählerbetrieb</div>
+                                    <div className="text-[10px] text-purple-300/70 mt-0.5">{t("admin_ggv.fee_admin_sub", "Software & Zählerbetrieb")}</div>
                                 </div>
                                 <div>
-                                    <div className="text-[11px] text-purple-300 font-semibold uppercase">Aufteilungsmodell</div>
+                                    <div className="text-[11px] text-purple-300 font-semibold uppercase">{t("admin_ggv.allocation_model", "Aufteilungsmodell")}</div>
                                     <div className="text-2xl font-black mt-1 text-emerald-300">
                                         MEA Quote
                                     </div>
-                                    <div className="text-[10px] text-purple-300/70 mt-0.5">1/1000 Miteigentum</div>
+                                    <div className="text-[10px] text-purple-300/70 mt-0.5">{t("admin_ggv.allocation_model_sub", "1/1000 Miteigentum")}</div>
                                 </div>
                             </div>
                         </div>
@@ -646,10 +646,10 @@ export default function GgvAdminPage() {
                         <div className="flex items-center justify-between mb-4">
                             <div>
                                 <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                                    Monatliche Solar-Abrechnungsnachweise der WEG
+                                    {t("admin_ggv.statements_title", "Monatliche Solar-Abrechnungsnachweise der WEG")}
                                 </h3>
                                 <p className="text-xs text-slate-500">
-                                    Eichrechtskonforme Nachweise für die Eigentümerversammlung und Betriebskostenabrechnung
+                                    {t("admin_ggv.statements_subtitle", "Eichrechtskonforme Nachweise für die Eigentümerversammlung und Betriebskostenabrechnung")}
                                 </p>
                             </div>
                             <div className="flex items-center gap-1.5">
@@ -671,11 +671,11 @@ export default function GgvAdminPage() {
                                                 <span className="font-mono font-bold text-xs">{stmt.statement_number}</span>
                                                 <span className="text-[10px] bg-slate-200 dark:bg-slate-700 px-2 py-0.5 rounded">{stmt.period_start} bis {stmt.period_end}</span>
                                             </div>
-                                            <div className="text-xs text-slate-500 mt-1">Eigentümer: <span className="font-medium text-slate-700 dark:text-slate-300">{stmt.user_email}</span></div>
+                                            <div className="text-xs text-slate-500 mt-1">{t("admin_ggv.owner_label", "Eigentümer:")} <span className="font-medium text-slate-700 dark:text-slate-300">{stmt.user_email}</span></div>
                                         </div>
                                         <div className="flex items-center gap-4">
                                             <div className="text-right">
-                                                <div className="text-xs text-slate-400">Solarnutzungsbetrag</div>
+                                                <div className="text-xs text-slate-400">{t("admin_ggv.solar_usage_amount", "Solarnutzungsbetrag")}</div>
                                                 <div className="text-lg font-black text-slate-900 dark:text-white">{Number(stmt.net_balance_eur ?? 0).toFixed(2)} €</div>
                                             </div>
                                             <button
@@ -691,7 +691,7 @@ export default function GgvAdminPage() {
                             </div>
                         ) : (
                             <div className="text-center py-8 text-xs text-slate-400 bg-slate-50 dark:bg-slate-800/30 rounded-xl border border-dashed">
-                                Noch keine Abrechnungsnachweise erstellt. Klicke auf 'Solarabrechnung anstoßen'.
+                                {t("admin_ggv.no_statements_msg", "Noch keine Abrechnungsnachweise erstellt. Klicke auf 'Solarabrechnung anstoßen'.")}
                             </div>
                         )}
                     </div>
@@ -707,7 +707,7 @@ export default function GgvAdminPage() {
             {/* TAB 6: AUDIT */}
             {activeTab === "audit" && (
                 <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs">
-                    <h2 className="text-sm font-bold text-slate-900 dark:text-white mb-3">WEG-Audit- & Beschlussprotokoll</h2>
+                    <h2 className="text-sm font-bold text-slate-900 dark:text-white mb-3">{t("admin_ggv.audit_title", "WEG-Audit- & Beschlussprotokoll")}</h2>
                     <div className="space-y-2 max-h-96 overflow-y-auto">
                         {logs.slice(0, 30).map((log, idx) => (
                             <div key={idx} className="border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30 p-3 rounded-xl text-xs flex justify-between">
