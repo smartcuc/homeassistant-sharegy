@@ -625,15 +625,15 @@ export default function Profile() {
                                         onChange={(e) => handleLandingPageChange(e.target.value)}
                                         className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none cursor-pointer"
                                     >
-                                        <option value="">⚙️ Automatisch (Rollen-Standard)</option>
-                                        <option value="/app">🏠 Privates EMS & Live-Dashboard</option>
-                                        <option value="/app/community">⚡ Regionales Energy Sharing (Genossenschaft)</option>
-                                        <option value="/app/community">🏢 Mieterstrom (§ 42a EnWG – Vollversorgung)</option>
-                                        <option value="/app/community">⚖️ Gebäudeversorgung (GGV § 42b EnWG)</option>
-                                        <option value="/app/tenant">🏛️ Mandanten- & Quartiersverwaltung (Vorstand / Admin)</option>
-                                        <option value="/app/energy">📈 Analysen, Energiefluss & Strommix</option>
-                                        <option value="/app/tariff">💰 Tarife & Dynamic Pricing</option>
-                                        <option value="/app/devices">🔌 Smart Meter & Steuerung</option>
+                                        <option value="">{t("profile.landing_auto", "⚙️ Automatisch (Rollen-Standard)")}</option>
+                                        <option value="/app">{t("profile.landing_ems", "🏠 Privates EMS & Live-Dashboard")}</option>
+                                        <option value="/app/community">{t("profile.landing_sharing", "⚡ Regionales Energy Sharing (Genossenschaft)")}</option>
+                                        <option value="/app/community">{t("profile.landing_mieterstrom", "🏢 Mieterstrom (§ 42a EnWG – Vollversorgung)")}</option>
+                                        <option value="/app/community">{t("profile.landing_ggv", "⚖️ Gebäudeversorgung (GGV § 42b EnWG)")}</option>
+                                        <option value="/app/tenant">{t("profile.landing_tenant", "🏛️ Mandanten- & Quartiersverwaltung (Vorstand / Admin)")}</option>
+                                        <option value="/app/energy">{t("profile.landing_energy", "📈 Analysen, Energiefluss & Strommix")}</option>
+                                        <option value="/app/tariff">{t("profile.landing_tariff", "💰 Tarife & Dynamic Pricing")}</option>
+                                        <option value="/app/devices">{t("profile.landing_devices", "🔌 Smart Meter & Steuerung")}</option>
                                     </select>
                                 </div>
                             </div>
@@ -689,7 +689,7 @@ export default function Profile() {
                                     <h3 className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase flex items-center gap-1.5">
                                         <span>📍</span> {t("profile.address_title", "Wohnort & Rechnungsadresse")}
                                     </h3>
-                                    <span className="text-[11px] text-gray-400">Optional / für Belege</span>
+                                    <span className="text-[11px] text-gray-400">{t("profile.address_optional", "Optional / für Belege")}</span>
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
@@ -748,7 +748,7 @@ export default function Profile() {
                                         </label>
                                         <div className="w-full border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/60 rounded-xl px-3 py-2 text-sm text-gray-800 dark:text-gray-200 font-medium flex items-center gap-2">
                                             <span>🇩🇪</span>
-                                            <span>Deutschland</span>
+                                            <span>{t("profile.country_germany", "Deutschland")}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -772,7 +772,7 @@ export default function Profile() {
                                         className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                                     />
                                     <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
-                                        Wird für kritische Notfall-Benachrichtigungen, SMS-Alarme und Vor-Ort-Rückfragen verwendet.
+                                        {t("profile.phone_hint", "Wird für kritische Notfall-Benachrichtigungen, SMS-Alarme und Vor-Ort-Rückfragen verwendet.")}
                                     </p>
                                 </div>
                             </div>
@@ -1037,7 +1037,7 @@ export default function Profile() {
                                                     ? "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800"
                                                     : "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
                                             }`}>
-                                                {isBusinessCustomer ? "🏢 Geschäftskunde (B2B)" : "👤 Privatkunde (B2C)"}
+                                                {isBusinessCustomer ? t("billing.customer_b2b", "🏢 Geschäftskunde (B2B)") : t("billing.customer_b2c", "👤 Privatkunde (B2C)")}
                                             </span>
                                         </div>
 
@@ -1073,12 +1073,12 @@ export default function Profile() {
                                             ) : (
                                                 <div className="text-amber-600 dark:text-amber-400 font-medium pt-0.5 flex items-center gap-1">
                                                     <span>⚠️</span>
-                                                    <span>Keine postalische Rechnungsadresse hinterlegt</span>
+                                                    <span>{t("billing.no_postal_address", "Keine postalische Rechnungsadresse hinterlegt")}</span>
                                                 </div>
                                             )}
 
                                             <div className="text-gray-500 dark:text-gray-400 pt-1 border-t border-gray-100 dark:border-slate-700/50">
-                                                📧 Belegversand an: <span className="font-semibold text-gray-700 dark:text-gray-200">{formData.billing_email || user?.email}</span>
+                                                {t("billing.invoice_dispatch_to", "📧 Belegversand an:")} <span className="font-semibold text-gray-700 dark:text-gray-200">{formData.billing_email || user?.email}</span>
                                             </div>
                                         </div>
 
@@ -1092,14 +1092,14 @@ export default function Profile() {
                                                         className="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline font-bold cursor-pointer flex items-center gap-1"
                                                     >
                                                         <span>🏢</span>
-                                                        <span>Firmendaten & Rechnungsadresse anpassen ➔</span>
+                                                        <span>{t("billing.edit_company_address", "Firmendaten & Rechnungsadresse anpassen ➔")}</span>
                                                     </button>
                                                     <button
                                                         type="button"
                                                         onClick={() => handleTabChange("profile")}
                                                         className="text-[10px] text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:underline cursor-pointer"
                                                     >
-                                                        Privatadresse ansehen
+                                                        {t("billing.view_private_address", "Privatadresse ansehen")}
                                                     </button>
                                                 </>
                                             ) : (
@@ -1110,14 +1110,14 @@ export default function Profile() {
                                                         className="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline font-bold cursor-pointer flex items-center gap-1"
                                                     >
                                                         <span>👤</span>
-                                                        <span>Persönliche Rechnungsanschrift anpassen ➔</span>
+                                                        <span>{t("billing.edit_personal_address", "Persönliche Rechnungsanschrift anpassen ➔")}</span>
                                                     </button>
                                                     <button
                                                         type="button"
                                                         onClick={() => handleTabChange("company")}
                                                         className="text-[10px] text-indigo-500 dark:text-indigo-400 hover:underline font-medium cursor-pointer"
                                                     >
-                                                        🏢 Auf Firmenrechnung (B2B) umstellen ➔
+                                                        {t("billing.switch_to_b2b", "🏢 Auf Firmenrechnung (B2B) umstellen ➔")}
                                                     </button>
                                                 </>
                                             )}
@@ -1130,10 +1130,10 @@ export default function Profile() {
                             <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/60 text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed space-y-1">
                                 <div className="font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
                                     <span>⚖️</span>
-                                    <span>Steuer- & Belegkonformität</span>
+                                    <span>{t("billing.tax_compliance_title", "Steuer- & Belegkonformität")}</span>
                                 </div>
                                 <p>
-                                    Alle Rechnungen enthalten ordnungsgemäß ausgewiesene 19 % MwSt. und erfüllen die gesetzlichen Vorgaben für den geschäftlichen Vorsteuerabzug.
+                                    {t("billing.tax_compliance_desc", "Alle Rechnungen enthalten ordnungsgemäß ausgewiesene 19 % MwSt. und erfüllen die gesetzlichen Vorgaben für den geschäftlichen Vorsteuerabzug.")}
                                 </p>
                             </div>
                         </div>
@@ -1238,11 +1238,11 @@ export default function Profile() {
                             <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <div className="font-bold text-gray-900 dark:text-white">Zwei-Faktor-Authentifizierung (2FA / TOTP)</div>
-                                        <p className="text-gray-500 dark:text-gray-400 text-[11px]">Zusätzlicher Schutz über Authenticator-Apps.</p>
+                                        <div className="font-bold text-gray-900 dark:text-white">{t("profile.two_factor_title", "Zwei-Faktor-Authentifizierung (2FA / TOTP)")}</div>
+                                        <p className="text-gray-500 dark:text-gray-400 text-[11px]">{t("profile.two_factor_desc", "Zusätzlicher Schutz über Authenticator-Apps.")}</p>
                                     </div>
                                     <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-800">
-                                        Demnächst
+                                        {t("profile.coming_soon", "Demnächst")}
                                     </span>
                                 </div>
                             </div>
@@ -1259,17 +1259,17 @@ export default function Profile() {
 
                         <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs space-y-2">
                             <div className="flex items-center justify-between">
-                                <span className="text-gray-500">Angemeldeter Account:</span>
+                                <span className="text-gray-500">{t("profile.logged_in_account", "Angemeldeter Account:")}</span>
                                 <span className="font-bold text-gray-800 dark:text-gray-200">{user?.email}</span>
                             </div>
                             <div className="flex items-center justify-between">
-                                <span className="text-gray-500">Browser / User-Agent:</span>
+                                <span className="text-gray-500">{t("profile.browser_user_agent", "Browser / User-Agent:")}</span>
                                 <span className="font-mono text-[10px] text-gray-700 dark:text-gray-300 truncate max-w-[200px]">
                                     {navigator.userAgent.slice(0, 35)}...
                                 </span>
                             </div>
                             <div className="flex items-center justify-between">
-                                <span className="text-gray-500">Spracheinstellung:</span>
+                                <span className="text-gray-500">{t("profile.language_setting", "Spracheinstellung:")}</span>
                                 <span className="font-bold uppercase text-indigo-600">{currentLang}</span>
                             </div>
                         </div>
@@ -1302,7 +1302,7 @@ export default function Profile() {
                                         <span>{t("gdpr.cat_profile", "Benutzer- & Stammdaten")}</span>
                                     </div>
                                     <p className="text-gray-600 dark:text-gray-400 text-[11px] leading-relaxed">
-                                        E-Mail (<code className="font-mono text-indigo-600 dark:text-indigo-400">{user?.email}</code>), Name, Sprache & Zeitzone.
+                                        {t("gdpr.cat_profile_desc", { email: user?.email, defaultValue: `E-Mail (${user?.email}), Name, Sprache & Zeitzone.` })}
                                     </p>
                                 </div>
 
@@ -1312,7 +1312,7 @@ export default function Profile() {
                                         <span>{t("gdpr.cat_energy", "Energie & Telemetrie")}</span>
                                     </div>
                                     <p className="text-gray-600 dark:text-gray-400 text-[11px] leading-relaxed">
-                                        Zähler, Wechselrichter, Speicher-SoC, OBIS-Messwerte und EMS-Aktorik.
+                                        {t("gdpr.cat_energy_desc", "Zähler, Wechselrichter, Speicher-SoC, OBIS-Messwerte und EMS-Aktorik.")}
                                     </p>
                                 </div>
 
@@ -1322,7 +1322,7 @@ export default function Profile() {
                                         <span>{t("gdpr.cat_b2b", "Firmendaten & Belege")}</span>
                                     </div>
                                     <p className="text-gray-600 dark:text-gray-400 text-[11px] leading-relaxed">
-                                        Firmenname, USt-IdNr., Mieterstrom-Clearing und Rechnungsnachbereitung.
+                                        {t("gdpr.cat_b2b_desc", "Firmenname, USt-IdNr., Mieterstrom-Clearing und Rechnungsnachbereitung.")}
                                     </p>
                                 </div>
 
@@ -1332,7 +1332,7 @@ export default function Profile() {
                                         <span>{t("gdpr.cat_billing", "Abrechnung & Stripe")}</span>
                                     </div>
                                     <p className="text-gray-600 dark:text-gray-400 text-[11px] leading-relaxed">
-                                        Aktiver Tarif ({planName}), Rechnungs-PDFs und Kundennummern.
+                                        {t("gdpr.cat_billing_desc", { plan: planName, defaultValue: `Aktiver Tarif (${planName}), Rechnungs-PDFs und Kundennummern.` })}
                                     </p>
                                 </div>
                             </div>
@@ -1364,13 +1364,13 @@ export default function Profile() {
 
                         <div className="p-4 rounded-2xl bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/60 space-y-3 text-xs">
                             <div className="font-bold text-rose-900 dark:text-rose-200">
-                                Unwiderrufliche Löschung aller Daten
+                                {t("gdpr.delete_warning_title", "Unwiderrufliche Löschung aller Daten")}
                             </div>
                             <p className="text-rose-800/90 dark:text-rose-300/90 leading-relaxed text-[11px]">
-                                Durch das Löschen deines Kontos werden alle deine Anmeldedaten, Geräteverknüpfungen, historischen Energiedaten und Benachrichtigungseinstellungen dauerhaft aus dem System entfernt.
+                                {t("gdpr.delete_warning_text", "Durch das Löschen deines Kontos werden alle deine Anmeldedaten, Geräteverknüpfungen, historischen Energiedaten und Benachrichtigungseinstellungen dauerhaft aus dem System entfernt.")}
                             </p>
                             <p className="text-[10px] text-rose-700/70 dark:text-rose-400/70">
-                                Gesetzliche Aufbewahrungsfristen für bereits ausgestellte Rechnungsbelege (§ 147 AO) bleiben hiervon unberührt.
+                                {t("gdpr.delete_warning_legal", "Gesetzliche Aufbewahrungsfristen für bereits ausgestellte Rechnungsbelege (§ 147 AO) bleiben hiervon unberührt.")}
                             </p>
 
                             <div className="pt-2">
@@ -1399,10 +1399,10 @@ export default function Profile() {
                                 <span className="text-2xl p-2 bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 rounded-2xl">🎨</span>
                                 <div>
                                     <h3 className="text-base font-bold text-gray-900 dark:text-white">
-                                        Profil-Avatar auswählen
+                                        {t("profile.avatar_modal_title", "Profil-Avatar auswählen")}
                                     </h3>
                                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                                        Wähle deinen persönlichen Avatar für TopNav, Menü und Dashboard.
+                                        {t("profile.avatar_modal_desc", "Wähle deinen persönlichen Avatar für TopNav, Menü und Dashboard.")}
                                     </p>
                                 </div>
                             </div>
@@ -1431,19 +1431,19 @@ export default function Profile() {
                                         {initials}
                                     </div>
                                     <div>
-                                        <div className="font-bold text-xs">Standard-Initialen verwenden ({initials})</div>
-                                        <div className="text-[11px] text-gray-400">Klassischer Buchstaben-Avatar basierend auf Vor- und Nachname</div>
+                                        <div className="font-bold text-xs">{t("profile.avatar_initials_title", { initials, defaultValue: `Standard-Initialen verwenden (${initials})` })}</div>
+                                        <div className="text-[11px] text-gray-400">{t("profile.avatar_initials_desc", "Klassischer Buchstaben-Avatar basierend auf Vor- und Nachname")}</div>
                                     </div>
                                 </div>
                                 {!formData.avatar && (
-                                    <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">✓ Aktiv</span>
+                                    <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">{t("profile.avatar_active", "✓ Aktiv")}</span>
                                 )}
                             </button>
 
                             {/* AVATAR GRID */}
                             <div>
                                 <div className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3">
-                                    ⚡ Energie- & Smart-Home-Avatare
+                                    {t("profile.avatar_section_energy", "⚡ Energie- & Smart-Home-Avatare")}
                                 </div>
                                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                                     {AVATAR_PRESETS.map((av) => {
@@ -1465,7 +1465,7 @@ export default function Profile() {
                                                 <div className="min-w-0">
                                                     <div className="font-bold text-xs truncate">{av.label}</div>
                                                     <div className="text-[10px] text-gray-400 truncate">
-                                                        {isSelected ? "✓ Gewählt" : "Wählen"}
+                                                        {isSelected ? t("profile.avatar_selected", "✓ Gewählt") : t("profile.avatar_select", "Wählen")}
                                                     </div>
                                                 </div>
                                             </button>
@@ -1481,7 +1481,7 @@ export default function Profile() {
                                 onClick={() => setShowAvatarModal(false)}
                                 className="px-5 py-2 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 hover:bg-gray-100 transition cursor-pointer"
                             >
-                                Schließen
+                                {t("common.close", "Schließen")}
                             </button>
                         </div>
                     </div>
@@ -1496,10 +1496,10 @@ export default function Profile() {
                             <span className="text-2xl p-2 bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 rounded-2xl">✉️</span>
                             <div>
                                 <h3 className="text-base font-bold text-gray-900 dark:text-white">
-                                    E-Mail-Adresse ändern
+                                    {t("profile.email_modal_title", "E-Mail-Adresse ändern")}
                                 </h3>
                                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                                    Sicherheitsbestätigung via E-Mail-Link
+                                    {t("profile.email_modal_sub", "Sicherheitsbestätigung via E-Mail-Link")}
                                 </p>
                             </div>
                         </div>
@@ -1509,9 +1509,9 @@ export default function Profile() {
                                 <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center text-2xl mx-auto border border-emerald-200 dark:border-emerald-800">
                                     ✅
                                 </div>
-                                <h4 className="font-bold text-gray-900 dark:text-white text-sm">Bestätigungslink gesendet!</h4>
+                                <h4 className="font-bold text-gray-900 dark:text-white text-sm">{t("profile.email_link_sent_title", "Bestätigungslink gesendet!")}</h4>
                                 <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
-                                    Wir haben eine Verifizierungs-E-Mail an <strong className="font-mono text-indigo-600 dark:text-indigo-400">{newEmailInput}</strong> gesendet. Bitte klicke auf den Link in der E-Mail (gültig für 30 Minuten), um die Änderung abzuschließen.
+                                    {t("profile.email_link_sent_desc", { email: newEmailInput, defaultValue: `Wir haben eine Verifizierungs-E-Mail an ${newEmailInput} gesendet. Bitte klicke auf den Link in der E-Mail (gültig für 30 Minuten), um die Änderung abzuschließen.` })}
                                 </p>
                                 <div className="pt-2">
                                     <button
@@ -1523,7 +1523,7 @@ export default function Profile() {
                                         }}
                                         className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
                                     >
-                                        Verstanden & Schließen
+                                        {t("profile.email_link_sent_btn", "Verstanden & Schließen")}
                                     </button>
                                 </div>
                             </div>
@@ -1531,12 +1531,12 @@ export default function Profile() {
                             <form onSubmit={handleRequestEmailChange}>
                                 <div className="p-6 space-y-4 text-xs sm:text-sm text-gray-700 dark:text-gray-300">
                                     <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                                        Aus Sicherheitsgründen senden wir einen Bestätigungslink an deine neue Adresse. Deine aktuelle Adresse bleibt aktiv, bis du den Link bestätigt hast.
+                                        {t("profile.email_modal_info", "Aus Sicherheitsgründen senden wir einen Bestätigungslink an deine neue Adresse. Deine aktuelle Adresse bleibt aktiv, bis du den Link bestätigt hast.")}
                                     </p>
 
                                     <div className="space-y-1.5">
                                         <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">
-                                            Neue E-Mail-Adresse
+                                            {t("profile.new_email_label", "Neue E-Mail-Adresse")}
                                         </label>
                                         <input
                                             type="email"
@@ -1558,7 +1558,7 @@ export default function Profile() {
                                         }}
                                         className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 hover:bg-gray-100 transition cursor-pointer"
                                     >
-                                        Abbrechen
+                                        {t("common.cancel", "Abbrechen")}
                                     </button>
 
                                     <button
@@ -1567,7 +1567,7 @@ export default function Profile() {
                                         className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-bold shadow-xs transition cursor-pointer flex items-center gap-1.5"
                                     >
                                         <span>✉️</span>
-                                        <span>{requestingEmailChange ? "Sende Link..." : "Bestätigungslink senden"}</span>
+                                        <span>{requestingEmailChange ? t("profile.sending_link", "Sende Link...") : t("profile.send_confirm_link", "Bestätigungslink senden")}</span>
                                     </button>
                                 </div>
                             </form>
@@ -1665,14 +1665,14 @@ export default function Profile() {
                             </p>
 
                             <div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs text-gray-600 dark:text-gray-400">
-                                {t("gdpr.modal_delete_prompt", "Zur Bestätigung gib bitte deine E-Mail-Adresse")} (<strong>{user?.email}</strong>) {t("gdpr.modal_delete_or", "oder")} <strong>LÖSCHEN</strong> {t("gdpr.modal_delete_in_field", "ein:")}
+                                {t("gdpr.modal_delete_prompt", "Zur Bestätigung gib bitte deine E-Mail-Adresse")} (<strong>{user?.email}</strong>) {t("gdpr.modal_delete_or", "oder")} <strong>{t("gdpr.delete_keyword", "LÖSCHEN")}</strong> {t("gdpr.modal_delete_in_field", "ein:")}
                             </div>
 
                             <input
                                 type="text"
                                 value={deleteConfirmation}
                                 onChange={(e) => setDeleteConfirmation(e.target.value)}
-                                placeholder={user?.email || "LÖSCHEN"}
+                                placeholder={user?.email || t("gdpr.delete_keyword", "LÖSCHEN")}
                                 className="w-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-sm font-medium focus:ring-2 focus:ring-rose-500 focus:outline-none text-gray-900 dark:text-white"
                             />
 
