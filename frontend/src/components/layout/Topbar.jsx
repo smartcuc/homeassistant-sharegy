@@ -164,11 +164,16 @@ export default function AppTopbar({ onOpenMobileMenu }) {
 
     const hasAnyLiveMetric = gridPower !== null || pvPower !== null || loadPower !== null || batterySoc !== null;
 
+    const homeDisplayName = activeHome?.name || primaryHome?.name || "";
     const isDemo = Boolean(
         user?.is_demo ||
         user?.email?.toLowerCase().includes("demo") ||
-        activeHome?.name?.toLowerCase().includes("demo") ||
-        primaryHome?.name?.toLowerCase().includes("demo") ||
+        user?.username?.toLowerCase().includes("demo") ||
+        user?.email?.toLowerCase().endsWith("@sharegy.de") ||
+        homeDisplayName.toLowerCase().includes("demo") ||
+        homeDisplayName.toLowerCase().includes("sharegy") ||
+        homeDisplayName.toLowerCase().includes("sharing") ||
+        homeDisplayName.toLowerCase().includes("smart home") ||
         location.pathname.startsWith("/demo") ||
         location.pathname.startsWith("/app/demo") ||
         localStorage.getItem("sharegy_is_demo") === "true"
