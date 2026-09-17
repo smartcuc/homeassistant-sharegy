@@ -243,6 +243,20 @@ export default function Profile() {
             tz.startsWith("Europe/") || tz === "UTC"
         ) || [];
 
+    const [preferredLandingPage, setPreferredLandingPage] = useState(() => {
+        return localStorage.getItem("sharegy_preferred_landing_page") || "";
+    });
+
+    const handleLandingPageChange = (val) => {
+        setPreferredLandingPage(val);
+        if (val) {
+            localStorage.setItem("sharegy_preferred_landing_page", val);
+        } else {
+            localStorage.removeItem("sharegy_preferred_landing_page");
+        }
+        showSuccess(t("profile.landing_page_saved", "Startseite nach dem Login gespeichert!"));
+    };
+
     const activeTimezone = selectedTimezone ?? settings?.timezone ?? "";
 
     async function handleLanguageChange(langId) {
@@ -593,6 +607,32 @@ export default function Profile() {
                                         <span>💾</span>
                                         <span>{savingTimezone ? t("common.saving", "Speichere...") : t("profile.save_timezone", "Speichern")}</span>
                                     </button>
+                                </div>
+                            </div>
+
+                            {/* SECTION 4: STARTSEITE NACH DEM LOGIN */}
+                            <div className="border-t border-gray-100 dark:border-slate-800 pt-4">
+                                <h3 className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase flex items-center gap-1.5 mb-1.5">
+                                    <span>🚀</span> {t("profile.landing_page_title", "Startseite nach dem Login")}
+                                </h3>
+                                <p className="text-[11px] text-gray-500 dark:text-gray-400 mb-3">
+                                    {t("profile.landing_page_desc", "Wähle deinen bevorzugten Einstiegsbereich beim Öffnen der Plattform.")}
+                                </p>
+
+                                <div>
+                                    <select
+                                        value={preferredLandingPage}
+                                        onChange={(e) => handleLandingPageChange(e.target.value)}
+                                        className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none cursor-pointer"
+                                    >
+                                        <option value="">⚙️ Automatisch (Rollen-Standard: Dashboard / Community / Mieterportal)</option>
+                                        <option value="/app">📊 Live-Cockpit & Gesamtübersicht</option>
+                                        <option value="/app/community">⚡ Energy Sharing & Genossenschaft</option>
+                                        <option value="/app/tenant">🏢 Mieter- & Quartiersportal</option>
+                                        <option value="/app/analytics">📈 Analysen & Lastgang-Visualisierung</option>
+                                        <option value="/app/tariffs">💰 Tarife & Dynamic Pricing</option>
+                                        <option value="/app/devices">🔌 Smart Meter & Steuerung</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>

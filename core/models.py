@@ -24,6 +24,49 @@ class Tenant(models.Model):
 
     is_public = models.BooleanField(default=False)
 
+    MODEL_TYPE_MIETERSTROM = "mieterstrom"
+    MODEL_TYPE_GGV = "ggv"
+    MODEL_TYPE_ENERGY_SHARING = "energy_sharing"
+
+    MODEL_TYPE_CHOICES = [
+        (MODEL_TYPE_MIETERSTROM, "Mieterstrom (§ 42a EnWG Vollversorgung)"),
+        (MODEL_TYPE_GGV, "Gemeinschaftliche Gebäudeversorgung (§ 42b EnWG)"),
+        (MODEL_TYPE_ENERGY_SHARING, "Regionales Energy Sharing (Bürgerenergie / RED II)"),
+    ]
+
+    LEGAL_FORM_COOPERATIVE = "cooperative"
+    LEGAL_FORM_ASSOCIATION = "association"
+    LEGAL_FORM_GMBH = "gmbh"
+    LEGAL_FORM_WEG = "weg"
+    LEGAL_FORM_LANDLORD = "landlord"
+
+    LEGAL_FORM_CHOICES = [
+        (LEGAL_FORM_COOPERATIVE, "Eingetragene Genossenschaft (eG)"),
+        (LEGAL_FORM_ASSOCIATION, "Eingetragener Verein (e.V.)"),
+        (LEGAL_FORM_GMBH, "GmbH / Bürger-GmbH & Co. KG"),
+        (LEGAL_FORM_WEG, "Wohnungseigentümergemeinschaft (WEG)"),
+        (LEGAL_FORM_LANDLORD, "Vermieter / Contractor"),
+    ]
+
+    model_type = models.CharField(
+        max_length=30,
+        choices=MODEL_TYPE_CHOICES,
+        default=MODEL_TYPE_ENERGY_SHARING,
+    )
+    legal_form = models.CharField(
+        max_length=30,
+        choices=LEGAL_FORM_CHOICES,
+        default=LEGAL_FORM_COOPERATIVE,
+    )
+
+    # Satzung & Genossenschafts-Parameter gem. § 15b/30 GenG
+    statute_url = models.CharField(max_length=500, blank=True, default="")
+    statute_text = models.TextField(blank=True, default="")
+    statute_version = models.CharField(max_length=50, blank=True, default="1.0")
+    share_nominal_value_eur = models.DecimalField(max_digits=10, decimal_places=2, default=100.00)
+    min_shares_count = models.PositiveIntegerField(default=1)
+    max_shares_count = models.PositiveIntegerField(default=100)
+
     # Theme & Branding Felder (aus tenants.models konsolidiert)
     primary_color = models.CharField(max_length=50, default="#10B981")
     secondary_color = models.CharField(max_length=50, default="#059669")

@@ -31,6 +31,13 @@ from billing.api.views_community import (
     community_msb_meters_view,
     community_virtual_master_meter_view,
 )
+from billing.api.views_cooperative import (
+    cooperative_public_info_view,
+    cooperative_submit_application_view,
+    cooperative_admin_applications_view,
+    cooperative_admin_approve_application_view,
+    cooperative_admin_reject_application_view,
+)
 
 from billing.api.views_stripe import (
     StripeConfigView,
@@ -75,6 +82,12 @@ urlpatterns = [
     path("communities/<uuid:tenant_id>/virtual-meter/", community_virtual_master_meter_view, name="community_tenant_virtual_meter"),
     path("communities/<uuid:tenant_id>/announcements/", community_announcements_view, name="community_announcements"),
     path("communities/<uuid:tenant_id>/settings/", community_settings_update_view, name="community_settings_update"),
+    # 🏛️ GENOSSENSCHAFTS-BEITRITT & MITGLIEDERBUCH (§§ 15b, 30 GenG)
+    path("cooperative/join/<slug:slug>/", cooperative_submit_application_view, name="cooperative_submit_application"),
+    path("cooperative/info/<slug:slug>/", cooperative_public_info_view, name="cooperative_public_info"),
+    path("cooperative/applications/", cooperative_admin_applications_view, name="cooperative_admin_applications"),
+    path("cooperative/applications/<uuid:application_id>/approve/", cooperative_admin_approve_application_view, name="cooperative_admin_approve"),
+    path("cooperative/applications/<uuid:application_id>/reject/", cooperative_admin_reject_application_view, name="cooperative_admin_reject"),
 ]
 
 # BNetzA AS4 Marktkommunikation

@@ -16,8 +16,9 @@ import VppAggregatorCockpit from "../features/energy/components/VppAggregatorCoc
 import TenantSetupWizardModal from "../features/community/components/TenantSetupWizardModal";
 import WhitelabelSettingsModal from "../features/tenant/components/WhitelabelSettingsModal";
 import MarketCommunicationModal from "../features/billing/components/MarketCommunicationModal";
+import CooperativeApplicationsTab from "../features/community/components/CooperativeApplicationsTab";
 
-const ALL_TABS = ["cockpit", "virtual_meter", "vpp", "settlement", "members", "msb", "audit"];
+const ALL_TABS = ["cockpit", "virtual_meter", "vpp", "settlement", "members", "applications", "msb", "audit"];
 const MEMBER_TABS = ["cockpit", "settlement"];
 
 export default function TenantDashboard() {
@@ -463,6 +464,16 @@ export default function TenantDashboard() {
                                 }`}
                             >
                                 👥 Mitglieder ({members.length})
+                            </button>
+                            <button
+                                onClick={() => handleTabChange("applications")}
+                                className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
+                                    activeTab === "applications"
+                                        ? "bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 font-bold shadow-xs"
+                                        : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                                }`}
+                            >
+                                📋 Beitrittsanträge
                             </button>
                             <button
                                 onClick={() => handleTabChange("msb")}
@@ -1221,6 +1232,13 @@ export default function TenantDashboard() {
             {/* ======================================================== */}
             {activeTab === "msb" && (
                 <MsbSmartMeterHub tenant={tenant} />
+            )}
+
+            {/* ======================================================== */}
+            {/* 5. BEITRITTSANTRÄGE (GENOSSENSCHAFT / ENERGY SHARING) TAB */}
+            {/* ======================================================== */}
+            {activeTab === "applications" && (
+                <CooperativeApplicationsTab tenant={tenant} />
             )}
 
             {/* ======================================================== */}

@@ -11,6 +11,7 @@ const Login = lazy(() => import("./pages/Login"));
 const MagicLogin = lazy(() => import("./pages/MagicLogin"));
 const ConfirmEmailChangePage = lazy(() => import("./pages/ConfirmEmailChangePage"));
 const Join = lazy(() => import("./pages/Join"));
+const CooperativeJoinPage = lazy(() => import("./features/community/pages/CooperativeJoinPage"));
 const EnergyPage = lazy(() => import("./pages/EnergyPage"));
 const Impressum = lazy(() => import("./pages/Impressum"));
 const Datenschutz = lazy(() => import("./pages/Datenschutz"));
@@ -38,6 +39,7 @@ export default function AppRoutes() {
 
                 <Route path="/login" element={<Login />} />
                 <Route path="/join" element={<Join />} />
+                <Route path="/join/:slug" element={<CooperativeJoinPage />} />
                 <Route path="/t/:token" element={<MagicLogin />} />
                 <Route path="/magic-login" element={<MagicLogin />} />
                 <Route path="/auth/magic/:token" element={<MagicLogin />} />

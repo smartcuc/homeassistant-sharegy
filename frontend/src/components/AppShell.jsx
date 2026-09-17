@@ -3,6 +3,7 @@
 */
 
 import { useUser } from "../hooks/useUser";
+import { useUserNavigation } from "../hooks/useUserNavigation";
 import AppTopbar from "../components/layout/Topbar";
 import Sidebar from "../components/layout/Sidebar";
 import MobileBottomNav from "../components/layout/MobileBottomNav";
@@ -59,6 +60,7 @@ function PageSuspenseLoader() {
 export default function AppShell() {
 
     const { user, loading, isStaffOrAdmin, hasCommunityAdminAccess, canAccessSupportHub } = useUser();
+    const { activeMetadata, activeMode } = useUserNavigation();
     const location = useLocation();
     const contentRef = useRef(null);
     const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
@@ -78,6 +80,9 @@ export default function AppShell() {
     if (!user) {
         return <Navigate to="/" replace />;
     }
+
+    const preferredLandingPath = localStorage.getItem("sharegy_preferred_landing_page");
+    const defaultLandingPath = preferredLandingPath || activeMetadata?.defaultPath || "/app/dashboard";
 
     return (
         <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
@@ -102,8 +107,8 @@ export default function AppShell() {
                         <Routes>
 
 
-                            {/* ✅ DEFAULT */}
-                            <Route index element={<Navigate to="/app/dashboard" replace />} />
+                            {/* ✅ INTELLIGENTES DEFAULT LANDING ROUTING */}
+                            <Route index element={<Navigate to={defaultLandingPath} replace />} />
 
                             <Route path="dashboard" element={<Dashboard user={user} />} />
                             <Route path="profile" element={<Profile />} />

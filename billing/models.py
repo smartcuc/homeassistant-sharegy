@@ -763,6 +763,109 @@ class CommunityAnnouncement(models.Model):
 
 
 # =========================================================
+# 🏛️ GENOSSENSCHAFTS-BEITRITTE & MITGLIEDERBUCH (§§ 15b, 30 GenG)
+# =========================================================
+
+class CooperativeApplication(models.Model):
+    """
+    Digitaler Beitrittsantrag zu einer Energiegenossenschaft (eG) oder Bürgerenergie-Gemeinschaft
+    mit dokumentierter Satzungs-Zustimmung und Vorstandsbeschluss-Tracking gem. §§ 15b, 30 GenG.
+    """
+    STATUS_PENDING = "pending_approval"
+    STATUS_APPROVED = "approved"
+    STATUS_REJECTED = "rejected"
+    STATUS_WITHDRAWN = "withdrawn"
+
+    STATUS_CHOICES = [
+        (STATUS_PENDING, "Wartet auf Vorstandsbeschluss"),
+        (STATUS_APPROVED, "Vom Vorstand genehmigt"),
+        (STATUS_REJECTED, "Abgelehnt"),
+        (STATUS_WITHDRAWN, "Zurückgezogen"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    tenant = models.ForeignKey(
+        "core.Tenant",
+        on_delete=models.CASCADE,
+        related_name="cooperative_applications",
+    )
+    user = models.ForeignKey(
+        "accounts.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="cooperative_applications",
+    )
+
+    # Antragsteller Stammdaten
+    first_name = models.CharField(max_length=150)
+    last_name = models.CharField(max_length=150)
+    email = models.EmailField()
+    phone = models.CharField(max_length=50, blank=True, default="")
+    birth_date = models.DateField(null=True, blank=True)
+    street = models.CharField(max_length=255)
+    postal_code = models.CharField(max_length=20)
+    city = models.CharField(max_length=100)
+    country = models.CharField(max_length=50, default="DE")
+
+    # Zähler- & Marktlokations-Zuordnung (wMSB)
+    meter_malo_id = models.CharField(
+        max_length=50,
+        blank=True,
+        default="",
+        help_text="11-stellige Marktlokations-ID (MaLo) des Zählers für 15m-Allokation",
+    )
+    participant_role = models.CharField(
+        max_length=20,
+        choices=[("prosumer", "Prosumer (Einspeiser)"), ("consumer", "Consumer (Abnehmer)"), ("both", "Beides")],
+        default="consumer",
+    )
+
+    # Geschäftsanteile gem. § 15b GenG
+    shares_count = models.PositiveIntegerField(default=1)
+    share_nominal_value_eur = models.DecimalField(max_digits=10, decimal_places=2, default=100.00)
+    total_amount_eur = models.DecimalField(max_digits=10, decimal_places=2, default=100.00)
+
+    # Dokumentierte Satzungs-Zustimmung
+    statute_accepted = models.BooleanField(default=True)
+    statute_version_accepted = models.CharField(max_length=50, default="1.0")
+    statute_accepted_at = models.DateTimeField(default=timezone.now)
+    statute_ip_address = models.GenericIPAddressField(null=True, blank=True)
+
+    # Status & Vorstandsbeschluss gem. § 30 GenG
+    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    member_number = models.CharField(
+        max_length=50,
+        blank=True,
+        default="",
+        help_text="Fortlaufende Mitgliedsnummer im Mitgliederverzeichnis gem. § 30 GenG",
+    )
+    board_approved_by = models.ForeignKey(
+        "accounts.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="approved_cooperative_applications",
+    )
+    board_approved_at = models.DateTimeField(null=True, blank=True)
+    board_notes = models.TextField(blank=True, default="")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "billing_cooperative_application"
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["tenant", "status"]),
+            models.Index(fields=["email"]),
+        ]
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name} ({self.email}) → {self.tenant.name} [{self.status}]"
+
+
+# =========================================================
 # 🔄 SIGNALS: AUTOMATISCHE FREE-PLAN ZUWEISUNG BEI REGISTRIERUNG
 # =========================================================
 from django.db.models.signals import post_save
