@@ -85,7 +85,18 @@
     "click_to_open": "Click to open",
     "mode": "Mode",
     "total": "Total",
-    "this_month": "This Month"
+    "this_month": "This Month",
+    "copy_link": "📋 Copy Link",
+    "revoke": "Revoke",
+    "month": "Month",
+    "to": "to",
+    "grid_import": "Import",
+    "grid_export": "Feed-in",
+    "generation": "Generation",
+    "consumption": "Consumption",
+    "shared": "Shared",
+    "autarky": "Autarky",
+    "to_dashboard": "To Dashboard"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -977,7 +988,11 @@
     "consumer": "Consumer",
     "battery": "Storage",
     "both": "Producer & Consumer",
-    "grid": "Grid Meter"
+    "grid": "Grid Meter",
+    "member": "Tenant / Member",
+    "user_admin": "Property Management",
+    "auditor": "Auditor",
+    "admin": "Owner / Operator"
   },
   "generator_types": {
     "solar": "Photovoltaics / Solar",
@@ -2900,7 +2915,18 @@
     "rate_base_label": "Base Price",
     "rate_base_sub": "Metering & Billing",
     "tenant_subsidy": "Tenant Electricity Subsidy",
-    "subsidy_for_operator": "Subsidy for Operator"
+    "subsidy_for_operator": "Subsidy for Operator",
+    "btn_mako": "Meter Data Export (MSCONS)",
+    "invite_label": "Tenant Invitation",
+    "qr_title": "QR Code for Hallway Notice",
+    "qr_desc": "Tenants can scan the code to digitally activate their tenant electricity contract.",
+    "tariff_banner_sub": "Tenant electricity full supply under § 42a EnWG (Solar power + residual grid power in a unified bill)",
+    "solar_working_price": "Solar Working Price",
+    "onsite_pv_electricity": "On-site PV Power",
+    "residual_price": "Residual Power Price",
+    "residual_grid_supply": "Grid Import (Full Supply)",
+    "base_price": "Base Price",
+    "meter_and_billing": "Metering & Billing"
   },
   "admin_ggv": {
     "title": "Shared Building Energy Supply (§ 42b EnWG)",
@@ -2960,7 +2986,10 @@
     "tab_cockpit": "⚡ Cooperative Cockpit",
     "tab_members": "👥 Cooperative Members",
     "tab_applications": "📋 Membership Applications",
-    "tab_settlement": "💰 15m Sharing Settlement"
+    "tab_settlement": "💰 15m Sharing Settlement",
+    "loading": "Loading Regional Energy Sharing & Citizen Energy Coop...",
+    "no_cooperative": "No Citizen Energy Cooperative Assigned",
+    "no_cooperative_desc": "You are currently not assigned to any energy sharing community."
   },
   "admin_communities": {
     "title": "District & Portfolio Management (Platform Admin)",
@@ -3129,9 +3158,9 @@
     "step2_desc": "Enter the units, meter numbers, and {{shareType}} here.",
     "share_type_mea": "co-ownership shares (MEA %)",
     "share_type_quotes": "allocation quotas (%)",
-    "add_apartment": "+ Add Apartment",
-    "add_owner": "+ Add Owner",
-    "add_member": "+ Add Member",
+    "add_apartment": "Add Apartment",
+    "add_owner": "Add Owner",
+    "add_member": "Add Member",
     "placeholder_unit_name": "Name",
     "placeholder_meter_id": "Meter ID",
     "savings_title": "🎉 Projected Cost Advantage",
@@ -3225,7 +3254,14 @@
     "raw_preview": "EDIFACT Raw Data Preview",
     "download_edi": "Download (.edi)",
     "preview_placeholder": "Click 'Generate EDIFACT & Send to AS4' to load the preview.",
-    "sent_confirmed": "AS4 Transmission Confirmed"
+    "sent_confirmed": "AS4 Transmission Confirmed",
+    "title": "BNetzA AS4 Market Communication Adapter",
+    "subtitle": "Automated EDIFACT generation & AS4 dispatch for 15-minute load profiles (Energy Sharing / MSCONS) and metering point master data (UTILMD).",
+    "tab_export": "EDIFACT Export & AS4 Dispatch",
+    "tab_logs": "Transmission Logs ({{count}})",
+    "mscons_desc": "15m load profiles & meter readings",
+    "utilmd_desc": "Metering point & master data",
+    "no_logs": "No market communication transmissions logged yet."
   },
   "cooperative": {
     "open_applications": "Open Applications",

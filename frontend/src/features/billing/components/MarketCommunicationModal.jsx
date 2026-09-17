@@ -93,11 +93,11 @@ export default function MarketCommunicationModal({ isOpen, onClose, tenantId }) 
                   <FileText className="w-5 h-5" />
                 </div>
                 <h2 className="text-xl md:text-2xl font-bold text-white">
-                  BNetzA AS4 Marktkommunikations-Adapter
+                  {t("mako.title", "BNetzA AS4 Marktkommunikations-Adapter")}
                 </h2>
               </div>
               <p className="text-xs md:text-sm text-slate-400">
-                Automatisierte EDIFACT-Generierung & AS4-Dispatch für 15-Minuten-Lastgänge (Energy Sharing / MSCONS) und Zählpunkt-Stammdaten (UTILMD).
+                {t("mako.subtitle", "Automatisierte EDIFACT-Generierung & AS4-Dispatch für 15-Minuten-Lastgänge (Energy Sharing / MSCONS) und Zählpunkt-Stammdaten (UTILMD).")}
               </p>
             </div>
             <button
@@ -118,7 +118,7 @@ export default function MarketCommunicationModal({ isOpen, onClose, tenantId }) 
                   : "border-transparent text-slate-400 hover:text-slate-200"
               }`}
             >
-              EDIFACT Export & AS4 Dispatch
+              {t("mako.tab_export", "EDIFACT Export & AS4 Dispatch")}
             </button>
             <button
               onClick={() => setActiveTab("logs")}
@@ -128,7 +128,7 @@ export default function MarketCommunicationModal({ isOpen, onClose, tenantId }) 
                   : "border-transparent text-slate-400 hover:text-slate-200"
               }`}
             >
-              Übertragungs-Protokoll ({logs.length})
+              {t("mako.tab_logs", { count: logs.length, defaultValue: `Übertragungs-Protokoll (${logs.length})` })}
             </button>
           </div>
         </div>
@@ -162,7 +162,7 @@ export default function MarketCommunicationModal({ isOpen, onClose, tenantId }) 
                     }`}
                   >
                     <div className="text-xs font-bold">MSCONS 2.2b</div>
-                    <div className="text-[11px] opacity-80">15m-Lastgänge & Zählerstände</div>
+                    <div className="text-[11px] opacity-80">{t("mako.mscons_desc", "15m-Lastgänge & Zählerstände")}</div>
                   </button>
                   <button
                     type="button"
@@ -174,7 +174,7 @@ export default function MarketCommunicationModal({ isOpen, onClose, tenantId }) 
                     }`}
                   >
                     <div className="text-xs font-bold">UTILMD 2.4</div>
-                    <div className="text-[11px] opacity-80">Zählpunkt & Stammdaten</div>
+                    <div className="text-[11px] opacity-80">{t("mako.utilmd_desc", "Zählpunkt & Stammdaten")}</div>
                   </button>
                 </div>
               </div>
@@ -269,7 +269,7 @@ export default function MarketCommunicationModal({ isOpen, onClose, tenantId }) 
           <div className="space-y-3 max-h-96 overflow-y-auto">
             {logs.length === 0 ? (
               <div className="py-12 text-center text-slate-500 text-sm">
-                Noch keine Marktkommunikations-Übertragungen protokolliert.
+                {t("mako.no_logs", "Noch keine Marktkommunikations-Übertragungen protokolliert.")}
               </div>
             ) : (
               logs.map((log, idx) => (
@@ -304,7 +304,7 @@ export default function MarketCommunicationModal({ isOpen, onClose, tenantId }) 
             onClick={onClose}
             className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium rounded-xl transition cursor-pointer"
           >
-            Schließen
+            {t("common.close", "Schließen")}
           </button>
         </div>
 

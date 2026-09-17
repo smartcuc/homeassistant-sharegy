@@ -319,7 +319,7 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
                                     onClick={addApartment}
                                     className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition cursor-pointer flex items-center gap-1.5"
                                 >
-                                    <span>+</span> {isMieterstrom ? t("wizard.add_apartment", "+ Wohnung hinzufügen") : isGgv ? t("wizard.add_owner", "+ Eigentümer hinzufügen") : t("wizard.add_member", "+ Mitglied hinzufügen")}
+                                    <span>+</span> <span>{isMieterstrom ? t("wizard.add_apartment", "Wohnung hinzufügen") : isGgv ? t("wizard.add_owner", "Eigentümer hinzufügen") : t("wizard.add_member", "Mitglied hinzufügen")}</span>
                                 </button>
                             </div>
 

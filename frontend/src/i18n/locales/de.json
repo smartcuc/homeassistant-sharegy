@@ -85,7 +85,18 @@
     "click_to_open": "Klicken zum Öffnen",
     "mode": "Modus",
     "total": "Gesamt",
-    "this_month": "Dieser Monat"
+    "this_month": "Dieser Monat",
+    "copy_link": "📋 Link kopieren",
+    "revoke": "Widerrufen",
+    "month": "Monat",
+    "to": "bis",
+    "grid_import": "Bezug",
+    "grid_export": "Einspeisung",
+    "generation": "Erzeugung",
+    "consumption": "Verbrauch",
+    "shared": "Geteilt",
+    "autarky": "Autarkie",
+    "to_dashboard": "Zum Dashboard"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -977,7 +988,11 @@
     "consumer": "Verbraucher",
     "battery": "Speicher",
     "both": "Erzeuger & Verbraucher",
-    "grid": "Netzmessung"
+    "grid": "Netzmessung",
+    "member": "Mieter / Mitglied",
+    "user_admin": "Hausverwaltung",
+    "auditor": "Rechnungsprüfer",
+    "admin": "Eigentümer / Betreiber"
   },
   "generator_types": {
     "solar": "Photovoltaik / Solar",
@@ -2900,7 +2915,18 @@
     "rate_base_label": "Grundpreis",
     "rate_base_sub": "Zähler & Abrechnung",
     "tenant_subsidy": "Mieterstromzuschlag",
-    "subsidy_for_operator": "Förderung für Betreiber"
+    "subsidy_for_operator": "Förderung für Betreiber",
+    "btn_mako": "Zählerdaten-Export (MSCONS)",
+    "invite_label": "Mieter-Einladung",
+    "qr_title": "QR-Code für Hausflur-Aushang",
+    "qr_desc": "Mieter können den Code scannen, um ihren Mieterstromvertrag digital zu aktivieren.",
+    "tariff_banner_sub": "Mieterstrom-Vollversorgung gem. § 42a EnWG (Solarstrom + Reststrom in einer Gesamtrechnung)",
+    "solar_working_price": "Solar-Arbeitspreis",
+    "onsite_pv_electricity": "Vor-Ort PV-Strom",
+    "residual_price": "Reststrompreis",
+    "residual_grid_supply": "Netzbezug (Vollversorger)",
+    "base_price": "Grundpreis",
+    "meter_and_billing": "Zähler & Abrechnung"
   },
   "admin_ggv": {
     "title": "Gemeinschaftliche Gebäudeversorgung (§ 42b EnWG)",
@@ -2960,7 +2986,10 @@
     "tab_cockpit": "⚡ Bürgerenergie-Cockpit",
     "tab_members": "👥 Genossenschaftsmitglieder",
     "tab_applications": "📋 Beitrittsanträge",
-    "tab_settlement": "💰 15m-Sharing-Abrechnung"
+    "tab_settlement": "💰 15m-Sharing-Abrechnung",
+    "loading": "Lade Regionales Energy Sharing & Bürgerenergie eG...",
+    "no_cooperative": "Keine Bürgerenergiegenossenschaft zugewiesen",
+    "no_cooperative_desc": "Du bist aktuell keiner Energiegemeinschaft zugeordnet."
   },
   "admin_communities": {
     "title": "Quartiers- & Portfolio-Verwaltung (Plattform-Admin)",
@@ -3129,9 +3158,9 @@
     "step2_desc": "Trage hier die Einheiten, Zählernummern und {{shareType}} ein.",
     "share_type_mea": "Miteigentumsanteile (MEA %)",
     "share_type_quotes": "Aufteilungsquoten (%)",
-    "add_apartment": "+ Wohnung hinzufügen",
-    "add_owner": "+ Eigentümer hinzufügen",
-    "add_member": "+ Mitglied hinzufügen",
+    "add_apartment": "Wohnung hinzufügen",
+    "add_owner": "Eigentümer hinzufügen",
+    "add_member": "Mitglied hinzufügen",
     "placeholder_unit_name": "Name",
     "placeholder_meter_id": "Zählernummer",
     "savings_title": "🎉 Prognostizierter Kostenvorteil",
@@ -3225,7 +3254,14 @@
     "raw_preview": "EDIFACT Rohdaten-Vorschau",
     "download_edi": "Download (.edi)",
     "preview_placeholder": "Klicken Sie auf 'EDIFACT generieren & an AS4 senden', um die Vorschau zu laden.",
-    "sent_confirmed": "AS4 Übertragung bestätigt"
+    "sent_confirmed": "AS4 Übertragung bestätigt",
+    "title": "BNetzA AS4 Marktkommunikations-Adapter",
+    "subtitle": "Automatisierte EDIFACT-Generierung & AS4-Dispatch für 15-Minuten-Lastgänge (Energy Sharing / MSCONS) und Zählpunkt-Stammdaten (UTILMD).",
+    "tab_export": "EDIFACT Export & AS4 Dispatch",
+    "tab_logs": "Übertragungs-Protokoll ({{count}})",
+    "mscons_desc": "15m-Lastgänge & Zählerstände",
+    "utilmd_desc": "Zählpunkt & Stammdaten",
+    "no_logs": "Noch keine Marktkommunikations-Übertragungen protokolliert."
   },
   "cooperative": {
     "open_applications": "Offene Anträge",
