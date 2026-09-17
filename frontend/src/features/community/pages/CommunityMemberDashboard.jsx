@@ -21,6 +21,7 @@ export default function CommunityMemberDashboard() {
     const [timeRange, setTimeRange] = useState("today"); // 'today' | 'month'
     const [shareModalOpen, setShareModalOpen] = useState(false);
     const [downloadingId, setDownloadingId] = useState(null);
+    const [memberPerspective, setMemberPerspective] = useState("all");
 
     async function loadData() {
         setLoading(true);
@@ -132,10 +133,6 @@ export default function CommunityMemberDashboard() {
     // Rollenbestimmung im Energy Sharing
     const isProsumer = myTotalSharedExportKwh > 0 || myTotalProducedKwh > 0;
     const isConsumer = myTotalSharedImportKwh > 0 || myTotalConsumedKwh > 0 || !isProsumer;
-
-    const [memberPerspective, setMemberPerspective] = useState(
-        isProsumer && !isConsumer ? "prosumer" : isConsumer && !isProsumer ? "consumer" : "all"
-    );
 
     // Ersparnis vs. Grundversorger (~38 Ct/kWh Grundversorger vs ~18 Ct/kWh Sharing)
     const estimatedSavingsEur = myTotalSharedImportKwh * 0.20;
