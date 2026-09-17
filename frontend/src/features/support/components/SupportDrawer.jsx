@@ -149,12 +149,10 @@ export default function SupportDrawer({ isOpen, onClose, defaultContext = {}, in
         }
     }, [isOpen, user]);
 
-    // Synchronize activeTab and defaultContext when initialTab/defaultContext changes or drawer opens
+    // Synchronize activeTab and defaultContext when initialTab changes or drawer opens
     useEffect(() => {
         if (isOpen) {
-            if (initialTab) {
-                setActiveTab(initialTab);
-            }
+            setActiveTab(initialTab || "help");
             if (defaultContext?.subject) {
                 setSubject(defaultContext.subject);
             }
@@ -168,7 +166,7 @@ export default function SupportDrawer({ isOpen, onClose, defaultContext = {}, in
                 setPriority(defaultContext.priority);
             }
         }
-    }, [isOpen, initialTab, defaultContext, canChoosePriority]);
+    }, [isOpen, initialTab, defaultContext?.subject, defaultContext?.message, defaultContext?.category, defaultContext?.priority, canChoosePriority]);
 
     const handleCreateTicket = async (e) => {
         e.preventDefault();
