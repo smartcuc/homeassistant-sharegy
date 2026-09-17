@@ -5,8 +5,10 @@
 import { useEffect, useState } from "react";
 import { apiFetch } from "../api/client";
 import { useTranslation } from "react-i18next";
+import { QRCodeSVG } from "qrcode.react";
 import MsbSmartMeterHub from "../features/community/components/MsbSmartMeterHub";
 import CommunityShareModal from "../features/community/components/CommunityShareModal";
+import CommunityInviteModal from "../features/community/components/CommunityInviteModal";
 import VirtualMasterMeterHub from "../features/community/components/VirtualMasterMeterHub";
 import VppAggregatorCockpit from "../features/energy/components/VppAggregatorCockpit";
 import TenantSetupWizardModal from "../features/community/components/TenantSetupWizardModal";
@@ -27,12 +29,16 @@ export default function TenantDashboard() {
     const [activeTab, setActiveTab] = useState("cockpit"); // 'cockpit' | 'settlement' | 'members' | 'audit'
     const [loading, setLoading] = useState(true);
     const [shareModalOpen, setShareModalOpen] = useState(false);
+    const [inviteModalOpen, setInviteModalOpen] = useState(false);
+    const [inviteInitialRole, setInviteInitialRole] = useState("member");
     const [wizardOpen, setWizardOpen] = useState(false);
     const [whitelabelModalOpen, setWhitelabelModalOpen] = useState(false);
     const [makoModalOpen, setMakoModalOpen] = useState(false);
     const [settling, setSettling] = useState(false);
     const [downloadingId, setDownloadingId] = useState(null);
     const [exportingFormat, setExportingFormat] = useState(null);
+    const [activeQrToken, setActiveQrToken] = useState(null);
+    const [copiedToken, setCopiedToken] = useState(null);
 
     // ✅ Daten laden
     async function loadData() {
@@ -100,15 +106,21 @@ export default function TenantDashboard() {
 
     // ✅ INVITE ERSTELLEN
     async function createInvite(role) {
-        const data = await apiFetch("/api/create-invite/", {
-            method: "POST",
-            body: JSON.stringify({
-                tenant_id: tenant.id,
-                role: role,
-            }),
-        });
-        await loadData();
-        alert(`${t("community.invite_link", "Einladungslink")}:\n${window.location.origin}${data.link}`);
+        try {
+            const data = await apiFetch("/api/create-invite/", {
+                method: "POST",
+                body: JSON.stringify({
+                    tenant_id: tenant.id,
+                    role: role,
+                }),
+            });
+            await loadData();
+            return data;
+        } catch (err) {
+            console.error("Invite error:", err);
+            alert("Fehler beim Erstellen des Einladungslinks: " + (err.message || ""));
+            throw err;
+        }
     }
 
     // ✅ PDF STATEMENT DOWNLOAD
@@ -856,105 +868,239 @@ export default function TenantDashboard() {
                 <div className="space-y-6">
 
                     {/* INVITES SECTION */}
-                    <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs">
-                        <h2 className="text-sm font-bold text-slate-900 dark:text-white mb-3">
-                            {t.invites || "Einladungslinks für Nachbarn & Mieter"}
-                        </h2>
+                    <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs space-y-5">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
+                            <div>
+                                <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                    <span>🤝</span>
+                                    <span>{t("tenant.invites_title", "Einladungslinks für Mitglieder & Mieter")}</span>
+                                </h2>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                    {t("tenant.invites_subtitle", "Lade Teilnehmer für das gemeinschaftliche Energy Sharing (§ 42b EnWG) oder Mieterstrom ein.")}
+                                </p>
+                            </div>
 
-                        <div className="flex flex-wrap gap-2 mb-4">
                             <button
-                                onClick={() => createInvite("member")}
-                                className="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow-xs transition cursor-pointer"
+                                type="button"
+                                onClick={() => {
+                                    setInviteInitialRole("member");
+                                    setInviteModalOpen(true);
+                                }}
+                                className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-xs transition-all flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] cursor-pointer self-start sm:self-auto"
                             >
-                                ⚡ Mitglied einladen
-                            </button>
-                            <button
-                                onClick={() => createInvite("user_admin")}
-                                className="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow-xs transition cursor-pointer"
-                            >
-                                👥 Userverwaltung
-                            </button>
-                            <button
-                                onClick={() => createInvite("helpdesk")}
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow-xs transition cursor-pointer"
-                            >
-                                🛟 Helpdesk
-                            </button>
-                            <button
-                                onClick={() => createInvite("auditor")}
-                                className="bg-slate-700 hover:bg-slate-800 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow-xs transition cursor-pointer"
-                            >
-                                📊 Auditor / Beirat
-                            </button>
-                            <button
-                                onClick={() => createInvite("admin")}
-                                className="bg-red-600 hover:bg-red-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow-xs transition cursor-pointer"
-                            >
-                                🏛️ Energy-Admin
+                                <span>+</span>
+                                <span>{t("tenant.btn_invite_member", "Mitglied oder Mieter einladen")}</span>
                             </button>
                         </div>
 
-                        <div className="space-y-2">
-                            {invites.map(i => (
-                                <div key={i.token} className="border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 p-3.5 rounded-xl flex flex-col shadow-xs">
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                                            {i.role_display || i.role}
-                                        </span>
-                                        <span className="text-xs text-slate-400">
-                                            Verwendet: {i.used}
-                                        </span>
-                                    </div>
-                                    <div className="text-xs font-mono text-slate-500 dark:text-slate-400 break-all mt-1 bg-white dark:bg-slate-900 p-1.5 rounded-lg border border-slate-200 dark:border-slate-700">
-                                        {window.location.origin}/onboarding?invite={i.token}
-                                    </div>
-                                    <div className="flex gap-3 mt-2">
-                                        <button
-                                            onClick={() => navigator.clipboard.writeText(window.location.origin + "/onboarding?invite=" + i.token)}
-                                            className="text-indigo-600 dark:text-indigo-400 font-semibold text-xs hover:underline cursor-pointer"
-                                        >
-                                            Link kopieren
-                                        </button>
-                                        <button
-                                            onClick={() => deactivateInvite(i.token)}
-                                            className="text-red-500 text-xs hover:underline cursor-pointer"
-                                        >
-                                            Deaktivieren
-                                        </button>
-                                    </div>
+                        {/* ROLE SHORTCUT PILLS */}
+                        <div>
+                            <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
+                                {t("tenant.quick_invite_role", "Schnellauswahl nach Rolle:")}
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setInviteInitialRole("member");
+                                        setInviteModalOpen(true);
+                                    }}
+                                    className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-500/20 transition flex items-center gap-1.5 cursor-pointer"
+                                >
+                                    <span>⚡</span>
+                                    <span>Mitglied / Mieter</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setInviteInitialRole("user_admin");
+                                        setInviteModalOpen(true);
+                                    }}
+                                    className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-800 dark:text-indigo-300 border border-indigo-500/20 transition flex items-center gap-1.5 cursor-pointer"
+                                >
+                                    <span>👥</span>
+                                    <span>Mitglieder- & Mieterbetreuung</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setInviteInitialRole("helpdesk");
+                                        setInviteModalOpen(true);
+                                    }}
+                                    className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-sky-500/10 hover:bg-sky-500/20 text-sky-800 dark:text-sky-300 border border-sky-500/20 transition flex items-center gap-1.5 cursor-pointer"
+                                >
+                                    <span>🛟</span>
+                                    <span>Support vor Ort</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setInviteInitialRole("auditor");
+                                        setInviteModalOpen(true);
+                                    }}
+                                    className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/20 transition flex items-center gap-1.5 cursor-pointer"
+                                >
+                                    <span>📊</span>
+                                    <span>Kassenprüfer / Beirat</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setInviteInitialRole("admin");
+                                        setInviteModalOpen(true);
+                                    }}
+                                    className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-rose-500/10 hover:bg-rose-500/20 text-rose-800 dark:text-rose-300 border border-rose-500/20 transition flex items-center gap-1.5 cursor-pointer"
+                                >
+                                    <span>🏛️</span>
+                                    <span>Gemeinschafts-Leitung</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* INVITES LIST */}
+                        <div className="space-y-3 pt-2">
+                            <div className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                                {t("tenant.active_invites", "Aktive Einladungslinks:")} ({invites.length})
+                            </div>
+
+                            {invites.length === 0 ? (
+                                <div className="p-6 text-center rounded-2xl bg-slate-50 dark:bg-slate-800/30 border border-dashed border-slate-200 dark:border-slate-800 text-xs text-slate-400">
+                                    Aktuell sind keine offenen Einladungslinks vorhanden. Erstelle oben einen neuen Link für Nachbarn oder Mieter.
                                 </div>
-                            ))}
+                            ) : (
+                                invites.map((i) => {
+                                    const fullInviteUrl = `${window.location.origin}/onboarding?invite=${i.token}`;
+                                    const isCopied = copiedToken === i.token;
+                                    const isQrOpen = activeQrToken === i.token;
+
+                                    const roleLabels = {
+                                        member: "⚡ Mitglied / Mieter",
+                                        user_admin: "👥 Mitglieder- & Mieterbetreuung",
+                                        helpdesk: "🛟 Support vor Ort",
+                                        auditor: "📊 Kassenprüfer / Beirat",
+                                        admin: "🏛️ Gemeinschafts-Leitung",
+                                    };
+
+                                    return (
+                                        <div
+                                            key={i.token}
+                                            className="border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 p-4 rounded-2xl flex flex-col gap-3 shadow-xs"
+                                        >
+                                            <div className="flex flex-wrap items-center justify-between gap-2">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-xs font-bold text-slate-900 dark:text-white">
+                                                        {roleLabels[i.role] || i.role_display || i.role}
+                                                    </span>
+                                                    <span className="text-[10px] bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-full font-bold">
+                                                        Verwendet: {i.used || 0}
+                                                    </span>
+                                                </div>
+
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            navigator.clipboard.writeText(fullInviteUrl);
+                                                            setCopiedToken(i.token);
+                                                            setTimeout(() => setCopiedToken(null), 2500);
+                                                        }}
+                                                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                                                            isCopied
+                                                                ? "bg-emerald-600 text-white"
+                                                                : "bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 border border-slate-200 dark:border-slate-700 hover:border-indigo-300"
+                                                        }`}
+                                                    >
+                                                        <span>{isCopied ? "✓" : "📋"}</span>
+                                                        <span>{isCopied ? "Kopiert!" : "Link kopieren"}</span>
+                                                    </button>
+
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setActiveQrToken(isQrOpen ? null : i.token)}
+                                                        className="px-3 py-1.5 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-slate-400 transition flex items-center gap-1.5 cursor-pointer"
+                                                    >
+                                                        <span>📱</span>
+                                                        <span>{isQrOpen ? "QR schließen" : "QR-Code"}</span>
+                                                    </button>
+
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => deactivateInvite(i.token)}
+                                                        className="px-2.5 py-1.5 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition cursor-pointer font-semibold"
+                                                    >
+                                                        Widerrufen
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div className="text-[11px] font-mono text-slate-500 dark:text-slate-400 break-all bg-white dark:bg-slate-900 p-2 rounded-xl border border-slate-200 dark:border-slate-700 select-all">
+                                                {fullInviteUrl}
+                                            </div>
+
+                                            {/* INLINE QR CODE PREVIEW */}
+                                            {isQrOpen && (
+                                                <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-center gap-4 animate-fade-in">
+                                                    <div className="p-2 bg-white rounded-xl shadow-xs border border-slate-100 shrink-0">
+                                                        <QRCodeSVG value={fullInviteUrl} size={120} level="M" />
+                                                    </div>
+                                                    <div className="text-center sm:text-left text-xs">
+                                                        <h5 className="font-bold text-slate-800 dark:text-white">
+                                                            QR-Code für Hausflur-Aushang
+                                                        </h5>
+                                                        <p className="text-slate-500 dark:text-slate-400 text-[11px] mt-0.5">
+                                                            Bewohner können diesen Code direkt scannen, um der Community beizutreten.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })
+                            )}
                         </div>
                     </section>
 
                     {/* MEMBERS SECTION */}
-                    <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs">
-                        <h2 className="text-sm font-bold text-slate-900 dark:text-white mb-3">
-                            {t.members || "Aktive Mitglieder & Rollen"} ({members.length})
-                        </h2>
+                    <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs space-y-4">
+                        <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                            <div>
+                                <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                    <span>👥</span>
+                                    <span>{t("tenant.members_title", "Aktive Mitglieder & Mieter")} ({members.length})</span>
+                                </h2>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                    Zugewiesene Berechtigungen und Rollen in {tenant?.name}
+                                </p>
+                            </div>
+                        </div>
 
-                        <div className="space-y-2">
+                        <div className="space-y-2.5">
                             {members.map(m => (
                                 <div
                                     key={m.id}
-                                    className="border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 p-3.5 rounded-xl flex justify-between items-center shadow-xs"
+                                    className="border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 p-3.5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
                                 >
-                                    <span className="text-sm font-medium text-slate-900 dark:text-slate-100">{m.email}</span>
-                                    <div className="flex gap-2 items-center">
+                                    <div className="flex items-center gap-2.5">
+                                        <div className="w-8 h-8 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold text-xs flex items-center justify-center">
+                                            {m.email?.slice(0, 2).toUpperCase()}
+                                        </div>
+                                        <span className="text-xs font-semibold text-slate-900 dark:text-slate-100">{m.email}</span>
+                                    </div>
+                                    <div className="flex gap-2 items-center self-end sm:self-auto">
                                         <select
                                             value={m.role}
                                             onChange={(e) => updateRole(m.id, e.target.value)}
-                                            className="text-xs font-medium border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg px-2.5 py-1.5 dark:text-white"
+                                            className="text-xs font-semibold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3 py-1.5 text-slate-800 dark:text-white cursor-pointer"
                                         >
-                                            <option value="member">⚡ Mitglied</option>
-                                            <option value="user_admin">👥 Energy-Userverwaltung</option>
-                                            <option value="helpdesk">🛟 Energy-Helpdesk</option>
-                                            <option value="auditor">📊 Auditor / Kassenprüfer</option>
-                                            <option value="admin">🏛️ Energy-Admin</option>
+                                            <option value="member">⚡ Mitglied / Mieter</option>
+                                            <option value="user_admin">👥 Mitglieder- & Mieterbetreuung</option>
+                                            <option value="helpdesk">🛟 Support vor Ort</option>
+                                            <option value="auditor">📊 Kassenprüfer / Beirat</option>
+                                            <option value="admin">🏛️ Gemeinschafts-Leitung</option>
                                         </select>
                                         <button
                                             onClick={() => removeMember(m.id)}
-                                            className="text-red-600 hover:text-red-700 text-xs font-semibold px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-950/30 transition cursor-pointer"
+                                            className="text-rose-600 hover:text-rose-700 text-xs font-semibold px-2.5 py-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/30 transition cursor-pointer"
                                         >
                                             Entfernen
                                         </button>
@@ -1057,6 +1203,15 @@ export default function TenantDashboard() {
                 isOpen={makoModalOpen}
                 onClose={() => setMakoModalOpen(false)}
                 tenantId={tenant?.id}
+            />
+
+            {/* COMMUNITY INVITE MODAL */}
+            <CommunityInviteModal
+                isOpen={inviteModalOpen}
+                onClose={() => setInviteModalOpen(false)}
+                tenant={tenant}
+                initialRole={inviteInitialRole}
+                onInviteCreated={createInvite}
             />
         </div>
     );
