@@ -625,12 +625,14 @@ export default function Profile() {
                                         onChange={(e) => handleLandingPageChange(e.target.value)}
                                         className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none cursor-pointer"
                                     >
-                                        <option value="">⚙️ Automatisch (Rollen-Standard: Dashboard / Community / Mieterportal)</option>
-                                        <option value="/app">📊 Live-Cockpit & Gesamtübersicht</option>
-                                        <option value="/app/community">⚡ Energy Sharing & Genossenschaft</option>
-                                        <option value="/app/tenant">🏢 Mieter- & Quartiersportal</option>
-                                        <option value="/app/analytics">📈 Analysen & Lastgang-Visualisierung</option>
-                                        <option value="/app/tariffs">💰 Tarife & Dynamic Pricing</option>
+                                        <option value="">⚙️ Automatisch (Rollen-Standard)</option>
+                                        <option value="/app">🏠 Privates EMS & Live-Dashboard</option>
+                                        <option value="/app/community">⚡ Regionales Energy Sharing (Genossenschaft)</option>
+                                        <option value="/app/community">🏢 Mieterstrom (§ 42a EnWG – Vollversorgung)</option>
+                                        <option value="/app/community">⚖️ Gebäudeversorgung (GGV § 42b EnWG)</option>
+                                        <option value="/app/tenant">🏛️ Mandanten- & Quartiersverwaltung (Vorstand / Admin)</option>
+                                        <option value="/app/energy">📈 Analysen, Energiefluss & Strommix</option>
+                                        <option value="/app/tariff">💰 Tarife & Dynamic Pricing</option>
                                         <option value="/app/devices">🔌 Smart Meter & Steuerung</option>
                                     </select>
                                 </div>

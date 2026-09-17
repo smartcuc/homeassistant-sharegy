@@ -213,14 +213,6 @@ export default function CommunityMemberDashboard() {
                     </div>
 
                     <div className="flex items-center gap-2.5 self-start sm:self-auto">
-                        <a
-                            href="/app/help/mieterstrom-ggv-und-energy-sharing-unterschiede"
-                            className="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition flex items-center gap-1.5"
-                        >
-                            <span>📖</span>
-                            <span>Handbuch: Mieterstrom vs. GGV vs. Sharing</span>
-                        </a>
-
                         <button
                             type="button"
                             onClick={() => setShareModalOpen(true)}

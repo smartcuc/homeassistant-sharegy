@@ -53,13 +53,23 @@ export function UserNavigationProvider({ children }) {
 
     const isAdmin = Boolean(isDemoUser || isStaffOrAdmin || user?.is_superuser || user?.is_platform_admin);
 
+    // Ermitteln des genauen Community-Modus (Mieterstrom, GGV oder Energy Sharing)
+    const userCommunityMode = useMemo(() => {
+        const tenantModel = user?.tenant?.model_type || user?.memberships?.[0]?.tenant?.model_type;
+        if (tenantModel === "mieterstrom") return NAV_MODES.MIETERSTROM;
+        if (tenantModel === "ggv") return NAV_MODES.GGV;
+        return NAV_MODES.ENERGY_SHARING;
+    }, [user]);
+
     // 2. Verfügbare Modi für diesen Benutzer ermitteln
     const availableModes = useMemo(() => {
         if (isDemoUser) {
             return [
                 NAV_MODES.HYBRID,
                 NAV_MODES.EMS_ONLY,
-                NAV_MODES.SHARING_ONLY,
+                NAV_MODES.MIETERSTROM,
+                NAV_MODES.GGV,
+                NAV_MODES.ENERGY_SHARING,
                 NAV_MODES.PARTNER,
                 NAV_MODES.ADMIN,
             ];
@@ -69,11 +79,11 @@ export function UserNavigationProvider({ children }) {
         if (hasEms && !hasEnergySharing) {
             modes.push(NAV_MODES.EMS_ONLY);
         } else if (!hasEms && hasEnergySharing) {
-            modes.push(NAV_MODES.SHARING_ONLY);
+            modes.push(userCommunityMode);
         } else if (hasEms && hasEnergySharing) {
             modes.push(NAV_MODES.HYBRID);
             modes.push(NAV_MODES.EMS_ONLY);
-            modes.push(NAV_MODES.SHARING_ONLY);
+            modes.push(userCommunityMode);
         } else {
             modes.push(NAV_MODES.EMS_ONLY);
         }
@@ -86,16 +96,16 @@ export function UserNavigationProvider({ children }) {
         }
 
         return Array.from(new Set(modes));
-    }, [isDemoUser, hasEms, hasEnergySharing, isPartner, isAdmin]);
+    }, [isDemoUser, hasEms, hasEnergySharing, userCommunityMode, isPartner, isAdmin]);
 
     const defaultMode = useMemo(() => {
         if (getAppFlavor() === "pro") return NAV_MODES.PARTNER;
         if (hasEms && hasEnergySharing) return NAV_MODES.HYBRID;
-        if (hasEnergySharing && !hasEms) return NAV_MODES.SHARING_ONLY;
+        if (hasEnergySharing && !hasEms) return userCommunityMode;
         if (isPartner && !hasEms) return NAV_MODES.PARTNER;
         if (isAdmin && !hasEms) return NAV_MODES.ADMIN;
         return NAV_MODES.EMS_ONLY;
-    }, [hasEms, hasEnergySharing, isPartner, isAdmin]);
+    }, [hasEms, hasEnergySharing, userCommunityMode, isPartner, isAdmin]);
 
     const [activeMode, setActiveMode] = useState(() => {
         const saved = localStorage.getItem(STORAGE_KEY);
@@ -139,18 +149,7 @@ export function UserNavigationProvider({ children }) {
 export function useUserNavigation() {
     const context = useContext(UserNavigationContext);
     if (!context) {
-        return {
-            activeMode: NAV_MODES.EMS_ONLY,
-            availableModes: [NAV_MODES.EMS_ONLY],
-            switchMode: () => {},
-            hasEms: true,
-            hasEnergySharing: false,
-            isPartner: false,
-            isAdmin: false,
-            activeMetadata: MODE_METADATA[NAV_MODES.EMS_ONLY],
-            allMetadata: MODE_METADATA,
-            isMultiMode: false,
-        };
+        throw new Error("useUserNavigation must be used within a UserNavigationProvider");
     }
     return context;
 }
