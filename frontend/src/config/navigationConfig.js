@@ -111,7 +111,7 @@ export function getNavigationSections({
             sections.push({
                 title: `🛡️ ${t("nav.admin_group", "Administration")}`,
                 items: [
-                    { name: t("nav.tenant_management_mieterstrom", "Mieter & Wohnungsverwaltung"), path: "/app/tenant", icon: "🏢" },
+                    { name: t("nav.tenant_management_mieterstrom", "Mieter & Wohnungsverwaltung"), path: "/app/admin/mieterstrom", icon: "🏢" },
                     ...(isStaffOrAdmin ? [{ name: t("nav.communities_hub", "Quartiere & Gemeinschaften (Portfolio)"), path: "/app/admin/communities", icon: "🏘️" }] : []),
                 ],
             });
@@ -150,7 +150,7 @@ export function getNavigationSections({
             sections.push({
                 title: `🛡️ ${t("nav.admin_group", "Administration")}`,
                 items: [
-                    { name: t("nav.tenant_management_ggv", "WEG & Gebäudeverwaltung"), path: "/app/tenant", icon: "⚖️" },
+                    { name: t("nav.tenant_management_ggv", "WEG & Gebäudeverwaltung"), path: "/app/admin/ggv", icon: "⚖️" },
                     ...(isStaffOrAdmin ? [{ name: t("nav.communities_hub", "Quartiere & Gemeinschaften (Portfolio)"), path: "/app/admin/communities", icon: "🏘️" }] : []),
                 ],
             });
@@ -189,7 +189,7 @@ export function getNavigationSections({
             sections.push({
                 title: `🛡️ ${t("nav.admin_group", "Administration")}`,
                 items: [
-                    { name: t("nav.tenant_management_sharing", "Genossenschaft & Mitglieder"), path: "/app/tenant", icon: "👥" },
+                    { name: t("nav.tenant_management_sharing", "Genossenschaft & Mitglieder"), path: "/app/admin/sharing", icon: "👥" },
                     ...(isStaffOrAdmin ? [{ name: t("nav.communities_hub", "Quartiere & Gemeinschaften (Portfolio)"), path: "/app/admin/communities", icon: "🏘️" }] : []),
                 ],
             });
@@ -243,7 +243,9 @@ export function getNavigationSections({
                 title: `🛡️ ${t("nav.admin_group", "Administration")}`,
                 items: [
                     { name: t("nav.communities_hub", "Quartiere & Gemeinschaften (Portfolio)"), path: "/app/admin/communities", icon: "🏘️" },
-                    { name: t("nav.tenant_management_admin", "Mandanten- & Objektcockpit"), path: "/app/tenant", icon: "👥" },
+                    { name: t("nav.tenant_management_mieterstrom", "🏢 Mieterstrom (§ 42a)"), path: "/app/admin/mieterstrom", icon: "🏢" },
+                    { name: t("nav.tenant_management_ggv", "⚖️ GGV-Gebäude (§ 42b)"), path: "/app/admin/ggv", icon: "⚖️" },
+                    { name: t("nav.tenant_management_sharing", "⚡ Energy Sharing (eG)"), path: "/app/admin/sharing", icon: "👥" },
                     { name: t("nav.admin_vpp", "VPP & Flex-Zentrale"), path: "/app/admin/vpp", icon: "⚡" },
                     { name: t("nav.admin_dashboard", "Admin Dashboard"), path: "/app/admin/dashboard", icon: "📊" },
                     { name: t("nav.admin_tracking", "Event & Tracking"), path: "/app/admin/tracking", icon: "📈" },

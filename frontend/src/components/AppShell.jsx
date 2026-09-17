@@ -38,6 +38,9 @@ const AgentSupportHubPage = lazy(() => import("../features/support/pages/AgentSu
 const AdminDashboard = lazy(() => import("../pages/admin/AdminDashboard"));
 const TrackingDashboard = lazy(() => import("../pages/admin/TrackingDashboard"));
 const TenantDashboard = lazy(() => import("../pages/TenantDashboard"));
+const MieterstromAdminPage = lazy(() => import("../pages/admin/MieterstromAdminPage"));
+const GgvAdminPage = lazy(() => import("../pages/admin/GgvAdminPage"));
+const SharingAdminPage = lazy(() => import("../pages/admin/SharingAdminPage"));
 const CommunityMemberDashboard = lazy(() => import("../features/community/pages/CommunityMemberDashboard"));
 const CommunitiesManagementHub = lazy(() => import("../pages/admin/CommunitiesManagementHub"));
 const PartnerDashboard = lazy(() => import("../features/partner/PartnerDashboard"));
@@ -166,14 +169,16 @@ export default function AppShell() {
                                 path="admin/tracking" 
                                 element={isStaffOrAdmin ? <TrackingDashboard /> : <Navigate to="/app/dashboard" replace />} 
                             />
-                            <Route 
-                                path="admin/communities" 
+                            <Route path="admin/communities" 
                                 element={isStaffOrAdmin ? <CommunitiesManagementHub /> : <Navigate to="/app/dashboard" replace />} 
                             />
                             <Route 
                                 path="communities" 
                                 element={isStaffOrAdmin ? <CommunitiesManagementHub /> : <Navigate to="/app/dashboard" replace />} 
                             />
+                            <Route path="admin/mieterstrom" element={<MieterstromAdminPage />} />
+                            <Route path="admin/ggv" element={<GgvAdminPage />} />
+                            <Route path="admin/sharing" element={<SharingAdminPage />} />
                             <Route path="tenant" element={<TenantDashboard />} />
                             <Route path="tenant-management" element={<TenantDashboard />} />
                             <Route path="community" element={<CommunityMemberDashboard />} />
