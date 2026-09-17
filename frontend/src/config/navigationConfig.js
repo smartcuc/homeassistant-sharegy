@@ -75,16 +75,16 @@ export function getNavigationSections({
     if (activeMode === NAV_MODES.SHARING_ONLY) {
         sections.push(
             {
-                title: null,
+                title: `🏢 ${t("nav.community", "Energiegemeinschaft")}`,
                 items: [
                     { name: t("nav.community_overview", "Community Cockpit"), path: "/app/tenant", icon: "🏢" },
+                    { name: t("nav.tariffs_and_settlement", "Tarife & Abrechnungen"), path: "/app/tenant?tab=settlement", icon: "💰" },
                 ],
             },
             {
-                title: `📊 ${t("nav.tenant_analytics", "Mein Verbrauch & Sharing")}`,
+                title: `📊 ${t("nav.my_energy", "Mein Verbrauch")}`,
                 items: [
                     { name: t("energy.energy_balance", "Energiefluss & Solaranteil"), path: "/app/energy", icon: "⚡" },
-                    { name: t("nav.tariffs_and_settlement", "Tarife & Abrechnungen"), path: "/app/tenant?tab=settlement", icon: "💰" },
                 ],
             },
             {

@@ -413,7 +413,7 @@ export default function TenantDashboard() {
                                 : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                         }`}
                     >
-                        ⚡ {isCommunityAdmin ? "Cockpit" : "Mein Verbrauch & Bilanzen"}
+                        ⚡ {isCommunityAdmin ? "Cockpit" : "Übersicht & Solarbilanz"}
                     </button>
 
                     {isCommunityAdmin && (
@@ -449,7 +449,7 @@ export default function TenantDashboard() {
                                 : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                         }`}
                     >
-                        💰 {isCommunityAdmin ? "Tarife & Abrechnungen" : "Meine Abrechnungen & Tarife"}
+                        💰 Tarife & Abrechnungen
                     </button>
 
                     {isCommunityAdmin && (
