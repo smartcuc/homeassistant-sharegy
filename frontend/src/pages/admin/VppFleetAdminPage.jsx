@@ -214,8 +214,6 @@ export default function VppFleetAdminPage() {
                 iconBg="bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400"
                 title={t("admin_vpp.title", "Virtuelles Kraftwerk (VPP) & Flexibilitäts-Zentrale")}
                 subtitle={t("admin_vpp.subtitle", "Aggregation, Sekundärregelleistung (aFRR), Redispatch 2.0 & 80/20 Market Clearing")}
-                badge={t("admin_vpp.badge_aggregator", "VPP Aggregator")}
-                badgeColor="emerald"
                 manualLink="/app/help/admin-vpp-flex-aggregator-guide"
                 manualLabel={t("admin_vpp.btn_manual", "Handbuch (VPP)")}
                 actions={

@@ -273,8 +273,6 @@ export default function GgvAdminPage() {
                 iconBg="bg-purple-500/10 border-purple-500/20 text-purple-600 dark:text-purple-400"
                 title={tenant.name}
                 subtitle={t("admin_ggv.subtitle", "Vor-Ort-Solarstromaufteilung nach Miteigentumsanteilen (MEA in 1/1000). Keine Reststrom-Lieferantenpflicht – jeder Eigentümer/Nutzer behält seinen eigenen Reststromvertrag.")}
-                badge={t("admin_ggv.badge_enwg", "§ 42b EnWG GGV")}
-                badgeColor="purple"
                 manualLink="/app/help/admin-ggv-weg-guide"
                 manualLabel={t("admin_ggv.btn_manual", "Handbuch (§ 42b EnWG)")}
                 actions={

@@ -140,8 +140,6 @@ export default function AgentSupportHubPage() {
                             ? t("agent_support.subtitle_global", "Zentrale Bearbeitung aller Kunden- & Systemtickets aus Sharegy EMS und Factofy Digital Twin")
                             : t("agent_support.subtitle_partner", "Bearbeitung und Störungsanalyse für deine betreuten Kunden und Liegenschaften")
                     }
-                    badge={isGlobalAdmin ? t("agent_support.badge_global", "Global Triage") : t("agent_support.badge_partner", "Partner Support")}
-                    badgeColor={isGlobalAdmin ? "indigo" : "emerald"}
                     actions={
                         <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60">
                             <button

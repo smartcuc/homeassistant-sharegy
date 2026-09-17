@@ -281,8 +281,6 @@ export default function SharingAdminPage() {
                 iconBg="bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400"
                 title={tenant.name}
                 subtitle={t("admin_sharing.subtitle", "15-Minuten Smart-Meter-Bilanzierung & Verteilnetz-Allokation der Bürgerenergiegenossenschaft mit BNetzA AS4/MSCONS Marktkommunikation")}
-                badge={t("admin_sharing.badge_geng", "Bürgerenergie eG (GenG)")}
-                badgeColor="emerald"
                 manualLink="/app/help/admin-energy-sharing-cooperative-guide"
                 manualLabel={t("admin_sharing.btn_manual", "Handbuch (Genossenschaft)")}
                 actions={

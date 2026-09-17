@@ -152,8 +152,6 @@ export default function PartnerDashboard() {
           iconBg="bg-sky-500/10 border-sky-500/20 text-sky-600 dark:text-sky-400"
           title={data?.partner_company?.name || t("partner.portal_title", "Installateurs- & Partner-Portal")}
           subtitle={t("partner.subtitle", "Zentrale Flotten-Telemetrie, Störungsampel & 1-Klick Fernwartung betreuter Kundenanlagen.")}
-          badge={data?.partner_company?.tier_display || t("partner.tier_default", "Fachpartner")}
-          badgeColor="amber"
           manualLink="/app/help/admin-partner-fleet-installer-guide"
           manualLabel={t("partner.btn_manual", "Handbuch (Partner)")}
           actions={

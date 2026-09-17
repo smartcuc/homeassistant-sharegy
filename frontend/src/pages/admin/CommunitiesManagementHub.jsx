@@ -380,23 +380,21 @@ export default function CommunitiesManagementHub() {
                 iconBg="bg-indigo-500/10 border-indigo-500/20 text-indigo-600 dark:text-indigo-400"
                 title={t("admin_communities.title", "Quartiers- & Portfolio-Verwaltung")}
                 subtitle={t("admin_communities.subtitle", "Zentrale Steuerung aller Mieterstrom-Projekte (§ 42a), GGV-Gebäude (§ 42b) und Energy-Sharing-Gemeinschaften")}
-                badge={t("admin_communities.badge_platform", "Plattform-Admin")}
-                badgeColor="indigo"
                 manualLink="/app/help/admin-communities-portfolio-guide"
                 manualLabel={t("admin_communities.btn_manual", "Handbuch (Portfolio)")}
-                actions={
+                searchSlot={
                     <div className="relative">
                         <input
                             type="text"
                             placeholder={t("admin_communities.search_placeholder", "Gemeinschaft suchen...")}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 w-56 sm:w-64 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/40 shadow-2xs"
+                            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 w-full focus:outline-hidden focus:ring-2 focus:ring-indigo-500/40 shadow-2xs"
                         />
                         {searchQuery && (
                             <button
                                 onClick={() => setSearchQuery("")}
-                                className="absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 text-xs"
+                                className="absolute right-2.5 top-1.5 text-slate-400 hover:text-slate-600 text-xs"
                             >
                                 ✕
                             </button>

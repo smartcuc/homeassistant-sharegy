@@ -276,8 +276,6 @@ export default function MieterstromAdminPage() {
                 iconBg="bg-sky-500/10 border-sky-500/20 text-sky-600 dark:text-sky-400"
                 title={tenant.name}
                 subtitle={t("admin_mieterstrom.subtitle", "Vollversorgungs-Modell: Vor-Ort-Solarstrom & Reststrom in einer gemeinsamen Monatsabrechnung mit Mieterstromzuschlag gem. § 21 Abs. 3 EEG")}
-                badge={t("admin_mieterstrom.badge_enwg", "§ 42a EnWG Mieterstrom")}
-                badgeColor="sky"
                 manualLink="/app/help/admin-mieterstrom-enwg-guide"
                 manualLabel={t("admin_mieterstrom.btn_manual", "Handbuch (§ 42a EnWG)")}
                 actions={

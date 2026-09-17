@@ -142,8 +142,6 @@ export default function AdminDashboard() {
                 iconBg="bg-indigo-500/10 border-indigo-500/20 text-indigo-600 dark:text-indigo-400"
                 title={t("admin.title", "Admin & Conversion Center")}
                 subtitle={t("admin.subtitle", "Übersicht über Nutzer-Onboarding, Magic-Link-Konvertierung, Live-Aktivitäten und Systemstatus.")}
-                badge={t("admin.badge_staff", "Staff Portal")}
-                badgeColor="indigo"
                 manualLink="/app/help/admin-communities-portfolio-guide"
                 manualLabel={t("nav.manual", "Handbuch")}
                 actions={
