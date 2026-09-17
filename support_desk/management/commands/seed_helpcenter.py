@@ -2570,17 +2570,102 @@ The official **Sharegy Home Assistant Integration** streams all your local smart
                 "sort_order": 1,
             },
             # ---------------------------------------------------------------------
-            # 10. ENERGY SHARING & TENANT ADMIN: DER GROSSE LEITFADEN FÜR VERWALTER
+            # 10. ENERGY SHARING, GGV & MIETERSTROM: DER GROSSE VERGLEICHS-LEITFADEN
             # ---------------------------------------------------------------------
+            {
+                "category": cats["energy-sharing"],
+                "slug": "mieterstrom-ggv-und-energy-sharing-unterschiede",
+                "context_key": "energy_sharing_guide",
+                "title_de": "Mieterstrom (§ 42a), GGV (§ 42b) & Energy Sharing: Unterschiede, Rechte & Abrechnung",
+                "title_en": "Tenant Electricity (§ 42a), Collective Building Supply (§ 42b) & Energy Sharing Explained",
+                "summary_de": "Der vollständige Vergleich: Klassischer Mieterstrom vs. Gemeinschaftliche Gebäudeversorgung (GGV) vs. Regionales Energy Sharing mit Prosumern.",
+                "summary_en": "The definitive guide explaining the differences between full-supply tenant power (§ 42a), collective building supply (§ 42b), and prosumer energy sharing.",
+                "content_de": r"""# ⚡ Mieterstrom (§ 42a), GGV (§ 42b) & Energy Sharing im Vergleich
+
+In der modernen Energiewirtschaft und im Sharegy-Ökosystem unterscheiden wir zwischen drei grundlegend verschiedenen Modellen für die gemeinsame Nutzung von Solarstrom:
+
+---
+
+## 📊 1. Die drei Modelle im tabellarischen Schnellvergleich
+
+| Merkmal | 🏢 1. Mieterstrom (§ 42a EnWG) | 🏘️ 2. GGV / Quartier (§ 42b EnWG) | ⚡ 3. Energy Sharing (Bürgerenergie / RED II) |
+| :--- | :--- | :--- | :--- |
+| **Netznutzung** | **Keine** Durchleitung durch das öffentliche Netz (hinter dem Summenzähler). | **Keine** Durchleitung durch das öffentliche Netz (im selben Gebäude / Grundstück). | **MIT Durchleitung** durch das öffentliche Verteilnetz (bilanzielles Sharing). |
+| **Teilnehmer-Rollen** | **Reine Consumer (Mieter)**. | **Wohnungseigentümer / Mieter** (nach MEA oder dynamisch). | **Prosumer** (Einspeiser) & **Consumer** (Abnehmer). |
+| **Erzeugung** | Zentrale Dachanlage des Vermieters / Contractors. | Gemeinsame Anlage auf dem Gebäude (z. B. WEG). | **Viele dezentrale Anlagen** verschiedener Prosumer im Verteilnetz. |
+| **Vertragsmodell** | **Vollversorgungsvertrag** (Vermieter liefert Solar- UND Reststrom aus einer Hand). | **Reine interne Aufteilung** (Jeder Bewohner behält seinen eigenen Reststromvertrag). | **Sharing-Gemeinschaftsvertrag** (Jeder behält eigenen Versorger + wMSB-Allokation). |
+| **Finanzfluss** | Mieter zahlt monatliche Gesamtrechnung an Vermieter. | Interne Abrechnung des Solarstroms / Umlage der Anlagenkosten. | **Zweiseitig**: <br>• **Prosumer** erhält Sharing-Einspeisevergütung.<br>• **Consumer** zahlt reduzierten Sharing-Bezugspreis. |
+| **Sharegy Cockpit** | `/app/tenant` (Liegenschafts-Dashboard) | `/app/tenant` (Gebäude-Wizard, MEA, Virtueller Summenzähler) | `/app/community` (Prosumer- & Consumer-Cockpit) |
+
+---
+
+## 🏢 Modell 1: Mieterstrom (§ 42a EnWG)
+
+Beim klassischen Mieterstrom tritt der Vermieter oder ein beauftragter Energiedienstleister (Contractor) als **Vollversorger** auf.
+
+* **Rechte & Pflichten**: Der Lieferant muss die Mieter zu 100 % mit Strom versorgen (auch wenn keine Sonne scheint). Er kauft Reststrom an der Strombörse oder beim Vorlieferanten zu.
+* **Rechnungsstellung**: Der Mieter erhält eine einzige Gesamtrechnung für seinen kompletten Stromverbrauch.
+* **Gesetzliche Vorgabe**: Der Mieterstrompreis darf maximal 90 % des örtlichen Grundversorgertarifs betragen.
+
+---
+
+## 🏘️ Modell 2: Gemeinschaftliche Gebäudeversorgung (GGV nach § 42b EnWG)
+
+Mit dem Solarpaket I hat der Gesetzgeber die **Gemeinschaftliche Gebäudeversorgung** geschaffen, um die bürokratischen Hürden des Mieterstroms abzubauen:
+
+* **Keine Lieferantenpflichten**: Die WEG oder der Vermieter wird **nicht** zum Vollversorger.
+* **Eigener Reststromvertrag**: Jede Mietpartei / jeder Eigentümer behält weiterhin seinen bestehenden Vertrag mit einem frei gewählten Stromanbieter.
+* **15-Minuten-Aufteilung**: Sharegy verteilt den erzeugten Solarstrom im 15-Minuten-Takt entweder **statisch nach Miteigentumsanteilen (MEA)** oder **dynamisch nach zeitgleichem Verbrauch**.
+* **Abrechnung**: Sharegy generiert monatlich einen reinen **Solarstrom-Nachweis** für den im Haus genutzten Strom.
+
+---
+
+## ⚡ Modell 3: Regionales Energy Sharing (Bürgerenergie / EU RED II)
+
+Energy Sharing ermöglicht es Bürgerinnen, Bürgern und Prosumern, Strom über das **öffentliche Mittel- und Niederspannungsnetz** hinweg miteinander zu teilen:
+
+* **Dezentraler Erzeuger-Pool**: Prosumer mit PV-Anlagen, Heimspeichern oder Windkraftanlagen speisen ihren Überschussstrom ins Verteilnetz ein.
+* **Doppelter wirtschaftlicher Hebel**:
+  1. **Prosumer** erhalten für ihren geteilten Strom eine attraktive **Sharing-Einspeisevergütung** (z. B. 10 Ct/kWh), die über der gesetzlichen EEG-Einspeisevergütung liegt.
+  2. **Consumer** im selben Verteilnetzgebiet beziehen diesen Ökostrom zu einem günstigen **Sharing-Tarif** (z. B. 12–15 Ct/kWh) und sparen gegenüber dem Netzstrom.
+* **Bilanzieller Ausgleich**: Sharegy und der wettbewerbliche Messstellenbetreiber (wMSB) führen im 15-Minuten-Raster den bilanziellen Abgleich durch.
+
+---
+
+## 🧭 Wo finde ich was in Sharegy?
+
+1. **Liegenschafts-Admins & WEG-Verwalter (GGV & Mieterstrom)**:
+   * Gehe zu **`/app/tenant`**. Nutze den 3-Schritte-Gebäude-Wizard, pflege MEA-Anteile und verwalte den Virtuellen Summenzähler.
+2. **Mitglieder einer regionalen Energiegemeinschaft (Energy Sharing)**:
+   * Gehe zu **`/app/community`**. Sieh deine persönliche Einspeisung (als Prosumer) oder deinen Bezug (als Consumer) sowie deine monatlichen Nachweise und Gutschriften.
+""",
+                "content_en": r"""# ⚡ Tenant Electricity (§ 42a), Collective Building Supply (§ 42b) & Energy Sharing
+
+Understanding the key differences between on-site building supply and regional prosumer energy sharing in the Sharegy platform.
+
+## 📊 1. Quick Comparison Matrix
+
+| Feature | 🏢 1. Tenant Power (§ 42a EnWG) | 🏘️ 2. Collective Supply / GGV (§ 42b EnWG) | ⚡ 3. Regional Energy Sharing (RED II) |
+| :--- | :--- | :--- | :--- |
+| **Grid Usage** | **No** public grid transit (behind local master meter). | **No** public grid transit (within the building/property). | **WITH transit** over the public distribution grid. |
+| **Roles** | **Pure Consumers (Tenants)**. | **Apartment Owners / Tenants** (MEA or dynamic split). | **Prosumers** (Feeders) & **Consumers** (Offtakers). |
+| **Generation** | Single central roof PV system. | Shared building PV system. | **Multiple distributed prosumer assets** in the region. |
+| **Contract** | **Full supply contract** (Solar + grid residual from one source). | **On-site allocation only** (Each resident keeps their own residual grid provider). | **Sharing community membership** (15-min smart meter allocation). |
+| **Dashboard** | `/app/tenant` | `/app/tenant` (Building Wizard, MEA, Master Meter) | `/app/community` (Prosumer & Consumer Cockpit) |
+""",
+                "tags": ["energy-sharing", "ggv", "mieterstrom", "enwg", "prosumer", "consumer", "abrechnung"],
+                "is_featured": True,
+                "sort_order": 1,
+            },
             {
                 "category": cats["energy-sharing"],
                 "slug": "tenant-admin-leitfaden-mieterstrom-und-vpp",
                 "context_key": "tenant_admin_guide",
-                "title_de": "Tenant-Admin Leitfaden: Virtueller Summenzähler, § 42b Mieterstrom & PDF-Abrechnungen",
-                "title_en": "Tenant-Admin Guide: Virtual Master Meter, Multi-Tenant Allocation & PDF Invoices",
+                "title_de": "Tenant-Admin Leitfaden: Virtueller Summenzähler, § 42b GGV & PDF-Abrechnungen",
+                "title_en": "Tenant-Admin Guide: Virtual Master Meter, § 42b Collective Supply & PDF Invoices",
                 "summary_de": "Der vollständige Leitfaden für Liegenschafts-Admins, Vermieter und WEGs: 15m NAP-Saldierung, MEA-Aufteilungsschlüssel, PDF-Abrechnungen und VPP-Flexibilität.",
                 "summary_en": "Comprehensive guide for property managers and communities: 15-minute grid settlement, allocation keys, automated PDF billing, and VPP flexibility.",
-                "content_de": r"""# 🏢 Tenant-Admin Leitfaden: Liegenschafts-Dashboard, Mieterstrom & Energy Sharing
+                "content_de": r"""# 🏢 Tenant-Admin Leitfaden: Liegenschafts-Dashboard, GGV & Mieterstrom
 
 Als **Liegenschafts- oder Quartiers-Administrator (Tenant-Admin)** steuerst und überwachst du alle energiewirtschaftlichen, kaufmännischen und organisatorischen Prozesse deines Gebäudes oder deiner Nachbarschaftsgemeinschaft im zentralen Cockpit (`/app/tenant`).
 

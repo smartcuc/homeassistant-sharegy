@@ -119,13 +119,28 @@ export default function CommunityMemberDashboard() {
     const statements = statementsData?.statements || [];
 
     // Berechne persönliche Summen über alle vorliegenden Nachweise
-    const myTotalSolarKwh = statements.reduce((acc, s) => acc + Number(s.shared_imported_kwh || 0), 0);
-    const myTotalGridKwh = statements.reduce((acc, s) => acc + Number(s.grid_residual_import_kwh || 0), 0);
-    const myTotalConsumedKwh = myTotalSolarKwh + myTotalGridKwh;
-    const mySolarSharePercent = myTotalConsumedKwh > 0 ? (myTotalSolarKwh / myTotalConsumedKwh) * 100 : 0;
+    const myTotalSharedImportKwh = statements.reduce((acc, s) => acc + Number(s.shared_imported_kwh || 0), 0);
+    const myTotalSharedExportKwh = statements.reduce((acc, s) => acc + Number(s.shared_exported_kwh || 0), 0);
+    const myTotalGridResidualImportKwh = statements.reduce((acc, s) => acc + Number(s.grid_residual_import_kwh || 0), 0);
+    const myTotalProducedKwh = statements.reduce((acc, s) => acc + Number(s.produced_total_kwh || 0), 0);
+    const myTotalConsumedKwh = statements.reduce((acc, s) => acc + Number(s.consumed_total_kwh || 0), 0);
+
+    const myTotalExportCreditEur = statements.reduce((acc, s) => acc + Number(s.credit_shared_export_eur || 0), 0);
+    const myTotalImportChargeEur = statements.reduce((acc, s) => acc + Number(s.charge_shared_import_eur || 0), 0);
+    const myTotalNetBalanceEur = statements.reduce((acc, s) => acc + Number(s.net_balance_eur || 0), 0);
+
+    // Rollenbestimmung im Energy Sharing
+    const isProsumer = myTotalSharedExportKwh > 0 || myTotalProducedKwh > 0;
+    const isConsumer = myTotalSharedImportKwh > 0 || myTotalConsumedKwh > 0 || !isProsumer;
+
+    const [memberPerspective, setMemberPerspective] = useState(
+        isProsumer && !isConsumer ? "prosumer" : isConsumer && !isProsumer ? "consumer" : "all"
+    );
 
     // Ersparnis vs. Grundversorger (~38 Ct/kWh Grundversorger vs ~18 Ct/kWh Sharing)
-    const estimatedSavingsEur = myTotalSolarKwh * 0.20;
+    const estimatedSavingsEur = myTotalSharedImportKwh * 0.20;
+    // Mehrerlös Prosumer vs. reine EEG-Einspeisung (~10 Ct Sharing vs ~7 Ct EEG = 3 Ct Vorteil)
+    const estimatedProducerBonusEur = myTotalSharedExportKwh * 0.03;
 
     return (
         <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6">
@@ -135,7 +150,7 @@ export default function CommunityMemberDashboard() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-start gap-3.5">
                         <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 text-white flex items-center justify-center text-2xl shadow-sm shrink-0 mt-0.5">
-                            ☀️
+                            ⚡
                         </div>
                         <div>
                             <div className="flex flex-wrap items-center gap-2.5">
@@ -144,53 +159,70 @@ export default function CommunityMemberDashboard() {
                                 </h1>
                                 <span className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold px-3 py-1 rounded-full border border-emerald-500/20 flex items-center gap-1.5">
                                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                    {t("tenant.community_active", "Sharing Aktiv")}
+                                    {t("tenant.community_active", "Energy Sharing Aktiv")}
+                                </span>
+                                <span className="bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-bold px-3 py-1 rounded-full border border-indigo-500/20">
+                                    {isProsumer && isConsumer
+                                        ? "⚡ Prosumer & Consumer"
+                                        : isProsumer
+                                        ? "☀️ Prosumer (Einspeiser)"
+                                        : "🔌 Consumer (Abnehmer)"}
                                 </span>
                             </div>
                             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-                                Dein persönliches Mitglieder-Cockpit für lokale Solarstrom-Nutzung
+                                Dein persönliches Cockpit für geteilten Solarstrom im regionalen Verteilnetz
                             </p>
                         </div>
                     </div>
 
-                    <button
-                        type="button"
-                        onClick={() => setShareModalOpen(true)}
-                        className="px-4 py-2.5 rounded-xl text-xs font-bold bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/80 transition-all shadow-xs flex items-center gap-2 self-start sm:self-auto cursor-pointer"
-                    >
-                        <span>📢</span>
-                        <span>{t("tenant.share_btn", "Erfolge teilen")}</span>
-                    </button>
+                    <div className="flex items-center gap-2.5 self-start sm:self-auto">
+                        <a
+                            href="/app/help/mieterstrom-ggv-und-energy-sharing-unterschiede"
+                            className="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition flex items-center gap-1.5"
+                        >
+                            <span>📖</span>
+                            <span>Handbuch: Mieterstrom vs. GGV vs. Sharing</span>
+                        </a>
+
+                        <button
+                            type="button"
+                            onClick={() => setShareModalOpen(true)}
+                            className="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/80 transition shadow-xs flex items-center gap-2 cursor-pointer"
+                        >
+                            <span>📢</span>
+                            <span>{t("tenant.share_btn", "Erfolge teilen")}</span>
+                        </button>
+                    </div>
                 </div>
 
-                {/* 🌟 ENERGIE-MODELL ERKLÄRBOX (§ 42b vs § 42a) */}
+                {/* 🌟 ENERGIE-MODELL ERKLÄRBOX */}
                 <div className="p-4 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
                     <div className="flex items-start gap-3 text-indigo-950 dark:text-indigo-200">
                         <span className="text-xl shrink-0 mt-0.5">⚖️</span>
                         <div className="space-y-0.5">
                             <div className="font-bold flex items-center gap-2">
-                                <span>Gemeinschaftliche Gebäudeversorgung (Energy Sharing gem. § 42b EnWG)</span>
+                                <span>Regionales Energy Sharing (Bürgerenergie & Verteilnetz-Allokation)</span>
                                 <span className="text-[10px] bg-indigo-200/60 dark:bg-indigo-800/60 text-indigo-900 dark:text-indigo-200 px-2 py-0.5 rounded-md font-mono font-semibold">
-                                    15m Lastgang-Aufteilung
+                                    15m Smart-Meter-Bilanzierung
                                 </span>
                             </div>
                             <div className="text-indigo-700/80 dark:text-indigo-300/80 text-[11px] leading-relaxed">
-                                Dein Solarstrom wird im 15-Minuten-Takt direkt vor Ort verrechnet. Reststrom beziehst du weiterhin unabhängig über deinen eigenen Stromversorger.
+                                Prosumer speisen überschüssigen Solarstrom in die Gemeinschaft ein – Consumer beziehen ihn bilanziell vor Ort. Reststrom beziehst du weiterhin unabhängig über deinen bestehenden Stromversorger.
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* 2. DIE GEMEINSCHAFT (WAS HAT DAS GEBÄUDE ERZEUGT & GETEILT?) */}
+            {/* 2. DIE GEMEINSCHAFT IM ÜBERBLICK */}
             <div className="space-y-4">
                 <div className="flex items-center justify-between">
                     <div>
                         <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                            <span>🏢</span> Die Energiegemeinschaft im Überblick
+                            <span>🏘️</span> Die Energiegemeinschaft im Überblick
                         </h2>
                         <p className="text-xs text-slate-500 dark:text-slate-400">
-                            Gesamte Solarenergie vom Dach und geteilter Strom der Hausgemeinschaft
+                            Gesamterzeugung der Prosumer-Anlagen und geteilter Strom aller Teilnehmer
                         </p>
                     </div>
 
@@ -220,11 +252,11 @@ export default function CommunityMemberDashboard() {
 
                 {/* 4 Community KPI Cards */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-                    {/* Solar-Erzeugung */}
+                    {/* Solar-Erzeugung Prosumer-Pool */}
                     <div className="bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 flex flex-col justify-between">
                         <div className="flex items-center justify-between">
                             <span className="text-[11px] font-bold text-amber-700 dark:text-amber-300 uppercase tracking-wider">
-                                Solaranlage Dach
+                                Prosumer Erzeugung
                             </span>
                             <span className="text-lg">☀️</span>
                         </div>
@@ -233,7 +265,7 @@ export default function CommunityMemberDashboard() {
                                 {Number(currentStats?.produced_kwh ?? 0).toFixed(1)} <span className="text-xs font-normal">kWh</span>
                             </div>
                             <div className="text-[11px] text-amber-700/80 dark:text-amber-300/80 mt-0.5">
-                                Gesamte Erzeugung im Gebäude
+                                Solarertrag aller Erzeuger im Pool
                             </div>
                         </div>
                     </div>
@@ -251,7 +283,7 @@ export default function CommunityMemberDashboard() {
                                 {Number(currentStats?.shared_kwh ?? 0).toFixed(1)} <span className="text-xs font-normal">kWh</span>
                             </div>
                             <div className="text-[11px] text-emerald-700/80 dark:text-emerald-300/80 mt-0.5">
-                                Direkt in Wohnungen genutzt
+                                Bilanziell im Netzgebiet geteilt
                             </div>
                         </div>
                     </div>
@@ -269,7 +301,7 @@ export default function CommunityMemberDashboard() {
                                 {Number(currentStats?.consumed_kwh ?? 0).toFixed(1)} <span className="text-xs font-normal">kWh</span>
                             </div>
                             <div className="text-[11px] text-sky-700/80 dark:text-sky-300/80 mt-0.5">
-                                Stromverbrauch aller Parteien
+                                Stromverbrauch aller Teilnehmer
                             </div>
                         </div>
                     </div>
@@ -278,7 +310,7 @@ export default function CommunityMemberDashboard() {
                     <div className="bg-purple-500/5 dark:bg-purple-500/10 border border-purple-500/20 rounded-2xl p-4 flex flex-col justify-between">
                         <div className="flex items-center justify-between">
                             <span className="text-[11px] font-bold text-purple-700 dark:text-purple-300 uppercase tracking-wider">
-                                Solar-Deckung
+                                Autarkiegrad
                             </span>
                             <span className="text-lg">🌱</span>
                         </div>
@@ -287,7 +319,7 @@ export default function CommunityMemberDashboard() {
                                 {Number(currentStats?.autarky_pct ?? 0).toFixed(0)} <span className="text-xs font-normal">%</span>
                             </div>
                             <div className="text-[11px] text-purple-700/80 dark:text-purple-300/80 mt-0.5">
-                                Unabhängigkeit vom Netz
+                                Deckung aus eigenem Pool
                             </div>
                         </div>
                     </div>
@@ -304,7 +336,7 @@ export default function CommunityMemberDashboard() {
                                 </h3>
                             </div>
                             <span className="text-[11px] text-slate-400">
-                                Ideal für Waschmaschine, Spülmaschine & E-Auto
+                                Günstigste Fenster für Verbraucher & flexible Lasten
                             </span>
                         </div>
 
@@ -335,57 +367,143 @@ export default function CommunityMemberDashboard() {
                 )}
             </div>
 
-            {/* 3. MEIN HAUSHALT (WAS HABE ICH ERZEUGT, BEZOGEN & GESPART?) */}
+            {/* 3. MEIN PERSÖNLICHER BEITRAG (PROSUMER & CONSUMER PERSPEKTIVE) */}
             <div className="space-y-4 pt-2">
-                <div>
-                    <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                        <span>👤</span> Mein persönlicher Anteil & Ersparnis
-                    </h2>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                        Deine Verbrauchs- und Bezugsdaten aus der 15-Minuten-Verrechnung
-                    </p>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    {/* Solarbezug */}
-                    <div className="bg-gradient-to-br from-indigo-500/10 to-indigo-600/5 border border-indigo-500/20 rounded-2xl p-5">
-                        <div className="text-[11px] font-bold text-indigo-700 dark:text-indigo-300 uppercase">
-                            Mein Solar-Bezug
-                        </div>
-                        <div className="text-3xl font-black text-indigo-900 dark:text-indigo-100 mt-2">
-                            {myTotalSolarKwh.toFixed(1)} <span className="text-sm font-normal">kWh</span>
-                        </div>
-                        <div className="text-xs text-indigo-600 dark:text-indigo-400 mt-1">
-                            Günstiger Strom direkt vom Hausdach
-                        </div>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <span>👤</span> Mein persönlicher Beitrag & Nutzen
+                        </h2>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                            Deine Einspeise- und Verbrauchsdaten aus der 15-Minuten-Bilanzierung
+                        </p>
                     </div>
 
-                    {/* Solaranteil Quote */}
-                    <div className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border border-emerald-500/20 rounded-2xl p-5">
-                        <div className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 uppercase">
-                            Mein Solaranteil
-                        </div>
-                        <div className="text-3xl font-black text-emerald-900 dark:text-emerald-100 mt-2">
-                            {mySolarSharePercent.toFixed(0)} <span className="text-sm font-normal">%</span>
-                        </div>
-                        <div className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">
-                            Deines Bedarfs durch die Community gedeckt
-                        </div>
-                    </div>
-
-                    {/* Berechnete Ersparnis */}
-                    <div className="bg-gradient-to-br from-cyan-500/10 to-cyan-600/5 border border-cyan-500/20 rounded-2xl p-5">
-                        <div className="text-[11px] font-bold text-cyan-700 dark:text-cyan-300 uppercase">
-                            Deine Ersparnis
-                        </div>
-                        <div className="text-3xl font-black text-cyan-900 dark:text-cyan-100 mt-2">
-                            ~{estimatedSavingsEur.toFixed(2)} <span className="text-sm font-normal">€</span>
-                        </div>
-                        <div className="text-xs text-cyan-600 dark:text-cyan-400 mt-1">
-                            ggü. teurem Grundversorger-Tarif
-                        </div>
+                    {/* PERSPEKTIVEN UMSCHALTER */}
+                    <div className="flex bg-slate-100 dark:bg-slate-800 p-0.5 rounded-xl text-xs font-semibold gap-1">
+                        <button
+                            onClick={() => setMemberPerspective("all")}
+                            className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
+                                memberPerspective === "all"
+                                    ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs font-bold"
+                                    : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                            }`}
+                        >
+                            ⚡ Gesamtbilanz
+                        </button>
+                        <button
+                            onClick={() => setMemberPerspective("prosumer")}
+                            className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
+                                memberPerspective === "prosumer"
+                                    ? "bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 shadow-xs font-bold"
+                                    : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                            }`}
+                        >
+                            ☀️ Prosumer (Einspeisung)
+                        </button>
+                        <button
+                            onClick={() => setMemberPerspective("consumer")}
+                            className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
+                                memberPerspective === "consumer"
+                                    ? "bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs font-bold"
+                                    : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                            }`}
+                        >
+                            🔌 Consumer (Bezug)
+                        </button>
                     </div>
                 </div>
+
+                {/* DYNAMISCHE KARTEN JE NACH PERSPEKTIVE */}
+                {(memberPerspective === "all" || memberPerspective === "prosumer") && (
+                    <div className="space-y-2">
+                        <div className="text-xs font-bold text-amber-700 dark:text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+                            <span>☀️</span> Meine Prosumer-Einspeisung in die Community
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 border border-amber-500/20 rounded-2xl p-5">
+                                <div className="text-[11px] font-bold text-amber-700 dark:text-amber-300 uppercase">
+                                    Geteilter Solarstrom
+                                </div>
+                                <div className="text-3xl font-black text-amber-900 dark:text-amber-100 mt-2">
+                                    {myTotalSharedExportKwh.toFixed(1)} <span className="text-sm font-normal">kWh</span>
+                                </div>
+                                <div className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                                    Überschuss mit Nachbarn geteilt
+                                </div>
+                            </div>
+
+                            <div className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border border-emerald-500/20 rounded-2xl p-5">
+                                <div className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 uppercase">
+                                    Meine Sharing-Erlöse
+                                </div>
+                                <div className="text-3xl font-black text-emerald-900 dark:text-emerald-100 mt-2">
+                                    {myTotalExportCreditEur.toFixed(2)} <span className="text-sm font-normal">€</span>
+                                </div>
+                                <div className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">
+                                    Gutschrift aus Quartiers-Einspeisung
+                                </div>
+                            </div>
+
+                            <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20 rounded-2xl p-5">
+                                <div className="text-[11px] font-bold text-purple-700 dark:text-purple-300 uppercase">
+                                    Mehrerlös ggü. EEG
+                                </div>
+                                <div className="text-3xl font-black text-purple-900 dark:text-purple-100 mt-2">
+                                    ~{estimatedProducerBonusEur.toFixed(2)} <span className="text-sm font-normal">€</span>
+                                </div>
+                                <div className="text-xs text-purple-600 dark:text-purple-400 mt-1">
+                                    Mehrertrag gegenüber Standard-Einspeisung
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {(memberPerspective === "all" || memberPerspective === "consumer") && (
+                    <div className="space-y-2 pt-2">
+                        <div className="text-xs font-bold text-indigo-700 dark:text-indigo-300 uppercase tracking-wider flex items-center gap-1.5">
+                            <span>🔌</span> Mein Consumer-Bezug aus der Community
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div className="bg-gradient-to-br from-indigo-500/10 to-indigo-600/5 border border-indigo-500/20 rounded-2xl p-5">
+                                <div className="text-[11px] font-bold text-indigo-700 dark:text-indigo-300 uppercase">
+                                    Mein Solar-Bezug
+                                </div>
+                                <div className="text-3xl font-black text-indigo-900 dark:text-indigo-100 mt-2">
+                                    {myTotalSharedImportKwh.toFixed(1)} <span className="text-sm font-normal">kWh</span>
+                                </div>
+                                <div className="text-xs text-indigo-600 dark:text-indigo-400 mt-1">
+                                    Günstiger Ökostrom aus dem Verteilnetz
+                                </div>
+                            </div>
+
+                            <div className="bg-gradient-to-br from-cyan-500/10 to-cyan-600/5 border border-cyan-500/20 rounded-2xl p-5">
+                                <div className="text-[11px] font-bold text-cyan-700 dark:text-cyan-300 uppercase">
+                                    Meine Ersparnis
+                                </div>
+                                <div className="text-3xl font-black text-cyan-900 dark:text-cyan-100 mt-2">
+                                    ~{estimatedSavingsEur.toFixed(2)} <span className="text-sm font-normal">€</span>
+                                </div>
+                                <div className="text-xs text-cyan-600 dark:text-cyan-400 mt-1">
+                                    Ersparnis ggü. Netz-Grundversorger
+                                </div>
+                            </div>
+
+                            <div className="bg-gradient-to-br from-slate-500/10 to-slate-600/5 border border-slate-500/20 rounded-2xl p-5">
+                                <div className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase">
+                                    Reststrom aus Netz
+                                </div>
+                                <div className="text-3xl font-black text-slate-900 dark:text-slate-100 mt-2">
+                                    {myTotalGridResidualImportKwh.toFixed(1)} <span className="text-sm font-normal">kWh</span>
+                                </div>
+                                <div className="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                                    Über externen Lieferanten bezogen
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* 4. SHARING-TARIF & MONATLICHE ABRECHNUNGSNACHWEISE (§ 42b EnWG) */}
@@ -472,9 +590,21 @@ export default function CommunityMemberDashboard() {
                                             </span>
                                         </div>
                                         <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600 dark:text-slate-400 pt-1">
-                                            <span>☀️ Solar bezogen: <strong>{Number(stmt.shared_imported_kwh ?? 0).toFixed(1)} kWh</strong></span>
-                                            <span>🏠 Netz bezogen: <strong>{Number(stmt.grid_residual_import_kwh ?? 0).toFixed(1)} kWh</strong></span>
-                                            <span>🤝 Solarquote: <strong>{Number(stmt.shared_imported_kwh || 0) + Number(stmt.grid_residual_import_kwh || 0) > 0 ? ((Number(stmt.shared_imported_kwh || 0) / (Number(stmt.shared_imported_kwh || 0) + Number(stmt.grid_residual_import_kwh || 0))) * 100).toFixed(0) : 0} %</strong></span>
+                                            {Number(stmt.shared_exported_kwh || 0) > 0 && (
+                                                <span className="text-amber-700 dark:text-amber-300">
+                                                    ☀️ Solar geteilt: <strong>{Number(stmt.shared_exported_kwh).toFixed(1)} kWh</strong>
+                                                </span>
+                                            )}
+                                            {Number(stmt.shared_imported_kwh || 0) > 0 && (
+                                                <span className="text-indigo-700 dark:text-indigo-300">
+                                                    🔌 Solar bezogen: <strong>{Number(stmt.shared_imported_kwh).toFixed(1)} kWh</strong>
+                                                </span>
+                                            )}
+                                            {Number(stmt.grid_residual_import_kwh || 0) > 0 && (
+                                                <span>
+                                                    🏠 Netz bezogen: <strong>{Number(stmt.grid_residual_import_kwh).toFixed(1)} kWh</strong>
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
 
