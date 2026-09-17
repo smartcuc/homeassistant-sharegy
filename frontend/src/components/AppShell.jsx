@@ -37,6 +37,7 @@ const AgentSupportHubPage = lazy(() => import("../features/support/pages/AgentSu
 const AdminDashboard = lazy(() => import("../pages/admin/AdminDashboard"));
 const TrackingDashboard = lazy(() => import("../pages/admin/TrackingDashboard"));
 const TenantDashboard = lazy(() => import("../pages/TenantDashboard"));
+const CommunityMemberDashboard = lazy(() => import("../features/community/pages/CommunityMemberDashboard"));
 const CommunitiesManagementHub = lazy(() => import("../pages/admin/CommunitiesManagementHub"));
 const PartnerDashboard = lazy(() => import("../features/partner/PartnerDashboard"));
 const VppFleetAdminPage = lazy(() => import("../pages/admin/VppFleetAdminPage"));
@@ -170,7 +171,7 @@ export default function AppShell() {
                             />
                             <Route path="tenant" element={<TenantDashboard />} />
                             <Route path="tenant-management" element={<TenantDashboard />} />
-                            <Route path="community" element={<TenantDashboard />} />
+                            <Route path="community" element={<CommunityMemberDashboard />} />
                             <Route path="partner" element={<PartnerDashboard />} />
                             <Route path="installer" element={<PartnerDashboard />} />
 

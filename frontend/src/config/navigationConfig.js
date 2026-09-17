@@ -23,10 +23,10 @@ export const MODE_METADATA = {
     [NAV_MODES.SHARING_ONLY]: {
         id: NAV_MODES.SHARING_ONLY,
         labelKey: "nav.mode_sharing",
-        defaultLabel: "Community & Mieterstrom",
+        defaultLabel: "Energy Sharing",
         icon: "🏢",
-        description: "Mein Verbrauch, Solarstrom-Anteil & Monatsabrechnungen",
-        defaultPath: "/app/tenant",
+        description: "Mein Verbrauch, Solarstrom-Anteil & Abrechnungsnachweise (§ 42b EnWG)",
+        defaultPath: "/app/community",
     },
     [NAV_MODES.HYBRID]: {
         id: NAV_MODES.HYBRID,
@@ -77,8 +77,7 @@ export function getNavigationSections({
             {
                 title: `🏢 ${t("nav.community", "Energiegemeinschaft")}`,
                 items: [
-                    { name: t("nav.community_overview", "Community Cockpit"), path: "/app/tenant", icon: "🏢" },
-                    { name: t("nav.tariffs_and_settlement", "Tarife & Abrechnungen"), path: "/app/tenant?tab=settlement", icon: "💰" },
+                    { name: t("nav.community_overview", "Community Cockpit"), path: "/app/community", icon: "🏢" },
                 ],
             },
             {
@@ -216,8 +215,8 @@ export function getNavigationSections({
     // Wenn HYBRID (User 3) oder Tenant-Access vorhanden ist: Community-Sharing Reiter einbinden
     if (activeMode === NAV_MODES.HYBRID || (hasCommunityAdminAccess && !isStaffOrAdmin)) {
         controlItems.push({
-            name: t("nav.tenant_management", "Community & Sharing"),
-            path: "/app/tenant",
+            name: (hasCommunityAdminAccess || isStaffOrAdmin) ? t("nav.tenant_management", "Mandanten & Communities") : t("nav.community_overview", "Energy Sharing"),
+            path: (hasCommunityAdminAccess || isStaffOrAdmin) ? "/app/tenant" : "/app/community",
             icon: "👥",
         });
     }
