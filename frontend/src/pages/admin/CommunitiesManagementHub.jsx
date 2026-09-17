@@ -14,11 +14,64 @@ export default function CommunitiesManagementHub() {
     const [loading, setLoading] = useState(true);
     const [drilldownLoading, setDrilldownLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
+    const [modelFilter, setModelFilter] = useState("all"); // 'all' | 'mieterstrom' | 'ggv' | 'energy_sharing'
     const [announcementModal, setAnnouncementModal] = useState(false);
     const [newAnnouncement, setNewAnnouncement] = useState({ title: "", message: "", category: "info" });
     const [settingsForm, setSettingsForm] = useState({ name: "", primary_color: "#10b981", is_public: true });
     const [savingSettings, setSavingSettings] = useState(false);
     const [exportingFormat, setExportingFormat] = useState(null);
+
+    // ⚖️ Hilfsfunktion: Rechtliche & fachliche Metadaten pro Modelltyp
+    function getModelMetadata(modelType) {
+        switch (modelType) {
+            case "mieterstrom":
+                return {
+                    id: "mieterstrom",
+                    label: "Mieterstrom (§ 42a EnWG)",
+                    shortLabel: "Mieterstrom",
+                    badgeText: "🏢 Mieterstrom (§ 42a)",
+                    icon: "🏢",
+                    badgeClass: "bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-800",
+                    description: "Vollversorgung: PV-Strom & Reststrom in einer Monatsabrechnung für Mieter",
+                    membersTitle: "Mieter & Wohneinheiten",
+                    sharesTitle: "Mieterstrom-Zuteilungsquoten",
+                    tariffTitle: "Mieterstrom-Vollversorgertarif",
+                    meterTitle: "Summenzähler & Wohnungszähler",
+                    alertText: "🏢 Mieterstrom-Modell (§ 42a EnWG): Der Vermieter/Contractor übernimmt die Vollversorgung der Mieter mit PV- und Reststrom. Die Abrechnung erfolgt als Gesamtstromrechnung inklusive Mieterstromzuschlag.",
+                };
+            case "ggv":
+                return {
+                    id: "ggv",
+                    label: "Gebäudeversorgung (GGV § 42b EnWG)",
+                    shortLabel: "GGV (§ 42b)",
+                    badgeText: "⚖️ GGV (§ 42b)",
+                    icon: "⚖️",
+                    badgeClass: "bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800",
+                    description: "Vor-Ort-Solaraufteilung nach Miteigentumsanteilen (MEA /1000) ohne Reststrompflicht",
+                    membersTitle: "Wohnungseigentümer & Parteien",
+                    sharesTitle: "Miteigentumsanteile (MEA /1000)",
+                    tariffTitle: "Solar-Nutzungsentgelt (ohne Reststrom)",
+                    meterTitle: "Wohnungs- & Erzeugungszähler",
+                    alertText: "⚖️ Gemeinschaftliche Gebäudeversorgung (§ 42b EnWG): Reine Vor-Ort-Aufteilung des Solarstroms nach Miteigentumsanteilen (MEA). Es besteht keine Reststromlieferpflicht; jeder Nutzer hat seinen eigenen Reststromvertrag.",
+                };
+            case "energy_sharing":
+            default:
+                return {
+                    id: "energy_sharing",
+                    label: "Energy Sharing (Genossenschaft)",
+                    shortLabel: "Energy Sharing",
+                    badgeText: "⚡ Energy Sharing",
+                    icon: "⚡",
+                    badgeClass: "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800",
+                    description: "15-Minuten Smart-Meter-Bilanzierung & Verteilnetz-Allokation für Bürgerenergie",
+                    membersTitle: "Genossenschaftsmitglieder",
+                    sharesTitle: "15m-Allokationsschlüssel",
+                    tariffTitle: "Bürgerenergie-Sharingtarif",
+                    meterTitle: "Smart Meter (iMSys / RLM)",
+                    alertText: "⚡ Regionales Energy Sharing: 15-minütige Bilanzierung über das öffentliche Netz gemäß EU-Richtlinie / § 42c EnWG mit Netzentgelt-Rabatt und automatisiertem BNetzA MSCONS EDIFACT Export.",
+                };
+        }
+    }
 
     // ⚖️ Beteiligungsquoten & Allokation State
     const [sharesData, setSharesData] = useState(null);
@@ -276,15 +329,18 @@ export default function CommunitiesManagementHub() {
         }
     }
 
-    // 🔍 Filterung nach Suche
+    // 🔍 Filterung nach Suche und Rechtsmodell
     const filteredCommunities = useMemo(() => {
         if (!portfolioData || !portfolioData.communities) return [];
-        if (!searchQuery.trim()) return portfolioData.communities;
-        const q = searchQuery.toLowerCase();
-        return portfolioData.communities.filter(
-            (c) => c.name.toLowerCase().includes(q) || c.slug.toLowerCase().includes(q)
-        );
-    }, [portfolioData, searchQuery]);
+        return portfolioData.communities.filter((c) => {
+            const matchesSearch = !searchQuery.trim() ||
+                c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                c.slug.toLowerCase().includes(searchQuery.toLowerCase());
+            const cModel = c.model_type || "energy_sharing";
+            const matchesModel = modelFilter === "all" || cModel === modelFilter;
+            return matchesSearch && matchesModel;
+        });
+    }, [portfolioData, searchQuery, modelFilter]);
 
     // Live-Summe der editierten Quoten
     const currentSharesSum = useMemo(() => {
@@ -398,98 +454,151 @@ export default function CommunitiesManagementHub() {
             </div>
 
             {/* ======================================================== */}
-            {/* 2. COMMUNITIES GRID */}
+            {/* 2. COMMUNITIES GRID WITH MODEL FILTER PILLS */}
             {/* ======================================================== */}
             <div className="space-y-4">
-                <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
-                    Verwaltete Energiegemeinschaften ({filteredCommunities.length})
-                </h2>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+                        Verwaltete Einheiten & Modelle ({filteredCommunities.length})
+                    </h2>
+
+                    {/* MODEL FILTER BUTTON GROUP */}
+                    <div className="flex flex-wrap items-center gap-1.5 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl text-xs font-semibold">
+                        <button
+                            type="button"
+                            onClick={() => setModelFilter("all")}
+                            className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
+                                modelFilter === "all"
+                                    ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs"
+                                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                            }`}
+                        >
+                            Alle ({portfolioData?.communities?.length || 0})
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setModelFilter("mieterstrom")}
+                            className={`px-3 py-1.5 rounded-lg transition cursor-pointer flex items-center gap-1.5 ${
+                                modelFilter === "mieterstrom"
+                                    ? "bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 shadow-xs border border-sky-200 dark:border-sky-800"
+                                    : "text-slate-600 dark:text-slate-400 hover:text-sky-600"
+                            }`}
+                        >
+                            <span>🏢</span> Mieterstrom (§ 42a)
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setModelFilter("ggv")}
+                            className={`px-3 py-1.5 rounded-lg transition cursor-pointer flex items-center gap-1.5 ${
+                                modelFilter === "ggv"
+                                    ? "bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 shadow-xs border border-purple-200 dark:border-purple-800"
+                                    : "text-slate-600 dark:text-slate-400 hover:text-purple-600"
+                            }`}
+                        >
+                            <span>⚖️</span> GGV (§ 42b)
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setModelFilter("energy_sharing")}
+                            className={`px-3 py-1.5 rounded-lg transition cursor-pointer flex items-center gap-1.5 ${
+                                modelFilter === "energy_sharing"
+                                    ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 shadow-xs border border-emerald-200 dark:border-emerald-800"
+                                    : "text-slate-600 dark:text-slate-400 hover:text-emerald-600"
+                            }`}
+                        >
+                            <span>⚡</span> Energy Sharing
+                        </button>
+                    </div>
+                </div>
 
                 {filteredCommunities.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {filteredCommunities.map((c) => (
-                            <div
-                                key={c.id}
-                                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 hover:border-indigo-500/40 transition shadow-2xs flex flex-col justify-between"
-                            >
-                                <div className="space-y-3">
-                                    <div className="flex items-start justify-between gap-2">
-                                        <div className="flex items-center gap-2.5">
-                                            <div
-                                                className="w-3.5 h-3.5 rounded-full"
-                                                style={{ backgroundColor: c.primary_color || "#10b981" }}
-                                            ></div>
+                        {filteredCommunities.map((c) => {
+                            const meta = getModelMetadata(c.model_type || "energy_sharing");
+                            return (
+                                <div
+                                    key={c.id}
+                                    className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 hover:border-indigo-500/40 transition shadow-2xs flex flex-col justify-between"
+                                >
+                                    <div className="space-y-3">
+                                        <div className="flex items-start justify-between gap-2">
+                                            <div className="flex items-center gap-2.5">
+                                                <div
+                                                    className="w-3.5 h-3.5 rounded-full"
+                                                    style={{ backgroundColor: c.primary_color || "#10b981" }}
+                                                ></div>
+                                                <div>
+                                                    <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                                                        {c.name}
+                                                    </h3>
+                                                    <span className="text-[11px] font-mono text-slate-400">
+                                                        /{c.slug}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${meta.badgeClass}`}>
+                                                {meta.badgeText}
+                                            </span>
+                                        </div>
+
+                                        {/* Autarkie Progress */}
+                                        <div className="space-y-1 pt-1">
+                                            <div className="flex justify-between text-xs font-semibold">
+                                                <span className="text-slate-500 dark:text-slate-400">Autarkiegrad</span>
+                                                <span className="text-emerald-600 dark:text-emerald-400">{Number(c.autarky_pct ?? 0).toFixed(1)}%</span>
+                                            </div>
+                                            <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                                                <div
+                                                    className="bg-emerald-500 h-full rounded-full transition-all"
+                                                    style={{ width: `${Math.min(c.autarky_pct ?? 0, 100)}%` }}
+                                                ></div>
+                                            </div>
+                                        </div>
+
+                                        {/* Kennzahlen */}
+                                        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
                                             <div>
-                                                <h3 className="font-bold text-sm text-slate-900 dark:text-white">
-                                                    {c.name}
-                                                </h3>
-                                                <span className="text-[11px] font-mono text-slate-400">
-                                                    /{c.slug}
-                                                </span>
+                                                <span className="text-slate-400 text-[10px]">Monat Erzeugung</span>
+                                                <div className="font-bold text-amber-600 dark:text-amber-400">
+                                                    ☀️ {Number(c.month_produced_kwh ?? 0).toFixed(1)} kWh
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <span className="text-slate-400 text-[10px]">Vor-Ort / Sharing</span>
+                                                <div className="font-bold text-emerald-600 dark:text-emerald-400">
+                                                    🤝 {Number(c.month_shared_kwh ?? 0).toFixed(1)} kWh
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <span className="text-slate-400 text-[10px]">{meta.membersTitle}</span>
+                                                <div className="font-semibold text-slate-700 dark:text-slate-300">
+                                                    👥 {c.members_count ?? 0} / 🔌 {c.meters_count ?? 0}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <span className="text-slate-400 text-[10px]">Aktiver Tarif</span>
+                                                <div className="font-semibold text-indigo-600 dark:text-indigo-400 truncate">
+                                                    {c.tariff ? `${Number(c.tariff.sharing_price_ct_kwh ?? 0).toFixed(1)} Ct/kWh` : "Standard"}
+                                                </div>
                                             </div>
                                         </div>
-                                        <span className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-500/20">
-                                            Aktiv
-                                        </span>
                                     </div>
 
-                                    {/* Autarkie Progress */}
-                                    <div className="space-y-1 pt-1">
-                                        <div className="flex justify-between text-xs font-semibold">
-                                            <span className="text-slate-500 dark:text-slate-400">Autarkiegrad</span>
-                                            <span className="text-emerald-600 dark:text-emerald-400">{Number(c.autarky_pct ?? 0).toFixed(1)}%</span>
-                                        </div>
-                                        <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
-                                            <div
-                                                className="bg-emerald-500 h-full rounded-full transition-all"
-                                                style={{ width: `${Math.min(c.autarky_pct ?? 0, 100)}%` }}
-                                            ></div>
-                                        </div>
-                                    </div>
-
-                                    {/* Kennzahlen */}
-                                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
-                                        <div>
-                                            <span className="text-slate-400 text-[10px]">Monat Erzeugung</span>
-                                            <div className="font-bold text-amber-600 dark:text-amber-400">
-                                                ☀️ {Number(c.month_produced_kwh ?? 0).toFixed(1)} kWh
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <span className="text-slate-400 text-[10px]">Geteilt (Sharing)</span>
-                                            <div className="font-bold text-emerald-600 dark:text-emerald-400">
-                                                🤝 {Number(c.month_shared_kwh ?? 0).toFixed(1)} kWh
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <span className="text-slate-400 text-[10px]">Mitglieder & Zähler</span>
-                                            <div className="font-semibold text-slate-700 dark:text-slate-300">
-                                                👥 {c.members_count ?? 0} / 🔌 {c.meters_count ?? 0}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <span className="text-slate-400 text-[10px]">Aktiver Tarif</span>
-                                            <div className="font-semibold text-indigo-600 dark:text-indigo-400">
-                                                {c.tariff ? `${Number(c.tariff.sharing_price_ct_kwh ?? 0).toFixed(1)} Ct/kWh` : "Standard"}
-                                            </div>
-                                        </div>
+                                    <div className="pt-4 mt-3 border-t border-slate-100 dark:border-slate-800">
+                                        <button
+                                            onClick={() => openDrilldown(c.id)}
+                                            className="w-full py-2 bg-slate-100 hover:bg-indigo-50 dark:bg-slate-800 dark:hover:bg-slate-700/60 text-slate-800 hover:text-indigo-600 dark:text-slate-200 dark:hover:text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                                        >
+                                            <span>🔍</span> Drill-Down & Verwalten
+                                        </button>
                                     </div>
                                 </div>
-
-                                <div className="pt-4 mt-3 border-t border-slate-100 dark:border-slate-800">
-                                    <button
-                                        onClick={() => openDrilldown(c.id)}
-                                        className="w-full py-2 bg-slate-100 hover:bg-indigo-50 dark:bg-slate-800 dark:hover:bg-slate-700/60 text-slate-800 hover:text-indigo-600 dark:text-slate-200 dark:hover:text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
-                                    >
-                                        <span>🔍</span> Drill-Down & Verwalten
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 ) : (
                     <div className="text-center py-12 text-slate-400 text-xs bg-slate-50 dark:bg-slate-900 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
-                        Keine Energiegemeinschaften gefunden.
+                        Keine Energiegemeinschaften oder Objekte in diesem Filter gefunden.
                     </div>
                 )}
             </div>
@@ -497,33 +606,48 @@ export default function CommunitiesManagementHub() {
             {/* ======================================================== */}
             {/* 3. DRILLDOWN MODAL / PANEL */}
             {/* ======================================================== */}
-            {selectedTenantId && drilldownData && (
+            {selectedTenantId && drilldownData && (() => {
+                const drilldownMeta = getModelMetadata(drilldownData.community.model_type || "energy_sharing");
+                return (
                 <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
                     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-5xl w-full p-6 space-y-6 shadow-2xl my-8">
                         
                         {/* Modal Header */}
-                        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4 gap-3">
                             <div className="flex items-center gap-3">
                                 <div
-                                    className="w-4 h-4 rounded-full"
+                                    className="w-4 h-4 rounded-full shrink-0"
                                     style={{ backgroundColor: drilldownData.community.primary_color || "#10b981" }}
                                 ></div>
                                 <div>
-                                    <h2 className="text-lg font-black text-slate-900 dark:text-white">
-                                        {drilldownData.community.name}
-                                    </h2>
-                                    <span className="text-xs text-slate-400">
-                                        Community-ID: {drilldownData.community.id}
-                                    </span>
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                        <h2 className="text-lg font-black text-slate-900 dark:text-white">
+                                            {drilldownData.community.name}
+                                        </h2>
+                                        <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${drilldownMeta.badgeClass}`}>
+                                            {drilldownMeta.badgeText}
+                                        </span>
+                                    </div>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                        {drilldownMeta.description}
+                                    </p>
                                 </div>
                             </div>
 
                             <button
                                 onClick={() => setSelectedTenantId(null)}
-                                className="text-slate-400 hover:text-slate-600 dark:hover:text-white text-lg p-1 rounded-lg cursor-pointer"
+                                className="text-slate-400 hover:text-slate-600 dark:hover:text-white text-lg p-1 rounded-lg cursor-pointer self-start sm:self-center"
                             >
                                 ✕
                             </button>
+                        </div>
+
+                        {/* Model Legal Context Alert */}
+                        <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-3.5 text-xs text-slate-700 dark:text-slate-300 flex items-start gap-2.5">
+                            <span className="text-lg shrink-0 mt-0.5">{drilldownMeta.icon}</span>
+                            <div className="flex-1 leading-relaxed">
+                                {drilldownMeta.alertText}
+                            </div>
                         </div>
 
                         {/* TAB NAVIGATION */}
@@ -536,7 +660,7 @@ export default function CommunitiesManagementHub() {
                                         : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                                 }`}
                             >
-                                👥 Teilnehmer ({drilldownData.members.length})
+                                👥 {drilldownMeta.membersTitle} ({drilldownData.members.length})
                             </button>
                             <button
                                 onClick={() => setDrilldownTab("shares")}
@@ -546,7 +670,7 @@ export default function CommunitiesManagementHub() {
                                         : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                                 }`}
                             >
-                                ⚖️ Beteiligungsquoten & Allokation
+                                ⚖️ {drilldownMeta.sharesTitle}
                             </button>
                             <button
                                 onClick={() => setDrilldownTab("tariffs")}
@@ -556,7 +680,7 @@ export default function CommunitiesManagementHub() {
                                         : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                                 }`}
                             >
-                                💰 Tarife & Clearing
+                                💰 {drilldownMeta.tariffTitle}
                             </button>
                             <button
                                 onClick={() => setDrilldownTab("announcements")}
@@ -1047,7 +1171,8 @@ export default function CommunitiesManagementHub() {
 
                     </div>
                 </div>
-            )}
+                );
+            })()}
 
             {/* ANNOUNCEMENT CREATE MODAL */}
             {announcementModal && (

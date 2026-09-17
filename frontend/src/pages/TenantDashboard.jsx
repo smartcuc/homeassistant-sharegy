@@ -18,6 +18,54 @@ import WhitelabelSettingsModal from "../features/tenant/components/WhitelabelSet
 import MarketCommunicationModal from "../features/billing/components/MarketCommunicationModal";
 import CooperativeApplicationsTab from "../features/community/components/CooperativeApplicationsTab";
 
+function getTenantModelInfo(modelType) {
+    switch (modelType) {
+        case "mieterstrom":
+            return {
+                titleIcon: "🏢",
+                badgeLabel: "🏢 Mieterstrom (§ 42a EnWG)",
+                badgeClass: "bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-800",
+                subtitle: "Vollversorgung des Gebäudes: Solarstrom & Reststrom in einer gemeinsamen Monatsabrechnung",
+                membersTabTitle: "Mieter & Parteien",
+                settlementTabTitle: "Mieterstrom-Abrechnungen",
+                virtualMeterTabTitle: "Wohnungs- & Summenzähler",
+                kpiCockpitTitle: "Mieterstrom Bilanzen & Strommix",
+                emptyMembersMsg: "Noch keine Mieter oder Wohneinheiten im Mieterstrom-Objekt registriert.",
+                inviteBtnLabel: "Neuen Mieter einladen",
+                legalNotice: "Vollversorgung nach § 42a EnWG: Die Abrechnung umfasst sowohl den vor Ort erzeugten Solarstrom als auch den aus dem Netz bezogenen Reststrom.",
+            };
+        case "ggv":
+            return {
+                titleIcon: "⚖️",
+                badgeLabel: "⚖️ Gemeinschaftliche Gebäudeversorgung (§ 42b EnWG)",
+                badgeClass: "bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800",
+                subtitle: "Vor-Ort-Solarstromaufteilung nach Miteigentumsanteilen (MEA) mit externem Reststromvertrag",
+                membersTabTitle: "Eigentümer & Parteien",
+                settlementTabTitle: "Vor-Ort-Solarabrechnungen",
+                virtualMeterTabTitle: "Messkonzept & Zähler",
+                kpiCockpitTitle: "Gebäude-Solarbilanz & MEA-Aufteilung",
+                emptyMembersMsg: "Noch keine Wohnungseigentümer oder Parteien im GGV-Gebäude registriert.",
+                inviteBtnLabel: "Neuen Wohnungseigentümer einladen",
+                legalNotice: "Gebäudeversorgung nach § 42b EnWG: Reine Aufteilung des Solarstroms im Gebäude. Jeder Teilnehmer bezieht seinen Reststrom eigenständig über seinen bestehenden Reststromlieferanten.",
+            };
+        case "energy_sharing":
+        default:
+            return {
+                titleIcon: "⚡",
+                badgeLabel: "⚡ Regionales Energy Sharing (Genossenschaft)",
+                badgeClass: "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800",
+                subtitle: "15-Minuten Smart-Meter-Bilanzierung & Verteilnetz-Allokation der Bürgerenergie",
+                membersTabTitle: "Genossen & Teilnehmer",
+                settlementTabTitle: "15m-Sharing-Abrechnungen",
+                virtualMeterTabTitle: "Virtueller Summenzähler & iMSys",
+                kpiCockpitTitle: "Bürgerenergie Bilanzen & Allokation",
+                emptyMembersMsg: "Noch keine Teilnehmer in der Energiegemeinschaft registriert.",
+                inviteBtnLabel: "Neues Mitglied einladen",
+                legalNotice: "Regionales Energy Sharing: 15-minütige Verrechnung über das öffentliche Verteilnetz mit Netzentgeltreduktion und BNetzA MSCONS Export.",
+            };
+    }
+}
+
 const ALL_TABS = ["cockpit", "virtual_meter", "vpp", "settlement", "members", "applications", "msb", "audit"];
 const MEMBER_TABS = ["cockpit", "settlement"];
 
@@ -338,27 +386,29 @@ export default function TenantDashboard() {
     const activeTariff = tariffData ? tariffData.active_tariff : null;
     const statements = statementsData ? statementsData.statements : [];
 
+    const modelInfo = getTenantModelInfo(tenant?.model_type || "energy_sharing");
+
     return (
         <div className="p-6 max-w-7xl mx-auto space-y-6">
 
-            {/* ✅ TITLE & HEADER (FULL WIDTH WITH ACTION BADGES UNDERNEATH) */}
+            {/* ✅ TITLE & HEADER (MODEL-AWARE FULL WIDTH) */}
             <div className="space-y-4 pb-4 border-b border-slate-200 dark:border-slate-800">
                 <div className="flex items-start gap-3.5">
                     <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-xl shrink-0 mt-0.5">
-                        ⚡
+                        {modelInfo.titleIcon}
                     </div>
                     <div className="flex-1 min-w-0">
                         <div className="flex flex-wrap items-center gap-2.5">
                             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white truncate">
                                 {tenant.name}
                             </h1>
-                            <span className="shrink-0 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold px-3 py-1 rounded-full border border-emerald-500/20 flex items-center gap-1.5">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                {t("tenant.community_active", "Community Aktiv")}
+                            <span className={`shrink-0 text-xs font-bold px-3 py-1 rounded-full border flex items-center gap-1.5 ${modelInfo.badgeClass}`}>
+                                <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></span>
+                                {modelInfo.badgeLabel}
                             </span>
                         </div>
                         <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-                            {t("tenant.subtitle", "Eichrechtskonformes 15-Minuten Energy Sharing & Prädiktive KI-Steuerung")}
+                            {modelInfo.subtitle}
                         </p>
                     </div>
                 </div>
@@ -414,7 +464,7 @@ export default function TenantDashboard() {
                                 : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                         }`}
                     >
-                        ⚡ {isCommunityAdmin ? "Cockpit" : "Übersicht & Solarbilanz"}
+                        {modelInfo.titleIcon} {isCommunityAdmin ? "Cockpit" : "Übersicht & Solarbilanz"}
                     </button>
 
                     {isCommunityAdmin && (
@@ -427,7 +477,7 @@ export default function TenantDashboard() {
                                         : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                                 }`}
                             >
-                                🏢 Virtueller Summenzähler
+                                {modelInfo.virtualMeterTabTitle}
                             </button>
                             <button
                                 onClick={() => handleTabChange("vpp")}
@@ -450,7 +500,7 @@ export default function TenantDashboard() {
                                 : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                         }`}
                     >
-                        💰 Tarife & Abrechnungen
+                        💰 {modelInfo.settlementTabTitle}
                     </button>
 
                     {isCommunityAdmin && (
@@ -463,7 +513,7 @@ export default function TenantDashboard() {
                                         : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                                 }`}
                             >
-                                👥 Mitglieder ({members.length})
+                                👥 {modelInfo.membersTabTitle} ({members.length})
                             </button>
                             <button
                                 onClick={() => handleTabChange("applications")}
