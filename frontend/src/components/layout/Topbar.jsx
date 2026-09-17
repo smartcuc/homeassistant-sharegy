@@ -164,6 +164,16 @@ export default function AppTopbar({ onOpenMobileMenu }) {
 
     const hasAnyLiveMetric = gridPower !== null || pvPower !== null || loadPower !== null || batterySoc !== null;
 
+    const isDemo = Boolean(
+        user?.is_demo ||
+        user?.email?.toLowerCase().includes("demo") ||
+        activeHome?.name?.toLowerCase().includes("demo") ||
+        primaryHome?.name?.toLowerCase().includes("demo") ||
+        location.pathname.startsWith("/demo") ||
+        location.pathname.startsWith("/app/demo") ||
+        localStorage.getItem("sharegy_is_demo") === "true"
+    );
+
     return (
         <>
             <header className="h-14 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 sticky top-0 z-30 flex items-center justify-between px-2 sm:px-4 transition-colors w-full">
@@ -179,7 +189,16 @@ export default function AppTopbar({ onOpenMobileMenu }) {
                             <Menu className="w-5 h-5" />
                         </button>
                     )}
-                    {homes.length > 1 ? (
+                    {isDemo ? (
+                        /* 🏡 Demo-Modus: Kein Link zur Struktur, gekürzt auf 'Sharegy Demo' */
+                        <span
+                            className="flex items-center gap-1 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100/90 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 px-2 sm:px-3 py-1 rounded-xl shadow-2xs select-none"
+                            title="Sharegy Demo"
+                        >
+                            <span className="text-sm shrink-0">🏡</span>
+                            <span className="truncate">Sharegy Demo</span>
+                        </span>
+                    ) : homes.length > 1 ? (
                         /* 🏢 Mehrere Liegenschaften -> Moderner Switcher */
                         <div className="relative" ref={homeDropdownRef}>
                             <button
