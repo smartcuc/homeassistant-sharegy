@@ -19,6 +19,7 @@ import TenantSetupWizardModal from "../../features/community/components/TenantSe
 import WhitelabelSettingsModal from "../../features/tenant/components/WhitelabelSettingsModal";
 import MarketCommunicationModal from "../../features/billing/components/MarketCommunicationModal";
 import CooperativeApplicationsTab from "../../features/community/components/CooperativeApplicationsTab";
+import AdminPageHeader from "../../components/admin/AdminPageHeader";
 
 export default function SharingAdminPage() {
     const { t } = useTranslation();
@@ -274,74 +275,53 @@ export default function SharingAdminPage() {
 
     return (
         <div className="p-6 max-w-7xl mx-auto space-y-6">
-            {/* HEADER */}
-            <div className="space-y-4 pb-4 border-b border-slate-200 dark:border-slate-800">
-                <div className="flex items-start gap-3.5">
-                    <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-xl shrink-0 mt-0.5">
-                        ⚡
-                    </div>
-                    <div className="flex-1 min-w-0">
-                        <div className="flex flex-wrap items-center gap-2.5">
-                            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white truncate">
-                                {tenant.name}
-                            </h1>
-                            <span className="shrink-0 text-xs font-bold px-3 py-1 rounded-full border flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800">
-                                <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></span>
-                                {t("admin_sharing.title", "⚡ Regionales Energy Sharing (Bürgerenergie eG)")}
-                            </span>
-                            <span className="shrink-0 text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60">
-                                {t("admin_sharing.badge_model", "Genossenschaftssatzung (GenG)")}
-                            </span>
-                        </div>
-                        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-                            {t("admin_sharing.subtitle", "15-Minuten Smart-Meter-Bilanzierung & Verteilnetz-Allokation der Bürgerenergiegenossenschaft mit BNetzA AS4/MSCONS Marktkommunikation")}
-                        </p>
-                    </div>
-                </div>
-
-                {/* ACTION BUTTONS */}
-                <div className="flex flex-wrap items-center gap-2.5 pt-1">
-                    <button
-                        type="button"
-                        onClick={() => setWhitelabelModalOpen(true)}
-                        className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 border border-slate-200 dark:border-slate-800 hover:border-emerald-300 transition-all shadow-xs flex items-center gap-2 cursor-pointer"
-                    >
-                        <span>🎨</span>
-                        <span>{t("tenant.whitelabel_btn", "Whitelabel & Branding")}</span>
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => setMakoModalOpen(true)}
-                        className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-teal-50 dark:hover:bg-teal-950/40 text-slate-700 dark:text-slate-200 hover:text-teal-600 dark:hover:text-teal-400 border border-slate-200 dark:border-slate-800 hover:border-teal-300 transition-all shadow-xs flex items-center gap-2 cursor-pointer"
-                    >
-                        <span>📄</span>
-                        <span>{t("admin_sharing.btn_mako", "Marktkommunikation (AS4)")}</span>
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => setWizardOpen(true)}
-                        className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 border border-slate-200 dark:border-slate-800 hover:border-emerald-300 transition-all shadow-xs flex items-center gap-2 cursor-pointer"
-                    >
-                        <span>✨</span>
-                        <span>{t("admin_sharing.btn_wizard", "Genossenschafts-Assistent (3 Schritte)")}</span>
-                    </button>
-                    <Link
-                        to="/app/help/admin-energy-sharing-cooperative-guide"
-                        className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 border border-slate-200 dark:border-slate-800 hover:border-emerald-300 transition-all shadow-xs flex items-center gap-2"
-                    >
-                        <span>📖</span>
-                        <span>{t("admin_sharing.btn_manual", "Handbuch (Genossenschaft)")}</span>
-                    </Link>
-                    <button
-                        type="button"
-                        onClick={() => setShareModalOpen(true)}
-                        className="px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/80 transition-all shadow-xs flex items-center gap-2 cursor-pointer"
-                    >
-                        <span>📢</span>
-                        <span>{t("tenant.share_btn", "Erfolge teilen")}</span>
-                    </button>
-                </div>
-            </div>
+            {/* UNIFIED ADMIN HEADER */}
+            <AdminPageHeader
+                icon="⚡"
+                iconBg="bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+                title={tenant.name}
+                subtitle={t("admin_sharing.subtitle", "15-Minuten Smart-Meter-Bilanzierung & Verteilnetz-Allokation der Bürgerenergiegenossenschaft mit BNetzA AS4/MSCONS Marktkommunikation")}
+                badge={t("admin_sharing.badge_geng", "Bürgerenergie eG (GenG)")}
+                badgeColor="emerald"
+                manualLink="/app/help/admin-energy-sharing-cooperative-guide"
+                manualLabel={t("admin_sharing.btn_manual", "Handbuch (Genossenschaft)")}
+                actions={
+                    <>
+                        <button
+                            type="button"
+                            onClick={() => setWhitelabelModalOpen(true)}
+                            className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-800 hover:border-slate-300 transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                        >
+                            <span>🎨</span>
+                            <span>{t("tenant.whitelabel_btn", "Whitelabel")}</span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setMakoModalOpen(true)}
+                            className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-teal-50 dark:hover:bg-teal-950/40 text-slate-700 dark:text-slate-200 hover:text-teal-600 dark:hover:text-teal-400 border border-slate-200 dark:border-slate-800 hover:border-teal-300 transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                        >
+                            <span>📄</span>
+                            <span>{t("admin_sharing.btn_mako", "AS4 Mako")}</span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setShareModalOpen(true)}
+                            className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-800 transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                        >
+                            <span>📢</span>
+                            <span>{t("tenant.share_btn", "Teilen")}</span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setWizardOpen(true)}
+                            className="px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+                        >
+                            <span>✨</span>
+                            <span>{t("admin_sharing.btn_wizard", "Assistent")}</span>
+                        </button>
+                    </>
+                }
+            />
 
             {/* TAB SWITCHER */}
             <div className="flex flex-wrap bg-slate-100 dark:bg-slate-800/70 p-1 rounded-xl text-xs font-semibold gap-1">

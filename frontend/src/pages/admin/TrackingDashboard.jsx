@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import ReactECharts from "echarts-for-react";
 import { apiFetch } from "../../api/client";
+import AdminPageHeader from "../../components/admin/AdminPageHeader";
 
 function formatStats(stats) {
     const map = {};
@@ -96,7 +97,7 @@ export default function TrackingDashboard() {
 
     if (isLoading) {
         return (
-            <div className="p-8 max-w-7xl mx-auto flex items-center justify-center text-gray-400 text-sm animate-pulse">
+            <div className="p-8 max-w-7xl mx-auto flex items-center justify-center text-slate-400 text-sm animate-pulse">
                 {t("common.loading", "Lade Tracking- und Eventdaten…")}
             </div>
         );
@@ -106,46 +107,41 @@ export default function TrackingDashboard() {
 
     return (
         <div className="p-6 max-w-7xl mx-auto space-y-6">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-gray-200 rounded-3xl p-6 shadow-xs">
-                <div>
-                    <div className="flex items-center gap-2.5">
-                        <span className="text-2xl">📈</span>
-                        <h1 className="text-2xl font-black text-gray-900 tracking-tight">{t("tracking.title", "Event-Tracking & Telemetrie-Analytics")}</h1>
-                        <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-50 text-purple-700 border border-purple-100">
-                            {totalEventsCount.toLocaleString()} {t("tracking.total_events", "Gesamt-Events")}
-                        </span>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                        {t("tracking.subtitle", "Detaillierte Erfassung von Nutzerinteraktionen, Feature-Nutzung und Registrierungstrichter.")}
-                    </p>
-                </div>
-
-                <div className="flex items-center gap-2">
-                    <Link
-                        to="/app/admin/dashboard"
-                        className="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-xs rounded-xl transition flex items-center gap-1.5"
-                    >
-                        <span>📊</span> {t("admin.title", "Admin Dashboard")}
-                    </Link>
-                    <a
-                        href="/admin/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-4 py-2 bg-slate-900 hover:bg-black text-white font-semibold text-xs rounded-xl transition flex items-center gap-1.5 shadow-xs"
-                    >
-                        <span>⚙️</span> Django Admin <span>↗</span>
-                    </a>
-                </div>
-            </div>
+            {/* Unified SaaS-Enterprise Header */}
+            <AdminPageHeader
+                icon="📈"
+                iconBg="bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 border-purple-100 dark:border-purple-900/50"
+                title={t("tracking.title", "Event-Tracking & Telemetrie-Analytics")}
+                subtitle={t("tracking.subtitle", "Detaillierte Erfassung von Nutzerinteraktionen, Feature-Nutzung und Registrierungstrichter.")}
+                badge={`${totalEventsCount.toLocaleString()} ${t("tracking.total_events", "Gesamt-Events")}`}
+                badgeColor="purple"
+                actions={
+                    <>
+                        <Link
+                            to="/app/admin/dashboard"
+                            className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs rounded-xl transition flex items-center gap-1.5"
+                        >
+                            <span>📊</span> {t("admin.title", "Admin Dashboard")}
+                        </Link>
+                        <a
+                            href="/admin/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3.5 py-1.5 bg-slate-900 hover:bg-black dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl transition flex items-center gap-1.5 shadow-xs"
+                        >
+                            <span>⚙️</span> Django Admin <span>↗</span>
+                        </a>
+                    </>
+                }
+            />
 
             {/* 7-Tage Timeline Chart */}
-            <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-xs space-y-4">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs space-y-4">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                    <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                         <span>📅</span> {t("tracking.chart_title", "Event-Aktivität (Letzte 7 Tage)")}
                     </h2>
-                    <span className="text-xs text-gray-400 font-mono">{t("tracking.chart_subtitle", "Tägliche Interaktionen")}</span>
+                    <span className="text-xs text-slate-400 font-mono">{t("tracking.chart_subtitle", "Tägliche Interaktionen")}</span>
                 </div>
 
                 <div className="h-72 w-full">
@@ -157,7 +153,7 @@ export default function TrackingDashboard() {
                             lazyUpdate={true}
                         />
                     ) : (
-                        <div className="h-full flex items-center justify-center text-gray-400 text-xs">
+                        <div className="h-full flex items-center justify-center text-slate-400 text-xs">
                             {t("tracking.no_data_7_days", "Keine Daten für die letzten 7 Tage")}
                         </div>
                     )}
@@ -167,12 +163,12 @@ export default function TrackingDashboard() {
             {/* Grid: Conversion Funnel & Top Events */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Conversion Funnel */}
-                <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-xs space-y-4">
-                    <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                        <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs space-y-4">
+                    <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                        <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                             <span>🎯</span> {t("tracking.funnel_title", "User Funnel Schritte")}
                         </h2>
-                        <span className="text-xs text-gray-400">Step-by-Step Conversion</span>
+                        <span className="text-xs text-slate-400">Step-by-Step Conversion</span>
                     </div>
 
                     <div className="space-y-4 pt-1">
@@ -183,16 +179,16 @@ export default function TrackingDashboard() {
 
                             return (
                                 <div key={item.key} className="space-y-1.5">
-                                    <div className="flex justify-between text-xs font-semibold text-gray-700">
+                                    <div className="flex justify-between text-xs font-semibold text-slate-700 dark:text-slate-300">
                                         <span className="flex items-center gap-1.5">
                                             <span>{item.icon}</span> {item.label}
                                         </span>
-                                        <span className="font-mono text-gray-500">
-                                            {value} <span className="text-indigo-600">({percent}%)</span>
+                                        <span className="font-mono text-slate-500 dark:text-slate-400">
+                                            {value} <span className="text-indigo-600 dark:text-indigo-400 font-bold">({percent}%)</span>
                                         </span>
                                     </div>
 
-                                    <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                                    <div className="h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                                         <div
                                             className="h-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full transition-all duration-500"
                                             style={{ width: `${percent}%` }}
@@ -205,28 +201,28 @@ export default function TrackingDashboard() {
                 </div>
 
                 {/* Top Events Table */}
-                <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-xs space-y-4">
-                    <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                        <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs space-y-4">
+                    <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                        <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                             <span>🔥</span> {t("tracking.top_events_title", "Häufigste Event-Typen")}
                         </h2>
-                        <span className="text-xs text-gray-400">Top 10 Events</span>
+                        <span className="text-xs text-slate-400">Top 10 Events</span>
                     </div>
 
-                    <div className="divide-y divide-gray-100">
+                    <div className="divide-y divide-slate-100 dark:divide-slate-800">
                         {stats
                             .sort((a, b) => b.count - a.count)
                             .slice(0, 10)
                             .map((item, idx) => (
                                 <div
                                     key={item.event}
-                                    className="flex items-center justify-between py-2.5 text-xs text-gray-700 hover:bg-slate-50 px-2 rounded-lg transition"
+                                    className="flex items-center justify-between py-2.5 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 px-2 rounded-lg transition"
                                 >
                                     <div className="flex items-center gap-2 truncate">
-                                        <span className="font-bold text-gray-400 font-mono w-4">#{idx + 1}</span>
-                                        <span className="font-mono text-gray-800 truncate">{item.event}</span>
+                                        <span className="font-bold text-slate-400 font-mono w-4">#{idx + 1}</span>
+                                        <span className="font-mono text-slate-800 dark:text-slate-200 truncate">{item.event}</span>
                                     </div>
-                                    <span className="font-bold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-full font-mono text-[11px]">
+                                    <span className="font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 px-2.5 py-0.5 rounded-full font-mono text-[11px] border border-indigo-100 dark:border-indigo-900/50">
                                         {item.count}
                                     </span>
                                 </div>

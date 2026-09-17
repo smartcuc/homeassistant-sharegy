@@ -31,6 +31,7 @@ import {
 import Card from "../../components/ui/Card";
 import ReactECharts from "echarts-for-react";
 import { useTheme } from "../../theme/ThemeContext";
+import AdminPageHeader from "../../components/admin/AdminPageHeader";
 
 export default function VppFleetAdminPage() {
     const { t } = useTranslation();
@@ -207,63 +208,49 @@ export default function VppFleetAdminPage() {
 
     return (
         <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
-            {/* ⚡ HEADER */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                    <div className="flex items-center gap-2.5">
-                        <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-xl shadow-xs">
-                            ⚡
-                        </div>
-                        <div>
-                            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-                                {t("admin_vpp.title", "Virtuelles Kraftwerk (VPP) & Flexibilitäts-Zentrale")}
-                            </h1>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">
-                                {t("admin_vpp.subtitle", "Aggregation, Sekundärregelleistung (aFRR), Redispatch 2.0 & 80/20 Market Clearing")}
-                            </p>
-                        </div>
-                    </div>
-                </div>
+            {/* UNIFIED ADMIN HEADER */}
+            <AdminPageHeader
+                icon="⚡"
+                iconBg="bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+                title={t("admin_vpp.title", "Virtuelles Kraftwerk (VPP) & Flexibilitäts-Zentrale")}
+                subtitle={t("admin_vpp.subtitle", "Aggregation, Sekundärregelleistung (aFRR), Redispatch 2.0 & 80/20 Market Clearing")}
+                badge={t("admin_vpp.badge_aggregator", "VPP Aggregator")}
+                badgeColor="emerald"
+                manualLink="/app/help/admin-vpp-flex-aggregator-guide"
+                manualLabel={t("admin_vpp.btn_manual", "Handbuch (VPP)")}
+                actions={
+                    <>
+                        <button
+                            onClick={() => {
+                                fleetQuery.refetch();
+                                dispatchesQuery.refetch();
+                                scheduleQuery.refetch();
+                            }}
+                            className="px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition flex items-center gap-1.5 cursor-pointer shadow-xs"
+                        >
+                            <RefreshCw className={`w-3.5 h-3.5 ${fleetQuery.isFetching ? "animate-spin" : ""}`} />
+                            <span>{t("common.refresh", "Aktualisieren")}</span>
+                        </button>
 
-                <div className="flex items-center gap-2">
-                    <Link
-                        to="/app/help/admin-vpp-flex-aggregator-guide"
-                        className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:border-emerald-300 rounded-xl text-xs font-bold transition flex items-center gap-1.5"
-                    >
-                        <span>📖</span>
-                        <span>{t("admin_vpp.btn_manual", "Handbuch (VPP)")}</span>
-                    </Link>
+                        <button
+                            onClick={() => clearingMutation.mutate()}
+                            disabled={clearingMutation.isPending}
+                            className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center gap-1.5 cursor-pointer"
+                        >
+                            <DollarSign className="w-3.5 h-3.5" />
+                            <span>{clearingMutation.isPending ? t("admin_vpp.clearing_running", "Clearing läuft...") : t("admin_vpp.run_clearing", "80/20 Clearing")}</span>
+                        </button>
 
-                    <button
-                        onClick={() => {
-                            fleetQuery.refetch();
-                            dispatchesQuery.refetch();
-                            scheduleQuery.refetch();
-                        }}
-                        className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-750 transition flex items-center gap-1.5 cursor-pointer"
-                    >
-                        <RefreshCw className={`w-3.5 h-3.5 ${fleetQuery.isFetching ? "animate-spin" : ""}`} />
-                        {t("common.refresh", "Aktualisieren")}
-                    </button>
-
-                    <button
-                        onClick={() => clearingMutation.mutate()}
-                        disabled={clearingMutation.isPending}
-                        className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center gap-1.5 cursor-pointer"
-                    >
-                        <DollarSign className="w-3.5 h-3.5" />
-                        {clearingMutation.isPending ? t("admin_vpp.clearing_running", "Clearing läuft...") : t("admin_vpp.run_clearing", "80/20 Clearing ausführen")}
-                    </button>
-
-                    <button
-                        onClick={() => setTestDispatchModal(true)}
-                        className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center gap-1.5 cursor-pointer"
-                    >
-                        <Play className="w-3.5 h-3.5" />
-                        {t("admin_vpp.start_test_dispatch", "Test-Dispatch starten")}
-                    </button>
-                </div>
-            </div>
+                        <button
+                            onClick={() => setTestDispatchModal(true)}
+                            className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center gap-1.5 cursor-pointer"
+                        >
+                            <Play className="w-3.5 h-3.5" />
+                            <span>{t("admin_vpp.start_test_dispatch", "Test-Dispatch")}</span>
+                        </button>
+                    </>
+                }
+            />
 
             {/* ACTION NOTIFICATION */}
             {actionMsg && (

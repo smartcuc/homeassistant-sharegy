@@ -6,6 +6,7 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { LifeBuoy, Search, RefreshCw, Send } from "lucide-react";
+import AdminPageHeader from "../../../components/admin/AdminPageHeader";
 import {
     fetchAgentTickets,
     fetchTicketDetail,
@@ -129,64 +130,53 @@ export default function AgentSupportHubPage() {
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-6">
             <div className="max-w-7xl mx-auto space-y-6">
-                {/* Header & Project Switcher */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                    <div>
-                        <div className="flex items-center gap-2.5 mb-1 flex-wrap">
-                            <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-sm">
-                                <LifeBuoy className="w-5 h-5" />
-                            </div>
-                            <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                                {t("agent_support.title", "Support & Incident Hub")}
-                            </h1>
-                            <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${isGlobalAdmin
-                                ? "bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300"
-                                : "bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300"
-                                }`}>
-                                {isGlobalAdmin ? t("agent_support.badge_global", "🛡️ Global Triage (Alle Projekte & Mandanten)") : t("agent_support.badge_partner", "🔧 Partner Support (Eigene Kunden & Flotte)")}
-                            </span>
+                {/* Unified SaaS-Enterprise Header */}
+                <AdminPageHeader
+                    icon={<LifeBuoy className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />}
+                    iconBg="bg-indigo-50 dark:bg-indigo-950/60 border-indigo-100 dark:border-indigo-900/50"
+                    title={t("agent_support.title", "Support & Incident Hub")}
+                    subtitle={
+                        isGlobalAdmin
+                            ? t("agent_support.subtitle_global", "Zentrale Bearbeitung aller Kunden- & Systemtickets aus Sharegy EMS und Factofy Digital Twin")
+                            : t("agent_support.subtitle_partner", "Bearbeitung und Störungsanalyse für deine betreuten Kunden und Liegenschaften")
+                    }
+                    badge={isGlobalAdmin ? t("agent_support.badge_global", "Global Triage") : t("agent_support.badge_partner", "Partner Support")}
+                    badgeColor={isGlobalAdmin ? "indigo" : "emerald"}
+                    actions={
+                        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60">
+                            <button
+                                type="button"
+                                onClick={() => setSelectedProject("all")}
+                                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${selectedProject === "all"
+                                    ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-xs"
+                                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                                    }`}
+                            >
+                                {t("agent_support.project_all", { count: kpis.total, defaultValue: `🌐 Alle (${kpis.total})` })}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setSelectedProject("sharegy")}
+                                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${selectedProject === "sharegy"
+                                    ? "bg-emerald-600 text-white shadow-xs"
+                                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                                    }`}
+                            >
+                                {t("agent_support.project_sharegy", { count: kpis.sharegy_count, defaultValue: `☀️ Sharegy (${kpis.sharegy_count})` })}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setSelectedProject("factofy")}
+                                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${selectedProject === "factofy"
+                                    ? "bg-blue-600 text-white shadow-xs"
+                                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                                    }`}
+                            >
+                                {t("agent_support.project_factofy", { count: kpis.factofy_count, defaultValue: `🏙️ Factofy (${kpis.factofy_count})` })}
+                            </button>
                         </div>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
-                            {isGlobalAdmin
-                                ? t("agent_support.subtitle_global", "Zentrale Bearbeitung aller Kunden- & Systemtickets aus Sharegy EMS und Factofy Digital Twin")
-                                : t("agent_support.subtitle_partner", "Bearbeitung und Störungsanalyse für deine betreuten Kunden und Liegenschaften")}
-                        </p>
-                    </div>
-
-                    {/* Project Filter Pills */}
-                    <div className="flex items-center gap-2 p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 self-start md:self-auto">
-                        <button
-                            type="button"
-                            onClick={() => setSelectedProject("all")}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${selectedProject === "all"
-                                ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-xs"
-                                : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
-                                }`}
-                        >
-                            {t("agent_support.project_all", { count: kpis.total, defaultValue: `🌐 Alle (${kpis.total})` })}
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setSelectedProject("sharegy")}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${selectedProject === "sharegy"
-                                ? "bg-emerald-600 text-white shadow-xs"
-                                : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
-                                }`}
-                        >
-                            {t("agent_support.project_sharegy", { count: kpis.sharegy_count, defaultValue: `☀️ Sharegy (${kpis.sharegy_count})` })}
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setSelectedProject("factofy")}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${selectedProject === "factofy"
-                                ? "bg-blue-600 text-white shadow-xs"
-                                : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
-                                }`}
-                        >
-                            {t("agent_support.project_factofy", { count: kpis.factofy_count, defaultValue: `🏙️ Factofy (${kpis.factofy_count})` })}
-                        </button>
-                    </div>
-                </div>
+                    }
+                />
 
                 {/* KPI Overview Grid */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">

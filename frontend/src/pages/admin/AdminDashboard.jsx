@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import ReactECharts from "echarts-for-react";
 import { KpiCard } from "../../components/admin/KpiCard";
 import { apiFetch } from "../../api/client";
+import AdminPageHeader from "../../components/admin/AdminPageHeader";
 
 export default function AdminDashboard() {
     const { t } = useTranslation();
@@ -135,51 +136,45 @@ export default function AdminDashboard() {
 
     return (
         <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6 animate-fade-in">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs">
-                <div>
-                    <div className="flex items-center gap-2.5">
-                        <span className="text-2xl">🛡️</span>
-                        <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">{t("admin.title", "Admin & Conversion Center")}</h1>
-                        <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
-                            Staff Portal
-                        </span>
-                    </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                        {t("admin.subtitle", "Übersicht über Nutzer-Onboarding, Magic-Link-Konvertierung, Live-Aktivitäten und Systemstatus.")}
-                    </p>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2">
-                    <Link
-                        to="/app/help/admin-communities-portfolio-guide"
-                        className="px-3.5 py-2 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl transition shadow-xs flex items-center gap-1.5"
-                    >
-                        <span>📖</span> {t("nav.manual", "Handbuch")}
-                    </Link>
-                    <Link
-                        to="/app/admin/tracking"
-                        className="px-3.5 py-2 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-bold text-xs rounded-xl border border-indigo-200 dark:border-indigo-800/80 transition flex items-center gap-1.5"
-                    >
-                        <span>📈</span> {t("admin.event_tracking", "Event-Tracking")}
-                    </Link>
-                    <button
-                        onClick={fetchStats}
-                        className="p-2.5 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl transition cursor-pointer shadow-xs"
-                        title={t("common.refresh", "Aktualisieren")}
-                    >
-                        <span className={loading ? "animate-spin inline-block" : ""}>🔄</span>
-                    </button>
-                    <a
-                        href="/admin/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-3.5 py-2 bg-slate-900 dark:bg-slate-800 hover:bg-black dark:hover:bg-slate-700 text-white font-bold text-xs rounded-xl transition flex items-center gap-1.5 shadow-xs"
-                    >
-                        <span>⚙️</span> Django Admin <span>↗</span>
-                    </a>
-                </div>
-            </div>
+            {/* UNIFIED ADMIN HEADER */}
+            <AdminPageHeader
+                icon="🛡️"
+                iconBg="bg-indigo-500/10 border-indigo-500/20 text-indigo-600 dark:text-indigo-400"
+                title={t("admin.title", "Admin & Conversion Center")}
+                subtitle={t("admin.subtitle", "Übersicht über Nutzer-Onboarding, Magic-Link-Konvertierung, Live-Aktivitäten und Systemstatus.")}
+                badge={t("admin.badge_staff", "Staff Portal")}
+                badgeColor="indigo"
+                manualLink="/app/help/admin-communities-portfolio-guide"
+                manualLabel={t("nav.manual", "Handbuch")}
+                actions={
+                    <>
+                        <Link
+                            to="/app/admin/tracking"
+                            className="px-3.5 py-2 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-bold text-xs rounded-xl border border-indigo-200 dark:border-indigo-800/80 transition flex items-center gap-1.5 shadow-xs"
+                        >
+                            <span>📈</span>
+                            <span>{t("admin.event_tracking", "Event-Tracking")}</span>
+                        </Link>
+                        <button
+                            onClick={fetchStats}
+                            className="p-2.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 rounded-xl transition cursor-pointer shadow-xs"
+                            title={t("common.refresh", "Aktualisieren")}
+                        >
+                            <span className={loading ? "animate-spin inline-block text-xs" : "text-xs"}>🔄</span>
+                        </button>
+                        <a
+                            href="/admin/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3.5 py-2 bg-slate-900 dark:bg-slate-800 hover:bg-black dark:hover:bg-slate-700 text-white font-bold text-xs rounded-xl transition flex items-center gap-1.5 shadow-xs"
+                        >
+                            <span>⚙️</span>
+                            <span>Django Admin</span>
+                            <span className="text-[10px]">↗</span>
+                        </a>
+                    </>
+                }
+            />
 
             {/* KPI Cards */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { apiFetch } from "../../api/client";
+import AdminPageHeader from "../../components/admin/AdminPageHeader";
 import {
   Wrench,
   ShieldCheck,
@@ -143,53 +144,40 @@ export default function PartnerDashboard() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-4 md:p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
+      <div className="max-w-7xl mx-auto space-y-6">
         
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 p-6 rounded-3xl shadow-xs">
-          <div className="space-y-1">
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="p-2.5 bg-sky-500/10 border border-sky-500/30 rounded-2xl text-sky-600 dark:text-sky-400">
-                <Wrench className="w-6 h-6" />
-              </div>
-              <h1 className="text-2xl md:text-3xl font-black tracking-tight text-slate-900 dark:text-white">
-                {data?.partner_company?.name || t("partner.portal_title", "Installateurs- & Partner-Portal")}
-              </h1>
-              <span className="px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300">
-                {data?.partner_company?.tier_display || t("partner.tier_default", "Fachpartner")}
-              </span>
-            </div>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-              {t("partner.subtitle", "Zentrale Flotten-Telemetrie, Störungsampel & 1-Klick Fernwartung betreuter Kundenanlagen.")}
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2.5 shrink-0">
-            <Link
-              to="/app/help/admin-partner-fleet-installer-guide"
-              className="flex items-center gap-2 px-3.5 py-2.5 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs sm:text-sm rounded-xl shadow-xs transition duration-200"
-            >
-              <span>📖</span>
-              <span>{t("partner.btn_manual", "Handbuch (Partner)")}</span>
-            </Link>
-            <button
-              type="button"
-              onClick={() => setShowOnboardModal(true)}
-              className="flex items-center gap-2 px-4 py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs sm:text-sm rounded-xl shadow-xs transition duration-200 cursor-pointer"
-            >
-              <PlusCircle className="w-4 h-4" />
-              <span>{t("partner.quick_onboard_btn", "Schnell-Inbetriebnahme")}</span>
-            </button>
-            <button
-              type="button"
-              onClick={fetchFleet}
-              className="p-2.5 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-300 transition cursor-pointer shadow-xs"
-              title={t("common.refresh", "Aktualisieren")}
-            >
-              <RefreshCw className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
+        {/* UNIFIED ADMIN HEADER */}
+        <AdminPageHeader
+          icon={<Wrench className="w-5 h-5 text-sky-500" />}
+          iconBg="bg-sky-500/10 border-sky-500/20 text-sky-600 dark:text-sky-400"
+          title={data?.partner_company?.name || t("partner.portal_title", "Installateurs- & Partner-Portal")}
+          subtitle={t("partner.subtitle", "Zentrale Flotten-Telemetrie, Störungsampel & 1-Klick Fernwartung betreuter Kundenanlagen.")}
+          badge={data?.partner_company?.tier_display || t("partner.tier_default", "Fachpartner")}
+          badgeColor="amber"
+          manualLink="/app/help/admin-partner-fleet-installer-guide"
+          manualLabel={t("partner.btn_manual", "Handbuch (Partner)")}
+          actions={
+            <>
+              <button
+                type="button"
+                onClick={fetchFleet}
+                className="px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition flex items-center gap-1.5 cursor-pointer shadow-xs"
+                title={t("common.refresh", "Aktualisieren")}
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>{t("common.refresh", "Aktualisieren")}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowOnboardModal(true)}
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs rounded-xl shadow-xs transition duration-200 cursor-pointer"
+              >
+                <PlusCircle className="w-3.5 h-3.5" />
+                <span>{t("partner.quick_onboard_btn", "Schnell-IBN")}</span>
+              </button>
+            </>
+          }
+        />
 
         {/* KPI Cards (6 Metriken) */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">

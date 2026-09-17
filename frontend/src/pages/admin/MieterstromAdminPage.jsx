@@ -18,6 +18,7 @@ import VppAggregatorCockpit from "../../features/energy/components/VppAggregator
 import TenantSetupWizardModal from "../../features/community/components/TenantSetupWizardModal";
 import WhitelabelSettingsModal from "../../features/tenant/components/WhitelabelSettingsModal";
 import MarketCommunicationModal from "../../features/billing/components/MarketCommunicationModal";
+import AdminPageHeader from "../../components/admin/AdminPageHeader";
 
 export default function MieterstromAdminPage() {
     const { t } = useTranslation();
@@ -269,74 +270,53 @@ export default function MieterstromAdminPage() {
 
     return (
         <div className="p-6 max-w-7xl mx-auto space-y-6">
-            {/* HEADER */}
-            <div className="space-y-4 pb-4 border-b border-slate-200 dark:border-slate-800">
-                <div className="flex items-start gap-3.5">
-                    <div className="w-10 h-10 rounded-2xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-xl shrink-0 mt-0.5">
-                        🏢
-                    </div>
-                    <div className="flex-1 min-w-0">
-                        <div className="flex flex-wrap items-center gap-2.5">
-                            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white truncate">
-                                {tenant.name}
-                            </h1>
-                            <span className="shrink-0 text-xs font-bold px-3 py-1 rounded-full border flex items-center gap-1.5 bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-800">
-                                <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></span>
-                                {t("admin_mieterstrom.title", "🏢 Mieterstrom (§ 42a EnWG)")}
-                            </span>
-                            <span className="shrink-0 text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60">
-                                {t("admin_mieterstrom.badge_model", "Vollversorgungsmodell (AGB)")}
-                            </span>
-                        </div>
-                        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-                            {t("admin_mieterstrom.subtitle", "Vollversorgungs-Modell: Vor-Ort-Solarstrom & Reststrom in einer gemeinsamen Monatsabrechnung mit Mieterstromzuschlag gem. § 21 Abs. 3 EEG")}
-                        </p>
-                    </div>
-                </div>
-
-                {/* ACTION BUTTONS */}
-                <div className="flex flex-wrap items-center gap-2.5 pt-1">
-                    <button
-                        type="button"
-                        onClick={() => setWhitelabelModalOpen(true)}
-                        className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-sky-50 dark:hover:bg-sky-950/40 text-slate-700 dark:text-slate-200 hover:text-sky-600 dark:hover:text-sky-400 border border-slate-200 dark:border-slate-800 hover:border-sky-300 transition-all shadow-xs flex items-center gap-2 cursor-pointer"
-                    >
-                        <span>🎨</span>
-                        <span>{t("tenant.whitelabel_btn", "Whitelabel & Branding")}</span>
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => setMakoModalOpen(true)}
-                        className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-teal-50 dark:hover:bg-teal-950/40 text-slate-700 dark:text-slate-200 hover:text-teal-600 dark:hover:text-teal-400 border border-slate-200 dark:border-slate-800 hover:border-teal-300 transition-all shadow-xs flex items-center gap-2 cursor-pointer"
-                    >
-                        <span>📄</span>
-                        <span>{t("admin_mieterstrom.btn_mako", "Zählerdaten-Export (MSCONS)")}</span>
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => setWizardOpen(true)}
-                        className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-sky-50 dark:hover:bg-sky-950/40 text-slate-700 dark:text-slate-200 hover:text-sky-600 dark:hover:text-sky-400 border border-slate-200 dark:border-slate-800 hover:border-sky-300 transition-all shadow-xs flex items-center gap-2 cursor-pointer"
-                    >
-                        <span>✨</span>
-                        <span>{t("admin_mieterstrom.btn_wizard", "Mieterstrom-Assistent (3 Schritte)")}</span>
-                    </button>
-                    <Link
-                        to="/app/help/admin-mieterstrom-enwg-guide"
-                        className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-sky-50 dark:hover:bg-sky-950/40 text-slate-700 dark:text-slate-200 hover:text-sky-600 dark:hover:text-sky-400 border border-slate-200 dark:border-slate-800 hover:border-sky-300 transition-all shadow-xs flex items-center gap-2"
-                    >
-                        <span>📖</span>
-                        <span>{t("admin_mieterstrom.btn_manual", "Handbuch (§ 42a EnWG)")}</span>
-                    </Link>
-                    <button
-                        type="button"
-                        onClick={() => setShareModalOpen(true)}
-                        className="px-3.5 py-2 rounded-xl text-xs font-bold bg-sky-50 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 text-sky-800 dark:text-sky-300 border border-sky-200 dark:border-sky-800/80 transition-all shadow-xs flex items-center gap-2 cursor-pointer"
-                    >
-                        <span>📢</span>
-                        <span>{t("admin_mieterstrom.btn_share", "Quartier teilen")}</span>
-                    </button>
-                </div>
-            </div>
+            {/* UNIFIED ADMIN HEADER */}
+            <AdminPageHeader
+                icon="🏢"
+                iconBg="bg-sky-500/10 border-sky-500/20 text-sky-600 dark:text-sky-400"
+                title={tenant.name}
+                subtitle={t("admin_mieterstrom.subtitle", "Vollversorgungs-Modell: Vor-Ort-Solarstrom & Reststrom in einer gemeinsamen Monatsabrechnung mit Mieterstromzuschlag gem. § 21 Abs. 3 EEG")}
+                badge={t("admin_mieterstrom.badge_enwg", "§ 42a EnWG Mieterstrom")}
+                badgeColor="sky"
+                manualLink="/app/help/admin-mieterstrom-enwg-guide"
+                manualLabel={t("admin_mieterstrom.btn_manual", "Handbuch (§ 42a EnWG)")}
+                actions={
+                    <>
+                        <button
+                            type="button"
+                            onClick={() => setWhitelabelModalOpen(true)}
+                            className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-800 hover:border-slate-300 transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                        >
+                            <span>🎨</span>
+                            <span>{t("tenant.whitelabel_btn", "Whitelabel")}</span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setMakoModalOpen(true)}
+                            className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-teal-50 dark:hover:bg-teal-950/40 text-slate-700 dark:text-slate-200 hover:text-teal-600 dark:hover:text-teal-400 border border-slate-200 dark:border-slate-800 hover:border-teal-300 transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                        >
+                            <span>📄</span>
+                            <span>{t("admin_mieterstrom.btn_mako", "MSCONS")}</span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setShareModalOpen(true)}
+                            className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-800 transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                        >
+                            <span>📢</span>
+                            <span>{t("admin_mieterstrom.btn_share", "Teilen")}</span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setWizardOpen(true)}
+                            className="px-3.5 py-2 rounded-xl text-xs font-bold bg-sky-600 hover:bg-sky-500 text-white shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+                        >
+                            <span>✨</span>
+                            <span>{t("admin_mieterstrom.btn_wizard", "Assistent")}</span>
+                        </button>
+                    </>
+                }
+            />
 
             {/* TAB SWITCHER */}
             <div className="flex flex-wrap bg-slate-100 dark:bg-slate-800/70 p-1 rounded-xl text-xs font-semibold gap-1">

@@ -8,6 +8,7 @@ import { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../api/client";
+import AdminPageHeader from "../../components/admin/AdminPageHeader";
 
 export default function CommunitiesManagementHub() {
     const { t } = useTranslation();
@@ -371,51 +372,38 @@ export default function CommunitiesManagementHub() {
     };
 
     return (
-        <div className="p-6 max-w-7xl mx-auto space-y-8">
+        <div className="p-6 max-w-7xl mx-auto space-y-6">
 
-            {/* TOP BAR / TITEL */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800">
-                <div>
-                    <div className="flex items-center gap-3">
-                        <span className="text-3xl">🏛️</span>
-                        <div>
-                            <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
-                                {t("admin_communities.title", "Quartiers- & Portfolio-Verwaltung (Plattform-Admin)")}
-                            </h1>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                                {t("admin_communities.subtitle", "Zentrale Steuerung aller Mieterstrom-Projekte (§ 42a), GGV-Gebäude (§ 42b) und Energy-Sharing-Gemeinschaften")}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                    <Link
-                        to="/app/help/admin-communities-portfolio-guide"
-                        className="px-3 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 border border-slate-200 dark:border-slate-800 hover:border-indigo-300 transition-all shadow-xs flex items-center gap-1.5 shrink-0"
-                    >
-                        <span>📖</span>
-                        <span>{t("admin_communities.btn_manual", "Handbuch (Portfolio)")}</span>
-                    </Link>
+            {/* UNIFIED ADMIN HEADER */}
+            <AdminPageHeader
+                icon="🏛️"
+                iconBg="bg-indigo-500/10 border-indigo-500/20 text-indigo-600 dark:text-indigo-400"
+                title={t("admin_communities.title", "Quartiers- & Portfolio-Verwaltung")}
+                subtitle={t("admin_communities.subtitle", "Zentrale Steuerung aller Mieterstrom-Projekte (§ 42a), GGV-Gebäude (§ 42b) und Energy-Sharing-Gemeinschaften")}
+                badge={t("admin_communities.badge_platform", "Plattform-Admin")}
+                badgeColor="indigo"
+                manualLink="/app/help/admin-communities-portfolio-guide"
+                manualLabel={t("admin_communities.btn_manual", "Handbuch (Portfolio)")}
+                actions={
                     <div className="relative">
                         <input
                             type="text"
                             placeholder={t("admin_communities.search_placeholder", "Gemeinschaft suchen...")}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 w-64 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/40"
+                            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 w-56 sm:w-64 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/40 shadow-2xs"
                         />
                         {searchQuery && (
                             <button
                                 onClick={() => setSearchQuery("")}
-                                className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 text-xs"
+                                className="absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 text-xs"
                             >
                                 ✕
                             </button>
                         )}
                     </div>
-                </div>
-            </div>
+                }
+            />
 
             {/* ======================================================== */}
             {/* 1. PORTFOLIO HERO STATS */}

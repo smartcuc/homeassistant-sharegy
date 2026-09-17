@@ -16,6 +16,7 @@ import CommunityInviteModal from "../../features/community/components/CommunityI
 import VirtualMasterMeterHub from "../../features/community/components/VirtualMasterMeterHub";
 import TenantSetupWizardModal from "../../features/community/components/TenantSetupWizardModal";
 import WhitelabelSettingsModal from "../../features/tenant/components/WhitelabelSettingsModal";
+import AdminPageHeader from "../../components/admin/AdminPageHeader";
 
 export default function GgvAdminPage() {
     const { t } = useTranslation();
@@ -266,66 +267,45 @@ export default function GgvAdminPage() {
 
     return (
         <div className="p-6 max-w-7xl mx-auto space-y-6">
-            {/* HEADER */}
-            <div className="space-y-4 pb-4 border-b border-slate-200 dark:border-slate-800">
-                <div className="flex items-start gap-3.5">
-                    <div className="w-10 h-10 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-xl shrink-0 mt-0.5">
-                        ⚖️
-                    </div>
-                    <div className="flex-1 min-w-0">
-                        <div className="flex flex-wrap items-center gap-2.5">
-                            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white truncate">
-                                {tenant.name}
-                            </h1>
-                            <span className="shrink-0 text-xs font-bold px-3 py-1 rounded-full border flex items-center gap-1.5 bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800">
-                                <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></span>
-                                {t("admin_ggv.title", "⚖️ Gemeinschaftliche Gebäudeversorgung (§ 42b EnWG)")}
-                            </span>
-                            <span className="shrink-0 text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                                {t("admin_ggv.badge_model", "WEG & Mehrparteienhaus")}
-                            </span>
-                        </div>
-                        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-                            {t("admin_ggv.subtitle", "Vor-Ort-Solarstromaufteilung nach Miteigentumsanteilen (MEA in 1/1000). Keine Reststrom-Lieferantenpflicht – jeder Eigentümer/Nutzer behält seinen eigenen Reststromvertrag.")}
-                        </p>
-                    </div>
-                </div>
-
-                {/* ACTION BUTTONS */}
-                <div className="flex flex-wrap items-center gap-2.5 pt-1">
-                    <button
-                        type="button"
-                        onClick={() => setWhitelabelModalOpen(true)}
-                        className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-purple-50 dark:hover:bg-purple-950/40 text-slate-700 dark:text-slate-200 hover:text-purple-600 dark:hover:text-purple-400 border border-slate-200 dark:border-slate-800 hover:border-purple-300 transition-all shadow-xs flex items-center gap-2 cursor-pointer"
-                    >
-                        <span>🎨</span>
-                        <span>{t("tenant.whitelabel_btn", "Whitelabel & Branding")}</span>
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => setWizardOpen(true)}
-                        className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-purple-50 dark:hover:bg-purple-950/40 text-slate-700 dark:text-slate-200 hover:text-purple-600 dark:hover:text-purple-400 border border-slate-200 dark:border-slate-800 hover:border-purple-300 transition-all shadow-xs flex items-center gap-2 cursor-pointer"
-                    >
-                        <span>✨</span>
-                        <span>{t("admin_ggv.btn_wizard", "WEG-Gebäude-Assistent (3 Schritte)")}</span>
-                    </button>
-                    <Link
-                        to="/app/help/admin-ggv-weg-guide"
-                        className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-purple-50 dark:hover:bg-purple-950/40 text-slate-700 dark:text-slate-200 hover:text-purple-600 dark:hover:text-purple-400 border border-slate-200 dark:border-slate-800 hover:border-purple-300 transition-all shadow-xs flex items-center gap-2"
-                    >
-                        <span>📖</span>
-                        <span>{t("admin_ggv.btn_manual", "Handbuch (§ 42b EnWG)")}</span>
-                    </Link>
-                    <button
-                        type="button"
-                        onClick={() => setShareModalOpen(true)}
-                        className="px-3.5 py-2 rounded-xl text-xs font-bold bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/60 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-800/80 transition-all shadow-xs flex items-center gap-2 cursor-pointer"
-                    >
-                        <span>📢</span>
-                        <span>{t("admin_ggv.btn_share", "Liegenschaft teilen")}</span>
-                    </button>
-                </div>
-            </div>
+            {/* UNIFIED ADMIN HEADER */}
+            <AdminPageHeader
+                icon="⚖️"
+                iconBg="bg-purple-500/10 border-purple-500/20 text-purple-600 dark:text-purple-400"
+                title={tenant.name}
+                subtitle={t("admin_ggv.subtitle", "Vor-Ort-Solarstromaufteilung nach Miteigentumsanteilen (MEA in 1/1000). Keine Reststrom-Lieferantenpflicht – jeder Eigentümer/Nutzer behält seinen eigenen Reststromvertrag.")}
+                badge={t("admin_ggv.badge_enwg", "§ 42b EnWG GGV")}
+                badgeColor="purple"
+                manualLink="/app/help/admin-ggv-weg-guide"
+                manualLabel={t("admin_ggv.btn_manual", "Handbuch (§ 42b EnWG)")}
+                actions={
+                    <>
+                        <button
+                            type="button"
+                            onClick={() => setWhitelabelModalOpen(true)}
+                            className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-800 hover:border-slate-300 transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                        >
+                            <span>🎨</span>
+                            <span>{t("tenant.whitelabel_btn", "Whitelabel")}</span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setShareModalOpen(true)}
+                            className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-800 transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                        >
+                            <span>📢</span>
+                            <span>{t("admin_ggv.btn_share", "Teilen")}</span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setWizardOpen(true)}
+                            className="px-3.5 py-2 rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-500 text-white shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+                        >
+                            <span>✨</span>
+                            <span>{t("admin_ggv.btn_wizard", "Assistent")}</span>
+                        </button>
+                    </>
+                }
+            />
 
             {/* TAB SWITCHER */}
             <div className="flex flex-wrap bg-slate-100 dark:bg-slate-800/70 p-1 rounded-xl text-xs font-semibold gap-1">
