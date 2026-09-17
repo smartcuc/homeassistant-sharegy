@@ -2580,63 +2580,157 @@ The official **Sharegy Home Assistant Integration** streams all your local smart
                 "title_en": "Tenant-Admin Guide: Virtual Master Meter, Multi-Tenant Allocation & PDF Invoices",
                 "summary_de": "Der vollständige Leitfaden für Liegenschafts-Admins, Vermieter und WEGs: 15m NAP-Saldierung, MEA-Aufteilungsschlüssel, PDF-Abrechnungen und VPP-Flexibilität.",
                 "summary_en": "Comprehensive guide for property managers and communities: 15-minute grid settlement, allocation keys, automated PDF billing, and VPP flexibility.",
-                "content_de": r"""# 🏢 Tenant-Admin Leitfaden: Virtueller Summenzähler, Mieterstrom & Monatsabrechnungen
+                "content_de": r"""# 🏢 Tenant-Admin Leitfaden: Liegenschafts-Dashboard, Mieterstrom & Energy Sharing
 
-Als **Liegenschafts- oder Quartiers-Administrator (Tenant-Admin)** verwaltest du die energiewirtschaftlichen Prozesse deines Gebäudes oder deiner Nachbarschaftsgemeinschaft.
+Als **Liegenschafts- oder Quartiers-Administrator (Tenant-Admin)** steuerst und überwachst du alle energiewirtschaftlichen, kaufmännischen und organisatorischen Prozesse deines Gebäudes oder deiner Nachbarschaftsgemeinschaft im zentralen Cockpit (`/app/tenant`).
 
 ---
 
-## 🌟 Die Kernfunktionen im Liegenschafts-Dashboard (`/app/tenant`)
+## 🌟 1. Schnellaktionen im Header
 
-### 1. 🏢 Virtueller Summenzähler & NAP-Saldierung
-* **Eichrechtskonforme 15-Minuten-Saldierung**: Sharegy berechnet für alle 96 Viertelstunden des Tages den exakten Netzeinspeise- und Bezugssaldo am Netzanschlusspunkt (NAP).
-* **3 Aufteilungsmodelle (§ 42b EnWG)**:
-  1. *Dynamisch (zeitgleich)*: Zuteilung proportional zum Echtzeit-Verbrauch im selben 15m-Intervall (Maximale Fairness).
-  2. *Statisch (nach MEA-Schlüssel)*: Feste Zuteilungsquote nach Miteigentumsanteilen je Wohnung.
-  3. *Hybrid*: Vorrangige Eigenversorgung + dynamisches Überschuss-Sharing.
+Direkt unter dem Community-Namen stehen vier zentrale Werkzeuge bereit:
 
-### 2. 💰 Tarife & Monatliche PDF-Abrechnungen
-* **Tarifkonfiguration**: Einstellen von Solarstrompreis (ct/kWh), Reststrombezug (ct/kWh) und monatlicher Grundgebühr (€).
-* **Monatliches Clearing**: 1-Klick Auslösung der Monatsabrechnung erzeugt für jeden Mieter einen rechtssicheren PDF-Abrechnungsnachweis mit Einzelnachweis.
-* **Exporte für Hausverwaltung & Steuerberater**: Excel (`.xlsx`), CSV (DATEV-kompatibel, Semikolon/UTF-8 BOM) und XML für ERP-Software (Haufe, DOMUS etc.).
+### 🎨 Whitelabel & Branding
+* **Eigene Corporate Identity**: Passe Logo, Primär- und Akzentfarben für deine Hausverwaltung, Genossenschaft oder Stadtwerke an.
+* **Eigene Domain / Subdomain**: Bereitstellung unter eigener Mandanten-Domain (z. B. `energie.mein-quartier.de`).
+* **White-Label-Mieterbelege**: Alle generierten PDF-Abrechnungsnachweise und E-Mails tragen automatisch dein Branding.
 
-### 3. 🔌 VPP Kraftwerk & § 14a EnWG Flexibilitäts-Pool
-* **Aggregierte Flexibilität**: Übersicht des steuerbaren Leistungsbandes (+kW / -kW) aller Heimspeicher und Lasten.
-* **§ 14a SteuVE Modul**: Dimmbare Wallboxen und Wärmepumpen zur Sicherung des pauschalen Netzentgelt-Rabatts (~160 € / Anlage / Jahr).
-* **Redispatch 2.0 / Connect+ 96-Fahrplan**: Automatische Fahrplangenerierung (`PT15M`) für Netzbetreiber.
+### 📄 Marktkommunikation (AS4 / EDIFACT)
+* **BNetzA-konforme Marktpartner-Kommunikation**: Anbindung an das 1:1-Marktkommunikationsnetz der Energiewirtschaft.
+* **AS4-Zertifikate & MP-ID**: Sichere Verschlüsselung von Zählzeitreihen (MSCONS), Stammdaten (UTILMD) und Allokationsmeldungen.
+* **Automatisierter Datenaustausch**: Schnittstelle zum Verteilnetzbetreiber (VNB) und Bilanzkreisverantwortlichen (BKV).
 
-### 4. 👥 Mitglieder & Rollenverwaltung
-* Rollenbasierte Rechtevergabe: *Admin* 🏛️, *Energy-Userverwaltung* 👥, *Auditor / Kassenprüfer* 📊, *Helpdesk* 🛟 und *Mitglied* ⚡.
-* Datenschutzkonformität: Mieter sehen ausschließlich den eigenen Verbrauch und die eigene Abrechnung.
+### ✨ Gebäude-Assistent (3 Schritte)
+* **Geführte Erstinbetriebnahme** für neue Mehrfamilienhäuser und Quartiere:
+  1. *Gebäudedaten & Adresse erfassen* (Flurstück, Wohneinheiten, PLZ).
+  2. *Zählerstruktur definieren* (Netzanschlusspunkt + Unterzähler je Wohneinheit).
+  3. *Tarif- und Verteilschlüssel wählen* (§ 42b EnWG Allokationsmodell).
+
+### 📢 Erfolge teilen
+* **Community-Erfolgs-Card**: Zeigt die gemeinsame Autarkiequote (%), geteilten Solarstrom (kWh) und CO₂-Ersparnis.
+* Ideal zum Teilen auf Eigentümerversammlungen oder zur Kommunikation mit Mietern und Beiräten.
+
+---
+
+## 📑 2. Die 7 Funktionsbereiche im Detail
+
+### ⚡ 1. Cockpit & Live-Sharing-Matrix (`Tab: Cockpit`)
+* **15-Minuten-Saldierung in Echtzeit**: Visualisiert die viertelstündliche Erzeugung, den gemeinsamen Verbrauch und den Reststrombezug.
+* **Autarkiegrad & Eigenverbrauchsquote**: Kennzahlen zur kontinuierlichen Optimierung der Eigenversorgung im Gebäude.
+* **Quartiers-Energiefluss**: Verfolgung, wie viel PV-Strom aktuell im Haus verbleibt und wie viel ins Netz eingespeist wird.
+
+### 🏢 2. Virtueller Summenzähler (`Tab: Virtueller Summenzähler`)
+* **Differenzbilanzierung am NAP**: Errechnet den virtuellen Hauptzähler aus der Summe aller MID-konformen Unterzähler und Erzeuger.
+* **3 gesetzliche Verteilschlüssel (§ 42b EnWG)**:
+  1. *Dynamisch (zeitgleich)*: Aufteilung proportional zum tatsächlichen Verbrauch in derselben 15-Minuten-Viertelstunde (Maximale Fairness).
+  2. *Statisch (nach MEA-Schlüssel)*: Feste Zuteilung nach Miteigentumsanteilen oder Wohnfläche.
+  3. *Hybrid*: Vorrangige Eigenversorgung einzelner Wohnungen mit dynamischem Überschuss-Sharing.
+
+### 🔌 3. VPP Kraftwerk & § 14a EnWG Flex-Pool (`Tab: VPP Kraftwerk`)
+* **Virtuelles Kraftwerk (VPP)**: Aggregiert alle Heimspeicher, bidirektionalen Wallboxen und steuerbaren Lasten zu einem virtuellen Großkraftwerk.
+* **Flexibilitäts-Bonus**: Ermöglicht Zusatzerlöse durch netzdienliche Schwarmsteuerung am Regelenergiemarkt.
+* **§ 14a EnWG Modul**: Erfüllung der Dimmvorgaben (4,2 kW) für Wallboxen und Wärmepumpen zur Sicherung pauschaler Netzentgelt-Rabatte (~160 € / Jahr je Großverbraucher).
+
+### 💰 4. Tarife & Monatsabrechnungen (`Tab: Tarife & Abrechnungen`)
+* **Rechtssichere Tarifstruktur**: Getrennte Bepreisung von vor Ort erzeugtem Solarstrom (ct/kWh), Reststrombezug (ct/kWh) und Grundgebühr (€/Monat).
+* **1-Klick Monatsabrechnung**: Generiert für jede Mietpartei einen eichrechtskonformen, übersichtlichen PDF-Abrechnungsnachweis mit detailliertem 15-Minuten-Einzelnachweis.
+* **Multi-Format-Exporte**: Download aller Monatsdaten als **Excel (`.xlsx`)**, **DATEV-kompatible CSV** (mit Semikolon und UTF-8 BOM) und **XML** für Hausverwaltungssoftware (Haufe, DOMUS, Immoware24).
+
+### 👥 5. Mitglieder- & Mieterverwaltung (`Tab: Mitglieder & Mieter`)
+* **Einladungsdialog ohne IT-Jargon**: Erstellung sicherer Registrierungslinks für Sharing-Teilnehmer, Mieter und Hausverwaltungen.
+* **Die 5 Rechte-Rollen im System**:
+  1. ⚡ **Mitglied / Mieter (Sharing-Teilnehmer)**: Einsicht in den eigenen Solar-Anteil, Live-Verbrauch und persönliche Monatsabrechnungen.
+  2. 👥 **Mitglieder- & Mieterbetreuung**: Darf Teilnehmer einladen, Links verwalten und Wohnungszuordnungen bei Mieterwechsel pflegen.
+  3. 🛟 **Gemeinschafts- & Mieter-Support**: First-Level-Ansprechpartner vor Ort bei Fragen zu Zählern oder der App.
+  4. 📊 **Kassenprüfer / Beirat**: Reiner Lesezugriff zur transparenten Einsicht in Quartiersbilanzen, Summenzähler und Abrechnungsberichte.
+  5. 🏛️ **Gemeinschafts-Leitung / Energie-Verwalter**: Volle administrative Kontrolle über Tarife, Submetering und Verträge.
+* **3 Ausgabemöglichkeiten**:
+  * 📋 *1-Klick Link kopieren* (mit visuellem Checkmark-Feedback).
+  * ✉️ *Vorbereitete E-Mail* (öffnet vorausgefüllte Einladungsmail an Bewohner).
+  * 📱 / 🖨️ *QR-Code für Hausflur-Aushänge* (zum Ausdrucken für das Schwarze Brett im Treppenhaus).
+* **Widerrufen & Löschen**: Veraltete oder versehentlich erstellte Links können mit 1 Klick dauerhaft deaktiviert werden.
+
+### 📟 6. wMSB & Smart Meter Gateways (`Tab: wMSB & Zähler`)
+* **Direkte SMGW-Kopplung**: Integration wettbewerblicher Messstellenbetreiber (wMSB) wie Discovergy, Solandeo und inexogy.
+* **Zählerstatus & Latenz-Überwachung**: Kontinuierliche Prüfung der Zählerstände und Kommunikationsverbindungen.
+
+### 🛡️ 7. Revisionssicheres Audit-Log (`Tab: Audit`)
+* **GoBD- und DSGVO-konforme Protokollierung**: Lückenlose Aufzeichnung aller administrativen Änderungen (Tarifänderungen, Rollenzuweisungen, Einladungen, Mieterwechsel).
+* Unveränderliche Nachvollziehbarkeit für Kassenprüfer, Beiräte und Steuerberater.
 """,
-                "content_en": r"""# 🏢 Tenant-Admin Guide: Virtual Master Meter, Sub-Metering & PDF Invoices
+                "content_en": r"""# 🏢 Tenant-Admin Guide: Property Dashboard, Multi-Tenant Power & Energy Sharing
 
-As a **Tenant Administrator (Property Manager / Community Admin)**, you manage all energy flows, billing, and flexibility across your multi-family building or energy community.
+As a **Property or Community Administrator (Tenant-Admin)**, you manage all energy, billing, and organizational workflows across your multi-family building or energy community via the central cockpit (`/app/tenant`).
 
 ---
 
-## 🌟 Key Capabilities in the Tenant Dashboard (`/app/tenant`)
+## 🌟 1. Header Quick Actions
 
-### 1. 🏢 Virtual Master Meter & Grid Connection (NAP) Settlement
-* **15-Minute Interval Settlement**: Exact calculation of grid feed-in and import balances across all 96 quarter-hours per day.
-* **3 Allocation Keys (§ 42b EnWG)**:
-  1. *Dynamic (Concurrent)*: Allocated in real-time based on 15m energy demand (Max fairness).
-  2. *Static (Ownership Share / MEA)*: Fixed percentage allocated per apartment.
+Located directly beneath the community title, four key tools provide instant access:
+
+### 🎨 Whitelabel & Branding
+* **Custom Brand Identity**: Configure logo, primary and accent colors for housing associations, utilities, or property managers.
+* **Custom Subdomain**: Host under your dedicated domain (e.g. `energy.my-property.com`).
+* **White-Label Invoices**: All generated PDF settlement statements and notification emails carry your custom branding.
+
+### 📄 Market Communication (AS4 / EDIFACT)
+* **BNetzA Energy Market Interface**: Connect to the regulated 1:1 German energy market communication network.
+* **AS4 Certificates & MP-ID**: Secure encryption of metering time series (MSCONS), master data (UTILMD), and allocation clearing.
+* **Automated Data Exchange**: Direct integration with distribution system operators (DSO) and balance responsible parties (BRP).
+
+### ✨ Building Setup Wizard (3 Steps)
+* **Guided Initial Commissioning**:
+  1. *Property & Location Data* (Building address, apartment units, postal code).
+  2. *Metering Hierarchy* (Grid connection NAP + sub-meters per apartment).
+  3. *Tariff & Allocation Model* (§ 42b EnWG sharing key).
+
+### 📢 Share Achievements
+* **Community KPI Card**: Displays collective autarky (%), shared solar energy (kWh), and CO₂ savings for resident meetings and AGM reports.
+
+---
+
+## 📑 2. The 7 Main Features in Detail
+
+### ⚡ 1. Cockpit & Live Sharing Matrix (`Tab: Cockpit`)
+* **Real-Time 15-Minute Settlement**: Visualizes quarter-hourly generation, collective consumption, and grid imports.
+* **Autarky & Self-Consumption KPIs**: Actionable metrics to maximize local solar self-reliance.
+
+### 🏢 2. Virtual Master Meter (`Tab: Virtual Master Meter`)
+* **Difference Settlement at Grid Connection (NAP)**: Aggregates MID-certified sub-meters into a virtual building meter.
+* **3 Legal Allocation Keys (§ 42b EnWG)**:
+  1. *Dynamic (Concurrent)*: Allocated proportional to real-time 15m consumption (Maximum fairness).
+  2. *Static (Ownership Share / MEA)*: Fixed percentage per apartment.
   3. *Hybrid*: Priority self-consumption with dynamic excess sharing.
 
-### 2. 💰 Tariffs & Automated Monthly PDF Statements
-* **Tariff Setup**: Configure Solar sharing rates (ct/kWh), Grid import rates (ct/kWh), and base fees (€/mo).
-* **Monthly Clearing**: 1-click settlement generates compliant, itemized PDF statements for every resident.
-* **Multi-Format Exports**: Excel (`.xlsx`), CSV (DATEV-ready), and XML for property ERP systems.
+### 🔌 3. VPP Swarm & Grid Flexibility (`Tab: VPP Kraftwerk`)
+* **Virtual Power Plant (VPP)**: Aggregates home batteries, smart wallboxes, and heat pumps into a synchronized virtual power asset.
+* **Flexibility Bonus**: Monetize grid-supportive swarm dispatch on balancing markets.
+* **§ 14a EnWG Compliance**: Automated 4.2 kW active power dimming securing annual grid fee rebates (~€160 / asset / year).
 
-### 3. 🔌 Virtual Power Plant (VPP) & Grid Flexibility
-* **Aggregated Fleet Capacity**: Real-time positive (+kW) and negative (-kW) active power flexibility.
-* **Controllable Loads (§ 14a EnWG)**: Dimmable wallboxes and heat pumps qualifying for grid fee rebates.
-* **Redispatch 2.0 / Connect+ 96 Schedule**: Standardized `PT15M` schedules for transmission system operators.
+### 💰 4. Tariffs & Monthly Statements (`Tab: Tarife & Abrechnungen`)
+* **Compliant Tariff Configuration**: Distinct rates for local solar power (ct/kWh), grid import (ct/kWh), and base fees (€/month).
+* **1-Click Settlement**: Generates compliant, itemized PDF invoices for every resident with 15-minute billing breakdowns.
+* **Multi-Format Exports**: Download monthly records in **Excel (`.xlsx`)**, **DATEV-compatible CSV** (semicolon + UTF-8 BOM), and **XML** for property ERP systems.
 
-### 4. 👥 Member & RBAC Management
-* Assign roles: *Admin* 🏛️, *User Manager* 👥, *Auditor* 📊, *Helpdesk* 🛟, and *Member* ⚡.
-* Strict GDPR compliance: Residents only see their own private energy usage and invoices.
+### 👥 5. Member & Resident Management (`Tab: Mitglieder & Mieter`)
+* **Clear Role-Based Access Control**:
+  1. ⚡ **Member / Resident (Sharing Participant)**: Views personal solar allocation, real-time consumption, and monthly statements.
+  2. 👥 **Resident & Member Management**: Invites participants, manages links, and updates apartment assignments during tenant transitions.
+  3. 🛟 **Local Community Support**: On-site point of contact for meter or app inquiries.
+  4. 📊 **Auditor / Advisory Board**: Read-only oversight for quarter-hourly balances and financial audit reports.
+  5. 🏛️ **Community Lead / Property Admin**: Full administrative control over contracts, tariffs, and sub-metering.
+* **3 Invitation Channels**:
+  * 📋 *1-Click Copy Link* (with instant checkmark feedback).
+  * ✉️ *Pre-formatted Email* (opens welcoming invitation email template).
+  * 📱 / 🖨️ *Bulletin Board QR Code* (for hallway flyers and community noticeboards).
+* **Revoke & Delete**: Easily revoke outdated or unused invitation tokens with 1 click.
+
+### 📟 6. wMSB & Smart Meter Gateways (`Tab: wMSB & Zähler`)
+* **SMGW Integration**: Direct connectivity with competitive meter operators (Discovergy, Solandeo, inexogy).
+* **Health & Latency Telemetry**: Real-time monitoring of meter readings and gateway communication.
+
+### 🛡️ 7. Tamper-Proof Audit Log (`Tab: Audit`)
+* **Audit-Proof Activity Protocol**: Complete chronological logging of all administrative actions (tariff adjustments, role changes, tenant transitions) for auditors and tax advisors.
 """,
                 "tags": ["tenant admin", "mieterstrom", "virtual master meter", "pdf abrechnung", "vpp", "§ 42b EnWG", "hausverwaltung"],
                 "is_featured": True,
