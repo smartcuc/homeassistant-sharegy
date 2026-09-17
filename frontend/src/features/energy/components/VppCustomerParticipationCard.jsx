@@ -114,15 +114,20 @@ export default function VppCustomerParticipationCard() {
                             <h3 className="text-base font-black text-slate-900 dark:text-white">
                                 Virtuelles Kraftwerk (VPP) Flexibilitäts-Bonus
                             </h3>
-                            {data.is_participating && (
+                            {data.is_participating ? (
                                 <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
                                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                    Aktiv vergütet (80 % Split)
+                                    VPP-Ready: Eingeschrieben (80 % Erlösauskehrung)
+                                </span>
+                            ) : (
+                                <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
+                                    <span>⚡</span>
+                                    Pilot-Pool Vorregistrierung
                                 </span>
                             )}
                         </div>
                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                            Stelle freie Speicherkapazität zur Netzstabilisierung bereit und erhalte automatische Gutschriften auf deine Stromrechnung.
+                            Registriere deinen Heimspeicher kostenfrei für das Sharegy Virtuelle Kraftwerk und sichere dir deinen 80 % Erlösauskehrungs-Platz bei Netzstabilisierung & Börsenarbitrage.
                         </p>
                     </div>
                 </div>
@@ -137,7 +142,7 @@ export default function VppCustomerParticipationCard() {
                         className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 shrink-0"
                     >
                         <span>✨</span>
-                        <span>Jetzt teilnehmen & bis zu 250 €/Jahr sichern</span>
+                        <span>Speicher für VPP-Pool vorregistrieren</span>
                     </button>
                 )}
             </div>
@@ -219,13 +224,16 @@ export default function VppCustomerParticipationCard() {
                         </div>
                     </div>
 
-                    <div className="flex justify-end pt-2">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-2">
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                            🛡️ <strong>Rechtlicher Hinweis:</strong> Dein Speicher wird kostenfrei für das VPP-Pilotprogramm registriert. Die automatische Erlösauszahlung startet mit Aktivierung des regionalen Aggregator-Pools. Bis dahin sparst du sofort durch PV-Überschuss & § 14a Netzentgeltpauschale.
+                        </p>
                         <button
                             onClick={() => enrollMutation.mutate()}
                             disabled={enrollMutation.isPending || !selectedDevice}
-                            className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-xs transition-all disabled:opacity-50"
+                            className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-xs transition-all disabled:opacity-50 shrink-0"
                         >
-                            {enrollMutation.isPending ? "Wird aktiviert..." : "Kostenfrei aktivieren & Prämie sichern"}
+                            {enrollMutation.isPending ? "Wird registriert..." : "Kostenfrei vorregistrieren"}
                         </button>
                     </div>
                 </div>
@@ -244,13 +252,13 @@ export default function VppCustomerParticipationCard() {
                         <span className="text-xs font-bold text-slate-400">€</span>
                     </div>
                     <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold block mt-0.5">
-                        ✓ Direkt gutgeschrieben
+                        ✓ 80 % Erlösauskehrung
                     </span>
                 </div>
 
                 <div className="bg-white dark:bg-slate-800/80 p-4 rounded-xl border border-slate-200/80 dark:border-slate-700/80 shadow-2xs">
                     <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
-                        Prognose / Jahr
+                        Potenzial / Jahr (Prognose)
                     </span>
                     <div className="flex items-baseline gap-1 mt-1">
                         <span className="text-2xl font-black text-slate-900 dark:text-white">
@@ -259,7 +267,7 @@ export default function VppCustomerParticipationCard() {
                         <span className="text-xs font-bold text-slate-400">€/a</span>
                     </div>
                     <span className="text-[10px] text-slate-400 font-medium block mt-0.5">
-                        Basierend auf Marktprämien
+                        Basierend auf aFRR-Marktpreisen
                     </span>
                 </div>
 
