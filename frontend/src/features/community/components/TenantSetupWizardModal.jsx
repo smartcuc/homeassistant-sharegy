@@ -214,7 +214,7 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
                         <div className="space-y-4 animate-fade-in">
                             <div className="bg-indigo-500/10 border border-indigo-500/20 p-4 rounded-2xl">
                                 <h3 className="text-sm font-bold text-indigo-900 dark:text-indigo-200 flex items-center gap-1.5">
-                                    <span>💡</span> Wie funktioniert das?
+                                    <span>💡</span> {t("wizard.how_it_works", "Wie funktioniert das?")}
                                 </h3>
                                 <p className="text-xs text-indigo-700/90 dark:text-indigo-300/90 mt-1 leading-relaxed">
                                     {legalExplainText}
@@ -224,19 +224,19 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                                        {isMieterstrom ? "Name der Liegenschaft / Quartier" : isGgv ? "Name der WEG / Liegenschaft" : "Name der Energiegenossenschaft"}
+                                        {isMieterstrom ? t("wizard.name_mieterstrom", "Name der Liegenschaft / Quartier") : isGgv ? t("wizard.name_ggv", "Name der WEG / Liegenschaft") : t("wizard.name_sharing", "Name der Energiegenossenschaft")}
                                     </label>
                                     <input
                                         type="text"
                                         value={buildingData.name}
                                         onChange={(e) => setBuildingData({ ...buildingData, name: e.target.value })}
-                                        placeholder="z.B. Mehrfamilienhaus Sonnenweg 8"
+                                        placeholder={t("wizard.placeholder_name", "z.B. Mehrfamilienhaus Sonnenweg 8")}
                                         className="w-full text-sm font-semibold p-3 border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-indigo-500 dark:text-white"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                                        Adresse (Straße, PLZ, Ort)
+                                        {t("wizard.address_label", "Adresse (Straße, PLZ, Ort)")}
                                     </label>
                                     <input
                                         type="text"
@@ -251,7 +251,7 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
                                 <div>
                                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                                        ☀️ PV-Leistung
+                                        {t("wizard.pv_capacity_label", "☀️ PV-Leistung")}
                                     </label>
                                     <div className="relative">
                                         <input
@@ -266,7 +266,7 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
 
                                 <div>
                                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                                        🔋 Batteriespeicher
+                                        {t("wizard.battery_capacity_label", "🔋 Batteriespeicher")}
                                     </label>
                                     <div className="relative">
                                         <input
@@ -281,16 +281,16 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
 
                                 <div>
                                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                                        ⚖️ Aufteilungs-Logik
+                                        {t("wizard.allocation_logic_label", "⚖️ Aufteilungs-Logik")}
                                     </label>
                                     <select
                                         value={buildingData.allocation_model}
                                         onChange={(e) => setBuildingData({ ...buildingData, allocation_model: e.target.value })}
                                         className="w-full text-sm font-semibold p-3 border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 rounded-xl dark:text-white cursor-pointer"
                                     >
-                                        <option value="dynamic">⚡ Dynamisch (15m Lastgang)</option>
-                                        <option value="static">📐 Statisch (Nach MEA / Quote)</option>
-                                        <option value="hybrid">🤝 Hybrid (Quote + Überlauf)</option>
+                                        <option value="dynamic">{t("wizard.alloc_dynamic", "⚡ Dynamisch (15m Lastgang)")}</option>
+                                        <option value="static">{t("wizard.alloc_static", "📐 Statisch (Nach MEA / Quote)")}</option>
+                                        <option value="hybrid">{t("wizard.alloc_hybrid", "🤝 Hybrid (Quote + Überlauf)")}</option>
                                     </select>
                                 </div>
                             </div>
@@ -305,17 +305,19 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
                             <div className="flex items-center justify-between">
                                 <div>
                                     <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                                        {isMieterstrom ? "Wohnungen & Mieter" : isGgv ? "Wohnungseigentümer & Anteile" : "Genossenschaftsmitglieder"} ({apartments.length} Einheiten)
+                                        {isMieterstrom ? t("wizard.step2_heading_mieterstrom", "Wohnungen & Mieter") : isGgv ? t("wizard.step2_heading_ggv", "Wohnungseigentümer & Anteile") : t("wizard.step2_heading_sharing", "Genossenschaftsmitglieder")} ({t("wizard.units_count", "{{count}} Einheiten", { count: apartments.length })})
                                     </h3>
                                     <p className="text-xs text-slate-500">
-                                        Trage hier die Einheiten, Zählernummern und {isGgv ? "Miteigentumsanteile (MEA %)" : "Aufteilungsquoten (%)"} ein.
+                                        {t("wizard.step2_desc", "Trage hier die Einheiten, Zählernummern und {{shareType}} ein.", {
+                                            shareType: isGgv ? t("wizard.share_type_mea", "Miteigentumsanteile (MEA %)") : t("wizard.share_type_quotes", "Aufteilungsquoten (%)")
+                                        })}
                                     </p>
                                 </div>
                                 <button
                                     onClick={addApartment}
                                     className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition cursor-pointer flex items-center gap-1.5"
                                 >
-                                    <span>+</span> {isMieterstrom ? "Wohnung hinzufügen" : isGgv ? "Eigentümer hinzufügen" : "Mitglied hinzufügen"}
+                                    <span>+</span> {isMieterstrom ? t("wizard.add_apartment", "+ Wohnung hinzufügen") : isGgv ? t("wizard.add_owner", "+ Eigentümer hinzufügen") : t("wizard.add_member", "+ Mitglied hinzufügen")}
                                 </button>
                             </div>
 
@@ -330,7 +332,7 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
                                                 type="text"
                                                 value={apt.name}
                                                 onChange={(e) => updateApartment(apt.id, "name", e.target.value)}
-                                                placeholder="Name"
+                                                placeholder={t("wizard.placeholder_unit_name", "Name")}
                                                 className="w-full text-xs font-bold p-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg dark:text-white"
                                             />
                                         </div>
@@ -348,7 +350,7 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
                                                 type="text"
                                                 value={apt.meter_id}
                                                 onChange={(e) => updateApartment(apt.id, "meter_id", e.target.value)}
-                                                placeholder="Zählernummer"
+                                                placeholder={t("wizard.placeholder_meter_id", "Zählernummer")}
                                                 className="w-full text-xs font-mono p-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg dark:text-white"
                                             />
                                         </div>
@@ -386,10 +388,10 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
                             <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-2xl flex items-center justify-between">
                                 <div>
                                     <div className="text-xs font-bold text-emerald-800 dark:text-emerald-300">
-                                        🎉 Prognostizierter Kostenvorteil
+                                        {t("wizard.savings_title", "🎉 Prognostizierter Kostenvorteil")}
                                     </div>
                                     <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5">
-                                        ~{estimatedYearlyCommunitySavingsEur.toLocaleString("de-DE")} € <span className="text-xs font-normal text-slate-500">Ersparnis pro Jahr</span>
+                                        ~{estimatedYearlyCommunitySavingsEur.toLocaleString("de-DE")} € <span className="text-xs font-normal text-slate-500">{t("wizard.savings_per_year", "Ersparnis pro Jahr")}</span>
                                     </div>
                                 </div>
                                 <div className="text-3xl">💰</div>
@@ -398,7 +400,7 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 <div className="p-4 bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 rounded-2xl">
                                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                                        ☀️ {isMieterstrom ? "Solarstrom-Preis" : isGgv ? "Solar-Nutzungsentgelt" : "Sharing-Bezugspreis"}
+                                        {isMieterstrom ? t("wizard.rate_solar_mieterstrom", "☀️ Solarstrom-Preis") : isGgv ? t("wizard.rate_solar_ggv", "☀️ Solar-Nutzungsentgelt") : t("wizard.rate_solar_sharing", "☀️ Sharing-Bezugspreis")}
                                     </label>
                                     <div className="relative">
                                         <input
@@ -411,13 +413,13 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
                                         <span className="absolute right-3 top-3.5 text-xs text-slate-400 font-bold">ct/kWh</span>
                                     </div>
                                     <p className="text-[10px] text-slate-400 mt-1">
-                                        {isMieterstrom ? "Mieterpreis für den Dach-Solarstrom." : isGgv ? "Umlage für die Solaranlagennutzung." : "Preis für Energie aus dem Sharing-Pool."}
+                                        {isMieterstrom ? t("wizard.desc_solar_mieterstrom", "Mieterpreis für den Dach-Solarstrom.") : isGgv ? t("wizard.desc_solar_ggv", "Umlage für die Solaranlagennutzung.") : t("wizard.desc_solar_sharing", "Preis für Energie aus dem Sharing-Pool.")}
                                     </p>
                                 </div>
 
                                 <div className="p-4 bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 rounded-2xl">
                                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                                        🔌 {isGgv ? "Referenz-Reststrom" : "Netz-Reststrom"}
+                                        {isGgv ? t("wizard.rate_grid_ggv", "🔌 Referenz-Reststrom") : t("wizard.rate_grid_default", "🔌 Netz-Reststrom")}
                                     </label>
                                     <div className="relative">
                                         <input
@@ -430,13 +432,13 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
                                         <span className="absolute right-3 top-3.5 text-xs text-slate-400 font-bold">ct/kWh</span>
                                     </div>
                                     <p className="text-[10px] text-slate-400 mt-1">
-                                        {isGgv ? "Externer Vergleichstarif der Bewohner." : "Preis für Netzbezug bei Bewölkung."}
+                                        {isGgv ? t("wizard.desc_grid_ggv", "Externer Vergleichstarif der Bewohner.") : t("wizard.desc_grid_default", "Preis für Netzbezug bei Bewölkung.")}
                                     </p>
                                 </div>
 
                                 <div className="p-4 bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 rounded-2xl">
                                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                                        🏛️ Grundgebühr / Umlage
+                                        {t("wizard.base_fee_label", "🏛️ Grundgebühr / Umlage")}
                                     </label>
                                     <div className="relative">
                                         <input
@@ -448,7 +450,7 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
                                         />
                                         <span className="absolute right-3 top-3.5 text-xs text-slate-400 font-bold">€/Monat</span>
                                     </div>
-                                    <p className="text-[10px] text-slate-400 mt-1">Für Messstellenbetrieb & Plattform.</p>
+                                    <p className="text-[10px] text-slate-400 mt-1">{t("wizard.base_fee_desc", "Für Messstellenbetrieb & Plattform.")}</p>
                                 </div>
                             </div>
                         </div>
@@ -464,7 +466,7 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
                                 onClick={() => setStep(step - 1)}
                                 className="px-4 py-2 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition cursor-pointer"
                             >
-                                ← Zurück
+                                {t("wizard.back", "← Zurück")}
                             </button>
                         )}
                     </div>
@@ -474,7 +476,7 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
                             onClick={onClose}
                             className="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer"
                         >
-                            Abbrechen
+                            {t("common.cancel", "Abbrechen")}
                         </button>
 
                         {step < 3 ? (
@@ -482,7 +484,7 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
                                 onClick={() => setStep(step + 1)}
                                 className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition cursor-pointer flex items-center gap-1.5"
                             >
-                                Weiter zu Schritt {step + 1} →
+                                {t("wizard.next_step", "Weiter zu Schritt {{next}} →", { next: step + 1 })}
                             </button>
                         ) : (
                             <button
@@ -490,7 +492,7 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
                                 disabled={saving}
                                 className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black px-6 py-2.5 rounded-xl transition shadow-md hover:shadow-lg cursor-pointer flex items-center gap-2"
                             >
-                                {saving ? "Speichere..." : isMieterstrom ? "🚀 Mieterstrom jetzt aktivieren" : isGgv ? "🚀 GGV-Liegenschaft aktivieren" : "🚀 Bürgerenergie jetzt aktivieren"}
+                                {saving ? t("common.saving", "Speichere...") : isMieterstrom ? t("wizard.submit_mieterstrom", "🚀 Mieterstrom jetzt aktivieren") : isGgv ? t("wizard.submit_ggv", "🚀 GGV-Liegenschaft aktivieren") : t("wizard.submit_sharing", "🚀 Bürgerenergie jetzt aktivieren")}
                             </button>
                         )}
                     </div>

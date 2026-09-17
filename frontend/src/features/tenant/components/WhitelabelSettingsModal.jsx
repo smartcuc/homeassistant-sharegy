@@ -131,10 +131,10 @@ export default function WhitelabelSettingsModal({ isOpen, onClose }) {
         method: "PATCH",
         body: JSON.stringify(formData),
       });
-      setSuccessMsg("Branding & Whitelabel-Einstellungen erfolgreich gespeichert!");
+      setSuccessMsg(t("whitelabel.success_msg", "Branding & Whitelabel-Einstellungen erfolgreich gespeichert!"));
       await reloadTheming();
     } catch (err) {
-      setErrorMsg(err?.message || "Speichern fehlgeschlagen.");
+      setErrorMsg(err?.message || t("whitelabel.error_msg", "Speichern fehlgeschlagen."));
     } finally {
       setSaving(false);
     }
@@ -152,11 +152,11 @@ export default function WhitelabelSettingsModal({ isOpen, onClose }) {
                 <Palette className="w-5 h-5" />
               </div>
               <h2 className="text-xl md:text-2xl font-bold text-white">
-                B2B Whitelabel & Dynamic Theming Engine
+                {t("whitelabel.modal_title", "B2B Whitelabel & Dynamic Theming Engine")}
               </h2>
             </div>
             <p className="text-xs md:text-sm text-slate-400">
-              Passen Sie Farben, Logos, Firmennamen und Custom-Domains für Ihre EVU-, WEG- oder Stadtwerke-Kunden an.
+              {t("whitelabel.modal_subtitle", "Passen Sie Farben, Logos, Firmennamen und Custom-Domains für Ihre EVU-, WEG- oder Stadtwerke-Kunden an.")}
             </p>
           </div>
           <button
@@ -297,7 +297,7 @@ export default function WhitelabelSettingsModal({ isOpen, onClose }) {
                   />
                 </div>
                 <p className="text-[11px] text-slate-500 mt-1">
-                  Setzen Sie bei Ihrem DNS-Provider einen CNAME-Eintrag auf <span className="font-mono text-sky-400">cname.sharegy.de</span>.
+                  {t("whitelabel.cname_hint", "Setzen Sie bei Ihrem DNS-Provider einen CNAME-Eintrag auf")} <span className="font-mono text-sky-400">cname.sharegy.de</span>.
                 </p>
               </div>
 
@@ -348,7 +348,7 @@ export default function WhitelabelSettingsModal({ isOpen, onClose }) {
                 {/* Card Preview */}
                 <div className="bg-slate-900/90 border border-slate-800 p-4 rounded-xl space-y-3">
                   <div className="flex justify-between items-center text-xs">
-                    <span className="text-slate-400">Gemeinschaftliche Gebäudeversorgung</span>
+                    <span className="text-slate-400">{t("whitelabel.preview_ggv_title", "Gemeinschaftliche Gebäudeversorgung")}</span>
                     <span className="text-emerald-400 font-semibold">§ 42b EnWG</span>
                   </div>
                   <div className="text-xl font-extrabold text-white">4.820 kWh</div>
@@ -363,12 +363,12 @@ export default function WhitelabelSettingsModal({ isOpen, onClose }) {
                     className="w-full py-2 rounded-lg text-xs font-semibold text-white shadow transition"
                     style={{ backgroundColor: formData.button_color }}
                   >
-                    Monatsabrechnung einsehen
+                    {t("whitelabel.preview_btn_billing", "Monatsabrechnung einsehen")}
                   </button>
                 </div>
 
                 <div className="text-[11px] text-slate-500 text-center">
-                  Support: {formData.support_email || "support@sharegy.de"}
+                  {t("whitelabel.support_label", "Support:")} {formData.support_email || "support@sharegy.de"}
                 </div>
               </div>
             </div>

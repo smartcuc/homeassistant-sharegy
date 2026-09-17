@@ -390,22 +390,22 @@ export default function VppFleetAdminPage() {
                             </div>
                             <div className="flex flex-wrap gap-1.5">
                                 <span className="px-2 py-1 rounded-lg text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
-                                    ⚡ aFRR Sekundärregelung
+                                    {t("admin_vpp.prod_afrr", "⚡ aFRR Sekundärregelung")}
                                 </span>
                                 <span className="px-2 py-1 rounded-lg text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                                    🔋 FCR Primärregelung
+                                    {t("admin_vpp.prod_fcr", "🔋 FCR Primärregelung")}
                                 </span>
                                 <span className="px-2 py-1 rounded-lg text-[10px] font-bold bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
-                                    🔌 Redispatch 2.0
+                                    {t("admin_vpp.prod_redispatch", "🔌 Redispatch 2.0")}
                                 </span>
                                 <span className="px-2 py-1 rounded-lg text-[10px] font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
-                                    📈 Spotmarkt-Arbitrage
+                                    {t("admin_vpp.prod_spotmarket", "📈 Spotmarkt-Arbitrage")}
                                 </span>
                             </div>
                         </div>
 
                         <div className="pt-2 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400">
-                            Telemetrie-Protokoll: <b>OpenADR 2.0b / IEC 60870-5-104</b>
+                            {t("admin_vpp.telemetry_protocol", "Telemetrie-Protokoll:")} <b>OpenADR 2.0b / IEC 60870-5-104</b>
                         </div>
                     </Card>
                 </div>
