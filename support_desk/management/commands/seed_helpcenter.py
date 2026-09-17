@@ -107,6 +107,15 @@ class Command(BaseCommand):
                 "sort_order": 10,
             },
             {
+                "key": "admin-governance",
+                "icon": "🛡️",
+                "title_de": "Administration, Quartiere & VPP",
+                "title_en": "Administration, Communities & VPP",
+                "description_de": "Leitfäden für Portfoliomanager, Mieterstrom (§ 42a), GGV (§ 42b), Bürgerenergiegenossenschaften, VPP-Flexibilitätsaggregate & Partner-Flotten.",
+                "description_en": "Comprehensive guides for portfolio managers, tenant power (§ 42a), collective supply (§ 42b), energy sharing cooperatives, VPP aggregators & partner fleets.",
+                "sort_order": 12,
+            },
+            {
                 "key": "devices-protocols",
                 "icon": "🔌",
                 "title_de": "Geräte, Schnittstellen & Protokolle",
@@ -3433,7 +3442,774 @@ Controllable loads (> 4.2 kW) connected after Jan 1, 2024 must support grid-orie
                 "is_featured": True,
                 "sort_order": 7,
             },
+
+            # ---------------------------------------------------------------------
+            # 12. ADMIN & GOVERNANCE LEITFÄDEN (6 SPEZIFISCHE ADMINBEREICHE)
+            # ---------------------------------------------------------------------
+            {
+                "category": cats["admin-governance"],
+                "slug": "admin-communities-portfolio-guide",
+                "context_key": "admin_communities",
+                "title_de": "Quartiere & Gemeinschaften: Portfolio-Cockpit, Aggregierte Bilanzen & Liegenschaftsverwaltung",
+                "title_en": "Communities & Portfolios: Aggregated Balances, Property Management & Simulation",
+                "summary_de": "Umfassender Leitfaden zur Verwaltung mehrerer Liegenschaften, Quartiersbilanzen, Simulation von Erzeugungs- und Lastprofilen sowie Whitelabel-Rollen.",
+                "summary_en": "Comprehensive guide for multi-property portfolio management, aggregated community balances, load simulation, and role-based access control.",
+                "content_de": """# Quartiere & Gemeinschaften (Portfolio-Verwaltung)
+
+Das **Community Portfolio Cockpit** (`/app/admin/communities`) ist die zentrale Steuerzentrale für Energieversorger, Stadtwerke, Quartiersentwickler, Wohnungsbaugesellschaften und Verwalter mit mehreren Liegenschaften. Es bündelt sämtliche dezentralen Erzeugungs- und Verbrauchsanlagen in einer ganzheitlichen Mandantenübersicht.
+
+---
+
+## 1. Portfolio-Übersicht & Aggregierte Live-Kennzahlen
+
+Auf der obersten Portfolio-Ebene aggregiert Sharegy in Echtzeit:
+
+| Kennzahl | Beschreibung & Relevanz |
+| :--- | :--- |
+| **🏘️ Aktive Liegenschaften** | Gesamtzahl aller verwalteten Quartiere, Mehrfamilienhäuser und Gewerbeparks |
+| **☀️ Aggregierte Solarleistung** | Summe der installierten PV-Peakleistung (kWp) sowie momentane Echtzeit-Erzeugung (kW) |
+| **⚡ Quartiers-Gesamtverbrauch** | Momentane Last aller Wohneinheiten, Gemeinschaftsflächen und Wärmepumpen/Wallboxen |
+| **🔄 Lokaler Deckungsgrad** | Prozentualer Anteil des Gesamtverbrauchs, der zeitgleich aus lokaler PV-Erzeugung gedeckt wird |
+| **🛡️ Lokale Autarkiequote** | Unabhängigkeit des gesamten Portfolios vom übergeordneten Verteilnetz |
+| **🔋 Flexibilitätspotenzial** | Momentan verfügbare positive (+kW) und negative (-kW) Regelleistung aller Heimspeicher |
+
+---
+
+## 2. Liegenschaften anlegen & Stammdaten konfigurieren
+
+Beim Anlegen eines neuen Quartiers über den Button **„+ Neues Quartier anlegen“** werden folgende Kernparameter erfasst:
+
+1. **Stammdaten & Adresse**: Name der Liegenschaft, Anschrift, Bundesland und Geokoordinaten (für hochpräzise Solar- und Einstrahlungsprognosen).
+2. **Netzanschlusspunkt (NAP)**: 
+   * Zählpunktbezeichnung (MaLo-ID / 33-stelliger Zählpunktcode).
+   * Verteilnetzbetreiber (VNB) und zuständiger Messstellenbetreiber (gMSB / wMSB).
+   * Maximal zulässige Netzanschlussleistung (kVA).
+3. **Erzeugungs- & Speicherzuweisung**:
+   * Zuweisung von Zentral-Wechselrichtern, Dachanlagen und Batteriespeicher-Blöcken.
+4. **Wohneinheiten & Zählerstruktur**:
+   * Erfassung aller Parteien, Unterzähler (MID) oder Smart Meter Gateways (SMGW).
+
+---
+
+## 3. Mandanten- & Rollenberechtigungen (RBAC)
+
+Sharegy unterstützt ein granulares rollenbasiertes Zugriffskonzept:
+
+* **Super-Administrator**: Voller Zugriff auf das gesamte Portfolio, Globale Tarife, API-Keys und Whitelabel-Einstellungen.
+* **Quartiersverwalter / Property Manager**: Verwaltung spezifischer Liegenschaften, Einsicht in Lastgänge, Einladung von Mietern und Initiierung von Monatsabrechnungen.
+* **Hausverwaltung / Beirat (WEG)**: Lesender Zugriff auf Energiebilanzen, Quartiers-Zertifikate und Beschlussvorlagen.
+* **Fachpartner / Installateur**: Technischer Zugriff auf Inverter, Modbus-Register und IBN-Protokolle.
+
+---
+
+## 4. Quartiers-Simulation & Lastprofiloptimierung
+
+Im Bereich **Quartiers-Simulation** können Sie vor Investitionsentscheidungen virtuelle Szenarien berechnen:
+
+* **Gleichzeitigkeitsfaktor-Analyse**: Wie verteilen sich die Spitzenlasten von 20, 50 oder 100 Wohnungen bei gleichzeitiger Nutzung von Elektroautos und Wärmepumpen?
+* **Batteriespeicher-Dimensionierung**: Simulation von 30 kWh bis 200 kWh Quartiersspeichern zur Vermeidung teurer Netzausbauten (Peak Shaving).
+* **Dynamische Preisszenarien**: Berechnung der Portfoliokosten bei Börsenstromtarifen im Vergleich zu klassischen Festverträgen.
+
+---
+
+## 5. Export, ESG-Reporting & Monatsberichte
+
+Mit einem Klick generiert das Portfolio-Cockpit:
+* **ESG- & Nachhaltigkeitsberichte (PDF/CSV)**: Nachweis der vermiedenen CO2-Emissionen gem. GHG Protocol (Scope 1 & 2).
+* **DATEV-kompatible Buchungsstapel**: Vorkontierte Erlös- und Kostenstellen für die Buchhaltung.
+* **BNetzA-Jahresmeldung**: Zusammenfassung aller erzeugten, vor Ort verbrauchten und eingespeisten Kilowattstunden.
+""",
+                "content_en": """# Communities & Portfolios (Multi-Property Management)
+
+The **Community Portfolio Cockpit** (`/app/admin/communities`) is the mission control center for energy suppliers, municipal utilities, housing corporations, and property managers overseeing multiple assets. It consolidates all distributed energy resources and multi-unit loads into a unified tenant structure.
+
+---
+
+## 1. Portfolio Overview & Real-Time KPIs
+
+At the portfolio level, Sharegy aggregates real-time metrics across all locations:
+
+| Metric | Description & Strategic Value |
+| :--- | :--- |
+| **🏘️ Active Communities** | Total number of managed residential complexes, quarters, and commercial sites |
+| **☀️ Aggregated Solar Power** | Total installed PV peak power (kWp) alongside instantaneous live generation (kW) |
+| **⚡ Total Community Load** | Combined power demand across all apartments, common areas, and heat pumps / EVs |
+| **🔄 Local Coverage Ratio** | Percentage of active demand supplied directly by on-site solar generation |
+| **🛡️ Local Self-Sufficiency** | Grid independence percentage across the complete property portfolio |
+| **🔋 Flexibility Potential** | Aggregated positive (+kW discharge) and negative (-kW charging) balancing reserves |
+
+---
+
+## 2. Setting Up & Configuring New Communities
+
+Clicking **"+ Add New Community"** initiates the configuration workflow:
+
+1. **Master Data & Geolocation**: Community name, address, federal state, and precise GPS coordinates for solar irradiance forecasting.
+2. **Grid Connection Point (NAP)**:
+   * 33-digit Market Location ID (MaLo-ID).
+   * Distribution System Operator (DSO / VNB) and Metering Point Operator (MSB).
+   * Maximum authorized grid connection capacity (kVA).
+3. **Generation & Battery Assignment**: Linking central inverters, sub-inverters, and storage blocks.
+4. **Units & Meter Hierarchy**: Mapping individual residential units, MID submeters, and Smart Meter Gateways (SMGW).
+
+---
+
+## 3. Role-Based Access Control (RBAC)
+
+* **Super Admin**: Full multi-tenant governance, global tariff templates, API integrations, and whitelabeling.
+* **Portfolio Manager**: Multi-site management, load curve inspection, resident onboarding, and settlement runs.
+* **HOA / Building Board**: Read-only oversight of energy metrics, sustainability certificates, and meeting templates.
+* **Certified Partner / Installer**: Engineering access for Modbus registers, telemetry diagnostic checks, and commissioning.
+
+---
+
+## 4. Community Simulation & Load Curve Optimization
+
+* **Coincidence Factor Modeling**: Simulating peak demand across 20 to 200 units with concurrent heat pump and EV charging sessions.
+* **Storage Sizing**: Sizing community storage systems (30–300 kWh) for optimal peak-shaving and self-consumption.
+* **Dynamic Tariff Impact**: Simulating day-ahead spot market exposure versus fixed utility contracts.
+
+---
+
+## 5. Automated ESG Reporting & Export
+
+* **ESG & Sustainability PDF Reports**: Audited GHG Protocol Scope 1 & 2 carbon reduction statements.
+* **DATEV Accounting Export**: Standardized transaction ledgers for automated bookkeeping.
+* **Regulatory Compliance**: Complete annual summaries for grid and market operators.
+""",
+                "tags": ["portfolio", "communities", "quartiere", "liegenschaften", "admin", "multi-tenant", "simulation", "esg", "kpi"],
+                "is_featured": True,
+                "sort_order": 1,
+            },
+            {
+                "category": cats["admin-governance"],
+                "slug": "admin-mieterstrom-enwg-guide",
+                "context_key": "admin_mieterstrom",
+                "title_de": "Mieterstrom gem. § 42a EnWG: Vollversorgung, Zählerkaskade, AS4-Marktkommunikation & Monatsabrechnung",
+                "title_en": "Tenant Power (§ 42a EnWG): Full Supply, Submetering, AS4 Market Dispatch & Monthly Billing",
+                "summary_de": "Praxisleitfaden für Vermieter & Betreiber: Solar- & Reststromtarife in einer Gesamtrechnung, 15m-MSCONS-Export, Mieterstromzuschlag und automatisiertes Onboarding.",
+                "summary_en": "Operator guide for full-supply tenant electricity: combined solar & grid tariffs, 15m MSCONS export, statutory subsidies, and automated tenant onboarding.",
+                "content_de": """# Mieterstrom-Vollversorgung gem. § 42a EnWG
+
+Das Modul **Mieter- & Wohnungsverwaltung** (`/app/admin/mieterstrom`) bildet die rechtlichen und abrechnungstechnischen Anforderungen des klassischen Mieterstroms gem. **§ 42a Energiewirtschaftsgesetz (EnWG)** vollständig digital ab.
+
+---
+
+## 1. Gesetzliche Grundlagen & Das Vollversorgungs-Prinzip
+
+Beim Mieterstrom nach § 42a EnWG tritt der Betreiber (z. B. Vermieter, Stadtwerk oder Contracting-Dienstleister) als **Vollversorger** auf. Das bedeutet:
+
+* **Eine einzige Gesamtrechnung**: Der Mieter erhält eine einheitliche Rechnung, die sowohl den vor Ort erzeugten Solarstrom als auch den aus dem öffentlichen Netz bezogenen Reststrom umfasst.
+* **Gesetzlicher Preisdeckel**: Der Mieterstromtarif darf **maximal 90 % des Grundversorgertarifs** im jeweiligen Netzgebiet betragen (§ 42a Abs. 4 EnWG).
+* **Freie Versorgerwahl**: Mieter sind gesetzlich nicht verpflichtet, Mieterstrom zu beziehen; ein Kopplungsverbot mit dem Mietvertrag ist zwingend einzuhalten (§ 42a Abs. 2 EnWG).
+* **Gesetzlicher Mieterstromzuschlag**: Für jede an Mieter gelieferte Kilowattstunde Solarstrom erhält der Anlagenbetreiber eine zusätzliche EEG-Förderung (Mieterstromzuschlag).
+
+---
+
+## 2. Tarifstruktur & Preisbausteine
+
+Im Mieterstrom-Cockpit konfigurieren Sie folgende Kernparameter:
+
+| Preisbaustein | Erläuterung | Typischer Bereich |
+| :--- | :--- | :--- |
+| **☀️ Solar-Arbeitspreis** | Preis je kWh für direkt vom Dach verbrauchten PV-Strom | 16,00 – 22,00 ct/kWh |
+| **⚡ Reststrompreis** | Preis je kWh für aus dem Netz bezogenen Strom | 28,00 – 34,00 ct/kWh |
+| **🏢 Grundpreis** | Monatliche Gebühr für Zählerbetrieb, Abrechnung & Grundkosten | 6,00 – 12,00 € / Monat |
+| **💶 Mieterstromzuschlag** | Gesetzliche EEG-Förderung für den Betreiber | Gemäß Bundesnetzagentur-Satz |
+
+---
+
+## 3. Zählerkaskade & Messkonzepte
+
+Sharegy unterstützt sowohl physische Kaskadenmessungen als auch moderne virtuelle Summenzähler mit Smart Meter Gateways:
+
+```
+                  [ Öffentliches Netz ]
+                            |
+                     [ Z1: Zweirichtungs-Summenzähler ]
+                            |
+      +---------------------+---------------------+
+      |                                           |
+[ PV-Anlage Z2 ]                        [ Mieter-Unterzähler ]
+ (Erzeugung)                           /          |                                            [ Z_Wohnung 1 ] [ Z_Wohnung 2 ] [ Z_Wohnung 3 ]
+```
+
+* **Summenzähler (Z1)**: Misst den gesamten Netzbezug und die Netzeinspeisung des Gebäudes.
+* **Erzeugungszähler (Z2)**: Misst die gesamte Brutto-PV-Erzeugung.
+* **Unterzähler (Z3..Zn)**: MID-konforme Unterzähler oder intelligente Messsysteme je Wohneinheit.
+* **Automatisches Clearing**: Sharegy berechnet im 15-Minuten-Intervall die exakte Aufteilung von Solar- und Reststrom je Partei.
+
+---
+
+## 4. BNetzA AS4 Marktkommunikations-Adapter
+
+Für die automatische Übermittlung an Verteilnetzbetreiber (VNB) und Messstellenbetreiber (MSB) verfügt Sharegy über einen integrierten **AS4 / EDIFACT Konnektor**:
+
+* **MSCONS Export**: Automatisierte Erstellung von 15-Minuten-Lastgangnachrichten (Viertelstundenwerte gem. BNetzA MaKo 2020 / 2024).
+* **UTILMD Dispatch**: Stammdatenänderungen, Zählpunktanmeldungen und Abmeldungen bei Mieterwechsel.
+* **Protokoll-Verschlüsselung**: BSI-konforme AS4-Webservice-Schnittstelle mit Zertifikatsvalidierung.
+
+---
+
+## 5. Monatsabrechnung auslösen ("Trigger Monthly Settlement")
+
+Am Monatsende erfolgt die Abrechnung in 3 einfachen Schritten:
+
+1. **Prüfung**: Klick auf *„Trigger Monthly Settlement“* öffnet den Monatsprüfbericht.
+2. **Validierung**: Sharegy gleicht Zählerstände, Lastgänge und Mieterstammdaten automatisch auf Plausibilität ab.
+3. **Generierung & Versand**: 
+   * Erstellung rechtssicherer PDF-Abrechnungen für jeden Mieter.
+   * Automatischer SEPA-Lastschriftexport (XML camt.053 / pain.008).
+   * E-Mail-Versand an Mieter mit Link zum Mieter-Portal.
+""",
+                "content_en": """# Tenant Electricity Full-Supply (§ 42a EnWG)
+
+The **Tenant & Apartment Management** module (`/app/admin/mieterstrom`) fully automates the regulatory and billing requirements of statutory German tenant power pursuant to **§ 42a EnWG**.
+
+---
+
+## 1. Statutory Framework & Full-Supply Principle
+
+Under § 42a EnWG, the operator acts as a **full electricity supplier**. Key legal obligations:
+
+* **Unified Monthly Invoice**: Tenants receive one combined invoice covering both on-site solar consumption and grid residual power.
+* **Statutory Price Cap**: The tenant rate must **not exceed 90 % of the local default utility tariff** (§ 42a para. 4 EnWG).
+* **Freedom of Choice**: Participation is strictly voluntary; bundling electricity contracts with tenancy agreements is prohibited by law.
+* **Statutory Tenant Power Surcharge**: Operators receive an EEG subsidy per kWh of solar energy delivered directly to tenants.
+
+---
+
+## 2. Tariff Structure & Price Components
+
+| Component | Definition | Typical Range |
+| :--- | :--- | :--- |
+| **☀️ Solar Energy Rate** | Price per kWh for locally consumed rooftop solar | 16.00 – 22.00 ct/kWh |
+| **⚡ Residual Grid Rate** | Price per kWh for supplementary grid power | 28.00 – 34.00 ct/kWh |
+| **🏢 Base Service Fee** | Monthly metering and billing maintenance fee | €6.00 – €12.00 / month |
+| **💶 Operator Subsidy** | Official EEG tenant subsidy paid to the operator | Regulated BNetzA rate |
+
+---
+
+## 3. Submetering Cascades & Meter Hierarchy
+
+Sharegy natively supports physical meter cascades as well as virtual balancing via Smart Meter Gateways:
+
+* **Main Grid Meter (Z1)**: Dual-direction meter measuring total grid import and export.
+* **Production Meter (Z2)**: Certified meter tracking gross solar generation.
+* **Submeters (Z3..Zn)**: MID-approved submeters per apartment.
+* **15-Minute Clearing Engine**: Sharegy calculates the exact 15-minute split between solar self-consumption and grid backup for each unit.
+
+---
+
+## 4. BNetzA AS4 Market Communication Adapter
+
+* **EDIFACT MSCONS Dispatch**: Automated generation of 15-minute load curves for DSO and MSB balancing.
+* **UTILMD Master Data Exchange**: Automated tenant moving-in/moving-out notifications.
+* **AS4 BSI Security**: Encrypted communication using certified PKI market certificates.
+
+---
+
+## 5. Monthly Settlement Workflow ("Trigger Monthly Settlement")
+
+1. **Review**: Launch *Trigger Monthly Settlement* to review aggregated consumption and revenue splits.
+2. **Automated Audit**: Pre-flight validation checks for meter gaps or tariff anomalies.
+3. **Dispatch & Invoicing**: Automated PDF generation, tenant email notifications, and SEPA direct debit XML export (pain.008).
+""",
+                "tags": ["mieterstrom", "enwg", "§ 42a", "abrechnung", "as4", "mscons", "utilmd", "submetering", "vollversorgung"],
+                "is_featured": True,
+                "sort_order": 2,
+            },
+            {
+                "category": cats["admin-governance"],
+                "slug": "admin-ggv-weg-guide",
+                "context_key": "admin_ggv",
+                "title_de": "WEG & Gebäudeverwaltung: Gemeinschaftliche Gebäudeversorgung (§ 42b EnWG / Solarpaket I)",
+                "title_en": "HOA & Building Management: Collective Self-Supply (§ 42b EnWG / Solar Package I)",
+                "summary_de": "Bürokratiearmer Solarstrom für Mehrparteienhäuser: Statische & dynamische 15m-Aufteilungsschlüssel (MEA), WEG-Beschlussvorlagen und AS4-Clearing ohne Versorgerpflichten.",
+                "summary_en": "Streamlined solar for multi-family homes: Static & dynamic 15m allocation keys (MEA), HOA resolution templates, and AS4 grid clearing without full-supplier burdens.",
+                "content_de": """# WEG & Gebäudeverwaltung: Gemeinschaftliche Gebäudeversorgung (§ 42b EnWG)
+
+Mit dem **Solarpaket I** wurde die **Gemeinschaftliche Gebäudeversorgung (GGV)** gem. **§ 42b EnWG** eingeführt. Sie ermöglicht es Wohnungseigentümergemeinschaften (WEG), Vermietern und Mietergemeinschaften, Solarstrom vom eigenen Dach bürokratiearm im Gebäude aufzuteilen – **ohne Vollversorgerpflichten und ohne Gewerbeanmeldung**.
+
+Das Modul **WEG & Gebäudeverwaltung** (`/app/admin/ggv`) führt Verwaltungen und Beiräte schrittweise durch Beschlüsse, Schlüsselaufteilung und Zählerabgleich.
+
+---
+
+## 1. Die Revolution des § 42b EnWG: GGV vs. Mieterstrom
+
+| Kriterium | 🏢 Klassischer Mieterstrom (§ 42a EnWG) | ⚖️ Gemeinschaftliche Gebäudeversorgung (§ 42b EnWG) |
+| :--- | :--- | :--- |
+| **Versorgerpflicht** | **JA** (Vollversorgung mit Reststrom zwingend) | **NEIN** (Reine Solarstrom-Aufteilung; Reststrom bleibt frei) |
+| **Reststromvertrag** | Betreiber muss Reststrom an der Strombörse einkaufen | Jeder Bewohner behält seinen eigenen Stromanbieter |
+| **Bürokratieaufwand** | Hoch (EVU-Meldepflichten, Bilanzkreisabrechnung) | **Minimal** (Keine EVU-Registrierung notwendig) |
+| **Messung** | Physische Kaskadenzähler oder Smart Meter | **Smart Meter (iMSys)** je Partei erforderlich |
+| **Ideal für** | Große Wohnungsunternehmen & Contracting | **WEGs, Mehrfamilienhäuser, Vermieter ab 2 Einheiten** |
+
+---
+
+## 2. Die beiden 15-Minuten-Aufteilungsschlüssel
+
+Gemäß § 42b Abs. 3 EnWG kann der erzeugte Solarstrom in jedem 15-Minuten-Intervall nach zwei Modellen aufgeteilt werden:
+
+### A. Statischer Aufteilungsschlüssel (z. B. nach MEA oder Fläche)
+* Jede Wohneinheit erhält einen festen prozentualen Anteil der jeweiligen Momentanerzeugung (z. B. 25 % bei 4 gleich großen Wohnungen oder gem. Miteigentumsanteil im Grundbuch).
+* *Vorteil*: Maximale Einfachheit und absolute Planbarkeit für die Eigentümergemeinschaft.
+
+### B. Dynamischer Aufteilungsschlüssel (Echtzeit-Optimierung)
+* Der momentan erzeugte Solarstrom wird in jeder Viertelstunde **proportional zum tatsächlichen Momentanverbrauch** der teilnehmenden Parteien verteilt.
+* *Vorteil*: Höchste solare Nutzungsquote im Gesamtgebäude; kein Strom wird ungenutzt eingespeist, wenn eine Partei gerade nicht zu Hause ist.
+
+---
+
+## 3. WEG-Beschlussvorlagen & Gebäudevertrag (§ 42b Abs. 2)
+
+Im GGV-Cockpit stellt Sharegy rechtssichere Vorlagen für die Eigentümerversammlung bereit:
+
+1. **Beschlussfassung in der WEG**:
+   * Beschluss über die Errichtung / Nutzung der PV-Anlage auf dem Gemeinschaftseigentum.
+   * Festlegung des Aufteilungsmodells (Statisch vs. Dynamisch).
+2. **Gebäudevertrag (Vertrag zur gemeinschaftlichen Gebäudeversorgung)**:
+   * Gesetzlich vorgeschriebener Vertrag zwischen Anlagenbetreiber/WEG und den teilnehmenden Parteien.
+   * Regelt Solarpreis, Betriebskostenumlage, Instandhaltung und Kündigungsmöglichkeiten.
+
+---
+
+## 4. Messstellenbetrieb & BNetzA Marktkommunikation
+
+Für die rechtskonforme Bilanzierung meldet Sharegy die 15-Minuten-Werte an den Netzbetreiber:
+
+* **Smart Meter Gateway (SMGW)**: Auslesung über wMSB (z. B. Discovergy, Solandeo, inexogy) oder gMSB (CLS-Kanal).
+* **AS4 MSCONS Dispatch**: Der Verteilnetzbetreiber zieht die solaren Bezugsmengen rechnerisch vom externen Netzbezug des jeweiligen Mieters ab. Der Mieter zahlt seinem externen Versorger automatisch nur noch den reduzierten Reststrom.
+""",
+                "content_en": """# HOA & Building Management: Collective Self-Supply (§ 42b EnWG)
+
+Enacted under Germany's **Solar Package I (Solarpaket I)**, **Collective Building Supply (Gemeinschaftliche Gebäudeversorgung - GGV)** pursuant to **§ 42b EnWG** enables Homeowners Associations (HOA / WEG) and landlords to share rooftop solar energy across all building units **without supplier licensing or full-utility burdens**.
+
+The **HOA & Building Management** module (`/app/admin/ggv`) guides property managers and boards through HOA resolutions, allocation key selection, and automated meter balancing.
+
+---
+
+## 1. § 42b EnWG vs. Classic Tenant Power
+
+| Feature | 🏢 Classic Tenant Power (§ 42a EnWG) | ⚖️ Collective Self-Supply (§ 42b EnWG) |
+| :--- | :--- | :--- |
+| **Supplier Obligations** | **YES** (Must supply 100% residual grid electricity) | **NO** (Only allocates rooftop solar; grid power is independent) |
+| **Grid Power Sourcing** | Operator must purchase grid electricity on spot markets | Each resident keeps their own individual grid provider |
+| **Regulatory Burden** | High (Utility registration, balancing group audits) | **Minimal** (No energy utility registration required) |
+| **Metering Setup** | Physical meter cascades or smart meters | **Smart Meter Gateways (iMSys)** per participating unit |
+| **Best Suited For** | Large real estate developers & energy contractors | **HOAs, 2–30 unit apartment buildings, private landlords** |
+
+---
+
+## 2. 15-Minute Solar Allocation Models
+
+Pursuant to § 42b para. 3 EnWG, rooftop solar is split in 15-minute settlement intervals:
+
+### A. Static Allocation Key (e.g. Ownership Share / MEA)
+* Each apartment receives a fixed percentage of momentary generation (e.g., 25% for 4 equal units or proportional to land registry co-ownership shares).
+* *Benefit*: Predictable, transparent, and simple for HOA accounting.
+
+### B. Dynamic Allocation Key (Real-Time Proportional)
+* Momentary solar generation is distributed dynamically in every 15-minute window based on the **actual simultaneous consumption** of participating units.
+* *Benefit*: Maximizes self-consumption; solar energy is not wasted when a resident is away.
+
+---
+
+## 3. HOA Resolutions & Statutory Building Agreement
+
+The GGV cockpit generates ready-to-sign legal templates:
+
+1. **HOA Assembly Resolution (WEG-Beschluss)**: Formal voting draft approving rooftop solar utilization and selected allocation key.
+2. **Statutory Building Agreement (§ 42b para. 2 EnWG)**: Mandatory contract between building operator/HOA and participants detailing solar pricing, maintenance reserves, and exit clauses.
+
+---
+
+## 4. Metering & Automated Grid Operator Dispatch
+
+* **Smart Meter Integration**: Data ingestion via independent metering operators (wMSB) or basic metering operators (gMSB CLS channel).
+* **AS4 MSCONS Clearing**: Sharegy transmits 15-minute allocations to the local grid operator, automatically deducting on-site solar consumption from each resident's external utility bill.
+""",
+                "tags": ["ggv", "weg", "§ 42b", "solarpaket", "gemeinschaftliche gebaeudeversorgung", "mea", "aufteilungsschluessel", "eigentuemergemeinschaft"],
+                "is_featured": True,
+                "sort_order": 3,
+            },
+            {
+                "category": cats["admin-governance"],
+                "slug": "admin-energy-sharing-cooperative-guide",
+                "context_key": "admin_sharing",
+                "title_de": "Bürgerenergie & Genossenschaften: Energy Sharing, Mitgliederverwaltung & P2P-Strompool",
+                "title_en": "Energy Cooperatives: Energy Sharing, Member Management & P2P Electricity Pool",
+                "summary_de": "Bürgerstrom im virtuellen Bilanzkreis: 15-Minuten P2P-Sharing, Netzentgelt-Reduktion, Genossenschaftsanteile und transparente Mitgliederabrechnung.",
+                "summary_en": "Local citizen energy pooling: 15-minute P2P sharing matrix, grid fee discounts, cooperative shares, and transparent member billing.",
+                "content_de": """# Bürgerenergie & Genossenschaften (Energy Sharing)
+
+Das Modul **Genossenschaft & Mitglieder** (`/app/admin/sharing`) ist die Steuerungsplattform für Bürgerenergiegenossenschaften (eG), Erneuerbare-Energien-Gemeinschaften (EEG) und regionale Energie-Sharing-Initiativen gem. der europäischen **Renewable Energy Directive II (EU RED II)** und dem **Genossenschaftsgesetz (GenG)**.
+
+---
+
+## 1. Das Sharegy Energy-Sharing-Konzept
+
+Energy Sharing verbindet dezentrale Erzeuger (Solaranlagen, Bürger-Windparks, Biomasse) mit privaten und gewerblichen Verbrauchern in einem gemeinsamen virtuellen Strom-Pool:
+
+```
+[ Bürger-PV-Anlagen & Windparks ]
+               |
+    [ Virtueller Energy-Pool ] <---> [ Sharegy 15-Minuten P2P Matching Engine ]
+               |
+     +---------+---------+---------+
+     |                   |         |
+[ Mitglied A ]     [ Mitglied B ]  [ Mitglied C ]
+ (Prosumer)         (Reiner Verbr.) (Gewerbe)
+```
+
+* **Viertelstündlicher P2P-Ausgleich**: In jedem 15-Minuten-Intervall matcht der Algorithmus Erzeugung und Verbrauch der Mitglieder.
+* **Transparenter Bürgerstrom**: Mitglieder sehen in Echtzeit, aus welchen lokalen Anlagen ihr Strom stammt.
+* **Finanzielle Vorteile**: Geringere Stromgestehungskosten, Netzentgeltreduktion bei regionalem Verbrauch und genossenschaftliche Rückvergütungen.
+
+---
+
+## 2. Mitgliederverwaltung & Onboarding-Workflow
+
+Über das Genossenschafts-Cockpit verwalten Vorstände und Administratoren:
+
+1. **Mitglieder-Einladungen**: Versenden personalisierter Registrierungslinks per E-Mail oder QR-Code.
+2. **Anteilsverwaltung**: Erfassung der gezeichneten Genossenschaftsanteile gem. Satzung.
+3. **Zähler- & Messstellen-Kopplung**: Verknüpfung von Smart Metern (iMSys) oder MID-Zählern der Mitglieder.
+4. **Tarif- & Vergütungsmodelle**: Festlegung des internen Sharing-Arbeitspreises sowie der Einspeisevergütung für Überschusseinspeiser.
+
+---
+
+## 3. Das Transparenz-Cockpit (/app/admin/sharing)
+
+Das Live-Dashboard visualisiert für das gesamte Kollektiv:
+
+| Kennzahl | Bedeutung |
+| :--- | :--- |
+| **☀️ Kollektive Erzeugung** | Momentane Stromproduktion aller angeschlossenen Photovoltaik- und Erzeugungsanlagen |
+| **⚡ Kollektiver Verbrauch** | Zeitgleiche Last aller privaten Haushalte und Gewerbemitglieder |
+| **🔄 Geteilter Strom (Sharing)** | Menge an Strom, die im selben Zeitfenster innerhalb der Genossenschaft getauscht wurde |
+| **🛡️ Autarkiegrad der Gemeinschaft** | Grad der Unabhängigkeit vom externen Großhandelsmarkt |
+| **🌱 Vermiedenes CO2** | Einsparung an Treibhausgasen im Vergleich zum bundesweiten Strommix |
+
+---
+
+## 4. Abrechnung, Clearing & Dividenden-Ausschüttung
+
+Sharegy automatisiert das genossenschaftliche Clearing:
+* **Monatliche Abrechnungsbelege**: Aufschlüsselung über bezogenen Gemeinschaftsstrom, Reststrom und Einspeiseerlöse.
+* **Gutschriften für Erzeuger**: Direkte Auszahlung der Erlöse an Mitglieder, die Solarstrom in den Pool einspeisen.
+* **Jahresabschluss & Dividende**: Aggregierte Datenbasis für die Generalversammlung und Dividendenausschüttung.
+""",
+                "content_en": """# Citizen Energy Cooperatives (Energy Sharing)
+
+The **Cooperative & Member Management** module (`/app/admin/sharing`) provides the core engine for Citizen Energy Cooperatives (eG), Renewable Energy Communities (REC), and local energy sharing pools under the EU **Renewable Energy Directive II (EU RED II)**.
+
+---
+
+## 1. The Sharegy Energy Sharing Architecture
+
+Energy sharing dynamically links decentralized producers (community solar, wind farms, biomass) with local consumers in a shared virtual electricity pool:
+
+* **15-Minute P2P Matching**: Advanced algorithms calculate quarter-hourly matching between local generation and consumption.
+* **Source Transparency**: Members track in real time which local wind or solar system powers their home.
+* **Economic Benefits**: Substantially lower levelized costs of electricity (LCOE), regional grid fee incentives, and cooperative patronage refunds.
+
+---
+
+## 2. Member Management & Onboarding
+
+Cooperative boards and administrators manage workflows in one portal:
+
+1. **Member Invitations**: Single-click invitation links via email or QR codes.
+2. **Share Registry**: Audited tracking of subscribed cooperative equity shares.
+3. **Meter Binding**: Linking Smart Meter Gateways (iMSys) or certified submeters.
+4. **Internal Tariff Formulation**: Setting internal sharing tariffs and feed-in compensation for prosumers.
+
+---
+
+## 3. Community Transparency Cockpit (/app/admin/sharing)
+
+| Metric | Meaning & Value |
+| :--- | :--- |
+| **☀️ Collective Generation** | Live power generation across all member solar and wind assets |
+| **⚡ Collective Demand** | Simultaneous electricity demand of all participating homes and businesses |
+| **🔄 Shared Energy** | Energy matched directly within the cooperative during the current interval |
+| **🛡️ Community Autarky** | Collective independence percentage from external wholesale energy |
+| **🌱 Carbon Offset** | Audited greenhouse gas abatement compared to national grid mix |
+
+---
+
+## 4. Clearing, Accounting & Dividend Payouts
+
+* **Automated Monthly Invoices**: Detailed statements of shared energy, residual backup, and feed-in revenue.
+* **Producer Credits**: Automated disbursements to members feeding solar into the collective pool.
+* **Annual Assembly Export**: Audited accounting reports for the general assembly and statutory dividend distribution.
+""",
+                "tags": ["energy sharing", "genossenschaft", "buergerenergie", "red ii", "p2p", "strompool", "mitgliederverwaltung", "clearing"],
+                "is_featured": True,
+                "sort_order": 4,
+            },
+            {
+                "category": cats["admin-governance"],
+                "slug": "admin-vpp-flex-aggregator-guide",
+                "context_key": "admin_vpp",
+                "title_de": "VPP & Flex-Zentrale: Schwarm-Aggregation, § 14a SteuVE, Regelleistung & 80/20 Clearing",
+                "title_en": "VPP & Flex Control Center: Swarm Aggregation, § 14a SteuVE, Balancing Power & 80/20 Clearing",
+                "summary_de": "Das Virtuelle Kraftwerk von Sharegy: Heimspeicher & SteuVE bündeln, Positive & Negative Flexibilität, Leitsystem-Simulator und automatisierte Erlösausschüttung.",
+                "summary_en": "Sharegy Virtual Power Plant: Pooling home batteries & steerable loads, positive/negative flexibility dispatch, grid services, and 80/20 revenue settlement.",
+                "content_de": """# VPP & Flex-Zentrale (Virtuelles Kraftwerk)
+
+Die **VPP & Flex-Zentrale** (`/app/admin/vpp`) vernetzt dezentrale Heimspeicher, steuerbare Verbrauchseinrichtungen (**§ 14a EnWG SteuVE**) wie Wallboxen und Wärmepumpen sowie Photovoltaikanlagen zu einem leistungsstarken **Virtuellen Kraftwerk (Virtual Power Plant - VPP)**.
+
+Betreiber monetarisieren Flexibilitäten an den Regelleistungsmärkten (aFRR / FCR), unterstützen Netzbetreiber bei **Redispatch 2.0 / Connect+** und schütten Erlöse automatisiert über ein faires **80/20-Clearing** an die Anlagenbesitzer aus.
+
+---
+
+## 1. Die Flexibilitäts-Säulen im Virtuellen Kraftwerk
+
+Sharegy unterscheidet zwei fundamentale Steuerungsrichtungen:
+
+| Flexibilitätsart | Technische Maßnahmen | Netzdienlicher Nutzen |
+| :--- | :--- | :--- |
+| **📈 Positive Flexibilität (+kW)** | * Entladung vernetzter Heimspeicher ins Haus/Netz<br>* § 14a Lastabwurf / Drosselung von Wallboxen & WP | Stützt das Netz bei Unterdeckung, Frequenzabfall und teuren Peak-Preisen |
+| **📉 Negative Flexibilität (-kW)** | * Forciertes Laden von Speichern aus dem Netz<br>* Abregelung / Drosselung von PV-Einspeisung | Nimmt Überschussenergie bei Sturm/Sonnenspitzen auf und verhindert Netzüberlastungen |
+
+---
+
+## 2. § 14a EnWG SteuVE-Schwarm (Wallboxen & Wärmepumpen)
+
+Alle steuerbaren Verbrauchseinrichtungen mit einer Anschlussleistung ≥ 4,2 kW fallen unter die BNetzA-Regulierung zum § 14a EnWG:
+
+* **Automatisierte Pflichtdrosselung**: Bei Überlastung des Ortsnetzes kann der Verteilnetzbetreiber (VNB) ein Dimmsignal senden.
+* **Sharegy EMS-Vorteil**: Statt Geräte hart abzuschalten, drosselt das Sharegy EMS die Leistungsaufnahme am Netzanschlusspunkt präzise auf 4,2 kW, während lokaler Solarstrom ungedimmt weitergenutzt werden darf.
+* **Netzentgelt-Reduktion**: Kunden erhalten Modul 1 (Pauschalrabatt 130–190 €/a) oder Modul 2 (prozentuale Reduktion).
+
+---
+
+## 3. Leitsystem-Simulator: Regelleistungs-Abruf (Dispatch)
+
+In der Dispatch-Zentrale (`/app/admin/vpp`) können Administratoren:
+
+1. **Manuellen Test-Dispatch auslösen**: Zur Verifikation der Latenzzeiten und Reaktionsfähigkeit des Speicher- und Wallbox-Schwarms.
+2. **Automatisierte Marktkopplung (aFRR / Redispatch 2.0)**: Sekundenschnelle Reaktion auf automatisierte Abrufe der Übertragungsnetzbetreiber (ÜNB) über standardisierte REST/WebSocket- und EEBUS-Schnittstellen.
+3. **Audit-Log**: Lückenloses Nachweisprotokoll über Soll-Leistung, Ist-Leistung und Netzfrequenz gem. VDE-AR-N 4105.
+
+---
+
+## 4. 96-Viertelstunden-Fahrplan (Redispatch 2.0 & Day-Ahead)
+
+Sharegy berechnet täglich rollierend einen **96-Viertelstunden-Fahrplan (`PT15M`)**:
+* **Prognose**: Erwartete Residuallast und Erzeugung aller Anlagen.
+* **Flexibilitätskorridor**: Verfügbare positive und negative Bandbreite für jeden 15-Minuten-Slot.
+* **Automatisierter Datenversand**: Übertragung via Connect+ / BNetzA-Marktprozesse.
+
+---
+
+## 5. Automatisches Market Clearing & 80/20 Erlösausschüttung
+
+Die Teilnahme am Virtuellen Kraftwerk wird für Kunden vollautomatisch vergütet:
+
+* **80 % Kundenerlös**: 80 Prozent aller an den Regelenergie- und Arbitragemärkten erzielten Gewinne werden direkt dem Anlagenbesitzer gutgeschrieben.
+* **20 % Plattformmarge**: 20 Prozent verbleiben als Servicegebühr bei Sharegy für Netzwerkinfrastruktur, Prognosemodelle und Marktzugang.
+* **Abrechnung**: Monatliche Gutschriftenanzeige im Kunden-Dashboard und automatisierte Überweisung.
+""",
+                "content_en": """# VPP & Flex Control Center (Virtual Power Plant)
+
+The **VPP & Flex Control Center** (`/app/admin/vpp`) aggregates residential battery storage, controllable loads pursuant to **§ 14a EnWG (SteuVE)** such as EV wallboxes and heat pumps, and solar assets into a utility-scale **Virtual Power Plant (VPP)**.
+
+Operators monetize flexible capacity across balancing markets (aFRR / FCR), support DSOs with **Redispatch 2.0 / Connect+**, and disburse revenues automatically via a transparent **80/20 market clearing** model.
+
+---
+
+## 1. Flexibility Pillars in the Virtual Power Plant
+
+| Flexibility Vector | Physical Execution | Grid & Economic Function |
+| :--- | :--- | :--- |
+| **📈 Positive Flexibility (+kW)** | * Coordinated home battery discharge<br>* § 14a load shedding / throttling of EV chargers & heat pumps | Supports the grid during supply deficits, under-frequency events, and peak prices |
+| **📉 Negative Flexibility (-kW)** | * Forced grid-charging into batteries<br>* Curtailed / throttled PV feed-in | Absorbs wind and solar surpluses during negative pricing events, preventing transformer overload |
+
+---
+
+## 2. § 14a EnWG SteuVE Aggregation (EV Chargers & Heat Pumps)
+
+All steerable loads ≥ 4.2 kW connected after Jan 1, 2024 fall under statutory § 14a EnWG rules:
+
+* **Automated Grid Dimming**: Upon local grid congestion, the DSO can issue a mandatory power ceiling.
+* **Sharegy EMS Advantage**: Rather than hard-disconnecting devices, Sharegy EMS limits grid import to 4.2 kW while allowing full unrestricted utilization of on-site solar power.
+* **Grid Fee Reductions**: Owners benefit from statutory discounts (Module 1 lump sum €130–€190/yr or Module 2 percentage reduction).
+
+---
+
+## 3. Dispatch Simulator & Balancing Control
+
+Within the dispatch console (`/app/admin/vpp`), administrators can:
+
+1. **Simulate Live Test Dispatches**: Verify swarm response latency and actual power delivery across connected batteries.
+2. **Automated Market Clearing (aFRR / Redispatch 2.0)**: Execute automated secondary frequency response orders via REST/EEBUS.
+3. **Audit Trail**: Millisecond-accurate telemetry logging matching VDE-AR-N 4105 compliance standards.
+
+---
+
+## 4. 96 Quarter-Hour Day-Ahead Schedules (`PT15M`)
+
+Sharegy computes rolling 96 quarter-hour baseline and flexibility schedules:
+* **Forecast Matrix**: Baseline demand and solar yield for each 15-minute slot.
+* **Flex Corridor**: Guaranteed positive (+kW) and negative (-kW) bandwidth available for grid operators.
+* **Connect+ Export**: Automated EDIFACT/REST payload exchange with German grid coordinators.
+
+---
+
+## 5. Automated Market Clearing & 80/20 Revenue Settlement
+
+* **80 % Asset Owner Share**: 80 percent of all net balancing and arbitrage profits are credited directly to participating homeowners.
+* **20 % Platform Share**: 20 percent retained by Sharegy covering infrastructure, forecasting AI, and market access fees.
+* **Disbursement**: Monthly self-billing credit notes in the user dashboard and automated SEPA payouts.
+""",
+                "tags": ["vpp", "virtuelles kraftwerk", "flexibilitaet", "§ 14a", "steuve", "dispatch", "redispatch 2.0", "clearing", "80/20", "afrr"],
+                "is_featured": True,
+                "sort_order": 5,
+            },
+            {
+                "category": cats["admin-governance"],
+                "slug": "admin-partner-fleet-installer-guide",
+                "context_key": "admin_partner",
+                "title_de": "Fachpartner & Flottenmanagement: 1-Klick IBN, 6-in-1 Fernwartungs-Konsole & Abnahmeprotokolle",
+                "title_en": "Certified Installers & Fleet Management: 1-Click Commissioning, 6-in-1 Remote Console & Protocols",
+                "summary_de": "Leitfaden für Solarteure & Fachbetriebe: Flottenüberwachung (/app/partner), 3-Sekunden Schnell-Inbetriebnahme, bidirektionale Fernwartung und digitale IBN-Protokolle.",
+                "summary_en": "Installer handbook: fleet monitoring (/app/partner), 3-second rapid commissioning, bidirectional remote maintenance console, and digital handover protocols.",
+                "content_de": """# Fachpartner & Flottenmanagement-Portal
+
+Das **Fachpartner- und Installateurs-Portal** (`/app/partner`) wurde speziell für Solarteure, Elektrofachbetriebe, Servicetechniker und Systemhäuser entwickelt. Es minimiert den Zeitaufwand bei der Inbetriebnahme (IBN) vor Ort und ermöglicht eine lückenlose **6-in-1 Fernwartung** ohne zeitraubende Vor-Ort-Fahrten.
+
+---
+
+## 1. Das Flotten-Dashboard im Überblick
+
+Im Partner-Cockpit haben Installateure alle betreuten Kundenanlagen im Blick:
+
+| KPI & Status | Funktionsumfang |
+| :--- | :--- |
+| **🏢 Betreute Kundenanlagen** | Gesamtübersicht aller installierten Systeme mit Live-Online/Offline-Status |
+| **☀️ Installierte Gesamtleistung** | Summe der installierten PV-Kapazität (kWp) und Echtzeit-Erzeugung |
+| **🔋 Heimspeicher & Ø SoC** | Anzahl der Batteriesysteme und durchschnittlicher Ladezustand der Flotte |
+| **🚗 § 14a SteuVE (Dimmbar)** | Registrierte Wallboxen und Wärmepumpen mit aktivem Dimmstatus |
+| **🛡️ Flotten-Health-Score** | 0–100 % Qualitätsindex; automatische Erkennung von Störungen und Ertragsausfällen |
+| **🚨 Offene Service-Tickets** | Priorisierte Liste von Kunden mit Handlungsbedarf |
+
+---
+
+## 2. 1-Klick Schnell-Inbetriebnahme (IBN in unter 3 Minuten)
+
+Vor Ort beim Kunden ermöglicht der geführte IBN-Assistent:
+
+1. **QR-Code / Seriennummern-Scan**: Automatisches Einlesen von Wechselrichter, Speicher und Zähler.
+2. **Automatischer Modbus-TCP / Cloud-Scan**: Sharegy erkennt automatisch Wechselrichter-Hersteller (SMA, Sungrow, Fronius, SolarEdge, Kostal, Deye, Huawei, GoodWe etc.) und konfiguriert alle Register.
+3. **3-Sekunden Hardware-Selbsttest**: 
+   * Überprüfung von Phasendrehfeldern und Zählerpolarität (Verhinderung von Fehlverdrahtungen).
+   * Test-Kommunikation mit Steuerbox (§ 14a EnWG) und Wallbox.
+4. **Digitales IBN-Abnahmeprotokoll (PDF)**:
+   * Rechtssicheres Protokoll nach **VDE-AR-N 4105** mit Zeitstempel, Seriennummern und Messwerten.
+   * Direkter PDF-Export zur Vorlage beim Verteilnetzbetreiber und Kundenunterschrift auf dem Tablet.
+
+---
+
+## 3. Die 6-in-1 Fernwartungs-Konsole
+
+Treten beim Kunden Fragen oder Störungen auf, öffnet der Partner mit einem Klick die **Fernwartungs-Konsole**:
+
+```
+[ 6-in-1 Fernwartungs-Konsole ]
+  |-- 1. Register-Direktabfrage (Modbus/REST Live-Werte)
+  |-- 2. Grid-Code & Wirkleistungsbegrenzung (Cos Phi / 70% / 4,2 kW)
+  |-- 3. Firmware- & Konfigurations-Update (OTA Push)
+  |-- 4. Steuerbox- & § 14a Relaistest (Schaltprüfung)
+  |-- 5. Batteriezellen-Balancing & SoC-Kalibrierung
+  `-- 6. Fehlerspeicher (DTC) & Diagnose-Ereignislog
+```
+
+---
+
+## 4. Live-Ansicht (Kunden-EMS direkt spiegeln)
+
+Über die Funktion **„Live-Ansicht (Kunden-EMS)“** kann der Support-Techniker das Kunden-Dashboard exakt so einsehen wie der Kunde selbst:
+* Identifikation von Fehlkonfigurationen im Smart Energy Optimizer.
+* Überprüfung von Prioritätsregeln für Wallbox-Überschussladen.
+* Anpassung dynamischer Stromtarif-Schwellenwerte aus der Ferne.
+
+---
+
+## 5. Präventive Störungserkennung & Health-Scores
+
+Sharegy analysiert kontinuierlich alle Telemetriedaten und schlägt Alarm bei:
+* **String-Ausfällen**: Erkennung von Mismatch oder defekten Modulsträngen durch DC-Spannungsvergleich.
+* **Batteriezellen-Drift**: Frühzeitige Warnung bei abweichenden Zellspannungen vor Tiefentladung.
+* **Isolationsfehlern**: Erkennung von Feuchtigkeitseintritten vor Auslösen des FI-Schutzschalters.
+""",
+                "content_en": """# Certified Installers & Fleet Management Portal
+
+The **Partner & Installer Portal** (`/app/partner`) is engineered specifically for solar EPCs, electrical contractors, and maintenance engineers. It drastically shortens on-site commissioning (IBN) time and delivers a comprehensive **6-in-1 remote maintenance console** to eliminate unnecessary truck rolls.
+
+---
+
+## 1. Fleet Dashboard Overview
+
+The partner dashboard provides instantaneous visibility across all managed customer sites:
+
+| KPI & Status | Core Capabilities |
+| :--- | :--- |
+| **🏢 Managed Customer Sites** | Complete registry of deployed systems with real-time online/offline heartbeat |
+| **☀️ Total Installed Capacity** | Combined PV peak capacity (kWp) and instantaneous generation |
+| **🔋 Battery Fleet & Avg. SoC** | Total connected battery systems and fleet-wide average state of charge |
+| **🚗 § 14a SteuVE (Dimmable)** | Registered EV chargers and heat pumps with active grid dimming status |
+| **🛡️ Fleet Health Score** | 0–100 % aggregate reliability score with automated anomaly detection |
+| **🚨 Active Service Tickets** | Prioritized action items and diagnostic alerts |
+
+---
+
+## 2. 1-Click Rapid Commissioning (Under 3 Minutes)
+
+The on-site commissioning wizard guides technicians through:
+
+1. **QR Code / Serial Scan**: Instantaneous binding of inverters, batteries, and smart meters.
+2. **Automated Modbus TCP / Cloud Discovery**: Auto-detects inverters (SMA, Sungrow, Fronius, SolarEdge, Kostal, Deye, Huawei, GoodWe etc.) and configures all register addresses.
+3. **3-Second Diagnostic Self-Test**: Validates grid phase rotation, CT clamp polarity, and § 14a relay responses.
+4. **Digital Handover Protocol (PDF)**:
+   * Generates a compliant **VDE-AR-N 4105 handover protocol** with cryptographic timestamps, serial numbers, and live electrical telemetry.
+   * Direct customer on-glass tablet signature for immediate submission to the grid operator.
+
+---
+
+## 3. The 6-in-1 Remote Maintenance Console
+
+When customer anomalies arise, technicians launch the **Remote Console**:
+
+1. **Live Register Query**: Raw Modbus/REST polling of electrical parameters.
+2. **Grid-Code & Power Limits**: Adjusting Cos Phi, active power derating, or 4.2 kW ceilings.
+3. **Firmware & Config Push**: Over-the-air parameter and firmware deployments.
+4. **Steuerbox & § 14a Relay Test**: Actuating digital contacts to confirm VNB dimming readiness.
+5. **Battery Balancing & SoC Calibration**: Forced top-balancing cycles for drifted battery packs.
+6. **Diagnostic Trouble Codes (DTC)**: Inverter fault log inspection with clear actionable remedies.
+
+---
+
+## 4. Live EMS Mirror (Customer Dashboard View)
+
+Using the **"Live View (Customer EMS)"** bridge, engineers mirror the exact customer dashboard to assist with optimizer scheduling, EV priority settings, or dynamic tariff thresholds without physical visits.
+
+---
+
+## 5. Predictive Maintenance & Anomaly Detection
+
+* **String Degradation**: Identifies shaded, soiled, or disconnected PV strings via DC voltage comparison.
+* **Cell Voltage Drift**: Early alerts for battery cell imbalance before degradation occurs.
+* **Insulation Resistance Warnings**: Alerts on moisture ingress before ground fault trips occur.
+""",
+                "tags": ["partner", "solarteur", "installateur", "flottenmanagement", "inbetriebnahme", "ibn", "vde-ar-n 4105", "fernwartung", "modbus"],
+                "is_featured": True,
+                "sort_order": 6,
+            },
         ]
+
         valid_slugs = set()
         for adata in articles_data:
             valid_slugs.add(adata["slug"])

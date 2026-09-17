@@ -5,6 +5,7 @@ import useModalDismiss from "../../hooks/useModalDismiss";
 */
 
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../api/client";
@@ -225,6 +226,14 @@ export default function VppFleetAdminPage() {
                 </div>
 
                 <div className="flex items-center gap-2">
+                    <Link
+                        to="/app/help/admin-vpp-flex-aggregator-guide"
+                        className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:border-emerald-300 rounded-xl text-xs font-bold transition flex items-center gap-1.5"
+                    >
+                        <span>📖</span>
+                        <span>{t("admin_vpp.btn_manual", "Handbuch (VPP)")}</span>
+                    </Link>
+
                     <button
                         onClick={() => {
                             fleetQuery.refetch();

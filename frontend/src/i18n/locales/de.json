@@ -2926,7 +2926,8 @@
     "residual_price": "Reststrompreis",
     "residual_grid_supply": "Netzbezug (Vollversorger)",
     "base_price": "Grundpreis",
-    "meter_and_billing": "Zähler & Abrechnung"
+    "meter_and_billing": "Zähler & Abrechnung",
+    "btn_manual": "Handbuch (§ 42a EnWG)"
   },
   "admin_ggv": {
     "title": "Gemeinschaftliche Gebäudeversorgung (§ 42b EnWG)",
@@ -2975,7 +2976,8 @@
     "owner_label": "Eigentümer:",
     "solar_usage_amount": "Solarnutzungsbetrag",
     "no_statements_msg": "Noch keine Abrechnungsnachweise erstellt. Klicke auf 'Solarabrechnung anstoßen'.",
-    "audit_title": "WEG-Audit- & Beschlussprotokoll"
+    "audit_title": "WEG-Audit- & Beschlussprotokoll",
+    "btn_manual": "Handbuch (§ 42b EnWG)"
   },
   "admin_sharing": {
     "title": "Regionales Energy Sharing (Bürgerenergie eG)",
@@ -2989,7 +2991,8 @@
     "tab_settlement": "💰 15m-Sharing-Abrechnung",
     "loading": "Lade Regionales Energy Sharing & Bürgerenergie eG...",
     "no_cooperative": "Keine Bürgerenergiegenossenschaft zugewiesen",
-    "no_cooperative_desc": "Du bist aktuell keiner Energiegemeinschaft zugeordnet."
+    "no_cooperative_desc": "Du bist aktuell keiner Energiegemeinschaft zugeordnet.",
+    "btn_manual": "Handbuch (Genossenschaft)"
   },
   "admin_communities": {
     "title": "Quartiers- & Portfolio-Verwaltung (Plattform-Admin)",
@@ -3115,7 +3118,8 @@
       "message_placeholder": "Text der Mitteilung an alle Teilnehmer dieser Energiegemeinschaft...",
       "cancel_btn": "Abbrechen",
       "publish_btn": "Veröffentlichen"
-    }
+    },
+    "btn_manual": "Handbuch (Portfolio)"
   },
   "wizard": {
     "step1_title": "1. Modell & Stammdaten",
@@ -3221,7 +3225,8 @@
     "prod_fcr": "🔋 FCR Primärregelung",
     "prod_redispatch": "🔌 Redispatch 2.0",
     "prod_spotmarket": "📈 Spotmarkt-Arbitrage",
-    "telemetry_protocol": "Telemetrie-Protokoll:"
+    "telemetry_protocol": "Telemetrie-Protokoll:",
+    "btn_manual": "Handbuch (VPP)"
   },
   "whitelabel": {
     "presets_title": "Schnell-Farbprofile",
@@ -3592,7 +3597,8 @@
     "onboard_battery_label": "Batteriespeicher (kWh)",
     "handover_title": "Inbetriebnahmeprotokoll & Übergabenachweis",
     "handover_sub": "Eichrechtskonforme Dokumentation für Fachbetrieb & Netzbetreiber",
-    "handover_print": "Protokoll drucken / PDF"
+    "handover_print": "Protokoll drucken / PDF",
+    "btn_manual": "Handbuch (Partner)"
   },
   "msb": {
     "badge_compliance": "§ 42b EnWG & MsbG Konform",

@@ -2926,7 +2926,8 @@
     "residual_price": "Residual Power Price",
     "residual_grid_supply": "Grid Import (Full Supply)",
     "base_price": "Base Price",
-    "meter_and_billing": "Metering & Billing"
+    "meter_and_billing": "Metering & Billing",
+    "btn_manual": "Manual (§ 42a EnWG)"
   },
   "admin_ggv": {
     "title": "Shared Building Energy Supply (§ 42b EnWG)",
@@ -2975,7 +2976,8 @@
     "owner_label": "Owner:",
     "solar_usage_amount": "Solar Usage Amount",
     "no_statements_msg": "No allocation statements generated yet. Click 'Trigger Solar Settlement'.",
-    "audit_title": "HOA Audit & Resolution Log"
+    "audit_title": "HOA Audit & Resolution Log",
+    "btn_manual": "Manual (§ 42b EnWG)"
   },
   "admin_sharing": {
     "title": "Regional Energy Sharing (Cooperative)",
@@ -2989,7 +2991,8 @@
     "tab_settlement": "💰 15m Sharing Settlement",
     "loading": "Loading Regional Energy Sharing & Citizen Energy Coop...",
     "no_cooperative": "No Citizen Energy Cooperative Assigned",
-    "no_cooperative_desc": "You are currently not assigned to any energy sharing community."
+    "no_cooperative_desc": "You are currently not assigned to any energy sharing community.",
+    "btn_manual": "Manual (Cooperative)"
   },
   "admin_communities": {
     "title": "District & Portfolio Management (Platform Admin)",
@@ -3115,7 +3118,8 @@
       "message_placeholder": "Message text to all members of this energy community...",
       "cancel_btn": "Cancel",
       "publish_btn": "Publish"
-    }
+    },
+    "btn_manual": "Manual (Portfolio)"
   },
   "wizard": {
     "step1_title": "1. Model & Master Data",
@@ -3221,7 +3225,8 @@
     "prod_fcr": "🔋 FCR Primary Reserve",
     "prod_redispatch": "🔌 Redispatch 2.0",
     "prod_spotmarket": "📈 Spot Market Arbitrage",
-    "telemetry_protocol": "Telemetry Protocol:"
+    "telemetry_protocol": "Telemetry Protocol:",
+    "btn_manual": "Manual (VPP)"
   },
   "whitelabel": {
     "presets_title": "Quick Color Profiles",
@@ -3592,7 +3597,8 @@
     "onboard_battery_label": "Battery Storage (kWh)",
     "handover_title": "Commissioning & Handover Protocol",
     "handover_sub": "Compliant technical documentation for installer and grid operator",
-    "handover_print": "Print Protocol / PDF"
+    "handover_print": "Print Protocol / PDF",
+    "btn_manual": "Manual (Partner)"
   },
   "msb": {
     "badge_compliance": "§ 42b EnWG & MsbG Compliant",

@@ -165,6 +165,13 @@ export default function PartnerDashboard() {
           </div>
 
           <div className="flex items-center gap-2.5 shrink-0">
+            <Link
+              to="/app/help/admin-partner-fleet-installer-guide"
+              className="flex items-center gap-2 px-3.5 py-2.5 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs sm:text-sm rounded-xl shadow-xs transition duration-200"
+            >
+              <span>📖</span>
+              <span>{t("partner.btn_manual", "Handbuch (Partner)")}</span>
+            </Link>
             <button
               type="button"
               onClick={() => setShowOnboardModal(true)}

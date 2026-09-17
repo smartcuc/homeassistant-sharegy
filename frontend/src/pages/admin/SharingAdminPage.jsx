@@ -325,6 +325,13 @@ export default function SharingAdminPage() {
                         <span>✨</span>
                         <span>{t("admin_sharing.btn_wizard", "Genossenschafts-Assistent (3 Schritte)")}</span>
                     </button>
+                    <Link
+                        to="/app/help/admin-energy-sharing-cooperative-guide"
+                        className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 border border-slate-200 dark:border-slate-800 hover:border-emerald-300 transition-all shadow-xs flex items-center gap-2"
+                    >
+                        <span>📖</span>
+                        <span>{t("admin_sharing.btn_manual", "Handbuch (Genossenschaft)")}</span>
+                    </Link>
                     <button
                         type="button"
                         onClick={() => setShareModalOpen(true)}

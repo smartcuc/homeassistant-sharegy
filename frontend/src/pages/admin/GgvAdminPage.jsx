@@ -309,6 +309,13 @@ export default function GgvAdminPage() {
                         <span>✨</span>
                         <span>{t("admin_ggv.btn_wizard", "WEG-Gebäude-Assistent (3 Schritte)")}</span>
                     </button>
+                    <Link
+                        to="/app/help/admin-ggv-weg-guide"
+                        className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-purple-50 dark:hover:bg-purple-950/40 text-slate-700 dark:text-slate-200 hover:text-purple-600 dark:hover:text-purple-400 border border-slate-200 dark:border-slate-800 hover:border-purple-300 transition-all shadow-xs flex items-center gap-2"
+                    >
+                        <span>📖</span>
+                        <span>{t("admin_ggv.btn_manual", "Handbuch (§ 42b EnWG)")}</span>
+                    </Link>
                     <button
                         type="button"
                         onClick={() => setShareModalOpen(true)}

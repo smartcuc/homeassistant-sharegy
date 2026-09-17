@@ -5,6 +5,7 @@ import useModalDismiss from "../../hooks/useModalDismiss";
 */
 
 import { useEffect, useState, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../api/client";
 
@@ -389,6 +390,13 @@ export default function CommunitiesManagementHub() {
                 </div>
 
                 <div className="flex items-center gap-3">
+                    <Link
+                        to="/app/help/admin-communities-portfolio-guide"
+                        className="px-3 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 border border-slate-200 dark:border-slate-800 hover:border-indigo-300 transition-all shadow-xs flex items-center gap-1.5 shrink-0"
+                    >
+                        <span>📖</span>
+                        <span>{t("admin_communities.btn_manual", "Handbuch (Portfolio)")}</span>
+                    </Link>
                     <div className="relative">
                         <input
                             type="text"
