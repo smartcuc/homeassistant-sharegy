@@ -300,66 +300,7 @@ class GrowattAdapter(BaseInverterAdapter):
                             pass
             return None
 
-        # 1. PV Erzeugung (DC Solar Input & AC Output & Plant Totals)
-        ppv_direct = _get_val(
-            "solar_power", "solarpower", "solarPower",
-            "ppv", "ppvTotal", "ppv_total", "p_pv", "pv_power", "pvPower", "pvpower", "pv_power_w", "pvPowerW", "pPv",
-            "pAct", "pact", "p_act",
-            "output_power", "outputpower", "outputPower", "outPutPower", "active_power", "activePower",
-            "real_power", "realPower", "inverter_power", "inverterPower",
-            "sys_power", "syspower", "powerOfPhotovoltaic",
-            is_power=True
-        )
-        curr_power = _get_val(
-            "currentPower", "current_power", "currPower", "curr_power", "plantPower",
-            "plant_power", "current_power_kw", "currentpowerkw", "currentEnergy", "current_energy",
-            is_power=True
-        )
-        pac_direct = _get_val(
-            "pac", "invPac", "inv_pac", "ac_power", "acPower", "dc_power", "dcPower",
-            is_power=True
-        )
-
-        # Multi-String PV Summe (String 1 bis String 16)
-        string_powers = []
-        for s_idx in range(1, 17):
-            s_val = _get_val(f"ppv{s_idx}", f"pPv{s_idx}", f"p_pv{s_idx}", f"pv{s_idx}_power", f"mppt{s_idx}_power", f"mppt{s_idx}", is_power=True)
-            if s_val and s_val > 0:
-                string_powers.append(s_val)
-        ppv_string_sum = sum(string_powers) if string_powers else 0.0
-
-        # 3-Phasen AC Summe (pac1 + pac2 + pac3)
-        pac1 = _get_val("pac1", "invPac1", "inv_pac1", "power1", is_power=True) or 0.0
-        pac2 = _get_val("pac2", "invPac2", "inv_pac2", "power2", is_power=True) or 0.0
-        pac3 = _get_val("pac3", "invPac3", "inv_pac3", "power3", is_power=True) or 0.0
-        pac_3phase_sum = (pac1 + pac2 + pac3) if (pac1 + pac2 + pac3) > 0 else 0.0
-
-        # Volt * Ampere Strings (falls nur Spannungen und Ströme geliefert werden)
-        va_sum = 0.0
-        for s_idx in range(1, 9):
-            v_s = _get_val(f"vpv{s_idx}", f"vPv{s_idx}", f"v_pv{s_idx}") or 0.0
-            i_s = _get_val(f"ipv{s_idx}", f"iPv{s_idx}", f"i_pv{s_idx}") or 0.0
-            if v_s > 0 and i_s > 0:
-                va_sum += (v_s * i_s)
-        va_string_sum = round(va_sum, 1) if va_sum > 0 else 0.0
-
-        # Prioritätsauswahl für PV Erzeugung:
-        if ppv_direct is not None:
-            pv = ppv_direct
-        elif pac_direct is not None:
-            pv = pac_direct
-        elif ppv_string_sum > 0:
-            pv = ppv_string_sum
-        elif pac_3phase_sum > 0:
-            pv = pac_3phase_sum
-        elif curr_power is not None:
-            pv = curr_power
-        elif va_string_sum > 0:
-            pv = va_string_sum
-        else:
-            pv = 0.0
-
-        # 2. Batterie Leistung (+ Entladung, - Ladung) & SoC
+        # 2. Batterie Leistung (+ Entladung, - Ladung) & SoC zuerst einlesen für Plausibilisierung
         bat_dis = _get_val("pdisCharge", "pdisCharge1", "pDisCharge", "pDischarge", "discharge_power", "dischargePower", "disChargePowerOfBattery", is_power=True) or 0.0
         bat_chg = _get_val("pcharge", "pcharge1", "pCharge", "charge_power", "chargePower", "chargePowerOfBattery", is_power=True) or 0.0
         bat_to_storage = _get_val("pactostorage", "pstorage", "p_storage", "storage_power", is_power=True) or 0.0
@@ -373,6 +314,82 @@ class GrowattAdapter(BaseInverterAdapter):
             bat_pwr = bat_dis - (bat_chg or bat_to_storage)
 
         # Batterie Volt * Ampere falls keine Watt geliefert wurden
+        if abs(bat_pwr or 0.0) < 1.0:
+            v_bat = _get_val("vbat", "v_bat", "vBat", "batteryVoltage", "battery_voltage", "bmsVbat", "bdc1Vbat") or 0.0
+            i_bat = _get_val("ibat", "i_bat", "iBat", "batteryCurrent", "battery_current", "bmsIbat", "bdc1Ibat") or 0.0
+            if v_bat > 0 and abs(i_bat) > 0.1:
+                bat_pwr = round(v_bat * i_bat, 1)
+
+        soc = _get_val("soc", "batterySoc", "battery_soc", "batteryPercent", "chargeLevel", "capacity", "SOC", "storageSoc", "bmsSoc", "bdc1Soc", "battery_level")
+
+        # 1. PV Erzeugung: Reine DC-Solar-Eingangsleistung (von den Strings/Modulen)
+        ppv_dc = _get_val(
+            "solar_power", "solarpower", "solarPower",
+            "ppv", "ppvTotal", "ppv_total", "p_pv", "pv_power", "pvPower", "pvpower", "pv_power_w", "pvPowerW", "pPv",
+            "powerOfPhotovoltaic",
+            is_power=True
+        )
+
+        # Multi-String PV Summe (String 1 bis String 16)
+        string_powers = []
+        for s_idx in range(1, 17):
+            s_val = _get_val(f"ppv{s_idx}", f"pPv{s_idx}", f"p_pv{s_idx}", f"pv{s_idx}_power", f"mppt{s_idx}_power", f"mppt{s_idx}", is_power=True)
+            if s_val and s_val > 0:
+                string_powers.append(s_val)
+        ppv_string_sum = sum(string_powers) if string_powers else 0.0
+
+        # Volt * Ampere Strings (falls nur Spannungen und Ströme geliefert werden)
+        va_sum = 0.0
+        for s_idx in range(1, 9):
+            v_s = _get_val(f"vpv{s_idx}", f"vPv{s_idx}", f"v_pv{s_idx}") or 0.0
+            i_s = _get_val(f"ipv{s_idx}", f"iPv{s_idx}", f"i_pv{s_idx}") or 0.0
+            if v_s > 0 and i_s > 0:
+                va_sum += (v_s * i_s)
+        va_string_sum = round(va_sum, 1) if va_sum > 0 else 0.0
+
+        # AC Wechselrichter-Ausgangsleistung (kann bei Hybrid-Invertern auch Batterie-Entladung enthalten)
+        pac_ac = _get_val(
+            "pac", "invPac", "inv_pac",
+            "pAct", "pact", "p_act",
+            "output_power", "outputpower", "outputPower", "outPutPower",
+            "active_power", "activePower", "real_power", "realPower",
+            "inverter_power", "inverterPower", "ac_power", "acPower",
+            "sys_power", "syspower",
+            is_power=True
+        )
+        curr_power = _get_val(
+            "currentPower", "current_power", "currPower", "curr_power", "plantPower",
+            "plant_power", "current_power_kw", "currentpowerkw", "currentEnergy", "current_energy",
+            is_power=True
+        )
+
+        # 3-Phasen AC Summe (pac1 + pac2 + pac3)
+        pac1 = _get_val("pac1", "invPac1", "inv_pac1", "power1", is_power=True) or 0.0
+        pac2 = _get_val("pac2", "invPac2", "inv_pac2", "power2", is_power=True) or 0.0
+        pac3 = _get_val("pac3", "invPac3", "inv_pac3", "power3", is_power=True) or 0.0
+        pac_3phase_sum = (pac1 + pac2 + pac3) if (pac1 + pac2 + pac3) > 0 else 0.0
+
+        # Prioritätsauswahl für PV Erzeugung:
+        # Priorität 1: Reines DC Solarfeld (z. B. ppv oder Stringsumme)
+        if ppv_dc is not None:
+            pv = ppv_dc
+        elif ppv_string_sum > 0:
+            pv = ppv_string_sum
+        elif va_string_sum > 0:
+            pv = va_string_sum
+        # Priorität 2: AC-Ausgangsleistung (unter Abzug von Batterieentladung bei Dunkelheit)
+        elif pac_ac is not None:
+            # Bei Hybrid-Wechselrichtern: AC-Leistung minus Batterieentladeleistung = echte Solarleistung (0W bei Dunkelheit)
+            bat_discharge_now = max(0.0, float(bat_pwr or 0.0))
+            pv = max(0.0, pac_ac - bat_discharge_now)
+        elif pac_3phase_sum > 0:
+            bat_discharge_now = max(0.0, float(bat_pwr or 0.0))
+            pv = max(0.0, pac_3phase_sum - bat_discharge_now)
+        elif curr_power is not None:
+            bat_discharge_now = max(0.0, float(bat_pwr or 0.0))
+            pv = max(0.0, curr_power - bat_discharge_now)
+        else:
+            pv = 0.0
         if abs(bat_pwr or 0.0) < 1.0:
             v_bat = _get_val("vbat", "v_bat", "vBat", "batteryVoltage", "battery_voltage", "bmsVbat", "bdc1Vbat") or 0.0
             i_bat = _get_val("ibat", "i_bat", "iBat", "batteryCurrent", "battery_current", "bmsIbat", "bdc1Ibat") or 0.0
