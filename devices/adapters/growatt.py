@@ -243,8 +243,13 @@ class GrowattAdapter(BaseInverterAdapter):
                                         if is_power and not has_w and not has_kw:
                                             # Nur reine Anlagen-Überblicksfelder (die laut Growatt-API per Definition in kW gemeldet werden) skalieren
                                             is_plant_kw_field = any(pk in k_low for pk in ["currentpower", "current_power", "plantpower", "plant_power", "currpower", "curr_power", "current_power_kw", "currentpowerkw", "plant_power_kw", "plantpowerkw"])
-                                            if is_plant_kw_field or (val > 0 and val < 50.0 and not has_large_watts):
+                                            if is_plant_kw_field:
                                                 val = val * 1000.0
+                                            elif val > 0:
+                                                if val < 1.0:
+                                                    val = val * 1000.0
+                                                elif 1.0 <= val < 100.0:
+                                                    val = val * 10.0
                                         return val
                                     except (ValueError, TypeError):
                                         pass
@@ -293,8 +298,13 @@ class GrowattAdapter(BaseInverterAdapter):
                             if is_power and not has_w and not has_kw:
                                 # Nur reine Anlagen-Überblicksfelder (die laut Growatt-API per Definition in kW gemeldet werden) skalieren
                                 is_plant_kw_field = any(pk in k_low for pk in ["currentpower", "current_power", "plantpower", "plant_power", "currpower", "curr_power", "current_power_kw", "currentpowerkw", "plant_power_kw", "plantpowerkw"])
-                                if is_plant_kw_field or (val > 0 and val < 50.0 and not has_large_watts):
+                                if is_plant_kw_field:
                                     val = val * 1000.0
+                                elif val > 0:
+                                    if val < 1.0:
+                                        val = val * 1000.0
+                                    elif 1.0 <= val < 100.0:
+                                        val = val * 10.0
                             return val  # Sobald der prioritäre Key gefunden wurde, sofort zurückliefern!
                         except (ValueError, TypeError):
                             pass
@@ -379,7 +389,7 @@ class GrowattAdapter(BaseInverterAdapter):
             pv = va_string_sum
         # Priorität 2: AC-Ausgangsleistung (unter Abzug von Batterieentladung bei Dunkelheit)
         elif pac_ac is not None:
-            # Bei Hybrid-Wechselrichtern: AC-Leistung minus Batterieentladeleistung = echte Solarleistung (0W bei Dunkelheit)
+            # Bei Hybrid-Wechselrichtern: AC-Leistung minus Batterieentladeleistung = echte Solarleistung
             bat_discharge_now = max(0.0, float(bat_pwr or 0.0))
             pv = max(0.0, pac_ac - bat_discharge_now)
         elif pac_3phase_sum > 0:
@@ -390,6 +400,12 @@ class GrowattAdapter(BaseInverterAdapter):
             pv = max(0.0, curr_power - bat_discharge_now)
         else:
             pv = 0.0
+
+        # DC-Volt x Ampere Plausibilisierung
+        # Wenn Volt x Ampere berechnet wurde und genauer/größer als Roh-Register ist (z. B. 256 W vs 25.6)
+        if va_string_sum > 0 and (pv <= 0.0 or va_string_sum >= pv * 5.0):
+            pv = va_string_sum
+
         if abs(bat_pwr or 0.0) < 1.0:
             v_bat = _get_val("vbat", "v_bat", "vBat", "batteryVoltage", "battery_voltage", "bmsVbat", "bdc1Vbat") or 0.0
             i_bat = _get_val("ibat", "i_bat", "iBat", "batteryCurrent", "battery_current", "bmsIbat", "bdc1Ibat") or 0.0
@@ -412,41 +428,6 @@ class GrowattAdapter(BaseInverterAdapter):
 
         # 4. Hausverbrauch (pactouser / pLocalLoad / pload)
         load = _get_val("pactouser", "pLocalLoad", "pToUser", "pload", "p_load", "use_power", "useEnergy", "familyLoadPower", "load_power", "loadPower", "use_power_w", "home_load", "consumption", "powerOfLoad", "pacToLocalLoad", "pacToUserTotal", is_power=True)
-
-        # 5. Physikalische Plausibilisierung & Standby/Schlafmodus-Erkennung
-        # Growatt-Spezifikum: Wenn der Wechselrichter bei Dämmerung in den Standby/Schlafmodus geht,
-        # friert der ShineServer oft den letzten Messwert (z.B. 400 W) ein, bis zum Mitternachts-Reset (02:00 Uhr MESZ).
-        device_status = _get_val("status", "inv_status", "invstatus", "plant_status", "plantstatus", "device_status", "devicestatus")
-        is_lost = _get_val("lost", "is_lost", "islost")
-        is_sleeping_or_offline = False
-
-        if is_lost in (1.0, 1, True, "1", "true"):
-            is_sleeping_or_offline = True
-        elif device_status in (0.0, 0, -1.0, -1, "0", "-1"):
-            # 0: Standby/Warten (Nacht), -1: Offline
-            is_sleeping_or_offline = True
-
-        # Timestamp-Staleness-Check: Wenn Messwert älter als 25 Minuten ist
-        raw_time_str = flat_latest.get("time") or flat_latest.get("calendar") or flat_latest.get("datatime") or flat.get("time") or flat.get("calendar") or flat.get("datatime") or flat.get("lastupdatetime")
-        if raw_time_str and isinstance(raw_time_str, str):
-            try:
-                import re as _re
-                from datetime import datetime as _dt
-                # Suche nach YYYY-MM-DD HH:MM:SS
-                _m_time = _re.search(r"\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}(?::\d{2})?", raw_time_str)
-                if _m_time:
-                    _fmt = "%Y-%m-%d %H:%M:%S" if len(_m_time.group(0)) > 16 else "%Y-%m-%d %H:%M"
-                    _rec_dt = _dt.strptime(_m_time.group(0), _fmt)
-                    _now_dt = _dt.now()
-                    _age_mins = (_now_dt - _rec_dt).total_seconds() / 60.0
-                    # Wenn älter als 25 Minuten und PV gemeldet wird (obwohl WR schläft)
-                    if _age_mins > 25.0:
-                        is_sleeping_or_offline = True
-            except Exception:
-                pass
-
-        if is_sleeping_or_offline and bat_dis == 0.0 and bat_chg == 0.0:
-            pv = 0.0
 
         pv_val = max(0.0, float(pv or 0.0))
         bat_val = float(bat_pwr or 0.0)
