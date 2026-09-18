@@ -31,7 +31,7 @@ class TenantThemingApiTest(TestCase):
         self.client.force_authenticate(user=self.admin_user)
 
     def test_get_and_patch_theming(self):
-        res = self.client.get(f"/api/core/tenant/theming/?tenant_id={self.tenant.id}")
+        res = self.client.get(f"/api/core/tenant/theming/?tenant_id={self.tenant.id}", secure=True)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data["primary_color"], "#0284C7")
         self.assertTrue(res.data["is_whitelabel_active"])
@@ -41,13 +41,13 @@ class TenantThemingApiTest(TestCase):
             "primary_color": "#0EA5E9",
             "accent_color": "#F59E0B",
             "company_legal_name": "Stadtwerke Nord Energie GmbH"
-        }, format="json")
+        }, format="json", secure=True)
         self.assertEqual(patch_res.status_code, status.HTTP_200_OK)
         self.assertEqual(patch_res.data["theming"]["primary_color"], "#0EA5E9")
 
     def test_public_domain_lookup(self):
         anon_client = APIClient()
-        res = anon_client.get("/api/core/tenant/by-domain/?domain=portal.stadtwerke-nord.de")
+        res = anon_client.get("/api/core/tenant/by-domain/?domain=portal.stadtwerke-nord.de", secure=True)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertTrue(res.data["whitelabel"])
         self.assertEqual(res.data["name"], "Stadtwerke Nord")

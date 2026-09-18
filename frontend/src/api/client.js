@@ -21,6 +21,17 @@ export function getApiUrl(url) {
     return `${API_BASE_URL}${cleanUrl}`;
 }
 
+/**
+ * Erzeugt einen kryptografisch sicheren Idempotency-Key für schreibende API-Mutations
+ * (Abrechnung, Stripe Checkout, Lastschaltbefehle, VPP-Dispatches).
+ */
+export function generateIdempotencyKey() {
+    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+        return crypto.randomUUID();
+    }
+    return `idem_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+}
+
 export async function apiFetch(url, options = {}) {
     const fullUrl = getApiUrl(url);
 
@@ -29,6 +40,13 @@ export async function apiFetch(url, options = {}) {
         "Content-Type": "application/json",
         "X-CSRFToken": getCSRFToken(),
     };
+
+    // 🛡️ Automatischer X-Idempotency-Key Support bei Mutations
+    if (options.idempotencyKey) {
+        defaultHeaders["X-Idempotency-Key"] = options.idempotencyKey;
+    } else if (options.idempotent === true) {
+        defaultHeaders["X-Idempotency-Key"] = generateIdempotencyKey();
+    }
 
     let res;
     try {
@@ -58,17 +76,34 @@ export async function apiFetch(url, options = {}) {
         throw { type: "auth" };
     }
 
-    // ✅ 400 → Validierungsfehler
-    if (res.status === 400) {
+    // ✅ 409 Conflict (z.B. Idempotency In-Progress)
+    if (res.status === 409) {
         let data;
         try {
             data = await res.json();
         } catch {
-            data = { error: "Ungültige Anfrage (400)" };
+            data = { error: "Operation wird bereits ausgeführt (409 Conflict)." };
+        }
+        throw {
+            type: "conflict",
+            status: 409,
+            data,
+            message: data?.error || "Operation wird bereits ausgeführt.",
+        };
+    }
+
+    // ✅ 400 / 422 → Validierungsfehler / Idempotency Payload Mismatch
+    if (res.status === 400 || res.status === 422) {
+        let data;
+        try {
+            data = await res.json();
+        } catch {
+            data = { error: `Ungültige Anfrage (${res.status})` };
         }
 
         throw {
             type: "validation",
+            status: res.status,
             data,
         };
     }
@@ -93,6 +128,7 @@ export async function apiFetch(url, options = {}) {
 
         throw {
             type: "server",
+            status: res.status,
             message: errorMsg,
         };
     }
