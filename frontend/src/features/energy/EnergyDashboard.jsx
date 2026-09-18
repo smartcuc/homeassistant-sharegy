@@ -3,9 +3,11 @@
 */
 
 import { useState, useMemo } from "react";
+import { useSearchParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../api/client";
+import { Eye, ArrowLeft, Wrench, ShieldCheck, FileText } from "lucide-react";
 import EnergyOptimizerCard from "./components/EnergyOptimizerCard";
 import BatteryForecastCard from "./components/BatteryForecastCard";
 import BatteryArbitrageCard from "./components/BatteryArbitrageCard";
@@ -28,6 +30,12 @@ import { translateInsight } from "../../utils/translateInsight";
 
 export default function EnergyDashboard() {
     const { t } = useTranslation();
+    const [searchParams] = useSearchParams();
+    const homeIdParam = searchParams.get("home_id");
+    const isPartnerView = searchParams.get("partner_view") === "true" || Boolean(homeIdParam);
+    const homeNameParam = searchParams.get("home_name");
+    const customerNameParam = searchParams.get("customer");
+
     const { isPro } = useSubscription();
     const [period, setPeriod] = useState("today");
     const [selectedTrendMeter, setSelectedTrendMeter] = useState(null);
@@ -150,6 +158,42 @@ export default function EnergyDashboard() {
 
     return (
         <div className="p-6 max-w-7xl mx-auto space-y-6">
+
+            {/* =========================================================
+                REMOTE-SUPPORT / IMPERSONATION BANNER
+            ========================================================= */}
+            {isPartnerView && (
+                <div className="bg-gradient-to-r from-sky-600 via-indigo-600 to-sky-700 text-white p-4 rounded-3xl shadow-lg border border-sky-400/30 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 animate-fade-in">
+                    <div className="flex items-center gap-3.5">
+                        <div className="p-2.5 bg-white/15 backdrop-blur-md rounded-2xl text-sky-100 ring-1 ring-white/20 shrink-0">
+                            <Eye className="w-5 h-5 animate-pulse" />
+                        </div>
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <span className="text-[10px] uppercase tracking-wider font-black bg-white/20 border border-white/30 px-2 py-0.5 rounded-md">
+                                    {t("partner.remote_mode_badge", "Remote-Support-Modus")}
+                                </span>
+                                <span className="text-xs text-sky-100 font-medium">
+                                    {t("partner.remote_mode_readonly", "Schreibgeschützte Live-Diagnose")}
+                                </span>
+                            </div>
+                            <h3 className="text-sm sm:text-base font-black mt-0.5 text-white">
+                                {customerNameParam ? `${customerNameParam} • ` : ""}{homeNameParam || t("partner.remote_default_site", "Kunden-Liegenschaft")}
+                            </h3>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 self-stretch sm:self-auto justify-end shrink-0">
+                        <Link
+                            to="/app/partner"
+                            className="px-4 py-2 bg-white hover:bg-sky-50 text-sky-900 rounded-xl text-xs font-black flex items-center gap-1.5 shadow-xs transition cursor-pointer"
+                        >
+                            <ArrowLeft className="w-4 h-4" />
+                            <span>{t("partner.btn_back_to_fleet", "Zurück zur Flottenübersicht")}</span>
+                        </Link>
+                    </div>
+                </div>
+            )}
 
             {/* =========================================================
                 HEADER (MATCHING SOLAR-PROGNOSE STYLE)

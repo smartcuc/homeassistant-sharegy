@@ -425,7 +425,7 @@ export default function PartnerDashboard() {
                         <td className="py-3.5 px-5 text-right">
                           <div className="flex items-center justify-end gap-1.5">
                             <Link
-                              to={`/app/energy?home_id=${home.id}`}
+                              to={`/app/energy?home_id=${home.id}&partner_view=true&home_name=${encodeURIComponent(home.name)}&customer=${encodeURIComponent(home.customer_name || "")}`}
                               className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 transition flex items-center gap-1 cursor-pointer"
                               title={t("partner.btn_view_customer_ems", "Live-Ansicht")}
                             >
@@ -514,7 +514,7 @@ export default function PartnerDashboard() {
 
                 <div className="grid grid-cols-3 gap-1.5 pt-2 border-t border-slate-100 dark:border-slate-800">
                   <Link
-                    to={`/app/energy?home_id=${home.id}`}
+                    to={`/app/energy?home_id=${home.id}&partner_view=true&home_name=${encodeURIComponent(home.name)}&customer=${encodeURIComponent(home.customer_name || "")}`}
                     className="py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold text-center border border-slate-200 dark:border-slate-700 transition flex items-center justify-center gap-1"
                     title={t("partner.btn_view_customer_ems", "Live-Ansicht")}
                   >

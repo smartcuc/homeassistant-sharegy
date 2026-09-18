@@ -3617,7 +3617,11 @@
     "btn_print_pdf": "Drucken / PDF Export",
     "company_default": "Elektro-Fachpartnerbetrieb",
     "map_title": "Flotten-Radar & Servicetechniker-Routenplanung",
-    "map_subtitle": "Interaktive Liegenschafts-Karte mit Störungs-Priorisierung und 1-Klick-Navigation"
+    "map_subtitle": "Interaktive Liegenschafts-Karte mit Störungs-Priorisierung und 1-Klick-Navigation",
+    "remote_mode_badge": "Remote-Support-Modus",
+    "remote_mode_readonly": "Schreibgeschützte Live-Diagnose",
+    "remote_default_site": "Kunden-Liegenschaft",
+    "btn_back_to_fleet": "Zurück zur Flottenübersicht"
   },
   "msb": {
     "badge_compliance": "Smart-Meter & MsbG konform",

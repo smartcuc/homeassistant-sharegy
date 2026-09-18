@@ -3632,7 +3632,11 @@
     "btn_print_pdf": "Drukuj / Eksportuj PDF",
     "company_default": "Certyfikowany partner elektroinstalacyjny",
     "map_title": "Radar floty i planowanie tras serwisowych",
-    "map_subtitle": "Interaktywna mapa obiektów z priorytetyzacją awarii i nawigacją 1 kliknięciem"
+    "map_subtitle": "Interaktywna mapa obiektów z priorytetyzacją awarii i nawigacją 1 kliknięciem",
+    "remote_mode_badge": "Tryb zdalnego wsparcia",
+    "remote_mode_readonly": "Diagnostyka na żywo (tylko do odczytu)",
+    "remote_default_site": "Obiekt klienta",
+    "btn_back_to_fleet": "Powrót do floty"
   },
   "msb": {
     "badge_compliance": "& MsbG Compliant",

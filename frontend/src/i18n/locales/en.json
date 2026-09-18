@@ -3617,7 +3617,11 @@
     "btn_print_pdf": "Print / PDF Export",
     "company_default": "Certified Electrician Partner",
     "map_title": "Fleet Radar & Service Route Planning",
-    "map_subtitle": "Interactive site map with alert prioritization and 1-click navigation"
+    "map_subtitle": "Interactive site map with alert prioritization and 1-click navigation",
+    "remote_mode_badge": "Remote Support Mode",
+    "remote_mode_readonly": "Read-only live diagnosis",
+    "remote_default_site": "Customer Site",
+    "btn_back_to_fleet": "Back to Fleet Overview"
   },
   "msb": {
     "badge_compliance": "Smart Meter & MsbG Compliant",

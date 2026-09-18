@@ -3632,7 +3632,11 @@
     "btn_print_pdf": "Yazdır / PDF Dışa Aktar",
     "company_default": "Yetkili Elektrikçi İş Ortağı",
     "map_title": "Filo Radarı & Servis Rota Planlaması",
-    "map_subtitle": "Arıza önceliklendirmeli ve tek tıkla navigasyonlu interaktif tesis haritası"
+    "map_subtitle": "Arıza önceliklendirmeli ve tek tıkla navigasyonlu interaktif tesis haritası",
+    "remote_mode_badge": "Uzaktan Destek Modu",
+    "remote_mode_readonly": "Salt okunur canlı teşhis",
+    "remote_default_site": "Müşteri Tesisi",
+    "btn_back_to_fleet": "Filo Genel Bakışına Dön"
   },
   "msb": {
     "badge_compliance": "& MsbG Compliant",

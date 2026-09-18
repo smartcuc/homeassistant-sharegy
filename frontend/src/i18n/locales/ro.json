@@ -3632,7 +3632,11 @@
     "btn_print_pdf": "Imprimare / Export PDF",
     "company_default": "Partener electrician autorizat",
     "map_title": "Radar flotă și planificare trasee service",
-    "map_subtitle": "Hartă interactivă a instalațiilor cu prioritate pentru alerte și navigare rapidă"
+    "map_subtitle": "Hartă interactivă a instalațiilor cu prioritate pentru alerte și navigare rapidă",
+    "remote_mode_badge": "Mod Suport la Distanță",
+    "remote_mode_readonly": "Diagnostic live (doar citire)",
+    "remote_default_site": "Locație client",
+    "btn_back_to_fleet": "Înapoi la flotă"
   },
   "msb": {
     "badge_compliance": "& MsbG Compliant",
