@@ -418,7 +418,7 @@ export default function SystemStatusPage() {
                                         <option value="wallbox_ocpp">{t("system_status.cat_wallbox_ocpp", "Wallbox & E-Mobilität (OCPP-Gateway / Überschussladen)")}</option>
                                         <option value="market_tariffs">{t("system_status.cat_market_tariffs", "Dynamische Stromtarife & Börsenpreise (EPEX Spot Feed)")}</option>
                                         <option value="grid_curtailment">{t("system_status.cat_grid_curtailment", "§ 14a EnWG Dimmung & Netzsteuerung (CLS / SMGW)")}</option>
-                                        <option value="energy_sharing">{t("system_status.cat_energy_sharing", "Energy Sharing & Quartiersbilanzierung (§ 42b EnWG)")}</option>
+                                        <option value="energy_sharing">{t("system_status.cat_energy_sharing", "Energy Sharing & Quartiersbilanzierung")}</option>
                                         <option value="platform_api">{t("system_status.cat_platform_api", "Plattform, Login & WebSockets (Allgemeine Störung)")}</option>
                                         <option value="other">{t("system_status.cat_other", "Sonstiges technisches Infrastruktur-Problem")}</option>
                                     </select>

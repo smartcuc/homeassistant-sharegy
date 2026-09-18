@@ -243,7 +243,7 @@ export default function GgvAdminPage() {
     if (loading) {
         return (
             <div className="p-12 text-center text-slate-400 text-sm animate-pulse">
-                Lade Gemeinschaftliche Gebäudeversorgung (§ 42b EnWG)...
+                {t("admin_ggv.loading", "Lade Gemeinschaftliche Gebäudeversorgung...")}
             </div>
         );
     }
@@ -274,7 +274,7 @@ export default function GgvAdminPage() {
                 title={tenant.name}
                 subtitle={t("admin_ggv.subtitle", "Vor-Ort-Solarstromaufteilung nach Miteigentumsanteilen (MEA in 1/1000). Keine Reststrom-Lieferantenpflicht – jeder Eigentümer/Nutzer behält seinen eigenen Reststromvertrag.")}
                 manualLink="/app/help/admin-ggv-weg-guide"
-                manualLabel={t("admin_ggv.btn_manual", "Handbuch (§ 42b EnWG)")}
+                manualLabel={t("admin_ggv.btn_manual", "Handbuch (Gebäudeversorgung)")}
                 actions={
                     <>
                         <button
@@ -362,7 +362,7 @@ export default function GgvAdminPage() {
                 <div className="space-y-6">
                     <div className="flex items-center justify-between">
                         <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200">
-                            {t("admin_ggv.balance_title", "Gebäude-Solarbilanz & MEA-Aufteilung (§ 42b EnWG)")}
+                            {t("admin_ggv.balance_title", "Gebäude-Solarbilanz & MEA-Aufteilung")}
                         </h2>
                         <div className="flex bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg text-xs font-semibold">
                             <button
@@ -446,7 +446,7 @@ export default function GgvAdminPage() {
                     <div className="bg-purple-50/50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800/60 rounded-2xl p-4 text-xs text-purple-900 dark:text-purple-200 flex items-start gap-3">
                         <span className="text-lg shrink-0">ℹ️</span>
                         <div>
-                            <strong>{t("admin_ggv.legal_hint_title", "Hinweis zur Abrechnung gem. § 42b EnWG:")}</strong> {t("admin_ggv.legal_hint", "In der Gemeinschaftlichen Gebäudeversorgung findet keine Reststromlieferung durch die Gemeinschaft oder den WEG-Verwalter statt. Jede Partei bezieht ihren darüber hinausgehenden Strombedarf über ihren individuellen Stromliefervertrag.")}
+                            <strong>{t("admin_ggv.legal_hint_title", "Hinweis zur Abrechnung:")}</strong> {t("admin_ggv.legal_hint", "In der Gemeinschaftlichen Gebäudeversorgung findet keine Reststromlieferung durch die Gemeinschaft oder den WEG-Verwalter statt. Jede Partei bezieht ihren darüber hinausgehenden Strombedarf über ihren individuellen Stromliefervertrag.")}
                         </div>
                     </div>
                 </div>
@@ -548,7 +548,7 @@ export default function GgvAdminPage() {
                                         </div>
                                         <div>
                                             <div className="text-xs font-semibold text-slate-900 dark:text-white">{m.email}</div>
-                                            <div className="text-[10px] text-purple-600 dark:text-purple-400">{t("admin_ggv.participant_badge", "§ 42b EnWG Teilnehmer")}</div>
+                                            <div className="text-[10px] text-purple-600 dark:text-purple-400">{t("admin_ggv.participant_badge", "GGV-Teilnehmer")}</div>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">
@@ -588,7 +588,7 @@ export default function GgvAdminPage() {
                                         </span>
                                     </div>
                                     <p className="text-xs text-purple-200/80 mt-1">
-                                        {t("admin_ggv.settlement_subtitle", "Vor-Ort-Solarstromabrechnung gem. § 42b EnWG (Reine Solaraufteilung, keine Reststromabrechnung)")}
+                                        {t("admin_ggv.settlement_subtitle", "Vor-Ort-Solarstromabrechnung (Reine Solaraufteilung, keine Reststromabrechnung)")}
                                     </p>
                                 </div>
                                 <button

@@ -151,7 +151,7 @@ export default function CommunityMemberDashboard() {
 
     const modelConfig = {
         mieterstrom: {
-            title: t("community_dashboard.models.mieterstrom.title", "Mieterstrom (§ 42a EnWG)"),
+            title: t("community_dashboard.models.mieterstrom.title", "Mieterstrom"),
             badge: t("community_dashboard.models.mieterstrom.badge", "⚡ Vollversorgung"),
             userBadge: t("community_dashboard.models.mieterstrom.userBadge", "🏢 Mieterstrom-Teilnehmer"),
             subBadge: t("community_dashboard.models.mieterstrom.subBadge", "Mieterstromzuschlag"),
@@ -177,12 +177,12 @@ export default function CommunityMemberDashboard() {
             consumerResidualLabel: t("community_dashboard.models.mieterstrom.consumerResidualLabel", "Netz-Reststrom"),
             consumerResidualDesc: t("community_dashboard.models.mieterstrom.consumerResidualDesc", "Über Vollversorger-Tarif abgerechnet"),
             tariffTitle: t("community_dashboard.models.mieterstrom.tariffTitle", "Gültiger Mieterstrom-Vollversorger-Tarif"),
-            tariffLegalBadge: t("community_dashboard.models.mieterstrom.tariffLegalBadge", "Aktiv nach § 42a EnWG"),
-            statementsTitle: t("community_dashboard.models.mieterstrom.statementsTitle", "Meine Mieterstrom-Abrechnungsbelege (§ 42a EnWG)"),
+            tariffLegalBadge: t("community_dashboard.models.mieterstrom.tariffLegalBadge", "Aktiv"),
+            statementsTitle: t("community_dashboard.models.mieterstrom.statementsTitle", "Meine Mieterstrom-Abrechnungsbelege"),
             statementsDesc: t("community_dashboard.models.mieterstrom.statementsDesc", "Konsolidierte Monatsabrechnungen für Solar- & Netzstrom mit PDF-Nachweisen"),
         },
         ggv: {
-            title: t("community_dashboard.models.ggv.title", "Gemeinschaftliche Gebäudeversorgung (§ 42b EnWG)"),
+            title: t("community_dashboard.models.ggv.title", "Gemeinschaftliche Gebäudeversorgung"),
             badge: t("community_dashboard.models.ggv.badge", "🏠 Vor-Ort-Aufteilung"),
             userBadge: t("community_dashboard.models.ggv.userBadge", "🏠 GGV-Teilnehmer"),
             subBadge: t("community_dashboard.models.ggv.subBadge", "Eigenständiger Reststromvertrag"),
@@ -208,8 +208,8 @@ export default function CommunityMemberDashboard() {
             consumerResidualLabel: t("community_dashboard.models.ggv.consumerResidualLabel", "Eigenständiger Reststrom"),
             consumerResidualDesc: t("community_dashboard.models.ggv.consumerResidualDesc", "Direkt über deinen eigenen Stromversorger"),
             tariffTitle: t("community_dashboard.models.ggv.tariffTitle", "Gültiger Gebäude-Solarstromtarif"),
-            tariffLegalBadge: t("community_dashboard.models.ggv.tariffLegalBadge", "Aktiv nach § 42b EnWG"),
-            statementsTitle: t("community_dashboard.models.ggv.statementsTitle", "Interne PV-Aufteilungsnachweise (§ 42b EnWG)"),
+            tariffLegalBadge: t("community_dashboard.models.ggv.tariffLegalBadge", "Aktiv"),
+            statementsTitle: t("community_dashboard.models.ggv.statementsTitle", "Interne PV-Aufteilungsnachweise"),
             statementsDesc: t("community_dashboard.models.ggv.statementsDesc", "Monatliche interne Abrechnungsbelege zur Gebäude-PV (ohne externen Reststrom)"),
         },
         energy_sharing: {

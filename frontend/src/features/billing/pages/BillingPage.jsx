@@ -116,7 +116,7 @@ export default function BillingPage() {
                                 {t("billing.community_notice_title", "Suchst du deine Strom-Abrechnungsnachweise der Gemeinschaft?")}
                             </span>
                             <span className="text-indigo-700/80 dark:text-indigo-300/80">
-                                {t("billing.community_notice_desc", "Deine monatlichen Abrechnungsnachweise nach § 42b EnWG (kWh Solar vs. Netz) und der aktive Sharing-Tarif werden im Community Cockpit verwaltet.")}
+                                {t("billing.community_notice_desc", "Deine monatlichen Abrechnungsnachweise (kWh Solar vs. Netz) und der aktive Sharing-Tarif werden im Community Cockpit verwaltet.")}
                             </span>
                         </div>
                     </div>

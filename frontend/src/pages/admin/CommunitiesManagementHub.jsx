@@ -42,14 +42,14 @@ export default function CommunitiesManagementHub() {
                     sharesTitle: t("admin_communities.models.mieterstrom.sharesTitle", "Mieterstrom-Zuteilungsquoten"),
                     tariffTitle: t("admin_communities.models.mieterstrom.tariffTitle", "Mieterstrom-Vollversorgertarif"),
                     meterTitle: t("admin_communities.models.mieterstrom.meterTitle", "Summenzähler & Wohnungszähler"),
-                    alertText: t("admin_communities.models.mieterstrom.alertText", "Mieterstrom-Modell (§ 42a EnWG): Der Vermieter/Contractor übernimmt die Vollversorgung der Mieter mit PV- und Reststrom. Die Abrechnung erfolgt als Gesamtstromrechnung inklusive Mieterstromzuschlag."),
+                    alertText: t("admin_communities.models.mieterstrom.alertText", "Mieterstrom-Modell: Der Vermieter/Contractor übernimmt die Vollversorgung der Mieter mit PV- und Reststrom. Die Abrechnung erfolgt als Gesamtstromrechnung inklusive Mieterstromzuschlag."),
                 };
             case "ggv":
                 return {
                     id: "ggv",
-                    label: t("admin_communities.models.ggv.label", "Gebäudeversorgung (GGV § 42b EnWG)"),
-                    shortLabel: t("admin_communities.models.ggv.shortLabel", "GGV (§ 42b)"),
-                    badgeText: t("admin_communities.models.ggv.badgeText", "GGV (§ 42b)"),
+                    label: t("admin_communities.models.ggv.label", "Gebäudeversorgung (GGV)"),
+                    shortLabel: t("admin_communities.models.ggv.shortLabel", "GGV"),
+                    badgeText: t("admin_communities.models.ggv.badgeText", "GGV"),
                     icon: "⚖️",
                     badgeClass: "bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800",
                     description: t("admin_communities.models.ggv.description", "Vor-Ort-Solaraufteilung nach Miteigentumsanteilen (MEA /1000) ohne Reststrompflicht"),
@@ -57,7 +57,7 @@ export default function CommunitiesManagementHub() {
                     sharesTitle: t("admin_communities.models.ggv.sharesTitle", "Miteigentumsanteile (MEA /1000)"),
                     tariffTitle: t("admin_communities.models.ggv.tariffTitle", "Solar-Nutzungsentgelt (ohne Reststrom)"),
                     meterTitle: t("admin_communities.models.ggv.meterTitle", "Wohnungs- & Erzeugungszähler"),
-                    alertText: t("admin_communities.models.ggv.alertText", "Gemeinschaftliche Gebäudeversorgung (§ 42b EnWG): Reine Vor-Ort-Aufteilung des Solarstroms nach Miteigentumsanteilen (MEA). Es besteht keine Reststromlieferpflicht; jeder Nutzer hat seinen eigenen Reststromvertrag."),
+                    alertText: t("admin_communities.models.ggv.alertText", "Gemeinschaftliche Gebäudeversorgung: Reine Vor-Ort-Aufteilung des Solarstroms nach Miteigentumsanteilen (MEA). Es besteht keine Reststromlieferpflicht; jeder Nutzer hat seinen eigenen Reststromvertrag."),
                 };
             case "energy_sharing":
             default:
@@ -73,7 +73,7 @@ export default function CommunitiesManagementHub() {
                     sharesTitle: t("admin_communities.models.energy_sharing.sharesTitle", "15m-Allokationsschlüssel"),
                     tariffTitle: t("admin_communities.models.energy_sharing.tariffTitle", "Bürgerenergie-Sharingtarif"),
                     meterTitle: t("admin_communities.models.energy_sharing.meterTitle", "Smart Meter (iMSys / RLM)"),
-                    alertText: t("admin_communities.models.energy_sharing.alertText", "Regionales Energy Sharing: 15-minütige Bilanzierung über das öffentliche Netz gemäß EU-Richtlinie / § 42c EnWG mit Netzentgelt-Rabatt und automatisiertem BNetzA MSCONS EDIFACT Export."),
+                    alertText: t("admin_communities.models.energy_sharing.alertText", "Regionales Energy Sharing: 15-minütige Bilanzierung über das öffentliche Netz mit Netzentgelt-Rabatt und automatisiertem BNetzA MSCONS EDIFACT Export."),
                 };
         }
     }
@@ -379,7 +379,7 @@ export default function CommunitiesManagementHub() {
                 icon="🏛️"
                 iconBg="bg-indigo-500/10 border-indigo-500/20 text-indigo-600 dark:text-indigo-400"
                 title={t("admin_communities.title", "Quartiers- & Portfolio-Verwaltung")}
-                subtitle={t("admin_communities.subtitle", "Zentrale Steuerung aller Mieterstrom-Projekte (§ 42a), GGV-Gebäude (§ 42b) und Energy-Sharing-Gemeinschaften")}
+                subtitle={t("admin_communities.subtitle", "Zentrale Steuerung aller Mieterstrom-Projekte, GGV-Gebäude und Energy-Sharing-Gemeinschaften")}
                 manualLink="/app/help/admin-communities-portfolio-guide"
                 manualLabel={t("admin_communities.btn_manual", "Handbuch (Portfolio)")}
                 searchSlot={
@@ -481,7 +481,7 @@ export default function CommunitiesManagementHub() {
                                     : "text-slate-600 dark:text-slate-400 hover:text-sky-600"
                             }`}
                         >
-                            <span>🏢</span> {t("admin_communities.filter_mieterstrom", "Mieterstrom (§ 42a)")}
+                            <span>🏢</span> {t("admin_communities.filter_mieterstrom", "Mieterstrom")}
                         </button>
                         <button
                             type="button"
@@ -492,7 +492,7 @@ export default function CommunitiesManagementHub() {
                                     : "text-slate-600 dark:text-slate-400 hover:text-purple-600"
                             }`}
                         >
-                            <span>⚖️</span> {t("admin_communities.filter_ggv", "GGV (§ 42b)")}
+                            <span>⚖️</span> {t("admin_communities.filter_ggv", "Gebäudeversorgung (GGV)")}
                         </button>
                         <button
                             type="button"

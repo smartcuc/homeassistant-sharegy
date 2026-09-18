@@ -31,7 +31,7 @@ export default function CommunityInviteCard({ onOpenShareModal, kpis = {} }) {
                 <div>
                     <div className="flex items-center gap-2">
                         <h4 className="text-sm font-bold text-white tracking-tight">
-                            {t("community.sharing_title", "Quartiers-Energy Sharing (§ 42b EnWG)")}
+                            {t("community.sharing_title", "Quartiers-Energy Sharing")}
                         </h4>
                         <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                             {t("community.badge", "Community")}

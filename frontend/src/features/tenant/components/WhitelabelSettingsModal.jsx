@@ -351,7 +351,7 @@ export default function WhitelabelSettingsModal({ isOpen, onClose }) {
                 <div className="bg-slate-900/90 border border-slate-800 p-4 rounded-xl space-y-3">
                   <div className="flex justify-between items-center text-xs">
                     <span className="text-slate-400">{t("whitelabel.preview_ggv_title", "Gemeinschaftliche Gebäudeversorgung")}</span>
-                    <span className="text-emerald-400 font-semibold">§ 42b EnWG</span>
+                    <span className="text-emerald-400 font-semibold">{t("whitelabel.preview_badge", "GGV")}</span>
                   </div>
                   <div className="text-xl font-extrabold text-white">4.820 kWh</div>
                   <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">

@@ -202,7 +202,7 @@ export default function MarketCommunicationModal({ isOpen, onClose, tenantId }) 
                   <span>{t("mako.compliance_title", "BNetzA GPKE / WiM Konformität")}</span>
                 </div>
                 <p>
-                  {t("mako.compliance_desc", "Erzeugt standardisierte EDIFACT UNA/UNB/UNH/UNT Segmente mit automatischem Prüfsummenabgleich für die Gemeinschaftliche Gebäudeversorgung nach § 42b EnWG.")}
+                  {t("mako.compliance_desc", "Erzeugt standardisierte EDIFACT UNA/UNB/UNH/UNT Segmente mit automatischem Prüfsummenabgleich für die Vor-Ort-Gebäudeversorgung und Bilanzierung.")}
                 </p>
               </div>
 

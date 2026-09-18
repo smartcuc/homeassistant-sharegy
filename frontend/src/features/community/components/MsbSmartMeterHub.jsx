@@ -134,7 +134,7 @@ export default function MsbSmartMeterHub({ tenant }) {
                     <div className="space-y-2 max-w-2xl">
                         <div className="flex items-center gap-2">
                             <span className="px-3 py-1 bg-indigo-500/20 border border-indigo-400/30 rounded-full text-indigo-300 text-xs font-black tracking-wider uppercase">
-                                {t("msb.badge_compliance", "§ 42b EnWG & MsbG Konform")}
+                                {t("msb.badge_compliance", "Smart-Meter & MsbG konform")}
                             </span>
                             <span className="px-2.5 py-1 bg-emerald-500/20 border border-emerald-400/30 rounded-full text-emerald-300 text-xs font-extrabold">
                                 {t("msb.badge_paths", "3 Zählerpfade Aktiv")}

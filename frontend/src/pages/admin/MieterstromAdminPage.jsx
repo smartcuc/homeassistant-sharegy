@@ -246,7 +246,7 @@ export default function MieterstromAdminPage() {
     if (loading) {
         return (
             <div className="p-12 text-center text-slate-400 text-sm animate-pulse">
-                Lade Mieterstrom-Verwaltung (§ 42a EnWG)...
+                {t("admin_mieterstrom.loading", "Lade Mieterstrom-Verwaltung...")}
             </div>
         );
     }
@@ -275,9 +275,9 @@ export default function MieterstromAdminPage() {
                 icon="🏢"
                 iconBg="bg-sky-500/10 border-sky-500/20 text-sky-600 dark:text-sky-400"
                 title={tenant.name}
-                subtitle={t("admin_mieterstrom.subtitle", "Vollversorgungs-Modell: Vor-Ort-Solarstrom & Reststrom in einer gemeinsamen Monatsabrechnung mit Mieterstromzuschlag gem. § 21 Abs. 3 EEG")}
+                subtitle={t("admin_mieterstrom.subtitle", "Vollversorgungs-Modell: Vor-Ort-Solarstrom & Reststrom in einer gemeinsamen Monatsabrechnung mit Mieterstromzuschlag")}
                 manualLink="/app/help/admin-mieterstrom-enwg-guide"
-                manualLabel={t("admin_mieterstrom.btn_manual", "Handbuch (§ 42a EnWG)")}
+                manualLabel={t("admin_mieterstrom.btn_manual", "Handbuch (Mieterstrom)")}
                 actions={
                     <>
                         <button
@@ -639,7 +639,7 @@ export default function MieterstromAdminPage() {
                                         </span>
                                     </div>
                                     <p className="text-xs text-sky-200/80 mt-1">
-                                        {t("admin_mieterstrom.tariff_banner_sub", "Mieterstrom-Vollversorgung gem. § 42a EnWG (Solarstrom + Reststrom in einer Gesamtrechnung)")}
+                                        {t("admin_mieterstrom.tariff_banner_sub", "Mieterstrom-Vollversorgung (Solarstrom + Reststrom in einer Gesamtrechnung)")}
                                     </p>
                                 </div>
                                 <button

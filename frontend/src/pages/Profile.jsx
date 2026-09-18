@@ -633,8 +633,8 @@ export default function Profile() {
                                         <option value="">{t("profile.landing_auto", "⚙️ Automatisch (Rollen-Standard)")}</option>
                                         <option value="/app">{t("profile.landing_ems", "🏠 Privates EMS & Live-Dashboard")}</option>
                                         <option value="/app/community">{t("profile.landing_sharing", "⚡ Regionales Energy Sharing (Genossenschaft)")}</option>
-                                        <option value="/app/community">{t("profile.landing_mieterstrom", "🏢 Mieterstrom (§ 42a EnWG – Vollversorgung)")}</option>
-                                        <option value="/app/community">{t("profile.landing_ggv", "⚖️ Gebäudeversorgung (GGV § 42b EnWG)")}</option>
+                                        <option value="/app/community">{t("profile.landing_mieterstrom", "🏢 Mieterstrom (Vollversorgung)")}</option>
+                                        <option value="/app/community">{t("profile.landing_ggv", "⚖️ Gebäudeversorgung (GGV)")}</option>
                                         <option value="/app/tenant">{t("profile.landing_tenant", "🏛️ Mandanten- & Quartiersverwaltung (Vorstand / Admin)")}</option>
                                         <option value="/app/energy">{t("profile.landing_energy", "📈 Analysen, Energiefluss & Strommix")}</option>
                                         <option value="/app/tariff">{t("profile.landing_tariff", "💰 Tarife & Dynamic Pricing")}</option>

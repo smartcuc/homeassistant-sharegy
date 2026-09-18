@@ -770,7 +770,7 @@ data:
                                     {t("interfaces.wmsb_title", "8. Smart Meter Gateways, wMSB & Eichrechtliches Messwesen")}
                                 </h2>
                                 <span className="text-[10px] font-bold px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full border border-emerald-200">
-                                    {t("interfaces.wmsb_badge", "§ 42b EnWG & MsbG Konform")}
+                                    {t("interfaces.wmsb_badge", "Smart-Meter & MsbG konform")}
                                 </span>
                             </div>
                             <p className="text-xs text-gray-500">

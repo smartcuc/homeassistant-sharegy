@@ -112,9 +112,9 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
 
     // Model-spezifische Texte
     const wizardTitle = isMieterstrom
-        ? t("wizard.mieterstrom_title", "🏢 Mieterstrom-Einrichtungs-Assistent (§ 42a EnWG)")
+        ? t("wizard.mieterstrom_title", "🏢 Mieterstrom-Einrichtungs-Assistent")
         : isGgv
-        ? t("wizard.ggv_title", "⚖️ GGV-Gebäude-Assistent (§ 42b EnWG)")
+        ? t("wizard.ggv_title", "⚖️ GGV-Gebäude-Assistent")
         : t("wizard.sharing_title", "⚡ Bürgerenergie-Assistent (Energy Sharing)");
 
     const wizardSubtitle = isMieterstrom
@@ -142,9 +142,9 @@ export default function TenantSetupWizardModal({ isOpen, onClose, onComplete, ex
         : t("wizard.step3_sharing", "Sharing-Tarif & Netzentgelt");
 
     const legalExplainText = isMieterstrom
-        ? t("wizard.legal_mieterstrom", "Mieterstrom-Vollversorgung nach § 42a EnWG: Als Vermieter/Contractor belieferst du die Mieter mit Solarstrom vom Dach und Reststrom aus dem Netz in einer gemeinsamen Abrechnung inkl. Mieterstromzuschlag.")
+        ? t("wizard.legal_mieterstrom", "Mieterstrom-Vollversorgung: Als Vermieter/Contractor belieferst du die Mieter mit Solarstrom vom Dach und Reststrom aus dem Netz in einer gemeinsamen Abrechnung inkl. Mieterstromzuschlag.")
         : isGgv
-        ? t("wizard.legal_ggv", "Gemeinschaftliche Gebäudeversorgung nach § 42b EnWG: Reine Vor-Ort-Aufteilung des Solarstroms nach Miteigentumsanteilen (MEA). Die Teilnehmer behalten ihren eigenen Reststromvertrag ohne Lieferantenpflichten für die WEG.")
+        ? t("wizard.legal_ggv", "Gemeinschaftliche Gebäudeversorgung: Reine Vor-Ort-Aufteilung des Solarstroms nach Miteigentumsanteilen (MEA). Die Teilnehmer behalten ihren eigenen Reststromvertrag ohne Lieferantenpflichten für die WEG.")
         : t("wizard.legal_sharing", "Regionales Energy Sharing: 15-minütige Verrechnung und Allokation von Erzeugung und Verbrauch über das Verteilnetz mit Netzentgeltreduktion und automatisiertem BNetzA MSCONS Datenaustausch.");
 
     return (

@@ -59,9 +59,9 @@ export default function VirtualMasterMeterHub({ tenant }) {
                         ? t("master_meter.header_ggv", "Messkonzept & Gebäude-Solaraufteilung (GGV)") 
                         : t("master_meter.header_sharing", "15-Minuten Bilanzierung & Virtueller Summenzähler");
                     const badgeLabel = isMieterstrom
-                        ? t("master_meter.badge_mieterstrom", "🏢 § 42a EnWG Mieterstrom")
+                        ? t("master_meter.badge_mieterstrom", "🏢 Mieterstrom")
                         : isGgv
-                        ? t("master_meter.badge_ggv", "⚖️ § 42b EnWG Gebäudeversorgung")
+                        ? t("master_meter.badge_ggv", "⚖️ Gebäudeversorgung (GGV)")
                         : t("master_meter.badge_sharing", "⚡ Regionales Energy Sharing");
                     const badgeClass = isMieterstrom
                         ? "bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20"
@@ -154,7 +154,7 @@ export default function VirtualMasterMeterHub({ tenant }) {
                             </p>
                         </div>
                         <div className="p-3 bg-white/80 dark:bg-slate-900/80 rounded-xl border border-amber-500/10">
-                            <div className="font-bold text-slate-900 dark:text-white mb-1">{t("master_meter.glossary_15m_title", "⏱️ 15-Minuten-Takt (§ 42b EnWG)")}</div>
+                            <div className="font-bold text-slate-900 dark:text-white mb-1">{t("master_meter.glossary_15m_title", "⏱️ 15-Minuten-Takt")}</div>
                             <p className="text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">
                                 {t("master_meter.glossary_15m_desc", "Das Gesetz schreibt vor, dass Erzeugung und Verbrauch in Viertelstunden-Blöcken verrechnet werden müssen. Wer zur Mittagszeit wäscht oder das E-Auto lädt, bekommt den günstigen Sonnenstrom sofort centgenau gutgeschrieben.")}
                             </p>

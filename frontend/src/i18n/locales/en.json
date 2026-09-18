@@ -161,7 +161,7 @@
     "support": "Help & Support",
     "manual": "User Manual",
     "mode_ems": "Private EMS",
-    "mode_mieterstrom": "Tenant Electricity (§ 42a EnWG)",
+    "mode_mieterstrom": "Tenant Electricity",
     "mode_ggv": "Building Energy Supply (GGV § 42b EnWG)",
     "mode_sharing": "Energy Sharing (Cooperative)",
     "mode_hybrid": "EMS & Sharing Hub",
@@ -171,7 +171,7 @@
     "context_label": "Workspace",
     "select_context": "Select View",
     "select_context_desc": "Adjust navigation to your role",
-    "mieterstrom": "Tenant Electricity (§ 42a EnWG)",
+    "mieterstrom": "Tenant Electricity",
     "ggv": "Building Energy Supply (§ 42b EnWG)",
     "home_title": "To sharegy home & info",
     "open_menu": "Open menu",
@@ -610,7 +610,7 @@
     "nodered_step_2": "2. Configure the broker with your credentials.",
     "nodered_step_3": "3. Send JSON payloads to your base topic.",
     "wmsb_title": "8. Smart Meter Gateways, wMSB & Fiscal Metering",
-    "wmsb_badge": "§ 42b EnWG & MsbG Compliant",
+    "wmsb_badge": "Smart Meter & MsbG Compliant",
     "wmsb_desc": "15-minute load profiles from certified Smart Meter Gateways (wMSB / gMSB) for Energy Sharing & submetering.",
     "to_wmsb_cockpit": "Go to Community & wMSB Cockpit",
     "wmsb_cloud_push": "wMSB Cloud Push",
@@ -732,7 +732,7 @@
     "landing_auto": "⚙️ Automatic (Role default)",
     "landing_ems": "🏠 Private EMS & Live Dashboard",
     "landing_sharing": "⚡ Regional Energy Sharing (Cooperative)",
-    "landing_mieterstrom": "🏢 Tenant Electricity (§ 42a EnWG – Full Supply)",
+    "landing_mieterstrom": "🏢 Tenant Electricity (Full Supply)",
     "landing_ggv": "⚖️ Joint Building Supply (GGV § 42b EnWG)",
     "landing_tenant": "🏛️ Tenant & District Admin (Board / Admin)",
     "landing_energy": "📈 Analytics, Energy Flow & Power Mix",
@@ -2240,7 +2240,7 @@
     "share_stats": "Share Achievements",
     "invite_link": "Invite Link",
     "share_stats_title": "Share achievements & autarky with neighbors and social media",
-    "sharing_title": "Neighborhood Energy Sharing (§ 42b EnWG)",
+    "sharing_title": "Neighborhood Energy Sharing",
     "badge": "Community",
     "sharing_desc": "Share your surplus solar power with neighbors or tenants and save on high grid fees together with automated 15-minute clearing.",
     "share_and_invite": "Share Achievements & Invite"
@@ -2863,7 +2863,7 @@
     "whitelabel_btn": "Whitelabel & Branding"
   },
   "admin_mieterstrom": {
-    "title": "Tenant Electricity (§ 42a EnWG)",
+    "title": "Tenant Electricity",
     "badge_model": "Full Supply Model (GTC)",
     "subtitle": "Full supply model: On-site solar & residual grid power in a single monthly bill with tenant electricity surcharge (§ 21 (3) EEG)",
     "btn_wizard": "Tenant Electricity Wizard (3 Steps)",
@@ -2906,7 +2906,7 @@
     "invoice_amount": "Invoice Amount",
     "audit_title": "Legally compliant tenant electricity audit log",
     "apartments_subtitle": "Manage residential units, meter allocations, and full supply terms of tenants.",
-    "legal_sub": "Tenant electricity full supply under § 42a EnWG (Solar power + residual grid power in a unified bill)",
+    "legal_sub": "Tenant electricity full supply (Solar power + residual grid power in a unified bill)",
     "btn_trigger_settlement": "Trigger Monthly Settlement",
     "rate_solar_label": "Solar Working Price",
     "rate_solar_sub": "On-site PV Power",
@@ -2920,17 +2920,17 @@
     "invite_label": "Tenant Invitation",
     "qr_title": "QR Code for Hallway Notice",
     "qr_desc": "Tenants can scan the code to digitally activate their tenant electricity contract.",
-    "tariff_banner_sub": "Tenant electricity full supply under § 42a EnWG (Solar power + residual grid power in a unified bill)",
+    "tariff_banner_sub": "Tenant electricity full supply (Solar power + residual grid power in a unified bill)",
     "solar_working_price": "Solar Working Price",
     "onsite_pv_electricity": "On-site PV Power",
     "residual_price": "Residual Power Price",
     "residual_grid_supply": "Grid Import (Full Supply)",
     "base_price": "Base Price",
     "meter_and_billing": "Metering & Billing",
-    "btn_manual": "Manual (§ 42a EnWG)"
+    "btn_manual": "Manual (Tenant Electricity)"
   },
   "admin_ggv": {
-    "title": "Shared Building Energy Supply (§ 42b EnWG)",
+    "title": "Shared Building Energy Supply",
     "badge_model": "HOA & Multi-Family Building",
     "subtitle": "On-site solar power sharing according to ownership shares (1/1000). No supplier obligation – each resident keeps their own external electricity contract.",
     "btn_wizard": "HOA Building Wizard (3 Steps)",
@@ -2941,7 +2941,7 @@
     "tab_meters": "⚡ Metering & Virtual Meter",
     "tab_msb": "⚡ Meter Management",
     "tab_audit": "📜 HOA Audit & Resolutions",
-    "balance_title": "Building Solar Balance & Allocation (§ 42b EnWG)",
+    "balance_title": "Building Solar Balance & Allocation",
     "kpi_pv_gen": "PV Generation",
     "kpi_pv_gen_sub": "Shared Rooftop System",
     "kpi_demand": "Building Demand",
@@ -2952,7 +2952,7 @@
     "kpi_grid_export_sub": "Surplus to Grid",
     "kpi_cost_benefit": "HOA Cost Benefit",
     "kpi_cost_benefit_sub": "Avoided Grid Purchases",
-    "legal_hint_title": "Billing note pursuant to § 42b EnWG:",
+    "legal_hint_title": "Billing note:",
     "legal_hint": "In the Shared Building Energy Supply model, no residual grid power is supplied by the community or property manager. Each resident continues their own external electricity contract.",
     "units_title": "Homeowners & Allocation Keys ({{count}})",
     "units_subtitle": "Manage co-ownership shares (in 1/1000 shares), invitation links and voting permissions for the property.",
@@ -2960,10 +2960,10 @@
     "open_invites": "Open Invitation Links: ({{count}})",
     "no_open_invites": "No open invitation links for owners or tenants.",
     "registered_owners": "Registered Homeowners / Units:",
-    "participant_badge": "§ 42b EnWG Participant",
+    "participant_badge": "GGV Participant",
     "remove_member": "Remove",
     "active_badge": "Active",
-    "settlement_subtitle": "On-site solar billing pursuant to § 42b EnWG (Pure solar allocation, no residual grid billing)",
+    "settlement_subtitle": "On-site solar billing (Pure solar allocation, no residual grid billing)",
     "trigger_settlement_btn": "Trigger Solar Settlement",
     "fee_solar_use": "Solar Utilization Fee",
     "fee_solar_use_sub": "Contribution to HOA Reserve",
@@ -2977,7 +2977,7 @@
     "solar_usage_amount": "Solar Usage Amount",
     "no_statements_msg": "No allocation statements generated yet. Click 'Trigger Solar Settlement'.",
     "audit_title": "HOA Audit & Resolution Log",
-    "btn_manual": "Manual (§ 42b EnWG)"
+    "btn_manual": "Manual (Building Supply)"
   },
   "admin_sharing": {
     "title": "Regional Energy Sharing (Cooperative)",
@@ -2992,7 +2992,7 @@
     "loading": "Loading Regional Energy Sharing & Citizen Energy Coop...",
     "no_cooperative": "No Citizen Energy Cooperative Assigned",
     "no_cooperative_desc": "You are currently not assigned to any energy sharing community.",
-    "btn_manual": "Manual (Cooperative)"
+    "btn_manual": "Manual (Energy Sharing)"
   },
   "admin_communities": {
     "title": "District & Portfolio Management (Platform Admin)",
@@ -3007,8 +3007,8 @@
     "kpi_savings": "Savings",
     "managed_units_title": "Managed Units & Models ({{count}})",
     "filter_all": "All ({{count}})",
-    "filter_mieterstrom": "Tenant Power (§ 42a)",
-    "filter_ggv": "GGV (§ 42b)",
+    "filter_mieterstrom": "Tenant Electricity",
+    "filter_ggv": "Shared Building Supply (GGV)",
     "filter_energy_sharing": "Energy Sharing",
     "card_autarky": "Autarky Rate",
     "card_month_gen": "Monthly Generation",
@@ -3019,26 +3019,26 @@
     "no_communities_found": "No energy communities or properties found matching this filter.",
     "models": {
       "mieterstrom": {
-        "label": "Tenant Electricity (§ 42a EnWG)",
+        "label": "Tenant Electricity",
         "shortLabel": "Tenant Power",
-        "badgeText": "Tenant Power (§ 42a)",
+        "badgeText": "Tenant Electricity",
         "description": "Full supply: PV generation & residual grid power in a single monthly invoice for tenants",
         "membersTitle": "Tenants & Units",
         "sharesTitle": "Tenant Power Allocation Quotas",
         "tariffTitle": "Full Supply Tenant Tariff",
         "meterTitle": "Master Meter & Unit Submeters",
-        "alertText": "Tenant Electricity Model (§ 42a EnWG): The landlord or contractor manages full power supply with rooftop solar and grid residual power under statutory tariff caps."
+        "alertText": "Tenant Electricity Model: The landlord or contractor manages full power supply with rooftop solar and grid residual power under statutory tariff caps."
       },
       "ggv": {
-        "label": "Shared Building Supply (GGV § 42b EnWG)",
-        "shortLabel": "GGV (§ 42b)",
-        "badgeText": "GGV (§ 42b)",
+        "label": "Shared Building Supply (GGV)",
+        "shortLabel": "Shared Building Supply (GGV)",
+        "badgeText": "Shared Building Supply (GGV)",
         "description": "On-site solar sharing by co-ownership shares (1/1000 MEA) without residual grid supply obligations",
         "membersTitle": "Homeowners & Units",
         "sharesTitle": "Co-Ownership Shares (1/1000 MEA)",
         "tariffTitle": "Solar Utilization Fee (No Residual Supply)",
         "meterTitle": "Unit & Generation Meters",
-        "alertText": "Shared Building Energy Supply (§ 42b EnWG): Pure on-site solar power sharing according to ownership shares. No residual supply obligation; each resident keeps their external supplier contract."
+        "alertText": "Shared Building Energy Supply: Pure on-site solar power sharing according to ownership shares. No residual supply obligation; each resident keeps their external supplier contract."
       },
       "energy_sharing": {
         "label": "Energy Sharing (Cooperative)",
@@ -3049,7 +3049,7 @@
         "sharesTitle": "15-Minute Allocation Keys",
         "tariffTitle": "Community Energy Sharing Tariff",
         "meterTitle": "Smart Meters (iMSys / RLM)",
-        "alertText": "Regional Energy Sharing: 15-minute digital balancing across public distribution grids pursuant to EU guidelines / § 42c EnWG with automated BNetzA MSCONS EDIFACT export."
+        "alertText": "Regional Energy Sharing: 15-minute digital balancing across public distribution grids with automated BNetzA MSCONS EDIFACT export."
       }
     },
     "loading_portfolio": "Loading Multi-Community Portfolio & Performance Hubs...",
@@ -3125,8 +3125,8 @@
     "step1_title": "1. Model & Master Data",
     "step2_title": "2. Tariffs & Terms",
     "step3_title": "3. Invitation & Completion",
-    "mieterstrom_title": "🏢 Tenant Electricity Setup Wizard (§ 42a EnWG)",
-    "ggv_title": "⚖️ GGV Building Wizard (§ 42b EnWG)",
+    "mieterstrom_title": "🏢 Tenant Electricity Setup Wizard",
+    "ggv_title": "⚖️ GGV Building Wizard",
     "sharing_title": "⚡ Citizen Energy Wizard (Energy Sharing)",
     "mieterstrom_sub": "Set up your tenant electricity property, residential units, and full supply tariff in 3 simple steps.",
     "ggv_sub": "Set up your HOA property, co-ownership shares (MEA), and on-site solar fee in 3 steps.",
@@ -3140,8 +3140,8 @@
     "step3_mieterstrom": "Full Supply Tariff & Savings",
     "step3_ggv": "Solar Usage Fee & Levies",
     "step3_sharing": "Sharing Tariff & Grid Fee",
-    "legal_mieterstrom": "Tenant electricity full supply under § 42a EnWG: As landlord/contractor, you provide tenants with rooftop solar and grid residual power in a unified bill including tenant electricity subsidy.",
-    "legal_ggv": "Communal building supply under § 42b EnWG: Pure on-site allocation of solar power by co-ownership shares (MEA). Participants keep their own residual power supplier contracts without utility obligations for the HOA.",
+    "legal_mieterstrom": "Tenant electricity full supply : As landlord/contractor, you provide tenants with rooftop solar and grid residual power in a unified bill including tenant electricity subsidy.",
+    "legal_ggv": "Communal building supply : Pure on-site allocation of solar power by co-ownership shares (MEA). Participants keep their own residual power supplier contracts without utility obligations for the HOA.",
     "legal_sharing": "Regional Energy Sharing: 15-minute settlement and allocation of generation and consumption across the distribution grid with grid fee reductions and automated BNetzA MSCONS data exchange.",
     "how_it_works": "How does this work?",
     "name_mieterstrom": "Name of Property / Quarter",
@@ -3254,7 +3254,7 @@
     "format_type": "Message Format & Transaction Type",
     "target_system": "Target Billing System / AS4 Gateway",
     "compliance_title": "BNetzA GPKE / WiM Compliance",
-    "compliance_desc": "Generates standardized EDIFACT UNA/UNB/UNH/UNT segments with automated checksum verification for joint building supply under § 42b EnWG.",
+    "compliance_desc": "Generates standardized EDIFACT UNA/UNB/UNH/UNT segments with automated checksum verification for joint building supply .",
     "generate_send": "Generate EDIFACT & Send to AS4",
     "raw_preview": "EDIFACT Raw Data Preview",
     "download_edi": "Download (.edi)",
@@ -3390,7 +3390,7 @@
     "no_statements_msg": "📜 There are no finalized monthly statements for your account in this period yet. Once the month-end billing run is complete, your PDF records will appear here.",
     "models": {
       "mieterstrom": {
-        "title": "Tenant Electricity (§ 42a EnWG)",
+        "title": "Tenant Electricity",
         "badge": "⚡ Full Supply",
         "userBadge": "🏢 Tenant Electricity Member",
         "subBadge": "Tenant Solar Surcharge",
@@ -3414,7 +3414,7 @@
         "consumerResidualLabel": "Grid Residual Power",
         "consumerResidualDesc": "Billed via full supply tariff",
         "tariffTitle": "Active Tenant Electricity Full Supply Tariff",
-        "tariffLegalBadge": "Active under § 42a EnWG",
+        "tariffLegalBadge": "Active",
         "statementsTitle": "My Tenant Electricity Invoices (§ 42a EnWG)",
         "statementsDesc": "Consolidated monthly invoices for solar & grid electricity with PDF records"
       },
@@ -3443,7 +3443,7 @@
         "consumerResidualLabel": "Independent Residual Grid",
         "consumerResidualDesc": "Directly via your individual supplier",
         "tariffTitle": "Active Building Solar Tariff",
-        "tariffLegalBadge": "Active under § 42b EnWG",
+        "tariffLegalBadge": "Active",
         "statementsTitle": "Internal Solar Allocation Records (§ 42b EnWG)",
         "statementsDesc": "Monthly internal settlement records for building solar (excluding external residual electricity)"
       },
@@ -3601,7 +3601,7 @@
     "btn_manual": "Manual (Partner)"
   },
   "msb": {
-    "badge_compliance": "§ 42b EnWG & MsbG Compliant",
+    "badge_compliance": "Smart Meter & MsbG Compliant",
     "badge_paths": "3 Metering Paths Active",
     "title": "Meter Flexibility & wMSB Smart Meter Hub ⚡",
     "subtitle": "Connect certified Smart Meter Gateways (iMSys), competitive meter operators (wMSB), or MID submeters. Sharegy aggregates 15-minute load profiles for legally compliant energy sharing.",
@@ -3695,7 +3695,7 @@
     "label_tenant": "Tenant:",
     "label_category": "Category:",
     "label_context": "🔧 Context:",
-    "internal_note_prefix": "🔒 INTERNAL NOTE: ",
+    "internal_note_prefix": "🔒 INTERNAL NOTE:",
     "support_agent_suffix": "(Support Agent)",
     "tab_public_reply": "Public Reply",
     "tab_internal_note": "🔒 Internal Note (Yellow)",

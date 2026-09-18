@@ -34,7 +34,7 @@ export const ROLE_DEFINITIONS = [
         title: "Kassenprüfer / Beirat",
         badge: "Prüfung",
         badgeColor: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20",
-        description: "Reiner Lesezugriff zur transparenten Einsicht in Quartiersbilanzen, Summenzähler und Abrechnungsnachweise nach § 42b EnWG.",
+        description: "Reiner Lesezugriff zur transparenten Einsicht in Quartiersbilanzen, Summenzähler und Abrechnungsnachweise.",
     },
     {
         key: "admin",
@@ -42,7 +42,7 @@ export const ROLE_DEFINITIONS = [
         title: "Gemeinschafts-Leitung / Energie-Verwalter",
         badge: "Vollzugriff",
         badgeColor: "bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20",
-        description: "Vollständige administrative Kontrolle über Tarife, Submetering, wMSB-Messstellenbetrieb und § 42b EnWG Abrechnung.",
+        description: "Vollständige administrative Kontrolle über Tarife, Submetering, Messstellenbetrieb und Quartiersabrechnung.",
     },
 ];
 
