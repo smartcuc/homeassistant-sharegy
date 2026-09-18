@@ -3624,7 +3624,15 @@
     "handover_sub": "Compliant technical documentation for installer and grid operator",
     "handover_print": "Print Protocol / PDF",
     "title": "Партнерский Портал и Флот",
-    "btn_manual": "Руководство (Партнерский Портал)"
+    "btn_manual": "Руководство (Партнерский Портал)",
+    "view_map": "Карта и маршруты",
+    "btn_handover_protocol": "Акт ввода",
+    "protocol_title": "Цифровой акт ввода в эксплуатацию",
+    "protocol_subtitle": "Официальный сертификат соответствия VDE-AR-N 4105 и EnWG § 14a для клиента и сетевого оператора",
+    "btn_print_pdf": "Печать / Экспорт PDF",
+    "company_default": "Сертифицированный партнер-электромонтажник",
+    "map_title": "Радар парка и планирование маршрутов сервиса",
+    "map_subtitle": "Интерактивная карта объектов с приоритизацией сбоев и навигацией в 1 клик"
   },
   "msb": {
     "badge_compliance": "& MsbG Compliant",

@@ -3624,7 +3624,15 @@
     "handover_sub": "Compliant technical documentation for installer and grid operator",
     "handover_print": "Print Protocol / PDF",
     "title": "Portal Partnerski i Flota",
-    "btn_manual": "Podręcznik (Portal Partnerski)"
+    "btn_manual": "Podręcznik (Portal Partnerski)",
+    "view_map": "Mapa i trasa",
+    "btn_handover_protocol": "Protokół odbioru",
+    "protocol_title": "Cyfrowy protokół odbioru i uruchomienia",
+    "protocol_subtitle": "Oficjalny certyfikat VDE-AR-N 4105 i EnWG § 14a dla klienta i operatora sieci",
+    "btn_print_pdf": "Drukuj / Eksportuj PDF",
+    "company_default": "Certyfikowany partner elektroinstalacyjny",
+    "map_title": "Radar floty i planowanie tras serwisowych",
+    "map_subtitle": "Interaktywna mapa obiektów z priorytetyzacją awarii i nawigacją 1 kliknięciem"
   },
   "msb": {
     "badge_compliance": "& MsbG Compliant",

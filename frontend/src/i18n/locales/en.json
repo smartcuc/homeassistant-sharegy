@@ -3609,7 +3609,15 @@
     "handover_print": "Print Protocol / PDF",
     "btn_manual": "Manual (Partner)",
     "title": "Partner & Fleet Portal",
-    "btn_qr_stickers": "Meter Stickers"
+    "btn_qr_stickers": "Meter Stickers",
+    "view_map": "Radar Map & Route",
+    "btn_handover_protocol": "Commissioning Protocol",
+    "protocol_title": "Digital Commissioning & Handover Protocol",
+    "protocol_subtitle": "Official VDE-AR-N 4105 & EnWG § 14a compliance certificate for customer & grid operator",
+    "btn_print_pdf": "Print / PDF Export",
+    "company_default": "Certified Electrician Partner",
+    "map_title": "Fleet Radar & Service Route Planning",
+    "map_subtitle": "Interactive site map with alert prioritization and 1-click navigation"
   },
   "msb": {
     "badge_compliance": "Smart Meter & MsbG Compliant",

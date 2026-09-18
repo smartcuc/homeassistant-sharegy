@@ -3624,7 +3624,15 @@
     "handover_sub": "Compliant technical documentation for installer and grid operator",
     "handover_print": "Print Protocol / PDF",
     "title": "İş Ortağı Portalı ve Filo",
-    "btn_manual": "El Kitabı (İş Ortağı Portalı)"
+    "btn_manual": "El Kitabı (İş Ortağı Portalı)",
+    "view_map": "Harita & Rota",
+    "btn_handover_protocol": "Devreye Alma Protokolü",
+    "protocol_title": "Dijital Devreye Alma ve Teslim Protokolü",
+    "protocol_subtitle": "Müşteri ve şebeke işletmecisi için resmi VDE-AR-N 4105 ve EnWG § 14a uygunluk belgesi",
+    "btn_print_pdf": "Yazdır / PDF Dışa Aktar",
+    "company_default": "Yetkili Elektrikçi İş Ortağı",
+    "map_title": "Filo Radarı & Servis Rota Planlaması",
+    "map_subtitle": "Arıza önceliklendirmeli ve tek tıkla navigasyonlu interaktif tesis haritası"
   },
   "msb": {
     "badge_compliance": "& MsbG Compliant",

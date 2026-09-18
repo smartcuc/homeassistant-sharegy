@@ -3624,7 +3624,15 @@
     "handover_sub": "Compliant technical documentation for installer and grid operator",
     "handover_print": "Print Protocol / PDF",
     "title": "Portal Parteneri și Flotă",
-    "btn_manual": "Manual (Portal Parteneri)"
+    "btn_manual": "Manual (Portal Parteneri)",
+    "view_map": "Hartă & Rută",
+    "btn_handover_protocol": "Protocol PIF",
+    "protocol_title": "Protocol digital de punere în funcțiune",
+    "protocol_subtitle": "Certificat oficial VDE-AR-N 4105 & EnWG § 14a pentru client și operatorul de rețea",
+    "btn_print_pdf": "Imprimare / Export PDF",
+    "company_default": "Partener electrician autorizat",
+    "map_title": "Radar flotă și planificare trasee service",
+    "map_subtitle": "Hartă interactivă a instalațiilor cu prioritate pentru alerte și navigare rapidă"
   },
   "msb": {
     "badge_compliance": "& MsbG Compliant",

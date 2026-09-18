@@ -3609,7 +3609,15 @@
     "handover_print": "Protokoll drucken / PDF",
     "btn_manual": "Handbuch (Partner)",
     "title": "Partner- & Flottenportal",
-    "btn_qr_stickers": "Zähler-Sticker"
+    "btn_qr_stickers": "Zähler-Sticker",
+    "view_map": "Karten-Radar & Route",
+    "btn_handover_protocol": "IBN-Protokoll",
+    "protocol_title": "Digitales IBN- & Übergabeprotokoll",
+    "protocol_subtitle": "Offizieller VDE-AR-N 4105 & EnWG § 14a Nachweis für Endkunde & Netzbetreiber (VNB)",
+    "btn_print_pdf": "Drucken / PDF Export",
+    "company_default": "Elektro-Fachpartnerbetrieb",
+    "map_title": "Flotten-Radar & Servicetechniker-Routenplanung",
+    "map_subtitle": "Interaktive Liegenschafts-Karte mit Störungs-Priorisierung und 1-Klick-Navigation"
   },
   "msb": {
     "badge_compliance": "Smart-Meter & MsbG konform",
