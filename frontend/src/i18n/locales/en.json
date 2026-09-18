@@ -2927,7 +2927,8 @@
     "residual_grid_supply": "Grid Import (Full Supply)",
     "base_price": "Base Price",
     "meter_and_billing": "Metering & Billing",
-    "btn_manual": "Manual (Tenant Electricity)"
+    "btn_manual": "Manual (Tenant Electricity)",
+    "loading": "Loading Tenant Electricity Management..."
   },
   "admin_ggv": {
     "title": "Shared Building Energy Supply",
@@ -2977,7 +2978,8 @@
     "solar_usage_amount": "Solar Usage Amount",
     "no_statements_msg": "No allocation statements generated yet. Click 'Trigger Solar Settlement'.",
     "audit_title": "HOA Audit & Resolution Log",
-    "btn_manual": "Manual (Building Supply)"
+    "btn_manual": "Manual (Building Supply)",
+    "loading": "Loading Shared Building Supply..."
   },
   "admin_sharing": {
     "title": "Regional Energy Sharing (Cooperative)",
@@ -3103,7 +3105,10 @@
       "new_announcement_btn": "+ Post New Announcement",
       "settings_name": "Energy Community Name",
       "settings_branding": "Branding / Primary Color",
-      "settings_save_btn": "Apply Settings"
+      "settings_save_btn": "Apply Settings",
+      "tab_audit": "📜 Audit Log",
+      "tab_mako": "⚡ EDIFACT MSCONS",
+      "close": "Close"
     },
     "modal_announcement": {
       "title": "New Community Announcement",
@@ -3598,7 +3603,8 @@
     "handover_title": "Commissioning & Handover Protocol",
     "handover_sub": "Compliant technical documentation for installer and grid operator",
     "handover_print": "Print Protocol / PDF",
-    "btn_manual": "Manual (Partner)"
+    "btn_manual": "Manual (Partner)",
+    "title": "Partner & Fleet Portal"
   },
   "msb": {
     "badge_compliance": "Smart Meter & MsbG Compliant",

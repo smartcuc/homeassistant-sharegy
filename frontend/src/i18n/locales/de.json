@@ -2927,7 +2927,8 @@
     "residual_grid_supply": "Netzbezug (Vollversorger)",
     "base_price": "Grundpreis",
     "meter_and_billing": "Zähler & Abrechnung",
-    "btn_manual": "Handbuch (Mieterstrom)"
+    "btn_manual": "Handbuch (Mieterstrom)",
+    "loading": "Lade Mieterstrom-Verwaltung..."
   },
   "admin_ggv": {
     "title": "Gemeinschaftliche Gebäudeversorgung",
@@ -2977,7 +2978,8 @@
     "solar_usage_amount": "Solarnutzungsbetrag",
     "no_statements_msg": "Noch keine Abrechnungsnachweise erstellt. Klicke auf 'Solarabrechnung anstoßen'.",
     "audit_title": "WEG-Audit- & Beschlussprotokoll",
-    "btn_manual": "Handbuch (Gebäudeversorgung)"
+    "btn_manual": "Handbuch (Gebäudeversorgung)",
+    "loading": "Lade Gemeinschaftliche Gebäudeversorgung..."
   },
   "admin_sharing": {
     "title": "Regionales Energy Sharing (Bürgerenergie eG)",
@@ -3103,7 +3105,10 @@
       "new_announcement_btn": "+ Neue Mitteilung posten",
       "settings_name": "Name der Energiegemeinschaft",
       "settings_branding": "Branding / Primärfarbe",
-      "settings_save_btn": "Einstellungen übernehmen"
+      "settings_save_btn": "Einstellungen übernehmen",
+      "tab_audit": "📜 Auditprotokoll",
+      "tab_mako": "⚡ EDIFACT MSCONS",
+      "close": "Schließen"
     },
     "modal_announcement": {
       "title": "Neue Community-Mitteilung",
@@ -3598,7 +3603,8 @@
     "handover_title": "Inbetriebnahmeprotokoll & Übergabenachweis",
     "handover_sub": "Eichrechtskonforme Dokumentation für Fachbetrieb & Netzbetreiber",
     "handover_print": "Protokoll drucken / PDF",
-    "btn_manual": "Handbuch (Partner)"
+    "btn_manual": "Handbuch (Partner)",
+    "title": "Partner- & Flottenportal"
   },
   "msb": {
     "badge_compliance": "Smart-Meter & MsbG konform",
