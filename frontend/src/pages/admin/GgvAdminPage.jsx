@@ -17,6 +17,7 @@ import VirtualMasterMeterHub from "../../features/community/components/VirtualMa
 import TenantSetupWizardModal from "../../features/community/components/TenantSetupWizardModal";
 import WhitelabelSettingsModal from "../../features/tenant/components/WhitelabelSettingsModal";
 import AdminPageHeader from "../../components/admin/AdminPageHeader";
+import MeterQrStickerGeneratorModal from "../../components/admin/MeterQrStickerGeneratorModal";
 
 export default function GgvAdminPage() {
     const { t } = useTranslation();
@@ -44,6 +45,7 @@ export default function GgvAdminPage() {
     const [inviteModalOpen, setInviteModalOpen] = useState(false);
     const [wizardOpen, setWizardOpen] = useState(false);
     const [whitelabelModalOpen, setWhitelabelModalOpen] = useState(false);
+    const [qrGeneratorOpen, setQrGeneratorOpen] = useState(false);
     const [settling, setSettling] = useState(false);
     const [downloadingId, setDownloadingId] = useState(null);
     const [exportingFormat, setExportingFormat] = useState(null);
@@ -284,6 +286,14 @@ export default function GgvAdminPage() {
                         >
                             <span>🎨</span>
                             <span>{t("tenant.whitelabel_btn", "Whitelabel")}</span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setQrGeneratorOpen(true)}
+                            className="px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                        >
+                            <span>🏷️</span>
+                            <span>{t("admin_ggv.btn_qr_stickers", "Zähler-Sticker")}</span>
                         </button>
                         <button
                             type="button"
@@ -712,6 +722,7 @@ export default function GgvAdminPage() {
             <CommunityShareModal isOpen={shareModalOpen} onClose={() => setShareModalOpen(false)} kpis={{ autarky_pct: cockpit?.autarky_pct || 90, community_shared_kwh: cockpit?.shared_kwh || 140, self_consumption_pct: cockpit?.self_consumption_pct || 95 }} />
             <WhitelabelSettingsModal isOpen={whitelabelModalOpen} onClose={() => setWhitelabelModalOpen(false)} />
             <CommunityInviteModal isOpen={inviteModalOpen} onClose={() => setInviteModalOpen(false)} tenant={tenant} initialRole="member" onInviteCreated={createInvite} />
+            <MeterQrStickerGeneratorModal isOpen={qrGeneratorOpen} onClose={() => setQrGeneratorOpen(false)} communityName={tenant?.name} />
         </div>
     );
 }

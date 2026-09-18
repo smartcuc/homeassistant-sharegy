@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { apiFetch } from "../../api/client";
 import AdminPageHeader from "../../components/admin/AdminPageHeader";
+import MeterQrStickerGeneratorModal from "../../components/admin/MeterQrStickerGeneratorModal";
 import {
   Wrench,
   ShieldCheck,
@@ -52,6 +53,7 @@ export default function PartnerDashboard() {
 
   // Quick Onboard Modal State
   const [showOnboardModal, setShowOnboardModal] = useState(false);
+  const [showStickerModal, setShowStickerModal] = useState(false);
   useModalDismiss(Boolean(selectedAsset), () => { setSelectedAsset(null); setShowHandoverProtocol(false); });
   useModalDismiss(showOnboardModal, () => setShowOnboardModal(false));
 
@@ -164,6 +166,15 @@ export default function PartnerDashboard() {
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 <span>{t("common.refresh", "Aktualisieren")}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowStickerModal(true)}
+                className="px-3.5 py-2 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 rounded-xl text-xs font-bold hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition flex items-center gap-1.5 cursor-pointer shadow-xs"
+                title={t("partner.btn_qr_stickers", "Zähler-Sticker")}
+              >
+                <Printer className="w-3.5 h-3.5" />
+                <span>{t("partner.btn_qr_stickers", "Zähler-Sticker")}</span>
               </button>
               <button
                 type="button"
@@ -824,6 +835,13 @@ export default function PartnerDashboard() {
             </div>
           </div>
         )}
+
+        {/* ZÄHLER-STICKER & MIETER-ONBOARDING GENERATOR MODAL */}
+        <MeterQrStickerGeneratorModal
+          isOpen={showStickerModal}
+          onClose={() => setShowStickerModal(false)}
+          communityName={data?.partner_company?.name || "Kundenanlagen"}
+        />
 
       </div>
     </div>

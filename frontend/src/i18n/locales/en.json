@@ -2930,7 +2930,8 @@
     "base_price": "Base Price",
     "meter_and_billing": "Metering & Billing",
     "btn_manual": "Manual (Tenant Electricity)",
-    "loading": "Loading Tenant Electricity Management..."
+    "loading": "Loading Tenant Electricity Management...",
+    "btn_qr_stickers": "Meter Stickers"
   },
   "admin_ggv": {
     "title": "Shared Building Energy Supply",
@@ -2981,7 +2982,8 @@
     "no_statements_msg": "No allocation statements generated yet. Click 'Trigger Solar Settlement'.",
     "audit_title": "HOA Audit & Resolution Log",
     "btn_manual": "Manual (Building Supply)",
-    "loading": "Loading Shared Building Supply..."
+    "loading": "Loading Shared Building Supply...",
+    "btn_qr_stickers": "Meter Stickers"
   },
   "admin_sharing": {
     "title": "Regional Energy Sharing (Cooperative)",
@@ -3606,7 +3608,8 @@
     "handover_sub": "Compliant technical documentation for installer and grid operator",
     "handover_print": "Print Protocol / PDF",
     "btn_manual": "Manual (Partner)",
-    "title": "Partner & Fleet Portal"
+    "title": "Partner & Fleet Portal",
+    "btn_qr_stickers": "Meter Stickers"
   },
   "msb": {
     "badge_compliance": "Smart Meter & MsbG Compliant",
@@ -3852,5 +3855,37 @@
     "clearing_interval_val": "Monthly (PT1M)",
     "clearing_channel_label": "Payout Channel",
     "clearing_channel_val": "Electricity Bill / Stripe"
+  },
+  "spot_heatmap": {
+    "title": "Spot Price Heatmap (Day-Ahead & Intraday)",
+    "subtitle": "EPEX Spot / Day-Ahead Auction & Intraday Price Curve in ct/kWh (incl. VAT & grid fees)",
+    "market_window_48h": "48h Forecast",
+    "range_24h": "24h View",
+    "range_48h": "48h Forecast",
+    "kpi_current": "Current Price",
+    "kpi_lowest": "Lowest Price (Optimal Window)",
+    "kpi_highest": "Peak Price (Most Expensive Hour)",
+    "legend_negative": "Negative / Free (< 0 ct)",
+    "legend_low": "Very Low (< 15 ct)",
+    "legend_normal": "Normal (15 - 28 ct)",
+    "legend_high": "High (> 28 ct)",
+    "slot_now": "NOW",
+    "stat_average": "Average",
+    "stat_spread": "Price Spread",
+    "stat_optimal_hours": "Cheap Hours (< 15 ct)",
+    "advice_battery_title": "AI Recommendation: Storage & SteuVE",
+    "advice_battery_text": "A price spread of {spread} ct/kWh is forecasted today. We recommend charging your home battery or EV around {lowHour} hrs and avoiding grid draw during peak hours around {highHour} hrs."
+  },
+  "qr_generator": {
+    "modal_title": "Meter QR Sticker & Tenant Onboarding Generator",
+    "modal_subtitle": "Print-ready DIN A4 sticker sheets for DIN-rail meters & tenant welcome letters.",
+    "print_action": "Print / Export PDF",
+    "tab_stickers": "🏷️ Meter Stickers (DIN-Rail / Panel)",
+    "tab_letters": "✉️ Tenant Welcome Letter (A4)",
+    "select_all": "All Units",
+    "include_branding": "Branding / Logo",
+    "select_units_title": "Select Units",
+    "contact_label": "Contact info on sheet",
+    "footer_hint": "Tip: For electrical cabinets we recommend weatherproof polyester or vinyl sticker sheets."
   }
 }

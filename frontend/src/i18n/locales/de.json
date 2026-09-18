@@ -2930,7 +2930,8 @@
     "base_price": "Grundpreis",
     "meter_and_billing": "Zähler & Abrechnung",
     "btn_manual": "Handbuch (Mieterstrom)",
-    "loading": "Lade Mieterstrom-Verwaltung..."
+    "loading": "Lade Mieterstrom-Verwaltung...",
+    "btn_qr_stickers": "Zähler-Sticker"
   },
   "admin_ggv": {
     "title": "Gemeinschaftliche Gebäudeversorgung",
@@ -2981,7 +2982,8 @@
     "no_statements_msg": "Noch keine Abrechnungsnachweise erstellt. Klicke auf 'Solarabrechnung anstoßen'.",
     "audit_title": "WEG-Audit- & Beschlussprotokoll",
     "btn_manual": "Handbuch (Gebäudeversorgung)",
-    "loading": "Lade Gemeinschaftliche Gebäudeversorgung..."
+    "loading": "Lade Gemeinschaftliche Gebäudeversorgung...",
+    "btn_qr_stickers": "Zähler-Sticker"
   },
   "admin_sharing": {
     "title": "Regionales Energy Sharing (Bürgerenergie eG)",
@@ -3606,7 +3608,8 @@
     "handover_sub": "Eichrechtskonforme Dokumentation für Fachbetrieb & Netzbetreiber",
     "handover_print": "Protokoll drucken / PDF",
     "btn_manual": "Handbuch (Partner)",
-    "title": "Partner- & Flottenportal"
+    "title": "Partner- & Flottenportal",
+    "btn_qr_stickers": "Zähler-Sticker"
   },
   "msb": {
     "badge_compliance": "Smart-Meter & MsbG konform",
@@ -3852,5 +3855,37 @@
     "clearing_interval_val": "Monatlich (PT1M)",
     "clearing_channel_label": "Auszahlungskanal",
     "clearing_channel_val": "Stromrechnung / Stripe"
+  },
+  "spot_heatmap": {
+    "title": "Börsenstrompreis-Heatmap (Day-Ahead & Intraday)",
+    "subtitle": "EPEX Spot / Day-Ahead-Auktion & Intraday-Preiskurve in ct/kWh (inkl. MwSt. & Netzentgelte)",
+    "market_window_48h": "48h Forecast",
+    "range_24h": "24h Ansicht",
+    "range_48h": "48h Vorschau",
+    "kpi_current": "Aktueller Tarifpreis",
+    "kpi_lowest": "Tiefstpreis (Günstigstes Zeitfenster)",
+    "kpi_highest": "Spitzenpreis (Teuerste Stunde)",
+    "legend_negative": "Negativ / Gratis (< 0 ct)",
+    "legend_low": "Sehr günstig (< 15 ct)",
+    "legend_normal": "Normal (15 - 28 ct)",
+    "legend_high": "Teuer (> 28 ct)",
+    "slot_now": "JETZT",
+    "stat_average": "Durchschnitt",
+    "stat_spread": "Preis-Spread",
+    "stat_optimal_hours": "Günstige Stunden (< 15 ct)",
+    "advice_battery_title": "KI-Empfehlung Heimspeicher & SteuVE",
+    "advice_battery_text": "Heute ist ein ausgeprägter Preis-Spread von {spread} ct/kWh prognostiziert. Es wird empfohlen, den Heimspeicher zwischen {lowHour} Uhr aus dem Netz oder über Solarüberschuss nachzuladen und Spitzenlasten zwischen {highHour} Uhr aus der Batterie abzudecken."
+  },
+  "qr_generator": {
+    "modal_title": "Zähler-QR-Sticker & Mieter-Onboarding-Generator",
+    "modal_subtitle": "Druckfertige Klebeschilder für die Hutschiene & Mieter-Willkommensdossiers.",
+    "print_action": "PDF drucken / exportieren",
+    "tab_stickers": "🏷️ Zähler-Klebeschilder (Hutschiene)",
+    "tab_letters": "✉️ Mieter-Willkommensbrief (A4)",
+    "select_all": "Alle Wohneinheiten",
+    "include_branding": "Branding / Logo",
+    "select_units_title": "Wohneinheiten wählen",
+    "contact_label": "Kontaktzeile auf Ausdruck",
+    "footer_hint": "Tipp: Für Zählerschränke empfehlen wir wetterfeste Polyester- oder Vinyl-Etikettenbögen (z.B. Avery Zweckform A4)."
   }
 }

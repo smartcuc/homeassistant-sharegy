@@ -20,6 +20,7 @@ import SubmeterStackedTrendChart from "./components/SubmeterStackedTrendChart";
 import DateRangePickerModal from "./components/DateRangePickerModal";
 import ExportDropdown from "./components/ExportDropdown";
 import GridCo2Card from "../market/components/GridCo2Card";
+import SpotPriceHeatmapCard from "../market/components/SpotPriceHeatmapCard";
 import { useSubscription } from "../../hooks/useSubscription";
 import ProBadge from "../../components/common/ProBadge";
 import ProUpgradeModal from "../../components/common/ProUpgradeModal";
@@ -772,8 +773,10 @@ export default function EnergyDashboard() {
             </div>
 
             {/* =========================================================
-                BATTERY ARBITRAGE SIMULATOR & GRID CO2 SIGNAL
+                SPOT PRICE HEATMAP, BATTERY ARBITRAGE SIMULATOR & GRID CO2 SIGNAL
             ========================================================= */}
+            <SpotPriceHeatmapCard />
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <BatteryArbitrageCard />
                 <GridCo2Card />

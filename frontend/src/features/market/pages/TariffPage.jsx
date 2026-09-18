@@ -5,6 +5,7 @@
 import HomeTariffSettingsCard from "../components/HomeTariffSettingsCard";
 import TibberSettingsCard from "../components/TibberSettingsCard";
 import TariffProfileRecommendationBanner from "../components/TariffProfileRecommendationBanner";
+import SpotPriceHeatmapCard from "../components/SpotPriceHeatmapCard";
 import { useTranslation } from "react-i18next";
 
 export default function TariffPage() {
@@ -24,6 +25,9 @@ export default function TariffPage() {
 
             {/* 🌟 PROFIL-BASIERTE TARIF-EMPFEHLUNG (KOMPASS) */}
             <TariffProfileRecommendationBanner />
+
+            {/* 📊 DYNAMISCHE BÖRSENSTROM-HEATMAP (24h/48h) */}
+            <SpotPriceHeatmapCard />
 
             {/* 1. STROMTARIF CARD */}
             <HomeTariffSettingsCard />

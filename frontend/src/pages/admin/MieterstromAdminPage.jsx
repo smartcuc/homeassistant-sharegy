@@ -19,6 +19,7 @@ import TenantSetupWizardModal from "../../features/community/components/TenantSe
 import WhitelabelSettingsModal from "../../features/tenant/components/WhitelabelSettingsModal";
 import MarketCommunicationModal from "../../features/billing/components/MarketCommunicationModal";
 import AdminPageHeader from "../../components/admin/AdminPageHeader";
+import MeterQrStickerGeneratorModal from "../../components/admin/MeterQrStickerGeneratorModal";
 
 export default function MieterstromAdminPage() {
     const { t } = useTranslation();
@@ -47,6 +48,7 @@ export default function MieterstromAdminPage() {
     const [wizardOpen, setWizardOpen] = useState(false);
     const [whitelabelModalOpen, setWhitelabelModalOpen] = useState(false);
     const [makoModalOpen, setMakoModalOpen] = useState(false);
+    const [qrGeneratorOpen, setQrGeneratorOpen] = useState(false);
     const [settling, setSettling] = useState(false);
     const [downloadingId, setDownloadingId] = useState(null);
     const [exportingFormat, setExportingFormat] = useState(null);
@@ -287,6 +289,14 @@ export default function MieterstromAdminPage() {
                         >
                             <span>🎨</span>
                             <span>{t("tenant.whitelabel_btn", "Whitelabel")}</span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setQrGeneratorOpen(true)}
+                            className="px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                        >
+                            <span>🏷️</span>
+                            <span>{t("admin_mieterstrom.btn_qr_stickers", "Zähler-Sticker")}</span>
                         </button>
                         <button
                             type="button"
@@ -774,6 +784,7 @@ export default function MieterstromAdminPage() {
             <WhitelabelSettingsModal isOpen={whitelabelModalOpen} onClose={() => setWhitelabelModalOpen(false)} />
             <MarketCommunicationModal isOpen={makoModalOpen} onClose={() => setMakoModalOpen(false)} tenantId={tenant?.id} />
             <CommunityInviteModal isOpen={inviteModalOpen} onClose={() => setInviteModalOpen(false)} tenant={tenant} initialRole="member" onInviteCreated={createInvite} />
+            <MeterQrStickerGeneratorModal isOpen={qrGeneratorOpen} onClose={() => setQrGeneratorOpen(false)} communityName={tenant?.name} />
         </div>
     );
 }
