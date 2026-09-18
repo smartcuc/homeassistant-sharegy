@@ -242,8 +242,8 @@ class GrowattAdapter(BaseInverterAdapter):
                                         val = float(match.group(0)) * factor
                                         if is_power and not has_w and not has_kw:
                                             # Nur reine Anlagen-Überblicksfelder (die laut Growatt-API per Definition in kW gemeldet werden) skalieren
-                                            is_plant_kw_field = any(pk in k_low for pk in ["current_power_kw", "currentpowerkw", "plant_power_kw", "plantpowerkw"])
-                                            if is_plant_kw_field:
+                                            is_plant_kw_field = any(pk in k_low for pk in ["currentpower", "current_power", "plantpower", "plant_power", "currpower", "curr_power", "current_power_kw", "currentpowerkw", "plant_power_kw", "plantpowerkw"])
+                                            if is_plant_kw_field or (val > 0 and val < 50.0 and not has_large_watts):
                                                 val = val * 1000.0
                                         return val
                                     except (ValueError, TypeError):
@@ -292,8 +292,8 @@ class GrowattAdapter(BaseInverterAdapter):
                             val = float(match.group(0)) * factor
                             if is_power and not has_w and not has_kw:
                                 # Nur reine Anlagen-Überblicksfelder (die laut Growatt-API per Definition in kW gemeldet werden) skalieren
-                                is_plant_kw_field = any(pk in k_low for pk in ["current_power_kw", "currentpowerkw", "plant_power_kw", "plantpowerkw"])
-                                if is_plant_kw_field:
+                                is_plant_kw_field = any(pk in k_low for pk in ["currentpower", "current_power", "plantpower", "plant_power", "currpower", "curr_power", "current_power_kw", "currentpowerkw", "plant_power_kw", "plantpowerkw"])
+                                if is_plant_kw_field or (val > 0 and val < 50.0 and not has_large_watts):
                                     val = val * 1000.0
                             return val  # Sobald der prioritäre Key gefunden wurde, sofort zurückliefern!
                         except (ValueError, TypeError):
