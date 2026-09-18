@@ -249,7 +249,7 @@ class TenantAdmin(admin.ModelAdmin):
     inlines = [TenantMembershipInline]
 
 
-from core.models import MemberEnergyProfile
+from core.models import MemberEnergyProfile, AuditLog
 
 
 @admin.register(MemberEnergyProfile)
@@ -258,6 +258,15 @@ class MemberEnergyProfileAdmin(admin.ModelAdmin):
     list_filter = ("energy_role",)
     search_fields = ("member__user__email", "grid_connection_id")
     raw_id_fields = ("member",)
+
+
+@admin.register(AuditLog)
+class AuditLogAdmin(admin.ModelAdmin):
+    list_display = ("created_at", "action", "resource_type", "resource_name", "actor_email", "severity", "ip_address")
+    list_filter = ("severity", "action", "resource_type")
+    search_fields = ("actor_email", "resource_name", "resource_id", "action")
+    readonly_fields = ("id", "created_at", "changes", "metadata")
+
 
 
 

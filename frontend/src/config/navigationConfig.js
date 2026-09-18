@@ -249,6 +249,7 @@ export function getNavigationSections({
                     { name: t("nav.admin_vpp", "VPP & Flex-Zentrale"), path: "/app/admin/vpp", icon: "⚡" },
                     { name: t("nav.admin_dashboard", "Admin Dashboard"), path: "/app/admin/dashboard", icon: "📊" },
                     { name: t("nav.admin_tracking", "Event & Tracking"), path: "/app/admin/tracking", icon: "📈" },
+                    { name: t("nav.admin_audit_logs", "Audit Trail & Revision"), path: "/app/admin/audit-logs", icon: "🔒" },
                     { name: t("nav.partner_fleet", "Partner-Flotten"), path: "/app/partner", icon: "🔧" },
                     { name: t("nav.agent_support_hub", "Support-Zentrale"), path: "/app/support-hub", icon: "🛟" },
                     {

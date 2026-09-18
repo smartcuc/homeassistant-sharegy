@@ -169,6 +169,19 @@ export default function AdminLayout({ children }) {
                         </NavLink>
 
                         <NavLink
+                            to="/app/admin/audit-logs"
+                            className={({ isActive }) =>
+                                `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${
+                                    isActive
+                                        ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-bold"
+                                        : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60"
+                                }`
+                            }
+                        >
+                            <span className="text-sm">🔒</span> {t("admin.audit_trail", "Audit Trail & Revision")}
+                        </NavLink>
+
+                        <NavLink
                             to="/app/help"
                             className={({ isActive }) =>
                                 `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${

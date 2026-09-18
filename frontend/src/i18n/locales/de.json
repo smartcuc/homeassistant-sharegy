@@ -175,7 +175,8 @@
     "ggv": "Gebäudeversorgung (§ 42b EnWG)",
     "home_title": "Zur sharegy Startseite & Info",
     "open_menu": "Menü öffnen",
-    "theme": "Design"
+    "theme": "Design",
+    "admin_audit_logs": "Audit Trail & Revision"
   },
   "dashboard": {
     "title": "Deine Energiezentrale ⚡",
@@ -1545,7 +1546,9 @@
     "logged_in_success": "hat sich erfolgreich eingeloggt",
     "no_recent_logins": "Keine aktuellen Logins verzeichnet.",
     "tenants": "Mandanten & Mieter",
-    "back_to_portal": "Zurück zum Hauptportal"
+    "back_to_portal": "Zurück zum Hauptportal",
+    "audit_trail": "Audit Trail & Revision",
+    "audit_subtitle": "Revisionssicheres Protokoll aller Konfigurationen und § 14a / VPP Eingriffe"
   },
   "tracking": {
     "title": "Event-Tracking & Telemetrie-Analytics",

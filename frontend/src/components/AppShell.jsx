@@ -45,6 +45,7 @@ const CommunityMemberDashboard = lazy(() => import("../features/community/pages/
 const CommunitiesManagementHub = lazy(() => import("../pages/admin/CommunitiesManagementHub"));
 const PartnerDashboard = lazy(() => import("../features/partner/PartnerDashboard"));
 const VppFleetAdminPage = lazy(() => import("../pages/admin/VppFleetAdminPage"));
+const AuditLogsAdminPage = lazy(() => import("../pages/admin/AuditLogsAdminPage"));
 
 function PageSuspenseLoader() {
     return (
@@ -168,6 +169,10 @@ export default function AppShell() {
                             <Route 
                                 path="admin/tracking" 
                                 element={isStaffOrAdmin ? <TrackingDashboard /> : <Navigate to="/app/dashboard" replace />} 
+                            />
+                            <Route 
+                                path="admin/audit-logs" 
+                                element={isStaffOrAdmin ? <AuditLogsAdminPage /> : <Navigate to="/app/dashboard" replace />} 
                             />
                             <Route path="admin/communities" 
                                 element={isStaffOrAdmin ? <CommunitiesManagementHub /> : <Navigate to="/app/dashboard" replace />} 

@@ -6,6 +6,7 @@ import uuid
 from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
+from django.conf import settings
 
 from core.ownership import owner_xor_constraints
 
@@ -317,4 +318,80 @@ class MemberEnergyProfile(models.Model):
 
     def __str__(self):
         return f"{self.member} ({self.energy_role})"
+
+
+# -----------------------------------------------------
+# ENTERPRISE AUDIT TRAIL
+# -----------------------------------------------------
+class AuditLog(models.Model):
+    """
+    Revisionssicheres Audit-Log für ISO 27001 / SOC 2 Konformität.
+    Erfasst alle administrativen, sicherheitsrelevanten und regulatorischen Aktionen.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    actor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="audit_logs",
+    )
+    actor_email = models.CharField(max_length=255, blank=True, default="")
+    tenant = models.ForeignKey(
+        Tenant,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="audit_logs",
+    )
+
+    ACTION_CHOICES = [
+        ("CREATE", "Ressource erstellt"),
+        ("UPDATE", "Ressource aktualisiert"),
+        ("DELETE", "Ressource gelöscht"),
+        ("LOGIN", "Authentifizierung"),
+        ("SECURITY_CONFIG", "Sicherheitskonfiguration"),
+        ("DIMMING_TRIGGER", "§ 14a EnWG Dimm-Befehl"),
+        ("DISPATCH_EXECUTE", "VPP Dispatch ausgeführt"),
+        ("DISPATCH_CANCEL", "VPP Dispatch storniert"),
+        ("CONSENT_GRANT", "Wartungs-Consent erteilt"),
+        ("CONSENT_REVOKE", "Wartungs-Consent widerrufen"),
+        ("TARIFF_UPDATE", "Tarif/Preise angepasst"),
+        ("EICHRECHT_VERIFY", "Eichrechtsprüfung durchgeführt"),
+    ]
+
+    SEVERITY_CHOICES = [
+        ("info", "Information"),
+        ("warning", "Warnung"),
+        ("critical", "Kritisch"),
+        ("security", "Sicherheitsrelevant"),
+    ]
+
+    action = models.CharField(max_length=100, db_index=True)
+    resource_type = models.CharField(max_length=100, db_index=True)
+    resource_id = models.CharField(max_length=255, blank=True, default="", db_index=True)
+    resource_name = models.CharField(max_length=255, blank=True, default="")
+    severity = models.CharField(max_length=20, choices=SEVERITY_CHOICES, default="info", db_index=True)
+
+    ip_address = models.CharField(max_length=64, blank=True, default="")
+    user_agent = models.CharField(max_length=500, blank=True, default="")
+
+    changes = models.JSONField(default=dict, blank=True)
+    metadata = models.JSONField(default=dict, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        db_table = "core_auditlog"
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["resource_type", "resource_id"]),
+            models.Index(fields=["action", "created_at"]),
+            models.Index(fields=["severity", "created_at"]),
+        ]
+
+    def __str__(self):
+        return f"[{self.created_at.strftime('%Y-%m-%d %H:%M')}] {self.action} on {self.resource_type} by {self.actor_email or 'System'}"
+
     

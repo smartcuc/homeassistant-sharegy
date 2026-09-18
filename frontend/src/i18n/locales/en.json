@@ -175,7 +175,8 @@
     "ggv": "Building Energy Supply (§ 42b EnWG)",
     "home_title": "To sharegy home & info",
     "open_menu": "Open menu",
-    "theme": "Theme"
+    "theme": "Theme",
+    "admin_audit_logs": "Audit Trail & Compliance"
   },
   "dashboard": {
     "title": "Your Energy Hub ⚡",
@@ -1545,7 +1546,9 @@
     "logged_in_success": "successfully logged in",
     "no_recent_logins": "No recent logins recorded.",
     "tenants": "Tenants & Organizations",
-    "back_to_portal": "Back to Main Portal"
+    "back_to_portal": "Back to Main Portal",
+    "audit_trail": "Audit Trail & Compliance",
+    "audit_subtitle": "Tamper-proof audit logs for all configurations, § 14a and VPP events"
   },
   "tracking": {
     "title": "Event Tracking & Telemetry Analytics",

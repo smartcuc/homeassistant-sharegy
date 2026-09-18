@@ -18,6 +18,10 @@ from vpp.views import (
     vpp_user_earnings_view,
     vpp_clearing_run_view,
     vpp_aggregator_webhook_view,
+    steuve_grid_fee_calculator_view,
+    cls_health_inspector_view,
+    eichrecht_signature_verify_view,
+    vpp_market_clearing_simulator_view,
 )
 
 urlpatterns = [
@@ -46,5 +50,18 @@ urlpatterns = [
 
     # 🌐 Aggregator & ÜNB Webhook (Next Kraftwerke / 50Hertz / Connect+)
     path("aggregator/webhook/", vpp_aggregator_webhook_view, name="vpp_aggregator_webhook"),
+
+    # ⚡ § 14a EnWG Netzentgelt-Einsparungs-Kalkulator
+    path("steuve/calculator/", steuve_grid_fee_calculator_view, name="vpp_steuve_calculator"),
+
+    # 📡 SMGW & CLS-Kanal Live Health Inspector
+    path("cls-inspector/", cls_health_inspector_view, name="vpp_cls_inspector"),
+
+    # ⚖️ Eichrechtskonforme Messwert-Signaturprüfung (PTB-A 50.7)
+    path("eichrecht/verify/", eichrecht_signature_verify_view, name="vpp_eichrecht_verify"),
+
+    # 🧪 VPP Flex-Markt Clearing Simulator (Sandbox-Modus)
+    path("simulator/run/", vpp_market_clearing_simulator_view, name="vpp_simulator_run"),
 ]
+
 

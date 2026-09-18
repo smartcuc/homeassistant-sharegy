@@ -20,3 +20,5 @@ export function KpiCard({ title, value, icon, subtitle }) {
         </div>
     );
 }
+
+export default KpiCard;

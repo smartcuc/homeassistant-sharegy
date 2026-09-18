@@ -5,6 +5,7 @@ import TrackingDashboard from "./pages/admin/TrackingDashboard";
 import TenantDashboard from "./pages/TenantDashboard";
 import CommunitiesManagementHub from "./pages/admin/CommunitiesManagementHub";
 import VppFleetAdminPage from "./pages/admin/VppFleetAdminPage";
+import AuditLogsAdminPage from "./pages/admin/AuditLogsAdminPage";
 import AgentSupportHubPage from "./features/support/pages/AgentSupportHubPage";
 import PartnerDashboard from "./features/partner/PartnerDashboard";
 import { useUser } from "./hooks/useUser";
@@ -29,6 +30,7 @@ export default function AdminApp() {
                 <Route index element={<Navigate to="communities" replace />} />
                 <Route path="communities" element={<CommunitiesManagementHub />} />
                 <Route path="vpp" element={<VppFleetAdminPage />} />
+                <Route path="audit-logs" element={<AuditLogsAdminPage />} />
                 <Route path="dashboard" element={<AdminDashboard />} />
                 <Route path="tracking" element={<TrackingDashboard />} />
                 <Route path="tenants" element={<TenantDashboard />} />
