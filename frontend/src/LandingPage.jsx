@@ -97,24 +97,24 @@ export default function LandingPage() {
                             href="/api/demo/user/"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-3 p-3.5 rounded-xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-200 hover:border-emerald-300 text-slate-900 transition-all shadow-2xs group hover:-translate-y-0.5"
+                            className="flex items-center gap-3 p-3.5 rounded-xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-200 hover:border-emerald-300 text-slate-900 transition-all shadow-2xs group hover:-translate-y-0.5 cursor-pointer"
                         >
                             <span className="text-2xl group-hover:scale-110 transition-transform">⚡</span>
                             <div className="flex flex-col text-left">
-                                <span className="font-bold text-xs text-slate-900 group-hover:text-emerald-900">{t("landing.demo_role_user", "User Cockpit (EMS & Community)")}</span>
-                                <span className="text-[10px] text-slate-500 font-medium">Smart EMS, dynamische Tarife & Mieter/Sharing</span>
+                                <span className="font-bold text-xs text-slate-900 group-hover:text-emerald-900">{t("landing.demo_role_user", "⚡ Verbraucher & Erzeuger")}</span>
+                                <span className="text-[10px] text-slate-500 font-medium">{t("landing.demo_role_user_sub", "EMS, Mieter, GGV & Sharing User")}</span>
                             </div>
                         </a>
                         <a
                             href="/api/demo/admin/"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-3 p-3.5 rounded-xl bg-slate-50 hover:bg-indigo-50/80 border border-slate-200 hover:border-indigo-300 text-slate-900 transition-all shadow-2xs group hover:-translate-y-0.5"
+                            className="flex items-center gap-3 p-3.5 rounded-xl bg-slate-50 hover:bg-indigo-50/80 border border-slate-200 hover:border-indigo-300 text-slate-900 transition-all shadow-2xs group hover:-translate-y-0.5 cursor-pointer"
                         >
                             <span className="text-2xl group-hover:scale-110 transition-transform">🏢</span>
                             <div className="flex flex-col text-left">
-                                <span className="font-bold text-xs text-slate-900 group-hover:text-indigo-900">{t("landing.demo_role_admin", "Admin-Zentrale (Liegenschaften & Flotten)")}</span>
-                                <span className="text-[10px] text-slate-500 font-medium">Mieterstrom, GGV, Sharing & Abrechnungen</span>
+                                <span className="font-bold text-xs text-slate-900 group-hover:text-indigo-900">{t("landing.demo_role_admin", "🏢 Verwalter & Betreiber")}</span>
+                                <span className="text-[10px] text-slate-500 font-medium">{t("landing.demo_role_admin_sub", "Mieter, GGV & Sharing Admin & Partner")}</span>
                             </div>
                         </a>
                     </div>
@@ -295,7 +295,7 @@ export default function LandingPage() {
                             className="px-3.5 py-1.5 rounded-xl bg-white/90 border border-slate-200 hover:border-emerald-400 hover:bg-emerald-50/60 text-slate-700 hover:text-emerald-700 font-semibold transition shadow-2xs flex items-center gap-1.5 cursor-pointer"
                         >
                             <Zap className="w-3.5 h-3.5 text-amber-500" />
-                            <span>{t("landing.demo_role_user", "⚡ User-Cockpit (EMS, Mieter & Sharing)")}</span>
+                            <span>{t("landing.demo_role_user", "⚡ Verbraucher & Erzeuger")}</span>
                         </a>
                         <a
                             href="/api/demo/admin/"
@@ -304,7 +304,7 @@ export default function LandingPage() {
                             className="px-3.5 py-1.5 rounded-xl bg-white/90 border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/60 text-slate-700 hover:text-indigo-700 font-semibold transition shadow-2xs flex items-center gap-1.5 cursor-pointer"
                         >
                             <Users className="w-3.5 h-3.5 text-indigo-600" />
-                            <span>{t("landing.demo_role_admin", "🏢 Admin-Zentrale (Liegenschaften & Flotten)")}</span>
+                            <span>{t("landing.demo_role_admin", "🏢 Verwalter & Betreiber")}</span>
                         </a>
                     </div>
 
@@ -528,19 +528,19 @@ export default function LandingPage() {
                                 href="/api/demo/admin/"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-lg shadow-emerald-600/20 hover:scale-[1.02] transition cursor-pointer"
+                                className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-lg shadow-indigo-600/20 hover:scale-[1.02] transition cursor-pointer"
                             >
-                                <Users className="w-4 h-4 text-teal-200" />
-                                <span>{t("landing.p2_demo_admin_btn", "🏢 WEG & Quartiers-Admin Demo")}</span>
+                                <Users className="w-4 h-4 text-indigo-200" />
+                                <span>{t("landing.p2_demo_admin_btn", "🏢 Verwalter & Betreiber Demo")}</span>
                                 <ArrowRight className="w-3.5 h-3.5" />
                             </a>
                             <a
                                 href="/api/demo/user/"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-white hover:bg-teal-50 text-teal-900 border border-teal-300 text-xs font-bold shadow-sm hover:scale-[1.02] transition cursor-pointer"
+                                className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-white hover:bg-emerald-50 text-emerald-900 border border-emerald-300 text-xs font-bold shadow-xs hover:scale-[1.02] transition cursor-pointer"
                             >
-                                <span>{t("landing.p2_demo_user_btn", "👤 Mieterstrom & Teilnehmer Demo")}</span>
+                                <span>{t("landing.p2_demo_user_btn", "⚡ Verbraucher & Erzeuger Demo")}</span>
                                 <ArrowRight className="w-3.5 h-3.5" />
                             </a>
                         </div>
