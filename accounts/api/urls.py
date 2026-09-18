@@ -19,12 +19,7 @@ from .views import RequestMagicLinkView, MagicLoginView, MagicLinkStatsView, Liv
 from .views import DashboardStatsView
 from .views import (
     DemoLoginView,
-    DemoSharingAdminLoginView,
-    DemoSharingUserLoginView,
-    DemoMieterstromAdminLoginView,
-    DemoMieterstromUserLoginView,
-    DemoGGVAdminLoginView,
-    DemoGGVUserLoginView,
+    DemoAdminLoginView,
 )
 ##from .views import TrackEventView
 from rest_framework_simplejwt.views import TokenRefreshView
@@ -117,18 +112,8 @@ urlpatterns += [
 
 urlpatterns += [
     path("demo/", DemoLoginView.as_view(), name="demo-login"),
-    path("demo/sharing-admin/", DemoSharingAdminLoginView.as_view(), name="demo-sharing-admin"),
-    path("demo/sharing-user/", DemoSharingUserLoginView.as_view(), name="demo-sharing-user"),
-    path("demo/mieterstrom-admin/", DemoMieterstromAdminLoginView.as_view(), name="demo-mieterstrom-admin"),
-    path("demo/mieterstrom-user/", DemoMieterstromUserLoginView.as_view(), name="demo-mieterstrom-user"),
-    path("demo/ggv-admin/", DemoGGVAdminLoginView.as_view(), name="demo-ggv-admin"),
-    path("demo/ggv-user/", DemoGGVUserLoginView.as_view(), name="demo-ggv-user"),
-    path("demo/admin/", DemoSharingAdminLoginView.as_view(), name="demo-admin"),
-    path("demo/community/", DemoSharingUserLoginView.as_view(), name="demo-community"),
-    path("demo/user/", DemoSharingUserLoginView.as_view(), name="demo-user"),
-    # Aliases for demo-sharing/...
-    path("demo-sharing/admin/", DemoSharingAdminLoginView.as_view(), name="demo-sharing-admin-alias"),
-    path("demo-sharing/user/", DemoSharingUserLoginView.as_view(), name="demo-sharing-user-alias"),
+    path("demo/user/", DemoLoginView.as_view(), name="demo-user"),
+    path("demo/admin/", DemoAdminLoginView.as_view(), name="demo-admin"),
     path("gdpr/export/", GDPRExportView.as_view(), name="gdpr-export"),
     path("gdpr/delete-account/", GDPRDeleteAccountView.as_view(), name="gdpr-delete-account"),
 ]

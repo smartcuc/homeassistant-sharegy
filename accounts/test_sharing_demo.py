@@ -39,9 +39,9 @@ class SharingDemoTests(TestCase):
         # Prüfe ob Zähler existieren
         self.assertTrue(tenant.meters.exists())
 
-    def test_demo_sharing_admin_login_endpoint(self):
-        """Testet den Endpoint /api/demo/sharing-admin/."""
-        response = self.client.get("/api/demo/sharing-admin/")
+    def test_demo_admin_login_endpoint(self):
+        """Testet den Endpoint /api/demo/admin/."""
+        response = self.client.get("/api/demo/admin/", secure=True)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, "/app/admin/communities")
 
@@ -51,24 +51,24 @@ class SharingDemoTests(TestCase):
         user = User.objects.get(id=user_id)
         self.assertEqual(user.email, "sharing-admin@sharegy.de")
 
-    def test_demo_sharing_user_login_endpoint(self):
-        """Testet den Endpoint /api/demo/sharing-user/."""
-        response = self.client.get("/api/demo/sharing-user/")
+    def test_demo_user_login_endpoint(self):
+        """Testet den Endpoint /api/demo/user/."""
+        response = self.client.get("/api/demo/user/", secure=True)
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, "/app/tenant")
+        self.assertEqual(response.url, "/app/dashboard")
 
         # Prüfe ob eingeloggt
         user_id = self.client.session.get("_auth_user_id")
         self.assertIsNotNone(user_id)
         user = User.objects.get(id=user_id)
-        self.assertEqual(user.email, "sharing-user@sharegy.de")
+        self.assertEqual(user.email, "demo@sharegy.de")
 
     def test_demo_login_with_query_params(self):
-        """Testet /api/demo/?role=sharing-admin und /api/demo/?role=sharing-user."""
-        res_admin = self.client.get("/api/demo/?role=sharing-admin")
+        """Testet /api/demo/?role=admin und /api/demo/."""
+        res_admin = self.client.get("/api/demo/?role=admin", secure=True)
         self.assertEqual(res_admin.status_code, 302)
         self.assertEqual(res_admin.url, "/app/admin/communities")
 
-        res_user = self.client.get("/api/demo/?role=sharing-user")
+        res_user = self.client.get("/api/demo/", secure=True)
         self.assertEqual(res_user.status_code, 302)
-        self.assertEqual(res_user.url, "/app/tenant")
+        self.assertEqual(res_user.url, "/app/dashboard")

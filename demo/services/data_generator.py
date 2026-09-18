@@ -78,17 +78,10 @@ def setup_demo_household(target_user=None):
     old_device_ids = list(old_devices_qs.values_list("id", flat=True))
 
     if old_device_ids or old_home_ids:
-        # A. TimescaleDB Metrik-Hypertables und Detail-Messwerte über ORM löschen
         from devices.models import (
             DeviceMetric,
             DeviceMetric1m,
-            DeviceMetric5m,
             DeviceMetric15m,
-            DeviceMetric1h,
-            DeviceLatestMetric,
-            DeviceConfig,
-            CloudDeviceIntegration,
-            ChargingStation,
         )
         for model_cls in [
             DeviceMetric,
@@ -107,7 +100,6 @@ def setup_demo_household(target_user=None):
 
         # B. Erzeuger-, Speicher-, Wallbox- & Alarm-Verknüpfungen
         try:
-            from producer.models import GeneratorString, GeneratorSystem, StorageSystem
             GeneratorString.objects.filter(generator__home_id__in=old_home_ids).delete()
             GeneratorSystem.objects.filter(home_id__in=old_home_ids).delete()
             StorageSystem.objects.filter(home_id__in=old_home_ids).delete()

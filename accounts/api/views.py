@@ -985,28 +985,17 @@ class DashboardStatsView(APIView):
         })
 
 
-# ---------------- DEMO SYSTEM ---------------- #
+# ---------------- DEMO SYSTEM (CLEAN 2-ROLE ARCHITECTURE) ---------------- #
 class DemoLoginView(View):
+    """
+    Loggt den Demo-Nutzer ein (volles Home EMS & Community-Cockpit) und leitet auf das Dashboard weiter.
+    Unterstützt auch /api/demo/user/ und /api/demo/?role=admin.
+    """
     def get(self, request):
         role = request.GET.get("role", "").lower().strip()
-        if role in ("sharing-admin", "sharing_admin", "admin-sharing"):
-            return DemoSharingAdminLoginView().get(request)
-        elif role in ("sharing-user", "sharing_user", "community", "sharing"):
-            return DemoSharingUserLoginView().get(request)
-        elif role in ("mieterstrom-admin", "mieterstrom_admin", "admin-mieterstrom"):
-            return DemoMieterstromAdminLoginView().get(request)
-        elif role in ("mieterstrom-user", "mieterstrom_user", "mieterstrom", "mieter"):
-            return DemoMieterstromUserLoginView().get(request)
-        elif role in ("ggv-admin", "ggv_admin", "admin-ggv"):
-            return DemoGGVAdminLoginView().get(request)
-        elif role in ("ggv-user", "ggv_user", "ggv"):
-            return DemoGGVUserLoginView().get(request)
-        elif role in ("admin", "superadmin"):
-            return DemoSharingAdminLoginView().get(request)
-        elif role in ("user", "household"):
-            pass
+        if role in ("admin", "superadmin", "sharing-admin", "mieterstrom-admin", "ggv-admin"):
+            return DemoAdminLoginView().get(request)
 
-        # Standard Dashboard Demo
         demo_user, created = User.objects.get_or_create(
             email="demo@sharegy.de",
             defaults={"username": "demo@sharegy.de", "first_name": "Demo", "last_name": "User", "is_active": True}
@@ -1034,9 +1023,9 @@ class DemoLoginView(View):
         return redirect("/app/dashboard")
 
 
-class DemoSharingAdminLoginView(View):
+class DemoAdminLoginView(View):
     """
-    Loggt den Sharing-Admin ein und leitet direkt auf den Multi-Community Hub weiter.
+    Loggt den Demo-Administrator ein und leitet direkt auf die Portfolio-Zentrale (/app/admin/communities) weiter.
     """
     def get(self, request):
         import logging
@@ -1047,7 +1036,7 @@ class DemoSharingAdminLoginView(View):
             data = seed_sharing_demo_environment()
             admin_user = data.get("admin_user")
         except Exception as e:
-            logger.exception("Demo seeding error in DemoSharingAdminLoginView: %s", e)
+            logger.exception("Demo seeding error in DemoAdminLoginView: %s", e)
             admin_user = None
 
         if not admin_user or not isinstance(admin_user, User):
@@ -1063,161 +1052,6 @@ class DemoSharingAdminLoginView(View):
         )
 
         return redirect("/app/admin/communities")
-
-
-class DemoSharingUserLoginView(View):
-    """
-    Loggt den Sharing-User / Community-Teilnehmer ein und leitet auf das Energy Sharing Cockpit weiter.
-    """
-    def get(self, request):
-        import logging
-        from accounts.services_demo_sharing import seed_sharing_demo_environment
-
-        logger = logging.getLogger(__name__)
-        try:
-            data = seed_sharing_demo_environment()
-            member_user = data.get("member_user")
-        except Exception as e:
-            logger.exception("Demo seeding error in DemoSharingUserLoginView: %s", e)
-            member_user = None
-
-        if not member_user or not isinstance(member_user, User):
-            member_user, _ = User.objects.get_or_create(
-                email="sharing-user@sharegy.de",
-                defaults={"username": "sharing-user@sharegy.de", "first_name": "Julia", "last_name": "Sonnenschein", "is_active": True}
-            )
-
-        login(
-            request,
-            member_user,
-            backend="django.contrib.auth.backends.ModelBackend",
-        )
-
-        return redirect("/app/community")
-
-
-class DemoMieterstromAdminLoginView(View):
-    """
-    Loggt den Mieterstrom-Admin (Vermieter/Contractor) ein.
-    """
-    def get(self, request):
-        import logging
-        from accounts.services_demo_sharing import seed_sharing_demo_environment
-
-        logger = logging.getLogger(__name__)
-        try:
-            data = seed_sharing_demo_environment()
-            admin_user = data.get("mieterstrom_admin")
-        except Exception as e:
-            logger.exception("Demo seeding error in DemoMieterstromAdminLoginView: %s", e)
-            admin_user = None
-
-        if not admin_user or not isinstance(admin_user, User):
-            admin_user, _ = User.objects.get_or_create(
-                email="mieterstrom-admin@sharegy.de",
-                defaults={"username": "mieterstrom-admin@sharegy.de", "first_name": "Maximilian", "last_name": "Contractor", "is_staff": True, "is_active": True}
-            )
-
-        login(
-            request,
-            admin_user,
-            backend="django.contrib.auth.backends.ModelBackend",
-        )
-
-        return redirect("/app/admin/communities")
-
-
-class DemoMieterstromUserLoginView(View):
-    """
-    Loggt den Mieterstrom-User / Mieter ein und leitet auf das Mieterstrom-Cockpit weiter.
-    """
-    def get(self, request):
-        import logging
-        from accounts.services_demo_sharing import seed_sharing_demo_environment
-
-        logger = logging.getLogger(__name__)
-        try:
-            data = seed_sharing_demo_environment()
-            user = data.get("mieterstrom_user")
-        except Exception as e:
-            logger.exception("Demo seeding error in DemoMieterstromUserLoginView: %s", e)
-            user = None
-
-        if not user or not isinstance(user, User):
-            user, _ = User.objects.get_or_create(
-                email="mieterstrom-user@sharegy.de",
-                defaults={"username": "mieterstrom-user@sharegy.de", "first_name": "Tim", "last_name": "Mieter", "is_active": True}
-            )
-
-        login(
-            request,
-            user,
-            backend="django.contrib.auth.backends.ModelBackend",
-        )
-
-        return redirect("/app/community")
-
-
-class DemoGGVAdminLoginView(View):
-    """
-    Loggt den GGV-Admin (WEG-Verwalter) ein.
-    """
-    def get(self, request):
-        import logging
-        from accounts.services_demo_sharing import seed_sharing_demo_environment
-
-        logger = logging.getLogger(__name__)
-        try:
-            data = seed_sharing_demo_environment()
-            admin_user = data.get("ggv_admin")
-        except Exception as e:
-            logger.exception("Demo seeding error in DemoGGVAdminLoginView: %s", e)
-            admin_user = None
-
-        if not admin_user or not isinstance(admin_user, User):
-            admin_user, _ = User.objects.get_or_create(
-                email="ggv-admin@sharegy.de",
-                defaults={"username": "ggv-admin@sharegy.de", "first_name": "Susanne", "last_name": "WEG-Verwaltung", "is_staff": True, "is_active": True}
-            )
-
-        login(
-            request,
-            admin_user,
-            backend="django.contrib.auth.backends.ModelBackend",
-        )
-
-        return redirect("/app/admin/communities")
-
-
-class DemoGGVUserLoginView(View):
-    """
-    Loggt den GGV-User / Wohnungseigentümer ein und leitet auf das GGV-Cockpit weiter.
-    """
-    def get(self, request):
-        import logging
-        from accounts.services_demo_sharing import seed_sharing_demo_environment
-
-        logger = logging.getLogger(__name__)
-        try:
-            data = seed_sharing_demo_environment()
-            user = data.get("ggv_user")
-        except Exception as e:
-            logger.exception("Demo seeding error in DemoGGVUserLoginView: %s", e)
-            user = None
-
-        if not user or not isinstance(user, User):
-            user, _ = User.objects.get_or_create(
-                email="ggv-user@sharegy.de",
-                defaults={"username": "ggv-user@sharegy.de", "first_name": "Sabine", "last_name": "Eigentümerin", "is_active": True}
-            )
-
-        login(
-            request,
-            user,
-            backend="django.contrib.auth.backends.ModelBackend",
-        )
-
-        return redirect("/app/community")
 
 
 # ---------------- GDPR / DSGVO COMPLIANCE ---------------- #
