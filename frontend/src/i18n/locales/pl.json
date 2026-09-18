@@ -3870,5 +3870,25 @@
     "clearing_interval_val": "Monthly (PT1M)",
     "clearing_channel_label": "Payout Channel",
     "clearing_channel_val": "Electricity Bill / Stripe"
+  },
+  "spot_heatmap": {
+    "title": "Mapa cieplna cen giełdowych (Day-Ahead & Intraday)",
+    "subtitle": "EPEX Spot / Aukcja Day-Ahead i krzywa cenowa Intraday w ct/kWh (z VAT i opłatami sieciowymi)",
+    "market_window_48h": "Prognoza 48h",
+    "range_24h": "Widok 24h",
+    "range_48h": "Prognoza 48h",
+    "kpi_current": "Aktualna cena taryfowa",
+    "kpi_lowest": "Najniższa cena (Najlepsze okno)",
+    "kpi_highest": "Cena szczytowa (Najdroższa godzina)",
+    "legend_negative": "Ujemna / Gratis (< 0 ct)",
+    "legend_low": "Bardzo tanio (< 15 ct)",
+    "legend_normal": "Normalnie (15 - 28 ct)",
+    "legend_high": "Drogo (> 28 ct)",
+    "slot_now": "TERAZ",
+    "stat_average": "Średnia",
+    "stat_spread": "Spread cenowy",
+    "stat_optimal_hours": "Tanie godziny (< 15 ct)",
+    "advice_battery_title": "Rekomendacja AI dla magazynu energii i SteuVE",
+    "advice_battery_text": "Prognozowany jest spread cenowy rzędu {spread} ct/kWh. Zaleca się ładowanie magazynu lub EV około godz. {lowHour} i unikanie poboru z sieci w godzinach szczytu około godz. {highHour}."
   }
 }

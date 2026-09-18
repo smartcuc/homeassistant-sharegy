@@ -3870,5 +3870,25 @@
     "clearing_interval_val": "Monthly (PT1M)",
     "clearing_channel_label": "Payout Channel",
     "clearing_channel_val": "Electricity Bill / Stripe"
+  },
+  "spot_heatmap": {
+    "title": "Тепловая карта спотовых цен (Day-Ahead & Intraday)",
+    "subtitle": "EPEX Spot / Day-Ahead аукцион и внутридневная кривая цен в ct/кВт·ч (вкл. НДС и сетевые сборы)",
+    "market_window_48h": "Прогноз на 48ч",
+    "range_24h": "24 часа",
+    "range_48h": "Прогноз 48ч",
+    "kpi_current": "Текущий тариф",
+    "kpi_lowest": "Минимальная цена (Оптимальное окно)",
+    "kpi_highest": "Пиковая цена (Самый дорогой час)",
+    "legend_negative": "Отрицательная / Бесплатно (< 0 ct)",
+    "legend_low": "Очень выгодно (< 15 ct)",
+    "legend_normal": "Стандартно (15 - 28 ct)",
+    "legend_high": "Дорого (> 28 ct)",
+    "slot_now": "СЕЙЧАС",
+    "stat_average": "Среднее",
+    "stat_spread": "Спред цен",
+    "stat_optimal_hours": "Выгодные часы (< 15 ct)",
+    "advice_battery_title": "ИИ-рекомендация для накопителя и нагрузок",
+    "advice_battery_text": "Сегодня прогнозируется спред цен в {spread} ct/кВт·ч. Рекомендуется заряжать домашний накопитель около {lowHour}:00 и использовать батарею в пиковые часы около {highHour}:00."
   }
 }

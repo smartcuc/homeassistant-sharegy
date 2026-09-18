@@ -3870,5 +3870,25 @@
     "clearing_interval_val": "Monthly (PT1M)",
     "clearing_channel_label": "Payout Channel",
     "clearing_channel_val": "Electricity Bill / Stripe"
+  },
+  "spot_heatmap": {
+    "title": "Harta termică a prețurilor spot (Day-Ahead & Intraday)",
+    "subtitle": "EPEX Spot / Licitație Day-Ahead & curba de preț Intraday în ct/kWh (incl. TVA & tarife de rețea)",
+    "market_window_48h": "Prognoză 48h",
+    "range_24h": "Vizualizare 24h",
+    "range_48h": "Prognoză 48h",
+    "kpi_current": "Preț tarifar curent",
+    "kpi_lowest": "Cel mai mic preț (Fereastra optimă)",
+    "kpi_highest": "Preț de vârf (Cea mai scumpă oră)",
+    "legend_negative": "Negativ / Gratuit (< 0 ct)",
+    "legend_low": "Foarte ieftin (< 15 ct)",
+    "legend_normal": "Normal (15 - 28 ct)",
+    "legend_high": "Scump (> 28 ct)",
+    "slot_now": "ACUM",
+    "stat_average": "Medie",
+    "stat_spread": "Spread de preț",
+    "stat_optimal_hours": "Ore avantajoase (< 15 ct)",
+    "advice_battery_title": "Recomandare AI: Baterie & consumatori flexibili",
+    "advice_battery_text": "Astăzi se prognozează o variație de preț de {spread} ct/kWh. Se recomandă încărcarea bateriei în jurul orei {lowHour} și acoperirea vârfurilor din baterie în jurul orei {highHour}."
   }
 }

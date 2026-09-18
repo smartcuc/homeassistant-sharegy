@@ -3870,5 +3870,25 @@
     "clearing_interval_val": "Monthly (PT1M)",
     "clearing_channel_label": "Payout Channel",
     "clearing_channel_val": "Electricity Bill / Stripe"
+  },
+  "spot_heatmap": {
+    "title": "Spot Elektrik Fiyatı Isı Haritası (Day-Ahead & Gün İçi)",
+    "subtitle": "EPEX Spot / Gün Öncesi İhalesi ve Gün İçi Fiyat Eğrisi (KDV ve şebeke bedelleri dahil, ct/kWh)",
+    "market_window_48h": "48s Tahmin",
+    "range_24h": "24s Görünüm",
+    "range_48h": "48s Tahmin",
+    "kpi_current": "Güncel Tarife Fiyatı",
+    "kpi_lowest": "En Düşük Fiyat (En Uygun Zaman)",
+    "kpi_highest": "Zirve Fiyat (En Pahalı Saat)",
+    "legend_negative": "Negatif / Ücretsiz (< 0 ct)",
+    "legend_low": "Çok Ucuz (< 15 ct)",
+    "legend_normal": "Normal (15 - 28 ct)",
+    "legend_high": "Pahalı (> 28 ct)",
+    "slot_now": "ŞİMDİ",
+    "stat_average": "Ortalama",
+    "stat_spread": "Fiyat Farkı (Spread)",
+    "stat_optimal_hours": "Ucuz Saatler (< 15 ct)",
+    "advice_battery_title": "Ev Bataryası & SteuVE için Yapay Zeka Tavsiyesi",
+    "advice_battery_text": "Bugün {spread} ct/kWh tutarında belirgin bir fiyat farkı öngörülüyor. Ev bataryasının {lowHour} saatinde şebekeden veya güneşten şarj edilmesi ve {highHour} civarındaki zirve saatlerde yükün bataryadan karşılanması önerilir."
   }
 }
