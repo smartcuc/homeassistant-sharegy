@@ -3953,15 +3953,15 @@ Cooperative boards and administrators manage workflows in one portal:
                 "category": cats["admin-governance"],
                 "slug": "admin-vpp-flex-aggregator-guide",
                 "context_key": "admin_vpp",
-                "title_de": "VPP & Flex-Zentrale: Schwarm-Aggregation, § 14a SteuVE, Regelleistung & 80/20 Clearing",
-                "title_en": "VPP & Flex Control Center: Swarm Aggregation, § 14a SteuVE, Balancing Power & 80/20 Clearing",
-                "summary_de": "Das Virtuelle Kraftwerk von Sharegy: Heimspeicher & SteuVE bündeln, Positive & Negative Flexibilität, Leitsystem-Simulator und automatisierte Erlösausschüttung.",
-                "summary_en": "Sharegy Virtual Power Plant: Pooling home batteries & steerable loads, positive/negative flexibility dispatch, grid services, and 80/20 revenue settlement.",
-                "content_de": """# VPP & Flex-Zentrale (Virtuelles Kraftwerk)
+                "title_de": "VPP & Flex-Zentrale: Schwarm-Aggregation, § 14a EnWG, Eichrecht & 80/20 Clearing",
+                "title_en": "VPP & Flex Control Center: Swarm Aggregation, § 14a EnWG, Legal Metrology & 80/20 Settlement",
+                "summary_de": "Das Virtuelle Kraftwerk von Sharegy: Heimspeicher & SteuVE bündeln, § 14a Netzentgelt-Kalkulator, SMGW/CLS Inspector, PTB-A 50.7 Eichrecht und 80/20 Clearing Simulator.",
+                "summary_en": "Sharegy Virtual Power Plant: Pooling home batteries & steerable loads, § 14a grid fee calculator, SMGW/CLS inspector, PTB-A 50.7 metrology verification, and 80/20 clearing simulator.",
+                "content_de": """# VPP & Flex-Zentrale: Schwarm-Aggregation, § 14a EnWG, Eichrecht & 80/20 Clearing
 
-Die **VPP & Flex-Zentrale** (`/app/admin/vpp`) vernetzt dezentrale Heimspeicher, steuerbare Verbrauchseinrichtungen (**§ 14a EnWG SteuVE**) wie Wallboxen und Wärmepumpen sowie Photovoltaikanlagen zu einem leistungsstarken **Virtuellen Kraftwerk (Virtual Power Plant - VPP)**.
+Die **VPP & Flex-Zentrale** (`/app/admin/vpp`) vernetzt dezentrale Heimspeicher, steuerbare Verbrauchseinrichtungen (**§ 14a EnWG SteuVE**) wie Wallboxen und Wärmepumpen sowie Photovoltaikanlagen zu einem hochverfügbaren **Virtuellen Kraftwerk (Virtual Power Plant - VPP)**.
 
-Betreiber monetarisieren Flexibilitäten an den Regelleistungsmärkten (aFRR / FCR), unterstützen Netzbetreiber bei **Redispatch 2.0 / Connect+** und schütten Erlöse automatisiert über ein faires **80/20-Clearing** an die Anlagenbesitzer aus.
+Betreiber monetarisieren Flexibilitäten an den Regelleistungsmärkten (aFRR / FCR), unterstützen Netzbetreiber bei **Redispatch 2.0 / Connect+**, prüfen eichrechtskonforme Messdaten nach **PTB-A 50.7** und schütten Erlöse automatisiert über ein faires **80/20-Clearing** an die Anlagenbesitzer aus.
 
 ---
 
@@ -3976,48 +3976,51 @@ Sharegy unterscheidet zwei fundamentale Steuerungsrichtungen:
 
 ---
 
-## 2. § 14a EnWG SteuVE-Schwarm (Wallboxen & Wärmepumpen)
+## 2. § 14a EnWG Netzentgelt-Kalkulator & SteuVE-Flotte
 
-Alle steuerbaren Verbrauchseinrichtungen mit einer Anschlussleistung ≥ 4,2 kW fallen unter die BNetzA-Regulierung zum § 14a EnWG:
+Alle steuerbaren Verbrauchseinrichtungen mit einer Anschlussleistung ≥ 4,2 kW (Wallboxen, Wärmepumpen, Batteriespeicher) profitieren von reduzierten Netzentgelten gem. BNetzA-Beschluss:
 
-* **Automatisierte Pflichtdrosselung**: Bei Überlastung des Ortsnetzes kann der Verteilnetzbetreiber (VNB) ein Dimmsignal senden.
-* **Sharegy EMS-Vorteil**: Statt Geräte hart abzuschalten, drosselt das Sharegy EMS die Leistungsaufnahme am Netzanschlusspunkt präzise auf 4,2 kW, während lokaler Solarstrom ungedimmt weitergenutzt werden darf.
-* **Netzentgelt-Reduktion**: Kunden erhalten Modul 1 (Pauschalrabatt 130–190 €/a) oder Modul 2 (prozentuale Reduktion).
-
----
-
-## 3. Leitsystem-Simulator: Regelleistungs-Abruf (Dispatch)
-
-In der Dispatch-Zentrale (`/app/admin/vpp`) können Administratoren:
-
-1. **Manuellen Test-Dispatch auslösen**: Zur Verifikation der Latenzzeiten und Reaktionsfähigkeit des Speicher- und Wallbox-Schwarms.
-2. **Automatisierte Marktkopplung (aFRR / Redispatch 2.0)**: Sekundenschnelle Reaktion auf automatisierte Abrufe der Übertragungsnetzbetreiber (ÜNB) über standardisierte REST/WebSocket- und EEBUS-Schnittstellen.
-3. **Audit-Log**: Lückenloses Nachweisprotokoll über Soll-Leistung, Ist-Leistung und Netzfrequenz gem. VDE-AR-N 4105.
+1. **Modul 1 (Pauschale Vergütung)**:
+   * Jährlicher Netzentgelt-Rabatt von ca. **130 € bis 190 € / Jahr** (bundesweiter Durchschnitt).
+   * Kein separater Zähler erforderlich.
+2. **Modul 2 (Prozentuale Reduktion)**:
+   * **60 % Erlass auf den Arbeitspreis** des Netzentgelts (Ct/kWh).
+   * Besonders rentabel für Wärmepumpen & Vielfahrer-Wallboxen ab ~3.500 kWh Jahresverbrauch.
+   * Separater Unterzähler / Messlokation (MeLo) erforderlich.
+3. **Modul 3 (Zeitvariable Netzentgelte)**:
+   * Dynamische Netzentgelte in Hoch-, Standard- und Niedriglastzeiten ab 2025.
 
 ---
 
-## 4. 96-Viertelstunden-Fahrplan (Redispatch 2.0 & Day-Ahead)
+## 3. SMGW & CLS-Kanal Inspector (BSI TR-03109-1)
 
-Sharegy berechnet täglich rollierend einen **96-Viertelstunden-Fahrplan (`PT15M`)**:
-* **Prognose**: Erwartete Residuallast und Erzeugung aller Anlagen.
-* **Flexibilitätskorridor**: Verfügbare positive und negative Bandbreite für jeden 15-Minuten-Slot.
-* **Automatisierter Datenversand**: Übertragung via Connect+ / BNetzA-Marktprozesse.
+Der integrierte CLS-Inspector überwacht die hochsichere Steuerungsinfrastruktur:
+* **TLS 1.3 & PKI-Status**: Gültigkeit der BSI-zertifizierten Sub-CA Zertifikate des Smart Meter Gateways.
+* **Protokoll-Brücken**: Latenzüberwachung für **EEBUS (SPINE/SHIP)**, **OCPP 1.6-J / 2.0.1** und **Modbus TCP**.
+* **4,2 kW Dimm-Garantie**: Strikte Einhaltung der BNetzA-Vorgabe (Mindestleistung 4,2 kW verbleibt immer beim Kunden).
 
 ---
 
-## 5. Automatisches Market Clearing & 80/20 Erlösausschüttung
+## 4. Eichrechtskonforme Messwert-Prüfung (PTB-A 50.7)
 
-Die Teilnahme am Virtuellen Kraftwerk wird für Kunden vollautomatisch vergütet:
+Zur revisionssicheren Abrechnung von VPP-Dispatches und Mieterstrom validiert Sharegy Rohmesswerte:
+* **Kryptographische Signatur-Prüfung**: SHA-256 Digest-Validierung und Public-Key-Abgleich der SML/OBIS-Zählerstände (1.8.0 Netzbezug, 2.8.0 Einspeisung).
+* **Transparenzsoftware-Kompatibilität**: 100 % konform mit den Prüfregeln der Physikalisch-Technischen Bundesanstalt (PTB).
+* **Automatisierter Audit-Eintrag**: Jede Prüfung wird unveränderlich im `AuditLog` protokolliert.
 
-* **80 % Kundenerlös**: 80 Prozent aller an den Regelenergie- und Arbitragemärkten erzielten Gewinne werden direkt dem Anlagenbesitzer gutgeschrieben.
-* **20 % Plattformmarge**: 20 Prozent verbleiben als Servicegebühr bei Sharegy für Netzwerkinfrastruktur, Prognosemodelle und Marktzugang.
-* **Abrechnung**: Monatliche Gutschriftenanzeige im Kunden-Dashboard und automatisierte Überweisung.
-""",
-                "content_en": """# VPP & Flex Control Center (Virtual Power Plant)
+---
 
-The **VPP & Flex Control Center** (`/app/admin/vpp`) aggregates residential battery storage, controllable loads pursuant to **§ 14a EnWG (SteuVE)** such as EV wallboxes and heat pumps, and solar assets into a utility-scale **Virtual Power Plant (VPP)**.
+## 5. VPP Sandbox Clearing Simulator (80/20 Payout)
 
-Operators monetize flexible capacity across balancing markets (aFRR / FCR), support DSOs with **Redispatch 2.0 / Connect+**, and disburse revenues automatically via a transparent **80/20 market clearing** model.
+Im interaktiven Simulator können Betreiber Markt-Ausschreibungen und Spotmarkt-Arbitrage testen:
+* **80 % Prosumer Pool Payout**: Direkte Ausschüttung an die beteiligten Heimspeicher- und Anlagenbesitzer.
+* **20 % Sharegy Aggregator-Marge**: Deckung von Netzzugang, Prognosemodellen und Betrieb.
+* **Ökologischer Nachweis**: Exakte Ausweisung der vermiedenen CO₂-Emissionen (Peak-Shaving).""",
+                "content_en": """# VPP & Flex Control Center: Swarm Aggregation, § 14a EnWG, Legal Metrology & 80/20 Settlement
+
+The **VPP & Flex Control Center** (`/app/admin/vpp`) aggregates residential battery storage, controllable loads pursuant to **§ 14a EnWG (SteuVE)** such as EV wallboxes and heat pumps, and solar assets into a high-availability **Virtual Power Plant (VPP)**.
+
+Operators monetize flexible capacity across balancing markets (aFRR / FCR), support DSOs with **Redispatch 2.0 / Connect+**, verify metrology signatures pursuant to **PTB-A 50.7**, and disburse revenues automatically via a transparent **80/20 market clearing** model.
 
 ---
 
@@ -4030,42 +4033,47 @@ Operators monetize flexible capacity across balancing markets (aFRR / FCR), supp
 
 ---
 
-## 2. § 14a EnWG SteuVE Aggregation (EV Chargers & Heat Pumps)
+## 2. § 14a EnWG Grid Fee Calculator & SteuVE Fleet
 
-All steerable loads ≥ 4.2 kW connected after Jan 1, 2024 fall under statutory § 14a EnWG rules:
+All steerable loads ≥ 4.2 kW (EV chargers, heat pumps, batteries) benefit from statutory grid fee reductions:
 
-* **Automated Grid Dimming**: Upon local grid congestion, the DSO can issue a mandatory power ceiling.
-* **Sharegy EMS Advantage**: Rather than hard-disconnecting devices, Sharegy EMS limits grid import to 4.2 kW while allowing full unrestricted utilization of on-site solar power.
-* **Grid Fee Reductions**: Owners benefit from statutory discounts (Module 1 lump sum €130–€190/yr or Module 2 percentage reduction).
-
----
-
-## 3. Dispatch Simulator & Balancing Control
-
-Within the dispatch console (`/app/admin/vpp`), administrators can:
-
-1. **Simulate Live Test Dispatches**: Verify swarm response latency and actual power delivery across connected batteries.
-2. **Automated Market Clearing (aFRR / Redispatch 2.0)**: Execute automated secondary frequency response orders via REST/EEBUS.
-3. **Audit Trail**: Millisecond-accurate telemetry logging matching VDE-AR-N 4105 compliance standards.
+1. **Module 1 (Flat Reimbursement)**:
+   * Fixed annual discount of approx. **€130 to €190 / year**.
+   * No separate dedicated smart meter required.
+2. **Module 2 (Percentage Discount)**:
+   * **60% reduction on the volumetric grid fee** (ct/kWh).
+   * Maximum savings for high-consumption heat pumps & EV fleets (>3,500 kWh/yr).
+   * Requires a dedicated meter point (MeLo).
+3. **Module 3 (Time-Variable Grid Tariffs)**:
+   * Dynamic grid fees across peak, standard, and off-peak hours.
 
 ---
 
-## 4. 96 Quarter-Hour Day-Ahead Schedules (`PT15M`)
+## 3. SMGW & CLS Channel Inspector (BSI TR-03109-1)
 
-Sharegy computes rolling 96 quarter-hour baseline and flexibility schedules:
-* **Forecast Matrix**: Baseline demand and solar yield for each 15-minute slot.
-* **Flex Corridor**: Guaranteed positive (+kW) and negative (-kW) bandwidth available for grid operators.
-* **Connect+ Export**: Automated EDIFACT/REST payload exchange with German grid coordinators.
+The integrated CLS inspector monitors the secure communication pipeline:
+* **TLS 1.3 & PKI Health**: Sub-CA certificate validity and encryption cipher suites.
+* **Protocol Bridges**: Latency tracking for **EEBUS (SPINE/SHIP)**, **OCPP 1.6-J / 2.0.1**, and **Modbus TCP**.
+* **4.2 kW Floor Guarantee**: Assures minimum guaranteed power for consumer emergency operation.
 
 ---
 
-## 5. Automated Market Clearing & 80/20 Revenue Settlement
+## 4. Legal Metrology Verification (PTB-A 50.7 / German Eichrecht)
 
-* **80 % Asset Owner Share**: 80 percent of all net balancing and arbitrage profits are credited directly to participating homeowners.
-* **20 % Platform Share**: 20 percent retained by Sharegy covering infrastructure, forecasting AI, and market access fees.
-* **Disbursement**: Monthly self-billing credit notes in the user dashboard and automated SEPA payouts.
-""",
-                "tags": ["vpp", "virtuelles kraftwerk", "flexibilitaet", "§ 14a", "steuve", "dispatch", "redispatch 2.0", "clearing", "80/20", "afrr"],
+For tamper-proof billing of flexibility dispatches and tenant energy:
+* **Cryptographic Signature Verification**: SHA-256 digest validation and public-key verification of SML/OBIS meter telegrams.
+* **Transparency Software Compliance**: 100% compliant with PTB-A 50.7 verification rules.
+* **Immutable Audit Trail**: Every validation is permanently recorded in the system audit log.
+
+---
+
+## 5. VPP Sandbox Clearing Simulator (80/20 Payout)
+
+Test balancing tenders and spot market arbitrage in an interactive simulation sandbox:
+* **80% Prosumer Pool Payout**: Direct financial disbursement to home battery owners.
+* **20% Sharegy Aggregator Margin**: Platform infrastructure and market access fee.
+* **CO₂ Avoidance Telemetry**: Quantifies avoided greenhouse gas emissions through peak-shaving.""",
+                "tags": ["vpp", "flexibilitaet", "regelleistung", "afrr", "redispatch 2.0", "clearing", "14a enwg", "steuve", "eichrecht", "ptb", "cls"],
                 "is_featured": True,
                 "sort_order": 5,
             },
@@ -4207,6 +4215,259 @@ Using the **"Live View (Customer EMS)"** bridge, engineers mirror the exact cust
                 "tags": ["partner", "solarteur", "installateur", "flottenmanagement", "inbetriebnahme", "ibn", "vde-ar-n 4105", "fernwartung", "modbus"],
                 "is_featured": True,
                 "sort_order": 6,
+            },
+            {
+                "category": cats["admin-governance"],
+                "slug": "admin-audit-trail-guide",
+                "context_key": "admin_audit_logs",
+                "title_de": "Enterprise Audit Trail, Revisionssicherheit & KRITIS-Nachweisführung",
+                "title_en": "Enterprise Audit Trail, Compliance & KRITIS Event Logging",
+                "summary_de": "Vollständige Dokumentation des revisionssicheren Audit-Loggings: SHA-256 Signaturen, Vorher/Nachher-Diffs, EnWG § 14a Nachweisführung, CSV-Export und ISO 27001 / SOC 2 Konformität.",
+                "summary_en": "Complete guide to tamper-proof audit logging: SHA-256 signatures, before/after JSON diffs, EnWG § 14a proof of dispatch, CSV export, and ISO 27001 / SOC 2 compliance.",
+                "content_de": """# Enterprise Audit Trail & Revisionsprotokoll
+
+Das **Audit Trail & Revisions-Cockpit** (`/app/admin/audit-logs`) stellt die lückenlose, unveränderliche Aufzeichnung aller administrativen, steuerungs- und sicherheitsrelevanten Aktionen innerhalb der Sharegy-Plattform sicher.
+
+Es erfüllt die strengen Anforderungen des **Energiewirtschaftsgesetzes (EnWG § 14a)**, des **BSI IT-Sicherheitsgesetzes 2.0 (KRITIS)**, der **DSGVO** sowie relevanter Compliance-Frameworks wie **ISO/IEC 27001** und **SOC 2 Type II**.
+
+---
+
+## 1. Architektur & Revisionssicherheit
+
+Jeder schreibende oder steuernde Zugriff wird im System automatisch über das `core.services_audit` Subsystem erfasst:
+
+| Parameter | Beschreibung & Revisionswert |
+| :--- | :--- |
+| **Zeitstempel (UTC)** | Mikrosekundengenauer Zeitstempel mit Zeitzonen-Offset |
+| **Akteur & Identität** | Benutzer-ID, E-Mail-Adresse und Rollenberechtigung (Superuser, Staff, Partner) |
+| **Netzwerk-Kontext** | Client-IP-Adresse (X-Forwarded-For bereinigt) und User-Agent |
+| **Aktion & Ressourcentyp** | Eindeutiger Aktionscode (z.B. `VPP_DISPATCH_TRIGGERED`, `STEUVE_DIMMING_APPLIED`, `CONFIG_UPDATED`) |
+| **Vorher/Nachher-Diff** | Vollständiger JSON-Snapshot der geänderten Attribute zur exakten Rekonstruktion |
+| **Schweregrad** | Einstufung in `info`, `warning`, `critical` oder `security` |
+
+---
+
+## 2. KRITIS & § 14a EnWG Nachweisführung
+
+Im Rahmen von Netzengpass-Drosselungen und Redispatch 2.0-Abrufen verlangen Verteilnetzbetreiber (VNB) und die Bundesnetzagentur (BNetzA) einen lückenlosen Konformitätsnachweis:
+
+1. **Dimm-Befehle**: Jeder 4,2 kW Sollwert-Eingriff wird mit Ziel-Liegenschaft, Leistungswert und Quell-Signal (VNB Relais oder CLS) unveränderlich protokolliert.
+2. **PTB-A 50.7 Eichrechts-Nachweis**: Prüfungsergebnisse kryptographischer Zählersignaturen werden mit SHA-256 Hash im Log abgelegt.
+3. **80/20 Clearing-Transaktionen**: Auszahlungsberechnungen an Prosumer werden revisionssicher eingefroren.
+
+---
+
+## 3. Filterung, Suche & CSV-Audit-Export
+
+Für interne und externe Wirtschaftsprüfungen (Audits) bietet das Cockpit:
+* **Echtzeit-Filter**: Nach Schweregrad, Aktionstyp und Suchbegriffen (IP, E-Mail, Objekt-ID).
+* **Detail-Inspektor**: Klick auf ein Ereignis öffnet das formatierte Vorher/Nachher-Diff.
+* **1-Klick CSV-Export**: Exportiert gefilterte Prüfberichte im UTF-8 CSV-Format für Behörden und Auditoren.
+""",
+                "content_en": """# Enterprise Audit Trail & Compliance Logging
+
+The **Enterprise Audit Trail Cockpit** (`/app/admin/audit-logs`) provides an immutable, tamper-proof record of all administrative, dispatch, and security events across the Sharegy energy management platform.
+
+It is engineered to fulfill statutory requirements under the **German Energy Industry Act (EnWG § 14a)**, **BSI Critical Infrastructure Regulations (KRITIS)**, **GDPR / DSGVO**, and international enterprise compliance frameworks including **ISO/IEC 27001** and **SOC 2 Type II**.
+
+---
+
+## 1. Architecture & Immutability
+
+Every modifying API call and control dispatch is automatically intercepted by the `core.services_audit` pipeline:
+
+| Audit Parameter | Description & Compliance Value |
+| :--- | :--- |
+| **Timestamp (UTC)** | Microsecond-precise UTC timestamp with timezone awareness |
+| **Actor & Identity** | User ID, email, and permission level (superuser, staff, partner admin) |
+| **Network Context** | Client IP address and HTTP User-Agent string |
+| **Action & Resource** | Unique action key (e.g. `VPP_DISPATCH_TRIGGERED`, `STEUVE_DIMMING_APPLIED`, `SETTLEMENT_PROCESSED`) |
+| **Before / After Diff** | Full JSON snapshot of state changes for precise forensic reconstruction |
+| **Severity Level** | Classified into `info`, `warning`, `critical`, or `security` |
+
+---
+
+## 2. KRITIS & § 14a EnWG Proof of Dispatch
+
+Grid operators and the Federal Network Agency (BNetzA) mandate strict verifiable audit logs for grid flexibility interventions:
+
+1. **Dimming Commands**: Every 4.2 kW ceiling intervention is logged with target home, duration, and triggering source.
+2. **PTB-A 50.7 Metrology Proof**: Cryptographic validation digests are permanently tied to audit logs.
+3. **Settlement Runs**: 80/20 prosumer payout distributions are frozen against retrospective alteration.
+
+---
+
+## 3. Filtering, Inspection & CSV Audit Export
+
+* **Multi-Vector Filtering**: Filter by severity, action category, or search keywords.
+* **Forensic Inspector**: Visualizes full JSON state differences.
+* **1-Click CSV Export**: Exports filtered audit reports formatted for external compliance auditors.
+""",
+                "tags": ["audit", "revision", "compliance", "kritis", "enwg 14a", "iso 27001", "soc 2", "sicherheit", "dsgvo"],
+                "is_featured": True,
+                "sort_order": 7,
+            },
+            {
+                "category": cats["admin-governance"],
+                "slug": "admin-tracking-telemetry-guide",
+                "context_key": "admin_tracking",
+                "title_de": "Event-Tracking, Telemetrie-Analytics & Conversion-Funnel",
+                "title_en": "Event Tracking, Telemetry Analytics & Conversion Funnel",
+                "summary_de": "Leitfaden für Telemetrie-Analytics: Nutzerinteraktionen, 7-Tage Event-Trend, Onboarding-Funnel, Magic-Link Tracking und datenschutzkonforme Auswertungen.",
+                "summary_en": "Guide to telemetry analytics: User interactions, 7-day event volume trends, onboarding conversion funnel, magic-link tracking, and GDPR-compliant metrics.",
+                "content_de": """# Event-Tracking, Telemetrie-Analytics & Conversion-Funnel
+
+Das **Event-Tracking & Telemetrie-Dashboard** (`/app/admin/tracking`) liefert tiefe Einblicke in die tatsächliche Nutzung der Sharegy-Plattform, die Effektivität des Registrierungstrichters und die Beliebtheit einzelner Features.
+
+Alle Telemetriedaten werden **DSGVO-konform** erhoben, anonymisiert verarbeitet und ermöglichen datenbasierte Produktentscheidungen.
+
+---
+
+## 1. Der Onboarding- & Registrierungs-Funnel
+
+Der Trichter visualisiert die User Journey vom Erstbesuch bis zum aktiven Dashboard-Nutzer:
+
+1. **🌐 Landing Page Aufruf (`landing_view`)**: Impressionen der Startseite und Kampagnen-Seiten.
+2. **📝 Registrierung geklickt (`signup_click`)**: Nutzer initiiert den Registrierungs- oder Login-Flow.
+3. **✉️ Magic-Link angefordert (`magic_link_requested`)**: Versand der passwortlosen Authentifizierungs-E-Mail.
+4. **📬 E-Mail geöffnet (`email_open`)**: Bestätigung der Zustellung im Postfach.
+5. **🖱️ Link angeklickt (`magic_link_click`)**: Nutzer klickt den sicheren Token-Link.
+6. **🔑 Erfolgreich eingeloggt (`magic_login_success`)**: Verifizierung des Tokens und Session-Start.
+7. **🏠 Dashboard geöffnet (`dashboard_open`)**: Ankunft im Live-Energiemonitoring.
+
+---
+
+## 2. 7-Tage Timeline & Trend-Analyse
+
+Das interaktive Flächendiagramm stellt das tägliche Eventvolumen der letzten 7 Tage dar:
+* **Lastspitzen**: Identifikation von Nutzungspeaks nach Newslettern oder Preisänderungen.
+* **Aktivitäts-Muster**: Erkennung von Wochenend- vs. Werktagsnutzung.
+
+---
+
+## 3. Detail-Tabelle & Häufigkeitsverteilung
+
+Die aggregierte Ereignis-Tabelle schlüsselt alle Events nach Name, Icon, Gesamtzahl und prozentualem Anteil am Gesamtvolumen auf.
+""",
+                "content_en": """# Event Tracking, Telemetry Analytics & Conversion Funnel
+
+The **Event Tracking & Telemetry Dashboard** (`/app/admin/tracking`) delivers product telemetry insights into user engagement, feature adoption, and onboarding funnel conversion rates.
+
+All telemetry is collected strictly in compliance with **GDPR / DSGVO** standards without collecting unauthorized personal data.
+
+---
+
+## 1. The Onboarding & Registration Funnel
+
+The conversion funnel tracks the user journey from landing page visit to active dashboard engagement:
+
+1. **🌐 Landing Page View (`landing_view`)**: Public website visits and marketing landing pages.
+2. **📝 Signup Clicked (`signup_click`)**: User starts the onboarding or login flow.
+3. **✉️ Magic Link Requested (`magic_link_requested`)**: Passwordless email token dispatch.
+4. **📬 Email Open (`email_open`)**: Delivery and inbox confirmation.
+5. **🖱️ Link Clicked (`magic_link_click`)**: User clicks verification link.
+6. **🔑 Login Success (`magic_login_success`)**: Session authentication established.
+7. **🏠 Dashboard Opened (`dashboard_open`)**: First arrival in the live energy dashboard.
+
+---
+
+## 2. 7-Day Timeline & Trend Analysis
+
+The interactive chart provides a rolling 7-day timeline of aggregate platform events to detect engagement spikes and marketing campaign resonance.
+
+---
+
+## 3. Event Breakdown & Relative Distribution
+
+The breakdown table classifies every event type with total execution counts and relative share of total platform activity.
+""",
+                "tags": ["tracking", "telemetrie", "analytics", "funnel", "conversion", "magic link", "onboarding", "events"],
+                "is_featured": False,
+                "sort_order": 8,
+            },
+            {
+                "category": cats["admin-governance"],
+                "slug": "admin-support-desk-guide",
+                "context_key": "admin_support",
+                "title_de": "Support-Zentrale: Multi-Mandanten-Triage & Ticket-Management",
+                "title_en": "Agent Support Hub: Multi-Tenant Triage & Ticket Management",
+                "summary_de": "Leitfaden für die Support-Zentrale: Globale Triage von Sharegy EMS und Factofy Tickets, SLA-Überwachung, Status-Workflows und Fachpartner-Eskalation.",
+                "summary_en": "Guide to the Agent Support Hub: Global triage across Sharegy EMS and Factofy tickets, SLA monitoring, status workflows, and installer escalation.",
+                "content_de": """# Support-Zentrale: Multi-Mandanten-Triage & Ticket-Management
+
+Die **Support-Zentrale** (`/app/support-hub` bzw. `/app/support`) dient als zentraler Helpdesk für Support-Mitarbeiter, Administratoren und Fachpartner.
+
+Sie bündelt alle Kundenanfragen, Störungsmeldungen und Hardware-Diagnosen über das gesamte Ökosystem – inklusive **Sharegy EMS** (B2C Prosumer & Quartiere) und **Factofy** (B2B Gewerbe- und Industriemanagement).
+
+---
+
+## 1. Multi-Mandanten Projektfilter
+
+Über die Schnellfilter in der Kopfzeile filtern Agenten den Arbeitsvorrat:
+* **🌐 Alle Tickets**: Übergreifende Gesamtansicht für Hauptadministratoren.
+* **☀️ Sharegy Tickets**: Private Haushalte, Mieterstrom-Teilnehmer und Heimspeicher-Besitzer.
+* **🏙️ Factofy Tickets**: Gewerbliche Liegenschaften, Lastspitzenkappung (Peak-Shaving) und Industrie-Submeter.
+
+---
+
+## 2. Ticket-Status & Workflow
+
+Jedes Support-Ticket durchläuft einen definierten Lifecycle:
+
+| Status | Bedeutung & nächste Aktion |
+| :--- | :--- |
+| **🔵 Offen (`open`)** | Neues Ticket, wartet auf Zuweisung oder Erstprüfung |
+| **🟡 In Bearbeitung (`in_progress`)** | Agent oder Fachpartner analysiert das Problem aktiv |
+| **🟣 Wartet auf Kunde (`waiting_on_customer`)** | Rückfrage oder Messdatenanforderung an den Kunden gesendet |
+| **🟢 Gelöst (`resolved`)** | Problem behoben, Kunde informiert |
+| **⚪ Geschlossen (`closed`)** | Abgeschlossener Vorgang im Revisionsarchiv |
+
+---
+
+## 3. Schnelle Störungsbehebung & Diagnose-Verknüpfung
+
+Support-Mitarbeiter können direkt aus dem Ticket heraus:
+* **Geräte-Telemetrie einsehen**: Wechselrichter-Verbindungsstatus, Zählerstände und Fehlercodes.
+* **Prioritäten anpassen**: Einstufung in `Niedrig`, `Normal`, `Hoch` oder `Kritisch (P1)`.
+* **Fachpartner eskalieren**: Tickets an den zuständigen Installationsbetrieb weiterleiten.
+""",
+                "content_en": """# Agent Support Hub: Multi-Tenant Triage & Ticket Management
+
+The **Agent Support Hub** (`/app/support-hub`) serves as the mission control center for support engineers, staff administrators, and certified installation partners.
+
+It unifies incoming support requests, diagnostic alerts, and customer inquiries across the entire ecosystem – including **Sharegy EMS** (residential & community energy) and **Factofy** (industrial submetering & peak shaving).
+
+---
+
+## 1. Multi-Tenant Project Filter
+
+Agents can quickly isolate their scope of work:
+* **🌐 All Tickets**: Unified global queue for primary dispatchers.
+* **☀️ Sharegy Tickets**: Residential households, tenant power participants, and home battery owners.
+* **🏙️ Factofy Tickets**: Commercial properties, industrial loads, and enterprise microgrids.
+
+---
+
+## 2. Ticket Lifecycle & SLA Tracking
+
+Every support ticket progresses through standard workflow states:
+* **🔵 Open (`open`)**: Newly received, awaiting initial assessment.
+* **🟡 In Progress (`in_progress`)**: Actively investigated by support or technical engineers.
+* **🟣 Waiting on Customer (`waiting_on_customer`)**: Additional telemetry or customer clarification requested.
+* **🟢 Resolved (`resolved`)**: Root cause rectified, customer notified.
+* **⚪ Closed (`closed`)**: Archived in historical knowledge base.
+
+---
+
+## 3. Diagnostic Integration & Partner Escalation
+
+* **Live Telemetry Inspect**: Direct bridge to inverter error codes and meter communication states.
+* **Priority Escalation**: Triage severity from Low to Critical (P1 SLA).
+* **Partner Dispatch**: Seamless assignment to the responsible installer contractor.
+""",
+                "tags": ["support", "helpdesk", "triage", "tickets", "sla", "sharegy", "factofy", "kundenservice"],
+                "is_featured": True,
+                "sort_order": 9,
             },
         ]
 
