@@ -124,6 +124,6 @@ from ..api_partner import PartnerFleetView, PartnerQuickOnboardView, PartnerAsse
 urlpatterns += [
     path("partner/fleet/", PartnerFleetView.as_view(), name="partner-fleet"),
     path("partner/quick-onboard/", PartnerQuickOnboardView.as_view(), name="partner-quick-onboard"),
-    path("partner/diagnostics/<uuid:asset_id>/", PartnerAssetDiagnosticsView.as_view(), name="partner-asset-diagnostics"),
+    path("partner/diagnostics/<str:asset_id>/", PartnerAssetDiagnosticsView.as_view(), name="partner-asset-diagnostics"),
 ]
 

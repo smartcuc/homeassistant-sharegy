@@ -113,6 +113,9 @@ export default function TrackingDashboard() {
                 iconBg="bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 border-purple-100 dark:border-purple-900/50"
                 title={t("tracking.title", "Event-Tracking & Telemetrie-Analytics")}
                 subtitle={t("tracking.subtitle", "Detaillierte Erfassung von Nutzerinteraktionen, Feature-Nutzung und Registrierungstrichter.")}
+                badge="Telemetrie-Analytics"
+                badgeColor="purple"
+                manualLink="/app/help/admin-dashboard-guide"
                 actions={
                     <>
                         <Link

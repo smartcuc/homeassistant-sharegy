@@ -7,6 +7,7 @@ import AdminPageHeader from "../../components/admin/AdminPageHeader";
 import MeterQrStickerGeneratorModal from "../../components/admin/MeterQrStickerGeneratorModal";
 import PartnerHandoverProtocolModal from "./components/PartnerHandoverProtocolModal";
 import PartnerFleetMap from "./components/PartnerFleetMap";
+import RemoteMaintenanceModal from "./components/RemoteMaintenanceModal";
 import {
   Wrench,
   ShieldCheck,
@@ -563,154 +564,12 @@ export default function PartnerDashboard() {
         {/* ======================================================== */}
         {/* FERNWARTUNGS- & DIAGNOSE-MODAL */}
         {/* ======================================================== */}
-        {selectedAsset && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fade-in" onClick={() => setSelectedAsset(null)}>
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-xl w-full p-6 space-y-6 shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
-              <div className="flex justify-between items-start">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <div className="p-2 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">
-                      <Wrench className="w-5 h-5" />
-                    </div>
-                    <h3 className="text-lg font-black text-slate-900 dark:text-white">
-                      {t("partner.modal_remote_title", { name: selectedAsset.name, defaultValue: `Fernwartung: ${selectedAsset.name}` })}
-                    </h3>
-                  </div>
-                  <p className="text-xs text-slate-500">
-                    {t("partner.modal_customer_label", { name: selectedAsset.customer_name, defaultValue: `Kunde: ${selectedAsset.customer_name}` })} • {selectedAsset.address}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setSelectedAsset(null)}
-                  className="p-1.5 text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
-                >
-                  <XCircle className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* Action Grid (6 Fernwartungs-Aktionen) */}
-              <div className="space-y-2.5">
-                <div className="text-xs font-bold text-slate-700 dark:text-slate-300">{t("partner.action_execute_label", "Wartungs- & Diagnose-Aktion ausführen:")}</div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleRunDiagnostics(selectedAsset.id, "ping")}
-                    disabled={diagLoading}
-                    className="p-3 bg-slate-50 dark:bg-slate-800/60 hover:bg-sky-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-2xl text-left transition cursor-pointer"
-                  >
-                    <div className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                      <Wifi className="w-3.5 h-3.5 text-sky-500" />
-                      {t("partner.action_ping_title", "Live-Ping & Status")}
-                    </div>
-                    <div className="text-[10px] text-slate-400 mt-0.5">{t("partner.action_ping_desc", "Gateway & Latenz")}</div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleRunDiagnostics(selectedAsset.id, "ocpp_trigger")}
-                    disabled={diagLoading}
-                    className="p-3 bg-slate-50 dark:bg-slate-800/60 hover:bg-sky-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-2xl text-left transition cursor-pointer"
-                  >
-                    <div className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                      <RefreshCw className="w-3.5 h-3.5 text-indigo-500" />
-                      {t("partner.action_ocpp_title", "OCPP Reset")}
-                    </div>
-                    <div className="text-[10px] text-slate-400 mt-0.5">{t("partner.action_ocpp_desc", "Hard/Soft Reboot")}</div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleRunDiagnostics(selectedAsset.id, "steuve_dim")}
-                    disabled={diagLoading}
-                    className="p-3 bg-slate-50 dark:bg-slate-800/60 hover:bg-sky-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-2xl text-left transition cursor-pointer"
-                  >
-                    <div className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                      <ShieldCheck className="w-3.5 h-3.5 text-teal-500" />
-                      {t("partner.action_steuve_title", "§ 14a Dimm-Test")}
-                    </div>
-                    <div className="text-[10px] text-slate-400 mt-0.5">{t("partner.action_steuve_desc", "4,2 kW Not-Drosselung")}</div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleRunDiagnostics(selectedAsset.id, "bus_scan")}
-                    disabled={diagLoading}
-                    className="p-3 bg-slate-50 dark:bg-slate-800/60 hover:bg-sky-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-2xl text-left transition cursor-pointer"
-                  >
-                    <div className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                      <Cpu className="w-3.5 h-3.5 text-amber-500" />
-                      {t("partner.action_bus_title", "Modbus Scan")}
-                    </div>
-                    <div className="text-[10px] text-slate-400 mt-0.5">{t("partner.action_bus_desc", "Zähler & BMS Bus")}</div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleRunDiagnostics(selectedAsset.id, "inverter_reconnect")}
-                    disabled={diagLoading}
-                    className="p-3 bg-slate-50 dark:bg-slate-800/60 hover:bg-sky-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-2xl text-left transition cursor-pointer"
-                  >
-                    <div className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                      <Sun className="w-3.5 h-3.5 text-amber-500" />
-                      {t("partner.action_inverter_title", "Inverter Sync")}
-                    </div>
-                    <div className="text-[10px] text-slate-400 mt-0.5">{t("partner.action_inverter_desc", "Wechselrichter Sync")}</div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setProtocolAsset(selectedAsset)}
-                    className="p-3 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 border border-indigo-200 dark:border-indigo-800 rounded-2xl text-left transition cursor-pointer"
-                  >
-                    <div className="text-xs font-bold text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5">
-                      <FileText className="w-3.5 h-3.5" />
-                      {t("partner.action_protocol_title", "IBN-Protokoll")}
-                    </div>
-                    <div className="text-[10px] text-indigo-600/70 dark:text-indigo-400 mt-0.5">{t("partner.action_protocol_desc", "PDF Übergabenachweis")}</div>
-                  </button>
-                </div>
-              </div>
-
-              {/* Diagnose-Konsole */}
-              <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 font-mono text-xs space-y-2 text-slate-200 shadow-inner">
-                <div className="text-slate-400 flex items-center justify-between border-b border-slate-800 pb-2">
-                  <span className="flex items-center gap-1.5 font-bold">
-                    <Radio className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
-                    {t("partner.console_title", "Diagnose-Konsole & System-Log")}
-                  </span>
-                  {diagLoading && <RefreshCw className="w-3.5 h-3.5 animate-spin text-sky-400" />}
-                </div>
-                {diagResult ? (
-                  <div className="space-y-1.5 pt-1">
-                    <div className="text-emerald-400 font-bold">✓ {diagResult.message}</div>
-                    {diagResult.status && (
-                      <div className="text-slate-300">Status: <span className="text-sky-300 font-semibold">{diagResult.status}</span></div>
-                    )}
-                    {diagResult.active_nodes && (
-                      <div className="text-slate-400">Gefundene Knoten: {diagResult.active_nodes.join(", ")}</div>
-                    )}
-                    {diagResult.grid_compliance && (
-                      <div className="text-teal-300 font-semibold">⚡ {diagResult.grid_compliance}</div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="text-slate-600 py-3 text-center">{t("partner.console_waiting", "Wähle oben eine Diagnose-Aktion aus…")}</div>
-                )}
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-                <button
-                  type="button"
-                  onClick={() => setSelectedAsset(null)}
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl transition cursor-pointer"
-                >
-                  {t("common.close", "Schließen")}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        <RemoteMaintenanceModal
+          isOpen={Boolean(selectedAsset)}
+          onClose={() => setSelectedAsset(null)}
+          asset={selectedAsset}
+          onOpenProtocol={(asset) => setProtocolAsset(asset)}
+        />
 
         {/* ======================================================== */}
         {/* SCHNELL-INBETRIEBNAHME MODAL */}
