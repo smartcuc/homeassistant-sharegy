@@ -156,62 +156,50 @@ flowchart TB
 
 ---
 
-## 🛠️ 5. Hardware-Empfehlungen, Spezifikationen & BOM (Bill of Materials)
+## 🛠️ 5. Realistische Hardware-Optionen & Bezugsquellen (Deutschland / DACH)
 
-Da der Go/Rust-Daemon nur **~12–20 MB RAM** und **< 1,5% CPU-Last** benötigt, reicht extrem günstige, energieeffiziente Hardware aus. Im Zählerschrank sind vor allem **galvanisch getrennte Schnittstellen (RS485)**, **Ethernet-Ports (RJ45)** und **niedriger Eigenverbrauch** entscheidend.
+> [!NOTE]
+> **Transparenz-Hinweis zur Preisgestaltung:**  
+> Reine OEM-Nacktplatinen (Bare Boards) aus China (wie Orange Pi oder reine Compute-Module-Baseboards) werben oft mit 20–30 $ Herstellerpreisen. Im **deutschen Einzelhandel (Amazon.de, Reichelt, BerryBase, eBay)** kommen jedoch Gehäuse, Hutschienen-Adapter, Netzteile, Steuern und Händlermargen hinzu.  
+> Nachfolgend sind ausschließlich **in Deutschland sofort lieferbare, realistische Gesamtlösungen** aufgeführt.
 
-### 5.1. Die Hardware-Matrix im Überblick
+### 5.1. Die 4 praxiserprobten Hardware-Pfade im deutschen Markt
 
-| Kategorie | Hardware-Modell | Richtpreis | Schnittstellen | Montage-Formfaktor | Ideal für |
-|---|---|---|---|---|---|
-| **Tier 1: B2B & Elektro-Handwerk** *(Top-Empfehlung)* | **Waveshare CM4 / Core3566 DIN-Rail Gateway** | ca. **55 – 75 €** | 1x RJ45 LAN, 1x RS485 (isoliert), 1x RTC-Uhr, 2x USB | Hutschiene (DIN-Rail 2–4 TE, 9–36V DC) | Professionelle Schaltschrank-Installation durch Elektriker |
-| **Tier 2: Preis-Leistungs-Sieger** *(Standalone-Box)* | **Orange Pi Zero 3 (1 GB RAM)** + USB-RS485 | ca. **22 – 28 €** (+5 € Adapter) | 1x Gigabit LAN, 3x USB, WiFi 5, BLE | Kompakt-Gehäuse / Hutschiene-Clip | Power-User, Prosumer & Standalone-Betrieb |
-| **Tier 3: Ultra-Low-Budget DIY** *(Labor & Tester)* | **Raspberry Pi Zero 2 W** + USB-Ethernet | ca. **18 – 22 €** (+6 € Adapter) | WiFi 4, Micro-USB | Miniatur-Gehäuse | Günstige Testaufbauten & Bastler |
-| **Tier 4: Zähler-Direktlesekopf** *(eHZ IR)* | **Hichi Smartmeter IR WiFi / BitShake** (ESP32) | ca. **15 – 20 €** | Infrarot-Lesekopf, WiFi / MQTT | Magnet-Haftung direkt am Zähler | Auslesen optischer m-Bus/SML Stromzähler |
-
----
-
-### 5.2. Detail-Spezifikation der empfohlenen Produktvarianten
-
-#### 🥇 Variante A: Das "Sharegy Box" Hutschienen-Gateway (B2B-Standard)
-```
-┌────────────────────────────────────────────────────────┐
-│  SHAREGY BOX DIN-RAIL (2 TE / 4 TE Zählerschrank)      │
-├────────────────────────────────────────────────────────┤
-│ • SoC: Rockchip RK3566 (Quad Cortex-A55) oder CM4      │
-│ • RAM: 1 GB LPDDR4                                     │
-│ • Flash: 8 GB eMMC 5.1 (Industrie-Flash, kein SD-Verschleiß)│
-│ • Spannungsversorgung: 9V–36V DC Weitbereichseingang   │
-│ • RS485: Galvanisch isoliert (bis 2.500 V Schutz)      │
-│ • LAN: 100/1000M RJ45 Ethernet                         │
-│ • Echtzeituhr (RTC): DS3231 mit Supercap/Knopfzelle    │
-│ • Leistungsaufnahme: 1,8 W im Dauerbetrieb             │
-│ • EK-Stückkosten (Serie): ca. 45 – 55 €                │
-└────────────────────────────────────────────────────────┘
-```
-* **Vorteile für Installateure:**
-  * Wird einfach im Verteilerschrank auf die DIN-Hutschiene geklickt.
-  * Keine wackeligen Steckernetzteile oder SD-Karten-Fehler.
-  * Kann direkt vom 24V-Hutschienen-Netzteil des Schaltschranks mitversorgt werden.
-
-#### 🥈 Variante B: Der Orange Pi Zero 3 (Smart Home Prosumer)
-* **SoC:** Allwinner H618 (Quad-Core 64-Bit Cortex-A53).
-* **RAM:** 1 GB oder 1.5 GB LPDDR4.
-* **Schnittstellen:** Echter Gigabit-LAN Port (RJ45), USB-Host für RS485-Dongle, Type-C 5V Stromversorgung.
-* **Leistungsaufnahme:** ~1,2 W im Idle, ~2,2 W unter Vollast.
-* **Vorteil:** Unschlagbar günstig bei voller 64-Bit ARMv8 Performance.
+| Kategorie | Konkretes Produkt / Setup | Realer Endkundenpreis (DE) | Bezugsquelle | Formfaktor & Besonderheiten |
+|---|---|---|---|---|
+| **🥇 1. Der unzerstörbare x86 Mini-PC** *(Geheimtipp für Prosumer)* | **Fujitsu Futro S740 / HP T630** *(Refurbished)* | **ca. 35 – 55 €** *(komplett mit Netzteil & Gehäuse)* | eBay.de, Refurbished-Händler | Intel Quad-Core x86_64, 4–8 GB RAM, nativer Gigabit-LAN-Port, robuster Dauerläufer (4–5 W), passive Kühlung |
+| **🥈 2. Der direkt lieferbare SBC** *(Amazon Prime)* | **Libre Computer "Le Potato" (AML-S905X-CC)** | **ca. 39 – 45 €** *(Board)* / ca. **55 €** *(mit Netzteil/Gehäuse)* | Amazon.de, BerryBase | ARM64 Quad-Core, 2 GB RAM, 100M LAN, 4x USB. Vollständiger Raspberry-Pi-Formfaktor, sofort ab deutschem Lager lieferbar |
+| **🥉 3. Der Zählerschrank-Standard** *(Klassiker)* | **Raspberry Pi 4 (2 GB)** + **DIN-Rail Hutschienengehäuse** | **ca. 65 – 85 €** *(Komplettset)* | BerryBase, Reichelt, Welectron | Echter Raspberry Pi mit riesiger Community, passives Aluminium-Hutschienengehäuse für 4 TE im Verteiler |
+| **⚡ 4. Plug & Play Zähler-Lesekopf** *(Für eHZ Stromzähler)* | **BitShake SmartMeterReader / Hichi WiFi** | **ca. 35 – 42 €** *(fertig mit Tasmota)* | Amazon.de, eBay.de | Magnetischer IR-Kopf mit ESP32/ESP8266. Liest SML/m-Bus Zählerdaten optisch aus und sendet per MQTT/HTTP |
+| **🏢 5. Industrie-All-in-One** *(B2B / Elektriker-Zertifiziert)* | **Seeed EdgeBox-RPI-200 / Kunbus RevPi** | **ca. 280 – 450 €** | Antratek, Conrad, Reichelt | Vollständig CE/Industrie-zertifiziertes DIN-Rail-Gerät mit integriertem galvanisch getrenntem RS485, CAN & USV-Puffer |
 
 ---
 
-### 5.3. Betriebskosten & Amortisation im Dauerbetrieb (24/7)
+### 5.2. Detail-Empfehlung: Warum der "Refurbished Thin Client" (Futro S740) oft die beste Wahl ist
 
-| Kennzahl | Wert |
-|---|---|
-| **Dauerleistung (P_avg)** | **1,5 Watt** (Durchschnitt) |
-| **Täglicher Energieverbrauch** | 0,036 kWh / Tag |
-| **Jährlicher Energieverbrauch (8.760 h)** | **13,14 kWh / Jahr** |
-| **Jährliche Stromkosten (bei 0,35 € / kWh)** | **nur ca. 4,60 € pro Jahr** |
-| **Flash-Lebensdauer (bei Wear-Leveling & tmpfs)** | **> 10 Jahre** ohne Kartentausch |
+Für private Prosumer und Betreiber, die keinen Raspberry Pi zur Hand haben, ist ein gebrauchter Industrie-Thin-Client (z.B. **Fujitsu Futro S740** mit Intel Celeron J4105 / J4005) die wirtschaftlichste und stabilste Lösung:
+* **Komplettgerät:** Kommt ab Werk im Metallgehäuse mit 230V-Netzteil, 16–64 GB SSD und 4–8 GB DDR4-RAM (kein SD-Karten-Verschleiß!).
+* **Preis:** Auf eBay permanent für **35 bis 50 €** aus Firmen-Leasingrückläufen verfügbar.
+* **Leistungsaufnahme:** Zieht im Idle nur **3,5 bis 4,5 Watt** (ca. 12–15 € Stromkosten pro Jahr).
+* **Betriebssystem:** Normales Debian/Ubuntu Linux x86_64 – das Sharegy Go-Binary läuft darauf mit 0,1% CPU-Last.
+
+---
+
+### 5.3. RS485-Schnittstellen-Adapter für Wechselrichter & Speicher
+
+Um Wechselrichter (SMA, SolarEdge, Sungrow, Fronius) oder Stromzähler (SDM630, Janitza) per Modbus RTU anzuschließen:
+* **DSD TECH SH-U10 USB-zu-RS485 Konverter (mit FTDI-Chip):** ca. **12 – 15 €** auf Amazon.de.
+* **Waveshare USB to RS485 (mit galvanischer Trennung / Überspannungsschutz):** ca. **18 – 22 €** auf Amazon.de / BerryBase.
+
+---
+
+### 5.4. Betriebskosten & Amortisation im Dauerbetrieb (24/7)
+
+| Setup | Dauerleistung | Verbrauch / Jahr | Stromkosten / Jahr (bei 0,35 €/kWh) |
+|---|---|---|---|
+| **SBC (Le Potato / Pi 4)** | ~1,8 – 2,5 W | ~16 – 22 kWh | **ca. 5,60 € – 7,70 €** |
+| **Thin Client (Futro S740)** | ~3,8 – 4,5 W | ~33 – 39 kWh | **ca. 11,50 € – 13,60 €** |
+| **Industrie DIN-Rail Box** | ~2,2 – 3,0 W | ~19 – 26 kWh | **ca. 6,65 € – 9,10 €** |
 
 ---
 
