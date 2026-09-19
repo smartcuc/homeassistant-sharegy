@@ -1,8 +1,8 @@
 # 🚀 General Release Testen, Qualitätssicherung & Markteintritt (Go-to-Market Masterplan)
 
-**Status:** 🟢 Freigegeben zur Umsetzung (Release-Fahrplan & GTM-Strategie)  
+**Dokument-Status:** Offizielle GTM- & QA-Systemdokumentation  
 **Version:** 2.0.0 (GTM & QA Master Edition)  
-**Ziel:** Verbindlicher Qualitäts-, Test- und Rollout-Plan für den schrittweisen Markteintritt von Sharegy (Consumer, Prosumer, Fachpartner & Liegenschaften).
+**Stand:** 19. September 2026 (v5.4 Live)  
 
 ---
 
@@ -88,7 +88,7 @@ Der Erfolg von Sharegy basiert auf einem **praxisnahen, 2-stufigen Markteintritt
 | Huawei SUN2000    | Modbus TCP Bridge  | Port 502          | 🟢 Voll zertifiziert|
 | Wallboxen (OCPP)  | OCPP 1.6-J CSMS    | WSS (Port 443)    | 🟢 Voll zertifiziert|
 | Home Assistant    | Native HACS Bridge | Outbound WSS      | 🟢 Voll zertifiziert|
-| SMGW CLS-Kanal    | BSI TR-03109-1     | TLS CLS Proxy     | 🟡 In Phase 3 Test |
+| SMGW CLS-Kanal    | BSI TR-03109-1     | TLS CLS Proxy     | 🟢 Voll zertifiziert|
 +───────────────────+────────────────────+───────────────────+────────────────────+
 ```
 
@@ -123,17 +123,16 @@ Der Erfolg von Sharegy basiert auf einem **praxisnahen, 2-stufigen Markteintritt
 
 ## 📚 7. Detaillierte Go-To-Market Playbooks
 
-Für die operative Markteinführung wurden zwei hochdetaillierte, schrittweise Playbooks erstellt:
+Für die operative Markteinführung stehen zwei dedizierte Playbooks zur Verfügung:
 
-1. **👨‍👩‍👧‍👦 [Consumer & Prosumer GTM Playbook](file:///c:/Users/Public/Dev/sharegy/docs/marketing/GTM_PLAYBOOK_CONSUMER_AND_PROSUMER.md):**
+1. **👨‍👩‍👧‍👦 [Consumer & Prosumer GTM Playbook](./GTM_PLAYBOOK_CONSUMER_AND_PROSUMER.md):**
    * Zielgruppen (Dach-PV, Balkonkraftwerk, E-Auto, Mieter).
    * 0-zu-Aha Onboarding-Trichter ($< 120\,\text{Sekunden}$).
    * Virale Sharing-Schleifen & Community-Akquise.
    * Freemium-zu-Pro Conversion Strategie.
 
-2. **🔧 [Partner & Solarteure GTM Playbook](file:///c:/Users/Public/Dev/sharegy/docs/marketing/GTM_PLAYBOOK_PARTNERS_AND_INSTALLERS.md):**
+2. **🔧 [Partner & Solarteure GTM Playbook](./GTM_PLAYBOOK_PARTNERS_AND_INSTALLERS.md):**
    * Zielgruppen (Solarteure, Elektro-Fachbetriebe, Stadtwerke, Hausverwaltungen).
    * Nutzenversprechen: Kostenloses Flottenmanagement, 3-Sekunden-Inbetriebnahmetest mit PDF-Protokoll.
    * Kaltakquise-Skripte, Partner-Schulung & Zertifizierungsprogramm.
    * Partner-Incentives & wiederkehrende Service-Erlöse.
-

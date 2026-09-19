@@ -1,6 +1,6 @@
 # ⚡ Sharegy Documentation & Knowledge Base Index
 
-**Stand:** 12. September 2026 (v5.3 / Milestone 9 Live)
+**Stand:** 19. September 2026 (v5.4 / Enterprise & Compliance Live)
 
 Willkommen im offiziellen Wissens- und Dokumentations-Hub der **Sharegy**-Plattform (Smart Home Energy Management & Community Energy Sharing).
 
@@ -27,8 +27,10 @@ docs/
 
 | Dokument | Beschreibung |
 |---|---|
-| ⚡ **[`VPP_FLEXIBILITY_BONUS_ECOSYSTEM_AND_PROCESS_GUIDE.md`](./architecture/VPP_FLEXIBILITY_BONUS_ECOSYSTEM_AND_PROCESS_GUIDE.md)** | **NEU:** Virtuelles Kraftwerk (VPP) Flexibilitäts-Bonus: Ökosystem, Kooperationsmatrix (Wer mit wem wo), End-to-End Prozesse & 80/20 Erlösmodelle |
-| 🌐 **[`DECOUPLED_MONITORING_AND_REMOTE_RPC_ARCHITECTURE.md`](./architecture/DECOUPLED_MONITORING_AND_REMOTE_RPC_ARCHITECTURE.md)** | **NEU:** Entkoppelte Monitoring-Subdomain (`mon.sharegy.de`), WSS Reverse-RPC Fernwartung & Edge-Isolation |
+| ⚡ **[`BNETZA_CLS_SMART_METER_GATEWAY_INTEGRATION.md`](./architecture/BNETZA_CLS_SMART_METER_GATEWAY_INTEGRATION.md)** | **NEU:** BNetzA CLS-Kanal & Smart Meter Gateway (SMGW) Kopplung (§ 14a EnWG Drosselung, FNN Steuerbox Quittierung) |
+| 📈 **[`AUTOMATED_FLEXIBILITY_AND_VPP_MARKET_CLEARING.md`](./architecture/AUTOMATED_FLEXIBILITY_AND_VPP_MARKET_CLEARING.md)** | **NEU:** Automatisierter Flexibilitäts- & Regelleistungshandel (aFRR/SRL, 80/20 Erlös-Clearing & Aggregator-Schnittstelle) |
+| ⚡ **[`VPP_FLEXIBILITY_BONUS_ECOSYSTEM_AND_PROCESS_GUIDE.md`](./architecture/VPP_FLEXIBILITY_BONUS_ECOSYSTEM_AND_PROCESS_GUIDE.md)** | Virtuelles Kraftwerk (VPP) Flexibilitäts-Bonus: Ökosystem, Kooperationsmatrix, End-to-End Prozesse & Erlösmodelle |
+| 🌐 **[`DECOUPLED_MONITORING_AND_REMOTE_RPC_ARCHITECTURE.md`](./architecture/DECOUPLED_MONITORING_AND_REMOTE_RPC_ARCHITECTURE.md)** | Entkoppelte Monitoring-Subdomain (`mon.sharegy.de`), WSS Reverse-RPC Fernwartung & Edge-Isolation |
 | 🔌 **[`API_REFERENCE_AND_ENDPOINTS.md`](./architecture/API_REFERENCE_AND_ENDPOINTS.md)** | Vollständige REST- & WebSocket-API-Referenz, Authentifizierung (JWT/API-Keys) & Endpunktkatalog |
 | 🏛️ **[`ARCHITECTURE.md`](./architecture/ARCHITECTURE.md)** | Gesamtsystem-Architektur, Dual-Core Konzept, Tech-Stack, Subdomains & Datenflüsse |
 | 🧭 **[`SHAREGY_STRATEGIC_HORIZONS_AND_IMPLEMENTATION_BLUEPRINT.md`](./architecture/SHAREGY_STRATEGIC_HORIZONS_AND_IMPLEMENTATION_BLUEPRINT.md)** | Strategische Handlungsempfehlungen, Umsetzungs-Statusmatrix & Realisierungspläne |
@@ -48,7 +50,7 @@ docs/
 
 | Dokument | Beschreibung |
 |---|---|
-| ⚡ **[`VPP_FLEXIBILITY_AND_MARKET_CLEARING_OPERATIONS.md`](./operations/VPP_FLEXIBILITY_AND_MARKET_CLEARING_OPERATIONS.md)** | **NEU:** Virtuelles Kraftwerk (VPP), Regelleistung (aFRR/FCR), 80/20 Market Clearing, Aggregator-Webhooks & Runbooks |
+| ⚡ **[`VPP_FLEXIBILITY_AND_MARKET_CLEARING_OPERATIONS.md`](./operations/VPP_FLEXIBILITY_AND_MARKET_CLEARING_OPERATIONS.md)** | Virtuelles Kraftwerk (VPP), Regelleistung (aFRR/FCR), 80/20 Market Clearing, Aggregator-Webhooks & Runbooks |
 | 🚀 **[`OPERATIONS_AND_DEPLOYMENT.md`](./operations/OPERATIONS_AND_DEPLOYMENT.md)** | Server-Deployment (Ubuntu/Debian), Systemd Services, Redis, Celery & Health-Checks |
 | 🛡️ **[`DATA_PRIVACY_AND_GDPR_COMPLIANCE.md`](./operations/DATA_PRIVACY_AND_GDPR_COMPLIANCE.md)** | DSGVO-Konzept, Technische und Organisatorische Maßnahmen (TOMs), AVV-Muster & Löschfristen |
 | ✅ **[`PRODUCTION_DEPLOYMENT_CHECKLIST.md`](./operations/PRODUCTION_DEPLOYMENT_CHECKLIST.md)** | Checkliste für Produktiv-Rollouts, SSL-Zertifikate, Umgebungsvariablen & DNS |
@@ -62,7 +64,7 @@ docs/
 
 | Dokument | Beschreibung |
 |---|---|
-| 📱 **[`ANDROID_APP_DEVELOPMENT_AND_RELEASE_GUIDE.md`](./mobile/ANDROID_APP_DEVELOPMENT_AND_RELEASE_GUIDE.md)** | **Konsolidiert:** Native Android App (Capacitor 7, Android Studio Setup, Emulatoren, Gradle Build & Signing) |
+| 📱 **[`ANDROID_APP_DEVELOPMENT_AND_RELEASE_GUIDE.md`](./mobile/ANDROID_APP_DEVELOPMENT_AND_RELEASE_GUIDE.md)** | Native Android App (Capacitor 7, Android Studio Setup, Emulatoren, Gradle Build & Signing) |
 | 🛒 **[`PLAY_STORE_RELEASE_AND_ACCOUNT_GUIDE.md`](./mobile/PLAY_STORE_RELEASE_AND_ACCOUNT_GUIDE.md)** | Google Play Console Setup, D-U-N-S Verifikation & Release-Pipeline |
 | 🔔 **[`NOTIFICATIONS_AND_MOBILE_PUSH.md`](./mobile/NOTIFICATIONS_AND_MOBILE_PUSH.md)** | Mobile Push & Notification Engine (W3C Web-Push, VAPID, Service Worker & Quiet Hours) |
 
@@ -72,6 +74,7 @@ docs/
 
 | Dokument | Beschreibung |
 |---|---|
+| 🧭 **[`ROLE_BASED_NAVIGATION_AND_CONTEXT_SWITCHING.md`](./admin/ROLE_BASED_NAVIGATION_AND_CONTEXT_SWITCHING.md)** | **NEU:** Rollen- & kontextbasierte Aufteilung der Side-Navigation für EMS, Mieter, Partner & Admins |
 | 🏢 **[`TENANT_ADMIN_HANDBOOK_AND_FAQ.md`](./admin/TENANT_ADMIN_HANDBOOK_AND_FAQ.md)** | Mandanten-Handbuch: Gebäude anlegen, Mieter verwalten, Zähler zuweisen & Tarife |
 | 👥 **[`RBAC_AND_USER_MANAGEMENT_GUIDE.md`](./admin/RBAC_AND_USER_MANAGEMENT_GUIDE.md)** | Multi-Tenant Rollen- & Berechtigungskonzept (Plattform- & Community-Rollen) |
 | 🎫 **[`HELPDESK_MODULE_DOCUMENTATION.md`](./admin/HELPDESK_MODULE_DOCUMENTATION.md)** | Support Desk, Ticket-System, ITIL-Prioritäten, Deflection & Factofy-Integration |
@@ -92,6 +95,7 @@ docs/
 
 | Dokument | Beschreibung |
 |---|---|
+| 🚀 **[`GENERAL_RELEASE_TESTING_AND_GO_TO_MARKET.md`](./marketing/GENERAL_RELEASE_TESTING_AND_GO_TO_MARKET.md)** | **NEU:** General Release QA-, Test- und Rollout-Masterplan für B2C & B2B |
 | 💼 **[`COMMERCIAL_SALES_PITCH_AND_B2B_KIT.md`](./marketing/COMMERCIAL_SALES_PITCH_AND_B2B_KIT.md)** | B2B-Sales-Kits für WEGs, Hausverwaltungen, Energiegenossenschaften & Installateure |
 | ⚡ **[`SHAREGY_FEATURE_CATALOG_AND_MARKETING_MATRIX.md`](./marketing/SHAREGY_FEATURE_CATALOG_AND_MARKETING_MATRIX.md)** | Gesamter Feature-Katalog & Marketing-Leistungsmatrix aller 15 Module |
 | 📱 **[`APP_TEASER.md`](./marketing/APP_TEASER.md)** | App Store Beschreibungen, Teaser-Texte und Marken-Farbkonzepte |
@@ -108,14 +112,11 @@ docs/
 
 ---
 
-### 🧪 8. Entwicklungs-Backlog & WIP Features ([`docs/wip/`](./wip/))
+### 🧪 8. Entwicklungs-Backlog & Aktive WIP-Features ([`docs/wip/`](./wip/))
 
 | Dokument | Bereich | Status & Priorität | Beschreibung |
 |---|---|:---:|---|
-| 🛠️ **[`OPTIMIZATION_AND_AUDIT_MASTERPLAN.md`](./wip/OPTIMIZATION_AND_AUDIT_MASTERPLAN.md)** | Masterplan | 🟢 v5.4 Live | Konsolidierter Status (78% Live, 14% WIP, 8% Backlog) & Gesamt-Roadmap |
-| ⚡ **[`WIP_BNETZA_CLS_SMART_METER_GATEWAY.md`](./wip/WIP_BNETZA_CLS_SMART_METER_GATEWAY.md)** | § 14a EnWG / SMGW | 🟢 **100% Live** | Direkte Kopplung an Smart-Meter-Gateways über den CLS-Kanal & Quittierung |
-| 📈 **[`WIP_AUTOMATED_FLEXIBILITY_AND_VPP_MARKET_CLEARING.md`](./wip/WIP_AUTOMATED_FLEXIBILITY_AND_VPP_MARKET_CLEARING.md)** | VPP & Regelenergie | 🟢 **100% Live** | Flex-Aggregatoren, aFRR/SRL Vermarktung & 80/20 Erlösausschüttungs-Clearing |
-| 🧭 **[`WIP_ROLE_BASED_SIDENAV_AND_CONTEXT_NAVIGATION.md`](./wip/WIP_ROLE_BASED_SIDENAV_AND_CONTEXT_NAVIGATION.md)** | Frontend UX & RBAC | 🟢 **100% Live** | Rollenmatrix (`SuperAdmin`, `Dispatcher`, `Billing`, `Tech`, `Auditor`) & Menüs |
+| 🛠️ **[`OPTIMIZATION_AND_AUDIT_MASTERPLAN.md`](./wip/OPTIMIZATION_AND_AUDIT_MASTERPLAN.md)** | Masterplan | 🟢 v5.4 Live | Konsolidierter Status (78% Live, 14% WIP, 8% Backlog) & Roadmap |
 | 📱 **[`WIP_DUAL_APP_ECOSYSTEM_USER_VS_PARTNER.md`](./wip/WIP_DUAL_APP_ECOSYSTEM_USER_VS_PARTNER.md)** | Mobile App | 🟢 **90%** / 🔴 Hoch | Two-App Strategie (`Sharegy Home` vs. `Sharegy Pro` mit QR-Inbetriebnahme) |
 | 🔒 **[`WIP_DYNAMIC_WHITELABEL_SSL_PROVISIONING.md`](./wip/WIP_DYNAMIC_WHITELABEL_SSL_PROVISIONING.md)** | Whitelabel / TLS | 🟡 **70%** / 🟡 Mittel | Automatisierte Let's Encrypt SSL-Provisionierung für CNAME-Domains |
 | 🌐 **[`WIP_SMARTEVO_WEBSITE_PRODUCT_INTEGRATION.md`](./wip/WIP_SMARTEVO_WEBSITE_PRODUCT_INTEGRATION.md)** | Dachmarken-Web | 🟡 **65%** / 🟡 Mittel | Integration von Sharegy & Factofy im smartEvo.de Webauftritt |
@@ -127,5 +128,5 @@ docs/
 ### 📋 9. Walkthroughs & Meilensteine ([`docs/walkthroughs/`](./walkthroughs/))
 
 Chronologische Entwicklungs- und Release-Protokolle:
-* 📝 **[`2026-09-16_code_review_and_vpp_resilience_optimization.md`](./walkthroughs/2026-09-16_code_review_and_vpp_resilience_optimization.md)**: **NEU:** DTOs, Redis-Caching für Flottenaggregation & Circuit-Breaker API-Resilienz
+* 📝 **[`2026-09-16_code_review_and_vpp_resilience_optimization.md`](./walkthroughs/2026-09-16_code_review_and_vpp_resilience_optimization.md)**: DTOs, Redis-Caching für Flottenaggregation & Circuit-Breaker API-Resilienz
 * 📂 **[Alle Meilenstein-Protokolle ansehen](./walkthroughs/)**
