@@ -621,6 +621,17 @@ STRIPE_PRICE_IDS = {
 TANKERKOENIG_API_KEY = os.getenv("TANKERKOENIG_API_KEY", "00000000-0000-0000-0000-000000000002").strip()
 
 
+# =============================
+# 🛡️ smartEvo Operations & Monitoring Hub (moniy)
+# =============================
+MONIY_URL = os.getenv("MONIY_URL", os.getenv("SMARTEVO_OPERATIONS_HUB_URL", "https://mon.smartevo.de")).rstrip("/")
+MONIY_BASE_URL = MONIY_URL
+MONIY_S2S_KEY = os.getenv("MONIY_S2S_KEY", os.getenv("SMARTEVO_OPERATIONS_API_KEY", "nexus-s2s-sharegy-factofy-production-auth-key-change-me"))
+SMARTEVO_OPERATIONS_HUB_URL = MONIY_URL
+SMARTEVO_OPERATIONS_API_KEY = MONIY_S2S_KEY
+
+
+
 
 
 
