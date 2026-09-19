@@ -156,7 +156,66 @@ flowchart TB
 
 ---
 
-## 📊 5. Ressourcen- & Performance-Ziele
+## 🛠️ 5. Hardware-Empfehlungen, Spezifikationen & BOM (Bill of Materials)
+
+Da der Go/Rust-Daemon nur **~12–20 MB RAM** und **< 1,5% CPU-Last** benötigt, reicht extrem günstige, energieeffiziente Hardware aus. Im Zählerschrank sind vor allem **galvanisch getrennte Schnittstellen (RS485)**, **Ethernet-Ports (RJ45)** und **niedriger Eigenverbrauch** entscheidend.
+
+### 5.1. Die Hardware-Matrix im Überblick
+
+| Kategorie | Hardware-Modell | Richtpreis | Schnittstellen | Montage-Formfaktor | Ideal für |
+|---|---|---|---|---|---|
+| **Tier 1: B2B & Elektro-Handwerk** *(Top-Empfehlung)* | **Waveshare CM4 / Core3566 DIN-Rail Gateway** | ca. **55 – 75 €** | 1x RJ45 LAN, 1x RS485 (isoliert), 1x RTC-Uhr, 2x USB | Hutschiene (DIN-Rail 2–4 TE, 9–36V DC) | Professionelle Schaltschrank-Installation durch Elektriker |
+| **Tier 2: Preis-Leistungs-Sieger** *(Standalone-Box)* | **Orange Pi Zero 3 (1 GB RAM)** + USB-RS485 | ca. **22 – 28 €** (+5 € Adapter) | 1x Gigabit LAN, 3x USB, WiFi 5, BLE | Kompakt-Gehäuse / Hutschiene-Clip | Power-User, Prosumer & Standalone-Betrieb |
+| **Tier 3: Ultra-Low-Budget DIY** *(Labor & Tester)* | **Raspberry Pi Zero 2 W** + USB-Ethernet | ca. **18 – 22 €** (+6 € Adapter) | WiFi 4, Micro-USB | Miniatur-Gehäuse | Günstige Testaufbauten & Bastler |
+| **Tier 4: Zähler-Direktlesekopf** *(eHZ IR)* | **Hichi Smartmeter IR WiFi / BitShake** (ESP32) | ca. **15 – 20 €** | Infrarot-Lesekopf, WiFi / MQTT | Magnet-Haftung direkt am Zähler | Auslesen optischer m-Bus/SML Stromzähler |
+
+---
+
+### 5.2. Detail-Spezifikation der empfohlenen Produktvarianten
+
+#### 🥇 Variante A: Das "Sharegy Box" Hutschienen-Gateway (B2B-Standard)
+```
+┌────────────────────────────────────────────────────────┐
+│  SHAREGY BOX DIN-RAIL (2 TE / 4 TE Zählerschrank)      │
+├────────────────────────────────────────────────────────┤
+│ • SoC: Rockchip RK3566 (Quad Cortex-A55) oder CM4      │
+│ • RAM: 1 GB LPDDR4                                     │
+│ • Flash: 8 GB eMMC 5.1 (Industrie-Flash, kein SD-Verschleiß)│
+│ • Spannungsversorgung: 9V–36V DC Weitbereichseingang   │
+│ • RS485: Galvanisch isoliert (bis 2.500 V Schutz)      │
+│ • LAN: 100/1000M RJ45 Ethernet                         │
+│ • Echtzeituhr (RTC): DS3231 mit Supercap/Knopfzelle    │
+│ • Leistungsaufnahme: 1,8 W im Dauerbetrieb             │
+│ • EK-Stückkosten (Serie): ca. 45 – 55 €                │
+└────────────────────────────────────────────────────────┘
+```
+* **Vorteile für Installateure:**
+  * Wird einfach im Verteilerschrank auf die DIN-Hutschiene geklickt.
+  * Keine wackeligen Steckernetzteile oder SD-Karten-Fehler.
+  * Kann direkt vom 24V-Hutschienen-Netzteil des Schaltschranks mitversorgt werden.
+
+#### 🥈 Variante B: Der Orange Pi Zero 3 (Smart Home Prosumer)
+* **SoC:** Allwinner H618 (Quad-Core 64-Bit Cortex-A53).
+* **RAM:** 1 GB oder 1.5 GB LPDDR4.
+* **Schnittstellen:** Echter Gigabit-LAN Port (RJ45), USB-Host für RS485-Dongle, Type-C 5V Stromversorgung.
+* **Leistungsaufnahme:** ~1,2 W im Idle, ~2,2 W unter Vollast.
+* **Vorteil:** Unschlagbar günstig bei voller 64-Bit ARMv8 Performance.
+
+---
+
+### 5.3. Betriebskosten & Amortisation im Dauerbetrieb (24/7)
+
+| Kennzahl | Wert |
+|---|---|
+| **Dauerleistung (P_avg)** | **1,5 Watt** (Durchschnitt) |
+| **Täglicher Energieverbrauch** | 0,036 kWh / Tag |
+| **Jährlicher Energieverbrauch (8.760 h)** | **13,14 kWh / Jahr** |
+| **Jährliche Stromkosten (bei 0,35 € / kWh)** | **nur ca. 4,60 € pro Jahr** |
+| **Flash-Lebensdauer (bei Wear-Leveling & tmpfs)** | **> 10 Jahre** ohne Kartentausch |
+
+---
+
+## 📊 6. Ressourcen- & Performance-Ziele
 
 | Parameter | Zielwert (Raspberry Pi Zero 2W / Industrie-Gateway) |
 |---|---|
@@ -168,7 +227,7 @@ flowchart TB
 
 ---
 
-## 🗺️ 6. Roadmap & Implementierungs-Phasen
+## 🗺️ 7. Roadmap & Implementierungs-Phasen
 
 1. **Phase 1 (2026 – Jetzt):**
    - Cloud-first Architektur + Vor-Ort-Resilienz via **Home Assistant Integration** und **ioBroker Adapter** (`iobroker.sharegy`).
@@ -181,6 +240,7 @@ flowchart TB
 
 ---
 
-## 📄 7. Verankerung im System
+## 📄 8. Verankerung im System
 * Dokument ist dauerhaft archiviert unter [`docs/architecture/SHAREGY_STANDALONE_EDGE_DAEMON_ARCHITECTURE.md`](./SHAREGY_STANDALONE_EDGE_DAEMON_ARCHITECTURE.md).
 * Referenziert im zentralen Dokumentations-Index [`docs/README.md`](../README.md).
+
