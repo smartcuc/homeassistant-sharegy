@@ -156,50 +156,74 @@ flowchart TB
 
 ---
 
-## 🛠️ 5. Realistische Hardware-Optionen & Bezugsquellen (Deutschland / DACH)
+## 🛠️ 5. Professionelle Hardware-Lösungen für den Zählerschrank (DIN-Hutschiene)
 
-> [!NOTE]
-> **Transparenz-Hinweis zur Preisgestaltung:**  
-> Reine OEM-Nacktplatinen (Bare Boards) aus China (wie Orange Pi oder reine Compute-Module-Baseboards) werben oft mit 20–30 $ Herstellerpreisen. Im **deutschen Einzelhandel (Amazon.de, Reichelt, BerryBase, eBay)** kommen jedoch Gehäuse, Hutschienen-Adapter, Netzteile, Steuern und Händlermargen hinzu.  
-> Nachfolgend sind ausschließlich **in Deutschland sofort lieferbare, realistische Gesamtlösungen** aufgeführt.
-
-### 5.1. Die 4 praxiserprobten Hardware-Pfade im deutschen Markt
-
-| Kategorie | Konkretes Produkt / Setup | Realer Endkundenpreis (DE) | Bezugsquelle | Formfaktor & Besonderheiten |
-|---|---|---|---|---|
-| **🥇 1. Der unzerstörbare x86 Mini-PC** *(Geheimtipp für Prosumer)* | **Fujitsu Futro S740 / HP T630** *(Refurbished)* | **ca. 35 – 55 €** *(komplett mit Netzteil & Gehäuse)* | eBay.de, Refurbished-Händler | Intel Quad-Core x86_64, 4–8 GB RAM, nativer Gigabit-LAN-Port, robuster Dauerläufer (4–5 W), passive Kühlung |
-| **🥈 2. Der direkt lieferbare SBC** *(Amazon Prime)* | **Libre Computer "Le Potato" (AML-S905X-CC)** | **ca. 39 – 45 €** *(Board)* / ca. **55 €** *(mit Netzteil/Gehäuse)* | Amazon.de, BerryBase | ARM64 Quad-Core, 2 GB RAM, 100M LAN, 4x USB. Vollständiger Raspberry-Pi-Formfaktor, sofort ab deutschem Lager lieferbar |
-| **🥉 3. Der Zählerschrank-Standard** *(Klassiker)* | **Raspberry Pi 4 (2 GB)** + **DIN-Rail Hutschienengehäuse** | **ca. 65 – 85 €** *(Komplettset)* | BerryBase, Reichelt, Welectron | Echter Raspberry Pi mit riesiger Community, passives Aluminium-Hutschienengehäuse für 4 TE im Verteiler |
-| **⚡ 4. Plug & Play Zähler-Lesekopf** *(Für eHZ Stromzähler)* | **BitShake SmartMeterReader / Hichi WiFi** | **ca. 35 – 42 €** *(fertig mit Tasmota)* | Amazon.de, eBay.de | Magnetischer IR-Kopf mit ESP32/ESP8266. Liest SML/m-Bus Zählerdaten optisch aus und sendet per MQTT/HTTP |
-| **🏢 5. Industrie-All-in-One** *(B2B / Elektriker-Zertifiziert)* | **Seeed EdgeBox-RPI-200 / Kunbus RevPi** | **ca. 280 – 450 €** | Antratek, Conrad, Reichelt | Vollständig CE/Industrie-zertifiziertes DIN-Rail-Gerät mit integriertem galvanisch getrenntem RS485, CAN & USV-Puffer |
+> [!IMPORTANT]
+> **Fokus auf fabrikneue, installationsfertige Zählerschrank-Hardware:**  
+> Für einen professionellen Rollout (B2B, Elektro-Fachbetriebe und qualitätsbewusste Endkunden) kommen Bastellösungen oder Gebrauchtgeräte nicht infrage.  
+> Die nachfolgenden **3 Neugeräte-Optionen** sind exakt für die **35-mm-DIN-Hutschiene im Zählerschrank (2 bis 4 TE)** konzipiert, besitzen alle erforderlichen Industrie-Schnittstellen (RS485, RJ45-LAN, Weitbereichs-Spannungseingang) und sind über deutsche Distributoren (BerryBase, Welectron, Reichelt, Amazon.de) sofort lieferbar.
 
 ---
 
-### 5.2. Detail-Empfehlung: Warum der "Refurbished Thin Client" (Futro S740) oft die beste Wahl ist
+### 5.1. Die 3 offiziellen Neugeräte-Standards im Überblick
 
-Für private Prosumer und Betreiber, die keinen Raspberry Pi zur Hand haben, ist ein gebrauchter Industrie-Thin-Client (z.B. **Fujitsu Futro S740** mit Intel Celeron J4105 / J4005) die wirtschaftlichste und stabilste Lösung:
-* **Komplettgerät:** Kommt ab Werk im Metallgehäuse mit 230V-Netzteil, 16–64 GB SSD und 4–8 GB DDR4-RAM (kein SD-Karten-Verschleiß!).
-* **Preis:** Auf eBay permanent für **35 bis 50 €** aus Firmen-Leasingrückläufen verfügbar.
-* **Leistungsaufnahme:** Zieht im Idle nur **3,5 bis 4,5 Watt** (ca. 12–15 € Stromkosten pro Jahr).
-* **Betriebssystem:** Normales Debian/Ubuntu Linux x86_64 – das Sharegy Go-Binary läuft darauf mit 0,1% CPU-Last.
-
----
-
-### 5.3. RS485-Schnittstellen-Adapter für Wechselrichter & Speicher
-
-Um Wechselrichter (SMA, SolarEdge, Sungrow, Fronius) oder Stromzähler (SDM630, Janitza) per Modbus RTU anzuschließen:
-* **DSD TECH SH-U10 USB-zu-RS485 Konverter (mit FTDI-Chip):** ca. **12 – 15 €** auf Amazon.de.
-* **Waveshare USB to RS485 (mit galvanischer Trennung / Überspannungsschutz):** ca. **18 – 22 €** auf Amazon.de / BerryBase.
+| Setup | Kern-Komponenten | Formfaktor | Schnittstellen | Reale Gesamtkosten (Neu) | Bezugsquellen (DE) |
+|---|---|---|---|---|---|
+| **🥇 1. Der Waveshare Industrial CM4 DIN-Controller** *(Top-Standard)* | Waveshare CM4 Industrial Baseboard + Raspberry Pi CM4 (2 GB) + Metall-Hutschienengehäuse | **4 TE Hutschiene (DIN-Rail)** | 1x RS485 (galv. isoliert), 1x RJ45 Gigabit-LAN, 1x CAN-Bus, 1x RTC DS3231, 7–36V DC Eingang | **ca. 85 – 105 €** *(komplett neu)* | BerryBase, Welectron, Reichelt |
+| **🥈 2. Der Raspberry Pi 4 Industrie-Hutschienen-Kit** | Raspberry Pi 4 (2 GB) + KKSB/Joy-IT Aluminium-Hutschienengehäuse + Waveshare USB-RS485 | **4 TE Hutschiene (DIN-Rail)** | 1x RJ45 Gigabit-LAN, 1x RS485 (isoliert via USB), 4x USB, 5V DC Eingang | **ca. 90 – 105 €** *(komplett neu)* | Reichelt, BerryBase, Amazon.de |
+| **⚡ 3. Die reine Zählerschrank-Aktorik (DIN-Rail)** | **Shelly PRO 3EM / Shelly PRO Serie** | **1 – 3 TE Hutschiene** | 1x RJ45 LAN, 1x WiFi, 3x Stromwandler (120A), 230V AC direkt | **ca. 89 – 110 €** *(fertiges Produkt)* | Reichelt, Amazon.de, Shelly Shop |
 
 ---
 
-### 5.4. Betriebskosten & Amortisation im Dauerbetrieb (24/7)
+### 5.2. Detail-BOM & Komponentenliste: Das Waveshare CM4 Industrial Gateway
 
-| Setup | Dauerleistung | Verbrauch / Jahr | Stromkosten / Jahr (bei 0,35 €/kWh) |
-|---|---|---|---|
-| **SBC (Le Potato / Pi 4)** | ~1,8 – 2,5 W | ~16 – 22 kWh | **ca. 5,60 € – 7,70 €** |
-| **Thin Client (Futro S740)** | ~3,8 – 4,5 W | ~33 – 39 kWh | **ca. 11,50 € – 13,60 €** |
-| **Industrie DIN-Rail Box** | ~2,2 – 3,0 W | ~19 – 26 kWh | **ca. 6,65 € – 9,10 €** |
+Dieses Setup ist das **ideale "Sharegy Box" Referenzdesign** für Elektriker und Installateure:
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│        SHAREGY BOX: WAVESHARE CM4 INDUSTRIAL DIN-RAIL GATEWAY          │
+├──────────────────────────────┬──────────────────────────┬──────────────┤
+│ Komponente                   │ Modell / Spezifikation   │ Richtpreis   │
+├──────────────────────────────┼──────────────────────────┼──────────────┤
+│ 1. Trägerplatine (Baseboard) │ Waveshare CM4-IO-WIRELESS│ ca. 38 – 42 €│
+│                              │ -BASE (SKU 20286 / 21303)│              │
+│                              │ Inkl. RS485, CAN, RTC,   │              │
+│                              │ Hutschienen-Clip & Klemmen│             │
+│ 2. Rechenmodul (Compute Mod.)│ Raspberry Pi CM4 Lite    │ ca. 39 – 45 €│
+│                              │ (2 GB RAM, Quad-Core A72)│              │
+│ 3. Industrie-MicroSD / Flash │ SanDisk Industrial 16 GB │ ca. 8 – 10 € │
+│                              │ (High-Endurance / pSLC)  │              │
+│ 4. Zählerschrank-Stromvers.  │ MeanWell HDR-15-12       │ ca. 12 – 14 €│
+│                              │ (12V / 1.25A Hutschiene) │              │
+├──────────────────────────────┴──────────────────────────┼──────────────┤
+│ GESAMT-STÜCKKOSTEN (Fabrikneues B2B-Produkt)            │ ca. 97 – 111 €│
+└─────────────────────────────────────────────────────────┴──────────────┘
+```
+
+#### Warum Installateure und Kunden diese Waveshare-Lösung schätzen:
+1. **Galvanisch isolierter RS485-Anschluss:** Der Schraubklemmen-Block ist optisch und galvanisch vom Rechenmodul getrennt. Eventuelle Überspannungen auf dem Buskabel zum Wechselrichter oder Speicher können das Board nicht zerstören.
+2. **7–36V Weitbereichseingang:** Kann direkt an jedes vorhandene 12V- oder 24V-Hutschienennetzteil im Verteiler angeschlossen werden (keine wackeligen USB-Steckernetzteile).
+3. **Integrierte DS3231 Echtzeituhr (RTC):** Garantiert sekundengenaue Tarifierung und § 14a EnWG Protokollierung selbst nach einem Netzausfall ohne NTP-Verbindung.
+4. **Statisches Go-Binary:** Läuft als `systemd`-Dienst mit < 15 MB RAM und < 1% CPU-Last.
+
+---
+
+### 5.3. Ergänzung: Optische Zählerauslesung (m-Bus / SML am eHZ)
+
+Für Kunden, deren Wechselrichter keine freie RS485-Klemme hat und deren Stromzähler optisch ausgelesen werden soll:
+* **BitShake SmartMeterReader / Hichi WiFi (Fabrikneu):** ca. **35 – 39 €** auf Amazon.de / eBay.
+* Wird magnetisch auf die Info-Schnittstelle des elektronischen Haushaltszählers (eHZ) gesetzt und liefert 1-Sekunden-Leistungswerte direkt per LAN/WLAN an das Gateway.
+
+---
+
+### 5.4. Dauerbetriebskosten & Energieeffizienz
+
+| Kennzahl | Wert (Waveshare CM4 Industrial Gateway) |
+|---|---|
+| **Dauerleistung im Betrieb** | **ca. 1,8 bis 2,4 Watt** |
+| **Jahresenergieverbrauch (8.760 h)** | **ca. 15,8 bis 21,0 kWh / Jahr** |
+| **Jährliche Stromkosten (bei 0,35 €/kWh)** | **nur ca. 5,50 € bis 7,35 € pro Jahr** |
+| **Wärmeentwicklung** | Minimal, rein passive Kühlung über das Metallgehäuse (kein Lüfter) |
 
 ---
 
