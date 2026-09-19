@@ -1,197 +1,167 @@
 # 🌐 Sharegy API Referenz & Endpunkt-Katalog
 
 **REST & WebSocket Schnittstellen für Partner, Mobile Apps & Externe Systeme**  
-*Stand: 12. September 2026 | Version: 5.3 | Base URL: `https://app.sharegy.de/api/` bzw. `https://mon.sharegy.de/ws/`*
+*Stand: 19. September 2026 | Version: 5.4 | Base URL: `https://app.sharegy.de/api/` bzw. `https://mon.sharegy.de/ws/`*
 
 ---
 
 ## 1. Authentifizierung & Autorisierung
 
-Sharegy unterstützt drei standardisierte Authentifizierungs-Verfahren:
+Sharegy unterstützt standardisierte Authentifizierungs-Verfahren:
 
 1. **Bearer JWT Token** (für Web-Frontend, Mobile Apps & Admin-Portal):
    * Header: `Authorization: Bearer <access_token>`
    * Gültigkeit: Access Token (15 Min), Refresh Token (30 Tage mit Rotation).
-2. **Partner API Key** (für Stadtwerke-ERP / CRM Integrationen):
-   * Header: `X-Partner-API-Key: sk_live_...`
+2. **Partner & Aggregator API Key** (für Stadtwerke-ERP / CRM & VPP-Aggregatoren):
+   * Header: `X-Partner-API-Key: sk_live_...` oder `X-API-Key: ...`
 3. **Edge / Device Token** (für Shelly, ioBroker Adapter & Inverter-Gateways):
    * Header: `X-Device-Token: dev_tok_...` oder WebSocket Sub-Protocol / Query Param.
 
 ---
 
-## 2. Endpunkt-Übersicht
+## 2. Endpunkt-Übersicht nach Modulen
 
 ```mermaid
-graph LR
-    Client["Client / App / ERP"] --> Gateway["Traefik / Caddy Reverse Proxy"]
-    Gateway -->|"REST /api/v1/*"| Django["Django ASGI Core Service"]
+graph TD
+    Client["Client / App / ERP / ÜNB"] --> Gateway["Cloudflare & Ingress Proxy"]
+    Gateway -->|"REST /api/*"| Django["Django ASGI Core Service"]
     Gateway -->|"WebSocket /ws/*"| Cluster["Monitoring & WSS Cluster"]
+    
+    Django --> M1["Auth & RBAC Matrix"]
+    Django --> M2["Core Documents & GoBD Hub"]
+    Django --> M3["Energy & § 14a CLS SMGW"]
+    Django --> M4["VPP & 80/20 Market Clearing"]
+    Django --> M5["Billing & § 42b EnWG Sharing"]
 ```
 
 ---
 
-## 3. Kern-Endpunkte nach Modul
+## 3. Kern-Endpunkte im Detail
 
-### 3.1 Authentifizierung & Mandanten-Theming
+### 3.1 Authentifizierung & Granulare RBAC-Rollenmatrix
 
-#### `POST /api/v1/auth/token/`
+#### `POST /api/auth/token/`
 Bezieht ein JWT-Token-Paar für Benutzer.
-* **Payload**:
-  ```json
-  {
-    "email": "user@example.com",
-    "password": "SecretPassword123!"
-  }
-  ```
-* **Response (200 OK)**:
-  ```json
-  {
-    "access": "eyJhbGciOiJIUzI1Ni...",
-    "refresh": "eyJhbGciOiJIUzI1Ni...",
-    "user": { "id": "u-491", "email": "user@example.com", "role": "TENANT_USER" }
-  }
-  ```
+* **Payload**: `{"email": "user@example.com", "password": "..."}`
+* **Response (200 OK)**: `{"access": "eyJ...", "refresh": "eyJ..."}`
 
-#### `GET /api/core/tenant/theming/`
-Gibt das Whitelabel-Farbschema und Branding für die aktuelle Domain zurück.
+#### `GET /api/auth/me/`
+Gibt das Profil des authentifizierten Benutzers inkl. RBAC-Rollenflags zurück.
 * **Response (200 OK)**:
   ```json
   {
-    "tenant_name": "Stadtwerke Musterstadt",
-    "primary_color": "#0055A5",
-    "secondary_color": "#FFCC00",
-    "accent_color": "#00A86B",
-    "logo_url": "https://cdn.sharegy.de/logos/sw-muster.png",
-    "portal_title": "Musterstadt Energie-Portal"
+    "id": "u-491",
+    "email": "dispatcher@stadtwerke.de",
+    "platform_role": "dispatcher",
+    "is_system_admin": false,
+    "is_dispatcher": true,
+    "is_billing_specialist": false,
+    "is_field_technician": false,
+    "is_auditor": false
   }
   ```
 
 ---
 
-### 3.2 B2B Partner Portal & Flottenmanagement
+### 3.2 Zentraler Dokumenten- & Export-Manager (`/api/core/documents/`)
 
-#### `GET /api/v1/partners/fleet-overview/`
-Liefert eine aggregierte Übersicht aller durch einen Partner installierten Anlagen.
-* **Auth**: Partner-Rolle oder `X-Partner-API-Key`.
+#### `GET /api/core/documents/`
+Liefert alle generierten Abrechnungsbelege, DATEV-Exporte, MSCONS-Dateien, IBN-Protokolle und Eichnachweise mit SHA-256 Hash.
+* **Query-Parameter**: `category`, `search`, `limit`, `offset`
 * **Response (200 OK)**:
   ```json
   {
-    "total_systems": 142,
-    "online_systems": 138,
-    "systems_with_errors": 4,
-    "aggregated_pv_power_kw": 1280.5,
-    "aggregated_storage_kwh": 950.0,
-    "fleet_health_score": 97.2
-  }
-  ```
-
-#### `POST /api/v1/partners/quick-onboard/`
-Legt ein neues Kundensystem mit Inverter-Cloud-Zugang im 1-Klick-Verfahren an.
-* **Payload**:
-  ```json
-  {
-    "customer_email": "kunde@musterstadt.de",
-    "system_name": "PV Anlage Familie Meier",
-    "inverter_brand": "sungrow",
-    "credentials": {
-      "username": "meier_sg",
-      "password": "sg_password_2026",
-      "app_key": "optional_gateway_key"
-    },
-    "grid_connection_kw": 11.0,
-    "storage_capacity_kwh": 10.0
-  }
-  ```
-
----
-
-### 3.3 EMS & Live-Telemetrie
-
-#### `GET /api/v1/ems/live-power/`
-Gibt den aktuellen Energiefluss (PV, Netz, Batterie, Last, Wallbox) in Echtzeit zurück.
-* **Response (200 OK)**:
-  ```json
-  {
-    "timestamp": "2026-09-12T14:30:00Z",
-    "pv_power_watts": 6450,
-    "grid_power_watts": -2100,
-    "battery_power_watts": 2800,
-    "battery_soc_percent": 78.5,
-    "house_load_watts": 1550,
-    "wallbox_power_watts": 0,
-    "heatpump_power_watts": 0,
-    "status": "PV_SURPLUS_CHARGING"
-  }
-  ```
-
-#### `GET /api/v1/ems/dynamic-tariffs/`
-Ruft die 15-Minuten-EPEX-Spot Börsenstrompreise inklusive Netzentgelte ab.
-* **Response (200 OK)**:
-  ```json
-  {
-    "unit": "EUR/kWh",
-    "prices": [
-      { "start": "2026-09-12T14:00:00Z", "end": "2026-09-12T14:15:00Z", "total_price": 0.182, "spot_price": 0.042 },
-      { "start": "2026-09-12T14:15:00Z", "end": "2026-09-12T14:30:00Z", "total_price": 0.178, "spot_price": 0.038 }
+    "count": 42,
+    "results": [
+      {
+        "id": "doc_8f1b2c3d",
+        "title": "Abrechnung § 42b EnWG - August 2026",
+        "category": "billing_statement",
+        "file_type": "PDF",
+        "file_size_bytes": 245812,
+        "download_url": "/api/core/documents/doc_8f1b2c3d/download/",
+        "sha256_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "created_at": "2026-09-01T00:00:00Z"
+      }
     ]
   }
   ```
 
+#### `POST /api/core/documents/generate/`
+Stößt eine On-Demand Dokumenten-Generierung an.
+* **Payload**: `{"category": "datev_export", "period": "2026-08", "format": "csv"}`
+* **Response (202 Accepted)**: `{"status": "processing", "document_id": "doc_99a8b7"}`
+
 ---
 
-### 3.4 BNetzA Marktkommunikation & EDIFACT
+### 3.3 § 14a EnWG CLS SMGW Gateway (`/api/energy/cls/`)
 
-#### `POST /api/v1/billing/edi-export/mscons/`
-Generiert eine MSCONS 2.2b EDIFACT-Nachricht für 15-Minuten-Zählerwerte.
+#### `POST /api/energy/cls/signal/`
+BSI TR-03109-1 konformer Endpunkt für eingehende Dimm- und Lastabwurfsignale vom Smart Meter Gateway CLS-Kanal.
 * **Payload**:
   ```json
   {
-    "tenant_id": 1,
-    "malo_id": "DE0001234567890000000000000001234",
-    "meter_reading_type": "DELIVERY_AND_CONSUMPTION",
-    "start_date": "2026-09-01T00:00:00Z",
-    "end_date": "2026-09-01T23:59:59Z"
+    "signal_id": "cls_sig_991823",
+    "vnb_operator_id": "9900123456789",
+    "target_power_kw": 4.2,
+    "duration_minutes": 120,
+    "cause": "grid_congestion_level_2"
   }
   ```
+* **Response (200 OK - FNN Quittung)**:
+  ```json
+  {
+    "status": "acknowledged",
+    "dispatch_id": "fnn_ack_881923",
+    "execution_timestamp_utc": "2026-09-19T03:45:00Z",
+    "allocated_steuve_count": 8,
+    "power_budget_effective_kw": 4.2
+  }
+  ```
+
+#### `GET /api/energy/cls/status/`
+Liefert den aktuellen Drosselungsstatus, aktive Signale und das Audit-Log.
+
+#### `POST /api/energy/cls/clear/`
+Stellt nach VNB-Entwarnung den ungedrosselten Normalbetrieb für alle SteuVE wieder her.
+
+---
+
+### 3.4 Virtuelles Kraftwerk (VPP) & 80/20 Market Clearing (`/api/vpp/`)
+
+#### `GET /api/vpp/flexibility/`
+Ermittelt in Echtzeit die aggregierte Lade- und Entladekapazität (MW) über alle Heimspeicher und Pools.
 * **Response (200 OK)**:
   ```json
   {
-    "status": "GENERATED",
-    "message_reference": "SHAREGY-MSCONS-20260912-001",
-    "edifact_payload": "UNB+UNOC:3+9901234567890:500+9909876543210:500+260912:1430+SHAREGY-MSCONS-20260912-001'UNH+1+MSCONS:D:04B:UN:2.2b'..."
+    "total_assets": 640,
+    "available_discharge_power_kw": 2850.0,
+    "available_charge_power_kw": 3120.0,
+    "reserve_soc_guaranteed_percent": 20.0
   }
   ```
 
----
+#### `POST /api/vpp/dispatch/`
+Sendet eine Pool-Dispatch-Order zur Frequenzstützung (positive/negative SRL).
+* **Payload**: `{"dispatch_type": "afrr_positive", "requested_power_kw": 1200.0, "duration_sec": 900}`
 
-### 3.5 WebSockets & Echtzeit-Kanäle
-
-| WSS-Endpunkt | Protokoll / Format | Zweck |
-| :--- | :--- | :--- |
-| `wss://mon.sharegy.de/ws/edge/` | Sharegy JSON RPC v2 | Outbound WSS Verbindung für ioBroker Adapter & Edge-Gateways |
-| `wss://mon.sharegy.de/ws/shelly/` | Shelly RPC over WSS | Direkte Zähler- und Relaisdaten von Shelly Pro / 3EM Geräten |
-| `wss://mon.sharegy.de/ws/ocpp/{charge_point_id}` | OCPP 1.6-J / 2.0.1 / 2.1 | Ladeinfrastruktur & Wallbox-Management (Smart Charging) |
-| `wss://mon.sharegy.de/ws/live-metrics/` | Pub/Sub JSON Stream | UI-Live-Aktualisierung des Energieflussdiagramms |
+#### `GET /api/vpp/clearing/statements/`
+Liefert die monatlichen Abrechnungen mit 80/20 Erlösausschüttung für Kunden und Verwalter.
 
 ---
 
-## 4. HTTP-Statuscodes & Fehlerbehandlung
+### 3.5 Energy Sharing & Virtueller Summenzähler (§ 42b EnWG)
 
-Alle API-Fehler folgen dem **RFC 7807 Problem Details** Standard:
+#### `GET /api/billing/balance-slots/`
+Gibt 15-Minuten-Bilanzierungsdaten ($P_{\text{NAP}}$, Solar-Allokation, Reststrom) zurück.
 
-```json
-{
-  "type": "https://sharegy.de/errors/unauthorized-remote-access",
-  "title": "Consent Required",
-  "status": 403,
-  "detail": "No active MaintenanceConsent found for device sg-inverter-042. Please request customer approval in app."
-}
-```
+#### `GET /api/billing/invoices/`
+Rechtssichere Mieterstrom- und Energy-Sharing-Rechnungen mit Einzelnachweisen.
 
-* `200 OK`: Erfolgreiche Anfrage.
-* `201 Created`: Ressource erfolgreich erstellt.
-* `400 Bad Request`: Ungültige Parameter / Validierungsfehler.
-* `401 Unauthorized`: Fehlendes oder abgelaufenes JWT-Token.
-* `403 Forbidden`: Unzureichende Rechte (RBAC) oder fehlender Consent.
-* `429 Too Many Requests`: Rate-Limit überschritten (Standard: 120 req/min pro IP).
-* `500 Internal Server Error`: Server-Fehler (wird automatisch geloggt).
+---
+
+### 3.6 WebSocket Streaming-Endpunkte (`wss://`)
+
+* `wss://app.sharegy.de/ws/energy/live/` (Sub-Sekunden-Telemetrie & Sankey-Stream)
+* `wss://app.sharegy.de/ws/vpp/market/` (Echtzeit VPP-Dispatch & Netzfrequenz)
+* `wss://mon.sharegy.de/ws/admin/fleet/` (Control-Plane Reverse-RPC & Fernwartung)

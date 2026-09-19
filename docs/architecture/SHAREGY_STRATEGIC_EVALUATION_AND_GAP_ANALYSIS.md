@@ -1,7 +1,7 @@
 # 🎯 Sharegy: Strategische Gesamtevaluation, Schwachstellen-Analyse & Gap-Matrix
 
-**Dokument-Version**: 1.0  
-**Stand**: September 2026 (Live Release v5.2)  
+**Dokument-Version**: 5.4  
+**Stand**: 19. September 2026 (Live Release v5.4)  
 **Erstellt von**: Antigravity Principal Engineering & Product Strategy  
 **Zielgruppe**: Geschäftsführung, Gesellschafter, Beirat & Produkt-Management  
 
@@ -9,8 +9,8 @@
 
 ## 🧭 Executive Summary
 
-Sharegy befindet sich mit dem **Live-Release v5.2** an einem entscheidenden strategischen Wendepunkt:
-Die Software ist technologisch und architektonisch fertig, gehärtet, getestet und vereint als **erste Plattform in Europa** ein herstellerunabhängiges **Home Energy Management System (EMS, Säule 1)** mit gesetzeskonformem **Energy Sharing & Quartiers-Clearing (§ 42b EnWG, Säule 2)**.
+Sharegy befindet sich mit dem **Live-Release v5.4** an einem entscheidenden strategischen Wendepunkt:
+Die Software ist technologisch und architektonisch fertig, gehärtet, getestet und vereint als **erste Plattform in Europa** ein herstellerunabhängiges **Home Energy Management System (EMS, Säule 1)** mit gesetzeskonformem **Energy Sharing & Quartiers-Clearing (§ 42b EnWG, Säule 2)**, integrierter **BNetzA CLS § 14a Netzdrosselung**, **VPP 80/20 Regelleistungs-Vermarktung** und **GoBD-konformem Dokumenten-Hub**.
 
 Dieses Dokument liefert eine **ungeschminkte, ehrliche und schonungslose Analyse**:
 1. **Wo Sharegy heute absolute Weltklasse und dem Markt voraus ist.**
@@ -24,145 +24,104 @@ Dieses Dokument liefert eine **ungeschminkte, ehrliche und schonungslose Analyse
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│                               DIE 7 KERN-SPITZENLEISTUNGEN                              │
+│                               DIE 8 KERN-SPITZENLEISTUNGEN                              │
 ├─────────────────────────────────────────────────────────────────────────────────────────┤
-│ 1. ⚡ ECHTE DUAL-CORE PLATTFORM: EMS (Prosumer) + Energy Sharing (Quartiere) in einem   │
+│ 1. ⚡ ECHTE DUAL-CORE PLATTFORM: EMS (Prosumer) + Energy Sharing (Quartiere) + VPP      │
 │ 2. 🚀 UNERREICHTE TELEMETRIE-PERFORMANCE: TimescaleDB Hypertables & $O(1)$ Live-Cache   │
-│ 3. 🌡️ INGENIEURMÄSSIGES MPC-HEIZEN: Prädiktive Estrich-Vorladung & BWWP Boost bis 60°C  │
-│ 4. 🌐 MAXIMALER ZERO-LOCK-IN: Outbound-WSS, OCPP 1.6-J, ioBroker, Home Assistant, MQTT  │
-│ 5. 💳 VOLLAUTOMATISIERTER EU-ZAHLUNGS-STACK: 6 Sprachen, Stripe, SEPA, PayPal, Klarna   │
-│ 6. 👑 CONVERSION-STARKE FREEMIUM-UX: 4 Pro-Hubs mit interaktiver Demo-Vorschau          │
-│ 7. 🎯 ENERGIE-PROFIL MATRIX & ADAPTIVE UX: Präzise Klassifizierung (A.1–F.1), Rechner,  │
-│       automatischer Tarif-Kompass & 2. Zähler Kaskaden-Analyse                          │
+│ 3. 🛡️ BNETZA CLS § 14a GATEWAY: BSI TR-03109-1 Ingest & FNN Steuerbox-Quittierung       │
+│ 4. 📈 VPP REGELENERGIE & 80/20 CLEARING: aFRR/SRL Pooling & automatisierte Gutschriften │
+│ 5. 📁 GOBD DOKUMENTEN- & EXPORT-HUB: DATEV-, MSCONS 2.2b- & PDF-Streaming Exporte       │
+│ 6. 🔑 GRANULARE ENTERPRISE RBAC-MATRIX: 5 Rollen für Großkunden, Dispatcher & Auditoren │
+│ 7. ⏳ SKELETON-LOADING & SWR UX: Ladezeitfreie Navigation ($< 20\,\text{ms}$)           │
+│ 8. 🌐 MAXIMALER ZERO-LOCK-IN: 10 Inverter-Clouds, Outbound-WSS, OCPP 1.6-J, ioBroker, HA│
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 1.1 Die Dual-Core Architektur (Säule 1 + Säule 2)
-* **Alleinstellungsmerkmal**: Auf dem europäischen Markt existiert keine einzige Plattform, die ein vollwertiges B2C-Smart-Home-EMS mit rechtssicherem B2B-Quartiersclearing verbindet.
-* **Markt-Lücke geschlossen**: Prosumer nutzen Sharegy im Eigenheim für 7,99 €/Monat. Schließt sich dieselbe Liegenschaft einer WEG oder Bürgerenergiegenossenschaft an, bucht dieselbe Plattform nahtlos das 15-Minuten-Clearing nach § 42b EnWG ab.
+### 1.1 Die Dual-Core Architektur (Säule 1 + Säule 2 + VPP)
+* **Alleinstellungsmerkmal**: Auf dem europäischen Markt existiert keine einzige Plattform, die ein vollwertiges B2C-Smart-Home-EMS mit rechtssicherem B2B-Quartiersclearing (§ 42b EnWG) und VPP-Regelleistung vereint.
+* **Markt-Lücke geschlossen**: Prosumer nutzen Sharegy im Eigenheim für 7,99 €/Monat. Schließt sich dieselbe Liegenschaft einer WEG oder Bürgerenergiegenossenschaft an, bucht dieselbe Plattform nahtlos das 15-Minuten-Clearing nach § 42b EnWG ab und vermarktet Speicher-Flexibilitäten am Regelenergiemarkt.
 
 ### 1.2 Datenbank- & Abfrage-Performance
 * **TimescaleDB Hypertables & Continuous Aggregates**: Selbst bei Hunderten Millionen Messpunkten laden Dashboards, Jahresbilanzen und Lastgänge in $< 20\,\text{ms}$.
 * **$O(1)$ Snapshot-Tabelle (`DeviceLatestMetric`)**: Vermeidet Tabellenscans auf historischen Zeitreihen; der Live-Fluss im Header (`Live-Pulse`) aktualisiert sich flackerfrei in Sub-Sekunden.
 
-### 1.3 Physikalisches Model Predictive Control (MPC) für Wärme & BWWP
-* **Estrich-Speichermasse ($15\text{–}20\,\text{t}$)**: Sharegy nutzt Bauteilaktivierung als thermische $18\,\text{kWh}_\text{th}$ Batterie.
-* **Prädiktives Absenken**: Bei Sonnenstrahlung ($G > 100\,\text{W/m}^2$) senkt Sharegy den Vorlauf vorab um bis zu $2,0\,\text{K}$ ab, um passive Fenstergewinne zu nutzen.
-* **Verdichter- & Taktschutz**: Einhaltung von Mindestlaufzeiten ($\ge 20\,\text{min}$) und Ruhezeiten ($\ge 15\,\text{min}$) schützt teure Wärmepumpen vor frühzeitigem Verschleiß.
+### 1.3 § 14a EnWG CLS SMGW Gateway & Netzdrosselung
+* **BSI TR-03109-1 Konformität**: Empfang und Quittierung von Dimm-Befehlen über den CLS-Kanal mit FNN Steuerbox-Dispatch-Quittierung.
+* **Dynamisches Summenleistungs-Modell**: $P_{\text{allow}} = 4{,}2\,\text{kW} (\text{Netz}) + P_{\text{PV}} + P_{\text{Batt}} - P_{\text{Base}}$, wodurch der Wohn- und Ladekomfort trotz Netzdrosselung voll erhalten bleibt.
 
-### 1.4 Vollständiger Europa-Zahlungsstack & Self-Service
-* **6 Sprachen** (🇩🇪 DE, 🇬🇧 EN, 🇵🇱 PL, 🇹🇷 TR, 🇷🇺 RU, 🇷🇴 RO) nahtlos in UI und Stripe-Checkout integriert.
-* **Rechtssichere Rechnungslegung**: § 14 UStG Invoicing, 19% MwSt., USt-IdNr, fortlaufende Nummernkreise und Customer Portal für vollständige Self-Service-Kündigung/Upgrades ohne Supportaufwand.
+### 1.4 Virtuelles Kraftwerk (VPP) & 80/20 Erlös-Clearing
+* **Regelleistungsmärkte**: Sekundärregelleistung (aFRR/SRL) und FCR mit 96-Viertelstunden-Fahrplänen.
+* **Faires Erlösmodell**: 80 % der Erlöse fließen automatisch als Gutschrift an den Kunden, 20 % verbleiben als Plattform-Marge.
 
-### 1.5 Standardisiertes Pro-Freemium Gating
-* Alle 4 Pro-Hubs (`/app/control`, `/app/mobility`, `/app/heating`, `/app/alerts`) bieten Free-Nutzern eine transparente, interaktive Vorschau mit Weichzeichner (`backdrop-blur-[1.5px]`) und Showcase-Hero – maximale Conversion bei null Frustration.
-
-### 1.6 Die Energie-Profil Matrix (A.1 bis F.1) & Intelligenter Ersparnisrechner
-* **Ganzheitliche Klassifizierung**: 6 Archetypen bilden jede Haushaltskonstellation (vom Balkonkraftwerk bis zum voll-elektrifizierten All-In Prosumer) präzise ab.
-* **4-Kanal Sparpotenzial-Berechnung**: Ermittlung der jährlichen Ersparnis (€/a) und verschiebbaren Lasten ($E_\text{shiftable}$) aus Direktverbrauch, § 14a EnWG Netzentgelt-Pauschale (~160 €/a), Börsentiefs und Winter-Arbitrage.
-* **Fundierter Tarif-Kompass**: Wirtschaftliche Gegenüberstellung von Festpreis vs. dynamischem Tarif inklusive 2. Zählerplatz / Kaskadenschaltung (Zusatzkosten 80–120 €/a).
-* **Adaptives UI-System**: Hero Quick-Actions auf dem Dashboard und passgenaue Wissensportal-Leitfäden für jedes Profil.
+### 1.5 Zentraler GoBD-Dokumenten-Hub & Granulare RBAC-Matrix
+* **Revisionssicherheit**: Zentraler Download-Hub (`/app/documents`) mit DATEV-Buchungsstapeln, BNetzA MSCONS 2.2b Zeitreihen und SHA-256 Hashketten-Prüfung.
+* **Rollenisolation**: 5 dedizierte Profile (`SuperAdmin`, `Dispatcher`, `Billing Specialist`, `Field Technician`, `Auditor / Read-Only`).
 
 ---
 
 ## 🔴 2. Die schonungslose Schwachstellen-Analyse (Wo wir noch Defizite haben)
 
-Trotz herausragender Softwarequalität hat Sharegy aktuell **5 kritische Baustellen**, die für die Skalierung gelöst werden müssen:
+Trotz herausragender Softwarequalität hat Sharegy aktuell **4 verbleibende operative Baustellen**, die für die Skalierung gelöst werden müssen:
 
 ---
 
-### ⚠️ Baustelle A: Cloud-Abhängigkeit vs. Lokale Offline-Resilienz
-* **Das Problem**: Sharegy arbeitet aktuell als reine Cloud-SaaS-Plattform. Aktoren (Shellys, Relais, Wallboxen) werden über Cloud-APIs, Outbound-WSS oder ioBroker/HA-Bridges geschaltet.
-* **Die Schwachstelle**: Bricht beim Kunden die Internetverbindung ab oder hat die Cloud kurz Schluckauf, wird in dieser Zeit kein Lastfahrplan ausgeführt.
-* **Risiko**: Nutzer mit dynamischen Stromtarifen oder Netzdrosselung (§ 14a EnWG) erwarten, dass die Steuerung auch offline garantiert weiterläuft.
-* **Lösung**:
-  * Entwicklung eines **Sharegy Local Edge Daemon** (leichtgewichtiges Binary in Go/Rust oder Docker-Container für Raspberry Pi / Home Assistant), der den 24h-Fahrplan lokal zwischenspeichert und bei Netzausfall autonom steuert.
+### ⚠️ Baustelle A: Lokale Offline-Resilienz (Edge Daemon)
+* **Das Problem**: Sharegy arbeitet aktuell als cloudbasierte SaaS-Plattform. Aktoren (Shellys, Relais, Wallboxen) werden über Cloud-APIs oder Outbound-WSS geschaltet.
+* **Die Schwachstelle**: Bricht beim Kunden die Internetverbindung ab, wird in dieser Zeit kein Lastfahrplan ausgeführt.
+* **Lösung**: Entwicklung eines leichtgewichtigen **Sharegy Local Edge Daemon** (Go/Rust/Docker für Raspberry Pi / Home Assistant), der 24h-Fahrpläne lokal cacht und bei Netzausfall autonom regelt.
 
 ---
 
-### ⚠️ Baustelle B: Fehlende Native Mobile Apps (App Store & Play Store)
-* **Das Problem**: Die mobile App ist derzeit ein Capacitor-Web-Wrapper für Android.
-* **Die Schwachstelle**:
-  * Es fehlen **iOS Live-Activities** auf dem Sperrbildschirm (z. B. Live-Ladefortschritt des E-Autos oder aktueller Strompreis).
-  * Es fehlen **Apple Watch / WearOS Komplikationen**.
-  * Es fehlt **Apple CarPlay / Android Auto Integration** (z. B. für den Spritpreis-Radar oder Lade-Status direkt im Auto-Cockpit).
-  * Im Apple App Store und Google Play Store ist Sharegy noch nicht als eigenständige Marken-App such- und installierbar.
-* **Lösung**:
-  * Capacitor-Plugins für iOS Live-Activities & Widgets implementieren.
-  * Offizielles App-Store- und Play-Store-Deployment durchführen.
+### ⚠️ Baustelle B: App-Store-Präsenz & Mobile Widgets
+* **Das Problem**: Die mobile App ist als Capacitor 7 Shell gebaut und kompiliert, aber noch nicht im Apple App Store und Google Play Store öffentlich gelistet.
+* **Die Schwachstelle**: Es fehlen iOS Live-Activities (z. B. Live-Ladefortschritt des E-Autos auf dem Sperrbildschirm) und Apple Watch / WearOS Komplikationen.
+* **Lösung**: Finales Einreichen im Google Play Store & Apple App Store sowie Implementierung nativer Widget-Plugins.
 
 ---
 
 ### ⚠️ Baustelle C: Smart Meter Hardware-Flaschenhals in Deutschland
-* **Das Problem**: Für die eichrechtskonforme Säule 2 (Energy Sharing § 42b EnWG) wird ein Smart Meter Gateway (iMSys) oder ein wMSB (Discovergy/inexogy) benötigt. Der deutsche Rollout verläuft jedoch schleppend.
-* **Die Schwachstelle**: Ein Prosumer mit einem klassischen digitalen Zähler (mME) kann ohne Hardwaretausch oder Zwischenzähler (Shelly Pro 3EM) nicht sofort im Sekundentakt messen.
-* **Lösung**:
-  * Unterstützung standardisierter, günstiger **IR-Leseköpfe** (z. B. Hichi / Tasmota Wifi-Lesekopf für ca. 25–40 €) mit 1-Klick Setup in Sharegy.
-  * Partnerschaften mit wettbewerblichen Messstellenbetreibern (wMSB) für geförderten Zählertausch ausbauen.
+* **Das Problem**: Für die eichrechtskonforme Säule 2 (§ 42b EnWG) wird ein Smart Meter Gateway (iMSys) oder ein wMSB (Discovergy/inexogy) benötigt. Der deutsche Rollout verläuft jedoch schleppend.
+* **Lösung**: 1-Klick Setup für günstige WLAN-Infrarot-Leseköpfe (Hichi / Tasmota für ca. 25–40 €), um alte digitale Zähler (mME) ohne Zählertausch sofort im Sekundentakt einzubinden.
 
 ---
 
-### ⚠️ Baustelle D: BNetzA Marktkommunikation & Bilanzkreis-Anbindung (AS4 / EDIFACT)
-* **Das Problem**: Die mathematische 15-Minuten-Clearing-Engine und MSCONS-Dateigenerierung ist zu 100% funktionsfähig. Um jedoch mit den 800+ deutschen Verteilnetzbetreibern (VNB) automatisiert über Marktprozesse abzurechnen, fordert die Bundesnetzagentur eine **AS4-zertifizierte Marktkommunikations-Infrastruktur** mit 11-stelligen BDEW-Codenummern und Bilanzkreis-Verträgen (BKV).
-* **Die Schwachstelle**: Sharegy ist ein Software-Unternehmen und kein lizenzierter Energieversorger mit eigenem Bilanzkreis.
-* **Lösung**:
-  * Kooperation mit **White-Label Abwicklungsdienstleistern** (z. B. getFlexible, E-Bridge, inexogy, EWE), die den regulatorischen AS4-Transport übernehmen, während Sharegy die Plattform, Tarife und Abrechnungen liefert.
+### ⚠️ Baustelle D: B2B2C Vertriebsskalierung & Markenbekanntheit
+* **Das Problem**: Wettbewerber wie 1Komma5° investieren zweistellige Millionenbeträge in Werbung.
+* **Lösung**: Fokus auf **B2B2C Hebel**: Freie Solar- und Wärmepumpen-Installateure, Hausverwaltungen (WEGs) und Stadtwerke, die Sharegy ihren Kunden als schlüsselfertige Lösung mitgeben.
 
 ---
 
-### ⚠️ Baustelle E: Markenbekanntheit & Customer Acquisition Cost (CAC)
-* **Das Problem**: Wettbewerber wie 1Komma5° oder Tibber investieren zweistellige Millionenbeträge in TV- und Social-Media-Werbung.
-* **Die Schwachstelle**: Reines B2C-Endkunden-Marketing über Google/Meta-Ads ist extrem teuer (CAC > 120 € pro Lead).
-* **Lösung**:
-  * **Strikte B2B2C-Strategie**: Kooperationen mit freien Solar- und Wärmepumpen-Installateuren, Hausverwaltungen (WEGs) und Bürgerenergiegenossenschaften, die Sharegy ihren Kunden als schlüsselfertige Software mitliefern.
-
----
-
-## ⚔️ 3. Detaillierter Mitbewerber-Vorteilsvergleich
-
-| Mitbewerber | Wo sie aktuell besser sind | Warum sie dort führen | Was Sharegy tun muss |
-|---|---|---|---|
-| **1Komma5°** | **Kapitalkraft & Installationsnetz vor Ort** | Über **300 Mio. € Funding**, eigenes Handwerker-Netzwerk. Verkaufen Hardware + Software im Paket für 20.000–30.000 €. | **Installateur-Partnerprogramm**: Freien Installateuren Sharegy als herstellerunabhängige Alternative zu Heartbeat bereitstellen. |
-| **Tibber** | **Markenbekanntheit & Hardware-Dongle** | Der **Tibber Pulse** (50 € IR-Lesekopf) macht jeden alten mME-Zähler sofort smart. Eigener Stromliefervertrag. | 1-Klick Setup für günstige WLAN-Leseköpfe (Hichi / Tasmota) anbieten, um ohne Zählertausch sofort Live-Werte zu liefern. |
-| **evcc** | **Community-Vielfalt bei Exoten-Wallboxen** | 100+ Open-Source Entwickler binden wöchentlich obskure Auto- und Wallbox-APIs per Reverse-Engineering ein. | Standardisiertes **OCPP 1.6-J** als Industriestandard beibehalten und Top-Hersteller-Presets pflegen. |
-| **Exnaton** | **Bestehende Enterprise-Rahmenverträge mit Stadtwerken** | Langjährige Präsenz in Stadtwerke-Gremien in der Schweiz und Süddeutschland. | **Bürgerenergie- & WEG-Nische besetzen**: Kleinere Genossenschaften und Hausverwaltungen gewinnen, die Exnatons 20.000 € Setup nicht zahlen können. |
-| **Clever-PV** | **Einfaches B2C-Balkonkraftwerk-Onboarding** | Stark vereinfachtes Cloud-Schalten für Einsteiger ohne Anspruch auf physikalische Tiefe. | Durch die neuen **Showcases & interaktive Vorschau** den Einstieg genauso einfach gestalten, aber mit unendlich mehr Tiefgang. |
-
----
-
-## 📊 4. SWOT-Matrix im Überblick
+## 📊 3. SWOT-Matrix im Überblick
 
 ```
 ┌──────────────────────────────────────────────┬──────────────────────────────────────────────┐
 │ 🟢 STÄRKEN (STRENGTHS)                       │ 🔴 SCHWÄCHEN (WEAKNESSES)                    │
 ├──────────────────────────────────────────────┼──────────────────────────────────────────────┤
-│ • Einzige Dual-Core Plattform (EMS + Sharing)│ • Reine Cloud-Aktorik (noch kein Edge Daemon)│
-│ • TimescaleDB Sub-Sekunden-Performance       │ • Mobile App ist Web-Wrapper (keine Widgets) │
-│ • Physikalisches MPC-Heiz- & BWWP-Modell     │ • Keine AS4-Zertifizierung für direkte VNB-MaKo│
-│ • 100% Zero-Lock-in & Hardware-Offenheit     │ • Keine eigene Hardware (z. B. Zähler-Dongle)│
-│ • Fertiger Multi-Zahlungs-Stack (6 Sprachen) │ • Geringe Markenbekanntheit im Massenmarkt   │
+│ • Einzige Dual-Core Plattform (EMS+Sharing)  │ • Reine Cloud-Aktorik (noch kein Edge Daemon)│
+│ • TimescaleDB Sub-Sekunden-Performance       │ • Apps noch nicht in Store-Verzeichnissen   │
+│ • § 14a CLS SMGW Gateway & VPP 80/20 Clearing│ • Keine eigene Zähler-Hardware               │
+│ • Zentraler GoBD Dokumenten- & Export-Hub    │ • Geringere Markenbekanntheit als 1Komma5°   │
+│ • 100% Zero-Lock-in & 10 Inverter-Clouds     │                                              │
 ├──────────────────────────────────────────────┼──────────────────────────────────────────────┤
 │ 🔵 CHANCEN (OPPORTUNITIES)                   │ 🟡 RISIKEN (THREATS)                         │
 ├──────────────────────────────────────────────┼──────────────────────────────────────────────┤
 │ • Gesetzlicher Zwang zu § 14a EnWG Drosselung│ • Zögerlicher Smart-Meter-Rollout in DE      │
-│ • Boom von § 42b EnWG Bürgerenergie & Mieter │ • Preiskampf durch kapitalstarke Anbieter    │
-│ • B2B2C-Vertrieb über unabhängige Installateure • API-Restriktionen durch Wechselrichter-Herst.│
-│ • White-Label Partnerschaften mit Stadtwerken│ • Regulatorische Änderungen bei dynamischen T.│
+│ • Boom von § 42b EnWG Bürgerenergie & WEGs   │ • Preiskampf durch kapitalstarke Anbieter    │
+│ • B2B2C-Vertrieb über freie Installateure    │ • API-Restriktionen durch Inverter-Hersteller│
+│ • White-Label Partnerschaften mit Stadtwerken│                                              │
 └──────────────────────────────────────────────┴──────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🚀 5. Der strategische Masterplan für Sharegy (2026 / 2027)
+## 🚀 4. Der strategische 3-Stufen-Wachstumsplan (2026 / 2027)
 
 ```
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│                           DER 3-STUFEN WACHSTUMSPLAN                          │
-├───────────────────────────────────────────────────────────────────────────────┤
 │ STUFE 1: MONETARISIERUNG & B2B2C-HEBEL (Q4 2026)                              │
 │ • Installateur-Portal: White-Label Dashboard für Solarteure & Elektriker      │
 │ • B2B-Offensive: 20 Bürgerenergiegenossenschaften & WEGs für Säule 2 gewinnen │
-│ • App Store & Play Store Release der nativen Apps                             │
+│ • App Store & Play Store Live-Release der nativen Apps                        │
 │                                                                               │
 │ STUFE 2: HARDWARE- & OFFLINE-RESILIENZ (Q1–Q2 2027)                           │
 │ • Sharegy Edge Daemon (Offline-First Dispatch für Raspberry Pi / HA)          │
@@ -175,26 +134,3 @@ Trotz herausragender Softwarequalität hat Sharegy aktuell **5 kritische Baustel
 │ • Bewertung von 5,0 Mio. €+ für Series-A oder strategischen M&A-Exit          │
 └───────────────────────────────────────────────────────────────────────────────┘
 ```
-
----
-
-## ⚡ 6. Erreichte Meilensteine: Go-To-Market & PLG Conversion Engine
-
-| Feature | Status | Beschreibung & Impact |
-| :--- | :---: | :--- |
-| **Landingpage 2.0 (CleanTech)** | ✅ Live | Modernes, helles SaaS-Design mit gleichberechtigter Präsentation von Säule 1 (EMS & § 14a) und Säule 2 (P2P Energy Sharing). |
-| **1-Klick-Gast-Zugang (`/api/demo/`)** | ✅ Live | Barrierefreier Einstieg ins echte Live-Dashboard (`demo@sharegy.de`) in einem neuen Tab – ohne Registrierungshürde. |
-| **Live Energy Flow Simulator** | ✅ Live | Interaktive 4-Szenarien-Simulation (Mittags-Überschuss, Nacht-Arbitrage, Peak-Shaving, § 14a Dimmung). |
-| **§ 14a & Sharing ROI-Rechner** | ✅ Live | Interaktive Haushalts-Kalkulation des jährlichen finanziellen Vorteils (PV + Speicher + WP + Wallbox + Sharing). |
-| **Hardware-Kompatibilität & § 23 MarkenG** | ✅ Live | Symmetrisches 12-Hersteller Grid (SMA, Fronius, Sungrow, Huawei, Tesla, BYD, Daikin, Viessmann etc.) inkl. rechtssicherem Disclaimer. |
-| **Energie-Profil Matrix (A.1–F.1)** | ✅ Live | Präzise Klassifizierung aller 6 Archetypen, 4-Kanal Ersparnisrechner, Lastverschiebungs-Analyse und automatischer Tarif-Kompass. |
-| **Profil-Adaptives UI & Hero Actions** | ✅ Live | Dynamische Dashboard Hero-Kacheln, kontextuelle 1-Klick Aktionen und automatisches Erkennen von Tarif-Fehlstellungen. |
-| **Wissensportal & Help Center 2.0** | ✅ Live | 9 Kategorien & 20 fundierte Handbuch-Artikel in DE & EN mit automatischer Empfehlung passend zum Haushalts-Profil. |
-
----
-
-## 🎯 Schlussfazit
-
-Sharegy hat das schwierigste Problem gelöst: **Das Produkt ist softwareseitig fertig, architektonisch brillant und dem Wettbewerb inhaltlich überlegen.**
-
-Mit der neuen **Landingpage 2.0**, dem **1-Klick-Gast-Zugang** und der **Dual-Pillar-Positionierung** steht die Product-Led Growth (PLG) Conversion Engine bereit. Der Fokus für die kommenden Quartale liegt nun auf **Vertriebshebeln (Installateure & Genossenschaften)**, **Offline-Resilienz (Edge Daemon)** und **App-Store-Präsenz**. Damit ist Sharegy optimal aufgestellt, um die dominierende Energie-Plattform im DACH-Raum zu werden.
