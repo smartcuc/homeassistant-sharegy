@@ -1,0 +1,48 @@
+# ==============================================================================
+# Sharegy Production Crontab Configuration
+# Place this file in /etc/cron.d/sharegy or load via `crontab -e`
+# ==============================================================================
+# Environment variables for cron
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+MAILTO=admin@sharegy.de
+
+# ------------------------------------------------------------------------------
+# 1. High-Availability Watchdog & Health Heartbeat (Every 2 Minutes)
+# ------------------------------------------------------------------------------
+*/2 * * * * root /var/www/sharegy/live/scripts/heartbeat_watchdog.sh >/dev/null 2>&1
+
+# ------------------------------------------------------------------------------
+# 2. Market Prices & Solar Weather Forecasts (Hourly at :15)
+# ------------------------------------------------------------------------------
+15 * * * * sharegy /var/www/sharegy/live/scripts/sync_market_and_forecast.sh >/dev/null 2>&1
+
+# ------------------------------------------------------------------------------
+# 3. TimescaleDB Telemetry Aggregations & Rollups (Every 15 Minutes)
+# ------------------------------------------------------------------------------
+*/15 * * * * sharegy /var/www/sharegy/live/scripts/maintenance_timescaledb.sh >/dev/null 2>&1
+
+# ------------------------------------------------------------------------------
+# 4. Differential / In-Flight Delta Database Backup (Every Hour at :30)
+# ------------------------------------------------------------------------------
+30 * * * * postgres /var/www/sharegy/live/scripts/backup_db_diff.sh >/dev/null 2>&1
+
+# ------------------------------------------------------------------------------
+# 5. Full PostgreSQL / TimescaleDB Backup (Daily at 03:00 AM)
+# ------------------------------------------------------------------------------
+0 3 * * * postgres /var/www/sharegy/live/scripts/backup_db.sh >/dev/null 2>&1
+
+# ------------------------------------------------------------------------------
+# 6. Let's Encrypt / SSL Certificate Auto-Renewal & Expiry Check (Twice Daily)
+# ------------------------------------------------------------------------------
+30 2,14 * * * root /var/www/sharegy/live/scripts/renew_ssl.sh >/dev/null 2>&1
+
+# ------------------------------------------------------------------------------
+# 7. System Housekeeping: Expired Sessions & Tokens Cleanup (Daily at 04:00 AM)
+# ------------------------------------------------------------------------------
+0 4 * * * sharegy /var/www/sharegy/live/scripts/cleanup_housekeeping.sh >/dev/null 2>&1
+
+# ------------------------------------------------------------------------------
+# 8. Log Rotation, Compression & Disk Space Guard (Daily at 04:30 AM)
+# ------------------------------------------------------------------------------
+30 4 * * * root /var/www/sharegy/live/scripts/rotate_logs.sh >/dev/null 2>&1
