@@ -53,7 +53,6 @@ Für die folgenden Module existieren detaillierte Spezifikationen und teils impl
 |---|---|:---:|---|
 | **📱 Dual-App Android (Home vs. Pro)** | [`WIP_DUAL_APP_ECOSYSTEM_USER_VS_PARTNER.md`](./WIP_DUAL_APP_ECOSYSTEM_USER_VS_PARTNER.md) | 🟢 **90 %** | Build-Flavors `android-home` und `android-pro` im Fastlane-Release finalisieren. |
 | **🌐 Dynamische Whitelabel SSL-Provisionierung** | [`WIP_DYNAMIC_WHITELABEL_SSL_PROVISIONING.md`](./WIP_DYNAMIC_WHITELABEL_SSL_PROVISIONING.md) | 🟡 **70 %** | CNAME Ingress-Proxy (Caddy/Traefik) mit On-Demand ACME Let's Encrypt verknüpfen. |
-| **🛰️ Entkoppelter Monitoring-Cluster & Reverse-RPC** | [`WIP_DECOUPLED_MONITORING_CLUSTER_AND_REVERSE_RPC.md`](./WIP_DECOUPLED_MONITORING_CLUSTER_AND_REVERSE_RPC.md) | 🟢 **100 %** | Produktiv als `moniy` (`mon.smartevo.de`) mit In-Flight Vault & Reverse-RPC. |
 | **📡 EEBUS & Cloud Ecosystem Bridge** | [`WIP_EEBUS_AND_CLOUD_ECOSYSTEM_BRIDGE.md`](./WIP_EEBUS_AND_CLOUD_ECOSYSTEM_BRIDGE.md) | 🟡 **45 %** | SHIP/SPINE Daemon für lokale Wärmepumpen-Anbindung (Vaillant, Viessmann, Bosch). |
 
 ---
