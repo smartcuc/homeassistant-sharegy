@@ -156,74 +156,64 @@ flowchart TB
 
 ---
 
-## 🛠️ 5. Professionelle Hardware-Lösungen für den Zählerschrank (DIN-Hutschiene)
+## 🛠️ 5. Offizieller Hardware-Standard: Die "Sharegy Box" (DIN-Hutschiene)
 
 > [!IMPORTANT]
-> **Fokus auf fabrikneue, installationsfertige Zählerschrank-Hardware:**  
-> Für einen professionellen Rollout (B2B, Elektro-Fachbetriebe und qualitätsbewusste Endkunden) kommen Bastellösungen oder Gebrauchtgeräte nicht infrage.  
-> Die nachfolgenden **3 Neugeräte-Optionen** sind exakt für die **35-mm-DIN-Hutschiene im Zählerschrank (2 bis 4 TE)** konzipiert, besitzen alle erforderlichen Industrie-Schnittstellen (RS485, RJ45-LAN, Weitbereichs-Spannungseingang) und sind über deutsche Distributoren (BerryBase, Welectron, Reichelt, Amazon.de) sofort lieferbar.
+> **Das offizielle Sharegy Hardware-Referenzdesign v1.0:**  
+> Für Vor-Ort-Installationen im Zählerschrank (Reiheneinbau / DIN-Hutschiene) wurde das **Waveshare ESP32-S3-8DI-8Rly-POE-ETH** als primäre All-in-One-Hardware gewählt.  
+> Es vereint Rechenkern, 8 isolierte Digitaleingänge (§ 14a Steuerbox), 8 Relaisausgänge (Wärmepumpe/Schütze), isoliertes RS485 (Modbus Zähler/Wechselrichter) und PoE-Ethernet in einem einzigen, installationsfertigen Hutschienengehäuse für **ca. 44 €**.
 
 ---
 
-### 5.1. Die 3 offiziellen Neugeräte-Standards im Überblick
-
-| Setup | Kern-Komponenten | Formfaktor | Schnittstellen | Reale Gesamtkosten (Neu) | Bezugsquellen (DE) |
-|---|---|---|---|---|---|
-| **🥇 1. Der Waveshare Industrial CM4 DIN-Controller** *(Top-Standard)* | Waveshare CM4 Industrial Baseboard + Raspberry Pi CM4 (2 GB) + Metall-Hutschienengehäuse | **4 TE Hutschiene (DIN-Rail)** | 1x RS485 (galv. isoliert), 1x RJ45 Gigabit-LAN, 1x CAN-Bus, 1x RTC DS3231, 7–36V DC Eingang | **ca. 85 – 105 €** *(komplett neu)* | BerryBase, Welectron, Reichelt |
-| **🥈 2. Der Raspberry Pi 4 Industrie-Hutschienen-Kit** | Raspberry Pi 4 (2 GB) + KKSB/Joy-IT Aluminium-Hutschienengehäuse + Waveshare USB-RS485 | **4 TE Hutschiene (DIN-Rail)** | 1x RJ45 Gigabit-LAN, 1x RS485 (isoliert via USB), 4x USB, 5V DC Eingang | **ca. 90 – 105 €** *(komplett neu)* | Reichelt, BerryBase, Amazon.de |
-| **⚡ 3. Die reine Zählerschrank-Aktorik (DIN-Rail)** | **Shelly PRO 3EM / Shelly PRO Serie** | **1 – 3 TE Hutschiene** | 1x RJ45 LAN, 1x WiFi, 3x Stromwandler (120A), 230V AC direkt | **ca. 89 – 110 €** *(fertiges Produkt)* | Reichelt, Amazon.de, Shelly Shop |
-
----
-
-### 5.2. Detail-BOM & Komponentenliste: Das Waveshare CM4 Industrial Gateway
-
-Dieses Setup ist das **ideale "Sharegy Box" Referenzdesign** für Elektriker und Installateure:
+### 5.1. Das All-in-One Referenzgerät im Detail
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│        SHAREGY BOX: WAVESHARE CM4 INDUSTRIAL DIN-RAIL GATEWAY          │
-├──────────────────────────────┬──────────────────────────┬──────────────┤
-│ Komponente                   │ Modell / Spezifikation   │ Richtpreis   │
-├──────────────────────────────┼──────────────────────────┼──────────────┤
-│ 1. Trägerplatine (Baseboard) │ Waveshare CM4-IO-WIRELESS│ ca. 38 – 42 €│
-│                              │ -BASE (SKU 20286 / 21303)│              │
-│                              │ Inkl. RS485, CAN, RTC,   │              │
-│                              │ Hutschienen-Clip & Klemmen│             │
-│ 2. Rechenmodul (Compute Mod.)│ Raspberry Pi CM4 Lite    │ ca. 39 – 45 €│
-│                              │ (2 GB RAM, Quad-Core A72)│              │
-│ 3. Industrie-MicroSD / Flash │ SanDisk Industrial 16 GB │ ca. 8 – 10 € │
-│                              │ (High-Endurance / pSLC)  │              │
-│ 4. Zählerschrank-Stromvers.  │ MeanWell HDR-15-12       │ ca. 12 – 14 €│
-│                              │ (12V / 1.25A Hutschiene) │              │
-├──────────────────────────────┴──────────────────────────┼──────────────┤
-│ GESAMT-STÜCKKOSTEN (Fabrikneues B2B-Produkt)            │ ca. 97 – 111 €│
-└─────────────────────────────────────────────────────────┴──────────────┘
+│     SHAREGY BOX v1.0: WAVESHARE ESP32-S3-8DI-8RLY-POE-ETH             │
+├────────────────────────────────────────────────────────────────────────┤
+│ • Prozessor: ESP32-S3 Dual-Core Xtensa LX7 (240 MHz, 8MB Flash)        │
+│ • Netzwerk: 1x RJ45 Ethernet MIT PoE (IEEE 802.3af) + 2.4 GHz WiFi/BLE │
+│ • Eingänge (§ 14a EnWG): 8x Optokoppler-isolierte Digitaleingänge (DI) │
+│ • Ausgänge (Aktorik): 8x Relais (10A / 250V AC) für SG-Ready / Schütze │
+│ • Serielle Schnittstelle: 1x galvanisch isoliertes RS485 (Modbus RTU)  │
+│ • Spannungsversorgung: PoE (über LAN-Kabel) ODER 7–36V DC Schraubklem. │
+│ • Montage: 35-mm DIN-Hutschiene, Klemmen oben und unten                │
+│ • Bezugsquelle: Amazon.de [ASIN: B0FBKGGKK3] / BerryBase               │
+│ • Stückpreis (Fabrikneu): ca. 44 €                                     │
+└────────────────────────────────────────────────────────────────────────┘
 ```
 
-#### Warum Installateure und Kunden diese Waveshare-Lösung schätzen:
-1. **Galvanisch isolierter RS485-Anschluss:** Der Schraubklemmen-Block ist optisch und galvanisch vom Rechenmodul getrennt. Eventuelle Überspannungen auf dem Buskabel zum Wechselrichter oder Speicher können das Board nicht zerstören.
-2. **7–36V Weitbereichseingang:** Kann direkt an jedes vorhandene 12V- oder 24V-Hutschienennetzteil im Verteiler angeschlossen werden (keine wackeligen USB-Steckernetzteile).
-3. **Integrierte DS3231 Echtzeituhr (RTC):** Garantiert sekundengenaue Tarifierung und § 14a EnWG Protokollierung selbst nach einem Netzausfall ohne NTP-Verbindung.
-4. **Statisches Go-Binary:** Läuft als `systemd`-Dienst mit < 15 MB RAM und < 1% CPU-Last.
+#### Warum dieses Gerät das perfekte All-in-One-Design ist:
+1. **Power over Ethernet (PoE):** Wenn ein PoE-fähiges Netzwerkkabel im Zählerschrank liegt, wird das Gerät über das LAN-Kabel mit Strom versorgt – **kein separates Netzteil nötig!**
+2. **Flexible Versorgung als Backup:** Liegt kein PoE vor, lässt es sich an jedes 12V/24V-Hutschienennetzteil (z.B. MeanWell HDR-15-12) anklemmen.
+3. **8x Steuerbox-Eingänge (DI):** Liest alle 4 bitcodierten Schaltstufen der FNN-Steuerbox (100%, 60%, 30%, 4,2 kW) in unter 5 Millisekunden ein.
+4. **8x Relais-Ausgänge (DO):** Schaltet Wärmepumpen (SG-Ready Boost/Sperre), Heizstäbe oder Wallbox-Freigabeschütze direkt.
+5. **Isoliertes RS485:** Liest Energiezähler (SDM630, Janitza) und Wechselrichter ohne teure Zusatz-Dongles aus.
+
+---
+
+### 5.2. Erweiterte B2B-Alternative: Waveshare CM4 Industrial Gateway
+
+Für komplexe Großprojekte (z.B. Mehrparteienhäuser mit 50 Zählern oder lokalem Linux-Serverbedarf) steht als modulare Linux-Alternative das **Waveshare CM4 Industrial Baseboard** (mit Raspberry Pi CM4, ca. 95–110 €) bereit.
 
 ---
 
 ### 5.3. Ergänzung: Optische Zählerauslesung (m-Bus / SML am eHZ)
 
-Für Kunden, deren Wechselrichter keine freie RS485-Klemme hat und deren Stromzähler optisch ausgelesen werden soll:
+Für Kunden mit elektronischem Haushaltszähler (eHZ) ohne freie RS485-Klemmen:
 * **BitShake SmartMeterReader / Hichi WiFi (Fabrikneu):** ca. **35 – 39 €** auf Amazon.de / eBay.
-* Wird magnetisch auf die Info-Schnittstelle des elektronischen Haushaltszählers (eHZ) gesetzt und liefert 1-Sekunden-Leistungswerte direkt per LAN/WLAN an das Gateway.
+* Wird magnetisch auf die Info-Schnittstelle des Zählers geklickt und sendet 1-Sekunden-Leistungswerte direkt per LAN/WLAN an das Sharegy-Gateway.
 
 ---
 
 ### 5.4. Dauerbetriebskosten & Energieeffizienz
 
-| Kennzahl | Wert (Waveshare CM4 Industrial Gateway) |
+| Kennzahl | Wert (Waveshare ESP32-S3 PoE Controller) |
 |---|---|
-| **Dauerleistung im Betrieb** | **ca. 1,8 bis 2,4 Watt** |
-| **Jahresenergieverbrauch (8.760 h)** | **ca. 15,8 bis 21,0 kWh / Jahr** |
-| **Jährliche Stromkosten (bei 0,35 €/kWh)** | **nur ca. 5,50 € bis 7,35 € pro Jahr** |
-| **Wärmeentwicklung** | Minimal, rein passive Kühlung über das Metallgehäuse (kein Lüfter) |
+| **Dauerleistung im Betrieb** | **ca. 0,9 bis 1,6 Watt** |
+| **Jahresenergieverbrauch (8.760 h)** | **ca. 7,9 bis 14,0 kWh / Jahr** |
+| **Jährliche Stromkosten (bei 0,35 €/kWh)** | **nur ca. 2,75 € bis 4,90 € pro Jahr** |
+| **Wärmeentwicklung** | Praktisch nicht spürbar, rein passive Kühlung |
 
 ---
 
