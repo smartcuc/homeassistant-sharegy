@@ -130,8 +130,8 @@ docs/
 | 🪝 **[`WIP_OUTBOX_WEBHOOK_DISPATCHER_ERP_CRM.md`](./wip/WIP_OUTBOX_WEBHOOK_DISPATCHER_ERP_CRM.md)** | B2B Integration | 🟡 15% / 🔴 Hoch | Transaktionales Outbox-Pattern für SAP, DATEV & CRM mit HMAC-SHA256 |
 | 📱 **[`WIP_DUAL_APP_ECOSYSTEM_USER_VS_PARTNER.md`](./wip/WIP_DUAL_APP_ECOSYSTEM_USER_VS_PARTNER.md)** | Mobile App | 🟢 **90%** / 🔴 Hoch | Two-App Strategie (`Sharegy Home` vs. `Sharegy Pro` mit QR-Inbetriebnahme) |
 | 🔒 **[`WIP_DYNAMIC_WHITELABEL_SSL_PROVISIONING.md`](./wip/WIP_DYNAMIC_WHITELABEL_SSL_PROVISIONING.md)** | Whitelabel / TLS | 🟡 **70%** / 🟡 Mittel | Automatisierte Let's Encrypt SSL-Provisionierung für CNAME-Domains |
-| 🔌 **[`WIP_DECOUPLED_MONITORING_CLUSTER_AND_REVERSE_RPC.md`](./wip/WIP_DECOUPLED_MONITORING_CLUSTER_AND_REVERSE_RPC.md)** | Edge & WSS | 🟡 **55%** / 🔴 Hoch | Auslagerung auf `mon.sharegy.de` & Zero-Trust WSS Reverse-RPC Wartung |
-| 🏠 **[`WIP_EEBUS_AND_CLOUD_ECOSYSTEM_BRIDGE.md`](./wip/WIP_EEBUS_AND_CLOUD_ECOSYSTEM_BRIDGE.md)** | HEMS / Wärmepumpe | 🟡 **45%** / 🔴 Hoch | EEBUS SHIP/SPINE Stack & Cloud-APIs (myVAILLANT, Home Connect) |
+| 🔌 **[`WIP_DECOUPLED_MONITORING_CLUSTER_AND_REVERSE_RPC.md`](./wip/WIP_DECOUPLED_MONITORING_CLUSTER_AND_REVERSE_RPC.md)** | Edge & WSS | 🟢 **100%** / Produktiv | Auslagerung auf `moniy` (`mon.smartevo.de`), In-Flight Vault & Zero-Trust WSS Reverse-RPC |
+| 🏠 **[`WIP_EEBUS_AND_CLOUD_ECOSYSTEM_BRIDGE.md`](./wip/WIP_EEBUS_AND_CLOUD_ECOSYSTEM_BRIDGE.md)** | EMS / Wärmepumpe | 🟡 **45%** / 🔴 Hoch | EEBUS SHIP/SPINE Stack & Cloud-APIs (myVAILLANT, Home Connect) |
 
 ---
 

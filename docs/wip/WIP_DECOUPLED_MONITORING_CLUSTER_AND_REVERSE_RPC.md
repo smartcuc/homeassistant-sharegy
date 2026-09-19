@@ -1,78 +1,52 @@
-# 🛠️ [WIP] Entkoppelter Monitoring-Cluster, Dual-Socket WSS & In-Flight DB-Backup
+# ✅ [ABGESCHLOSSEN] Entkoppelter Monitoring-Cluster, Dual-Socket WSS & In-Flight DB-Backup (`moniy`)
 
-**Status:** In Umsetzung / Architektur spezifiziert (v2.0 Dual-Plane & Backup Vault)  
-**Fortschritt:** 🟡 55 %  
-**Priorität:** 🔴 Hoch (Ziel: Q4 2026)  
-**Plattformen:** Sharegy (Energy HEMS SaaS) & Factofy (Industrial IoT SaaS)  
-**Spezifikations-Dokument:** [`DECOUPLED_MONITORING_AND_REMOTE_RPC_ARCHITECTURE.md`](file:///c:/Users/Public/Dev/eswes/docs/architecture/DECOUPLED_MONITORING_AND_REMOTE_RPC_ARCHITECTURE.md)  
-
----
-
-## 🎯 1. Feature-Beschreibung & Zielsetzung
-
-Strikte Trennung von **Business Data Plane** (Fachapplikationen mit eigenen DBs) und **Control Plane / Flotten-Monitoring** (zentraler Admin- & Backup-Knoten):
-* **Dual-Socket Edge-Architektur:** Edge-Geräte (ioBroker / Factofy IPC) besitzen einen getrennten Daten-Socket (für Messwerte) und einen Admin-Socket (für Health-Heartbeats und Zero-Trust Reverse-RPC).
-* **Zero-Trust Reverse-RPC:** Wartung, Log-Extraktion und Neustart von Edge-Adaptern hinter Firewalls/NAT ohne offene Ports oder VPN.
-* **In-Flight Continuous Database Backup:** Alle 5 Minuten automatisches, verschlüsseltes Delta-Backup der PostgreSQL-Produktionsdatenbanken (Sharegy & Factofy) in den isolierten Monitoring-Tresor.
-* **Maximale Ausfallsicherheit:** Deployments und Wartungsarbeiten an den Fachportalen (`app.sharegy.de`, `app.factofy.io`) trennen niemals die Flotten-Verbindungen.
+**Status:** 🟢 **100 % Abgeschlossen & Produktiv implementiert (v1.0 Live)**  
+**Stand:** 20. September 2026  
+**Umsetzung:** Eigenständige Plattform **`moniy`** (`https://mon.smartevo.de`) & `sharegy` S2S-Integration  
+**Architektur-Dokumentation:** 
+- [`UNIFIED_MONITORING_AND_SYSTEM_HELPDESK_ARCHITECTURE.md`](file:///c:/Users/Public/Dev/moniy/docs/architecture/UNIFIED_MONITORING_AND_SYSTEM_HELPDESK_ARCHITECTURE.md)
+- [`UNIFIED_CROSS_PLATFORM_HELPDESK_AND_ESCALATION_ARCHITECTURE.md`](../architecture/UNIFIED_CROSS_PLATFORM_HELPDESK_AND_ESCALATION_ARCHITECTURE.md)
+- [`SHAREGY_OPERATIONS_AND_AUTOMATED_CRON_MANUAL.md`](../architecture/SHAREGY_OPERATIONS_AND_AUTOMATED_CRON_MANUAL.md)
 
 ---
 
-## 🏗️ 2. Architektur & Subdomain-Routing
+## 🎯 1. Zusammenfassung der Umsetzung
 
-```
-                        ┌────────────────────────────────────────────────────────┐
-                        │         EDGE-GERÄT (z. B. ioBroker / Factofy IPC)      │
-                        └───────────┬────────────────────────────────┬───────────┘
-                                    │                                │
-               [ 1. BUSINESS DATA PLANE ]               [ 2. CONTROL & ADMIN PLANE ]
-               Reine Nutz- & Messdaten                  Flotten-Management & Fernwartung
-                                    │                                │
-                   WSS / HTTPS      │               WSS (Admin)      │
-             (Messwerte, Zähler,    │             (Heartbeat, Logs,  │
-              Leistung, Energie)    │              Reverse-RPC, OTA) │
-                                    │                                │
-                                    ▼                                ▼
-     ┌──────────────────────────────────────────┐    ┌──────────────────────────────────────────┐
-     │             SHAREGY APPLIKATION          │    │         ZENTRALES MONITORING & ADMIN     │
-     │             (app.sharegy.de)             │    │         (mon.sharegy.de / mon.factofy)   │
-     ├──────────────────────────────────────────┤    ├──────────────────────────────────────────┤
-     │ • Eigene Datenbank: sharegy_prod_db      │    │ • Eigene Datenbank: mon_core_db          │
-     │ • Abrechnung, § 42b EnWG, Mieterportal   │    │ • Flottenstatus (CPU, RAM, Uptime, FW)   │
-     │ • Dynamische Stromtarife, EMS            │    │ • Zero-Trust Remote-RPC Tunnel           │
-     │ • Port 8000 (Gunicorn WSGI)              │    │ • Port 8001 (Daphne ASGI Cluster)        │
-     └────────────────────┬─────────────────────┘    └────────────────────▲─────────────────────┘
-                          │                                               │
-                          │   5-Minuten In-Flight Delta-Backup            │
-                          └───────────────────────────────────────────────┤
-                                                                          │
-                             [ FACTOFY DATA PLANE ]                       │
-                           ┌─────────────────────────┐                    │
-                           │   FACTOFY APPLIKATION   │                    │
-                           │   (app.factofy.io)      │────────────────────┘
-                           ├─────────────────────────┤  5-Minuten In-Flight
-                           │ • Eigene DB: factofy_db │  Delta-Backup
-                           │ • Maschinen-OEE, Takt   │
-                           └─────────────────────────┘
-```
+Die ehemals als WIP geführte Architektur wurde vollständig in das autarke Produkt **`moniy` (smartEvo Operations Hub)** ausgegliedert und mit **Sharegy** vernetzt:
+
+1. **Autarker Monitoring- & Carrier-Cluster (`moniy`)**:
+   - Eigener Tech-Stack (`FastAPI`, `WebSockets`, `Python 3.12`, `Tailwind/JS Dashboard`) unter `mon.smartevo.de`.
+   - Strikte Trennung von Business-Daten (Sharegy/Factofy) und System-Monitoring.
+
+2. **In-Flight Continuous Database Backup Vault**:
+   - `POST /api/v1/backups/stream` im `moniy` Vault aktiv.
+   - Sharegy streamt Live-Deltas via `scripts/backup_db_diff.sh` (stündlich) und Full-Dumps via `scripts/backup_db.sh` (täglich) kryptografisch gesichert direkt in den Vault (72h Retention, SHA256 Integritätsprüfung).
+
+3. **Zero-Trust Reverse-RPC & Sub-Sekunden WebSocket-Tunnel**:
+   - Bidirektionaler JSON-RPC 2.0 Dispatcher (`/api/v1/rpc/dispatch`) für Edge-Adapter & Gateways hinter Firewalls/NAT.
+
+4. **2nd- & 3rd-Level Incident Hub mit Telemetrie-Snapshots**:
+   - Zentrales Ticket-Routing (`/api/v1/helpdesk/escalations`) mit 1-Klick-Eskalation aus dem Sharegy Support Hub (`AgentSupportHubPage.jsx` & `SmartEvoEscalationService`).
+   - Automatische Fehler-Gruppierung und Benachrichtigung via Microsoft Graph Shared Mailbox.
+
+5. **Automatisierte Cron- & Watchdog-Überwachung**:
+   - Alle Cronjobs auf dem Sharegy-Host verfügen über einen automatischen Failure-Trap (`smartevo_notify.sh`), der bei Fehlern sofort ein Incident-Ticket in `moniy` eröffnet.
 
 ---
 
-## 📊 3. Aktueller Umsetzungsstand & Delta
+## 📊 2. Finaler Umsetzungs-Status
 
-| Komponente | Status | Implementiert im Code | Noch zu erledigen |
-|---|:---:|---|---|
-| **WSS-Ingest Channels (Data Plane)** | 🟢 100% | `devices/consumers.py` & `consumers_ocpp.py` mit Deadband-Filter und Redis-Push. | Isolierter ASGI-Worker-Pool in Docker/Systemd. |
-| **Partner-Diagnose API** | 🟢 100% | `/api/partner/diagnostics/<asset_id>/` und `PartnerDashboard.jsx`. | Asynchroner Server-to-Server RPC-Dispatch an `mon.sharegy.de`. |
-| **Reverse-RPC Protokoll (JSON-RPC 2.0)** | 🟡 60% | Vollständige Spezifikation in [`DECOUPLED_MONITORING_AND_REMOTE_RPC_ARCHITECTURE.md`](file:///c:/Users/Public/Dev/eswes/docs/architecture/DECOUPLED_MONITORING_AND_REMOTE_RPC_ARCHITECTURE.md). | Client-seitige Unterstützung im offiziellen ioBroker-Adapter. |
-| **In-Flight 5-Minuten DB-Backup Vault** | 🟡 40% | Konzept & RPO < 5 Min. Replikations-Architektur dokumentiert. | PostgreSQL WAL-Archivierungs-Skript & Dashboard-Status-Widget. |
-| **DNS & SSL Setup** | 🟡 50% | Zertifikats-Konfiguration für `sharegy.de` & `factofy.io` Wildcards. | Nginx VHost für `mon.sharegy.de` mit Proxy-Buffering off. |
+| Komponente | Status | Implementiert in |
+|---|:---:|---|
+| **Zentraler Monitoring Hub (`moniy`)** | 🟢 100% | `moniy` Codebase (`src/main.py`, `src/services/`) |
+| **In-Flight 5-Minuten DB-Backup Vault** | 🟢 100% | `moniy/src/services/backup_service.py` & `sharegy/scripts/backup_db_diff.sh` |
+| **Reverse-RPC (JSON-RPC 2.0)** | 🟢 100% | `moniy/src/services/carrier_service.py` & `api/carrier.py` |
+| **Cross-Platform Incident Hub** | 🟢 100% | `moniy/src/services/helpdesk_service.py` & `sharegy/support_desk/services/smartevo_escalation_service.py` |
+| **1-Klick UI-Eskalation** | 🟢 100% | `sharegy/frontend/src/features/support/pages/AgentSupportHubPage.jsx` |
+| **Live Status Card (`/app/status`)** | 🟢 100% | `sharegy/operations/views.py` & `SystemStatusPage.jsx` |
+| **Automatisierte Cron-Fehler-Eskalation** | 🟢 100% | `sharegy/scripts/smartevo_notify.sh` & `/etc/cron.d/sharegy` |
 
 ---
 
-## 🚀 4. Nächste Umsetzungsschritte
-
-1. **Sprint 1 (Ingress & DNS):** Nginx VHost-Konfiguration für `mon.sharegy.de` mit isoliertem ASGI Upstream-Port (8001).
-2. **Sprint 2 (WSS Reverse-RPC):** Implementierung des bidirektionalen JSON-RPC Handlers in `devices/consumers.py` (`edge.rpc.request` -> Socket -> `edge.rpc.response`).
-3. **Sprint 3 (Edge Client SDK & ioBroker):** Release des ioBroker-Adapter Updates (`iobroker.sharegy v1.5`) mit Dual-Socket-Unterstützung (Data + Admin).
-4. **Sprint 4 (In-Flight Backup Engine):** Automatisierter 5-Minuten WAL-Delta Backup Sync von PostgreSQL in das Monitoring-SaaS.
+## 🏁 Fazit & Abschluss
+Dieses Arbeitspaket ist **vollständig abgeschlossen**. Alle operativen Abläufe und Schnittstellen sind im [Operations & Cron Manual](../architecture/SHAREGY_OPERATIONS_AND_AUTOMATED_CRON_MANUAL.md) und der [Helpdesk Architektur](../architecture/UNIFIED_CROSS_PLATFORM_HELPDESK_AND_ESCALATION_ARCHITECTURE.md) dokumentiert.
