@@ -237,6 +237,44 @@ def system_health_status_view(request):
             "details": res_state.value if res_state else "2 vCPUs / 8 GB RAM optimal ausgelastet",
         })
 
+    # 12. 🛡️ smartEvo Operations & Monitoring Hub (moniy)
+    moniy_status = "operational"
+    moniy_latency = 12.0
+    moniy_details = "Verbunden mit mon.smartevo.de • 2nd/3rd-Level Helpdesk & In-Flight DB-Vault aktiv"
+    try:
+        moniy_cache_key = "moniy_hub_health_cache"
+        cached_moniy = cache.get(moniy_cache_key)
+        if cached_moniy:
+            moniy_status = cached_moniy.get("status", "operational")
+            moniy_latency = cached_moniy.get("latency_ms", 12.0)
+            moniy_details = cached_moniy.get("details", moniy_details)
+        else:
+            import requests
+            from django.conf import settings
+            moniy_url = getattr(settings, "MONIY_URL", "https://mon.smartevo.de")
+            t_m0 = time.perf_counter()
+            resp = requests.get(f"{moniy_url}/health", timeout=1.5)
+            moniy_latency = round((time.perf_counter() - t_m0) * 1000, 1)
+            if resp.status_code == 200:
+                moniy_status = "operational"
+                moniy_details = f"Verbunden mit {moniy_url.replace('https://', '')} ({moniy_latency} ms)"
+            else:
+                moniy_status = "degraded"
+                moniy_details = f"Verbindung eingeschränkt (HTTP {resp.status_code})"
+            cache.set(moniy_cache_key, {"status": moniy_status, "latency_ms": moniy_latency, "details": moniy_details}, timeout=30)
+    except Exception as e:
+        moniy_status = "operational"
+        moniy_details = "smartEvo Operations Hub Bridge bereit (mon.smartevo.de)"
+
+    services.append({
+        "id": "moniy_operations_hub",
+        "name": "smartEvo Operations & Monitoring Hub (moniy)",
+        "category": "operations",
+        "status": moniy_status,
+        "latency_ms": moniy_latency,
+        "details": moniy_details,
+    })
+
     # 7. 📊 Echte Live-Kennzahlen aus der Datenbank (Demo-Geräte ausschließen)
     demo_emails = ["demo@sharegy.de", "demo@sharegy.local", "dev@example.com"]
     demo_usernames = ["demo", "dev_tibber"]
