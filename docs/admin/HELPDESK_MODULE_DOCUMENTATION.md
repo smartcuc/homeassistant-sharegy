@@ -1,8 +1,8 @@
 # 🎫 Helpdesk & Ticketing Modul — Vollständige Dokumentation
 
 > **Modul:** `support_desk`  
-> **Letzte Aktualisierung:** 2026-08-28  
-> **Projekte:** Sharegy HEMS · Factofy Digital Twin (Cross-Project)
+> **Letzte Aktualisierung:** 2026-09-20 (v5.4 Release)  
+> **Architektur:** Sharegy EMS & Mieterstrom (1st-Level) · smartEvo moniy Platform Hub (2nd/3rd-Level)
 
 ---
 
@@ -17,18 +17,16 @@
 7. [Deflection (FAQ-Vorschläge)](#7-deflection-faq-vorschläge)
 8. [Canned Responses (Textbausteine)](#8-canned-responses-textbausteine)
 9. [Ticket-Nummernschema](#9-ticket-nummernschema)
-10. [Factofy-Integration](#10-factofy-integration)
+10. [smartEvo 1-Klick-Eskalation (moniy)](#10-smartevo-1-klick-eskalation-moniy)
 11. [Produktionsbetrieb & Checkliste](#11-produktionsbetrieb--checkliste)
 
 ---
 
 ## 1. Überblick & Architektur
 
-Das `support_desk`-Modul ist ein universelles Helpdesk- und Ticketsystem, das für **mehrere Projekte gleichzeitig** betrieben werden kann. Sharegy und Factofy teilen sich **ein einziges Backend**, jedoch mit:
+Das `support_desk`-Modul ist das **1st-Level Support- und Incident-System** für Sharegy (EMS, PV-Prosumer, § 14a EnWG und Mieterstrom). Es ermöglicht Anwendern, Mietern und Betreibern eine nahtlose Ticketerstellung mit integrierter FAQ-Deflection und Wissensportal.
 
-- Projektspezifischen **Ticket-Präfixen** (`SHAR-2026-0001`, `FACT-2026-0042`)
-- Projektspezifischen **JWT-Secrets** für externe Authentifizierung
-- Einem gemeinsamen **Agent Hub** für das Support-Team
+Für komplexe, plattformübergreifende Hardware-, Firmware- oder Treiber-Probleme verfügt das System über eine **1-Klick-Eskalation an das zentrale smartEvo Operations Center (`moniy`)**, bei der automatisch ein datenschutzkonformer Telemetrie-Snapshot mitgesendet wird.
 
 ### Komponentenübersicht
 
@@ -41,11 +39,12 @@ FRONTEND (React)
                           ↓ Klick auf Ticket
                          TicketChatModal (Thread + Status-Toggle)
 
-  AgentSupportHubPage (/app/support-hub) — nur Staff
+  AgentSupportHubPage (/app/support-hub) — nur Staff & Partner
     ├── KPI-Grid (Neue/Offene/In Bearbeitung/Gelöst)
-    ├── Filter (Projekt · Status · Suche)
+    ├── Filter (Status · Priorität · Suche)
     ├── Ticket-Liste (links)
-    └── Chat-Thread mit internen Notizen (rechts)
+    ├── Chat-Thread mit internen Notizen (rechts)
+    └── [⚡ An smartEvo eskalieren] Button (2nd/3rd-Level Triage in moniy)
 
 BACKEND (Django) — /api/support/ & /api/help/
   support_desk/api/
@@ -454,49 +453,29 @@ Die Zählung startet jedes Jahr neu bei `0001`.
 
 ---
 
-## 10. Factofy-Integration
+## 10. smartEvo 1-Klick-Eskalation (moniy)
 
-Vollständige Anleitung: **[`docs/integrations/FACTOFY_SUPPORT_INTEGRATION_GUIDE.md`](./integrations/FACTOFY_SUPPORT_INTEGRATION_GUIDE.md)**
+Vollständige Architektur: **[`docs/architecture/UNIFIED_CROSS_PLATFORM_HELPDESK_AND_ESCALATION_ARCHITECTURE.md`](../architecture/UNIFIED_CROSS_PLATFORM_HELPDESK_AND_ESCALATION_ARCHITECTURE.md)**
 
-### Kurzanleitung (4 Schritte):
+### Ablauf der 2nd/3rd-Level Eskalation:
 
-**Schritt 1 — Secret übertragen:**
-Im Django Admin den `secret_key` des `factofy`-Projekts kopieren und in Factofy setzen:
-```bash
-# Factofy .env
-SHAREGY_SUPPORT_SECRET=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-SHAREGY_SUPPORT_API_URL=https://api.sharegy.de/api/support
-```
+1. Ein Support-Agent oder Partner öffnet ein Ticket in `/app/support-hub`.
+2. Stellt sich heraus, dass ein tieferliegender Fehler vorliegt (z. B. Firmware-Inkompatibilität eines Wechselrichters oder API-Rate-Limit), klickt der Agent auf **„⚡ An smartEvo eskalieren“**.
+3. Der `SmartEvoEscalationService` (`support_desk/services/smartevo_escalation_service.py`) aggregiert automatisch:
+   - Den anonymisierten Kunden-Hash (DSGVO-konform)
+   - Den Telemetrie-Snapshot (Modelle, Firmware-Stände, aktive Fehler-Codes)
+   - Die bisherige Nachrichten-Historie
+4. Das Ticket wird über die gesicherte S2S-Schnittstelle (`POST https://mon.smartevo.de/api/v1/helpdesk/escalations`) direkt in das **smartEvo Operations Dashboard (`moniy`)** übertragen.
+5. In Sharegy wechselt das Ticket automatisch auf den Status `waiting_internal` und zeigt das Badge `⚡ Eskaliert: EVO-TKT-YYYY-XXXX`.
 
-**Schritt 2 — Next.js Token-Route anlegen** (`/api/support-token`):
-```typescript
-// Generiert ein JWT für den aktuell eingeloggten Factofy-Nutzer
-// Payload: { sub, email, name, project: "factofy", iat, exp }
-// Signiert mit SHAREGY_SUPPORT_SECRET via HMAC-SHA256
-```
-
-**Schritt 3 — Widget einbinden:**
-```jsx
-// In Factofy-Layout oder als Floating-Button
-import { FactofySupportWidget } from "@/components/support/FactofySupportWidget";
-
-<FactofySupportWidget
-  buildingId={currentBuilding?.id}
-  assetId={selectedAsset?.id}
-/>
-```
-
-**Schritt 4 — Testen (Django Shell):**
 ```python
-from support_desk.services.auth_jwt import generate_support_jwt
+# Direkter Python-Aufruf (z. B. via API oder Management-Command):
+from support_desk.services.smartevo_escalation_service import SmartEvoEscalationService
+from support_desk.models import SupportTicket
 
-token = generate_support_jwt(
-    project_key="factofy",
-    user_id="usr_test_123",
-    email="test@factofy.de",
-    name="Test Nutzer",
-)
-print(token)  # Als Authorization: Bearer <token> testen
+ticket = SupportTicket.objects.get(ticket_number="SHAR-2026-0042")
+result = SmartEvoEscalationService.escalate_ticket(ticket, actor=request.user)
+print(result["smartevo_ticket_id"])  # e.g. "EVO-TKT-2026-0012"
 ```
 
 ---

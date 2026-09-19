@@ -52,6 +52,11 @@ Das Fundament ist felsenfest. Die Plattform schließt als einzige Lösung in Eur
 * **Revisionssicherheit**: Zentraler Download-Hub (`/app/documents`) mit DATEV-Buchungsstapeln, BNetzA MSCONS 2.2b Zeitreihen und SHA-256 Hashketten-Prüfung.
 * **Rollenisolation**: 5 dedizierte Profile (`SuperAdmin`, `Dispatcher`, `Billing Specialist`, `Field Technician`, `Auditor / Read-Only`).
 
+### 2.5 24/7 Enterprise Support-Desk & smartEvo Operations Hub (`moniy`)
+* **3-stufiges ITIL-Supportmodell**: Autarker 1st-Level Support-Desk in Sharegy für Kunden, Mieter & Partner mit integrierter FAQ-Deflection.
+* **1-Klick Telemetrie-Snapshot Eskalation**: Direkte S2S-Eskalation tiefgreifender Störungen an das zentrale **smartEvo Operations Center (`mon.smartevo.de`)** mit Hardware- & Firmware-Snapshot (DSGVO-konform).
+* **Automatisierte Zero-Loss Cron- & Watchdog-Überwachung**: Kontinuierliche Selbstüberwachung; Systemausfälle oder Cronjob-Fehler öffnen vollautomatisch Incident-Tickets in `moniy` mit Mailbox-Routing via Microsoft Graph.
+
 ---
 
 ## 💡 3. Lokale Offline-Resilienz: Gelöst über ioBroker & Home Assistant

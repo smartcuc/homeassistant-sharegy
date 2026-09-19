@@ -22,7 +22,7 @@ Bei einer wachsenden Multi-SaaS-Plattformfamilie (**Sharegy**, **Factofy**, **Mo
 ```mermaid
 flowchart TB
     subgraph Level1 ["1st-Level: Fachdomänen-SaaS (Kunden & Partner)"]
-        SharegyDesk["⚡ Sharegy Support Desk\n(app.sharegy.de/app/support)\n• PV-Prosumer & Installateure\n• § 14a EnWG & HEMS"]
+        SharegyDesk["⚡ Sharegy Support Desk\n(app.sharegy.de/app/support)\n• PV-Prosumer & Installateure\n• § 14a EnWG & EMS"]
         FactofyDesk["🏭 Factofy Support Desk\n(app.factofy.io/support)\n• Industrie, OEE & Maschinen\n• Digitale Zwillinge"]
     end
 
