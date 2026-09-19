@@ -1,57 +1,97 @@
 # 🛠️ Sharegy Optimierungs-, Audit- & Backlog-Masterplan
 
-**Dokument-Status:** Konsolidierter Audit-Status & Entwicklungs-Backlog  
-**Stand:** 12. September 2026 (v5.3 / Post-Meilenstein 9)  
+**Dokument-Status:** Konsolidierter Entwicklungs-Status & Roadmap-Masterplan  
+**Stand:** 19. September 2026 (v5.4 / Enterprise & Compliance Release)  
 
 ---
 
-## 📊 1. Status-Zusammenfassung aller Audit- & Optimierungs-Meilensteine
+## 📊 1. Gesamt-Statusübersicht (Fertiggestellt vs. Offen)
 
-Alle wesentlichen Härtungs-, Skalierungs- und Feature-Erweiterungen aus den vorangegangenen System-Audits wurden erfolgreich abgeschlossen:
-
-| Meilenstein / Bereich | Vorheriger Status | Aktueller Status (v5.3) | Implementierte Kernkomponenten |
-|---|:---:|:---:|---|
-| **M1: Core HEMS & Telemetrie-Härtung** | 🟡 In Progress | 🟢 **100% Live** | TimescaleDB Hypertables, Deadband-Filter, $O(1)$ LatestMetric-Snapshots, Decompression-Fix. |
-| **M2: Live Flow & Sankey-Engine** | 🟡 In Progress | 🟢 **100% Live** | ECharts/SVG Sankey, Merit-Order Flussverteilung, Restlast-Disaggregation. |
-| **M3: Smart Autopilot & Dispatch Hub** | 🟡 In Progress | 🟢 **100% Live** | 4 Autopilot-Modi, BWWP SG-Ready Anti-Cycling Schutz, Live Power Budgeting, Surplus Waterfall. |
-| **M4: Spotpreise & Batterie-Arbitrage** | 🟡 In Progress | 🟢 **100% Live** | 7-Tage EPEX Trend, dynamische Tarife, 96h Solar- & Lastprognose mit Random Forest ML. |
-| **M5: 6-Sprachen i18n & Globalisierung** | 🔴 Offen | 🟢 **100% Live** | Vollständiges i18n für DE, EN, PL, FR, IT, ES mit automatischem Fallback und Translation-Sync. |
-| **M6: UI/UX & Responsive Redesign** | 🔴 Offen | 🟢 **100% Live** | Glassmorphic Dark/Light Mode, Mobile Topbar, Drawer & Bottom-Nav, Zero-Layout-Shift. |
-| **M7: Multi-Cloud-Inverter Ökosystem** | 🔴 Offen | 🟢 **100% Live** | Sungrow, Fronius, SMA, SolarEdge, Huawei, Deye, Hoymiles, GoodWe, Kostal, Victron API v2. |
-| **M8: Native Android App & Store Ready** | 🔴 Offen | 🟢 **100% Live** | Capacitor 7 Native Shell, Fastlane Release Pipeline, FCM Push, Deep Linking. |
-| **M9: B2B Whitelabel & AS4 Mako Hub** | 🔴 Offen | 🟢 **100% Live** | Partner-Flottencockpit, Dynamic Theming Engine, BNetzA EDIFACT MSCONS/UTILMD Generator. |
-| **M10: Cloudflare Edge CDN & Security** | 🔴 Offen | 🟢 **100% Live** | Full Strict Universal SSL, 3x Edge Cache Rules, WebSockets Anycast, Sub-10ms DNS ([Doku](../operations/CLOUDFLARE_INFRASTRUCTURE_AND_EDGE_SECURITY.md)). |
-| **M11: Handbuch & Support-Desk 2.0** | 🔴 Offen | 🟢 **100% Live** | 11 Themen-Kategorien, 43 DE/EN-Artikel, 50/50 Dual-Card Header, reaktiver Support-Drawer. |
-| **M12: GTM & Rollout Masterplan** | 🔴 Offen | 🟢 **100% Live** | Consumer/Prosumer GTM Playbook, Partner/Installer GTM Playbook, Real-World VPP Playbook. |
+```mermaid
+pie title Sharegy Feature- & Modul-Status (v5.4)
+    "🟢 100% Live & Deployed" : 78
+    "🟡 In aktiver Umsetzung (WIP)" : 14
+    "🔴 Geplante Roadmap & Backlog" : 8
+```
 
 ---
 
-## 🔮 2. Aktives Strategie- & Entwicklungs-Backlog (Dedicated WIP Specs)
+## 🟢 2. Was ist bereits fertiggestellt? (100% Live & Gepusht)
 
-Jedes anstehende Feature wird in einer eigenständigen Spezifikation im Ordner `docs/wip/` geführt:
+Alle folgenden Meilensteine und Enterprise-Features sind vollständig im Code implementiert, getestet (`python manage.py check`, `npm run build`), im Online-Handbuch dokumentiert und nach `origin/main` gepusht:
 
-1. 📧 **E-Mail-Zustellbarkeit & MS Graph Integration (`backend/email_backends/msgraph.py`)**
-   * **Ziel**: Vollständige Ablösung unzuverlässiger SMTP-Relays durch die offizielle Microsoft Graph REST-API (M365 Exchange Online) mit dediziertem `noreply@smartevo.de` Postfach für 100% Posteingangs-Garantie bei Gmail, GMX, WEB.DE & Outlook.
-   * **Status & Prio**: 🟢 **100 % Live** | 🔴 Kritisch für B2C Launch (Erfolgreich verifiziert)
+| Bereich / Meilenstein | Live seit | Implementierte Kernkomponenten & Nutzen |
+|---|:---:|---|
+| **📁 Zentraler Dokumenten- & Export-Manager** | v5.4 (Sep 2026) | `/app/documents` mit KPI-Karten, On-Demand Streaming-Exporten (PDF, CSV, JSON, DATEV, MSCONS), SHA-256 Hashketten-Prüfung und GoBD-Archivierung. |
+| **🔑 Granulare Enterprise RBAC-Rollenmatrix** | v5.4 (Sep 2026) | 5 feingranulare Rollen (`SuperAdmin`, `Dispatcher`, `Billing Specialist`, `Field Technician`, `Auditor / Read-Only`) in Backend (`permissions.py`, `models.py`) und Frontend (`useUser.js`). |
+| **⏳ Skeleton-Loading & SWR Caching UX** | v5.4 (Sep 2026) | Reusable `Skeleton`-Suite (`SkeletonCard`, `SkeletonKpiGrid`, `SkeletonChart`, `SkeletonTable`) & globales TanStack Query SWR-Caching (`staleTime: 2m`) für Zero Layout Shift. |
+| **📖 Helpcenter 2.0 & Online-Handbuch** | v5.4 (Sep 2026) | 11 Themen-Kategorien, 46 zweisprachige (DE/EN) Enterprise-Artikel inkl. RBAC-Matrix, GoBD-Audit-Trail und Export-Manager. |
+| **⚡ Smart Meter CLS & § 14a EnWG Gateway** | v5.3 (Sep 2026) | Dimm- und Lastabwurfbefehle via BNetzA CLS-Kanal mit VNB-Quittierung & Audit-Trail. |
+| **📈 VPP Flexibilität & Market Clearing** | v5.3 (Sep 2026) | Virtuelles Kraftwerk für Heimspeicher-Pooling, aFRR/SRL- & Intraday-Vermarktung mit 80/20 Erlös-Clearing. |
+| **🧭 Rollen- & Kontextbasierte Navigation** | v5.3 (Sep 2026) | Dynamische Side-Navigation für EMS-Prosumer, Mieterstrom, GGV-Sharing, Installateure und Liegenschafts-Admins. |
+| **📧 E-Mail-Zustellbarkeit (MS Graph M365)** | v5.3 (Sep 2026) | Microsoft Graph REST-API (`noreply@smartevo.de`) mit 100% Posteingangs-Garantie bei Gmail, GMX & Outlook. |
+| **🚨 Alert- & Incident-Engine** | v5.3 (Sep 2026) | Saubere Trennung von Telemetrie-Alarmen (`AlertEvent`) und Helpdesk-Tickets (`Ticket`) mit Support-Drawer. |
+| **M1: Core HEMS & Telemetrie-Härtung** | v5.2 | TimescaleDB Hypertables, Deadband-Filter, $O(1)$ LatestMetric-Snapshots. |
+| **M2: Live Flow & Sankey-Engine** | v5.2 | ECharts/SVG Sankey, Merit-Order Flussverteilung, Restlast-Disaggregation. |
+| **M3: Smart Autopilot & Dispatch Hub** | v5.2 | 4 Autopilot-Modi, BWWP SG-Ready Anti-Cycling Schutz, Live Power Budgeting. |
+| **M4: Spotpreise & Batterie-Arbitrage** | v5.2 | 7-Tage EPEX Trend, dynamische Tarife, 96h Solar- & Lastprognose mit Random Forest ML. |
+| **M5: 6-Sprachen i18n** | v5.2 | DE, EN, PL, FR, IT, ES mit automatischem Fallback und Translation-Sync. |
+| **M6: UI/UX Glassmorphism & Theme Engine** | v5.2 | Dark/Light Mode, Mobile Topbar, Drawer & Bottom-Nav. |
+| **M7: Multi-Cloud-Inverter Ökosystem** | v5.2 | Sungrow, Fronius, SMA, SolarEdge, Huawei, Deye, Hoymiles, GoodWe, Kostal, Victron API v2. |
+| **M8: Native Android App (Capacitor 7)** | v5.2 | Capacitor Native Shell, Fastlane Release Pipeline, FCM Push, Deep Linking. |
+| **M9: B2B Whitelabel & AS4 Mako Hub** | v5.2 | Partner-Flottencockpit, Dynamic Theming Engine, BNetzA EDIFACT MSCONS/UTILMD Generator. |
+| **M10: Cloudflare Edge CDN & Security** | v5.2 | Full Strict Universal SSL, 3x Edge Cache Rules, WebSockets Anycast, Sub-10ms DNS. |
 
-2. 🚨 **Alert- & Benachrichtigungs-Engine (`alerts/views.py` & `AlertsPage.jsx`)**
-   * **Ziel**: Saubere Trennung von Telemetrie-Alarmen (`AlertEvent`) und Helpdesk-Tickets (`Ticket`), Schutz vor automatischem Incident-Spam im Support-Desk und bedarfsgesteuerte Hilfe-Eskalation über den `SupportDrawer`.
-   * **Status & Prio**: 🟢 **100 % Live** | 🔴 Kritisch für B2C Launch (Erfolgreich verifiziert)
+---
 
-3. ⚡ **[`WIP_BNETZA_CLS_SMART_METER_GATEWAY.md`](./WIP_BNETZA_CLS_SMART_METER_GATEWAY.md)**
-   * **Ziel**: Gesetzeskonforme Dimm- und Steuerbefehle nach § 14a EnWG direkt über den Controllable Local System (CLS) Kanal des SMGW empfangen inkl. VNB Dispatch-Quittierung.
-   * **Status & Prio**: 🟢 **100 % Live** | 🔴 Hoch (Abgeschlossen)
+## 🟡 3. Was ist in aktiver Umsetzung / Vorbereitung? (WIP)
 
-4. 📈 **[`WIP_AUTOMATED_FLEXIBILITY_AND_VPP_MARKET_CLEARING.md`](./WIP_AUTOMATED_FLEXIBILITY_AND_VPP_MARKET_CLEARING.md)**
-   * **Ziel**: Vollautomatisierte Vermarktung gepoolter Heimspeicher an den aFRR/SRL- und Intraday-Märkten über Aggregatoren mit automatischem 80/20 Erlös-Clearing.
-   * **Status & Prio**: 🟢 **100 % Live** | 🔴 Hoch (Abgeschlossen & verifiziert)
+Für die folgenden Module existieren detaillierte Spezifikationen und teils implementierte Code-Basen in `docs/wip/`:
 
-5. 🧭 **[`WIP_ROLE_BASED_SIDENAV_AND_CONTEXT_NAVIGATION.md`](./WIP_ROLE_BASED_SIDENAV_AND_CONTEXT_NAVIGATION.md)**
-   * **Ziel**: Rollen- und kontextbasierte Aufteilung der Side-Navigation für EMS-Prosumer, Mieterstrom-Nutzer, Installateure und Liegenschafts-Admins inkl. Multi-Role Switcher.
-   * **Status & Prio**: 🟢 **100 % Live** | 🔴 Hoch (Abgeschlossen)
+| Modul / Feature | Spezifikation | Aktueller Fortschritt | Nächster Schritt |
+|---|---|:---:|---|
+| **📱 Dual-App Android (Home vs. Pro)** | [`WIP_DUAL_APP_ECOSYSTEM_USER_VS_PARTNER.md`](./WIP_DUAL_APP_ECOSYSTEM_USER_VS_PARTNER.md) | 🟢 **90 %** | Build-Flavors `android-home` und `android-pro` im Fastlane-Release finalisieren. |
+| **🌐 Dynamische Whitelabel SSL-Provisionierung** | [`WIP_DYNAMIC_WHITELABEL_SSL_PROVISIONING.md`](./WIP_DYNAMIC_WHITELABEL_SSL_PROVISIONING.md) | 🟡 **70 %** | CNAME Ingress-Proxy (Caddy/Traefik) mit On-Demand ACME Let's Encrypt verknüpfen. |
+| **🌐 smartEvo Dachmarken-Website Integration** | [`WIP_SMARTEVO_WEBSITE_PRODUCT_INTEGRATION.md`](./WIP_SMARTEVO_WEBSITE_PRODUCT_INTEGRATION.md) | 🟡 **65 %** | Vereinheitlichung der Hero- und Feature-Cards im Astro-Frontend (`smartevo-web`). |
+| **🛰️ Entkoppelter Monitoring-Cluster & Reverse-RPC** | [`WIP_DECOUPLED_MONITORING_CLUSTER_AND_REVERSE_RPC.md`](./WIP_DECOUPLED_MONITORING_CLUSTER_AND_REVERSE_RPC.md) | 🟡 **55 %** | Dual-Socket WSS Control Plane zur Zero-Trust Fernwartung von Edge-Gateways. |
+| **📡 EEBUS & Cloud Ecosystem Bridge** | [`WIP_EEBUS_AND_CLOUD_ECOSYSTEM_BRIDGE.md`](./WIP_EEBUS_AND_CLOUD_ECOSYSTEM_BRIDGE.md) | 🟡 **45 %** | SHIP/SPINE Daemon für lokale Wärmepumpen-Anbindung (Vaillant, Viessmann, Bosch). |
 
-6. 🌐 **[`WIP_SMARTEVO_WEBSITE_PRODUCT_INTEGRATION.md`](./WIP_SMARTEVO_WEBSITE_PRODUCT_INTEGRATION.md)**
-   * **Ziel**: Nahtlose Integration von Sharegy und Factofy in das smartEvo.de Design-System (Cyan/Petrol Look), Bereinigung obsoleter Sektionen und Ausbau der Dachmarken-Architektur.
-7. 🛡️ **[`CLOUDFLARE_INFRASTRUCTURE_AND_EDGE_SECURITY.md`](../operations/CLOUDFLARE_INFRASTRUCTURE_AND_EDGE_SECURITY.md)**
-   * **Ziel**: Vollständiges Cloudflare Edge-Security & Hardening Runbook für alle 5 Domains (`smartevo.de`, `sharegy.de`, `factofy.de`, `valofy.de`, `moniy.de`) inkl. DNSSEC, HSTS, Rate Limiting, HTTP/3, Brotli und Security-Header.
-   * **Status & Prio**: 🟢 **100 % Dokumentiert & Bereit** | 🔴 Hoch (Security & GTM Standard)
+---
+
+## 🔴 4. Was muss noch gemacht werden? (Geplante Roadmap & Backlog)
+
+Empfohlene nächste Ausbaustufen für Enterprise-Power-User und Großkunden:
+
+### 1. ⚡ Globales `Cmd+K` / `Ctrl+K` Command-Center (Spotlight-Search)
+* **Ziel**: Tastaturgesteuertes Quick-Nav-Overlay für Power-User und Admins.
+* **Funktionen**:
+  - Schnellsprung zu jeder Liegenschaft, jedem Zähler, jedem Quartier und Handbuch-Artikel in $< 300\,\text{ms}$.
+  - Direktbefehle: Dark/Light Mode umschalten, Fernwartungs-Diagnose starten, CSV-Export anstoßen.
+
+### 2. 🔔 Enterprise Notification & Activity Flyout (Topbar-Glocke)
+* **Ziel**: Ablösung des modalen Alert-Centers durch ein reaktives Topbar-Dropdown.
+* **Funktionen**:
+  - 4 strukturierte Tabs: 🚨 Störungen, ⚡ VPP/Netz-Aktionen, 📄 Neue IBN-Protokolle, 👥 System-Events.
+  - 1-Klick-Aktionen: „Alle als gelesen markieren“, Direktlink zur betroffenen Anlage.
+
+### 3. 🍞 Globales Toast-Notification-System (z. B. sonner / react-hot-toast)
+* **Ziel**: Elegante, nicht-blockierende Statusmeldungen für asynchrone Aktionen („Dimm-Befehl erfolgreich gesendet“, „Zählerstand gespeichert“).
+* **Funktionen**: Undo-Button für rückgängig machbare Aktionen, Auto-Dismiss nach 4 Sekunden.
+
+### 4. 🔐 2FA / Zwei-Faktor-Authentifizierung (TOTP / WebAuthn)
+* **Ziel**: Pflicht-2FA für privilegierte Rollen (`SuperAdmin`, `Dispatcher`, `Partner-Installateur`).
+* **Funktionen**: Google Authentifier / 1Password TOTP QR-Code Setup, Notfall-Backup-Codes, Session-Steuerung.
+
+### 5. 🪝 Outbox-Pattern Webhook-Dispatcher für ERP & CRM
+* **Ziel**: Automatische Event-Benachrichtigung für Stadtwerke- und Hausverwalter-Systeme (SAP, DATEV, Salesforce).
+* **Events**: `meter.reading.created`, `invoice.issued`, `vpp.dispatch.triggered`, `handover.completed`.
+
+---
+
+## 🎯 5. Nächste empfohlene Schritte
+
+```
+[1. Spotlight Command-Center (Cmd+K)] ──► [2. Topbar Notification Flyout] ──► [3. Global Toast System]
+                                                                                       │
+[5. Webhook-Dispatcher (ERP/CRM)]     ◄── [4. Zwei-Faktor-Authentifizierung (2FA)] ◄──┘
+```

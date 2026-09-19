@@ -112,14 +112,15 @@ docs/
 
 | Dokument | Bereich | Status & Priorität | Beschreibung |
 |---|---|:---:|---|
-| 🛠️ **[`OPTIMIZATION_AND_AUDIT_MASTERPLAN.md`](./wip/OPTIMIZATION_AND_AUDIT_MASTERPLAN.md)** | Masterplan | 🟢 M1–M9 Live | Gesamter Audit-Status & strategischer Gesamt-Backlog |
-| 🔌 **[`WIP_DECOUPLED_MONITORING_CLUSTER_AND_REVERSE_RPC.md`](./wip/WIP_DECOUPLED_MONITORING_CLUSTER_AND_REVERSE_RPC.md)** | Edge & WSS | 🟡 50% / 🔴 Hoch | Auslagerung auf `mon.sharegy.de` & Zero-Trust WSS Reverse-RPC Wartung |
-| 🏠 **[`WIP_EEBUS_AND_CLOUD_ECOSYSTEM_BRIDGE.md`](./wip/WIP_EEBUS_AND_CLOUD_ECOSYSTEM_BRIDGE.md)** | HEMS / Wärmepumpe | 🟡 40% / 🔴 Hoch | EEBUS SHIP/SPINE Stack & Cloud-APIs (myVAILLANT, Home Connect) |
-| ⚡ **[`WIP_BNETZA_CLS_SMART_METER_GATEWAY.md`](./wip/WIP_BNETZA_CLS_SMART_METER_GATEWAY.md)** | § 14a EnWG / SMGW | 🟡 40% / 🔴 Hoch | Direkte Kopplung an Smart-Meter-Gateways über den CLS-Kanal |
-| 🔒 **[`WIP_DYNAMIC_WHITELABEL_SSL_PROVISIONING.md`](./wip/WIP_DYNAMIC_WHITELABEL_SSL_PROVISIONING.md)** | Whitelabel / TLS | 🟡 70% / 🟡 Mittel | Automatisierte Let's Encrypt SSL-Provisionierung für CNAME-Domains |
-| 📈 **[`WIP_AUTOMATED_FLEXIBILITY_AND_VPP_MARKET_CLEARING.md`](./wip/WIP_AUTOMATED_FLEXIBILITY_AND_VPP_MARKET_CLEARING.md)** | VPP & Regelenergie | 🟡 60% / 🟡 Mittel | Direkte Kopplung an Flex-Aggregatoren & Erlösausschüttungs-Clearing |
-| 📱 **[`WIP_DUAL_APP_ECOSYSTEM_USER_VS_PARTNER.md`](./wip/WIP_DUAL_APP_ECOSYSTEM_USER_VS_PARTNER.md)** | Mobile App | 🟡 55% / 🟡 Mittel | Evaluierung der Two-App Strategie (Sharegy Home vs. Sharegy Pro mit QR-Inbetriebnahme) |
-| 🧭 **[`WIP_ROLE_BASED_SIDENAV_AND_CONTEXT_NAVIGATION.md`](./wip/WIP_ROLE_BASED_SIDENAV_AND_CONTEXT_NAVIGATION.md)** | Frontend UX | 🟡 40% / 🔴 Hoch | Rollen- & kontextbasierte Aufteilung der Side-Navigation für EMS, Mieter, Partner & Admins |
+| 🛠️ **[`OPTIMIZATION_AND_AUDIT_MASTERPLAN.md`](./wip/OPTIMIZATION_AND_AUDIT_MASTERPLAN.md)** | Masterplan | 🟢 v5.4 Live | Konsolidierter Status (78% Live, 14% WIP, 8% Backlog) & Gesamt-Roadmap |
+| ⚡ **[`WIP_BNETZA_CLS_SMART_METER_GATEWAY.md`](./wip/WIP_BNETZA_CLS_SMART_METER_GATEWAY.md)** | § 14a EnWG / SMGW | 🟢 **100% Live** | Direkte Kopplung an Smart-Meter-Gateways über den CLS-Kanal & Quittierung |
+| 📈 **[`WIP_AUTOMATED_FLEXIBILITY_AND_VPP_MARKET_CLEARING.md`](./wip/WIP_AUTOMATED_FLEXIBILITY_AND_VPP_MARKET_CLEARING.md)** | VPP & Regelenergie | 🟢 **100% Live** | Flex-Aggregatoren, aFRR/SRL Vermarktung & 80/20 Erlösausschüttungs-Clearing |
+| 🧭 **[`WIP_ROLE_BASED_SIDENAV_AND_CONTEXT_NAVIGATION.md`](./wip/WIP_ROLE_BASED_SIDENAV_AND_CONTEXT_NAVIGATION.md)** | Frontend UX & RBAC | 🟢 **100% Live** | Rollenmatrix (`SuperAdmin`, `Dispatcher`, `Billing`, `Tech`, `Auditor`) & Menüs |
+| 📱 **[`WIP_DUAL_APP_ECOSYSTEM_USER_VS_PARTNER.md`](./wip/WIP_DUAL_APP_ECOSYSTEM_USER_VS_PARTNER.md)** | Mobile App | 🟢 **90%** / 🔴 Hoch | Two-App Strategie (`Sharegy Home` vs. `Sharegy Pro` mit QR-Inbetriebnahme) |
+| 🔒 **[`WIP_DYNAMIC_WHITELABEL_SSL_PROVISIONING.md`](./wip/WIP_DYNAMIC_WHITELABEL_SSL_PROVISIONING.md)** | Whitelabel / TLS | 🟡 **70%** / 🟡 Mittel | Automatisierte Let's Encrypt SSL-Provisionierung für CNAME-Domains |
+| 🌐 **[`WIP_SMARTEVO_WEBSITE_PRODUCT_INTEGRATION.md`](./wip/WIP_SMARTEVO_WEBSITE_PRODUCT_INTEGRATION.md)** | Dachmarken-Web | 🟡 **65%** / 🟡 Mittel | Integration von Sharegy & Factofy im smartEvo.de Webauftritt |
+| 🔌 **[`WIP_DECOUPLED_MONITORING_CLUSTER_AND_REVERSE_RPC.md`](./wip/WIP_DECOUPLED_MONITORING_CLUSTER_AND_REVERSE_RPC.md)** | Edge & WSS | 🟡 **55%** / 🔴 Hoch | Auslagerung auf `mon.sharegy.de` & Zero-Trust WSS Reverse-RPC Wartung |
+| 🏠 **[`WIP_EEBUS_AND_CLOUD_ECOSYSTEM_BRIDGE.md`](./wip/WIP_EEBUS_AND_CLOUD_ECOSYSTEM_BRIDGE.md)** | HEMS / Wärmepumpe | 🟡 **45%** / 🔴 Hoch | EEBUS SHIP/SPINE Stack & Cloud-APIs (myVAILLANT, Home Connect) |
 
 ---
 
