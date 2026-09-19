@@ -40,8 +40,17 @@ window.addEventListener("unhandledrejection", (event) => {
   }
 });
 
-// ✅ globaler Cache
-const queryClient = new QueryClient();
+// ✅ Globaler Cache mit Stale-While-Revalidate (SWR) Strategie
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 2, // 2 Minuten Stale-While-Revalidate (Instant Navigation ohne Ladeverzögerung)
+      gcTime: 1000 * 60 * 15,   // 15 Minuten Garbage Collection Cache
+      refetchOnWindowFocus: true, // Automatisches Hintergrund-Update bei Fokus
+      retry: 1,
+    },
+  },
+});
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>

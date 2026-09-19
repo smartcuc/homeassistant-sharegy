@@ -48,18 +48,10 @@ const VppFleetAdminPage = lazy(() => import("../pages/admin/VppFleetAdminPage"))
 const AuditLogsAdminPage = lazy(() => import("../pages/admin/AuditLogsAdminPage"));
 const DocumentsHubPage = lazy(() => import("../pages/DocumentsHubPage"));
 
+import { SkeletonPageLoader } from "./ui/Skeleton";
+
 function PageSuspenseLoader() {
-    return (
-        <div className="p-8 max-w-7xl mx-auto space-y-6 animate-pulse">
-            <div className="h-8 bg-gray-200/80 dark:bg-slate-800 rounded-xl w-1/3"></div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="h-32 bg-gray-100 dark:bg-slate-850 rounded-2xl"></div>
-                <div className="h-32 bg-gray-100 dark:bg-slate-850 rounded-2xl"></div>
-                <div className="h-32 bg-gray-100 dark:bg-slate-850 rounded-2xl"></div>
-            </div>
-            <div className="h-96 bg-gray-100 dark:bg-slate-850 rounded-2xl"></div>
-        </div>
-    );
+    return <SkeletonPageLoader />;
 }
 
 export default function AppShell() {

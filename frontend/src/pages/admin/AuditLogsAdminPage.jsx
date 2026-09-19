@@ -24,6 +24,7 @@ import {
 import AdminPageHeader from "../../components/admin/AdminPageHeader";
 import KpiCard from "../../components/admin/KpiCard";
 import useModalDismiss from "../../hooks/useModalDismiss";
+import { Skeleton } from "../../components/ui/Skeleton";
 
 export default function AuditLogsAdminPage() {
   const { t } = useTranslation();
@@ -224,7 +225,18 @@ export default function AuditLogsAdminPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
-              {logs.length === 0 ? (
+              {logsQuery.isLoading ? (
+                Array.from({ length: 6 }).map((_, i) => (
+                  <tr key={i} className="animate-pulse">
+                    <td className="py-4 px-5"><Skeleton className="h-3.5 w-24" /></td>
+                    <td className="py-4 px-5"><Skeleton className="h-5 w-16 rounded-full" /></td>
+                    <td className="py-4 px-5 space-y-1.5"><Skeleton className="h-4 w-40" /><Skeleton className="h-3 w-28" /></td>
+                    <td className="py-4 px-5"><Skeleton className="h-3.5 w-32" /></td>
+                    <td className="py-4 px-5"><Skeleton className="h-3.5 w-20" /></td>
+                    <td className="py-4 px-5 text-right"><Skeleton className="h-7 w-20 rounded-lg ml-auto" /></td>
+                  </tr>
+                ))
+              ) : logs.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="py-12 text-center text-slate-400">
                     <ShieldCheck className="w-8 h-8 mx-auto mb-2 text-slate-300 dark:text-slate-600" />

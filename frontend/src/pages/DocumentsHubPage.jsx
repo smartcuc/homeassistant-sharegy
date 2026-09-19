@@ -33,6 +33,7 @@ import {
 import Card from "../components/ui/Card";
 import { useTheme } from "../theme/ThemeContext";
 import useModalDismiss from "../hooks/useModalDismiss";
+import { Skeleton, SkeletonCard, SkeletonTable } from "../components/ui/Skeleton";
 
 export default function DocumentsHubPage() {
   const { t } = useTranslation();
@@ -395,9 +396,32 @@ export default function DocumentsHubPage() {
       {/* 📄 4. DOKUMENTEN-LISTE */}
       {/* ========================================================================= */}
       {isLoading ? (
-        <div className="p-12 text-center space-y-4">
-          <RefreshCw className="w-8 h-8 text-indigo-500 animate-spin mx-auto" />
-          <p className="text-sm font-semibold text-slate-500">Dokumentenkatalog wird geladen...</p>
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                className="p-5 sm:p-6 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl space-y-4 animate-fade-in"
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3.5 w-full max-w-lg">
+                    <Skeleton className="h-12 w-12 rounded-2xl shrink-0" />
+                    <div className="space-y-2 w-full">
+                      <div className="flex items-center gap-2">
+                        <Skeleton className="h-4 w-28 rounded-md" />
+                        <Skeleton className="h-4 w-24 rounded-full" />
+                      </div>
+                      <Skeleton className="h-5 w-3/4" />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Skeleton className="h-9 w-28 rounded-xl" />
+                    <Skeleton className="h-9 w-24 rounded-xl" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       ) : documents.length === 0 ? (
         <Card className="p-12 text-center space-y-4 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
