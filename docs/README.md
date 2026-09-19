@@ -51,6 +51,7 @@ docs/
 
 | Dokument | Beschreibung |
 |---|---|
+| 🧪 **[`CLOSED_BETA_HARDWARE_PATEN_PLAYBOOK_AND_DIAGNOSTICS.md`](./operations/CLOSED_BETA_HARDWARE_PATEN_PLAYBOOK_AND_DIAGNOSTICS.md)** | **NEU:** Diskretes 1-zu-1 Hardware-Paten Beta-Testing, Inverter-Diagnostik (`verify_inverter_telemetry`), Einladungsvorlagen & Verifikationsprozess |
 | ⚡ **[`VPP_FLEXIBILITY_AND_MARKET_CLEARING_OPERATIONS.md`](./operations/VPP_FLEXIBILITY_AND_MARKET_CLEARING_OPERATIONS.md)** | Virtuelles Kraftwerk (VPP), Regelleistung (aFRR/FCR), 80/20 Market Clearing, Aggregator-Webhooks & Runbooks |
 | 🚀 **[`OPERATIONS_AND_DEPLOYMENT.md`](./operations/OPERATIONS_AND_DEPLOYMENT.md)** | Server-Deployment (Ubuntu/Debian), Systemd Services, Redis, Celery & Health-Checks |
 | 🛡️ **[`DATA_PRIVACY_AND_GDPR_COMPLIANCE.md`](./operations/DATA_PRIVACY_AND_GDPR_COMPLIANCE.md)** | DSGVO-Konzept, Technische und Organisatorische Maßnahmen (TOMs), AVV-Muster & Löschfristen |
