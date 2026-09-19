@@ -17,15 +17,21 @@ class User(AbstractUser):
     """
 
     PLATFORM_ROLE_SYSTEM_ADMIN = "system_admin"
-    PLATFORM_ROLE_FINANCE = "finance"
-    PLATFORM_ROLE_USER_ADMIN = "user_admin"
-    PLATFORM_ROLE_HELPDESK = "helpdesk"
+    PLATFORM_ROLE_DISPATCHER = "dispatcher"         # Operations / Dispatcher (VPP & SteuVE)
+    PLATFORM_ROLE_FINANCE = "finance"               # Billing Specialist (Finanzen & Abrechnungen)
+    PLATFORM_ROLE_USER_ADMIN = "user_admin"         # Globale Userverwaltung
+    PLATFORM_ROLE_INSTALLER = "installer"           # Field Technician / Installateur
+    PLATFORM_ROLE_AUDITOR = "auditor"               # Kassenprüfer / Auditor (Read-Only)
+    PLATFORM_ROLE_HELPDESK = "helpdesk"             # Support-Triage
     PLATFORM_ROLE_NONE = "none"
 
     PLATFORM_ROLE_CHOICES = [
-        (PLATFORM_ROLE_SYSTEM_ADMIN, "Systemadmin"),
-        (PLATFORM_ROLE_FINANCE, "Finanzen & Billing"),
+        (PLATFORM_ROLE_SYSTEM_ADMIN, "SuperAdmin (Vollzugriff)"),
+        (PLATFORM_ROLE_DISPATCHER, "Operations / Dispatcher (VPP & Steuerung)"),
+        (PLATFORM_ROLE_FINANCE, "Billing Specialist (Finanzen & Abrechnungen)"),
         (PLATFORM_ROLE_USER_ADMIN, "Userverwaltung (Global)"),
+        (PLATFORM_ROLE_INSTALLER, "Field Technician / Fachpartner"),
+        (PLATFORM_ROLE_AUDITOR, "Auditor / Revisionsprüfer (Read-Only)"),
         (PLATFORM_ROLE_HELPDESK, "Plattform Helpdesk"),
         (PLATFORM_ROLE_NONE, "Keine Plattform-Rolle"),
     ]
@@ -53,8 +59,20 @@ class User(AbstractUser):
         return bool(self.is_superuser or self.platform_role == self.PLATFORM_ROLE_SYSTEM_ADMIN)
 
     @property
+    def is_dispatcher(self) -> bool:
+        return bool(self.is_superuser or self.platform_role in [self.PLATFORM_ROLE_SYSTEM_ADMIN, self.PLATFORM_ROLE_DISPATCHER])
+
+    @property
     def is_finance_admin(self) -> bool:
         return bool(self.is_superuser or self.platform_role in [self.PLATFORM_ROLE_SYSTEM_ADMIN, self.PLATFORM_ROLE_FINANCE])
+
+    @property
+    def is_field_technician(self) -> bool:
+        return bool(self.is_superuser or self.platform_role in [self.PLATFORM_ROLE_SYSTEM_ADMIN, self.PLATFORM_ROLE_INSTALLER])
+
+    @property
+    def is_auditor(self) -> bool:
+        return bool(self.is_superuser or self.platform_role in [self.PLATFORM_ROLE_SYSTEM_ADMIN, self.PLATFORM_ROLE_AUDITOR])
 
     @property
     def is_global_user_admin(self) -> bool:
@@ -182,6 +200,8 @@ class UserSettings(models.Model):
 class TenantMembership(models.Model):
 
     ROLE_ADMIN = "admin"                    # Energy-Admin (Vollzugriff auf Community & Tarife)
+    ROLE_DISPATCHER = "dispatcher"          # Operations / Dispatcher (VPP & Laststeuerung)
+    ROLE_BILLING = "billing"                # Billing Specialist (Rechnungen & Zählerstände)
     ROLE_USER_ADMIN = "user_admin"          # Energy-Userverwaltung (Einladungen & Rollenzuweisung)
     ROLE_HELPDESK = "helpdesk"              # Energy-Helpdesk (1st-Level Quartierssupport)
     ROLE_AUDITOR = "auditor"                # Kassenprüfer / Beirat (Read-only Bilanzen & Berichte)
@@ -192,6 +212,8 @@ class TenantMembership(models.Model):
 
     ROLE_CHOICES = [
         (ROLE_ADMIN, "Energy Admin"),
+        (ROLE_DISPATCHER, "Operations / Dispatcher"),
+        (ROLE_BILLING, "Billing Specialist"),
         (ROLE_USER_ADMIN, "Energy Userverwaltung"),
         (ROLE_HELPDESK, "Energy Helpdesk"),
         (ROLE_AUDITOR, "Kassenprüfer / Auditor"),

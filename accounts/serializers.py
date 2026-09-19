@@ -72,9 +72,12 @@ class UserMeSerializer(serializers.ModelSerializer):
     avatar = serializers.SerializerMethodField()
     profile = serializers.SerializerMethodField()
     is_platform_admin = serializers.BooleanField(read_only=True)
+    is_dispatcher = serializers.BooleanField(read_only=True)
     is_finance_admin = serializers.BooleanField(read_only=True)
     is_global_user_admin = serializers.BooleanField(read_only=True)
     is_platform_helpdesk = serializers.BooleanField(read_only=True)
+    is_field_technician = serializers.BooleanField(read_only=True)
+    is_auditor = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = User
@@ -90,9 +93,12 @@ class UserMeSerializer(serializers.ModelSerializer):
             "is_superuser",
             "platform_role",
             "is_platform_admin",
+            "is_dispatcher",
             "is_finance_admin",
             "is_global_user_admin",
             "is_platform_helpdesk",
+            "is_field_technician",
+            "is_auditor",
             "is_pro",
             "memberships",
         ]

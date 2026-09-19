@@ -17,10 +17,31 @@ ROLE_PERMISSIONS = {
         "manage_members",
         "manage_invites",
         "manage_tickets",
+        "manage_vpp",
+        "manage_dimming",
+        "manage_statements",
         "view_reports",
         "edit_data",
         "view_data",
         "view_audit_log",
+        "export_data",
+    ],
+    "dispatcher": [
+        "manage_vpp",
+        "manage_dimming",
+        "view_data",
+        "view_reports",
+    ],
+    "billing": [
+        "manage_statements",
+        "view_reports",
+        "view_data",
+        "export_data",
+    ],
+    "installer": [
+        "manage_devices",
+        "view_protocols",
+        "view_data",
     ],
     "user_admin": [
         "manage_members",
@@ -35,6 +56,7 @@ ROLE_PERMISSIONS = {
         "view_reports",
         "view_data",
         "view_audit_log",
+        "export_data",
     ],
     "member": [
         "view_data",
@@ -86,6 +108,24 @@ def can_handle_community_tickets(user, tenant) -> bool:
 
 def can_view_community_reports(user, tenant) -> bool:
     return has_permission(user, tenant, "view_reports")
+
+
+def can_dispatch_vpp(user, tenant=None) -> bool:
+    if getattr(user, "is_dispatcher", False) or getattr(user, "is_platform_admin", False) or user.is_superuser:
+        return True
+    return has_permission(user, tenant, "manage_vpp") if tenant else False
+
+
+def can_manage_billing(user, tenant=None) -> bool:
+    if getattr(user, "is_finance_admin", False) or getattr(user, "is_platform_admin", False) or user.is_superuser:
+        return True
+    return has_permission(user, tenant, "manage_statements") if tenant else False
+
+
+def can_view_audit_log(user, tenant=None) -> bool:
+    if getattr(user, "is_auditor", False) or getattr(user, "is_platform_admin", False) or user.is_superuser:
+        return True
+    return has_permission(user, tenant, "view_audit_log") if tenant else False
 
 
 

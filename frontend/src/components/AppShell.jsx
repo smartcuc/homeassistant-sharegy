@@ -46,6 +46,7 @@ const CommunitiesManagementHub = lazy(() => import("../pages/admin/CommunitiesMa
 const PartnerDashboard = lazy(() => import("../features/partner/PartnerDashboard"));
 const VppFleetAdminPage = lazy(() => import("../pages/admin/VppFleetAdminPage"));
 const AuditLogsAdminPage = lazy(() => import("../pages/admin/AuditLogsAdminPage"));
+const DocumentsHubPage = lazy(() => import("../pages/DocumentsHubPage"));
 
 function PageSuspenseLoader() {
     return (
@@ -188,6 +189,11 @@ export default function AppShell() {
                             <Route path="tenant-management" element={<TenantDashboard />} />
                             <Route path="community" element={<CommunityMemberDashboard />} />
                             <Route path="partner" element={<PartnerDashboard />} />
+
+                            {/* 📁 ZENTRALER DOKUMENTEN- & EXPORT-MANAGER (DOWNLOAD HUB) */}
+                            <Route path="documents" element={<DocumentsHubPage />} />
+                            <Route path="downloads" element={<DocumentsHubPage />} />
+                            <Route path="admin/documents" element={<DocumentsHubPage />} />
                             <Route path="installer" element={<PartnerDashboard />} />
 
 

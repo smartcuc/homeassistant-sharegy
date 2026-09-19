@@ -4469,6 +4469,357 @@ Every support ticket progresses through standard workflow states:
                 "is_featured": True,
                 "sort_order": 9,
             },
+            # ---------------------------------------------------------------------
+            # 11. ADMIN & GOVERNANCE: ENTERPRISE RBAC ROLLENMATRIX & RECHTEVERWALTUNG
+            # ---------------------------------------------------------------------
+            {
+                "category": cats["admin-governance"],
+                "slug": "enterprise-rbac-rollenmatrix-und-berechtigungen",
+                "context_key": "admin_rbac_matrix",
+                "title_de": "Enterprise Multi-Tenant RBAC: Benutzerrollen, Rechte & Berechtigungsmatrix",
+                "title_en": "Enterprise Multi-Tenant RBAC: User Roles, Permissions & Access Control Matrix",
+                "summary_de": "Vollständiger Leitfaden zur rollenbasierten Zugriffskontrolle (RBAC): SuperAdmin, Operations/Dispatcher, Billing Specialist, Field Technician, Auditor & Community-Rollen.",
+                "summary_en": "Comprehensive guide to Role-Based Access Control (RBAC): SuperAdmin, Operations/Dispatcher, Billing Specialist, Field Technician, Auditor & Community roles.",
+                "content_de": """# Enterprise Multi-Tenant RBAC: Benutzerrollen, Rechte & Berechtigungsmatrix
+
+Sharegy implementiert eine **zweistufige Enterprise-Rollenarchitektur (Multi-Tenant RBAC)**, die strenge Funktionstrennung (Separation of Duties) für Stadtwerke, Wohnungsbaugesellschaften, Bürgerenergiegenossenschaften und Großkunden gewährleistet.
+
+---
+
+## 1. Die 2-Ebenen-Architektur im Überblick
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│ EBENE 1: Globale Sharegy Plattform (Global / Staff)                    │
+│  - 👑 SuperAdmin (Vollzugriff)     - ⚡ Operations / Dispatcher (VPP)    │
+│  - 💳 Billing Specialist (Finanzen)- 👥 Global User-Admin              │
+│  - 🛟 Plattform Helpdesk                                               │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │ hostet & delegiert
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│ EBENE 2: Lokale Quartiere / Liegenschaften / Partner (Multi-Tenant)    │
+│  - 🏛️ Quartiers-Admin (WEG/EVU)   - 🔧 Field Technician (Installateur) │
+│  - 👥 Energy-Userverwaltung        - 📊 Kassenprüfer / Auditor (Read-Only)
+│  - 🛟 Energy-Helpdesk (Support)    - ⚡ Community-Mitglied (Endkunde)   │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 2. Detaillierte Rollenübersicht
+
+### 👑 1. SuperAdmin (`system_admin` / `is_superuser`)
+* **Zielgruppe**: Sharegy Betreiberteam & Hauptadministratoren von Stadtwerken.
+* **Befugnisse**: Voller Systemzugriff auf alle Plattform-Module, Mandanten, API-Keys, Django Admin, Systemgesundheit und Datenbank-Migrationen.
+
+### ⚡ 2. Operations / Dispatcher (VPP & Steuerung)
+* **Zielgruppe**: Technische Leitwarten, Netzbetreiber-Dispatcher und VPP-Aggregatoren.
+* **Befugnisse**:
+  * Vollzugriff auf das Virtuelle Kraftwerk ([`/app/admin/vpp`](file:///app/admin/vpp)), Redispatch 2.0 / Connect+ Fahrpläne und aFRR-Abrufe.
+  * Steuerung netzdienlicher Lastdrosselungen gem. § 14a EnWG ([`/app/control`](file:///app/control)).
+  * **Datenschutz-Schutzregel**: Kein Zugriff auf Endkunden-Bankverbindungen oder personenbezogene Abrechnungsdetails.
+
+### 💳 3. Billing Specialist (`finance`)
+* **Zielgruppe**: Buchhaltung, Abrechnungsdienstleister und Finanzbeiräte.
+* **Befugnisse**:
+  * Verwaltung von Stripe-Zahlungsströmen, SEPA-Lastschriftläufen und Clearing-Abrechnungen.
+  * Festschreibung monatlicher Abrechnungsbescheide gem. § 42b / § 42a EnWG.
+  * Zählerstands-Export (DATEV CSV, MSCONS 2.2b, Excel).
+
+### 🔧 4. Field Technician / Fachpartner (`installer` / `PartnerMembership`)
+* **Zielgruppe**: Elektro-Installateure, Solarteure und Instandhaltungsteams.
+* **Befugnisse**:
+  * Flotten-Management ([`/app/partner`](file:///app/partner)), Asset-Onboarding und 3-Sekunden-Diagnosetests.
+  * Erstellung digitaler Inbetriebsetzungs- & Übergabeprotokolle nach VDE-AR-N 4105.
+  * Fernwartung und Firmware-Status bei Störungsmeldungen.
+
+### 📊 5. Auditor / Kassenprüfer (`auditor` - Read-Only)
+* **Zielgruppe**: Revisionsprüfer, WEG-Beiräte, Steuerberater und Aufsichtsräte.
+* **Befugnisse**:
+  * Vollständiger **Read-Only-Zugriff** auf Quartiersbilanzen, Verbrauchszeitreihen, Abrechnungsberichte und das Enterprise Audit-Log ([`/app/admin/audit-logs`](file:///app/admin/audit-logs)).
+  * **Sicherheitsgarantie**: Keine Berechtigung zum Bearbeiten von Daten, Schalten von Geräten oder Ändern von Tarifen.
+
+### 👥 6. Community-Userverwaltung (`user_admin`)
+* **Zielgruppe**: Hausverwaltungen und Mieterbetreuer vor Ort.
+* **Befugnisse**: Erstellung von Einladungslinks für Nachbarn/Mieter, Rollenzuweisung (`member`, `helpdesk`, `auditor`) und Stammdatenpflege.
+
+### ⚡ 7. Community-Mitglied (`member`)
+* **Zielgruppe**: Endnutzer, Mieter und Prosumer.
+* **Befugnisse**: Einsicht in die persönlichen Live-Flüsse, 15m-Zuteilungen, Monatsabrechnungen und Ersparnisrechner.
+
+---
+
+## 3. Vollständige Berechtigungsmatrix
+
+| Berechtigung | SuperAdmin | Operations / Dispatcher | Billing Specialist | Field Technician | Auditor (Read-Only) | Community Admin | Mitglied |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **System-Infrastruktur & API-Keys** | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **VPP Flexibilität & Dispatch-Abruf** | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **§ 14a SteuVE Lastdrosselung** | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Monatsabrechnungen (§ 42b EnWG)** | ✅ | ❌ | ✅ | ❌ | 👁️ *(Lesen)* | ✅ | 👁️ *(Eigen)* |
+| **Stripe & SEPA Finanzströme** | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **IBN-Protokolle (VDE-AR-N 4105)** | ✅ | ❌ | ❌ | ✅ | 👁️ *(Lesen)* | 👁️ *(Lesen)* | ❌ |
+| **Fernwartung & Diagnostik** | ✅ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| **Audit-Log Einsicht (ISO 27001)** | ✅ | 👁️ *(Lesen)* | 👁️ *(Lesen)* | ❌ | ✅ | 👁️ *(Tenant)* | ❌ |
+| **Dokumenten-Manager (Download Hub)** | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+---
+
+## 4. Rollenhierarchie & Schutzregeln
+
+1. **Selbsterhöhungs-Schutz (Privilege Escalation Guard)**:
+   * Ein `user_admin` kann nur Rollen bis zur eigenen Berechtigungsstufe vergeben. Er kann **keine neuen Admins ernennen** und bestehende Admins nicht herabstufen.
+2. **Revisionssichere Protokollierung**:
+   * Jede Zuweisung, Änderung oder Entziehung einer Rolle wird unveränderlich mit IP-Adresse, Timestamp und Akteur im [`core_auditlog`](file:///app/admin/audit-logs) festgehalten.
+""",
+                "content_en": """# Enterprise Multi-Tenant RBAC: User Roles, Permissions & Access Control Matrix
+
+Sharegy enforces a **two-tier Enterprise Role-Based Access Control (RBAC) architecture**, providing strict Separation of Duties for utilities, housing corporations, energy sharing cooperatives, and enterprise customers.
+
+---
+
+## 1. Two-Tier Hierarchy Overview
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│ TIER 1: Global Sharegy Platform (Global / Staff)                       │
+│  - 👑 SuperAdmin (Full Access)      - ⚡ Operations / Dispatcher (VPP)   │
+│  - 💳 Billing Specialist (Finance)  - 👥 Global User-Admin             │
+│  - 🛟 Platform Helpdesk                                                │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │ hosts & delegates
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│ TIER 2: Local Communities / Properties / Partners (Multi-Tenant)       │
+│  - 🏛️ Community Admin (HOA/Utility) - 🔧 Field Technician (Installer)  │
+│  - 👥 Member Administrator          - 📊 Auditor / Inspector (Read-Only)│
+│  - 🛟 Community Helpdesk (Support)  - ⚡ Resident Member (Consumer)     │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 2. Detailed Role Profiles
+
+* **👑 SuperAdmin (`system_admin` / `is_superuser`)**: Complete root access across all platform modules, tenants, migration pipelines, and API integrations.
+* **⚡ Operations / Dispatcher**: Full command over the Virtual Power Plant ([`/app/admin/vpp`](file:///app/admin/vpp)), Redispatch 2.0 schedules, and § 14a EnWG controllable load dimming ([`/app/control`](file:///app/control)), with no access to billing/banking data.
+* **💳 Billing Specialist (`finance`)**: In charge of Stripe settlement runs, SEPA batches, § 42b EnWG monthly statement finalization, and DATEV/MSCONS exports.
+* **🔧 Field Technician (`installer` / `PartnerMembership`)**: Partner fleet monitoring ([`/app/partner`](file:///app/partner)), VDE-AR-N 4105 digital commissioning protocols, and remote diagnostic testing.
+* **📊 Auditor / Inspector (`auditor` - Read-Only)**: Zero write access; complete read-only review rights for community balances, settlement records, and the compliance audit log ([`/app/admin/audit-logs`](file:///app/admin/audit-logs)).
+* **👥 Member Admin (`user_admin`)**: Local resident onboarding, invitation token management, and basic role provisioning.
+* **⚡ Resident Member (`member`)**: Personal dashboard access to real-time power flows, 15-minute community allocation, and personal statements.
+
+---
+
+## 3. Comprehensive Permission Matrix
+
+| Capability | SuperAdmin | Operations / Dispatcher | Billing Specialist | Field Technician | Auditor (Read-Only) | Community Admin | Resident Member |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **System Infrastructure & Keys** | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **VPP Flexibility & Dispatch** | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **§ 14a EnWG Curtailment** | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Monthly Statements (§ 42b)** | ✅ | ❌ | ✅ | ❌ | 👁️ *(Read)* | ✅ | 👁️ *(Self)* |
+| **Stripe & SEPA Financials** | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Commissioning Protocols** | ✅ | ❌ | ❌ | ✅ | 👁️ *(Read)* | 👁️ *(Read)* | ❌ |
+| **Remote Maintenance & Tests** | ✅ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| **Audit Log (ISO 27001)** | ✅ | 👁️ *(Read)* | 👁️ *(Read)* | ❌ | ✅ | 👁️ *(Tenant)* | ❌ |
+| **Document Hub Access** | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
+""",
+                "tags": ["rbac", "roles", "superadmin", "dispatcher", "billing", "installer", "auditor", "berechtigungen", "rollenmatrix", "governance"],
+                "is_featured": True,
+                "sort_order": 1,
+            },
+            # ---------------------------------------------------------------------
+            # 12. ADMIN & GOVERNANCE: REVISIONSSICHERHEIT & AUDIT TRAIL (ISO 27001 / GoBD)
+            # ---------------------------------------------------------------------
+            {
+                "category": cats["admin-governance"],
+                "slug": "revisionssicherheit-audit-trail-und-gobd-compliance",
+                "context_key": "admin_audit_gobd",
+                "title_de": "Revisionssicherheit & Audit Trail: GoBD-, ISO 27001- und EnWG-Compliance",
+                "title_en": "Audit Trail & Security Governance: GoBD, ISO 27001 and EnWG Compliance",
+                "summary_de": "Revisionssichere Protokollierung aller administrativen Aktionen, § 14a EnWG Drosselungsnachweise, PTB-A 50.7 Eichrecht und GoBD-konforme Archivierung.",
+                "summary_en": "Immutable activity logging of administrative events, § 14a EnWG dimming proofs, PTB-A 50.7 calibration crypto signatures, and GoBD compliance.",
+                "content_de": """# Revisionssicherheit & Audit Trail: GoBD-, ISO 27001- und EnWG-Compliance
+
+Für Stadtwerke, Wohnungsbaugesellschaften und Energiegemeinschaften gelten strenge gesetzliche Anforderungen an die **Nachvollziehbarkeit, Unveränderbarkeit und Revisionssicherheit** digitaler Prozesse (ISO 27001, SOC 2, GoBD, § 14a EnWG, MessEG).
+
+Sharegy stellt hierfür eine integrierte Compliance- und Audit-Log-Architektur bereit.
+
+---
+
+## 1. Enterprise Audit Log (`core_auditlog`)
+
+Jede sicherheitskritische Aktion im System wird **automatisch und unveränderbar** mit vollständigem Kontext protokolliert:
+
+* **Echtzeit-Metadaten**:
+  * Timestamp mit Zeitzone (`Europe/Berlin`)
+  * Akteur (Benutzer-ID & E-Mail)
+  * Quell-IP-Adresse (inkl. Reverse-Proxy Header `X-Forwarded-For`)
+  * User-Agent & Client-Typ (Web / Native App / API)
+* **Diff-Tracking**: Vorher/Nachher-Vergleich geänderter Parameter (z. B. Netzdienlichkeits-Grenzwerte oder Rollenzuweisungen).
+* **Severity-Klassifizierung**: `info`, `warning`, `critical`.
+
+```
+Beispiel-Ereignisse im Audit-Log:
+• ROLE_ASSIGNED: Akteur admin@stadtwerke.de weist user@quartier.de die Rolle 'auditor' zu.
+• STEUVE_DIMMING_TRIGGERED: VNB-Befehl dimmt Wärmepumpe WP-102 auf 4,2 kW (gem. § 14a EnWG).
+• STATEMENT_FINALIZED: Monatsabrechnung ABR-202609 für Liegenschaft Spreeblick festgeschrieben.
+• EICHRECHT_VERIFY: Zählerstand 1EMH0012398471 kryptographisch gem. PTB-A 50.7 validiert.
+```
+
+Das Audit-Log kann von berechtigten Auditoren und Administratoren unter [`/app/admin/audit-logs`](file:///app/admin/audit-logs) eingesehen und im CSV-/Excel-Format exportiert werden.
+
+---
+
+## 2. § 14a EnWG Netzdrosselungs-Nachweisführung
+
+Im Rahmen des § 14a EnWG müssen Netzbetreiber und Betreiber steuerbarer Verbrauchseinrichtungen (SteuVE) netzdienliche Dimm-Ereignisse revisionssicher nachweisen können:
+
+* **Protokollierung im `EnWG14aDimmingAuditLog`**:
+  * Signal-Empfang über den CLS-Kanal (BSI TR-03109-1)
+  * Quittierungs-Latenz (in Millisekunden)
+  * Leistungsreduktion auf maximal 4,2 kW je Großlast
+  * Wiederherstellung des Normalbetriebs nach Entwarnung
+
+---
+
+## 3. Eichrechtskonforme Messwertsignaturen (PTB-A 50.7)
+
+Alle 15-Minuten-Lastgänge und Zählerstände werden mit kryptographischen Signaturen (ECDSA Secp256r1) versehen und sind mit der offiziellen **Transparenzsoftware** der PTB prüfbar.
+
+---
+
+## 4. Zentraler Dokumenten- & Download-Hub (`/app/documents`)
+
+Alle generierten PDF-Monatsabrechnungen, IBN-Übergabeprotokolle nach VDE-AR-N 4105 und Eichrechtsberichte werden im [Dokumenten-Manager](file:///app/documents) revisionssicher historisiert und stehen für Wirtschaftsprüfer und Kassenprüfer jederzeit zum 1-Klick-Download bereit.
+""",
+                "content_en": """# Audit Trail & Security Governance: GoBD, ISO 27001 and EnWG Compliance
+
+Utilities, housing associations, and energy communities are subject to stringent regulatory requirements regarding **traceability, immutability, and auditability** (ISO 27001, SOC 2, GoBD, § 14a EnWG, MessEG).
+
+Sharegy delivers an integrated compliance, audit logging, and cryptographic verification architecture.
+
+---
+
+## 1. Enterprise Audit Log (`core_auditlog`)
+
+Every security-relevant operation is recorded in an immutable ledger with full contextual telemetry:
+* **Real-time Telemetry**: UTC/Europe timezone timestamp, actor ID & email, origin IP address (`X-Forwarded-For`), and user-agent.
+* **Diff Tracking**: Before/After state differences for modified parameters (e.g. curtailment limits, tariff modifications, role transitions).
+* **Severity Levels**: `info`, `warning`, `critical`.
+
+Review and export the live audit log at [`/app/admin/audit-logs`](file:///app/admin/audit-logs).
+
+---
+
+## 2. § 14a EnWG Curtailment Compliance Ledger
+
+Complies with mandatory grid operator reporting:
+* Logged in `EnWG14aDimmingAuditLog` with CLS channel ingest (BSI TR-03109-1).
+* Sub-second acknowledgment timestamps and 4.2 kW power ceiling confirmation.
+
+---
+
+## 3. PTB-A 50.7 Cryptographic Verification & Document Hub
+
+* 15-minute smart meter readings signed with ECDSA Secp256r1 / SHA-256 for PTB Transparency Software compatibility.
+* Centralized historical access to all statements, commissioning protocols, and certificates via the [Download Hub](file:///app/documents).
+""",
+                "tags": ["audit", "compliance", "gobd", "iso27001", "revisionssicherheit", "enwg14a", "ptb", "eichrecht", "dokumente"],
+                "is_featured": True,
+                "sort_order": 2,
+            },
+            # ---------------------------------------------------------------------
+            # 13. ADMIN & BILLING: ZENTRALER DOKUMENTEN- & EXPORT-MANAGER (DOWNLOAD HUB)
+            # ---------------------------------------------------------------------
+            {
+                "category": cats["admin-governance"],
+                "slug": "zentraler-dokumenten-und-export-manager-download-hub",
+                "context_key": "document_download_hub",
+                "title_de": "Zentraler Dokumenten- & Export-Manager: Monatsabrechnungen, Berichte & Download Hub",
+                "title_en": "Central Document & Export Manager: Monthly Statements, Reports & Download Hub",
+                "summary_de": "Vollständige Anleitung zum Dokumenten-Manager: Historisierte PDF-Abrechnungen (§ 42b EnWG), EMS-Jahresberichte, IBN-Protokolle, DATEV-Exporte und On-Demand Generator.",
+                "summary_en": "Complete guide to the Document Hub: Historical PDF statements (§ 42b EnWG), EMS annual reports, commissioning protocols, DATEV exports, and On-Demand Generator.",
+                "content_de": """# Zentraler Dokumenten- & Export-Manager: Monatsabrechnungen, Berichte & Download Hub
+
+Der **Zentrale Dokumenten- & Export-Manager** ([`/app/documents`](file:///app/documents)) bündelt alle im System erzeugten Abrechnungen, Messzertifikate, Energieberichte und Inbetriebnahmeprotokolle an einer einzigen, revisionssicheren Stelle.
+
+---
+
+## 1. Übersicht & Kernfunktionen
+
+Der Download Hub erfüllt wesentliche gesetzliche und betriebliche Anforderungen (GoBD, § 14 UStG, EnWG § 42b, ISO 27001):
+
+* 📂 **Zentrale Historisierung**: Alle generierten Monatsabschlüsse, Zählerlisten und Prüfberichte bleiben dauerhaft archiviert und können jederzeit erneut heruntergeladen werden.
+* ⚡ **On-Demand Sofort-Export Generator**: Erzeuge Ad-hoc-Berichte für beliebige Zeiträume (Heute, Monat, Vormonat, Gesamtjahr) in deinem Wunschformat (PDF, Excel, CSV, JSON).
+* 🔍 **Live-Suche & Filterleiste**: Filtere nach Dokumentenkategorie oder suche direkt nach Rechnungsnummer, Zähler-Seriennummer oder Liegenschaft.
+* ⚖️ **Kryptographisches Prüfsiegel**: Jedes Dokument besitzt eine eindeutige SHA-256 Prüfsumme zur revisionssicheren Verifikation gegenüber Wirtschaftsprüfern, Finanzamt und Steuerberatern.
+
+---
+
+## 2. Unterstützte Dokumenttypen & Exportformate
+
+| Dokumenttyp | Kategorie | Rechtsgrundlage / Norm | Verfügbare Dateiformate |
+| :--- | :--- | :--- | :--- |
+| **Monatsabrechnungsbescheide** | 📄 Abrechnungen | § 42b / § 42a EnWG, § 14 UStG | 📄 PDF (Druckbescheid), 📊 Excel (.xlsx), 📝 CSV (DATEV), 💻 XML / ERP |
+| **EMS Energie- & Autarkieberichte** | ⚡ Energiebilanzen | DIN EN ISO 50001, EnWG | 📄 PDF (Auswertungsbericht), 📊 Excel (.xlsx), 📝 CSV-Rohdaten, 💻 JSON |
+| **Digitale IBN- & Übergabeprotokolle** | 🔧 IBN-Protokolle | VDE-AR-N 4105, § 14a EnWG, NAV | 📄 PDF (Rechtsverbindliches Übergabeprotokoll mit TREI-Zertifikat) |
+| **Eichrechts- & Messzertifikate** | ⚖️ Eichrecht & Zähler | MessEG, PTB-A 50.7, BSI TR-03109-1 | 📄 PDF (Signaturprüfbericht), 📊 CSV (15m MSCONS EDIFACT Lastgang) |
+| **DSGVO Datenabzug** | 🔒 Datenschutz | Art. 15 & Art. 20 EU-DSGVO | 💻 JSON (Vollständiges Maschinenlesbares Archiv) |
+
+---
+
+## 3. Der On-Demand Export-Generator
+
+Über die obere Schnell-Aktionsleiste im Dokumenten-Manager können individuelle Berichte ohne vorherigen Monatsabschluss erzeugt werden:
+
+1. **Berichtstyp wählen**: Energiebilanz & Autarkie, Digitales IBN-Protokoll oder PTB-A 50.7 Eichrechtsnachweis.
+2. **Zeitraum wählen**:
+   * *Heute (Live)*: Sub-Sekunden-Snapshot des aktuellen Tages.
+   * *Laufender Monat*: Bisherige Monatssummen und Autarkiegrad.
+   * *Letzter Monat*: Abgeschlossener Vormonat.
+   * *Gesamtjahr (YTD)*: Jahresenergiefluss und CO₂-Einsparung.
+3. **Format wählen**: PDF für Vorlagen und Druck, Excel `.xlsx` für Tabellenkalkulation, CSV für DATEV-Buchhaltung oder JSON für Entwickler.
+4. Klick auf **„Download“**: Der Download startet sofort im Browser.
+
+---
+
+## 4. Revisions- & Prüfnachweis-Modal
+
+Durch Klick auf **„Details & Prüfsiegel“** bei einem Dokument öffnet sich das Inspektions-Modal:
+* Anzeige des kryptographischen SHA-256 Hashes
+* Verknüpfte Zähler- und Asset-IDs
+* Bestätigung des WORM-konformen Festschreibungsstatus (Write Once, Read Many)
+""",
+                "content_en": """# Central Document & Export Manager: Monthly Statements, Reports & Download Hub
+
+The **Central Document & Export Manager** ([`/app/documents`](file:///app/documents)) consolidates all generated financial statements, calibration certificates, energy balances, and commissioning records in a single audit-ready workspace.
+
+---
+
+## 1. Overview & Key Capabilities
+
+* 📂 **Centralized Archival**: Historical statements and meter reading logs remain persistently accessible.
+* ⚡ **On-Demand Export Generator**: Generate custom reports for any time window (Today, Month, Last Month, Full Year) in PDF, Excel, CSV, or JSON.
+* 🔍 **Smart Filter & Search**: Instantly locate records by invoice number, meter serial, or community name.
+* ⚖️ **Cryptographic Verification**: Every document includes a SHA-256 checksum for audit compliance (GoBD, ISO 27001, § 14 UStG).
+
+---
+
+## 2. Document Types & Formats
+
+* **Monthly Settlement Statements (§ 42b EnWG)**: Formats: PDF, Excel (.xlsx), DATEV CSV, XML ERP.
+* **EMS Energy & Autarky Balances**: Formats: PDF report, Excel, raw CSV, JSON.
+* **Digital Commissioning Protocols (VDE-AR-N 4105)**: Formats: Official PDF handover protocol with contractor certification.
+* **Eichrecht & Meter Certificates (PTB-A 50.7)**: Formats: PDF proof, 15-minute MSCONS EDIFACT CSV.
+* **GDPR Data Export (Art. 15 / 20)**: Formats: RFC 8259 JSON full archive.
+""",
+                "tags": ["dokumente", "export", "download", "pdf", "excel", "datev", "abrechnung", "ibn", "eichrecht", "download-hub"],
+                "is_featured": True,
+                "sort_order": 3,
+            },
         ]
 
         valid_slugs = set()

@@ -120,6 +120,7 @@ export function getNavigationSections({
         sections.push({
             title: `⚙️ ${t("nav.account_settings", "Mein Konto")}`,
             items: [
+                { name: t("nav.documents", "Dokumente & Downloads"), path: "/app/documents", icon: "📁" },
                 { name: t("nav.profile", "Profil & Stammdaten"), path: "/app/profile", icon: "👤" },
                 { name: t("nav.manual", "Handbuch"), path: "/app/help", icon: "📖" },
             ],
@@ -159,6 +160,7 @@ export function getNavigationSections({
         sections.push({
             title: `⚙️ ${t("nav.account_settings", "Mein Konto")}`,
             items: [
+                { name: t("nav.documents", "Dokumente & Downloads"), path: "/app/documents", icon: "📁" },
                 { name: t("nav.profile", "Profil & Stammdaten"), path: "/app/profile", icon: "👤" },
                 { name: t("nav.manual", "Handbuch"), path: "/app/help", icon: "📖" },
             ],
@@ -198,6 +200,7 @@ export function getNavigationSections({
         sections.push({
             title: `⚙️ ${t("nav.account_settings", "Mein Konto")}`,
             items: [
+                { name: t("nav.documents", "Dokumente & Downloads"), path: "/app/documents", icon: "📁" },
                 { name: t("nav.profile", "Profil & Stammdaten"), path: "/app/profile", icon: "👤" },
                 { name: t("nav.manual", "Handbuch"), path: "/app/help", icon: "📖" },
             ],
@@ -263,6 +266,7 @@ export function getNavigationSections({
             {
                 title: `⚙️ ${t("nav.account_settings", "Mein Konto & System")}`,
                 items: [
+                    { name: t("nav.documents", "Dokumente & Downloads"), path: "/app/documents", icon: "📁" },
                     { name: t("nav.profile", "Profil & Stammdaten"), path: "/app/profile", icon: "👤" },
                     { name: t("nav.system_status", "Systemstatus (Server)"), path: "/app/status", icon: "🌐" },
                     { name: t("nav.manual", "Handbuch"), path: "/app/help", icon: "📖" },
@@ -288,6 +292,7 @@ export function getNavigationSections({
         title: `📊 ${t("nav.analytics", "Analysen & Monitoring")}`,
         items: [
             { name: t("energy.energy_balance", "Energiebilanz"), path: "/app/energy", icon: "⚡" },
+            { name: t("nav.documents", "Dokumente & Downloads"), path: "/app/documents", icon: "📁" },
             { name: t("nav.solar_forecast", "Solar-Prognose"), path: "/app/solarforecast", icon: "☀️" },
             {
                 name: t("nav.alerts", "Alarmzentrale"),
