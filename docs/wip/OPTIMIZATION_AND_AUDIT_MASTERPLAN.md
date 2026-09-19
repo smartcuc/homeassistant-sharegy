@@ -60,35 +60,27 @@ Für die folgenden Module existieren detaillierte Spezifikationen und teils impl
 
 ## 🔴 4. Was muss noch gemacht werden? (Geplante Roadmap & Backlog)
 
-> [!NOTE]
-> Die vollständige technische Spezifikation für diese 5 Enterprise-Erweiterungen ist dokumentiert in:  
-> 📄 **[`WIP_ENTERPRISE_POWER_USER_AND_AUTOMATION_EXTENSIONS.md`](./WIP_ENTERPRISE_POWER_USER_AND_AUTOMATION_EXTENSIONS.md)**
+Empfohlene nächste Ausbaustufen für Enterprise-Power-User und Großkunden (jeweils mit eigenständiger WIP-Spezifikation):
 
-Empfohlene nächste Ausbaustufen für Enterprise-Power-User und Großkunden:
+### 1. ⚡ [`WIP_COMMAND_CENTER_SPOTLIGHT_SEARCH.md`](./WIP_COMMAND_CENTER_SPOTLIGHT_SEARCH.md)
+* **Ziel**: Tastaturgesteuertes Quick-Nav-Overlay (`Cmd+K` / `Ctrl+K`) für Power-User und Admins.
+* **Funktionen**: Schnellsprung zu jeder Liegenschaft, jedem Zähler, Quartier und Handbuch-Artikel in $< 300\,\text{ms}$, Theme-Toggle & Schnell-Exporte.
 
-### 1. ⚡ Globales `Cmd+K` / `Ctrl+K` Command-Center (Spotlight-Search)
-* **Ziel**: Tastaturgesteuertes Quick-Nav-Overlay für Power-User und Admins.
-* **Funktionen**:
-  - Schnellsprung zu jeder Liegenschaft, jedem Zähler, jedem Quartier und Handbuch-Artikel in $< 300\,\text{ms}$.
-  - Direktbefehle: Dark/Light Mode umschalten, Fernwartungs-Diagnose starten, CSV-Export anstoßen.
-
-### 2. 🔔 Enterprise Notification & Activity Flyout (Topbar-Glocke)
+### 2. 🔔 [`WIP_ENTERPRISE_NOTIFICATION_AND_ACTIVITY_FLYOUT.md`](./WIP_ENTERPRISE_NOTIFICATION_AND_ACTIVITY_FLYOUT.md)
 * **Ziel**: Ablösung des modalen Alert-Centers durch ein reaktives Topbar-Dropdown.
-* **Funktionen**:
-  - 4 strukturierte Tabs: 🚨 Störungen, ⚡ VPP/Netz-Aktionen, 📄 Neue IBN-Protokolle, 👥 System-Events.
-  - 1-Klick-Aktionen: „Alle als gelesen markieren“, Direktlink zur betroffenen Anlage.
+* **Funktionen**: 4 Tabs (🚨 Störungen, ⚡ VPP/Netz-Aktionen, 📄 Neue IBN-Protokolle, 👥 System-Events) & 1-Klick-„Alle als gelesen markieren“.
 
-### 3. 🍞 Globales Toast-Notification-System (z. B. sonner / react-hot-toast)
-* **Ziel**: Elegante, nicht-blockierende Statusmeldungen für asynchrone Aktionen („Dimm-Befehl erfolgreich gesendet“, „Zählerstand gespeichert“).
-* **Funktionen**: Undo-Button für rückgängig machbare Aktionen, Auto-Dismiss nach 4 Sekunden.
+### 3. 🍞 [`WIP_GLOBAL_TOAST_NOTIFICATION_SYSTEM.md`](./WIP_GLOBAL_TOAST_NOTIFICATION_SYSTEM.md)
+* **Ziel**: Elegante, nicht-blockierende Statusmeldungen für asynchrone Aktionen („Dimm-Befehl gesendet“, „Zählerstand gespeichert“).
+* **Funktionen**: Undo-Button für rückgängig machbare Aktionen, Auto-Dismiss nach 4–6 Sekunden, Glassmorphic Styling.
 
-### 4. 🔐 2FA / Zwei-Faktor-Authentifizierung (TOTP / WebAuthn)
+### 4. 🔐 [`WIP_TWO_FACTOR_AUTHENTICATION_MFA.md`](./WIP_TWO_FACTOR_AUTHENTICATION_MFA.md)
 * **Ziel**: Pflicht-2FA für privilegierte Rollen (`SuperAdmin`, `Dispatcher`, `Partner-Installateur`).
-* **Funktionen**: Google Authentifier / 1Password TOTP QR-Code Setup, Notfall-Backup-Codes, Session-Steuerung.
+* **Funktionen**: Google Authenticator / 1Password TOTP QR-Code Setup, Notfall-Backup-Codes, Session-Token Scoping.
 
-### 5. 🪝 Outbox-Pattern Webhook-Dispatcher für ERP & CRM
-* **Ziel**: Automatische Event-Benachrichtigung für Stadtwerke- und Hausverwalter-Systeme (SAP, DATEV, Salesforce).
-* **Events**: `meter.reading.created`, `invoice.issued`, `vpp.dispatch.triggered`, `handover.completed`.
+### 5. 🪝 [`WIP_OUTBOX_WEBHOOK_DISPATCHER_ERP_CRM.md`](./WIP_OUTBOX_WEBHOOK_DISPATCHER_ERP_CRM.md)
+* **Ziel**: Transaktionale Event-Benachrichtigung für ERP- & CRM-Systeme von Stadtwerken & Verwaltern (SAP, DATEV, Salesforce).
+* **Events**: `meter.reading.created`, `invoice.issued`, `vpp.dispatch.triggered`, `handover.completed` mit HMAC-SHA256 Signatur.
 
 ---
 

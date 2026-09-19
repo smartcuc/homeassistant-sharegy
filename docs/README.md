@@ -117,7 +117,11 @@ docs/
 | Dokument | Bereich | Status & Priorität | Beschreibung |
 |---|---|:---:|---|
 | 🛠️ **[`OPTIMIZATION_AND_AUDIT_MASTERPLAN.md`](./wip/OPTIMIZATION_AND_AUDIT_MASTERPLAN.md)** | Masterplan | 🟢 v5.4 Live | Konsolidierter Status (78% Live, 14% WIP, 8% Backlog) & Roadmap |
-| ⚡ **[`WIP_ENTERPRISE_POWER_USER_AND_AUTOMATION_EXTENSIONS.md`](./wip/WIP_ENTERPRISE_POWER_USER_AND_AUTOMATION_EXTENSIONS.md)** | Enterprise UX & Sec | 🟡 Spec / 🔴 Hoch | Cmd+K Spotlight, Notification-Flyout, Toasts, 2FA/MFA & Webhook-Outbox |
+| ⚡ **[`WIP_COMMAND_CENTER_SPOTLIGHT_SEARCH.md`](./wip/WIP_COMMAND_CENTER_SPOTLIGHT_SEARCH.md)** | Power-User UX | 🟡 25% / 🔴 Hoch | Tastaturgesteuertes Cmd+K / Ctrl+K Quick-Nav Overlay ($<300\,\text{ms}$) |
+| 🔔 **[`WIP_ENTERPRISE_NOTIFICATION_AND_ACTIVITY_FLYOUT.md`](./wip/WIP_ENTERPRISE_NOTIFICATION_AND_ACTIVITY_FLYOUT.md)** | Operator UX | 🟡 20% / 🔴 Hoch | Reaktives Topbar-Dropdown mit 4 Tabs (Störungen, VPP, IBN, System) |
+| 🍞 **[`WIP_GLOBAL_TOAST_NOTIFICATION_SYSTEM.md`](./wip/WIP_GLOBAL_TOAST_NOTIFICATION_SYSTEM.md)** | Micro-UX | 🟡 25% / 🔴 Hoch | Nicht-blockierende Toasts für Erfolge & Warnungen mit Undo-Support |
+| 🔐 **[`WIP_TWO_FACTOR_AUTHENTICATION_MFA.md`](./wip/WIP_TWO_FACTOR_AUTHENTICATION_MFA.md)** | Security | 🟡 20% / 🔴 Hoch | Pflicht-2FA für Admins & Dispatcher (TOTP QR-Code, Backup-Codes) |
+| 🪝 **[`WIP_OUTBOX_WEBHOOK_DISPATCHER_ERP_CRM.md`](./wip/WIP_OUTBOX_WEBHOOK_DISPATCHER_ERP_CRM.md)** | B2B Integration | 🟡 15% / 🔴 Hoch | Transaktionales Outbox-Pattern für SAP, DATEV & CRM mit HMAC-SHA256 |
 | 📱 **[`WIP_DUAL_APP_ECOSYSTEM_USER_VS_PARTNER.md`](./wip/WIP_DUAL_APP_ECOSYSTEM_USER_VS_PARTNER.md)** | Mobile App | 🟢 **90%** / 🔴 Hoch | Two-App Strategie (`Sharegy Home` vs. `Sharegy Pro` mit QR-Inbetriebnahme) |
 | 🔒 **[`WIP_DYNAMIC_WHITELABEL_SSL_PROVISIONING.md`](./wip/WIP_DYNAMIC_WHITELABEL_SSL_PROVISIONING.md)** | Whitelabel / TLS | 🟡 **70%** / 🟡 Mittel | Automatisierte Let's Encrypt SSL-Provisionierung für CNAME-Domains |
 | 🌐 **[`WIP_SMARTEVO_WEBSITE_PRODUCT_INTEGRATION.md`](./wip/WIP_SMARTEVO_WEBSITE_PRODUCT_INTEGRATION.md)** | Dachmarken-Web | 🟡 **65%** / 🟡 Mittel | Integration von Sharegy & Factofy im smartEvo.de Webauftritt |
