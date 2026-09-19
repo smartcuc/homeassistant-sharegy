@@ -27,6 +27,7 @@ docs/
 
 | Dokument | Beschreibung |
 |---|---|
+| 🧭 **[`SHAREGY_EXECUTIVE_STATUS_AND_POSITIONING_REPORT.md`](./architecture/SHAREGY_EXECUTIVE_STATUS_AND_POSITIONING_REPORT.md)** | **NEU:** Offizielle Standortbestimmung, Technologische Spitzenleistungen, Reifegrad & Strategisches Fazit |
 | ⚡ **[`BNETZA_CLS_SMART_METER_GATEWAY_INTEGRATION.md`](./architecture/BNETZA_CLS_SMART_METER_GATEWAY_INTEGRATION.md)** | **NEU:** BNetzA CLS-Kanal & Smart Meter Gateway (SMGW) Kopplung (§ 14a EnWG Drosselung, FNN Steuerbox Quittierung) |
 | 📈 **[`AUTOMATED_FLEXIBILITY_AND_VPP_MARKET_CLEARING.md`](./architecture/AUTOMATED_FLEXIBILITY_AND_VPP_MARKET_CLEARING.md)** | **NEU:** Automatisierter Flexibilitäts- & Regelleistungshandel (aFRR/SRL, 80/20 Erlös-Clearing & Aggregator-Schnittstelle) |
 | ⚡ **[`VPP_FLEXIBILITY_BONUS_ECOSYSTEM_AND_PROCESS_GUIDE.md`](./architecture/VPP_FLEXIBILITY_BONUS_ECOSYSTEM_AND_PROCESS_GUIDE.md)** | Virtuelles Kraftwerk (VPP) Flexibilitäts-Bonus: Ökosystem, Kooperationsmatrix, End-to-End Prozesse & Erlösmodelle |
