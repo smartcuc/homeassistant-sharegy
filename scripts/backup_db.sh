@@ -3,16 +3,21 @@
 # Sharegy – Automated PostgreSQL / TimescaleDB Full Backup Script
 # ==============================================================================
 # Features:
-#  - Automatisches Laden der DB-Credentials aus .env (/var/www/sharegy/shared/.env)
+#  - Automatisches Laden der DB-Credentials aus .env
 #  - Erstellung komprimierter, konsistenter pg_dump Backups (.dump / .sql.gz)
-#  - Vollständig kompatibel mit TimescaleDB Hypertables & Continuous Aggregates
-#  - Automatischer S2S-Stream zu smartEvo moniy Vault (falls konfiguriert)
+#  - S2S-Stream zu smartEvo moniy Vault
+#  - Automatisches Öffnen eines smartEvo Incident-Tickets bei Fehlern
 #  - Tägliches Backup-Logging mit Zeitstempeln
-#  - Automatische Bereinigung alter Backups (Retention: 14 Tage standardmäßig)
-#  - Optional: Offsite-Upload via S3 / rclone / Hetzner Storage Box
+#  - Automatische Bereinigung alter Backups (Retention: 14 Tage)
 # ==============================================================================
 
 set -eo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [ -f "${SCRIPT_DIR}/smartevo_notify.sh" ]; then
+    source "${SCRIPT_DIR}/smartevo_notify.sh"
+    trap notify_smartevo_failure EXIT
+fi
 
 # ------------------------------------------------------------------------------
 # 1. Konfiguration & Pfade
@@ -22,10 +27,10 @@ if [ ! -f "$ENV_FILE" ]; then
     ENV_FILE="/var/www/sharegy/live/.env"
 fi
 if [ ! -f "$ENV_FILE" ]; then
-    ENV_FILE="$(dirname "$0")/../.env.prod"
+    ENV_FILE="${SCRIPT_DIR}/../.env.prod"
 fi
 if [ ! -f "$ENV_FILE" ]; then
-    ENV_FILE="$(dirname "$0")/../.env"
+    ENV_FILE="${SCRIPT_DIR}/../.env"
 fi
 
 BACKUP_DIR="${BACKUP_DIR:-/var/backups/sharegy/db}"
@@ -71,7 +76,7 @@ log "Starte PostgreSQL/TimescaleDB Full Backup für Datenbank: '$DB_NAME'..."
 BACKUP_FILE="${BACKUP_DIR}/sharegy_db_${DB_NAME}_${DATE_STR}.dump"
 GZ_SQL_FILE="${BACKUP_DIR}/sharegy_db_${DB_NAME}_${DATE_STR}.sql.gz"
 
-# Methode 1: Custom Archive Format (-Fc) für maximale Performance & pg_restore Flexibilität
+# Methode 1: Custom Archive Format (-Fc)
 if pg_dump -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -Fc -b -v "$DB_NAME" > "$BACKUP_FILE" 2>> "$LOG_FILE"; then
     BACKUP_SIZE="$(du -h "$BACKUP_FILE" | cut -f1)"
     log "Custom-Dump erfolgreich erstellt: $BACKUP_FILE (Größe: $BACKUP_SIZE)"
@@ -80,7 +85,7 @@ else
     exit 1
 fi
 
-# Methode 2: Gekapseltes SQL.gz als universelles Text-Backup
+# Methode 2: Gekapseltes SQL.gz
 if command -v gzip >/dev/null 2>&1; then
     if pg_dump -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" --clean --if-exists "$DB_NAME" | gzip -9 > "$GZ_SQL_FILE" 2>> "$LOG_FILE"; then
         GZ_SIZE="$(du -h "$GZ_SQL_FILE" | cut -f1)"
@@ -89,7 +94,7 @@ if command -v gzip >/dev/null 2>&1; then
 fi
 
 # ------------------------------------------------------------------------------
-# 4. Offsite Sync (moniy Vault / S3 / Rclone)
+# 4. Offsite Sync & moniy Streaming
 # ------------------------------------------------------------------------------
 if [ -n "$MONIY_URL" ] && [ -n "$MONIY_KEY" ] && command -v curl >/dev/null 2>&1; then
     log "Übertrage Full-Backup an smartEvo moniy Vault ($MONIY_URL)..."
@@ -112,7 +117,7 @@ if [ -n "$RCLONE_REMOTE" ] && command -v rclone >/dev/null 2>&1; then
 fi
 
 # ------------------------------------------------------------------------------
-# 5. Retention Management: Alte Backups bereinigen
+# 5. Retention Management
 # ------------------------------------------------------------------------------
 log "Prüfe und bereinige Backups älter als $RETENTION_DAYS Tage..."
 find "$BACKUP_DIR" -type f \( -name "sharegy_db_*.dump" -o -name "sharegy_db_*.sql.gz" \) -mtime +"$RETENTION_DAYS" -exec rm -v {} \; >> "$LOG_FILE" 2>&1 || true

@@ -3,14 +3,29 @@
 # Sharegy – Automated Let's Encrypt / SSL Certificate Renewal & Health Check
 # ==============================================================================
 # Features:
-#  - Führt certbot renew non-interaktiv aus
-#  - Automatischer Nginx Reload nach erfolgreichem Renewal (Post-Hook)
-#  - Prüfung des Ablaufdatums des Zertifikats via OpenSSL
-#  - Validierung des Live-HTTPS-Endpunkts (https://sharegy.de/api/operations/status/)
-#  - Warnung bei Zertifikaten mit < 14 Tagen Restlaufzeit
+#  - certbot renew mit Post-Hook (systemctl reload nginx)
+#  - OpenSSL Expiry Check (< 14 Tage Warnung)
+#  - Automatisches Öffnen eines smartEvo Incident-Tickets bei Fehlern
 # ==============================================================================
 
 set -eo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [ -f "${SCRIPT_DIR}/smartevo_notify.sh" ]; then
+    source "${SCRIPT_DIR}/smartevo_notify.sh"
+    trap notify_smartevo_failure EXIT
+fi
+
+ENV_FILE="${ENV_FILE:-/var/www/sharegy/shared/.env}"
+if [ ! -f "$ENV_FILE" ]; then
+    ENV_FILE="/var/www/sharegy/live/.env"
+fi
+if [ ! -f "$ENV_FILE" ]; then
+    ENV_FILE="${SCRIPT_DIR}/../.env.prod"
+fi
+if [ -f "$ENV_FILE" ]; then
+    export $(grep -v '^#' "$ENV_FILE" | grep -E '^(MONIY_URL|MONIY_S2S_KEY)=' | xargs)
+fi
 
 LOG_FILE="${LOG_FILE:-/var/log/sharegy/ssl_renew.log}"
 CERT_DOMAIN="${CERT_DOMAIN:-sharegy.de}"
@@ -50,6 +65,7 @@ if [ -f "$CERT_PATH" ]; then
         
         if [ "$DAYS_LEFT" -le 14 ]; then
             log "[CRITICAL] Zertifikat läuft in weniger als 14 Tagen ab ($DAYS_LEFT Tage)! Bitte manuell prüfen."
+            exit 1
         fi
     fi
 else
@@ -63,6 +79,7 @@ if command -v curl >/dev/null 2>&1; then
         log "HTTPS-Verbindung zu '$CHECK_URL' erfolgreich (HTTP $HTTP_CODE)."
     else
         log "[WARN] HTTPS-Verbindung zu '$CHECK_URL' lieferte HTTP Status $HTTP_CODE!"
+        exit 1
     fi
 fi
 

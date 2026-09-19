@@ -2,22 +2,15 @@
 # Sharegy Production Crontab Configuration
 # Place this file in /etc/cron.d/sharegy or load via `crontab -e`
 # ==============================================================================
-# HINWEIS:
-# Fachliche Anwendungsaufgaben (EPEX Spot Marktpreise, Wetter- & PV-Prognosen,
-# Telemetrie-Aggregationen und Abrechnungssalden) werden kontinuierlich und
-# hochfrequent über Celery Beat gesteuert (siehe backend/settings/base.py).
-#
-# Diese Crontab steuert die SYSTEM- & INFRASTRUKTUR-Ebene:
-#  - Datenbank-Vollsicherungen & In-Flight Diffs
-#  - Let's Encrypt SSL-Zertifikate
-#  - Log-Rotation & Disk Space Watchdog
-#  - High-Availability Service Watchdog (inkl. Celery/Gunicorn Monitoring)
-#  - System-Housekeeping & Session-Pruning
+# ARCHITEKTUR-HINWEIS:
+#  - MAILTO ist leer (""), da alle Skripte Fehler automatisch über den
+#    smartEvo Incident-Hub (moniy) eskalieren und dort Tickets erstellen.
+#  - Alle Ausgaben fließen sauber mit Zeitstempel nach /var/log/sharegy/*.log.
 # ==============================================================================
 
 SHELL=/bin/bash
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-MAILTO=admin@sharegy.de
+MAILTO=""
 
 # ------------------------------------------------------------------------------
 # 1. High-Availability Watchdog & smartEvo Heartbeat (alle 2 Min)
@@ -51,12 +44,6 @@ MAILTO=admin@sharegy.de
 
 # ------------------------------------------------------------------------------
 # 6. Log Rotation, Compression & Disk Space Guard (täglich um 04:30)
-#    Komprimiert alte Logs (.gz), bereinigt nach 14 Tagen und warnt bei > 85% Disk.
+#    Komprimiert alte Logs (.gz), bereinigt nach 14 Tagen und öffnet moniy-Ticket bei > 85% Disk.
 # ------------------------------------------------------------------------------
 30 4 * * * root /var/www/sharegy/live/scripts/rotate_logs.sh >/dev/null 2>&1
-
-# ------------------------------------------------------------------------------
-# 7. Optional / Fallback: TimescaleDB Wartung (täglich um 05:00)
-#    (Wird primär über Celery Beat ausgeführt; dient hier als Sicherheits-Fallback)
-# ------------------------------------------------------------------------------
-0 5 * * * sharegy /var/www/sharegy/live/scripts/maintenance_timescaledb.sh >/dev/null 2>&1

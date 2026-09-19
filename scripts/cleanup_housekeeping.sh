@@ -6,14 +6,31 @@
 #  - Bereinigt abgelaufene Django-Sessions (clearsessions)
 #  - Bereinigt abgelaufene Magic-Login- & Auth-Tokens (cleanup_tokens)
 #  - MQTT Status-Reconciliation & Event-Queue Replay (mqtt_reconcile)
-#  - Bereinigt alte temporäre Cache- & Scratch-Dateien
+#  - Automatisches Öffnen eines smartEvo Incident-Tickets bei Fehlern
 # ==============================================================================
 
 set -eo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [ -f "${SCRIPT_DIR}/smartevo_notify.sh" ]; then
+    source "${SCRIPT_DIR}/smartevo_notify.sh"
+    trap notify_smartevo_failure EXIT
+fi
+
+ENV_FILE="${ENV_FILE:-/var/www/sharegy/shared/.env}"
+if [ ! -f "$ENV_FILE" ]; then
+    ENV_FILE="/var/www/sharegy/live/.env"
+fi
+if [ ! -f "$ENV_FILE" ]; then
+    ENV_FILE="${SCRIPT_DIR}/../.env.prod"
+fi
+if [ -f "$ENV_FILE" ]; then
+    export $(grep -v '^#' "$ENV_FILE" | grep -E '^(MONIY_URL|MONIY_S2S_KEY)=' | xargs)
+fi
+
 APP_DIR="${APP_DIR:-/var/www/sharegy/live}"
 if [ ! -d "$APP_DIR" ]; then
-    APP_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+    APP_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 fi
 
 VENV_DIR="${VENV_DIR:-${APP_DIR}/venv}"
@@ -36,19 +53,15 @@ log "Starte System Housekeeping & Cleanup..."
 
 cd "$APP_DIR"
 
-# 1. Django Sessions bereinigen
 log "Bereinige abgelaufene Django Sessions (clearsessions)..."
-"$PYTHON_BIN" manage.py clearsessions >> "$LOG_FILE" 2>&1 || log "[WARN] clearsessions fehlgeschlagen."
+"$PYTHON_BIN" manage.py clearsessions >> "$LOG_FILE" 2>&1
 
-# 2. Expired Auth Tokens bereinigen
 log "Bereinige abgelaufene Auth- & Magic-Tokens (cleanup_tokens)..."
-"$PYTHON_BIN" manage.py cleanup_tokens >> "$LOG_FILE" 2>&1 || log "[WARN] cleanup_tokens fehlgeschlagen."
+"$PYTHON_BIN" manage.py cleanup_tokens >> "$LOG_FILE" 2>&1
 
-# 3. MQTT Reconcile & State Sync
 log "Führe MQTT State Reconciliation aus (mqtt_reconcile)..."
-"$PYTHON_BIN" manage.py mqtt_reconcile >> "$LOG_FILE" 2>&1 || log "[WARN] mqtt_reconcile fehlgeschlagen."
+"$PYTHON_BIN" manage.py mqtt_reconcile >> "$LOG_FILE" 2>&1 || log "[WARN] mqtt_reconcile gab Warnung zurück."
 
-# 4. Temporäre Cache-Dateien im OS bereinigen
 log "Bereinige temporäre Dateien..."
 find /tmp -type f -name "sharegy_tmp_*" -mtime +2 -delete 2>/dev/null || true
 
