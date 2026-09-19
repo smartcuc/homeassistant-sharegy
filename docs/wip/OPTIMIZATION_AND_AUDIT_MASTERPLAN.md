@@ -60,6 +60,10 @@ Für die folgenden Module existieren detaillierte Spezifikationen und teils impl
 
 ## 🔴 4. Was muss noch gemacht werden? (Geplante Roadmap & Backlog)
 
+> [!NOTE]
+> Die vollständige technische Spezifikation für diese 5 Enterprise-Erweiterungen ist dokumentiert in:  
+> 📄 **[`WIP_ENTERPRISE_POWER_USER_AND_AUTOMATION_EXTENSIONS.md`](./WIP_ENTERPRISE_POWER_USER_AND_AUTOMATION_EXTENSIONS.md)**
+
 Empfohlene nächste Ausbaustufen für Enterprise-Power-User und Großkunden:
 
 ### 1. ⚡ Globales `Cmd+K` / `Ctrl+K` Command-Center (Spotlight-Search)

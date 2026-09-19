@@ -117,6 +117,7 @@ docs/
 | Dokument | Bereich | Status & Priorität | Beschreibung |
 |---|---|:---:|---|
 | 🛠️ **[`OPTIMIZATION_AND_AUDIT_MASTERPLAN.md`](./wip/OPTIMIZATION_AND_AUDIT_MASTERPLAN.md)** | Masterplan | 🟢 v5.4 Live | Konsolidierter Status (78% Live, 14% WIP, 8% Backlog) & Roadmap |
+| ⚡ **[`WIP_ENTERPRISE_POWER_USER_AND_AUTOMATION_EXTENSIONS.md`](./wip/WIP_ENTERPRISE_POWER_USER_AND_AUTOMATION_EXTENSIONS.md)** | Enterprise UX & Sec | 🟡 Spec / 🔴 Hoch | Cmd+K Spotlight, Notification-Flyout, Toasts, 2FA/MFA & Webhook-Outbox |
 | 📱 **[`WIP_DUAL_APP_ECOSYSTEM_USER_VS_PARTNER.md`](./wip/WIP_DUAL_APP_ECOSYSTEM_USER_VS_PARTNER.md)** | Mobile App | 🟢 **90%** / 🔴 Hoch | Two-App Strategie (`Sharegy Home` vs. `Sharegy Pro` mit QR-Inbetriebnahme) |
 | 🔒 **[`WIP_DYNAMIC_WHITELABEL_SSL_PROVISIONING.md`](./wip/WIP_DYNAMIC_WHITELABEL_SSL_PROVISIONING.md)** | Whitelabel / TLS | 🟡 **70%** / 🟡 Mittel | Automatisierte Let's Encrypt SSL-Provisionierung für CNAME-Domains |
 | 🌐 **[`WIP_SMARTEVO_WEBSITE_PRODUCT_INTEGRATION.md`](./wip/WIP_SMARTEVO_WEBSITE_PRODUCT_INTEGRATION.md)** | Dachmarken-Web | 🟡 **65%** / 🟡 Mittel | Integration von Sharegy & Factofy im smartEvo.de Webauftritt |
