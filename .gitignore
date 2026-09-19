@@ -29,6 +29,7 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
+*.code-workspace
 
 # Backup / temporär
 *.bak
