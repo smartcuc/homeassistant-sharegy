@@ -95,7 +95,8 @@ docs/
 
 | Dokument | Beschreibung |
 |---|---|
-| 🚀 **[`GENERAL_RELEASE_TESTING_AND_GO_TO_MARKET.md`](./marketing/GENERAL_RELEASE_TESTING_AND_GO_TO_MARKET.md)** | **NEU:** General Release QA-, Test- und Rollout-Masterplan für B2C & B2B |
+| 🌐 **[`SMARTEVO_WEBSITE_PRODUCT_INTEGRATION.md`](./marketing/SMARTEVO_WEBSITE_PRODUCT_INTEGRATION.md)** | **NEU:** smartEvo Dachmarken- & Web-Architektur (Astro 5, Sharegy & Factofy Integration, Cloudflare Pages) |
+| 🚀 **[`GENERAL_RELEASE_TESTING_AND_GO_TO_MARKET.md`](./marketing/GENERAL_RELEASE_TESTING_AND_GO_TO_MARKET.md)** | General Release QA-, Test- und Rollout-Masterplan für B2C & B2B |
 | 💼 **[`COMMERCIAL_SALES_PITCH_AND_B2B_KIT.md`](./marketing/COMMERCIAL_SALES_PITCH_AND_B2B_KIT.md)** | B2B-Sales-Kits für WEGs, Hausverwaltungen, Energiegenossenschaften & Installateure |
 | ⚡ **[`SHAREGY_FEATURE_CATALOG_AND_MARKETING_MATRIX.md`](./marketing/SHAREGY_FEATURE_CATALOG_AND_MARKETING_MATRIX.md)** | Gesamter Feature-Katalog & Marketing-Leistungsmatrix aller 15 Module |
 | 📱 **[`APP_TEASER.md`](./marketing/APP_TEASER.md)** | App Store Beschreibungen, Teaser-Texte und Marken-Farbkonzepte |
@@ -116,7 +117,7 @@ docs/
 
 | Dokument | Bereich | Status & Priorität | Beschreibung |
 |---|---|:---:|---|
-| 🛠️ **[`OPTIMIZATION_AND_AUDIT_MASTERPLAN.md`](./wip/OPTIMIZATION_AND_AUDIT_MASTERPLAN.md)** | Masterplan | 🟢 v5.4 Live | Konsolidierter Status (78% Live, 14% WIP, 8% Backlog) & Roadmap |
+| 🛠️ **[`OPTIMIZATION_AND_AUDIT_MASTERPLAN.md`](./wip/OPTIMIZATION_AND_AUDIT_MASTERPLAN.md)** | Masterplan | 🟢 v5.4 Live | Konsolidierter Status (82% Live, 10% WIP, 8% Backlog) & Roadmap |
 | ⚡ **[`WIP_COMMAND_CENTER_SPOTLIGHT_SEARCH.md`](./wip/WIP_COMMAND_CENTER_SPOTLIGHT_SEARCH.md)** | Power-User UX | 🟡 25% / 🔴 Hoch | Tastaturgesteuertes Cmd+K / Ctrl+K Quick-Nav Overlay ($<300\,\text{ms}$) |
 | 🔔 **[`WIP_ENTERPRISE_NOTIFICATION_AND_ACTIVITY_FLYOUT.md`](./wip/WIP_ENTERPRISE_NOTIFICATION_AND_ACTIVITY_FLYOUT.md)** | Operator UX | 🟡 20% / 🔴 Hoch | Reaktives Topbar-Dropdown mit 4 Tabs (Störungen, VPP, IBN, System) |
 | 🍞 **[`WIP_GLOBAL_TOAST_NOTIFICATION_SYSTEM.md`](./wip/WIP_GLOBAL_TOAST_NOTIFICATION_SYSTEM.md)** | Micro-UX | 🟡 25% / 🔴 Hoch | Nicht-blockierende Toasts für Erfolge & Warnungen mit Undo-Support |
@@ -124,7 +125,6 @@ docs/
 | 🪝 **[`WIP_OUTBOX_WEBHOOK_DISPATCHER_ERP_CRM.md`](./wip/WIP_OUTBOX_WEBHOOK_DISPATCHER_ERP_CRM.md)** | B2B Integration | 🟡 15% / 🔴 Hoch | Transaktionales Outbox-Pattern für SAP, DATEV & CRM mit HMAC-SHA256 |
 | 📱 **[`WIP_DUAL_APP_ECOSYSTEM_USER_VS_PARTNER.md`](./wip/WIP_DUAL_APP_ECOSYSTEM_USER_VS_PARTNER.md)** | Mobile App | 🟢 **90%** / 🔴 Hoch | Two-App Strategie (`Sharegy Home` vs. `Sharegy Pro` mit QR-Inbetriebnahme) |
 | 🔒 **[`WIP_DYNAMIC_WHITELABEL_SSL_PROVISIONING.md`](./wip/WIP_DYNAMIC_WHITELABEL_SSL_PROVISIONING.md)** | Whitelabel / TLS | 🟡 **70%** / 🟡 Mittel | Automatisierte Let's Encrypt SSL-Provisionierung für CNAME-Domains |
-| 🌐 **[`WIP_SMARTEVO_WEBSITE_PRODUCT_INTEGRATION.md`](./wip/WIP_SMARTEVO_WEBSITE_PRODUCT_INTEGRATION.md)** | Dachmarken-Web | 🟡 **65%** / 🟡 Mittel | Integration von Sharegy & Factofy im smartEvo.de Webauftritt |
 | 🔌 **[`WIP_DECOUPLED_MONITORING_CLUSTER_AND_REVERSE_RPC.md`](./wip/WIP_DECOUPLED_MONITORING_CLUSTER_AND_REVERSE_RPC.md)** | Edge & WSS | 🟡 **55%** / 🔴 Hoch | Auslagerung auf `mon.sharegy.de` & Zero-Trust WSS Reverse-RPC Wartung |
 | 🏠 **[`WIP_EEBUS_AND_CLOUD_ECOSYSTEM_BRIDGE.md`](./wip/WIP_EEBUS_AND_CLOUD_ECOSYSTEM_BRIDGE.md)** | HEMS / Wärmepumpe | 🟡 **45%** / 🔴 Hoch | EEBUS SHIP/SPINE Stack & Cloud-APIs (myVAILLANT, Home Connect) |
 

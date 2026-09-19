@@ -31,6 +31,7 @@ Alle folgenden Meilensteine und Enterprise-Features sind vollständig im Code im
 | **🧭 Rollen- & Kontextbasierte Navigation** | v5.3 (Sep 2026) | Dynamische Side-Navigation für EMS-Prosumer, Mieterstrom, GGV-Sharing, Installateure und Liegenschafts-Admins. |
 | **📧 E-Mail-Zustellbarkeit (MS Graph M365)** | v5.3 (Sep 2026) | Microsoft Graph REST-API (`noreply@smartevo.de`) mit 100% Posteingangs-Garantie bei Gmail, GMX & Outlook. |
 | **🚨 Alert- & Incident-Engine** | v5.3 (Sep 2026) | Saubere Trennung von Telemetrie-Alarmen (`AlertEvent`) und Helpdesk-Tickets (`Ticket`) mit Support-Drawer. |
+| **🌐 smartEvo Dachmarken-Website (`smartevo.de`)** | v5.4 (Sep 2026) | 11 Routen (Astro 5 + Tailwind), Dachmarken-Struktur, Sharegy- & Factofy-Integration, Solar-Rechner & Cloudflare Pages Hosting. |
 | **M1: Core HEMS & Telemetrie-Härtung** | v5.2 | TimescaleDB Hypertables, Deadband-Filter, $O(1)$ LatestMetric-Snapshots. |
 | **M2: Live Flow & Sankey-Engine** | v5.2 | ECharts/SVG Sankey, Merit-Order Flussverteilung, Restlast-Disaggregation. |
 | **M3: Smart Autopilot & Dispatch Hub** | v5.2 | 4 Autopilot-Modi, BWWP SG-Ready Anti-Cycling Schutz, Live Power Budgeting. |
@@ -52,7 +53,6 @@ Für die folgenden Module existieren detaillierte Spezifikationen und teils impl
 |---|---|:---:|---|
 | **📱 Dual-App Android (Home vs. Pro)** | [`WIP_DUAL_APP_ECOSYSTEM_USER_VS_PARTNER.md`](./WIP_DUAL_APP_ECOSYSTEM_USER_VS_PARTNER.md) | 🟢 **90 %** | Build-Flavors `android-home` und `android-pro` im Fastlane-Release finalisieren. |
 | **🌐 Dynamische Whitelabel SSL-Provisionierung** | [`WIP_DYNAMIC_WHITELABEL_SSL_PROVISIONING.md`](./WIP_DYNAMIC_WHITELABEL_SSL_PROVISIONING.md) | 🟡 **70 %** | CNAME Ingress-Proxy (Caddy/Traefik) mit On-Demand ACME Let's Encrypt verknüpfen. |
-| **🌐 smartEvo Dachmarken-Website Integration** | [`WIP_SMARTEVO_WEBSITE_PRODUCT_INTEGRATION.md`](./WIP_SMARTEVO_WEBSITE_PRODUCT_INTEGRATION.md) | 🟡 **65 %** | Vereinheitlichung der Hero- und Feature-Cards im Astro-Frontend (`smartevo-web`). |
 | **🛰️ Entkoppelter Monitoring-Cluster & Reverse-RPC** | [`WIP_DECOUPLED_MONITORING_CLUSTER_AND_REVERSE_RPC.md`](./WIP_DECOUPLED_MONITORING_CLUSTER_AND_REVERSE_RPC.md) | 🟡 **55 %** | Dual-Socket WSS Control Plane zur Zero-Trust Fernwartung von Edge-Gateways. |
 | **📡 EEBUS & Cloud Ecosystem Bridge** | [`WIP_EEBUS_AND_CLOUD_ECOSYSTEM_BRIDGE.md`](./WIP_EEBUS_AND_CLOUD_ECOSYSTEM_BRIDGE.md) | 🟡 **45 %** | SHIP/SPINE Daemon für lokale Wärmepumpen-Anbindung (Vaillant, Viessmann, Bosch). |
 
