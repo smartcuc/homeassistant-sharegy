@@ -14,6 +14,7 @@ import {
     postAgentInternalNote,
     postTicketMessage,
     fetchCannedResponses,
+    escalateTicketToSmartEvo,
 } from "../api";
 
 export default function AgentSupportHubPage() {
@@ -24,7 +25,7 @@ export default function AgentSupportHubPage() {
     const [loading, setLoading] = useState(true);
 
     // Filters
-    const [selectedProject, setSelectedProject] = useState("all"); // 'all' | 'sharegy' | 'factofy'
+    const [selectedProject, setSelectedProject] = useState("sharegy");
     const [selectedStatus, setSelectedStatus] = useState("all");
     const [selectedPriority] = useState("all");
     const [searchQuery, setSearchQuery] = useState("");
@@ -36,6 +37,7 @@ export default function AgentSupportHubPage() {
     const [isInternalNote, setIsInternalNote] = useState(false);
     const [cannedResponses, setCannedResponses] = useState([]);
     const [submittingReply, setSubmittingReply] = useState(false);
+    const [escalating, setEscalating] = useState(false);
 
     // Bump refreshCounter to trigger a re-fetch from event handlers.
     const [refreshCounter, setRefreshCounter] = useState(0);
@@ -123,6 +125,28 @@ export default function AgentSupportHubPage() {
         }
     };
 
+    const handleEscalateToSmartEvo = async () => {
+        if (!activeTicket) return;
+        if (!confirm(`Möchtest du das Ticket #${activeTicket.ticket_number} inkl. Diagnosedaten an das zentrale smartEvo Operations Center (moniy) eskalieren?`)) return;
+
+        setEscalating(true);
+        try {
+            const res = await escalateTicketToSmartEvo(activeTicket.id);
+            if (res.status === "escalated" || res.smartevo_ticket_id) {
+                alert(`✅ Ticket erfolgreich an smartEvo Operations eskaliert!\n\nsmartEvo Incident-ID: ${res.smartevo_ticket_id}`);
+                const updated = await fetchTicketDetail(activeTicket.id);
+                setActiveTicket(updated);
+                triggerRefresh();
+            } else {
+                alert("Eskalation fehlgeschlagen: " + (res.error || "Unbekannter Fehler"));
+            }
+        } catch (err) {
+            alert("Fehler bei der Eskalation: " + err.message);
+        } finally {
+            setEscalating(false);
+        }
+    };
+
     const insertCanned = (body) => {
         setReplyText((prev) => (prev ? `${prev}\n${body}` : body));
     };
@@ -132,50 +156,28 @@ export default function AgentSupportHubPage() {
             <div className="max-w-7xl mx-auto space-y-6">
                 {/* Unified SaaS-Enterprise Header */}
                 <AdminPageHeader
-                    icon={<LifeBuoy className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />}
-                    iconBg="bg-indigo-50 dark:bg-indigo-950/60 border-indigo-100 dark:border-indigo-900/50"
-                    title={t("agent_support.title", "Support & Incident Hub")}
+                    icon={<LifeBuoy className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />}
+                    iconBg="bg-emerald-50 dark:bg-emerald-950/60 border-emerald-100 dark:border-emerald-900/50"
+                    title={t("agent_support.title", "Sharegy Helpdesk & Incident Hub")}
                     subtitle={
                         isGlobalAdmin
-                            ? t("agent_support.subtitle_global", "Zentrale Bearbeitung aller Kunden- & Systemtickets aus Sharegy EMS und Factofy Digital Twin")
-                            : t("agent_support.subtitle_partner", "Bearbeitung und Störungsanalyse für deine betreuten Kunden und Liegenschaften")
+                            ? t("agent_support.subtitle_global", "Zentrale Bearbeitung aller Kunden-, PV- und HEMS-Tickets aus Sharegy EMS & Mieterstrom")
+                            : t("agent_support.subtitle_partner", "1st-Level Support & Störungsanalyse für deine betreuten Kunden und Liegenschaften")
                     }
-                    badge={isGlobalAdmin ? "Multi-Tenant Triage" : "Partner Support"}
-                    badgeColor="indigo"
+                    badge="Sharegy 1st-Level Helpdesk"
+                    badgeColor="emerald"
                     manualLink="/app/help/admin-support-agent-triage-guide"
                     actions={
-                        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60">
-                            <button
-                                type="button"
-                                onClick={() => setSelectedProject("all")}
-                                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${selectedProject === "all"
-                                    ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-xs"
-                                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                                    }`}
-                            >
-                                {t("agent_support.project_all", { count: kpis.total, defaultValue: `🌐 Alle (${kpis.total})` })}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setSelectedProject("sharegy")}
-                                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${selectedProject === "sharegy"
-                                    ? "bg-emerald-600 text-white shadow-xs"
-                                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                                    }`}
-                            >
-                                {t("agent_support.project_sharegy", { count: kpis.sharegy_count, defaultValue: `☀️ Sharegy (${kpis.sharegy_count})` })}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setSelectedProject("factofy")}
-                                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${selectedProject === "factofy"
-                                    ? "bg-blue-600 text-white shadow-xs"
-                                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                                    }`}
-                            >
-                                {t("agent_support.project_factofy", { count: kpis.factofy_count, defaultValue: `🏙️ Factofy (${kpis.factofy_count})` })}
-                            </button>
-                        </div>
+                        <a
+                            href="https://mon.smartevo.de"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800/60 text-indigo-700 dark:text-indigo-300 text-xs font-semibold hover:bg-indigo-100 dark:hover:bg-indigo-900/80 transition-all shadow-2xs"
+                        >
+                            <span>⚡</span>
+                            <span>smartEvo Operations Hub (2nd/3rd-Level)</span>
+                            <span className="text-[10px] text-slate-400">↗</span>
+                        </a>
                     }
                 />
 
@@ -350,8 +352,26 @@ export default function AgentSupportHubPage() {
                                             </span>
                                         </div>
 
-                                        {/* Status Changer */}
-                                        <div className="flex items-center gap-1.5">
+                                        {/* Actions: SmartEvo Escalation & Status Changer */}
+                                        <div className="flex items-center gap-2">
+                                            {activeTicket.context_payload?.smartevo_escalated ? (
+                                                <span className="px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
+                                                    <span>⚡ Eskaliert:</span>
+                                                    <span>{activeTicket.context_payload?.smartevo_ticket_id || 'smartEvo Ops'}</span>
+                                                </span>
+                                            ) : (
+                                                <button
+                                                    type="button"
+                                                    onClick={handleEscalateToSmartEvo}
+                                                    disabled={escalating}
+                                                    className="px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-500/10 hover:bg-rose-500/20 text-rose-700 dark:text-rose-400 border border-rose-500/20 flex items-center gap-1 transition-all cursor-pointer shadow-2xs"
+                                                    title="Ticket inkl. Hardware- & Telemetrie-Diagnosesatz an smartEvo Operations eskalieren"
+                                                >
+                                                    <span>🚀</span>
+                                                    <span>{escalating ? "Eskaliere..." : "An smartEvo eskalieren"}</span>
+                                                </button>
+                                            )}
+
                                             <select
                                                 value={activeTicket.status}
                                                 onChange={(e) => handleStatusChange(e.target.value)}

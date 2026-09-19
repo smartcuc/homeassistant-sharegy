@@ -487,3 +487,21 @@ def canned_responses_list(request):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+@api_view(["POST"])
+@authentication_classes([SupportJWTAuthentication, CsrfExemptSessionAuthentication, SessionAuthentication, JWTAuthentication])
+@permission_classes([IsStaffOrPlatformHelpdesk])
+def agent_ticket_escalate_to_smartevo(request, ticket_id):
+    """
+    1-Klick Eskalation eines 1st-Level Tickets an das zentrale smartEvo Operations Center (moniy).
+    """
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    from support_desk.services.smartevo_escalation_service import smartevo_escalation_service
+
+    result = smartevo_escalation_service.escalate_ticket_to_smartevo(
+        ticket=ticket,
+        escalating_admin_user=request.user,
+    )
+    return Response(result)
+
+

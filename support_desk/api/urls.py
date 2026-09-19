@@ -9,6 +9,7 @@ from support_desk.api.views import (
     ticket_add_message,
     deflection_suggest,
     agent_ticket_management,
+    agent_ticket_escalate_to_smartevo,
     canned_responses_list,
 )
 
@@ -24,6 +25,7 @@ urlpatterns = [
     # Staff / Agent management
     path("agent/tickets/", agent_ticket_management, name="support-agent-tickets"),
     path("agent/tickets/<uuid:ticket_id>/", agent_ticket_management, name="support-agent-ticket-detail"),
+    path("agent/tickets/<uuid:ticket_id>/escalate/", agent_ticket_escalate_to_smartevo, name="support-agent-ticket-escalate"),
     path("canned-responses/", canned_responses_list, name="support-canned-responses"),
 ]
 

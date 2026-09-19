@@ -110,6 +110,12 @@ export async function postAgentInternalNote(ticketId, bodyText) {
     });
 }
 
+export async function escalateTicketToSmartEvo(ticketId) {
+    return apiFetch(`${API_BASE}/agent/tickets/${ticketId}/escalate/`, {
+        method: "POST",
+    });
+}
+
 export async function fetchCannedResponses(projectKey = "sharegy") {
     try {
         return await apiFetch(`${API_BASE}/canned-responses/?project_key=${encodeURIComponent(projectKey)}`);
@@ -117,4 +123,5 @@ export async function fetchCannedResponses(projectKey = "sharegy") {
         return [];
     }
 }
+
 
