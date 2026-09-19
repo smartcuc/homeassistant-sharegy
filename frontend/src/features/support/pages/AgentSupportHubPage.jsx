@@ -1,6 +1,6 @@
 /*
 # src/features/support/pages/AgentSupportHubPage.jsx
-# Unified Support Agent Command Center for Sharegy & Factofy
+# Sharegy 1st-Level Support Agent Command Center
 */
 
 import { useState, useEffect } from "react";
@@ -161,7 +161,7 @@ export default function AgentSupportHubPage() {
                     title={t("agent_support.title", "Sharegy Helpdesk & Incident Hub")}
                     subtitle={
                         isGlobalAdmin
-                            ? t("agent_support.subtitle_global", "Zentrale Bearbeitung aller Kunden-, PV- und HEMS-Tickets aus Sharegy EMS & Mieterstrom")
+                            ? t("agent_support.subtitle_global", "Zentrale Bearbeitung aller Kunden-, PV- und Support-Tickets aus Sharegy EMS & Mieterstrom")
                             : t("agent_support.subtitle_partner", "1st-Level Support & Störungsanalyse für deine betreuten Kunden und Liegenschaften")
                     }
                     badge="Sharegy 1st-Level Helpdesk"
