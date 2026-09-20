@@ -22,6 +22,8 @@ from vpp.views import (
     cls_health_inspector_view,
     eichrecht_signature_verify_view,
     vpp_market_clearing_simulator_view,
+    vnb_14a_certificate_pdf_view,
+    vnb_14a_certificate_metadata_view,
 )
 
 urlpatterns = [
@@ -51,8 +53,12 @@ urlpatterns = [
     # 🌐 Aggregator & ÜNB Webhook (Next Kraftwerke / 50Hertz / Connect+)
     path("aggregator/webhook/", vpp_aggregator_webhook_view, name="vpp_aggregator_webhook"),
 
-    # ⚡ § 14a EnWG Netzentgelt-Einsparungs-Kalkulator
+    # ⚡ § 14a EnWG Netzentgelt-Einsparungs-Kalkulator & VNB-Konformitätszertifikat (PDF)
     path("steuve/calculator/", steuve_grid_fee_calculator_view, name="vpp_steuve_calculator"),
+    path("steuve/certificate/status/", vnb_14a_certificate_metadata_view, name="vpp_steuve_cert_status"),
+    path("steuve/certificate/pdf/", vnb_14a_certificate_pdf_view, name="vpp_steuve_cert_pdf"),
+    path("steuve/certificate/<int:device_id>/pdf/", vnb_14a_certificate_pdf_view, name="vpp_steuve_cert_device_pdf"),
+    path("steuve/certificate/identifier/<str:identifier>/pdf/", vnb_14a_certificate_pdf_view, name="vpp_steuve_cert_identifier_pdf"),
 
     # 📡 SMGW & CLS-Kanal Live Health Inspector
     path("cls-inspector/", cls_health_inspector_view, name="vpp_cls_inspector"),

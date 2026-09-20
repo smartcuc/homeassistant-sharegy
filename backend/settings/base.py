@@ -102,7 +102,9 @@ SIMPLE_JWT = {
 # HTTPS / Security Headers
 # =============================
 
-HTTPS = os.getenv("HTTPS", "False") == "True"
+import sys
+IS_TESTING = "test" in sys.argv or any("test" in arg for arg in sys.argv)
+HTTPS = (os.getenv("HTTPS", "False") == "True") and not IS_TESTING
 
 SECURE_SSL_REDIRECT = HTTPS
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

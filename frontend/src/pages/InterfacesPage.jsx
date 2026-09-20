@@ -9,6 +9,8 @@ import { QRCodeSVG } from "qrcode.react";
 import { useTranslation } from "react-i18next";
 import CloudInverterIntegrationCard from "../features/devices/components/CloudInverterIntegrationCard";
 import ShellyCloudIntegrationCard from "../features/devices/components/ShellyCloudIntegrationCard";
+import HardwarePatenWizardModal from "../features/devices/components/HardwarePatenWizardModal";
+import { Award, ShieldCheck, Download, Sparkles } from "lucide-react";
 
 export default function InterfacesPage() {
     const { primaryHome, isLoading: homeLoading, regenerateMqttPassword, isRegenerating } = useHomes();
@@ -17,6 +19,7 @@ export default function InterfacesPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [copiedKey, setCopiedKey] = useState(null);
     const [showQR, setShowQR] = useState(false);
+    const [showHardwarePatenWizard, setShowHardwarePatenWizard] = useState(false);
     useModalDismiss(showQR, () => setShowQR(false));
     const [guideTab, setGuideTab] = useState("otel");
 
@@ -150,6 +153,42 @@ export default function InterfacesPage() {
                 <p className="text-sm text-gray-500 mt-1">
                     {t("interfaces.subtitle", "Verbinde deine Geräte und Zentralen direkt über Outbound-WebSocket (Shelly), Sungrow Direkt-Kopplung, Cloud-Wechselrichter, das Home Assistant Plugin oder MQTT mit Sharegy.")}
                 </p>
+            </div>
+
+            {/* 🌟 HARDWARE-PATEN & § 14a EnWG VNB-ZERTIFIKAT BANNER */}
+            <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-sky-700 rounded-3xl p-6 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">
+                <div className="absolute right-0 top-0 translate-x-8 -translate-y-8 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none" />
+                <div className="space-y-2 z-10 max-w-2xl">
+                    <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-bold tracking-wide">
+                        <Award className="w-3.5 h-3.5" />
+                        <span>HARDWARE-PATEN-PROGRAMM & § 14a EnWG</span>
+                    </div>
+                    <h2 className="text-xl font-bold tracking-tight">
+                        Geführter Einrichtungsassistent & 1-Klick VNB-Zertifikat
+                    </h2>
+                    <p className="text-xs text-white/90 leading-relaxed">
+                        Verifiziere deinen ioBroker / Home Assistant Adapter oder Cloud-Wechselrichter in 3 geführten Schritten. 
+                        Erhalte ein offizielles, digitales <b>§ 14a EnWG VNB-Konformitäts-Zertifikat (PDF)</b> zur Vorlage beim Netzbetreiber für pauschale Netzentgelt-Rabatte (~160 €/Jahr).
+                    </p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-3 z-10 shrink-0 w-full md:w-auto">
+                    <button
+                        onClick={() => setShowHardwarePatenWizard(true)}
+                        className="py-3 px-5 rounded-2xl bg-white hover:bg-slate-50 text-emerald-950 font-bold text-xs shadow-lg flex items-center justify-center space-x-2 transition-transform hover:scale-105"
+                    >
+                        <Sparkles className="w-4 h-4 text-emerald-600" />
+                        <span>Paten-Assistent starten</span>
+                    </button>
+                    <a
+                        href="/api/vpp/steuve/certificate/pdf/"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="py-3 px-5 rounded-2xl bg-white/15 hover:bg-white/25 border border-white/30 text-white font-bold text-xs flex items-center justify-center space-x-2 backdrop-blur-md transition-colors"
+                    >
+                        <Download className="w-4 h-4" />
+                        <span>§ 14a PDF herunterladen</span>
+                    </a>
+                </div>
             </div>
 
             {/* LIVE INTERFACES STATUS & DIAGNOSTICS */}
@@ -849,6 +888,12 @@ data:
                     </div>
                 </div>
             )}
+
+            {/* 🌟 GEFÜHRTER HARDWARE-PATEN-ASSISTENT MODAL */}
+            <HardwarePatenWizardModal
+                open={showHardwarePatenWizard}
+                onClose={() => setShowHardwarePatenWizard(false)}
+            />
         </div>
     );
 }
