@@ -218,6 +218,10 @@ class SharegyBridge:
         self.error_log_buffer = []
         self.max_error_log_size = 30
 
+        # Canary A/B OTA Update Watchdog
+        from .update_guard import HaUpdateWatchdog
+        self.update_watchdog = HaUpdateWatchdog(self)
+
         # Real-time state received from Sharegy
         self.flow_temp_setpoint_c = 30.0
         self.screed_soc_pct = 50.0
@@ -251,6 +255,7 @@ class SharegyBridge:
     async def start(self):
         """Start the background streaming worker, carrier connection, and state change listeners."""
         self._running = True
+        self.update_watchdog.check_pending_update_on_startup()
         self._setup_control_listeners()
         self._task = asyncio.create_task(self._main_loop())
         self._offline_task = asyncio.create_task(self._offline_heating_loop())
@@ -587,6 +592,21 @@ class SharegyBridge:
                     "limit_w": limit_w,
                     "timestamp": int(time.time() * 1000),
                 })
+            elif method in ("adapter.update", "edge.update"):
+                target = params.get("target") or params.get("version") or "main"
+                timeout_sec = int(params.get("timeout_seconds") or params.get("timeout") or 900)
+                res = await self.update_watchdog.initiate_update(target, timeout_sec)
+                await send_response(res)
+            elif method == "adapter.confirm_update":
+                reason = params.get("reason", "manual_admin_rpc")
+                res = self.update_watchdog.confirm_update(reason)
+                await send_response(res)
+            elif method == "adapter.rollback":
+                res = self.update_watchdog.trigger_immediate_rollback()
+                await send_response(res)
+            elif method == "adapter.get_update_status":
+                res = self.update_watchdog.get_status()
+                await send_response(res)
             else:
                 await send_response(error={"code": -32601, "message": f"Method '{method}' not found"})
         except Exception as err:
