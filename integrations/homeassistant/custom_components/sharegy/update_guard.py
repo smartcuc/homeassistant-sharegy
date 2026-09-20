@@ -125,6 +125,57 @@ class HaUpdateWatchdog:
             _LOGGER.error("[OTA Watchdog] Failed to create backup snapshot: %s", e)
             return {"status": "error", "message": f"Backup snapshot failed: {e}"}
 
+        # 2. Download and extract new version from GitHub
+        import aiohttp
+        import zipfile
+        import io
+
+        branch_or_tag = "main"
+        repo = "smartcuc/homeassistant-sharegy"
+        if "#" in target_str:
+            parts = target_str.split("#", 1)
+            repo = parts[0].replace("https://github.com/", "")
+            branch_or_tag = parts[1]
+
+        if branch_or_tag.startswith("v") or (len(branch_or_tag) > 0 and branch_or_tag[0].isdigit()):
+            zip_url = f"https://github.com/{repo}/archive/refs/tags/{branch_or_tag}.zip"
+        else:
+            zip_url = f"https://github.com/{repo}/archive/refs/heads/{branch_or_tag}.zip"
+
+        _LOGGER.info("[OTA Watchdog] Downloading update archive from: %s", zip_url)
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(zip_url, timeout=aiohttp.ClientTimeout(total=60)) as resp:
+                    if resp.status != 200 and zip_url.endswith(f"/tags/{branch_or_tag}.zip"):
+                        fallback_url = f"https://github.com/{repo}/archive/refs/heads/main.zip"
+                        async with session.get(fallback_url, timeout=aiohttp.ClientTimeout(total=60)) as fallback_resp:
+                            if fallback_resp.status != 200:
+                                return {"status": "error", "message": f"HTTP {fallback_resp.status} downloading update from GitHub."}
+                            content = await fallback_resp.read()
+                    elif resp.status != 200:
+                        return {"status": "error", "message": f"HTTP {resp.status} downloading update from GitHub."}
+                    else:
+                        content = await resp.read()
+
+            with zipfile.ZipFile(io.BytesIO(content)) as zf:
+                extracted_count = 0
+                for member in zf.namelist():
+                    if "/custom_components/sharegy/" in member and not member.endswith("/"):
+                        rel_path = member.split("/custom_components/sharegy/", 1)[1]
+                        dest_path = os.path.join(self.component_dir, rel_path)
+                        os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+                        with open(dest_path, "wb") as f_out:
+                            f_out.write(zf.read(member))
+                        extracted_count += 1
+
+                _LOGGER.info("[OTA Watchdog] Extracted %d updated component files into %s", extracted_count, self.component_dir)
+                if extracted_count == 0:
+                    return {"status": "error", "message": "No valid component files found in downloaded ZIP."}
+
+        except Exception as dl_err:
+            _LOGGER.error("[OTA Watchdog] Failed to download or extract update: %s", dl_err)
+            return {"status": "error", "message": f"Download/extract failed: {dl_err}"}
+
         state = {
             "previous_version": current_version,
             "target_version": target_str,
@@ -135,13 +186,25 @@ class HaUpdateWatchdog:
         }
         self.write_state(state)
 
+        # Schedule Home Assistant restart
+        asyncio.create_task(self._schedule_restart())
+
         return {
             "status": "initiated",
             "previous_version": current_version,
             "target": target_str,
             "timeout_seconds": timeout_seconds,
-            "message": "Guarded OTA update initiated with 15-minute rollback protection.",
+            "message": "Guarded OTA update downloaded and extracted. Home Assistant restart scheduled in 3 seconds.",
         }
+
+    async def _schedule_restart(self):
+        """Triggers Home Assistant restart after a short delay."""
+        try:
+            await asyncio.sleep(3)
+            _LOGGER.warning("[OTA Watchdog] 🔄 Restarting Home Assistant to apply updated Sharegy component...")
+            await self.bridge.hass.services.async_call("homeassistant", "restart")
+        except Exception as e:
+            _LOGGER.error("[OTA Watchdog] Failed to restart Home Assistant: %s", e)
 
     def trigger_immediate_rollback(self) -> Dict[str, Any]:
         """Restores previous version from backup snapshot."""
