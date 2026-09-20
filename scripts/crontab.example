@@ -25,7 +25,7 @@ MAILTO=""
 
 # ------------------------------------------------------------------------------
 # 3. Full PostgreSQL & TimescaleDB Backup (täglich um 03:00)
-#    Erstellt Custom-Dump (-Fc) & .sql.gz inkl. S2S-Stream an moniy (14 Tage Retention).
+#    Erstellt Custom-Dump (-Fc) & .sql.gz inkl. S2S-Stream an moniy (7 Tage Retention).
 # ------------------------------------------------------------------------------
 0 3 * * * root {{APP_DIR}}/scripts/backup_db.sh >/dev/null 2>&1
 

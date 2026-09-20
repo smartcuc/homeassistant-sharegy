@@ -11,11 +11,11 @@ Die Backup-Architektur folgt einem ressourcenschonenden, 2-stufigen Modell:
 1. **5-Minuten In-Flight Delta-Backup ([`scripts/backup_postgres_inflight.sh`](file:///c:/Users/Public/Dev/sharegy/scripts/backup_postgres_inflight.sh))**:
    - Streamt alle 5 Minuten ausschließlich die neuen Datensätze (Messwerte, Telemetrie, Logs, Transaktionen der letzten 10 Minuten) komprimiert an das smartEvo moniy Vault.
    - Extrem leichtgewichtig (< 500 KB pro Stream), kein lokaler Festplatten-Bloat.
-   - **Retention**: Im Moniy Vault für **72 Stunden** (3 Tage) aufbewahrt und danach automatisch bereinigt.
+   - **Retention**: Im Moniy Vault für **24 Stunden** aufbewahrt und danach automatisch bereinigt.
 
 2. **Tägliches PostgreSQL / TimescaleDB Full-Backup ([`scripts/backup_db.sh`](file:///c:/Users/Public/Dev/sharegy/scripts/backup_db.sh))**:
    - Erstellt täglich um 03:00 UTC einen vollständigen, konsistenten Datenbank-Dump (`pg_full_${DB_NAME}`, ca. 246 MB) und überträgt ihn an das Moniy Vault sowie lokal nach `/var/backups/sharegy/db`.
-   - **Retention**: Für **14 Tage** im Vault und auf dem Server aufbewahrt.
+   - **Retention**: Für **7 Tage** im Vault und auf dem Server aufbewahrt.
 
 3. **Monatliches Konfigurations-Backup ([`scripts/backup_config.sh`](file:///c:/Users/Public/Dev/sharegy/scripts/backup_config.sh))**:
    - Sichert am 1. jedes Monats alle Konfigurationsdateien (`.env`, Nginx, Systemd, Fail2ban, UFW, Crontabs; 12 Monate Retention).

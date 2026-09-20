@@ -8,7 +8,7 @@
 #  - S2S-Stream zu smartEvo moniy Vault
 #  - Automatisches Öffnen eines smartEvo Incident-Tickets bei Fehlern
 #  - Tägliches Backup-Logging mit Zeitstempeln
-#  - Automatische Bereinigung alter Backups (Retention: 14 Tage)
+#  - Automatische Bereinigung alter Backups (Retention: 7 Tage)
 # ==============================================================================
 
 set -eo pipefail
@@ -35,7 +35,7 @@ fi
 
 BACKUP_DIR="${BACKUP_DIR:-/var/backups/sharegy/db}"
 LOG_FILE="${LOG_FILE:-/var/log/sharegy/db_backup.log}"
-RETENTION_DAYS="${RETENTION_DAYS:-14}"
+RETENTION_DAYS="${RETENTION_DAYS:-7}"
 DATE_STR="$(date +"%Y%m%d_%H%M%S")"
 
 # ------------------------------------------------------------------------------
