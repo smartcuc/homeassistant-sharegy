@@ -1,6 +1,5 @@
 # ==============================================================================
-# Sharegy Production Crontab Configuration
-# Place this file in /etc/cron.d/sharegy or load via `crontab -e`
+# Sharegy Production Crontab Configuration (/etc/cron.d/sharegy)
 # ==============================================================================
 # ARCHITEKTUR-HINWEIS:
 #  - MAILTO ist leer (""), da alle Skripte Fehler automatisch über den
@@ -13,37 +12,37 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 MAILTO=""
 
 # ------------------------------------------------------------------------------
-# 1. High-Availability Watchdog & smartEvo Heartbeat (alle 2 Min)
-#    Prüft Gunicorn, PostgreSQL, Redis, Celery & MQTT; startet bei Ausfall neu.
-# ------------------------------------------------------------------------------
-*/2 * * * * root /var/www/sharegy/live/scripts/heartbeat_watchdog.sh >/dev/null 2>&1
-
-# ------------------------------------------------------------------------------
-# 2. Differential / In-Flight Delta Database Backup (stündlich um :30)
+# 1. 5-Minuten In-Flight Delta Database Backup Streamer
 #    Streamt Live-Deltas komprimiert direkt an das smartEvo moniy Vault.
 # ------------------------------------------------------------------------------
-30 * * * * postgres /var/www/sharegy/live/scripts/backup_db_diff.sh >/dev/null 2>&1
+*/5 * * * * root {{APP_DIR}}/scripts/backup_postgres_inflight.sh >/dev/null 2>&1
+
+# ------------------------------------------------------------------------------
+# 2. High-Availability Watchdog & smartEvo Heartbeat (alle 2 Min)
+#    Prüft Gunicorn, Daphne, PostgreSQL, Redis & MQTT; heilt bei Ausfall.
+# ------------------------------------------------------------------------------
+*/2 * * * * root {{APP_DIR}}/scripts/heartbeat_watchdog.sh >/dev/null 2>&1
 
 # ------------------------------------------------------------------------------
 # 3. Full PostgreSQL & TimescaleDB Backup (täglich um 03:00)
 #    Erstellt Custom-Dump (-Fc) & .sql.gz inkl. S2S-Stream an moniy (14 Tage Retention).
 # ------------------------------------------------------------------------------
-0 3 * * * postgres /var/www/sharegy/live/scripts/backup_db.sh >/dev/null 2>&1
+0 3 * * * root {{APP_DIR}}/scripts/backup_db.sh >/dev/null 2>&1
 
 # ------------------------------------------------------------------------------
 # 4. Let's Encrypt / SSL Certificate Auto-Renewal & Expiry Check (2x täglich)
 #    Führt certbot renew mit Nginx-Reload-Hook aus und prüft Restlaufzeit.
 # ------------------------------------------------------------------------------
-30 2,14 * * * root /var/www/sharegy/live/scripts/renew_ssl.sh >/dev/null 2>&1
+30 2,14 * * * root {{APP_DIR}}/scripts/renew_ssl.sh >/dev/null 2>&1
 
 # ------------------------------------------------------------------------------
 # 5. System Housekeeping: Expired Sessions & Tokens Cleanup (täglich um 04:00)
 #    Bereinigt abgelaufene Django Sessions, Magic-Login-Tokens und temporäre Caches.
 # ------------------------------------------------------------------------------
-0 4 * * * sharegy /var/www/sharegy/live/scripts/cleanup_housekeeping.sh >/dev/null 2>&1
+0 4 * * * root {{APP_DIR}}/scripts/cleanup_housekeeping.sh >/dev/null 2>&1
 
 # ------------------------------------------------------------------------------
 # 6. Log Rotation, Compression & Disk Space Guard (täglich um 04:30)
 #    Komprimiert alte Logs (.gz), bereinigt nach 14 Tagen und öffnet moniy-Ticket bei > 85% Disk.
 # ------------------------------------------------------------------------------
-30 4 * * * root /var/www/sharegy/live/scripts/rotate_logs.sh >/dev/null 2>&1
+30 4 * * * root {{APP_DIR}}/scripts/rotate_logs.sh >/dev/null 2>&1
