@@ -4,14 +4,24 @@ Dieses Dokument beschreibt die Einrichtung der automatisierten täglichen Datenb
 
 ---
 
-## 📋 1. Übersicht & Skripte
+## 📋 1. Übersicht & Backup-Strategie
 
-Im Verzeichnis `scripts/` stehen folgende produktionsreife Werkzeuge zur Verfügung:
-1. [`scripts/backup_postgres_inflight.sh`](file:///c:/Users/Public/Dev/sharegy/scripts/backup_postgres_inflight.sh) – Kontinuierliches 5-Minuten In-Flight PostgreSQL Delta-Backup direkt an das Moniy Vault (ohne lokalen Festplatten-Bloat).
-2. [`scripts/backup_db.sh`](file:///c:/Users/Public/Dev/sharegy/scripts/backup_db.sh) – Tägliches komprimiertes PostgreSQL/TimescaleDB Full-Backup (14 Tage Retention).
-3. [`scripts/backup_config.sh`](file:///c:/Users/Public/Dev/sharegy/scripts/backup_config.sh) – Monatliches vollständiges Backup aller Server- & Applikations-Konfigurationen (`.env`, Nginx, Fail2ban, Systemd, UFW, Redis, Crontabs, Paketlisten; 12 Monate Retention).
-4. [`scripts/restore_db.sh`](file:///c:/Users/Public/Dev/sharegy/scripts/restore_db.sh) – 1-Klick Restore-Hilfe für die Datenbank mit Sicherheitsabfrage und Service-Handling.
-5. [`scripts/install_cron.sh`](file:///c:/Users/Public/Dev/sharegy/scripts/install_cron.sh) – Schlüsselfertiger Installer für die System-Crontab (`/etc/cron.d/sharegy`).
+Die Backup-Architektur folgt einem ressourcenschonenden, 2-stufigen Modell:
+
+1. **5-Minuten In-Flight Delta-Backup ([`scripts/backup_postgres_inflight.sh`](file:///c:/Users/Public/Dev/sharegy/scripts/backup_postgres_inflight.sh))**:
+   - Streamt alle 5 Minuten ausschließlich die neuen Datensätze (Messwerte, Telemetrie, Logs, Transaktionen der letzten 10 Minuten) komprimiert an das smartEvo moniy Vault.
+   - Extrem leichtgewichtig (< 500 KB pro Stream), kein lokaler Festplatten-Bloat.
+   - **Retention**: Im Moniy Vault für **24 Stunden** aufbewahrt und danach automatisch bereinigt.
+
+2. **Tägliches PostgreSQL / TimescaleDB Full-Backup ([`scripts/backup_db.sh`](file:///c:/Users/Public/Dev/sharegy/scripts/backup_db.sh))**:
+   - Erstellt täglich um 03:00 UTC einen vollständigen, konsistenten Datenbank-Dump (`pg_full_${DB_NAME}`, ca. 246 MB) und überträgt ihn an das Moniy Vault sowie lokal nach `/var/backups/sharegy/db`.
+   - **Retention**: Für **14 Tage** im Vault und auf dem Server aufbewahrt.
+
+3. **Monatliches Konfigurations-Backup ([`scripts/backup_config.sh`](file:///c:/Users/Public/Dev/sharegy/scripts/backup_config.sh))**:
+   - Sichert am 1. jedes Monats alle Konfigurationsdateien (`.env`, Nginx, Systemd, Fail2ban, UFW, Crontabs; 12 Monate Retention).
+
+4. **1-Klick Restore ([`scripts/restore_db.sh`](file:///c:/Users/Public/Dev/sharegy/scripts/restore_db.sh))**:
+   - Schnelle Wiederherstellung von `.dump` und `.sql.gz` Snapshots mit Service-Handling und Sicherheitsabfrage.
 
 ---
 
