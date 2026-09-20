@@ -25,6 +25,7 @@ async def async_setup_entry(
 
     sensors = [
         SharegyStatusSensor(entry, bridge),
+        SharegyCarrierStatusSensor(entry, bridge),
         SharegyOfflineAutonomousSensor(entry, bridge),
         SharegyIntegrationVersionSensor(entry, bridge),
         SharegyBufferCountSensor(entry, bridge),
@@ -60,6 +61,33 @@ class SharegyStatusSensor(SensorEntity):
             "host": self._bridge.host,
             "protocol": self._bridge.protocol,
             "token_prefix": self._bridge.token[:8] if self._bridge.token else "-",
+        }
+
+
+class SharegyCarrierStatusSensor(SensorEntity):
+    """Representation of the smartEvo moniy Carrier Admin Socket state."""
+
+    _attr_icon = "mdi:lan-connect"
+    _attr_has_entity_name = True
+    _attr_name = "smartEvo Carrier Admin Status"
+
+    def __init__(self, entry: ConfigEntry, bridge):
+        self._entry = entry
+        self._bridge = bridge
+        self._attr_unique_id = f"{entry.entry_id}_carrier_status"
+
+    @property
+    def native_value(self) -> str:
+        """Return carrier connection state."""
+        if not getattr(self._bridge, "carrier_enabled", True):
+            return "deaktiviert"
+        return "online" if getattr(self._bridge, "is_carrier_connected", False) else "offline"
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        return {
+            "carrier_url": getattr(self._bridge, "carrier_url", "-"),
+            "carrier_enabled": getattr(self._bridge, "carrier_enabled", True),
         }
 
 
