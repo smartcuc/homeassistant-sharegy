@@ -46,6 +46,10 @@ from .const import (
     CONF_WALLBOX_SWITCH,
     CONF_SUBMETER_SENSORS,
     CONF_SYNC_INTERVAL,
+    CONF_CARRIER_ENABLED,
+    CONF_CARRIER_URL,
+    DEFAULT_CARRIER_ENABLED,
+    DEFAULT_CARRIER_URL,
     DEFAULT_FBH_TARGET_ROOM_TEMP,
     DEFAULT_FBH_BOOST_DELTA_K,
     DEFAULT_FBH_MAX_FLOOR_TEMP,
@@ -191,16 +195,24 @@ class SharegyBridge:
         self.host = entry_data.get(CONF_HOST, "https://sharegy.de").rstrip("/")
         self.protocol = entry_data.get(CONF_PROTOCOL, "websocket")
         self.bidirectional_enabled = entry_data.get(CONF_BIDIRECTIONAL_ENABLED, True)
+        self.carrier_enabled = entry_data.get(CONF_CARRIER_ENABLED, DEFAULT_CARRIER_ENABLED)
+        self.carrier_url = entry_data.get(CONF_CARRIER_URL, DEFAULT_CARRIER_URL)
         self.buffer = SharegyOfflineBuffer(db_path)
         self.is_connected = False
+        self.is_carrier_connected = False
         self.offline_autonomous = False
         self._running = False
         self._ws_session = None
         self._ws = None
+        self._carrier_session = None
+        self._carrier_ws = None
         self._task = None
         self._offline_task = None
+        self._carrier_task = None
         self._unsub_listeners = []
         self._reconnect_attempts = 0
+        self._carrier_reconnect_attempts = 0
+        self._start_time = time.time()
 
         # Real-time state received from Sharegy
         self.flow_temp_setpoint_c = 30.0
@@ -219,15 +231,27 @@ class SharegyBridge:
             base = f"wss://sharegy.de/ws/energy/{self.token}/"
 
         if "?" not in base:
-            base += "?client=homeassistant&source=homeassistant&version=2.1.0"
+            base += "?client=homeassistant&source=homeassistant&version=2.2.0"
         return base
 
+    def get_effective_carrier_url(self) -> str:
+        """Resolve full smartEvo Carrier Admin WebSocket URL."""
+        base = (self.carrier_url or DEFAULT_CARRIER_URL).strip()
+        if not base.startswith("ws://") and not base.startswith("wss://"):
+            base = f"wss://{base}"
+        if not base.endswith("/"):
+            base += "/"
+        token = self.token or "unknown"
+        return f"{base}?device_sn={token}&tenant=sharegy&client=homeassistant&version={VERSION}"
+
     async def start(self):
-        """Start the background streaming worker and state change listeners."""
+        """Start the background streaming worker, carrier connection, and state change listeners."""
         self._running = True
         self._setup_control_listeners()
         self._task = asyncio.create_task(self._main_loop())
         self._offline_task = asyncio.create_task(self._offline_heating_loop())
+        if self.carrier_enabled:
+            self._carrier_task = asyncio.create_task(self._carrier_loop())
 
     async def stop(self):
         """Stop worker and close connections."""
@@ -240,10 +264,176 @@ class SharegyBridge:
             await self._ws.close()
         if self._ws_session:
             await self._ws_session.close()
+        if self._carrier_ws:
+            await self._carrier_ws.close()
+        if self._carrier_session:
+            await self._carrier_session.close()
         if self._task:
             self._task.cancel()
         if self._offline_task:
             self._offline_task.cancel()
+        if self._carrier_task:
+            self._carrier_task.cancel()
+
+    async def _carrier_loop(self):
+        """Persistent connection loop for 24/7 smartEvo moniy Carrier Admin socket & Reverse-RPC."""
+        while self._running:
+            try:
+                carrier_url = self.get_effective_carrier_url()
+                _LOGGER.info("Connecting to smartEvo moniy Carrier Admin Socket at %s", self.carrier_url)
+                self._carrier_session = aiohttp.ClientSession()
+                async with self._carrier_session.ws_connect(carrier_url, heartbeat=20.0, timeout=10.0) as ws:
+                    self._carrier_ws = ws
+                    self.is_carrier_connected = True
+                    self._carrier_reconnect_attempts = 0
+                    _LOGGER.info("Connected to smartEvo moniy Carrier Admin Socket successfully!")
+
+                    # Start concurrent carrier heartbeat loop (30s interval)
+                    heartbeat_task = asyncio.create_task(self._carrier_heartbeat_loop(ws))
+
+                    try:
+                        async for msg in ws:
+                            if not self._running:
+                                break
+                            if msg.type == aiohttp.WSMsgType.TEXT:
+                                await self._handle_carrier_message(ws, msg.data)
+                            elif msg.type in (aiohttp.WSMsgType.CLOSED, aiohttp.WSMsgType.ERROR):
+                                break
+                    finally:
+                        heartbeat_task.cancel()
+
+            except asyncio.CancelledError:
+                break
+            except Exception as err:
+                _LOGGER.debug("Carrier connection error: %s", err)
+            finally:
+                self.is_carrier_connected = False
+                if self._carrier_ws:
+                    try:
+                        await self._carrier_ws.close()
+                    except Exception:
+                        pass
+                    self._carrier_ws = None
+                if self._carrier_session:
+                    try:
+                        await self._carrier_session.close()
+                    except Exception:
+                        pass
+                    self._carrier_session = None
+
+            if not self._running:
+                break
+
+            self._carrier_reconnect_attempts += 1
+            backoff = min(60.0, 5.0 * (1.5 ** min(self._carrier_reconnect_attempts - 1, 6)))
+            jitter = random.uniform(0.0, 1.0)
+            delay = round(backoff + jitter, 1)
+            _LOGGER.debug("Carrier socket disconnected. Retrying in %.1fs (Attempt #%d)...", delay, self._carrier_reconnect_attempts)
+            await asyncio.sleep(delay)
+
+    async def _carrier_heartbeat_loop(self, ws):
+        """Send periodic health ping to smartEvo moniy."""
+        while self._running and not ws.closed:
+            try:
+                payload = {
+                    "type": "health_ping",
+                    "timestamp": int(time.time() * 1000),
+                    "stats": {
+                        "uptime": int(time.time() - self._start_time),
+                        "version": VERSION,
+                        "buffered_count": self.buffer.count_pending(),
+                        "connected_to_sharegy": self.is_connected,
+                        "offline_autonomous": self.offline_autonomous,
+                        "client": "homeassistant",
+                    },
+                }
+                await ws.send_str(json.dumps(payload))
+            except Exception as err:
+                _LOGGER.debug("Failed to send carrier heartbeat: %s", err)
+            await asyncio.sleep(30.0)
+
+    async def _handle_carrier_message(self, ws, raw_data: str):
+        """Process incoming JSON-RPC 2.0 command from smartEvo moniy."""
+        try:
+            msg = json.loads(raw_data)
+        except Exception:
+            _LOGGER.warning("Invalid JSON on carrier socket: %s", raw_data)
+            return
+
+        if not isinstance(msg, dict):
+            return
+
+        msg_id = msg.get("id")
+        method = msg.get("method")
+        params = msg.get("params") or {}
+
+        if not method:
+            return
+
+        _LOGGER.info("[Carrier RPC] Received method '%s' (ID: %s)", method, msg_id)
+
+        async def send_response(result=None, error=None):
+            if ws.closed or msg_id is None:
+                return
+            resp = {"jsonrpc": "2.0", "id": msg_id}
+            if error:
+                resp["error"] = error
+            else:
+                resp["result"] = result or {}
+            try:
+                await ws.send_str(json.dumps(resp))
+            except Exception as e:
+                _LOGGER.warning("Failed to send carrier RPC response: %s", e)
+
+        try:
+            if method == "sys.ping":
+                await send_response({
+                    "pong": True,
+                    "timestamp": int(time.time() * 1000),
+                    "uptime": int(time.time() - self._start_time),
+                    "version": VERSION,
+                })
+            elif method == "sys.diagnostics":
+                await send_response({
+                    "system": "Home Assistant",
+                    "version": VERSION,
+                    "uptime": int(time.time() - self._start_time),
+                    "buffered_count": self.buffer.count_pending(),
+                    "connected_to_sharegy": self.is_connected,
+                    "offline_autonomous": self.offline_autonomous,
+                    "screed_soc_pct": self.screed_soc_pct,
+                    "operating_mode": self.operating_mode,
+                    "flow_temp_setpoint_c": self.flow_temp_setpoint_c,
+                    "timestamp": int(time.time() * 1000),
+                })
+            elif method == "device.read":
+                ent_id = params.get("id") or params.get("entity_id") or params.get("state_id")
+                if not ent_id:
+                    await send_response(error={"code": -32602, "message": "Missing required parameter: id or entity_id"})
+                    return
+                state_obj = self.hass.states.get(ent_id)
+                await send_response({
+                    "id": ent_id,
+                    "state": state_obj.state if state_obj else None,
+                    "attributes": dict(state_obj.attributes) if state_obj else {},
+                    "last_updated": state_obj.last_updated.isoformat() if state_obj else None,
+                })
+            elif method == "ems.curtail":
+                active = bool(params.get("active"))
+                limit_w = int(params.get("limit_w", 0))
+                reason = params.get("reason", "smartEvo carrier § 14a EnWG test")
+                _LOGGER.warning("[Carrier RPC] EMS Curtailment signal received: active=%s, limit=%sW, reason='%s'", active, limit_w, reason)
+                await send_response({
+                    "status": "acknowledged",
+                    "curtailed": active,
+                    "limit_w": limit_w,
+                    "timestamp": int(time.time() * 1000),
+                })
+            else:
+                await send_response(error={"code": -32601, "message": f"Method '{method}' not found"})
+        except Exception as err:
+            _LOGGER.error("[Carrier RPC] Error executing '%s': %s", method, err)
+            await send_response(error={"code": -32000, "message": str(err)})
 
     def _setup_control_listeners(self):
         """Listen to state changes on control switches for closed-loop status feedback."""
