@@ -1,7 +1,17 @@
 """Constants for the Sharegy Cloud Energy Bridge integration."""
+import json
+import os
 
 DOMAIN = "sharegy"
-VERSION = "2.2.0"
+
+# Single Source of Truth: Read version directly from manifest.json
+_MANIFEST_PATH = os.path.join(os.path.dirname(__file__), "manifest.json")
+try:
+    with open(_MANIFEST_PATH, "r", encoding="utf-8") as _f:
+        _manifest_data = json.load(_f)
+        VERSION = _manifest_data.get("version", "2.2.0")
+except Exception:
+    VERSION = "2.2.0"
 
 # Configuration Keys
 CONF_HOST = "host"
