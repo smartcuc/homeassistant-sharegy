@@ -239,7 +239,7 @@ class SharegyBridge:
             base = f"wss://sharegy.de/ws/energy/{self.token}/"
 
         if "?" not in base:
-            base += "?client=homeassistant&source=homeassistant&version=2.2.0"
+            base += f"?client=homeassistant&source=homeassistant&version={VERSION}"
         return base
 
     def get_effective_carrier_url(self) -> str:
