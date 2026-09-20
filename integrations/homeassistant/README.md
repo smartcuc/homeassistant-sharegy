@@ -12,6 +12,8 @@ Connects your Home Assistant smart home (PV systems, battery storages, heat pump
 - ☀️ **Realtime EMS Telemetry** (Live energy flow, PV generation, grid feed-in/import, battery SoC)
 - 🔥 **Wärme, Heizung & Raumklima (DIN EN 12831 / MPC)**: Vorausschauende Fußbodenheizungs- & thermische Estrichspeicher-Steuerung
 - 🛡️ **Lokale 24h-Offline-Resilienz**: Cacht den 24h-MPC-Fahrplan lokal in SQLite und regelt die Heizung bei Internetausfall vollkommen autonom weiter
+- 🛰️ **24/7 Entkoppelter Carrier Admin & Reverse-RPC**: Sichere Fernwartung, § 14a EnWG Notfalldrosselung und Echtzeit-Konfigurationsvalidierung ohne Port-Weiterleitung
+- 🔄 **Canary A/B OTA Updates & 15-Minuten Rollback-Watchdog**: Selbstheilendes Flottenmanagement – automatisches Rollback bei Boot-Fehlern
 - 🌡️ **Custom Devices & Submeters** (Heatpumps, Brauchwasserwärmepumpen, temperature sensors, smart plugs)
 - 📦 **SQLite Store & Forward Offline Buffer** (Lückenlose Historie ohne Datenverlust bei Internetausfall)
 - 🎛️ **Bidirectional Smart Load Control** (SG-Ready und dynamische Tarif-Optimierung direkt in HA-Entities)

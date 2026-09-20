@@ -111,11 +111,16 @@ Ein Wechselrichter-Hersteller gilt erst dann als "Öffentlich Verifiziert", wenn
 2. Für **mindestens 48 Stunden ununterbrochene Telemetrie** ohne API-Exceptions vorliegt.
 3. Die berechneten Tageserträge mit dem Hersteller-Portal übereinstimmen.
 
+### Regel 6: Die 15-Minuten Unbricking- & Rollback-Garantie (Zero Risk bei Updates)
+* Selbst wenn wir einem Hardware-Paten oder Kunden ein Remote-Update aufspielen und dieses unerwartet einen Fehler enthält oder die Verbindung verliert:
+* Der integrierte, unabhängige **15-Minuten Rollback-Watchdog** im ioBroker- und Home-Assistant-Adapter stellt nach Ablauf des Zeitfensters vollautomatisch die funktionierende Vorversion wieder her.
+* Der Kunde oder Tester bleibt **niemals mit einem abgestürzten Adapter zurück**, und wir müssen niemals physisch vor Ort anfahren ("Zero Truck Roll").
+
 ---
 
 ## 🎯 4. Fazit & Mentale Leitlinie für den Gründer
 
 > **Merksatz für die Zukunft:**  
-> *"Perfektion entsteht nicht im luftleeren Entwickler-Labor, sondern im geschützten, diskreten Dialog mit echten Anwendern. Mit dem Hardware-Paten-Playbook und dem Diagnose-Tool haben wir die volle Kontrolle über den Prozess – ohne jedes Risiko einer öffentlichen Blamage."*
+> *"Perfektion entsteht nicht im luftleeren Entwickler-Labor, sondern im geschützten, diskreten Dialog mit echten Anwendern. Mit dem Hardware-Paten-Playbook, dem Diagnose-Tool und dem selbstheilenden 15-Minuten Rollback-Watchdog haben wir die volle Kontrolle über den Prozess – ohne jedes Risiko einer öffentlichen Blamage oder teurer Vor-Ort-Einsätze."*
 
 Dieses Dokument ist die dauerhafte Referenz. Wann immer Zweifel oder Anspannung aufkommen, bietet dieser Leitfaden das feste Fundament für jeden weiteren Schritt.

@@ -64,14 +64,16 @@ Sharegy ist keine einfache CRUD-Webanwendung, sondern eine **hochkomplexe, verte
 | **12. Helpcenter 2.0, Handbuch & Dokumentationsportal**<br>• 11 Themen-Kategorien, 46 zweisprachige (DE/EN) Fachartikel<br>• Vollständige Wissensdatenbank & Revisions-Leitfäden | Technical Writer<br>Lead Architect | 60 PT<br>*(~3,0 PM)* | 48.000 € – 62.000 € | 70.000 € – 95.000 € |
 | **13. B2B Whitelabeling & Cloudflare Edge CDN Security**<br>• Dynamic CSS Theming, Subdomain Routing, Full Strict SSL<br>• Cloudflare DNSSEC, HSTS, Rate Limiting & WebSockets Anycast | Lead Architect<br>DevOps / Cloud Eng. | 50 PT<br>*(~2,5 PM)* | 42.000 € – 55.000 € | 65.000 € – 90.000 € |
 | **14. QA, Testabdeckung, Security & Compliance**<br>• 100% automatisierte Test Suite (180+ Unit- & Integrationstests)<br>• Multi-Tenant Isolation, DSGVO-TOMs, Audit-Logging | QA / Test Engineer<br>Security Specialist | 60 PT<br>*(~3,0 PM)* | 48.000 € – 62.000 € | 70.000 € – 92.000 € |
-| **GESAMT-ENTWICKLUNGSAUFWAND** | **Team: 4–6 Experten** | **1.080 PT**<br>*(~54 PM)* | **893.000 € – 1.148.000 €** | **1.295.000 € – 1.713.000 €** |
+| **15. Decoupled Carrier Admin, 24/7 Reverse-RPC & Canary OTA Watchdog**<br>• 24/7 Admin-Tunnel nach `mon.smartevo.de` mit § 14a Notfall-RPC<br>• Autonomer 15-Minuten Rollback-Watchdog (Zero-Truck-Roll Garantie)<br>• Automatische PostgreSQL-Flottentelemetrie & Ringpuffer-Fehlerübertragung | Senior Systems Architect<br>Embedded/Cloud Eng. | 45 PT<br>*(~2,3 PM)* | 38.000 € – 52.000 € | 55.000 € – 75.000 € |
+| **GESAMT-ENTWICKLUNGSAUFWAND** | **Team: 4–6 Experten** | **1.125 PT**<br>*(~56 PM)* | **931.000 € – 1.200.000 €** | **1.350.000 € – 1.788.000 €** |
 
 ---
 
-### 1.4 Gesamtfazit der Entwicklungskosten
+### 1.4 Gesamtfazit der Entwicklungskosten & OPEX-Hebel
 
-* **Inhouse-Softwareteam**: Bei Aufbau eines eigenen spezialisierten Entwicklungsteams (4–6 Senior Engineers über eine Laufzeit von **24 Monaten**) belaufen sich die reinen Lohn- und Arbeitgeber-Vollkosten auf **ca. 890.000 € bis 1.150.000 €**.
-* **Beauftragung einer Digitalagentur / IT-Dienstleisters**: Bei Vergabe an eine spezialisierte IoT- und Cloud-Agentur im DACH-Raum lägen die Entwicklungskosten bei **ca. 1.295.000 € bis 1.710.000 € netto**.
+* **Inhouse-Softwareteam**: Bei Aufbau eines eigenen spezialisierten Entwicklungsteams (4–6 Senior Engineers über eine Laufzeit von **24 Monaten**) belaufen sich die reinen Lohn- und Arbeitgeber-Vollkosten auf **ca. 930.000 € bis 1.200.000 €**.
+* **Beauftragung einer Digitalagentur / IT-Dienstleisters**: Bei Vergabe an eine spezialisierte IoT- und Cloud-Agentur im DACH-Raum lägen die Entwicklungskosten bei **ca. 1.350.000 € bis 1.788.000 € netto**.
+* **Operativer Hebel (OPEX-Reduktion durch Self-Healing OTA)**: Die integrierte Canary OTA Rollback-Architektur spart bei einer Flotte von 1.000 Zählerschränken jährlich schätzungsweise **150.000 € bis 300.000 € an Vor-Ort-Wartungskosten (Truck Rolls)** ein, was die operative Rentabilität (EBITDA-Marge) signifikant erhöht.
 
 ---
 

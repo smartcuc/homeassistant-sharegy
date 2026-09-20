@@ -20,7 +20,7 @@ Das Fundament ist felsenfest. Die Plattform schließt als einzige Lösung in Eur
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│                                DIE 8 KERN-SPITZENLEISTUNGEN                             │
+│                                DIE 9 KERN-SPITZENLEISTUNGEN                             │
 ├─────────────────────────────────────────────────────────────────────────────────────────┤
 │ 1. ⚡ TRI-PILLAR DUAL-CORE PLATTFORM: EMS (Prosumer) + Sharing (Quartiere) + VPP        │
 │ 2. 🚀 UNERREICHTE TELEMETRIE-PERFORMANCE: TimescaleDB Hypertables & $O(1)$ Live-Cache   │
@@ -30,6 +30,7 @@ Das Fundament ist felsenfest. Die Plattform schließt als einzige Lösung in Eur
 │ 6. 🔑 GRANULARE ENTERPRISE RBAC-MATRIX: 5 Rollen für Großkunden, Dispatcher & Auditoren │
 │ 7. ⏳ SKELETON-LOADING & SWR UX: Ladezeitfreie Navigation ($< 20\,\text{ms}$)           │
 │ 8. 🌐 MAXIMALER ZERO-LOCK-IN: 10 Inverter-Clouds, Outbound-WSS, OCPP 1.6-J, ioBroker, HA│
+│ 9. 🔄 ZERO-TRUCK-ROLL CANARY OTA & REVERSE-RPC: Selbstheilender 15-Min Rollback-Watchdog│
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -57,9 +58,14 @@ Das Fundament ist felsenfest. Die Plattform schließt als einzige Lösung in Eur
 * **1-Klick Telemetrie-Snapshot Eskalation**: Direkte S2S-Eskalation tiefgreifender Störungen an das zentrale **smartEvo Operations Center (`mon.smartevo.de`)** mit Hardware- & Firmware-Snapshot (DSGVO-konform).
 * **Automatisierte Zero-Loss Cron- & Watchdog-Überwachung**: Kontinuierliche Selbstüberwachung; Systemausfälle oder Cronjob-Fehler öffnen vollautomatisch Incident-Tickets in `moniy` mit Mailbox-Routing via Microsoft Graph.
 
+### 2.6 Zero-Truck-Roll Flottenmanagement (Canary A/B OTA & 15-Minuten Rollback Guard)
+* **Selbstheilende Edge-Infrastruktur**: Jedes Remote-Update an ioBroker, Home Assistant oder Edge-Boxen wird unter einem 15-minütigen Sicherheits-Watchdog ausgeführt.
+* **Autonomes Rollback bei Boot- oder Netzwerkfehlern**: Schlägt ein Update fehl oder bootet der Knoten nicht stabil, rollt das System nach 15 Minuten autonom auf die funktionierende Vorversion zurück.
+* **Massiver OPEX-Vorteil**: Vollständige Eliminierung von Vor-Ort-Einsätzen (Truck Rolls, Ersparnis 150 €–300 € pro Zählerschrank).
+
 ---
 
-## 💡 3. Lokale Offline-Resilienz: Gelöst über ioBroker & Home Assistant
+## 💡 3. Lokale Offline-Resilienz & Selbstheilung: Gelöst über ioBroker & Home Assistant
 
 Ein oft genannter Kritikpunkt an Cloud-Plattformen ist die Abhängigkeit von einer stabilen Internetverbindung. Für Sharegy ist dieser Punkt **bereits heute für die Praxis gelöst**:
 
@@ -72,6 +78,8 @@ Ein oft genannter Kritikpunkt an Cloud-Plattformen ist die Abhängigkeit von ein
 │ • Lokale Aktorik via LAN (Shelly CoAP/HTTP, Modbus TCP, Zigbee, KNX)    │
 │ • Autonomer Weiterbetrieb mit gepufferten Schwellwerten bei Internetausfall│
 │ • Automatische Nachsynchronisation historischer Daten bei Reconnect     │
+│ • 24/7 Decoupled Admin-Carrier Tunnel (mon.smartevo.de) für Reverse-RPC│
+│ • Integrierter 15-Minuten Rollback-Watchdog für gefahrlose OTA-Updates   │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
