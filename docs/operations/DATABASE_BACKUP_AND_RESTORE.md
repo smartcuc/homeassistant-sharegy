@@ -6,46 +6,36 @@ Dieses Dokument beschreibt die Einrichtung der automatisierten täglichen Datenb
 
 ## 📋 1. Übersicht & Skripte
 
-Im Verzeichnis `scripts/` stehen drei produktionsreife Werkzeuge zur Verfügung:
-1. [`scripts/backup_db.sh`](file:///c:/Users/Public/Dev/eswes/scripts/backup_db.sh) – Tägliches komprimiertes PostgreSQL/TimescaleDB Backup (14 Tage Retention).
-2. [`scripts/backup_config.sh`](file:///c:/Users/Public/Dev/eswes/scripts/backup_config.sh) – Monatliches vollständiges Backup aller Server- & Applikations-Konfigurationen (`.env`, Nginx, Fail2ban, Systemd, UFW, Redis, Crontabs, Paketlisten; 12 Monate Retention).
-3. [`scripts/restore_db.sh`](file:///c:/Users/Public/Dev/eswes/scripts/restore_db.sh) – 1-Klick Restore-Hilfe für die Datenbank mit Sicherheitsabfrage und Service-Handling.
+Im Verzeichnis `scripts/` stehen folgende produktionsreife Werkzeuge zur Verfügung:
+1. [`scripts/backup_postgres_inflight.sh`](file:///c:/Users/Public/Dev/sharegy/scripts/backup_postgres_inflight.sh) – Kontinuierliches 5-Minuten In-Flight PostgreSQL Delta-Backup direkt an das Moniy Vault (ohne lokalen Festplatten-Bloat).
+2. [`scripts/backup_db.sh`](file:///c:/Users/Public/Dev/sharegy/scripts/backup_db.sh) – Tägliches komprimiertes PostgreSQL/TimescaleDB Full-Backup (14 Tage Retention).
+3. [`scripts/backup_config.sh`](file:///c:/Users/Public/Dev/sharegy/scripts/backup_config.sh) – Monatliches vollständiges Backup aller Server- & Applikations-Konfigurationen (`.env`, Nginx, Fail2ban, Systemd, UFW, Redis, Crontabs, Paketlisten; 12 Monate Retention).
+4. [`scripts/restore_db.sh`](file:///c:/Users/Public/Dev/sharegy/scripts/restore_db.sh) – 1-Klick Restore-Hilfe für die Datenbank mit Sicherheitsabfrage und Service-Handling.
+5. [`scripts/install_cron.sh`](file:///c:/Users/Public/Dev/sharegy/scripts/install_cron.sh) – Schlüsselfertiger Installer für die System-Crontab (`/etc/cron.d/sharegy`).
 
 ---
 
-## ⚙️ 2. Einrichtung auf dem Server
+## ⚙️ 2. Schlüsselfertige Einrichtung auf dem Server
 
-### Schritt 1: Ausführungsrechte vergeben
+Führen Sie im App-Verzeichnis einfach den automatisierten Installer aus:
+
 ```bash
-chmod +x /var/www/sharegy/live/scripts/backup_db.sh
-chmod +x /var/www/sharegy/live/scripts/backup_config.sh
-chmod +x /var/www/sharegy/live/scripts/restore_db.sh
+cd /var/www/sharegy/green
+sudo bash scripts/install_cron.sh
 ```
 
-### Schritt 2: Verzeichnisse und Rechte anlegen
+Das Skript:
+* Setzt alle Ausführungsrechte (`chmod +x`).
+* Erstellt Verzeichnisse für Logs (`/var/log/sharegy`) und lokale Dumps (`/var/backups/sharegy`).
+* Aktiviert die System-Crontab unter `/etc/cron.d/sharegy`.
+
+### 🔍 Crontab prüfen & überwachen:
 ```bash
-sudo mkdir -p /var/backups/sharegy/db
-sudo mkdir -p /var/backups/sharegy/config
-sudo mkdir -p /var/log/sharegy
-sudo chown -R www-data:www-data /var/backups/sharegy /var/log/sharegy
-```
+# Crontab-Einträge anzeigen:
+cat /etc/cron.d/sharegy
 
-### Schritt 3: Automatisierte Cronjobs einrichten (`sudo crontab -e`)
-Öffnen Sie die Root-Crontab:
-```bash
-sudo crontab -e
-```
-
-Fügen Sie die beiden Jobs ein:
-```cron
-# ==============================================================================
-# Sharegy Backup Cronjobs
-# ==============================================================================
-# 1. Tägliches Datenbank-Backup (PostgreSQL & TimescaleDB) um 03:00 Uhr
-0 3 * * * /var/www/sharegy/live/scripts/backup_db.sh >> /var/log/sharegy/cron_backup.log 2>&1
-
-# 2. Monatliches Server- & Konfigurations-Backup (.env, Nginx, Systemd, UFW, F2B) am 1. jeden Monats um 03:30 Uhr
-30 3 1 * * /var/www/sharegy/live/scripts/backup_config.sh >> /var/log/sharegy/cron_config_backup.log 2>&1
+# Cron-Ausführungen im Log mitverfolgen:
+sudo journalctl -u cron -n 20 --no-pager
 ```
 
 ---

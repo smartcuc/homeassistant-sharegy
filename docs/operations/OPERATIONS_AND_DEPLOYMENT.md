@@ -77,7 +77,43 @@ Environment="DJANGO_SETTINGS_MODULE=backend.settings.prod"
 ExecStart=/var/www/sharegy/green/venv/bin/celery -A backend worker -Q fiscal,realtime,analytics,background -l INFO --concurrency=2 --pidfile=/var/run/celery/worker.pid
 Restart=always
 
-[Install]
-WantedBy=multi-user.target
+---
+
+## ⏰ 5. Automatisierte System-Crontabs & In-Flight Backups
+
+Alle wiederkehrenden Wartungs-, Backup- und Überwachungsaufgaben sind als systemweite Crontab unter `/etc/cron.d/sharegy` eingerichtet.
+
+### 📋 Übersicht der Cronjobs & ausführenden Benutzer
+
+| Task / Skript | Intervall | Ausführender Benutzer | Funktion |
+|---|---|---|---|
+| **`backup_postgres_inflight.sh`** | Alle 5 Min. (`*/5 * * * *`) | **`root`** | 5-Minuten In-Flight DB-Delta-Stream an Moniy Vault |
+| **`heartbeat_watchdog.sh`** | Alle 2 Min. (`*/2 * * * *`) | **`root`** | HA-Wächter (kann Gunicorn/Daphne/Redis bei Ausfall heilen) |
+| **`backup_db.sh`** | Täglich 03:00 (`0 3 * * *`) | **`root`** | Täglicher Full-Dump mit 14-Tage-Retention |
+| **`renew_ssl.sh`** | 2x täglich (`30 2,14 * * *`) | **`root`** | Let's Encrypt SSL-Erneuerung & Nginx-Reload |
+| **`cleanup_housekeeping.sh`** | Täglich 04:00 (`0 4 * * *`) | **`root`** | Löschen abgelaufener Django-Sessions & Magic-Tokens |
+| **`rotate_logs.sh`** | Täglich 04:30 (`30 4 * * *`) | **`root`** | Komprimieren & Bereinigen alter Log-Dateien |
+
+### 🚀 1-Klick-Installation der Crontabs
+Das Skript `scripts/install_cron.sh` erkennt den aktuellen Installationspfad (`/var/www/sharegy/green`) dynamisch und richtet `/etc/cron.d/sharegy` schlüsselfertig ein:
+
+```bash
+cd /var/www/sharegy/green
+sudo bash scripts/install_cron.sh
 ```
-> **Hinweis zur Queue-Reihenfolge**: Durch `-Q fiscal,realtime,analytics,background` arbeitet Celery die Queues strikt von links nach rechts ab. Sobald ein Abrechnungs- oder MQTT-Task eingeht, wird dieser sofort vor wartenden Analyse- oder Hintergrundjobs vorgezogen.
+
+### 🔍 Überprüfung & Monitoring der Cronjobs
+
+```bash
+# 1. Aktive Crontab-Konfiguration anzeigen:
+cat /etc/cron.d/sharegy
+
+# 2. Letzte Cron-Ausführungen im System-Journal ansehen:
+sudo journalctl -u cron -n 25 --no-pager
+
+# 3. Live-Cronjob-Ausführungen im Syslog mitverfolgen:
+sudo tail -f /var/log/syslog | grep CRON
+
+# 4. Status des System-Cron-Daemons prüfen:
+sudo systemctl status cron
+```
