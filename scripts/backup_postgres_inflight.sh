@@ -6,14 +6,26 @@
 
 set -euo pipefail
 
+# Load .env if present in current or parent directory
+if [ -f "./.env" ]; then
+    set -a
+    source ./.env
+    set +a
+elif [ -f "../.env" ]; then
+    set -a
+    source ../.env
+    set +a
+fi
+
 # Configuration
-MONIY_URL="${MONIY_URL:-https://mon.sharegy.de}"
-MONIY_KEY="${MONIY_S2S_KEY:-moniy-s2s-sharegy-factofy-production-auth-key-change-me}"
+MONIY_URL="${MONIY_URL:-https://mon.smartevo.de}"
+MONIY_KEY="${MONIY_S2S_KEY:-${NEXUS_SERVER_TO_SERVER_API_KEY:-nexus-s2s-sharegy-factofy-production-auth-key-change-me}}"
 TENANT_ID="${BACKUP_TENANT_ID:-sharegy}"
-DB_NAME="${POSTGRES_DB:-sharegy_db}"
-DB_USER="${POSTGRES_USER:-postgres}"
-DB_HOST="${POSTGRES_HOST:-127.0.0.1}"
-DB_PORT="${POSTGRES_PORT:-5432}"
+DB_NAME="${POSTGRES_DB:-${DB_NAME:-sharegy}}"
+DB_USER="${POSTGRES_USER:-${DB_USER:-postgres}}"
+DB_HOST="${POSTGRES_HOST:-${DB_HOST:-127.0.0.1}}"
+DB_PORT="${POSTGRES_PORT:-${DB_PORT:-5432}}"
+PGPASSWORD="${POSTGRES_PASSWORD:-${DB_PASSWORD:-}}"
 
 TIMESTAMP=$(date -u +"%Y%m%d_%H%M%S")
 PREFIX="pg_delta_${DB_NAME}"
