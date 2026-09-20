@@ -538,7 +538,7 @@ class SharegyBridge:
                     "uptime": int(time.time() - self._start_time),
                     "version": VERSION,
                 })
-            elif method == "sys.diagnostics":
+            elif method in ("sys.diagnostics", "edge.get_diagnostics"):
                 await send_response({
                     "system": "Home Assistant",
                     "version": VERSION,
@@ -576,9 +576,9 @@ class SharegyBridge:
                     "attributes": dict(state_obj.attributes) if state_obj else {},
                     "last_updated": state_obj.last_updated.isoformat() if state_obj else None,
                 })
-            elif method == "ems.curtail":
-                active = bool(params.get("active"))
-                limit_w = int(params.get("limit_w", 0))
+            elif method in ("ems.curtail", "eebus.curtail"):
+                active = bool(params.get("active") if "active" in params else (params.get("limit_kw") is not None or params.get("limit_w") is not None))
+                limit_w = int(params.get("limit_w") if params.get("limit_w") is not None else float(params.get("limit_kw", 0)) * 1000)
                 reason = params.get("reason", "smartEvo carrier § 14a EnWG test")
                 _LOGGER.warning("[Carrier RPC] EMS Curtailment signal received: active=%s, limit=%sW, reason='%s'", active, limit_w, reason)
                 await send_response({
