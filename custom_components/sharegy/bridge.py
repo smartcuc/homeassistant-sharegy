@@ -214,6 +214,10 @@ class SharegyBridge:
         self._carrier_reconnect_attempts = 0
         self._start_time = time.time()
 
+        # In-memory circular error buffer for remote diagnostics (moniy)
+        self.error_log_buffer = []
+        self.max_error_log_size = 30
+
         # Real-time state received from Sharegy
         self.flow_temp_setpoint_c = 30.0
         self.screed_soc_pct = 50.0
@@ -331,6 +335,146 @@ class SharegyBridge:
             _LOGGER.debug("Carrier socket disconnected. Retrying in %.1fs (Attempt #%d)...", delay, self._carrier_reconnect_attempts)
             await asyncio.sleep(delay)
 
+    def record_error(self, code: str, message: str, context: dict = None, level: str = "error", push_to_carrier: bool = False):
+        """Record error in in-memory ring buffer and optionally push event to moniy carrier."""
+        error_entry = {
+            "ts": int(time.time() * 1000),
+            "level": level,
+            "code": code,
+            "message": str(message),
+            "context": context or {},
+        }
+        self.error_log_buffer.insert(0, error_entry)
+        if len(self.error_log_buffer) > self.max_error_log_size:
+            self.error_log_buffer.pop()
+
+        if level == "error":
+            _LOGGER.error("[%s] %s", code, message)
+        else:
+            _LOGGER.warning("[%s] %s", code, message)
+
+        if push_to_carrier and self.is_carrier_connected and self._carrier_ws and not self._carrier_ws.closed:
+            asyncio.create_task(self._emit_carrier_error(code, message, context, level))
+
+    async def _emit_carrier_error(self, code: str, message: str, details: dict = None, level: str = "error"):
+        """Proactively push error event over carrier socket to moniy."""
+        if not self._carrier_ws or self._carrier_ws.closed:
+            return
+        try:
+            frame = {
+                "type": "log_event",
+                "level": level,
+                "code": code,
+                "message": str(message),
+                "details": details or {},
+                "timestamp": int(time.time() * 1000),
+            }
+            await self._carrier_ws.send_str(json.dumps(frame))
+        except Exception as err:
+            _LOGGER.debug("Failed to emit carrier error log: %s", err)
+
+    def validate_configuration(self) -> dict:
+        """Validates all configured Home Assistant entities and checks availability and numeric validity."""
+        checks = [
+            ("pv_power_sensor", self.entry_data.get(CONF_PV_POWER_SENSOR), "number", False),
+            ("grid_power_sensor", self.entry_data.get(CONF_GRID_POWER_SENSOR), "number", False),
+            ("battery_power_sensor", self.entry_data.get(CONF_BATTERY_POWER_SENSOR), "number", True),
+            ("battery_soc_sensor", self.entry_data.get(CONF_BATTERY_SOC_SENSOR), "number", True),
+            ("load_power_sensor", self.entry_data.get(CONF_LOAD_POWER_SENSOR), "number", True),
+            ("bwwp_power", self.entry_data.get(CONF_BWWP_POWER), "number", True),
+            ("bwwp_switch", self.entry_data.get(CONF_BWWP_SWITCH), "switch", True),
+            ("heatpump_power", self.entry_data.get(CONF_HEATPUMP_POWER), "number", True),
+            ("heatpump_switch", self.entry_data.get(CONF_HEATPUMP_SWITCH), "switch", True),
+            ("floor_heating_power", self.entry_data.get(CONF_FLOOR_HEATING_POWER), "number", True),
+            ("floor_heating_room_temp", self.entry_data.get(CONF_FLOOR_HEATING_ROOM_TEMP), "number", True),
+            ("floor_heating_flow_temp", self.entry_data.get(CONF_FLOOR_HEATING_FLOW_TEMP), "number", True),
+            ("floor_heating_floor_temp", self.entry_data.get(CONF_FLOOR_HEATING_FLOOR_TEMP), "number", True),
+            ("floor_heating_switch", self.entry_data.get(CONF_FLOOR_HEATING_SWITCH), "switch", True),
+            ("wallbox_power", self.entry_data.get(CONF_WALLBOX_POWER), "number", True),
+            ("wallbox_switch", self.entry_data.get(CONF_WALLBOX_SWITCH), "switch", True),
+        ]
+
+        submeters = self.entry_data.get(CONF_SUBMETER_SENSORS, [])
+        if isinstance(submeters, list):
+            for sm in submeters:
+                if sm:
+                    checks.append((f"submeter_{sm}", sm, "number", True))
+
+        results = []
+        total_configured = 0
+        valid_count = 0
+        warning_count = 0
+
+        for field_name, ent_id, expected_type, optional in checks:
+            if not ent_id or not str(ent_id).strip():
+                if not optional:
+                    results.append({
+                        "field": field_name,
+                        "entity_id": "",
+                        "status": "missing_required",
+                        "message": "Pflicht-Entität ist in Home Assistant nicht konfiguriert",
+                    })
+                    warning_count += 1
+                continue
+
+            ent_id_str = str(ent_id).strip()
+            total_configured += 1
+            state_obj = self.hass.states.get(ent_id_str)
+
+            if state_obj is None:
+                results.append({
+                    "field": field_name,
+                    "entity_id": ent_id_str,
+                    "status": "not_found",
+                    "message": f"Entität '{ent_id_str}' existiert in Home Assistant nicht",
+                })
+                warning_count += 1
+            elif state_obj.state.lower() in ("unavailable", "unknown", "none"):
+                results.append({
+                    "field": field_name,
+                    "entity_id": ent_id_str,
+                    "status": "unavailable",
+                    "message": f"Entität ist '{state_obj.state}'",
+                    "attributes": dict(state_obj.attributes),
+                })
+                warning_count += 1
+            elif expected_type == "number":
+                try:
+                    val = float(state_obj.state)
+                    results.append({
+                        "field": field_name,
+                        "entity_id": ent_id_str,
+                        "status": "ok",
+                        "current_value": val,
+                        "unit": state_obj.attributes.get("unit_of_measurement", ""),
+                    })
+                    valid_count += 1
+                except (ValueError, TypeError):
+                    results.append({
+                        "field": field_name,
+                        "entity_id": ent_id_str,
+                        "status": "type_mismatch",
+                        "message": f"Wert '{state_obj.state}' kann nicht als Zahl geparst werden",
+                    })
+                    warning_count += 1
+            else:
+                results.append({
+                    "field": field_name,
+                    "entity_id": ent_id_str,
+                    "status": "ok",
+                    "current_value": state_obj.state,
+                })
+                valid_count += 1
+
+        return {
+            "valid": warning_count == 0,
+            "total_checked": total_configured,
+            "valid_count": valid_count,
+            "issue_count": warning_count,
+            "checks": results,
+            "timestamp": int(time.time() * 1000),
+        }
+
     async def _carrier_heartbeat_loop(self, ws):
         """Send periodic health ping to smartEvo moniy."""
         while self._running and not ws.closed:
@@ -342,6 +486,7 @@ class SharegyBridge:
                         "uptime": int(time.time() - self._start_time),
                         "version": VERSION,
                         "buffered_count": self.buffer.count_pending(),
+                        "error_count": len(self.error_log_buffer),
                         "connected_to_sharegy": self.is_connected,
                         "offline_autonomous": self.offline_autonomous,
                         "client": "homeassistant",
@@ -399,6 +544,7 @@ class SharegyBridge:
                     "version": VERSION,
                     "uptime": int(time.time() - self._start_time),
                     "buffered_count": self.buffer.count_pending(),
+                    "error_count": len(self.error_log_buffer),
                     "connected_to_sharegy": self.is_connected,
                     "offline_autonomous": self.offline_autonomous,
                     "screed_soc_pct": self.screed_soc_pct,
@@ -406,6 +552,18 @@ class SharegyBridge:
                     "flow_temp_setpoint_c": self.flow_temp_setpoint_c,
                     "timestamp": int(time.time() * 1000),
                 })
+            elif method == "sys.get_errors":
+                await send_response({
+                    "total_recorded": len(self.error_log_buffer),
+                    "errors": self.error_log_buffer,
+                    "timestamp": int(time.time() * 1000),
+                })
+            elif method == "sys.clear_errors":
+                self.error_log_buffer.clear()
+                await send_response({"cleared": True, "timestamp": int(time.time() * 1000)})
+            elif method == "sys.validate_config":
+                validation = self.validate_configuration()
+                await send_response(validation)
             elif method == "device.read":
                 ent_id = params.get("id") or params.get("entity_id") or params.get("state_id")
                 if not ent_id:
@@ -490,6 +648,14 @@ class SharegyBridge:
             except Exception as err:
                 self.is_connected = False
                 self._reconnect_attempts += 1
+                if self._reconnect_attempts in (5, 10):
+                    self.record_error(
+                        "ERR_RECONNECT_FAILURES",
+                        f"Repeated connection failures to Sharegy cloud ({self._reconnect_attempts} attempts): {err}",
+                        {"attempts": self._reconnect_attempts, "error": str(err)},
+                        "warn",
+                        True,
+                    )
                 # Exponential backoff: 2s -> 3s -> 4.5s -> 6.75s ... max 25s
                 backoff = min(25.0, 2.0 * (1.5 ** min(self._reconnect_attempts - 1, 7)))
                 jitter = random.uniform(0.0, 0.5)
