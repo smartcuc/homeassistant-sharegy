@@ -87,13 +87,27 @@ class HaUpdateWatchdog:
             "confirmed_at": state["confirmed_at"],
         }
 
-    async def initiate_update(self, target_version: str = "main", timeout_seconds: int = 900) -> Dict[str, Any]:
+    async def initiate_update(self, target_version: str = "smartcuc/homeassistant-sharegy#main", timeout_seconds: int = 900) -> Dict[str, Any]:
         """Creates backup and downloads new component version with 15-minute rollback safety."""
         from .const import VERSION
         current_version = VERSION
         backup_dir = os.path.join(self.component_dir, f".backup_{current_version}_{int(time.time())}")
 
-        _LOGGER.warning("[OTA Watchdog] 🚀 Initiating guarded OTA update from %s to '%s'...", current_version, target_version)
+        # Guard: Reject ioBroker packages sent to Home Assistant
+        target_str = str(target_version or "").strip()
+        if "iobroker" in target_str.lower():
+            _LOGGER.error("[OTA Watchdog] ❌ Invalid update target '%s' for Home Assistant integration!", target_str)
+            return {
+                "status": "error",
+                "message": f"Invalid update package '{target_str}'. Home Assistant requires 'smartcuc/homeassistant-sharegy', not ioBroker packages.",
+            }
+
+        if not target_str or target_str == "main":
+            target_str = "smartcuc/homeassistant-sharegy#main"
+        elif not target_str.startswith("http") and not "/" in target_str:
+            target_str = f"smartcuc/homeassistant-sharegy#{target_str}"
+
+        _LOGGER.warning("[OTA Watchdog] 🚀 Initiating guarded OTA update from %s to '%s'...", current_version, target_str)
 
         # 1. Create local backup snapshot
         try:
@@ -113,7 +127,7 @@ class HaUpdateWatchdog:
 
         state = {
             "previous_version": current_version,
-            "target_version": target_version,
+            "target_version": target_str,
             "backup_dir": backup_dir,
             "started_at": time.time(),
             "timeout_seconds": timeout_seconds,
@@ -124,7 +138,7 @@ class HaUpdateWatchdog:
         return {
             "status": "initiated",
             "previous_version": current_version,
-            "target": target_version,
+            "target": target_str,
             "timeout_seconds": timeout_seconds,
             "message": "Guarded OTA update initiated with 15-minute rollback protection.",
         }
