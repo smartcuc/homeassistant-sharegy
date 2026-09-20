@@ -481,9 +481,25 @@ class SharegyBridge:
         }
 
     async def _carrier_heartbeat_loop(self, ws):
-        """Send periodic health ping to smartEvo moniy."""
+        """Send periodic health ping to smartEvo moniy with enhanced host & runtime telemetry."""
+        import sys
+        import os
         while self._running and not ws.closed:
             try:
+                mem_rss_mb = 0
+                try:
+                    import resource
+                    mem_rss_mb = int(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024)
+                except Exception:
+                    pass
+
+                load_avg_1m = 0.0
+                try:
+                    if hasattr(os, "getloadavg"):
+                        load_avg_1m = round(os.getloadavg()[0], 2)
+                except Exception:
+                    pass
+
                 payload = {
                     "type": "health_ping",
                     "timestamp": int(time.time() * 1000),
@@ -495,6 +511,10 @@ class SharegyBridge:
                         "connected_to_sharegy": self.is_connected,
                         "offline_autonomous": self.offline_autonomous,
                         "client": "homeassistant",
+                        "memory_rss_mb": mem_rss_mb,
+                        "python_version": sys.version.split()[0],
+                        "platform": sys.platform,
+                        "load_avg_1m": load_avg_1m,
                     },
                 }
                 await ws.send_str(json.dumps(payload))
