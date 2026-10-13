@@ -1,6 +1,6 @@
 blueprint:
   name: "Sharegy: Lokale Zähler & Telemetrie an Sharegy übertragen"
-  description: "Sendet Messwerte deiner lokalen Home Assistant Sensoren (z. B. Shelly 3EM, Wallbox, Wärmepumpe) in festen Intervallen verschlüsselt an Sharegy HEMS."
+  description: "Sendet Messwerte deiner lokalen Home Assistant Sensoren (z. B. Shelly 3EM, Wallbox, Wärmepumpe) in festen Intervallen verschlüsselt an Sharegy EMS."
   domain: automation
   input:
     push_interval:
