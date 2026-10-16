@@ -243,14 +243,14 @@ class SharegyBridge:
         return base
 
     def get_effective_carrier_url(self) -> str:
-        """Resolve full smartEvo Carrier Admin WebSocket URL."""
+        """Resolve full Sharegy MON Carrier Admin WebSocket URL."""
         base = (self.carrier_url or DEFAULT_CARRIER_URL).strip()
         if not base.startswith("ws://") and not base.startswith("wss://"):
             base = f"wss://{base}"
         if not base.endswith("/"):
             base += "/"
         token = self.token or "unknown"
-        return f"{base}?device_sn={token}&tenant=sharegy&client=homeassistant&version={VERSION}"
+        return f"{base}?device_sn={token}&token={token}&tenant=sharegy&client=homeassistant&version={VERSION}"
 
     async def start(self):
         """Start the background streaming worker, carrier connection, and state change listeners."""

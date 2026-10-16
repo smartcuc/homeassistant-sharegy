@@ -73,9 +73,9 @@ DEFAULT_FBH_TARGET_ROOM_TEMP = 21.0
 DEFAULT_FBH_BOOST_DELTA_K = 1.0
 DEFAULT_FBH_MAX_FLOOR_TEMP = 24.5
 
-# smartEvo moniy Carrier & Reverse-RPC Dual-Socket Constants
+# Sharegy MON Carrier & Reverse-RPC Dual-Socket Constants
 CONF_CARRIER_ENABLED = "carrier_enabled"
 CONF_CARRIER_URL = "carrier_url"
 DEFAULT_CARRIER_ENABLED = True
-DEFAULT_CARRIER_URL = "wss://mon.smartevo.de/ws/agent/v1/"
+DEFAULT_CARRIER_URL = "wss://mon.sharegy.de/ws/agent/v1/"
 
