@@ -1,4 +1,4 @@
-# Sharegy Integration for Home Assistant (v2.2.0)
+# Sharegy Integration for Home Assistant (v2.2.2)
 
 ![Logo](logo.png)
 

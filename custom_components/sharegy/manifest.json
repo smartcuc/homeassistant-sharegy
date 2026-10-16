@@ -1,6 +1,6 @@
 {
   "domain": "sharegy",
-  "name": "Sharegy Cloud Energy Bridge",
+  "name": "Sharegy Energy Management",
   "codeowners": [
     "@smartcuc",
     "@sharegy"
