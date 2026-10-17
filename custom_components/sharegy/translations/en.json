@@ -41,6 +41,13 @@
           "submeter_sensors": "📊 Other Submeters / Sensors (Multi-Select)",
           "sync_interval": "⏱️ Sync Interval (Seconds)"
         }
+      },
+      "reconfigure": {
+        "title": "Sharegy Re-Pairing",
+        "description": "Enter the new 6-digit Pairing PIN generated in Sharegy OS to re-pair this Home Assistant instance.",
+        "data": {
+          "home_token": "6-Digit Pairing PIN"
+        }
       }
     },
     "error": {
@@ -48,15 +55,17 @@
       "cannot_connect": "Failed to connect to Sharegy Cloud."
     },
     "abort": {
-      "already_configured": "This Sharegy Home is already configured."
+      "already_configured": "This Sharegy Home is already configured.",
+      "reconfigure_successful": "Re-pairing successful! Connection updated."
     }
   },
   "options": {
     "step": {
       "init": {
         "title": "Edit Sharegy Sensors & Devices",
-        "description": "Update your sensor and device bundle mappings live.",
+        "description": "Update your sensor and device bundle mappings live, or enter a new 6-digit PIN to re-pair.",
         "data": {
+          "pairing_pin": "🔄 New 6-Digit Pairing PIN (Re-Pairing, optional)",
           "grid_power_sensor": "⚡ Grid Power (W / kW)",
           "pv_power_sensor": "☀️ Solar Generation / PV (W / kW)",
           "battery_power_sensor": "🔋 Battery Power (W / kW)",

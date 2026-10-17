@@ -13,8 +13,10 @@ from homeassistant.helpers import selector
 
 from .const import (
     DOMAIN,
+    CONF_HOST,
     CONF_WS_URL,
     CONF_HOME_TOKEN,
+    CONF_PAIRING_PIN,
     CONF_GRID_POWER_SENSOR,
     CONF_PV_POWER_SENSOR,
     CONF_BATTERY_POWER_SENSOR,
@@ -43,11 +45,13 @@ from .const import (
     CONF_WALLBOX_SWITCH,
     CONF_SUBMETER_SENSORS,
     CONF_SYNC_INTERVAL,
+    DEFAULT_HOST,
     DEFAULT_WS_URL,
     DEFAULT_SYNC_INTERVAL,
     DEFAULT_FBH_TARGET_ROOM_TEMP,
     DEFAULT_FBH_BOOST_DELTA_K,
     DEFAULT_FBH_MAX_FLOOR_TEMP,
+    VERSION,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -65,6 +69,48 @@ def extract_token(user_input: dict[str, Any]) -> str:
                 return match.group(1).strip()
 
     return token_input
+
+
+async def async_claim_pairing_token(pin: str, host: str = DEFAULT_HOST) -> tuple[str | None, str | None]:
+    """Exchange 6-digit PIN for permanent home_token via Sharegy Cloud API.
+
+    Returns (token, error_key).
+    error_key: 'invalid_auth', 'cannot_connect', or None.
+    """
+    clean_pin = pin.replace("-", "").strip()
+    try:
+        import aiohttp
+        import secrets
+
+        host_str = (host or DEFAULT_HOST).rstrip("/")
+        if not host_str.startswith("http"):
+            host_str = f"https://{host_str}"
+        claim_url = f"{host_str}/api/v1/devices/pairing/claim/"
+
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                claim_url,
+                json={
+                    "pin": clean_pin,
+                    "device_id": f"ha_{secrets.token_hex(4)}",
+                    "client": "homeassistant",
+                    "model": "Home Assistant Sharegy Integration",
+                    "firmware_version": VERSION,
+                },
+                timeout=aiohttp.ClientTimeout(total=10.0),
+            ) as resp:
+                if resp.status in (200, 201):
+                    data = await resp.json()
+                    real_token = data.get("home_token") or data.get("device_token")
+                    if real_token:
+                        return real_token, None
+                    return None, "invalid_auth"
+                else:
+                    _LOGGER.warning("Pairing claim HTTP error %s: %s", resp.status, await resp.text())
+                    return None, "invalid_auth"
+    except Exception as ex:
+        _LOGGER.warning("Error claiming pairing PIN: %s", ex)
+        return None, "cannot_connect"
 
 
 class SharegyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -90,37 +136,15 @@ class SharegyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 errors["base"] = "invalid_auth"
             elif len(token) == 6 and token.isdigit():
                 # 6-digit Zero-Touch PIN entered -> claim from Sharegy Cloud
-                try:
-                    import aiohttp
-                    import secrets
-                    host_str = (user_input.get(CONF_HOST) or "https://sharegy.de").rstrip("/")
-                    if not host_str.startswith("http"):
-                        host_str = f"https://{host_str}"
-                    claim_url = f"{host_str}/api/v1/devices/pairing/claim/"
-                    async with aiohttp.ClientSession() as session:
-                        async with session.post(
-                            claim_url,
-                            json={
-                                "pin": token,
-                                "device_id": f"ha_{secrets.token_hex(4)}",
-                                "client": "homeassistant",
-                                "model": "Home Assistant Sharegy Integration",
-                                "firmware_version": VERSION,
-                            },
-                            timeout=aiohttp.ClientTimeout(total=8.0),
-                        ) as resp:
-                            if resp.status in (200, 201):
-                                data = await resp.json()
-                                real_token = data.get("home_token") or data.get("device_token")
-                                if real_token:
-                                    token = real_token
-                            else:
-                                errors["base"] = "invalid_auth"
-                except Exception as ex:
-                    _LOGGER.warning("Error claiming pairing PIN: %s", ex)
-                    errors["base"] = "cannot_connect"
+                real_token, err = await async_claim_pairing_token(token)
+                if err:
+                    errors["base"] = err
+                else:
+                    token = real_token
 
             if not errors:
+                await self.async_set_unique_id(f"sharegy_{token[:16]}")
+                self._abort_if_unique_id_configured()
                 user_input[CONF_HOME_TOKEN] = token
                 self._auth_data = user_input
                 return await self.async_step_entities()
@@ -134,6 +158,46 @@ class SharegyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="user",
             data_schema=data_schema,
+            errors=errors,
+        )
+
+    async def async_step_reconfigure(
+        self, user_input: dict[str, Any] | None = None
+    ) -> config_entries.FlowResult:
+        """Handle re-configuration / re-pairing with a new 6-digit PIN."""
+        errors: dict[str, str] = {}
+        entry = getattr(self, "_get_reconfigure_entry", lambda: None)()
+        if not entry and hasattr(self, "context") and self.context.get("entry_id"):
+            entry = self.hass.config_entries.async_get_entry(self.context["entry_id"])
+
+        if user_input is not None:
+            token = extract_token(user_input)
+            if not token:
+                errors["base"] = "invalid_auth"
+            elif len(token) == 6 and token.isdigit():
+                real_token, err = await async_claim_pairing_token(token)
+                if err:
+                    errors["base"] = err
+                else:
+                    token = real_token
+
+            if not errors and entry:
+                self.hass.config_entries.async_update_entry(
+                    entry,
+                    title=f"Sharegy ({token[:8]}...)",
+                    unique_id=f"sharegy_{token[:16]}",
+                    data={**entry.data, CONF_HOME_TOKEN: token},
+                )
+                await self.hass.config_entries.async_reload(entry.entry_id)
+                return self.async_abort(reason="reconfigure_successful")
+
+        return self.async_show_form(
+            step_id="reconfigure",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(CONF_HOME_TOKEN, default=""): str,
+                }
+            ),
             errors=errors,
         )
 
@@ -267,22 +331,47 @@ class SharegyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
 
 class SharegyOptionsFlowHandler(config_entries.OptionsFlow):
-    """Handle options for updating entity mapping live in HA."""
+    """Handle options for updating entity mapping live in HA or re-pairing."""
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> config_entries.FlowResult:
-        """Manage entity selectors."""
+        """Manage entity selectors and optional re-pairing PIN."""
+        errors: dict[str, str] = {}
+
         if user_input is not None:
-            self.hass.config_entries.async_update_entry(
-                self.config_entry,
-                data={**self.config_entry.data, **user_input},
-            )
-            return self.async_create_entry(title="", data={})
+            raw_pin = str(user_input.pop(CONF_PAIRING_PIN, "") or "").strip().replace(" ", "")
+            updated_data = {**self.config_entry.data, **user_input}
+            new_title = None
+
+            if raw_pin:
+                if len(raw_pin) == 6 and raw_pin.isdigit():
+                    real_token, err = await async_claim_pairing_token(raw_pin)
+                    if err:
+                        errors["base"] = err
+                    else:
+                        updated_data[CONF_HOME_TOKEN] = real_token
+                        new_title = f"Sharegy ({real_token[:8]}...)"
+                else:
+                    errors["base"] = "invalid_auth"
+
+            if not errors:
+                update_kwargs = {"data": updated_data}
+                if new_title:
+                    update_kwargs["title"] = new_title
+                    update_kwargs["unique_id"] = f"sharegy_{updated_data[CONF_HOME_TOKEN][:16]}"
+                self.hass.config_entries.async_update_entry(
+                    self.config_entry,
+                    **update_kwargs,
+                )
+                return self.async_create_entry(title="", data={})
 
         data = self.config_entry.data
 
         fields = {}
+        # Re-Pairing 6-Digit PIN (optional)
+        fields[vol.Optional(CONF_PAIRING_PIN, default="")] = str
+
         # Core EMS Sensors
         for key in [
             CONF_GRID_POWER_SENSOR,
@@ -428,4 +517,5 @@ class SharegyOptionsFlowHandler(config_entries.OptionsFlow):
         return self.async_show_form(
             step_id="init",
             data_schema=vol.Schema(fields),
+            errors=errors,
         )

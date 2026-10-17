@@ -17,6 +17,7 @@ except Exception:
 CONF_HOST = "host"
 CONF_WS_URL = "ws_url"
 CONF_HOME_TOKEN = "home_token"
+CONF_PAIRING_PIN = "pairing_pin"
 CONF_MQTT_PASSWORD = "mqtt_password"
 CONF_PROTOCOL = "protocol"
 CONF_BIDIRECTIONAL_ENABLED = "bidirectional_enabled"

@@ -41,6 +41,13 @@
           "submeter_sensors": "📊 Sonstige Einzelsensoren / Submeter (Multi-Select)",
           "sync_interval": "⏱️ Übertragungsintervall (Sekunden)"
         }
+      },
+      "reconfigure": {
+        "title": "Sharegy neu koppeln",
+        "description": "Gib den neuen 6-stelligen Kopplungs-PIN aus Sharegy OS ein, um diese Home Assistant Instanz neu zu verknüpfen.",
+        "data": {
+          "home_token": "6-stelliger Kopplungs-PIN"
+        }
       }
     },
     "error": {
@@ -48,15 +55,17 @@
       "cannot_connect": "Verbindung zur Sharegy Cloud fehlgeschlagen."
     },
     "abort": {
-      "already_configured": "Dieses Sharegy-Zuhause ist bereits in Home Assistant konfiguriert."
+      "already_configured": "Dieses Sharegy-Zuhause ist bereits in Home Assistant konfiguriert.",
+      "reconfigure_successful": "Erfolgreich neu gekoppelt! Die Verbindung wurde aktualisiert."
     }
   },
   "options": {
     "step": {
       "init": {
         "title": "Sharegy Sensoren & Geräte anpassen",
-        "description": "Passe die Zuordnung deiner Zähler, Fußbodenheizung, Wärmepumpen, BWWP und Wallbox live an.",
+        "description": "Passe die Zuordnung deiner Sensoren und Geräte live an, oder gib einen neuen 6-stelligen PIN ein, um neu zu koppeln.",
         "data": {
+          "pairing_pin": "🔄 Neuer 6-stelliger Kopplungs-PIN (Re-Pairing, optional)",
           "grid_power_sensor": "⚡ Netzleistung (W / kW)",
           "pv_power_sensor": "☀️ PV-Erzeugung Leistung (W / kW)",
           "battery_power_sensor": "🔋 Batteriespeicher Leistung (W / kW)",
