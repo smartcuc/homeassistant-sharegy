@@ -56,9 +56,9 @@ _LOGGER = logging.getLogger(__name__)
 def extract_token(user_input: dict[str, Any]) -> str:
     """Extract clean token from either URL or token input field."""
     ws_url = (user_input.get(CONF_WS_URL) or "").strip()
-    token_input = (user_input.get(CONF_HOME_TOKEN) or "").strip()
+    token_input = (user_input.get(CONF_HOME_TOKEN) or "").strip().replace(" ", "")
 
-    for candidate in [ws_url, token_input]:
+    for candidate in [token_input, ws_url]:
         if candidate:
             match = re.search(r"/ws/energy/([a-zA-Z0-9_-]+)", candidate)
             if match:
@@ -78,10 +78,13 @@ class SharegyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> config_entries.FlowResult:
-        """Step 1: Authenticate with Sharegy Token or 1-Click WSS URL."""
+        """Step 1: Authenticate with 6-digit PIN (Zero-Touch Onboarding)."""
         errors: dict[str, str] = {}
 
         if user_input is not None:
+            if CONF_WS_URL not in user_input or not user_input[CONF_WS_URL]:
+                user_input[CONF_WS_URL] = DEFAULT_WS_URL
+
             token = extract_token(user_input)
             if not token:
                 errors["base"] = "invalid_auth"
@@ -124,8 +127,7 @@ class SharegyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         data_schema = vol.Schema(
             {
-                vol.Required(CONF_WS_URL, default=DEFAULT_WS_URL): str,
-                vol.Optional(CONF_HOME_TOKEN, default=""): str,
+                vol.Required(CONF_HOME_TOKEN, default=""): str,
             }
         )
 

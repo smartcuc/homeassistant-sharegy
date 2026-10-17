@@ -2,12 +2,10 @@
   "config": {
     "step": {
       "user": {
-        "title": "Sharegy Platform Connection",
-        "description": "Connect your Home Assistant with the Sharegy Cloud Platform. Copy and paste your personal WebSocket URL from the Sharegy Web-App (Settings → Interfaces).",
+        "title": "Sharegy Zero-Touch Pairing",
+        "description": "Enter the 6-digit Pairing PIN generated in Sharegy OS (Interfaces → Home Assistant → Generate 6-digit Pairing PIN).",
         "data": {
-          "ws_url": "WebSocket URL (Copy & Paste from Sharegy Interfaces)",
-          "home_token": "Home Token (optional if included in URL)",
-          "protocol": "Transmission Protocol"
+          "home_token": "6-Digit Pairing PIN"
         }
       },
       "entities": {
