@@ -16,7 +16,6 @@ from .const import (
     CONF_HOST,
     CONF_WS_URL,
     CONF_HOME_TOKEN,
-    CONF_MQTT_PASSWORD,
     CONF_PROTOCOL,
     CONF_BIDIRECTIONAL_ENABLED,
     CONF_GRID_POWER_SENSOR,
@@ -192,7 +191,6 @@ class SharegyBridge:
         self.hass = hass
         self.entry_data = entry_data
         self.token = entry_data.get(CONF_HOME_TOKEN) or ""
-        self.password = entry_data.get(CONF_MQTT_PASSWORD) or ""
         self.ws_url_config = entry_data.get(CONF_WS_URL) or ""
         self.host = entry_data.get(CONF_HOST, "https://sharegy.de").rstrip("/")
         self.protocol = entry_data.get(CONF_PROTOCOL, "websocket")
@@ -263,8 +261,7 @@ class SharegyBridge:
             host_str = f"https://{host_str}"
         host_str = host_str.rstrip("/")
 
-        password_str = (self.password or "").strip()
-        url = f"{host_str}/api/v1/devices/carrier-token/?token={token}&password={password_str}&client=homeassistant&device_sn={token}"
+        url = f"{host_str}/api/v1/devices/carrier-token/?token={token}&client=homeassistant&device_sn={token}"
 
         try:
             async with aiohttp.ClientSession() as session:

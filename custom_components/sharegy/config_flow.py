@@ -85,7 +85,39 @@ class SharegyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             token = extract_token(user_input)
             if not token:
                 errors["base"] = "invalid_auth"
-            else:
+            elif len(token) == 6 and token.isdigit():
+                # 6-digit Zero-Touch PIN entered -> claim from Sharegy Cloud
+                try:
+                    import aiohttp
+                    import secrets
+                    host_str = (user_input.get(CONF_HOST) or "https://sharegy.de").rstrip("/")
+                    if not host_str.startswith("http"):
+                        host_str = f"https://{host_str}"
+                    claim_url = f"{host_str}/api/v1/devices/pairing/claim/"
+                    async with aiohttp.ClientSession() as session:
+                        async with session.post(
+                            claim_url,
+                            json={
+                                "pin": token,
+                                "device_id": f"ha_{secrets.token_hex(4)}",
+                                "client": "homeassistant",
+                                "model": "Home Assistant Sharegy Integration",
+                                "firmware_version": VERSION,
+                            },
+                            timeout=aiohttp.ClientTimeout(total=8.0),
+                        ) as resp:
+                            if resp.status in (200, 201):
+                                data = await resp.json()
+                                real_token = data.get("home_token") or data.get("device_token")
+                                if real_token:
+                                    token = real_token
+                            else:
+                                errors["base"] = "invalid_auth"
+                except Exception as ex:
+                    _LOGGER.warning("Error claiming pairing PIN: %s", ex)
+                    errors["base"] = "cannot_connect"
+
+            if not errors:
                 user_input[CONF_HOME_TOKEN] = token
                 self._auth_data = user_input
                 return await self.async_step_entities()
