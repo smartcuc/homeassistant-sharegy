@@ -557,9 +557,12 @@ class SharegyBridge:
 
         try:
             if method == "sys.ping":
+                now_utc = datetime.now(timezone.utc)
                 await send_response({
                     "pong": True,
-                    "timestamp": int(time.time() * 1000),
+                    "timestamp": int(now_utc.timestamp() * 1000),
+                    "timestamp_iso": now_utc.isoformat(),
+                    "time_local": datetime.now().strftime("%H:%M:%S"),
                     "uptime": int(time.time() - self._start_time),
                     "version": VERSION,
                 })
