@@ -624,9 +624,24 @@ class SharegyBridge:
             elif method == "adapter.rollback":
                 res = self.update_watchdog.trigger_immediate_rollback()
                 await send_response(res)
-            elif method == "adapter.get_update_status":
-                res = self.update_watchdog.get_status()
-                await send_response(res)
+            elif method in ("adapter.restart", "edge.restart_service"):
+                asyncio.create_task(self.hass.services.async_call("homeassistant", "restart"))
+                await send_response({"restarting": True, "message": "Home Assistant restart initiated."})
+            elif method in ("device.reboot", "sys.reboot"):
+                asyncio.create_task(self.hass.services.async_call("hassio", "host_reboot"))
+                await send_response({"rebooting": True, "message": "Host reboot initiated via Supervisor."})
+            elif method in ("carrier.reconnect", "ws.reconnect"):
+                if self.ws:
+                    await self.ws.close()
+                await send_response({"reconnecting": True, "message": "Carrier WebSocket reconnection scheduled."})
+            elif method in ("logs.get_tail", "logs.tail"):
+                lines_count = int(params.get("lines") or 50)
+                await send_response({
+                    "lines_requested": lines_count,
+                    "recent_errors": self.error_log_buffer[-lines_count:],
+                    "status": "OK",
+                    "timestamp": int(time.time() * 1000),
+                })
             else:
                 await send_response(error={"code": -32601, "message": f"Method '{method}' not found"})
         except Exception as err:
