@@ -212,6 +212,8 @@ class SharegyBridge:
         self._unsub_listeners = []
         self._reconnect_attempts = 0
         self._carrier_reconnect_attempts = 0
+        self._carrier_jwt = None
+        self._carrier_device_sn = None
         self._start_time = time.time()
 
         # In-memory circular error buffer for remote diagnostics (moniy)
@@ -242,15 +244,51 @@ class SharegyBridge:
             base += f"?client=homeassistant&source=homeassistant&version={VERSION}"
         return base
 
-    def get_effective_carrier_url(self) -> str:
+    async def async_fetch_carrier_jwt(self) -> Optional[str]:
+        """
+        Fetches cryptographically signed Carrier JWT from Sharegy EMS.
+        Held strictly in private memory (_carrier_jwt), never exposed in entities or UI.
+        """
+        if getattr(self, "_carrier_jwt", None):
+            return self._carrier_jwt
+
+        token = self.token
+        if not token:
+            return None
+
+        host_str = (self.host or "https://sharegy.de").strip()
+        if not host_str.startswith("http://") and not host_str.startswith("https://"):
+            host_str = f"https://{host_str}"
+        host_str = host_str.rstrip("/")
+
+        url = f"{host_str}/api/v1/devices/carrier-token/?token={token}&client=homeassistant&device_sn={token}"
+
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, timeout=aiohttp.ClientTimeout(total=8.0)) as resp:
+                    if resp.status == 200:
+                        data = await resp.json()
+                        self._carrier_jwt = data.get("carrier_token")
+                        self._carrier_device_sn = data.get("device_sn") or token
+                        _LOGGER.debug("Received MON carrier token for %s", self._carrier_device_sn)
+                        return self._carrier_jwt
+                    else:
+                        _LOGGER.debug("Carrier token request returned status %s", resp.status)
+        except Exception as e:
+            _LOGGER.debug("Could not fetch carrier token from Sharegy EMS: %s", e)
+
+        return None
+
+    def get_effective_carrier_url(self, jwt_token: Optional[str] = None) -> str:
         """Resolve full Sharegy MON Carrier Admin WebSocket URL."""
         base = (self.carrier_url or DEFAULT_CARRIER_URL).strip()
         if not base.startswith("ws://") and not base.startswith("wss://"):
             base = f"wss://{base}"
         if not base.endswith("/"):
             base += "/"
-        token = self.token or "unknown"
-        return f"{base}?device_sn={token}&token={token}&tenant=sharegy&client=homeassistant&version={VERSION}"
+        token = jwt_token or getattr(self, "_carrier_jwt", None) or self.token or "unknown"
+        device_sn = getattr(self, "_carrier_device_sn", None) or self.token or "unknown"
+        return f"{base}?device_sn={device_sn}&token={token}&tenant=sharegy&client=homeassistant&version={VERSION}"
 
     async def start(self):
         """Start the background streaming worker, carrier connection, and state change listeners."""
@@ -288,7 +326,13 @@ class SharegyBridge:
         """Persistent connection loop for 24/7 smartEvo moniy Carrier Admin socket & Reverse-RPC."""
         while self._running:
             try:
-                carrier_url = self.get_effective_carrier_url()
+                jwt_token = await self.async_fetch_carrier_jwt()
+                if not jwt_token:
+                    _LOGGER.info("Awaiting MON Carrier token from Sharegy EMS before establishing connection...")
+                    await asyncio.sleep(10)
+                    continue
+
+                carrier_url = self.get_effective_carrier_url(jwt_token=jwt_token)
                 _LOGGER.info("Connecting to smartEvo moniy Carrier Admin Socket at %s", self.carrier_url)
                 self._carrier_session = aiohttp.ClientSession()
                 async with self._carrier_session.ws_connect(carrier_url, heartbeat=20.0, timeout=10.0) as ws:
@@ -311,6 +355,10 @@ class SharegyBridge:
                     finally:
                         heartbeat_task.cancel()
 
+            except aiohttp.WSServerHandshakeError as handshake_err:
+                if handshake_err.status in (401, 403):
+                    self._carrier_jwt = None  # Force re-fetching fresh token on next attempt
+                _LOGGER.debug("Carrier handshake failed (%s). Reconnecting...", handshake_err)
             except asyncio.CancelledError:
                 break
             except Exception as err:
